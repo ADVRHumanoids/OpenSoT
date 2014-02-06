@@ -1,7 +1,6 @@
 #include "sot_VelKinCon_ctrl.h"
 #include <boost/foreach.hpp>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
+
 
 #define toRad(X) (X*M_PI/180.0)
 
@@ -160,30 +159,73 @@ void sot_VelKinCon_ctrl::setQPostural()
     yarp::sig::Vector qMax = coman_iDyn3.getJointBoundMax();
     yarp::sig::Vector qMin = coman_iDyn3.getJointBoundMin();
 
+//    yarp::sig::Vector i(qMax.size(), 1.0);
+//    yarp::sig::Vector w = i/(qMax-qMin);
+//    w*=w;
+
+//    std::vector<unsigned int> waist_left_arm_joint_numbers = waist_joint_numbers;
+//    std::vector<unsigned int> waist_right_arm_joint_numbers = waist_joint_numbers;
+//    waist_left_arm_joint_numbers.insert(waist_left_arm_joint_numbers.end(), left_arm_joint_numbers.begin(), left_arm_joint_numbers.end());
+//    waist_right_arm_joint_numbers.insert(waist_right_arm_joint_numbers.end(), right_arm_joint_numbers.begin(), right_arm_joint_numbers.end());
+
+//    for(unsigned int i = 0; i < waist_left_arm_joint_numbers.size(); ++i)
+//    {
+//        w[waist_left_arm_joint_numbers[i]]  *= (double)(waist_left_arm_joint_numbers.size() - i);
+//    }
+
+//    for(unsigned int i = waist_joint_numbers.size(); i < waist_right_arm_joint_numbers.size(); ++i)
+//    {
+//        w[waist_right_arm_joint_numbers[i]] *= (double)(waist_right_arm_joint_numbers.size() - i);
+//    }
+//    for(unsigned int i = 0; i < waist_joint_numbers.size(); ++i) {
+//        w[waist_joint_numbers[i]] *= TORSO_WEIGHT;
+//    }
+
+//    std::cout << "Q_w: " << w.toString() << std::endl;
+//    Q_postural.diagonal(w);
+    Q_postural.diagonal(computeW(qMin, qMax, right_arm_joint_numbers, left_arm_joint_numbers, waist_joint_numbers));
+}
+
+yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
+                                               const yarp::sig::Vector &qMax,
+                                               const std::vector<unsigned int>& right_arm_joint_numbers,
+                                               const std::vector<unsigned int>& left_arm_joint_numbers,
+                                               const std::vector<unsigned int>& waist_joint_numbers)
+{
     yarp::sig::Vector i(qMax.size(), 1.0);
     yarp::sig::Vector w = i/(qMax-qMin);
     w*=w;
+    std::cout<<"w: "<<w.toString()<<std::endl;
 
     std::vector<unsigned int> waist_left_arm_joint_numbers = waist_joint_numbers;
     std::vector<unsigned int> waist_right_arm_joint_numbers = waist_joint_numbers;
     waist_left_arm_joint_numbers.insert(waist_left_arm_joint_numbers.end(), left_arm_joint_numbers.begin(), left_arm_joint_numbers.end());
     waist_right_arm_joint_numbers.insert(waist_right_arm_joint_numbers.end(), right_arm_joint_numbers.begin(), right_arm_joint_numbers.end());
 
+    std::cout<<"index weight waist_left_arm: ";
     for(unsigned int i = 0; i < waist_left_arm_joint_numbers.size(); ++i)
     {
         w[waist_left_arm_joint_numbers[i]]  *= (double)(waist_left_arm_joint_numbers.size() - i);
+        std::cout<<(double)(waist_left_arm_joint_numbers.size() - i)<<" ";
     }
+    std::cout<<std::endl;
 
-    for(unsigned int i = waist_joint_numbers.size(); i < waist_right_arm_joint_numbers.size(); ++i)
+    std::cout<<"index weight waist_right_arm: ";
+    for(unsigned int i = 0; i < waist_right_arm_joint_numbers.size(); ++i)
     {
         w[waist_right_arm_joint_numbers[i]] *= (double)(waist_right_arm_joint_numbers.size() - i);
+        std::cout<<(double)(waist_right_arm_joint_numbers.size() - i)<<" ";
     }
+    std::cout<<std::endl;
+
+    std::cout<<"index weight waist: ";
     for(unsigned int i = 0; i < waist_joint_numbers.size(); ++i) {
         w[waist_joint_numbers[i]] *= TORSO_WEIGHT;
+        std::cout<<TORSO_WEIGHT<<" ";
     }
+    std::cout<<std::endl;
 
-    std::cout << "Q_w: " << w.toString() << std::endl;
-    Q_postural.diagonal(w);
+    return w;
 }
 
 void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose = false)

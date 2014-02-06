@@ -6,6 +6,8 @@
 #include <iCub/iDynTree/DynTree.h>
 #include <kdl_parser/kdl_parser.hpp>
 #include "yarp_interface.h"
+#include <yarp/math/Math.h>
+#include <yarp/sig/all.h>
 
 class sot_VelKinCon_ctrl : public yarp::os::RateThread
  {
@@ -14,6 +16,11 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
 
      virtual bool threadInit();
      virtual void run();
+
+     static yarp::sig::Vector computeW(const yarp::sig::Vector& qMin, const yarp::sig::Vector& qMax,
+                                const std::vector<unsigned int>& right_arm_joint_numbers,
+                                const std::vector<unsigned int>& left_arm_joint_numbers,
+                                const std::vector<unsigned int>& waist_joint_numbers);
  private:
      KDL::Tree coman_tree; // A KDL Tree
      urdf::Model coman_model; // A URDF Model
