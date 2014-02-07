@@ -11,6 +11,9 @@ public:
     yarp_interface();
     ~yarp_interface();
 
+    void getLeftArmCartesianRef(yarp::sig::Vector& left_arm_ref);
+    void getRightArmCartesianRef(yarp::sig::Vector& right_arm_ref);
+
 
     int getDofLeftArm()
     {
@@ -61,6 +64,9 @@ public:
     yarp::dev::IPositionDirect *directControl_left_arm;
     yarp::dev::IPositionDirect *directControl_right_arm;
     yarp::dev::IPositionDirect *directControl_torso;
+
+    yarp::os::BufferedPort<yarp::os::Bottle> right_arm_pos_ref_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
 
 private:
     bool createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver);

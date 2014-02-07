@@ -21,6 +21,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
                                 const std::vector<unsigned int>& right_arm_joint_numbers,
                                 const std::vector<unsigned int>& left_arm_joint_numbers,
                                 const std::vector<unsigned int>& waist_joint_numbers);
+
  private:
      KDL::Tree coman_tree; // A KDL Tree
      urdf::Model coman_model; // A URDF Model
@@ -51,6 +52,8 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      yarp::sig::Vector q_right_arm; // Vector of measured joint angles
      yarp::sig::Vector q_right_leg; // Vector of measured joint angles
      yarp::sig::Vector q_torso; // Vector of measured joint angles
+     yarp::sig::Vector right_arm_pos_ref; // Vector of desired position for right arm [1x3]
+     yarp::sig::Vector left_arm_pos_ref; // Vector of desired position for left arm [1x3]
      /** Some Theory: **/
      /**
         We are considering the optimization problem:
@@ -75,6 +78,8 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      void setControlledKinematicChainsJointNumbers();
      void setQPostural();
      void getFeedBack();
+     void checkInput();
+     void move();
      void setJointNames()
      {
          right_arm_joint_names.push_back("RShSag");

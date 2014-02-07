@@ -3,6 +3,7 @@
 
 
 #define toRad(X) (X*M_PI/180.0)
+#define toDeg(X) (X*180.0/M_PI)
 
 /** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
 
@@ -27,7 +28,9 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     q_right_arm(1),
     q_left_leg(1),
     q_right_leg(1),
-    q_torso(1)
+    q_torso(1),
+    right_arm_pos_ref(3, 0.0),
+    left_arm_pos_ref(3, 0.0)
 {
     iDyn3Model();
     setJointNames();
@@ -58,10 +61,23 @@ bool sot_VelKinCon_ctrl::threadInit()
 {
     getFeedBack();
 
-    //Here we set as initial reference the measured value
+    //Here we set as initial reference the measured value: this will be the postural task
     q_ref = q;
 
     updateiDyn3Model(true);
+
+    right_arm_pos_ref = coman_iDyn3.getPosition(right_arm_LinkIndex).getCol(3).subVector(0,2);
+    left_arm_pos_ref = coman_iDyn3.getPosition(left_arm_LinkIndex).getCol(3).subVector(0,2);
+    std::cout<<"Initial Position Ref left_arm: "<<left_arm_pos_ref.toString()<<std::endl;
+    std::cout<<"Initial Position Ref right_arm: "<<right_arm_pos_ref.toString()<<std::endl;
+
+    std::cout<<"Setting Position Mode for torso:"<<std::endl;
+    for(unsigned int i = 0; i < q_right_arm.size(); ++i)
+        IYarp.controlMode_right_arm->setPositionMode(i);
+    for(unsigned int i = 0; i < q_left_arm.size(); ++i)
+        IYarp.controlMode_left_arm->setPositionMode(i);
+    for(unsigned int i = 0; i < q_torso.size(); ++i)
+        IYarp.controlMode_torso->setPositionMode(i);
 
     std::cout<<"sot_VelKinCon START!!!"<<std::endl;
     return true;
@@ -69,7 +85,8 @@ bool sot_VelKinCon_ctrl::threadInit()
 
 void sot_VelKinCon_ctrl::run()
 {
-
+    checkInput();
+    move();
 }
 
 void sot_VelKinCon_ctrl::iDyn3Model()
@@ -267,4 +284,36 @@ void sot_VelKinCon_ctrl::getFeedBack()
         q_torso[i] = toRad(q_torso[i]); //from deg to rad!
         q[coman_iDyn3.getDOFIndex(torso_joint_names[i])] = q_torso[i];
     }
+}
+
+void sot_VelKinCon_ctrl::checkInput()
+{
+    IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
+    IYarp.getRightArmCartesianRef(right_arm_pos_ref);
+}
+
+/** Here we convert from rad to deg!
+    The implemented control is like a velocity control: q_ref = q_old + dq
+**/
+void sot_VelKinCon_ctrl::move()
+{
+    yarp::sig::Vector torso(q_torso.size(), 0.0);
+    yarp::sig::Vector left_arm(q_left_arm.size(), 0.0);
+    yarp::sig::Vector right_arm(q_right_arm.size(), 0.0);
+
+    double q_sent = 0.0;
+    for(unsigned int i = 0; i < torso.size(); ++i){
+        q_sent = q[waist_joint_numbers[i]] + dq_ref[waist_joint_numbers[i]];
+        torso[i] = toDeg( q_sent );}
+    //Here we assumes that left and right arm has the same number of joints!
+    for(unsigned int i = 0; i < left_arm.size(); ++i){
+        q_sent = q[left_arm_joint_numbers[i]] + dq_ref[left_arm_joint_numbers[i]];
+        left_arm[i] = toDeg( q_sent );
+        q_sent = q[right_arm_joint_numbers[i]] + dq_ref[right_arm_joint_numbers[i]];
+        right_arm[i] = toDeg( q_sent );
+    }
+
+    IYarp.directControl_torso->setPositions(torso.data());
+    IYarp.directControl_left_arm->setPositions(left_arm.data());
+    IYarp.directControl_right_arm->setPositions(right_arm.data());
 }

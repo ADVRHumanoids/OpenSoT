@@ -30,13 +30,19 @@ yarp_interface::yarp_interface()
     if(createPolyDriver("torso", polyDriver_torso))
     {
         polyDriver_torso.view(encodersMotor_torso);
-        polyDriver_right_arm.view(directControl_torso);
-        polyDriver_left_arm.view(controlMode_torso);
+        polyDriver_torso.view(directControl_torso);
+        polyDriver_torso.view(controlMode_torso);
     }
+
+    left_arm_pos_ref_port.open("/sot_VelKinCon/left_arm/set_ref:i");
+    right_arm_pos_ref_port.open("/sot_VelKinCon/right_arm/set_ref:i");
 }
 
 yarp_interface::~yarp_interface()
 {
+    left_arm_pos_ref_port.close();
+    right_arm_pos_ref_port.close();
+
     polyDriver_left_arm.close();
     polyDriver_right_arm.close();
     polyDriver_left_leg.close();
@@ -66,5 +72,27 @@ bool yarp_interface::createPolyDriver(const std::string &kinematic_chain, yarp::
     else{
         std::cout<<"Device "<<kinematic_chain<<" available."<<std::endl;
         return true;
+    }
+}
+
+void yarp_interface::getLeftArmCartesianRef(Vector &left_arm_ref)
+{
+    yarp::os::Bottle *bot = left_arm_pos_ref_port.read(false);
+
+    if(!bot == NULL && bot->size() == left_arm_ref.size()){
+        for(unsigned int i = 0; i < left_arm_ref.size(); ++i)
+            left_arm_ref[i] = bot->get(i).asDouble();
+        std::cout<<"New reference for left_arm is "<<left_arm_ref.toString()<<std::endl;
+    }
+}
+
+void yarp_interface::getRightArmCartesianRef(Vector &right_arm_ref)
+{
+    yarp::os::Bottle *bot = right_arm_pos_ref_port.read(false);
+
+    if(!bot == NULL && bot->size() == right_arm_ref.size()){
+        for(unsigned int i = 0; i < right_arm_ref.size(); ++i)
+            right_arm_ref[i] = bot->get(i).asDouble();
+        std::cout<<"New reference for right_arm is "<<right_arm_ref.toString()<<std::endl;
     }
 }
