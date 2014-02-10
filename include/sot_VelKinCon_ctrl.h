@@ -80,6 +80,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      void getFeedBack();
      void checkInput();
      void move();
+     void controlLaw();
      void setJointNames()
      {
          right_arm_joint_names.push_back("RShSag");

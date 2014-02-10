@@ -86,6 +86,11 @@ bool sot_VelKinCon_ctrl::threadInit()
 void sot_VelKinCon_ctrl::run()
 {
     checkInput();
+
+    getFeedBack();
+
+    updateiDyn3Model();
+
     move();
 }
 
@@ -316,4 +321,17 @@ void sot_VelKinCon_ctrl::move()
     IYarp.directControl_torso->setPositions(torso.data());
     IYarp.directControl_left_arm->setPositions(left_arm.data());
     IYarp.directControl_right_arm->setPositions(right_arm.data());
+}
+
+void sot_VelKinCon_ctrl::controlLaw()
+{
+    yarp::sig::Vector pos_R = coman_iDyn3.getPosition(right_arm_LinkIndex).getCol(3).subVector(0,2);
+    yarp::sig::Vector pos_L = coman_iDyn3.getPosition(left_arm_LinkIndex).getCol(3).subVector(0,2);
+
+    yarp::sig::Matrix JRWrist;
+    if(!coman_iDyn3.getJacobian(right_arm_LinkIndex,JRWrist))
+        std::cout << "Error computing Jacobian for Right Wrist" << std::endl;
+    JRWrist = JRWrist.removeRows(3,3);    // getting only position part of Jacobian
+    JRWrist = JRWrist.removeCols(0,6);    // removing unactuated joints (floating base)
+
 }
