@@ -1,13 +1,17 @@
 #include "sot_VelKinCon_ctrl.h"
 #include <boost/foreach.hpp>
+#include "task_solver.h"
 
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
+#define MilliSecToSec(X) (X/1000.0)
 
 /** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
 
 #define TORSO_WEIGHT 1.0
+#define MAX_JOINT_VELOCITY toRad(50.0) //[rad/sec]
+#define MAX_CARTESIAN_VELOCITY 1.0 //[m/sec]
 
 /** ******************************************* **/
 
@@ -59,6 +63,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
 //Qui devo prendere la configurazione iniziale del robot!
 bool sot_VelKinCon_ctrl::threadInit()
 {
+    dq_ref.zero();
     getFeedBack();
 
     //Here we set as initial reference the measured value: this will be the postural task
@@ -71,11 +76,13 @@ bool sot_VelKinCon_ctrl::threadInit()
     std::cout<<"Initial Position Ref left_arm: "<<left_arm_pos_ref.toString()<<std::endl;
     std::cout<<"Initial Position Ref right_arm: "<<right_arm_pos_ref.toString()<<std::endl;
 
-    std::cout<<"Setting Position Mode for torso:"<<std::endl;
+    std::cout<<"Setting Position Mode for q_right_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
         IYarp.controlMode_right_arm->setPositionMode(i);
+    std::cout<<"Setting Position Mode for q_left_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
         IYarp.controlMode_left_arm->setPositionMode(i);
+    std::cout<<"Setting Position Mode for torso:"<<std::endl;
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
 
@@ -87,11 +94,15 @@ void sot_VelKinCon_ctrl::run()
 {
     checkInput();
 
-    getFeedBack();
+//    std::cout<<"q: "<<q.toString()<<std::endl;
+//    std::cout<<"dq_ref: "<<dq_ref.toString()<<std::endl;
+    q += dq_ref;
+    //getFeedBack();
 
     updateiDyn3Model();
 
-    move();
+    if(controlLaw())
+        move();
 }
 
 void sot_VelKinCon_ctrl::iDyn3Model()
@@ -228,12 +239,12 @@ yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
     return w;
 }
 
-void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose = false)
+void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
 {
     // Here we set these values in our internal model
-    coman_iDyn3.setAng(q_ref);
+    coman_iDyn3.setAng(q);
     coman_iDyn3.setDAng(dq_ref);
-    coman_iDyn3.setD2Ang(ddq_ref); // Since we want only the gravity term we set ddq = 0!
+    coman_iDyn3.setD2Ang(ddq_ref);
     // This is the fake Inertial Measure
     yarp::sig::Vector g(3);
     g[0] = 0; g[1] = 0; g[2] = 9.81;
@@ -295,10 +306,10 @@ void sot_VelKinCon_ctrl::checkInput()
 {
     IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
     IYarp.getRightArmCartesianRef(right_arm_pos_ref);
-}
+}/// xchè 10.0?????
 
 /** Here we convert from rad to deg!
-    The implemented control is like a velocity control: q_ref = q_old + dq
+    The implemented control is like a velocity control: q_d = q + dq
 **/
 void sot_VelKinCon_ctrl::move()
 {
@@ -323,7 +334,7 @@ void sot_VelKinCon_ctrl::move()
     IYarp.directControl_right_arm->setPositions(right_arm.data());
 }
 
-void sot_VelKinCon_ctrl::controlLaw()
+bool sot_VelKinCon_ctrl::controlLaw()
 {
     yarp::sig::Vector pos_R = coman_iDyn3.getPosition(right_arm_LinkIndex).getCol(3).subVector(0,2);
     yarp::sig::Vector pos_L = coman_iDyn3.getPosition(left_arm_LinkIndex).getCol(3).subVector(0,2);
@@ -334,4 +345,32 @@ void sot_VelKinCon_ctrl::controlLaw()
     JRWrist = JRWrist.removeRows(3,3);    // getting only position part of Jacobian
     JRWrist = JRWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
+    yarp::sig::Matrix JLWrist;
+    if(!coman_iDyn3.getJacobian(left_arm_LinkIndex,JLWrist))
+        std::cout << "Error computing Jacobian for Left Wrist" << std::endl;
+    JLWrist = JLWrist.removeRows(3,3);   // getting only position part of Jacobian
+    JLWrist = JLWrist.removeCols(0,6);    // removing unactuated joints (floating base)
+
+    extractJacobians(JRWrist, JLWrist);
+
+    yarp::sig::Vector eRWrist = right_arm_pos_ref - pos_R ;
+    yarp::sig::Vector eLWrist = left_arm_pos_ref - pos_L ;
+//    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
+//    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
+
+    yarp::sig::Matrix J1 = yarp::math::pile(JRWrist, JLWrist);
+    yarp::sig::Vector e1 = MAX_JOINT_VELOCITY*yarp::math::cat(eRWrist, eLWrist);
+    yarp::sig::Vector eq = MAX_CARTESIAN_VELOCITY*(q_ref - q); // postural error
+
+    bool control_computed = false;
+    control_computed = task_solver::computeControlHQP(J1, e1, Q_postural, eq,
+                                                      coman_iDyn3.getJointBoundMax(),
+                                                      coman_iDyn3.getJointBoundMin(),
+                                                      q, MAX_JOINT_VELOCITY,
+                                                      MilliSecToSec(getRate()),
+                                                      dq_ref);
+    if(!control_computed) {
+        std::cout << "Error computing control" << std::endl;
+    }
+    return control_computed;
 }

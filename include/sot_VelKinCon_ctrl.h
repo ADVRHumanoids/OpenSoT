@@ -43,9 +43,9 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      std::vector<unsigned int> left_arm_joint_numbers;
      std::vector<unsigned int> waist_joint_numbers;
 
-     yarp::sig::Vector q_ref; // Vector of desired joint configurations [1x23]
-     yarp::sig::Vector dq_ref; // Vector of desired joint velocities [1x23]
-     yarp::sig::Vector ddq_ref; // Vector of desired joint accelerations [1x23]
+     yarp::sig::Vector q_ref; // Vector of desired joint configurations [1x29]
+     yarp::sig::Vector dq_ref; // Vector of desired joint velocities [1x29]
+     yarp::sig::Vector ddq_ref; // Vector of desired joint accelerations [1x29]
      yarp::sig::Vector q; // Vector of measured joint angles
      yarp::sig::Vector q_left_arm; // Vector of measured joint angles
      yarp::sig::Vector q_left_leg; // Vector of measured joint angles
@@ -73,14 +73,14 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      yarp_interface IYarp;
 
      void iDyn3Model();
-     void updateiDyn3Model(const bool set_world_pose);
+     void updateiDyn3Model(const bool set_world_pose = false);
      void setControlledKinematicChainsLinkIndex();
      void setControlledKinematicChainsJointNumbers();
      void setQPostural();
      void getFeedBack();
      void checkInput();
      void move();
-     void controlLaw();
+     bool controlLaw();
      void setJointNames()
      {
          right_arm_joint_names.push_back("RShSag");
@@ -116,6 +116,49 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
          torso_joint_names.push_back("WaistSag");
          torso_joint_names.push_back("WaistLat");
          torso_joint_names.push_back("WaistYaw");
+     }
+
+     /**
+       We use this function to set to zero all the part of the Jacobians that we are not
+       controlloing (basically the legs).
+       Each Jacobian contains only waist + arm.
+       **/
+     void extractJacobians(yarp::sig::Matrix& JRWrist, yarp::sig::Matrix& JLWrist)
+     {
+        for(unsigned int i = 0; i < JLWrist.cols(); ++i)
+        {
+             bool set_zero = true;
+             for(unsigned int j = 0; j < right_arm_joint_names.size(); ++j){
+                 if(i == right_arm_joint_numbers[j]){
+                     set_zero = false;
+                     break;}
+             }
+             for(unsigned int j = 0; j < torso_joint_names.size(); ++j){
+                 if(i == waist_joint_numbers[j]){
+                     set_zero = false;
+                     break;}
+             }
+             if(set_zero){
+                 for(unsigned int k = 0; k < 3; ++k)
+                     JRWrist(k,i) = 0.0;
+             }
+
+             set_zero = true;
+             for(unsigned int j = 0; j < left_arm_joint_names.size(); ++j){
+                 if(i == left_arm_joint_numbers[j]){
+                     set_zero = false;
+                     break;}
+             }
+             for(unsigned int j = 0; j < torso_joint_names.size(); ++j){
+                 if(i == waist_joint_numbers[j]){
+                     set_zero = false;
+                     break;}
+             }
+             if(set_zero){
+                 for(unsigned int k = 0; k < 3; ++k)
+                     JLWrist(k,i) = 0.0;
+             }
+        }
      }
  };
 
