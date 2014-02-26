@@ -50,7 +50,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J1,
     yarp::sig::Vector g2 = -1.0*J2.transposed()*eq;
 
     yarp::sig::Vector u1(nj); yarp::sig::Vector l1(nj); //Joint Limits constraints;
-    u1 = (qMax - q)*dT; //Suppose we want to reach joint limits in 1 sec
+    u1 = (qMax - q)*dT; //We consider joint limits as joint velocities limits [rad/sec]
     l1 = (qMin - q)*dT;
 
     yarp::sig::Vector u2(nj, MAX_JOINT_VELOCITY*dT); //Max velocity
@@ -77,10 +77,6 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J1,
 
 
     /** Solve first QP. **/
-    /**
-      Qui viene usato initial_guess che viene messo a false all'inizio del metodo...
-      forse deve essere una variabile della classe.
-    **/
     int nWSR = 2^32;
     if(initial_guess==true)
         qp1.init( H1.data(),g1.data(), l.data(), u.data(),nWSR,0, dq1.data(), y1.data(), &bounds1);
@@ -115,10 +111,6 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J1,
 
         nWSR = 2^32;
 
-        /**
-          Qui viene usato initial_guess che viene messo a false all'inizio del metodo...
-          forse deve essere una variabile della classe.
-        **/
         if(initial_guess == true)
             qp2.init( H2.data(),g2.data(), J1.data(), l.data(), u.data(),
                       b2l.data(), b2u.data(), nWSR, 0, dq2.data(), y2.data(),
@@ -149,6 +141,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J1,
         else
         {
             dq_ref = dq2;
+            initial_guess = true;
             return true;
         }
     }

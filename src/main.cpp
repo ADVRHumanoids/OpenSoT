@@ -1,7 +1,7 @@
 #include <yarp/os/all.h>
 #include "sot_VelKinCon_ctrl.h"
 
-#define dT 0.001 //[s]
+#define dT 0.025 //[s]
 
 class sot_VelKinCon_module: public yarp::os::RFModule
 {

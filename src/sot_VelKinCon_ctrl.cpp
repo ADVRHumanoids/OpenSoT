@@ -10,8 +10,7 @@
 /** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
 
 #define TORSO_WEIGHT 1.0
-#define MAX_JOINT_VELOCITY toRad(50.0) //[rad/sec]
-#define MAX_CARTESIAN_VELOCITY 1.0 //[m/sec]
+#define MAX_JOINT_VELOCITY toRad(30.0) //[rad/sec]
 
 /** ******************************************* **/
 
@@ -40,9 +39,16 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     setJointNames();
     setControlledKinematicChainsLinkIndex();
     setControlledKinematicChainsJointNumbers();
-    setQPostural();
 
     int nJ = coman_iDyn3.getNrOfDOFs();
+
+    Q_postural.resize(nJ, nJ);
+    Q_postural.eye();
+//    yarp::sig::Vector qMax = coman_iDyn3.getJointBoundMax();
+//    yarp::sig::Vector qMin = coman_iDyn3.getJointBoundMin();
+//    Q_postural.diagonal(computeW(qMin, qMax, right_arm_joint_numbers,
+//                                 left_arm_joint_numbers, waist_joint_numbers));
+
     q.resize(nJ, 0.0);
     q_ref.resize(nJ, 0.0);
     dq_ref.resize(nJ,0.0);
@@ -182,20 +188,6 @@ void sot_VelKinCon_ctrl::setControlledKinematicChainsJointNumbers()
     std::cout<<std::endl;
 }
 
-void sot_VelKinCon_ctrl::setQPostural()
-{
-    int nJ = coman_iDyn3.getNrOfDOFs();
-
-    Q_postural.resize(nJ, nJ);
-    Q_postural.eye();
-
-    yarp::sig::Vector qMax = coman_iDyn3.getJointBoundMax();
-    yarp::sig::Vector qMin = coman_iDyn3.getJointBoundMin();
-
-    Q_postural.diagonal(computeW(qMin, qMax, right_arm_joint_numbers,
-                                 left_arm_joint_numbers, waist_joint_numbers));
-}
-
 yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
                                                const yarp::sig::Vector &qMax,
                                                const std::vector<unsigned int>& right_arm_joint_numbers,
@@ -306,7 +298,7 @@ void sot_VelKinCon_ctrl::checkInput()
 {
     IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
     IYarp.getRightArmCartesianRef(right_arm_pos_ref);
-}/// xchè 10.0?????
+}
 
 /** Here we convert from rad to deg!
     The implemented control is like a velocity control: q_d = q + dq
@@ -359,8 +351,8 @@ bool sot_VelKinCon_ctrl::controlLaw()
 //    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
 
     yarp::sig::Matrix J1 = yarp::math::pile(JRWrist, JLWrist);
-    yarp::sig::Vector e1 = MAX_JOINT_VELOCITY*yarp::math::cat(eRWrist, eLWrist);
-    yarp::sig::Vector eq = MAX_CARTESIAN_VELOCITY*(q_ref - q); // postural error
+    yarp::sig::Vector e1 = yarp::math::cat(eRWrist, eLWrist);
+    yarp::sig::Vector eq = (q_ref - q); // postural error
 
     bool control_computed = false;
     control_computed = task_solver::computeControlHQP(J1, e1, Q_postural, eq,

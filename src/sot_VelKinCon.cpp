@@ -26,7 +26,7 @@ const std::string coman_model_folder = std::string(getenv("YARP_WORKSPACE")) + "
 
 sot_VelKinCon::sot_VelKinCon() :
     yarp(),
-    yarp::os::RateThread(RATE_PERIOD*1000.0 /* [ms] */)
+    yarp::os::RateThread(RATE_PERIOD /* [ms] */)
 {
     /// iDyn3 Model creation
     // Giving name to references for FT sensors and IMU

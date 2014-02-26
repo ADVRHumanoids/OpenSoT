@@ -76,7 +76,6 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      void updateiDyn3Model(const bool set_world_pose = false);
      void setControlledKinematicChainsLinkIndex();
      void setControlledKinematicChainsJointNumbers();
-     void setQPostural();
      void getFeedBack();
      void checkInput();
      void move();
