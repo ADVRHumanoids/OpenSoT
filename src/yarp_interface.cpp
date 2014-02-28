@@ -82,30 +82,9 @@ void yarp_interface::getLeftArmCartesianRef(Vector &left_arm_ref, const iCub::iD
 
     if(!bot == NULL)
     {
-        Bottle& frame = bot->findGroup("frame");
-        if(!frame.isNull())
-        {
-            std::string ref_frame = frame.get(1).asString();
-            //if(!ref_frame.compare("base_link"))
-                //transformRefFrame();
-
-            Bottle& data = bot->findGroup("data");
-            if(!data.isNull())
-            {
-                if(data.size() == left_arm_ref.size()+1)
-                {
-                    for(unsigned int i = 1; i < left_arm_ref.size()+1; ++i)
-                        left_arm_ref[i-1] = data.get(i).asDouble();
-                    std::cout<<"New reference for left_arm is "<<left_arm_ref.toString()<<"in base_link"<<std::endl;
-                }
-                else
-                    std::cout<<"Wrong size of reference! Should be "<<left_arm_ref.size()<<std::endl;
-            }
-            else
-                std::cout << "error: no data section" << std::endl;
-        }
-        else
-            std::cout << "error: no frame section" <<std::endl;
+        std::cout<<"Left Arm:"<<std::endl;
+        getArmCartesianRef(left_arm_ref, bot);
+        std::cout<<std::endl;
     }
 }
 
@@ -115,30 +94,9 @@ void yarp_interface::getRightArmCartesianRef(Vector &right_arm_ref, const iCub::
 
     if(!bot == NULL)
     {
-        Bottle& frame = bot->findGroup("frame");
-        if(!frame.isNull())
-        {
-            std::string ref_frame = frame.get(1).asString();
-            //if(!ref_frame.compare("base_link"))
-                //transformRefFrame();
-
-            Bottle& data = bot->findGroup("data");
-            if(!data.isNull())
-            {
-                if(data.size() == right_arm_ref.size()+1)
-                {
-                    for(unsigned int i = 1; i < right_arm_ref.size()+1; ++i)
-                        right_arm_ref[i-1] = data.get(i).asDouble();
-                    std::cout<<"New reference for right_arm is "<<right_arm_ref.toString()<<"in base_link"<<std::endl;
-                }
-                else
-                    std::cout<<"Wrong size of reference! Should be "<<right_arm_ref.size()<<std::endl;
-            }
-            else
-                std::cout << "error: no data section inside valve data" << std::endl;
-        }
-        else
-            std::cout << "error: no frame section" <<std::endl;
+        std::cout<<"Right Arm:"<<std::endl;
+        getArmCartesianRef(right_arm_ref, bot);
+        std::cout<<std::endl;
     }
 }
 
@@ -154,3 +112,35 @@ void yarp_interface::getSetClik(bool &is_clik)
             std::cout<<"CLIK NOT activated!"<<std::endl;
     }
 }
+
+bool yarp_interface::getArmCartesianRef(Vector &arm_ref, yarp::os::Bottle *bot)
+{
+    Bottle& frame = bot->findGroup("frame");
+    if(!frame.isNull())
+    {
+        if(checkRefFrame(frame.get(1).asString()))
+        {
+            Bottle& data = bot->findGroup("data");
+            if(!data.isNull())
+            {
+                if(data.size() == arm_ref.size()+1)
+                {
+                    for(unsigned int i = 1; i < arm_ref.size()+1; ++i)
+                        arm_ref[i-1] = data.get(i).asDouble();
+                    std::cout<<"    New reference in base_link is "<<arm_ref.toString()<<std::endl;
+                    return true;
+                }
+                else
+                    std::cout<<"    ERROR: wrong size of reference! Should be "<<arm_ref.size()<<std::endl;
+            }
+            else
+                std::cout<<"    ERROR: no data section in port"<<std::endl;
+        }
+        else
+            std::cout<<"    ERROR: wrong Reference Frame, should be base_link!"<<std::endl;
+    }
+    else
+        std::cout<<"    ERROR: no frame section in port"<<std::endl;
+    return false;
+}
+

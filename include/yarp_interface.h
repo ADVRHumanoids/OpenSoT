@@ -73,6 +73,13 @@ public:
 
 private:
     bool createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver);
+    bool checkRefFrame(const std::string& ref_frame)
+    {
+        if(ref_frame.compare("base_link") == 0)
+            return true;
+        return false;
+    }
+    bool getArmCartesianRef(yarp::sig::Vector &arm_ref, yarp::os::Bottle *bot);
 };
 
 #endif
