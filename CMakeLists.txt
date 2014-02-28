@@ -25,17 +25,14 @@ LINK_DIRECTORIES(${ROS_HYDRO_LIB_FOLDER} ${KDL_CODYCO_LIB_FOLDER} ${CODYCO_LIB_F
 # add required linker flags
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")              
 
-ADD_LIBRARY(sot_VelKinCon_old src/sot_VelKinCon.cpp)
 ADD_LIBRARY(sot_VelKinCon_ctrl src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp)
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp)
 ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp)
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(sot_VelKinCon_old kdl_codyco iDynTree orocos-kdl urdf kdl_parser
-                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} qpOASES)
 TARGET_LINK_LIBRARIES(sot_VelKinCon_ctrl kdl_codyco iDynTree orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} qpOASES)
-TARGET_LINK_LIBRARIES(sot_VelKinCon sot_VelKinCon_ctrl sot_VelKinCon_old kdl_codyco iDynTree orocos-kdl urdf kdl_parser
+TARGET_LINK_LIBRARIES(sot_VelKinCon sot_VelKinCon_ctrl kdl_codyco iDynTree orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(uTest1 sot_VelKinCon_ctrl sot_VelKinCon_old kdl_codyco iDynTree orocos-kdl urdf kdl_parser
+TARGET_LINK_LIBRARIES(uTest1 sot_VelKinCon_ctrl kdl_codyco iDynTree orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})

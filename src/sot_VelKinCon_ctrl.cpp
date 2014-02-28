@@ -64,6 +64,8 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     q_right_leg.resize(nJ, 0.0);
     IYarp.encodersMotor_torso->getAxes(&nJ);
     q_torso.resize(nJ, 0.0);
+
+    is_clik = false;
 }
 
 //Qui devo prendere la configurazione iniziale del robot!
@@ -92,6 +94,11 @@ bool sot_VelKinCon_ctrl::threadInit()
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
 
+    if(is_clik)
+        std::cout<<"SoT is running as CLIK"<<std::endl;
+    else
+        std::cout<<"SoT is NOT running as CLIK"<<std::endl;
+
     std::cout<<"sot_VelKinCon START!!!"<<std::endl;
     return true;
 }
@@ -100,10 +107,10 @@ void sot_VelKinCon_ctrl::run()
 {
     checkInput();
 
-//    std::cout<<"q: "<<q.toString()<<std::endl;
-//    std::cout<<"dq_ref: "<<dq_ref.toString()<<std::endl;
+    if(is_clik)
+        getFeedBack();
+    else
     q += dq_ref;
-    //getFeedBack();
 
     updateiDyn3Model();
 
@@ -250,10 +257,11 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
     // Set World Pose: to do only once at the beginning
     if(set_world_pose)
     {
-        yarp::sig::Vector foot_pose(3);
-        foot_pose = coman_iDyn3.getPosition(coman_iDyn3.getLinkIndex("r_sole")).getCol(3).subVector(0,2);
         yarp::sig::Matrix worldT(4,4);
         worldT.eye();
+        coman_iDyn3.setWorldBasePose(worldT);
+        yarp::sig::Vector foot_pose(3);
+        foot_pose = coman_iDyn3.getPosition(coman_iDyn3.getLinkIndex("r_sole")).getCol(3).subVector(0,2);
         worldT(2,3) = -foot_pose(2);
         std::cout<<"World Base Pose:\n";
         std::cout<<worldT.toString()<<std::endl;
@@ -296,8 +304,9 @@ void sot_VelKinCon_ctrl::getFeedBack()
 
 void sot_VelKinCon_ctrl::checkInput()
 {
-    IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
-    IYarp.getRightArmCartesianRef(right_arm_pos_ref);
+    IYarp.getLeftArmCartesianRef(left_arm_pos_ref, coman_iDyn3);
+    IYarp.getRightArmCartesianRef(right_arm_pos_ref, coman_iDyn3);
+    IYarp.getSetClik(is_clik);
 }
 
 /** Here we convert from rad to deg!

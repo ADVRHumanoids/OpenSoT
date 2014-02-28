@@ -32,6 +32,8 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      std::vector<std::string> right_leg_joint_names;
      std::vector<std::string> torso_joint_names;
 
+     bool is_clik;
+
      int waist_LinkIndex;
      int right_arm_LinkIndex;
      int left_arm_LinkIndex;

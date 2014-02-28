@@ -4,6 +4,7 @@
 #include <yarp/os/all.h>
 #include <yarp/sig/all.h>
 #include <yarp/dev/all.h>
+#include <iCub/iDynTree/DynTree.h>
 
 class yarp_interface
 {
@@ -11,8 +12,9 @@ public:
     yarp_interface();
     ~yarp_interface();
 
-    void getLeftArmCartesianRef(yarp::sig::Vector& left_arm_ref);
-    void getRightArmCartesianRef(yarp::sig::Vector& right_arm_ref);
+    void getLeftArmCartesianRef(yarp::sig::Vector& left_arm_ref, const iCub::iDynTree::DynTree& coman_idyn3);
+    void getRightArmCartesianRef(yarp::sig::Vector& right_arm_ref, const iCub::iDynTree::DynTree& coman_idyn3);
+    void getSetClik(bool& is_clik);
 
 
     int getDofLeftArm()
@@ -67,6 +69,7 @@ public:
 
     yarp::os::BufferedPort<yarp::os::Bottle> right_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> clik_port;
 
 private:
     bool createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver);

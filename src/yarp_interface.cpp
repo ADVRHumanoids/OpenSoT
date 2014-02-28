@@ -36,6 +36,7 @@ yarp_interface::yarp_interface()
 
     left_arm_pos_ref_port.open("/sot_VelKinCon/left_arm/set_ref:i");
     right_arm_pos_ref_port.open("/sot_VelKinCon/right_arm/set_ref:i");
+    clik_port.open("/sot_VelKinCon/set_clik:i");
 }
 
 yarp_interface::~yarp_interface()
@@ -75,24 +76,81 @@ bool yarp_interface::createPolyDriver(const std::string &kinematic_chain, yarp::
     }
 }
 
-void yarp_interface::getLeftArmCartesianRef(Vector &left_arm_ref)
+void yarp_interface::getLeftArmCartesianRef(Vector &left_arm_ref, const iCub::iDynTree::DynTree &coman_idyn3)
 {
     yarp::os::Bottle *bot = left_arm_pos_ref_port.read(false);
 
-    if(!bot == NULL && bot->size() == left_arm_ref.size()){
-        for(unsigned int i = 0; i < left_arm_ref.size(); ++i)
-            left_arm_ref[i] = bot->get(i).asDouble();
-        std::cout<<"New reference for left_arm is "<<left_arm_ref.toString()<<std::endl;
+    if(!bot == NULL)
+    {
+        Bottle& frame = bot->findGroup("frame");
+        if(!frame.isNull())
+        {
+            std::string ref_frame = frame.get(1).asString();
+            //if(!ref_frame.compare("base_link"))
+                //transformRefFrame();
+
+            Bottle& data = bot->findGroup("data");
+            if(!data.isNull())
+            {
+                if(data.size() == left_arm_ref.size()+1)
+                {
+                    for(unsigned int i = 1; i < left_arm_ref.size()+1; ++i)
+                        left_arm_ref[i-1] = data.get(i).asDouble();
+                    std::cout<<"New reference for left_arm is "<<left_arm_ref.toString()<<"in base_link"<<std::endl;
+                }
+                else
+                    std::cout<<"Wrong size of reference! Should be "<<left_arm_ref.size()<<std::endl;
+            }
+            else
+                std::cout << "error: no data section" << std::endl;
+        }
+        else
+            std::cout << "error: no frame section" <<std::endl;
     }
 }
 
-void yarp_interface::getRightArmCartesianRef(Vector &right_arm_ref)
+void yarp_interface::getRightArmCartesianRef(Vector &right_arm_ref, const iCub::iDynTree::DynTree &coman_idyn3)
 {
     yarp::os::Bottle *bot = right_arm_pos_ref_port.read(false);
 
-    if(!bot == NULL && bot->size() == right_arm_ref.size()){
-        for(unsigned int i = 0; i < right_arm_ref.size(); ++i)
-            right_arm_ref[i] = bot->get(i).asDouble();
-        std::cout<<"New reference for right_arm is "<<right_arm_ref.toString()<<std::endl;
+    if(!bot == NULL)
+    {
+        Bottle& frame = bot->findGroup("frame");
+        if(!frame.isNull())
+        {
+            std::string ref_frame = frame.get(1).asString();
+            //if(!ref_frame.compare("base_link"))
+                //transformRefFrame();
+
+            Bottle& data = bot->findGroup("data");
+            if(!data.isNull())
+            {
+                if(data.size() == right_arm_ref.size()+1)
+                {
+                    for(unsigned int i = 1; i < right_arm_ref.size()+1; ++i)
+                        right_arm_ref[i-1] = data.get(i).asDouble();
+                    std::cout<<"New reference for right_arm is "<<right_arm_ref.toString()<<"in base_link"<<std::endl;
+                }
+                else
+                    std::cout<<"Wrong size of reference! Should be "<<right_arm_ref.size()<<std::endl;
+            }
+            else
+                std::cout << "error: no data section inside valve data" << std::endl;
+        }
+        else
+            std::cout << "error: no frame section" <<std::endl;
+    }
+}
+
+void yarp_interface::getSetClik(bool &is_clik)
+{
+    yarp::os::Bottle *bot = clik_port.read(false);
+
+    if(!bot == NULL){
+        is_clik = (bool)bot->get(0).asInt();
+        if(is_clik)
+            std::cout<<"CLIK activated!"<<std::endl;
+        else
+            std::cout<<"CLIK NOT activated!"<<std::endl;
     }
 }

@@ -19,7 +19,12 @@ public:
             return false;
         }
         std::cout<<"Starting Module"<<std::endl;
-        ctrl_started = true;
+        ctrl_started = false;
+
+        if(!ctrl_started){
+            thr->stop();
+            std::cout<<"Ctrl started in STOP mode! To run it send a true to idle:i port!"<<std::endl;
+        }
 
         idle_port.open("/sot_VelKinCon/idle:i");
         return true;

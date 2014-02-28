@@ -40,17 +40,32 @@ while(1):
     right_arm_y = right_arm_y_0 + r*( np.cos(0.5*t%(2 * np.pi)) - 1 )
     right_arm_z = right_arm_z_0 + r*( np.sin(0.5*t%(2 * np.pi)) )
 
+
     bottle_left = left_arm.prepare()
     bottle_left.clear()
-    bottle_left.addDouble(left_arm_x)
-    bottle_left.addDouble(left_arm_y)
-    bottle_left.addDouble(left_arm_z)
     
+    bottle_tmp0 = bottle_left.addList()
+    bottle_tmp0.addString("frame")
+    bottle_tmp0.addString("base_link")        
+    
+    bottle_tmp = bottle_left.addList()
+    bottle_tmp.addString("data")
+    bottle_tmp.addDouble(left_arm_x)
+    bottle_tmp.addDouble(left_arm_y)
+    bottle_tmp.addDouble(left_arm_z)
+
     bottle_right = right_arm.prepare()
     bottle_right.clear()
-    bottle_right.addDouble(right_arm_x)
-    bottle_right.addDouble(right_arm_y)
-    bottle_right.addDouble(right_arm_z)
+    
+    bottle_tmp0 = bottle_right.addList()
+    bottle_tmp0.addString("frame")
+    bottle_tmp0.addString("base_link")      
+    
+    bottle_tmp = bottle_right.addList()
+    bottle_tmp.addString("data")
+    bottle_tmp.addDouble(right_arm_x)
+    bottle_tmp.addDouble(right_arm_y)
+    bottle_tmp.addDouble(right_arm_z)
     
     left_arm.write()
     right_arm.write()
