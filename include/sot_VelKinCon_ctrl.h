@@ -119,6 +119,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
          torso_joint_names.push_back("WaistYaw");
      }
 
+
      /**
        We use this function to set to zero all the part of the Jacobians that we are not
        controlloing (basically the legs).
