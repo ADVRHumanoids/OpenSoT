@@ -29,6 +29,7 @@ ADD_LIBRARY(sot_VelKinCon_ctrl src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp
 ADD_LIBRARY(cartesian_utils src/cartesian_utils.cpp)
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp)
 ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp)
+ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(cartesian_utils kdl_codyco iDynTree orocos-kdl urdf kdl_parser
@@ -38,4 +39,6 @@ TARGET_LINK_LIBRARIES(sot_VelKinCon_ctrl cartesian_utils kdl_codyco iDynTree oro
 TARGET_LINK_LIBRARIES(sot_VelKinCon sot_VelKinCon_ctrl cartesian_utils kdl_codyco iDynTree orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(uTest1 sot_VelKinCon_ctrl kdl_codyco iDynTree orocos-kdl urdf kdl_parser
+                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
+TARGET_LINK_LIBRARIES(uTest2 cartesian_utils kdl_codyco iDynTree orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})

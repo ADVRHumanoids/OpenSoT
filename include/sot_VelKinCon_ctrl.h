@@ -54,8 +54,8 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      yarp::sig::Vector q_right_arm; // Vector of measured joint angles
      yarp::sig::Vector q_right_leg; // Vector of measured joint angles
      yarp::sig::Vector q_torso; // Vector of measured joint angles
-     yarp::sig::Vector right_arm_pos_ref; // Vector of desired position for right arm [1x3]
-     yarp::sig::Vector left_arm_pos_ref; // Vector of desired position for left arm [1x3]
+     yarp::sig::Matrix right_arm_pos_ref; // Homogeneous Matrix of desired position for right arm
+     yarp::sig::Matrix left_arm_pos_ref; // Homogeneous Matrix of desired position for left arm
      /** Some Theory: **/
      /**
         We are considering the optimization problem:
@@ -141,7 +141,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
                      break;}
              }
              if(set_zero){
-                 for(unsigned int k = 0; k < 3; ++k)
+                 for(unsigned int k = 0; k < 6; ++k)
                      JRWrist(k,i) = 0.0;
              }
 
@@ -157,7 +157,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
                      break;}
              }
              if(set_zero){
-                 for(unsigned int k = 0; k < 3; ++k)
+                 for(unsigned int k = 0; k < 6; ++k)
                      JLWrist(k,i) = 0.0;
              }
         }
