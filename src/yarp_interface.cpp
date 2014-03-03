@@ -1,4 +1,5 @@
 #include "yarp_interface.h"
+#include "cartesian_utils.h"
 
 using namespace yarp::os;
 using namespace yarp::sig;
@@ -76,7 +77,7 @@ bool yarp_interface::createPolyDriver(const std::string &kinematic_chain, yarp::
     }
 }
 
-void yarp_interface::getLeftArmCartesianRef(Vector &left_arm_ref, const iCub::iDynTree::DynTree &coman_idyn3)
+void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
 {
     yarp::os::Bottle *bot = left_arm_pos_ref_port.read(false);
 
@@ -88,7 +89,7 @@ void yarp_interface::getLeftArmCartesianRef(Vector &left_arm_ref, const iCub::iD
     }
 }
 
-void yarp_interface::getRightArmCartesianRef(Vector &right_arm_ref, const iCub::iDynTree::DynTree &coman_idyn3)
+void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
 {
     yarp::os::Bottle *bot = right_arm_pos_ref_port.read(false);
 
@@ -113,7 +114,7 @@ void yarp_interface::getSetClik(bool &is_clik)
     }
 }
 
-bool yarp_interface::getArmCartesianRef(Vector &arm_ref, yarp::os::Bottle *bot)
+bool yarp_interface::getArmCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot)
 {
     Bottle& frame = bot->findGroup("frame");
     if(!frame.isNull())
@@ -123,15 +124,17 @@ bool yarp_interface::getArmCartesianRef(Vector &arm_ref, yarp::os::Bottle *bot)
             Bottle& data = bot->findGroup("data");
             if(!data.isNull())
             {
-                if(data.size() == arm_ref.size()+1)
+                if(data.size() == 6+1)
                 {
-                    for(unsigned int i = 1; i < arm_ref.size()+1; ++i)
-                        arm_ref[i-1] = data.get(i).asDouble();
-                    std::cout<<"    New reference in base_link is "<<arm_ref.toString()<<std::endl;
+                    cartesian_utils::homogeneousMatrixFromRPY(arm_ref,
+                                                              data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
+                                                              toRad(data.get(4).asDouble()), toRad(data.get(5).asDouble()), toRad(data.get(6).asDouble()));
+                    std::cout<<"    New reference in base_link is "<<std::endl;
+                    std::cout<<arm_ref.toString()<<std::endl;
                     return true;
                 }
                 else
-                    std::cout<<"    ERROR: wrong size of reference! Should be "<<arm_ref.size()<<std::endl;
+                    std::cout<<"    ERROR: wrong size of reference! Should be 6!"<<std::endl;
             }
             else
                 std::cout<<"    ERROR: no data section in port"<<std::endl;

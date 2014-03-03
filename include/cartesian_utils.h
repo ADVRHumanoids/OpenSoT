@@ -21,7 +21,14 @@ public:
 
     }
 
-    quaternion(double x, double y, double z, double w);
+    quaternion(double _x, double _y, double _z, double _w):
+        x(_x),
+        y(_y),
+        z(_z),
+        w(_w)
+    {
+
+    }
 
     KDL::Rotation skew()
     {
@@ -46,13 +53,16 @@ public:
 
 class cartesian_utils
 {
-    static void computeCartesianError(const yarp::sig::Matrix &T,
-                                      const yarp::sig::Matrix &Td,
+public:
+    static void computeCartesianError(yarp::sig::Matrix &T,
+                                      yarp::sig::Matrix &Td,
                                       yarp::sig::Vector& position_error,
                                       yarp::sig::Vector& orientation_error);
     static void homogeneousMatrixFromRPY(yarp::sig::Matrix& T,
                                          const double x, const double y, const double z,
                                          const double R, const double P, const double Y);
+    static void fromKDLFrameToYARPMatrix(const KDL::Frame& Ti, yarp::sig::Matrix& To);
+    static void fromYARPMatrixtoKDLFrame(const yarp::sig::Matrix& Ti, KDL::Frame& To);
 };
 
 #endif

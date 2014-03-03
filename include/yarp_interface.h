@@ -12,8 +12,8 @@ public:
     yarp_interface();
     ~yarp_interface();
 
-    void getLeftArmCartesianRef(yarp::sig::Vector& left_arm_ref, const iCub::iDynTree::DynTree& coman_idyn3);
-    void getRightArmCartesianRef(yarp::sig::Vector& right_arm_ref, const iCub::iDynTree::DynTree& coman_idyn3);
+    void getLeftArmCartesianRef(yarp::sig::Matrix& left_arm_ref);
+    void getRightArmCartesianRef(yarp::sig::Matrix& right_arm_ref);
     void getSetClik(bool& is_clik);
 
 
@@ -79,7 +79,7 @@ private:
             return true;
         return false;
     }
-    bool getArmCartesianRef(yarp::sig::Vector &arm_ref, yarp::os::Bottle *bot);
+    bool getArmCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot);
 };
 
 #endif

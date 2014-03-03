@@ -1,6 +1,7 @@
 #include "sot_VelKinCon_ctrl.h"
 #include <boost/foreach.hpp>
 #include "task_solver.h"
+#include "cartesian_utils.h"
 
 
 #define toRad(X) (X*M_PI/180.0)
@@ -11,6 +12,7 @@
 
 #define TORSO_WEIGHT 1.0
 #define MAX_JOINT_VELOCITY toRad(30.0) //[rad/sec]
+#define ORIENTATION_ERROR_GAIN 1.0
 
 /** ******************************************* **/
 
@@ -79,10 +81,28 @@ bool sot_VelKinCon_ctrl::threadInit()
 
     updateiDyn3Model(true);
 
-    right_arm_pos_ref = coman_iDyn3.getPosition(right_arm_LinkIndex).getCol(3).subVector(0,2);
-    left_arm_pos_ref = coman_iDyn3.getPosition(left_arm_LinkIndex).getCol(3).subVector(0,2);
+    right_arm_pos_ref = coman_iDyn3.getPosition(right_arm_LinkIndex);
+    left_arm_pos_ref = coman_iDyn3.getPosition(left_arm_LinkIndex);
     std::cout<<"Initial Position Ref left_arm: "<<left_arm_pos_ref.toString()<<std::endl;
     std::cout<<"Initial Position Ref right_arm: "<<right_arm_pos_ref.toString()<<std::endl;
+
+    /////////////////////////////////////////
+    KDL::Frame tmp_r;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(right_arm_pos_ref, tmp_r);
+    KDL::Frame tmp_l;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(left_arm_pos_ref, tmp_l);
+
+    double R,P,Y;
+    tmp_r.M.GetRPY(R,P,Y);
+
+    std::cout<<"tmp_r "<<tmp_r.p.x()<<"  "<<tmp_r.p.y()<<"  "<<tmp_r.p.y()<<"  "<<
+               R<<"  "<<P<<"  "<<Y<<std::endl;
+    tmp_l.M.GetRPY(R,P,Y);
+
+    std::cout<<"tmp_l "<<tmp_l.p.x()<<"  "<<tmp_l.p.y()<<"  "<<tmp_l.p.y()<<"  "<<
+               R<<"  "<<P<<"  "<<Y<<std::endl;
+    /////////////////////////////////////////
+
 
     std::cout<<"Setting Position Mode for q_right_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
@@ -304,8 +324,8 @@ void sot_VelKinCon_ctrl::getFeedBack()
 
 void sot_VelKinCon_ctrl::checkInput()
 {
-    IYarp.getLeftArmCartesianRef(left_arm_pos_ref, coman_iDyn3);
-    IYarp.getRightArmCartesianRef(right_arm_pos_ref, coman_iDyn3);
+    IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
+    IYarp.getRightArmCartesianRef(right_arm_pos_ref);
     IYarp.getSetClik(is_clik);
 }
 
@@ -337,27 +357,31 @@ void sot_VelKinCon_ctrl::move()
 
 bool sot_VelKinCon_ctrl::controlLaw()
 {
-    yarp::sig::Vector pos_R = coman_iDyn3.getPosition(right_arm_LinkIndex).getCol(3).subVector(0,2);
-    yarp::sig::Vector pos_L = coman_iDyn3.getPosition(left_arm_LinkIndex).getCol(3).subVector(0,2);
+    yarp::sig::Matrix pos_R = coman_iDyn3.getPosition(right_arm_LinkIndex);
+    yarp::sig::Matrix pos_L = coman_iDyn3.getPosition(left_arm_LinkIndex);
 
     yarp::sig::Matrix JRWrist;
     if(!coman_iDyn3.getJacobian(right_arm_LinkIndex,JRWrist))
         std::cout << "Error computing Jacobian for Right Wrist" << std::endl;
-    JRWrist = JRWrist.removeRows(3,3);    // getting only position part of Jacobian
     JRWrist = JRWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
     yarp::sig::Matrix JLWrist;
     if(!coman_iDyn3.getJacobian(left_arm_LinkIndex,JLWrist))
         std::cout << "Error computing Jacobian for Left Wrist" << std::endl;
-    JLWrist = JLWrist.removeRows(3,3);   // getting only position part of Jacobian
     JLWrist = JLWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
     extractJacobians(JRWrist, JLWrist);
 
-    yarp::sig::Vector eRWrist = right_arm_pos_ref - pos_R ;
-    yarp::sig::Vector eLWrist = left_arm_pos_ref - pos_L ;
-//    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
-//    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
+    yarp::sig::Vector eRWrist_p(3), eRWrist_o(3);
+    yarp::sig::Vector eLWrist_p(3), eLWrist_o(3);
+    cartesian_utils::computeCartesianError(pos_R, right_arm_pos_ref,
+                                           eRWrist_p, eRWrist_o);
+    cartesian_utils::computeCartesianError(pos_L, left_arm_pos_ref,
+                                           eLWrist_p, eLWrist_o);
+    yarp::sig::Vector eRWrist = yarp::math::cat(eRWrist_p, -ORIENTATION_ERROR_GAIN*eRWrist_o);
+    yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -ORIENTATION_ERROR_GAIN*eLWrist_o);
+    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
+    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
 
     yarp::sig::Matrix J1 = yarp::math::pile(JRWrist, JLWrist);
     yarp::sig::Vector e1 = yarp::math::cat(eRWrist, eLWrist);
