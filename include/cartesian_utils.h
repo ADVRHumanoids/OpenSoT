@@ -4,6 +4,12 @@
 #include <yarp/sig/all.h>
 #include <kdl/frames.hpp>
 
+/**
+  This class implements quaternion error as in the paper:
+    "Operational Space Control: A Theoretical and Empirical Comparison"
+  Authors: Jun Nakanishi, Rick Cory, Michael Mistry, Jan Peters and Stefan Schaal
+  The International Journal of Robotics Research, Vol. 27, No. 6, June 2008, pp. 737–757
+  **/
 class quaternion
 {
 public:
