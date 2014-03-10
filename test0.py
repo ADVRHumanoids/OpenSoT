@@ -24,7 +24,7 @@ left_arm_Y_0 = -22.06
 
 left_arm_x_f = 0.119692
 left_arm_y_f = 0.189703
-left_arm_z_f = 0.819815
+left_arm_z_f = 0.719815
 
 
 right_arm_x_0 = 0.119692
