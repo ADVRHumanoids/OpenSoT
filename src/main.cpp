@@ -13,20 +13,24 @@ public:
     bool configure(int argc, char* argv[])
     {
         thr = new sot_VelKinCon_ctrl(dT, argc, argv);
-        if(!thr->start())
-        {
-            delete thr;
-            return false;
-        }
-        std::cout<<"Starting Module"<<std::endl;
+
         ctrl_started = false;
 
-        if(!ctrl_started){
-            thr->stop();
-            std::cout<<"Ctrl started in STOP mode! To run it send a true to idle:i port!"<<std::endl;
-        }
-
         idle_port.open("/sot_VelKinCon/idle:i");
+
+        if(ctrl_started)
+        {
+            if(!thr->start())
+            {
+                std::cout<<"Problems Starting module, closing!"<<std::endl;
+                delete thr;
+                return false;
+            }
+            std::cout<<"Starting Module"<<std::endl;
+        }
+        else
+            std::cout<<"Ctrl started in STOP mode! To run it send a true to idle:i port!"<<std::endl;
+
         return true;
     }
 
@@ -51,7 +55,12 @@ public:
             if((start.compare(bot->get(0).asString()) == 0) && !ctrl_started)
             {
                 ctrl_started = true;
-                thr->start();
+                if(!thr->start())
+                {
+                    std::cout<<"Problems Starting module, closing!"<<std::endl;
+                    delete thr;
+                    return false;
+                }
                 std::cout<<"Starting Module"<<std::endl;
             }
             if((stop.compare(bot->get(0).asString()) == 0) && ctrl_started)
