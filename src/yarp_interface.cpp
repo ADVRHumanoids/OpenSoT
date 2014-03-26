@@ -41,6 +41,7 @@ yarp_interface::yarp_interface()
 
     left_arm_pos_ref_port.open("/sot_VelKinCon/left_arm/set_ref:i");
     right_arm_pos_ref_port.open("/sot_VelKinCon/right_arm/set_ref:i");
+    com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     clik_port.open("/sot_VelKinCon/set_clik:i");
 }
 
@@ -48,6 +49,7 @@ yarp_interface::~yarp_interface()
 {
     left_arm_pos_ref_port.close();
     right_arm_pos_ref_port.close();
+    com_pos_ref_port.close();
 
     polyDriver_left_arm.close();
     polyDriver_right_arm.close();
@@ -88,7 +90,7 @@ void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
     if(!bot == NULL)
     {
         std::cout<<"Left Arm:"<<std::endl;
-        getArmCartesianRef(left_arm_ref, bot);
+        getCartesianRef(left_arm_ref, bot);
         std::cout<<std::endl;
     }
 }
@@ -100,7 +102,19 @@ void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
     if(!bot == NULL)
     {
         std::cout<<"Right Arm:"<<std::endl;
-        getArmCartesianRef(right_arm_ref, bot);
+        getCartesianRef(right_arm_ref, bot);
+        std::cout<<std::endl;
+    }
+}
+
+void yarp_interface::getCoMCartesianRef(Matrix &com_ref)
+{
+    yarp::os::Bottle *bot = com_pos_ref_port.read(false);
+
+    if(!bot == NULL)
+    {
+        std::cout<<"CoM::"<<std::endl;
+        getCartesianRef(com_ref, bot);
         std::cout<<std::endl;
     }
 }
@@ -118,7 +132,7 @@ void yarp_interface::getSetClik(bool &is_clik)
     }
 }
 
-bool yarp_interface::getArmCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot)
+bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot)
 {
     Bottle& frame = bot->findGroup("frame");
     if(!frame.isNull())

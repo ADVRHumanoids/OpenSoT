@@ -14,6 +14,7 @@ public:
 
     void getLeftArmCartesianRef(yarp::sig::Matrix& left_arm_ref);
     void getRightArmCartesianRef(yarp::sig::Matrix& right_arm_ref);
+    void getCoMCartesianRef(yarp::sig::Matrix& com_ref);
     void getSetClik(bool& is_clik);
 
 
@@ -73,6 +74,7 @@ public:
 
     yarp::os::BufferedPort<yarp::os::Bottle> right_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> com_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> clik_port;
 
 private:
@@ -83,7 +85,7 @@ private:
             return true;
         return false;
     }
-    bool getArmCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot);
+    bool getCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot);
 };
 
 #endif

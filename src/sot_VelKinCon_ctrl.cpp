@@ -86,6 +86,8 @@ bool sot_VelKinCon_ctrl::threadInit()
 
     right_arm_pos_ref = coman_iDyn3.getPosition(right_arm_LinkIndex);
     left_arm_pos_ref = coman_iDyn3.getPosition(left_arm_LinkIndex);
+
+    com_pos_ref = coman_iDyn3.getCOM();
     swing_foot_pos_ref = coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
     std::cout<<"Initial Position Ref left_arm: "<<left_arm_pos_ref.toString()<<std::endl;
     std::cout<<"Initial Position Ref right_arm: "<<right_arm_pos_ref.toString()<<std::endl;
@@ -403,6 +405,8 @@ bool sot_VelKinCon_ctrl::controlLaw()
     yarp::sig::Matrix pos_wrist_R = coman_iDyn3.getPosition(right_arm_LinkIndex);
     yarp::sig::Matrix pos_wrist_L = coman_iDyn3.getPosition(left_arm_LinkIndex);
 
+    yarp::sig::Vector pos_CoM = coman_iDyn3.getCOM("",support_foot_LinkIndex);
+
     yarp::sig::Matrix pos_foot_swing = coman_iDyn3.getPosition(support_foot_LinkIndex,swing_foot_LinkIndex);
 
     yarp::sig::Matrix JRWrist;
@@ -416,8 +420,13 @@ bool sot_VelKinCon_ctrl::controlLaw()
     JLWrist = JLWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
     yarp::sig::Matrix JSwingFoot; // for now, SwingFoot is Left
-    if(!coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot))
+    if(!coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot,true))
         std::cout << "Error computing Jacobian for Left Wrist" << std::endl;
+
+    yarp::sig::Matrix JCoM;
+    //
+    if(!coman_iDyn3.getCOMJacobian(JCoM))
+        std::cout << "Error computing CoM Jacobian" << std::endl;
 
     extractJacobians(JRWrist, JLWrist);
 

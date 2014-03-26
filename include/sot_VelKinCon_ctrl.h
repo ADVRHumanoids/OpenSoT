@@ -64,6 +64,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      yarp::sig::Vector q_torso; // Vector of measured joint angles
      yarp::sig::Matrix right_arm_pos_ref; // Homogeneous Matrix of desired position for right arm
      yarp::sig::Matrix left_arm_pos_ref; // Homogeneous Matrix of desired position for left arm
+     yarp::sig::Vector com_pos_ref;
      yarp::sig::Matrix swing_foot_pos_ref;
      /** Some Theory: **/
      /**
