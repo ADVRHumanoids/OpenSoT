@@ -1,5 +1,6 @@
 #include "yarp_interface.h"
 #include "cartesian_utils.h"
+#include <iCub/iDynTree/yarp_kdl.h>
 
 using namespace yarp::os;
 using namespace yarp::sig;
@@ -107,14 +108,17 @@ void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
     }
 }
 
-void yarp_interface::getCoMCartesianRef(Matrix &com_ref)
+void yarp_interface::getCoMCartesianRef(Vector &com_ref)
 {
     yarp::os::Bottle *bot = com_pos_ref_port.read(false);
-
+    Matrix com_ref_T;
     if(!bot == NULL)
     {
         std::cout<<"CoM::"<<std::endl;
-        getCartesianRef(com_ref, bot);
+        getCartesianRef(com_ref_T, bot);
+        KDL::Frame com_ref_T_KDL;
+        YarptoKDL(com_ref_T, com_ref_T_KDL);
+        com_ref = KDLtoYarp(com_ref_T_KDL.p);
         std::cout<<std::endl;
     }
 }

@@ -7,7 +7,9 @@
 class task_solver
 {
 public:
-    static bool computeControlHQP(const yarp::sig::Matrix& J1,
+    static bool computeControlHQP(const yarp::sig::Matrix &J0,
+                                  const yarp::sig::Vector &e0,
+                                  const yarp::sig::Matrix& J1,
                                   const yarp::sig::Vector& e1,
                                   const yarp::sig::Matrix& J2,
                                   const yarp::sig::Vector& eq,

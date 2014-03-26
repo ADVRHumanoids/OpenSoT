@@ -87,11 +87,13 @@ bool sot_VelKinCon_ctrl::threadInit()
     right_arm_pos_ref = coman_iDyn3.getPosition(right_arm_LinkIndex);
     left_arm_pos_ref = coman_iDyn3.getPosition(left_arm_LinkIndex);
 
-    com_pos_ref = coman_iDyn3.getCOM();
+    com_pos_ref = coman_iDyn3.getCOM("",support_foot_LinkIndex);
+
     swing_foot_pos_ref = coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
     std::cout<<"Initial Position Ref left_arm: "<<left_arm_pos_ref.toString()<<std::endl;
     std::cout<<"Initial Position Ref right_arm: "<<right_arm_pos_ref.toString()<<std::endl;
     std::cout<<"Initial Position Ref swing_foot: "<<swing_foot_pos_ref.toString()<<std::endl;
+    std::cout<<"Initial Position Ref CoM: "<<com_pos_ref.toString()<<std::endl;
 
     /////////////////////////////////////////
     KDL::Frame tmp_r;
@@ -360,6 +362,7 @@ void sot_VelKinCon_ctrl::checkInput()
 {
     IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
     IYarp.getRightArmCartesianRef(right_arm_pos_ref);
+    IYarp.getCoMCartesianRef(com_pos_ref);
     IYarp.getSetClik(is_clik);
 }
 
@@ -425,14 +428,20 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     yarp::sig::Matrix JCoM;
     //
+    coman_iDyn3.setFloatingBaseLink(support_foot_LinkIndex);
     if(!coman_iDyn3.getCOMJacobian(JCoM))
         std::cout << "Error computing CoM Jacobian" << std::endl;
+    coman_iDyn3.setFloatingBaseLink(waist_LinkIndex);
+    JCoM = JCoM.removeCols(0,6);    // remove floating base
+    JCoM = JCoM.removeRows(3,3);    // remove orientation
 
     extractJacobians(JRWrist, JLWrist);
 
     yarp::sig::Vector eRWrist_p(3), eRWrist_o(3);
     yarp::sig::Vector eLWrist_p(3), eLWrist_o(3);
     yarp::sig::Vector eSwingFoot_p(3), eSwingFoot_o(3);
+    yarp::sig::Vector eCoM = com_pos_ref-pos_CoM;
+
     cartesian_utils::computeCartesianError(pos_wrist_R, right_arm_pos_ref,
                                            eRWrist_p, eRWrist_o);
     cartesian_utils::computeCartesianError(pos_wrist_L, left_arm_pos_ref,
@@ -445,15 +454,21 @@ bool sot_VelKinCon_ctrl::controlLaw()
     std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
     std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
     std::cout<<"eSwingFoot: "<<eSwingFoot.toString()<<std::endl;
+    std::cout<<"eCoM: "<<eCoM.toString()<<std::endl;
+    std::cout<<"com_pos_ref: "<<com_pos_ref.toString()<<std::endl;
+    std::cout<<"pos_CoM: "<<pos_CoM.toString()<<std::endl;
 
-    yarp::sig::Matrix J1 = yarp::math::pile(JRWrist, JLWrist);
-    J1 = yarp::math::pile(J1, JSwingFoot);
-    yarp::sig::Vector e1 = yarp::math::cat(eRWrist, eLWrist);
-    e1 = yarp::math::cat(e1, eSwingFoot);
+
+    yarp::sig::Matrix JEe = yarp::math::pile(JRWrist, JLWrist);
+    JEe = yarp::math::pile(JEe, JSwingFoot);
+    yarp::sig::Vector eEe = yarp::math::cat(eRWrist, eLWrist);
+    eEe = yarp::math::cat(eEe, eSwingFoot);
     yarp::sig::Vector eq = (q_ref - q); // postural error
 
     bool control_computed = false;
-    control_computed = task_solver::computeControlHQP(J1, e1, Q_postural, eq,
+    control_computed = task_solver::computeControlHQP(JCoM,eCoM,
+                                                      JEe, eEe,
+                                                      Q_postural, eq,
                                                       coman_iDyn3.getJointBoundMax(),
                                                       coman_iDyn3.getJointBoundMin(),
                                                       q, MAX_JOINT_VELOCITY,

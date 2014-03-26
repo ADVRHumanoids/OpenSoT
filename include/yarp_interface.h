@@ -14,7 +14,7 @@ public:
 
     void getLeftArmCartesianRef(yarp::sig::Matrix& left_arm_ref);
     void getRightArmCartesianRef(yarp::sig::Matrix& right_arm_ref);
-    void getCoMCartesianRef(yarp::sig::Matrix& com_ref);
+    void getCoMCartesianRef(yarp::sig::Vector& com_ref);
     void getSetClik(bool& is_clik);
 
 
