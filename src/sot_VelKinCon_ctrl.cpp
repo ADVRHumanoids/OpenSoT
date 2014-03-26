@@ -81,10 +81,15 @@ bool sot_VelKinCon_ctrl::threadInit()
 
     updateiDyn3Model(true);
 
+    support_foot_LinkIndex = left_leg_LinkIndex;
+    swing_foot_LinkIndex = right_leg_LinkIndex;
+
     right_arm_pos_ref = coman_iDyn3.getPosition(right_arm_LinkIndex);
     left_arm_pos_ref = coman_iDyn3.getPosition(left_arm_LinkIndex);
+    swing_foot_pos_ref = coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
     std::cout<<"Initial Position Ref left_arm: "<<left_arm_pos_ref.toString()<<std::endl;
     std::cout<<"Initial Position Ref right_arm: "<<right_arm_pos_ref.toString()<<std::endl;
+    std::cout<<"Initial Position Ref swing_foot: "<<swing_foot_pos_ref.toString()<<std::endl;
 
     /////////////////////////////////////////
     KDL::Frame tmp_r;
@@ -113,6 +118,13 @@ bool sot_VelKinCon_ctrl::threadInit()
     std::cout<<"Setting Position Mode for torso:"<<std::endl;
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
+
+    std::cout<<"Setting Position Mode for q_right_leg:"<<std::endl;
+    for(unsigned int i = 0; i < q_right_leg.size(); ++i)
+        IYarp.controlMode_right_leg->setPositionMode(i);
+    std::cout<<"Setting Position Mode for q_left_leg:"<<std::endl;
+    for(unsigned int i = 0; i < q_left_leg.size(); ++i)
+        IYarp.controlMode_left_leg->setPositionMode(i);
 
     if(is_clik)
         std::cout<<"SoT is running as CLIK"<<std::endl;
@@ -182,15 +194,23 @@ void sot_VelKinCon_ctrl::setControlledKinematicChainsLinkIndex()
 {
     right_arm_name = "r_wrist";
     left_arm_name = "l_wrist";
+    right_leg_name = "r_sole";
+    left_leg_name = "l_sole";
     waist_LinkIndex = coman_iDyn3.getLinkIndex(waist_link_name);
     right_arm_LinkIndex = coman_iDyn3.getLinkIndex(right_arm_name);
     left_arm_LinkIndex = coman_iDyn3.getLinkIndex(left_arm_name);
+    right_leg_LinkIndex = coman_iDyn3.getLinkIndex(right_leg_name);
+    left_leg_LinkIndex = coman_iDyn3.getLinkIndex(left_leg_name);
     if(right_arm_LinkIndex == -1)
         std::cout << "Failed to get link index for right arm" << std::endl;
     if(left_arm_LinkIndex == -1)
         std::cout << "Failed to get link index for left arm" << std::endl;
     if(waist_LinkIndex == -1)
         std::cout << "Failed to get link index for Waist" << std::endl;
+    if(right_leg_LinkIndex == -1)
+        std::cout << "Failed to get link index for right leg" << std::endl;
+    if(left_leg_LinkIndex == -1)
+        std::cout << "Failed to get link index for left leg" << std::endl;
 }
 
 void sot_VelKinCon_ctrl::setControlledKinematicChainsJointNumbers()
@@ -211,6 +231,18 @@ void sot_VelKinCon_ctrl::setControlledKinematicChainsJointNumbers()
     BOOST_FOREACH(std::string joint_name, torso_joint_names){
         std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
         waist_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
+    }
+    std::cout<<std::endl;
+    std::cout<<"Right Leg joint indices: \n";
+    BOOST_FOREACH(std::string joint_name, right_leg_joint_names){
+        std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
+        right_leg_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
+    }
+    std::cout<<std::endl;
+    std::cout<<"Left Leg joint indices: \n";
+    BOOST_FOREACH(std::string joint_name, left_leg_joint_names){
+        std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
+        left_leg_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
     }
     std::cout<<std::endl;
 }
@@ -337,6 +369,8 @@ void sot_VelKinCon_ctrl::move()
     yarp::sig::Vector torso(q_torso.size(), 0.0);
     yarp::sig::Vector left_arm(q_left_arm.size(), 0.0);
     yarp::sig::Vector right_arm(q_right_arm.size(), 0.0);
+    yarp::sig::Vector left_leg(q_left_leg.size(), 0.0);
+    yarp::sig::Vector right_leg(q_right_leg.size(), 0.0);
 
     double q_sent = 0.0;
     for(unsigned int i = 0; i < torso.size(); ++i){
@@ -349,16 +383,27 @@ void sot_VelKinCon_ctrl::move()
         q_sent = q[right_arm_joint_numbers[i]] + dq_ref[right_arm_joint_numbers[i]];
         right_arm[i] = toDeg( q_sent );
     }
+    //Here we assumes that left and right leg has the same number of joints!
+    for(unsigned int i = 0; i < left_leg.size(); ++i){
+        q_sent = q[left_leg_joint_numbers[i]] + dq_ref[left_leg_joint_numbers[i]];
+        left_leg[i] = toDeg( q_sent );
+        q_sent = q[right_leg_joint_numbers[i]] + dq_ref[right_leg_joint_numbers[i]];
+        right_leg[i] = toDeg( q_sent );
+    }
 
     IYarp.directControl_torso->setPositions(torso.data());
     IYarp.directControl_left_arm->setPositions(left_arm.data());
     IYarp.directControl_right_arm->setPositions(right_arm.data());
+    IYarp.directControl_left_leg->setPositions(left_leg.data());
+    IYarp.directControl_right_leg->setPositions(right_leg.data());
 }
 
 bool sot_VelKinCon_ctrl::controlLaw()
 {
-    yarp::sig::Matrix pos_R = coman_iDyn3.getPosition(right_arm_LinkIndex);
-    yarp::sig::Matrix pos_L = coman_iDyn3.getPosition(left_arm_LinkIndex);
+    yarp::sig::Matrix pos_wrist_R = coman_iDyn3.getPosition(right_arm_LinkIndex);
+    yarp::sig::Matrix pos_wrist_L = coman_iDyn3.getPosition(left_arm_LinkIndex);
+
+    yarp::sig::Matrix pos_foot_swing = coman_iDyn3.getPosition(support_foot_LinkIndex,swing_foot_LinkIndex);
 
     yarp::sig::Matrix JRWrist;
     if(!coman_iDyn3.getJacobian(right_arm_LinkIndex,JRWrist))
@@ -370,21 +415,32 @@ bool sot_VelKinCon_ctrl::controlLaw()
         std::cout << "Error computing Jacobian for Left Wrist" << std::endl;
     JLWrist = JLWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
+    yarp::sig::Matrix JSwingFoot; // for now, SwingFoot is Left
+    if(!coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot))
+        std::cout << "Error computing Jacobian for Left Wrist" << std::endl;
+
     extractJacobians(JRWrist, JLWrist);
 
     yarp::sig::Vector eRWrist_p(3), eRWrist_o(3);
     yarp::sig::Vector eLWrist_p(3), eLWrist_o(3);
-    cartesian_utils::computeCartesianError(pos_R, right_arm_pos_ref,
+    yarp::sig::Vector eSwingFoot_p(3), eSwingFoot_o(3);
+    cartesian_utils::computeCartesianError(pos_wrist_R, right_arm_pos_ref,
                                            eRWrist_p, eRWrist_o);
-    cartesian_utils::computeCartesianError(pos_L, left_arm_pos_ref,
+    cartesian_utils::computeCartesianError(pos_wrist_L, left_arm_pos_ref,
                                            eLWrist_p, eLWrist_o);
+    cartesian_utils::computeCartesianError(pos_foot_swing, swing_foot_pos_ref,
+                                           eSwingFoot_p, eSwingFoot_o);
     yarp::sig::Vector eRWrist = yarp::math::cat(eRWrist_p, -ORIENTATION_ERROR_GAIN*eRWrist_o);
     yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -ORIENTATION_ERROR_GAIN*eLWrist_o);
+    yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -ORIENTATION_ERROR_GAIN*eSwingFoot_o);
     std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
     std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
+    std::cout<<"eSwingFoot: "<<eSwingFoot.toString()<<std::endl;
 
     yarp::sig::Matrix J1 = yarp::math::pile(JRWrist, JLWrist);
+    J1 = yarp::math::pile(J1, JSwingFoot);
     yarp::sig::Vector e1 = yarp::math::cat(eRWrist, eLWrist);
+    e1 = yarp::math::cat(e1, eSwingFoot);
     yarp::sig::Vector eq = (q_ref - q); // postural error
 
     bool control_computed = false;

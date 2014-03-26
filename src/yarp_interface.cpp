@@ -23,10 +23,14 @@ yarp_interface::yarp_interface()
     if(createPolyDriver("left_leg", polyDriver_left_leg))
     {
         polyDriver_left_leg.view(encodersMotor_left_leg);
+        polyDriver_left_leg.view(directControl_left_leg);
+        polyDriver_left_leg.view(controlMode_left_leg);
     }
     if(createPolyDriver("right_leg", polyDriver_right_leg))
     {
         polyDriver_right_leg.view(encodersMotor_right_leg);
+        polyDriver_right_leg.view(directControl_right_leg);
+        polyDriver_right_leg.view(controlMode_right_leg);
     }
     if(createPolyDriver("torso", polyDriver_torso))
     {

@@ -37,12 +37,20 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      int waist_LinkIndex;
      int right_arm_LinkIndex;
      int left_arm_LinkIndex;
+     int right_leg_LinkIndex;
+     int left_leg_LinkIndex;
+     int support_foot_LinkIndex;
+     int swing_foot_LinkIndex;
      std::string right_arm_name;
      std::string left_arm_name;
+     std::string right_leg_name;
+     std::string left_leg_name;
      std::string waist_link_name;
      // Joint ids for right arm and left arm
      std::vector<unsigned int> right_arm_joint_numbers;
      std::vector<unsigned int> left_arm_joint_numbers;
+     std::vector<unsigned int> right_leg_joint_numbers;
+     std::vector<unsigned int> left_leg_joint_numbers;
      std::vector<unsigned int> waist_joint_numbers;
 
      yarp::sig::Vector q_ref; // Vector of desired joint configurations [1x29]
@@ -56,6 +64,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
      yarp::sig::Vector q_torso; // Vector of measured joint angles
      yarp::sig::Matrix right_arm_pos_ref; // Homogeneous Matrix of desired position for right arm
      yarp::sig::Matrix left_arm_pos_ref; // Homogeneous Matrix of desired position for left arm
+     yarp::sig::Matrix swing_foot_pos_ref;
      /** Some Theory: **/
      /**
         We are considering the optimization problem:
@@ -122,7 +131,7 @@ class sot_VelKinCon_ctrl : public yarp::os::RateThread
 
      /**
        We use this function to set to zero all the part of the Jacobians that we are not
-       controlloing (basically the legs).
+       controlling (basically the legs).
        Each Jacobian contains only waist + arm.
        **/
      void extractJacobians(yarp::sig::Matrix& JRWrist, yarp::sig::Matrix& JLWrist)
