@@ -17,7 +17,7 @@ com_z_0 = 0.525539
 
 com_x_f = 0.021886
 com_y_f = -0.015690
-com_z_f = 0.525539
+com_z_f = 0.475539
 
 t_start = yarp.Time.now()
 while(1):

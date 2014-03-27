@@ -14,12 +14,14 @@ yarp_interface::yarp_interface()
         polyDriver_left_arm.view(encodersMotor_left_arm);
         polyDriver_left_arm.view(directControl_left_arm);
         polyDriver_left_arm.view(controlMode_left_arm);
+        polyDriver_left_arm.view(impedanceCtrl_left_arm);
     }
     if(createPolyDriver("right_arm", polyDriver_right_arm))
     {
         polyDriver_right_arm.view(encodersMotor_right_arm);
         polyDriver_right_arm.view(directControl_right_arm);
         polyDriver_right_arm.view(controlMode_right_arm);
+        polyDriver_right_arm.view(impedanceCtrl_right_arm);
     }
     if(createPolyDriver("left_leg", polyDriver_left_leg))
     {
@@ -44,6 +46,7 @@ yarp_interface::yarp_interface()
     right_arm_pos_ref_port.open("/sot_VelKinCon/right_arm/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     clik_port.open("/sot_VelKinCon/set_clik:i");
+    world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
 }
 
 yarp_interface::~yarp_interface()
@@ -134,6 +137,35 @@ void yarp_interface::getSetClik(bool &is_clik)
         else
             std::cout<<"CLIK NOT activated!"<<std::endl;
     }
+}
+
+bool yarp_interface::sendCartesianBottle(BufferedPort<Bottle> &port, const std::string &ref_frame , const Matrix &T)
+{
+    yarp::os::Bottle &temp = port.prepare();
+    yarp::os::Bottle &tf_list  = temp.addList();
+
+    tf_list.addString("frame");
+    tf_list.addString(ref_frame);
+
+    yarp::os::Bottle &pose_list  = temp.addList();
+
+    KDL::Frame T_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_kdl);
+    pose_list.addString("data");
+
+    pose_list.add(T_kdl.p.x());
+    pose_list.add(T_kdl.p.y());
+    pose_list.add(T_kdl.p.z());
+
+    double R = 0.0;
+    double P = 0.0;
+    double Y = 0.0;
+    T_kdl.M.GetRPY(R,P,Y);
+    pose_list.add(R);
+    pose_list.add(P);
+    pose_list.add(Y);
+
+    port.write();
 }
 
 bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot)

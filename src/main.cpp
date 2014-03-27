@@ -13,7 +13,6 @@ public:
     bool configure(int argc, char* argv[])
     {
         thr = new sot_VelKinCon_ctrl(dT, argc, argv);
-
         ctrl_started = false;
 
         idle_port.open("/sot_VelKinCon/idle:i");

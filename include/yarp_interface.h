@@ -49,6 +49,12 @@ public:
         return dofs;
     }
 
+    void sendWorldToBaseLinkPose(const yarp::sig::Matrix& T_world_base_link)
+    {
+        //Here the reference frame is the same that in updateIdyn3Model !!!
+        sendCartesianBottle(world_to_base_link_pose_port, "r_sole", T_world_base_link);
+    }
+
     yarp::dev::PolyDriver polyDriver_left_arm;
     yarp::dev::PolyDriver polyDriver_right_arm;
     yarp::dev::PolyDriver polyDriver_left_leg;
@@ -72,10 +78,15 @@ public:
     yarp::dev::IPositionDirect *directControl_left_leg;
     yarp::dev::IPositionDirect *directControl_right_leg;
 
+    yarp::dev::IImpedanceControl *impedanceCtrl_left_arm;
+    yarp::dev::IImpedanceControl *impedanceCtrl_right_arm;
+
     yarp::os::BufferedPort<yarp::os::Bottle> right_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> com_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> clik_port;
+
+    yarp::os::BufferedPort<yarp::os::Bottle> world_to_base_link_pose_port;
 
 private:
     bool createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver);
@@ -86,6 +97,8 @@ private:
         return false;
     }
     bool getCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot);
+    bool sendCartesianBottle(yarp::os::BufferedPort<yarp::os::Bottle>& port, const std::string& ref_frame,
+                            const yarp::sig::Matrix& T);
 };
 
 #endif

@@ -35,7 +35,8 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     q_right_leg(1),
     q_torso(1),
     right_arm_pos_ref(3, 0.0),
-    left_arm_pos_ref(3, 0.0)
+    left_arm_pos_ref(3, 0.0),
+    worldT(4,4)
 {
     iDyn3Model();
     setJointNames();
@@ -66,6 +67,8 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     q_right_leg.resize(nJ, 0.0);
     IYarp.encodersMotor_torso->getAxes(&nJ);
     q_torso.resize(nJ, 0.0);
+
+    worldT.eye();
 
     is_clik = false;
 }
@@ -118,7 +121,10 @@ bool sot_VelKinCon_ctrl::threadInit()
         IYarp.controlMode_right_arm->setPositionMode(i);
     std::cout<<"Setting Position Mode for q_left_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
-        IYarp.controlMode_left_arm->setPositionMode(i);
+    {
+        //IYarp.controlMode_left_arm->setPositionMode(i);
+        IYarp.controlMode_left_arm->setImpedancePositionMode(i);
+    }
     std::cout<<"Setting Position Mode for torso:"<<std::endl;
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
@@ -152,6 +158,8 @@ void sot_VelKinCon_ctrl::run()
 
     if(controlLaw())
         move();
+
+    IYarp.sendWorldToBaseLinkPose(worldT);
 }
 
 void sot_VelKinCon_ctrl::iDyn3Model()
@@ -313,7 +321,7 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
     // Set World Pose: to do only once at the beginning
     if(set_world_pose)
     {
-        yarp::sig::Matrix worldT(4,4);
+        //yarp::sig::Matrix worldT(4,4);
         worldT.eye();
         coman_iDyn3.setWorldBasePose(worldT);
         yarp::sig::Vector foot_pose(3);
