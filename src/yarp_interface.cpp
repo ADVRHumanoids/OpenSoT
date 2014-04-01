@@ -6,6 +6,7 @@ using namespace yarp::os;
 using namespace yarp::sig;
 
 #define toRad(X) (X*M_PI/180.0)
+#define toDeg(X) (X*180.0/M_PI)
 
 yarp_interface::yarp_interface()
 {
@@ -139,7 +140,7 @@ void yarp_interface::getSetClik(bool &is_clik)
     }
 }
 
-bool yarp_interface::sendCartesianBottle(BufferedPort<Bottle> &port, const std::string &ref_frame , const Matrix &T)
+bool yarp_interface::sendCartesianRef(BufferedPort<Bottle> &port, const std::string &ref_frame , const Matrix &T)
 {
     yarp::os::Bottle &temp = port.prepare();
     yarp::os::Bottle &tf_list  = temp.addList();
@@ -161,9 +162,9 @@ bool yarp_interface::sendCartesianBottle(BufferedPort<Bottle> &port, const std::
     double P = 0.0;
     double Y = 0.0;
     T_kdl.M.GetRPY(R,P,Y);
-    pose_list.add(R);
-    pose_list.add(P);
-    pose_list.add(Y);
+    pose_list.add(toDeg(R));
+    pose_list.add(toDeg(P));
+    pose_list.add(toDeg(Y));
 
     port.write();
 }

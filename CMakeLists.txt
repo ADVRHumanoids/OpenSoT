@@ -28,9 +28,12 @@ LINK_DIRECTORIES(${ROS_HYDRO_LIB_FOLDER} "${CMAKE_CURRENT_SOURCE_DIR}/../extern/
 # add required linker flags
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 
+# for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
+file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
+
 ADD_LIBRARY(sot_VelKinCon_ctrl STATIC src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp)
 ADD_LIBRARY(cartesian_utils STATIC src/cartesian_utils.cpp)
-ADD_EXECUTABLE(sot_VelKinCon src/main.cpp)
+ADD_EXECUTABLE(sot_VelKinCon src/main.cpp ${sot_INCLUDES})
 ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 

@@ -52,7 +52,7 @@ public:
     void sendWorldToBaseLinkPose(const yarp::sig::Matrix& T_world_base_link)
     {
         //Here the reference frame is the same that in updateIdyn3Model !!!
-        sendCartesianBottle(world_to_base_link_pose_port, "r_sole", T_world_base_link);
+        sendCartesianRef(world_to_base_link_pose_port, "r_sole", T_world_base_link);
     }
 
     yarp::dev::PolyDriver polyDriver_left_arm;
@@ -97,7 +97,7 @@ private:
         return false;
     }
     bool getCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot);
-    bool sendCartesianBottle(yarp::os::BufferedPort<yarp::os::Bottle>& port, const std::string& ref_frame,
+    bool sendCartesianRef(yarp::os::BufferedPort<yarp::os::Bottle>& port, const std::string& ref_frame,
                             const yarp::sig::Matrix& T);
 };
 
