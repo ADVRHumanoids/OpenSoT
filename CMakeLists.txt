@@ -14,16 +14,18 @@ FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(kdl_codyco REQUIRED)
 
-ExternalProject_Add(qpOASES-ext SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../extern/qpOASES/" 
-                                INSTALL_COMMAND "")
-                                #CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
+ExternalProject_Add(qpOASES-ext GIT_REPOSITORY https://github.com/asherikov/qpOASES.git
+                            PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
+                            INSTALL_COMMAND "")
+                            #CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
 
+set(qpOASES_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext/")
 
 SET(ROS_HYDRO_LIB_FOLDER /opt/ros/hydro/lib/)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/../extern/qpOASES/include/")
-LINK_DIRECTORIES(${ROS_HYDRO_LIB_FOLDER} "${CMAKE_CURRENT_SOURCE_DIR}/../extern/qpOASES/lib/")
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} "${qpOASES_FOLDER}/include/")
+LINK_DIRECTORIES(${ROS_HYDRO_LIB_FOLDER} "${qpOASES_FOLDER}/lib/")
 
 # add required linker flags
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
