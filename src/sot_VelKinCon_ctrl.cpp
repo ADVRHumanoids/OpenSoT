@@ -76,6 +76,8 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
 //Qui devo prendere la configurazione iniziale del robot!
 bool sot_VelKinCon_ctrl::threadInit()
 {
+    IYarp.cleanPorts();
+
     dq_ref.zero();
     getFeedBack();
 

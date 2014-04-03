@@ -59,6 +59,8 @@ public:
         sendCartesianRef(world_to_base_link_pose_port, "r_sole", T_world_base_link);
     }
 
+    void cleanPorts();
+
 
     yarp::dev::PolyDriver polyDriver_left_arm;
     yarp::dev::PolyDriver polyDriver_right_arm;
@@ -86,12 +88,15 @@ public:
     yarp::dev::IImpedanceControl *impedanceCtrl_left_arm;
     yarp::dev::IImpedanceControl *impedanceCtrl_right_arm;
 
+    /// Remember every time you put a port here to clean it as done in function cleanPorts()!!!
     yarp::os::BufferedPort<yarp::os::Bottle> right_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> com_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> clik_port;
-
     yarp::os::BufferedPort<yarp::os::Bottle> world_to_base_link_pose_port;
+    ///
+
+
 
 private:
     bool createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver);

@@ -213,3 +213,27 @@ bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const s
     return false;
 }
 
+void yarp_interface::cleanPorts()
+{
+    yarp::os::Bottle* foo;
+
+    int pendings = left_arm_pos_ref_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        left_arm_pos_ref_port.read(foo);
+
+    pendings = right_arm_pos_ref_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        right_arm_pos_ref_port.read(foo);
+
+    pendings = com_pos_ref_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        com_pos_ref_port.read(foo);
+
+    pendings = clik_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        clik_port.read(foo);
+
+    pendings = world_to_base_link_pose_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        world_to_base_link_pose_port.read(foo);
+}
