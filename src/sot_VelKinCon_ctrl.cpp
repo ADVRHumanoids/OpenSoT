@@ -93,10 +93,11 @@ bool sot_VelKinCon_ctrl::threadInit()
     com_pos_ref = coman_iDyn3.getCOM("",support_foot_LinkIndex);
 
     swing_foot_pos_ref = coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
-    std::cout<<"Initial Position Ref left_arm: "<<left_arm_pos_ref.toString()<<std::endl;
-    std::cout<<"Initial Position Ref right_arm: "<<right_arm_pos_ref.toString()<<std::endl;
-    std::cout<<"Initial Position Ref swing_foot: "<<swing_foot_pos_ref.toString()<<std::endl;
-    std::cout<<"Initial Position Ref CoM: "<<com_pos_ref.toString()<<std::endl;
+
+    std::cout<<"Initial Pose Ref left_arm:"<<std::endl; cartesian_utils::printHomogeneousTransform(left_arm_pos_ref);std::cout<<std::endl;
+    std::cout<<"Initial Pose Ref right_arm:"<<std::endl; cartesian_utils::printHomogeneousTransform(right_arm_pos_ref);std::cout<<std::endl;
+    std::cout<<"Initial Pose Ref swing_foot:"<<std::endl; cartesian_utils::printHomogeneousTransform(swing_foot_pos_ref);std::cout<<std::endl;
+    std::cout<<"Initial Position Ref CoM: [ "<<com_pos_ref.toString()<<" ]"<<std::endl;
 
     /////////////////////////////////////////
     KDL::Frame tmp_r;
@@ -116,15 +117,13 @@ bool sot_VelKinCon_ctrl::threadInit()
     /////////////////////////////////////////
 
 
-    std::cout<<"Setting Position Mode for q_right_arm:"<<std::endl;
+    std::cout<<"Setting Impedance Mode for q_right_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
-        IYarp.controlMode_right_arm->setPositionMode(i);
-    std::cout<<"Setting Position Mode for q_left_arm:"<<std::endl;
+        IYarp.controlMode_right_arm->setImpedancePositionMode(i);
+    std::cout<<"Setting Impedance Mode for q_left_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
-    {
-        //IYarp.controlMode_left_arm->setPositionMode(i);
         IYarp.controlMode_left_arm->setImpedancePositionMode(i);
-    }
+
     std::cout<<"Setting Position Mode for torso:"<<std::endl;
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
@@ -327,8 +326,7 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
         yarp::sig::Vector foot_pose(3);
         foot_pose = coman_iDyn3.getPosition(coman_iDyn3.getLinkIndex("r_sole")).getCol(3).subVector(0,2);
         worldT(2,3) = -foot_pose(2);
-        std::cout<<"World Base Pose:\n";
-        std::cout<<worldT.toString()<<std::endl;
+        std::cout<<"World Base Pose: "<<std::endl; cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
         coman_iDyn3.setWorldBasePose(worldT);
         coman_iDyn3.computePositions();
     }
@@ -459,12 +457,13 @@ bool sot_VelKinCon_ctrl::controlLaw()
     yarp::sig::Vector eRWrist = yarp::math::cat(eRWrist_p, -ORIENTATION_ERROR_GAIN*eRWrist_o);
     yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -ORIENTATION_ERROR_GAIN*eLWrist_o);
     yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -ORIENTATION_ERROR_GAIN*eSwingFoot_o);
-    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
-    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
-    std::cout<<"eSwingFoot: "<<eSwingFoot.toString()<<std::endl;
-    std::cout<<"eCoM: "<<eCoM.toString()<<std::endl;
-    std::cout<<"com_pos_ref: "<<com_pos_ref.toString()<<std::endl;
-    std::cout<<"pos_CoM: "<<pos_CoM.toString()<<std::endl;
+
+//    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
+//    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
+//    std::cout<<"eSwingFoot: "<<eSwingFoot.toString()<<std::endl;
+//    std::cout<<"eCoM: "<<eCoM.toString()<<std::endl;
+//    std::cout<<"com_pos_ref: "<<com_pos_ref.toString()<<std::endl;
+//    std::cout<<"pos_CoM: "<<pos_CoM.toString()<<std::endl;
 
 
     yarp::sig::Matrix JEe = yarp::math::pile(JRWrist, JLWrist);

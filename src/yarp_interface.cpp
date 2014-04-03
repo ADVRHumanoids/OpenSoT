@@ -171,7 +171,7 @@ bool yarp_interface::sendCartesianRef(BufferedPort<Bottle> &port, const std::str
     port.write();
 }
 
-bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot, const std::string &local_frame)
+bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const std::string &local_frame)
 {
     Bottle& frame = bot->findGroup("frame");
     if(!frame.isNull())
@@ -183,15 +183,24 @@ bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot, con
             {
                 if(data.size() == 6+1)
                 {
-                    cartesian_utils::homogeneousMatrixFromRPY(arm_ref,
+                    cartesian_utils::homogeneousMatrixFromRPY(ref,
                                                               data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                               toRad(data.get(4).asDouble()), toRad(data.get(5).asDouble()), toRad(data.get(6).asDouble()));
                     std::cout<<"    New reference in "<< local_frame.c_str()<< " is "<<std::endl;
-                    std::cout<<arm_ref.toString()<<std::endl;
+                    std::cout<<ref.toString()<<std::endl;
+                    return true;
+                }
+                else if(data.size() == 7+1)
+                {
+                    cartesian_utils::homogeneousMatrixFromQuaternion(ref,
+                                                                     data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
+                                                                     data.get(4).asDouble(), data.get(5).asDouble(), data.get(6).asDouble(), data.get(7).asDouble());
+                    std::cout<<"    New reference in "<< local_frame.c_str()<< " is "<<std::endl;
+                    std::cout<<ref.toString()<<std::endl;
                     return true;
                 }
                 else
-                    std::cout<<"    ERROR: wrong size of reference! Should be 6!"<<std::endl;
+                    std::cout<<"    ERROR: wrong size of reference! Should be 6 if RPY are used or 7 if Quaternions are used!"<<std::endl;
             }
             else
                 std::cout<<"    ERROR: no data section in port"<<std::endl;

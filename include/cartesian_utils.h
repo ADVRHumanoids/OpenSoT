@@ -67,8 +67,12 @@ public:
     static void homogeneousMatrixFromRPY(yarp::sig::Matrix& T,
                                          const double x, const double y, const double z,
                                          const double R, const double P, const double Y);
+    static void homogeneousMatrixFromQuaternion(yarp::sig::Matrix& T,
+                                                const double x, const double y, const double z,
+                                                const double quaternion_x, const double quaternion_y, const double quaternion_z, const double quaternion_w);
     static void fromKDLFrameToYARPMatrix(const KDL::Frame& Ti, yarp::sig::Matrix& To);
     static void fromYARPMatrixtoKDLFrame(const yarp::sig::Matrix& Ti, KDL::Frame& To);
+    static void printHomogeneousTransform(const yarp::sig::Matrix& T);
 };
 
 #endif

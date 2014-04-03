@@ -101,7 +101,7 @@ private:
             return true;
         return false;
     }
-    bool getCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot, const std::string& local_frame);
+    bool getCartesianRef(yarp::sig::Matrix &ref, yarp::os::Bottle *bot, const std::string& local_frame);
     bool sendCartesianRef(yarp::os::BufferedPort<yarp::os::Bottle>& port, const std::string& ref_frame,
                             const yarp::sig::Matrix& T);
 };
