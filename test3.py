@@ -61,7 +61,7 @@ while(1):
     
     bottle_tmp0 = bottle_left.addList()
     bottle_tmp0.addString("frame")
-    bottle_tmp0.addString("base_link")        
+    bottle_tmp0.addString("world")        
     
     bottle_tmp = bottle_left.addList()
     bottle_tmp.addString("data")
@@ -77,7 +77,7 @@ while(1):
     
     bottle_tmp0 = bottle_right.addList()
     bottle_tmp0.addString("frame")
-    bottle_tmp0.addString("base_link")      
+    bottle_tmp0.addString("world")      
     
     bottle_tmp = bottle_right.addList()
     bottle_tmp.addString("data")

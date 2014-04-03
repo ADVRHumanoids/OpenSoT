@@ -95,7 +95,7 @@ void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
     if(!bot == NULL)
     {
         std::cout<<"Left Arm:"<<std::endl;
-        getCartesianRef(left_arm_ref, bot);
+        getCartesianRef(left_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
         std::cout<<std::endl;
     }
 }
@@ -107,7 +107,7 @@ void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
     if(!bot == NULL)
     {
         std::cout<<"Right Arm:"<<std::endl;
-        getCartesianRef(right_arm_ref, bot);
+        getCartesianRef(right_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
         std::cout<<std::endl;
     }
 }
@@ -119,11 +119,13 @@ void yarp_interface::getCoMCartesianRef(Vector &com_ref)
     if(!bot == NULL)
     {
         std::cout<<"CoM::"<<std::endl;
-        getCartesianRef(com_ref_T, bot);
-        KDL::Frame com_ref_T_KDL;
-        YarptoKDL(com_ref_T, com_ref_T_KDL);
-        com_ref = KDLtoYarp(com_ref_T_KDL.p);
-        std::cout<<std::endl;
+        if(getCartesianRef(com_ref_T, bot, LOCAL_FRAME_COM))
+        {
+            KDL::Frame com_ref_T_KDL;
+            YarptoKDL(com_ref_T, com_ref_T_KDL);
+            com_ref = KDLtoYarp(com_ref_T_KDL.p);
+            std::cout<<std::endl;
+        }
     }
 }
 
@@ -169,12 +171,12 @@ bool yarp_interface::sendCartesianRef(BufferedPort<Bottle> &port, const std::str
     port.write();
 }
 
-bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot)
+bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot, const std::string &local_frame)
 {
     Bottle& frame = bot->findGroup("frame");
     if(!frame.isNull())
     {
-        if(checkRefFrame(frame.get(1).asString()))
+        if(checkRefFrame(frame.get(1).asString(), local_frame.c_str()))
         {
             Bottle& data = bot->findGroup("data");
             if(!data.isNull())
@@ -184,7 +186,7 @@ bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot)
                     cartesian_utils::homogeneousMatrixFromRPY(arm_ref,
                                                               data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                               toRad(data.get(4).asDouble()), toRad(data.get(5).asDouble()), toRad(data.get(6).asDouble()));
-                    std::cout<<"    New reference in base_link is "<<std::endl;
+                    std::cout<<"    New reference in "<< local_frame.c_str()<< " is "<<std::endl;
                     std::cout<<arm_ref.toString()<<std::endl;
                     return true;
                 }
@@ -195,7 +197,7 @@ bool yarp_interface::getCartesianRef(Matrix &arm_ref, yarp::os::Bottle *bot)
                 std::cout<<"    ERROR: no data section in port"<<std::endl;
         }
         else
-            std::cout<<"    ERROR: wrong Reference Frame, should be base_link!"<<std::endl;
+            std::cout<<"    ERROR: wrong Reference Frame, should be "<< local_frame.c_str() <<std::endl;
     }
     else
         std::cout<<"    ERROR: no frame section in port"<<std::endl;

@@ -6,6 +6,10 @@
 #include <yarp/dev/all.h>
 #include <iCub/iDynTree/DynTree.h>
 
+#define LOCAL_FRAME_UPPER_BODY "world"
+#define LOCAL_FRAME_LOWER_BODY "world"
+#define LOCAL_FRAME_COM "l_sole"
+
 class yarp_interface
 {
 public:
@@ -55,6 +59,7 @@ public:
         sendCartesianRef(world_to_base_link_pose_port, "r_sole", T_world_base_link);
     }
 
+
     yarp::dev::PolyDriver polyDriver_left_arm;
     yarp::dev::PolyDriver polyDriver_right_arm;
     yarp::dev::PolyDriver polyDriver_left_leg;
@@ -90,13 +95,13 @@ public:
 
 private:
     bool createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver);
-    bool checkRefFrame(const std::string& ref_frame)
+    bool checkRefFrame(const std::string& ref_frame, const std::string& local_frame)
     {
-        if(ref_frame.compare("base_link") == 0)
+        if(ref_frame.compare(local_frame.c_str()) == 0)
             return true;
         return false;
     }
-    bool getCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot);
+    bool getCartesianRef(yarp::sig::Matrix &arm_ref, yarp::os::Bottle *bot, const std::string& local_frame);
     bool sendCartesianRef(yarp::os::BufferedPort<yarp::os::Bottle>& port, const std::string& ref_frame,
                             const yarp::sig::Matrix& T);
 };
