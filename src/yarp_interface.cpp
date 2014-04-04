@@ -1,5 +1,6 @@
 #include "yarp_interface.h"
 #include "cartesian_utils.h"
+#include <yarp/os/Time.h>
 #include <iCub/iDynTree/yarp_kdl.h>
 
 using namespace yarp::os;
@@ -8,8 +9,20 @@ using namespace yarp::sig;
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
 
+void yarp_interface::tic()
+{
+    time_tic = yarp::os::Time::now();
+}
+
+double yarp_interface::toc()
+{
+    return yarp::os::Time::now() - time_tic;
+}
+
 yarp_interface::yarp_interface()
 {
+    time_tic = 0.0;
+
     if(createPolyDriver("left_arm", polyDriver_left_arm))
     {
         polyDriver_left_arm.view(encodersMotor_left_arm);

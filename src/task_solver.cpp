@@ -14,8 +14,8 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const yarp::sig::Vector &qMax,
                                     const yarp::sig::Vector &qMin,
                                     const yarp::sig::Vector &q,
-                                    const double &MAX_JOINT_VELOCITY,
-                                    const double &dT,
+                                    const double &_maxJointVelocity,
+                                    const double &_dT,
                                     yarp::sig::Vector &dq_ref)
 {
     int nj = dq_ref.size();
@@ -60,10 +60,10 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     yarp::sig::Vector g2 = -1.0*J2.transposed()*eq;
 
     yarp::sig::Vector u1(nj); yarp::sig::Vector l1(nj); //Joint Limits constraints;
-    u1 = (qMax - q)*dT; //We consider joint limits as joint velocities limits [rad/sec]
-    l1 = (qMin - q)*dT;
+    u1 = (qMax - q)*_dT; //We consider joint limits as joint velocities limits [rad/sec]
+    l1 = (qMin - q)*_dT;
 
-    yarp::sig::Vector u2(nj, MAX_JOINT_VELOCITY*dT); //Max velocity
+    yarp::sig::Vector u2(nj, _maxJointVelocity*_dT); //Max velocity
     yarp::sig::Vector u(nj); yarp::sig::Vector l(nj);
     for(unsigned int i = 0; i < nj; ++i){
         u[i] = std::min(u1[i], u2[i]);

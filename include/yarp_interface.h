@@ -20,7 +20,8 @@ public:
     void getRightArmCartesianRef(yarp::sig::Matrix& right_arm_ref);
     void getCoMCartesianRef(yarp::sig::Vector& com_ref);
     void getSetClik(bool& is_clik);
-
+    void tic();
+    double toc();
 
     int getDofLeftArm()
     {
@@ -99,6 +100,7 @@ public:
 
 
 private:
+    double time_tic;
     bool createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver);
     bool checkRefFrame(const std::string& ref_frame, const std::string& local_frame)
     {

@@ -16,8 +16,9 @@ public:
                                   const yarp::sig::Vector &qMax,
                                   const yarp::sig::Vector &qMin,
                                   const yarp::sig::Vector &q,
-                                  const double &MAX_JOINT_VELOCITY,
-                                  const double &dT, yarp::sig::Vector &dq_ref);
+                                  const double &_maxJointVelocity,
+                                  const double &_dT,
+                                  yarp::sig::Vector &dq_ref);
 };
 
 #endif

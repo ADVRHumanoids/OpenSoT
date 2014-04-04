@@ -1,18 +1,29 @@
 #include <yarp/os/all.h>
+#include <paramHelp/paramHelperServer.h>
 #include "sot_VelKinCon_ctrl.h"
 
-#define dT 0.025 //[s]
+// module name, time constant, DEBUG mode are defined here
+#include "sot_VelKinCon_constants.h"
 
 class sot_VelKinCon_module: public yarp::os::RFModule
 {
+    paramHelp::ParamHelperServer *paramHelper;
 protected:
-    sot_VelKinCon_ctrl *thr;
+    wb_sot::sot_VelKinCon_ctrl *thr;
     bool ctrl_started;
     yarp::os::BufferedPort<yarp::os::Bottle> idle_port;
 public:
     bool configure(int argc, char* argv[])
     {
-        thr = new sot_VelKinCon_ctrl(dT, argc, argv);
+        //--------------------------PARAMETER HELPER--------------------------
+        paramHelper = new ParamHelperServer(wb_sot::sot_VelKinCon_ParamDescr, wb_sot::PARAM_ID_SIZE, NULL, 0);
+
+        // Open ports for communicating with other modules
+        std::string MODULE_NAME_DEBUG = std::string(MODULE_NAME) + "_DEBUG";
+        if(!paramHelper->init(MODULE_NAME_DEBUG.c_str())){ fprintf(stderr, "Error while initializing parameter helper. Closing module.\n"); return false; }
+        setName(MODULE_NAME);
+
+        thr = new wb_sot::sot_VelKinCon_ctrl(dT, argc, argv, paramHelper);
         ctrl_started = false;
 
         idle_port.open("/sot_VelKinCon/switch:i");
@@ -35,8 +46,9 @@ public:
 
     virtual bool close()
     {
-        thr->stop();
-        delete thr;
+        if(paramHelper){    paramHelper->close();       delete paramHelper;     paramHelper = 0;    }
+        if(thr){            thr->stop();                delete thr;             thr = 0;            }
+
         idle_port.close();
         return true;
     }

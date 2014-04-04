@@ -51,7 +51,7 @@ int main()
     std::cout<<std::endl;
 
 
-    std::cout<<"diag(W): "<<sot_VelKinCon_ctrl::computeW(qMin, qMax, right_arm_joint_number, left_arm_joint_number,
+    std::cout<<"diag(W): "<< wb_sot::sot_VelKinCon_ctrl::computeW(qMin, qMax, right_arm_joint_number, left_arm_joint_number,
                                  torso_arm_joint_number).toString()<<std::endl;
 
 

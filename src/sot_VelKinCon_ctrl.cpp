@@ -18,11 +18,12 @@
 
 using namespace iCub::iDynTree;
 using namespace yarp::math;
+using namespace wb_sot;
 
 // Here it is the path to the URDF model
 const std::string coman_model_folder = std::string(getenv("YARP_WORKSPACE")) + "/coman_yarp_apps/coman_urdf/coman.urdf";
 
-sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv[]):
+sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv[], paramHelp::ParamHelperServer* _ph):
     RateThread(int(period*1000.0)),
     IYarp(),
     q_ref(1),
@@ -36,7 +37,16 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     q_torso(1),
     right_arm_pos_ref(3, 0.0),
     left_arm_pos_ref(3, 0.0),
-    worldT(4,4)
+    worldT(4,4),
+    t_elapsed(0.0),
+    eRWrist_p(3, 0.0),
+    eRWrist_o(3, 0.0),
+    eLWrist_p(3, 0.0),
+    eLWrist_o(3, 0.0),
+    eSwingFoot_p(3, 0.0),
+    eSwingFoot_o(3, 0.0),
+    eCoM(3, 0.0),
+    paramHelper(_ph)
 {
     iDyn3Model();
     setJointNames();
@@ -71,6 +81,11 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     worldT.eye();
 
     is_clik = false;
+}
+
+void sot_VelKinCon_ctrl::parameterUpdated(const ParamProxyInterface *pd)
+{
+    return;
 }
 
 //Qui devo prendere la configurazione iniziale del robot!
@@ -143,11 +158,28 @@ bool sot_VelKinCon_ctrl::threadInit()
         std::cout<<"SoT is NOT running as CLIK"<<std::endl;
 
     std::cout<<"sot_VelKinCon START!!!"<<std::endl;
+
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_COMPUTATION_TIME,             &t_elapsed));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LEFT_ARM_POSITION_ERROR,      eLWrist_p.data()));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LEFT_ARM_ORIENTATION_ERROR,   eLWrist_o.data()));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_RIGHT_ARM_POSITION_ERROR,     eRWrist_p.data()));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_RIGHT_ARM_ORIENTATION_ERROR,  eRWrist_o.data()));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_SWING_FOOT_POSITION_ERROR,    eSwingFoot_p.data()));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_SWING_FOOT_ORIENTATION_ERROR, eSwingFoot_o.data()));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_COM_POSITION_ERROR,           eCoM.data()));
+
     return true;
 }
 
 void sot_VelKinCon_ctrl::run()
 {
+#ifdef DEBUG
+    paramHelper->lock();
+    paramHelper->readStreamParams();
+#endif
+
+    IYarp.tic();
+
     checkInput();
 
     if(is_clik)
@@ -161,6 +193,13 @@ void sot_VelKinCon_ctrl::run()
         move();
 
     IYarp.sendWorldToBaseLinkPose(worldT);
+
+    t_elapsed = IYarp.toc();
+
+#ifdef DEBUG
+    paramHelper->sendStreamParams();
+    paramHelper->unlock();
+#endif
 }
 
 void sot_VelKinCon_ctrl::iDyn3Model()
@@ -445,17 +484,14 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     extractJacobians(JRWrist, JLWrist);
 
-    yarp::sig::Vector eRWrist_p(3), eRWrist_o(3);
-    yarp::sig::Vector eLWrist_p(3), eLWrist_o(3);
-    yarp::sig::Vector eSwingFoot_p(3), eSwingFoot_o(3);
-    yarp::sig::Vector eCoM = com_pos_ref-pos_CoM;
-
     cartesian_utils::computeCartesianError(pos_wrist_R, right_arm_pos_ref,
                                            eRWrist_p, eRWrist_o);
     cartesian_utils::computeCartesianError(pos_wrist_L, left_arm_pos_ref,
                                            eLWrist_p, eLWrist_o);
     cartesian_utils::computeCartesianError(pos_foot_swing, swing_foot_pos_ref,
                                            eSwingFoot_p, eSwingFoot_o);
+    eCoM = com_pos_ref-pos_CoM;
+
     yarp::sig::Vector eRWrist = yarp::math::cat(eRWrist_p, -ORIENTATION_ERROR_GAIN*eRWrist_o);
     yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -ORIENTATION_ERROR_GAIN*eLWrist_o);
     yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -ORIENTATION_ERROR_GAIN*eSwingFoot_o);
