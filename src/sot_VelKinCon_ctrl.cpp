@@ -11,8 +11,9 @@
 /** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
 
 #define TORSO_WEIGHT 1.0
-#define MAX_JOINT_VELOCITY toRad(30.0) //[rad/sec]
+#define MAX_JOINT_VELOCITY toRad(20.0) //[rad/sec]
 #define ORIENTATION_ERROR_GAIN 1.0
+#define SET_3_TASKS false
 
 /** ******************************************* **/
 
@@ -471,7 +472,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     yarp::sig::Matrix JSwingFoot; // for now, SwingFoot is Left
     if(!coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot,true))
-        std::cout << "Error computing Jacobian for Left Wrist" << std::endl;
+        std::cout << "Error computing Jacobian for Left Foot" << std::endl;
 
     yarp::sig::Matrix JCoM;
     //
@@ -503,14 +504,23 @@ bool sot_VelKinCon_ctrl::controlLaw()
 //    std::cout<<"com_pos_ref: "<<com_pos_ref.toString()<<std::endl;
 //    std::cout<<"pos_CoM: "<<pos_CoM.toString()<<std::endl;
 
-
+#if SET_3_TASKS
     yarp::sig::Matrix JEe = yarp::math::pile(JRWrist, JLWrist);
     JEe = yarp::math::pile(JEe, JSwingFoot);
     yarp::sig::Vector eEe = yarp::math::cat(eRWrist, eLWrist);
     eEe = yarp::math::cat(eEe, eSwingFoot);
+#else
+    yarp::sig::Matrix JEe = yarp::math::pile(JRWrist, JLWrist);
+    JEe = yarp::math::pile(JEe, JSwingFoot);
+    JEe = yarp::math::pile(JEe, JCoM);
+    yarp::sig::Vector eEe = yarp::math::cat(eRWrist, eLWrist);
+    eEe = yarp::math::cat(eEe, eSwingFoot);
+    eEe = yarp::math::cat(eEe, eCoM);
+#endif
     yarp::sig::Vector eq = (q_ref - q); // postural error
 
     bool control_computed = false;
+#if SET_3_TASKS
     control_computed = task_solver::computeControlHQP(JCoM,eCoM,
                                                       JEe, eEe,
                                                       Q_postural, eq,
@@ -519,6 +529,16 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                       q, MAX_JOINT_VELOCITY,
                                                       MilliSecToSec(getRate()),
                                                       dq_ref);
+#else
+   control_computed = task_solver::computeControlHQP_2Tasks(JEe, eEe,
+                                                            Q_postural, eq,
+                                                            coman_iDyn3.getJointBoundMax(),
+                                                            coman_iDyn3.getJointBoundMin(),
+                                                            q, MAX_JOINT_VELOCITY,
+                                                            MilliSecToSec(getRate()),
+                                                            dq_ref);
+#endif
+
     if(!control_computed) {
         std::cout << "Error computing control" << std::endl;
     }
