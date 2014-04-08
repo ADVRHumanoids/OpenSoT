@@ -9,5 +9,7 @@ list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
 include(YarpInstallationHelpers)	
 
 file(GLOB conf conf/*.ini)
+file(GLOB scripts scripts/*.ini)
 
 yarp_install(FILES ${conf} DESTINATION ${YARP_CONTEXTS_INSTALL_DIR}/sot_velkincon)   # directory name matches what is provided as "default context" in code
+yarp_install(FILES ${scripts} DESTINATION ${YARP_CONTEXTS_INSTALL_DIR}/sot_velkincon)   # directory name matches what is provided as "default context" in code
