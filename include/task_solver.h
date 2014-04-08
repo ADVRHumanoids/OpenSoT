@@ -20,18 +20,16 @@ public:
                                   const double &_dT,
                                   yarp::sig::Vector &dq_ref);
 
-    static bool computeControlHQP_2Tasks(const yarp::sig::Matrix &J0,
-                                         const yarp::sig::Vector &e0,
-                                         const yarp::sig::Matrix &J1,
-                                         const yarp::sig::Vector &eq,
-                                         const yarp::sig::Vector &qMax,
-                                         const yarp::sig::Vector &qMin,
-                                         const yarp::sig::Vector &q,
-                                         const double &_maxJointVelocity,
-                                         const double &_dT,
-                                         yarp::sig::Vector &dq_ref);
-};
-
+    static bool computeControlHQP(const yarp::sig::Matrix &J0,
+                                  const yarp::sig::Vector &e0,
+                                  const yarp::sig::Matrix &J1,
+                                  const yarp::sig::Vector &eq,
+                                  const yarp::sig::Vector &qMax,
+                                  const yarp::sig::Vector &qMin,
+                                  const yarp::sig::Vector &q,
+                                  const double &_maxJointVelocity,
+                                  const double &_dT,
+                                  yarp::sig::Vector &dq_ref);
 };
 
 #endif

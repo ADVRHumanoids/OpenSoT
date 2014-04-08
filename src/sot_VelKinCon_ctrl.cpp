@@ -530,13 +530,13 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                       MilliSecToSec(getRate()),
                                                       dq_ref);
 #else
-   control_computed = task_solver::computeControlHQP_2Tasks(JEe, eEe,
-                                                            Q_postural, eq,
-                                                            coman_iDyn3.getJointBoundMax(),
-                                                            coman_iDyn3.getJointBoundMin(),
-                                                            q, MAX_JOINT_VELOCITY,
-                                                            MilliSecToSec(getRate()),
-                                                            dq_ref);
+   control_computed = task_solver::computeControlHQP(JEe, eEe,
+                                                     Q_postural, eq,
+                                                     coman_iDyn3.getJointBoundMax(),
+                                                     coman_iDyn3.getJointBoundMin(),
+                                                     q, MAX_JOINT_VELOCITY,
+                                                     MilliSecToSec(getRate()),
+                                                     dq_ref);
 #endif
 
     if(!control_computed) {

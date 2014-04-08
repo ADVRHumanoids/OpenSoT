@@ -206,16 +206,16 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     return false;
 }
 
-bool task_solver::computeControlHQP_2Tasks(const yarp::sig::Matrix &J0,
-                                           const yarp::sig::Vector &e0,
-                                           const yarp::sig::Matrix &J1,
-                                           const yarp::sig::Vector &eq,
-                                           const yarp::sig::Vector &qMax,
-                                           const yarp::sig::Vector &qMin,
-                                           const yarp::sig::Vector &q,
-                                           const double &MAX_JOINT_VELOCITY,
-                                           const double &dT,
-                                           yarp::sig::Vector &dq_ref)
+bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
+                                    const yarp::sig::Vector &e0,
+                                    const yarp::sig::Matrix &J1,
+                                    const yarp::sig::Vector &eq,
+                                    const yarp::sig::Vector &qMax,
+                                    const yarp::sig::Vector &qMin,
+                                    const yarp::sig::Vector &q,
+                                    const double &MAX_JOINT_VELOCITY,
+                                    const double &dT,
+                                    yarp::sig::Vector &dq_ref)
 {
     int nj = dq_ref.size();
     static bool initial_guess = false;
