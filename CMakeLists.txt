@@ -54,3 +54,10 @@ TARGET_LINK_LIBRARIES(uTest2 cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_
 
 install(TARGETS sot_VelKinCon DESTINATION bin)
 #install(TARGETS cartesian_utils sot_VelKinCon_ctrl DESTINATION lib)
+
+add_subdirectory(app)
+
+add_custom_target(  copy_conf_files_to_build ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/app/conf"
+        "${CMAKE_BINARY_DIR}/")
