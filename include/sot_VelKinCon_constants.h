@@ -1,6 +1,13 @@
 #ifndef SOT_VELKINCON_CONSTANTS_H
 #define SOT_VELKINCON_CONSTANTS_H
 
+/** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
+
+#define TORSO_WEIGHT 1.0
+#define MAX_JOINT_VELOCITY toRad(20.0) //[rad/sec]
+#define ORIENTATION_ERROR_GAIN 1.0
+#define SET_3_TASKS false
+
 #define DEBUG
 #define MODULE_NAME "sot_VelKinCon"
 #define dT 0.025 //[s]

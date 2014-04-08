@@ -8,13 +8,6 @@
 #define toDeg(X) (X*180.0/M_PI)
 #define MilliSecToSec(X) (X/1000.0)
 
-/** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
-
-#define TORSO_WEIGHT 1.0
-#define MAX_JOINT_VELOCITY toRad(20.0) //[rad/sec]
-#define ORIENTATION_ERROR_GAIN 1.0
-#define SET_3_TASKS false
-
 /** ******************************************* **/
 
 using namespace iCub::iDynTree;
