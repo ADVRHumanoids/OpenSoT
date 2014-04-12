@@ -1,3 +1,9 @@
+/*
+ * Copyright: (C) 2014 Walkman Consortium
+ * Authors: Enrico Mingo, Alessio Rocchi
+ * CopyPolicy: Released under the terms of the GNU GPL v2.0.
+*/
+
 #include "task_solver.h"
 #include <yarp/math/Math.h>
 

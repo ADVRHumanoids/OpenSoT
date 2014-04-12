@@ -1,3 +1,9 @@
+/*
+ * Copyright: (C) 2014 Walkman Consortium
+ * Authors: Enrico Mingo, Alessio Rocchi
+ * CopyPolicy: Released under the terms of the GNU GPL v2.0.
+*/
+
 #include "sot_VelKinCon_ctrl.h"
 #include <boost/foreach.hpp>
 #include "task_solver.h"

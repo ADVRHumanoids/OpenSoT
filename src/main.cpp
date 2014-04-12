@@ -1,3 +1,10 @@
+/*
+ * Copyright: (C) 2014 Walkman Consortium
+ * Authors: Enrico Mingo, Alessio Rocchi
+ * CopyPolicy: Released under the terms of the GNU GPL v2.0.
+*/
+
+
 #include <yarp/os/all.h>
 #include <paramHelp/paramHelperServer.h>
 #include "sot_VelKinCon_ctrl.h"

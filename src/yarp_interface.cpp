@@ -1,3 +1,9 @@
+/*
+ * Copyright: (C) 2014 Walkman Consortium
+ * Authors: Enrico Mingo, Alessio Rocchi
+ * CopyPolicy: Released under the terms of the GNU GPL v2.0.
+*/
+
 #include "yarp_interface.h"
 #include "cartesian_utils.h"
 #include <yarp/os/Time.h>
