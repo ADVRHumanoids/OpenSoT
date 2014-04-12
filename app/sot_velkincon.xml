@@ -56,9 +56,9 @@
             <description>cartesian reference for swing foot</description>
         </input>
         <output>
-            <type>ImageOfPixelRgb</type>
-            <port carrier="udp">/grabber</port>
-            <description>output image port</description>
+            <type>cartesianRef</type>
+            <port>/sot_VelKinCon/world_to_base_link_pose:o</port>
+            <description>cartesian reference for base link</description>
         </output>   
     </data> 
 
