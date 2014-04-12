@@ -1,3 +1,7 @@
+# Copyright: (C) 2014 Walkman Consortium
+# Authors: Enrico Mingo, Alessio Rocchi
+# CopyPolicy: Released under the terms of the GNU GPL v2.0.
+
 cmake_minimum_required(VERSION 2.8)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 OLD)
@@ -37,6 +41,7 @@ file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 ADD_LIBRARY(sot_VelKinCon_ctrl STATIC src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp)
 ADD_LIBRARY(cartesian_utils STATIC src/cartesian_utils.cpp)
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp ${sot_INCLUDES})
+ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
 ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
@@ -50,6 +55,8 @@ TARGET_LINK_LIBRARIES(sot_VelKinCon sot_VelKinCon_ctrl cartesian_utils ${kdl_cod
 TARGET_LINK_LIBRARIES(uTest1 sot_VelKinCon_ctrl ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(uTest2 cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
+                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
+TARGET_LINK_LIBRARIES(createMonitorScope cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 
 install(TARGETS sot_VelKinCon DESTINATION bin)
