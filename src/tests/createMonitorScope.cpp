@@ -37,8 +37,8 @@ const std::string createMonitorScope(const ParamProxyInterface *const sot_VelKin
     unsigned int ncols;
 
 
-    nrows = floor(sqrt(size));
-    ncols = ceil(size/nrows);
+    ncols = ceil(sqrt(size));
+    nrows = floor(size/ncols);
 
     ss << "<!--" << std::endl;
     ss << "Scope for the monitor port of module " << moduleName << std::endl;
@@ -47,7 +47,7 @@ const std::string createMonitorScope(const ParamProxyInterface *const sot_VelKin
 
     ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
     ss << "<portscope rows=\"" << nrows << "\"" <<
-                     "columns=\"" << ncols << "\" carrier=\"udp\" persistent=\"1\">" << std::endl;
+                    " columns=\"" << ncols << "\" carrier=\"udp\" persistent=\"1\">" << std::endl;
     unsigned int gridx = 0;
     unsigned int gridy = 0;
     for(unsigned int i; i < size; ++i) {
@@ -78,6 +78,7 @@ const std::string createMonitorScope(const ParamProxyInterface *const sot_VelKin
         }
         ss << "     </plot>" << std::endl;
     }
+    ss << "</portscope>" << std::endl;
     ss.sync();
     return ss.str();
 }
