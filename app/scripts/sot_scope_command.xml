@@ -1,0 +1,35 @@
+<application>
+    <name>sot_VelKinCon Command Scope</name>
+
+      <authors>
+          <author email="alessio.rocchi@iit.it">Alessio Rocchi</author>
+      </authors>
+
+      <dependencies>
+         <port>/root</port>
+      </dependencies>
+    
+      <!-- -------------------- COMMANDS ------------------------ -->
+
+      <module>
+              <name>yarpscope</name>
+              <node>localhost</node>
+              <parameters>--xml scope_legs_command --context sot_velkincon</parameters>
+              <tag>scope_legs_command</tag>
+      </module>
+
+      <module>
+              <name>yarpscope</name>
+              <node>localhost</node>
+              <parameters>--xml scope_arms_command.xml --context sot_velkincon</parameters>
+              <tag>scope_arms_command</tag>
+      </module>
+
+      <module>
+              <name>yarpscope</name>
+              <node>localhost</node>
+              <parameters>--xml scope_torso_command.xml --context sot_velkincon</parameters>
+              <tag>scope_torso_command</tag>
+      </module>
+       
+</application>

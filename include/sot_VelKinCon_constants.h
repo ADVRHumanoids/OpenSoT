@@ -44,14 +44,14 @@ const ParamProxyInterface *const sot_VelKinCon_ParamDescr[PARAM_ID_SIZE] =
 {
 //                          NAME                ID                                   SIZE       CONSTRAINTS                                 I/O ACCESS          DEFAULT VALUE                   DESCRIPTION
 // ************************************************* STREAMING OUTPUT PARAMETERS ****************************************************************************************************************************************************************************************************************************
-new ParamProxyBasic<double>("t_elapsed",       PARAM_ID_COMPUTATION_TIME,             1,        ParamConstraint<double>(),              PARAM_OUT_STREAM,  &SOT_DEFAULT_ELAPSED,               "Time taken by each invocation of run()"),
-new ParamProxyBasic<double>("eLWrist_p",       PARAM_ID_LEFT_ARM_POSITION_ERROR,      3,        ParamConstraint<double>(),                  PARAM_OUT_STREAM,  SOT_DEFAULT_ERROR.data(),       "Position error of left arm"),
-new ParamProxyBasic<double>("eLWrist_o",       PARAM_ID_LEFT_ARM_ORIENTATION_ERROR,   3,        ParamConstraint<double>(),                  PARAM_OUT_STREAM,  SOT_DEFAULT_ERROR.data(),       "Orientation error of left arm"),
-new ParamProxyBasic<double>("eRWrist_p",       PARAM_ID_RIGHT_ARM_POSITION_ERROR,     3,        ParamConstraint<double>(),                  PARAM_OUT_STREAM,  SOT_DEFAULT_ERROR.data(),       "Position error of right arm"),
-new ParamProxyBasic<double>("eRWrist_o",       PARAM_ID_RIGHT_ARM_ORIENTATION_ERROR,  3,        ParamConstraint<double>(),                  PARAM_OUT_STREAM,  SOT_DEFAULT_ERROR.data(),       "Orientation error of right arm"),
-new ParamProxyBasic<double>("eSwingFoot_p",    PARAM_ID_SWING_FOOT_POSITION_ERROR,    3,        ParamConstraint<double>(),                  PARAM_OUT_STREAM,  SOT_DEFAULT_ERROR.data(),       "Position error of swing foot"),
-new ParamProxyBasic<double>("eSwingFoot_o",    PARAM_ID_SWING_FOOT_ORIENTATION_ERROR, 3,        ParamConstraint<double>(),                  PARAM_OUT_STREAM,  SOT_DEFAULT_ERROR.data(),       "Orientation error of swing foot"),
-new ParamProxyBasic<double>("eCoM",            PARAM_ID_COM_POSITION_ERROR,           3,        ParamConstraint<double>(),                  PARAM_OUT_STREAM,  SOT_DEFAULT_ERROR.data(),       "Position error of COM")
+new ParamProxyBasic<double>("t_elapsed",       PARAM_ID_COMPUTATION_TIME,             1,        ParamConstraint<double>(),                  PARAM_MONITOR,      &SOT_DEFAULT_ELAPSED,               "Time taken by each invocation of run()"),
+new ParamProxyBasic<double>("eLWrist_p",       PARAM_ID_LEFT_ARM_POSITION_ERROR,      3,        ParamConstraint<double>(),                  PARAM_MONITOR,      SOT_DEFAULT_ERROR.data(),       "Position error of left arm"),
+new ParamProxyBasic<double>("eLWrist_o",       PARAM_ID_LEFT_ARM_ORIENTATION_ERROR,   3,        ParamConstraint<double>(),                  PARAM_MONITOR,     SOT_DEFAULT_ERROR.data(),       "Orientation error of left arm"),
+new ParamProxyBasic<double>("eRWrist_p",       PARAM_ID_RIGHT_ARM_POSITION_ERROR,     3,        ParamConstraint<double>(),                  PARAM_MONITOR,     SOT_DEFAULT_ERROR.data(),       "Position error of right arm"),
+new ParamProxyBasic<double>("eRWrist_o",       PARAM_ID_RIGHT_ARM_ORIENTATION_ERROR,  3,        ParamConstraint<double>(),                  PARAM_MONITOR,     SOT_DEFAULT_ERROR.data(),       "Orientation error of right arm"),
+new ParamProxyBasic<double>("eSwingFoot_p",    PARAM_ID_SWING_FOOT_POSITION_ERROR,    3,        ParamConstraint<double>(),                  PARAM_MONITOR,     SOT_DEFAULT_ERROR.data(),       "Position error of swing foot"),
+new ParamProxyBasic<double>("eSwingFoot_o",    PARAM_ID_SWING_FOOT_ORIENTATION_ERROR, 3,        ParamConstraint<double>(),                  PARAM_MONITOR,     SOT_DEFAULT_ERROR.data(),       "Orientation error of swing foot"),
+new ParamProxyBasic<double>("eCoM",            PARAM_ID_COM_POSITION_ERROR,           3,        ParamConstraint<double>(),                  PARAM_MONITOR,     SOT_DEFAULT_ERROR.data(),       "Position error of COM")
 };
 
 }

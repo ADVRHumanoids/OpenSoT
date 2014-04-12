@@ -1,0 +1,38 @@
+<!-- 
+Scope for the joint commands for the arms 
+Author: Alessio Rocchi 
+
+This xml file must be used with yarpscope: it plots by columns the joint position commands of arms -->
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<portscope rows="2" columns="4" carrier="udp" persistent="1">
+
+<!-- TORSO COMMAND -->
+
+    <plot gridx="0"
+          gridy="0"
+          hspan="1"
+          vspan="1"
+          title="Joint 0 (blue=Right red=Left)"
+          minval="-180"
+          maxval="180"
+          bgcolor="White">
+        <graph remote="/sot_VelKinCon/torso/command:o"
+               index="0"
+               color="Red"
+               type="lines"
+               size="2" />
+        <graph remote="/sot_VelKinCon/torso/command:o"
+               index="1"
+               color="Green"
+               size="2"
+               type="lines" />
+        <graph remote="/sot_VelKinCon/torso/command:o"
+               index="2"
+               color="Blue"
+               size="2"
+               type="lines" />
+    </plot>
+    
+    
+</portscope>

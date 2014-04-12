@@ -1,0 +1,77 @@
+<module>
+    <name>sot_VelKinCon</name>
+    <description> A kinematic control implemented in Mansard's stack of tasks framework using QpOases as a solver for each stack in the stack of QPs. The control outputs velocities</description>
+    <version>1.0</version>
+    
+    <arguments>
+        <!-- <param default="/yarpview/img:i" required="no" desc="input port name">name</param> -->
+        <!--
+    <param default="128" required="no" desc="desired width of test image">width</param>
+        <param default="128" required="no" desc="desired height of test image">height</param>                       
+        <param default="0.033" required="no" desc="period of test images in second">period</param>
+        <param default="30" required="no" desc="rate of test images in Hz">freq</param>
+        <param default="line" required="no" desc="bouncy [ball], scrolly [line], grid [grid], random [rand]">mode</param>
+    -->
+    </arguments>
+            
+    <authors>
+        <author email="enrico.mingo@iit.it">Enrico Mingo</author>
+        <author email="alessio.rocchi@iit.it">Alessio Rocchi</author>
+    </authors>
+    
+    <data>     
+        <input>
+            <type>Rpc</type>
+            <port>/sot_VelKinCon/switch:i</port>
+            <required>yes</required>
+            <priority>no</priority>
+            <description> a port which receives rpc command such as 'start'.</description>
+        </input>
+        <input>
+            <type>cartesianRef</type>
+            <port>/sot_VelKinCon/left_arm_ref:i</port>
+            <required>no</required>
+            <priority>no</priority>
+            <description>cartesian reference for left wrist position wrt base link</description>
+        </input>
+        <input>
+            <type>cartesianRef</type>
+            <port>/sot_VelKinCon/right_arm_ref:i</port>
+            <required>no</required>
+            <priority>no</priority>
+            <description>cartesian reference for right wrist position wrt base link</description>
+        </input>
+        <input>
+            <type>cartesianRef</type>
+            <port>/sot_VelKinCon/CoM_ref:i</port>
+            <required>no</required>
+            <priority>no</priority>
+            <description>cartesian reference for CoM</description>
+        </input>
+        <input>
+            <type>cartesianRef</type>
+            <port>/sot_VelKinCon/swing_foot:i</port>
+            <required>no</required>
+            <priority>no</priority>
+            <description>cartesian reference for swing foot</description>
+        </input>
+        <output>
+            <type>ImageOfPixelRgb</type>
+            <port carrier="udp">/grabber</port>
+            <description>output image port</description>
+        </output>   
+    </data> 
+
+    <deployer>yarpdev</deployer> 
+
+    <dependencies>
+        <computer>
+        </computer>
+    </dependencies>
+
+    <development>
+        <include></include>
+        <library>YARP</library>
+    </development>
+    
+</module>

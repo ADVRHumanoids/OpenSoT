@@ -1,0 +1,25 @@
+<application>
+<name>sot_VelKinCon Monitor Scope</name>
+
+    <authors>
+        <author email="alessio.rocchi@iit.it">Alessio Rocchi</author>
+    </authors>
+
+    <dependencies>
+       <port>/root</port>
+    </dependencies>
+
+    <module>
+            <name>yarpscope </name>
+            <node>localhost</node>
+            <parameters>--name scope_monitor</parameters>
+            <tag>scope_monitor</tag>
+    </module>
+
+  <connection>
+      <from>/sot_VelKinCon_DEBUG/monitor:o</from>
+      <to>/scope_stream</to>
+      <protocol>udp</protocol>
+  </connection>
+
+</application>
