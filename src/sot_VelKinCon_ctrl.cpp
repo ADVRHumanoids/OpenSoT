@@ -328,10 +328,7 @@ yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
                                                const std::vector<unsigned int>& left_arm_joint_numbers,
                                                const std::vector<unsigned int>& waist_joint_numbers)
 {
-    yarp::sig::Vector i(qMax.size(), 1.0);
-    yarp::sig::Vector w = i/(qMax-qMin);
-    w*=w;
-    std::cout<<"i/(qMax-qMin)^2: "<<w.toString()<<std::endl;
+    yarp::sig::Vector w(qMax.size(), 1.0);
 
     std::vector<unsigned int> waist_left_arm_joint_numbers = waist_joint_numbers;
     std::vector<unsigned int> waist_right_arm_joint_numbers = waist_joint_numbers;
@@ -356,12 +353,18 @@ yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
 
     std::cout<<"index weight waist: ";
     for(unsigned int i = 0; i < waist_joint_numbers.size(); ++i) {
+        w[waist_joint_numbers[i]] = sqrt(w[waist_joint_numbers[i]]);
         w[waist_joint_numbers[i]] *= TORSO_WEIGHT;
         std::cout<<TORSO_WEIGHT<<" ";
     }
     std::cout<<std::endl;
 
-    std::cout<<"w: "<<w.toString()<<std::endl;
+    w = w/(qMax-qMin);
+    for(unsigned int j = 0; j < w.size(); ++j)
+        w[j] = fabs(w[j]);
+
+
+    std::cout<<"W: "<<w.toString()<<std::endl;
     return w;
 }
 
