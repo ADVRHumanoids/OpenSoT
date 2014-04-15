@@ -24,6 +24,7 @@ namespace wb_sot {
                                     const std::vector<unsigned int>& right_arm_joint_numbers,
                                     const std::vector<unsigned int>& left_arm_joint_numbers,
                                     const std::vector<unsigned int>& waist_joint_numbers);
+         yarp::sig::Vector getGravityCompensationTorque(const std::vector<std::string>& joint_names);
 
      private:
          paramHelp::ParamHelperServer   *paramHelper;
@@ -62,6 +63,7 @@ namespace wb_sot {
          yarp::sig::Vector q_ref; // Vector of desired joint configurations [1x29]
          yarp::sig::Vector dq_ref; // Vector of desired joint velocities [1x29]
          yarp::sig::Vector ddq_ref; // Vector of desired joint accelerations [1x29]
+         yarp::sig::Vector tau_gravity; // Vector of toques for gravity compensation
          yarp::sig::Vector q; // Vector of measured joint angles
          yarp::sig::Vector q_left_arm; // Vector of measured joint angles
          yarp::sig::Vector q_left_leg; // Vector of measured joint angles

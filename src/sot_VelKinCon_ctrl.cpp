@@ -30,6 +30,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     q_ref(1),
     dq_ref(1),
     ddq_ref(1),
+    tau_gravity(1),
     q(1),
     q_left_arm(1),
     q_right_arm(1),
@@ -67,6 +68,8 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
     q_ref.resize(nJ, 0.0);
     dq_ref.resize(nJ,0.0);
     ddq_ref.resize(nJ, 0.0);
+
+    tau_gravity.resize(nJ, 0.0);
 
     IYarp.encodersMotor_left_arm->getAxes(&nJ);
     q_left_arm.resize(nJ, 0.0);
@@ -366,7 +369,7 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
 {
     // Here we set these values in our internal model
     coman_iDyn3.setAng(q);
-    coman_iDyn3.setDAng(dq_ref);
+    coman_iDyn3.setDAng(ddq_ref); //We use the accelerations here because we want a vector of zeros
     coman_iDyn3.setD2Ang(ddq_ref);
     // This is the fake Inertial Measure
     yarp::sig::Vector g(3);
@@ -376,6 +379,10 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
     coman_iDyn3.setInertialMeasure(o, o, g);
 
     coman_iDyn3.kinematicRNEA();
+#if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE)
+    coman_iDyn3.dynamicRNEA();
+    tau_gravity = coman_iDyn3.getTorques();
+#endif
     coman_iDyn3.computePositions();
 
     // Set World Pose: to do only once at the beginning
@@ -468,6 +475,22 @@ void sot_VelKinCon_ctrl::move()
     IYarp.directControl_right_arm->setPositions(right_arm.data());
     IYarp.directControl_left_leg->setPositions(left_leg.data());
     IYarp.directControl_right_leg->setPositions(right_leg.data());
+
+#if LEFT_ARM_IMPEDANCE
+    yarp::sig::Vector tau_gravity_left_arm = getGravityCompensationTorque(left_arm_joint_names);
+    for(unsigned int i = 0; i < left_arm_joint_names.size(); ++i)
+        IYarp.impedanceCtrl_left_arm->setImpedanceOffset(i, tau_gravity_left_arm[i]);
+#endif
+#if RIGHT_ARM_IMPEDANCE
+    yarp::sig::Vector tau_gravity_right_arm = getGravityCompensationTorque(right_arm_joint_names);
+    for(unsigned int i = 0; i < right_arm_joint_names.size(); ++i)
+        IYarp.impedanceCtrl_right_arm->setImpedanceOffset(i, tau_gravity_right_arm[i]);
+#endif
+#if TORSO_IMPEDANCE
+    yarp::sig::Vector tau_gravity_torso = getGravityCompensationTorque(torso_joint_names);
+    for(unsigned int i = 0; i < torso_joint_names.size(); ++i)
+        IYarp.impedanceCtrl_torso->setImpedanceOffset(i, tau_gravity_torso[i]);
+#endif
 }
 
 bool sot_VelKinCon_ctrl::controlLaw()
@@ -562,4 +585,16 @@ bool sot_VelKinCon_ctrl::controlLaw()
         std::cout << "Error computing control" << std::endl;
     }
     return control_computed;
+}
+
+yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const std::vector<string> &joint_names)
+{
+    yarp::sig::Vector tau(joint_names.size(), 0.0);
+    int j = 0;
+    for(unsigned int i = 0; i < joint_names.size(); ++i)
+    {
+        j = coman_iDyn3.getDOFIndex(joint_names[i]);
+        tau[i] = tau_gravity[j];
+    }
+    return tau;
 }
