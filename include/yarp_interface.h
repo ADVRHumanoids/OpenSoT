@@ -80,6 +80,7 @@ public:
     yarp::dev::IControlMode *controlMode_torso;
     yarp::dev::IControlMode *controlMode_left_leg;
     yarp::dev::IControlMode *controlMode_right_leg;
+
     yarp::dev::IPositionDirect *directControl_left_arm;
     yarp::dev::IPositionDirect *directControl_right_arm;
     yarp::dev::IPositionDirect *directControl_torso;
@@ -88,6 +89,7 @@ public:
 
     yarp::dev::IImpedanceControl *impedanceCtrl_left_arm;
     yarp::dev::IImpedanceControl *impedanceCtrl_right_arm;
+    yarp::dev::IImpedanceControl *impedanceCtrl_torso;
 
     /// Remember every time you put a port here to clean it as done in function cleanPorts()!!!
     yarp::os::BufferedPort<yarp::os::Bottle> right_arm_pos_ref_port;

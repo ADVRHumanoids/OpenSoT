@@ -3,6 +3,10 @@
 
 /** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
 
+#define LEFT_ARM_IMPEDANCE true
+#define RIGHT_ARM_IMPEDANCE true
+#define TORSO_IMPEDANCE true
+
 #define TORSO_WEIGHT 1.0
 #define MAX_JOINT_VELOCITY toRad(20.0) //[rad/sec]
 #define ORIENTATION_ERROR_GAIN 1.0
@@ -11,6 +15,8 @@
 #define DEBUG
 #define MODULE_NAME "sot_VelKinCon"
 #define dT 0.025 //[s]
+
+/** ####################################### **/
 
 #include <paramHelp/paramProxyBasic.h>
 #include <yarp/sig/Vector.h>

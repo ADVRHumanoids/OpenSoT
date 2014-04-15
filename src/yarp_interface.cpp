@@ -60,6 +60,7 @@ yarp_interface::yarp_interface()
         polyDriver_torso.view(encodersMotor_torso);
         polyDriver_torso.view(directControl_torso);
         polyDriver_torso.view(controlMode_torso);
+        polyDriver_torso.view(impedanceCtrl_torso);
     }
 
     left_arm_pos_ref_port.open("/sot_VelKinCon/left_arm/set_ref:i");
@@ -74,6 +75,8 @@ yarp_interface::~yarp_interface()
     left_arm_pos_ref_port.close();
     right_arm_pos_ref_port.close();
     com_pos_ref_port.close();
+    world_to_base_link_pose_port.close();
+    clik_port.close();
 
     polyDriver_left_arm.close();
     polyDriver_right_arm.close();

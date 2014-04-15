@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include "task_solver.h"
 #include "cartesian_utils.h"
+#include "sot_VelKinCon_constants.h"
 
 
 #define toRad(X) (X*M_PI/180.0)
@@ -133,21 +134,40 @@ bool sot_VelKinCon_ctrl::threadInit()
                R<<"  "<<P<<"  "<<Y<<std::endl;
     /////////////////////////////////////////
 
-
+#if RIGHT_ARM_IMPEDANCE
     std::cout<<"Setting Impedance Mode for q_right_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
         IYarp.controlMode_right_arm->setImpedancePositionMode(i);
+#else
+    std::cout<<"Setting Position Mode for q_right_arm:"<<std::endl;
+    for(unsigned int i = 0; i < q_right_arm.size(); ++i)
+        IYarp.controlMode_right_arm->setPositionMode(i);
+#endif
+
+#if LEFT_ARM_IMPEDANCE
     std::cout<<"Setting Impedance Mode for q_left_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
         IYarp.controlMode_left_arm->setImpedancePositionMode(i);
+#else
+    std::cout<<"Setting Position Mode for q_left_arm:"<<std::endl;
+    for(unsigned int i = 0; i < q_left_arm.size(); ++i)
+        IYarp.controlMode_left_arm->setPositionMode(i);
+#endif
 
-    std::cout<<"Setting Position Mode for torso:"<<std::endl;
+#if TORSO_IMPEDANCE
+    std::cout<<"Setting Impedance Mode for q_torso:"<<std::endl;
+    for(unsigned int i = 0; i < q_torso.size(); ++i)
+        IYarp.controlMode_torso->setImpedancePositionMode(i);
+#else
+    std::cout<<"Setting Position Mode for q_torso:"<<std::endl;
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
+#endif
 
     std::cout<<"Setting Position Mode for q_right_leg:"<<std::endl;
     for(unsigned int i = 0; i < q_right_leg.size(); ++i)
         IYarp.controlMode_right_leg->setPositionMode(i);
+
     std::cout<<"Setting Position Mode for q_left_leg:"<<std::endl;
     for(unsigned int i = 0; i < q_left_leg.size(); ++i)
         IYarp.controlMode_left_leg->setPositionMode(i);
@@ -185,7 +205,7 @@ void sot_VelKinCon_ctrl::run()
     if(is_clik)
         getFeedBack();
     else
-    q += dq_ref;
+        q += dq_ref;
 
     updateiDyn3Model();
 

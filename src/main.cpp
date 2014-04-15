@@ -18,7 +18,7 @@ class sot_VelKinCon_module: public yarp::os::RFModule
 protected:
     wb_sot::sot_VelKinCon_ctrl *thr;
     bool ctrl_started;
-    yarp::os::BufferedPort<yarp::os::Bottle> idle_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> switch_port;
 public:
     bool configure(int argc, char* argv[])
     {
@@ -33,7 +33,7 @@ public:
         thr = new wb_sot::sot_VelKinCon_ctrl(dT, argc, argv, paramHelper);
         ctrl_started = false;
 
-        idle_port.open("/sot_VelKinCon/switch:i");
+        switch_port.open("/sot_VelKinCon/switch:i");
 
         if(ctrl_started)
         {
@@ -56,7 +56,7 @@ public:
         if(paramHelper){    paramHelper->close();       delete paramHelper;     paramHelper = 0;    }
         if(thr){            thr->stop();                delete thr;             thr = 0;            }
 
-        idle_port.close();
+        switch_port.close();
         return true;
     }
 
@@ -66,7 +66,7 @@ public:
         std::string start = "start";
         std::string stop = "stop";
 
-        yarp::os::Bottle* bot = idle_port.read();
+        yarp::os::Bottle* bot = switch_port.read();
 
         if(!bot==NULL)
         {
@@ -81,6 +81,7 @@ public:
                 }
                 std::cout<<"Starting Module"<<std::endl;
             }
+
             if((stop.compare(bot->get(0).asString()) == 0) && ctrl_started)
             {
                 ctrl_started = false;

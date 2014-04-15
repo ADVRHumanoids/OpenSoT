@@ -17,15 +17,15 @@ com_z_0 = 0.525539
 
 com_x_f = 0.021886
 com_y_f = -0.015690
-com_z_f = 0.475539
+com_z_f = 0.4#0.475539
 
 t_start = yarp.Time.now()
 while(1):
     t = yarp.Time.now() - t_start
     l = 0.5 * (-np.cos( 0.6*t%(2 * np.pi) ) + 1)
         
-    com_x = com_x_0 + l*(com_x_f - com_x_0)
-    com_y = com_y_0 + l*(com_y_f - com_y_0)
+    com_x = com_x_0# + l*(com_x_f - com_x_0)
+    com_y = com_y_0# + l*(com_y_f - com_y_0)
     com_z = com_z_0 + l*(com_z_f - com_z_0)
     
     bottle_CoM = CoM.prepare()
