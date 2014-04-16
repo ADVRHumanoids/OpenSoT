@@ -541,6 +541,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
     yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -ORIENTATION_ERROR_GAIN*eLWrist_o);
     yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -ORIENTATION_ERROR_GAIN*eSwingFoot_o);
 
+    yarp::sig::Vector gGradient = getGravityCompensationGradient();
 //    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
 //    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
 //    std::cout<<"eSwingFoot: "<<eSwingFoot.toString()<<std::endl;
@@ -561,13 +562,13 @@ bool sot_VelKinCon_ctrl::controlLaw()
     eEe = yarp::math::cat(eEe, eSwingFoot);
     eEe = yarp::math::cat(eEe, eCoM);
 #endif
-    yarp::sig::Vector eq = (q_ref - q); // postural error
+    //yarp::sig::Vector eq = (q_ref - q); // postural error
 
     bool control_computed = false;
 #if SET_3_TASKS
     control_computed = task_solver::computeControlHQP(JCoM,eCoM,
                                                       JEe, eEe,
-                                                      Q_postural, eq,
+                                                      Q_postural, gGradient,
                                                       coman_iDyn3.getJointBoundMax(),
                                                       coman_iDyn3.getJointBoundMin(),
                                                       q, MAX_JOINT_VELOCITY,
@@ -575,7 +576,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                       dq_ref);
 #else
    control_computed = task_solver::computeControlHQP(JEe, eEe,
-                                                     Q_postural, eq,
+                                                     Q_postural, gGradient,
                                                      coman_iDyn3.getJointBoundMax(),
                                                      coman_iDyn3.getJointBoundMin(),
                                                      q, MAX_JOINT_VELOCITY,
@@ -626,7 +627,7 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const yarp::s
 /** compute gradient of an effort (due to gravity) cost function */
 yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
 {
-    std::cout << "Computing gradient...";
+    //std::cout << "Computing gradient...";
     double start = yarp::os::Time::now();
     /// cost function is tau_g^t*tau_g
     double C_g_q = yarp::math::dot(tau_gravity,tau_gravity);
@@ -644,6 +645,6 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
     }
 
     double elapsed = yarp::os::Time::now() - start;
-    std::cout << " took " << elapsed << "ms" << std::endl;
+    //std::cout << " took " << elapsed << "ms" << std::endl;
     return gradient;
 }
