@@ -10,7 +10,6 @@
 #include "cartesian_utils.h"
 #include "sot_VelKinCon_constants.h"
 
-
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
 #define MilliSecToSec(X) (X/1000.0)
@@ -600,4 +599,51 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const std::ve
         tau[i] = tau_gravity[j];
     }
     return tau;
+}
+
+yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const yarp::sig::Vector q)
+{
+    static yarp::sig::Vector zeroes(q.size(),0.0);
+    static yarp::sig::Vector tau(q.size(),0.0);
+
+    coman_iDyn3.setAng(q);
+    coman_iDyn3.setDAng(zeroes); //We use the accelerations here because we want a vector of zeros
+    coman_iDyn3.setD2Ang(zeroes);
+    // This is the fake Inertial Measure
+    yarp::sig::Vector g(3);
+    g[0] = 0; g[1] = 0; g[2] = 9.81;
+    yarp::sig::Vector o(3);
+    o[0] = 0; o[1] = 0; o[2] = 0;
+    coman_iDyn3.setInertialMeasure(o, o, g);
+
+    coman_iDyn3.kinematicRNEA();
+    coman_iDyn3.dynamicRNEA();
+    tau = coman_iDyn3.getTorques();
+
+    return tau;
+}
+
+/** compute gradient of an effort (due to gravity) cost function */
+yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
+{
+    std::cout << "Computing gradient...";
+    double start = yarp::os::Time::now();
+    /// cost function is tau_g^t*tau_g
+    double C_g_q = yarp::math::dot(tau_gravity,tau_gravity);
+    static yarp::sig::Vector gradient(coman_iDyn3.getNrOfDOFs(),0.0);
+    static yarp::sig::Vector deltas(coman_iDyn3.getNrOfDOFs(),0.0);
+    for(unsigned int i = 0; i < gradient.size(); ++i)
+    {
+        // forward method gradient computation, milligrad
+        const double h = 1E-3;
+        deltas[i] = h;
+        yarp::sig::Vector tau_gravity_q = getGravityCompensationTorque(q+deltas);
+        double C_g_q_h = yarp::math::dot(tau_gravity_q,tau_gravity_q);
+        gradient[i] = (C_g_q - C_g_q_h)/h;
+        deltas[i] = 0;
+    }
+
+    double elapsed = yarp::os::Time::now() - start;
+    std::cout << " took " << elapsed << "ms" << std::endl;
+    return gradient;
 }

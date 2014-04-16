@@ -25,6 +25,8 @@ namespace wb_sot {
                                     const std::vector<unsigned int>& left_arm_joint_numbers,
                                     const std::vector<unsigned int>& waist_joint_numbers);
          yarp::sig::Vector getGravityCompensationTorque(const std::vector<std::string>& joint_names);
+         yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q);
+         yarp::sig::Vector getGravityCompensationGradient();
 
      private:
          paramHelp::ParamHelperServer   *paramHelper;
