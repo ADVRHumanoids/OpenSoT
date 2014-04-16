@@ -104,6 +104,7 @@ namespace wb_sot {
                 b = dx (desired Cartesian velocity to the goal)
          **/
          yarp::sig::Matrix Q_postural; //Matrix of weights for the postural task
+         yarp::sig::Vector zero;
 
          yarp_interface IYarp;
 

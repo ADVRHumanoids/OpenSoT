@@ -82,18 +82,24 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     Options qpOasesOptionsqp0;
     qpOasesOptionsqp0.printLevel = PL_HIGH;
     qpOasesOptionsqp0.setToReliable();
+    qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
+    qpOasesOptionsqp0.epsRegularisation *= 2E2;
     QProblemB qp0( nj, HST_SEMIDEF);
     qp0.setOptions( qpOasesOptionsqp0 );
 
     Options qpOasesOptionsqp1;
     qpOasesOptionsqp1.printLevel = PL_HIGH;
     qpOasesOptionsqp1.setToReliable();
+    qpOasesOptionsqp1.enableRegularisation = BT_TRUE;
+    qpOasesOptionsqp1.epsRegularisation *= 2E2;
     QProblem qp1( nj, njTask0, HST_SEMIDEF);
     qp1.setOptions( qpOasesOptionsqp1 );
 
     Options qpOasesOptionsqp2;
     qpOasesOptionsqp2.printLevel = PL_HIGH;
     qpOasesOptionsqp2.setToReliable();
+    qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
+    qpOasesOptionsqp0.epsRegularisation *= 2E2;
     QProblem qp2( nj, njTask0+njTask1, HST_POSDEF);
     qp2.setOptions( qpOasesOptionsqp2 );
 
@@ -273,13 +279,17 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     Options qpOasesOptionsqp0;
     qpOasesOptionsqp0.printLevel = PL_HIGH;
     qpOasesOptionsqp0.setToReliable();
+    qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
+    qpOasesOptionsqp0.epsRegularisation *= 2E2;
     QProblemB qp0( nj, HST_SEMIDEF);
     qp0.setOptions( qpOasesOptionsqp0 );
 
     Options qpOasesOptionsqp1;
     qpOasesOptionsqp1.printLevel = PL_HIGH;
     qpOasesOptionsqp1.setToReliable();
-    QProblem qp1( nj, njTask0, HST_SEMIDEF);
+    qpOasesOptionsqp1.enableRegularisation = BT_TRUE;
+    qpOasesOptionsqp1.epsRegularisation *= 2E2;
+    QProblem qp1( nj, njTask0, HST_POSDEF);
     qp1.setOptions( qpOasesOptionsqp1 );
 
     /** Solve zero QP. **/
