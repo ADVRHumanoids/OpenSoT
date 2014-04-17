@@ -279,7 +279,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     Options qpOasesOptionsqp1;
     qpOasesOptionsqp1.printLevel = PL_HIGH;
     qpOasesOptionsqp1.setToReliable();
-    QProblem qp1( nj, njTask0, HST_POSDEF);
+    QProblem qp1( nj, njTask0, HST_SEMIDEF);
     qp1.setOptions( qpOasesOptionsqp1 );
 
     /** Solve zero QP. **/

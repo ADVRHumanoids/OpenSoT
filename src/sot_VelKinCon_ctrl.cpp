@@ -58,10 +58,10 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
 
     Q_postural.resize(nJ, nJ);
     Q_postural.eye();
-//    yarp::sig::Vector qMax = coman_iDyn3.getJointBoundMax();
-//    yarp::sig::Vector qMin = coman_iDyn3.getJointBoundMin();
-//    Q_postural.diagonal(computeW(qMin, qMax, right_arm_joint_numbers,
-//                                 left_arm_joint_numbers, waist_joint_numbers));
+    yarp::sig::Vector qMax = coman_iDyn3.getJointBoundMax();
+    yarp::sig::Vector qMin = coman_iDyn3.getJointBoundMin();
+    Q_postural.diagonal(computeW(qMin, qMax, right_arm_joint_numbers,
+                                 left_arm_joint_numbers, waist_joint_numbers));
 
     q.resize(nJ, 0.0);
     q_ref.resize(nJ, 0.0);
@@ -209,7 +209,7 @@ void sot_VelKinCon_ctrl::run()
     else
         q += dq_ref;
 
-    updateiDyn3Model();
+    updateiDyn3Model(true);
 
     if(controlLaw())
         move();
@@ -387,15 +387,18 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
 #endif
     coman_iDyn3.computePositions();
 
-    // Set World Pose: to do only once at the beginning
+    // Set World Pose we do it at the beginning
     if(set_world_pose)
     {
         //yarp::sig::Matrix worldT(4,4);
         worldT.eye();
         coman_iDyn3.setWorldBasePose(worldT);
         yarp::sig::Vector foot_pose(3);
-        foot_pose = coman_iDyn3.getPosition(coman_iDyn3.getLinkIndex("r_sole")).getCol(3).subVector(0,2);
+        foot_pose = coman_iDyn3.getPosition(support_foot_LinkIndex).getCol(3).subVector(0,2);
         worldT(2,3) = -foot_pose(2);
+
+        worldT = yarp::math::luinv(coman_iDyn3.getPosition(coman_iDyn3.getLinkIndex("l_sole")));
+
         std::cout<<"World Base Pose: "<<std::endl; cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
         coman_iDyn3.setWorldBasePose(worldT);
         coman_iDyn3.computePositions();
@@ -562,7 +565,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
     eEe = yarp::math::cat(eEe, eSwingFoot);
     eEe = yarp::math::cat(eEe, eCoM);
 #endif
-    //yarp::sig::Vector eq = (q_ref - q); // postural error
+    yarp::sig::Vector eq = (q_ref - q); // postural error
 
     bool control_computed = false;
 #if SET_3_TASKS
@@ -575,8 +578,13 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                       MilliSecToSec(getRate()),
                                                       dq_ref);
 #else
-   control_computed = task_solver::computeControlHQP(JEe, eEe,
-                                                     Q_postural, gGradient,
+    yarp::sig::Vector zero(1, 0.0);
+    yarp::sig::Matrix ggGradient(1, gGradient.size());
+    ggGradient.setRow(0, gGradient);
+    yarp::sig::Matrix F = yarp::math::pile(Q_postural, -1.0*ggGradient);
+    yarp::sig::Vector f = yarp::math::cat(eq, zero);
+    control_computed = task_solver::computeControlHQP(JEe, eEe,
+                                                     F, f,
                                                      coman_iDyn3.getJointBoundMax(),
                                                      coman_iDyn3.getJointBoundMin(),
                                                      q, MAX_JOINT_VELOCITY,
