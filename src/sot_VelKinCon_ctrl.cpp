@@ -260,6 +260,21 @@ void sot_VelKinCon_ctrl::iDyn3Model()
 
     coman_iDyn3.setJointBoundMax(qMax);
     coman_iDyn3.setJointBoundMin(qMin);
+
+    yarp::sig::Vector tauMax; tauMax.resize(nJ,1.0);
+    for(i = coman_model.joints_.begin(); i != coman_model.joints_.end(); ++i) {
+        int jIndex = coman_iDyn3.getDOFIndex(i->first);
+        if(jIndex != -1) {
+            tauMax[jIndex] = i->second->limits->effort;
+        }
+    }
+    std::cout<<"Setting torque MAX"<<std::endl;
+
+    coman_iDyn3.setJointTorqueBoundMax(tauMax);
+
+    yarp::sig::Vector a; a = coman_iDyn3.getJointTorqueMax();
+    std::cout<<"MAX TAU: [ "<<a.toString()<<std::endl;
+
     std::cout<<"Loaded COMAN in iDyn3!"<<std::endl;
 
     std::cout<<"#DOFS: "<<coman_iDyn3.getNrOfDOFs()<<std::endl;
@@ -580,7 +595,9 @@ bool sot_VelKinCon_ctrl::controlLaw()
     yarp::sig::Vector eq = (q_ref - q);
     yarp::sig::Matrix gGradient(1, eq.size());
     gGradient.setRow(0, getGravityCompensationGradient());
-    yarp::sig::Matrix F = yarp::math::pile(Q_postural, -1.0*gGradient/40.0);
+    for(unsigned int i = 0; i < gGradient.cols(); ++i)
+        gGradient(0,i) = -1.0*gGradient(0,i)/coman_iDyn3.getJointTorqueMax()[i];
+    yarp::sig::Matrix F = yarp::math::pile(Q_postural, gGradient);
     yarp::sig::Vector f = yarp::math::cat(eq, zero);
 
     bool control_computed = false;
