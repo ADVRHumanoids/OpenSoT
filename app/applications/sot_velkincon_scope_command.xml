@@ -14,21 +14,21 @@
       <module>
               <name>yarpscope</name>
               <node>localhost</node>
-              <parameters>--xml scope_legs_command --context sot_velkincon</parameters>
+              <parameters>--xml scope_legs_command.xml --context sot_velkincon --title "Legs Command"</parameters>
               <tag>scope_legs_command</tag>
       </module>
 
       <module>
               <name>yarpscope</name>
               <node>localhost</node>
-              <parameters>--xml scope_arms_command.xml --context sot_velkincon</parameters>
+              <parameters>--xml scope_arms_command.xml --context sot_velkincon --title "Arms Command"</parameters>
               <tag>scope_arms_command</tag>
       </module>
 
       <module>
               <name>yarpscope</name>
               <node>localhost</node>
-              <parameters>--xml scope_torso_command.xml --context sot_velkincon</parameters>
+              <parameters>--xml scope_torso_command.xml --context sot_velkincon --title "Torso Command"</parameters>
               <tag>scope_torso_command</tag>
       </module>
        

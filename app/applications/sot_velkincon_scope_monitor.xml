@@ -12,7 +12,7 @@
     <module>
             <name>yarpscope </name>
             <node>localhost</node>
-            <parameters>--name scope_monitor</parameters>
+            <parameters>--xml scope_monitor.xml --title "/sot_VelKinCon/monitor:o" --context sot_velkincon</parameters>
             <tag>scope_monitor</tag>
     </module>
 
