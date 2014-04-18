@@ -229,7 +229,6 @@ void sot_VelKinCon_ctrl::iDyn3Model()
             ROS_ERROR("Failed to parse SRDF robot model!");
         else
         {
-            checkSRDF();
             coman_robot_model.reset(new robot_model::RobotModel(coman_model, coman_srdf));
             std::ostringstream robot_info;
             coman_robot_model->printModelInfo(robot_info);
@@ -243,7 +242,6 @@ void sot_VelKinCon_ctrl::iDyn3Model()
 
     // Here the iDyn3 model of the robot is generated
     coman_iDyn3.constructor(coman_tree, joint_sensor_names, waist_link_name);
-    ROS_INFO("Loaded COMAN in iDyn3!");
 
     int nJ = coman_iDyn3.getNrOfDOFs(); //29
     yarp::sig::Vector qMax; qMax.resize(nJ,0.0);
@@ -274,9 +272,6 @@ void sot_VelKinCon_ctrl::iDyn3Model()
     yarp::sig::Vector a; a = coman_iDyn3.getJointTorqueMax();
 
     ROS_INFO("Loaded COMAN in iDyn3!");
-
-    ROS_INFO("#DOFS: %i", coman_iDyn3.getNrOfDOFs());
-    ROS_INFO("#Links: %i", coman_iDyn3.getNrOfLinks());
 }
 
 void sot_VelKinCon_ctrl::setControlledKinematicChainsLinkIndex()

@@ -124,62 +124,27 @@ namespace wb_sot {
          bool controlLaw();
          void setJointNames()
          {
-             right_arm_joint_names.push_back("RShSag");
-             right_arm_joint_names.push_back("RShLat");
-             right_arm_joint_names.push_back("RShYaw");
-             right_arm_joint_names.push_back("RElbj");
-             right_arm_joint_names.push_back("RForearmPlate");
-             right_arm_joint_names.push_back("RWrj1");
-             right_arm_joint_names.push_back("RWrj2");
-
-             left_arm_joint_names.push_back("LShSag");
-             left_arm_joint_names.push_back("LShLat");
-             left_arm_joint_names.push_back("LShYaw");
-             left_arm_joint_names.push_back("LElbj");
-             left_arm_joint_names.push_back("LForearmPlate");
-             left_arm_joint_names.push_back("LWrj1");
-             left_arm_joint_names.push_back("LWrj2");
-
-             right_leg_joint_names.push_back("RHipSag");
-             right_leg_joint_names.push_back("RHipLat");
-             right_leg_joint_names.push_back("RHipYaw");
-             right_leg_joint_names.push_back("RKneeSag");
-             right_leg_joint_names.push_back("RAnkLat");
-             right_leg_joint_names.push_back("RAnkSag");
-
-             left_leg_joint_names.push_back("LHipSag");
-             left_leg_joint_names.push_back("LHipLat");
-             left_leg_joint_names.push_back("LHipYaw");
-             left_leg_joint_names.push_back("LKneeSag");
-             left_leg_joint_names.push_back("LAnkLat");
-             left_leg_joint_names.push_back("LAnkSag");
-
-             torso_joint_names.push_back("WaistSag");
-             torso_joint_names.push_back("WaistLat");
-             torso_joint_names.push_back("WaistYaw");
-         }
-
-         void checkSRDF()
-         {
-             std::vector<srdf::Model::Group> coman_groups = coman_srdf->getGroups();
-             for(unsigned int i = 0; i < coman_groups.size(); ++i)
+             for(unsigned int i = 0; i < coman_robot_model->getJointModelGroupNames().size(); ++i)
              {
-                 srdf::Model::Group group = coman_groups[i];
-                 std::pair< std::string, int> chain;
-                 chain.first = group.name_;
-                 chain.second = group.joints_.size();
-                 ROS_INFO("GROUP %i name is: %s", i, group.name_.c_str());
-                 for(unsigned int j = 0; j < group.joints_.size(); ++j)
-                 {
-                     std::pair< std::string, std::string> chain_joint_map;
-                     chain_joint_map.first = group.name_;
-                     chain_joint_map.second = group.joints_[j];
-                     std::string joint_name = group.joints_[j];
-                     ROS_INFO("  joint %i: %s", j, joint_name.c_str());
-                 }
+                 std::string group = coman_robot_model->getJointModelGroupNames()[i];
+                 moveit::core::JointModelGroup *joint_group = coman_robot_model->getJointModelGroup(group);
+
+                 if(group.compare("left_arm") == 0)
+                     left_arm_joint_names = joint_group->getActiveJointModelNames();
+
+                 if(group.compare("right_arm") == 0)
+                     right_arm_joint_names = joint_group->getActiveJointModelNames();
+
+                 if(group.compare("left_leg") == 0)
+                     left_leg_joint_names = joint_group->getActiveJointModelNames();
+
+                 if(group.compare("right_leg") == 0)
+                     right_leg_joint_names = joint_group->getActiveJointModelNames();
+
+                 if(group.compare("torso") == 0)
+                     torso_joint_names = joint_group->getActiveJointModelNames();
              }
          }
-
 
          /**
            We use this function to set to zero all the part of the Jacobians that we are not
