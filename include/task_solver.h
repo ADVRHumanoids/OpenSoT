@@ -3,6 +3,7 @@
 
 #include <qpOASES.hpp>
 #include <yarp/sig/all.h>
+#include <ros/ros.h>
 
 class task_solver
 {

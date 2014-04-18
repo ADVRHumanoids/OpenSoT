@@ -32,6 +32,12 @@ namespace wb_sot
 static const double                     SOT_DEFAULT_ELAPSED(0.0);
 static const yarp::sig::Vector          SOT_DEFAULT_ERROR(3, 0.0);
 
+static const std::string left_arm = "left_arm";
+static const std::string right_arm = "right_arm";
+static const std::string left_leg = "left_leg";
+static const std::string right_leg = "right_leg";
+static const std::string torso = "torso";
+
 // *** IDs of all the module streaming parameters
 enum sot_VelKinCon_ParamId {
     PARAM_ID_COMPUTATION_TIME,

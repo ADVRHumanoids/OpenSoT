@@ -129,19 +129,19 @@ namespace wb_sot {
                  std::string group = coman_robot_model->getJointModelGroupNames()[i];
                  moveit::core::JointModelGroup *joint_group = coman_robot_model->getJointModelGroup(group);
 
-                 if(group.compare("left_arm") == 0)
+                 if(group.compare(wb_sot::left_arm) == 0)
                      left_arm_joint_names = joint_group->getActiveJointModelNames();
 
-                 if(group.compare("right_arm") == 0)
+                 if(group.compare(wb_sot::right_arm) == 0)
                      right_arm_joint_names = joint_group->getActiveJointModelNames();
 
-                 if(group.compare("left_leg") == 0)
+                 if(group.compare(wb_sot::left_leg) == 0)
                      left_leg_joint_names = joint_group->getActiveJointModelNames();
 
-                 if(group.compare("right_leg") == 0)
+                 if(group.compare(wb_sot::right_leg) == 0)
                      right_leg_joint_names = joint_group->getActiveJointModelNames();
 
-                 if(group.compare("torso") == 0)
+                 if(group.compare(wb_sot::torso) == 0)
                      torso_joint_names = joint_group->getActiveJointModelNames();
              }
          }
