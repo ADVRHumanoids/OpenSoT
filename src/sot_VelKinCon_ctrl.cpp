@@ -9,8 +9,7 @@
 #include "task_solver.h"
 #include "cartesian_utils.h"
 #include "sot_VelKinCon_constants.h"
-#include <ros/package.h>
-#include <ros/ros.h>
+
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -219,10 +218,27 @@ void sot_VelKinCon_ctrl::iDyn3Model()
 
 
     std::string coman_model_folder = ros::package::getPath("coman_urdf") + "/urdf/coman.urdf";
-    if (!coman_model.initFile(coman_model_folder))
-      ROS_ERROR("Failed to parse urdf robot model!");
+    coman_model.reset(new urdf::Model());
+    if (!coman_model->initFile(coman_model_folder))
+      ROS_ERROR("Failed to parse URDF robot model!");
+    else
+    {
+        std::string path_to_srdf = ros::package::getPath("coman_srdf") + "/srdf/coman.srdf";
+        coman_srdf.reset(new srdf::Model());
+        if(!coman_srdf->initFile(*coman_model.get(), path_to_srdf))
+            ROS_ERROR("Failed to parse SRDF robot model!");
+        else
+        {
+            checkSRDF();
+            coman_robot_model.reset(new robot_model::RobotModel(coman_model, coman_srdf));
+            std::ostringstream robot_info;
+            coman_robot_model->printModelInfo(robot_info);
+            ROS_INFO(robot_info.str().c_str());
+        }
+    }
 
-    if (!kdl_parser::treeFromUrdfModel(coman_model, coman_tree))
+
+    if (!kdl_parser::treeFromUrdfModel(*coman_model.get(), coman_tree))
       ROS_ERROR("Failed to construct kdl tree!");
 
     // Here the iDyn3 model of the robot is generated
@@ -234,7 +250,7 @@ void sot_VelKinCon_ctrl::iDyn3Model()
     yarp::sig::Vector qMin; qMin.resize(nJ,0.0);
 
     std::map<std::string, boost::shared_ptr<urdf::Joint> >::iterator i;
-    for(i = coman_model.joints_.begin(); i != coman_model.joints_.end(); ++i) {
+    for(i = coman_model->joints_.begin(); i != coman_model->joints_.end(); ++i) {
         int jIndex = coman_iDyn3.getDOFIndex(i->first);
         if(jIndex != -1) {
             qMax[jIndex] = i->second->limits->upper;
@@ -246,7 +262,7 @@ void sot_VelKinCon_ctrl::iDyn3Model()
     coman_iDyn3.setJointBoundMin(qMin);
 
     yarp::sig::Vector tauMax; tauMax.resize(nJ,1.0);
-    for(i = coman_model.joints_.begin(); i != coman_model.joints_.end(); ++i) {
+    for(i = coman_model->joints_.begin(); i != coman_model->joints_.end(); ++i) {
         int jIndex = coman_iDyn3.getDOFIndex(i->first);
         if(jIndex != -1) {
             tauMax[jIndex] = i->second->limits->effort;
@@ -390,7 +406,7 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
         worldT(0,3) = 0.0;
         worldT(1,3) = 0.0;
 
-        ROS_INFO("World Base Pose: "); cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
+        //ROS_INFO("World Base Pose: "); cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
         coman_iDyn3.setWorldBasePose(worldT);
         coman_iDyn3.computePositions();
     }

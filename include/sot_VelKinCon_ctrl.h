@@ -3,6 +3,7 @@
 
 #include <yarp/os/RateThread.h>
 #include <urdf/model.h>
+#include <srdfdom/model.h>
 #include <iCub/iDynTree/DynTree.h>
 #include <kdl_parser/kdl_parser.hpp>
 #include "yarp_interface.h"
@@ -10,6 +11,9 @@
 #include <yarp/sig/all.h>
 #include <paramHelp/paramHelperServer.h>
 #include "sot_VelKinCon_constants.h"
+#include <ros/package.h>
+#include <ros/ros.h>
+#include <moveit/robot_model/robot_model.h>
 
 namespace wb_sot {
     class sot_VelKinCon_ctrl : public yarp::os::RateThread, public paramHelp::ParamValueObserver
@@ -33,7 +37,9 @@ namespace wb_sot {
          void parameterUpdated(const ParamProxyInterface *pd);
 
          KDL::Tree coman_tree; // A KDL Tree
-         urdf::Model coman_model; // A URDF Model
+         boost::shared_ptr<urdf::Model> coman_model; // A URDF Model
+         boost::shared_ptr<srdf::Model> coman_srdf; // A SRDF description
+         robot_model::RobotModelPtr coman_robot_model; // A robot model
          iCub::iDynTree::DynTree coman_iDyn3; // iDyn3 Model
          std::vector<std::string> left_arm_joint_names;
          std::vector<std::string> right_arm_joint_names;
@@ -151,6 +157,27 @@ namespace wb_sot {
              torso_joint_names.push_back("WaistSag");
              torso_joint_names.push_back("WaistLat");
              torso_joint_names.push_back("WaistYaw");
+         }
+
+         void checkSRDF()
+         {
+             std::vector<srdf::Model::Group> coman_groups = coman_srdf->getGroups();
+             for(unsigned int i = 0; i < coman_groups.size(); ++i)
+             {
+                 srdf::Model::Group group = coman_groups[i];
+                 std::pair< std::string, int> chain;
+                 chain.first = group.name_;
+                 chain.second = group.joints_.size();
+                 ROS_INFO("GROUP %i name is: %s", i, group.name_.c_str());
+                 for(unsigned int j = 0; j < group.joints_.size(); ++j)
+                 {
+                     std::pair< std::string, std::string> chain_joint_map;
+                     chain_joint_map.first = group.name_;
+                     chain_joint_map.second = group.joints_[j];
+                     std::string joint_name = group.joints_[j];
+                     ROS_INFO("  joint %i: %s", j, joint_name.c_str());
+                 }
+             }
          }
 
 
