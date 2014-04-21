@@ -20,3 +20,6 @@ yarp_install(FILES ${scopes} DESTINATION ${YARP_CONTEXTS_INSTALL_DIR}/${appname}
 yarp_install(FILES ${templates} DESTINATION ${YARP_APPLICATIONS_TEMPLATES_INSTALL_DIR})
 yarp_install(FILES ${applications} DESTINATION ${YARP_APPLICATIONS_INSTALL_DIR})
 yarp_install(FILES sot_velkincon.xml DESTINATION ${YARP_MODULES_INSTALL_DIR})
+
+# face target to include resource files
+ADD_CUSTOM_TARGET(sot_app SOURCES ${conf} ${scopes} ${templates} ${applications})
