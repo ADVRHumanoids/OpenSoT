@@ -15,7 +15,7 @@ namespace wb_sot {
     class sot_VelKinCon_ctrl : public yarp::os::RateThread, public paramHelp::ParamValueObserver
      {
      public:
-         sot_VelKinCon_ctrl(const double period, int argc, char* argv[], paramHelp::ParamHelperServer *_ph);
+         sot_VelKinCon_ctrl(const int period, paramHelp::ParamHelperServer *_ph);
 
          virtual bool threadInit();
          virtual void run();

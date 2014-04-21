@@ -23,8 +23,8 @@ using namespace wb_sot;
 // Here it is the path to the URDF model
 const std::string coman_model_folder = std::string(getenv("YARP_WORKSPACE")) + "/coman_yarp_apps/coman_urdf/coman.urdf";
 
-sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv[], paramHelp::ParamHelperServer* _ph):
-    RateThread(int(period*1000.0)),
+sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period, paramHelp::ParamHelperServer* _ph):
+    RateThread(period),
     IYarp(),
     q_ref(1),
     dq_ref(1),

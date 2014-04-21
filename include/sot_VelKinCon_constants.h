@@ -31,7 +31,6 @@
 
 #define DEBUG
 #define MODULE_NAME "sot_VelKinCon"
-#define dT 0.025 //[s]
 
 /** ####################################### **/
 
