@@ -15,7 +15,10 @@ namespace wb_sot {
     class sot_VelKinCon_ctrl : public yarp::os::RateThread, public paramHelp::ParamValueObserver
      {
      public:
-         sot_VelKinCon_ctrl(const int period, paramHelp::ParamHelperServer *_ph);
+         sot_VelKinCon_ctrl(const int period, const bool _LEFT_ARM_IMPEDANCE,
+                                              const bool _RIGHT_ARM_IMPEDANCE,
+                                              const bool _TORSO_IMPEDANCE,
+                                              paramHelp::ParamHelperServer *_ph);
 
          virtual bool threadInit();
          virtual void run();
@@ -31,6 +34,10 @@ namespace wb_sot {
      private:
          paramHelp::ParamHelperServer   *paramHelper;
          void parameterUpdated(const ParamProxyInterface *pd);
+
+         const bool LEFT_ARM_IMPEDANCE;
+         const bool RIGHT_ARM_IMPEDANCE;
+         const bool TORSO_IMPEDANCE;
 
          KDL::Tree coman_tree; // A KDL Tree
          urdf::Model coman_model; // A URDF Model

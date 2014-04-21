@@ -19,11 +19,6 @@
 #define SOT_VELKINCON_CONSTANTS_H
 
 /** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
-
-#define LEFT_ARM_IMPEDANCE true
-#define RIGHT_ARM_IMPEDANCE true
-#define TORSO_IMPEDANCE true
-
 #define TORSO_WEIGHT 1.0
 #define MAX_JOINT_VELOCITY toRad(20.0) //[rad/sec]
 #define ORIENTATION_ERROR_GAIN 1.0
@@ -107,9 +102,6 @@ new ParamProxyBasic<double>("eSwingFoot_p",                        PARAM_ID_SWIN
 new ParamProxyBasic<double>("eSwingFoot_o",                        PARAM_ID_SWING_FOOT_ORIENTATION_ERROR,        3,        ParamConstraint<double>(),             PARAM_MONITOR,    SOT_DEFAULT_ERROR.data(),                                "Orientation error of swing foot"),
 new ParamProxyBasic<double>("eCoM",                                PARAM_ID_COM_POSITION_ERROR,                  3,        ParamConstraint<double>(),             PARAM_MONITOR,    SOT_DEFAULT_ERROR.data(),                                "Position error of COM"),
 // ************************************************* RPC PARAMETERS ****************************************************************************************************************************************************************************************************************************
-new ParamProxyBasic<bool>("left_arm_impedance_control",            PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL,          1,                                               PARAM_IN_OUT,     NULL,                                                    "use joint impedance control for left arm"),
-new ParamProxyBasic<bool>("right_arm_impedance_control",           PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL,         1,                                               PARAM_IN_OUT,     NULL,                                                    "use joint impedance control for right arm"),
-new ParamProxyBasic<bool>("torso_impedance_control",               PARAM_ID_TORSO_IMPEDANCE_CONTROL,             1,                                               PARAM_IN_OUT,     NULL,                                                    "use joint impedance control for torso"),
 new ParamProxyBasic<bool>("use_3_stacks",                          PARAM_ID_USE_3_STACKS,                        1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_USE_3_STACKS,                               "use 3 stacks or two? If using three, first task is used for foot placement and precise CoM control"),
 new ParamProxyBasic<double>("max_joint_velocity",                  PARAM_ID_MAX_JOINT_VELOCITY,                  1,        ParamBilatBounds<double>(0,60.0),      PARAM_IN_OUT,     &SOT_DEFAULT_MAX_JOINT_VELOCITY,                         "Maximum velocity [rad/sec] for the joints"),
 new ParamProxyBasic<double>("orientation_error_gain",              PARAM_ID_ORIENTATION_ERROR_GAIN,              1,        ParamConstraint<double>(),             PARAM_IN_OUT,     &SOT_DEFAULT_ORIENTATION_ERROR_GAIN,                     "the orientation gain is used to weight orientation error over position eRWrist = yarp::math::cat(eRWrist_p,-ORIENTATION_ERROR_GAIN*eRWrist_o);"),
@@ -129,6 +121,9 @@ new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier0",PARAM_ID_QPOA
 new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier1",PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,1,        ParamConstraint<double>(),             PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER,      "enable regularisation for the second task"),
 new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier2",PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,1,        ParamConstraint<double>(),             PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER,      "enable regularisation for the first task"),
 // ************************************************* CONFIGURATION PARAMETERS ****************************************************************************************************************************************************************************************************************************
+new ParamProxyBasic<bool>("left_arm_impedance_control",            PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL,          1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for left arm"),
+new ParamProxyBasic<bool>("right_arm_impedance_control",           PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL,         1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for right arm"),
+new ParamProxyBasic<bool>("torso_impedance_control",               PARAM_ID_TORSO_IMPEDANCE_CONTROL,             1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for torso"),
 new ParamProxyBasic<double>("dT",                                  PARAM_ID_DT,                                  1,        ParamLowerBound<double>(1e-3),         PARAM_CONFIG,     NULL,                                                    "frequency to use for the SoT (1/dT , dT is [s])")
 };
 

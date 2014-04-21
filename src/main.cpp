@@ -22,15 +22,23 @@ class sot_VelKinCon_module: public yarp::os::RFModule
     wb_sot::sot_VelKinCon_ctrl *thr;
 
     int     period;
+    double  dT;
+    bool    left_arm_impedance_control, right_arm_impedance_control, torso_impedance_control;
     double  avgTime, stdDev, avgTimeUsed, stdDevUsed;
 public:
     bool configure(yarp::os::ResourceFinder &rf)
     {
         //--------------------------PARAMETER HELPER--------------------------
         paramHelper = new ParamHelperServer(wb_sot::sot_VelKinCon_ParamDescr, wb_sot::PARAM_ID_SIZE, NULL, 0);
+        paramHelper->linkParam(wb_sot::PARAM_ID_DT, &dT);
+        paramHelper->linkParam(wb_sot::PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL, &left_arm_impedance_control);
+        paramHelper->linkParam(wb_sot::PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL, &right_arm_impedance_control);
+        paramHelper->linkParam(wb_sot::PARAM_ID_TORSO_IMPEDANCE_CONTROL, &torso_impedance_control);
 
+        /*
         if(rf.check("dT")) period = rf.find("dT").asDouble()  * 1000;
         else { std::cerr << "Could not load parameter dT, exiting" << std::endl; return false; }
+        */
 
         // Read parameters from configuration file (or command line)
         yarp::os::Bottle initMsg;
@@ -43,9 +51,14 @@ public:
         setName(MODULE_NAME);
         attach(rpcPort);
 
+        period = dT*1000.0;
+        thr = new wb_sot::sot_VelKinCon_ctrl(period, left_arm_impedance_control,
+                                                     right_arm_impedance_control,
+                                                     torso_impedance_control,
+                                                     paramHelper);
 
-        thr = new wb_sot::sot_VelKinCon_ctrl(period, paramHelper);
-        ctrl_started = false;
+        /** if has flag startNow, start contol right away */
+        ctrl_started = rf.check("startNow");
 
         switch_port.open("/sot_VelKinCon/switch:i");
 
@@ -78,8 +91,8 @@ public:
         if(paramHelper){    paramHelper->close();       delete paramHelper;     paramHelper = 0;    }
         if(thr){            thr->stop();                delete thr;             thr = 0;            }
 
-        switch_port.close();
         //closing ports
+        switch_port.close();
         rpcPort.close();
 
         printf("[PERFORMANCE INFORMATION]:\n");

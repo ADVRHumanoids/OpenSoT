@@ -23,7 +23,10 @@ using namespace wb_sot;
 // Here it is the path to the URDF model
 const std::string coman_model_folder = std::string(getenv("YARP_WORKSPACE")) + "/coman_yarp_apps/coman_urdf/coman.urdf";
 
-sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period, paramHelp::ParamHelperServer* _ph):
+sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM_IMPEDANCE,
+                                                            const bool _RIGHT_ARM_IMPEDANCE,
+                                                            const bool _TORSO_IMPEDANCE,
+                                                            paramHelp::ParamHelperServer* _ph):
     RateThread(period),
     IYarp(),
     q_ref(1),
@@ -47,6 +50,9 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period, paramHelp::ParamHelperS
     eSwingFoot_p(3, 0.0),
     eSwingFoot_o(3, 0.0),
     eCoM(3, 0.0),
+    LEFT_ARM_IMPEDANCE(_LEFT_ARM_IMPEDANCE),
+    RIGHT_ARM_IMPEDANCE(_RIGHT_ARM_IMPEDANCE),
+    TORSO_IMPEDANCE(_TORSO_IMPEDANCE),
     paramHelper(_ph)
 {
     iDyn3Model();
@@ -138,35 +144,35 @@ bool sot_VelKinCon_ctrl::threadInit()
                R<<"  "<<P<<"  "<<Y<<std::endl;
     /////////////////////////////////////////
 
-#if RIGHT_ARM_IMPEDANCE
+if(RIGHT_ARM_IMPEDANCE) {
     std::cout<<"Setting Impedance Mode for q_right_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
         IYarp.controlMode_right_arm->setImpedancePositionMode(i);
-#else
+} else {
     std::cout<<"Setting Position Mode for q_right_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
         IYarp.controlMode_right_arm->setPositionMode(i);
-#endif
+}
 
-#if LEFT_ARM_IMPEDANCE
+if(LEFT_ARM_IMPEDANCE) {
     std::cout<<"Setting Impedance Mode for q_left_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
         IYarp.controlMode_left_arm->setImpedancePositionMode(i);
-#else
+} else {
     std::cout<<"Setting Position Mode for q_left_arm:"<<std::endl;
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
         IYarp.controlMode_left_arm->setPositionMode(i);
-#endif
+}
 
-#if TORSO_IMPEDANCE
+if(TORSO_IMPEDANCE) {
     std::cout<<"Setting Impedance Mode for q_torso:"<<std::endl;
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setImpedancePositionMode(i);
-#else
+} else {
     std::cout<<"Setting Position Mode for q_torso:"<<std::endl;
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
-#endif
+}
 
     std::cout<<"Setting Position Mode for q_right_leg:"<<std::endl;
     for(unsigned int i = 0; i < q_right_leg.size(); ++i)
