@@ -444,7 +444,7 @@ if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE) {
         worldT(0,3) = 0.0;
         worldT(1,3) = 0.0;
 
-        std::cout<<"World Base Pose: "<<std::endl; cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
+//        std::cout<<"World Base Pose: "<<std::endl; cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
         coman_iDyn3.setWorldBasePose(worldT);
         coman_iDyn3.computePositions();
     }

@@ -68,8 +68,12 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
     for(unsigned int i = 0; i < size; ++i) {
         const ParamProxyInterface *proxy = sot_VelKinCon_ParamDescr[i];
         if(proxy->ioType.value == paramHelp::PARAM_IN_OUT) {
+            const paramHelp::ParamProxyBasic<double>* proxyBasicDouble =
+                  dynamic_cast<const paramHelp::ParamProxyBasic<double>* >(proxy);
+            const paramHelp::ParamProxyBasic<int>* proxyBasicInt =
+                  dynamic_cast<const paramHelp::ParamProxyBasic<int>* >(proxy);
+            if( proxyBasicDouble != NULL) {
 
-            if(dynamic_cast<const paramHelp::ParamProxyBasic<double>* >(proxy) != NULL) {
                 unsigned int displacement = 0;
                 main << "\n\
                 <child>\n\
@@ -88,9 +92,29 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                 if(proxy->size == 1) {
                     adjustments << "\
   <object class=\"GtkAdjustment\" id=\"adjustment_"<< proxy->id + displacement <<"\">" << std::endl;
-                    /** @TODO add limits */
+
+                    const paramHelp::ParamConstraint<double>* constraints = proxyBasicDouble->constraint;
+                    const paramHelp::ParamBilatBounds<double>* bilatBounds =
+                          dynamic_cast<const paramHelp::ParamBilatBounds<double>* >(constraints);
+                    const paramHelp::ParamLowerBound<double>* lowerBound =
+                          dynamic_cast<const paramHelp::ParamLowerBound<double>* >(constraints);
+                    const paramHelp::ParamUpperBound<double>* upperBound =
+                          dynamic_cast<const paramHelp::ParamUpperBound<double>* >(constraints);
+
+                    if(bilatBounds != NULL)
+                        adjustments << "\
+    <property name=\"lower\">" << bilatBounds->lowerBound << "</property>\n\
+    <property name=\"upper\">" << bilatBounds->upperBound << "</property>" << std::endl;
+
+                    if(lowerBound != NULL)
+                        adjustments << "\
+    <property name=\"lower\">" << lowerBound->lowerBound << "</property>" << std::endl;
+
+                    if(upperBound != NULL)
+                        adjustments << "\
+    <property name=\"upper\">" << upperBound->upperBound << "</property>" << std::endl;
+
                     adjustments << "\
-    <property name=\"upper\">100</property>\n\
     <property name=\"step_increment\">0.1</property>\n\
     <property name=\"page_increment\">10</property>\n\
   </object>" << std::endl;
@@ -236,7 +260,7 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                      </packing>\n\
                    </child>" << std::endl;
 
-            } else if(dynamic_cast<const paramHelp::ParamProxyBasic<int>* >(proxy) != NULL) {
+            } else if(proxyBasicInt != NULL) {
                  unsigned int displacement = 0;
                  main << "\n\
                  <child>\n\
@@ -255,9 +279,29 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                  if(proxy->size == 1) {
                      adjustments << "\
    <object class=\"GtkAdjustment\" id=\"adjustment_"<< proxy->id + displacement <<"\">" << std::endl;
-                     /** @TODO add limits */
+
+                      const paramHelp::ParamConstraint<int>* constraints = proxyBasicInt->constraint;
+                      const paramHelp::ParamBilatBounds<int>* bilatBounds =
+                            dynamic_cast<const paramHelp::ParamBilatBounds<int>* >(constraints);
+                      const paramHelp::ParamLowerBound<int>* lowerBound =
+                            dynamic_cast<const paramHelp::ParamLowerBound<int>* >(constraints);
+                      const paramHelp::ParamUpperBound<int>* upperBound =
+                            dynamic_cast<const paramHelp::ParamUpperBound<int>* >(constraints);
+
+                      if(bilatBounds != NULL)
+                          adjustments << "\
+     <property name=\"lower\">" << bilatBounds->lowerBound << "</property>\n\
+     <property name=\"upper\">" << bilatBounds->upperBound << "</property>" << std::endl;
+
+                      if(lowerBound != NULL)
+                          adjustments << "\
+     <property name=\"lower\">" << lowerBound->lowerBound << "</property>" << std::endl;
+
+                      if(upperBound != NULL)
+                          adjustments << "\
+     <property name=\"upper\">" << upperBound->upperBound << "</property>" << std::endl;
+
                      adjustments << "\
-     <property name=\"upper\">100</property>\n\
      <property name=\"step_increment\">1</property>\n\
      <property name=\"page_increment\">10</property>\n\
    </object>" << std::endl;

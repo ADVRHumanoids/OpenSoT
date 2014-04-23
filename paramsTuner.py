@@ -21,7 +21,7 @@ class paramsTuner:
     def onValueChangedInt(self, widget):
         # widget sits in an hbox which sits in a vbox which sits in an expander
         expander = widget.get_parent().get_parent().get_parent()
-        self.setInt(expander.get_label(),widget.get_value())
+        self.setInt(expander.get_label(),int(widget.get_value()))
 
     def onValueChangedDouble(self, widget):
         # widget sits in a vbox which sits in an expander
@@ -73,8 +73,8 @@ class paramsTuner:
         ans.clear()
         map(cmd.addString,["get",name])
         self.paramPort.write(cmd,ans)
-        if ans.isDouble():
-            return ans.asDouble()
+        if ans.get(0).isDouble():
+            return ans.get(0).asDouble()
         else:
             raise Exception('error accessing',name,':not a double')
 
@@ -85,8 +85,8 @@ class paramsTuner:
         ans.clear()
         map(cmd.addString,["get",name])
         self.paramPort.write(cmd,ans)
-        if ans.isInt():
-            return ans.asInt()
+        if ans.get(0).isInt():
+            return ans.get(0).asInt()
         else:
             raise Exception('error accessing',name,':not an int')
 
@@ -97,8 +97,8 @@ class paramsTuner:
         ans.clear()
         map(cmd.addString,["get",name])
         self.paramPort.write(cmd,ans)
-        if ans.isInt():
-            return ans.asInt() == 1
+        if ans.get(0).isInt():
+            return ans.get(0).asInt() == 1
         else:
             raise Exception('error accessing',name,':not an int')
 
@@ -165,13 +165,13 @@ class paramsTuner:
                 spinbutton = self.expanderContainsDouble(obj)
                 if spinbutton:
                     # @TODO we should cycle here
-                    spinbutton.set_value(numpy.random.random_integers(1,10))
+                    spinbutton.set_value(self.getDouble(obj.get_label()))
                     print "Initializing Double SpinBox",obj.get_label()
 
                 spinbutton = self.expanderContainsInt(obj)
                 if spinbutton:
                     # @TODO we should cycle here
-                    spinbutton.set_value(numpy.random.rand()*10)
+                    spinbutton.set_value(self.getInt(obj.get_label()))
                     print "Initializing Int SpinBox",obj.get_label()
 
 
