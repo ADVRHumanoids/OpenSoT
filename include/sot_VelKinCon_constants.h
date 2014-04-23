@@ -18,12 +18,6 @@
 #ifndef SOT_VELKINCON_CONSTANTS_H
 #define SOT_VELKINCON_CONSTANTS_H
 
-/** TODO: PUT ALL THIS DEFINES IN A CONFIG FILE **/
-#define TORSO_WEIGHT 1.0
-#define MAX_JOINT_VELOCITY toRad(20.0) //[rad/sec]
-#define ORIENTATION_ERROR_GAIN 1.0
-#define SET_3_TASKS false
-
 #define DEBUG
 #define MODULE_NAME "sot_VelKinCon"
 
@@ -103,7 +97,7 @@ new ParamProxyBasic<double>("eSwingFoot_o",                        PARAM_ID_SWIN
 new ParamProxyBasic<double>("eCoM",                                PARAM_ID_COM_POSITION_ERROR,                  3,        ParamConstraint<double>(),             PARAM_MONITOR,    SOT_DEFAULT_ERROR.data(),                                "Position error of COM"),
 // ************************************************* RPC PARAMETERS ****************************************************************************************************************************************************************************************************************************
 new ParamProxyBasic<bool>("use_3_stacks",                          PARAM_ID_USE_3_STACKS,                        1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_USE_3_STACKS,                               "use 3 stacks or two? If using three, first task is used for foot placement and precise CoM control"),
-new ParamProxyBasic<double>("max_joint_velocity",                  PARAM_ID_MAX_JOINT_VELOCITY,                  1,        ParamBilatBounds<double>(0,60.0),      PARAM_IN_OUT,     &SOT_DEFAULT_MAX_JOINT_VELOCITY,                         "Maximum velocity [rad/sec] for the joints"),
+new ParamProxyBasic<double>("max_joint_velocity",                  PARAM_ID_MAX_JOINT_VELOCITY,                  1,        ParamBilatBounds<double>(0,1.0),       PARAM_IN_OUT,     &SOT_DEFAULT_MAX_JOINT_VELOCITY,                         "Maximum velocity [rad/sec] for the joints"),
 new ParamProxyBasic<double>("orientation_error_gain",              PARAM_ID_ORIENTATION_ERROR_GAIN,              1,        ParamConstraint<double>(),             PARAM_IN_OUT,     &SOT_DEFAULT_ORIENTATION_ERROR_GAIN,                     "the orientation gain is used to weight orientation error over position eRWrist = yarp::math::cat(eRWrist_p,-ORIENTATION_ERROR_GAIN*eRWrist_o);"),
 new ParamProxyBasic<int>("last_stack_type",                        PARAM_ID_LAST_STACK_TYPE,                     1,        ParamBilatBounds<int>(0,3),            PARAM_IN_OUT,     &SOT_DEFAULT_LAST_STACK_TYPE,                            "type of last stack. It is an enum, with values 0: postural (A=I, b=(q-q_ref)) 1: postural and gravity gradient (A=[I;grad_g(q)], b=[q-q_ref;0]) 2: (gravity torque) minimum effort (A=I, b=grad_g(q)^T) 3: postural and minimum effort (wrt gravity) (A=[I;I], b =[q-q_ref;grad_g(q)^T])"),
 new ParamProxyBasic<int>("postural_weight_strategy",               PARAM_ID_POSTURAL_WEIGHT_STRATEGY,            1,        ParamBilatBounds<int>(0,3),            PARAM_IN_OUT,     &SOT_DEFAULT_POSTURAL_WEIGHT_STRATEGY,                   "postural stack weight strategy. It is an enum, with values 0: postural uses Identity weight matrix 1: postural uses weight which lets distal joints move further away. The weight is normalized w.r.t. joint limits 2: postural uses diag(grad_g(q)) 3: postural uses joint-space Inertia matrix"),

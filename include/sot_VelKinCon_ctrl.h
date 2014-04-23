@@ -26,7 +26,8 @@ namespace wb_sot {
          static yarp::sig::Vector computeW(const yarp::sig::Vector& qMin, const yarp::sig::Vector& qMax,
                                     const std::vector<unsigned int>& right_arm_joint_numbers,
                                     const std::vector<unsigned int>& left_arm_joint_numbers,
-                                    const std::vector<unsigned int>& waist_joint_numbers);
+                                    const std::vector<unsigned int>& waist_joint_numbers,
+                                    const double w_torso_weight);
          yarp::sig::Vector getGravityCompensationTorque(const std::vector<std::string>& joint_names);
          yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q);
          yarp::sig::Vector getGravityCompensationGradient();
@@ -95,6 +96,25 @@ namespace wb_sot {
          yarp::sig::Vector eSwingFoot_p;
          yarp::sig::Vector eSwingFoot_o;
          yarp::sig::Vector eCoM;
+
+         bool use_3_stacks;
+         double max_joint_velocity;
+         double orientation_error_gain;
+         unsigned int last_stack_type;
+         unsigned int postural_weight_strategy;
+         double postural_weight_coefficient;
+         bool mineffort_weight_normalization;
+         double mineffort_weight_coefficient;
+         double w_torso_weight;
+         unsigned int qpOASES_NWSR0;
+         unsigned int qpOASES_NWSR1;
+         unsigned int qpOASES_NWSR2;
+         bool qpOASES_enableRegularisation0;
+         bool qpOASES_enableRegularisation1;
+         bool qpOASES_enableRegularisation2;
+         double qpOASES_eps0;
+         double qpOASES_eps1;
+         double qpOASES_eps2;
 
          /** Some Theory: **/
          /**

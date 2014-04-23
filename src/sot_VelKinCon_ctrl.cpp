@@ -198,6 +198,25 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_SWING_FOOT_ORIENTATION_ERROR, eSwingFoot_o.data()));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_COM_POSITION_ERROR,           eCoM.data()));
 
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_USE_3_STACKS,                 &use_3_stacks));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MAX_JOINT_VELOCITY,           &max_joint_velocity));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_ORIENTATION_ERROR_GAIN,       &orientation_error_gain));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LAST_STACK_TYPE,              &last_stack_type));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_STRATEGY,     &postural_weight_strategy));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_NORMALIZATION,&mineffort_weight_normalization));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_W_TORSO_WEIGHT,               &w_torso_weight));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR0,                &qpOASES_NWSR0));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR1,                &qpOASES_NWSR1));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR2,                &qpOASES_NWSR2));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_ENABLEREGULARISATION0,&qpOASES_enableRegularisation0));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_ENABLEREGULARISATION1,&qpOASES_enableRegularisation1));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_ENABLEREGULARISATION2,&qpOASES_enableRegularisation2));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER0,&qpOASES_eps0));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,&qpOASES_eps1));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,&qpOASES_eps2));
+
     return true;
 }
 
@@ -348,7 +367,8 @@ yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
                                                const yarp::sig::Vector &qMax,
                                                const std::vector<unsigned int>& right_arm_joint_numbers,
                                                const std::vector<unsigned int>& left_arm_joint_numbers,
-                                               const std::vector<unsigned int>& waist_joint_numbers)
+                                               const std::vector<unsigned int>& waist_joint_numbers,
+                                               const double w_torso_weight)
 {
     yarp::sig::Vector w(qMax.size(), 1.0);
 
@@ -376,8 +396,8 @@ yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
     std::cout<<"index weight waist: ";
     for(unsigned int i = 0; i < waist_joint_numbers.size(); ++i) {
         w[waist_joint_numbers[i]] = sqrt(w[waist_joint_numbers[i]]);
-        w[waist_joint_numbers[i]] *= TORSO_WEIGHT;
-        std::cout<<TORSO_WEIGHT<<" ";
+        w[waist_joint_numbers[i]] *= w_torso_weight;
+        std::cout<<w_torso_weight<<" ";
     }
     std::cout<<std::endl;
 
@@ -404,10 +424,10 @@ void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
     coman_iDyn3.setInertialMeasure(o, o, g);
 
     coman_iDyn3.kinematicRNEA();
-#if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE)
+if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE) {
     coman_iDyn3.dynamicRNEA();
     tau_gravity = coman_iDyn3.getTorques();
-#endif
+}
     coman_iDyn3.computePositions();
 
     // Set World Pose we do it at the beginning
@@ -506,21 +526,21 @@ void sot_VelKinCon_ctrl::move()
     IYarp.directControl_left_leg->setPositions(left_leg.data());
     IYarp.directControl_right_leg->setPositions(right_leg.data());
 
-#if LEFT_ARM_IMPEDANCE
-    yarp::sig::Vector tau_gravity_left_arm = getGravityCompensationTorque(left_arm_joint_names);
-    for(unsigned int i = 0; i < left_arm_joint_names.size(); ++i)
-        IYarp.impedanceCtrl_left_arm->setImpedanceOffset(i, tau_gravity_left_arm[i]);
-#endif
-#if RIGHT_ARM_IMPEDANCE
-    yarp::sig::Vector tau_gravity_right_arm = getGravityCompensationTorque(right_arm_joint_names);
-    for(unsigned int i = 0; i < right_arm_joint_names.size(); ++i)
-        IYarp.impedanceCtrl_right_arm->setImpedanceOffset(i, tau_gravity_right_arm[i]);
-#endif
-#if TORSO_IMPEDANCE
-    yarp::sig::Vector tau_gravity_torso = getGravityCompensationTorque(torso_joint_names);
-    for(unsigned int i = 0; i < torso_joint_names.size(); ++i)
-        IYarp.impedanceCtrl_torso->setImpedanceOffset(i, tau_gravity_torso[i]);
-#endif
+    if(LEFT_ARM_IMPEDANCE) {
+        yarp::sig::Vector tau_gravity_left_arm = getGravityCompensationTorque(left_arm_joint_names);
+        for(unsigned int i = 0; i < left_arm_joint_names.size(); ++i)
+            IYarp.impedanceCtrl_left_arm->setImpedanceOffset(i, tau_gravity_left_arm[i]);
+    }
+    if(RIGHT_ARM_IMPEDANCE) {
+        yarp::sig::Vector tau_gravity_right_arm = getGravityCompensationTorque(right_arm_joint_names);
+        for(unsigned int i = 0; i < right_arm_joint_names.size(); ++i)
+            IYarp.impedanceCtrl_right_arm->setImpedanceOffset(i, tau_gravity_right_arm[i]);
+    }
+    if(TORSO_IMPEDANCE) {
+        yarp::sig::Vector tau_gravity_torso = getGravityCompensationTorque(torso_joint_names);
+        for(unsigned int i = 0; i < torso_joint_names.size(); ++i)
+            IYarp.impedanceCtrl_torso->setImpedanceOffset(i, tau_gravity_torso[i]);
+    }
 }
 
 bool sot_VelKinCon_ctrl::controlLaw()
@@ -565,9 +585,9 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                            eSwingFoot_p, eSwingFoot_o);
     eCoM = com_pos_ref-pos_CoM;
 
-    yarp::sig::Vector eRWrist = yarp::math::cat(eRWrist_p, -ORIENTATION_ERROR_GAIN*eRWrist_o);
-    yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -ORIENTATION_ERROR_GAIN*eLWrist_o);
-    yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -ORIENTATION_ERROR_GAIN*eSwingFoot_o);
+    yarp::sig::Vector eRWrist = yarp::math::cat(eRWrist_p, -orientation_error_gain*eRWrist_o);
+    yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -orientation_error_gain*eLWrist_o);
+    yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -orientation_error_gain*eSwingFoot_o);
 
 //    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
 //    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
@@ -576,19 +596,22 @@ bool sot_VelKinCon_ctrl::controlLaw()
 //    std::cout<<"com_pos_ref: "<<com_pos_ref.toString()<<std::endl;
 //    std::cout<<"pos_CoM: "<<pos_CoM.toString()<<std::endl;
 
-#if SET_3_TASKS
-    yarp::sig::Matrix JEe = yarp::math::pile(JRWrist, JLWrist);
+yarp::sig::Matrix JEe;
+yarp::sig::Vector eEe;
+
+if(use_3_stacks) {
+    JEe = yarp::math::pile(JRWrist, JLWrist);
     JEe = yarp::math::pile(JEe, JSwingFoot);
-    yarp::sig::Vector eEe = yarp::math::cat(eRWrist, eLWrist);
+    eEe = yarp::math::cat(eRWrist, eLWrist);
     eEe = yarp::math::cat(eEe, eSwingFoot);
-#else
-    yarp::sig::Matrix JEe = yarp::math::pile(JRWrist, JLWrist);
+} else {
+    JEe = yarp::math::pile(JRWrist, JLWrist);
     JEe = yarp::math::pile(JEe, JSwingFoot);
     JEe = yarp::math::pile(JEe, JCoM);
-    yarp::sig::Vector eEe = yarp::math::cat(eRWrist, eLWrist);
+    eEe = yarp::math::cat(eRWrist, eLWrist);
     eEe = yarp::math::cat(eEe, eSwingFoot);
     eEe = yarp::math::cat(eEe, eCoM);
-#endif
+}
 
     /** Set of last tasks **/
     /**
@@ -599,32 +622,33 @@ bool sot_VelKinCon_ctrl::controlLaw()
     *
     **/
     yarp::sig::Vector eq = (q_ref - q);
+    yarp::sig::Vector eGradient = getGravityCompensationGradient();
     yarp::sig::Matrix gGradient(1, eq.size());
-    gGradient.setRow(0, getGravityCompensationGradient());
+    gGradient.setRow(0, eGradient);
     for(unsigned int i = 0; i < gGradient.cols(); ++i)
         gGradient(0,i) = -1.0*gGradient(0,i)/coman_iDyn3.getJointTorqueMax()[i];
     yarp::sig::Matrix F = yarp::math::pile(Q_postural, gGradient);
     yarp::sig::Vector f = yarp::math::cat(eq, zero);
 
     bool control_computed = false;
-#if SET_3_TASKS
-    control_computed = task_solver::computeControlHQP(JCoM,eCoM,
-                                                      JEe, eEe,
-                                                      Q_postural, gGradient,
-                                                      coman_iDyn3.getJointBoundMax(),
-                                                      coman_iDyn3.getJointBoundMin(),
-                                                      q, MAX_JOINT_VELOCITY,
-                                                      MilliSecToSec(getRate()),
-                                                      dq_ref);
-#else
-    control_computed = task_solver::computeControlHQP(JEe, eEe,
-                                                     F, f,
-                                                     coman_iDyn3.getJointBoundMax(),
-                                                     coman_iDyn3.getJointBoundMin(),
-                                                     q, MAX_JOINT_VELOCITY,
-                                                     MilliSecToSec(getRate()),
-                                                     dq_ref);
-#endif
+    if(use_3_stacks) {
+        control_computed = task_solver::computeControlHQP(JCoM,eCoM,
+                                                          JEe, eEe,
+                                                          Q_postural, eGradient,
+                                                          coman_iDyn3.getJointBoundMax(),
+                                                          coman_iDyn3.getJointBoundMin(),
+                                                          q, max_joint_velocity,
+                                                          MilliSecToSec(getRate()),
+                                                          dq_ref);
+    } else {
+        control_computed = task_solver::computeControlHQP(JEe, eEe,
+                                                         F, f,
+                                                         coman_iDyn3.getJointBoundMax(),
+                                                         coman_iDyn3.getJointBoundMin(),
+                                                         q, max_joint_velocity,
+                                                         MilliSecToSec(getRate()),
+                                                         dq_ref);
+    }
 
     if(!control_computed) {
         std::cout << "Error computing control" << std::endl;
