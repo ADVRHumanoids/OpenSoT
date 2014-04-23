@@ -42,6 +42,7 @@ ADD_LIBRARY(sot_VelKinCon_ctrl STATIC src/sot_VelKinCon_ctrl.cpp src/yarp_interf
 ADD_LIBRARY(cartesian_utils STATIC src/cartesian_utils.cpp)
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp ${sot_INCLUDES})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
+ADD_EXECUTABLE(createParamTuner src/tests/createParamTuner.cpp)
 ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
@@ -56,8 +57,10 @@ TARGET_LINK_LIBRARIES(uTest1 sot_VelKinCon_ctrl ${kdl_codyco_LIBRARIES} ${iDynTr
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(uTest2 cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(createMonitorScope cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
-                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
+TARGET_LINK_LIBRARIES(createMonitorScope ${YARP_LIBRARIES})
+
+TARGET_LINK_LIBRARIES(createParamTuner ${YARP_LIBRARIES})
+
 
 install(TARGETS sot_VelKinCon DESTINATION bin)
 #install(TARGETS cartesian_utils sot_VelKinCon_ctrl DESTINATION lib)
