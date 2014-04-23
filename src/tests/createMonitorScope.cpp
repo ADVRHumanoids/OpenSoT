@@ -50,7 +50,7 @@ const std::string createMonitorScope(const ParamProxyInterface *const sot_VelKin
                     " columns=\"" << ncols << "\" carrier=\"udp\" persistent=\"1\">" << std::endl;
     unsigned int gridx = 0;
     unsigned int gridy = 0;
-    for(unsigned int i; i < size; ++i) {
+    for(unsigned int i = 0; i < size; ++i) {
         const ParamProxyInterface *proxy = sot_VelKinCon_ParamDescr[i];
         if(proxy->ioType.isMonitoring()) {
             unsigned int startingPlotIndex = getStartingPlotIndexById(sot_VelKinCon_ParamDescr, size,
@@ -75,8 +75,9 @@ const std::string createMonitorScope(const ParamProxyInterface *const sot_VelKin
             gridy = (gridy + 1)%ncols;
             if(gridy == 0)
                 gridx++;
+
+            ss << "     </plot>" << std::endl;
         }
-        ss << "     </plot>" << std::endl;
     }
     ss << "</portscope>" << std::endl;
     ss.sync();
