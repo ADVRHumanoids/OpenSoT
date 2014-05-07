@@ -175,25 +175,29 @@ class paramsTuner:
                     print "Initializing Int SpinBox",obj.get_label()
 
 
-    def __init__(self, paramPort):
+    def __init__(self, paramPort, moduleName):
         self.paramPort = paramPort
 
         self.rf = yarp.ResourceFinder()
         self.rf.setVerbose(True)
-        self.rf.setDefaultContext("sot_velkincon")
+        self.rf.setDefaultContext(moduleName)
 
         self.builder = Gtk.Builder()
         self.builder.add_from_file(self.rf.findFileByName('tuner.xml'))
 
         self.window = self.builder.get_object("parameterTuning")
+
+        # load initial parameters from module
         self.init_parameters()
+
+        # connect signal handlers
         self.builder.connect_signals(self)
 
 
 if __name__ == "__main__":
 
     if(len(sys.argv) != 2):
-        print 'Example usage: python showdata.py "moduleName"'
+        print 'Example usage: python paramsTuner.py moduleName'
         exit(1)
     moduleName = sys.argv[1]
     yarp.Network.init()
@@ -211,7 +215,7 @@ if __name__ == "__main__":
     else:
         print 'Succesfully connected to ', moduleName
 
-    tuner = paramsTuner(streamer)
+    tuner = paramsTuner(streamer,moduleName)
     tuner.window.show_all()
     Gtk.main()
 
