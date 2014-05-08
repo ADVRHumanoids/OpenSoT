@@ -42,28 +42,33 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
 
     main << "\
   <object class=\"GtkWindow\" id=\"parameterTuning\">\n\
-    <property name=\"width_request\">300</property>\n\
+    <property name=\"width_request\">350</property>\n\
+    <property name=\"height_request\">500</property>\n\
     <property name=\"can_focus\">False</property>\n\
     <property name=\"title\" translatable=\"yes\">parameterTuning</property>\n\
     <property name=\"resizable\">False</property>\n\
     <signal name=\"delete-event\" handler=\"onDeleteWindow\" swapped=\"no\"/>\n\
     <child>\n\
-      <object class=\"GtkFrame\" id=\"main_frame\">\n\
+      <object class=\"GtkScrolledWindow\" id=\"main_scrolled\">\n\
         <property name=\"visible\">True</property>\n\
         <property name=\"can_focus\">False</property>\n\
-        <property name=\"label_xalign\">0</property>\n\
         <property name=\"shadow_type\">none</property>\n\
         <child>\n\
-          <object class=\"GtkAlignment\" id=\"frame_alignment\">\n\
+          <object class=\"GtkViewport\" id=\"main_viewport\">\n\
             <property name=\"visible\">True</property>\n\
             <property name=\"can_focus\">False</property>\n\
             <property name=\"left_padding\">12</property>\n\
+            <property name=\"halign\">start</property>\n\
+            <property name=\"valign\">start</property>\n\
             <child>\n\
               <object class=\"GtkBox\" id=\"main_hbox\">\n\
                 <property name=\"visible\">True</property>\n\
                 <property name=\"can_focus\">False</property>\n\
                 <property name=\"orientation\">vertical</property>\n\
-                <property name=\"spacing\">5</property>" << std::endl;
+                <property name=\"spacing\">5</property>\n\
+                <property name=\"margin_left\">10</property>\n\
+                <property name=\"halign\">start</property>\n\
+                <property name=\"valign\">start</property>" << std::endl;
 
     for(unsigned int i = 0; i < size; ++i) {
         const ParamProxyInterface *proxy = sot_VelKinCon_ParamDescr[i];
@@ -391,6 +396,30 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
     }
 
     main     << "\
+                  <child>\n\
+                    <object class=\"GtkLabel\" id=\"my_label\">\n\
+                      <property name=\"visible\">True</property>\n\
+                      <property name=\"can_focus\">False</property>\n\
+                      <property name=\"label\" translatable=\"yes\">&lt;b&gt;paramsTuner&lt;/b&gt; allows to change the controller \n\
+parameters online.\n\
+\n\
+You can mouse over the labels to have a \n\
+description of every parameter.\n\
+Scalar parameters of type double, int and bool\n\
+are currently supported.\n\
+\n\
+&lt;i&gt;Please use the scrollbar on the right instead of the\n\
+scrolling wheel on your mouse to avoid changing\n\
+the slides by chance.&lt;/i&gt;</property>\n\
+                      <property name=\"use_markup\">True</property>\n\
+                    </object>\n\
+                    <packing>\n\
+                      <property name=\"expand\">False</property>\n\
+                      <property name=\"fill\">True</property>\n\
+                      <property name=\"position\">0</property>\n\
+                      <property name=\"padding\">5</property>\n\
+                    </packing>\n\
+                  </child>\n\
               </object>\n\
             </child>\n\
           </object>\n\
