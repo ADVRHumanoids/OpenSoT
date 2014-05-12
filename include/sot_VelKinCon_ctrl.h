@@ -3,6 +3,7 @@
 
 #include <yarp/os/RateThread.h>
 #include <urdf/model.h>
+#include <srdfdom/model.h>
 #include <iCub/iDynTree/DynTree.h>
 #include <kdl_parser/kdl_parser.hpp>
 #include "yarp_interface.h"
@@ -10,6 +11,9 @@
 #include <yarp/sig/all.h>
 #include <paramHelp/paramHelperServer.h>
 #include "sot_VelKinCon_constants.h"
+#include <ros/package.h>
+#include <ros/ros.h>
+#include <moveit/robot_model/robot_model.h>
 
 namespace wb_sot {
     class sot_VelKinCon_ctrl : public yarp::os::RateThread, public paramHelp::ParamValueObserver
@@ -30,7 +34,7 @@ namespace wb_sot {
                                     const double w_torso_weight);
          yarp::sig::Vector getGravityCompensationTorque(const std::vector<std::string>& joint_names);
          yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q);
-         yarp::sig::Vector getGravityCompensationGradient();
+         yarp::sig::Vector getGravityCompensationGradient(const yarp::sig::Matrix& W);
 
      private:
          paramHelp::ParamHelperServer   *paramHelper;
@@ -41,7 +45,9 @@ namespace wb_sot {
          const bool TORSO_IMPEDANCE;
 
          KDL::Tree coman_tree; // A KDL Tree
-         urdf::Model coman_model; // A URDF Model
+         boost::shared_ptr<urdf::Model> coman_model; // A URDF Model
+         boost::shared_ptr<srdf::Model> coman_srdf; // A SRDF description
+         robot_model::RobotModelPtr coman_robot_model; // A robot model
          iCub::iDynTree::DynTree coman_iDyn3; // iDyn3 Model
          std::vector<std::string> left_arm_joint_names;
          std::vector<std::string> right_arm_joint_names;
@@ -149,41 +155,27 @@ namespace wb_sot {
          bool controlLaw();
          void setJointNames()
          {
-             right_arm_joint_names.push_back("RShSag");
-             right_arm_joint_names.push_back("RShLat");
-             right_arm_joint_names.push_back("RShYaw");
-             right_arm_joint_names.push_back("RElbj");
-             right_arm_joint_names.push_back("RForearmPlate");
-             right_arm_joint_names.push_back("RWrj1");
-             right_arm_joint_names.push_back("RWrj2");
+             for(unsigned int i = 0; i < coman_robot_model->getJointModelGroupNames().size(); ++i)
+             {
+                 std::string group = coman_robot_model->getJointModelGroupNames()[i];
+                 moveit::core::JointModelGroup *joint_group = coman_robot_model->getJointModelGroup(group);
 
-             left_arm_joint_names.push_back("LShSag");
-             left_arm_joint_names.push_back("LShLat");
-             left_arm_joint_names.push_back("LShYaw");
-             left_arm_joint_names.push_back("LElbj");
-             left_arm_joint_names.push_back("LForearmPlate");
-             left_arm_joint_names.push_back("LWrj1");
-             left_arm_joint_names.push_back("LWrj2");
+                 if(group.compare(wb_sot::left_arm) == 0)
+                     left_arm_joint_names = joint_group->getActiveJointModelNames();
 
-             right_leg_joint_names.push_back("RHipSag");
-             right_leg_joint_names.push_back("RHipLat");
-             right_leg_joint_names.push_back("RHipYaw");
-             right_leg_joint_names.push_back("RKneeSag");
-             right_leg_joint_names.push_back("RAnkLat");
-             right_leg_joint_names.push_back("RAnkSag");
+                 if(group.compare(wb_sot::right_arm) == 0)
+                     right_arm_joint_names = joint_group->getActiveJointModelNames();
 
-             left_leg_joint_names.push_back("LHipSag");
-             left_leg_joint_names.push_back("LHipLat");
-             left_leg_joint_names.push_back("LHipYaw");
-             left_leg_joint_names.push_back("LKneeSag");
-             left_leg_joint_names.push_back("LAnkLat");
-             left_leg_joint_names.push_back("LAnkSag");
+                 if(group.compare(wb_sot::left_leg) == 0)
+                     left_leg_joint_names = joint_group->getActiveJointModelNames();
 
-             torso_joint_names.push_back("WaistSag");
-             torso_joint_names.push_back("WaistLat");
-             torso_joint_names.push_back("WaistYaw");
+                 if(group.compare(wb_sot::right_leg) == 0)
+                     right_leg_joint_names = joint_group->getActiveJointModelNames();
+
+                 if(group.compare(wb_sot::torso) == 0)
+                     torso_joint_names = joint_group->getActiveJointModelNames();
+             }
          }
-
 
          /**
            We use this function to set to zero all the part of the Jacobians that we are not

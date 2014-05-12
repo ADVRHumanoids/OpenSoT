@@ -29,33 +29,33 @@ yarp_interface::yarp_interface()
 {
     time_tic = 0.0;
 
-    if(createPolyDriver("left_arm", polyDriver_left_arm))
+    if(createPolyDriver(wb_sot::left_arm, polyDriver_left_arm))
     {
         polyDriver_left_arm.view(encodersMotor_left_arm);
         polyDriver_left_arm.view(directControl_left_arm);
         polyDriver_left_arm.view(controlMode_left_arm);
         polyDriver_left_arm.view(impedanceCtrl_left_arm);
     }
-    if(createPolyDriver("right_arm", polyDriver_right_arm))
+    if(createPolyDriver(wb_sot::right_arm, polyDriver_right_arm))
     {
         polyDriver_right_arm.view(encodersMotor_right_arm);
         polyDriver_right_arm.view(directControl_right_arm);
         polyDriver_right_arm.view(controlMode_right_arm);
         polyDriver_right_arm.view(impedanceCtrl_right_arm);
     }
-    if(createPolyDriver("left_leg", polyDriver_left_leg))
+    if(createPolyDriver(wb_sot::left_leg, polyDriver_left_leg))
     {
         polyDriver_left_leg.view(encodersMotor_left_leg);
         polyDriver_left_leg.view(directControl_left_leg);
         polyDriver_left_leg.view(controlMode_left_leg);
     }
-    if(createPolyDriver("right_leg", polyDriver_right_leg))
+    if(createPolyDriver(wb_sot::right_leg, polyDriver_right_leg))
     {
         polyDriver_right_leg.view(encodersMotor_right_leg);
         polyDriver_right_leg.view(directControl_right_leg);
         polyDriver_right_leg.view(controlMode_right_leg);
     }
-    if(createPolyDriver("torso", polyDriver_torso))
+    if(createPolyDriver(wb_sot::torso, polyDriver_torso))
     {
         polyDriver_torso.view(encodersMotor_torso);
         polyDriver_torso.view(directControl_torso);
@@ -63,8 +63,8 @@ yarp_interface::yarp_interface()
         polyDriver_torso.view(impedanceCtrl_torso);
     }
 
-    left_arm_pos_ref_port.open("/sot_VelKinCon/left_arm/set_ref:i");
-    right_arm_pos_ref_port.open("/sot_VelKinCon/right_arm/set_ref:i");
+    left_arm_pos_ref_port.open("/sot_VelKinCon/" + wb_sot::left_arm + "/set_ref:i");
+    right_arm_pos_ref_port.open("/sot_VelKinCon/" + wb_sot::right_arm + "/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     clik_port.open("/sot_VelKinCon/set_clik:i");
     world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
@@ -101,11 +101,11 @@ bool yarp_interface::createPolyDriver(const std::string &kinematic_chain, yarp::
 
     polyDriver.open(options);
     if (!polyDriver.isValid()){
-        std::cout<<"Device "<<kinematic_chain<<" not available."<<std::endl;
+        ROS_ERROR("Device %s not available.", kinematic_chain.c_str());
         return false;
     }
     else{
-        std::cout<<"Device "<<kinematic_chain<<" available."<<std::endl;
+        ROS_INFO("Device %s available.", kinematic_chain.c_str());
         return true;
     }
 }
@@ -158,9 +158,9 @@ void yarp_interface::getSetClik(bool &is_clik)
     if(!bot == NULL){
         is_clik = (bool)bot->get(0).asInt();
         if(is_clik)
-            std::cout<<"CLIK activated!"<<std::endl;
+            ROS_WARN("CLIK activated!");
         else
-            std::cout<<"CLIK NOT activated!"<<std::endl;
+            ROS_WARN("CLIK NOT activated!");
     }
 }
 
@@ -208,8 +208,8 @@ bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const s
                     cartesian_utils::homogeneousMatrixFromRPY(ref,
                                                               data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                               toRad(data.get(4).asDouble()), toRad(data.get(5).asDouble()), toRad(data.get(6).asDouble()));
-                    std::cout<<"    New reference in "<< local_frame.c_str()<< " is "<<std::endl;
-                    std::cout<<ref.toString()<<std::endl;
+                    ROS_INFO("New reference in %s is:", local_frame.c_str());
+                    ROS_INFO(ref.toString().c_str());
                     return true;
                 }
                 else if(data.size() == 7+1)
@@ -217,21 +217,21 @@ bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const s
                     cartesian_utils::homogeneousMatrixFromQuaternion(ref,
                                                                      data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                                      data.get(4).asDouble(), data.get(5).asDouble(), data.get(6).asDouble(), data.get(7).asDouble());
-                    std::cout<<"    New reference in "<< local_frame.c_str()<< " is "<<std::endl;
-                    std::cout<<ref.toString()<<std::endl;
+                    ROS_INFO("New reference in %s is:", local_frame.c_str());
+                    ROS_INFO(ref.toString().c_str());
                     return true;
                 }
                 else
-                    std::cout<<"    ERROR: wrong size of reference! Should be 6 if RPY are used or 7 if Quaternions are used!"<<std::endl;
+                    ROS_ERROR("wrong size of reference! Should be 6 if RPY are used or 7 if Quaternions are used!");
             }
             else
-                std::cout<<"    ERROR: no data section in port"<<std::endl;
+                ROS_ERROR("no data section in port");
         }
         else
-            std::cout<<"    ERROR: wrong Reference Frame, should be "<< local_frame.c_str() <<std::endl;
+            ROS_ERROR("wrong Reference Frame, should be %s ", local_frame.c_str());
     }
     else
-        std::cout<<"    ERROR: no frame section in port"<<std::endl;
+        ROS_ERROR("no frame section in port");
     return false;
 }
 

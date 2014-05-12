@@ -130,7 +130,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     if(success0== RET_QP_NOT_SOLVED ||
       (success0 != RET_QP_SOLVED && success0 != SUCCESSFUL_RETURN))
     {
-        std::cout<<"ERROR OPTIMIZING ZERO TASK! ERROR #"<<success0<<std::endl;
+        ROS_ERROR("ERROR OPTIMIZING ZERO TASK! ERROR #%i", success0);
         initial_guess = false;
     }
     else
@@ -167,7 +167,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         if(success1== RET_QP_NOT_SOLVED ||
           (success1 != RET_QP_SOLVED && success1 != SUCCESSFUL_RETURN))
         {
-            std::cout<<"ERROR OPTIMIZING FIRST TASK! ERROR #"<<success1<<std::endl;
+            ROS_ERROR("ERROR OPTIMIZING FIRST TASK! ERROR #%i", success1);
             initial_guess = false;
         }
         else
@@ -205,7 +205,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
             if(success2 == RET_QP_NOT_SOLVED ||
               (success2 != RET_QP_SOLVED && success2 != SUCCESSFUL_RETURN))
             {
-                std::cout<<"ERROR OPTIMIZING POSTURE TASK! ERROR #"<<success2<<std::endl;
+                ROS_ERROR("ERROR OPTIMIZING POSTURE TASK! ERROR #%i", success2);
                 initial_guess = false;
             }
             else
@@ -319,7 +319,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     if(success0== RET_QP_NOT_SOLVED ||
       (success0 != RET_QP_SOLVED && success0 != SUCCESSFUL_RETURN))
     {
-        std::cout<<"ERROR OPTIMIZING ZERO TASK! ERROR #"<<success0<<std::endl;
+        ROS_ERROR("ERROR OPTIMIZING ZERO TASK! ERROR #%i", success0);
         initial_guess = false;
     }
     else
@@ -357,7 +357,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         if(success1 == RET_QP_NOT_SOLVED ||
           (success1 != RET_QP_SOLVED && success1 != SUCCESSFUL_RETURN))
         {
-            std::cout<<"ERROR OPTIMIZING POSTURE TASK! ERROR #"<<success1<<std::endl;
+            ROS_ERROR("ERROR OPTIMIZING POSTURE TASK! ERROR #%i", success1);
             initial_guess = false;
         }
         else

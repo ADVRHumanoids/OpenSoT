@@ -20,9 +20,6 @@ using namespace iCub::iDynTree;
 using namespace yarp::math;
 using namespace wb_sot;
 
-// Here it is the path to the URDF model
-const std::string coman_model_folder = std::string(getenv("YARP_WORKSPACE")) + "/coman_yarp_apps/coman_urdf/coman.urdf";
-
 sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM_IMPEDANCE,
                                                             const bool _RIGHT_ARM_IMPEDANCE,
                                                             const bool _TORSO_IMPEDANCE,
@@ -124,72 +121,55 @@ bool sot_VelKinCon_ctrl::threadInit()
 
     swing_foot_pos_ref = coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
 
-    std::cout<<"Initial Pose Ref left_arm:"<<std::endl; cartesian_utils::printHomogeneousTransform(left_arm_pos_ref);std::cout<<std::endl;
-    std::cout<<"Initial Pose Ref right_arm:"<<std::endl; cartesian_utils::printHomogeneousTransform(right_arm_pos_ref);std::cout<<std::endl;
-    std::cout<<"Initial Pose Ref swing_foot:"<<std::endl; cartesian_utils::printHomogeneousTransform(swing_foot_pos_ref);std::cout<<std::endl;
-    std::cout<<"Initial Position Ref CoM: [ "<<com_pos_ref.toString()<<" ]"<<std::endl;
-
-    /////////////////////////////////////////
-    KDL::Frame tmp_r;
-    cartesian_utils::fromYARPMatrixtoKDLFrame(right_arm_pos_ref, tmp_r);
-    KDL::Frame tmp_l;
-    cartesian_utils::fromYARPMatrixtoKDLFrame(left_arm_pos_ref, tmp_l);
-
-    double R,P,Y;
-    tmp_r.M.GetRPY(R,P,Y);
-
-    std::cout<<"tmp_r "<<tmp_r.p.x()<<"  "<<tmp_r.p.y()<<"  "<<tmp_r.p.y()<<"  "<<
-               R<<"  "<<P<<"  "<<Y<<std::endl;
-    tmp_l.M.GetRPY(R,P,Y);
-
-    std::cout<<"tmp_l "<<tmp_l.p.x()<<"  "<<tmp_l.p.y()<<"  "<<tmp_l.p.y()<<"  "<<
-               R<<"  "<<P<<"  "<<Y<<std::endl;
-    /////////////////////////////////////////
+    ROS_INFO("Initial Pose Ref left_arm:");   cartesian_utils::printHomogeneousTransform(left_arm_pos_ref);std::cout<<std::endl;
+    ROS_INFO("Initial Pose Ref right_arm:");  cartesian_utils::printHomogeneousTransform(right_arm_pos_ref);std::cout<<std::endl;
+    ROS_INFO("Initial Pose Ref swing_foot:"); cartesian_utils::printHomogeneousTransform(swing_foot_pos_ref);std::cout<<std::endl;
+    ROS_INFO("Initial Position Ref CoM: [ %s ]", com_pos_ref.toString().c_str());
 
 if(RIGHT_ARM_IMPEDANCE) {
-    std::cout<<"Setting Impedance Mode for q_right_arm:"<<std::endl;
+    ROS_INFO("Setting Impedance Mode for q_right_arm:");
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
         IYarp.controlMode_right_arm->setImpedancePositionMode(i);
 } else {
-    std::cout<<"Setting Position Mode for q_right_arm:"<<std::endl;
+    ROS_INFO("Setting Position Mode for q_right_arm:");
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
         IYarp.controlMode_right_arm->setPositionMode(i);
 }
 
 if(LEFT_ARM_IMPEDANCE) {
-    std::cout<<"Setting Impedance Mode for q_left_arm:"<<std::endl;
+    ROS_INFO("Setting Impedance Mode for q_left_arm:");
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
         IYarp.controlMode_left_arm->setImpedancePositionMode(i);
 } else {
-    std::cout<<"Setting Position Mode for q_left_arm:"<<std::endl;
+    ROS_INFO("Setting Position Mode for q_left_arm:");
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
         IYarp.controlMode_left_arm->setPositionMode(i);
 }
 
 if(TORSO_IMPEDANCE) {
-    std::cout<<"Setting Impedance Mode for q_torso:"<<std::endl;
+    ROS_INFO("Setting Impedance Mode for q_torso:");
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setImpedancePositionMode(i);
 } else {
-    std::cout<<"Setting Position Mode for q_torso:"<<std::endl;
+    ROS_INFO("Setting Position Mode for q_torso:");
     for(unsigned int i = 0; i < q_torso.size(); ++i)
         IYarp.controlMode_torso->setPositionMode(i);
 }
 
-    std::cout<<"Setting Position Mode for q_right_leg:"<<std::endl;
+    ROS_INFO("Setting Position Mode for q_right_leg:");
     for(unsigned int i = 0; i < q_right_leg.size(); ++i)
         IYarp.controlMode_right_leg->setPositionMode(i);
 
-    std::cout<<"Setting Position Mode for q_left_leg:"<<std::endl;
+    ROS_INFO("Setting Position Mode for q_left_leg:");
     for(unsigned int i = 0; i < q_left_leg.size(); ++i)
         IYarp.controlMode_left_leg->setPositionMode(i);
 
     if(is_clik)
-        std::cout<<"SoT is running as CLIK"<<std::endl;
+        ROS_WARN("SoT is running as CLIK");
     else
-        std::cout<<"SoT is NOT running as CLIK"<<std::endl;
+        ROS_WARN("SoT is NOT running as CLIK");
 
-    std::cout<<"sot_VelKinCon START!!!"<<std::endl;
+    ROS_INFO("sot_VelKinCon START!!!");
 
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_COMPUTATION_TIME,             &t_elapsed));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LEFT_ARM_POSITION_ERROR,      eLWrist_p.data()));
@@ -262,11 +242,29 @@ void sot_VelKinCon_ctrl::iDyn3Model()
     joint_sensor_names.push_back("r_ankle_joint");
     waist_link_name = "Waist";
 
-    if (!coman_model.initFile(coman_model_folder))
-      std::cout<<"Failed to parse urdf robot model"<<std::endl;
 
-    if (!kdl_parser::treeFromUrdfModel(coman_model, coman_tree))
-      std::cout<<"Failed to construct kdl tree"<<std::endl;
+    std::string coman_model_folder = ros::package::getPath("coman_urdf") + "/urdf/coman.urdf";
+    coman_model.reset(new urdf::Model());
+    if (!coman_model->initFile(coman_model_folder))
+      ROS_ERROR("Failed to parse URDF robot model!");
+    else
+    {
+        std::string path_to_srdf = ros::package::getPath("coman_srdf") + "/srdf/coman.srdf";
+        coman_srdf.reset(new srdf::Model());
+        if(!coman_srdf->initFile(*coman_model.get(), path_to_srdf))
+            ROS_ERROR("Failed to parse SRDF robot model!");
+        else
+        {
+            coman_robot_model.reset(new robot_model::RobotModel(coman_model, coman_srdf));
+            std::ostringstream robot_info;
+            coman_robot_model->printModelInfo(robot_info);
+            ROS_INFO(robot_info.str().c_str());
+        }
+    }
+
+
+    if (!kdl_parser::treeFromUrdfModel(*coman_model.get(), coman_tree))
+      ROS_ERROR("Failed to construct kdl tree!");
 
     // Here the iDyn3 model of the robot is generated
     coman_iDyn3.constructor(coman_tree, joint_sensor_names, waist_link_name);
@@ -277,7 +275,7 @@ void sot_VelKinCon_ctrl::iDyn3Model()
     yarp::sig::Vector qMin; qMin.resize(nJ,0.0);
 
     std::map<std::string, boost::shared_ptr<urdf::Joint> >::iterator i;
-    for(i = coman_model.joints_.begin(); i != coman_model.joints_.end(); ++i) {
+    for(i = coman_model->joints_.begin(); i != coman_model->joints_.end(); ++i) {
         int jIndex = coman_iDyn3.getDOFIndex(i->first);
         if(jIndex != -1) {
             qMax[jIndex] = i->second->limits->upper;
@@ -289,7 +287,7 @@ void sot_VelKinCon_ctrl::iDyn3Model()
     coman_iDyn3.setJointBoundMin(qMin);
 
     yarp::sig::Vector tauMax; tauMax.resize(nJ,1.0);
-    for(i = coman_model.joints_.begin(); i != coman_model.joints_.end(); ++i) {
+    for(i = coman_model->joints_.begin(); i != coman_model->joints_.end(); ++i) {
         int jIndex = coman_iDyn3.getDOFIndex(i->first);
         if(jIndex != -1) {
             tauMax[jIndex] = i->second->limits->effort;
@@ -302,10 +300,7 @@ void sot_VelKinCon_ctrl::iDyn3Model()
     yarp::sig::Vector a; a = coman_iDyn3.getJointTorqueMax();
     std::cout<<"MAX TAU: [ "<<a.toString()<<std::endl;
 
-    std::cout<<"Loaded COMAN in iDyn3!"<<std::endl;
-
-    std::cout<<"#DOFS: "<<coman_iDyn3.getNrOfDOFs()<<std::endl;
-    std::cout<<"#Links: "<<coman_iDyn3.getNrOfLinks()<<std::endl;
+    ROS_INFO("Loaded COMAN in iDyn3!");
 }
 
 void sot_VelKinCon_ctrl::setControlledKinematicChainsLinkIndex()
@@ -320,44 +315,48 @@ void sot_VelKinCon_ctrl::setControlledKinematicChainsLinkIndex()
     right_leg_LinkIndex = coman_iDyn3.getLinkIndex(right_leg_name);
     left_leg_LinkIndex = coman_iDyn3.getLinkIndex(left_leg_name);
     if(right_arm_LinkIndex == -1)
-        std::cout << "Failed to get link index for right arm" << std::endl;
+        ROS_ERROR("Failed to get link index for right arm");
     if(left_arm_LinkIndex == -1)
-        std::cout << "Failed to get link index for left arm" << std::endl;
+        ROS_ERROR("Failed to get link index for left arm");
     if(waist_LinkIndex == -1)
-        std::cout << "Failed to get link index for Waist" << std::endl;
+        ROS_ERROR("Failed to get link index for Waist");
     if(right_leg_LinkIndex == -1)
-        std::cout << "Failed to get link index for right leg" << std::endl;
+        ROS_ERROR("Failed to get link index for right leg");
     if(left_leg_LinkIndex == -1)
-        std::cout << "Failed to get link index for left leg" << std::endl;
+        ROS_ERROR("Failed to get link index for left leg");
 }
 
 void sot_VelKinCon_ctrl::setControlledKinematicChainsJointNumbers()
 {
-    std::cout<<"Right Arm joint indices: \n";
+    ROS_INFO("Right Arm joint indices:");
     BOOST_FOREACH(std::string joint_name, right_arm_joint_names){
         std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
         right_arm_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
     }
     std::cout<<std::endl;
-    std::cout<<"Left Arm joint indices: \n";
+
+    ROS_INFO("Left Arm joint indices:");
     BOOST_FOREACH(std::string joint_name, left_arm_joint_names){
         std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
         left_arm_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
     }
     std::cout<<std::endl;
-    std::cout<<"Waist joint indices: \n";
+
+    ROS_INFO("Waist joint indices:");
     BOOST_FOREACH(std::string joint_name, torso_joint_names){
         std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
         waist_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
     }
     std::cout<<std::endl;
-    std::cout<<"Right Leg joint indices: \n";
+
+    ROS_INFO("Right Leg joint indices:");
     BOOST_FOREACH(std::string joint_name, right_leg_joint_names){
         std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
         right_leg_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
     }
     std::cout<<std::endl;
-    std::cout<<"Left Leg joint indices: \n";
+
+    ROS_INFO("Left Leg joint indices:");
     BOOST_FOREACH(std::string joint_name, left_leg_joint_names){
         std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
         left_leg_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
@@ -379,36 +378,22 @@ yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
     waist_left_arm_joint_numbers.insert(waist_left_arm_joint_numbers.end(), left_arm_joint_numbers.begin(), left_arm_joint_numbers.end());
     waist_right_arm_joint_numbers.insert(waist_right_arm_joint_numbers.end(), right_arm_joint_numbers.begin(), right_arm_joint_numbers.end());
 
-    std::cout<<"index weight waist_left_arm: ";
     for(unsigned int i = 0; i < waist_left_arm_joint_numbers.size(); ++i)
-    {
         w[waist_left_arm_joint_numbers[i]]  *= (double)(waist_left_arm_joint_numbers.size() - i);
-        std::cout<<(double)(waist_left_arm_joint_numbers.size() - i)<<" ";
-    }
-    std::cout<<std::endl;
 
-    std::cout<<"index weight waist_right_arm: ";
     for(unsigned int i = 0; i < waist_right_arm_joint_numbers.size(); ++i)
-    {
         w[waist_right_arm_joint_numbers[i]] *= (double)(waist_right_arm_joint_numbers.size() - i);
-        std::cout<<(double)(waist_right_arm_joint_numbers.size() - i)<<" ";
-    }
-    std::cout<<std::endl;
 
-    std::cout<<"index weight waist: ";
     for(unsigned int i = 0; i < waist_joint_numbers.size(); ++i) {
         w[waist_joint_numbers[i]] = sqrt(w[waist_joint_numbers[i]]);
         w[waist_joint_numbers[i]] *= w_torso_weight;
-        std::cout<<w_torso_weight<<" ";
     }
-    std::cout<<std::endl;
 
     w = w/(qMax-qMin);
     for(unsigned int j = 0; j < w.size(); ++j)
         w[j] = fabs(w[j]);
 
-
-    std::cout<<"W: "<<w.toString()<<std::endl;
+    ROS_INFO("W: [ %s ]", w.toString().c_str());
     return w;
 }
 
@@ -446,7 +431,7 @@ if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE) {
         worldT(0,3) = 0.0;
         worldT(1,3) = 0.0;
 
-//        std::cout<<"World Base Pose: "<<std::endl; cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
+        //ROS_INFO("World Base Pose: "); cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
         coman_iDyn3.setWorldBasePose(worldT);
         coman_iDyn3.computePositions();
     }
@@ -556,23 +541,23 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     yarp::sig::Matrix JRWrist;
     if(!coman_iDyn3.getJacobian(right_arm_LinkIndex,JRWrist))
-        std::cout << "Error computing Jacobian for Right Wrist" << std::endl;
+        ROS_ERROR("Error computing Jacobian for Right Wrist");
     JRWrist = JRWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
     yarp::sig::Matrix JLWrist;
     if(!coman_iDyn3.getJacobian(left_arm_LinkIndex,JLWrist))
-        std::cout << "Error computing Jacobian for Left Wrist" << std::endl;
+        ROS_ERROR("Error computing Jacobian for Left Wrist");
     JLWrist = JLWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
     yarp::sig::Matrix JSwingFoot; // for now, SwingFoot is Left
     if(!coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot,true))
-        std::cout << "Error computing Jacobian for Left Foot" << std::endl;
+        ROS_ERROR("Error computing Jacobian for Left Foot");
 
     yarp::sig::Matrix JCoM;
     //
     coman_iDyn3.setFloatingBaseLink(support_foot_LinkIndex);
     if(!coman_iDyn3.getCOMJacobian(JCoM))
-        std::cout << "Error computing CoM Jacobian" << std::endl;
+        ROS_ERROR("Error computing CoM Jacobian");
     coman_iDyn3.setFloatingBaseLink(waist_LinkIndex);
     JCoM = JCoM.removeCols(0,6);    // remove floating base
     JCoM = JCoM.removeRows(3,3);    // remove orientation
@@ -625,15 +610,17 @@ if(use_3_stacks) {
     **/
     yarp::sig::Vector eq = (q_ref - q);
 
-    gradientGq = getGravityCompensationGradient();
+    yarp::sig::Matrix W(coman_iDyn3.getJointTorqueMax().size(), coman_iDyn3.getJointTorqueMax().size());
+    W.eye();
+
+    if(mineffort_weight_normalization) {
+	    for(unsigned int i = 0; i < coman_iDyn3.getJointTorqueMax().size(); ++i)
+	        W(i,i) = 1.0 / coman_iDyn3.getJointTorqueMax()[i];
+	}
+
+    gradientGq = getGravityCompensationGradient(W);
     yarp::sig::Matrix gGradient(1, eq.size());
     gGradient.setRow(0, gradientGq);
-
-    // do we want to normalize the gravity gradient?
-    if(mineffort_weight_normalization) {
-    for(unsigned int i = 0; i < gGradient.cols(); ++i)
-        gGradient(0,i) = -1.0*gGradient(0,i)/coman_iDyn3.getJointTorqueMax()[i];
-    }
 
     yarp::sig::Matrix F;
     yarp::sig::Vector f;
@@ -686,7 +673,7 @@ if(use_3_stacks) {
     }
 
     if(!control_computed) {
-        std::cout << "Error computing control" << std::endl;
+        ROS_ERROR("Error computing control");
     }
     return control_computed;
 }
@@ -726,12 +713,11 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const yarp::s
 }
 
 /** compute gradient of an effort (due to gravity) cost function */
-yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
+yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient(const yarp::sig::Matrix& W)
 {
-    //std::cout << "Computing gradient...";
-    double start = yarp::os::Time::now();
+    //double start = yarp::os::Time::now();
     /// cost function is tau_g^t*tau_g
-    double C_g_q = yarp::math::dot(tau_gravity,tau_gravity);
+    double C_g_q = yarp::math::dot(tau_gravity, W*tau_gravity);
     static yarp::sig::Vector gradient(coman_iDyn3.getNrOfDOFs(),0.0);
     static yarp::sig::Vector deltas(coman_iDyn3.getNrOfDOFs(),0.0);
     for(unsigned int i = 0; i < gradient.size(); ++i)
@@ -740,12 +726,13 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
         const double h = 1E-3;
         deltas[i] = h;
         yarp::sig::Vector tau_gravity_q = getGravityCompensationTorque(q+deltas);
-        double C_g_q_h = yarp::math::dot(tau_gravity_q,tau_gravity_q);
+
+        double C_g_q_h = yarp::math::dot(tau_gravity_q, W*tau_gravity_q);
         gradient[i] = (C_g_q - C_g_q_h)/h;
         deltas[i] = 0;
     }
 
-    double elapsed = yarp::os::Time::now() - start;
-    //std::cout << " took " << elapsed << "ms" << std::endl;
+    //double elapsed = yarp::os::Time::now() - start;
+    //ROS_WARN(" took %f ms", elapsed);
     return gradient;
 }

@@ -19,6 +19,12 @@ FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(paramHelp REQUIRED)
 FIND_PACKAGE(kdl_codyco REQUIRED)
 
+FIND_PACKAGE(roslib REQUIRED)
+FIND_PACKAGE(rospack REQUIRED)
+FIND_PACKAGE(rosconsole REQUIRED)
+FIND_PACKAGE(srdfdom REQUIRED)
+FIND_PACKAGE(moveit_core REQUIRED)
+
 ExternalProject_Add(qpOASES-ext GIT_REPOSITORY https://github.com/asherikov/qpOASES.git
                             PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
                             INSTALL_COMMAND "")
@@ -49,7 +55,9 @@ ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(sot_VelKinCon_ctrl cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser
+TARGET_LINK_LIBRARIES(sot_VelKinCon_ctrl ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+                      cartesian_utils
+                      ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} qpOASES)
 TARGET_LINK_LIBRARIES(sot_VelKinCon sot_VelKinCon_ctrl cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})

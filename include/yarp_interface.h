@@ -5,6 +5,8 @@
 #include <yarp/sig/all.h>
 #include <yarp/dev/all.h>
 #include <iCub/iDynTree/DynTree.h>
+#include "sot_VelKinCon_constants.h"
+#include <ros/ros.h>
 
 #define LOCAL_FRAME_UPPER_BODY "world"
 #define LOCAL_FRAME_LOWER_BODY "world"
