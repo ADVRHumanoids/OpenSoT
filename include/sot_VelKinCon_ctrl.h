@@ -89,6 +89,10 @@ namespace wb_sot {
 
          // how much time did it take to execute run()?
          double t_elapsed;
+
+         // the gradient of the gravity vector
+         yarp::sig::Vector gradientGq;
+
          yarp::sig::Vector eRWrist_p;
          yarp::sig::Vector eRWrist_o;
          yarp::sig::Vector eLWrist_p;

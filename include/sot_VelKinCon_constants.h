@@ -60,7 +60,7 @@ static const paramHelp::ParamLowerBound<int> SOT_QPOASES_NWSR_BOUND(ParamLowerBo
 // *** IDs of all the module streaming parameters
 enum sot_VelKinCon_ParamId {
 // ***************************************** MONITOR PARAMETERS *****************************************************************
-    PARAM_ID_COMPUTATION_TIME,
+    PARAM_ID_COMPUTATION_TIME,           PARAM_ID_GRAD_G_Q,
     PARAM_ID_LEFT_ARM_POSITION_ERROR,    PARAM_ID_LEFT_ARM_ORIENTATION_ERROR,
     PARAM_ID_RIGHT_ARM_POSITION_ERROR,   PARAM_ID_RIGHT_ARM_ORIENTATION_ERROR,
     PARAM_ID_SWING_FOOT_POSITION_ERROR,  PARAM_ID_SWING_FOOT_ORIENTATION_ERROR,
@@ -97,6 +97,18 @@ enum sot_VelKinCon_last_stack_type {
     LAST_STACK_TYPE_LINEAR_GRAVITY_GRADIENT
 };
 
+enum sot_VelKinCon_postural_weight_strategy {
+    // postural uses Identity weight matrix
+    POSTURAL_WEIGHT_STRATEGY_IDENTITY,
+    /* 1 postural uses weight which lets distal joints move further
+       away. The weight is normalized w.r.t. joint limits*/
+    POSTURAL_WEIGHT_STRATEGY_DISTAL,
+    // diag(grad_g(q))
+    POSTURAL_WEIGHT_STRATEGY_DIAG_GRAD_G,
+    // postural uses joint-space Inertia matrix
+    POSTURAL_WEIGHT_STRATEGY_JOINT_SPACE_INERTIA
+};
+
 
 // ******************************************************************************************************************************
 // ****************************************** DESCRIPTION OF ALL THE MODULE PARAMETERS ******************************************
@@ -106,6 +118,7 @@ const ParamProxyInterface *const sot_VelKinCon_ParamDescr[PARAM_ID_SIZE] =
 //                          NAME                                   ID                                           SIZE         CONSTRAINTS                            I/O ACCESS        DEFAULT VALUE                                          DESCRIPTION
 // ************************************************* MONITOR PARAMETERS ****************************************************************************************************************************************************************************************************************************
 new ParamProxyBasic<double>("t_elapsed",                           PARAM_ID_COMPUTATION_TIME,                    1,                                               PARAM_MONITOR,    &SOT_DEFAULT_ELAPSED,                                    "Time taken by each invocation of run()"),
+new ParamProxyBasic<double>("gradientGq",                          PARAM_ID_GRAD_G_Q,                            29,                                              PARAM_MONITOR,    NULL,                                                    "Gradient of g(q)"),
 new ParamProxyBasic<double>("eLWrist_p",                           PARAM_ID_LEFT_ARM_POSITION_ERROR,             3,                                               PARAM_MONITOR,    SOT_DEFAULT_ERROR.data(),                                "Position error of left arm"),
 new ParamProxyBasic<double>("eLWrist_o",                           PARAM_ID_LEFT_ARM_ORIENTATION_ERROR,          3,                                               PARAM_MONITOR,    SOT_DEFAULT_ERROR.data(),                                "Orientation error of left arm"),
 new ParamProxyBasic<double>("eRWrist_p",                           PARAM_ID_RIGHT_ARM_POSITION_ERROR,            3,                                               PARAM_MONITOR,    SOT_DEFAULT_ERROR.data(),                                "Position error of right arm"),
@@ -119,8 +132,8 @@ new ParamProxyBasic<double>("max_joint_velocity",                  PARAM_ID_MAX_
 new ParamProxyBasic<double>("orientation_error_gain",              PARAM_ID_ORIENTATION_ERROR_GAIN,              1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_ORIENTATION_ERROR_GAIN,                     "the orientation gain is used to weight orientation error over position eRWrist = yarp::math::cat(eRWrist_p,-ORIENTATION_ERROR_GAIN*eRWrist_o);"),
 new ParamProxyBasic<int>("last_stack_type",                        PARAM_ID_LAST_STACK_TYPE,                     1,        &SOT_LAST_STACK_TYPE_BOUNDS,           PARAM_IN_OUT,     &SOT_DEFAULT_LAST_STACK_TYPE,                            "type of last stack. It is an enum, with values 0: postural (A=I, b=(q-q_ref)) 1: postural and gravity gradient (A=[I;grad_g(q)], b=[q-q_ref;0]) 2: (gravity torque) minimum effort (A=I, b=grad_g(q)^T) 3: postural and minimum effort (wrt gravity) (A=[I;I], b =[q-q_ref;grad_g(q)^T])"),
 new ParamProxyBasic<int>("postural_weight_strategy",               PARAM_ID_POSTURAL_WEIGHT_STRATEGY,            1,        &SOT_POSTURAL_WEIGHT_STRATEGY_BOUNDS,  PARAM_IN_OUT,     &SOT_DEFAULT_POSTURAL_WEIGHT_STRATEGY,                   "postural stack weight strategy. It is an enum, with values 0: postural uses Identity weight matrix 1: postural uses weight which lets distal joints move further away. The weight is normalized w.r.t. joint limits 2: postural uses diag(grad_g(q)) 3: postural uses joint-space Inertia matrix"),
-new ParamProxyBasic<double>("postural_weight_coefficient",         PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,         1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_POSTURAL_WEIGHT_COEFFICIENT,                "postural weight coefficient. It is a scalar multiplying the postural weight matrix. Especially important when using last_stack_type 1 and 3"),
-new ParamProxyBasic<double>("mineffort_weight_coefficient",        PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,        1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_MINEFFORT_WEIGHT_COEFFICIENT,               "mineffort weight coefficient. It is a scalar multiplying the mineffort weight matrix. Especially important when using last_stack_type 1 and 3"),
+new ParamProxyBasic<double>("postural_weight_coefficient",         PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,         1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_POSTURAL_WEIGHT_COEFFICIENT,                "postural weight coefficient. It is a scalar multiplying the postural weight gradient. Especially important when using last_stack_type 1 and 3"),
+new ParamProxyBasic<double>("mineffort_weight_coefficient",        PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,        1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_MINEFFORT_WEIGHT_COEFFICIENT,               "mineffort weight coefficient. It is a scalar multiplying the mineffort weight gradient. Especially important when using last_stack_type 1 and 3"),
 new ParamProxyBasic<bool>("mineffort_weight_normalization",        PARAM_ID_MINEFFORT_WEIGHT_NORMALIZATION,      1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_MINEFFORT_WEIGHT_NORMALIZATION,             "mineffort weight normalization. If true, normalize the gradient with the torque limits"),
 new ParamProxyBasic<double>("W_torso_weight",                      PARAM_ID_W_TORSO_WEIGHT,                      1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_W_TORSO_WEIGHT,                             "what weight the torso should have in Postural Weight Scheme 1"),
 new ParamProxyBasic<int>("qpOases_nWSR0",                          PARAM_ID_QPOASES_NWSR0,                       1,        &SOT_QPOASES_NWSR_BOUND,               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_NWSR,                               "qpOases Maximum Number of Working Set recalculations for the first task. If too low, the QP can fail to converge."),

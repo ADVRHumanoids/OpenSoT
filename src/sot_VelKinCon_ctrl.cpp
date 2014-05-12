@@ -43,6 +43,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     left_arm_pos_ref(3, 0.0),
     worldT(4,4),
     t_elapsed(0.0),
+    gradientGq(1,0.0),
     eRWrist_p(3, 0.0),
     eRWrist_o(3, 0.0),
     eLWrist_p(3, 0.0),
@@ -62,6 +63,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
 
     int nJ = coman_iDyn3.getNrOfDOFs();
 
+    gradientGq.resize(nJ);
     Q_postural.resize(nJ, nJ);
     Q_postural.eye();
 //    yarp::sig::Vector qMax = coman_iDyn3.getJointBoundMax();
@@ -622,9 +624,10 @@ if(use_3_stacks) {
     *
     **/
     yarp::sig::Vector eq = (q_ref - q);
-    yarp::sig::Vector eGradient = getGravityCompensationGradient();
+
+    gradientGq = getGravityCompensationGradient();
     yarp::sig::Matrix gGradient(1, eq.size());
-    gGradient.setRow(0, eGradient);
+    gGradient.setRow(0, gradientGq);
 
     // do we want to normalize the gravity gradient?
     if(mineffort_weight_normalization) {
@@ -638,27 +641,27 @@ if(use_3_stacks) {
 
     if(last_stack_type == LAST_STACK_TYPE_POSTURAL) {
         F = Q_postural;
-        f = eq;
+        f = postural_weight_coefficient*eq;
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_GRAVITY_GRADIENT) {
         F = yarp::math::pile(Q_postural, gGradient);
-        f = yarp::math::cat(eq, zero);
+        f = yarp::math::cat(postural_weight_coefficient*eq, zero);
         qpOasesPosturalHessianType = qpOASES::HST_SEMIDEF;
     } else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT) {
         unsigned int nJ = coman_iDyn3.getNrOfDOFs();
         F.resize(nJ,nJ); F.eye();
-        f = eGradient;
+        f = mineffort_weight_coefficient*gradientGq;
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT) {
         unsigned int nJ = coman_iDyn3.getNrOfDOFs();
         yarp::sig::Matrix I; I.resize(nJ,nJ); I.eye();
         F = yarp::math::pile(I, I);
-        f = yarp::math::cat(eq, eGradient);
+        f = yarp::math::cat(postural_weight_coefficient*eq, mineffort_weight_coefficient*gradientGq);
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     } else { // last_stack_type == LAST_STACK_TYPE_LINEAR_GRAVITY_GRADIENT
         unsigned int nJ = coman_iDyn3.getNrOfDOFs();
         F.resize(nJ,nJ); F.zero();
-        f = eGradient;
+        f = gradientGq;
         qpOasesPosturalHessianType = qpOASES::HST_ZERO;
     }
 
