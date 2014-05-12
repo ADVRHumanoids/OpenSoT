@@ -8,7 +8,7 @@ find_package(YARP REQUIRED)
 list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
 include(YarpInstallationHelpers)	
 
-set(appname sot_velkincon)
+set(appname sot_VelKinCon)
 
 file(GLOB conf ${CMAKE_CURRENT_SOURCE_DIR}/conf/*.ini)
 file(GLOB scopes ${CMAKE_CURRENT_SOURCE_DIR}/scopes/*.xml)

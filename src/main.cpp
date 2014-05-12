@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
     yarp::os::ResourceFinder rf;
     rf.setVerbose(true);
     rf.setDefaultConfigFile("sot_velkincon.ini");         //default config file name.
-    rf.setDefaultContext("sot_velkincon"); //when no parameters are given to the module this is the default context
+    rf.setDefaultContext(MODULE_NAME); //when no parameters are given to the module this is the default context
     rf.configure(argc,argv);
 
     if (rf.check("help"))
