@@ -34,12 +34,14 @@ void cartesian_utils::computeCartesianError(yarp::sig::Matrix &T,
     position_error.resize(3, 0.0);
     orientation_error.resize(3, 0.0);
 
-    KDL::Frame x(KDL::Rotation::RPY(0.0, 0.0, 0.0), KDL::Vector(0.0, 0.0, 0.0)); // ee pose
+    KDL::Frame x; // ee pose
+    x.Identity();
     fromYARPMatrixtoKDLFrame(T, x);
     quaternion q;
     x.M.GetQuaternion(q.x, q.y, q.z, q.w);
 
-    KDL::Frame xd(KDL::Rotation::RPY(0.0, 0.0, 0.0), KDL::Vector(0.0, 0.0, 0.0)); // ee desired pose
+    KDL::Frame xd; // ee desired pose
+    xd.Identity();
     fromYARPMatrixtoKDLFrame(Td, xd);
     quaternion qd;
     xd.M.GetQuaternion(qd.x, qd.y, qd.z, qd.w);
