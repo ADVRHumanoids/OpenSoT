@@ -576,12 +576,16 @@ bool sot_VelKinCon_ctrl::controlLaw()
     *
     **/
     yarp::sig::Vector eq = (q_ref - q);
-    yarp::sig::Matrix gGradient(1, eq.size());
-    gGradient.setRow(0, getGravityCompensationGradient());
-    for(unsigned int i = 0; i < gGradient.cols(); ++i)
-        gGradient(0,i) = -1.0*gGradient(0,i)/coman_iDyn3.getJointTorqueMax()[i];
-    yarp::sig::Matrix F = yarp::math::pile(Q_postural, gGradient);
-    yarp::sig::Vector f = yarp::math::cat(eq, zero);
+    yarp::sig::Vector gGradient;
+    //yarp::sig::Matrix gGradient(1, eq.size());
+    gGradient = getGravityCompensationGradient();
+    for(unsigned int i = 0; i < gGradient.size(); ++i)
+        gGradient(i) = 0.7*gGradient(i);
+
+    yarp::sig::Matrix I(Q_postural.rows(), Q_postural.cols());
+    I.eye();
+    yarp::sig::Matrix F = yarp::math::pile(Q_postural, I);
+    yarp::sig::Vector f = yarp::math::cat(eq, gGradient);
 
     bool control_computed = false;
 #if SET_3_TASKS
@@ -646,9 +650,14 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const yarp::s
 /** compute gradient of an effort (due to gravity) cost function */
 yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
 {
+    yarp::sig::Matrix W(coman_iDyn3.getJointTorqueMax().size(), coman_iDyn3.getJointTorqueMax().size());
+    W.eye();
+    for(unsigned int i = 0; i < coman_iDyn3.getJointTorqueMax().size(); ++i)
+        W(i,i) = 1.0 / coman_iDyn3.getJointTorqueMax()[i];
+
     //double start = yarp::os::Time::now();
     /// cost function is tau_g^t*tau_g
-    double C_g_q = yarp::math::dot(tau_gravity,tau_gravity);
+    double C_g_q = yarp::math::dot(tau_gravity, W*tau_gravity);
     static yarp::sig::Vector gradient(coman_iDyn3.getNrOfDOFs(),0.0);
     static yarp::sig::Vector deltas(coman_iDyn3.getNrOfDOFs(),0.0);
     for(unsigned int i = 0; i < gradient.size(); ++i)
@@ -657,7 +666,8 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
         const double h = 1E-3;
         deltas[i] = h;
         yarp::sig::Vector tau_gravity_q = getGravityCompensationTorque(q+deltas);
-        double C_g_q_h = yarp::math::dot(tau_gravity_q,tau_gravity_q);
+
+        double C_g_q_h = yarp::math::dot(tau_gravity_q, W*tau_gravity_q);
         gradient[i] = (C_g_q - C_g_q_h)/h;
         deltas[i] = 0;
     }
