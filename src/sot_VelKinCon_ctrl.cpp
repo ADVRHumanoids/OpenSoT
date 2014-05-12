@@ -625,8 +625,13 @@ if(use_3_stacks) {
     yarp::sig::Vector eGradient = getGravityCompensationGradient();
     yarp::sig::Matrix gGradient(1, eq.size());
     gGradient.setRow(0, eGradient);
+
+    // do we want to normalize the gravity gradient?
+    if(mineffort_weight_normalization) {
     for(unsigned int i = 0; i < gGradient.cols(); ++i)
         gGradient(0,i) = -1.0*gGradient(0,i)/coman_iDyn3.getJointTorqueMax()[i];
+    }
+
     yarp::sig::Matrix F = yarp::math::pile(Q_postural, gGradient);
     yarp::sig::Vector f = yarp::math::cat(eq, zero);
 
