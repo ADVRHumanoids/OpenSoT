@@ -17,6 +17,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const yarp::sig::Vector &e1,
                                     const yarp::sig::Matrix &J2,
                                     const yarp::sig::Vector &eq,
+                                    const qpOASES::HessianType t2HessianType,
                                     const yarp::sig::Vector &qMax,
                                     const yarp::sig::Vector &qMin,
                                     const yarp::sig::Vector &q,
@@ -100,7 +101,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     qpOasesOptionsqp2.setToReliable();
     qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
     qpOasesOptionsqp0.epsRegularisation *= 2E2;
-    QProblem qp2( nj, njTask0+njTask1, HST_POSDEF);
+    QProblem qp2( nj, njTask0+njTask1, t2HessianType);
     qp2.setOptions( qpOasesOptionsqp2 );
 
 
@@ -222,6 +223,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const yarp::sig::Vector &e0,
                                     const yarp::sig::Matrix &J1,
                                     const yarp::sig::Vector &eq,
+                                    qpOASES::HessianType t1HessianType,
                                     const yarp::sig::Vector &qMax,
                                     const yarp::sig::Vector &qMin,
                                     const yarp::sig::Vector &q,
@@ -289,7 +291,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     qpOasesOptionsqp1.setToReliable();
     qpOasesOptionsqp1.enableRegularisation = BT_TRUE;
     qpOasesOptionsqp1.epsRegularisation *= 2E2;
-    QProblem qp1( nj, njTask0, HST_POSDEF);
+    QProblem qp1( nj, njTask0, t1HessianType);
     qp1.setOptions( qpOasesOptionsqp1 );
 
     /** Solve zero QP. **/

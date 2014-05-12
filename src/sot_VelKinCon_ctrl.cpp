@@ -632,14 +632,41 @@ if(use_3_stacks) {
         gGradient(0,i) = -1.0*gGradient(0,i)/coman_iDyn3.getJointTorqueMax()[i];
     }
 
-    yarp::sig::Matrix F = yarp::math::pile(Q_postural, gGradient);
-    yarp::sig::Vector f = yarp::math::cat(eq, zero);
+    yarp::sig::Matrix F;
+    yarp::sig::Vector f;
+    qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
+
+    if(last_stack_type == LAST_STACK_TYPE_POSTURAL) {
+        F = Q_postural;
+        f = eq;
+        qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
+    } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_GRAVITY_GRADIENT) {
+        F = yarp::math::pile(Q_postural, gGradient);
+        f = yarp::math::cat(eq, zero);
+        qpOasesPosturalHessianType = qpOASES::HST_SEMIDEF;
+    } else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT) {
+        unsigned int nJ = coman_iDyn3.getNrOfDOFs();
+        F.resize(nJ,nJ); F.eye();
+        f = eGradient;
+        qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
+    } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT) {
+        unsigned int nJ = coman_iDyn3.getNrOfDOFs();
+        yarp::sig::Matrix I; I.resize(nJ,nJ); I.eye();
+        F = yarp::math::pile(I, I);
+        f = yarp::math::cat(eq, eGradient);
+        qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
+    } else { // last_stack_type == LAST_STACK_TYPE_LINEAR_GRAVITY_GRADIENT
+        unsigned int nJ = coman_iDyn3.getNrOfDOFs();
+        F.resize(nJ,nJ); F.zero();
+        f = eGradient;
+        qpOasesPosturalHessianType = qpOASES::HST_ZERO;
+    }
 
     bool control_computed = false;
     if(use_3_stacks) {
         control_computed = task_solver::computeControlHQP(JCoM,eCoM,
                                                           JEe, eEe,
-                                                          Q_postural, eGradient,
+                                                          F, f, qpOasesPosturalHessianType,
                                                           coman_iDyn3.getJointBoundMax(),
                                                           coman_iDyn3.getJointBoundMin(),
                                                           q, max_joint_velocity,
@@ -647,7 +674,7 @@ if(use_3_stacks) {
                                                           dq_ref);
     } else {
         control_computed = task_solver::computeControlHQP(JEe, eEe,
-                                                         F, f,
+                                                         F, f, qpOasesPosturalHessianType,
                                                          coman_iDyn3.getJointBoundMax(),
                                                          coman_iDyn3.getJointBoundMin(),
                                                          q, max_joint_velocity,
