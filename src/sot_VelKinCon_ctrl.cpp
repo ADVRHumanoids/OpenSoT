@@ -576,12 +576,12 @@ bool sot_VelKinCon_ctrl::controlLaw()
     *  (-grad(g(q))/tau_max)dq <-- Min effort
     *
     **/
-    yarp::sig::Vector eq = (q_ref - q);
+    yarp::sig::Vector eq = 0.1*(q_ref - q);
     yarp::sig::Vector gGradient;
     //yarp::sig::Matrix gGradient(1, eq.size());
     gGradient = getGravityCompensationGradient();
     for(unsigned int i = 0; i < gGradient.size(); ++i)
-        gGradient(i) = 0.7*gGradient(i);
+        gGradient(i) = 1.0*gGradient(i);
 
     yarp::sig::Matrix I(Q_postural.rows(), Q_postural.cols());
     I.eye();
@@ -654,7 +654,7 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient()
     yarp::sig::Matrix W(coman_iDyn3.getJointTorqueMax().size(), coman_iDyn3.getJointTorqueMax().size());
     W.eye();
     for(unsigned int i = 0; i < coman_iDyn3.getJointTorqueMax().size(); ++i)
-        W(i,i) = 1.0 / coman_iDyn3.getJointTorqueMax()[i];
+        W(i,i) = 1.0 / (coman_iDyn3.getJointTorqueMax()[i]*coman_iDyn3.getJointTorqueMax()[i]);
 
     //double start = yarp::os::Time::now();
     /// cost function is tau_g^t*tau_g
