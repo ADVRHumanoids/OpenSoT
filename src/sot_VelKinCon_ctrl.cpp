@@ -49,6 +49,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const double period, int argc, char *argv
 {
     iDyn3Model();
     setJointNames();
+
     setControlledKinematicChainsLinkIndex();
     setControlledKinematicChainsJointNumbers();
 
