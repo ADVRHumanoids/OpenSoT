@@ -30,7 +30,7 @@ void cartesian_utils::computeCartesianError(yarp::sig::Matrix &T,
                                             yarp::sig::Matrix &Td,
                                             yarp::sig::Vector& position_error,
                                             yarp::sig::Vector& orientation_error)
-{
+{   
     position_error.resize(3, 0.0);
     orientation_error.resize(3, 0.0);
 
@@ -45,6 +45,10 @@ void cartesian_utils::computeCartesianError(yarp::sig::Matrix &T,
     fromYARPMatrixtoKDLFrame(Td, xd);
     quaternion qd;
     xd.M.GetQuaternion(qd.x, qd.y, qd.z, qd.w);
+
+    //This is needed to move along the short path in the quaternion error
+    if(quaternion::dot(q, qd) < 0.0)
+        q = q.operator *(-1.0); //che cagata...
 
     KDL::Vector xerr_p; // Cartesian position error
     KDL::Vector xerr_o; // Cartesian orientation error

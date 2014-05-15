@@ -36,6 +36,23 @@ public:
 
     }
 
+    static double dot(const quaternion& a, const quaternion& b)
+    {
+        return a.w*b.w + a.x*b.x + a.y*b.y + a.z*b.z;
+    }
+
+    quaternion operator*(const double a)
+    {
+        quaternion q(x, y, z, w);
+
+        q.x *= a;
+        q.y *= a;
+        q.z *= a;
+        q.w *= a;
+
+        return q;
+    }
+
     KDL::Rotation skew()
     {
         KDL::Rotation s(0.0,  -z,   y,

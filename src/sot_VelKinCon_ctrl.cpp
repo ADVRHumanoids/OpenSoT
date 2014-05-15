@@ -10,6 +10,7 @@
 #include "cartesian_utils.h"
 #include "sot_VelKinCon_constants.h"
 
+
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
 #define MilliSecToSec(X) (X/1000.0)
@@ -55,6 +56,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
 {
     iDyn3Model();
     setJointNames();
+
     setControlledKinematicChainsLinkIndex();
     setControlledKinematicChainsJointNumbers();
 
@@ -615,7 +617,7 @@ if(use_3_stacks) {
 
     if(mineffort_weight_normalization) {
 	    for(unsigned int i = 0; i < coman_iDyn3.getJointTorqueMax().size(); ++i)
-	        W(i,i) = 1.0 / coman_iDyn3.getJointTorqueMax()[i];
+	        W(i,i) = 1.0 / (coman_iDyn3.getJointTorqueMax()[i]*coman_iDyn3.getJointTorqueMax()[i]);
 	}
 
     gradientGq = getGravityCompensationGradient(W);
