@@ -132,7 +132,20 @@ class paramsTuner:
 
     def expanderContainsDouble(self, widget):
         try:
-            tentativeSpinButton = widget.get_children()[0].get_children()[0].get_children()[1]
+            tentativeWidgetsList = widget.get_children()[0].get_children()[0].get_children()
+
+            tentativeSpinButtonBounded = False
+            if(len(tentativeWidgetsList)>1):
+                tentativeSpinButtonBounded = tentativeWidgetsList[1]
+
+            tentativeSpinButtonUnbounded = tentativeWidgetsList[0]
+
+
+            if type(tentativeSpinButtonUnbounded) is Gtk.SpinButton:
+                tentativeSpinButton = tentativeSpinButtonUnbounded
+            elif type(tentativeSpinButtonBounded) is Gtk.SpinButton:
+                tentativeSpinButton = tentativeSpinButtonBounded
+
             if type(tentativeSpinButton) is Gtk.SpinButton:
                 step_increment = tentativeSpinButton.get_adjustment().get_step_increment()
                 if numpy.round(step_increment) != step_increment:
@@ -143,7 +156,20 @@ class paramsTuner:
 
     def expanderContainsInt(self, widget):
         try:
-            tentativeSpinButton = widget.get_children()[0].get_children()[0].get_children()[1]
+            tentativeWidgetsList = widget.get_children()[0].get_children()[0].get_children()
+
+            tentativeSpinButtonBounded = False
+            if(len(tentativeWidgetsList)>1):
+                tentativeSpinButtonBounded = tentativeWidgetsList[1]
+
+            tentativeSpinButtonUnbounded = tentativeWidgetsList[0]
+
+
+            if type(tentativeSpinButtonUnbounded) is Gtk.SpinButton:
+                tentativeSpinButton = tentativeSpinButtonUnbounded
+            elif type(tentativeSpinButtonBounded) is Gtk.SpinButton:
+                tentativeSpinButton = tentativeSpinButtonBounded
+
             if type(tentativeSpinButton) is Gtk.SpinButton:
                 step_increment = tentativeSpinButton.get_adjustment().get_step_increment()
                 if numpy.round(step_increment) == step_increment:
@@ -165,8 +191,10 @@ class paramsTuner:
                 spinbutton = self.expanderContainsDouble(obj)
                 if spinbutton:
                     # @TODO we should cycle here
+                    print "value for", obj.get_label(), "is", self.getDouble(obj.get_label())
                     spinbutton.set_value(self.getDouble(obj.get_label()))
                     print "Initializing Double SpinBox",obj.get_label()
+                    print "value for spinbutton is now ", spinbutton.get_value()
 
                 spinbutton = self.expanderContainsInt(obj)
                 if spinbutton:

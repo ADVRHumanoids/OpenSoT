@@ -10,6 +10,9 @@
 #include <math.h>
 #include <assert.h>
 
+#define DEFAULT_UPPER_BOUND 65532.0
+#define DEFAULT_LOWER_BOUND -65532.0
+
 /** creates a yarpscope xml file starting from ParamProxyInterface array */
 const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCon_ParamDescr[], unsigned int size, std::string moduleName);
 
@@ -111,13 +114,20 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
     <property name=\"lower\">" << bilatBounds->lowerBound << "</property>\n\
     <property name=\"upper\">" << bilatBounds->upperBound << "</property>" << std::endl;
 
-                    if(lowerBound != NULL)
+                    else if(lowerBound != NULL)
                         adjustments << "\
-    <property name=\"lower\">" << lowerBound->lowerBound << "</property>" << std::endl;
+    <property name=\"lower\">" << lowerBound->lowerBound << "</property>\n\
+    <property name=\"upper\">" << DEFAULT_UPPER_BOUND << "</property>" << std::endl;
 
-                    if(upperBound != NULL)
+                    else if(upperBound != NULL)
                         adjustments << "\
+    <property name=\"lower\">" << DEFAULT_LOWER_BOUND << "</property>\n\
     <property name=\"upper\">" << upperBound->upperBound << "</property>" << std::endl;
+
+                    else
+                        adjustments << "\
+    <property name=\"lower\">" << DEFAULT_LOWER_BOUND << "</property>\n\
+    <property name=\"upper\">" << DEFAULT_UPPER_BOUND << "</property>" << std::endl;
 
                     adjustments << "\
     <property name=\"step_increment\">0.1</property>\n\
@@ -129,7 +139,9 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                         <object class=\"GtkBox\" id=\"hbox_" << proxy->id + displacement << "\">\n\
                           <property name=\"visible\">True</property>\n\
                           <property name=\"can_focus\">False</property>\n\
-                          <child>\n\
+                          <child>" << std::endl;
+                    if(bilatBounds != NULL || lowerBound != NULL || upperBound != NULL)
+                        main << "\
                             <object class=\"GtkScale\" id=\"scale_" << proxy->id + displacement << "\">\n\
                               <property name=\"width_request\">200</property>\n\
                               <property name=\"visible\">True</property>\n\
@@ -137,8 +149,8 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                               <property name=\"adjustment\">adjustment_" << proxy->id + displacement << "</property>\n\
                               <property name=\"restrict_to_fill_level\">False</property>\n\
                               <property name=\"fill_level\">0</property>\n\
-                              <property name=\"round_digits\">1</property>\n\
-                              <property name=\"digits\">1</property>\n\
+                              <property name=\"round_digits\">2</property>\n\
+                              <property name=\"digits\">2</property>\n\
                               <property name=\"value_pos\">bottom</property>\n\
                             </object>\n\
                             <packing>\n\
@@ -156,7 +168,7 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                               <property name=\"invisible_char\">•</property>\n\
                               <property name=\"input_purpose\">digits</property>\n\
                               <property name=\"adjustment\">adjustment_" << proxy->id + displacement << "</property>\n\
-                              <property name=\"digits\">1</property>\n\
+                              <property name=\"digits\">2</property>\n\
                               <property name=\"snap_to_ticks\">True</property>\n\
                               <property name=\"numeric\">True</property>\n\
                               <property name=\"update_policy\">if-valid</property>\n\
@@ -176,6 +188,35 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                           <property name=\"position\">1</property>\n\
                         </packing>\n\
                       </child>"         << std::endl;
+                            else
+                            main << "\
+                                <object class=\"GtkSpinButton\" id=\"spinbutton_" << proxy->id + displacement << "\">\n\
+                                  <property name=\"width_request\">315</property>\n\
+                                  <property name=\"visible\">True</property>\n\
+                                  <property name=\"can_focus\">True</property>\n\
+                                  <property name=\"invisible_char\">•</property>\n\
+                                  <property name=\"input_purpose\">digits</property>\n\
+                                  <property name=\"adjustment\">adjustment_" << proxy->id + displacement << "</property>\n\
+                                  <property name=\"digits\">2</property>\n\
+                                  <property name=\"snap_to_ticks\">True</property>\n\
+                                  <property name=\"numeric\">True</property>\n\
+                                  <property name=\"update_policy\">if-valid</property>\n\
+                                  <signal name=\"value-changed\" handler=\"onValueChangedDouble\" swapped=\"no\"/>\n\
+                                </object>\n\
+                                <packing>\n\
+                                  <property name=\"expand\">False</property>\n\
+                                  <property name=\"fill\">True</property>\n\
+                                  <property name=\"position\">1</property>\n\
+                                </packing>\n\
+                              </child>\n\
+                            </object>\n\
+                            <packing>\n\
+                              <property name=\"expand\">False</property>\n\
+                              <property name=\"fill\">True</property>\n\
+                              <property name=\"padding\">5</property>\n\
+                              <property name=\"position\">1</property>\n\
+                            </packing>\n\
+                          </child>"         << std::endl;
 
 /*********************** DOUBLE VALUES, MULTIPLE ELEMENTS: SLIDER + SPINBOX **********************/
                 } else if(proxy->size > 1) {
@@ -293,18 +334,26 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                       const paramHelp::ParamUpperBound<int>* upperBound =
                             dynamic_cast<const paramHelp::ParamUpperBound<int>* >(constraints);
 
+
                       if(bilatBounds != NULL)
                           adjustments << "\
-     <property name=\"lower\">" << bilatBounds->lowerBound << "</property>\n\
-     <property name=\"upper\">" << bilatBounds->upperBound << "</property>" << std::endl;
+      <property name=\"lower\">" << bilatBounds->lowerBound << "</property>\n\
+      <property name=\"upper\">" << bilatBounds->upperBound << "</property>" << std::endl;
 
-                      if(lowerBound != NULL)
+                      else if(lowerBound != NULL)
                           adjustments << "\
-     <property name=\"lower\">" << lowerBound->lowerBound << "</property>" << std::endl;
+      <property name=\"lower\">" << lowerBound->lowerBound << "</property>\n\
+      <property name=\"upper\">" << DEFAULT_UPPER_BOUND << "</property>" << std::endl;
 
-                      if(upperBound != NULL)
+                      else if(upperBound != NULL)
                           adjustments << "\
-     <property name=\"upper\">" << upperBound->upperBound << "</property>" << std::endl;
+      <property name=\"lower\">" << DEFAULT_LOWER_BOUND << "</property>\n\
+      <property name=\"upper\">" << upperBound->upperBound << "</property>" << std::endl;
+
+                      else
+                          adjustments << "\
+      <property name=\"lower\">" << DEFAULT_LOWER_BOUND << "</property>\n\
+      <property name=\"upper\">" << DEFAULT_UPPER_BOUND << "</property>" << std::endl;
 
                      adjustments << "\
      <property name=\"step_increment\">1</property>\n\
@@ -316,7 +365,10 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                          <object class=\"GtkBox\" id=\"hbox_" << proxy->id + displacement << "\">\n\
                            <property name=\"visible\">True</property>\n\
                            <property name=\"can_focus\">False</property>\n\
-                           <child>\n\
+                           <child>" << std::endl;
+
+                     if(bilatBounds != NULL || lowerBound != NULL || upperBound != NULL)
+                        main << "\
                              <object class=\"GtkScale\" id=\"scale_" << proxy->id + displacement << "\">\n\
                                <property name=\"width_request\">200</property>\n\
                                <property name=\"visible\">True</property>\n\
@@ -363,6 +415,35 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
                            <property name=\"position\">1</property>\n\
                          </packing>\n\
                        </child>"         << std::endl;
+                      else
+                         main << "\
+                                 <object class=\"GtkSpinButton\" id=\"spinbutton_" << proxy->id + displacement << "\">\n\
+                                   <property name=\"width_request\">90</property>\n\
+                                   <property name=\"visible\">True</property>\n\
+                                   <property name=\"can_focus\">True</property>\n\
+                                   <property name=\"invisible_char\">•</property>\n\
+                                   <property name=\"input_purpose\">digits</property>\n\
+                                   <property name=\"adjustment\">adjustment_" << proxy->id + displacement << "</property>\n\
+                                   <property name=\"digits\">0</property>\n\
+                                   <property name=\"snap_to_ticks\">True</property>\n\
+                                   <property name=\"numeric\">True</property>\n\
+                                   <property name=\"update_policy\">if-valid</property>\n\
+                                   <signal name=\"value-changed\" handler=\"onValueChangedInt\" swapped=\"no\"/>\n\
+                                 </object>\n\
+                                 <packing>\n\
+                                   <property name=\"expand\">False</property>\n\
+                                   <property name=\"fill\">True</property>\n\
+                                   <property name=\"position\">1</property>\n\
+                                 </packing>\n\
+                               </child>\n\
+                             </object>\n\
+                             <packing>\n\
+                               <property name=\"expand\">False</property>\n\
+                               <property name=\"fill\">True</property>\n\
+                               <property name=\"padding\">5</property>\n\
+                               <property name=\"position\">1</property>\n\
+                             </packing>\n\
+                           </child>"         << std::endl;
 
  /*********************** INTEGER VALUES, MULTIPLE ELEMENTS: SLIDER + SPINBOX **********************/
                  } else if(proxy->size > 1) {
