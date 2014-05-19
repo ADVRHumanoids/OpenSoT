@@ -47,12 +47,6 @@ static const paramHelp::ParamBilatBounds<int> SOT_POSTURAL_WEIGHT_STRATEGY_BOUND
 static const paramHelp::ParamLowerBound<int> SOT_QPOASES_NWSR_BOUND(ParamLowerBound<int>(0));
 
 
-static const std::string left_arm = "left_arm";
-static const std::string right_arm = "right_arm";
-static const std::string left_leg = "left_leg";
-static const std::string right_leg = "right_leg";
-static const std::string torso = "torso";
-
 // *** IDs of all the module streaming parameters
 enum sot_VelKinCon_ParamId {
 // ***************************************** MONITOR PARAMETERS *****************************************************************

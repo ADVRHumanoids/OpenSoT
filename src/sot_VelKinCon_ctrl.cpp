@@ -54,13 +54,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     TORSO_IMPEDANCE(_TORSO_IMPEDANCE),
     paramHelper(_ph)
 {
-    iDyn3Model();
-    setJointNames();
-
-    setControlledKinematicChainsLinkIndex();
-    setControlledKinematicChainsJointNumbers();
-
-    int nJ = coman_iDyn3.getNrOfDOFs();
+    int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
 
     gradientGq.resize(nJ);
     Q_postural.resize(nJ, nJ);
@@ -108,15 +102,15 @@ bool sot_VelKinCon_ctrl::threadInit()
 
     updateiDyn3Model(true);
 
-    support_foot_LinkIndex = left_leg_LinkIndex;
-    swing_foot_LinkIndex = right_leg_LinkIndex;
+    support_foot_LinkIndex = idynutils.left_leg.index;
+    swing_foot_LinkIndex = idynutils.right_leg.index;
 
-    right_arm_pos_ref = coman_iDyn3.getPosition(right_arm_LinkIndex);
-    left_arm_pos_ref = coman_iDyn3.getPosition(left_arm_LinkIndex);
+    right_arm_pos_ref = idynutils.coman_iDyn3.getPosition(idynutils.right_arm.index);
+    left_arm_pos_ref = idynutils.coman_iDyn3.getPosition(idynutils.left_arm.index);
 
-    com_pos_ref = coman_iDyn3.getCOM("",support_foot_LinkIndex);
+    com_pos_ref = idynutils.coman_iDyn3.getCOM("",support_foot_LinkIndex);
 
-    swing_foot_pos_ref = coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
+    swing_foot_pos_ref = idynutils.coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
 
     ROS_INFO("Initial Pose Ref left_arm:");   cartesian_utils::printHomogeneousTransform(left_arm_pos_ref);std::cout<<std::endl;
     ROS_INFO("Initial Pose Ref right_arm:");  cartesian_utils::printHomogeneousTransform(right_arm_pos_ref);std::cout<<std::endl;
@@ -220,7 +214,7 @@ void sot_VelKinCon_ctrl::run()
     if(controlLaw())
         move();
 
-    IYarp.sendWorldToBaseLinkPose(worldT);
+    IYarp.sendWorldToBaseLinkPose(idynutils.coman_iDyn3.getWorldBasePose());
 
     t_elapsed = IYarp.toc();
 
@@ -228,137 +222,6 @@ void sot_VelKinCon_ctrl::run()
     paramHelper->sendStreamParams();
     paramHelper->unlock();
 #endif
-}
-
-void sot_VelKinCon_ctrl::iDyn3Model()
-{
-    /// iDyn3 Model creation
-    // Giving name to references for FT sensors and IMU
-    std::vector<std::string> joint_sensor_names;
-    joint_sensor_names.push_back("l_ankle_joint");
-    joint_sensor_names.push_back("r_ankle_joint");
-    waist_link_name = "Waist";
-
-
-    std::string coman_model_folder = ros::package::getPath("coman_urdf") + "/urdf/coman.urdf";
-    coman_model.reset(new urdf::Model());
-    if (!coman_model->initFile(coman_model_folder))
-      ROS_ERROR("Failed to parse URDF robot model!");
-    else
-    {
-        std::string path_to_srdf = ros::package::getPath("coman_srdf") + "/srdf/coman.srdf";
-        coman_srdf.reset(new srdf::Model());
-        if(!coman_srdf->initFile(*coman_model.get(), path_to_srdf))
-            ROS_ERROR("Failed to parse SRDF robot model!");
-        else
-        {
-            coman_robot_model.reset(new robot_model::RobotModel(coman_model, coman_srdf));
-            std::ostringstream robot_info;
-            coman_robot_model->printModelInfo(robot_info);
-            ROS_INFO(robot_info.str().c_str());
-        }
-    }
-
-
-    if (!kdl_parser::treeFromUrdfModel(*coman_model.get(), coman_tree))
-      ROS_ERROR("Failed to construct kdl tree!");
-
-    // Here the iDyn3 model of the robot is generated
-    coman_iDyn3.constructor(coman_tree, joint_sensor_names, waist_link_name);
-    std::cout<<"Loaded COMAN in iDyn3!"<<std::endl;
-
-    int nJ = coman_iDyn3.getNrOfDOFs(); //29
-    yarp::sig::Vector qMax; qMax.resize(nJ,0.0);
-    yarp::sig::Vector qMin; qMin.resize(nJ,0.0);
-
-    std::map<std::string, boost::shared_ptr<urdf::Joint> >::iterator i;
-    for(i = coman_model->joints_.begin(); i != coman_model->joints_.end(); ++i) {
-        int jIndex = coman_iDyn3.getDOFIndex(i->first);
-        if(jIndex != -1) {
-            qMax[jIndex] = i->second->limits->upper;
-            qMin[jIndex] = i->second->limits->lower;
-        }
-    }
-
-    coman_iDyn3.setJointBoundMax(qMax);
-    coman_iDyn3.setJointBoundMin(qMin);
-
-    yarp::sig::Vector tauMax; tauMax.resize(nJ,1.0);
-    for(i = coman_model->joints_.begin(); i != coman_model->joints_.end(); ++i) {
-        int jIndex = coman_iDyn3.getDOFIndex(i->first);
-        if(jIndex != -1) {
-            tauMax[jIndex] = i->second->limits->effort;
-        }
-    }
-    std::cout<<"Setting torque MAX"<<std::endl;
-
-    coman_iDyn3.setJointTorqueBoundMax(tauMax);
-
-    yarp::sig::Vector a; a = coman_iDyn3.getJointTorqueMax();
-    std::cout<<"MAX TAU: [ "<<a.toString()<<std::endl;
-
-    ROS_INFO("Loaded COMAN in iDyn3!");
-}
-
-void sot_VelKinCon_ctrl::setControlledKinematicChainsLinkIndex()
-{
-    right_arm_name = "r_wrist";
-    left_arm_name = "l_wrist";
-    right_leg_name = "r_sole";
-    left_leg_name = "l_sole";
-    waist_LinkIndex = coman_iDyn3.getLinkIndex(waist_link_name);
-    right_arm_LinkIndex = coman_iDyn3.getLinkIndex(right_arm_name);
-    left_arm_LinkIndex = coman_iDyn3.getLinkIndex(left_arm_name);
-    right_leg_LinkIndex = coman_iDyn3.getLinkIndex(right_leg_name);
-    left_leg_LinkIndex = coman_iDyn3.getLinkIndex(left_leg_name);
-    if(right_arm_LinkIndex == -1)
-        ROS_ERROR("Failed to get link index for right arm");
-    if(left_arm_LinkIndex == -1)
-        ROS_ERROR("Failed to get link index for left arm");
-    if(waist_LinkIndex == -1)
-        ROS_ERROR("Failed to get link index for Waist");
-    if(right_leg_LinkIndex == -1)
-        ROS_ERROR("Failed to get link index for right leg");
-    if(left_leg_LinkIndex == -1)
-        ROS_ERROR("Failed to get link index for left leg");
-}
-
-void sot_VelKinCon_ctrl::setControlledKinematicChainsJointNumbers()
-{
-    ROS_INFO("Right Arm joint indices:");
-    BOOST_FOREACH(std::string joint_name, right_arm_joint_names){
-        std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
-        right_arm_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
-    }
-    std::cout<<std::endl;
-
-    ROS_INFO("Left Arm joint indices:");
-    BOOST_FOREACH(std::string joint_name, left_arm_joint_names){
-        std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
-        left_arm_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
-    }
-    std::cout<<std::endl;
-
-    ROS_INFO("Waist joint indices:");
-    BOOST_FOREACH(std::string joint_name, torso_joint_names){
-        std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
-        waist_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
-    }
-    std::cout<<std::endl;
-
-    ROS_INFO("Right Leg joint indices:");
-    BOOST_FOREACH(std::string joint_name, right_leg_joint_names){
-        std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
-        right_leg_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
-    }
-    std::cout<<std::endl;
-
-    ROS_INFO("Left Leg joint indices:");
-    BOOST_FOREACH(std::string joint_name, left_leg_joint_names){
-        std::cout<<coman_iDyn3.getDOFIndex(joint_name)<<" ";
-        left_leg_joint_numbers.push_back(coman_iDyn3.getDOFIndex(joint_name));
-    }
-    std::cout<<std::endl;
 }
 
 yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
@@ -396,41 +259,18 @@ yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
 
 void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
 {
-    // Here we set these values in our internal model
-    coman_iDyn3.setAng(q);
-    coman_iDyn3.setDAng(ddq_ref); //We use the accelerations here because we want a vector of zeros
-    coman_iDyn3.setD2Ang(ddq_ref);
-    // This is the fake Inertial Measure
-    yarp::sig::Vector g(3);
-    g[0] = 0; g[1] = 0; g[2] = 9.81;
-    yarp::sig::Vector o(3);
-    o[0] = 0; o[1] = 0; o[2] = 0;
-    coman_iDyn3.setInertialMeasure(o, o, g);
-
-    coman_iDyn3.kinematicRNEA();
+    static yarp::sig::Vector zeroes(q.size(),0.0);
+    
+    idynutils.updateiDyn3Model(q,zeroes,zeroes);
 if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE) {
-    coman_iDyn3.dynamicRNEA();
-    tau_gravity = coman_iDyn3.getTorques();
+    idynutils.coman_iDyn3.dynamicRNEA();
+    tau_gravity = idynutils.coman_iDyn3.getTorques();
 }
-    coman_iDyn3.computePositions();
 
     // Set World Pose we do it at the beginning
     if(set_world_pose)
     {
-        //yarp::sig::Matrix worldT(4,4);
-        worldT.eye();
-        coman_iDyn3.setWorldBasePose(worldT);
-//        yarp::sig::Vector foot_pose(3);
-//        foot_pose = coman_iDyn3.getPosition(support_foot_LinkIndex).getCol(3).subVector(0,2);
-//        worldT(2,3) = -foot_pose(2);
-
-        worldT = yarp::math::luinv(coman_iDyn3.getPosition(coman_iDyn3.getLinkIndex("l_sole")));
-        worldT(0,3) = 0.0;
-        worldT(1,3) = 0.0;
-
-        //ROS_INFO("World Base Pose: "); cartesian_utils::printHomogeneousTransform(worldT);std::cout<<std::endl;
-        coman_iDyn3.setWorldBasePose(worldT);
-        coman_iDyn3.computePositions();
+        idynutils.setWorldPose();
     }
 }
 
@@ -447,23 +287,24 @@ void sot_VelKinCon_ctrl::getFeedBack()
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
     {
         q_left_arm[i] = toRad(q_left_arm[i]); //from deg to rad!
-        q[coman_iDyn3.getDOFIndex(left_arm_joint_names[i])] = q_left_arm[i];
         q_right_arm[i] = toRad(q_right_arm[i]); //from deg to rad!
-        q[coman_iDyn3.getDOFIndex(right_arm_joint_names[i])] = q_right_arm[i];
     }
     //To make things faster: we suppose that legs has same number of dofs
     for(unsigned int i = 0; i < q_left_leg.size(); ++i)
     {
         q_left_leg[i] = toRad(q_left_leg[i]); //from deg to rad!
-        q[coman_iDyn3.getDOFIndex(left_leg_joint_names[i])] = q_left_leg[i];
         q_right_leg[i] = toRad(q_right_leg[i]); //from deg to rad!
-        q[coman_iDyn3.getDOFIndex(right_leg_joint_names[i])] = q_right_leg[i];
     }
     for(unsigned int i = 0; i < q_torso.size(); ++i)
     {
         q_torso[i] = toRad(q_torso[i]); //from deg to rad!
-        q[coman_iDyn3.getDOFIndex(torso_joint_names[i])] = q_torso[i];
     }
+    idynutils.fromRobotToIDyn(q_left_arm,q,idynutils.left_arm);
+    idynutils.fromRobotToIDyn(q_right_arm,q,idynutils.right_arm);
+    idynutils.fromRobotToIDyn(q_left_leg,q,idynutils.left_leg);
+    idynutils.fromRobotToIDyn(q_right_leg,q,idynutils.right_leg);
+    idynutils.fromRobotToIDyn(q_torso,q,idynutils.torso);
+    
 }
 
 void sot_VelKinCon_ctrl::checkInput()
@@ -487,20 +328,20 @@ void sot_VelKinCon_ctrl::move()
 
     double q_sent = 0.0;
     for(unsigned int i = 0; i < torso.size(); ++i){
-        q_sent = q[waist_joint_numbers[i]] + dq_ref[waist_joint_numbers[i]];
+        q_sent = q[idynutils.torso.joint_numbers[i]] + dq_ref[idynutils.torso.joint_numbers[i]];
         torso[i] = toDeg( q_sent );}
     //Here we assumes that left and right arm has the same number of joints!
     for(unsigned int i = 0; i < left_arm.size(); ++i){
-        q_sent = q[left_arm_joint_numbers[i]] + dq_ref[left_arm_joint_numbers[i]];
+        q_sent = q[idynutils.left_arm.joint_numbers[i]] + dq_ref[idynutils.left_arm.joint_numbers[i]];
         left_arm[i] = toDeg( q_sent );
-        q_sent = q[right_arm_joint_numbers[i]] + dq_ref[right_arm_joint_numbers[i]];
+        q_sent = q[idynutils.right_arm.joint_numbers[i]] + dq_ref[idynutils.right_arm.joint_numbers[i]];
         right_arm[i] = toDeg( q_sent );
     }
     //Here we assumes that left and right leg has the same number of joints!
     for(unsigned int i = 0; i < left_leg.size(); ++i){
-        q_sent = q[left_leg_joint_numbers[i]] + dq_ref[left_leg_joint_numbers[i]];
+        q_sent = q[idynutils.left_leg.joint_numbers[i]] + dq_ref[idynutils.left_leg.joint_numbers[i]];
         left_leg[i] = toDeg( q_sent );
-        q_sent = q[right_leg_joint_numbers[i]] + dq_ref[right_leg_joint_numbers[i]];
+        q_sent = q[idynutils.right_leg.joint_numbers[i]] + dq_ref[idynutils.right_leg.joint_numbers[i]];
         right_leg[i] = toDeg( q_sent );
     }
 
@@ -511,51 +352,51 @@ void sot_VelKinCon_ctrl::move()
     IYarp.right_leg.move(right_leg);
 
     if(LEFT_ARM_IMPEDANCE) {
-        yarp::sig::Vector tau_gravity_left_arm = getGravityCompensationTorque(left_arm_joint_names);
-        for(unsigned int i = 0; i < left_arm_joint_names.size(); ++i)
+        yarp::sig::Vector tau_gravity_left_arm = getGravityCompensationTorque(idynutils.left_arm.joint_names);
+        for(unsigned int i = 0; i < idynutils.left_arm.joint_names.size(); ++i)
             IYarp.left_arm.impedancePositionControl->setImpedanceOffset(i, tau_gravity_left_arm[i]);
     }
     if(RIGHT_ARM_IMPEDANCE) {
-        yarp::sig::Vector tau_gravity_right_arm = getGravityCompensationTorque(right_arm_joint_names);
-        for(unsigned int i = 0; i < right_arm_joint_names.size(); ++i)
+        yarp::sig::Vector tau_gravity_right_arm = getGravityCompensationTorque(idynutils.right_arm.joint_names);
+        for(unsigned int i = 0; i < idynutils.right_arm.joint_names.size(); ++i)
             IYarp.right_arm.impedancePositionControl->setImpedanceOffset(i, tau_gravity_right_arm[i]);
     }
     if(TORSO_IMPEDANCE) {
-        yarp::sig::Vector tau_gravity_torso = getGravityCompensationTorque(torso_joint_names);
-        for(unsigned int i = 0; i < torso_joint_names.size(); ++i)
+        yarp::sig::Vector tau_gravity_torso = getGravityCompensationTorque(idynutils.torso.joint_names);
+        for(unsigned int i = 0; i < idynutils.torso.joint_names.size(); ++i)
             IYarp.torso.impedancePositionControl->setImpedanceOffset(i, tau_gravity_torso[i]);
     }
 }
 
 bool sot_VelKinCon_ctrl::controlLaw()
 {
-    yarp::sig::Matrix pos_wrist_R = coman_iDyn3.getPosition(right_arm_LinkIndex);
-    yarp::sig::Matrix pos_wrist_L = coman_iDyn3.getPosition(left_arm_LinkIndex);
+    yarp::sig::Matrix pos_wrist_R = idynutils.coman_iDyn3.getPosition(idynutils.right_arm.index);
+    yarp::sig::Matrix pos_wrist_L = idynutils.coman_iDyn3.getPosition(idynutils.left_arm.index);
 
-    yarp::sig::Vector pos_CoM = coman_iDyn3.getCOM("",support_foot_LinkIndex);
+    yarp::sig::Vector pos_CoM = idynutils.coman_iDyn3.getCOM("",support_foot_LinkIndex);
 
-    yarp::sig::Matrix pos_foot_swing = coman_iDyn3.getPosition(support_foot_LinkIndex,swing_foot_LinkIndex);
+    yarp::sig::Matrix pos_foot_swing = idynutils.coman_iDyn3.getPosition(support_foot_LinkIndex,swing_foot_LinkIndex);
 
     yarp::sig::Matrix JRWrist;
-    if(!coman_iDyn3.getJacobian(right_arm_LinkIndex,JRWrist))
+    if(!idynutils.coman_iDyn3.getJacobian(idynutils.right_arm.index,JRWrist))
         ROS_ERROR("Error computing Jacobian for Right Wrist");
     JRWrist = JRWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
     yarp::sig::Matrix JLWrist;
-    if(!coman_iDyn3.getJacobian(left_arm_LinkIndex,JLWrist))
+    if(!idynutils.coman_iDyn3.getJacobian(idynutils.left_arm.index,JLWrist))
         ROS_ERROR("Error computing Jacobian for Left Wrist");
     JLWrist = JLWrist.removeCols(0,6);    // removing unactuated joints (floating base)
 
     yarp::sig::Matrix JSwingFoot; // for now, SwingFoot is Left
-    if(!coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot,true))
+    if(!idynutils.coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot,true))
         ROS_ERROR("Error computing Jacobian for Left Foot");
 
     yarp::sig::Matrix JCoM;
     //
-    coman_iDyn3.setFloatingBaseLink(support_foot_LinkIndex);
-    if(!coman_iDyn3.getCOMJacobian(JCoM))
+    idynutils.coman_iDyn3.setFloatingBaseLink(support_foot_LinkIndex);
+    if(!idynutils.coman_iDyn3.getCOMJacobian(JCoM))
         ROS_ERROR("Error computing CoM Jacobian");
-    coman_iDyn3.setFloatingBaseLink(waist_LinkIndex);
+    idynutils.coman_iDyn3.setFloatingBaseLink(idynutils.torso.index);
     JCoM = JCoM.removeCols(0,6);    // remove floating base
     JCoM = JCoM.removeRows(3,3);    // remove orientation
 
@@ -607,12 +448,12 @@ if(use_3_stacks) {
     **/
     yarp::sig::Vector eq = (q_ref - q);
 
-    yarp::sig::Matrix W(coman_iDyn3.getJointTorqueMax().size(), coman_iDyn3.getJointTorqueMax().size());
+    yarp::sig::Matrix W(idynutils.coman_iDyn3.getJointTorqueMax().size(), idynutils.coman_iDyn3.getJointTorqueMax().size());
     W.eye();
 
     if(mineffort_weight_normalization) {
-	    for(unsigned int i = 0; i < coman_iDyn3.getJointTorqueMax().size(); ++i)
-	        W(i,i) = 1.0 / (coman_iDyn3.getJointTorqueMax()[i]*coman_iDyn3.getJointTorqueMax()[i]);
+        for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
+            W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
 	}
 
     gradientGq = getGravityCompensationGradient(W);
@@ -632,18 +473,18 @@ if(use_3_stacks) {
         f = yarp::math::cat(postural_weight_coefficient*eq, zero);
         qpOasesPosturalHessianType = qpOASES::HST_SEMIDEF;
     } else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT) {
-        unsigned int nJ = coman_iDyn3.getNrOfDOFs();
+        unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
         F.resize(nJ,nJ); F.eye();
         f = mineffort_weight_coefficient*gradientGq;
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT) {
-        unsigned int nJ = coman_iDyn3.getNrOfDOFs();
+        unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
         yarp::sig::Matrix I; I.resize(nJ,nJ); I.eye();
         F = yarp::math::pile(I, I);
         f = yarp::math::cat(postural_weight_coefficient*eq, mineffort_weight_coefficient*gradientGq);
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     } else { // last_stack_type == LAST_STACK_TYPE_LINEAR_GRAVITY_GRADIENT
-        unsigned int nJ = coman_iDyn3.getNrOfDOFs();
+        unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
         F.resize(nJ,nJ); F.zero();
         f = gradientGq;
         qpOasesPosturalHessianType = qpOASES::HST_ZERO;
@@ -654,16 +495,16 @@ if(use_3_stacks) {
         control_computed = task_solver::computeControlHQP(JCoM,eCoM,
                                                           JEe, eEe,
                                                           F, f, qpOasesPosturalHessianType,
-                                                          coman_iDyn3.getJointBoundMax(),
-                                                          coman_iDyn3.getJointBoundMin(),
+                                                          idynutils.coman_iDyn3.getJointBoundMax(),
+                                                          idynutils.coman_iDyn3.getJointBoundMin(),
                                                           q, max_joint_velocity,
                                                           MilliSecToSec(getRate()),
                                                           dq_ref);
     } else {
         control_computed = task_solver::computeControlHQP(JEe, eEe,
                                                          F, f, qpOasesPosturalHessianType,
-                                                         coman_iDyn3.getJointBoundMax(),
-                                                         coman_iDyn3.getJointBoundMin(),
+                                                         idynutils.coman_iDyn3.getJointBoundMax(),
+                                                         idynutils.coman_iDyn3.getJointBoundMin(),
                                                          q, max_joint_velocity,
                                                          MilliSecToSec(getRate()),
                                                          dq_ref);
@@ -681,7 +522,7 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const std::ve
     int j = 0;
     for(unsigned int i = 0; i < joint_names.size(); ++i)
     {
-        j = coman_iDyn3.getDOFIndex(joint_names[i]);
+        j = gravity_compensator_idynutils.coman_iDyn3.getDOFIndex(joint_names[i]);
         tau[i] = tau_gravity[j];
     }
     return tau;
@@ -692,19 +533,10 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const yarp::s
     static yarp::sig::Vector zeroes(q.size(),0.0);
     static yarp::sig::Vector tau(q.size(),0.0);
 
-    coman_iDyn3.setAng(q);
-    coman_iDyn3.setDAng(zeroes); //We use the accelerations here because we want a vector of zeros
-    coman_iDyn3.setD2Ang(zeroes);
-    // This is the fake Inertial Measure
-    yarp::sig::Vector g(3);
-    g[0] = 0; g[1] = 0; g[2] = 9.81;
-    yarp::sig::Vector o(3);
-    o[0] = 0; o[1] = 0; o[2] = 0;
-    coman_iDyn3.setInertialMeasure(o, o, g);
-
-    coman_iDyn3.kinematicRNEA();
-    coman_iDyn3.dynamicRNEA();
-    tau = coman_iDyn3.getTorques();
+    gravity_compensator_idynutils.updateiDyn3Model(q,zeroes,zeroes);
+    
+    gravity_compensator_idynutils.coman_iDyn3.dynamicRNEA();
+    tau = gravity_compensator_idynutils.coman_iDyn3.getTorques();
 
     return tau;
 }
@@ -715,8 +547,8 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient(const yarp:
     //double start = yarp::os::Time::now();
     /// cost function is tau_g^t*tau_g
     double C_g_q = yarp::math::dot(tau_gravity, W*tau_gravity);
-    static yarp::sig::Vector gradient(coman_iDyn3.getNrOfDOFs(),0.0);
-    static yarp::sig::Vector deltas(coman_iDyn3.getNrOfDOFs(),0.0);
+    static yarp::sig::Vector gradient(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
+    static yarp::sig::Vector deltas(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
     for(unsigned int i = 0; i < gradient.size(); ++i)
     {
         // forward method gradient computation, milligrad
