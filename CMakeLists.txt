@@ -10,6 +10,8 @@ endif(COMMAND cmake_policy)
 include(ExternalProject)
 PROJECT(sot_VelKinCon)
 
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11")
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(YARP REQUIRED)
@@ -18,7 +20,7 @@ FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(paramHelp REQUIRED)
 FIND_PACKAGE(kdl_codyco REQUIRED)
-
+FIND_PACKAGE(drc_shared REQUIRED)
 FIND_PACKAGE(roslib REQUIRED)
 FIND_PACKAGE(rospack REQUIRED)
 FIND_PACKAGE(rosconsole REQUIRED)
@@ -44,26 +46,24 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 
-ADD_LIBRARY(sot_VelKinCon_ctrl STATIC src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp)
+
 ADD_LIBRARY(cartesian_utils STATIC src/cartesian_utils.cpp)
-ADD_EXECUTABLE(sot_VelKinCon src/main.cpp ${sot_INCLUDES})
+ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp ${sot_INCLUDES})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
 ADD_EXECUTABLE(createParamTuner src/tests/createParamTuner.cpp)
-ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp)
+ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/tests/unitTest1.cpp src/task_solver.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(sot_VelKinCon_ctrl ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
-                      cartesian_utils
-                      ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser
-                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} qpOASES)
-TARGET_LINK_LIBRARIES(sot_VelKinCon sot_VelKinCon_ctrl cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
-                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(uTest1 sot_VelKinCon_ctrl ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
-                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(uTest2 cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
+TARGET_LINK_LIBRARIES(sot_VelKinCon ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+                      cartesian_utils  ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser
+                      qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} )
+TARGET_LINK_LIBRARIES(uTest1  ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+                      cartesian_utils  ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser
+                      qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
+TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES} cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(createMonitorScope ${YARP_LIBRARIES})
 

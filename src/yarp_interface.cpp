@@ -25,43 +25,10 @@ double yarp_interface::toc()
     return yarp::os::Time::now() - time_tic;
 }
 
-yarp_interface::yarp_interface()
+yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm("right_arm","sot_VelKinCon"),torso("torso","sot_VelKinCon"),
+                                left_leg("left_leg","sot_VelKinCon"),right_leg("right_leg","sot_VelKinCon")
 {
     time_tic = 0.0;
-
-    if(createPolyDriver(wb_sot::left_arm, polyDriver_left_arm))
-    {
-        polyDriver_left_arm.view(encodersMotor_left_arm);
-        polyDriver_left_arm.view(directControl_left_arm);
-        polyDriver_left_arm.view(controlMode_left_arm);
-        polyDriver_left_arm.view(impedanceCtrl_left_arm);
-    }
-    if(createPolyDriver(wb_sot::right_arm, polyDriver_right_arm))
-    {
-        polyDriver_right_arm.view(encodersMotor_right_arm);
-        polyDriver_right_arm.view(directControl_right_arm);
-        polyDriver_right_arm.view(controlMode_right_arm);
-        polyDriver_right_arm.view(impedanceCtrl_right_arm);
-    }
-    if(createPolyDriver(wb_sot::left_leg, polyDriver_left_leg))
-    {
-        polyDriver_left_leg.view(encodersMotor_left_leg);
-        polyDriver_left_leg.view(directControl_left_leg);
-        polyDriver_left_leg.view(controlMode_left_leg);
-    }
-    if(createPolyDriver(wb_sot::right_leg, polyDriver_right_leg))
-    {
-        polyDriver_right_leg.view(encodersMotor_right_leg);
-        polyDriver_right_leg.view(directControl_right_leg);
-        polyDriver_right_leg.view(controlMode_right_leg);
-    }
-    if(createPolyDriver(wb_sot::torso, polyDriver_torso))
-    {
-        polyDriver_torso.view(encodersMotor_torso);
-        polyDriver_torso.view(directControl_torso);
-        polyDriver_torso.view(controlMode_torso);
-        polyDriver_torso.view(impedanceCtrl_torso);
-    }
 
     left_arm_pos_ref_port.open("/sot_VelKinCon/" + wb_sot::left_arm + "/set_ref:i");
     right_arm_pos_ref_port.open("/sot_VelKinCon/" + wb_sot::right_arm + "/set_ref:i");
@@ -77,44 +44,13 @@ yarp_interface::~yarp_interface()
     com_pos_ref_port.close();
     world_to_base_link_pose_port.close();
     clik_port.close();
-
-    polyDriver_left_arm.close();
-    polyDriver_right_arm.close();
-    polyDriver_left_leg.close();
-    polyDriver_right_leg.close();
-    polyDriver_torso.close();
-}
-
-bool yarp_interface::createPolyDriver(const std::string &kinematic_chain, yarp::dev::PolyDriver &polyDriver)
-{
-    yarp::os::Property options;
-    options.put("robot", "coman");
-    options.put("device", "remote_controlboard");
-
-    yarp::os::ConstString s;
-    s = "/sot_VelKinCon/coman/" + kinematic_chain;
-    options.put("local", s.c_str());
-
-    yarp::os::ConstString ss;
-    ss = "/coman/" + kinematic_chain;
-    options.put("remote", ss.c_str());
-
-    polyDriver.open(options);
-    if (!polyDriver.isValid()){
-        ROS_ERROR("Device %s not available.", kinematic_chain.c_str());
-        return false;
-    }
-    else{
-        ROS_INFO("Device %s available.", kinematic_chain.c_str());
-        return true;
-    }
 }
 
 void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
 {
     yarp::os::Bottle *bot = left_arm_pos_ref_port.read(false);
 
-    if(!bot == NULL)
+    if(bot != NULL)
     {
         std::cout<<"Left Arm:"<<std::endl;
         getCartesianRef(left_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
@@ -126,7 +62,7 @@ void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
 {
     yarp::os::Bottle *bot = right_arm_pos_ref_port.read(false);
 
-    if(!bot == NULL)
+    if(bot != NULL)
     {
         std::cout<<"Right Arm:"<<std::endl;
         getCartesianRef(right_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
@@ -138,7 +74,7 @@ void yarp_interface::getCoMCartesianRef(Vector &com_ref)
 {
     yarp::os::Bottle *bot = com_pos_ref_port.read(false);
     Matrix com_ref_T;
-    if(!bot == NULL)
+    if(bot != NULL)
     {
         std::cout<<"CoM::"<<std::endl;
         if(getCartesianRef(com_ref_T, bot, LOCAL_FRAME_COM))
@@ -155,7 +91,7 @@ void yarp_interface::getSetClik(bool &is_clik)
 {
     yarp::os::Bottle *bot = clik_port.read(false);
 
-    if(!bot == NULL){
+    if(bot != NULL){
         is_clik = (bool)bot->get(0).asInt();
         if(is_clik)
             ROS_WARN("CLIK activated!");

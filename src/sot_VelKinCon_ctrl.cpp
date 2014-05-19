@@ -79,16 +79,11 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
 
     tau_gravity.resize(nJ, 0.0);
 
-    IYarp.encodersMotor_left_arm->getAxes(&nJ);
-    q_left_arm.resize(nJ, 0.0);
-    IYarp.encodersMotor_right_arm->getAxes(&nJ);
-    q_right_arm.resize(nJ, 0.0);
-    IYarp.encodersMotor_left_leg->getAxes(&nJ);
-    q_left_leg.resize(nJ, 0.0);
-    IYarp.encodersMotor_right_leg->getAxes(&nJ);
-    q_right_leg.resize(nJ, 0.0);
-    IYarp.encodersMotor_torso->getAxes(&nJ);
-    q_torso.resize(nJ, 0.0);
+    q_left_arm.resize(IYarp.left_arm.getNumberOfJoints(), 0.0);
+    q_right_arm.resize(IYarp.right_arm.getNumberOfJoints(), 0.0);
+    q_left_leg.resize(IYarp.left_leg.getNumberOfJoints(), 0.0);
+    q_right_leg.resize(IYarp.right_leg.getNumberOfJoints(), 0.0);
+    q_torso.resize(IYarp.torso.getNumberOfJoints(), 0.0);
 
     worldT.eye();
 
@@ -131,40 +126,40 @@ bool sot_VelKinCon_ctrl::threadInit()
 if(RIGHT_ARM_IMPEDANCE) {
     ROS_INFO("Setting Impedance Mode for q_right_arm:");
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
-        IYarp.controlMode_right_arm->setImpedancePositionMode(i);
+        IYarp.right_arm.controlMode->setImpedancePositionMode(i);
 } else {
     ROS_INFO("Setting Position Mode for q_right_arm:");
     for(unsigned int i = 0; i < q_right_arm.size(); ++i)
-        IYarp.controlMode_right_arm->setPositionMode(i);
+        IYarp.right_arm.controlMode->setPositionMode(i);
 }
 
 if(LEFT_ARM_IMPEDANCE) {
     ROS_INFO("Setting Impedance Mode for q_left_arm:");
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
-        IYarp.controlMode_left_arm->setImpedancePositionMode(i);
+        IYarp.left_arm.controlMode->setImpedancePositionMode(i);
 } else {
     ROS_INFO("Setting Position Mode for q_left_arm:");
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
-        IYarp.controlMode_left_arm->setPositionMode(i);
+        IYarp.left_arm.controlMode->setPositionMode(i);
 }
 
 if(TORSO_IMPEDANCE) {
     ROS_INFO("Setting Impedance Mode for q_torso:");
     for(unsigned int i = 0; i < q_torso.size(); ++i)
-        IYarp.controlMode_torso->setImpedancePositionMode(i);
+        IYarp.torso.controlMode->setImpedancePositionMode(i);
 } else {
     ROS_INFO("Setting Position Mode for q_torso:");
     for(unsigned int i = 0; i < q_torso.size(); ++i)
-        IYarp.controlMode_torso->setPositionMode(i);
+        IYarp.torso.controlMode->setPositionMode(i);
 }
 
     ROS_INFO("Setting Position Mode for q_right_leg:");
     for(unsigned int i = 0; i < q_right_leg.size(); ++i)
-        IYarp.controlMode_right_leg->setPositionMode(i);
+        IYarp.right_leg.controlMode->setPositionMode(i);
 
     ROS_INFO("Setting Position Mode for q_left_leg:");
     for(unsigned int i = 0; i < q_left_leg.size(); ++i)
-        IYarp.controlMode_left_leg->setPositionMode(i);
+        IYarp.left_leg.controlMode->setPositionMode(i);
 
     if(is_clik)
         ROS_WARN("SoT is running as CLIK");
@@ -442,11 +437,11 @@ if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE) {
 //Also here the configurations come in deg so we need to convert to rad!
 void sot_VelKinCon_ctrl::getFeedBack()
 {
-    IYarp.encodersMotor_left_arm->getEncoders(q_left_arm.data());
-    IYarp.encodersMotor_right_arm->getEncoders(q_right_arm.data());
-    IYarp.encodersMotor_left_leg->getEncoders(q_left_leg.data());
-    IYarp.encodersMotor_right_leg->getEncoders(q_right_leg.data());
-    IYarp.encodersMotor_torso->getEncoders(q_torso.data());
+    IYarp.left_arm.sense(q_left_arm);
+    IYarp.right_arm.sense(q_right_arm);
+    IYarp.left_leg.sense(q_left_leg);
+    IYarp.right_leg.sense(q_right_leg);
+    IYarp.torso.sense(q_torso);
 
     //To make things faster: we suppose that arms has same number of dofs
     for(unsigned int i = 0; i < q_left_arm.size(); ++i)
@@ -509,26 +504,26 @@ void sot_VelKinCon_ctrl::move()
         right_leg[i] = toDeg( q_sent );
     }
 
-    IYarp.directControl_torso->setPositions(torso.data());
-    IYarp.directControl_left_arm->setPositions(left_arm.data());
-    IYarp.directControl_right_arm->setPositions(right_arm.data());
-    IYarp.directControl_left_leg->setPositions(left_leg.data());
-    IYarp.directControl_right_leg->setPositions(right_leg.data());
+    IYarp.torso.move(torso);
+    IYarp.left_arm.move(left_arm);
+    IYarp.right_arm.move(right_arm);
+    IYarp.left_leg.move(left_leg);
+    IYarp.right_leg.move(right_leg);
 
     if(LEFT_ARM_IMPEDANCE) {
         yarp::sig::Vector tau_gravity_left_arm = getGravityCompensationTorque(left_arm_joint_names);
         for(unsigned int i = 0; i < left_arm_joint_names.size(); ++i)
-            IYarp.impedanceCtrl_left_arm->setImpedanceOffset(i, tau_gravity_left_arm[i]);
+            IYarp.left_arm.impedancePositionControl->setImpedanceOffset(i, tau_gravity_left_arm[i]);
     }
     if(RIGHT_ARM_IMPEDANCE) {
         yarp::sig::Vector tau_gravity_right_arm = getGravityCompensationTorque(right_arm_joint_names);
         for(unsigned int i = 0; i < right_arm_joint_names.size(); ++i)
-            IYarp.impedanceCtrl_right_arm->setImpedanceOffset(i, tau_gravity_right_arm[i]);
+            IYarp.right_arm.impedancePositionControl->setImpedanceOffset(i, tau_gravity_right_arm[i]);
     }
     if(TORSO_IMPEDANCE) {
         yarp::sig::Vector tau_gravity_torso = getGravityCompensationTorque(torso_joint_names);
         for(unsigned int i = 0; i < torso_joint_names.size(); ++i)
-            IYarp.impedanceCtrl_torso->setImpedanceOffset(i, tau_gravity_torso[i]);
+            IYarp.torso.impedancePositionControl->setImpedanceOffset(i, tau_gravity_torso[i]);
     }
 }
 
