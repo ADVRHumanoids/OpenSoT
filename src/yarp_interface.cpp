@@ -8,7 +8,7 @@
 #include "cartesian_utils.h"
 #include <yarp/os/Time.h>
 #include <iCub/iDynTree/yarp_kdl.h>
-
+#include <drc_shared/yarp_single_chain_interface.h>
 using namespace yarp::os;
 using namespace yarp::sig;
 
@@ -30,8 +30,8 @@ yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm(
 {
     time_tic = 0.0;
 
-    left_arm_pos_ref_port.open("/sot_VelKinCon/" + wb_sot::left_arm + "/set_ref:i");
-    right_arm_pos_ref_port.open("/sot_VelKinCon/" + wb_sot::right_arm + "/set_ref:i");
+    left_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::left_arm + "/set_ref:i");
+    right_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::right_arm + "/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     clik_port.open("/sot_VelKinCon/set_clik:i");
     world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
