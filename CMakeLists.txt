@@ -52,6 +52,9 @@ ADD_EXECUTABLE(createParamTuner src/tests/createParamTuner.cpp)
 ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
+# we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
+add_dependencies(sot_VelKinCon_ctrl qpOASES-ext)
+
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
