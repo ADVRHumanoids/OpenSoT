@@ -34,6 +34,7 @@ yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm(
     right_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::right_arm + "/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
+    l_sole_to_CoM_pose_port.open("/sot_VelKinCon/l_sole_to_CoM_pose:o");
 }
 
 yarp_interface::~yarp_interface()
@@ -42,6 +43,7 @@ yarp_interface::~yarp_interface()
     right_arm_pos_ref_port.close();
     com_pos_ref_port.close();
     world_to_base_link_pose_port.close();
+    l_sole_to_CoM_pose_port.close();
 }
 
 void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
@@ -178,4 +180,8 @@ void yarp_interface::cleanPorts()
     pendings = world_to_base_link_pose_port.getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)
         world_to_base_link_pose_port.read(foo);
+
+    pendings = l_sole_to_CoM_pose_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        l_sole_to_CoM_pose_port.read(foo);
 }

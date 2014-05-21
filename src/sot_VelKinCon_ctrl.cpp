@@ -271,6 +271,7 @@ void sot_VelKinCon_ctrl::run()
         move();
 
     IYarp.sendWorldToBaseLinkPose(idynutils.coman_iDyn3.getWorldBasePose());
+    IYarp.sendLSoleToCoMPose(idynutils.coman_iDyn3.getCOM());
 
     t_elapsed = IYarp.toc();
 
