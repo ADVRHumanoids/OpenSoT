@@ -29,7 +29,7 @@ public:
     void sendWorldToBaseLinkPose(const yarp::sig::Matrix& T_world_base_link)
     {
         //Here the reference frame is the same that in updateIdyn3Model !!!
-        sendCartesianRef(world_to_base_link_pose_port, "r_sole", T_world_base_link);
+        sendCartesianRef(world_to_base_link_pose_port, "l_sole", T_world_base_link);
     }
 
     void sendLSoleToCoMPose(const yarp::sig::Vector& p_l_sole_CoM)
