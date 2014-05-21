@@ -10,6 +10,7 @@
 #include "cartesian_utils.h"
 #include "sot_VelKinCon_constants.h"
 #include <boost/date_time.hpp>
+#include <boost/filesystem.hpp>
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -123,15 +124,16 @@ void sot_VelKinCon_ctrl::commandReceived(const CommandDescription &cd,
             std::cout << " and " << confPathWithTimestamp;
             reply.addString("saving...");
 
-            if(
+            if( paramHelper->writeParamsOnFile( confPathWithTimestamp,
+                                                configIds.data(),
+                                                configIds.size())) {
+                if(boost::filesystem::exists(confPath))
+                           boost::filesystem::remove(confPath);
                 paramHelper->writeParamsOnFile( confPath,
                                                 configIds.data(),
-                                                configIds.size()) &&
-                paramHelper->writeParamsOnFile( confPathWithTimestamp,
-                                                configIds.data(),
-                                                configIds.size()))
+                                                configIds.size());
                 reply.addString("ok");
-            else
+            } else
                 reply.addString("failed!");
         }
         break;
