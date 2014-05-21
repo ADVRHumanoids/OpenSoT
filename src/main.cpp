@@ -114,7 +114,7 @@ public:
             if(!paramHelper->processRpcCommand(cmd, reply))
                 reply.addString( (string("Command ")+cmd.toString().c_str()+" not recognized.").c_str());
             paramHelper->unlock();
-        } else ROS_ERROR("Trying to call rpc while the module is not started")
+        } else ROS_ERROR("Trying to call rpc while the module is not started");
 
         // if reply is empty put something into it, otherwise the rpc communication gets stuck
         if(reply.size()==0)
