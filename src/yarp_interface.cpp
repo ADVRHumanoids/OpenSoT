@@ -118,13 +118,16 @@ bool yarp_interface::sendCartesianRef(BufferedPort<Bottle> &port, const std::str
     pose_list.add(T_kdl.p.y());
     pose_list.add(T_kdl.p.z());
 
-    double R = 0.0;
-    double P = 0.0;
-    double Y = 0.0;
-    T_kdl.M.GetRPY(R,P,Y);
-    pose_list.add(toDeg(R));
-    pose_list.add(toDeg(P));
-    pose_list.add(toDeg(Y));
+    double qx = 0.0;
+    double qy = 0.0;
+    double qz = 0.0;
+    double qw = 0.0;
+
+    T_kdl.M.GetQuaternion(qx, qy, qz, qw);
+    pose_list.add(qx);
+    pose_list.add(qy);
+    pose_list.add(qz);
+    pose_list.add(qw);
 
     port.write();
 }
