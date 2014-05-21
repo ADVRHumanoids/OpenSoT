@@ -351,6 +351,7 @@ void sot_VelKinCon_ctrl::move()
     IYarp.left_leg.move(left_leg);
     IYarp.right_leg.move(right_leg);
 
+    /// GRAVITY COMPENSATION
     if(LEFT_ARM_IMPEDANCE) {
         yarp::sig::Vector tau_gravity_left_arm = getGravityCompensationTorque(idynutils.left_arm.joint_names);
         for(unsigned int i = 0; i < idynutils.left_arm.joint_names.size(); ++i)
