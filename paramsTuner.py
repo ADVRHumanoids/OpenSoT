@@ -60,9 +60,9 @@ class paramsTuner:
         ans.clear()
         map(cmd.addString,["set",name])
         if value == True:
-            cmd.addInt(1)
+            cmd.addVocab(yarp.Vocab.encode("true"))
         else:
-            cmd.addInt(0)
+            cmd.addVocab(0)
         self.paramPort.write(cmd,ans)
         return ans
 
