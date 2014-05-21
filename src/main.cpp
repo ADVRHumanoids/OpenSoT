@@ -110,7 +110,7 @@ public:
     bool respond(const yarp::os::Bottle& cmd, yarp::os::Bottle& reply)
     {
         paramHelper->lock();
-        if(!paramHelper->processRpcCommand(cmd, reply))
+        if(thr && ctrl_started && !paramHelper->processRpcCommand(cmd, reply))
             reply.addString( (string("Command ")+cmd.toString().c_str()+" not recognized.").c_str());
         paramHelper->unlock();
 
