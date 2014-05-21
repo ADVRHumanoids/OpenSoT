@@ -20,6 +20,7 @@
 
 #define DEBUG
 #define MODULE_NAME "sot_VelKinCon"
+#define CONF_NAME "sot_velkincon.ini"
 
 /** ####################################### **/
 
@@ -141,6 +142,24 @@ new ParamProxyBasic<int>("last_stack_type",                        PARAM_ID_LAST
 new ParamProxyBasic<int>("postural_weight_strategy",               PARAM_ID_POSTURAL_WEIGHT_STRATEGY,            1,        &SOT_POSTURAL_WEIGHT_STRATEGY_BOUNDS,  PARAM_CONFIG,     NULL,                                                    "postural stack weight strategy. It is an enum, with values 0: postural uses Identity weight matrix 1: postural uses weight which lets distal joints move further away. The weight is normalized w.r.t. joint limits 2: postural uses diag(grad_g(q)) 3: postural uses joint-space Inertia matrix"),
 new ParamProxyBasic<double>("dT",                                  PARAM_ID_DT,                                  1,        ParamLowerBound<double>(1e-3),         PARAM_CONFIG,     NULL,                                                    "frequency to use for the SoT (1/dT , dT is [s])")
 };
+
+
+// *** IDs of all the module command
+enum sot_VelKinCon_CommandId {
+    COMMAND_ID_HELP,
+    COMMAND_ID_SAVE_PARAMS,
+    COMMAND_ID_SIZE
+};
+// ******************************************************************************************************************************
+// ****************************************** DESCRIPTION OF ALL THE MODULE COMMANDS ********************************************
+// ******************************************************************************************************************************
+const CommandDescription sot_VelKinCon_CommandDescr[COMMAND_ID_SIZE]  =
+{
+//                  NAME            ID                          DESCRIPTION
+CommandDescription("help",          COMMAND_ID_HELP,            "Get instructions about how to communicate with this module"),
+CommandDescription("saveParams",    COMMAND_ID_SAVE_PARAMS,     "saveParams(string fileName) # Save the actual configuration parameters to file, inside the sot context folder"),
+};
+
 
 }
 

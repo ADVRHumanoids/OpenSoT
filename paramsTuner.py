@@ -102,6 +102,15 @@ class paramsTuner:
         else:
             raise Exception('error accessing',name,':not an int')
 
+
+    def onSaveButtonClick(self, *args):
+        cmd = yarp.Bottle()
+        ans = yarp.Bottle()
+        cmd.clear()
+        ans.clear()
+        cmd.addString("saveParams")
+        self.paramPort.write(cmd,ans)
+        
 ################ @TODO FUTURE IMPLEMENTATION: add cycling #####################
 
     def onValuesChangedBool(self, *args):

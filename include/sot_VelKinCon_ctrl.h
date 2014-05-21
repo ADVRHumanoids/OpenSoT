@@ -18,7 +18,9 @@
 
 
 namespace wb_sot {
-    class sot_VelKinCon_ctrl : public yarp::os::RateThread, public paramHelp::ParamValueObserver
+    class sot_VelKinCon_ctrl :  public yarp::os::RateThread,
+                                public paramHelp::ParamValueObserver,
+                                public paramHelp::CommandObserver
      {
      public:
          sot_VelKinCon_ctrl(const int period, const bool _LEFT_ARM_IMPEDANCE,
@@ -40,7 +42,13 @@ namespace wb_sot {
 
      private:
          paramHelp::ParamHelperServer   *paramHelper;
+
+         /** Callback function for parameter updates. */
          void parameterUpdated(const ParamProxyInterface *pd);
+         /** Callback function for rpc commands. */
+         void commandReceived(const CommandDescription &cd,
+                              const yarp::os::Bottle &params,
+                              yarp::os::Bottle &reply);
 
          const bool LEFT_ARM_IMPEDANCE;
          const bool RIGHT_ARM_IMPEDANCE;

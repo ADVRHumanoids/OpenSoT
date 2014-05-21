@@ -9,7 +9,7 @@
 #include "task_solver.h"
 #include "cartesian_utils.h"
 #include "sot_VelKinCon_constants.h"
-
+#include <boost/date_time.hpp>
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -19,6 +19,7 @@
 
 using namespace iCub::iDynTree;
 using namespace yarp::math;
+using namespace yarp::os;
 using namespace wb_sot;
 
 sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM_IMPEDANCE,
@@ -87,6 +88,54 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
 void sot_VelKinCon_ctrl::parameterUpdated(const ParamProxyInterface *pd)
 {
     return;
+}
+
+void sot_VelKinCon_ctrl::commandReceived(const CommandDescription &cd,
+                                         const Bottle &params, Bottle &reply)
+{
+    switch(cd.id)
+    {
+    case wb_sot::COMMAND_ID_HELP:
+        paramHelper->getHelpMessage(reply);
+        break;
+    case wb_sot::COMMAND_ID_SAVE_PARAMS:
+        {
+            std::string fileName = CONF_NAME;
+            yarp::os::ResourceFinder rf;
+            rf.setDefaultContext(MODULE_NAME);
+            std::string folderName = rf.getContextPath() + "/";
+            std::string confPath = folderName + fileName;
+            std::vector<int> configIds;
+            for(unsigned int i = 0; i < PARAM_ID_SIZE; ++i)
+                if( sot_VelKinCon_ParamDescr[i]->ioType.value == paramHelp::PARAM_IN_OUT ||
+                    sot_VelKinCon_ParamDescr[i]->ioType.value == paramHelp::PARAM_CONFIG )
+                    configIds.push_back(i);
+
+            std::cout << "Saving to " << confPath;
+
+            std::stringstream ss;
+            boost::posix_time::ptime pt = boost::posix_time::second_clock::local_time();
+            boost::posix_time::time_facet* output_facet = new boost::posix_time::time_facet("%Y%m%dT%H%M%S%F%q");
+            ss.imbue(std::locale(ss.getloc(), output_facet));
+            ss << pt;
+            std::string confPathWithTimestamp = confPath + "." + ss.str();
+
+            std::cout << " and " << confPathWithTimestamp;
+            reply.addString("saving...");
+
+            if(
+                paramHelper->writeParamsOnFile( confPath,
+                                                configIds.data(),
+                                                configIds.size()) &&
+                paramHelper->writeParamsOnFile( confPathWithTimestamp,
+                                                configIds.data(),
+                                                configIds.size()))
+                reply.addString("ok");
+            else
+                reply.addString("failed!");
+        }
+        break;
+    }
 }
 
 //Qui devo prendere la configurazione iniziale del robot!
@@ -189,6 +238,9 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER0,&qpOASES_eps0));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,&qpOASES_eps1));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,&qpOASES_eps2));
+
+    YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
+    YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
 
     return true;
 }

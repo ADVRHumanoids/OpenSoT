@@ -29,7 +29,8 @@ public:
     bool configure(yarp::os::ResourceFinder &rf)
     {
         //--------------------------PARAMETER HELPER--------------------------
-        paramHelper = new ParamHelperServer(wb_sot::sot_VelKinCon_ParamDescr, wb_sot::PARAM_ID_SIZE, NULL, 0);
+        paramHelper = new ParamHelperServer(wb_sot::sot_VelKinCon_ParamDescr, wb_sot::PARAM_ID_SIZE,
+                                            wb_sot::sot_VelKinCon_CommandDescr, wb_sot::COMMAND_ID_SIZE);
         paramHelper->linkParam(wb_sot::PARAM_ID_DT, &dT);
         paramHelper->linkParam(wb_sot::PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL, &left_arm_impedance_control);
         paramHelper->linkParam(wb_sot::PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL, &right_arm_impedance_control);
@@ -176,8 +177,8 @@ int main(int argc, char* argv[])
     //Creating and preparing the Resource Finder
     yarp::os::ResourceFinder rf;
     rf.setVerbose(true);
-    rf.setDefaultConfigFile("sot_velkincon.ini");         //default config file name.
-    rf.setDefaultContext(MODULE_NAME); //when no parameters are given to the module this is the default context
+    rf.setDefaultConfigFile(CONF_NAME); //default config file name.
+    rf.setDefaultContext(MODULE_NAME);  //when no parameters are given to the module this is the default context
     rf.configure(argc,argv);
 
     if (rf.check("help"))

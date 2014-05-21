@@ -478,7 +478,7 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
 
     main     << "\
                   <child>\n\
-                    <object class=\"GtkLabel\" id=\"my_label\">\n\
+                    <object class=\"GtkLabel\" id=\"intro_label\">\n\
                       <property name=\"visible\">True</property>\n\
                       <property name=\"can_focus\">False</property>\n\
                       <property name=\"label\" translatable=\"yes\">&lt;b&gt;paramsTuner&lt;/b&gt; allows to change the controller \n\
@@ -500,7 +500,17 @@ the slides by chance.&lt;/i&gt;</property>\n\
                       <property name=\"position\">0</property>\n\
                       <property name=\"padding\">5</property>\n\
                     </packing>\n\
-                  </child>\n\
+                  </child>\n\                            
+                <child>\n\
+                  <object class=\"GtkButton\" id=\"button_save\">\n\
+                    <property name=\"label\">gtk-save</property>\n\
+                    <property name=\"visible\">True</property>\n\
+                    <property name=\"can_focus\">False</property>\n\
+                    <property name=\"receives_default\">True</property>\n\
+                    <property name=\"use_stock\">True</property>\n\
+                    <signal name=\"clicked\" handler=\"onSaveButtonClick\" swapped=\"no\"/>\n\
+                  </object>\n\
+                </child>\n\
               </object>\n\
             </child>\n\
           </object>\n\
