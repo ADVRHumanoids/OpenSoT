@@ -238,6 +238,7 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER0,&qpOASES_eps0));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,&qpOASES_eps1));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,&qpOASES_eps2));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_CLIK,                                &is_clik));
 
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
@@ -257,9 +258,15 @@ void sot_VelKinCon_ctrl::run()
     checkInput();
 
     if(is_clik)
+    {
+        ROS_WARN("IS_CLICK!!!");
         getFeedBack();
+    }
     else
+    {
+        ROS_ERROR("IS_NOT_CLICK!!!");
         q += dq_ref;
+    }
 
     updateiDyn3Model(true);
 
@@ -364,7 +371,7 @@ void sot_VelKinCon_ctrl::checkInput()
     IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
     IYarp.getRightArmCartesianRef(right_arm_pos_ref);
     IYarp.getCoMCartesianRef(com_pos_ref);
-    IYarp.getSetClik(is_clik);
+    //IYarp.getSetClik(is_clik);
 }
 
 /** Here we convert from rad to deg!
@@ -533,8 +540,8 @@ if(use_3_stacks) {
     } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT) {
         unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
         yarp::sig::Matrix I; I.resize(nJ,nJ); I.eye();
-        F = yarp::math::pile(I, I);
-        f = yarp::math::cat(postural_weight_coefficient*eq, mineffort_weight_coefficient*gradientGq);
+        F = yarp::math::pile(sqrt(postural_weight_coefficient)*I, I);
+        f = yarp::math::cat(sqrt(postural_weight_coefficient)*eq, mineffort_weight_coefficient*gradientGq);
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     } else { // last_stack_type == LAST_STACK_TYPE_LINEAR_GRAVITY_GRADIENT
         unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();

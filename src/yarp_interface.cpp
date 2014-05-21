@@ -33,7 +33,6 @@ yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm(
     left_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::left_arm + "/set_ref:i");
     right_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::right_arm + "/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
-    clik_port.open("/sot_VelKinCon/set_clik:i");
     world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
 }
 
@@ -43,7 +42,6 @@ yarp_interface::~yarp_interface()
     right_arm_pos_ref_port.close();
     com_pos_ref_port.close();
     world_to_base_link_pose_port.close();
-    clik_port.close();
 }
 
 void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
@@ -84,19 +82,6 @@ void yarp_interface::getCoMCartesianRef(Vector &com_ref)
             com_ref = KDLtoYarp(com_ref_T_KDL.p);
             std::cout<<std::endl;
         }
-    }
-}
-
-void yarp_interface::getSetClik(bool &is_clik)
-{
-    yarp::os::Bottle *bot = clik_port.read(false);
-
-    if(bot != NULL){
-        is_clik = (bool)bot->get(0).asInt();
-        if(is_clik)
-            ROS_WARN("CLIK activated!");
-        else
-            ROS_WARN("CLIK NOT activated!");
     }
 }
 
@@ -189,10 +174,6 @@ void yarp_interface::cleanPorts()
     pendings = com_pos_ref_port.getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)
         com_pos_ref_port.read(foo);
-
-    pendings = clik_port.getPendingReads();
-    for(unsigned int i = 0; i < pendings; ++i)
-        clik_port.read(foo);
 
     pendings = world_to_base_link_pose_port.getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)

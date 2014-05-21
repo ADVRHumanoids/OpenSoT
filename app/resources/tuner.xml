@@ -1088,6 +1088,53 @@
                       <property name="position">0</property>
                     </packing>
                   </child>
+
+                 <child>
+                   <object class="GtkExpander" id="expander_30">
+                     <property name="visible">True</property>
+                       <property name="can_focus">False</property>
+                       <property name="tooltip_text" translatable="yes">enable clik (closed loop inverse kinematics</property>
+                       <property name="expanded">True</property>
+                       <child>
+                         <object class="GtkBox" id="vbox_30">
+                           <property name="visible">True</property>
+                           <property name="can_focus">False</property>
+                           <property name="orientation">vertical</property>
+                           <child>
+                             <object class="GtkCheckButton" id="checkbutton_30">
+                               <property name="label" translatable="yes">is_clik</property>
+                               <property name="tooltip_text" translatable="yes">enable clik (closed loop inverse kinematics</property>
+                               <property name="visible">True</property>
+                               <property name="can_focus">False</property>
+                               <property name="receives_default">False</property>
+                               <property name="xalign">0</property>
+                               <property name="draw_indicator">True</property>
+                               <signal name="toggled" handler="onValueChangedBool" swapped="no"/>
+                             </object>
+                             <packing>
+                               <property name="expand">False</property>
+                               <property name="fill">True</property>
+                               <property name="position">0</property>
+                             </packing>
+                           </child>
+                        </object>
+                       </child>
+                       <child type="label">
+                         <object class="GtkLabel" id="expander_30_label">
+                           <property name="visible">True</property>
+                           <property name="can_focus">False</property>
+                           <property name="tooltip_text" translatable="yes">enable clik (closed loop inverse kinematics</property>
+                           <property name="label" translatable="yes">is_clik</property>
+                         </object>
+                       </child>
+                     </object>
+                     <packing>
+                       <property name="expand">False</property>
+                       <property name="fill">True</property>
+                       <property name="padding">5</property>
+                       <property name="position">0</property>
+                     </packing>
+                   </child>
                   <child>
                     <object class="GtkLabel" id="my_label">
                       <property name="visible">True</property>

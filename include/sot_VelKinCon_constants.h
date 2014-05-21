@@ -41,6 +41,7 @@ static const yarp::sig::Vector          SOT_DEFAULT_ERROR(3, 0.0);
 static const int                        SOT_DEFAULT_QPOASES_NWSR(2^32);
 static const bool                       SOT_DEFAULT_QPOASES_ENABLE_REGULARISATION(true);
 static const double                     SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER(2e2);
+static const bool                       SOT_DEFAULT_CLIK(false);
 
 static const paramHelp::ParamBilatBounds<double> SOT_MAX_JOINT_VELOCITY_BOUNDS(ParamBilatBounds<double>(0,1.0));
 static const paramHelp::ParamBilatBounds<int> SOT_LAST_STACK_TYPE_BOUNDS(ParamBilatBounds<int>(0,3));
@@ -56,7 +57,7 @@ enum sot_VelKinCon_ParamId {
     PARAM_ID_RIGHT_ARM_POSITION_ERROR,   PARAM_ID_RIGHT_ARM_ORIENTATION_ERROR,
     PARAM_ID_SWING_FOOT_POSITION_ERROR,  PARAM_ID_SWING_FOOT_ORIENTATION_ERROR,
     PARAM_ID_COM_POSITION_ERROR,
-// ***************************************** RPC PARAMETERS *********************************************************************
+// ***************************************** I/O PARAMETERS *********************************************************************
     PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL, PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL,
     PARAM_ID_TORSO_IMPEDANCE_CONTROL,
     PARAM_ID_USE_3_STACKS,
@@ -70,6 +71,7 @@ enum sot_VelKinCon_ParamId {
     PARAM_ID_QPOASES_ENABLEREGULARISATION0, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER0,
     PARAM_ID_QPOASES_ENABLEREGULARISATION1, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,
     PARAM_ID_QPOASES_ENABLEREGULARISATION2, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,
+    PARAM_ID_CLIK,
 // ***************************************** CONFIGURATION PARAMETERS ***********************************************************
     PARAM_ID_DT,
     PARAM_ID_SIZE /*This is the number of parameters, so it must be the last value of the enum.*/
@@ -134,6 +136,7 @@ new ParamProxyBasic<bool>("qpOases_enableRegularisation2",         PARAM_ID_QPOA
 new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier0",PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER0,1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER,      "enable regularisation for the first task"),
 new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier1",PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER,      "enable regularisation for the second task"),
 new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier2",PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER,      "enable regularisation for the first task"),
+new ParamProxyBasic<bool>("is_clik"                               ,PARAM_ID_CLIK,                                1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_CLIK,                                       "enable clik (closed loop inverse kinematics"),
 // ************************************************* CONFIGURATION PARAMETERS ****************************************************************************************************************************************************************************************************************************
 new ParamProxyBasic<bool>("left_arm_impedance_control",            PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL,          1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for left arm"),
 new ParamProxyBasic<bool>("right_arm_impedance_control",           PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL,         1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for right arm"),
