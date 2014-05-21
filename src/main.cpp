@@ -109,10 +109,12 @@ public:
 
     bool respond(const yarp::os::Bottle& cmd, yarp::os::Bottle& reply)
     {
-        paramHelper->lock();
-        if(thr && ctrl_started && !paramHelper->processRpcCommand(cmd, reply))
-            reply.addString( (string("Command ")+cmd.toString().c_str()+" not recognized.").c_str());
-        paramHelper->unlock();
+        if(thr && ctrl_started) {
+            paramHelper->lock();
+            if(!paramHelper->processRpcCommand(cmd, reply))
+                reply.addString( (string("Command ")+cmd.toString().c_str()+" not recognized.").c_str());
+            paramHelper->unlock();
+        } else ROS_ERROR("Trying to call rpc while the module is not started")
 
         // if reply is empty put something into it, otherwise the rpc communication gets stuck
         if(reply.size()==0)
