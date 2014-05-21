@@ -68,9 +68,9 @@ TARGET_LINK_LIBRARIES(uTest1  ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES} cartesian_utils ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(createMonitorScope ${YARP_LIBRARIES})
+TARGET_LINK_LIBRARIES(createMonitorScope ${YARP_LIBRARIES} ${paramHelp_LIBRARIES})
 
-TARGET_LINK_LIBRARIES(createParamTuner ${YARP_LIBRARIES})
+TARGET_LINK_LIBRARIES(createParamTuner ${YARP_LIBRARIES} ${paramHelp_LIBRARIES})
 
 
 install(TARGETS sot_VelKinCon DESTINATION bin)
