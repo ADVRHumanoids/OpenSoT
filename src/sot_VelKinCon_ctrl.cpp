@@ -258,15 +258,10 @@ void sot_VelKinCon_ctrl::run()
     checkInput();
 
     if(is_clik)
-    {
-        ROS_WARN("IS_CLICK!!!");
         getFeedBack();
-    }
     else
-    {
-        ROS_ERROR("IS_NOT_CLICK!!!");
         q += dq_ref;
-    }
+
 
     updateiDyn3Model(true);
 
