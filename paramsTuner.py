@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# @todo move to a proper repo; add install target
 """paramsTuner.py: tunes parameters for module, using paramHelp.
 For now it supports just scalar parameters."""
 

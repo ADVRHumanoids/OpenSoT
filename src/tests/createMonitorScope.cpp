@@ -25,10 +25,10 @@ int main(int argc, char* argv[]) {
 }
 
 /** takes an array of ParamProxies, creates a scope for them
-    TODO move this to a proper place
-    TODO make this somehow automatic (e.g. a program using paramHelp
-         will be automatically be able to create the monitor scope when calling
-         paramHelp with a script, or maybe with some util?*/
+    @todo move this to a proper place (e.g. drc_shared )
+    @todo make this somehow automatic (e.g. a program using paramHelp
+          will be automatically be able to create the monitor scope when calling
+          paramHelp with a script, or maybe with some util?*/
 const std::string createMonitorScope(const ParamProxyInterface *const sot_VelKinCon_ParamDescr[],
                                      unsigned int size,
                                      std::string moduleName) {

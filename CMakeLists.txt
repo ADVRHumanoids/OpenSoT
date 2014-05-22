@@ -45,10 +45,11 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
+file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}" *.py)
 
 
 ADD_LIBRARY(cartesian_utils STATIC src/cartesian_utils.cpp)
-ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp ${sot_INCLUDES})
+ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
 ADD_EXECUTABLE(createParamTuner src/tests/createParamTuner.cpp)
 ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/tests/unitTest1.cpp src/task_solver.cpp)

@@ -86,11 +86,13 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     is_clik = false;
 }
 
+/** @todo move to drc_shared */
 void sot_VelKinCon_ctrl::parameterUpdated(const ParamProxyInterface *pd)
 {
     return;
 }
 
+/** @todo move to drc_shared */
 void sot_VelKinCon_ctrl::commandReceived(const CommandDescription &cd,
                                          const Bottle &params, Bottle &reply)
 {
@@ -141,6 +143,7 @@ void sot_VelKinCon_ctrl::commandReceived(const CommandDescription &cd,
 }
 
 //Qui devo prendere la configurazione iniziale del robot!
+/** @todo move the paramHelper stuff to the yarp_interface */
 bool sot_VelKinCon_ctrl::threadInit()
 {
     IYarp.cleanPorts();
