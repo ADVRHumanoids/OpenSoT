@@ -5,7 +5,7 @@
 */
 
 #include "yarp_interface.h"
-#include "cartesian_utils.h"
+#include <drc_shared/cartesian_utils.h>
 #include <yarp/os/Time.h>
 #include <iCub/iDynTree/yarp_kdl.h>
 #include <drc_shared/yarp_single_chain_interface.h>

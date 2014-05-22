@@ -7,7 +7,7 @@
 #include "sot_VelKinCon_ctrl.h"
 #include <boost/foreach.hpp>
 #include "task_solver.h"
-#include "cartesian_utils.h"
+#include <drc_shared/cartesian_utils.h>
 #include "sot_VelKinCon_constants.h"
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
