@@ -49,7 +49,7 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
     <property name=\"height_request\">500</property>\n\
     <property name=\"can_focus\">False</property>\n\
     <property name=\"title\" translatable=\"yes\">parameterTuning</property>\n\
-    <property name=\"resizable\">False</property>\n\
+    <property name=\"resizable\">True</property>\n\
     <signal name=\"delete-event\" handler=\"onDeleteWindow\" swapped=\"no\"/>\n\
     <child>\n\
       <object class=\"GtkScrolledWindow\" id=\"main_scrolled\">\n\
