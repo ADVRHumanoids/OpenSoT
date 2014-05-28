@@ -54,8 +54,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
-file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}" *.py)
-
+file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
@@ -89,7 +88,11 @@ add_custom_target(  copy_conf_files_to_build ALL
         "${PROJECT_SOURCE_DIR}/app/conf"
         "${CMAKE_BINARY_DIR}/")
 
+add_custom_target( copy_python_to_build ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/python"
+        "${CMAKE_BINARY_DIR}/")
+
 add_custom_target(generate_paramsTuner_gui ALL
     COMMAND "${CMAKE_BINARY_DIR}/createParamTuner" > "${CMAKE_CURRENT_SOURCE_DIR}/app/resources/tuner.xml")
-
 add_dependencies(generate_paramsTuner_gui createParamTuner)
