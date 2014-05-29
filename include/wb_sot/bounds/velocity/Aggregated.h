@@ -15,6 +15,9 @@
  * Public License for more details
 */
 
+#ifndef __BOUNDS_VELOCITY_AGGREGATED_H__
+#define __BOUNDS_VELOCITY_AGGREGATED_H__
+
 #include <wb_sot/Bounds.h>
 
 #include <yarp/sig/all.h>
@@ -23,44 +26,38 @@
 
  namespace wb_sot {
     namespace bounds {
-        template <unsigned int x_size>
-        class Aggregated: public Bounds<yarp::sig::Matrix, yarp::sig::Vector, x_size> {
+        namespace velocity {
 
-            typedef Bounds< yarp::sig::Matrix, yarp::sig::Vector, x_size> BoundType;
+            class Aggregated: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
 
-        private:
+                typedef Bounds< yarp::sig::Matrix, yarp::sig::Vector> BoundType;
 
-            std::list< Bounds<yarp::sig::Matrix, yarp::sig::Vector, x_size> > _bounds;
+            private:
 
-            yarp::sig::Vector _q;
+                std::list< BoundType* > _bounds;
 
-            yarp::sig::Vector _upperBound;
-            yarp::sig::Vector _lowerBound;
+            public:
+                /**
+                 * @brief Aggregated
+                 * @param bounds a std::list of Bounds
+                 */
+                Aggregated(const std::list<BoundType *> &bounds,
+                           const unsigned int x_size);
 
-            yarp::sig::Matrix _Aeq;
-            yarp::sig::Vector _beq;
+                const yarp::sig::Vector getLowerBound();
+                const yarp::sig::Vector getUpperBound();
 
-            yarp::sig::Matrix _Aineq;
-            yarp::sig::Vector _bUpperBound;
-            yarp::sig::Vector _bLowerBound;
-        public:
-            /**
-             * @brief Aggregated
-             * @param bounds a std::list of Bounds
-             */
-            Aggregated(const std::list< Bounds<yarp::sig::Matrix, yarp::sig::Vector, x_size> >& bounds);
+                const yarp::sig::Matrix getAeq();
+                const yarp::sig::Vector getbeq();
 
-            yarp::sig::Vector getLowerBound();
-            yarp::sig::Vector getUpperBound();
+                const yarp::sig::Matrix getAineq();
+                const yarp::sig::Vector getbLowerBound();
+                const yarp::sig::Vector getbUpperBound();
 
-            yarp::sig::Matrix getAeq();
-            yarp::sig::Vector getbeq();
-
-            yarp::sig::Matrix getAineq();
-            yarp::sig::Vector getbLowerBound();
-            yarp::sig::Vector getbUpperBound();
-
-            void update(const yarp::sig::Vector &x);
-        };
+                void update(const yarp::sig::Vector &x);
+            };
+        }
     }
  }
+
+#endif

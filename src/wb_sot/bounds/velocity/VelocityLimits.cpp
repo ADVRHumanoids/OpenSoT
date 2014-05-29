@@ -19,53 +19,22 @@
 #include <yarp/math/Math.h>
 #include <cmath>
 
-using namespace wb_sot::bounds;
+using namespace wb_sot::bounds::velocity;
 using namespace yarp::math;
 
-template <unsigned int x_size>
-VelocityLimits<x_size>::VelocityLimits(const double qDotLimit, const double dT) :
-    _dT(dT) {
+VelocityLimits::VelocityLimits(const double qDotLimit,
+                               const double dT,
+                               const unsigned int x_size) :
+    Bounds(x_size), _dT(dT) {
 
     _qDotLimit = std::abs(qDotLimit);
+/************************ COMPUTING BOUNDS ****************************/
 
-    /* bounds are constant, computing them once for all to generate bounds */
-    _qLowerBound = -1*_qDotLimit*yarp::sig::Vector(x_size,1.0);
-    _qUpperBound = +1*_qDotLimit*yarp::sig::Vector(x_size,1.0);
+    _lowerBound.resize(x_size,-1.0*_qDotLimit);
+    _upperBound.resize(x_size,+1.0*_qDotLimit);
+
+/**********************************************************************/
+
 }
 
-template <unsigned int x_size>
-yarp::sig::Vector VelocityLimits<x_size>::getLowerBound() {
-    return _qLowerBound;
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector VelocityLimits<x_size>::getUpperBound() {
-    return _qUpperBound;
-}
-
-/*************** RETURN ZERO DIMENSION MATRICES/VECTORS **************/
-template <unsigned int x_size>
-yarp::sig::Matrix  VelocityLimits<x_size>::getAeq() {
-    return yarp::sig::Matrix(0,0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector VelocityLimits<x_size>::getbeq() {
-    return yarp::sig::Vector(0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Matrix VelocityLimits<x_size>::getAineq() {
-    return yarp::sig::Matrix(0,0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector VelocityLimits<x_size>::getbLowerBound() {
-    return yarp::sig::Vector(0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector VelocityLimits<x_size>::getbUpperBound() {
-    return yarp::sig::Vector(0);
-}
 

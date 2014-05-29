@@ -15,6 +15,9 @@
  * Public License for more details
 */
 
+#ifndef __BOUNDS_VELOCITY_JOINTLIMITS_H__
+#define __BOUNDS_VELOCITY_JOINTLIMITS_H__
+
  #include <wb_sot/Bounds.h>
 
  #include <yarp/sig/all.h>
@@ -22,33 +25,25 @@
 
  namespace wb_sot {
     namespace bounds {
-        template <unsigned int x_size>
-        class JointLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector, x_size> {
-        private:
-            iCub::iDynTree::DynTree _robot;
-            yarp::sig::Vector _qLowerBounds;
-            yarp::sig::Vector _qUpperBounds;
-            yarp::sig::Vector _q;
-            double _dT;
-        public:
-            /**
-             * @brief JointLimits constructor
-             * @param robot the robot model which includes joint limits
-             * @param dT the time constant at which we are performing velocity control [s]
-             */
-            JointLimits(const iCub::iDynTree::DynTree& robot, const double dT);
+        namespace velocity {
+            class JointLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
+            private:
+                iCub::iDynTree::DynTree _robot;
+                double _dT;
+            public:
+                /**
+                 * @brief JointLimits constructor
+                 * @param robot the robot model which includes joint limits
+                 * @param dT the time constant at which we are performing velocity control [s]
+                 */
+                JointLimits(const iCub::iDynTree::DynTree& robot,
+                            const double dT,
+                            const unsigned int x_size);
 
-            yarp::sig::Vector getLowerBound();
-            yarp::sig::Vector getUpperBound();
-
-            yarp::sig::Matrix getAeq();
-            yarp::sig::Vector getbeq();
-
-            yarp::sig::Matrix getAineq();
-            yarp::sig::Vector getbLowerBound();
-            yarp::sig::Vector getbUpperBound();
-
-            void update(const yarp::sig::Vector &x);
-        };
+                void update(const yarp::sig::Vector &x);
+            };
+        }
     }
  }
+
+#endif

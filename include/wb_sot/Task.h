@@ -15,6 +15,9 @@
  * Public License for more details
 */
 
+#ifndef __TASK_H__
+#define __TASK_H__
+
  namespace wb_sot {
 
     /** Summarises all possible types of the QP's Hessian matrix. From qpOASES/Types.hpp */
@@ -74,5 +77,7 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         void update(const Vector_type x);
-    }
+    };
  }
+
+#endif

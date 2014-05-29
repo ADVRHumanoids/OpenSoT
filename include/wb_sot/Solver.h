@@ -15,8 +15,11 @@
  * Public License for more details
 */
 
- #include <wb_sot/Task.h>
- #include <wb_sot/Bounds.h>
+#include <wb_sot/Task.h>
+#include <wb_sot/Bounds.h>
+
+#ifndef __SOLVER_H__
+#define __SOLVER_H__
 
  namespace wb_sot {
     template <  class Matrix_type, class Vector_type,
@@ -35,3 +38,5 @@
         void addGlobalUpperBounds(const Vector_type upperBounds);
     };
  }
+
+#endif

@@ -89,21 +89,23 @@ SET(VelBLibs ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
              ${kdl_codyco_LIBRARIES} orocos-kdl kdl_parser
              ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
              icubmod ${ICUB_LIBRARIES}
-             ${GTEST_BOTH_LIBRARIES})
+             ${GTEST_BOTH_LIBRARIES} wb_sot)
 
 ADD_EXECUTABLE(testAggregatedVelB     src/tests/wb_sot/bounds/velocity/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedVelB ${VelBLibs})
-add_dependencies(testAggregatedVelB GTest-ext)
+add_dependencies(testAggregatedVelB GTest-ext wb_sot)
 
 ADD_EXECUTABLE(testJointLimitsVelB    src/tests/wb_sot/bounds/velocity/TestJointLimits.cpp)
 TARGET_LINK_LIBRARIES(testJointLimitsVelB ${VelBLibs})
-add_dependencies(testJointLimitsVelB GTest-ext)
+add_dependencies(testJointLimitsVelB GTest-ext wb_sot)
 
 ADD_EXECUTABLE(testVelocityLimitsVelB src/tests/wb_sot/bounds/velocity/TestVelocityLimits.cpp)
 TARGET_LINK_LIBRARIES(testVelocityLimitsVelB ${VelBLibs})
-add_dependencies(testVelocityLimitsVelB GTest-ext)
+add_dependencies(testVelocityLimitsVelB GTest-ext wb_sot)
 
-add_test(VelocityBounds testAggregatedVelB testJointLimitsVelB testVelocityLimitsVelB)
+add_test(wb_sot_bounds_velocity_Aggregated testAggregatedVelB)
+add_test(wb_sot_bounds_velocity_JointLimits  testJointLimitsVelB)
+add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)

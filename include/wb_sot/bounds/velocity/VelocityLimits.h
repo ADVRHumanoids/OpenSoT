@@ -15,44 +15,32 @@
  * Public License for more details
 */
 
+#ifndef __BOUNDS_VELOCITY_VELOCITYLIMITS_H__
+#define __BOUNDS_VELOCITY_VELOCITYLIMITS_H__
+
  #include <wb_sot/Bounds.h>
 
  #include <yarp/sig/all.h>
 
  namespace wb_sot {
     namespace bounds {
-        template <unsigned int x_size>
-        class VelocityLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector, x_size> {
-        private:
-            yarp::sig::Vector _qDotLimit;
-            yarp::sig::Vector _qLowerBound;
-            yarp::sig::Vector _qUpperBound;
-            double _dT;
-        public:
-            /**
-             * @brief VelocityLimits constructor
-             * @param robot the robot model which includes joint limits
-             * @param dT the time constant at which we are performing velocity control [s]
-             */
-            VelocityLimits(const double qDotLimit, const double dT);
-
-            yarp::sig::Vector getLowerBound();
-            yarp::sig::Vector getUpperBound();
-
-            yarp::sig::Matrix getAeq();
-            yarp::sig::Vector getbeq();
-
-            /**
-             * @brief getAineq
-             * @return 0xn_size Aineq matrix
-             */
-            yarp::sig::Matrix getAineq();
-            /**
-             * @brief getbLowerBound
-             * @return 0 sized b lower bound
-             */
-            yarp::sig::Vector getbLowerBound();
-            yarp::sig::Vector getbUpperBound();
-        };
+        namespace velocity {
+            class VelocityLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
+            private:
+                double _qDotLimit;
+                double _dT;
+            public:
+                /**
+                 * @brief VelocityLimits constructor
+                 * @param robot the robot model which includes joint limits
+                 * @param dT the time constant at which we are performing velocity control [s]
+                 */
+                VelocityLimits(const double qDotLimit,
+                               const double dT,
+                               const unsigned int x_size);
+            };
+        }
     }
  }
+
+#endif

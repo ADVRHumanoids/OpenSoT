@@ -20,54 +20,18 @@
 #include <yarp/math/Math.h>
 #include <assert.h>
 
-using namespace wb_sot::bounds;
+using namespace wb_sot::bounds::velocity;
 
-template <unsigned int x_size>
-Aggregated<x_size>::Aggregated(const std::list< Bounds<yarp::sig::Matrix, yarp::sig::Vector, x_size> >& bounds) :
-    _bounds(bounds)
+Aggregated::Aggregated(const std::list< BoundType* >& bounds,
+                       const unsigned int x_size) :
+    Bounds(x_size), _bounds(bounds)
 {
     /* calling update to generate bounds */
-    update(_q);
+    update(_x);
 }
 
-template <unsigned int x_size>
-yarp::sig::Vector Aggregated<x_size>::getLowerBound() {
-    return _lowerBound;
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector Aggregated<x_size>::getUpperBound() {
-    return _upperBound;
-}
-
-template <unsigned int x_size>
-yarp::sig::Matrix  Aggregated<x_size>::getAeq() {
-    return _Aeq;
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector Aggregated<x_size>::getbeq() {
-    return _beq;
-}
-
-template <unsigned int x_size>
-yarp::sig::Matrix Aggregated<x_size>::getAineq() {
-    return _Aineq;
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector Aggregated<x_size>::getbLowerBound() {
-    return _bLowerBound;
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector Aggregated<x_size>::getbUpperBound() {
-    return _bUpperBound;
-}
-
-template <unsigned int x_size>
-void Aggregated<x_size>::update(const yarp::sig::Vector& x) {
-    _q = x;
+void Aggregated::update(const yarp::sig::Vector& x) {
+    _x = x;
 
     /* resetting all internal data */
     _upperBound = yarp::sig::Vector(0);
@@ -81,14 +45,15 @@ void Aggregated<x_size>::update(const yarp::sig::Vector& x) {
     _bLowerBound = yarp::sig::Vector(0);
 
     /* iterating on all bounds.. */
-    for(typename std::list< BoundType >::iterator b = _bounds.begin();
-        b != _bounds.end(); b++) {
+    for(typename std::list< BoundType* >::iterator i = _bounds.begin();
+        i != _bounds.end(); i++) {
 
+        BoundType* b = *i;
         /* update bounds */
-        b->update(_q);
+        b->update(_x);
 
         yarp::sig::Vector boundUpperBound = b->getUpperBound();
-        yarp::sig::Vector boundLowerBound = b->getLoweBound();
+        yarp::sig::Vector boundLowerBound = b->getLowerBound();
 
         yarp::sig::Matrix boundAeq = b->getAeq();
         yarp::sig::Vector boundbeq = b->getbeq();
@@ -100,8 +65,8 @@ void Aggregated<x_size>::update(const yarp::sig::Vector& x) {
         /* copying lowerBound, upperBound */
         if(boundUpperBound.size() != 0 ||
            boundLowerBound.size() != 0) {
-            assert(boundUpperBound.size() == x_size);
-            assert(boundLowerBound.size() == x_size);
+            assert(boundUpperBound.size() == _x_size);
+            assert(boundLowerBound.size() == _x_size);
 
             if(_upperBound.size() == 0 ||
                _lowerBound.size() == 0) { // first valid bounds found
@@ -109,7 +74,7 @@ void Aggregated<x_size>::update(const yarp::sig::Vector& x) {
                 _upperBound = boundUpperBound;
                 _lowerBound = boundLowerBound;
             } else {
-                for(unsigned int i = 0; i < x_size; ++i) {
+                for(unsigned int i = 0; i < _x_size; ++i) {
                     // compute the minimum between current and new upper bounds
                     _upperBound[i] = std::min(  _upperBound[i],
                                                 boundUpperBound[i]);
@@ -143,14 +108,14 @@ void Aggregated<x_size>::update(const yarp::sig::Vector& x) {
     }
 
     /* checking everything went fine */
-    assert(_lowerBound.size() == 0 || _lowerBound.size() == x_size);
-    assert(_upperBound.size() == 0 || _upperBound.size() == x_size);
+    assert(_lowerBound.size() == 0 || _lowerBound.size() == _x_size);
+    assert(_upperBound.size() == 0 || _upperBound.size() == _x_size);
 
     assert(_Aeq.rows() == _beq.size());
-    assert(_Aeq.cols() == x_size);
+    assert(_Aeq.cols() == _x_size);
 
     assert(_Aineq.rows() == _bUpperBound.size());
     assert(_Aineq.rows() == _bLowerBound.size());
-    assert(_Aineq.cols() == x_size);
+    assert(_Aineq.cols() == _x_size);
 }
 

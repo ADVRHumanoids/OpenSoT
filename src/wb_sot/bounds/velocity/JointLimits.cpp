@@ -19,64 +19,31 @@
 #include <yarp/math/Math.h>
 using namespace yarp::math;
 
-using namespace wb_sot::bounds;
+using namespace wb_sot::bounds::velocity;
 
-template <unsigned int x_size>
-JointLimits<x_size>::JointLimits(const iCub::iDynTree::DynTree& robot,
-                                 const double dT) :
-    _dT(dT), _robot(robot) {
-    _q = _robot.getAng();
+JointLimits::JointLimits(   const iCub::iDynTree::DynTree& robot,
+                            const double dT,
+                            const unsigned int x_size) :
+    Bounds(x_size), _dT(dT), _robot(robot) {
+    _x = _robot.getAng();
 
     /* calling update to generate bounds */
-    update(_q);
+    update(_x);
 }
 
-template <unsigned int x_size>
-yarp::sig::Vector JointLimits<x_size>::getLowerBound() {
-    return _qLowerBounds;
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector JointLimits<x_size>::getUpperBound() {
-    return _qLowerBounds;
-}
-
-template <unsigned int x_size>
-void JointLimits<x_size>::update(const yarp::sig::Vector& x)
+void JointLimits::update(const yarp::sig::Vector& x)
 {
-    _q = x;
-    /* actually computing bounds... */
-    _qUpperBounds = (_robot.getJointBoundMax() - _q)*_dT;
-    _qLowerBounds = (_robot.getJointBoundMin() - _q)*_dT;
+    _x = x;
+
+/************************ COMPUTING BOUNDS ****************************/
+
+    _upperBound = (_robot.getJointBoundMax() - _x)*_dT;
+    _lowerBound = (_robot.getJointBoundMin() - _x)*_dT;
+
+/**********************************************************************/
+
 }
 
 
 
-
-
-/*************** RETURN ZERO DIMENSION MATRICES/VECTORS **************/
-template <unsigned int x_size>
-yarp::sig::Matrix  JointLimits<x_size>::getAeq() {
-    return yarp::sig::Matrix(0,0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector JointLimits<x_size>::getbeq() {
-    return yarp::sig::Vector(0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Matrix JointLimits<x_size>::getAineq() {
-    return yarp::sig::Matrix(0,0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector JointLimits<x_size>::getbLowerBound() {
-    return yarp::sig::Vector(0);
-}
-
-template <unsigned int x_size>
-yarp::sig::Vector JointLimits<x_size>::getbUpperBound() {
-    return yarp::sig::Vector(0);
-}
 

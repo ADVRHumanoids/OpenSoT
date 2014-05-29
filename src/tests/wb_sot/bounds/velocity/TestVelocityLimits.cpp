@@ -1,48 +1,98 @@
-#include "gtest/gtest.h"
-#include <string>
+#include <gtest/gtest.h>
+#include <wb_sot/bounds/velocity/VelocityLimits.h>
+#include <yarp/sig/Vector.h>
+#include <yarp/math/Math.h>
+#include <cmath>
+#define  s 1.0
+#define x_size 10u
+#define  vel_lim 20.0
+
+using namespace wb_sot::bounds::velocity;
+using namespace yarp::math;
 
 namespace {
 
 // The fixture for testing class Foo.
-class TestVelocityLimits : public ::testing::Test {
+class testVelocityLimits : public ::testing::Test {
  protected:
+
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  TestVelocityLimits() {
+  testVelocityLimits() {
     // You can do set-up work for each test here.
+      zeros.resize(x_size,0.0);
+
+      velocityLimits = new VelocityLimits(  vel_lim,
+                                            0.001*s,
+                                            x_size);
+
   }
 
-  virtual ~TestVelocityLimits() {
+  virtual ~testVelocityLimits() {
     // You can do clean-up work that doesn't throw exceptions here.
+      if(velocityLimits != NULL) {
+        delete velocityLimits;
+        velocityLimits = NULL;
+      }
   }
 
   // If the constructor and destructor are not enough for setting up
   // and cleaning up each test, you can define the following methods:
 
-  virtual void SetUp() {
-    // Code here will be called immediately after the constructor (right
-    // before each test).
-  }
-
-  virtual void TearDown() {
-    // Code here will be called immediately after each test (right
-    // before the destructor).
-  }
 
   // Objects declared here can be used by all tests in the test case for Foo.
+
+  VelocityLimits* velocityLimits;
+
+  yarp::sig::Vector zeros;
 };
 
-// Tests that the Foo::Bar() method does Abc.
-TEST_F(TestVelocityLimits, MethodBarDoesAbc) {
- std::string test = "";
-  EXPECT_EQ(0, test.length());
+TEST_F(testVelocityLimits, sizesAreCorrect) {
+    yarp::sig::Vector lowerBound = velocityLimits->getLowerBound();
+    yarp::sig::Vector upperBound = velocityLimits->getUpperBound();
+
+    EXPECT_EQ(x_size, lowerBound.size()) << "lowerBound should have size"
+                                         << x_size;
+    EXPECT_EQ(x_size, upperBound.size()) << "upperBound should have size"
+                                         << x_size;
+
+    EXPECT_EQ(0, velocityLimits->getAeq().rows()) << "Aeq should have size 0"
+                                                  << "but has size"
+                                                  << velocityLimits->getAeq().rows();
+
+    EXPECT_EQ(0, velocityLimits->getbeq().size()) << "beq should have size 0"
+                                                  << "but has size"
+                                                  << velocityLimits->getbeq().size();
+
+    EXPECT_EQ(0,velocityLimits->getAineq().rows()) << "Aineq should have size 0"
+                                                   << "but has size"
+                                                   << velocityLimits->getAeq().rows();
+
+    EXPECT_EQ(0,velocityLimits->getbLowerBound().size()) << "beq should have size 0"
+                                                         << "but has size"
+                                                         << velocityLimits->getbLowerBound().size();
+
+    EXPECT_EQ(0,velocityLimits->getbUpperBound().size()) << "beq should have size 0"
+                                                         << "but has size"
+                                                         << velocityLimits->getbUpperBound().size();
 }
 
-// Tests that Foo does Xyz.
-TEST_F(TestVelocityLimits, DoesXyz) {
-  // Exercises the Xyz feature of Foo.
+
+// Tests that the Foo::getLowerBounds() are zero at the bounds
+TEST_F(testVelocityLimits, BoundsAreCorrect) {
+
+    yarp::sig::Vector lowerBound = velocityLimits->getLowerBound();
+    yarp::sig::Vector upperBound = velocityLimits->getUpperBound();
+    /* checking a joint at upper bound */
+    EXPECT_DOUBLE_EQ(-1.0*vel_lim, lowerBound[0]) << "Lower Velocity Limits should be "
+                                                  << -1*vel_lim << ", "
+                                                  <<  lowerBound[0] << "instead";
+    EXPECT_DOUBLE_EQ(+1.0*vel_lim, upperBound[0]) << "Upper Velocity Limits should be "
+                                                  << +1*vel_lim << ", "
+                                                  << upperBound[0] << "instead";
 }
+
 
 }  // namespace
 
