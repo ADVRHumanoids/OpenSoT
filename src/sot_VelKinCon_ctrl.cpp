@@ -463,6 +463,17 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     extractJacobians(JRWrist, JLWrist);
 
+    ///////////////////////////////////////
+    yarp::sig::Matrix torso_weight(6,6); torso_weight.eye();
+    torso_weight = 10.0 * torso_weight;
+    for(unsigned int i = 0; i < idynutils.torso.joint_numbers.size(); ++i)
+    {
+        JLWrist.getCol(idynutils.torso.joint_numbers[i]) = torso_weight * JLWrist.getCol(idynutils.torso.joint_numbers[i]);
+        JRWrist.getCol(idynutils.torso.joint_numbers[i]) = torso_weight * JRWrist.getCol(idynutils.torso.joint_numbers[i]);
+    }
+    ///////////////////////////////////////
+
+
     cartesian_utils::computeCartesianError(pos_wrist_R, right_arm_pos_ref,
                                            eRWrist_p, eRWrist_o);
     cartesian_utils::computeCartesianError(pos_wrist_L, left_arm_pos_ref,
