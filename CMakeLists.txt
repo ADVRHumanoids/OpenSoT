@@ -36,18 +36,33 @@ FIND_PACKAGE(rosconsole REQUIRED)
 FIND_PACKAGE(srdfdom REQUIRED)
 FIND_PACKAGE(moveit_core REQUIRED)
 
+enable_testing()
+
 ExternalProject_Add(qpOASES-ext GIT_REPOSITORY https://github.com/asherikov/qpOASES.git
                             PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
                             INSTALL_COMMAND "")
                             #CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
-
 set(qpOASES_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext/")
+
+#finding GTest
+#FIND_PACKAGE(GTest REQUIRED)
+set(gTestSource "/usr/src/gtest")
+ExternalProject_Add(GTest-ext SOURCE_DIR ${gTestSource}
+                              PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
+                              INSTALL_COMMAND "")
+set(GTEST_LIB_DIRS "${CMAKE_CURRENT_BINARY_DIR}/external/src/GTest-ext-build/")
+set(GTEST_INCLUDE_DIRS ${gTestSource})
+set(GTEST_BOTH_LIBRARIES gtest gtest_main)
 
 SET(ROS_HYDRO_LIB_FOLDER /opt/ros/hydro/lib/)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS} ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} "${qpOASES_FOLDER}/include/")
-LINK_DIRECTORIES(${ROS_HYDRO_LIB_FOLDER} "${qpOASES_FOLDER}/lib/")
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS}
+                            ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
+                            ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR}
+                            "${qpOASES_FOLDER}/include/" ${GTEST_INCLUDE_DIRS})
+
+LINK_DIRECTORIES(${ROS_HYDRO_LIB_FOLDER} "${qpOASES_FOLDER}/lib/" ${GTEST_LIB_DIRS})
 
 # add required linker flags
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
@@ -59,11 +74,36 @@ file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/JointLimits.cpp
                    src/wb_sot/bounds/velocity/VelocityLimits.cpp
                    src/wb_sot/bounds/velocity/Aggregated.cpp)
+add_custom_target(  wb_sot_test ALL
+                    COMMAND ${CMAKE_CTEST_COMMAND}
+                    DEPENDS wb_sot)
+
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
 ADD_EXECUTABLE(createParamTuner src/tests/createParamTuner.cpp)
 ADD_EXECUTABLE(uTest1 src/tests/unitTest1.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
+
+# gTests for Velocity Bounds
+SET(VelBLibs ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
+             ${kdl_codyco_LIBRARIES} orocos-kdl kdl_parser
+             ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
+             icubmod ${ICUB_LIBRARIES}
+             ${GTEST_BOTH_LIBRARIES})
+
+ADD_EXECUTABLE(testAggregatedVelB     src/tests/wb_sot/bounds/velocity/TestAggregated.cpp)
+TARGET_LINK_LIBRARIES(testAggregatedVelB ${VelBLibs})
+add_dependencies(testAggregatedVelB GTest-ext)
+
+ADD_EXECUTABLE(testJointLimitsVelB    src/tests/wb_sot/bounds/velocity/TestJointLimits.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsVelB ${VelBLibs})
+add_dependencies(testJointLimitsVelB GTest-ext)
+
+ADD_EXECUTABLE(testVelocityLimitsVelB src/tests/wb_sot/bounds/velocity/TestVelocityLimits.cpp)
+TARGET_LINK_LIBRARIES(testVelocityLimitsVelB ${VelBLibs})
+add_dependencies(testVelocityLimitsVelB GTest-ext)
+
+add_test(VelocityBounds testAggregatedVelB testJointLimitsVelB testVelocityLimitsVelB)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)
