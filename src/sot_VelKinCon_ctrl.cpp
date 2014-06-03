@@ -538,7 +538,7 @@ if(use_3_stacks) {
 
     if(last_stack_type == LAST_STACK_TYPE_POSTURAL) {
         F = Q_postural;
-        f = postural_weight_coefficient*eq;
+        f = postural_weight_coefficient * Q_postural * eq;
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_GRAVITY_GRADIENT) {
         F = yarp::math::pile(Q_postural, gGradient);
