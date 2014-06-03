@@ -80,14 +80,10 @@ enum sot_VelKinCon_ParamId {
 enum sot_VelKinCon_last_stack_type {
     // (A=I, b=(q-q_ref), q_ref <- initial_config.ini
     LAST_STACK_TYPE_POSTURAL,
-    // (A=[I;grad_g(q)], b=[q-q_ref;0])  grad_g(q) E R^1xn
-    LAST_STACK_TYPE_POSTURAL_AND_GRAVITY_GRADIENT,
     // (A=I, b=grad_g(q)^T)
     LAST_STACK_TYPE_MINIMUM_EFFORT,
     // (A=[I;I], b=[q-q_ref;grad_g(q)^T])
-    LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT,
-    // (A=[0], b=grad_g(q)^T])
-    LAST_STACK_TYPE_LINEAR_GRAVITY_GRADIENT
+    LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT
 };
 
 enum sot_VelKinCon_postural_weight_strategy {

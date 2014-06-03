@@ -463,17 +463,6 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     extractJacobians(JRWrist, JLWrist);
 
-    ///////////////////////////////////////
-    yarp::sig::Matrix torso_weight(6,6); torso_weight.eye();
-    torso_weight = 10.0 * torso_weight;
-    for(unsigned int i = 0; i < idynutils.torso.joint_numbers.size(); ++i)
-    {
-        JLWrist.getCol(idynutils.torso.joint_numbers[i]) = torso_weight * JLWrist.getCol(idynutils.torso.joint_numbers[i]);
-        JRWrist.getCol(idynutils.torso.joint_numbers[i]) = torso_weight * JRWrist.getCol(idynutils.torso.joint_numbers[i]);
-    }
-    ///////////////////////////////////////
-
-
     cartesian_utils::computeCartesianError(pos_wrist_R, right_arm_pos_ref,
                                            eRWrist_p, eRWrist_o);
     cartesian_utils::computeCartesianError(pos_wrist_L, left_arm_pos_ref,
@@ -529,38 +518,56 @@ if(use_3_stacks) {
 	}
 
     gradientGq = -1.0 * getGravityCompensationGradient2(W);
-    yarp::sig::Matrix gGradient(1, eq.size());
-    gGradient.setRow(0, gradientGq);
 
     yarp::sig::Matrix F;
     yarp::sig::Vector f;
     qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
 
-    if(last_stack_type == LAST_STACK_TYPE_POSTURAL) {
+    /////////////////////////////////////////////
+//    eq[idynutils.torso.joint_numbers[0]] = 0.0;
+//    eq[idynutils.torso.joint_numbers[1]] = 0.0;
+//    eq[idynutils.torso.joint_numbers[2]] = 0.0;
+    Q_postural(idynutils.torso.joint_numbers[0], idynutils.torso.joint_numbers[0]) = 100.0;
+    Q_postural(idynutils.torso.joint_numbers[1], idynutils.torso.joint_numbers[1]) = 100.0;
+    Q_postural(idynutils.torso.joint_numbers[2], idynutils.torso.joint_numbers[2]) = 100.0;
+    /////////////////////////////////////////////
+
+    if(last_stack_type == LAST_STACK_TYPE_POSTURAL)
+    {
+        /**
+          *  (dq - e)'Q^2(dq - e)
+          **/
+        eq.zero();
         F = Q_postural;
-        f = postural_weight_coefficient * Q_postural * eq;
+        f = Q_postural * eq;
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
-    } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_GRAVITY_GRADIENT) {
-        F = yarp::math::pile(Q_postural, gGradient);
-        f = yarp::math::cat(postural_weight_coefficient*eq, zero);
-        qpOasesPosturalHessianType = qpOASES::HST_SEMIDEF;
-    } else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT) {
+    }
+    else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT)
+    {
+        /**
+          *  (dq + grad(g(q)))'(dq + grad(g(q)))
+          **/
         unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
         F.resize(nJ,nJ); F.eye();
-        f = mineffort_weight_coefficient*gradientGq;
+        f = mineffort_weight_coefficient * gradientGq;
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
-    } else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT) {
+    }
+    else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
+    {
+        /**
+          *  (dq - e)'Q^2(dq - e)
+          *  (dq + grad(g(q)))'(dq + grad(g(q)))
+          **/
         unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
         yarp::sig::Matrix I; I.resize(nJ,nJ); I.eye();
-        F = yarp::math::pile(sqrt(postural_weight_coefficient)*I, I);
-        f = yarp::math::cat(sqrt(postural_weight_coefficient)*eq, mineffort_weight_coefficient*gradientGq);
+
+        double l = postural_weight_coefficient;
+        double l2 = 1.0 - l;
+        F = yarp::math::pile( l * Q_postural, l2 * I );
+        f = yarp::math::cat( l * Q_postural * eq, l2 * mineffort_weight_coefficient * gradientGq);
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
-    } else { // last_stack_type == LAST_STACK_TYPE_LINEAR_GRAVITY_GRADIENT
-        unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
-        F.resize(nJ,nJ); F.zero();
-        f = gradientGq;
-        qpOasesPosturalHessianType = qpOASES::HST_ZERO;
     }
+
 
     bool control_computed = false;
     if(use_3_stacks) {
