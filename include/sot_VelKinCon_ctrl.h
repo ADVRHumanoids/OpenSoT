@@ -39,6 +39,7 @@ namespace wb_sot {
          yarp::sig::Vector getGravityCompensationTorque(const std::vector<std::string>& joint_names);
          yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q);
          yarp::sig::Vector getGravityCompensationGradient(const yarp::sig::Matrix& W);
+         yarp::sig::Vector getGravityCompensationGradient2(const yarp::sig::Matrix& W);
 
      private:
          paramHelp::ParamHelperServer   *paramHelper;

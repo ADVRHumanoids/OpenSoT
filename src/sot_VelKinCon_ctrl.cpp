@@ -528,7 +528,7 @@ if(use_3_stacks) {
             W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
 	}
 
-    gradientGq = getGravityCompensationGradient(W);
+    gradientGq = -1.0 * getGravityCompensationGradient2(W);
     yarp::sig::Matrix gGradient(1, eq.size());
     gGradient.setRow(0, gradientGq);
 
@@ -630,6 +630,31 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient(const yarp:
 
         double C_g_q_h = yarp::math::dot(tau_gravity_q, W*tau_gravity_q);
         gradient[i] = (C_g_q - C_g_q_h)/h;
+        deltas[i] = 0;
+    }
+
+    //double elapsed = yarp::os::Time::now() - start;
+    //ROS_WARN(" took %f ms", elapsed);
+    return gradient;
+}
+
+yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient2(const yarp::sig::Matrix& W)
+{
+    //double start = yarp::os::Time::now();
+    /// cost function is tau_g^t*tau_g
+    static yarp::sig::Vector gradient(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
+    static yarp::sig::Vector deltas(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
+    for(unsigned int i = 0; i < gradient.size(); ++i)
+    {
+        // forward method gradient computation, milligrad
+        const double h = 1E-3;
+        deltas[i] = h;
+        yarp::sig::Vector tau_gravity_q_a = getGravityCompensationTorque(q+deltas);
+        yarp::sig::Vector tau_gravity_q_b = getGravityCompensationTorque(q-deltas);
+
+        double C_g_q_a = yarp::math::dot(tau_gravity_q_a, W*tau_gravity_q_a);
+        double C_g_q_b = yarp::math::dot(tau_gravity_q_b, W*tau_gravity_q_b);
+        gradient[i] = (C_g_q_a - C_g_q_b)/(2*h);
         deltas[i] = 0;
     }
 
