@@ -230,7 +230,6 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MAX_JOINT_VELOCITY,           &max_joint_velocity));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_ORIENTATION_ERROR_GAIN,       &orientation_error_gain));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LAST_STACK_TYPE,              &last_stack_type));
-    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_STRATEGY,     &postural_weight_strategy));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_NORMALIZATION,&mineffort_weight_normalization));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
@@ -524,14 +523,6 @@ if(use_3_stacks) {
     yarp::sig::Vector f;
     qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
 
-    /////////////////////////////////////////////
-//    eq[idynutils.torso.joint_numbers[0]] = 0.0;
-//    eq[idynutils.torso.joint_numbers[1]] = 0.0;
-//    eq[idynutils.torso.joint_numbers[2]] = 0.0;
-    Q_postural(idynutils.torso.joint_numbers[0], idynutils.torso.joint_numbers[0]) = 100.0;
-    Q_postural(idynutils.torso.joint_numbers[1], idynutils.torso.joint_numbers[1]) = 100.0;
-    Q_postural(idynutils.torso.joint_numbers[2], idynutils.torso.joint_numbers[2]) = 100.0;
-    /////////////////////////////////////////////
 
     if(last_stack_type == LAST_STACK_TYPE_POSTURAL)
     {
@@ -579,7 +570,7 @@ if(use_3_stacks) {
                                                           idynutils.coman_iDyn3.getJointBoundMin(),
                                                           q, max_joint_velocity,
                                                           MilliSecToSec(getRate()),
-                                                          dq_ref);
+                                                          dq_ref, 0.5);
     } else {
         control_computed = task_solver::computeControlHQP(JEe, eEe,
                                                          F, f, qpOasesPosturalHessianType,
@@ -587,7 +578,7 @@ if(use_3_stacks) {
                                                          idynutils.coman_iDyn3.getJointBoundMin(),
                                                          q, max_joint_velocity,
                                                          MilliSecToSec(getRate()),
-                                                         dq_ref);
+                                                         dq_ref, 0.5);
     }
 
     if(!control_computed) {

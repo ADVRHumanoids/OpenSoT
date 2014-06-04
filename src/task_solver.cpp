@@ -23,7 +23,8 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const yarp::sig::Vector &q,
                                     const double &_maxJointVelocity,
                                     const double &_dT,
-                                    yarp::sig::Vector &dq_ref)
+                                    yarp::sig::Vector &dq_ref,
+                                    const double velocity_bounds_scale)
 {
     int nj = dq_ref.size();
     static bool initial_guess = false;
@@ -70,7 +71,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     u1 = (qMax - q)*_dT; //We consider joint limits as joint velocities limits [rad/sec]
     l1 = (qMin - q)*_dT;
 
-    yarp::sig::Vector u2(nj, _maxJointVelocity*_dT); //Max velocity
+    yarp::sig::Vector u2(nj, velocity_bounds_scale * _maxJointVelocity * _dT); //Max velocity
     yarp::sig::Vector u(nj); yarp::sig::Vector l(nj);
     for(unsigned int i = 0; i < nj; ++i){
         u[i] = std::min(u1[i], u2[i]);
@@ -180,6 +181,13 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
             nWSR = 2^32;
 
+            yarp::sig::Vector u2(nj, _maxJointVelocity * _dT); //Max velocity
+            yarp::sig::Vector u(nj); yarp::sig::Vector l(nj);
+            for(unsigned int i = 0; i < nj; ++i){
+                u[i] = std::min(u1[i], u2[i]);
+                l[i] = std::max(l1[i], -u2[i]);
+            }
+
             if(initial_guess == true)
                 qp2.init( H2.data(),g2.data(), B2.data(), l.data(), u.data(),
                           b2l.data(), b2u.data(), nWSR, 0,
@@ -229,7 +237,8 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const yarp::sig::Vector &q,
                                     const double &MAX_JOINT_VELOCITY,
                                     const double &dT,
-                                    yarp::sig::Vector &dq_ref)
+                                    yarp::sig::Vector &dq_ref,
+                                    const double velocity_bounds_scale)
 {
     int nj = dq_ref.size();
     static bool initial_guess = false;
@@ -268,7 +277,8 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     u1 = (qMax - q)*dT; //We consider joint limits as joint velocities limits [rad/sec]
     l1 = (qMin - q)*dT;
 
-    yarp::sig::Vector u2(nj, MAX_JOINT_VELOCITY*dT); //Max velocity
+    /// TEST
+    yarp::sig::Vector u2(nj, velocity_bounds_scale * MAX_JOINT_VELOCITY*dT); //Max velocity
     yarp::sig::Vector u(nj); yarp::sig::Vector l(nj);
     for(unsigned int i = 0; i < nj; ++i){
         u[i] = std::min(u1[i], u2[i]);
@@ -332,6 +342,13 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
         nWSR = 2^32;
 
+        yarp::sig::Vector u2(nj, MAX_JOINT_VELOCITY*dT); //Max velocity
+        yarp::sig::Vector u(nj); yarp::sig::Vector l(nj);
+        for(unsigned int i = 0; i < nj; ++i){
+            u[i] = std::min(u1[i], u2[i]);
+            l[i] = std::max(l1[i], -u2[i]);
+        }
+
         if(initial_guess == true)
             qp1.init( H1.data(),g1.data(), B1.data(), l.data(), u.data(),
                       b1l.data(), b1u.data(), nWSR, 0,
@@ -340,6 +357,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         else
             qp1.init( H1.data(),g1.data(), B1.data(), l.data(), u.data(),
                       b1l.data(), b1u.data(), nWSR, 0);
+
         if(dq1.size() != qp1.getNV()) {
             dq1.resize(qp1.getNV());
             initial_guess = false;
@@ -365,7 +383,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
             dq_ref = dq1;
             initial_guess = true;
             return true;
-        }
+       }
     }
     return false;
 }
