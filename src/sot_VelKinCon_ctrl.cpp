@@ -533,6 +533,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     if(last_stack_type == LAST_STACK_TYPE_POSTURAL)
     {
+        ROS_WARN("LAST_STACK_TYPE_POSTURAL");
         /**
           *  (dq - e)'Q^2(dq - e)
           **/
@@ -543,6 +544,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
     }
     else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT)
     {
+        ROS_WARN("LAST_STACK_TYPE_MINIMUM_EFFORT");
         /**
           *  (dq + grad(g(q)))'(dq + grad(g(q)))
           **/
@@ -553,6 +555,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
     }
     else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
     {
+        ROS_WARN("LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT");
         /**
           *  (dq - e)'Q^2(dq - e)
           *  (dq + grad(g(q)))'(dq + grad(g(q)))

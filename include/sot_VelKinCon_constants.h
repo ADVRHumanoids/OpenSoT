@@ -65,7 +65,6 @@ enum sot_VelKinCon_ParamId {
     PARAM_ID_USE_3_STACKS,
     PARAM_ID_MAX_JOINT_VELOCITY,
     PARAM_ID_ORIENTATION_ERROR_GAIN,
-    PARAM_ID_LAST_STACK_TYPE,
     PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,
     PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,
     PARAM_ID_VELOCITY_BOUNDS_SCALE,
@@ -125,7 +124,6 @@ new ParamProxyBasic<bool>("is_clik"                               ,PARAM_ID_CLIK
 new ParamProxyBasic<bool>("left_arm_impedance_control",            PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL,          1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for left arm"),
 new ParamProxyBasic<bool>("right_arm_impedance_control",           PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL,         1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for right arm"),
 new ParamProxyBasic<bool>("torso_impedance_control",               PARAM_ID_TORSO_IMPEDANCE_CONTROL,             1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for torso"),
-new ParamProxyBasic<int>("last_stack_type",                        PARAM_ID_LAST_STACK_TYPE,                     1,        &SOT_LAST_STACK_TYPE_BOUNDS,           PARAM_CONFIG,     NULL,                                                    "type of last stack. It is an enum, with values 0: postural (A=I, b=(q-q_ref)) 1: postural and gravity gradient (A=[I;grad_g(q)], b=[q-q_ref;0]) 2: (gravity torque) minimum effort (A=I, b=grad_g(q)^T) 3: postural and minimum effort (wrt gravity) (A=[I;I], b =[q-q_ref;grad_g(q)^T])"),
 new ParamProxyBasic<double>("dT",                                  PARAM_ID_DT,                                  1,        ParamLowerBound<double>(1e-3),         PARAM_CONFIG,     NULL,                                                    "frequency to use for the SoT (1/dT , dT is [s])")
 };
 
