@@ -79,3 +79,8 @@ add_custom_target(  copy_conf_files_to_build ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/app/conf"
         "${CMAKE_BINARY_DIR}/")
+
+add_custom_target(generate_paramsTuner_gui ALL
+    COMMAND "${CMAKE_BINARY_DIR}/createParamTuner" > "${CMAKE_CURRENT_SOURCE_DIR}/app/resources/tuner.xml")
+
+add_dependencies(generate_paramsTuner_gui createParamTuner)
