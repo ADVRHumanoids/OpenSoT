@@ -34,6 +34,28 @@ using namespace std;
 namespace wb_sot
 {
 
+enum sot_VelKinCon_last_stack_type {
+    // (A=I, b=(q-q_ref), q_ref <- initial_config.ini
+    LAST_STACK_TYPE_POSTURAL,
+    // (A=I, b=grad_g(q)^T)
+    LAST_STACK_TYPE_MINIMUM_EFFORT,
+    // (A=[I;I], b=[q-q_ref;grad_g(q)^T])
+    LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT,
+
+    LAST_STACK_TYPE_SIZE
+};
+
+enum sot_VelKinCon_postural_weight_strategy {
+    // postural uses Identity weight matrix
+    POSTURAL_WEIGHT_STRATEGY_IDENTITY,
+    // diag(grad_g(q))
+    POSTURAL_WEIGHT_STRATEGY_GRAD_G,
+    // postural uses joint-space Inertia matrix
+    POSTURAL_WEIGHT_STRATEGY_JOINT_SPACE_INERTIA,
+
+    POSTURAL_WEIGHT_STRATEGY_SIZE
+};
+
 // *** DEFAULT PARAMETER VALUES
 // Streaming parameters
 static const double                     SOT_DEFAULT_ELAPSED(0.0);
@@ -43,12 +65,14 @@ static const bool                       SOT_DEFAULT_QPOASES_ENABLE_REGULARISATIO
 static const double                     SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER(2e2);
 static const bool                       SOT_DEFAULT_CLIK(false);
 static const double                     SOT_DEFAULT_VELOCITY_BOUNDS_SCALE(0.5);
+static const int                        SOT_DEFAULT_POSTURAL_WEIGHT_STRATEGY(0);
 
 static const paramHelp::ParamBilatBounds<double> SOT_MAX_JOINT_VELOCITY_BOUNDS(ParamBilatBounds<double>(0,1.0));
 static const paramHelp::ParamBilatBounds<int> SOT_LAST_STACK_TYPE_BOUNDS(ParamBilatBounds<int>(0,2));
 static const paramHelp::ParamLowerBound<int> SOT_QPOASES_NWSR_BOUND(ParamLowerBound<int>(0));
 static const paramHelp::ParamBilatBounds<double> SOT_POSTURAL_WEIGHT_COEFFICENT_BOUNDS(ParamBilatBounds<double>(0,1.0));
 static const paramHelp::ParamBilatBounds<double> SOT_VELOCITY_BOUNDS_SCALE(ParamBilatBounds<double>(0.1,1.0));
+static const paramHelp::ParamBilatBounds<int> SOT_POSTURAL_WEIGHT_STRATEGY_BOUNDS(ParamBilatBounds<int>(0,POSTURAL_WEIGHT_STRATEGY_SIZE));
 
 
 // *** IDs of all the module streaming parameters
@@ -67,6 +91,7 @@ enum sot_VelKinCon_ParamId {
     PARAM_ID_ORIENTATION_ERROR_GAIN,
     PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,
     PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,
+    PARAM_ID_POSTURAL_WEIGHT_STRATEGY,
     PARAM_ID_VELOCITY_BOUNDS_SCALE,
     PARAM_ID_QPOASES_NWSR0, PARAM_ID_QPOASES_NWSR1, PARAM_ID_QPOASES_NWSR2,
     PARAM_ID_QPOASES_ENABLEREGULARISATION0, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER0,
@@ -78,14 +103,7 @@ enum sot_VelKinCon_ParamId {
     PARAM_ID_SIZE /*This is the number of parameters, so it must be the last value of the enum.*/
 };
 
-enum sot_VelKinCon_last_stack_type {
-    // (A=I, b=(q-q_ref), q_ref <- initial_config.ini
-    LAST_STACK_TYPE_POSTURAL,
-    // (A=I, b=grad_g(q)^T)
-    LAST_STACK_TYPE_MINIMUM_EFFORT,
-    // (A=[I;I], b=[q-q_ref;grad_g(q)^T])
-    LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT
-};
+
 
 // ******************************************************************************************************************************
 // ****************************************** DESCRIPTION OF ALL THE MODULE PARAMETERS ******************************************
@@ -109,6 +127,7 @@ new ParamProxyBasic<double>("max_joint_velocity",                  PARAM_ID_MAX_
 new ParamProxyBasic<double>("orientation_error_gain",              PARAM_ID_ORIENTATION_ERROR_GAIN,              1,                                               PARAM_IN_OUT,     NULL,                                                    "the orientation gain is used to weight orientation error over position eRWrist = yarp::math::cat(eRWrist_p,-ORIENTATION_ERROR_GAIN*eRWrist_o);"),
 new ParamProxyBasic<double>("postural_weight_coefficient",         PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,         1,        &SOT_POSTURAL_WEIGHT_COEFFICENT_BOUNDS,PARAM_IN_OUT,     NULL,                                                    "postural weight coefficient. It is a scalar multiplying the postural weight gradient. Especially important when using last_stack_type 2."),
 new ParamProxyBasic<double>("mineffort_weight_coefficient",        PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,        1,                                               PARAM_IN_OUT,     NULL,                                                    "mineffort weight coefficient. It is a scalar multiplying the mineffort weight gradient."),
+new ParamProxyBasic<int>("postural_weight_strategy",               PARAM_ID_POSTURAL_WEIGHT_STRATEGY,            1,        &SOT_POSTURAL_WEIGHT_STRATEGY_BOUNDS,  PARAM_IN_OUT,     &SOT_DEFAULT_POSTURAL_WEIGHT_STRATEGY,                   "weight used for joints postural last task."),
 new ParamProxyBasic<double>("velocity_bounds_scale",               PARAM_ID_VELOCITY_BOUNDS_SCALE,               1,        &SOT_VELOCITY_BOUNDS_SCALE,            PARAM_IN_OUT,     &SOT_DEFAULT_VELOCITY_BOUNDS_SCALE,                      "scale of joint velocities used in Cartesian tasks"),
 new ParamProxyBasic<int>("qpOases_nWSR0",                          PARAM_ID_QPOASES_NWSR0,                       1,        &SOT_QPOASES_NWSR_BOUND,               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_NWSR,                               "qpOases Maximum Number of Working Set recalculations for the first task. If too low, the QP can fail to converge."),
 new ParamProxyBasic<int>("qpOases_nWSR1",                          PARAM_ID_QPOASES_NWSR1,                       1,        &SOT_QPOASES_NWSR_BOUND,               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_NWSR,                               "qpOases Maximum Number of Working Set recalculations for the second task. If too low, the QP can fail to converge."),

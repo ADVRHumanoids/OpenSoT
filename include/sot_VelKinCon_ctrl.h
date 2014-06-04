@@ -136,6 +136,9 @@ namespace wb_sot {
          void checkInput();
          void move();
          bool controlLaw();
+         void computeLastTaskType();
+         void computePosturalWeight();
+         void computeMinEffort();
 
          /**
            We use this function to set to zero all the part of the Jacobians that we are not

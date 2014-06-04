@@ -85,6 +85,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     worldT.eye();
 
     velocity_bounds_scale = 1.0;
+    postural_weight_strategy = 0;
 
     is_clik = false;
 }
@@ -233,6 +234,7 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_ORIENTATION_ERROR_GAIN,       &orientation_error_gain));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_STRATEGY,     &postural_weight_strategy));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_VELOCITY_BOUNDS_SCALE,        &velocity_bounds_scale));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR0,                &qpOASES_NWSR0));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR1,                &qpOASES_NWSR1));
@@ -505,35 +507,24 @@ bool sot_VelKinCon_ctrl::controlLaw()
     **/
     yarp::sig::Vector eq = (q_ref - q);
 
-    yarp::sig::Matrix W(idynutils.coman_iDyn3.getJointTorqueMax().size(), idynutils.coman_iDyn3.getJointTorqueMax().size());
-    W.eye();
-    for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
-        W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
-    gradientGq = -1.0 * getGravityCompensationGradient(W);
+    // Here I compute if the last task is pure postural, min effort or between
+    computeLastTaskType();
+
+    // Here I compute weights for the postural task if needed
+    if(last_stack_type == LAST_STACK_TYPE_POSTURAL ||
+       last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
+        computePosturalWeight();
+
+    // Here I compute gardient of garvity torques for the min effort task if needed
+    if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT ||
+            last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
+        computeMinEffort();
 
     yarp::sig::Matrix F;
     yarp::sig::Vector f;
     qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
-
-
-
-    //Q_postural.diagonal(-1.0 * gradientGq);
-
-    yarp::sig::Matrix M;
-    idynutils.coman_iDyn3.getFloatingBaseMassMatrix(M);
-    M.removeCols(0,6); M.removeRows(0,6);
-    Q_postural = M;
-
-    if(postural_weight_coefficient <= 0.001)
-        last_stack_type = LAST_STACK_TYPE_MINIMUM_EFFORT;
-    else if(postural_weight_coefficient > 0.9)
-        last_stack_type = LAST_STACK_TYPE_POSTURAL;
-    else
-        last_stack_type = LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT;
-
     if(last_stack_type == LAST_STACK_TYPE_POSTURAL)
     {
-        ROS_WARN("LAST_STACK_TYPE_POSTURAL");
         /**
           *  (dq - e)'Q^2(dq - e)
           **/
@@ -544,7 +535,6 @@ bool sot_VelKinCon_ctrl::controlLaw()
     }
     else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT)
     {
-        ROS_WARN("LAST_STACK_TYPE_MINIMUM_EFFORT");
         /**
           *  (dq + grad(g(q)))'(dq + grad(g(q)))
           **/
@@ -555,7 +545,6 @@ bool sot_VelKinCon_ctrl::controlLaw()
     }
     else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
     {
-        ROS_WARN("LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT");
         /**
           *  (dq - e)'Q^2(dq - e)
           *  (dq + grad(g(q)))'(dq + grad(g(q)))
@@ -651,4 +640,38 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient(const yarp:
     //double elapsed = yarp::os::Time::now() - start;
     //ROS_WARN(" took %f ms", elapsed);
     return gradient;
+}
+
+void sot_VelKinCon_ctrl::computeLastTaskType()
+{
+    if(postural_weight_coefficient <= 0.001)
+        last_stack_type = LAST_STACK_TYPE_MINIMUM_EFFORT;
+    else if(postural_weight_coefficient > 0.9)
+        last_stack_type = LAST_STACK_TYPE_POSTURAL;
+    else
+        last_stack_type = LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT;
+}
+
+void sot_VelKinCon_ctrl::computePosturalWeight()
+{
+    if(postural_weight_strategy == POSTURAL_WEIGHT_STRATEGY_IDENTITY)
+        Q_postural = Q_postural.eye();
+    else if(postural_weight_strategy == POSTURAL_WEIGHT_STRATEGY_GRAD_G)
+        Q_postural.diagonal(-1.0 * gradientGq);
+    else if(postural_weight_strategy == POSTURAL_WEIGHT_STRATEGY_JOINT_SPACE_INERTIA)
+    {
+        yarp::sig::Matrix M;
+        idynutils.coman_iDyn3.getFloatingBaseMassMatrix(M);
+        M.removeCols(0,6); M.removeRows(0,6);
+        Q_postural = M;
+    }
+}
+
+void sot_VelKinCon_ctrl::computeMinEffort()
+{
+    yarp::sig::Matrix W(idynutils.coman_iDyn3.getJointTorqueMax().size(), idynutils.coman_iDyn3.getJointTorqueMax().size());
+    W.eye();
+    for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
+        W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
+    gradientGq = -1.0 * getGravityCompensationGradient(W);
 }
