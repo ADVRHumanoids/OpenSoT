@@ -100,7 +100,6 @@ namespace wb_sot {
          unsigned int last_stack_type;
          unsigned int postural_weight_strategy;
          double postural_weight_coefficient;
-         bool mineffort_weight_normalization;
          double mineffort_weight_coefficient;
          double w_torso_weight;
          unsigned int qpOASES_NWSR0;

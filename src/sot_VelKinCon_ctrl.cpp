@@ -231,7 +231,6 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_ORIENTATION_ERROR_GAIN,       &orientation_error_gain));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LAST_STACK_TYPE,              &last_stack_type));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
-    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_NORMALIZATION,&mineffort_weight_normalization));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_W_TORSO_WEIGHT,               &w_torso_weight));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR0,                &qpOASES_NWSR0));
@@ -511,12 +510,8 @@ if(use_3_stacks) {
 
     yarp::sig::Matrix W(idynutils.coman_iDyn3.getJointTorqueMax().size(), idynutils.coman_iDyn3.getJointTorqueMax().size());
     W.eye();
-
-    if(mineffort_weight_normalization) {
-        for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
-            W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
-	}
-
+    for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
+        W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
     gradientGq = -1.0 * getGravityCompensationGradient(W);
 
     yarp::sig::Matrix F;

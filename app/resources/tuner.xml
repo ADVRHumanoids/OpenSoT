@@ -25,12 +25,18 @@
     <property name="step_increment">0.1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="adjustment_19">
+  <object class="GtkAdjustment" id="adjustment_18">
     <property name="lower">-65532</property>
     <property name="upper">65532</property>
     <property name="step_increment">0.1</property>
     <property name="page_increment">10</property>
   </object>
+   <object class="GtkAdjustment" id="adjustment_19">
+      <property name="lower">0</property>
+      <property name="upper">65532</property>
+     <property name="step_increment">1</property>
+     <property name="page_increment">10</property>
+   </object>
    <object class="GtkAdjustment" id="adjustment_20">
       <property name="lower">0</property>
       <property name="upper">65532</property>
@@ -43,25 +49,19 @@
      <property name="step_increment">1</property>
      <property name="page_increment">10</property>
    </object>
-   <object class="GtkAdjustment" id="adjustment_22">
-      <property name="lower">0</property>
-      <property name="upper">65532</property>
-     <property name="step_increment">1</property>
-     <property name="page_increment">10</property>
-   </object>
-  <object class="GtkAdjustment" id="adjustment_24">
+  <object class="GtkAdjustment" id="adjustment_23">
     <property name="lower">-65532</property>
     <property name="upper">65532</property>
     <property name="step_increment">0.1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="adjustment_26">
+  <object class="GtkAdjustment" id="adjustment_25">
     <property name="lower">-65532</property>
     <property name="upper">65532</property>
     <property name="step_increment">0.1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="adjustment_28">
+  <object class="GtkAdjustment" id="adjustment_27">
     <property name="lower">-65532</property>
     <property name="upper">65532</property>
     <property name="step_increment">0.1</property>
@@ -429,76 +429,29 @@
                     </packing>
                   </child>
 
-                 <child>
-                   <object class="GtkExpander" id="expander_18">
-                     <property name="visible">True</property>
-                       <property name="can_focus">False</property>
-                       <property name="tooltip_text" translatable="yes">mineffort weight normalization. If true, normalize the gradient with the torque limits</property>
-                       <property name="expanded">True</property>
-                       <child>
-                         <object class="GtkBox" id="vbox_18">
-                           <property name="visible">True</property>
-                           <property name="can_focus">False</property>
-                           <property name="orientation">vertical</property>
-                           <child>
-                             <object class="GtkCheckButton" id="checkbutton_18">
-                               <property name="label" translatable="yes">mineffort_weight_normalization</property>
-                               <property name="tooltip_text" translatable="yes">mineffort weight normalization. If true, normalize the gradient with the torque limits</property>
-                               <property name="visible">True</property>
-                               <property name="can_focus">False</property>
-                               <property name="receives_default">False</property>
-                               <property name="xalign">0</property>
-                               <property name="draw_indicator">True</property>
-                               <signal name="toggled" handler="onValueChangedBool" swapped="no"/>
-                             </object>
-                             <packing>
-                               <property name="expand">False</property>
-                               <property name="fill">True</property>
-                               <property name="position">0</property>
-                             </packing>
-                           </child>
-                        </object>
-                       </child>
-                       <child type="label">
-                         <object class="GtkLabel" id="expander_18_label">
-                           <property name="visible">True</property>
-                           <property name="can_focus">False</property>
-                           <property name="tooltip_text" translatable="yes">mineffort weight normalization. If true, normalize the gradient with the torque limits</property>
-                           <property name="label" translatable="yes">mineffort_weight_normalization</property>
-                         </object>
-                       </child>
-                     </object>
-                     <packing>
-                       <property name="expand">False</property>
-                       <property name="fill">True</property>
-                       <property name="padding">5</property>
-                       <property name="position">0</property>
-                     </packing>
-                   </child>
-
                 <child>
-                  <object class="GtkExpander" id="expander_19">
+                  <object class="GtkExpander" id="expander_18">
                     <property name="visible">True</property>
                       <property name="can_focus">False</property>
                       <property name="tooltip_text" translatable="yes">what weight the torso should have in Postural Weight Scheme 1</property>
                       <property name="expanded">True</property>
                       <child>
-                        <object class="GtkBox" id="vbox_19">
+                        <object class="GtkBox" id="vbox_18">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="orientation">vertical</property>
                       <child>
-                        <object class="GtkBox" id="hbox_19">
+                        <object class="GtkBox" id="hbox_18">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <child>
-                                <object class="GtkSpinButton" id="spinbutton_19">
+                                <object class="GtkSpinButton" id="spinbutton_18">
                                   <property name="width_request">315</property>
                                   <property name="visible">True</property>
                                   <property name="can_focus">True</property>
                                   <property name="invisible_char">•</property>
                                   <property name="input_purpose">digits</property>
-                                  <property name="adjustment">adjustment_19</property>
+                                  <property name="adjustment">adjustment_18</property>
                                   <property name="digits">2</property>
                                   <property name="snap_to_ticks">True</property>
                                   <property name="numeric">True</property>
@@ -522,7 +475,7 @@
                         </object>
                       </child>
                       <child type="label">
-                        <object class="GtkLabel" id="expander_19_label">
+                        <object class="GtkLabel" id="expander_18_label">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="tooltip_text" translatable="yes">what weight the torso should have in Postural Weight Scheme 1</property>
@@ -539,10 +492,91 @@
                   </child>
 
                  <child>
-                   <object class="GtkExpander" id="expander_20">
+                   <object class="GtkExpander" id="expander_19">
                      <property name="visible">True</property>
                        <property name="can_focus">False</property>
                        <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the first task. If too low, the QP can fail to converge.</property>
+                       <property name="expanded">True</property>
+                       <child>
+                         <object class="GtkBox" id="vbox_19">
+                           <property name="visible">True</property>
+                           <property name="can_focus">False</property>
+                           <property name="orientation">vertical</property>
+                       <child>
+                         <object class="GtkBox" id="hbox_19">
+                           <property name="visible">True</property>
+                           <property name="can_focus">False</property>
+                           <child>
+                             <object class="GtkScale" id="scale_19">
+                               <property name="width_request">200</property>
+                               <property name="visible">True</property>
+                               <property name="can_focus">False</property>
+                               <property name="adjustment">adjustment_19</property>
+                               <property name="restrict_to_fill_level">False</property>
+                               <property name="fill_level">0</property>
+                               <property name="round_digits">0</property>
+                               <property name="digits">0</property>
+                               <property name="value_pos">bottom</property>
+                             </object>
+                             <packing>
+                               <property name="expand">False</property>
+                               <property name="fill">True</property>
+                               <property name="padding">5</property>
+                               <property name="position">0</property>
+                             </packing>
+                           </child>
+                           <child>
+                             <object class="GtkSpinButton" id="spinbutton_19">
+                               <property name="width_request">90</property>
+                               <property name="visible">True</property>
+                               <property name="can_focus">True</property>
+                               <property name="invisible_char">•</property>
+                               <property name="input_purpose">digits</property>
+                               <property name="adjustment">adjustment_19</property>
+                               <property name="digits">0</property>
+                               <property name="snap_to_ticks">True</property>
+                               <property name="numeric">True</property>
+                               <property name="update_policy">if-valid</property>
+                               <signal name="value-changed" handler="onValueChangedInt" swapped="no"/>
+                             </object>
+                             <packing>
+                               <property name="expand">False</property>
+                               <property name="fill">True</property>
+                               <property name="position">1</property>
+                             </packing>
+                           </child>
+                         </object>
+                         <packing>
+                           <property name="expand">False</property>
+                           <property name="fill">True</property>
+                           <property name="padding">5</property>
+                           <property name="position">1</property>
+                         </packing>
+                       </child>
+                         </object>
+                       </child>
+                       <child type="label">
+                         <object class="GtkLabel" id="expander_19_label">
+                           <property name="visible">True</property>
+                           <property name="can_focus">False</property>
+                           <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the first task. If too low, the QP can fail to converge.</property>
+                           <property name="label" translatable="yes">qpOases_nWSR0</property>
+                         </object>
+                       </child>
+                     </object>
+                     <packing>
+                       <property name="expand">False</property>
+                       <property name="fill">True</property>
+                       <property name="padding">5</property>
+                       <property name="position">0</property>
+                     </packing>
+                   </child>
+
+                 <child>
+                   <object class="GtkExpander" id="expander_20">
+                     <property name="visible">True</property>
+                       <property name="can_focus">False</property>
+                       <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the second task. If too low, the QP can fail to converge.</property>
                        <property name="expanded">True</property>
                        <child>
                          <object class="GtkBox" id="vbox_20">
@@ -606,8 +640,8 @@
                          <object class="GtkLabel" id="expander_20_label">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
-                           <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the first task. If too low, the QP can fail to converge.</property>
-                           <property name="label" translatable="yes">qpOases_nWSR0</property>
+                           <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the second task. If too low, the QP can fail to converge.</property>
+                           <property name="label" translatable="yes">qpOases_nWSR1</property>
                          </object>
                        </child>
                      </object>
@@ -623,7 +657,7 @@
                    <object class="GtkExpander" id="expander_21">
                      <property name="visible">True</property>
                        <property name="can_focus">False</property>
-                       <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the second task. If too low, the QP can fail to converge.</property>
+                       <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the third task. If too low, the QP can fail to converge.</property>
                        <property name="expanded">True</property>
                        <child>
                          <object class="GtkBox" id="vbox_21">
@@ -687,8 +721,8 @@
                          <object class="GtkLabel" id="expander_21_label">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
-                           <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the second task. If too low, the QP can fail to converge.</property>
-                           <property name="label" translatable="yes">qpOases_nWSR1</property>
+                           <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the third task. If too low, the QP can fail to converge.</property>
+                           <property name="label" translatable="yes">qpOases_nWSR2</property>
                          </object>
                        </child>
                      </object>
@@ -704,96 +738,15 @@
                    <object class="GtkExpander" id="expander_22">
                      <property name="visible">True</property>
                        <property name="can_focus">False</property>
-                       <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the third task. If too low, the QP can fail to converge.</property>
+                       <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the first task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
                        <property name="expanded">True</property>
                        <child>
                          <object class="GtkBox" id="vbox_22">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="orientation">vertical</property>
-                       <child>
-                         <object class="GtkBox" id="hbox_22">
-                           <property name="visible">True</property>
-                           <property name="can_focus">False</property>
                            <child>
-                             <object class="GtkScale" id="scale_22">
-                               <property name="width_request">200</property>
-                               <property name="visible">True</property>
-                               <property name="can_focus">False</property>
-                               <property name="adjustment">adjustment_22</property>
-                               <property name="restrict_to_fill_level">False</property>
-                               <property name="fill_level">0</property>
-                               <property name="round_digits">0</property>
-                               <property name="digits">0</property>
-                               <property name="value_pos">bottom</property>
-                             </object>
-                             <packing>
-                               <property name="expand">False</property>
-                               <property name="fill">True</property>
-                               <property name="padding">5</property>
-                               <property name="position">0</property>
-                             </packing>
-                           </child>
-                           <child>
-                             <object class="GtkSpinButton" id="spinbutton_22">
-                               <property name="width_request">90</property>
-                               <property name="visible">True</property>
-                               <property name="can_focus">True</property>
-                               <property name="invisible_char">•</property>
-                               <property name="input_purpose">digits</property>
-                               <property name="adjustment">adjustment_22</property>
-                               <property name="digits">0</property>
-                               <property name="snap_to_ticks">True</property>
-                               <property name="numeric">True</property>
-                               <property name="update_policy">if-valid</property>
-                               <signal name="value-changed" handler="onValueChangedInt" swapped="no"/>
-                             </object>
-                             <packing>
-                               <property name="expand">False</property>
-                               <property name="fill">True</property>
-                               <property name="position">1</property>
-                             </packing>
-                           </child>
-                         </object>
-                         <packing>
-                           <property name="expand">False</property>
-                           <property name="fill">True</property>
-                           <property name="padding">5</property>
-                           <property name="position">1</property>
-                         </packing>
-                       </child>
-                         </object>
-                       </child>
-                       <child type="label">
-                         <object class="GtkLabel" id="expander_22_label">
-                           <property name="visible">True</property>
-                           <property name="can_focus">False</property>
-                           <property name="tooltip_text" translatable="yes">qpOases Maximum Number of Working Set recalculations for the third task. If too low, the QP can fail to converge.</property>
-                           <property name="label" translatable="yes">qpOases_nWSR2</property>
-                         </object>
-                       </child>
-                     </object>
-                     <packing>
-                       <property name="expand">False</property>
-                       <property name="fill">True</property>
-                       <property name="padding">5</property>
-                       <property name="position">0</property>
-                     </packing>
-                   </child>
-
-                 <child>
-                   <object class="GtkExpander" id="expander_23">
-                     <property name="visible">True</property>
-                       <property name="can_focus">False</property>
-                       <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the first task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
-                       <property name="expanded">True</property>
-                       <child>
-                         <object class="GtkBox" id="vbox_23">
-                           <property name="visible">True</property>
-                           <property name="can_focus">False</property>
-                           <property name="orientation">vertical</property>
-                           <child>
-                             <object class="GtkCheckButton" id="checkbutton_23">
+                             <object class="GtkCheckButton" id="checkbutton_22">
                                <property name="label" translatable="yes">qpOases_enableRegularisation0</property>
                                <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the first task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
                                <property name="visible">True</property>
@@ -812,7 +765,7 @@
                         </object>
                        </child>
                        <child type="label">
-                         <object class="GtkLabel" id="expander_23_label">
+                         <object class="GtkLabel" id="expander_22_label">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the first task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
@@ -829,18 +782,18 @@
                    </child>
 
                  <child>
-                   <object class="GtkExpander" id="expander_25">
+                   <object class="GtkExpander" id="expander_24">
                      <property name="visible">True</property>
                        <property name="can_focus">False</property>
                        <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the second task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
                        <property name="expanded">True</property>
                        <child>
-                         <object class="GtkBox" id="vbox_25">
+                         <object class="GtkBox" id="vbox_24">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="orientation">vertical</property>
                            <child>
-                             <object class="GtkCheckButton" id="checkbutton_25">
+                             <object class="GtkCheckButton" id="checkbutton_24">
                                <property name="label" translatable="yes">qpOases_enableRegularisation1</property>
                                <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the second task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
                                <property name="visible">True</property>
@@ -859,7 +812,7 @@
                         </object>
                        </child>
                        <child type="label">
-                         <object class="GtkLabel" id="expander_25_label">
+                         <object class="GtkLabel" id="expander_24_label">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the second task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
@@ -876,18 +829,18 @@
                    </child>
 
                  <child>
-                   <object class="GtkExpander" id="expander_27">
+                   <object class="GtkExpander" id="expander_26">
                      <property name="visible">True</property>
                        <property name="can_focus">False</property>
                        <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the third task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
                        <property name="expanded">True</property>
                        <child>
-                         <object class="GtkBox" id="vbox_27">
+                         <object class="GtkBox" id="vbox_26">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="orientation">vertical</property>
                            <child>
-                             <object class="GtkCheckButton" id="checkbutton_27">
+                             <object class="GtkCheckButton" id="checkbutton_26">
                                <property name="label" translatable="yes">qpOases_enableRegularisation2</property>
                                <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the third task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
                                <property name="visible">True</property>
@@ -906,7 +859,7 @@
                         </object>
                        </child>
                        <child type="label">
-                         <object class="GtkLabel" id="expander_27_label">
+                         <object class="GtkLabel" id="expander_26_label">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="tooltip_text" translatable="yes">qpOases Regularisation term for the third task. it multiplies the default which is epsRegularisation = 5.0e3*EPS</property>
@@ -923,28 +876,28 @@
                    </child>
 
                 <child>
-                  <object class="GtkExpander" id="expander_24">
+                  <object class="GtkExpander" id="expander_23">
                     <property name="visible">True</property>
                       <property name="can_focus">False</property>
                       <property name="tooltip_text" translatable="yes">enable regularisation for the first task</property>
                       <property name="expanded">True</property>
                       <child>
-                        <object class="GtkBox" id="vbox_24">
+                        <object class="GtkBox" id="vbox_23">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="orientation">vertical</property>
                       <child>
-                        <object class="GtkBox" id="hbox_24">
+                        <object class="GtkBox" id="hbox_23">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <child>
-                                <object class="GtkSpinButton" id="spinbutton_24">
+                                <object class="GtkSpinButton" id="spinbutton_23">
                                   <property name="width_request">315</property>
                                   <property name="visible">True</property>
                                   <property name="can_focus">True</property>
                                   <property name="invisible_char">•</property>
                                   <property name="input_purpose">digits</property>
-                                  <property name="adjustment">adjustment_24</property>
+                                  <property name="adjustment">adjustment_23</property>
                                   <property name="digits">2</property>
                                   <property name="snap_to_ticks">True</property>
                                   <property name="numeric">True</property>
@@ -968,7 +921,7 @@
                         </object>
                       </child>
                       <child type="label">
-                        <object class="GtkLabel" id="expander_24_label">
+                        <object class="GtkLabel" id="expander_23_label">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="tooltip_text" translatable="yes">enable regularisation for the first task</property>
@@ -985,28 +938,28 @@
                   </child>
 
                 <child>
-                  <object class="GtkExpander" id="expander_26">
+                  <object class="GtkExpander" id="expander_25">
                     <property name="visible">True</property>
                       <property name="can_focus">False</property>
                       <property name="tooltip_text" translatable="yes">enable regularisation for the second task</property>
                       <property name="expanded">True</property>
                       <child>
-                        <object class="GtkBox" id="vbox_26">
+                        <object class="GtkBox" id="vbox_25">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="orientation">vertical</property>
                       <child>
-                        <object class="GtkBox" id="hbox_26">
+                        <object class="GtkBox" id="hbox_25">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <child>
-                                <object class="GtkSpinButton" id="spinbutton_26">
+                                <object class="GtkSpinButton" id="spinbutton_25">
                                   <property name="width_request">315</property>
                                   <property name="visible">True</property>
                                   <property name="can_focus">True</property>
                                   <property name="invisible_char">•</property>
                                   <property name="input_purpose">digits</property>
-                                  <property name="adjustment">adjustment_26</property>
+                                  <property name="adjustment">adjustment_25</property>
                                   <property name="digits">2</property>
                                   <property name="snap_to_ticks">True</property>
                                   <property name="numeric">True</property>
@@ -1030,7 +983,7 @@
                         </object>
                       </child>
                       <child type="label">
-                        <object class="GtkLabel" id="expander_26_label">
+                        <object class="GtkLabel" id="expander_25_label">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="tooltip_text" translatable="yes">enable regularisation for the second task</property>
@@ -1047,28 +1000,28 @@
                   </child>
 
                 <child>
-                  <object class="GtkExpander" id="expander_28">
+                  <object class="GtkExpander" id="expander_27">
                     <property name="visible">True</property>
                       <property name="can_focus">False</property>
                       <property name="tooltip_text" translatable="yes">enable regularisation for the first task</property>
                       <property name="expanded">True</property>
                       <child>
-                        <object class="GtkBox" id="vbox_28">
+                        <object class="GtkBox" id="vbox_27">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="orientation">vertical</property>
                       <child>
-                        <object class="GtkBox" id="hbox_28">
+                        <object class="GtkBox" id="hbox_27">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <child>
-                                <object class="GtkSpinButton" id="spinbutton_28">
+                                <object class="GtkSpinButton" id="spinbutton_27">
                                   <property name="width_request">315</property>
                                   <property name="visible">True</property>
                                   <property name="can_focus">True</property>
                                   <property name="invisible_char">•</property>
                                   <property name="input_purpose">digits</property>
-                                  <property name="adjustment">adjustment_28</property>
+                                  <property name="adjustment">adjustment_27</property>
                                   <property name="digits">2</property>
                                   <property name="snap_to_ticks">True</property>
                                   <property name="numeric">True</property>
@@ -1092,7 +1045,7 @@
                         </object>
                       </child>
                       <child type="label">
-                        <object class="GtkLabel" id="expander_28_label">
+                        <object class="GtkLabel" id="expander_27_label">
                           <property name="visible">True</property>
                           <property name="can_focus">False</property>
                           <property name="tooltip_text" translatable="yes">enable regularisation for the first task</property>
@@ -1109,18 +1062,18 @@
                   </child>
 
                  <child>
-                   <object class="GtkExpander" id="expander_29">
+                   <object class="GtkExpander" id="expander_28">
                      <property name="visible">True</property>
                        <property name="can_focus">False</property>
                        <property name="tooltip_text" translatable="yes">enable clik (closed loop inverse kinematics</property>
                        <property name="expanded">True</property>
                        <child>
-                         <object class="GtkBox" id="vbox_29">
+                         <object class="GtkBox" id="vbox_28">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="orientation">vertical</property>
                            <child>
-                             <object class="GtkCheckButton" id="checkbutton_29">
+                             <object class="GtkCheckButton" id="checkbutton_28">
                                <property name="label" translatable="yes">is_clik</property>
                                <property name="tooltip_text" translatable="yes">enable clik (closed loop inverse kinematics</property>
                                <property name="visible">True</property>
@@ -1139,7 +1092,7 @@
                         </object>
                        </child>
                        <child type="label">
-                         <object class="GtkLabel" id="expander_29_label">
+                         <object class="GtkLabel" id="expander_28_label">
                            <property name="visible">True</property>
                            <property name="can_focus">False</property>
                            <property name="tooltip_text" translatable="yes">enable clik (closed loop inverse kinematics</property>
