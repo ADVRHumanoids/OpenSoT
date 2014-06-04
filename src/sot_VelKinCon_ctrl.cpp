@@ -231,7 +231,6 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_USE_3_STACKS,                 &use_3_stacks));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MAX_JOINT_VELOCITY,           &max_joint_velocity));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_ORIENTATION_ERROR_GAIN,       &orientation_error_gain));
-    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LAST_STACK_TYPE,              &last_stack_type));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_VELOCITY_BOUNDS_SCALE,        &velocity_bounds_scale));
@@ -516,6 +515,21 @@ bool sot_VelKinCon_ctrl::controlLaw()
     yarp::sig::Vector f;
     qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
 
+
+
+    //Q_postural.diagonal(-1.0 * gradientGq);
+
+    yarp::sig::Matrix M;
+    idynutils.coman_iDyn3.getFloatingBaseMassMatrix(M);
+    M.removeCols(0,6); M.removeRows(0,6);
+    Q_postural = M;
+
+    if(postural_weight_coefficient <= 0.001)
+        last_stack_type = LAST_STACK_TYPE_MINIMUM_EFFORT;
+    else if(postural_weight_coefficient > 0.9)
+        last_stack_type = LAST_STACK_TYPE_POSTURAL;
+    else
+        last_stack_type = LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT;
 
     if(last_stack_type == LAST_STACK_TYPE_POSTURAL)
     {
