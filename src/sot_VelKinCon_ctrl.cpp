@@ -65,6 +65,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
 //    yarp::sig::Vector qMin = coman_iDyn3.getJointBoundMin();
 //    Q_postural.diagonal(computeW(qMin, qMax, right_arm_joint_numbers,
 //                                 left_arm_joint_numbers, waist_joint_numbers));
+
     zero.resize(1);
     zero.zero();
 
@@ -517,7 +518,7 @@ if(use_3_stacks) {
             W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
 	}
 
-    gradientGq = -1.0 * getGravityCompensationGradient2(W);
+    gradientGq = -1.0 * getGravityCompensationGradient(W);
 
     yarp::sig::Matrix F;
     yarp::sig::Vector f;
@@ -620,32 +621,11 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const yarp::s
     return tau;
 }
 
-/** compute gradient of an effort (due to gravity) cost function */
+/**
+ * Two-point formula: it computes the slope of a nearby secant line through the
+ * points (x-h,f(x-h)) and (x+h,f(x+h))
+ **/
 yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient(const yarp::sig::Matrix& W)
-{
-    //double start = yarp::os::Time::now();
-    /// cost function is tau_g^t*tau_g
-    double C_g_q = yarp::math::dot(tau_gravity, W*tau_gravity);
-    static yarp::sig::Vector gradient(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
-    static yarp::sig::Vector deltas(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
-    for(unsigned int i = 0; i < gradient.size(); ++i)
-    {
-        // forward method gradient computation, milligrad
-        const double h = 1E-3;
-        deltas[i] = h;
-        yarp::sig::Vector tau_gravity_q = getGravityCompensationTorque(q+deltas);
-
-        double C_g_q_h = yarp::math::dot(tau_gravity_q, W*tau_gravity_q);
-        gradient[i] = (C_g_q - C_g_q_h)/h;
-        deltas[i] = 0;
-    }
-
-    //double elapsed = yarp::os::Time::now() - start;
-    //ROS_WARN(" took %f ms", elapsed);
-    return gradient;
-}
-
-yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient2(const yarp::sig::Matrix& W)
 {
     //double start = yarp::os::Time::now();
     /// cost function is tau_g^t*tau_g
