@@ -42,11 +42,13 @@ static const int                        SOT_DEFAULT_QPOASES_NWSR(2^32);
 static const bool                       SOT_DEFAULT_QPOASES_ENABLE_REGULARISATION(true);
 static const double                     SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER(2e2);
 static const bool                       SOT_DEFAULT_CLIK(false);
+static const double                     SOT_DEFAULT_VELOCITY_BOUNDS_SCALE(0.5);
 
 static const paramHelp::ParamBilatBounds<double> SOT_MAX_JOINT_VELOCITY_BOUNDS(ParamBilatBounds<double>(0,1.0));
 static const paramHelp::ParamBilatBounds<int> SOT_LAST_STACK_TYPE_BOUNDS(ParamBilatBounds<int>(0,2));
 static const paramHelp::ParamLowerBound<int> SOT_QPOASES_NWSR_BOUND(ParamLowerBound<int>(0));
 static const paramHelp::ParamBilatBounds<double> SOT_POSTURAL_WEIGHT_COEFFICENT_BOUNDS(ParamBilatBounds<double>(0,1.0));
+static const paramHelp::ParamBilatBounds<double> SOT_VELOCITY_BOUNDS_SCALE(ParamBilatBounds<double>(0.1,1.0));
 
 
 // *** IDs of all the module streaming parameters
@@ -66,6 +68,7 @@ enum sot_VelKinCon_ParamId {
     PARAM_ID_LAST_STACK_TYPE,
     PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,
     PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,
+    PARAM_ID_VELOCITY_BOUNDS_SCALE,
     PARAM_ID_QPOASES_NWSR0, PARAM_ID_QPOASES_NWSR1, PARAM_ID_QPOASES_NWSR2,
     PARAM_ID_QPOASES_ENABLEREGULARISATION0, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER0,
     PARAM_ID_QPOASES_ENABLEREGULARISATION1, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,
@@ -105,8 +108,9 @@ new ParamProxyBasic<double>("eCoM",                                PARAM_ID_COM_
 new ParamProxyBasic<bool>("use_3_stacks",                          PARAM_ID_USE_3_STACKS,                        1,                                               PARAM_IN_OUT,     NULL,                                                    "use 3 stacks or two? If using three, first task is used for foot placement and precise CoM control"),
 new ParamProxyBasic<double>("max_joint_velocity",                  PARAM_ID_MAX_JOINT_VELOCITY,                  1,        &SOT_MAX_JOINT_VELOCITY_BOUNDS,        PARAM_IN_OUT,     NULL,                                                    "Maximum velocity [rad/sec] for the joints"),
 new ParamProxyBasic<double>("orientation_error_gain",              PARAM_ID_ORIENTATION_ERROR_GAIN,              1,                                               PARAM_IN_OUT,     NULL,                                                    "the orientation gain is used to weight orientation error over position eRWrist = yarp::math::cat(eRWrist_p,-ORIENTATION_ERROR_GAIN*eRWrist_o);"),
-new ParamProxyBasic<double>("postural_weight_coefficient",         PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,         1,        &SOT_POSTURAL_WEIGHT_COEFFICENT_BOUNDS,PARAM_IN_OUT,     NULL,                                                    "postural weight coefficient. It is a scalar multiplying the postural weight gradient. Especially important when using last_stack_type 1 and 3"),
-new ParamProxyBasic<double>("mineffort_weight_coefficient",        PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,        1,                                               PARAM_IN_OUT,     NULL,                                                    "mineffort weight coefficient. It is a scalar multiplying the mineffort weight gradient. Especially important when using last_stack_type 1 and 3"),
+new ParamProxyBasic<double>("postural_weight_coefficient",         PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,         1,        &SOT_POSTURAL_WEIGHT_COEFFICENT_BOUNDS,PARAM_IN_OUT,     NULL,                                                    "postural weight coefficient. It is a scalar multiplying the postural weight gradient. Especially important when using last_stack_type 2."),
+new ParamProxyBasic<double>("mineffort_weight_coefficient",        PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT,        1,                                               PARAM_IN_OUT,     NULL,                                                    "mineffort weight coefficient. It is a scalar multiplying the mineffort weight gradient."),
+new ParamProxyBasic<double>("velocity_bounds_scale",               PARAM_ID_VELOCITY_BOUNDS_SCALE,               1,        &SOT_VELOCITY_BOUNDS_SCALE,            PARAM_IN_OUT,     &SOT_DEFAULT_VELOCITY_BOUNDS_SCALE,                      "scale of joint velocities used in Cartesian tasks"),
 new ParamProxyBasic<int>("qpOases_nWSR0",                          PARAM_ID_QPOASES_NWSR0,                       1,        &SOT_QPOASES_NWSR_BOUND,               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_NWSR,                               "qpOases Maximum Number of Working Set recalculations for the first task. If too low, the QP can fail to converge."),
 new ParamProxyBasic<int>("qpOases_nWSR1",                          PARAM_ID_QPOASES_NWSR1,                       1,        &SOT_QPOASES_NWSR_BOUND,               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_NWSR,                               "qpOases Maximum Number of Working Set recalculations for the second task. If too low, the QP can fail to converge."),
 new ParamProxyBasic<int>("qpOases_nWSR2",                          PARAM_ID_QPOASES_NWSR2,                       1,        &SOT_QPOASES_NWSR_BOUND,               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_NWSR,                               "qpOases Maximum Number of Working Set recalculations for the third task. If too low, the QP can fail to converge."),

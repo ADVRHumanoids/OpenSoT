@@ -84,6 +84,8 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
 
     worldT.eye();
 
+    velocity_bounds_scale = 1.0;
+
     is_clik = false;
 }
 
@@ -232,6 +234,7 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LAST_STACK_TYPE,              &last_stack_type));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_VELOCITY_BOUNDS_SCALE,        &velocity_bounds_scale));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR0,                &qpOASES_NWSR0));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR1,                &qpOASES_NWSR1));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR2,                &qpOASES_NWSR2));
@@ -560,15 +563,17 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                           idynutils.coman_iDyn3.getJointBoundMin(),
                                                           q, max_joint_velocity,
                                                           MilliSecToSec(getRate()),
-                                                          dq_ref, 0.5);
-    } else {
+                                                          dq_ref, velocity_bounds_scale);
+    }
+    else
+    {
         control_computed = task_solver::computeControlHQP(JEe, eEe,
                                                          F, f, qpOasesPosturalHessianType,
                                                          idynutils.coman_iDyn3.getJointBoundMax(),
                                                          idynutils.coman_iDyn3.getJointBoundMin(),
                                                          q, max_joint_velocity,
                                                          MilliSecToSec(getRate()),
-                                                         dq_ref, 0.5);
+                                                         dq_ref, velocity_bounds_scale);
     }
 
     if(!control_computed) {

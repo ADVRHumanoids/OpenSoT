@@ -101,7 +101,7 @@ namespace wb_sot {
          unsigned int postural_weight_strategy;
          double postural_weight_coefficient;
          double mineffort_weight_coefficient;
-         double w_torso_weight;
+         double velocity_bounds_scale;
          unsigned int qpOASES_NWSR0;
          unsigned int qpOASES_NWSR1;
          unsigned int qpOASES_NWSR2;
