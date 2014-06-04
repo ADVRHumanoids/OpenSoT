@@ -31,11 +31,6 @@ namespace wb_sot {
          virtual bool threadInit();
          virtual void run();
 
-         static yarp::sig::Vector computeW(const yarp::sig::Vector& qMin, const yarp::sig::Vector& qMax,
-                                    const std::vector<unsigned int>& right_arm_joint_numbers,
-                                    const std::vector<unsigned int>& left_arm_joint_numbers,
-                                    const std::vector<unsigned int>& waist_joint_numbers,
-                                    const double w_torso_weight);
          yarp::sig::Vector getGravityCompensationTorque(const std::vector<std::string>& joint_names);
          yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q);
          yarp::sig::Vector getGravityCompensationGradient(const yarp::sig::Matrix& W);

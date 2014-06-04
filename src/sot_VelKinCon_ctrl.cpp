@@ -61,10 +61,6 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     gradientGq.resize(nJ);
     Q_postural.resize(nJ, nJ);
     Q_postural.eye();
-//    yarp::sig::Vector qMax = coman_iDyn3.getJointBoundMax();
-//    yarp::sig::Vector qMin = coman_iDyn3.getJointBoundMin();
-//    Q_postural.diagonal(computeW(qMin, qMax, right_arm_joint_numbers,
-//                                 left_arm_joint_numbers, waist_joint_numbers));
 
     zero.resize(1);
     zero.zero();
@@ -284,39 +280,6 @@ void sot_VelKinCon_ctrl::run()
     paramHelper->sendStreamParams();
     paramHelper->unlock();
 #endif
-}
-
-yarp::sig::Vector sot_VelKinCon_ctrl::computeW(const yarp::sig::Vector &qMin,
-                                               const yarp::sig::Vector &qMax,
-                                               const std::vector<unsigned int>& right_arm_joint_numbers,
-                                               const std::vector<unsigned int>& left_arm_joint_numbers,
-                                               const std::vector<unsigned int>& waist_joint_numbers,
-                                               const double w_torso_weight)
-{
-    yarp::sig::Vector w(qMax.size(), 1.0);
-
-    std::vector<unsigned int> waist_left_arm_joint_numbers = waist_joint_numbers;
-    std::vector<unsigned int> waist_right_arm_joint_numbers = waist_joint_numbers;
-    waist_left_arm_joint_numbers.insert(waist_left_arm_joint_numbers.end(), left_arm_joint_numbers.begin(), left_arm_joint_numbers.end());
-    waist_right_arm_joint_numbers.insert(waist_right_arm_joint_numbers.end(), right_arm_joint_numbers.begin(), right_arm_joint_numbers.end());
-
-    for(unsigned int i = 0; i < waist_left_arm_joint_numbers.size(); ++i)
-        w[waist_left_arm_joint_numbers[i]]  *= (double)(waist_left_arm_joint_numbers.size() - i);
-
-    for(unsigned int i = 0; i < waist_right_arm_joint_numbers.size(); ++i)
-        w[waist_right_arm_joint_numbers[i]] *= (double)(waist_right_arm_joint_numbers.size() - i);
-
-    for(unsigned int i = 0; i < waist_joint_numbers.size(); ++i) {
-        w[waist_joint_numbers[i]] = sqrt(w[waist_joint_numbers[i]]);
-        w[waist_joint_numbers[i]] *= w_torso_weight;
-    }
-
-    w = w/(qMax-qMin);
-    for(unsigned int j = 0; j < w.size(); ++j)
-        w[j] = fabs(w[j]);
-
-    ROS_INFO("W: [ %s ]", w.toString().c_str());
-    return w;
 }
 
 void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
