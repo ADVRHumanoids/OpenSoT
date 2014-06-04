@@ -232,7 +232,6 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_LAST_STACK_TYPE,              &last_stack_type));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
-    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_W_TORSO_WEIGHT,               &w_torso_weight));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR0,                &qpOASES_NWSR0));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR1,                &qpOASES_NWSR1));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_NWSR2,                &qpOASES_NWSR2));
@@ -371,7 +370,6 @@ void sot_VelKinCon_ctrl::checkInput()
     IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
     IYarp.getRightArmCartesianRef(right_arm_pos_ref);
     IYarp.getCoMCartesianRef(com_pos_ref);
-    //IYarp.getSetClik(is_clik);
 }
 
 /** Here we convert from rad to deg!
@@ -474,29 +472,26 @@ bool sot_VelKinCon_ctrl::controlLaw()
     yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -orientation_error_gain*eLWrist_o);
     yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -orientation_error_gain*eSwingFoot_o);
 
-//    std::cout<<"eRWrist: "<<eRWrist.toString()<<std::endl;
-//    std::cout<<"eLWrist: "<<eLWrist.toString()<<std::endl;
-//    std::cout<<"eSwingFoot: "<<eSwingFoot.toString()<<std::endl;
-//    std::cout<<"eCoM: "<<eCoM.toString()<<std::endl;
-//    std::cout<<"com_pos_ref: "<<com_pos_ref.toString()<<std::endl;
-//    std::cout<<"pos_CoM: "<<pos_CoM.toString()<<std::endl;
 
-yarp::sig::Matrix JEe;
-yarp::sig::Vector eEe;
+    yarp::sig::Matrix JEe;
+    yarp::sig::Vector eEe;
 
-if(use_3_stacks) {
-    JEe = yarp::math::pile(JRWrist, JLWrist);
-    JEe = yarp::math::pile(JEe, JSwingFoot);
-    eEe = yarp::math::cat(eRWrist, eLWrist);
-    eEe = yarp::math::cat(eEe, eSwingFoot);
-} else {
-    JEe = yarp::math::pile(JRWrist, JLWrist);
-    JEe = yarp::math::pile(JEe, JSwingFoot);
-    JEe = yarp::math::pile(JEe, JCoM);
-    eEe = yarp::math::cat(eRWrist, eLWrist);
-    eEe = yarp::math::cat(eEe, eSwingFoot);
-    eEe = yarp::math::cat(eEe, eCoM);
-}
+    if(use_3_stacks)
+    {
+        JEe = yarp::math::pile(JRWrist, JLWrist);
+        JEe = yarp::math::pile(JEe, JSwingFoot);
+        eEe = yarp::math::cat(eRWrist, eLWrist);
+        eEe = yarp::math::cat(eEe, eSwingFoot);
+    }
+    else
+    {
+        JEe = yarp::math::pile(JRWrist, JLWrist);
+        JEe = yarp::math::pile(JEe, JSwingFoot);
+        JEe = yarp::math::pile(JEe, JCoM);
+        eEe = yarp::math::cat(eRWrist, eLWrist);
+        eEe = yarp::math::cat(eEe, eSwingFoot);
+        eEe = yarp::math::cat(eEe, eCoM);
+    }
 
     /** Set of last tasks **/
     /**
