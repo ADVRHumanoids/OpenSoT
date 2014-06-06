@@ -32,16 +32,6 @@ public:
         sendCartesianRef(world_to_base_link_pose_port, "l_sole", T_world_base_link);
     }
 
-    void sendLSoleToCoMPose(const yarp::sig::Vector& p_l_sole_CoM)
-    {
-        yarp::sig::Matrix T(4,4);
-        T.eye();
-        T(0,3) = p_l_sole_CoM[0];
-        T(1,3) = p_l_sole_CoM[1];
-        T(2,3) = p_l_sole_CoM[2];
-        sendCartesianRef(l_sole_to_CoM_pose_port, "l_sole", T);
-    }
-
     void cleanPorts();
 
 
@@ -52,7 +42,6 @@ public:
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> com_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> world_to_base_link_pose_port;
-    yarp::os::BufferedPort<yarp::os::Bottle> l_sole_to_CoM_pose_port;
     ///
 
 
