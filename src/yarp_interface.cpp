@@ -52,9 +52,9 @@ void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
 
     if(bot != NULL)
     {
-        std::cout<<"Left Arm:"<<std::endl;
+        //std::cout<<"Left Arm:"<<std::endl;
         getCartesianRef(left_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
-        std::cout<<std::endl;
+        //std::cout<<std::endl;
     }
 }
 
@@ -64,9 +64,9 @@ void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
 
     if(bot != NULL)
     {
-        std::cout<<"Right Arm:"<<std::endl;
+        //std::cout<<"Right Arm:"<<std::endl;
         getCartesianRef(right_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
-        std::cout<<std::endl;
+        //std::cout<<std::endl;
     }
 }
 
@@ -76,13 +76,13 @@ void yarp_interface::getCoMCartesianRef(Vector &com_ref)
     Matrix com_ref_T;
     if(bot != NULL)
     {
-        std::cout<<"CoM::"<<std::endl;
+        //std::cout<<"CoM::"<<std::endl;
         if(getCartesianRef(com_ref_T, bot, LOCAL_FRAME_COM))
         {
             KDL::Frame com_ref_T_KDL;
             YarptoKDL(com_ref_T, com_ref_T_KDL);
             com_ref = KDLtoYarp(com_ref_T_KDL.p);
-            std::cout<<std::endl;
+            //std::cout<<std::endl;
         }
     }
 }
@@ -134,8 +134,8 @@ bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const s
                     cartesian_utils::homogeneousMatrixFromRPY(ref,
                                                               data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                               toRad(data.get(4).asDouble()), toRad(data.get(5).asDouble()), toRad(data.get(6).asDouble()));
-                    ROS_INFO("New reference in %s is:", local_frame.c_str());
-                    ROS_INFO(ref.toString().c_str());
+                    //ROS_INFO("New reference in %s is:", local_frame.c_str());
+                    //ROS_INFO(ref.toString().c_str());
                     return true;
                 }
                 else if(data.size() == 7+1)
@@ -143,8 +143,8 @@ bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const s
                     cartesian_utils::homogeneousMatrixFromQuaternion(ref,
                                                                      data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                                      data.get(4).asDouble(), data.get(5).asDouble(), data.get(6).asDouble(), data.get(7).asDouble());
-                    ROS_INFO("New reference in %s is:", local_frame.c_str());
-                    ROS_INFO(ref.toString().c_str());
+                    //ROS_INFO("New reference in %s is:", local_frame.c_str());
+                    //ROS_INFO(ref.toString().c_str());
                     return true;
                 }
                 else
