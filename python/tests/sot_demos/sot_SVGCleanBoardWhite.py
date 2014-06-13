@@ -132,8 +132,9 @@ if __name__ == '__main__':
     print('r_wrist pose at t0 wrt world is:\n', r_wrist_pose_0)
 
     print('accessing path..')
-    y_path_0 = path.point(0).imag
-    z_path_0 = path.point(0).real
+
+    y_path_0 = path.point(0).real
+    z_path_0 = path.point(0).imag
 
     t_start = yarp.Time.now()
     print('starting trajectory generation')
@@ -141,16 +142,18 @@ if __name__ == '__main__':
         t = yarp.Time.now() - t_start
 
         # scaling time so that in 10 seconds we go from 0 to 1
-        t_scaled = 1 - abs(np.cos( 0.1/2 * t%(2 * np.pi) ))
+        t_scaled = t*.1
+        if t_scaled >= 1:
+            t_start = yarp.Time.now()
 
         # we will go through the path, scaled to be 10cm wide
-        y_path = (path.point(t_scaled).imag - y_path_0)/float(svg_width)*.1
-        z_path = (path.point(t_scaled).real - z_path_0)/float(svg_height)*.1
+        y_path = (path.point(t_scaled).real - y_path_0)/float(svg_width)*.2
+        z_path = (path.point(t_scaled).imag - z_path_0)/float(svg_height)*.2
 
-        print("SVG: going to:", y_path, z_path)
+        print("SVG: going to:", y_path, -z_path)
 
         pose_offset = kdl.Frame()
-        pose_offset.p = kdl.Vector(0, y_path, z_path)
+        pose_offset.p = kdl.Vector(0, y_path, -z_path)
 
         r_wrist_pose_t = pose_offset*r_wrist_pose_0
 
