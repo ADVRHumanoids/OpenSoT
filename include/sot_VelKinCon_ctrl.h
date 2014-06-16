@@ -54,6 +54,7 @@ namespace wb_sot {
 //          robot_model::RobotModelPtr coman_robot_model; // A robot model
 
          bool is_clik;
+         bool update_world;
 
          int support_foot_LinkIndex;
          int swing_foot_LinkIndex;

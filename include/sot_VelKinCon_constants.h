@@ -64,6 +64,7 @@ static const int                        SOT_DEFAULT_QPOASES_NWSR(2^32);
 static const bool                       SOT_DEFAULT_QPOASES_ENABLE_REGULARISATION(true);
 static const double                     SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER(2e2);
 static const bool                       SOT_DEFAULT_CLIK(false);
+static const bool                       SOT_DEFAULT_WORLD_UPDATE(true);
 static const double                     SOT_DEFAULT_VELOCITY_BOUNDS_SCALE(0.5);
 static const int                        SOT_DEFAULT_POSTURAL_WEIGHT_STRATEGY(0);
 
@@ -98,6 +99,7 @@ enum sot_VelKinCon_ParamId {
     PARAM_ID_QPOASES_ENABLEREGULARISATION1, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,
     PARAM_ID_QPOASES_ENABLEREGULARISATION2, PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,
     PARAM_ID_CLIK,
+    PARAM_ID_WORLD_UPDATE,
 // ***************************************** CONFIGURATION PARAMETERS ***********************************************************
     PARAM_ID_DT,
     PARAM_ID_SIZE /*This is the number of parameters, so it must be the last value of the enum.*/
@@ -139,6 +141,7 @@ new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier0",PARAM_ID_QPOA
 new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier1",PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER,      "enable regularisation for the second task"),
 new ParamProxyBasic<double>("qpOases_epsRegularisationMultiplier2",PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_QPOASES_EPS_REGULARISATION_MULTIPLIER,      "enable regularisation for the first task"),
 new ParamProxyBasic<bool>("is_clik"                               ,PARAM_ID_CLIK,                                1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_CLIK,                                       "enable clik (closed loop inverse kinematics"),
+new ParamProxyBasic<bool>("update_world"                               ,PARAM_ID_WORLD_UPDATE,                                1,                                               PARAM_IN_OUT,     &SOT_DEFAULT_WORLD_UPDATE,                                       "update world pose using forward kinematics"),
 // ************************************************* CONFIGURATION PARAMETERS ****************************************************************************************************************************************************************************************************************************
 new ParamProxyBasic<bool>("left_arm_impedance_control",            PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL,          1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for left arm"),
 new ParamProxyBasic<bool>("right_arm_impedance_control",           PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL,         1,                                               PARAM_CONFIG,     NULL,                                                    "use joint impedance control for right arm"),

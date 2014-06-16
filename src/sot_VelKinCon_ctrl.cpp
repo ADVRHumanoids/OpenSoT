@@ -84,6 +84,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     postural_weight_strategy = 0;
 
     is_clik = false;
+    update_world = true;
 }
 
 /** @todo move to drc_shared */
@@ -242,6 +243,7 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER1,&qpOASES_eps1));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_QPOASES_EPSREGULARISATIONMULTIPLIER2,&qpOASES_eps2));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_CLIK,                                &is_clik));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_WORLD_UPDATE,                        &update_world));
 
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
@@ -266,7 +268,12 @@ void sot_VelKinCon_ctrl::run()
         q += dq_ref;
 
 
-    updateiDyn3Model(true);
+    if(update_world)
+        ROS_WARN("ON");
+    if(!update_world)
+        ROS_WARN("OFF");
+
+    updateiDyn3Model(update_world);
 
     if(controlLaw())
         move();
