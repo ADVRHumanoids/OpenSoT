@@ -248,6 +248,19 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
 
+
+
+    KDL::Frame CoM_l_foot; CoM_l_foot.Identity();
+    KDL::Frame CoM_r_foot; CoM_r_foot.Identity();
+    yarp::sig::Vector pos_CoM_l_foot = idynutils.coman_iDyn3.getCOM("",
+                                    idynutils.coman_iDyn3.getLinkIndex("l_ankle"));
+    CoM_l_foot.p = KDL::Vector(pos_CoM_l_foot[0], pos_CoM_l_foot[1], pos_CoM_l_foot[2]);
+    yarp::sig::Vector pos_CoM_r_foot = idynutils.coman_iDyn3.getCOM("",
+                                    idynutils.coman_iDyn3.getLinkIndex("r_ankle"));
+    CoM_r_foot.p = KDL::Vector(pos_CoM_r_foot[0], pos_CoM_r_foot[1], pos_CoM_r_foot[2]);
+    _convex_hull.init(idynutils.coman_model, CoM_l_foot, CoM_r_foot);
+    _convex_hull.computeConvexHull();
+
     return true;
 }
 
@@ -267,11 +280,6 @@ void sot_VelKinCon_ctrl::run()
     else
         q += dq_ref;
 
-
-    if(update_world)
-        ROS_WARN("ON");
-    if(!update_world)
-        ROS_WARN("OFF");
 
     updateiDyn3Model(update_world);
 
