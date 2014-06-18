@@ -248,19 +248,6 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
 
-
-
-    KDL::Frame CoM_l_foot; CoM_l_foot.Identity();
-    KDL::Frame CoM_r_foot; CoM_r_foot.Identity();
-    yarp::sig::Vector pos_CoM_l_foot = idynutils.coman_iDyn3.getCOM("",
-                                    idynutils.coman_iDyn3.getLinkIndex("l_ankle"));
-    CoM_l_foot.p = KDL::Vector(pos_CoM_l_foot[0], pos_CoM_l_foot[1], pos_CoM_l_foot[2]);
-    yarp::sig::Vector pos_CoM_r_foot = idynutils.coman_iDyn3.getCOM("",
-                                    idynutils.coman_iDyn3.getLinkIndex("r_ankle"));
-    CoM_r_foot.p = KDL::Vector(pos_CoM_r_foot[0], pos_CoM_r_foot[1], pos_CoM_r_foot[2]);
-    _convex_hull.init(idynutils.coman_model, CoM_l_foot, CoM_r_foot);
-    _convex_hull.computeConvexHull();
-
     return true;
 }
 
@@ -431,11 +418,14 @@ bool sot_VelKinCon_ctrl::controlLaw()
         ROS_ERROR("Error computing Jacobian for Left Foot");
 
     yarp::sig::Matrix JCoM;
-    //
+    //This part of code is an HACK due to a bug in iDynTree
+    int floating_base_old_index = idynutils.coman_iDyn3.getFloatingBaseLink();
+
     idynutils.coman_iDyn3.setFloatingBaseLink(support_foot_LinkIndex);
     if(!idynutils.coman_iDyn3.getCOMJacobian(JCoM))
         ROS_ERROR("Error computing CoM Jacobian");
-    idynutils.coman_iDyn3.setFloatingBaseLink(idynutils.torso.index);
+    idynutils.coman_iDyn3.setFloatingBaseLink(floating_base_old_index);
+    idynutils.updateiDyn3Model(q, yarp::sig::Vector(q.size(), 0.0), yarp::sig::Vector(q.size(), 0.0));
     JCoM = JCoM.removeCols(0,6);    // remove floating base
     JCoM = JCoM.removeRows(3,3);    // remove orientation
 
