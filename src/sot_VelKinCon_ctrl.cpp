@@ -248,6 +248,8 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
 
+    max_CoM_velocity = 0.05;
+
     return true;
 }
 
@@ -535,6 +537,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                           idynutils.coman_iDyn3.getJointBoundMax(),
                                                           idynutils.coman_iDyn3.getJointBoundMin(),
                                                           q, max_joint_velocity,
+                                                          JCoM, max_CoM_velocity,
                                                           MilliSecToSec(getRate()),
                                                           dq_ref, velocity_bounds_scale);
     }
@@ -545,6 +548,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                          idynutils.coman_iDyn3.getJointBoundMax(),
                                                          idynutils.coman_iDyn3.getJointBoundMin(),
                                                          q, max_joint_velocity,
+                                                         JCoM, max_CoM_velocity,
                                                          MilliSecToSec(getRate()),
                                                          dq_ref, velocity_bounds_scale);
     }

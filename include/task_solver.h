@@ -41,6 +41,8 @@ public:
                                   const yarp::sig::Vector &qMin,
                                   const yarp::sig::Vector &q,
                                   const double &_maxJointVelocity,
+                                  const yarp::sig::Matrix &JCoM,
+                                  const double &_maxCoMVelocity,
                                   const double &_dT,
                                   yarp::sig::Vector &dq_ref,
                                   const double velocity_bounds_scale);
@@ -74,6 +76,8 @@ public:
                                   const yarp::sig::Vector &qMin,
                                   const yarp::sig::Vector &q,
                                   const double &_maxJointVelocity,
+                                  const yarp::sig::Matrix &JCoM,
+                                  const double &_maxCoMVelocity,
                                   const double &_dT,
                                   yarp::sig::Vector &dq_ref,
                                   const double velocity_bounds_scale);

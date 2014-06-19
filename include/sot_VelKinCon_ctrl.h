@@ -92,7 +92,8 @@ namespace wb_sot {
          yarp::sig::Vector eCoM;
 
          bool use_3_stacks;
-         double max_joint_velocity;
+         double max_joint_velocity; //[rad/sec]
+         double max_CoM_velocity; //[m/sec]
          double orientation_error_gain;
          unsigned int last_stack_type;
          unsigned int postural_weight_strategy;

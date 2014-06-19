@@ -21,7 +21,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const yarp::sig::Vector &qMax,
                                     const yarp::sig::Vector &qMin,
                                     const yarp::sig::Vector &q,
-                                    const double &_maxJointVelocity,
+                                    const double &_maxJointVelocity, const yarp::sig::Matrix &JCoM, const double &_maxCoMVelocity,
                                     const double &_dT,
                                     yarp::sig::Vector &dq_ref,
                                     const double velocity_bounds_scale)
@@ -39,6 +39,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     static qpOASES::Bounds bounds0;
     static qpOASES::Bounds bounds1;
     static qpOASES::Bounds bounds2;
+    static qpOASES::Constraints constraints0;
     static qpOASES::Constraints constraints1;
     static qpOASES::Constraints constraints2;
 
@@ -78,6 +79,9 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         l[i] = std::max(l1[i], -u2[i]);
     }
 
+    yarp::sig::Vector uA(3, _maxCoMVelocity*_dT);
+    yarp::sig::Vector lA(3, -_maxCoMVelocity*_dT);
+
     USING_NAMESPACE_QPOASES
 
     /** Setting up QProblem object. **/          
@@ -86,7 +90,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     qpOasesOptionsqp0.setToReliable();
     qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
     qpOasesOptionsqp0.epsRegularisation *= 2E2;
-    QProblemB qp0( nj, HST_SEMIDEF);
+    QProblem qp0( nj, 3, HST_SEMIDEF);
     qp0.setOptions( qpOasesOptionsqp0 );
 
     Options qpOasesOptionsqp1;
@@ -107,26 +111,35 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
 
     /** Solve zero QP. **/
-    int nWSR = 2^32;
+    int nWSR = 64;
     if(initial_guess==true)
-        qp0.init( H0.data(),g0.data(), l.data(), u.data(),nWSR,0,
+        qp0.init( H0.data(),g0.data(),
+                  JCoM.data(),
+                  l.data(), u.data(),
+                  lA.data(), uA.data(),
+                  nWSR,0,
                   dq0.data(), y0.data(),
-                  &bounds0);
+                  &bounds0, &constraints0);
     else
-        qp0.init( H0.data(),g0.data(), l.data(), u.data(), nWSR,0);
+        qp0.init( H0.data(),g0.data(),
+                  JCoM.data(),
+                  l.data(), u.data(),
+                  lA.data(), uA.data(),
+                  nWSR,0);
 
     if(dq0.size() != qp0.getNV()) {
         dq0.resize(qp0.getNV());
         initial_guess = false;
     }
-    if(y0.size() != qp0.getNV()) {
-        y0.resize(qp0.getNV());
+    if(y0.size() != qp0.getNV() + qp0.getNC()) {
+        y0.resize(qp0.getNV()+ qp0.getNC());
         initial_guess = false;
     }
 
     int success0 = qp0.getPrimalSolution( dq0.data() );
     qp0.getDualSolution(y0.data());
     qp0.getBounds(bounds0);
+    qp0.getConstraints(constraints0);
 
     if(success0== RET_QP_NOT_SOLVED ||
       (success0 != RET_QP_SOLVED && success0 != SUCCESSFUL_RETURN))
@@ -141,7 +154,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         yarp::sig::Vector b1u = b1;
         yarp::sig::Vector b1l = b1;
 
-        int nWSR = 2^32;
+        int nWSR = 64;
         if(initial_guess==true)
             qp1.init( H1.data(),g1.data(), J0.data(), l.data(), u.data(),
                       b1l.data(), b1u.data(), nWSR, 0,
@@ -179,7 +192,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
             yarp::sig::Vector b2u = b2;
             yarp::sig::Vector b2l = b2;
 
-            nWSR = 2^32;
+            nWSR = 64;
 
             yarp::sig::Vector u2(nj, _maxJointVelocity * _dT); //Max velocity
             yarp::sig::Vector u(nj); yarp::sig::Vector l(nj);
@@ -236,6 +249,8 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const yarp::sig::Vector &qMin,
                                     const yarp::sig::Vector &q,
                                     const double &MAX_JOINT_VELOCITY,
+                                    const yarp::sig::Matrix &JCoM,
+                                    const double &MAX_COM_VELOCITY,
                                     const double &dT,
                                     yarp::sig::Vector &dq_ref,
                                     const double velocity_bounds_scale)
@@ -250,7 +265,9 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
     static qpOASES::Bounds bounds0;
     static qpOASES::Bounds bounds1;
+    static qpOASES::Constraints constraints0;
     static qpOASES::Constraints constraints1;
+
 
     /**
       We solve a single QP where the priority between
@@ -285,6 +302,9 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         l[i] = std::max(l1[i], -u2[i]);
     }
 
+    yarp::sig::Vector uA(3, MAX_COM_VELOCITY*dT);
+    yarp::sig::Vector lA(3, -MAX_COM_VELOCITY*dT);
+
     USING_NAMESPACE_QPOASES
 
     /** Setting up QProblem object. **/
@@ -293,7 +313,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     qpOasesOptionsqp0.setToReliable();
     qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
     qpOasesOptionsqp0.epsRegularisation *= 2E2;
-    QProblemB qp0( nj, HST_SEMIDEF);
+    QProblem qp0( nj, 3, HST_SEMIDEF);
     qp0.setOptions( qpOasesOptionsqp0 );
 
     Options qpOasesOptionsqp1;
@@ -305,26 +325,35 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     qp1.setOptions( qpOasesOptionsqp1 );
 
     /** Solve zero QP. **/
-    int nWSR = 2^32;
+    int nWSR = 64;
     if(initial_guess==true)
-        qp0.init( H0.data(),g0.data(), l.data(), u.data(),nWSR,0,
+        qp0.init( H0.data(),g0.data(),
+                  JCoM.data(),
+                  l.data(), u.data(),
+                  lA.data(), uA.data(),
+                  nWSR,0,
                   dq0.data(), y0.data(),
-                  &bounds0);
+                  &bounds0, &constraints0);
     else
-        qp0.init( H0.data(),g0.data(), l.data(), u.data(), nWSR,0);
+        qp0.init( H0.data(),g0.data(),
+                  JCoM.data(),
+                  l.data(), u.data(),
+                  lA.data(), uA.data(),
+                  nWSR,0);
 
     if(dq0.size() != qp0.getNV()) {
         dq0.resize(qp0.getNV());
         initial_guess = false;
     }
-    if(y0.size() != qp0.getNV()) {
-        y0.resize(qp0.getNV());
+    if(y0.size() != qp0.getNV() + qp0.getNC()) {
+        y0.resize(qp0.getNV()+ qp0.getNC());
         initial_guess = false;
     }
 
     int success0 = qp0.getPrimalSolution( dq0.data() );
     qp0.getDualSolution(y0.data());
     qp0.getBounds(bounds0);
+    qp0.getConstraints(constraints0);
 
     if(success0== RET_QP_NOT_SOLVED ||
       (success0 != RET_QP_SOLVED && success0 != SUCCESSFUL_RETURN))
@@ -340,7 +369,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         yarp::sig::Vector b1u = b1;
         yarp::sig::Vector b1l = b1;
 
-        nWSR = 2^32;
+        nWSR = 64;
 
         yarp::sig::Vector u2(nj, MAX_JOINT_VELOCITY*dT); //Max velocity
         yarp::sig::Vector u(nj); yarp::sig::Vector l(nj);
