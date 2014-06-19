@@ -228,6 +228,7 @@ if(TORSO_IMPEDANCE) {
 
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_USE_3_STACKS,                 &use_3_stacks));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MAX_JOINT_VELOCITY,           &max_joint_velocity));
+    YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MAX_COM_VELOCITY,             &max_CoM_velocity));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_ORIENTATION_ERROR_GAIN,       &orientation_error_gain));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_POSTURAL_WEIGHT_COEFFICIENT,  &postural_weight_coefficient));
     YARP_ASSERT(paramHelper->linkParam(PARAM_ID_MINEFFORT_WEIGHT_COEFFICIENT, &mineffort_weight_coefficient));
@@ -248,7 +249,6 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
 
-    max_CoM_velocity = 0.05;
 
     return true;
 }
