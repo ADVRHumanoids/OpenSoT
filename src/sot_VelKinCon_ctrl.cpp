@@ -340,6 +340,7 @@ void sot_VelKinCon_ctrl::checkInput()
     IYarp.getLeftArmCartesianRef(left_arm_pos_ref);
     IYarp.getRightArmCartesianRef(right_arm_pos_ref);
     IYarp.getCoMCartesianRef(com_pos_ref);
+    IYarp.getSwingFootCartesianRef(swing_foot_pos_ref);
 }
 
 /** Here we convert from rad to deg!

@@ -13,6 +13,7 @@
 #define LOCAL_FRAME_UPPER_BODY "world"
 #define LOCAL_FRAME_LOWER_BODY "world"
 #define LOCAL_FRAME_COM "l_sole"
+#define LOCAL_FRAME_SWING_FOOT "l_sole"
 
 class yarp_interface
 {
@@ -23,6 +24,7 @@ public:
     void getLeftArmCartesianRef(yarp::sig::Matrix& left_arm_ref);
     void getRightArmCartesianRef(yarp::sig::Matrix& right_arm_ref);
     void getCoMCartesianRef(yarp::sig::Vector& com_ref);
+    void getSwingFootCartesianRef(yarp::sig::Matrix& swing_foot_ref);
     void tic();
     double toc();
 
@@ -42,6 +44,7 @@ public:
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> com_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> world_to_base_link_pose_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> swing_foot_pos_ref_port;
     ///
 
 

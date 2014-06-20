@@ -32,6 +32,7 @@ yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm(
 
     left_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::left_arm + "/set_ref:i");
     right_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::right_arm + "/set_ref:i");
+    swing_foot_pos_ref_port.open("/sot_VelKinCon/swing_foot/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
 }
@@ -40,6 +41,7 @@ yarp_interface::~yarp_interface()
 {
     left_arm_pos_ref_port.close();
     right_arm_pos_ref_port.close();
+    swing_foot_pos_ref_port.close();
     com_pos_ref_port.close();
     world_to_base_link_pose_port.close();
 }
@@ -65,6 +67,16 @@ void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
         //std::cout<<"Right Arm:"<<std::endl;
         getCartesianRef(right_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
         //std::cout<<std::endl;
+    }
+}
+
+void yarp_interface::getSwingFootCartesianRef(Matrix &swing_foot_ref)
+{
+    yarp::os::Bottle *bot = swing_foot_pos_ref_port.read(false);
+
+    if(bot != NULL)
+    {
+        getCartesianRef(swing_foot_ref, bot, LOCAL_FRAME_SWING_FOOT);
     }
 }
 
