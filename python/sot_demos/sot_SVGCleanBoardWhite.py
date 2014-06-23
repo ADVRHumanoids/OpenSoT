@@ -10,51 +10,9 @@ from pykdl_utils.kdl_parser import kdl_tree_from_urdf_model
 from pykdl_utils.kdl_kinematics import KDLKinematics
 from svg.path import parse_path, Path, Line, QuadraticBezier
 from xml.dom import minidom
+from pydrc import pydrc
 
 __author__ = 'Alessio Rocchi'
-
-def numPyToFrame(mat):
-    v = kdl.Vector(mat[0,3],mat[1,3],mat[2,3])
-    r = kdl.Rotation()
-    frame = kdl.Frame(r, v)
-    for i in range(3):
-        for j in range(3):
-            frame.M[i,j] = mat[i,j]
-
-    return frame
-
-def yarpPose2KDLPose(poseBottle):
-    l = poseBottle.get(1).asList()
-    v = kdl.Vector(l.get(1).asDouble(), l.get(2).asDouble(), l.get(3).asDouble())
-    #r = kdl.Rotation.RPY(l.get(4).asDouble(), l.get(5).asDouble(), l.get(6).asDouble())
-    r = kdl.Rotation()
-    return kdl.Frame(r, v)
-
-def KDLPose2yarpPose(kdlPose, bottle):
-    bottle.clear()
-
-    tmp0 = bottle.addList()
-    tmp0.addString("frame")
-    tmp0.addString("world")
-    p = kdlPose.p
-    r = kdlPose.M.GetQuaternion()
-    tmp = bottle_right.addList()
-    tmp.addString("data")
-    tmp.addDouble(p[0])
-    tmp.addDouble(p[1])
-    tmp.addDouble(p[2])
-    tmp.addDouble(r[0])
-    tmp.addDouble(r[1])
-    tmp.addDouble(r[2])
-    tmp.addDouble(r[3])
-
-    return bottle
-
-def yarpListToTuple(listBottle):
-    tuple = []
-    for i in range(listBottle.size()):
-        tuple += [listBottle.get(i).asDouble()]
-    return tuple
 
 if __name__ == '__main__':
 
@@ -112,14 +70,14 @@ if __name__ == '__main__':
     right_arm.open("/desired/right_arm/position/ref:o")
     yarp.Network.connect("/desired/right_arm/position/ref:o", "/sot_VelKinCon/right_arm/set_ref:i")
 
-    q_torso = yarpListToTuple(q_reader_torso.read())
-    q_right_arm = yarpListToTuple(q_reader_right_arm.read())
+    q_torso = pydrc.yarpListToTuple(q_reader_torso.read())
+    q_right_arm = pydrc.yarpListToTuple(q_reader_right_arm.read())
 
     q = np.array(q_torso+q_right_arm) * np.pi/180
 
-    world_pose = yarpPose2KDLPose(world_pose_reader.read())
+    world_pose = pydrc.yarpPose2KDLPose(world_pose_reader.read())
     poseNumpy = kdl_kin.forward(q) # forward kinematics (returns homogeneous 4x4 numpy.mat)
-    pose = numPyToFrame(poseNumpy)
+    pose = pydrc.numPyToFrame(poseNumpy)
 
     print("world pose is:\n", world_pose)
     print("r_wrist wrt base_link is:\n", pose)
@@ -156,7 +114,7 @@ if __name__ == '__main__':
 
         bottle_right = right_arm.prepare()
 
-        KDLPose2yarpPose(r_wrist_pose_t, bottle_right)
+        pydrc.KDLPose2yarpPose(r_wrist_pose_t, bottle_right)
 
         print("Desired Pose = ", r_wrist_pose_t)
 
