@@ -190,4 +190,8 @@ void yarp_interface::cleanPorts()
     pendings = world_to_base_link_pose_port.getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)
         world_to_base_link_pose_port.read(foo);
+
+    pendings = swing_foot_pos_ref_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        swing_foot_pos_ref_port.read(foo);
 }
