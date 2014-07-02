@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-import roslib
 import rospy
-import math
 import tf
-import geometry_msgs.msg
-import turtlesim.srv
 import yarp
+import PyKDL as kdl
+from pydrc import pydrc
 
 print("Test TF")
 
@@ -20,6 +18,9 @@ if __name__ == '__main__':
 
     listener = tf.TransformListener()
 
+    timeoutDuration = rospy.Duration(secs=10)
+    listener.waitForTransform(target_frame='/l_sole', source_frame='/CoM', time=rospy.Time(0), timeout=timeoutDuration)
+
     success = False
     while not success:
         try:
@@ -32,25 +33,14 @@ if __name__ == '__main__':
     print("CoM initial position is:")
     print l_sole_pos_CoM
 
-    com_x_d = l_sole_pos_CoM[0]
-    com_y_d= l_sole_pos_CoM[1]
-    com_z_d = l_sole_pos_CoM[2] - 0.05
+    com_pos_d = kdl.Frame
+    com_pos_d.p = kdl.Vector(l_sole_pos_CoM[0], l_sole_pos_CoM[1], l_sole_pos_CoM[2] - 0.05)
+    com_pos_d.M = kdl.Rotation.Quaternion(0.0, 0.0, 0.0, 1.0)
 
     bottle_CoM = CoM.prepare()
     bottle_CoM.clear()
 
-    bottle_tmp0 = bottle_CoM.addList()
-    bottle_tmp0.addString("frame")
-    bottle_tmp0.addString("l_sole")
-
-    bottle_tmp = bottle_CoM.addList()
-    bottle_tmp.addString("data")
-    bottle_tmp.addDouble(com_x_d)
-    bottle_tmp.addDouble(com_y_d)
-    bottle_tmp.addDouble(com_z_d)
-    bottle_tmp.addDouble(0.0)
-    bottle_tmp.addDouble(0.0)
-    bottle_tmp.addDouble(0.0)
+    pydrc.KDLPose2yarpPose(com_pos_d, bottle_CoM, "l_sole")
 
     CoM.write()
 
