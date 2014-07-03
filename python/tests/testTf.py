@@ -33,9 +33,9 @@ if __name__ == '__main__':
     print("CoM initial position is:")
     print l_sole_pos_CoM
 
-    com_pos_d = kdl.Frame
+    com_pos_d = kdl.Frame()
     com_pos_d.p = kdl.Vector(l_sole_pos_CoM[0], l_sole_pos_CoM[1], l_sole_pos_CoM[2] - 0.05)
-    com_pos_d.M = kdl.Rotation.Quaternion(0.0, 0.0, 0.0, 1.0)
+    com_pos_d.M = kdl.Rotation.Identity()
 
     bottle_CoM = CoM.prepare()
     bottle_CoM.clear()
