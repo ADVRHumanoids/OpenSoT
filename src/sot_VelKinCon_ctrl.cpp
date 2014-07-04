@@ -11,6 +11,7 @@
 #include "sot_VelKinCon_constants.h"
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
+#include <iCub/iDynTree/yarp_kdl.h>
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -54,7 +55,8 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     LEFT_ARM_IMPEDANCE(_LEFT_ARM_IMPEDANCE),
     RIGHT_ARM_IMPEDANCE(_RIGHT_ARM_IMPEDANCE),
     TORSO_IMPEDANCE(_TORSO_IMPEDANCE),
-    paramHelper(_ph)
+    paramHelper(_ph),
+    _convex_hull()
 {
     int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
 
@@ -490,6 +492,21 @@ bool sot_VelKinCon_ctrl::controlLaw()
             last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
         computeMinEffort();
 
+    // Here I compute Convex Hull Constraints for CoM
+    std::list<KDL::Vector> points;
+    yarp::sig::Matrix A_ch;
+    yarp::sig::Vector b_ch;
+    getSupportPolygonPoints(points);
+    _convex_hull.getConvexHull(points, A_ch, b_ch);
+    ROS_WARN("A: %s", A_ch.toString().c_str());
+    ROS_WARN("b: %s", b_ch.toString().c_str());
+
+
+    // Cartesian Constraints
+    yarp::sig::Matrix cartesian_A;
+    yarp::sig::Vector& cartesian_b = b_ch;
+    cartesian_A = A_ch*JCoM.submatrix(0, 1, 0, JCoM.cols()-1);
+
     yarp::sig::Matrix F;
     yarp::sig::Vector f;
     qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
@@ -539,6 +556,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                           idynutils.coman_iDyn3.getJointBoundMin(),
                                                           q, max_joint_velocity,
                                                           JCoM, max_CoM_velocity,
+                                                          cartesian_A, cartesian_b,
                                                           MilliSecToSec(getRate()),
                                                           dq_ref, velocity_bounds_scale);
     }
@@ -550,6 +568,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                          idynutils.coman_iDyn3.getJointBoundMin(),
                                                          q, max_joint_velocity,
                                                          JCoM, max_CoM_velocity,
+                                                         cartesian_A, cartesian_b,
                                                          MilliSecToSec(getRate()),
                                                          dq_ref, velocity_bounds_scale);
     }
@@ -646,4 +665,29 @@ void sot_VelKinCon_ctrl::computeMinEffort()
     for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
         W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
     gradientGq = -1.0 * getGravityCompensationGradient(W);
+}
+
+void sot_VelKinCon_ctrl::getSupportPolygonPoints(std::list<KDL::Vector>& points)
+{
+    std::vector<std::string> names;
+    names.push_back("l_foot_lower_left_link");
+    names.push_back("l_foot_lower_right_link");
+    names.push_back("l_foot_upper_left_link");
+    names.push_back("l_foot_upper_right_link");
+    names.push_back("r_foot_lower_left_link");
+    names.push_back("r_foot_lower_right_link");
+    names.push_back("r_foot_upper_left_link");
+    names.push_back("r_foot_upper_right_link");
+
+    KDL::Frame waist_T_CoM;
+    KDL::Frame waist_T_point;
+    KDL::Frame CoM_T_point;
+    for(unsigned int i = 0; i < names.size(); ++i)
+    {
+        waist_T_point = idynutils.coman_iDyn3.getPositionKDL(idynutils.coman_iDyn3.getLinkIndex(names[i]));
+        YarptoKDL(idynutils.coman_iDyn3.getCOM(), waist_T_CoM.p);
+
+        CoM_T_point = waist_T_CoM.Inverse() * waist_T_point;
+        points.push_back(CoM_T_point.p);
+    }
 }

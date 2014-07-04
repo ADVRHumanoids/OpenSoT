@@ -141,6 +141,8 @@ namespace wb_sot {
          void computePosturalWeight();
          void computeMinEffort();
 
+         void getSupportPolygonPoints(std::list<KDL::Vector>& points);
+
          /**
            We use this function to set to zero all the part of the Jacobians that we are not
            controlling (basically the legs).

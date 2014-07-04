@@ -41,9 +41,12 @@ void convex_hull::getConvexHull(const std::list<KDL::Vector>& points, yarp::sig:
     } else
         pcl::Vertices hullVertices = indicesOfVertexes[0];
 
-    printIndexAndPointsInfo(pointsInConvexHull, indicesOfVertexes);
+    //printIndexAndPointsInfo(pointsInConvexHull, indicesOfVertexes);
 
     getConstraints(pointsInConvexHull, indicesOfVertexes, A, b);
+
+    _pointCloud->clear();
+    _projectedPointCloud->clear();
 }
 
 pcl::PointXYZ convex_hull::fromKDLVector2PCLPointXYZ(const KDL::Vector &point)
@@ -90,7 +93,7 @@ void convex_hull::getConstraints(const pcl::PointCloud<pcl::PointXYZ> &pointsInC
             getLineCoefficients(pointsInConvexHull[vs.vertices[j]], pointsInConvexHull[vs.vertices[k]], _a, _b, _c);
             A(z,0) = _a;
             A(z,1) = _b;
-            b[z] = _c;
+            b[z] = -_c;
             z++;
         }
     }
