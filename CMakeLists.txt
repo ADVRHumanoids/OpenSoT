@@ -74,11 +74,11 @@ add_dependencies(sot_VelKinCon qpOASES-ext)
 TARGET_LINK_LIBRARIES(sot_VelKinCon ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
                                     ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} )
-TARGET_LINK_LIBRARIES(uTest1  ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
-                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser
-                      qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
-                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
+TARGET_LINK_LIBRARIES(uTest1        ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+                                    ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser ${PCL_LIBRARIES}
+                                    qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
+TARGET_LINK_LIBRARIES(uTest2        ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser
+                                    ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(createMonitorScope ${YARP_LIBRARIES} ${paramHelp_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(createParamTuner ${YARP_LIBRARIES} ${paramHelp_LIBRARIES})

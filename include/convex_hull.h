@@ -13,7 +13,7 @@ namespace wb_sot
 class convex_hull
 {
 public:
-    convex_hull(){}
+    convex_hull();
     ~convex_hull();
 
     void getConvexHull(const std::list<KDL::Vector>& points);

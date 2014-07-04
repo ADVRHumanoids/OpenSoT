@@ -19,13 +19,13 @@ void convex_hull::getConvexHull(const std::list<KDL::Vector>& points) {
     std::vector<pcl::Vertices> indicesOfVertexes;
 
     // estimate the convex hull in camera frame
-    pcl::ConvexHull<PointXY> huller;
-    huller.setInputCloud (pointCloud);
+    pcl::ConvexHull<pcl::PointXY> huller;
+    huller.setInputCloud (pcl::PointCloud<pcl::PointXY>::Ptr(&pointCloud));
     huller.reconstruct (pointsInConvexHull,
                         indicesOfVertexes);
     if(indicesOfVertexes.size() != 1) {
         std::cerr << "Error: more than one polygon found!" << std::endl;
-        return
+        return;
     } else
         pcl::Vertices hullVertices = indicesOfVertexes[0];
 
@@ -49,9 +49,9 @@ pcl::PointCloud<pcl::PointXY> convex_hull::fromSTDList2PCLPointCloud(
         const std::list<KDL::Vector> &points)
 {
     pcl::PointCloud<pcl::PointXY> pointCloud;
-    for(std::list<KDL::Vector>::iterator i = points.begin();
+    for(std::list<KDL::Vector>::const_iterator i = points.begin();
         i != points.end();
-        ++i)
+        i++)
         pointCloud.push_back(this->fromKDLVector2PCLPointXY(*i));
     return pointCloud;
 }
