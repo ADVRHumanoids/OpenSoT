@@ -15,8 +15,6 @@
 #include <ros/ros.h>
 #include <moveit/robot_model/robot_model.h>
 #include <drc_shared/idynutils.h>
-#include <convex_hull.h>
-
 
 namespace wb_sot {
     class sot_VelKinCon_ctrl :  public yarp::os::RateThread,
@@ -129,8 +127,6 @@ namespace wb_sot {
 
          yarp_interface IYarp;
          iDynUtils idynutils,gravity_compensator_idynutils;
-
-         convex_hull _convex_hull;
 
          void updateiDyn3Model(const bool set_world_pose = false);
          void getFeedBack();

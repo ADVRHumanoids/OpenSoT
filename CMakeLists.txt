@@ -35,8 +35,7 @@ FIND_PACKAGE(rospack REQUIRED)
 FIND_PACKAGE(rosconsole REQUIRED)
 FIND_PACKAGE(srdfdom REQUIRED)
 FIND_PACKAGE(moveit_core REQUIRED)
-FIND_PACKAGE(PCL 1.2 REQUIRED)
-FIND_PACKAGE(tf REQUIRED)
+
 
 ExternalProject_Add(qpOASES-ext GIT_REPOSITORY https://github.com/asherikov/qpOASES.git
                             PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
@@ -61,10 +60,10 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
-ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp src/convex_hull.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
+ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
 ADD_EXECUTABLE(createParamTuner src/tests/createParamTuner.cpp)
-ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/tests/unitTest1.cpp src/task_solver.cpp src/convex_hull.cpp)
+ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/tests/unitTest1.cpp src/task_solver.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
