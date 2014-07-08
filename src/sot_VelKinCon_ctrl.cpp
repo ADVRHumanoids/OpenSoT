@@ -12,6 +12,7 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <iCub/iDynTree/yarp_kdl.h>
+#include "convex_hull.h"
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -257,6 +258,9 @@ if(TORSO_IMPEDANCE) {
 
 void sot_VelKinCon_ctrl::run()
 {
+    std::list<KDL::Vector> points;
+    static yarp::sig::Matrix A_ch;
+    static yarp::sig::Vector b_ch;
 #ifdef DEBUG
     paramHelper->lock();
     paramHelper->readStreamParams();
@@ -278,6 +282,10 @@ void sot_VelKinCon_ctrl::run()
         move();
 
     IYarp.sendWorldToBaseLinkPose(idynutils.coman_iDyn3.getWorldBasePose());
+
+    getSupportPolygonPoints(points);
+    _convex_hull.getConvexHull(points,A_ch,b_ch);
+    IYarp.sendCH(A_ch,b_ch);
 
     t_elapsed = IYarp.toc();
 
