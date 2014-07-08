@@ -11,7 +11,7 @@
 #include "sot_VelKinCon_constants.h"
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
-#include <iCub/iDynTree/yarp_kdl.h>
+#include "convex_hull.h"
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -55,8 +55,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
     LEFT_ARM_IMPEDANCE(_LEFT_ARM_IMPEDANCE),
     RIGHT_ARM_IMPEDANCE(_RIGHT_ARM_IMPEDANCE),
     TORSO_IMPEDANCE(_TORSO_IMPEDANCE),
-    paramHelper(_ph),
-    _convex_hull()
+    paramHelper(_ph)
 {
     int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
 
@@ -257,6 +256,9 @@ if(TORSO_IMPEDANCE) {
 
 void sot_VelKinCon_ctrl::run()
 {
+    static wb_sot::convex_hull();
+    static yarp::sig::Matrix A_ch;
+    static yarp::sig::Vector b_ch;
 #ifdef DEBUG
     paramHelper->lock();
     paramHelper->readStreamParams();
@@ -278,6 +280,9 @@ void sot_VelKinCon_ctrl::run()
         move();
 
     IYarp.sendWorldToBaseLinkPose(idynutils.coman_iDyn3.getWorldBasePose());
+
+    convex_hull.getConvexHull(A_ch,b_ch);
+    IYarp.sendCH()
 
     t_elapsed = IYarp.toc();
 
@@ -492,21 +497,6 @@ bool sot_VelKinCon_ctrl::controlLaw()
             last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
         computeMinEffort();
 
-    // Here I compute Convex Hull Constraints for CoM
-    std::list<KDL::Vector> points;
-    yarp::sig::Matrix A_ch;
-    yarp::sig::Vector b_ch;
-    getSupportPolygonPoints(points);
-    _convex_hull.getConvexHull(points, A_ch, b_ch);
-    ROS_WARN("A: %s", A_ch.toString().c_str());
-    ROS_WARN("b: %s", b_ch.toString().c_str());
-
-
-    // Cartesian Constraints
-    yarp::sig::Matrix cartesian_A;
-    yarp::sig::Vector& cartesian_b = b_ch;
-    cartesian_A = A_ch*JCoM.submatrix(0, 1, 0, JCoM.cols()-1);
-
     yarp::sig::Matrix F;
     yarp::sig::Vector f;
     qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
@@ -556,7 +546,6 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                           idynutils.coman_iDyn3.getJointBoundMin(),
                                                           q, max_joint_velocity,
                                                           JCoM, max_CoM_velocity,
-                                                          cartesian_A, cartesian_b,
                                                           MilliSecToSec(getRate()),
                                                           dq_ref, velocity_bounds_scale);
     }
@@ -568,7 +557,6 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                          idynutils.coman_iDyn3.getJointBoundMin(),
                                                          q, max_joint_velocity,
                                                          JCoM, max_CoM_velocity,
-                                                         cartesian_A, cartesian_b,
                                                          MilliSecToSec(getRate()),
                                                          dq_ref, velocity_bounds_scale);
     }
