@@ -254,7 +254,8 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     const double &MAX_JOINT_VELOCITY,
                                     const yarp::sig::Matrix &JCoM,
                                     const double &MAX_COM_VELOCITY,
-                                    const yarp::sig::Matrix &cartesian_A, const yarp::sig::Vector &cartesian_b,
+                                    const yarp::sig::Matrix &cartesian_A,
+                                    const yarp::sig::Vector &cartesian_b,
                                     const double &dT,
                                     yarp::sig::Vector &dq_ref,
                                     const double velocity_bounds_scale)
@@ -308,9 +309,10 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
     //yarp::sig::Vector uA(3, MAX_COM_VELOCITY*dT);
     //yarp::sig::Vector lA(3, -MAX_COM_VELOCITY*dT);
-    yarp::sig::Vector bounds_A(6, MAX_COM_VELOCITY*dT);
-    bounds_A = yarp::math::cat(bounds_A, cartesian_b*dT);
-    yarp::sig::Matrix A = yarp::math::pile(JCoM, yarp::math::pile(-1.0*JCoM, cartesian_A));
+    yarp::sig::Vector b0(6, MAX_COM_VELOCITY*dT);
+    b0 = yarp::math::cat(b0, cartesian_b);
+    yarp::sig::Matrix A0 = yarp::math::pile(JCoM, yarp::math::pile(-1.0*JCoM, cartesian_A));
+
 
     USING_NAMESPACE_QPOASES
 
@@ -335,17 +337,17 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     int nWSR = 64;
     if(initial_guess==true)
         qp0.init( H0.data(),g0.data(),
-                  A.data(),
+                  A0.data(),
                   l.data(), u.data(),
-                  NULL, bounds_A.data(),
+                  NULL, b0.data(),
                   nWSR,0,
                   dq0.data(), y0.data(),
                   &bounds0, &constraints0);
     else
         qp0.init( H0.data(),g0.data(),
-                  A.data(),
+                  A0.data(),
                   l.data(), u.data(),
-                  NULL, bounds_A.data(),
+                  NULL, b0.data(),
                   nWSR,0);
 
     if(dq0.size() != qp0.getNV()) {
@@ -370,11 +372,20 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     }
     else
     {
+        yarp::sig::Vector bounds = cartesian_A * dq0;
+        for(unsigned int i = 0; i < bounds.size(); ++i) {
+            if(bounds[i] > cartesian_b[i]) {
+                ROS_ERROR("Bound %d in QP0 is not satisfied: %f >= %f", i, bounds[i], cartesian_b[i]);
+            }
+        }
+
         /** Solve first QP. **/
-        yarp::sig::Matrix B1 = J0;
+        yarp::sig::Matrix A1 = J0;
+        //A1 = yarp::math::pile(A1, -1.0*A1); // equality constraint
+        //A1 = yarp::math::pile(A1, A0);      // cartesian constraints from QP0
         yarp::sig::Vector b1 = J0*dq0;
-        yarp::sig::Vector b1u = b1;
-        yarp::sig::Vector b1l = b1;
+        //b1 = yarp::math::cat(b1,b1);        // equality constraint
+        //b1 = yarp::math::cat(b1,b0);        // cartesian constraints from QP0
 
         nWSR = 64;
 
@@ -386,13 +397,13 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         }
 
         if(initial_guess == true)
-            qp1.init( H1.data(),g1.data(), B1.data(), l.data(), u.data(),
-                      b1l.data(), b1u.data(), nWSR, 0,
+            qp1.init( H1.data(),g1.data(), A1.data(), l.data(), u.data(),
+                      b1.data(), b1.data(), nWSR, 0,
                       dq1.data(), y1.data(),
                       &bounds1, &constraints1);
         else
-            qp1.init( H1.data(),g1.data(), B1.data(), l.data(), u.data(),
-                      b1l.data(), b1u.data(), nWSR, 0);
+            qp1.init( H1.data(),g1.data(), A1.data(), l.data(), u.data(),
+                      b1.data(), b1.data(), nWSR, 0);
 
         if(dq1.size() != qp1.getNV()) {
             dq1.resize(qp1.getNV());
@@ -418,6 +429,12 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         {
             dq_ref = dq1;
             initial_guess = true;
+            yarp::sig::Vector bounds = cartesian_A * dq_ref;
+            for(unsigned int i = 0; i < bounds.size(); ++i) {
+                if(bounds[i] > cartesian_b[i]) {
+                    ROS_ERROR("Bound %d in QP1 is not satisfied: %f >= %f", i, bounds[i], cartesian_b[i]);
+                }
+            }
             return true;
        }
     }

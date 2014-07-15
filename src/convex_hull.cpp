@@ -91,9 +91,21 @@ void convex_hull::getConstraints(const pcl::PointCloud<pcl::PointXYZ> &pointsInC
         {
             unsigned int k = (j + 1)%vs.vertices.size();
             getLineCoefficients(pointsInConvexHull[vs.vertices[j]], pointsInConvexHull[vs.vertices[k]], _a, _b, _c);
-            A(z,0) = _a;
-            A(z,1) = _b;
-            b[z] = -_c;
+            if(_c <= 0.0) { // see Moleskine
+                A(z,0) = + _a;
+                A(z,1) = + _b;
+                b[z] =   - _c;
+            } else {
+                A(z,0) = - _a;
+                A(z,1) = - _b;
+                b[z] =   + _c;
+            }
+            double ch_boundary = 5*1e-3;
+            if(fabs(_c) <= ch_boundary)
+                b[z] = 0.0;
+            else
+                b[z] -= ch_boundary;
+            //b[z] *= 0.1;
             z++;
         }
     }
