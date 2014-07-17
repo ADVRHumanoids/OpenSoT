@@ -692,7 +692,9 @@ void sot_VelKinCon_ctrl::getSupportPolygonPoints(std::list<KDL::Vector>& points)
     KDL::Frame CoM_T_point;
     for(unsigned int i = 0; i < names.size(); ++i)
     {
+        // get points in world frame
         waist_T_point = idynutils.coman_iDyn3.getPositionKDL(idynutils.coman_iDyn3.getLinkIndex(names[i]));
+        // get CoM in the world frame
         YarptoKDL(idynutils.coman_iDyn3.getCOM(), waist_T_CoM.p);
 
         CoM_T_point = waist_T_CoM.Inverse() * waist_T_point;

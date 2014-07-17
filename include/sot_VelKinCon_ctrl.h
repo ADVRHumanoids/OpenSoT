@@ -141,6 +141,12 @@ namespace wb_sot {
          void computePosturalWeight();
          void computeMinEffort();
 
+         /**
+          * @brief getSupportPolygonPoints
+          * @param points return a list of points express in a frame F
+          *        oriented like the world frame and with origin
+          *        on the CoM projection in the support polygon
+          */
          void getSupportPolygonPoints(std::list<KDL::Vector>& points);
 
          /**

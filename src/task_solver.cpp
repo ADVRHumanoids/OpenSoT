@@ -82,8 +82,8 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
 //    yarp::sig::Vector uA(3, _maxCoMVelocity*_dT);
 //    yarp::sig::Vector lA(3, -_maxCoMVelocity*_dT);
-    yarp::sig::Vector bounds_A(6, _maxCoMVelocity*_dT);
-    yarp::sig::Matrix A = yarp::math::pile(JCoM, yarp::math::pile(-1.0*JCoM, cartesian_A));
+    yarp::sig::Vector b0(6, _maxCoMVelocity*_dT);
+    yarp::sig::Matrix A0 = yarp::math::pile(JCoM, yarp::math::pile(-1.0*JCoM, cartesian_A));
 
     USING_NAMESPACE_QPOASES
 
@@ -117,17 +117,17 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     int nWSR = 64;
     if(initial_guess==true)
         qp0.init( H0.data(),g0.data(),
-                  JCoM.data(),
+                  A0.data(),
                   l.data(), u.data(),
-                  NULL, bounds_A.data(),
+                  NULL, b0.data(),
                   nWSR,0,
                   dq0.data(), y0.data(),
                   &bounds0, &constraints0);
     else
         qp0.init( H0.data(),g0.data(),
-                  JCoM.data(),
+                  A0.data(),
                   l.data(), u.data(),
-                  NULL, bounds_A.data(),
+                  NULL, b0.data(),
                   nWSR,0);
 
     if(dq0.size() != qp0.getNV()) {
@@ -310,7 +310,9 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     //yarp::sig::Vector uA(3, MAX_COM_VELOCITY*dT);
     //yarp::sig::Vector lA(3, -MAX_COM_VELOCITY*dT);
     yarp::sig::Vector b0(6, MAX_COM_VELOCITY*dT);
-    b0 = yarp::math::cat(b0, cartesian_b*dT);
+    // adding a step safety on the margin bound
+    double step_safety = 0.3;
+    b0 = yarp::math::cat(b0, cartesian_b*step_safety);
     yarp::sig::Matrix A0 = yarp::math::pile(JCoM, yarp::math::pile(-1.0*JCoM, cartesian_A));
 
     USING_NAMESPACE_QPOASES
@@ -342,12 +344,14 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                   nWSR,0,
                   dq0.data(), y0.data(),
                   &bounds0, &constraints0);
-    else
+    else {
         qp0.init( H0.data(),g0.data(),
                   A0.data(),
                   l.data(), u.data(),
                   NULL, b0.data(),
                   nWSR,0);
+        ROS_WARN("Not using initial guess");
+    }
 
     if(dq0.size() != qp0.getNV()) {
         dq0.resize(qp0.getNV());
@@ -375,6 +379,11 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         for(unsigned int i = 0; i < bounds.size(); ++i) {
             if(bounds[i] > cartesian_b[i]) {
                 ROS_ERROR("Bound %d in QP0 is not satisfied: %f > %f", i, bounds[i], cartesian_b[i]);
+                if(qp0.isSolved())
+                    ROS_ERROR("..but qp0 returns as solved!");
+                else
+                    ROS_ERROR("..and qp0 returns as not!");
+                initial_guess = false;
             }
         }
 
@@ -432,6 +441,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
             for(unsigned int i = 0; i < bounds.size(); ++i) {
                 if(bounds[i] > cartesian_b[i]) {
                     ROS_ERROR("Bound %d in QP1 is not satisfied: %f > %f", i, bounds[i], cartesian_b[i]);
+                    initial_guess = false;
                 }
             }
             return true;
