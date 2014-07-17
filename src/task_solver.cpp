@@ -6,6 +6,7 @@
 
 #include "task_solver.h"
 #include <yarp/math/Math.h>
+#include <limits>
 
 using namespace yarp::math;
 
@@ -159,13 +160,19 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
         int nWSR = 64;
         if(initial_guess==true)
-            qp1.init( H1.data(),g1.data(), J0.data(), l.data(), u.data(),
-                      b1l.data(), b1u.data(), nWSR, 0,
+            qp1.init( H1.data(),g1.data(),
+                      J0.data(),
+                      l.data(), u.data(),
+                      b1l.data(), b1u.data(),
+                      nWSR, 0,
                       dq1.data(), y1.data(),
                       &bounds1, &constraints1);
         else
-            qp1.init( H1.data(),g1.data(), J0.data(), l.data(), u.data(),
-                      b1l.data(), b1u.data(), nWSR,0);
+            qp1.init( H1.data(),g1.data(),
+                      J0.data(),
+                      l.data(), u.data(),
+                      b1l.data(), b1u.data(),
+                      nWSR,0);
 
         if(dq1.size() != qp1.getNV()) {
             dq1.resize(qp1.getNV());
@@ -307,13 +314,12 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         l[i] = std::max(l1[i], -u2[i]);
     }
 
-    //yarp::sig::Vector uA(3, MAX_COM_VELOCITY*dT);
-    //yarp::sig::Vector lA(3, -MAX_COM_VELOCITY*dT);
-    yarp::sig::Vector b0(6, MAX_COM_VELOCITY*dT);
-    // adding a step safety on the margin bound
-    double step_safety = 0.3;
-    b0 = yarp::math::cat(b0, cartesian_b*step_safety);
-    yarp::sig::Matrix A0 = yarp::math::pile(JCoM, yarp::math::pile(-1.0*JCoM, cartesian_A));
+    yarp::sig::Vector uA(3, MAX_COM_VELOCITY*dT);
+    yarp::sig::Vector lA(3, -MAX_COM_VELOCITY*dT);
+    uA = yarp::math::cat(uA, cartesian_b);
+    lA = yarp::math::cat(lA, yarp::sig::Vector(cartesian_b.size(), std::numeric_limits<double>::lowest()));
+
+    yarp::sig::Matrix A0 = yarp::math::pile(JCoM, cartesian_A);
 
     USING_NAMESPACE_QPOASES
 
@@ -340,7 +346,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         qp0.init( H0.data(),g0.data(),
                   A0.data(),
                   l.data(), u.data(),
-                  NULL, b0.data(),
+                  lA.data(), uA.data(),
                   nWSR,0,
                   dq0.data(), y0.data(),
                   &bounds0, &constraints0);
@@ -348,7 +354,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         qp0.init( H0.data(),g0.data(),
                   A0.data(),
                   l.data(), u.data(),
-                  NULL, b0.data(),
+                  lA.data(), uA.data(),
                   nWSR,0);
         ROS_WARN("Not using initial guess");
     }
@@ -389,11 +395,13 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
         /** Solve first QP. **/
         yarp::sig::Matrix A1 = J0;
-        A1 = yarp::math::pile(A1, -1.0*A1); // equality constraint
         A1 = yarp::math::pile(A1, A0);      // cartesian constraints from QP0
         yarp::sig::Vector b1 = J0*dq0;
-        b1 = yarp::math::cat(b1,b1);        // equality constraint
-        b1 = yarp::math::cat(b1,b0);        // cartesian constraints from QP0
+        yarp::sig::Vector lA1 = b1;
+        yarp::sig::Vector uA1 = b1;
+        lA1 = yarp::math::cat(lA1,lA);        // cartesian constraints from QP0
+        uA1 = yarp::math::cat(uA1,uA);        // cartesian constraints from QP0
+
 
         nWSR = 127;
 
@@ -405,13 +413,19 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         }
 
         if(initial_guess == true)
-            qp1.init( H1.data(),g1.data(), A1.data(), l.data(), u.data(),
-                      b1.data(), b1.data(), nWSR, 0,
+            qp1.init( H1.data(),g1.data(),
+                      A1.data(),
+                      l.data(), u.data(),
+                      lA1.data(), uA1.data(),
+                      nWSR, 0,
                       dq1.data(), y1.data(),
                       &bounds1, &constraints1);
         else
-            qp1.init( H1.data(),g1.data(), A1.data(), l.data(), u.data(),
-                      b1.data(), b1.data(), nWSR, 0);
+            qp1.init( H1.data(),g1.data(),
+                      A1.data(),
+                      l.data(), u.data(),
+                      lA1.data(), uA1.data(),
+                      nWSR, 0);
 
         if(dq1.size() != qp1.getNV()) {
             dq1.resize(qp1.getNV());
