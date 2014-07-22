@@ -100,10 +100,10 @@ void convex_hull::getConstraints(const pcl::PointCloud<pcl::PointXYZ> &pointsInC
                 A(z,1) = - _b;
                 b[z] =   + _c;
             }
-            double ch_boundary = 1.0*1e-2;
+            double ch_boundary = 5e-3;
             if(fabs(_c) <= ch_boundary)
                 b[z] = 0.0;
-            else
+            else 
                 b[z] -= ch_boundary;
             b[z] *= 1.0;
             z++;
