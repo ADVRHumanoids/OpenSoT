@@ -310,10 +310,10 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         l[i] = std::max(l1[i], -u2[i]);
     }
 
-    yarp::sig::Vector uA(3, MAX_COM_VELOCITY*dT);
-    yarp::sig::Vector lA(3, -MAX_COM_VELOCITY*dT);
-    uA = yarp::math::cat(uA, cartesian_b);
-    lA = yarp::math::cat(lA, yarp::sig::Vector(cartesian_b.size(), std::numeric_limits<double>::lowest()));
+    yarp::sig::Vector uA0(3, MAX_COM_VELOCITY*dT);
+    yarp::sig::Vector lA0(3, -MAX_COM_VELOCITY*dT);
+    uA0 = yarp::math::cat(uA0, cartesian_b);
+    lA0 = yarp::math::cat(lA0, yarp::sig::Vector(cartesian_b.size(), std::numeric_limits<double>::lowest()));
 
     yarp::sig::Matrix A0 = yarp::math::pile(JCoM, cartesian_A);
 
@@ -325,7 +325,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     qpOasesOptionsqp0.setToReliable();
     qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
     qpOasesOptionsqp0.epsRegularisation *= 2E2;
-    QProblem qp0( nj, 3, HST_SEMIDEF);
+    QProblem qp0( nj, A0.rows(), HST_SEMIDEF);
     qp0.setOptions( qpOasesOptionsqp0 );
 
     Options qpOasesOptionsqp1;
@@ -342,7 +342,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         qp0.init( H0.data(),g0.data(),
                   A0.data(),
                   l.data(), u.data(),
-                  lA.data(), uA.data(),
+                  lA0.data(), uA0.data(),
                   nWSR,0,
                   dq0.data(), y0.data(),
                   &bounds0, &constraints0);
@@ -350,7 +350,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
         qp0.init( H0.data(),g0.data(),
                   A0.data(),
                   l.data(), u.data(),
-                  lA.data(), uA.data(),
+                  lA0.data(), uA0.data(),
                   nWSR,0);
         ROS_WARN("Not using initial guess");
     }
@@ -379,13 +379,9 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
     {
         /** Solve first QP. **/
         yarp::sig::Matrix A1 = J0;
-        A1 = yarp::math::pile(A1, A0);      // cartesian constraints from QP0
         yarp::sig::Vector b1 = J0*dq0;
         yarp::sig::Vector lA1 = b1;
         yarp::sig::Vector uA1 = b1;
-        lA1 = yarp::math::cat(lA1,lA);        // cartesian constraints from QP0
-        uA1 = yarp::math::cat(uA1,uA);        // cartesian constraints from QP0
-
 
         nWSR = 127;
 
