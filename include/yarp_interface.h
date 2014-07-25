@@ -28,6 +28,13 @@ public:
     void tic();
     double toc();
 
+    /**
+     * @brief sendCH sends a list of points through the CH port.
+     * @param A_ch a Matrix of coefficients for the CH rects, contains a_i,b_i
+     * @param b_ch a vector of coefficients for the CH rects, containts -c_i
+     */
+    void sendCH(yarp::sig::Matrix &A_ch, yarp::sig::Vector& b_ch);
+
     void sendWorldToBaseLinkPose(const yarp::sig::Matrix& T_world_base_link)
     {
         //Here the reference frame is the same that in updateIdyn3Model !!!
@@ -44,6 +51,7 @@ public:
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> com_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> world_to_base_link_pose_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> com_to_ch_pos_port;
     yarp::os::BufferedPort<yarp::os::Bottle> swing_foot_pos_ref_port;
     ///
 

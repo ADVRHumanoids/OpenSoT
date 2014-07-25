@@ -1,6 +1,6 @@
 /*
  * Copyright: (C) 2014 Walkman Consortium
- * Authors: Enrico Mingo, Alessio Rocchi
+ * Authors: Enrico Mingo, Alessio Rocchi, Valerio Varricchio
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.
 */
 
@@ -25,6 +25,37 @@ double yarp_interface::toc()
     return yarp::os::Time::now() - time_tic;
 }
 
+
+void yarp_interface::sendCH(yarp::sig::Matrix &A_ch, yarp::sig::Vector& b_ch)
+{
+    unsigned int nRects = A_ch.rows();
+    yarp::os::Bottle &temp = com_to_ch_pos_port.prepare();
+
+    for(unsigned int i = 0; i < nRects; i++) {
+        unsigned int j = (i+1)%nRects;
+        yarp::os::Bottle &points  = temp.addList();
+
+        // get coefficients for i-th rect
+        double a_i = A_ch(i,0);
+        double b_i = A_ch(i,1);
+        double c_i = -1*b_ch(i);
+
+        // get coefficients for rect nect to i-th
+        double a_j = A_ch(j,0);
+        double b_j = A_ch(j,1);
+        double c_j = -1*b_ch(j);
+
+        /** Kramer rule to find intersection between two rects by Valerio Varricchio */
+        double x = (-b_j*c_i+b_i*c_j)/(a_i*b_j-b_i*a_j);
+        double y = (-a_i*c_j+c_i*a_j)/(a_i*b_j-b_i*a_j);
+        points.addDouble(x);
+        points.addDouble(y);
+    }
+
+    com_to_ch_pos_port.write();
+}
+
+
 yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm("right_arm","sot_VelKinCon"),torso("torso","sot_VelKinCon"),
                                 left_leg("left_leg","sot_VelKinCon"),right_leg("right_leg","sot_VelKinCon")
 {
@@ -35,6 +66,7 @@ yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm(
     swing_foot_pos_ref_port.open("/sot_VelKinCon/swing_foot/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
+    com_to_ch_pos_port.open("/sot_VelKinCon/com_to_ch_pos:o");
 }
 
 yarp_interface::~yarp_interface()
@@ -44,6 +76,7 @@ yarp_interface::~yarp_interface()
     swing_foot_pos_ref_port.close();
     com_pos_ref_port.close();
     world_to_base_link_pose_port.close();
+    com_to_ch_pos_port.close();
 }
 
 void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
@@ -190,6 +223,10 @@ void yarp_interface::cleanPorts()
     pendings = world_to_base_link_pose_port.getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)
         world_to_base_link_pose_port.read(foo);
+
+    pendings = com_to_ch_pos_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        com_to_ch_pos_port.read(foo);
 
     pendings = swing_foot_pos_ref_port.getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)
