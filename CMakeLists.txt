@@ -40,18 +40,18 @@ FIND_PACKAGE(tf REQUIRED)
 
 set(qpOASES_SRC_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
 set(qpOASES_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
+set(ROS_LIB_FOLDER $ENV{ROS_LIB_FOLDER} CACHE STRING "ros lib folder")
 
 ExternalProject_Add(qpOASES-ext SOURCE_DIR "${qpOASES_SRC_FOLDER}"
                             PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
                             INSTALL_COMMAND "")
                             #CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
 
-SET(ROS_HYDRO_LIB_FOLDER /opt/ros/hydro/lib/)
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
                     ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} "${qpOASES_SRC_FOLDER}/include/" ${PCL_INCLUDE_DIRS})
-LINK_DIRECTORIES(${ROS_HYDRO_LIB_FOLDER} "${qpOASES_FOLDER}/libs/" ${PCL_LIBRARY_DIRS})
+LINK_DIRECTORIES(${ROS_LIB_FOLDER} "${qpOASES_FOLDER}/libs/" ${PCL_LIBRARY_DIRS})
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
