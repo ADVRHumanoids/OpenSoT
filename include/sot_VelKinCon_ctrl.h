@@ -15,7 +15,7 @@
 #include <ros/ros.h>
 #include <moveit/robot_model/robot_model.h>
 #include <drc_shared/idynutils.h>
-
+#include <convex_hull.h>
 
 namespace wb_sot {
     class sot_VelKinCon_ctrl :  public yarp::os::RateThread,
@@ -31,11 +31,6 @@ namespace wb_sot {
          virtual bool threadInit();
          virtual void run();
 
-         static yarp::sig::Vector computeW(const yarp::sig::Vector& qMin, const yarp::sig::Vector& qMax,
-                                    const std::vector<unsigned int>& right_arm_joint_numbers,
-                                    const std::vector<unsigned int>& left_arm_joint_numbers,
-                                    const std::vector<unsigned int>& waist_joint_numbers,
-                                    const double w_torso_weight);
          yarp::sig::Vector getGravityCompensationTorque(const std::vector<std::string>& joint_names);
          yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q);
          yarp::sig::Vector getGravityCompensationGradient(const yarp::sig::Matrix& W);
@@ -59,6 +54,7 @@ namespace wb_sot {
 //          robot_model::RobotModelPtr coman_robot_model; // A robot model
 
          bool is_clik;
+         bool update_world;
 
          int support_foot_LinkIndex;
          int swing_foot_LinkIndex;
@@ -95,14 +91,14 @@ namespace wb_sot {
          yarp::sig::Vector eCoM;
 
          bool use_3_stacks;
-         double max_joint_velocity;
+         double max_joint_velocity; //[rad/sec]
+         double max_CoM_velocity; //[m/sec]
          double orientation_error_gain;
          unsigned int last_stack_type;
          unsigned int postural_weight_strategy;
          double postural_weight_coefficient;
-         bool mineffort_weight_normalization;
          double mineffort_weight_coefficient;
-         double w_torso_weight;
+         double velocity_bounds_scale;
          unsigned int qpOASES_NWSR0;
          unsigned int qpOASES_NWSR1;
          unsigned int qpOASES_NWSR2;
@@ -132,11 +128,25 @@ namespace wb_sot {
 
          yarp_interface IYarp;
          iDynUtils idynutils,gravity_compensator_idynutils;
+
+         convex_hull _convex_hull;
+
          void updateiDyn3Model(const bool set_world_pose = false);
          void getFeedBack();
          void checkInput();
          void move();
          bool controlLaw();
+         void computeLastTaskType();
+         void computePosturalWeight();
+         void computeMinEffort();
+
+         /**
+          * @brief getSupportPolygonPoints
+          * @param points return a list of points express in a frame F
+          *        oriented like the world frame and with origin
+          *        on the CoM projection in the support polygon
+          */
+         void getSupportPolygonPoints(std::list<KDL::Vector>& points);
 
          /**
            We use this function to set to zero all the part of the Jacobians that we are not

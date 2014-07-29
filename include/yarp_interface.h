@@ -13,6 +13,7 @@
 #define LOCAL_FRAME_UPPER_BODY "world"
 #define LOCAL_FRAME_LOWER_BODY "world"
 #define LOCAL_FRAME_COM "l_sole"
+#define LOCAL_FRAME_SWING_FOOT "l_sole"
 
 class yarp_interface
 {
@@ -23,23 +24,21 @@ public:
     void getLeftArmCartesianRef(yarp::sig::Matrix& left_arm_ref);
     void getRightArmCartesianRef(yarp::sig::Matrix& right_arm_ref);
     void getCoMCartesianRef(yarp::sig::Vector& com_ref);
+    void getSwingFootCartesianRef(yarp::sig::Matrix& swing_foot_ref);
     void tic();
     double toc();
+
+    /**
+     * @brief sendCH sends a list of points through the CH port.
+     * @param A_ch a Matrix of coefficients for the CH rects, contains a_i,b_i
+     * @param b_ch a vector of coefficients for the CH rects, containts -c_i
+     */
+    void sendCH(yarp::sig::Matrix &A_ch, yarp::sig::Vector& b_ch);
 
     void sendWorldToBaseLinkPose(const yarp::sig::Matrix& T_world_base_link)
     {
         //Here the reference frame is the same that in updateIdyn3Model !!!
         sendCartesianRef(world_to_base_link_pose_port, "l_sole", T_world_base_link);
-    }
-
-    void sendLSoleToCoMPose(const yarp::sig::Vector& p_l_sole_CoM)
-    {
-        yarp::sig::Matrix T(4,4);
-        T.eye();
-        T(0,3) = p_l_sole_CoM[0];
-        T(1,3) = p_l_sole_CoM[1];
-        T(2,3) = p_l_sole_CoM[2];
-        sendCartesianRef(l_sole_to_CoM_pose_port, "l_sole", T);
     }
 
     void cleanPorts();
@@ -52,7 +51,8 @@ public:
     yarp::os::BufferedPort<yarp::os::Bottle> left_arm_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> com_pos_ref_port;
     yarp::os::BufferedPort<yarp::os::Bottle> world_to_base_link_pose_port;
-    yarp::os::BufferedPort<yarp::os::Bottle> l_sole_to_CoM_pose_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> com_to_ch_pos_port;
+    yarp::os::BufferedPort<yarp::os::Bottle> swing_foot_pos_ref_port;
     ///
 
 

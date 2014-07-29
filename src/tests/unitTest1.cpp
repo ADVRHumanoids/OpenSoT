@@ -4,62 +4,50 @@
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.
 */
 
-#include "sot_VelKinCon_ctrl.h"
+#include "convex_hull.h"
+#include <ros/ros.h>
 
-#define deg2rad(x) (x*M_PI/180.0)
-
-using namespace yarp::math;
+using namespace wb_sot;
 
 int main()
 {
-    std::cout<<"************Unit Test 1**********"<<std::endl;
+    convex_hull ch;
 
-    std::cout<<"\n\n ************* computeW *************"<<std::endl;
+    KDL::Vector p4(1.0, 0.0, -0.0006);
+    ROS_WARN("Point 0 is (%f, %f %f)", p4.x(), p4.y(), p4.z());
+    KDL::Vector p1(0.0, 0.0, 0.0);
+    ROS_WARN("Point 1 is (%f, %f %f)", p1.x(), p1.y(), p1.z());
+    KDL::Vector p2(0.0, 1.0, 0.0004);
+    ROS_WARN("Point 2 is (%f, %f %f)", p2.x(), p2.y(), p2.z());
+    KDL::Vector p3(1.0, 1.0, 0.0);
+    ROS_WARN("Point 3 is (%f, %f %f)", p3.x(), p3.y(), p3.z());
 
-    // We consider: 2 joints for each arm and 1 joint for the waist, total 5 joints
-    yarp::sig::Vector qMin(5, 0.0);
-    qMin[0] = deg2rad(-90.0);
-    qMin[1] = deg2rad(0.0);
-    qMin[2] = deg2rad(-10.0);
-    qMin[3] = deg2rad(0.0);
-    qMin[4] = deg2rad(-10.0);
-    std::cout<<"qMin: "<<qMin.toString()<<std::endl;
-
-    yarp::sig::Vector qMax(5, 0.0);
-    qMax[0] = deg2rad(90.0);
-    qMax[1] = deg2rad(110.0);
-    qMax[2] = deg2rad(30.0);
-    qMax[3] = deg2rad(110.0);
-    qMax[4] = deg2rad(30.0);
-    std::cout<<"qMax: "<<qMax.toString()<<std::endl;
-
-    yarp::sig::Vector deltaq = qMax - qMin;
-    std::cout<<"deltaq: "<<deltaq.toString()<<std::endl;
-
-    std::vector<unsigned int> right_arm_joint_number;
-    std::vector<unsigned int> left_arm_joint_number;
-    std::vector<unsigned int> torso_arm_joint_number;
-
-    std::cout<<"joint torso: ";
-    for(unsigned int i = 0; i < 1; ++i){
-        torso_arm_joint_number.push_back(i);
-        std::cout<<torso_arm_joint_number[i]<<" ";}
-    std::cout<<std::endl;
-    std::cout<<"joint left_arm: ";
-    for(unsigned int i = 0; i < 2; ++i){
-        left_arm_joint_number.push_back(i+1);
-        std::cout<<left_arm_joint_number[i]<<" ";}
-    std::cout<<std::endl;
-    std::cout<<"joint right_arm: ";
-    for(unsigned int i = 0; i < 2; ++i){
-        right_arm_joint_number.push_back(i+3);
-        std::cout<<right_arm_joint_number[i]<<" ";}
-    std::cout<<std::endl;
+    KDL::Vector p5(1.0, 0.0, -0.1);
+    ROS_WARN("Point 4 is (%f, %f %f)", p5.x(), p5.y(), p5.z());
+    KDL::Vector p6(0.5, 0.5, 0.0);
+    ROS_WARN("Point 5 is (%f, %f %f)", p6.x(), p6.y(), p6.z());
+    KDL::Vector p7(0.0, 0.5, 0.0);
+    ROS_WARN("Point 6 is (%f, %f %f)", p7.x(), p7.y(), p7.z());
+    KDL::Vector p8(0.5, 1.5, 1.0);
+    ROS_WARN("Point 7 is (%f, %f %f)", p8.x(), p8.y(), p8.z());
 
 
-    std::cout<<"diag(W): "<< wb_sot::sot_VelKinCon_ctrl::computeW(qMin, qMax, right_arm_joint_number, left_arm_joint_number,
-                                 torso_arm_joint_number,1.0).toString()<<std::endl;
+    std::list<KDL::Vector> points;
+    points.push_back(p1);
+    points.push_back(p2);
+    points.push_back(p3);
+    points.push_back(p4);
+    points.push_back(p5);
+    points.push_back(p6);
+    points.push_back(p7);
+    points.push_back(p8);
 
+    yarp::sig::Matrix A;
+    yarp::sig::Vector b;
+
+    ch.getConvexHull(points, A, b);
+    ROS_INFO("A: %s", A.toString().c_str());
+    ROS_INFO("b: %s", b.toString().c_str());
 
     return 0;
 }

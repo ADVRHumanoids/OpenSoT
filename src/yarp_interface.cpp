@@ -1,6 +1,6 @@
 /*
  * Copyright: (C) 2014 Walkman Consortium
- * Authors: Enrico Mingo, Alessio Rocchi
+ * Authors: Enrico Mingo, Alessio Rocchi, Valerio Varricchio
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.
 */
 
@@ -25,6 +25,37 @@ double yarp_interface::toc()
     return yarp::os::Time::now() - time_tic;
 }
 
+
+void yarp_interface::sendCH(yarp::sig::Matrix &A_ch, yarp::sig::Vector& b_ch)
+{
+    unsigned int nRects = A_ch.rows();
+    yarp::os::Bottle &temp = com_to_ch_pos_port.prepare();
+
+    for(unsigned int i = 0; i < nRects; i++) {
+        unsigned int j = (i+1)%nRects;
+        yarp::os::Bottle &points  = temp.addList();
+
+        // get coefficients for i-th rect
+        double a_i = A_ch(i,0);
+        double b_i = A_ch(i,1);
+        double c_i = -1*b_ch(i);
+
+        // get coefficients for rect nect to i-th
+        double a_j = A_ch(j,0);
+        double b_j = A_ch(j,1);
+        double c_j = -1*b_ch(j);
+
+        /** Kramer rule to find intersection between two rects by Valerio Varricchio */
+        double x = (-b_j*c_i+b_i*c_j)/(a_i*b_j-b_i*a_j);
+        double y = (-a_i*c_j+c_i*a_j)/(a_i*b_j-b_i*a_j);
+        points.addDouble(x);
+        points.addDouble(y);
+    }
+
+    com_to_ch_pos_port.write();
+}
+
+
 yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm("right_arm","sot_VelKinCon"),torso("torso","sot_VelKinCon"),
                                 left_leg("left_leg","sot_VelKinCon"),right_leg("right_leg","sot_VelKinCon")
 {
@@ -32,18 +63,20 @@ yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm(
 
     left_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::left_arm + "/set_ref:i");
     right_arm_pos_ref_port.open("/sot_VelKinCon/" + walkman::coman::right_arm + "/set_ref:i");
+    swing_foot_pos_ref_port.open("/sot_VelKinCon/swing_foot/set_ref:i");
     com_pos_ref_port.open("/sot_VelKinCon/com/set_ref:i");
     world_to_base_link_pose_port.open("/sot_VelKinCon/world_to_base_link_pose:o");
-    l_sole_to_CoM_pose_port.open("/sot_VelKinCon/l_sole_to_CoM_pose:o");
+    com_to_ch_pos_port.open("/sot_VelKinCon/com_to_ch_pos:o");
 }
 
 yarp_interface::~yarp_interface()
 {
     left_arm_pos_ref_port.close();
     right_arm_pos_ref_port.close();
+    swing_foot_pos_ref_port.close();
     com_pos_ref_port.close();
     world_to_base_link_pose_port.close();
-    l_sole_to_CoM_pose_port.close();
+    com_to_ch_pos_port.close();
 }
 
 void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
@@ -52,9 +85,9 @@ void yarp_interface::getLeftArmCartesianRef(Matrix &left_arm_ref)
 
     if(bot != NULL)
     {
-        std::cout<<"Left Arm:"<<std::endl;
+        //std::cout<<"Left Arm:"<<std::endl;
         getCartesianRef(left_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
-        std::cout<<std::endl;
+        //std::cout<<std::endl;
     }
 }
 
@@ -64,9 +97,19 @@ void yarp_interface::getRightArmCartesianRef(Matrix &right_arm_ref)
 
     if(bot != NULL)
     {
-        std::cout<<"Right Arm:"<<std::endl;
+        //std::cout<<"Right Arm:"<<std::endl;
         getCartesianRef(right_arm_ref, bot, LOCAL_FRAME_UPPER_BODY);
-        std::cout<<std::endl;
+        //std::cout<<std::endl;
+    }
+}
+
+void yarp_interface::getSwingFootCartesianRef(Matrix &swing_foot_ref)
+{
+    yarp::os::Bottle *bot = swing_foot_pos_ref_port.read(false);
+
+    if(bot != NULL)
+    {
+        getCartesianRef(swing_foot_ref, bot, LOCAL_FRAME_SWING_FOOT);
     }
 }
 
@@ -76,13 +119,13 @@ void yarp_interface::getCoMCartesianRef(Vector &com_ref)
     Matrix com_ref_T;
     if(bot != NULL)
     {
-        std::cout<<"CoM::"<<std::endl;
+        //std::cout<<"CoM::"<<std::endl;
         if(getCartesianRef(com_ref_T, bot, LOCAL_FRAME_COM))
         {
             KDL::Frame com_ref_T_KDL;
             YarptoKDL(com_ref_T, com_ref_T_KDL);
             com_ref = KDLtoYarp(com_ref_T_KDL.p);
-            std::cout<<std::endl;
+            //std::cout<<std::endl;
         }
     }
 }
@@ -134,8 +177,8 @@ bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const s
                     cartesian_utils::homogeneousMatrixFromRPY(ref,
                                                               data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                               toRad(data.get(4).asDouble()), toRad(data.get(5).asDouble()), toRad(data.get(6).asDouble()));
-                    ROS_INFO("New reference in %s is:", local_frame.c_str());
-                    ROS_INFO(ref.toString().c_str());
+                    //ROS_INFO("New reference in %s is:", local_frame.c_str());
+                    //ROS_INFO(ref.toString().c_str());
                     return true;
                 }
                 else if(data.size() == 7+1)
@@ -143,8 +186,8 @@ bool yarp_interface::getCartesianRef(Matrix &ref, yarp::os::Bottle *bot, const s
                     cartesian_utils::homogeneousMatrixFromQuaternion(ref,
                                                                      data.get(1).asDouble(), data.get(2).asDouble(), data.get(3).asDouble(),
                                                                      data.get(4).asDouble(), data.get(5).asDouble(), data.get(6).asDouble(), data.get(7).asDouble());
-                    ROS_INFO("New reference in %s is:", local_frame.c_str());
-                    ROS_INFO(ref.toString().c_str());
+                    //ROS_INFO("New reference in %s is:", local_frame.c_str());
+                    //ROS_INFO(ref.toString().c_str());
                     return true;
                 }
                 else
@@ -181,7 +224,11 @@ void yarp_interface::cleanPorts()
     for(unsigned int i = 0; i < pendings; ++i)
         world_to_base_link_pose_port.read(foo);
 
-    pendings = l_sole_to_CoM_pose_port.getPendingReads();
+    pendings = com_to_ch_pos_port.getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)
-        l_sole_to_CoM_pose_port.read(foo);
+        com_to_ch_pos_port.read(foo);
+
+    pendings = swing_foot_pos_ref_port.getPendingReads();
+    for(unsigned int i = 0; i < pendings; ++i)
+        swing_foot_pos_ref_port.read(foo);
 }
