@@ -27,7 +27,7 @@ VelocityLimits::VelocityLimits(const double qDotLimit,
                                const unsigned int x_size) :
     Bounds(x_size), _dT(dT) {
 
-    _qDotLimit = std::abs(qDotLimit);
+    _qDotLimit = std::abs(qDotLimit)*_dT;
 /************************ COMPUTING BOUNDS ****************************/
 
     _lowerBound.resize(x_size,-1.0*_qDotLimit);

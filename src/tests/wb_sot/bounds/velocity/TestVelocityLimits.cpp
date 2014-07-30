@@ -4,8 +4,9 @@
 #include <yarp/math/Math.h>
 #include <cmath>
 #define  s 1.0
-#define x_size 10u
+#define  x_size 10u
 #define  vel_lim 20.0
+#define  dT 0.001*s
 
 using namespace wb_sot::bounds::velocity;
 using namespace yarp::math;
@@ -24,7 +25,7 @@ class testVelocityLimits : public ::testing::Test {
       zeros.resize(x_size,0.0);
 
       velocityLimits = new VelocityLimits(  vel_lim,
-                                            0.001*s,
+                                            dT,
                                             x_size);
 
   }
@@ -85,12 +86,12 @@ TEST_F(testVelocityLimits, BoundsAreCorrect) {
     yarp::sig::Vector lowerBound = velocityLimits->getLowerBound();
     yarp::sig::Vector upperBound = velocityLimits->getUpperBound();
     /* checking a joint at upper bound */
-    EXPECT_DOUBLE_EQ(-1.0*vel_lim, lowerBound[0]) << "Lower Velocity Limits should be "
-                                                  << -1*vel_lim << ", "
-                                                  <<  lowerBound[0] << "instead";
-    EXPECT_DOUBLE_EQ(+1.0*vel_lim, upperBound[0]) << "Upper Velocity Limits should be "
-                                                  << +1*vel_lim << ", "
-                                                  << upperBound[0] << "instead";
+    EXPECT_DOUBLE_EQ(-dT*vel_lim, lowerBound[0]) << "Lower Velocity Limits should be "
+                                                  << -dT*vel_lim << ", "
+                                                  <<  lowerBound[0] << " instead";
+    EXPECT_DOUBLE_EQ(+dT*vel_lim, upperBound[0]) << "Upper Velocity Limits should be "
+                                                  << +dT*vel_lim << ", "
+                                                  << upperBound[0] << " instead";
 }
 
 
