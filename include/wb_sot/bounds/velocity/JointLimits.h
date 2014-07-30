@@ -29,16 +29,15 @@
             class JointLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
                 iCub::iDynTree::DynTree _robot;
-                double _dT;
+                double _boundScaling;
             public:
                 /**
                  * @brief JointLimits constructor
                  * @param robot the robot model which includes joint limits
-                 * @param dT the time constant at which we are performing velocity control [s]
                  */
                 JointLimits(const iCub::iDynTree::DynTree& robot,
-                            const double dT,
-                            const unsigned int x_size);
+                            const unsigned int x_size,
+                            const double boundScaling = 1.0);
 
                 void update(const yarp::sig::Vector &x);
             };

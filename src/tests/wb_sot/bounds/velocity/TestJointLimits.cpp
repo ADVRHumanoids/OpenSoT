@@ -21,7 +21,6 @@ class testJointLimits : public ::testing::Test {
   testJointLimits() {
     // You can do set-up work for each test here.
       jointLimits = new JointLimits(coman.coman_iDyn3,
-                                    0.001*s,
                                     coman.coman_iDyn3.getNrOfDOFs());
 
       qLowerBounds = coman.coman_iDyn3.getJointBoundMin();
