@@ -32,7 +32,6 @@
             public:
                 /**
                  * @brief VelocityLimits constructor
-                 * @param robot the robot model which includes joint limits
                  * @param dT the time constant at which we are performing velocity control [s]
                  */
                 VelocityLimits(const double qDotLimit,
