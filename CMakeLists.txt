@@ -23,7 +23,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
-FIND_PACKAGE(YARP REQUIRED)
+FIND_PACKAGE(YARP 2.3.63 REQUIRED)
 FIND_PACKAGE(ICUB REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
@@ -77,7 +77,8 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
-ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/JointLimits.cpp
+ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/CoMVelocity.cpp
+                   src/wb_sot/bounds/velocity/JointLimits.cpp
                    src/wb_sot/bounds/velocity/VelocityLimits.cpp
                    src/wb_sot/bounds/velocity/Aggregated.cpp)
 add_custom_target(  wb_sot_test ALL
@@ -109,9 +110,14 @@ ADD_EXECUTABLE(testVelocityLimitsVelB src/tests/wb_sot/bounds/velocity/TestVeloc
 TARGET_LINK_LIBRARIES(testVelocityLimitsVelB ${VelBLibs})
 add_dependencies(testVelocityLimitsVelB GTest-ext wb_sot)
 
+ADD_EXECUTABLE(testCoMVelocityVelB src/tests/wb_sot/bounds/velocity/TestCoMVelocity.cpp)
+TARGET_LINK_LIBRARIES(testCoMVelocityVelB ${VelBLibs})
+add_dependencies(testCoMVelocityVelB GTest-ext wb_sot)
+
 add_test(wb_sot_bounds_velocity_Aggregated testAggregatedVelB)
 add_test(wb_sot_bounds_velocity_JointLimits  testJointLimitsVelB)
 add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
+add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelB)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)
