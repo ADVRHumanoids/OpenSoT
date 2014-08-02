@@ -44,15 +44,15 @@
                 Aggregated(const std::list<BoundType *> &bounds,
                            const unsigned int x_size);
 
-                const yarp::sig::Vector getLowerBound();
-                const yarp::sig::Vector getUpperBound();
+//                const yarp::sig::Vector getLowerBound();
+//                const yarp::sig::Vector getUpperBound();
 
-                const yarp::sig::Matrix getAeq();
-                const yarp::sig::Vector getbeq();
+//                const yarp::sig::Matrix getAeq();
+//                const yarp::sig::Vector getbeq();
 
-                const yarp::sig::Matrix getAineq();
-                const yarp::sig::Vector getbLowerBound();
-                const yarp::sig::Vector getbUpperBound();
+//                const yarp::sig::Matrix getAineq();
+//                const yarp::sig::Vector getbLowerBound();
+//                const yarp::sig::Vector getbUpperBound();
 
                 void update(const yarp::sig::Vector &x);
             };

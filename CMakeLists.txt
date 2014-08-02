@@ -77,10 +77,11 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
-ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/CoMVelocity.cpp
+ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/Aggregated.cpp
+                   src/wb_sot/bounds/velocity/CoMVelocity.cpp
                    src/wb_sot/bounds/velocity/JointLimits.cpp
-                   src/wb_sot/bounds/velocity/VelocityLimits.cpp
-                   src/wb_sot/bounds/velocity/Aggregated.cpp)
+                   src/wb_sot/bounds/velocity/VelocityLimits.cpp)
+
 add_custom_target(  wb_sot_test ALL
                     COMMAND ${CMAKE_CTEST_COMMAND}
                     DEPENDS wb_sot)
