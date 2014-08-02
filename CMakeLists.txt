@@ -92,11 +92,11 @@ ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/test
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # gTests for Velocity Bounds
-SET(VelBLibs ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
+SET(VelBLibs  wb_sot ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
              ${kdl_codyco_LIBRARIES} orocos-kdl kdl_parser
              ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
              icubmod ${ICUB_LIBRARIES}
-             ${GTEST_BOTH_LIBRARIES} wb_sot)
+             ${GTEST_BOTH_LIBRARIES})
 
 ADD_EXECUTABLE(testAggregatedVelB     src/tests/wb_sot/bounds/velocity/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedVelB ${VelBLibs})
