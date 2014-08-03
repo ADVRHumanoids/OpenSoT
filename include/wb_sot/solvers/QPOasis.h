@@ -14,12 +14,19 @@ namespace wb_sot{
     public:
         QPOases():
             _bounds(0),
-            _constraints(0)
+            _constraints(0),
+            _options(0),
+            _qpProblems(0),
+            _initial_guess(false)
         {}
 
         ~QPOases(){}
 
-        void solve(Vector_type& solution){}
+        void solve(Vector_type& solution)
+        {
+
+        }
+
         Vector_type solve()
         {
             Vector_type solution;
@@ -30,10 +37,14 @@ namespace wb_sot{
 
         unsigned int getNumberOfBounds(){return _bounds.size();}
         unsigned int getNumberOfConstraints(){return _constraints.size();}
+        unsigned int getNumberOfStacks(){return _qpProblems.size();}
 
-    private:
+    protected:
         vector<qpOASES::Bounds> _bounds;
         vector<qpOASES::Constraints> _constraints;
+        vector<qpOASES::Options> _options;
+        vector<qpOASES::QProblem> _qpProblems;
+        bool _initial_guess;
     };
 
     }
