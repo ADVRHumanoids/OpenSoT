@@ -15,27 +15,40 @@
  * Public License for more details
 */
 
-#include <wb_sot/Task.h>
-#include <wb_sot/Bounds.h>
-
 #ifndef __SOLVER_H__
 #define __SOLVER_H__
 
+#include <wb_sot/Task.h>
+#include <wb_sot/Bounds.h>
+#include <list>
+
+using namespace std;
+
  namespace wb_sot {
-    template <  class Matrix_type, class Vector_type,
-                unsigned int x_size>
+    template < class Matrix_type, class Vector_type >
     class Solver {
-        Solver();
-        ~Solver();
+    public:
+        Solver(){}
+        virtual ~Solver(){}
 
-        Vector_type solve();
+        /**
+         * @brief solve Method to run QP optimization
+         * @param stack_of_tasks a list of task. Each element represent a stack.
+         * @param stack_of_bounds a list of bounds. Each element represent a stack.
+         * @param solution
+         */
+        virtual void solve(Vector_type& solution) = 0;
+        virtual Vector_type solve() = 0;
 
-        unsigned int addTask();
-        const int* getTasks();
-        const Task<Matrix_type, Vector_type, x_size>* getTask(const unsigned int taskId);
+        virtual unsigned int getNumberOfBounds(){return 0;}
+        virtual unsigned int getNumberOfConstraints(){return 0;}
 
-        void addGlobalLowerBounds(const Vector_type lowerBounds);
-        void addGlobalUpperBounds(const Vector_type upperBounds);
+//        unsigned int addTask();
+//        const int* getTasks();
+//        const Task<Matrix_type, Vector_type, x_size>* getTask(const unsigned int taskId);
+
+//        void addGlobalLowerBounds(const Vector_type lowerBounds);
+//        void addGlobalUpperBounds(const Vector_type upperBounds);
     };
  }
 

@@ -115,10 +115,21 @@ ADD_EXECUTABLE(testCoMVelocityVelB src/tests/wb_sot/bounds/velocity/TestCoMVeloc
 TARGET_LINK_LIBRARIES(testCoMVelocityVelB ${VelBLibs})
 add_dependencies(testCoMVelocityVelB GTest-ext wb_sot)
 
+SET(SolverLibs wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
+               ${kdl_codyco_LIBRARIES} orocos-kdl kdl_parser
+               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
+               icubmod ${ICUB_LIBRARIES}
+               ${GTEST_BOTH_LIBRARIES})
+ADD_EXECUTABLE(testSolverQPOases src/tests/wb_sot/solvers/TestQPOasis.cpp)
+TARGET_LINK_LIBRARIES(testSolverQPOases ${SolverLibs})
+add_dependencies(testSolverQPOases GTest-ext wb_sot qpOASES-ext)
+
+
 add_test(wb_sot_bounds_velocity_Aggregated testAggregatedVelB)
 add_test(wb_sot_bounds_velocity_JointLimits  testJointLimitsVelB)
 add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
 add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelB)
+add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)
