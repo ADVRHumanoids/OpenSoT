@@ -40,10 +40,7 @@ using namespace std;
         virtual void solve(Vector_type& solution) = 0;
         virtual Vector_type solve() = 0;
 
-        virtual unsigned int getNumberOfBounds(){return 0;}
-        virtual unsigned int getNumberOfConstraints(){return 0;}
-
-//        unsigned int addTask();
+//        virtual unsigned int addTask() = 0;
 //        const int* getTasks();
 //        const Task<Matrix_type, Vector_type, x_size>* getTask(const unsigned int taskId);
 
