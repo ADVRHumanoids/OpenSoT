@@ -33,6 +33,8 @@ FIND_PACKAGE(drc_shared REQUIRED)
 FIND_PACKAGE(roslib REQUIRED)
 FIND_PACKAGE(rospack REQUIRED)
 FIND_PACKAGE(rosconsole REQUIRED)
+FIND_PACKAGE(urdf REQUIRED)
+FIND_PACKAGE(kdl_parser REQUIRED)
 FIND_PACKAGE(srdfdom REQUIRED)
 FIND_PACKAGE(moveit_core REQUIRED)
 FIND_PACKAGE(PCL 1.2 REQUIRED)
@@ -42,13 +44,11 @@ enable_testing()
 
 set(qpOASES_SRC_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
 set(qpOASES_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
-set(ROS_LIB_FOLDER $ENV{ROS_LIB_FOLDER} CACHE STRING "ros lib folder")
 
 ExternalProject_Add(qpOASES-ext SOURCE_DIR "${qpOASES_SRC_FOLDER}"
                             PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
                             INSTALL_COMMAND "")
                             #CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
-
 
 #finding GTest
 #FIND_PACKAGE(GTest REQUIRED)
@@ -60,13 +60,11 @@ set(GTEST_LIB_DIRS "${CMAKE_CURRENT_BINARY_DIR}/external/src/GTest-ext-build/")
 set(GTEST_INCLUDE_DIRS ${gTestSource})
 set(GTEST_BOTH_LIBRARIES gtest gtest_main)
 
-SET(ROS_HYDRO_LIB_FOLDER /opt/ros/hydro/lib/)
-
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
                     ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} "${qpOASES_SRC_FOLDER}/include/" ${PCL_INCLUDE_DIRS}
 ${GTEST_INCLUDE_DIRS})
-LINK_DIRECTORIES(${ROS_LIB_FOLDER} "${qpOASES_FOLDER}/libs/" ${PCL_LIBRARY_DIRS} ${GTEST_LIB_DIRS})
+LINK_DIRECTORIES("${qpOASES_FOLDER}/libs/" ${GTEST_LIB_DIRS})
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
@@ -135,13 +133,13 @@ add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
 add_dependencies(sot_VelKinCon qpOASES-ext)
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(sot_VelKinCon ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
-                                    ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser ${PCL_LIBRARIES}
+TARGET_LINK_LIBRARIES(sot_VelKinCon ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+                                    ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} )
-TARGET_LINK_LIBRARIES(uTest1  ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}  ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
-                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl urdf kdl_parser ${PCL_LIBRARIES}
+TARGET_LINK_LIBRARIES(uTest1  ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl urdf kdl_parser ${PCL_LIBRARIES}
+TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(createMonitorScope ${YARP_LIBRARIES} ${paramHelp_LIBRARIES})
 
