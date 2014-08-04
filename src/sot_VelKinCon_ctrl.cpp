@@ -7,12 +7,10 @@
 #include "sot_VelKinCon_ctrl.h"
 #include <boost/foreach.hpp>
 #include "task_solver.h"
-#include <drc_shared/cartesian_utils.h>
 #include "sot_VelKinCon_constants.h"
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
-#include <iCub/iDynTree/yarp_kdl.h>
-#include "convex_hull.h"
+#include <drc_shared/cartesian_utils.h>
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -283,7 +281,7 @@ void sot_VelKinCon_ctrl::run()
 
     IYarp.sendWorldToBaseLinkPose(idynutils.coman_iDyn3.getWorldBasePose());
 
-    getSupportPolygonPoints(points);
+    drc_shared::convex_hull::getSupportPolygonPoints(idynutils,points);
     _convex_hull.getConvexHull(points,A_ch,b_ch);
     IYarp.sendCH(A_ch,b_ch);
 
@@ -504,7 +502,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
     std::list<KDL::Vector> points;
     yarp::sig::Matrix A_ch;
     yarp::sig::Vector b_ch;
-    getSupportPolygonPoints(points);
+    drc_shared::convex_hull::getSupportPolygonPoints(idynutils,points);
     _convex_hull.getConvexHull(points, A_ch, b_ch);
     ROS_WARN("A: %s", A_ch.toString().c_str());
     ROS_WARN("b: %s", b_ch.toString().c_str());
@@ -677,29 +675,3 @@ void sot_VelKinCon_ctrl::computeMinEffort()
     gradientGq = -1.0 * getGravityCompensationGradient(W);
 }
 
-void sot_VelKinCon_ctrl::getSupportPolygonPoints(std::list<KDL::Vector>& points)
-{
-    std::vector<std::string> names;
-    names.push_back("l_foot_lower_left_link");
-    names.push_back("l_foot_lower_right_link");
-    names.push_back("l_foot_upper_left_link");
-    names.push_back("l_foot_upper_right_link");
-    names.push_back("r_foot_lower_left_link");
-    names.push_back("r_foot_lower_right_link");
-    names.push_back("r_foot_upper_left_link");
-    names.push_back("r_foot_upper_right_link");
-
-    KDL::Frame waist_T_CoM;
-    KDL::Frame waist_T_point;
-    KDL::Frame CoM_T_point;
-    for(unsigned int i = 0; i < names.size(); ++i)
-    {
-        // get points in world frame
-        waist_T_point = idynutils.coman_iDyn3.getPositionKDL(idynutils.coman_iDyn3.getLinkIndex(names[i]));
-        // get CoM in the world frame
-        YarptoKDL(idynutils.coman_iDyn3.getCOM(), waist_T_CoM.p);
-
-        CoM_T_point = waist_T_CoM.Inverse() * waist_T_point;
-        points.push_back(CoM_T_point.p);
-    }
-}

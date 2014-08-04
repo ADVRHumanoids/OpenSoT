@@ -15,7 +15,7 @@
 #include <ros/ros.h>
 #include <moveit/robot_model/robot_model.h>
 #include <drc_shared/idynutils.h>
-#include <convex_hull.h>
+#include <drc_shared/utils/convex_hull.h>
 
 namespace wb_sot {
     class sot_VelKinCon_ctrl :  public yarp::os::RateThread,
@@ -129,7 +129,7 @@ namespace wb_sot {
          yarp_interface IYarp;
          iDynUtils idynutils,gravity_compensator_idynutils;
 
-         convex_hull _convex_hull;
+         drc_shared::convex_hull _convex_hull;
 
          void updateiDyn3Model(const bool set_world_pose = false);
          void getFeedBack();
@@ -139,14 +139,6 @@ namespace wb_sot {
          void computeLastTaskType();
          void computePosturalWeight();
          void computeMinEffort();
-
-         /**
-          * @brief getSupportPolygonPoints
-          * @param points return a list of points express in a frame F
-          *        oriented like the world frame and with origin
-          *        on the CoM projection in the support polygon
-          */
-         void getSupportPolygonPoints(std::list<KDL::Vector>& points);
 
          /**
            We use this function to set to zero all the part of the Jacobians that we are not

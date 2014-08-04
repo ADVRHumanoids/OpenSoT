@@ -4,14 +4,12 @@
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.
 */
 
-#include "convex_hull.h"
+#include <drc_shared/utils/convex_hull.h>
 #include <ros/ros.h>
-
-using namespace wb_sot;
 
 int main()
 {
-    convex_hull ch;
+    drc_shared::convex_hull ch;
 
     KDL::Vector p4(1.0, 0.0, -0.0006);
     ROS_WARN("Point 0 is (%f, %f %f)", p4.x(), p4.y(), p4.z());
