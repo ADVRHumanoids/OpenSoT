@@ -319,22 +319,6 @@ void sot_VelKinCon_ctrl::getFeedBack()
     IYarp.right_leg.sense(q_right_leg);
     IYarp.torso.sense(q_torso);
 
-    //To make things faster: we suppose that arms has same number of dofs
-    for(unsigned int i = 0; i < q_left_arm.size(); ++i)
-    {
-        q_left_arm[i] = toRad(q_left_arm[i]); //from deg to rad!
-        q_right_arm[i] = toRad(q_right_arm[i]); //from deg to rad!
-    }
-    //To make things faster: we suppose that legs has same number of dofs
-    for(unsigned int i = 0; i < q_left_leg.size(); ++i)
-    {
-        q_left_leg[i] = toRad(q_left_leg[i]); //from deg to rad!
-        q_right_leg[i] = toRad(q_right_leg[i]); //from deg to rad!
-    }
-    for(unsigned int i = 0; i < q_torso.size(); ++i)
-    {
-        q_torso[i] = toRad(q_torso[i]); //from deg to rad!
-    }
     idynutils.fromRobotToIDyn(q_left_arm,q,idynutils.left_arm);
     idynutils.fromRobotToIDyn(q_right_arm,q,idynutils.right_arm);
     idynutils.fromRobotToIDyn(q_left_leg,q,idynutils.left_leg);
@@ -364,21 +348,17 @@ void sot_VelKinCon_ctrl::move()
 
     double q_sent = 0.0;
     for(unsigned int i = 0; i < torso.size(); ++i){
-        q_sent = q[idynutils.torso.joint_numbers[i]] + dq_ref[idynutils.torso.joint_numbers[i]];
-        torso[i] = toDeg( q_sent );}
+        torso[i] = q[idynutils.torso.joint_numbers[i]] + dq_ref[idynutils.torso.joint_numbers[i]];
+    }
     //Here we assumes that left and right arm has the same number of joints!
     for(unsigned int i = 0; i < left_arm.size(); ++i){
-        q_sent = q[idynutils.left_arm.joint_numbers[i]] + dq_ref[idynutils.left_arm.joint_numbers[i]];
-        left_arm[i] = toDeg( q_sent );
-        q_sent = q[idynutils.right_arm.joint_numbers[i]] + dq_ref[idynutils.right_arm.joint_numbers[i]];
-        right_arm[i] = toDeg( q_sent );
+        left_arm[i] = q[idynutils.left_arm.joint_numbers[i]] + dq_ref[idynutils.left_arm.joint_numbers[i]];
+        right_arm[i] = q[idynutils.right_arm.joint_numbers[i]] + dq_ref[idynutils.right_arm.joint_numbers[i]];
     }
     //Here we assumes that left and right leg has the same number of joints!
     for(unsigned int i = 0; i < left_leg.size(); ++i){
-        q_sent = q[idynutils.left_leg.joint_numbers[i]] + dq_ref[idynutils.left_leg.joint_numbers[i]];
-        left_leg[i] = toDeg( q_sent );
-        q_sent = q[idynutils.right_leg.joint_numbers[i]] + dq_ref[idynutils.right_leg.joint_numbers[i]];
-        right_leg[i] = toDeg( q_sent );
+        left_leg[i] = q[idynutils.left_leg.joint_numbers[i]] + dq_ref[idynutils.left_leg.joint_numbers[i]];
+        right_leg[i] = q[idynutils.right_leg.joint_numbers[i]] + dq_ref[idynutils.right_leg.joint_numbers[i]];
     }
 
     IYarp.torso.move(torso);

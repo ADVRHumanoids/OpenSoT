@@ -56,8 +56,12 @@ void yarp_interface::sendCH(yarp::sig::Matrix &A_ch, yarp::sig::Vector& b_ch)
 }
 
 
-yarp_interface::yarp_interface():left_arm("left_arm","sot_VelKinCon"),right_arm("right_arm","sot_VelKinCon"),torso("torso","sot_VelKinCon"),
-                                left_leg("left_leg","sot_VelKinCon"),right_leg("right_leg","sot_VelKinCon")
+yarp_interface::yarp_interface() :
+    left_arm("left_arm", "sot_VelKinCon", true),
+    right_arm("right_arm", "sot_VelKinCon", true),
+    torso("torso", "sot_VelKinCon", true),
+    left_leg("left_leg", "sot_VelKinCon", true),
+    right_leg("right_leg", "sot_VelKinCon", true)
 {
     time_tic = 0.0;
 
