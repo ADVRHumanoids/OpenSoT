@@ -76,7 +76,8 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
-ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/Aggregated.cpp
+ADD_LIBRARY(wb_sot src/wb_sot/solvers/QPOases.cpp
+                   src/wb_sot/bounds/velocity/Aggregated.cpp
                    src/wb_sot/bounds/velocity/CoMVelocity.cpp
                    src/wb_sot/bounds/velocity/JointLimits.cpp
                    src/wb_sot/bounds/velocity/VelocityLimits.cpp)
@@ -92,7 +93,7 @@ ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/test
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # gTests for Velocity Bounds
-SET(VelBLibs  wb_sot ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
+SET(VelBLibs  wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
              ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
              ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
              icubmod ${ICUB_LIBRARIES}
