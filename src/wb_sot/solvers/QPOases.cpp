@@ -3,8 +3,6 @@
 
 using namespace yarp::math;
 
-#define INITIAL_NWSR 127
-
 using namespace wb_sot::solvers;
 
 QPOasesProblem::QPOasesProblem():
@@ -12,10 +10,9 @@ QPOasesProblem::QPOasesProblem():
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
     _bounds(),
     _constraints(),
-    _nWSR(INITIAL_NWSR),
+    _nWSR(32),
     _solution(0), _dual_solution(0),
-    _is_initialized(false),
-    _initial_guess(false)
+    _is_initialized(false)
 {
 
 }
@@ -27,10 +24,9 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
     _bounds(),
     _constraints(),
-    _nWSR(127),
+    _nWSR(32),
     _solution(number_of_variables), _dual_solution(number_of_variables),
-    _is_initialized(false),
-    _initial_guess(false)
+    _is_initialized(false)
 {
     qpOASES::Options opt;
     opt.printLevel = qpOASES::PL_HIGH;
@@ -40,7 +36,7 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _problem.setOptions(opt);
 }
 
-void QPOasesProblem::addProblem(const qpOASES::QProblem &problem)
+void QPOasesProblem::addProblem(const qpOASES::SQProblem &problem)
 {
     _problem = problem;
 }
@@ -50,13 +46,42 @@ void QPOasesProblem::setOptions(const qpOASES::Options &options)
     _problem.setOptions(options);
 }
 
-void QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
+bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
                                  const Matrix &A,
                                  const Vector &lA, const Vector &uA,
                                  const Vector &l, const Vector &u)
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
+
+    _problem.init( _H.data(),_g.data(),
+                   _A.data(),
+                   _l.data(), _u.data(),
+                   _lA.data(),_uA.data(),
+                   _nWSR,0);
+
+    if(_solution.size() != _problem.getNV())
+        _solution.resize(_problem.getNV());
+
+    if(_dual_solution.size() != _problem.getNV() + _problem.getNC())
+        _dual_solution.resize(_problem.getNV()+ _problem.getNC());
+
+
     _is_initialized = true;
+
+    //We get the solution
+    int success = _problem.getPrimalSolution(_solution.data());
+    _problem.getDualSolution(_dual_solution.data());
+    _problem.getBounds(_bounds);
+    _problem.getConstraints(_constraints);
+
+    if(success == qpOASES::RET_QP_NOT_SOLVED ||
+      (success != qpOASES::RET_QP_SOLVED &&
+       success != qpOASES::SUCCESSFUL_RETURN))
+    {
+        std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<success<<std::endl;
+        return false;
+    }
+    return true;
 }
 
 bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
@@ -103,86 +128,24 @@ bool QPOasesProblem::updateProblem(const Matrix &H, const Vector &g,
     return updateTask(H, g) && updateConstraints(A, lA, uA) && updateBounds(l, u);
 }
 
-bool QPOasesProblem::addTask(const Matrix &H, const Vector &g)
-{
-    if(_is_initialized)
-    {
-        _H = pile(_H, H);
-        _g = cat(_g, g);
-        _initial_guess = false;
-        return true;
-    }
-    return false;
-}
-
-bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vector &uA)
-{
-    if(_is_initialized)
-    {
-        _A = pile(_A, A);
-        _lA = cat(_lA, lA);
-        _uA = cat(_uA, uA);
-        _initial_guess = false;
-        return true;
-    }
-    return false;
-}
-
-bool QPOasesProblem::addBounds(const Vector &l, const Vector &u)
-{
-    if(_is_initialized)
-    {
-        _l = cat(_l, l);
-        _u = cat(_u, u);
-        _initial_guess = false;
-        return true;
-    }
-    return false;
-}
-
-bool QPOasesProblem::addProblem(const Matrix &H, const Vector &g,
-                                const Matrix &A, const Vector &lA, const Vector &uA,
-                                const Vector &l, const Vector &u)
-{
-    return addTask(H, g) && addConstraints(A, lA, uA) && addBounds(l, u);
-}
-
 bool QPOasesProblem::solve()
 {
     // To solve the problem it has to be initialized
     if(_is_initialized)
     {
-        // If initial guess true we use part of the previous solution..
-        if(_initial_guess)
-        {
-            _problem.init( _H.data(), _g.data(),
-                           _A.data(),
-                           _l.data(), _u.data(),
-                           _lA.data(),_uA.data(),
-                           _nWSR,0,
-                           _solution.data(), _dual_solution.data(),
-                           &_bounds, &_constraints);
-        }
-        else
-        {
-            _problem.init( _H.data(),_g.data(),
-                           _A.data(),
-                           _l.data(), _u.data(),
-                           _lA.data(),_uA.data(),
-                           _nWSR,0);
-        }
+        int nWSR = _nWSR;
+        _problem.hotstart(_H.data(),_g.data(),
+                       _A.data(),
+                       _l.data(), _u.data(),
+                       _lA.data(),_uA.data(),
+                       nWSR,0);
 
         // If solution has changed of size we update the size
         if(_solution.size() != _problem.getNV())
-        {
             _solution.resize(_problem.getNV());
-            _initial_guess = false;
-        }
+
         if(_dual_solution.size() != _problem.getNV() + _problem.getNC())
-        {
             _dual_solution.resize(_problem.getNV()+ _problem.getNC());
-            _initial_guess = false;
-        }
 
         //We get the solution
         int success = _problem.getPrimalSolution(_solution.data());
@@ -195,13 +158,9 @@ bool QPOasesProblem::solve()
            success != qpOASES::SUCCESSFUL_RETURN))
         {
             std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<success<<std::endl;
-            _initial_guess = false;
-            return _initial_guess;
+            return false;
         }
-        else
-        {
-            return true;
-        }
+        return true;
     }
     return false;
 }

@@ -12,7 +12,7 @@ public:
         g(2),
         A(2,2),
         l(2), u(2), lA(2), uA(2),
-        ht(qpOASES::HST_POSDEF)
+        ht(qpOASES::HST_IDENTITY)
     {
         H = H.eye();
         g[0] = -5.0; g[1] = 5.0;
@@ -44,7 +44,7 @@ protected:
 
     }
 
-    void setTestProblem(const qpOASES::QProblem &problem)
+    void setTestProblem(const qpOASES::SQProblem &problem)
     {
         this->addProblem(problem);
     }
@@ -69,23 +69,51 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
     yarp::sig::Vector x(2);
     simpleProblem sp;
 
-    qpOASES::QProblem testProblem(x.size(), sp.A.rows(), sp.ht);
+    qpOASES::SQProblem testProblem(x.size(), sp.A.rows(), sp.ht);
     this->setTestProblem(testProblem);
 
     this->initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
 
     EXPECT_TRUE(this->solve());
     EXPECT_TRUE(this->isQProblemInitialized());
-    EXPECT_EQ(sp.ht, this->getHessianType());
     yarp::sig::Vector s = this->getSolution();
     EXPECT_EQ(-sp.g[0], s[0]);
     EXPECT_EQ(-sp.g[1], s[1]);
+
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        EXPECT_TRUE(this->solve());
+
+        yarp::sig::Vector s = this->getSolution();
+        EXPECT_EQ(-sp.g[0], s[0]);
+        EXPECT_EQ(-sp.g[1], s[1]);
+    }
+
 }
 
-//TEST_F(testQPOasesProblem, testUpdatedProblem)
-//{
+TEST_F(testQPOasesProblem, testUpdatedProblem)
+{
+    yarp::sig::Vector x(2);
+    simpleProblem sp;
 
-//}
+    qpOASES::SQProblem testProblem(x.size(), sp.A.rows(), sp.ht);
+    this->setTestProblem(testProblem);
+
+    this->initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
+
+    EXPECT_TRUE(this->solve());
+    yarp::sig::Vector s = this->getSolution();
+    EXPECT_EQ(-sp.g[0], s[0]);
+    EXPECT_EQ(-sp.g[1], s[1]);
+
+    sp.g[0] = -1.0; sp.g[1] = 1.0;
+    EXPECT_TRUE(this->updateTask(sp.H, sp.g));
+    EXPECT_TRUE(this->solve());
+
+    s = this->getSolution();
+    EXPECT_EQ(-sp.g[0], s[0]);
+    EXPECT_EQ(-sp.g[1], s[1]);
+}
 
 }
 

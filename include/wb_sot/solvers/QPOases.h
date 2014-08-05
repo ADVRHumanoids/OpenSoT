@@ -22,13 +22,13 @@ namespace wb_sot{
 
         ~QPOasesProblem(){}
 
-        void addProblem(const qpOASES::QProblem& problem);
-        const qpOASES::QProblem& getProblem(){return _problem;}
+        void addProblem(const qpOASES::SQProblem& problem);
+        const qpOASES::SQProblem& getProblem(){return _problem;}
 
         const qpOASES::Options& getOptions(){return _problem.getOptions();}
         void setOptions(const qpOASES::Options& options);
 
-        void initProblem(const Matrix& H, const Vector& g,
+        bool initProblem(const Matrix& H, const Vector& g,
                         const Matrix& A,
                         const Vector& lA, const Vector& uA,
                         const Vector& l, const Vector& u);
@@ -44,21 +44,8 @@ namespace wb_sot{
                            const Vector& lA, const Vector& uA,
                            const Vector& l, const Vector& u);
 
-        /*
-         * This set of function add input data to the problem
-         */
-        bool addTask(const Matrix& H, const Vector& g);
-        bool addConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
-        bool addBounds(const Vector& l, const Vector& u);
-        bool addProblem(const Matrix& H, const Vector& g,
-                           const Matrix& A,
-                           const Vector& lA, const Vector& uA,
-                           const Vector& l, const Vector& u);
 
         bool solve();
-
-        void setInitialGuess(const bool initial_guess){_initial_guess = initial_guess;}
-        bool getInitialGuess(){return _initial_guess;}
 
         const Vector& getSolution(){return _solution;}
 
@@ -71,13 +58,14 @@ namespace wb_sot{
 
         bool isQProblemInitialized(){return _is_initialized;}
 
+        bool resetProblem(){return _problem.reset();}
+
     protected:
-        qpOASES::QProblem _problem;
+        qpOASES::SQProblem _problem;
         qpOASES::Bounds _bounds;
         qpOASES::Constraints _constraints;
         int _nWSR;
         bool _is_initialized;
-        bool _initial_guess;
 
         /*
          * Define a cost function
