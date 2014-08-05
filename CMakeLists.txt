@@ -29,6 +29,7 @@ FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(paramHelp REQUIRED)
 FIND_PACKAGE(kdl_codyco REQUIRED)
+FIND_PACKAGE(orocos_kdl REQUIRED)
 FIND_PACKAGE(drc_shared REQUIRED)
 FIND_PACKAGE(roslib REQUIRED)
 FIND_PACKAGE(rospack REQUIRED)
@@ -92,7 +93,7 @@ ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # gTests for Velocity Bounds
 SET(VelBLibs  wb_sot ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
-             ${kdl_codyco_LIBRARIES} orocos-kdl kdl_parser
+             ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
              ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
              icubmod ${ICUB_LIBRARIES}
              ${GTEST_BOTH_LIBRARIES})
@@ -114,7 +115,7 @@ TARGET_LINK_LIBRARIES(testCoMVelocityVelB ${VelBLibs})
 add_dependencies(testCoMVelocityVelB GTest-ext wb_sot)
 
 SET(SolverLibs wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
-               ${kdl_codyco_LIBRARIES} orocos-kdl kdl_parser
+               ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
                icubmod ${ICUB_LIBRARIES}
                ${GTEST_BOTH_LIBRARIES})
@@ -134,10 +135,10 @@ add_dependencies(sot_VelKinCon qpOASES-ext)
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(sot_VelKinCon ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
-                                    ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
+                                    ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} )
 TARGET_LINK_LIBRARIES(uTest1  ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
-                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} orocos-kdl ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
+                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} orocos-kdl ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
