@@ -147,11 +147,22 @@ namespace wb_sot{
         bool _is_initialized;
         bool _initial_guess;
 
+        /*
+         * Define a cost function
+         */
         Matrix _H;
         Vector _g;
+
+        /*
+         * Define a set of constraints weighted with A
+         */
         Matrix _A;
         Vector _lA;
         Vector _uA;
+
+        /*
+         * Define a set of bounds on solution
+         */
         Vector _l;
         Vector _u;
 
