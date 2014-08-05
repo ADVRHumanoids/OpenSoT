@@ -258,7 +258,6 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
                                     yarp::sig::Vector &dq_ref,
                                     const double velocity_bounds_scale)
 {
-    ROS_WARN("MERICOOOOOOOOOOOOOOOO");
     int nj = dq_ref.size();
 
     int njTask0 = J0.rows();

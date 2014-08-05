@@ -36,7 +36,7 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _problem.setOptions(opt);
 }
 
-void QPOasesProblem::addProblem(const qpOASES::SQProblem &problem)
+void QPOasesProblem::setProblem(const qpOASES::SQProblem &problem)
 {
     _problem = problem;
 }
@@ -53,17 +53,18 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
+    int nWSR = _nWSR;
     _problem.init( _H.data(),_g.data(),
                    _A.data(),
                    _l.data(), _u.data(),
                    _lA.data(),_uA.data(),
-                   _nWSR,0);
+                   nWSR,0);
 
     if(_solution.size() != _problem.getNV())
         _solution.resize(_problem.getNV());
 
     if(_dual_solution.size() != _problem.getNV() + _problem.getNC())
-        _dual_solution.resize(_problem.getNV()+ _problem.getNC());
+        _dual_solution.resize(_problem.getNV() + _problem.getNC());
 
 
     _is_initialized = true;
@@ -126,6 +127,58 @@ bool QPOasesProblem::updateProblem(const Matrix &H, const Vector &g,
                                    const Vector &l, const Vector &u)
 {
     return updateTask(H, g) && updateConstraints(A, lA, uA) && updateBounds(l, u);
+}
+
+bool QPOasesProblem::addTask(const Matrix &H, const Vector &g, const bool init_problem)
+{
+    if(_is_initialized && H.cols() == _H.cols())
+    {
+        _H = pile(_H, H);
+        _g = cat(_g, g);
+        if(init_problem){
+            _problem.reset();
+            initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
+        return true;
+    }
+    return false;
+}
+
+bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vector &uA,
+                                    const bool init_problem)
+{
+    if(_is_initialized && A.cols() == _A.cols())
+    {
+        _A = pile(_A, A);
+        _lA = cat(_lA, lA);
+        _uA = cat(_uA, uA);
+        if(init_problem){
+            _problem.reset();
+            initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
+        return true;
+    }
+    return false;
+}
+
+bool QPOasesProblem::addBounds(const Vector &l, const Vector &u, const bool init_problem)
+{
+    if(_is_initialized)
+    {
+        _l = cat(_l, l);
+        _u = cat(_u, u);
+        if(init_problem){
+            _problem.reset();
+            initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
+        return true;
+    }
+    return false;
+}
+
+bool QPOasesProblem::addProblem(const Matrix &H, const Vector &g,
+                                const Matrix &A, const Vector &lA,
+                                const Vector &uA, const Vector &l,
+                                const Vector &u)
+{
+    return addTask(H, g) && addConstraints(A, lA, uA) && addBounds(l, u, true);
 }
 
 bool QPOasesProblem::solve()
