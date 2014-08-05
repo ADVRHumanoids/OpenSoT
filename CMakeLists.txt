@@ -86,10 +86,10 @@ add_custom_target(  wb_sot_test ALL
                     COMMAND ${CMAKE_CTEST_COMMAND}
                     DEPENDS wb_sot)
 
-ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
+ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver2.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
 ADD_EXECUTABLE(createParamTuner src/tests/createParamTuner.cpp)
-ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/tests/unitTest1.cpp src/task_solver.cpp)
+ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/tests/unitTest1.cpp src/task_solver2.cpp)
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # gTests for Velocity Bounds
@@ -135,10 +135,10 @@ add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
 add_dependencies(sot_VelKinCon qpOASES-ext)
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(sot_VelKinCon ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+TARGET_LINK_LIBRARIES(sot_VelKinCon wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
                                     ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} )
-TARGET_LINK_LIBRARIES(uTest1  ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
+TARGET_LINK_LIBRARIES(uTest1  wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
                               ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
