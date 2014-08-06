@@ -26,30 +26,15 @@ double yarp_interface::toc()
 }
 
 
-void yarp_interface::sendCH(yarp::sig::Matrix &A_ch, yarp::sig::Vector& b_ch)
+void yarp_interface::sendCH(std::vector<KDL::Vector> ch)
 {
-    unsigned int nRects = A_ch.rows();
+    unsigned int nPoints = ch.size();
     yarp::os::Bottle &temp = com_to_ch_pos_port.prepare();
 
-    for(unsigned int i = 0; i < nRects; i++) {
-        unsigned int j = (i+1)%nRects;
+    for(unsigned int i = 0; i < nPoints; i++) {
         yarp::os::Bottle &points  = temp.addList();
-
-        // get coefficients for i-th rect
-        double a_i = A_ch(i,0);
-        double b_i = A_ch(i,1);
-        double c_i = -1*b_ch(i);
-
-        // get coefficients for rect nect to i-th
-        double a_j = A_ch(j,0);
-        double b_j = A_ch(j,1);
-        double c_j = -1*b_ch(j);
-
-        /** Kramer rule to find intersection between two rects by Valerio Varricchio */
-        double x = (-b_j*c_i+b_i*c_j)/(a_i*b_j-b_i*a_j);
-        double y = (-a_i*c_j+c_i*a_j)/(a_i*b_j-b_i*a_j);
-        points.addDouble(x);
-        points.addDouble(y);
+        points.addDouble(ch[i].x());
+        points.addDouble(ch[i].y());
     }
 
     com_to_ch_pos_port.write();

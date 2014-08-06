@@ -11,6 +11,7 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <drc_shared/cartesian_utils.h>
+#include "wb_sot/bounds/velocity/ConvexHull.h"
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -257,6 +258,7 @@ if(TORSO_IMPEDANCE) {
 void sot_VelKinCon_ctrl::run()
 {
     std::list<KDL::Vector> points;
+    std::vector<KDL::Vector> ch;
     static yarp::sig::Matrix A_ch;
     static yarp::sig::Vector b_ch;
 #ifdef DEBUG
@@ -281,9 +283,11 @@ void sot_VelKinCon_ctrl::run()
 
     IYarp.sendWorldToBaseLinkPose(idynutils.coman_iDyn3.getWorldBasePose());
 
+
     drc_shared::convex_hull::getSupportPolygonPoints(idynutils,points);
-    _convex_hull.getConvexHull(points,A_ch,b_ch);
-    IYarp.sendCH(A_ch,b_ch);
+    if(_convex_hull.getConvexHull(points,ch)) {
+        IYarp.sendCH(ch);
+    }
 
     t_elapsed = IYarp.toc();
 
@@ -480,10 +484,12 @@ bool sot_VelKinCon_ctrl::controlLaw()
 
     // Here I compute Convex Hull Constraints for CoM
     std::list<KDL::Vector> points;
+    std::vector<KDL::Vector> ch;
     yarp::sig::Matrix A_ch;
     yarp::sig::Vector b_ch;
     drc_shared::convex_hull::getSupportPolygonPoints(idynutils,points);
-    _convex_hull.getConvexHull(points, A_ch, b_ch);
+    _convex_hull.getConvexHull(points, ch);
+    wb_sot::bounds::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch);
     ROS_WARN("A: %s", A_ch.toString().c_str());
     ROS_WARN("b: %s", b_ch.toString().c_str());
 

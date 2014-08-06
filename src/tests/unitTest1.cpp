@@ -5,11 +5,12 @@
 */
 
 #include <drc_shared/utils/convex_hull.h>
+#include "wb_sot/bounds/velocity/ConvexHull.h"
 #include <ros/ros.h>
 
 int main()
 {
-    drc_shared::convex_hull ch;
+    drc_shared::convex_hull huller;
 
     KDL::Vector p4(1.0, 0.0, -0.0006);
     ROS_WARN("Point 0 is (%f, %f %f)", p4.x(), p4.y(), p4.z());
@@ -31,6 +32,7 @@ int main()
 
 
     std::list<KDL::Vector> points;
+    std::vector<KDL::Vector> ch;
     points.push_back(p1);
     points.push_back(p2);
     points.push_back(p3);
@@ -43,7 +45,8 @@ int main()
     yarp::sig::Matrix A;
     yarp::sig::Vector b;
 
-    ch.getConvexHull(points, A, b);
+    huller.getConvexHull(points, ch);
+    wb_sot::bounds::velocity::ConvexHull::getConstraints(ch, A, b);
     ROS_INFO("A: %s", A.toString().c_str());
     ROS_INFO("b: %s", b.toString().c_str());
 

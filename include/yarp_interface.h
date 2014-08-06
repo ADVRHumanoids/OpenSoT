@@ -33,7 +33,7 @@ public:
      * @param A_ch a Matrix of coefficients for the CH rects, contains a_i,b_i
      * @param b_ch a vector of coefficients for the CH rects, containts -c_i
      */
-    void sendCH(yarp::sig::Matrix &A_ch, yarp::sig::Vector& b_ch);
+    void sendCH(std::vector<KDL::Vector> ch);
 
     void sendWorldToBaseLinkPose(const yarp::sig::Matrix& T_world_base_link)
     {

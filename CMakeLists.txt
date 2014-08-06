@@ -76,11 +76,13 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
-ADD_LIBRARY(wb_sot src/wb_sot/solvers/QPOases.cpp
-                   src/wb_sot/bounds/velocity/Aggregated.cpp
+ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/Aggregated.cpp
                    src/wb_sot/bounds/velocity/CoMVelocity.cpp
+                   src/wb_sot/bounds/velocity/ConvexHull.cpp
                    src/wb_sot/bounds/velocity/JointLimits.cpp
-                   src/wb_sot/bounds/velocity/VelocityLimits.cpp)
+                   src/wb_sot/bounds/velocity/VelocityLimits.cpp
+                   src/wb_sot/solvers/QPOases.cpp
+                   )
 
 add_custom_target(  wb_sot_test ALL
                     COMMAND ${CMAKE_CTEST_COMMAND}
@@ -115,6 +117,10 @@ ADD_EXECUTABLE(testCoMVelocityVelB src/tests/wb_sot/bounds/velocity/TestCoMVeloc
 TARGET_LINK_LIBRARIES(testCoMVelocityVelB ${VelBLibs})
 add_dependencies(testCoMVelocityVelB GTest-ext wb_sot)
 
+ADD_EXECUTABLE(testConvexHullVelB src/tests/wb_sot/bounds/velocity/TestConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testConvexHullVelB ${VelBLibs} ${PCL_LIBRARIES})
+add_dependencies(testConvexHullVelB GTest-ext wb_sot)
+
 SET(SolverLibs wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
@@ -129,12 +135,14 @@ add_test(wb_sot_bounds_velocity_Aggregated testAggregatedVelB)
 add_test(wb_sot_bounds_velocity_JointLimits  testJointLimitsVelB)
 add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
 add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelB)
+add_test(wb_sot_bounds_velocity_ConvexHull testConvexHullVelB)
 add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)
 
 # we now add the YARP and iCub libraries to our project.
+TARGET_LINK_LIBRARIES(wb_sot  ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES})
 TARGET_LINK_LIBRARIES(sot_VelKinCon wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
                                     ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} )
