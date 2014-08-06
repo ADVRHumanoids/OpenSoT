@@ -19,12 +19,15 @@
 
 #include <yarp/math/Math.h>
 #include <assert.h>
+#include <limits>
 
 using namespace wb_sot::bounds::velocity;
+using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list< BoundType* >& bounds,
-                       const unsigned int x_size) :
-    Bounds(x_size), _bounds(bounds)
+                       const unsigned int x_size,
+                       const unsigned int aggregationPolicy) :
+    Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     /* calling update to generate bounds */
     update(_x);
@@ -98,12 +101,45 @@ void Aggregated::update(const yarp::sig::Vector& x) {
             boundbUpperBound.size() != 0 ||
             boundbLowerBound.size() != 0) {
 
-            assert(boundAineq.rows() == boundbUpperBound.size());
-            assert(boundAineq.rows() == boundbLowerBound.size());
+            /* if we need to transform all unilateral bounds to bilateral.. */
+            if(_aggregationPolicy & UNILATERAL_TO_BILATERAL) {
+                if(boundbUpperBound.size() == 0) {
+                    boundbUpperBound.resize(boundAineq.rows(),
+                                            std::numeric_limits<double>::infinity());
+                    assert(boundAineq.rows() == boundbLowerBound.size());
+                } else if(boundbLowerBound.size() == 0) {
+                    assert(boundAineq.rows() == boundbUpperBound.size());
+                    boundbUpperBound.resize(boundAineq.rows(),
+                                            std::numeric_limits<double>::lowest());
+                } else {
+                    assert(boundAineq.rows() == boundbLowerBound.size());
+                    assert(boundAineq.rows() == boundbUpperBound.size());
+                }
+            /* if we need to transform all bilateral bounds to unilateral.. */
+            } else {
+                /* we need to transform l < Ax into -Ax < -l */
+                if(boundbUpperBound.size() == 0) {
+                    boundAineq = -1.0 * boundAineq;
+                    boundbLowerBound = -1.0 * boundbLowerBound;
+                    assert(boundAineq.rows() == boundbLowerBound.size());
+                } else if(boundbLowerBound.size() == 0) {
+                    assert(boundAineq.rows() == boundbUpperBound.size());
+                } else {
+                    assert(boundAineq.rows() == boundbLowerBound.size());
+                    assert(boundAineq.rows() == boundbUpperBound.size());
+                    boundAineq = yarp::math::pile(boundAineq,
+                                                  -1.0 * boundAineq);
+                    boundbUpperBound = yarp::math::cat(boundbUpperBound,
+                                                       -1.0 * boundbLowerBound);
+                }
+            }
 
             _Aineq = yarp::math::pile(_Aineq, boundAineq);
             _bUpperBound = yarp::math::cat(_bUpperBound, boundbUpperBound);
-            _bLowerBound = yarp::math::cat(_bUpperBound, boundbLowerBound);
+            /*  if using UNILATERAL_TO_BILATERAL we always have lower bounds,
+                otherwise, we never have them */
+            if(_aggregationPolicy & UNILATERAL_TO_BILATERAL)
+                _bLowerBound = yarp::math::cat(_bLowerBound, boundbLowerBound);
         }
     }
 
@@ -115,7 +151,8 @@ void Aggregated::update(const yarp::sig::Vector& x) {
     assert(_Aeq.cols() == _x_size);
 
     assert(_Aineq.rows() == _bUpperBound.size());
-    assert(_Aineq.rows() == _bLowerBound.size());
+    if(!(_aggregationPolicy & UNILATERAL_TO_BILATERAL))
+        assert(_Aineq.rows() == _bLowerBound.size());
     assert(_Aineq.cols() == _x_size);
 }
 

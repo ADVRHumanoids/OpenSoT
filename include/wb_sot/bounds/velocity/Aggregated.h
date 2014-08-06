@@ -35,9 +35,11 @@
                 enum AggregationPolicy {
                     /** transform equalities to inequalities */
                     EQUALITIES_TO_INEQUALITIES = 0x001,
-                    /** l < x < u becomes x < u && -x < -l   */
-                    INEQUALITIES_TO_LOWERTHAN = 0x010,
-                     /** x < u becomes -inf < x < u, l < x becomes l < x < inf */
+                    /** if enabled, unilateral bounds will be converted to unilateral:
+                     *      x < u becomes -inf < x < u, l < x becomes l < x < inf
+                     *  if not enabled, bilateral bounds will be converted to unilateral:
+                     *      l < x < u becomes x < u && -x < -l
+                     */
                     UNILATERAL_TO_BILATERAL = 0x100
                 };
 
