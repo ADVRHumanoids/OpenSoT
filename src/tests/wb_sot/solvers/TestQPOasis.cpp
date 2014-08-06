@@ -2,6 +2,9 @@
 #include <wb_sot/solvers/QPOases.h>
 #include <yarp/sig/all.h>
 
+#define GREEN "\033[0;32m"
+#define DEFAULT "\033[0m"
+
 namespace {
 
 class simpleProblem
@@ -160,8 +163,8 @@ TEST_F(testQPOasesProblem, testAddProblem)
     yarp::sig::Vector s1 = this->getSolution();
     EXPECT_EQ(-g[0], s1[0]);
     EXPECT_EQ(-g[1], s1[1]);
-    std::cout<<"s1 size: "<<s1.size()<<std::endl;
-    std::cout<<"s1 solution: ["<<s1[0]<<" "<<s1[1]<<" "<<s1[2]<<"]"<<std::endl;
+    std::cout<<GREEN<<"s1 size: "<<s1.size()<<DEFAULT<<std::endl;
+    std::cout<<GREEN<<"s1 solution: ["<<s1[0]<<" "<<s1[1]<<" "<<s1[2]<<"]"<<DEFAULT<<std::endl;
 
     this->setnWSR(127);
     EXPECT_TRUE(this->addProblem(H_new, g_new, A_new, lA_new, uA_new, l_new, u_new));
@@ -169,8 +172,8 @@ TEST_F(testQPOasesProblem, testAddProblem)
     EXPECT_EQ(-g[0], s2[0]);
     EXPECT_EQ(-g[1], s2[1]);
     EXPECT_EQ(-g_new[0], s2[2]);
-    std::cout<<"s2 size: "<<s2.size()<<std::endl;
-    std::cout<<"s2 solution: ["<<s2[0]<<" "<<s2[1]<<" "<<s2[2]<<"]"<<std::endl;
+    std::cout<<GREEN<<"s2 size: "<<s2.size()<<DEFAULT<<std::endl;
+    std::cout<<GREEN<<"s2 solution: ["<<s2[0]<<" "<<s2[1]<<" "<<s2[2]<<"]"<<DEFAULT<<std::endl;
 }
 
 }

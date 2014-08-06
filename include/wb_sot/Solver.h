@@ -37,7 +37,6 @@ using namespace std;
          * @param stack_of_bounds a list of bounds. Each element represent a stack.
          * @param solution
          */
-        virtual void solve(Vector_type& solution) = 0;
         virtual Vector_type solve() = 0;
 
 //        virtual unsigned int addTask() = 0;

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2014 Walkman
+ * Author: Enrico Mingo, Alessio Rocchi
+ * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it
+ * Permission is granted to copy, distribute, and/or modify this program
+ * under the terms of the GNU Lesser General Public License, version 2 or any
+ * later version published by the Free Software Foundation.
+ *
+ * A copy of the license can be found at
+ * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details
+*/
+
 #ifndef _WB_SOT_SOLVERS_QP_OASES_H_
 #define _WB_SOT_SOLVERS_QP_OASES_H_
 
@@ -6,6 +23,8 @@
 #include <vector>
 #include <iostream>
 #include <yarp/sig/all.h>
+#include <wb_sot/Task.h>
+#include <boost/shared_ptr.hpp>
 
 using namespace yarp::sig;
 
@@ -61,7 +80,7 @@ namespace wb_sot{
          * @brief getOptions return the options of the QP problem
          * @return reference to options
          */
-        const qpOASES::Options& getOptions(){return _problem.getOptions();}
+        qpOASES::Options getOptions(){return _problem.getOptions();}
 
         /**
          * @brief setOptions of the QP problem. Default are set to:
@@ -157,53 +176,129 @@ namespace wb_sot{
                            const Vector& lA, const Vector& uA,
                            const Vector& l, const Vector& u);
 
-
+        /**
+         * @brief solve the QP problem
+         * @return true if the QP problem is initialized and solved
+         */
         bool solve();
 
+        /**
+         * @brief getSolution return the actual solution of the QP problem
+         * @return solution
+         */
         const Vector& getSolution(){return _solution;}
 
+        /**
+         * @brief getHessianType return the hessian type f the problem
+         * @return hessian type
+         */
         qpOASES::HessianType getHessianType(){return _problem.getHessianType();}
+
+        /**
+         * @brief setHessianType of the problem
+         * @param ht hessian type
+         */
         void setHessianType(const qpOASES::HessianType ht){_problem.setHessianType(ht);}
 
-
+        /**
+         * @brief getnWSR return maximum number of working set recalculations
+         * @return maximum number of working set recalculations
+         */
         int getnWSR(){return _nWSR;}
+
+        /**
+         * @brief setnWSR set maximum number of working set recalculations
+         * @param nWSR Maximum number of working set recalculations
+         */
         void setnWSR(const int nWSR){_nWSR = nWSR;}
 
+        /**
+         * @brief isQProblemInitialized
+         * @return true if the internal problem is initialized
+         */
         bool isQProblemInitialized(){return _is_initialized;}
 
+        /**
+         * @brief resetProblem call the reset method of the SQProblem
+         * @return true if reset
+         */
         bool resetProblem(){return _problem.reset();}
 
+        /**
+         * @brief getActiveBounds return the active bounds of the solved QP problem
+         * @return active bounds
+         */
+        const qpOASES::Bounds& getActiveBounds(){return _bounds;}
+
+        /**
+         * @brief getActiveConstraints return the active constraints of the solved QP problem
+         * @return active constraints
+         */
+        const qpOASES::Constraints& getActiveConstraints(){return _constraints;}
+
     protected:
+        /**
+         * @brief _problem is the internal SQProblem
+         */
         qpOASES::SQProblem _problem;
+
+        /**
+         * @brief _bounds are the active bounds of the SQProblem
+         */
         qpOASES::Bounds _bounds;
+
+        /**
+         * @brief _constraints are the active constraints of the SQProblem
+         */
         qpOASES::Constraints _constraints;
+
+        /**
+         * @brief _nWSR is the maximum number of working set recalculations
+         */
         int _nWSR;
+
+        /**
+         * @brief _is_initialized is set to true when the problem is initialized
+         */
         bool _is_initialized;
 
-        /*
-         * Define a cost function
+        /**
+         * Define a cost function: ||Hx - g||
          */
         Matrix _H;
         Vector _g;
 
-        /*
-         * Define a set of constraints weighted with A
+        /**
+         * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
         Matrix _A;
         Vector _lA;
         Vector _uA;
 
-        /*
-         * Define a set of bounds on solution
+        /**
+         * Define a set of bounds on solution: l <= x <= u
          */
         Vector _l;
         Vector _u;
 
+        /**
+         * Solution and dual solution of the QP problem
+         */
         Vector _solution;
         Vector _dual_solution;
     };
 
 
+    class QPOasesTask: public QPOasesProblem
+    {
+    public:
+        QPOasesTask();
+
+        ~QPOasesTask();
+
+    protected:
+        //boost::shared_ptr<Task<Matrix, Vector>> _task;
+    };
 
 
 
@@ -212,35 +307,16 @@ namespace wb_sot{
     class QPOases: public Solver<Matrix, Vector>
     {
     public:
-        QPOases():
-            _qpProblems(0),
-            _initial_guess(false)
-        {}
+        QPOases();
 
         ~QPOases(){}
 
-        void solve(Vector& solution)
-        {
-
-        }
-
-        Vector solve()
-        {
-            Vector solution;
-            solve(solution);
-            return solution;
-        }
-
-        void addTask()//(const Task& task)
-        {
-            //QPOasesProblem problem(task.getXSize(), );
-        }
+        Vector solve();
 
         unsigned int getNumberOfStacks(){return _qpProblems.size();}
 
     protected:
-        vector< QPOasesProblem > _qpProblems;
-        bool _initial_guess;
+        vector< QPOasesTask > _qpProblems;
     };
 
     }

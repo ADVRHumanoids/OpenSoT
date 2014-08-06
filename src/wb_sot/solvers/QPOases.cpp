@@ -5,6 +5,8 @@ using namespace yarp::math;
 
 using namespace wb_sot::solvers;
 
+/// QPOasesProblem ///
+
 QPOasesProblem::QPOasesProblem():
     _problem(),
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
@@ -216,4 +218,16 @@ bool QPOasesProblem::solve()
         return true;
     }
     return false;
+}
+
+/// QPOasesTask ///
+
+QPOasesTask::QPOasesTask()
+{
+
+}
+
+QPOasesTask::~QPOasesTask()
+{
+
 }
