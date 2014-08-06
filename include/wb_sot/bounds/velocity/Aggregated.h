@@ -32,9 +32,19 @@
 
                 typedef Bounds< yarp::sig::Matrix, yarp::sig::Vector> BoundType;
 
+                enum AggregationPolicy {
+                    /** transform equalities to inequalities */
+                    EQUALITIES_TO_INEQUALITIES = 0x001,
+                    /** l < x < u becomes x < u && -x < -l   */
+                    INEQUALITIES_TO_LOWERTHAN = 0x010,
+                     /** x < u becomes -inf < x < u, l < x becomes l < x < inf */
+                    UNILATERAL_TO_BILATERAL = 0x100
+                };
+
             private:
 
                 std::list< BoundType* > _bounds;
+                unsigned int _aggregationPolicy;
 
             public:
                 /**
@@ -42,7 +52,10 @@
                  * @param bounds a std::list of Bounds
                  */
                 Aggregated(const std::list<BoundType *> &bounds,
-                           const unsigned int x_size);
+                           const unsigned int x_size,
+                           const unsigned int aggregationPolicy =
+                                EQUALITIES_TO_INEQUALITIES |
+                                UNILATERAL_TO_BILATERAL);
 
                 void update(const yarp::sig::Vector &x);
             };
