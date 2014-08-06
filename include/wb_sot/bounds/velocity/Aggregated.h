@@ -33,12 +33,12 @@
                 typedef Bounds< yarp::sig::Matrix, yarp::sig::Vector> BoundType;
 
                 enum AggregationPolicy {
-                    /** transform equalities to inequalities */
+                    /** transform equalities Ax = b to inequalities b <= Ax <= b */
                     EQUALITIES_TO_INEQUALITIES = 0x001,
                     /** if enabled, unilateral bounds will be converted to unilateral:
-                     *      x < u becomes -inf < x < u, l < x becomes l < x < inf
+                     *      x <= u becomes -inf <= x <= u, l <= x becomes l <= x <= inf
                      *  if not enabled, bilateral bounds will be converted to unilateral:
-                     *      l < x < u becomes x < u && -x < -l
+                     *      l <= x <= u becomes x <= u && -x <= -l
                      */
                     UNILATERAL_TO_BILATERAL = 0x100
                 };

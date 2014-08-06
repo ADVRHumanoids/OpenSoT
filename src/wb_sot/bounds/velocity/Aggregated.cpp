@@ -92,8 +92,28 @@ void Aggregated::update(const yarp::sig::Vector& x) {
         if( boundAeq.rows() != 0 ||
             boundbeq.size() != 0) {
             assert(boundAeq.rows() == boundbeq.size());
-            _Aeq = yarp::math::pile(_Aeq, boundAeq);
-            _beq = yarp::math::cat(_beq, boundbeq);
+            /* when transforming equalities to inequalities,
+                Aeq*x = beq becomes
+                beq <= Aeq*x <= beq */
+            if(_aggregationPolicy & EQUALITIES_TO_INEQUALITIES) {
+                _Aineq = yarp::math::pile(_Aineq, boundAeq);
+                _bUpperBound = yarp::math::cat(_bUpperBound,
+                                               boundbeq);
+                if(_aggregationPolicy & UNILATERAL_TO_BILATERAL) {
+                    _bLowerBound = yarp::math::cat(_bLowerBound,
+                                                   boundbeq);
+                /* we want to have only unilateral constraints, so
+                   beq <= Aeq*x <= beq becomes
+                   -Aeq*x <= -beq && Aeq*x <= beq */
+                } else {
+                    _Aineq = yarp::math::pile(_Aineq, -1.0 * boundAeq);
+                    _bUpperBound = yarp::math::cat(_bUpperBound,
+                                                   -1.0 * boundbeq);
+                }
+            } else {
+                _Aeq = yarp::math::pile(_Aeq, boundAeq);
+                _beq = yarp::math::cat(_beq, boundbeq);
+            }
         }
 
         /* copying Aineq, bUpperBound, bLowerBound*/
