@@ -28,7 +28,7 @@ ConvexHull::ConvexHull(iDynUtils &robot,
                        const double boundScaling) :
     Bounds(x_size), _robot(robot),
     _boundScaling(boundScaling),
-    _x_size(x_size), _convex_hull() {
+    _convex_hull() {
 
     this->update(_zeroVector);
 }

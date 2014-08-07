@@ -36,7 +36,6 @@
                 double _boundScaling;
                 drc_shared::convex_hull _convex_hull;
                 int _support_foot_linkIndex;
-                unsigned int _x_size;
             public:
                 /**
                  * @brief ConvexHull constructor
