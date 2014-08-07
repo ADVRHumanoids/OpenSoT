@@ -55,15 +55,15 @@
         }
         virtual ~Bounds() {}
 
-        virtual const Vector_type getLowerBound() { return _lowerBound; }
-        virtual const Vector_type getUpperBound() { return _upperBound; }
+        virtual const Vector_type& getLowerBound() { return _lowerBound; }
+        virtual const Vector_type& getUpperBound() { return _upperBound; }
 
-        virtual const Matrix_type getAeq() { return _Aeq; }
-        virtual const Vector_type getbeq() { return _beq; }
+        virtual const Matrix_type& getAeq() { return _Aeq; }
+        virtual const Vector_type& getbeq() { return _beq; }
 
-        virtual const Matrix_type getAineq() { return _Aineq; }
-        virtual const Vector_type getbLowerBound() { return _bLowerBound; }
-        virtual const Vector_type getbUpperBound() { return _bUpperBound; }
+        virtual const Matrix_type& getAineq() { return _Aineq; }
+        virtual const Vector_type& getbLowerBound() { return _bLowerBound; }
+        virtual const Vector_type& getbUpperBound() { return _bUpperBound; }
 
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
