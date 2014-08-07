@@ -18,6 +18,9 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
+ #include <list>
+ #include <wb_sot/Bounds.h>
+
  namespace wb_sot {
 
     /** Summarises all possible types of the QP's Hessian matrix. From qpOASES/Types.hpp */
@@ -33,46 +36,68 @@
 
     /** Task represents
     */
-    template <class Matrix_type, class Vector_type,
-              unsigned int x_size>
+    template <class Matrix_type, class Vector_type>
     class Task {
-        const Vector_type x;
+    protected:
+        typedef Bounds< Matrix_type, Vector_type > BoundType;
+
+        unsigned int _x_size;
+        Vector_type _x0;
+
+        Vector_type _zeroVector;
+        Matrix_type _zeroMatrix;
+        Matrix_type _eyeMatrix;
+
+        HessianType _hessianType;
+
+        Matrix_type _A;
+        Vector_type _b;
+
+        Matrix_type _W;
+        double _alpha;
+
+        Vector_type _residual;
+
+        std::list< BoundType > _bounds;
+
+        Vector_type _x;
+
     public:
-        Task(const Vector_type& x0);
-        ~Task();
+        Task(const Vector_type& x,
+             const unsigned int x_size) : _x0(x), _x_size(x_size) {
+            _A = _zeroMatrix;
+            _b = _zeroVector;
 
-        /** Return */
-        const Matrix_type getA();
-        const HessianType getAtype();
-        const Vector_type getb();
+            _W = _eyeMatrix;
+            _alpha = 1.0;
 
-        const Matrix_type getWeight() const;
-        void setWeight(const Matrix_type& W);
+            _residual = _zeroVector;
+        }
 
-        const double getAlpha() const;
-        void setAlpha(double alpha);
+        virtual ~Task();
+
+        virtual const Matrix_type& getA() { return _A; }
+        virtual const HessianType getAtype() { return HST_UNKNOWN; }
+        virtual const Vector_type& getb() { return _b; }
+
+        virtual const Matrix_type& getWeight() const { return _W; }
+        virtual void setWeight(const Matrix_type& W) { _W = W; }
+
+        virtual const double getAlpha() const { return _alpha; }
+        virtual void setAlpha(double alpha) { _alpha = alpha; }
         
-        const Vector_type getLowerBound();
-        const Vector_type getUpperBound();
+        virtual const std::list< BoundType >& getConstraints() const { return _bounds; }
 
-        const Matrix_type getAeq();
-        const Vector_type getbeq();
-
-        const Matrix_type getAineq();
-
-        const Vector_type getbLowerBound();
-        const Vector_type getbUpperBound();
-
-        const Vector_type getResidual();
-        void setResidual(const Vector_type residual);
+        virtual const Vector_type getResidual() const { return _residual; }
+        virtual void setResidual(const Vector_type residual) { _residual = residual; }
 
         /** Gets the number of variables for the task.
             @return the number of columns of A */
-        const unsigned int getXSize();
+        const unsigned int getXSize() const { return _x_size; }
 
         /** Gets the task size.
             @return the number of rows of A */
-        const unsigned int getTaskSize();
+        virtual const unsigned int getTaskSize() const { return _A.rows(); }
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */

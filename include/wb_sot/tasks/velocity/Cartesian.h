@@ -15,14 +15,57 @@
  * Public License for more details
 */
 
+#ifndef __TASKS_VELOCITY_CARTESIAN_H__
+#define __TASKS_VELOCITY_CARTESIAN_H__
+
  #include <wb_sot/Task.h>
+ #include <drc_shared/idynutils.h>
+ #include <drc_shared/utils/convex_hull.h>
+ #include <kdl/frames.hpp>
+ #include <yarp/sig/all.h>
+#include <yarp/os/all.h>
 
  namespace wb_sot {
     namespace tasks {
-        template <class Matrix_type, class Vector_type,
-                  unsigned int x_size>
-        class Cartesian : public sot_task<x_size, task_size> {
-            
+        namespace velocity {
+            class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            private:
+                iDynUtils& _robot;
+
+                std::string _distal_link;
+                std::string _base_link;
+
+                int _distal_link_index;
+                int _base_link_index;
+
+                yarp::os::BufferedPort<yarp::os::Bottle> _referenceInputPort;
+
+                yarp::sig::Matrix _actualPose;
+                yarp::sig::Matrix _desiredPose;
+
+                /** TODO should this go inside idynutils?
+                         it is true if we are owners of the robot model */
+                bool _updateModel;
+
+            public:
+
+                yarp::sig::Vector positionError;
+                yarp::sig::Vector orientationError;
+
+                double orientationErrorGain;
+
+
+                Cartesian(const yarp::sig::Vector& x,
+                          iDynUtils &robot,
+                          const unsigned int x_size,
+                          std::string distal_link,
+                          std::string base_link = "base_link",
+                          const bool updateModel = false);
+
+                void update(const yarp::sig::Vector& x);
+            };
         }
     }
  }
+
+#endif
