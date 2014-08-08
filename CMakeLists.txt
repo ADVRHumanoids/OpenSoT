@@ -82,7 +82,8 @@ ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/Aggregated.cpp
                    src/wb_sot/bounds/velocity/JointLimits.cpp
                    src/wb_sot/bounds/velocity/VelocityLimits.cpp
                    src/wb_sot/solvers/QPOases.cpp
-                   src/wb_sot/tasks/Cartesian.cpp
+                   src/wb_sot/tasks/velocity/Cartesian.cpp
+                   src/wb_sot/tasks/velocity/CoM.cpp
                    )
 
 add_custom_target(  wb_sot_test ALL
