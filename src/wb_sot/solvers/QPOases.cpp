@@ -222,7 +222,14 @@ bool QPOasesProblem::solve()
 
 /// QPOasesTask ///
 
-QPOasesTask::QPOasesTask()
+QPOasesTask::QPOasesTask():
+    _task(new Task<Matrix, Vector>)
+{
+
+}
+
+QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
+    _task(task)
 {
 
 }
@@ -230,4 +237,9 @@ QPOasesTask::QPOasesTask()
 QPOasesTask::~QPOasesTask()
 {
 
+}
+
+void QPOasesTask::setTask(const boost::shared_ptr<Task<Matrix, Vector> > &task)
+{
+    _task = task;
 }

@@ -293,11 +293,14 @@ namespace wb_sot{
     {
     public:
         QPOasesTask();
+        QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task);
 
         ~QPOasesTask();
 
+        void setTask(const boost::shared_ptr< Task<Matrix, Vector> >& task);
+
     protected:
-        //boost::shared_ptr<Task<Matrix, Vector>> _task;
+        boost::shared_ptr< Task<Matrix, Vector> > _task;
     };
 
 

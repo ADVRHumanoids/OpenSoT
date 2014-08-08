@@ -30,7 +30,8 @@
         namespace velocity {
             class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             private:
-                iDynUtils& _robot;
+                //iDynUtils& _robot; <--DANGEROUS with internal update of model!!!
+                iDynUtils _robot;
 
                 std::string _distal_link;
                 std::string _base_link;
@@ -57,9 +58,8 @@
 
                 Cartesian(const yarp::sig::Vector& x,
                           iDynUtils &robot,
-                          const unsigned int x_size,
                           std::string distal_link,
-                          std::string base_link = "base_link",
+                          std::string base_link,
                           const bool updateModel = false);
 
                 void update(const yarp::sig::Vector& x);

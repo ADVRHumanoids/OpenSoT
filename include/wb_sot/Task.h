@@ -63,8 +63,12 @@
         Vector_type _x;
 
     public:
+        Task(){}
+
         Task(const Vector_type& x,
              const unsigned int x_size) : _x0(x), _x_size(x_size) {
+            for(unsigned int i = 0; i < x_size; ++i)
+                _x0[i] = 0.0;
             _A = _zeroMatrix;
             _b = _zeroVector;
 
@@ -74,7 +78,7 @@
             _residual = _zeroVector;
         }
 
-        virtual ~Task();
+        virtual ~Task(){}
 
         virtual const Matrix_type& getA() { return _A; }
         virtual const HessianType getAtype() { return HST_UNKNOWN; }

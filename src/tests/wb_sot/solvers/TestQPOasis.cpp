@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <wb_sot/solvers/QPOases.h>
 #include <yarp/sig/all.h>
+#include <wb_sot/tasks/velocity/Cartesian.h>
+#include <drc_shared/idynutils.h>
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -53,6 +55,35 @@ protected:
     }
 
     virtual ~testQPOasesProblem() {
+
+    }
+
+    virtual void SetUp() {
+
+    }
+
+    virtual void TearDown() {
+
+    }
+
+};
+
+class testQPOasesTask: public ::testing::Test,
+        public wb_sot::solvers::QPOasesTask
+{
+protected:
+
+    testQPOasesTask()
+    {
+
+    }
+
+    void setTestTask(const boost::shared_ptr<wb_sot::Task<Matrix, Vector>> &task)
+    {
+        this->setTask(task);
+    }
+
+    virtual ~testQPOasesTask() {
 
     }
 
@@ -174,6 +205,24 @@ TEST_F(testQPOasesProblem, testAddProblem)
     EXPECT_EQ(-g_new[0], s2[2]);
     std::cout<<GREEN<<"s2 size: "<<s2.size()<<DEFAULT<<std::endl;
     std::cout<<GREEN<<"s2 solution: ["<<s2[0]<<" "<<s2[1]<<" "<<s2[2]<<"]"<<DEFAULT<<std::endl;
+}
+
+TEST_F(testQPOasesTask, testQPOasesTaskConstructor)
+{
+    /// THIS TEST FOR NOW IS BROKEN
+//    iDynUtils coman;
+//    yarp::sig::Vector q(coman.coman_iDyn3.getNrOfDOFs(), 0.0);
+//    coman.updateiDyn3Model(q, q, q);
+
+//    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task
+//            (new wb_sot::tasks::velocity::Cartesian(q, coman,
+//                                                    coman.left_arm.name, "Waist"));
+
+//    this->setTask(cartesian_task);
+
+//    EXPECT_EQ(cartesian_task->getA(), this->_task->getA());
+//    EXPECT_EQ(cartesian_task->getb(), this->_task->getb());
+
 }
 
 }
