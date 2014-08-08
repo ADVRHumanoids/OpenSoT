@@ -40,7 +40,10 @@ Cartesian::Cartesian(std::string task_id,
 
     /* first update. Setting desired pose equal to the actual pose */
     this->update(_x0);
+
+    /* initializing to zero error */
     _desiredPose = _actualPose;
+    _b = _zeroVector;
 }
 
 void Cartesian::update(const yarp::sig::Vector &x) {
