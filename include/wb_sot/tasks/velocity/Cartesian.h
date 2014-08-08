@@ -53,16 +53,23 @@
                 yarp::sig::Vector positionError;
                 yarp::sig::Vector orientationError;
 
+                /*********** TASK PARAMETERS ************/
+
                 double orientationErrorGain;
 
+                /****************************************/
 
-                Cartesian(const yarp::sig::Vector& x,
+
+                Cartesian(std::string task_id,
+                          const yarp::sig::Vector& x,
                           iDynUtils &robot,
                           std::string distal_link,
                           std::string base_link,
                           const bool updateModel = false);
 
                 void update(const yarp::sig::Vector& x);
+
+                void setReference(const yarp::sig::Matrix& desiredPose);
             };
         }
     }

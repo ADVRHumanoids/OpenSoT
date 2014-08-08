@@ -24,16 +24,17 @@
 using namespace wb_sot::tasks::velocity;
 using namespace yarp::math;
 
-Cartesian::Cartesian(const yarp::sig::Vector& x,
+Cartesian::Cartesian(std::string task_id,
+                     const yarp::sig::Vector& x,
                      iDynUtils &robot,
                      std::string distal_link,
                      std::string base_link, const bool updateModel) :
-    Task(x, x.size()), _robot(robot), _updateModel(updateModel),
+    Task(task_id,x, x.size()), _robot(robot), _updateModel(updateModel),
     _distal_link(distal_link), _base_link(base_link),
     orientationErrorGain(1.0)
-{   
-    _base_link_index = robot.coman_iDyn3.getLinkIndex(_base_link);
-    assert(_base_link_index >= 0);
+{
+    this->_base_link_index = robot.coman_iDyn3.getLinkIndex(_base_link);
+    assert(this->_base_link_index >= 0);
     this->_distal_link_index = robot.coman_iDyn3.getLinkIndex(_distal_link);
     assert(this->_distal_link_index > 0);
 
@@ -46,7 +47,7 @@ void Cartesian::update(const yarp::sig::Vector &x) {
     /** TODO when using a cartesian task, we could update the model at the aggregate level
              instead of each cartesian task, to save computation time */
     if(_updateModel)
-        _robot.updateiDyn3Model(x, _x0, _x0);
+        _robot.updateiDyn3Model(x, _zeroVector, _zeroVector);
 
     /************************* COMPUTING TASK *****************************/
 
@@ -71,5 +72,10 @@ void Cartesian::update(const yarp::sig::Vector &x) {
 
     /**********************************************************************/
 }
+
+void Cartesian::setReference(const yarp::sig::Matrix& desiredPose) {
+    _desiredPose = desiredPose;
+}
+
 
 
