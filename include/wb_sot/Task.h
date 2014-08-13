@@ -19,6 +19,7 @@
 #define __TASK_H__
 
  #include <list>
+ #include <string>
  #include <wb_sot/Bounds.h>
 
  namespace wb_sot {
