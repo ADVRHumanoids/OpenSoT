@@ -67,6 +67,8 @@
                           std::string base_link,
                           const bool updateModel = false);
 
+                ~Cartesian();
+
                 void update(const yarp::sig::Vector& x);
 
                 void setReference(const yarp::sig::Matrix& desiredPose);

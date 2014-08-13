@@ -44,6 +44,11 @@ Cartesian::Cartesian(std::string task_id,
     /* initializing to zero error */
     _desiredPose = _actualPose;
     _b = _zeroVector;
+
+}
+
+Cartesian::~Cartesian()
+{
 }
 
 void Cartesian::update(const yarp::sig::Vector &x) {
