@@ -81,9 +81,9 @@
 
         virtual ~Task();
 
-        virtual const Matrix_type& getA() { return _A; }
+        virtual const Matrix_type& getA() { return _W * _A; }
         virtual const HessianType getAtype() { return HST_UNKNOWN; }
-        virtual const Vector_type& getb() { return _b; }
+        virtual const Vector_type& getb() { return _alpha * _W * _b; }
 
         virtual const Matrix_type& getWeight() const { return _W; }
         virtual void setWeight(const Matrix_type& W) { _W = W; }
