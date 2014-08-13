@@ -39,8 +39,6 @@
                 int _distal_link_index;
                 int _base_link_index;
 
-                yarp::os::BufferedPort<yarp::os::Bottle> _referenceInputPort;
-
                 yarp::sig::Matrix _actualPose;
                 yarp::sig::Matrix _desiredPose;
 
