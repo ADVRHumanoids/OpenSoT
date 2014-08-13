@@ -69,7 +69,6 @@
 
                 CoM(const yarp::sig::Vector& x,
                     iDynUtils &robot,
-                    const unsigned int x_size,
                     const bool updateModel = false);
 
                 ~CoM();
