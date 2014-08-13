@@ -223,7 +223,7 @@ bool QPOasesProblem::solve()
 /// QPOasesTask ///
 
 QPOasesTask::QPOasesTask():
-    _task(new Task<Matrix, Vector>)
+    _task()
 {
 
 }
