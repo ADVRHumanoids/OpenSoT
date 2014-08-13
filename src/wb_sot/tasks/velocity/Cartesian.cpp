@@ -45,6 +45,9 @@ Cartesian::Cartesian(std::string task_id,
     _desiredPose = _actualPose;
     _b = _zeroVector;
 
+    _W.resize(_A.rows(), _A.rows());
+    _W.eye();
+
 }
 
 Cartesian::~Cartesian()

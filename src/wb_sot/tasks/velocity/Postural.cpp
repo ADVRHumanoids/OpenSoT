@@ -27,6 +27,8 @@ using namespace yarp::math;
 Postural::Postural(   const yarp::sig::Vector& x) :
     Task("posture", x, x.size())
 {
+    _W.resize(_x_size, _x_size);
+    _W.eye();
 
     _A.resize(_x_size, _x_size);
     _A.eye();

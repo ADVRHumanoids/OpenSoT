@@ -39,6 +39,9 @@ CoM::CoM(   const yarp::sig::Vector& x,
     _desiredPosition = _actualPosition;
     _b = _zeroVector;
 
+    _W.resize(3,3);
+    _W.eye();
+
     //_referenceInputPort.open("/wb_sot/tasks/velocity/CoM/" + _task_id + "/set_ref:i");
 }
 
