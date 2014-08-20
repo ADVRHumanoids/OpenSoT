@@ -146,7 +146,7 @@ add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
 add_dependencies(sot_VelKinCon qpOASES-ext)
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(wb_sot  ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES})
+TARGET_LINK_LIBRARIES(wb_sot ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PCL_LIBRARIES})
 TARGET_LINK_LIBRARIES(sot_VelKinCon wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
                                     ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
                       qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES} )

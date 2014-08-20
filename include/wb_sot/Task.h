@@ -80,7 +80,7 @@
             _residual = _zeroVector;
         }
 
-        virtual ~Task();
+        virtual ~Task(){}
 
         virtual const Matrix_type& getA() { return _W * _A; }
         virtual const HessianType getAtype() { return HST_UNKNOWN; }
