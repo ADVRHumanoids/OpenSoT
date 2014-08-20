@@ -74,7 +74,7 @@ void Cartesian::update(const yarp::sig::Vector &x) {
     if(_base_link_index == 0)
         _actualPose = _robot.coman_iDyn3.getPosition(_distal_link_index);
     else
-        _desiredPose = _robot.coman_iDyn3.getPosition(_base_link_index, _distal_link_index);
+        _actualPose = _robot.coman_iDyn3.getPosition(_base_link_index, _distal_link_index);
 
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
