@@ -41,10 +41,6 @@ Cartesian::Cartesian(std::string task_id,
     /* first update. Setting desired pose equal to the actual pose */
     this->update(_x0);
 
-    /* initializing to zero error */
-    _desiredPose = _actualPose;
-    _b = _zeroVector;
-
     _W.resize(_A.rows(), _A.rows());
     _W.eye();
 
@@ -75,6 +71,12 @@ void Cartesian::update(const yarp::sig::Vector &x) {
         _actualPose = _robot.coman_iDyn3.getPosition(_distal_link_index);
     else
         _actualPose = _robot.coman_iDyn3.getPosition(_base_link_index, _distal_link_index);
+
+    if(_desiredPose.rows() == 0) {
+        /* initializing to zero error */
+        _desiredPose = _actualPose;
+        _b = _zeroVector;
+    }
 
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
