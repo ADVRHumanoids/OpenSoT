@@ -15,15 +15,16 @@
  * Public License for more details
 */
 
-#ifndef __TASKS_VELOCITY_CARTESIAN_H__
-#define __TASKS_VELOCITY_CARTESIAN_H__
+#ifndef __TASKS_VELOCITY_MINIMUMEFFORT_H__
+#define __TASKS_VELOCITY_MINIMUMEFFORT_H__
 
  #include <wb_sot/Task.h>
  #include <drc_shared/idynutils.h>
- #include <drc_shared/utils/convex_hull.h>
- #include <kdl/frames.hpp>
+ #include <drc_shared/cartesian_utils.h>
  #include <yarp/sig/all.h>
- #include <yarp/os/all.h>
+ #include <yarp/math/Math.h>
+
+ using namespace yarp::math;
 
  namespace wb_sot {
     namespace tasks {
@@ -34,8 +35,24 @@
 
                 iDynUtils _robot;
 
-                yarp::sig::Vector getGravityCompensationGradient(const yarp::sig::Matrix &W);
-                yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q);
+                class ComputeGTauGradient : public cartesian_utils::CostFunction {
+                    public:
+                    iDynUtils _robot;
+                    yarp::sig::Vector _q;
+                    yarp::sig::Matrix _W;
+                    ComputeGTauGradient(const yarp::sig::Vector& q) :
+                        _q(q), _W(_q.size(),_q.size())
+                    {;}
+                    double compute(const yarp::sig::Vector &q) {
+                        _robot.updateiDyn3Model(_q, true);
+                        yarp::sig::Vector tau = _robot.coman_iDyn3.getTorques();
+                        return yarp::math::dot(tau, _W * tau);
+                    }
+
+                    void setW(const yarp::sig::Matrix& W) { _W = W; }
+                };
+
+                ComputeGTauGradient _gTauGradientWorker;
 
             public:
 
