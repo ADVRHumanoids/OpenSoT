@@ -45,7 +45,7 @@
                             const unsigned int x_size,
                             const double boundScaling = BOUND_SCALING);
 
-                void update(const yarp::sig::Vector &x);
+                void update();
 
                 /**
                  * @brief getConstraints returns A and b such that A*\delta q < b implies staying in the convex hull

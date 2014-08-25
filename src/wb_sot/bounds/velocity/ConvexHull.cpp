@@ -30,10 +30,10 @@ ConvexHull::ConvexHull(iDynUtils &robot,
     _boundScaling(boundScaling),
     _convex_hull() {
 
-    this->update(_zeroVector);
+    this->update();
 }
 
-void ConvexHull::update(const yarp::sig::Vector &x) {
+void ConvexHull::update() {
 
     /************************ COMPUTING BOUNDS ****************************/
 
