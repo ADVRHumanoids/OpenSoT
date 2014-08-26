@@ -67,6 +67,8 @@
                  */
                 static void getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,
                                                 double &a, double& b, double &c);
+
+                void getConvexHull(std::vector<KDL::Vector>& ch);
             };
         }
     }

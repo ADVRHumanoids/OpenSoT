@@ -37,13 +37,19 @@ void ConvexHull::update() {
 
     /************************ COMPUTING BOUNDS ****************************/
 
-    std::list<KDL::Vector> points;
+
     std::vector<KDL::Vector> ch;
-    drc_shared::convex_hull::getSupportPolygonPoints(_robot, points);
-    _convex_hull.getConvexHull(points, ch);
+    getConvexHull(ch);
     this->getConstraints(ch, _Aineq, _bUpperBound, _boundScaling);
 
     /**********************************************************************/
+}
+
+void ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
+{
+    std::list<KDL::Vector> points;
+    drc_shared::convex_hull::getSupportPolygonPoints(_robot, points);
+    _convex_hull.getConvexHull(points, ch);
 }
 
 
