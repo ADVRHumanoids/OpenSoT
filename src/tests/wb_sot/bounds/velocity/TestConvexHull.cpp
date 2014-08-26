@@ -270,30 +270,30 @@ void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, iDy
     }
 }
 
-void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
-                              const yarp::sig::Vector& b_ch,
-                              std::vector<KDL::Vector>& points) {
-    unsigned int nRects = A_ch.rows();
+//void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
+//                              const yarp::sig::Vector& b_ch,
+//                              std::vector<KDL::Vector>& points) {
+//    unsigned int nRects = A_ch.rows();
 
-    for(unsigned int j = 0; j < nRects; ++j) {
-        unsigned int i = (j-1)%nRects;
+//    for(unsigned int j = 0; j < nRects; ++j) {
+//        unsigned int i = (j-1)%nRects;
 
-        // get coefficients for i-th rect
-        double a_i = A_ch(i,0);
-        double b_i = A_ch(i,1);
-        double c_i = -1.0*b_ch(i);
+//        // get coefficients for i-th rect
+//        double a_i = A_ch(i,0);
+//        double b_i = A_ch(i,1);
+//        double c_i = -1.0*b_ch(i);
 
-        // get coefficients for rect nect to i-th
-        double a_j = A_ch(j,0);
-        double b_j = A_ch(j,1);
-        double c_j = -1.0*b_ch(j);
+//        // get coefficients for rect nect to i-th
+//        double a_j = A_ch(j,0);
+//        double b_j = A_ch(j,1);
+//        double c_j = -1.0*b_ch(j);
 
-        /** Kramer rule to find intersection between two rects by Valerio Varricchio */
-        double x = (-b_j*c_i+b_i*c_j)/(a_i*b_j-b_i*a_j);
-        double y = (-a_i*c_j+c_i*a_j)/(a_i*b_j-b_i*a_j);
-        points.push_back(KDL::Vector(x,y,0.0));
-    }
-}
+//        /** Kramer rule to find intersection between two rects by Valerio Varricchio */
+//        double x = (-b_j*c_i+b_i*c_j)/(a_i*b_j-b_i*a_j);
+//        double y = (-a_i*c_j+c_i*a_j)/(a_i*b_j-b_i*a_j);
+//        points.push_back(KDL::Vector(x,y,0.0));
+//    }
+//}
 
 TEST_F(testConvexHull, comparisonWithOldImplementation) {
     // ------- Set The robot in a certain configuration ---------
@@ -368,108 +368,108 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
 
 }
 
-//TEST_F(testConvexHull, sizesAreCorrect) {
+TEST_F(testConvexHull, sizesAreCorrect) {
 
-//    std::list<KDL::Vector> points;
-//    std::vector<KDL::Vector> ch;
-//    drc_shared::convex_hull huller;
-//    drc_shared::convex_hull::getSupportPolygonPoints(coman, points);
-//    huller.getConvexHull(points, ch);
+    std::list<KDL::Vector> points;
+    std::vector<KDL::Vector> ch;
+    drc_shared::convex_hull huller;
+    drc_shared::convex_hull::getSupportPolygonPoints(coman, points);
+    huller.getConvexHull(points, ch);
 
-//    unsigned int hullSize = ch.size();
+    unsigned int hullSize = ch.size();
 
-//    unsigned int x_size = coman.coman_iDyn3.getNrOfDOFs();
+    unsigned int x_size = coman.coman_iDyn3.getNrOfDOFs();
 
-//    EXPECT_EQ(0, convexHull->getLowerBound().size()) << "lowerBound should have size 0"
-//                                                     << "but has size"
-//                                                     <<  convexHull->getLowerBound().size();
-//    EXPECT_EQ(0, convexHull->getUpperBound().size()) << "upperBound should have size 0"
-//                                                     << "but has size"
-//                                                     << convexHull->getUpperBound().size();
+    EXPECT_EQ(0, convexHull->getLowerBound().size()) << "lowerBound should have size 0"
+                                                     << "but has size"
+                                                     <<  convexHull->getLowerBound().size();
+    EXPECT_EQ(0, convexHull->getUpperBound().size()) << "upperBound should have size 0"
+                                                     << "but has size"
+                                                     << convexHull->getUpperBound().size();
 
-//    EXPECT_EQ(0, convexHull->getAeq().rows()) << "Aeq should have size 0"
-//                                              << "but has size"
-//                                              << convexHull->getAeq().rows();
+    EXPECT_EQ(0, convexHull->getAeq().rows()) << "Aeq should have size 0"
+                                              << "but has size"
+                                              << convexHull->getAeq().rows();
 
-//    EXPECT_EQ(0, convexHull->getbeq().size()) << "beq should have size 0"
-//                                              << "but has size"
-//                                              <<  convexHull->getbeq().size();
-
-
-//    EXPECT_EQ(2,convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
-//                                               << 2
-//                                               << " but has has "
-//                                               << convexHull->getAeq().cols()
-//                                               << " columns instead";
-
-//    EXPECT_EQ(0,convexHull->getbLowerBound().size()) << "beq should have size 3"
-//                                                     << "but has size"
-//                                                     << convexHull->getbLowerBound().size();
+    EXPECT_EQ(0, convexHull->getbeq().size()) << "beq should have size 0"
+                                              << "but has size"
+                                              <<  convexHull->getbeq().size();
 
 
+    EXPECT_EQ(2,convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
+                                               << 2
+                                               << " but has has "
+                                               << convexHull->getAeq().cols()
+                                               << " columns instead";
+
+    EXPECT_EQ(0,convexHull->getbLowerBound().size()) << "beq should have size 3"
+                                                     << "but has size"
+                                                     << convexHull->getbLowerBound().size();
 
 
-//    EXPECT_EQ(hullSize,convexHull->getAineq().rows()) << "Aineq should have size "
-//                                                      << hullSize
-//                                                      << " but has size"
-//                                                      << convexHull->getAineq().rows();
 
 
-//    EXPECT_EQ(hullSize,convexHull->getbUpperBound().size()) << "beq should have size "
-//                                                            << hullSize
-//                                                            << " but has size"
-//                                                            << convexHull->getbUpperBound().size();
-//}
+    EXPECT_EQ(hullSize,convexHull->getAineq().rows()) << "Aineq should have size "
+                                                      << hullSize
+                                                      << " but has size"
+                                                      << convexHull->getAineq().rows();
 
 
-//// Tests that the Foo::getLowerBounds() are zero at the bounds
-//TEST_F(testConvexHull, BoundsAreCorrect) {
+    EXPECT_EQ(hullSize,convexHull->getbUpperBound().size()) << "beq should have size "
+                                                            << hullSize
+                                                            << " but has size"
+                                                            << convexHull->getbUpperBound().size();
+}
 
-//    // ------- Set The robot in a certain configuration ---------
-//    yarp::sig::Vector q(coman.coman_iDyn3.getNrOfDOFs(), 0.0);
-//    q[coman.left_leg.joint_numbers[0]] = toRad(-23.5);
-//    q[coman.left_leg.joint_numbers[1]] = toRad(2.0);
-//    q[coman.left_leg.joint_numbers[2]] = toRad(-4.0);
-//    q[coman.left_leg.joint_numbers[3]] = toRad(50.1);
-//    q[coman.left_leg.joint_numbers[4]] = toRad(-2.0);
-//    q[coman.left_leg.joint_numbers[5]] = toRad(-26.6);
 
-//    q[coman.right_leg.joint_numbers[0]] = toRad(-23.5);
-//    q[coman.right_leg.joint_numbers[1]] = toRad(-2.0);
-//    q[coman.right_leg.joint_numbers[2]] = toRad(0.0);
-//    q[coman.right_leg.joint_numbers[3]] = toRad(50.1);
-//    q[coman.right_leg.joint_numbers[4]] = toRad(2.0);
-//    q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
+// Tests that the Foo::getLowerBounds() are zero at the bounds
+TEST_F(testConvexHull, BoundsAreCorrect) {
 
-//    updateiDyn3Model(true, q, coman);
-//    convexHull->update();
+    // ------- Set The robot in a certain configuration ---------
+    yarp::sig::Vector q(coman.coman_iDyn3.getNrOfDOFs(), 0.0);
+    q[coman.left_leg.joint_numbers[0]] = toRad(-23.5);
+    q[coman.left_leg.joint_numbers[1]] = toRad(2.0);
+    q[coman.left_leg.joint_numbers[2]] = toRad(-4.0);
+    q[coman.left_leg.joint_numbers[3]] = toRad(50.1);
+    q[coman.left_leg.joint_numbers[4]] = toRad(-2.0);
+    q[coman.left_leg.joint_numbers[5]] = toRad(-26.6);
 
-//    // Get Vector of CH's points from coman
-//    std::list<KDL::Vector> points;
-//    drc_shared::convex_hull::getSupportPolygonPoints(coman, points);
+    q[coman.right_leg.joint_numbers[0]] = toRad(-23.5);
+    q[coman.right_leg.joint_numbers[1]] = toRad(-2.0);
+    q[coman.right_leg.joint_numbers[2]] = toRad(0.0);
+    q[coman.right_leg.joint_numbers[3]] = toRad(50.1);
+    q[coman.right_leg.joint_numbers[4]] = toRad(2.0);
+    q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
 
-//    // Compute CH from previous points
-//    std::vector<KDL::Vector> ch;
-//    drc_shared::convex_hull huller;
-//    huller.getConvexHull(points, ch);
+    updateiDyn3Model(true, q, coman);
+    convexHull->update();
 
-//    //Compute CH from internal
-//    std::vector<KDL::Vector> ch2;
-//    convexHull->getConvexHull(ch2);
+    // Get Vector of CH's points from coman
+    std::list<KDL::Vector> points;
+    drc_shared::convex_hull::getSupportPolygonPoints(coman, points);
 
-//    std::cout << "CH:"<<std::endl;
-//    for(unsigned int i = 0; i < ch.size(); ++i)
-//        std::cout << ch[i].x() << " " << ch[i].y() << std::endl;
+    // Compute CH from previous points
+    std::vector<KDL::Vector> ch;
+    drc_shared::convex_hull huller;
+    huller.getConvexHull(points, ch);
 
-//    std::cout << "CH2:"<<std::endl;
-//    for(unsigned int i = 0; i < ch2.size(); ++i)
-//        std::cout << ch2[i].x() << " " << ch2[i].y() << std::endl;
+    //Compute CH from internal
+    std::vector<KDL::Vector> ch2;
+    convexHull->getConvexHull(ch2);
 
-//    ASSERT_EQ(ch.size(), ch2.size());
-//    for(unsigned int i = 0; i < ch.size(); ++i){
-//        ASSERT_DOUBLE_EQ(ch[i].x(), ch2[i].x());
-//        ASSERT_DOUBLE_EQ(ch[i].y(), ch2[i].y());
-//    }
+    std::cout << "CH:"<<std::endl;
+    for(unsigned int i = 0; i < ch.size(); ++i)
+        std::cout << ch[i].x() << " " << ch[i].y() << std::endl;
+
+    std::cout << "CH2:"<<std::endl;
+    for(unsigned int i = 0; i < ch2.size(); ++i)
+        std::cout << ch2[i].x() << " " << ch2[i].y() << std::endl;
+
+    ASSERT_EQ(ch.size(), ch2.size());
+    for(unsigned int i = 0; i < ch.size(); ++i){
+        ASSERT_DOUBLE_EQ(ch[i].x(), ch2[i].x());
+        ASSERT_DOUBLE_EQ(ch[i].y(), ch2[i].y());
+    }
 
 
 //    // Reconstruct CH from A and b
@@ -500,7 +500,7 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
 //        EXPECT_DOUBLE_EQ(ch[i].y(), chReconstructed[i].y()) << "ch.y and chReconstructed.y"
 //                                                            << " should be equal!" << std::endl;
 //    }
-//}
+}
 
 }  // namespace
 
