@@ -281,6 +281,7 @@ void sot_VelKinCon_ctrl::run()
     if(controlLaw())
         move();
 
+
     IYarp.sendWorldToBaseLinkPose(idynutils.coman_iDyn3.getWorldBasePose());
 
 
@@ -350,7 +351,6 @@ void sot_VelKinCon_ctrl::move()
     yarp::sig::Vector left_leg(q_left_leg.size(), 0.0);
     yarp::sig::Vector right_leg(q_right_leg.size(), 0.0);
 
-    double q_sent = 0.0;
     for(unsigned int i = 0; i < torso.size(); ++i){
         torso[i] = q[idynutils.torso.joint_numbers[i]] + dq_ref[idynutils.torso.joint_numbers[i]];
     }
