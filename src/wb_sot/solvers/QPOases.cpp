@@ -82,9 +82,9 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
        success != qpOASES::SUCCESSFUL_RETURN))
     {
         std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<success<<std::endl;
-        return false;
+        _is_initialized = false;
     }
-    return true;
+    return _is_initialized;
 }
 
 bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
