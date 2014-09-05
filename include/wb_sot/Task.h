@@ -38,53 +38,67 @@
     /** Task represents
     */
     template <class Matrix_type, class Vector_type>
+    /**
+     * @brief The Task class describe a task and its constraints.
+     */
     class Task {
     protected:
         typedef Bounds< Matrix_type, Vector_type > BoundType;
 
+        /**
+         * @brief _task_id unique name of the task
+         */
         std::string _task_id;
 
+        /**
+         * @brief _x_size size of the controlled variables
+         */
         unsigned int _x_size;
-        Vector_type _x0;
 
-        Vector_type _zeroVector;
-        Matrix_type _zeroMatrix;
-        Matrix_type _eyeMatrix;
-
+        /**
+         * @brief _hessianType Type of Hessian associated to the Task
+         */
         HessianType _hessianType;
 
+        /**
+         * @brief _A Jacobian of the Task
+         */
         Matrix_type _A;
+
+        /**
+         * @brief _b error associated to the Task
+         */
         Vector_type _b;
 
+        /**
+         * @brief _W Weight multiplied to the task Jacobian
+         */
         Matrix_type _W;
+
+        /**
+         * @brief _alpha error scaling
+         */
         double _alpha;
 
-        Vector_type _residual;
-
+        /**
+         * @brief _bounds related to the Task
+         */
         std::list< BoundType > _bounds;
-
-        Vector_type _x;
 
     public:
         Task(const std::string task_id,
-             const Vector_type& x,
              const unsigned int x_size) :
-            _task_id(task_id), _x0(x), _x_size(x_size)
+            _task_id(task_id), _x_size(x_size)
         {
-            _A = _zeroMatrix;
-            _b = _zeroVector;
-
-            _W = _eyeMatrix;
             _alpha = 1.0;
-
-            _residual = _zeroVector;
+            _hessianType = HST_UNKNOWN;
         }
 
         virtual ~Task(){}
 
-        virtual const Matrix_type& getA() { return _W * _A; }
-        virtual const HessianType getAtype() { return HST_UNKNOWN; }
-        virtual const Vector_type& getb() { return _alpha * _W * _b; }
+        virtual const Matrix_type& getA() { return _A; }
+        virtual const HessianType getHessianAtype() { return _hessianType; }
+        virtual const Vector_type& getb() { return _b; }
 
         virtual const Matrix_type& getWeight() const { return _W; }
         virtual void setWeight(const Matrix_type& W) { _W = W; }
@@ -92,10 +106,14 @@
         virtual const double getAlpha() const { return _alpha; }
         virtual void setAlpha(double alpha) { _alpha = alpha; }
         
-        virtual const std::list< BoundType >& getConstraints() const { return _bounds; }
-
-        virtual const Vector_type getResidual() const { return _residual; }
-        virtual void setResidual(const Vector_type residual) { _residual = residual; }
+        /**
+         * @brief getConstraints return a reference to the constraint list. Use the standard list methods
+         * to add, remove, clear, ... the constraints list.
+         * i.e.:
+         *              task.getConstraints().push_back(new_constraint)
+         * @return
+         */
+        virtual std::list< BoundType >& getConstraints() { return _bounds; }
 
         /** Gets the number of variables for the task.
             @return the number of columns of A */

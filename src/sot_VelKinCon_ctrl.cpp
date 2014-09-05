@@ -259,14 +259,13 @@ void sot_VelKinCon_ctrl::run()
 {
     std::list<KDL::Vector> points;
     std::vector<KDL::Vector> ch;
-    static yarp::sig::Matrix A_ch;
-    static yarp::sig::Vector b_ch;
+
 #ifdef DEBUG
     paramHelper->lock();
     paramHelper->readStreamParams();
 #endif
 
-    IYarp.tic();
+
 
     checkInput();
 
@@ -290,7 +289,7 @@ void sot_VelKinCon_ctrl::run()
         IYarp.sendCH(ch);
     }
 
-    t_elapsed = IYarp.toc();
+
 
 #ifdef DEBUG
     paramHelper->sendStreamParams();
@@ -538,6 +537,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
         qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
     }
 
+    IYarp.tic();
 
     bool control_computed = false;
     if(use_3_stacks) {
@@ -566,6 +566,11 @@ bool sot_VelKinCon_ctrl::controlLaw()
                                                          MilliSecToSec(getRate()),
                                                          dq_ref, velocity_bounds_scale);
     }
+
+    t_elapsed = IYarp.toc();
+    static std::ofstream FILE("time.dat");
+    FILE<<t_elapsed<<std::endl;
+    FILE.flush();
 
     if(!control_computed) {
         ROS_ERROR("Error computing control");

@@ -30,11 +30,10 @@ Aggregated::Aggregated(const std::list< BoundType* >& bounds,
     Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     /* calling update to generate bounds */
-    update(_x);
+    update(yarp::sig::Vector(x_size, 0.0));
 }
 
 void Aggregated::update(const yarp::sig::Vector& x) {
-    _x = x;
 
     /* resetting all internal data */
     _upperBound = yarp::sig::Vector(0);
@@ -53,7 +52,7 @@ void Aggregated::update(const yarp::sig::Vector& x) {
 
         BoundType* b = *i;
         /* update bounds */
-        b->update(_x);
+        b->update(x);
 
         yarp::sig::Vector boundUpperBound = b->getUpperBound();
         yarp::sig::Vector boundLowerBound = b->getLowerBound();

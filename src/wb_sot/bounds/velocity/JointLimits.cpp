@@ -25,20 +25,18 @@ JointLimits::JointLimits(   const iCub::iDynTree::DynTree& robot,
                             const unsigned int x_size,
                             const double boundScaling) :
     Bounds(x_size), _robot(robot), _boundScaling(boundScaling) {
-    _x = _robot.getAng();
 
     /* calling update to generate bounds */
-    update(_x);
+    update(_robot.getAng());
 }
 
 void JointLimits::update(const yarp::sig::Vector& x)
 {
-    _x = x;
 
 /************************ COMPUTING BOUNDS ****************************/
 
-    _upperBound = (_robot.getJointBoundMax() - _x)*_boundScaling;
-    _lowerBound = (_robot.getJointBoundMin() - _x)*_boundScaling;
+    _upperBound = (_robot.getJointBoundMax() - x)*_boundScaling;
+    _lowerBound = (_robot.getJointBoundMin() - x)*_boundScaling;
 
 /**********************************************************************/
 

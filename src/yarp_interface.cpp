@@ -17,12 +17,12 @@ using namespace yarp::sig;
 
 void yarp_interface::tic()
 {
-    time_tic = yarp::os::Time::now();
+    time_tic = system_clock.now();
 }
 
 double yarp_interface::toc()
 {
-    return yarp::os::Time::now() - time_tic;
+    return system_clock.now() - time_tic;
 }
 
 

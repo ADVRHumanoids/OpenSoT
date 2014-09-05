@@ -24,7 +24,7 @@ using namespace wb_sot::tasks::velocity;
 using namespace yarp::math;
 
 MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
-    Task("posture", x, x.size()), _gTauGradientWorker(x)
+    Task("posture", x.size()), _gTauGradientWorker(x)
 {
     _W.resize(_x_size, _x_size);
     _W.eye();
@@ -40,7 +40,7 @@ MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
     _A.eye();
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->update(_x0);
+    this->update(x);
 }
 
 MinimumEffort::~MinimumEffort()
@@ -50,10 +50,9 @@ MinimumEffort::~MinimumEffort()
 
 void MinimumEffort::update(const yarp::sig::Vector &x) {
 
-    _x = x;
     /************************* COMPUTING TASK *****************************/
 
-    _b = -1.0 * cartesian_utils::computeGradient(_x, _gTauGradientWorker);
+    _b = -1.0 * cartesian_utils::computeGradient(x, _gTauGradientWorker);
 
     /**********************************************************************/
 }

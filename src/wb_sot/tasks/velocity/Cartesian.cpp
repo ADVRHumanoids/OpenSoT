@@ -29,7 +29,7 @@ Cartesian::Cartesian(std::string task_id,
                      iDynUtils &robot,
                      std::string distal_link,
                      std::string base_link, const bool updateModel) :
-    Task(task_id,x, x.size()), _robot(robot), _updateModel(updateModel),
+    Task(task_id, x.size()), _robot(robot), _updateModel(updateModel),
     _distal_link(distal_link), _base_link(base_link),
     orientationErrorGain(1.0)
 {
@@ -39,7 +39,7 @@ Cartesian::Cartesian(std::string task_id,
     assert(this->_distal_link_index > 0);
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->update(_x0);
+    this->update(x);
 
     _W.resize(_A.rows(), _A.rows());
     _W.eye();
@@ -54,7 +54,7 @@ void Cartesian::update(const yarp::sig::Vector &x) {
     /** TODO when using a cartesian task, we could update the model at the aggregate level
              instead of each cartesian task, to save computation time */
     if(_updateModel)
-        _robot.updateiDyn3Model(x, _zeroVector, _zeroVector);
+        _robot.updateiDyn3Model(x);
 
     /************************* COMPUTING TASK *****************************/
 
@@ -75,7 +75,7 @@ void Cartesian::update(const yarp::sig::Vector &x) {
     if(_desiredPose.rows() == 0) {
         /* initializing to zero error */
         _desiredPose = _actualPose;
-        _b = _zeroVector;
+        _b.resize(_A.rows(), 0.0);
     }
 
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,

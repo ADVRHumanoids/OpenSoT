@@ -23,36 +23,70 @@
     /** Task represents
     */
  template <class Matrix_type, class Vector_type>
+    /**
+     * @brief The Bounds class describes all the different types of constraints:
+     * 1. bounds & bilateral
+     * 2. equalities
+     * 3. unilateral
+     */
     class Bounds {
     protected:
+        /**
+         * @brief _x_size size of the controlled variables
+         */
         unsigned int _x_size;
 
-        Vector_type _zeroVector;
-        Matrix_type _zeroMatrix;
-
+        /**
+         * @brief _lowerBound lower bounds on controlled variables
+         * e.g.:
+         *              _lowerBound <= x
+         */
         Vector_type _lowerBound;
+
+        /**
+         * @brief _upperBound upper bounds on controlled variables
+         * e.g.:
+         *              x <= _upperBound
+         */
         Vector_type _upperBound;
 
+        /**
+         * @brief _Aeq Matrix for equality constraint
+         * e.g.:
+         *              _Aeq*x = _beq
+         */
         Matrix_type _Aeq;
+
+        /**
+         * @brief _beq constraint vector for equality constraint
+         * e.g.:
+         *              _Aeq*x = _beq
+         */
         Vector_type _beq;
 
+        /**
+         * @brief _Aineq Matrix for inequality constraint
+         * e.g.:
+         *              _bLowerBound <= _Aineq*x <= _bUpperBound
+         */
         Matrix_type _Aineq;
+
+        /**
+         * @brief _bLowerBound lower bounds in generic inequality constraints
+         * e.g.:
+         *              _bLowerBound <= _Aineq*x
+         */
         Vector_type _bLowerBound;
+
+        /**
+         * @brief _bUpperBound upper bounds in generic inequality constraints
+         * e.g.:
+         *              _Aineq*x <= _bUpperBound
+         */
         Vector_type _bUpperBound;
 
-        Vector_type _x;
     public:
-        Bounds(const unsigned int x_size) : _x_size(x_size) {
-            _lowerBound = _zeroVector;
-            _upperBound = _zeroVector;
-
-            _Aeq = _zeroMatrix;
-            _beq = _zeroVector;
-
-            _Aineq = _zeroMatrix;
-            _bLowerBound = _zeroVector;
-            _bUpperBound = _zeroVector;
-        }
+        Bounds(const unsigned int x_size) : _x_size(x_size) {}
         virtual ~Bounds() {}
 
         virtual const Vector_type& getLowerBound() { return _lowerBound; }
@@ -68,7 +102,7 @@
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
-        virtual void update(const Vector_type& x) { _x = x; }
+        virtual void update(const Vector_type& x){}
     };
  }
 

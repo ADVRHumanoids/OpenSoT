@@ -58,6 +58,7 @@ public:
 
 
 private:
+    yarp::os::SystemClock system_clock;
     double time_tic;
     bool checkRefFrame(const std::string& ref_frame, const std::string& local_frame)
     {

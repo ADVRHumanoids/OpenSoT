@@ -37,7 +37,7 @@ Bounds(x_size), _robot(robot),_dT(dT), _velocityLimits(velocityLimits) {
     _bUpperBound.resize(x_size);
     this->_support_foot_linkIndex = _robot.left_leg.index;
     _robot.coman_iDyn3.setFloatingBaseLink(_support_foot_linkIndex);
-    this->update(_zeroVector);
+    this->update(yarp::sig::Vector(x_size, 0.0));
 
     /******************** COMPUTING CONSTANT BOUNDS ***********************/
 
@@ -49,7 +49,7 @@ Bounds(x_size), _robot(robot),_dT(dT), _velocityLimits(velocityLimits) {
 
 void CoMVelocity::update(const yarp::sig::Vector &x) {
     yarp::sig::Matrix JCoM;
-    _robot.updateiDyn3Model(x, _zeroVector, _zeroVector);
+    _robot.updateiDyn3Model(x);
 
     if(!_robot.coman_iDyn3.getCOMJacobian(JCoM))
         throw "Error computing CoM Jacobian";

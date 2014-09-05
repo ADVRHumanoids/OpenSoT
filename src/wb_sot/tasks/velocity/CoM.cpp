@@ -27,17 +27,18 @@ using namespace yarp::math;
 CoM::CoM(   const yarp::sig::Vector& x,
             iDynUtils &robot,
             const bool updateModel) :
-    Task("com", x, 3), _robot(robot), _updateModel(updateModel)
+    Task("com", x.size()), _robot(robot), _updateModel(updateModel)
 {
     _support_foot_link_index = _robot.left_leg.index;
     _swing_foot_link_index = _robot.right_leg.index;
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->update(_x0);
+    this->update(x);
+
 
     /* initializing to zero error */
     _desiredPosition = _actualPosition;
-    _b = _zeroVector;
+    _b.resize(3, 0.0);
 
     _W.resize(3,3);
     _W.eye();
@@ -54,7 +55,7 @@ void CoM::update(const yarp::sig::Vector &x) {
     /** TODO when using a cartesian task, we could update the model at the aggregate level
              instead of each cartesian task, to save computation time */
     if(_updateModel)
-        _robot.updateiDyn3Model(x, _zeroVector, _zeroVector);
+        _robot.updateiDyn3Model(x);
 
     /************************* COMPUTING TASK *****************************/
 
