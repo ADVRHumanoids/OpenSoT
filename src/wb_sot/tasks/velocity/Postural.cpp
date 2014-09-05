@@ -25,7 +25,7 @@ using namespace wb_sot::tasks::velocity;
 using namespace yarp::math;
 
 Postural::Postural(   const yarp::sig::Vector& x) :
-    Task("posture", x.size())
+    Task("postural", x.size())
 {
     _W.resize(_x_size, _x_size);
     _W.eye();
@@ -48,10 +48,6 @@ Postural::~Postural()
 void Postural::update(const yarp::sig::Vector &x) {
 
     /************************* COMPUTING TASK *****************************/
-
-    _A = _A.removeCols(0,6);    // remove floating base
-    _A = _A.removeRows(3,3);    // remove orientation
-
     _b = _x_desired - x;
     /**********************************************************************/
 }

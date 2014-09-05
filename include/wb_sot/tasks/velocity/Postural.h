@@ -29,7 +29,7 @@
     namespace tasks {
         namespace velocity {
             class Postural : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
-            private:
+            protected:
                 yarp::sig::Vector _x_desired;
 
             public:

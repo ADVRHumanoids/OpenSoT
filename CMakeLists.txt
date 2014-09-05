@@ -99,7 +99,7 @@ ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/test
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # gTests for Velocity Bounds
-SET(VelBLibs  wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
+SET(VelBLibs  wb_sot qpOASES ${drc_shared_LIBRARIES}
              ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
              ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
              icubmod ${ICUB_LIBRARIES}
@@ -125,6 +125,10 @@ ADD_EXECUTABLE(testConvexHullVelB src/tests/wb_sot/bounds/velocity/TestConvexHul
 TARGET_LINK_LIBRARIES(testConvexHullVelB ${VelBLibs} ${PCL_LIBRARIES})
 add_dependencies(testConvexHullVelB GTest-ext wb_sot)
 
+ADD_EXECUTABLE(testPosturalTask src/tests/wb_sot/tasks/TestPostural.cpp)
+TARGET_LINK_LIBRARIES(testPosturalTask ${VelBLibs} ${PCL_LIBRARIES})
+add_dependencies(testPosturalTask GTest-ext wb_sot)
+
 SET(SolverLibs wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
@@ -141,6 +145,7 @@ add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
 add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelB)
 add_test(wb_sot_bounds_velocity_ConvexHull testConvexHullVelB)
 add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
+add_test(wb_sot_task_postural testPosturalTask)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)

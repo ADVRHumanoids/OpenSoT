@@ -21,6 +21,7 @@
  #include <list>
  #include <string>
  #include <wb_sot/Bounds.h>
+#include <assert.h>
 
  namespace wb_sot {
 
@@ -76,7 +77,9 @@
         Matrix_type _W;
 
         /**
-         * @brief _alpha error scaling
+         * @brief _alpha error scaling,
+         * NOTE:
+         *          0.0 <= _alpha <= 1.0
          */
         double _alpha;
 
@@ -96,15 +99,19 @@
 
         virtual ~Task(){}
 
-        virtual const Matrix_type& getA() { return _A; }
+        virtual const Matrix_type& getA() const { return _A; }
         virtual const HessianType getHessianAtype() { return _hessianType; }
-        virtual const Vector_type& getb() { return _b; }
+        virtual const Vector_type& getb() const { return _b; }
 
         virtual const Matrix_type& getWeight() const { return _W; }
         virtual void setWeight(const Matrix_type& W) { _W = W; }
 
         virtual const double getAlpha() const { return _alpha; }
-        virtual void setAlpha(double alpha) { _alpha = alpha; }
+        virtual void setAlpha(double alpha)
+        {
+            assert(alpha <= 1.0 && alpha > 0.0);
+            _alpha = alpha;
+        }
         
         /**
          * @brief getConstraints return a reference to the constraint list. Use the standard list methods
