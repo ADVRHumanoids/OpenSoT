@@ -221,7 +221,7 @@ TEST_F(testQPOasesProblem, testTask)
     yarp::sig::Vector g(-1.0*postural_task.getb());
 
     qpOASES::SQProblem testProblem(q.size(), 0, qpOASES::HST_IDENTITY);
-    int nWSR = 32;
+    int nWSR = 132;
     qpOASES::returnValue val = testProblem.init(H.data(), g.data(), NULL, NULL, NULL, NULL,
                                                 NULL, nWSR);
 
@@ -230,18 +230,18 @@ TEST_F(testQPOasesProblem, testTask)
     yarp::sig::Vector dq(q.size());
     testProblem.getPrimalSolution(dq.data());
     for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_DOUBLE_EQ( q[i] + dq[i], q_ref[i]);
+        EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
 
     qpOASES::SQProblem testProblem2(q.size(), 0, qpOASES::HST_IDENTITY);
     this->setTestProblem(testProblem2);
-    nWSR = 32;
+    nWSR = 132;
     val = this->_problem.init(H.data(), g.data(), NULL, NULL, NULL, NULL,
                         NULL, nWSR);
     EXPECT_TRUE(val == qpOASES::SUCCESSFUL_RETURN);
     yarp::sig::Vector sol(q.size(), 0.0);
     this->_problem.getPrimalSolution(sol.data());
     for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_DOUBLE_EQ( q[i] + sol[i], q_ref[i]);
+        EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
 }
 
 TEST_F(testQPOasesTask, testQPOasesTask)

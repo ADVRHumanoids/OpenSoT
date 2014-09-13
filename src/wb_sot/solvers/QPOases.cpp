@@ -13,7 +13,7 @@ QPOasesProblem::QPOasesProblem():
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
     _bounds(),
     _constraints(),
-    _nWSR(32),
+    _nWSR(132),
     _solution(0), _dual_solution(0),
     _is_initialized(false)
 {
@@ -27,7 +27,7 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
     _bounds(),
     _constraints(),
-    _nWSR(32),
+    _nWSR(132),
     _solution(number_of_variables), _dual_solution(number_of_variables),
     _is_initialized(false)
 {
@@ -72,11 +72,15 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         _uA_ptr = _uA.data();
     else
         _uA_ptr = NULL;
+    if(_A.rows() > 0)
+        _A_ptr = _A.data();
+    else
+        _A_ptr = NULL;
 
     int nWSR = _nWSR;
         qpOASES::returnValue val =_problem.init( _H.data(),_g.data(),
-                       _A.data(),
-                       _l_ptr, _u.data(),
+                       _A_ptr,
+                       _l_ptr, _u_ptr,
                        _lA_ptr,_uA_ptr,
                        nWSR,0);
 
@@ -228,10 +232,15 @@ bool QPOasesProblem::solve()
             _uA_ptr = _uA.data();
         else
             _uA_ptr = NULL;
+        if(_A.rows() > 0)
+            _A_ptr = _A.data();
+        else
+            _A_ptr = NULL;
+
 
         int nWSR = _nWSR;
         _problem.hotstart(_H.data(),_g.data(),
-                       _A.data(),
+                       _A_ptr,
                        _l_ptr, _u_ptr,
                        _lA_ptr,_uA_ptr,
                        nWSR,0);

@@ -275,6 +275,7 @@ namespace wb_sot{
         Matrix _A;
         Vector _lA;
         Vector _uA;
+        double * _A_ptr;
         double *_lA_ptr;
         double *_uA_ptr;
 
