@@ -24,7 +24,7 @@
 using namespace wb_sot::bounds::velocity;
 using namespace yarp::math;
 
-Aggregated::Aggregated(const std::list< BoundType* >& bounds,
+Aggregated::Aggregated(const std::list<BoundType> &bounds,
                        const unsigned int x_size,
                        const unsigned int aggregationPolicy) :
     Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
@@ -47,10 +47,10 @@ void Aggregated::update(const yarp::sig::Vector& x) {
     _bLowerBound = yarp::sig::Vector(0);
 
     /* iterating on all bounds.. */
-    for(typename std::list< BoundType* >::iterator i = _bounds.begin();
+    for(typename std::list< BoundType >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
 
-        BoundType* b = *i;
+        BoundType* b = &(*i);
         /* update bounds */
         b->update(x);
 
@@ -167,11 +167,13 @@ void Aggregated::update(const yarp::sig::Vector& x) {
     assert(_upperBound.size() == 0 || _upperBound.size() == _x_size);
 
     assert(_Aeq.rows() == _beq.size());
-    assert(_Aeq.cols() == _x_size);
+    if(_Aeq.rows() > 0)
+        assert(_Aeq.cols() == _x_size);
 
     assert(_Aineq.rows() == _bUpperBound.size());
     if(!(_aggregationPolicy & UNILATERAL_TO_BILATERAL))
         assert(_Aineq.rows() == _bLowerBound.size());
-    assert(_Aineq.cols() == _x_size);
+    if(_Aineq.rows() > 0)
+        assert(_Aineq.cols() == _x_size);
 }
 

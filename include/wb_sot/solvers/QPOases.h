@@ -25,6 +25,7 @@
 #include <yarp/sig/all.h>
 #include <wb_sot/Task.h>
 #include <boost/shared_ptr.hpp>
+#include <wb_sot/bounds/velocity/Aggregated.h>
 
 using namespace yarp::sig;
 
@@ -274,12 +275,17 @@ namespace wb_sot{
         Matrix _A;
         Vector _lA;
         Vector _uA;
+        double *_lA_ptr;
+        double *_uA_ptr;
+
 
         /**
          * Define a set of bounds on solution: l <= x <= u
          */
         Vector _l;
         Vector _u;
+        double *_l_ptr;
+        double *_u_ptr;
 
         /**
          * Solution and dual solution of the QP problem
@@ -292,15 +298,16 @@ namespace wb_sot{
     class QPOasesTask: public QPOasesProblem
     {
     public:
-        QPOasesTask();
         QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task);
 
         ~QPOasesTask();
 
-        void setTask(const boost::shared_ptr< Task<Matrix, Vector> >& task);
+        bool solve();
 
     protected:
         boost::shared_ptr< Task<Matrix, Vector> > _task;
+
+        bool prepareData();
     };
 
 

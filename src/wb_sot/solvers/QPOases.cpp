@@ -1,6 +1,7 @@
 #include <wb_sot/solvers/QPOases.h>
 #include <yarp/math/Math.h>
 
+
 using namespace yarp::math;
 
 using namespace wb_sot::solvers;
@@ -55,21 +56,44 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
+    if(_l.size() > 0)
+        _l_ptr = _l.data();
+    else
+        _l_ptr = NULL;
+    if(_u.size() > 0)
+        _u_ptr = _u.data();
+    else
+        _u_ptr = NULL;
+    if(_lA.size() > 0)
+        _lA_ptr = _lA.data();
+    else
+        _lA_ptr = NULL;
+    if(_uA.size() > 0)
+        _uA_ptr = _uA.data();
+    else
+        _uA_ptr = NULL;
+
     int nWSR = _nWSR;
-    _problem.init( _H.data(),_g.data(),
-                   _A.data(),
-                   _l.data(), _u.data(),
-                   _lA.data(),_uA.data(),
-                   nWSR,0);
+        qpOASES::returnValue val =_problem.init( _H.data(),_g.data(),
+                       _A.data(),
+                       _l_ptr, _u.data(),
+                       _lA_ptr,_uA_ptr,
+                       nWSR,0);
+
+    _is_initialized = true;
+
+    if(!(val == qpOASES::SUCCESSFUL_RETURN))
+    {
+        _is_initialized = false;
+        std::cout<<"ERROR INITIALIZING QP PROBLEM "<<std::endl;
+        return _is_initialized;
+    }
 
     if(_solution.size() != _problem.getNV())
         _solution.resize(_problem.getNV());
 
     if(_dual_solution.size() != _problem.getNV() + _problem.getNC())
-        _dual_solution.resize(_problem.getNV() + _problem.getNC());
-
-
-    _is_initialized = true;
+        _dual_solution.resize(_problem.getNV() + _problem.getNC());  
 
     //We get the solution
     int success = _problem.getPrimalSolution(_solution.data());
@@ -188,11 +212,28 @@ bool QPOasesProblem::solve()
     // To solve the problem it has to be initialized
     if(_is_initialized)
     {
+        if(_l.size() > 0)
+            _l_ptr = _l.data();
+        else
+            _l_ptr = NULL;
+        if(_u.size() > 0)
+            _u_ptr = _u.data();
+        else
+            _u_ptr = NULL;
+        if(_lA.size() > 0)
+            _lA_ptr = _lA.data();
+        else
+            _lA_ptr = NULL;
+        if(_uA.size() > 0)
+            _uA_ptr = _uA.data();
+        else
+            _uA_ptr = NULL;
+
         int nWSR = _nWSR;
         _problem.hotstart(_H.data(),_g.data(),
                        _A.data(),
-                       _l.data(), _u.data(),
-                       _lA.data(),_uA.data(),
+                       _l_ptr, _u_ptr,
+                       _lA_ptr,_uA_ptr,
                        nWSR,0);
 
         // If solution has changed of size we update the size
@@ -221,17 +262,15 @@ bool QPOasesProblem::solve()
 }
 
 /// QPOasesTask ///
-
-QPOasesTask::QPOasesTask():
-    _task()
-{
-
-}
-
 QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
+    QPOasesProblem(task->getXSize(),
+                   wb_sot::bounds::velocity::Aggregated(task->getConstraints(), task->getXSize()).getAineq().rows(),
+                   (qpOASES::HessianType)task->getHessianAtype()),
+
     _task(task)
 {
-
+    prepareData();
+    initProblem(_H, _g, _A, _lA, _uA, _l, _u);
 }
 
 QPOasesTask::~QPOasesTask()
@@ -239,7 +278,29 @@ QPOasesTask::~QPOasesTask()
 
 }
 
-void QPOasesTask::setTask(const boost::shared_ptr<Task<Matrix, Vector> > &task)
+bool QPOasesTask::prepareData()
 {
-    _task = task;
+    /* Compute cost function */
+    _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
+    _g = -1.0 * _task->getAlpha() * _task->getA().transposed() * _task->getWeight() * _task->getb();
+
+    /* Compute constraints */
+    using namespace  wb_sot::bounds::velocity;
+    Aggregated constraints(_task->getConstraints(), _task->getXSize());
+    _A = constraints.getAineq();
+    _lA = constraints.getbLowerBound();
+    _uA = constraints.getbUpperBound();
+
+    /* Compute bounds */
+    _l = constraints.getLowerBound();
+    _u = constraints.getUpperBound();
+
+    return true;
 }
+
+bool QPOasesTask::solve()
+{
+    prepareData();
+    return this->QPOasesProblem::solve();
+}
+

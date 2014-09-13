@@ -29,7 +29,7 @@
         namespace velocity {
 
             class Aggregated: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
-
+            public:
                 typedef Bounds< yarp::sig::Matrix, yarp::sig::Vector> BoundType;
 
                 enum AggregationPolicy {
@@ -45,7 +45,7 @@
 
             private:
 
-                std::list< BoundType* > _bounds;
+                std::list< BoundType> _bounds;
                 unsigned int _aggregationPolicy;
 
             public:
@@ -53,7 +53,7 @@
                  * @brief Aggregated
                  * @param bounds a std::list of Bounds
                  */
-                Aggregated(const std::list<BoundType *> &bounds,
+                Aggregated(const std::list<BoundType> &bounds,
                            const unsigned int x_size,
                            const unsigned int aggregationPolicy =
                                 EQUALITIES_TO_INEQUALITIES |

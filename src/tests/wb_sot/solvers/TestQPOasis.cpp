@@ -1,8 +1,13 @@
 #include <gtest/gtest.h>
 #include <wb_sot/solvers/QPOases.h>
 #include <yarp/sig/all.h>
-#include <wb_sot/tasks/velocity/Cartesian.h>
 #include <drc_shared/idynutils.h>
+#include <wb_sot/tasks/velocity/Postural.h>
+#include <drc_shared/tests_utils.h>
+#include <yarp/math/Math.h>
+#include <wb_sot/bounds/velocity/Aggregated.h>
+
+using namespace yarp::math;
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -68,19 +73,13 @@ protected:
 
 };
 
-class testQPOasesTask: public ::testing::Test,
-        public wb_sot::solvers::QPOasesTask
+class testQPOasesTask: public ::testing::Test
 {
 protected:
 
     testQPOasesTask()
     {
 
-    }
-
-    void setTestTask(const boost::shared_ptr<wb_sot::Task<Matrix, Vector>> &task)
-    {
-        this->setTask(task);
     }
 
     virtual ~testQPOasesTask() {
@@ -207,21 +206,71 @@ TEST_F(testQPOasesProblem, testAddProblem)
     std::cout<<GREEN<<"s2 solution: ["<<s2[0]<<" "<<s2[1]<<" "<<s2[2]<<"]"<<DEFAULT<<std::endl;
 }
 
-TEST_F(testQPOasesTask, testQPOasesTaskConstructor)
+TEST_F(testQPOasesProblem, testTask)
 {
-    /// THIS TEST FOR NOW IS BROKEN
-//    iDynUtils coman;
-//    yarp::sig::Vector q(coman.coman_iDyn3.getNrOfDOFs(), 0.0);
-//    coman.updateiDyn3Model(q, q, q);
+    yarp::sig::Vector q_ref(10, 0.0);
+    yarp::sig::Vector q(q_ref.size(), 0.0);
+    for(unsigned int i = 0; i < q.size(); ++i)
+        q[i] = tests_utils::getRandomAngle();
 
-//    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task
-//            (new wb_sot::tasks::velocity::Cartesian(q, coman,
-//                                                    coman.left_arm.name, "Waist"));
+    wb_sot::tasks::velocity::Postural postural_task(q);
+    postural_task.setReference(q_ref);
+    postural_task.update(q);
 
-//    this->setTask(cartesian_task);
+    yarp::sig::Matrix H(q.size(),q.size()); H.eye();
+    yarp::sig::Vector g(-1.0*postural_task.getb());
 
-//    EXPECT_EQ(cartesian_task->getA(), this->_task->getA());
-//    EXPECT_EQ(cartesian_task->getb(), this->_task->getb());
+    qpOASES::SQProblem testProblem(q.size(), 0, qpOASES::HST_IDENTITY);
+    int nWSR = 32;
+    qpOASES::returnValue val = testProblem.init(H.data(), g.data(), NULL, NULL, NULL, NULL,
+                                                NULL, nWSR);
+
+    EXPECT_TRUE(val == qpOASES::SUCCESSFUL_RETURN);
+
+    yarp::sig::Vector dq(q.size());
+    testProblem.getPrimalSolution(dq.data());
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ( q[i] + dq[i], q_ref[i]);
+
+    qpOASES::SQProblem testProblem2(q.size(), 0, qpOASES::HST_IDENTITY);
+    this->setTestProblem(testProblem2);
+    nWSR = 32;
+    val = this->_problem.init(H.data(), g.data(), NULL, NULL, NULL, NULL,
+                        NULL, nWSR);
+    EXPECT_TRUE(val == qpOASES::SUCCESSFUL_RETURN);
+    yarp::sig::Vector sol(q.size(), 0.0);
+    this->_problem.getPrimalSolution(sol.data());
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ( q[i] + sol[i], q_ref[i]);
+}
+
+TEST_F(testQPOasesTask, testQPOasesTask)
+{
+    yarp::sig::Matrix A;
+    EXPECT_TRUE(A.data() == NULL);
+
+    yarp::sig::Vector q_ref(10, 0.0);
+    yarp::sig::Vector q(q_ref.size(), 0.0);
+    for(unsigned int i = 0; i < q.size(); ++i)
+        q[i] = tests_utils::getRandomAngle();
+    std::cout<<"q: "<<q.toString()<<std::endl;
+
+    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
+                new wb_sot::tasks::velocity::Postural(q));
+    postural_task->setReference(q_ref);
+    postural_task->update(q);
+    std::cout<<"error: "<<postural_task->getb().toString()<<std::endl;
+
+    wb_sot::solvers::QPOasesTask qp_postural_task(postural_task);
+    EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
+
+    postural_task->update(q);
+    EXPECT_TRUE(qp_postural_task.solve());
+    std::cout<<"solution: "<<qp_postural_task.getSolution().toString()<<std::endl;
+    q += qp_postural_task.getSolution();
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ(q[i], q_ref[i]);
 
 }
 
