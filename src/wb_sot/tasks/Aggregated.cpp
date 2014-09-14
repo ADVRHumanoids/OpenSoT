@@ -43,8 +43,8 @@ void Aggregated::update(const yarp::sig::Vector& x) {
         i != _tasks.end(); ++i) {
         TaskType *t = *i;
         t->update(x);
-        _A = yarp::math::pile(_A,t->getW()*t->getA());
-        _b = yarp::math::cat(_b, t->getW()*t->getalpha()*t->getb());
+        _A = yarp::math::pile(_A,t->getWeight()*t->getA());
+        _b = yarp::math::cat(_b, t->getWeight()*t->getAlpha()*t->getb());
         for(std::list< BoundType >::iterator j = t->getConstraints().begin();
             j!= t->getConstraints().end(); ++j) {
             this->getConstraints().push_back(*j);
