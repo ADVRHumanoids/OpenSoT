@@ -330,13 +330,15 @@ bool QPOases_sot::expandProblem(unsigned int i)
                     (_stack_of_tasks[j]->getA(),
                      _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i]->getSolution(),
                      _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i]->getSolution());
-        //2. Get constraints of task j
+        //2. Get constraints & bounds of task j
             std::list< wb_sot::bounds::velocity::Aggregated::BoundType > constraints_list =
                 _stack_of_tasks[j]->getConstraints().push_back(task_j_constraint);
             wb_sot::bounds::velocity::Aggregated
                 new_constraints_for_task_i(constraints_list, _stack_of_tasks[j]->getXSize());
-        //3. Add new constraints to problem i
+        //3. Add new constraints & bounds to problem i
+            //3.1 ADD constraints to problem i
 
+            //3.2 ADD bounds to problem i
 
 
     }
