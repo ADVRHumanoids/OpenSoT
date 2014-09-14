@@ -31,6 +31,9 @@
             class Postural : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             protected:
                 yarp::sig::Vector _x_desired;
+                yarp::sig::Vector _x;
+
+                void update_b();
 
             public:
 

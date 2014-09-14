@@ -24,7 +24,7 @@ using namespace wb_sot::tasks::velocity;
 using namespace yarp::math;
 
 MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
-    Task("posture", x.size()), _gTauGradientWorker(x)
+    Task("posture", x.size()), _gTauGradientWorker(x), _x(x)
 {
     _W.resize(_x_size, _x_size);
     _W.eye();
@@ -50,11 +50,17 @@ MinimumEffort::~MinimumEffort()
 
 void MinimumEffort::update(const yarp::sig::Vector &x) {
 
+    _x = x;
     /************************* COMPUTING TASK *****************************/
 
     _b = -1.0 * cartesian_utils::computeGradient(x, _gTauGradientWorker);
 
     /**********************************************************************/
+}
+
+double MinimumEffort::computeEffort()
+{
+    return _gTauGradientWorker.compute(_x);
 }
 
 

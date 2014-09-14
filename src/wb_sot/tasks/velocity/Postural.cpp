@@ -25,7 +25,7 @@ using namespace wb_sot::tasks::velocity;
 using namespace yarp::math;
 
 Postural::Postural(   const yarp::sig::Vector& x) :
-    Task("postural", x.size())
+    Task("postural", x.size()), _x(x)
 {
     _W.resize(_x_size, _x_size);
     _W.eye();
@@ -48,14 +48,20 @@ Postural::~Postural()
 }
 
 void Postural::update(const yarp::sig::Vector &x) {
+    _x = x;
 
     /************************* COMPUTING TASK *****************************/
-    _b = _x_desired - x;
+    this->update_b();
     /**********************************************************************/
 }
 
 void Postural::setReference(const yarp::sig::Vector& x_desired) {
     _x_desired = x_desired;
+    this->update_b();
+}
+
+void Postural::update_b() {
+    _b = _x_desired - _x;
 }
 
 

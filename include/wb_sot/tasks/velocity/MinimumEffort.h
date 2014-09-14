@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2014 Walkman
  * Authors:Alessio Rocchi, Enrico Mingo
@@ -30,21 +31,19 @@
     namespace tasks {
         namespace velocity {
             class MinimumEffort : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
-            private:
-                yarp::sig::Vector _x_desired;
-
+            protected:
                 iDynUtils _robot;
+                yarp::sig::Vector _x;
 
                 class ComputeGTauGradient : public cartesian_utils::CostFunction {
                     public:
                     iDynUtils _robot;
-                    yarp::sig::Vector _q;
                     yarp::sig::Matrix _W;
                     ComputeGTauGradient(const yarp::sig::Vector& q) :
-                        _q(q), _W(_q.size(),_q.size())
-                    {;}
+                        _W(q.size(),q.size())
+                    { _W.eye(); }
                     double compute(const yarp::sig::Vector &q) {
-                        _robot.updateiDyn3Model(_q, true);
+                        _robot.updateiDyn3Model(q);
                         yarp::sig::Vector tau = _robot.coman_iDyn3.getTorques();
                         return yarp::math::dot(tau, _W * tau);
                     }
@@ -61,6 +60,8 @@
                 ~MinimumEffort();
 
                 void update(const yarp::sig::Vector& x);
+
+                double computeEffort();
             };
         }
     }

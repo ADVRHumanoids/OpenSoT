@@ -28,8 +28,8 @@ Cartesian::Cartesian(std::string task_id,
                      const yarp::sig::Vector& x,
                      iDynUtils &robot,
                      std::string distal_link,
-                     std::string base_link, const bool updateModel) :
-    Task(task_id, x.size()), _robot(robot), _updateModel(updateModel),
+                     std::string base_link) :
+    Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     orientationErrorGain(1.0)
 {
@@ -51,10 +51,6 @@ Cartesian::~Cartesian()
 }
 
 void Cartesian::update(const yarp::sig::Vector &x) {
-    /** TODO when using a cartesian task, we could update the model at the aggregate level
-             instead of each cartesian task, to save computation time */
-    if(_updateModel)
-        _robot.updateiDyn3Model(x);
 
     /************************* COMPUTING TASK *****************************/
 
@@ -78,17 +74,24 @@ void Cartesian::update(const yarp::sig::Vector &x) {
         _b.resize(_A.rows(), 0.0);
     }
 
-    cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
-                                           positionError, orientationError);
-
-    _b = yarp::math::cat(positionError, -orientationErrorGain*orientationError);
+    this->update_b();
 
     /**********************************************************************/
 }
 
 void Cartesian::setReference(const yarp::sig::Matrix& desiredPose) {
     _desiredPose = desiredPose;
+    this->update_b();
 }
 
+void Cartesian::setOrientationErrorGain(const double &orientationErrorGain)
+{
+    this->orientationErrorGain = orientationErrorGain;
+}
 
+void Cartesian::update_b() {
+    cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
+                                           positionError, orientationError);
 
+    _b = yarp::math::cat(positionError, -orientationErrorGain*orientationError);
+}

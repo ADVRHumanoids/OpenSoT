@@ -30,7 +30,7 @@
         namespace velocity {
             class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             private:
-                iDynUtils& _robot;
+                iDynUtils _robot;
 
                 /** TODO add floating base support! */
                 /**
@@ -45,31 +45,16 @@
                  */
                 int _swing_foot_link_index;
 
-                /** TODO we could have the task itself, or maybe a wrapper, take care of ports? */
-                //yarp::os::BufferedPort<yarp::os::Bottle> _referenceInputPort;
-
                 yarp::sig::Vector _actualPosition;
                 yarp::sig::Vector _desiredPosition;
 
-                /** TODO should this go inside idynutils?
-                         it is true if we are owners of the robot model */
-                bool _updateModel;
+                void update_b();
 
             public:
 
                 yarp::sig::Vector positionError;
-                yarp::sig::Vector orientationError;
 
-                /*********** TASK PARAMETERS ************/
-
-                double orientationErrorGain;
-
-                /****************************************/
-
-
-                CoM(const yarp::sig::Vector& x,
-                    iDynUtils &robot,
-                    const bool updateModel = false);
+                CoM(const yarp::sig::Vector& x);
 
                 ~CoM();
 

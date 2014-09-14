@@ -90,7 +90,11 @@ ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/Aggregated.cpp
 
 add_custom_target(  wb_sot_test ALL
                     COMMAND ${CMAKE_CTEST_COMMAND}
-                    DEPENDS wb_sot)
+                    DEPENDS wb_sot
+                    testCartesianTask
+                    testCoMTask
+                    testMinimumEffortTask
+                    testPosturalTask)
 
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver2.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
@@ -125,6 +129,18 @@ ADD_EXECUTABLE(testConvexHullVelB src/tests/wb_sot/bounds/velocity/TestConvexHul
 TARGET_LINK_LIBRARIES(testConvexHullVelB ${VelBLibs} ${PCL_LIBRARIES})
 add_dependencies(testConvexHullVelB GTest-ext wb_sot)
 
+ADD_EXECUTABLE(testCartesianTask src/tests/wb_sot/tasks/TestCartesian.cpp)
+TARGET_LINK_LIBRARIES(testCartesianTask ${VelBLibs} ${PCL_LIBRARIES})
+add_dependencies(testCartesianTask GTest-ext wb_sot)
+
+ADD_EXECUTABLE(testCoMTask src/tests/wb_sot/tasks/TestCoM.cpp)
+TARGET_LINK_LIBRARIES(testCoMTask ${VelBLibs} ${PCL_LIBRARIES})
+add_dependencies(testCoMTask GTest-ext wb_sot)
+
+ADD_EXECUTABLE(testMinimumEffortTask src/tests/wb_sot/tasks/TestMinimumEffort.cpp)
+TARGET_LINK_LIBRARIES(testMinimumEffortTask ${VelBLibs} ${PCL_LIBRARIES})
+add_dependencies(testMinimumEffortTask GTest-ext wb_sot)
+
 ADD_EXECUTABLE(testPosturalTask src/tests/wb_sot/tasks/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalTask ${VelBLibs} ${PCL_LIBRARIES})
 add_dependencies(testPosturalTask GTest-ext wb_sot)
@@ -145,7 +161,10 @@ add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
 add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelB)
 add_test(wb_sot_bounds_velocity_ConvexHull testConvexHullVelB)
 add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
-add_test(wb_sot_task_postural testPosturalTask)
+add_test(wb_sot_task_Cartesian testCartesianTask)
+add_test(wb_sot_task_CoM testCoMTask)
+add_test(wb_sot_task_MinimumEffort testMinimumEffortTask)
+add_test(wb_sot_task_Postural testPosturalTask)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)

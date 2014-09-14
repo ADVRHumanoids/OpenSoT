@@ -24,10 +24,9 @@
 using namespace wb_sot::tasks::velocity;
 using namespace yarp::math;
 
-CoM::CoM(   const yarp::sig::Vector& x,
-            iDynUtils &robot,
-            const bool updateModel) :
-    Task("com", x.size()), _robot(robot), _updateModel(updateModel)
+CoM::CoM(   const yarp::sig::Vector& x) :
+    Task("com", x.size()),
+    _desiredPosition(3,0.0), _actualPosition(3,0.0)
 {
     _support_foot_link_index = _robot.left_leg.index;
     _swing_foot_link_index = _robot.right_leg.index;
@@ -43,26 +42,21 @@ CoM::CoM(   const yarp::sig::Vector& x,
     _W.resize(3,3);
     _W.eye();
 
-    //_referenceInputPort.open("/wb_sot/tasks/velocity/CoM/" + _task_id + "/set_ref:i");
 }
 
 CoM::~CoM()
 {
-   //_referenceInputPort.close();
 }
 
 void CoM::update(const yarp::sig::Vector &x) {
-    /** TODO when using a cartesian task, we could update the model at the aggregate level
-             instead of each cartesian task, to save computation time */
-    if(_updateModel)
-        _robot.updateiDyn3Model(x);
+    _robot.updateiDyn3Model(x);
 
     /************************* COMPUTING TASK *****************************/
 
     _actualPosition = _robot.coman_iDyn3.getCOM("",_support_foot_link_index);
+
     //This part of code is an HACK due to a bug in iDynTree
     int floating_base_old_index = _robot.coman_iDyn3.getFloatingBaseLink();
-
     _robot.coman_iDyn3.setFloatingBaseLink(_support_foot_link_index);
     assert(_robot.coman_iDyn3.getCOMJacobian(_A));
     _robot.coman_iDyn3.setFloatingBaseLink(floating_base_old_index);
@@ -70,12 +64,17 @@ void CoM::update(const yarp::sig::Vector &x) {
     _A = _A.removeCols(0,6);    // remove floating base
     _A = _A.removeRows(3,3);    // remove orientation
 
-    _b = _desiredPosition - _actualPosition;
+    this->update_b();
     /**********************************************************************/
 }
 
 void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
     _desiredPosition = desiredPosition;
+    this->update_b();
+}
+
+void CoM::update_b() {
+    _b = _desiredPosition - _actualPosition;
 }
 
 

@@ -30,8 +30,7 @@
         namespace velocity {
             class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             private:
-                //iDynUtils& _robot; <--DANGEROUS with internal update of model!!!
-                iDynUtils _robot;
+                iDynUtils& _robot;
 
                 std::string _distal_link;
                 std::string _base_link;
@@ -42,9 +41,7 @@
                 yarp::sig::Matrix _actualPose;
                 yarp::sig::Matrix _desiredPose;
 
-                /** TODO should this go inside idynutils?
-                         it is true if we are owners of the robot model */
-                bool _updateModel;
+                void update_b();
 
             public:
 
@@ -62,14 +59,15 @@
                           const yarp::sig::Vector& x,
                           iDynUtils &robot,
                           std::string distal_link,
-                          std::string base_link,
-                          const bool updateModel = false);
+                          std::string base_link);
 
                 ~Cartesian();
 
                 void update(const yarp::sig::Vector& x);
 
                 void setReference(const yarp::sig::Matrix& desiredPose);
+
+                void setOrientationErrorGain(const double& orientationErrorGain);
             };
         }
     }
