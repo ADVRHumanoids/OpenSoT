@@ -49,13 +49,8 @@ void QPOasesProblem::setOptions(const qpOASES::Options &options)
     _problem.setOptions(options);
 }
 
-bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
-                                 const Matrix &A,
-                                 const Vector &lA, const Vector &uA,
-                                 const Vector &l, const Vector &u)
+void QPOasesProblem::hack()
 {
-    _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
-
     if(_l.size() > 0)
         _l_ptr = _l.data();
     else
@@ -76,6 +71,16 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         _A_ptr = _A.data();
     else
         _A_ptr = NULL;
+}
+
+bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
+                                 const Matrix &A,
+                                 const Vector &lA, const Vector &uA,
+                                 const Vector &l, const Vector &u)
+{
+    _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
+
+    hack(); //<- PAY ATTENTION!
 
     int nWSR = _nWSR;
         qpOASES::returnValue val =_problem.init( _H.data(),_g.data(),
@@ -216,27 +221,7 @@ bool QPOasesProblem::solve()
     // To solve the problem it has to be initialized
     if(_is_initialized)
     {
-        if(_l.size() > 0)
-            _l_ptr = _l.data();
-        else
-            _l_ptr = NULL;
-        if(_u.size() > 0)
-            _u_ptr = _u.data();
-        else
-            _u_ptr = NULL;
-        if(_lA.size() > 0)
-            _lA_ptr = _lA.data();
-        else
-            _lA_ptr = NULL;
-        if(_uA.size() > 0)
-            _uA_ptr = _uA.data();
-        else
-            _uA_ptr = NULL;
-        if(_A.rows() > 0)
-            _A_ptr = _A.data();
-        else
-            _A_ptr = NULL;
-
+        hack(); //<- PAY ATTENTION!
 
         int nWSR = _nWSR;
         _problem.hotstart(_H.data(),_g.data(),
@@ -279,7 +264,7 @@ QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
     _task(task)
 {
     prepareData();
-    initProblem(_H, _g, _A, _lA, _uA, _l, _u);
+    assert(initProblem(_H, _g, _A, _lA, _uA, _l, _u));
 }
 
 QPOasesTask::~QPOasesTask()
@@ -287,7 +272,7 @@ QPOasesTask::~QPOasesTask()
 
 }
 
-bool QPOasesTask::prepareData()
+void QPOasesTask::prepareData()
 {
     /* Compute cost function */
     _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
@@ -303,8 +288,6 @@ bool QPOasesTask::prepareData()
     /* Compute bounds */
     _l = constraints.getLowerBound();
     _u = constraints.getUpperBound();
-
-    return true;
 }
 
 bool QPOasesTask::solve()
@@ -313,3 +296,43 @@ bool QPOasesTask::solve()
     return this->QPOasesProblem::solve();
 }
 
+/// QPOases_sot ///
+QPOases_sot::QPOases_sot(vector<boost::shared_ptr<Task<Matrix, Vector> > > &stack_of_tasks):
+_stack_of_tasks(stack_of_tasks)
+{
+    _qp_stack_of_tasks.reserve(_stack_of_tasks.size());
+    assert(prepareSoT());
+}
+
+bool QPOases_sot::prepareSoT()
+{
+    for(unsigned int i = 0; i < _stack_of_tasks.size(); ++i)
+    {
+        _qp_stack_of_tasks.push_back(QPOasesTask(_stack_of_tasks[i]));
+        if(i > 0)
+        {
+            _qp_stack_of_tasks.push_back(QPOasesTask(_stack_of_tasks[i]));
+            expandProblem(i);
+            //so cazzi...
+        }
+
+    }
+}
+
+bool QPOases_sot::expandProblem(unsigned int i)
+{
+    //I want to add all the constraints of the previous j tasks to task i
+    for(unsigned int j = 0; j < i; ++j)
+    {
+        //1. Get constraints of task j
+
+        //2. Prepare new constraints from task j
+
+        //3. Add new constraints to problem i
+    }
+}
+
+bool QPOases_sot::solve(Vector &solution)
+{
+
+}

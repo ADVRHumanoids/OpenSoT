@@ -293,22 +293,46 @@ namespace wb_sot{
          */
         Vector _solution;
         Vector _dual_solution;
+
+        /**
+         * @brief hack take care of the problem of yarp::sig::Matrix and yarp::sig::Vector
+         * that does not return NULL when empty!
+         */
+        void hack();
     };
 
 
+    /**
+     * @brief The QPOasesTask class wrapper around QPOasesProblem to easily pass a Task
+     */
     class QPOasesTask: public QPOasesProblem
     {
     public:
+        /**
+         * @brief QPOasesTask constructor takes a shared_ptr to have automatically
+         * updated task matrices
+         * @param task task to solve
+         */
         QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task);
 
         ~QPOasesTask();
 
+        /**
+         * @brief solve
+         * @return
+         */
         bool solve();
 
     protected:
+        /**
+         * @brief _task pointer to task to optimize
+         */
         boost::shared_ptr< Task<Matrix, Vector> > _task;
 
-        bool prepareData();
+        /**
+         * @brief prepareData compute matrices for QPOases
+         */
+        void prepareData();
     };
 
 
@@ -318,13 +342,18 @@ namespace wb_sot{
     class QPOases_sot: public Solver<Matrix, Vector>
     {
     public:
-        QPOases_sot();
+        QPOases_sot(vector <boost::shared_ptr< Task<Matrix, Vector> >>& stack_of_tasks);
 
         ~QPOases_sot(){}
 
         bool solve(Vector& solution);
 
     protected:
+        vector <boost::shared_ptr< Task<Matrix, Vector> >> _stack_of_tasks;
+        vector <QPOasesTask> _qp_stack_of_tasks;
+
+        bool prepareSoT();
+        bool expandProblem(unsigned int i);
 
     };
 
