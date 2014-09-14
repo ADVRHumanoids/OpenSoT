@@ -14,7 +14,7 @@ class testAggregatedTask: public ::testing::Test
 protected:
 
     std::list< Aggregated::TaskType * > _tasks;
-    yarp::sig::Vector q();
+    yarp::sig::Vector q;
 
     testAggregatedTask()
     {
@@ -50,14 +50,14 @@ protected:
 TEST_F(testAggregatedTask, testAggregatedTask_)
 {
 
-    wb_sot::tasks::velocity::Aggregated aggregated(q);
+    Aggregated aggregated(_tasks, q.size());
     yarp::sig::Matrix posturalAOne, posturalATwo;
     yarp::sig::Vector posturalbOne, posturalbTwo;
 
-    posturalAOne = *(_tasks.begin())->getA();
-    posturalATwo = *(++_tasks.begin())->getA();
-    posturalbOne = *(_tasks.begin())->getb();
-    posturalbTwo = *(++_tasks.begin())->getb();
+    posturalAOne = (*(_tasks.begin()))->getA();
+    posturalATwo = (*(++_tasks.begin()))->getA();
+    posturalbOne = (*(_tasks.begin()))->getb();
+    posturalbTwo = (*(++_tasks.begin()))->getb();
 
     EXPECT_TRUE(aggregated.getA() == yarp::math::pile(posturalAOne,posturalATwo));
     EXPECT_TRUE(aggregated.getb() == yarp::math::cat(posturalbOne,posturalbTwo));
@@ -68,8 +68,8 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     aggregated.setAlpha(K);
     EXPECT_DOUBLE_EQ(aggregated.getAlpha(), K);
 
-    /** TODO what about W and alpha? **/
-    EXPECT_TRUE(aggregated.getWeight() == yarp::sig::Matrix(q.size(), q.size()).eye());
+    /** TODO what about W, hessianType and alpha? **/
+    //EXPECT_TRUE(aggregated.getWeight() == yarp::sig::Matrix(q.size(), q.size()).eye());
 }
 
 }

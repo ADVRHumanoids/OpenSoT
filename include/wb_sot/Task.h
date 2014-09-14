@@ -43,6 +43,11 @@
      * @brief The Task class describe a task and its constraints.
      */
     class Task {
+
+    public:
+        typedef Bounds< Matrix_type, Vector_type > BoundType;
+        typedef Task< Matrix_type, Vector_type > TaskType;
+
     protected:
 
         /**
@@ -88,8 +93,6 @@
         std::list< BoundType > _bounds;
 
     public:
-        typedef Bounds< Matrix_type, Vector_type > BoundType;
-        typedef Task< Matrix_type, Vector_type > TaskType;
 
         Task(const std::string task_id,
              const unsigned int x_size) :
@@ -101,20 +104,21 @@
 
         virtual ~Task(){}
 
-        virtual const Matrix_type& getA() const { return _A; }
-        virtual const HessianType getHessianAtype() { return _hessianType; }
-        virtual const Vector_type& getb() const { return _b; }
+        const Matrix_type& getA() const { return _A; }
+        const HessianType getHessianAtype() { return _hessianType; }
+        const Vector_type& getb() const { return _b; }
 
-        virtual const Matrix_type& getWeight() const { return _W; }
-        virtual void setWeight(const Matrix_type& W) { _W = W; }
+        const Matrix_type& getWeight() const { return _W; }
+        void setWeight(const Matrix_type& W) { _W = W; }
 
-        virtual const double getAlpha() const { return _alpha; }
-        virtual void setAlpha(double alpha)
+        const double getAlpha() const { return _alpha; }
+        void setAlpha(double alpha)
         {
             assert(alpha <= 1.0 && alpha > 0.0);
             _alpha = alpha;
         }
         
+        /** TODO should we transform the list to a list of pointers?  */
         /**
          * @brief getConstraints return a reference to the constraint list. Use the standard list methods
          * to add, remove, clear, ... the constraints list.
@@ -122,7 +126,7 @@
          *              task.getConstraints().push_back(new_constraint)
          * @return
          */
-        virtual std::list< BoundType >& getConstraints() { return _bounds; }
+        std::list< BoundType >& getConstraints() { return _bounds; }
 
         /** Gets the number of variables for the task.
             @return the number of columns of A */
@@ -130,12 +134,12 @@
 
         /** Gets the task size.
             @return the number of rows of A */
-        virtual const unsigned int getTaskSize() const { return _A.rows(); }
+        const unsigned int getTaskSize() const { return _A.rows(); }
 
         /** TODO: call update on all constraints! */
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
-        void update(const Vector_type x);
+        virtual void update(const Vector_type &x) = 0;
     };
  }
 

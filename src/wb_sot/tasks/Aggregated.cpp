@@ -16,7 +16,6 @@
 */
 
 #include <wb_sot/tasks/Aggregated.h>
-
 #include <yarp/math/Math.h>
 #include <assert.h>
 
@@ -25,24 +24,28 @@ using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list< TaskType* >& tasks,
                        const unsigned int x_size) :
-    Task(std::string("Aggregated"),x_size), _tasks(tasks)
+    Task(std::string("aggregated"),x_size), _tasks(tasks)
 {
     /* calling update to generate bounds */
-    update(yarp::sig::Vector(x_size, 0.0));
+    this->update(yarp::sig::Vector(x_size, 0.0));
+}
+
+Aggregated::~Aggregated()
+{
 }
 
 void Aggregated::update(const yarp::sig::Vector& x) {
-    this->constraints.clear();
-    _A.clear();
-    _b.clear();
+    this->getConstraints().clear();
+    _A.resize(0,x.size());
+    _b.resize(0);
     for(std::list< TaskType *>::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         (*i)->update(x);
         _A = yarp::math::pile(_A,(*i)->getA());
         _b = yarp::math::cat(_b, (*i)->getb());
-        for(std::list< BoundType* >::iterator j = (*i)->getConstraints();
-            j!= _tasks.end(); ++j) {
-            this->constraints.push_back(*j);
+        for(std::list< BoundType >::iterator j = (*i)->getConstraints().begin();
+            j!= (*i)->getConstraints().end(); ++j) {
+            this->getConstraints().push_back(*j);
         }
     }
 }

@@ -38,13 +38,10 @@ Postural::Postural(   const yarp::sig::Vector& x) :
     /* first update. Setting desired pose equal to the actual pose */
     this->setReference(x);
     this->update(x);
-
-    //_referenceInputPort.open("/wb_sot/tasks/velocity/Postural/" + _task_id + "/set_ref:i");
 }
 
 Postural::~Postural()
 {
-   //_referenceInputPort.close();
 }
 
 void Postural::update(const yarp::sig::Vector &x) {

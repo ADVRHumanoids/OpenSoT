@@ -41,6 +41,7 @@
              */
             Aggregated(const std::list<TaskType *> &tasks,
                        const unsigned int x_size);
+            ~Aggregated();
 
             void update(const yarp::sig::Vector &x);
         };
