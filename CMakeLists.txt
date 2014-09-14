@@ -82,6 +82,7 @@ ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/Aggregated.cpp
                    src/wb_sot/bounds/velocity/JointLimits.cpp
                    src/wb_sot/bounds/velocity/VelocityLimits.cpp
                    src/wb_sot/solvers/QPOases.cpp
+                   src/wb_sot/tasks/Aggregated.cpp
                    src/wb_sot/tasks/velocity/Cartesian.cpp
                    src/wb_sot/tasks/velocity/CoM.cpp
                    src/wb_sot/tasks/velocity/MinimumEffort.cpp
@@ -129,6 +130,10 @@ ADD_EXECUTABLE(testConvexHullVelB src/tests/wb_sot/bounds/velocity/TestConvexHul
 TARGET_LINK_LIBRARIES(testConvexHullVelB ${VelBLibs} ${PCL_LIBRARIES})
 add_dependencies(testConvexHullVelB GTest-ext wb_sot)
 
+ADD_EXECUTABLE(testAggregatedTask src/tests/wb_sot/tasks/TestAggregated.cpp)
+TARGET_LINK_LIBRARIES(testAggregatedTask ${VelBLibs} ${PCL_LIBRARIES})
+add_dependencies(testAggregatedTask GTest-ext wb_sot)
+
 ADD_EXECUTABLE(testCartesianTask src/tests/wb_sot/tasks/TestCartesian.cpp)
 TARGET_LINK_LIBRARIES(testCartesianTask ${VelBLibs} ${PCL_LIBRARIES})
 add_dependencies(testCartesianTask GTest-ext wb_sot)
@@ -161,6 +166,7 @@ add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
 add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelB)
 add_test(wb_sot_bounds_velocity_ConvexHull testConvexHullVelB)
 add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
+add_test(wb_sot_task_Aggregated testAggregatedTask)
 add_test(wb_sot_task_Cartesian testCartesianTask)
 add_test(wb_sot_task_CoM testCoMTask)
 add_test(wb_sot_task_MinimumEffort testMinimumEffortTask)

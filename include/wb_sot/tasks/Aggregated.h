@@ -15,16 +15,37 @@
  * Public License for more details
 */
 
-#include <wb_sot/task.h>
+#ifndef __TASKS_AGGREGATED_H__
+#define __TASKS_AGGREGATED_H__
+
+#include <wb_sot/Task.h>
+
+#include <yarp/sig/all.h>
 #include <list>
+
 
  namespace wb_sot {
     namespace tasks {
-        template <unsigned int x_size>
-        class Aggregated : public Task<yarp::sig::Matrix, yarp::Sig::Vector, x_size> {
+
+        class Aggregated: public Task<yarp::sig::Matrix, yarp::sig::Vector> {
+
         private:
+
+            std::list< TaskType* > _tasks;
+            unsigned int _aggregationPolicy;
+
         public:
-            Aggregated(std::list<Task< > >)
-        }
-    };
+            /**
+             * @brief Aggregated
+             * @param bounds a std::list of Tasks
+             */
+            Aggregated(const std::list<TaskType *> &tasks,
+                       const unsigned int x_size);
+
+            void update(const yarp::sig::Vector &x);
+        };
+
+    }
  }
+
+#endif

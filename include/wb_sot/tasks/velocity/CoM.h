@@ -32,7 +32,6 @@
             private:
                 iDynUtils _robot;
 
-                /** TODO add floating base support! */
                 /**
                  * @brief _support_foot_link_index in fixed base systems,
                  *                                 we want to specify the CoM wrt
