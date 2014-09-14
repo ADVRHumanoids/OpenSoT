@@ -15,7 +15,7 @@
  * Public License for more details
 */
 
-#include <wb_sot/bounds/velocity/Aggregated.h>
+#include <wb_sot/bounds/Aggregated.h>
 
 #include <yarp/math/Math.h>
 #include <assert.h>

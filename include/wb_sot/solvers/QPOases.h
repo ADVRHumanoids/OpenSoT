@@ -25,7 +25,7 @@
 #include <yarp/sig/all.h>
 #include <wb_sot/Task.h>
 #include <boost/shared_ptr.hpp>
-#include <wb_sot/bounds/velocity/Aggregated.h>
+#include <wb_sot/bounds/Aggregated.h>
 
 using namespace yarp::sig;
 

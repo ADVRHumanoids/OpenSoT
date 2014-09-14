@@ -5,7 +5,7 @@
 #include <wb_sot/tasks/velocity/Postural.h>
 #include <drc_shared/tests_utils.h>
 #include <yarp/math/Math.h>
-#include <wb_sot/bounds/velocity/Aggregated.h>
+#include <wb_sot/bounds/Aggregated.h>
 
 using namespace yarp::math;
 

@@ -76,7 +76,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
-ADD_LIBRARY(wb_sot src/wb_sot/bounds/velocity/Aggregated.cpp
+ADD_LIBRARY(wb_sot src/wb_sot/bounds/Aggregated.cpp
                    src/wb_sot/bounds/velocity/CoMVelocity.cpp
                    src/wb_sot/bounds/velocity/ConvexHull.cpp
                    src/wb_sot/bounds/velocity/JointLimits.cpp
@@ -110,7 +110,7 @@ SET(VelBLibs  wb_sot qpOASES ${drc_shared_LIBRARIES}
              icubmod ${ICUB_LIBRARIES}
              ${GTEST_BOTH_LIBRARIES})
 
-ADD_EXECUTABLE(testAggregatedVelB     src/tests/wb_sot/bounds/velocity/TestAggregated.cpp)
+ADD_EXECUTABLE(testAggregatedVelB     src/tests/wb_sot/bounds/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedVelB ${VelBLibs})
 add_dependencies(testAggregatedVelB GTest-ext wb_sot)
 
@@ -155,7 +155,7 @@ SET(SolverLibs wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
                ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
                icubmod ${ICUB_LIBRARIES}
                ${GTEST_BOTH_LIBRARIES})
-ADD_EXECUTABLE(testSolverQPOases src/tests/wb_sot/solvers/TestQPOasis.cpp)
+ADD_EXECUTABLE(testSolverQPOases src/tests/wb_sot/solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testSolverQPOases ${SolverLibs})
 add_dependencies(testSolverQPOases GTest-ext wb_sot qpOASES-ext)
 
