@@ -29,6 +29,8 @@ MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
     _W.resize(_x_size, _x_size);
     _W.eye();
 
+    _hessianType = HST_SEMIDEF;
+
     for(unsigned int i = 0; i < _x_size; ++i)
         _W(i,i) = 1.0 / (_robot.coman_iDyn3.getJointTorqueMax()[i]
                                         *

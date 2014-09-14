@@ -42,6 +42,7 @@ CoM::CoM(   const yarp::sig::Vector& x) :
     _W.resize(3,3);
     _W.eye();
 
+    _hessianType = HST_POSDEF;
 }
 
 CoM::~CoM()

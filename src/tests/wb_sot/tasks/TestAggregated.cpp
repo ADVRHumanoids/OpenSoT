@@ -68,7 +68,6 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     aggregated.setAlpha(K);
     EXPECT_DOUBLE_EQ(aggregated.getAlpha(), K);
 
-    /** TODO what about hessianType? **/
     EXPECT_TRUE(aggregated.getWeight() == yarp::sig::Matrix(q.size()*2, q.size()*2).eye());
 }
 

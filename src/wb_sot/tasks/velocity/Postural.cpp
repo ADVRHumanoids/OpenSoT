@@ -33,7 +33,7 @@ Postural::Postural(   const yarp::sig::Vector& x) :
     _A.resize(_x_size, _x_size);
     _A.eye();
 
-    _hessianType = HST_IDENTITY;
+    _hessianType = HST_POSDEF;
 
     /* first update. Setting desired pose equal to the actual pose */
     this->setReference(x);
