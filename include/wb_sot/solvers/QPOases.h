@@ -315,19 +315,17 @@ namespace wb_sot{
 
 
 
-    class QPOases: public Solver<Matrix, Vector>
+    class QPOases_sot: public Solver<Matrix, Vector>
     {
     public:
-        QPOases();
+        QPOases_sot();
 
-        ~QPOases(){}
+        ~QPOases_sot(){}
 
-        Vector solve();
-
-        unsigned int getNumberOfStacks(){return _qpProblems.size();}
+        bool solve(Vector& solution);
 
     protected:
-        vector< QPOasesTask > _qpProblems;
+
     };
 
     }

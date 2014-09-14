@@ -32,12 +32,11 @@ using namespace std;
         virtual ~Solver(){}
 
         /**
-         * @brief solve Method to run QP optimization
-         * @param stack_of_tasks a list of task. Each element represent a stack.
-         * @param stack_of_bounds a list of bounds. Each element represent a stack.
-         * @param solution
+         * @brief solve solve an Optimization problem
+         * @param solution the solution
+         * @return  true if solved/solvable
          */
-        virtual Vector_type solve() = 0;
+        virtual bool solve(Vector_type& solution) = 0;
 
 //        virtual unsigned int addTask() = 0;
 //        const int* getTasks();
