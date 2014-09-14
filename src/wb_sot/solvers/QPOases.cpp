@@ -1,5 +1,6 @@
 #include <wb_sot/solvers/QPOases.h>
 #include <yarp/math/Math.h>
+#include <wb_sot/bounds/BilateralConstraint.h>
 
 
 using namespace yarp::math;
@@ -324,13 +325,20 @@ bool QPOases_sot::expandProblem(unsigned int i)
     //I want to add all the constraints of the previous j tasks to task i
     for(unsigned int j = 0; j < i; ++j)
     {
-        //1. Get constraints of task j
+        //1. Prepare new constraints from task j
+            wb_sot::bounds::BilateralConstraint task_j_constraint
+                    (_stack_of_tasks[j]->getA(),
+                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i]->getSolution(),
+                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i]->getSolution());
+        //2. Get constraints of task j
+            std::list< wb_sot::bounds::velocity::Aggregated::BoundType > constraints_list =
+                _stack_of_tasks[j]->getConstraints().push_back(task_j_constraint);
             wb_sot::bounds::velocity::Aggregated
-                    constraints_task_j(_stack_of_tasks[j]->getConstraints(),
-                                       _stack_of_tasks[j]->getXSize());
-        //2. Prepare new constraints from task j
-
+                new_constraints_for_task_i(constraints_list, _stack_of_tasks[j]->getXSize());
         //3. Add new constraints to problem i
+
+
+
     }
 }
 
