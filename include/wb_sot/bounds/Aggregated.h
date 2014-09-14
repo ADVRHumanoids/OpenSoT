@@ -15,8 +15,8 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_VELOCITY_AGGREGATED_H__
-#define __BOUNDS_VELOCITY_AGGREGATED_H__
+#ifndef __BOUNDS_AGGREGATED_H__
+#define __BOUNDS_AGGREGATED_H__
 
 #include <wb_sot/Bounds.h>
 
@@ -30,8 +30,6 @@
 
             class Aggregated: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
             public:
-                typedef Bounds< yarp::sig::Matrix, yarp::sig::Vector> BoundType;
-
                 enum AggregationPolicy {
                     /** transform equalities Ax = b to inequalities b <= Ax <= b */
                     EQUALITIES_TO_INEQUALITIES = 0x001,

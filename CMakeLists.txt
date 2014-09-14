@@ -77,6 +77,7 @@ file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
 ADD_LIBRARY(wb_sot src/wb_sot/bounds/Aggregated.cpp
+                   src/wb_sot/bounds/BilateralConstraint.cpp
                    src/wb_sot/bounds/velocity/CoMVelocity.cpp
                    src/wb_sot/bounds/velocity/ConvexHull.cpp
                    src/wb_sot/bounds/velocity/JointLimits.cpp

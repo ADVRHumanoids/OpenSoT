@@ -27,6 +27,10 @@
  namespace wb_sot {
     namespace tasks {
 
+        /**
+         * @brief The Aggregated class builds a new Task by piling up simpler tasks
+         *        so that A = [W1*A1; W2*A2], b=[W1*alpha1*b1;W2*alpha2*b2]
+         */
         class Aggregated: public Task<yarp::sig::Matrix, yarp::sig::Vector> {
 
         private:

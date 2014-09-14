@@ -28,6 +28,7 @@ Aggregated::Aggregated(const std::list< TaskType* >& tasks,
 {
     /* calling update to generate bounds */
     this->update(yarp::sig::Vector(x_size, 0.0));
+    _W.resize(_A.rows(),_A.rows()); _W.eye();
 }
 
 Aggregated::~Aggregated()
@@ -40,11 +41,12 @@ void Aggregated::update(const yarp::sig::Vector& x) {
     _b.resize(0);
     for(std::list< TaskType *>::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
-        (*i)->update(x);
-        _A = yarp::math::pile(_A,(*i)->getA());
-        _b = yarp::math::cat(_b, (*i)->getb());
-        for(std::list< BoundType >::iterator j = (*i)->getConstraints().begin();
-            j!= (*i)->getConstraints().end(); ++j) {
+        TaskType *t = *i;
+        t->update(x);
+        _A = yarp::math::pile(_A,t->getW()*t->getA());
+        _b = yarp::math::cat(_b, t->getW()*t->getalpha()*t->getb());
+        for(std::list< BoundType >::iterator j = t->getConstraints().begin();
+            j!= t->getConstraints().end(); ++j) {
             this->getConstraints().push_back(*j);
         }
     }

@@ -30,6 +30,8 @@
      * 3. unilateral
      */
     class Bounds {
+    public:
+        typedef Bounds< Matrix_type, Vector_type > BoundType;
     protected:
         /**
          * @brief _x_size size of the controlled variables
@@ -86,8 +88,6 @@
         Vector_type _bUpperBound;
 
     public:
-        typedef Bounds< Matrix_type, Vector_type > BoundType;
-
         Bounds(const unsigned int x_size) : _x_size(x_size) {}
         virtual ~Bounds() {}
 
