@@ -325,7 +325,9 @@ bool QPOases_sot::expandProblem(unsigned int i)
     for(unsigned int j = 0; j < i; ++j)
     {
         //1. Get constraints of task j
-
+            wb_sot::bounds::velocity::Aggregated
+                    constraints_task_j(_stack_of_tasks[j]->getConstraints(),
+                                       _stack_of_tasks[j]->getXSize());
         //2. Prepare new constraints from task j
 
         //3. Add new constraints to problem i
