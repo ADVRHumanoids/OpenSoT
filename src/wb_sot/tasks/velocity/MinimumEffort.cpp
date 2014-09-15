@@ -42,7 +42,7 @@ MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
     _A.eye();
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->update(x);
+    this->_update(x);
 }
 
 MinimumEffort::~MinimumEffort()
@@ -50,7 +50,7 @@ MinimumEffort::~MinimumEffort()
    //_referenceInputPort.close();
 }
 
-void MinimumEffort::update(const yarp::sig::Vector &x) {
+void MinimumEffort::_update(const yarp::sig::Vector &x) {
 
     _x = x;
     /************************* COMPUTING TASK *****************************/

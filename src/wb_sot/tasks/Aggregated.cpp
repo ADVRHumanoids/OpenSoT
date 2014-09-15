@@ -27,7 +27,7 @@ Aggregated::Aggregated(const std::list< TaskType* >& tasks,
     Task(std::string("aggregated"),x_size), _tasks(tasks)
 {
     /* calling update to generate bounds */
-    this->update(yarp::sig::Vector(x_size, 0.0));
+    this->_update(yarp::sig::Vector(x_size, 0.0));
     _W.resize(_A.rows(),_A.rows()); _W.eye();
 
     _hessianType = HST_SEMIDEF;
@@ -37,7 +37,7 @@ Aggregated::~Aggregated()
 {
 }
 
-void Aggregated::update(const yarp::sig::Vector& x) {
+void Aggregated::_update(const yarp::sig::Vector& x) {
     this->getConstraints().clear();
     _A.resize(0,x.size());
     _b.resize(0);

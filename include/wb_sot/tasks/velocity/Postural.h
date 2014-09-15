@@ -41,7 +41,7 @@
 
                 ~Postural();
 
-                void update(const yarp::sig::Vector& x);
+                void _update(const yarp::sig::Vector& x);
 
                 void setReference(const yarp::sig::Vector& x_desired);
             };

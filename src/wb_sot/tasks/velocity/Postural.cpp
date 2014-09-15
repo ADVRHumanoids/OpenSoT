@@ -37,14 +37,14 @@ Postural::Postural(   const yarp::sig::Vector& x) :
 
     /* first update. Setting desired pose equal to the actual pose */
     this->setReference(x);
-    this->update(x);
+    this->_update(x);
 }
 
 Postural::~Postural()
 {
 }
 
-void Postural::update(const yarp::sig::Vector &x) {
+void Postural::_update(const yarp::sig::Vector &x) {
     _x = x;
 
     /************************* COMPUTING TASK *****************************/

@@ -45,9 +45,8 @@
     class Task {
 
     public:
-        typedef Bounds< Matrix_type, Vector_type > BoundType;
         typedef Task< Matrix_type, Vector_type > TaskType;
-
+        typedef Bounds< Matrix_type, Vector_type > BoundType;
     protected:
 
         /**
@@ -136,10 +135,16 @@
             @return the number of rows of A */
         const unsigned int getTaskSize() const { return _A.rows(); }
 
-        /** TODO: call update on all constraints! */
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
-        virtual void update(const Vector_type &x) = 0;
+        void update(const Vector_type &x) {
+            for(typename std::list< BoundType >::iterator i = _bounds.begin();
+                i != _bounds.end(); ++i) i->update(x);
+            this->_update(x); }
+
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
+            @param x variable state at the current step (input) */
+        virtual void _update(const Vector_type &x) = 0;
     };
  }
 

@@ -39,7 +39,7 @@ Cartesian::Cartesian(std::string task_id,
     assert(this->_distal_link_index > 0);
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->update(x);
+    this->_update(x);
 
     _W.resize(_A.rows(), _A.rows());
     _W.eye();
@@ -51,7 +51,7 @@ Cartesian::~Cartesian()
 {
 }
 
-void Cartesian::update(const yarp::sig::Vector &x) {
+void Cartesian::_update(const yarp::sig::Vector &x) {
 
     /************************* COMPUTING TASK *****************************/
 

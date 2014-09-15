@@ -32,7 +32,7 @@ CoM::CoM(   const yarp::sig::Vector& x) :
     _swing_foot_link_index = _robot.right_leg.index;
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->update(x);
+    this->_update(x);
 
 
     /* initializing to zero error */
@@ -49,7 +49,7 @@ CoM::~CoM()
 {
 }
 
-void CoM::update(const yarp::sig::Vector &x) {
+void CoM::_update(const yarp::sig::Vector &x) {
     _robot.updateiDyn3Model(x);
 
     /************************* COMPUTING TASK *****************************/

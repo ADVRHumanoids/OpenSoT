@@ -47,7 +47,7 @@
                        const unsigned int x_size);
             ~Aggregated();
 
-            void update(const yarp::sig::Vector &x);
+            void _update(const yarp::sig::Vector &x);
         };
 
     }

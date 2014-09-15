@@ -89,7 +89,7 @@ TEST_F(testCartesianTask, testCartesianTask_)
     for(unsigned int i = 0; i < 50; ++i)
     {
         _robot.updateiDyn3Model(q_whole);
-        cartesian.update(q_whole);
+        cartesian._update(q_whole);
         q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getAlpha()*cartesian.getb();
         _robot.updateiDyn3Model(q_whole);
         x_now = _robot.coman_iDyn3.getPosition(0,
