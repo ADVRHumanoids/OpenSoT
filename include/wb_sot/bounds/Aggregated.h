@@ -26,40 +26,37 @@
 
  namespace wb_sot {
     namespace bounds {
-        namespace velocity {
-
-            class Aggregated: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
-            public:
-                enum AggregationPolicy {
-                    /** transform equalities Ax = b to inequalities b <= Ax <= b */
-                    EQUALITIES_TO_INEQUALITIES = 0x001,
-                    /** if enabled, unilateral bounds will be converted to unilateral:
-                     *      x <= u becomes -inf <= x <= u, l <= x becomes l <= x <= inf
-                     *  if not enabled, bilateral bounds will be converted to unilateral:
-                     *      l <= x <= u becomes x <= u && -x <= -l
-                     */
-                    UNILATERAL_TO_BILATERAL = 0x100
-                };
-
-            private:
-
-                std::list< BoundType> _bounds;
-                unsigned int _aggregationPolicy;
-
-            public:
-                /**
-                 * @brief Aggregated
-                 * @param bounds a std::list of Bounds
+        class Aggregated: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
+        public:
+            enum AggregationPolicy {
+                /** transform equalities Ax = b to inequalities b <= Ax <= b */
+                EQUALITIES_TO_INEQUALITIES = 0x001,
+                /** if enabled, unilateral bounds will be converted to unilateral:
+                 *      x <= u becomes -inf <= x <= u, l <= x becomes l <= x <= inf
+                 *  if not enabled, bilateral bounds will be converted to unilateral:
+                 *      l <= x <= u becomes x <= u && -x <= -l
                  */
-                Aggregated(const std::list<BoundType> &bounds,
-                           const unsigned int x_size,
-                           const unsigned int aggregationPolicy =
-                                EQUALITIES_TO_INEQUALITIES |
-                                UNILATERAL_TO_BILATERAL);
-
-                void update(const yarp::sig::Vector &x);
+                UNILATERAL_TO_BILATERAL = 0x100
             };
-        }
+
+        private:
+
+            std::list< BoundType> _bounds;
+            unsigned int _aggregationPolicy;
+
+        public:
+            /**
+             * @brief Aggregated
+             * @param bounds a std::list of Bounds
+             */
+            Aggregated(const std::list<BoundType> &bounds,
+                       const unsigned int x_size,
+                       const unsigned int aggregationPolicy =
+                            EQUALITIES_TO_INEQUALITIES |
+                            UNILATERAL_TO_BILATERAL);
+
+            void update(const yarp::sig::Vector &x);
+        };
     }
  }
 

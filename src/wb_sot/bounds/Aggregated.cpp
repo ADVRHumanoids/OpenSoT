@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <limits>
 
-using namespace wb_sot::bounds::velocity;
+using namespace wb_sot::bounds;
 using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<BoundType> &bounds,

@@ -259,7 +259,7 @@ bool QPOasesProblem::solve()
 /// QPOasesTask ///
 QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
     QPOasesProblem(task->getXSize(),
-                   wb_sot::bounds::velocity::Aggregated(task->getConstraints(), task->getXSize()).getAineq().rows(),
+                   wb_sot::bounds::Aggregated(task->getConstraints(), task->getXSize()).getAineq().rows(),
                    (qpOASES::HessianType)task->getHessianAtype()),
 
     _task(task)
@@ -280,7 +280,7 @@ void QPOasesTask::prepareData()
     _g = -1.0 * _task->getAlpha() * _task->getA().transposed() * _task->getWeight() * _task->getb();
 
     /* Compute constraints */
-    using namespace  wb_sot::bounds::velocity;
+    using namespace  wb_sot::bounds;
     Aggregated constraints(_task->getConstraints(), _task->getXSize());
     _A = constraints.getAineq();
     _lA = constraints.getbLowerBound();
@@ -330,10 +330,10 @@ bool QPOases_sot::expandProblem(unsigned int i)
                      _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution(),
                      _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution());
         //2. Get constraints & bounds of task j
-            std::list< wb_sot::bounds::velocity::Aggregated::BoundType > constraints_list =
+            std::list< wb_sot::bounds::Aggregated::BoundType > constraints_list =
                 _stack_of_tasks[j]->getConstraints();
             constraints_list.push_back(task_j_constraint);
-            wb_sot::bounds::velocity::Aggregated
+            wb_sot::bounds::Aggregated
                 new_constraints_for_task_i(constraints_list, _stack_of_tasks[j]->getXSize());
         //3. Add new constraints & bounds to problem i
             //3.1 ADD constraints to problem i

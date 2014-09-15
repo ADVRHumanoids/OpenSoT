@@ -94,9 +94,9 @@ add_custom_target(  wb_sot_test ALL
                     COMMAND ${CMAKE_CTEST_COMMAND}
                     DEPENDS wb_sot
                     testCartesianTask
-                    testCoMTask
-                    testMinimumEffortTask
-                    testPosturalTask)
+                    TestComVelocityTask
+                    testMinimumEffortVelocityTask
+                    testPosturalVelocityTask)
 
 ADD_EXECUTABLE(sot_VelKinCon src/main.cpp src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/task_solver2.cpp ${sot_INCLUDES} ${sot_SCRIPTS})
 ADD_EXECUTABLE(createMonitorScope src/tests/createMonitorScope.cpp)
@@ -105,51 +105,51 @@ ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/test
 ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # gTests for Velocity Bounds
-SET(VelBLibs  wb_sot qpOASES ${drc_shared_LIBRARIES}
+SET(VelocityBoundsLibs  wb_sot qpOASES ${drc_shared_LIBRARIES}
              ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
              ${iDynTree_LIBRARIES} ${YARP_LIBRARIES}
              icubmod ${ICUB_LIBRARIES}
              ${GTEST_BOTH_LIBRARIES})
 
-ADD_EXECUTABLE(testAggregatedVelB     src/tests/wb_sot/bounds/TestAggregated.cpp)
-TARGET_LINK_LIBRARIES(testAggregatedVelB ${VelBLibs})
-add_dependencies(testAggregatedVelB GTest-ext wb_sot)
+ADD_EXECUTABLE(testAggregatedVelocityBounds     src/tests/wb_sot/bounds/TestAggregated.cpp)
+TARGET_LINK_LIBRARIES(testAggregatedVelocityBounds ${VelocityBoundsLibs})
+add_dependencies(testAggregatedVelocityBounds GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testJointLimitsVelB    src/tests/wb_sot/bounds/velocity/TestJointLimits.cpp)
-TARGET_LINK_LIBRARIES(testJointLimitsVelB ${VelBLibs})
-add_dependencies(testJointLimitsVelB GTest-ext wb_sot)
+ADD_EXECUTABLE(testJointLimitsVelocityBounds    src/tests/wb_sot/bounds/velocity/TestJointLimits.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${VelocityBoundsLibs})
+add_dependencies(testJointLimitsVelocityBounds GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testVelocityLimitsVelB src/tests/wb_sot/bounds/velocity/TestVelocityLimits.cpp)
-TARGET_LINK_LIBRARIES(testVelocityLimitsVelB ${VelBLibs})
-add_dependencies(testVelocityLimitsVelB GTest-ext wb_sot)
+ADD_EXECUTABLE(testVelocityLimitsVelocityBounds src/tests/wb_sot/bounds/velocity/TestVelocityLimits.cpp)
+TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${VelocityBoundsLibs})
+add_dependencies(testVelocityLimitsVelocityBounds GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testCoMVelocityVelB src/tests/wb_sot/bounds/velocity/TestCoMVelocity.cpp)
-TARGET_LINK_LIBRARIES(testCoMVelocityVelB ${VelBLibs})
-add_dependencies(testCoMVelocityVelB GTest-ext wb_sot)
+ADD_EXECUTABLE(testCoMVelocityVelocityBounds src/tests/wb_sot/bounds/velocity/TestCoMVelocity.cpp)
+TARGET_LINK_LIBRARIES(testCoMVelocityVelocityBounds ${VelocityBoundsLibs})
+add_dependencies(testCoMVelocityVelocityBounds GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testConvexHullVelB src/tests/wb_sot/bounds/velocity/TestConvexHull.cpp)
-TARGET_LINK_LIBRARIES(testConvexHullVelB ${VelBLibs} ${PCL_LIBRARIES})
-add_dependencies(testConvexHullVelB GTest-ext wb_sot)
+ADD_EXECUTABLE(testConvexHullVelocityBounds src/tests/wb_sot/bounds/velocity/TestConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testConvexHullVelocityBounds ${VelocityBoundsLibs} ${PCL_LIBRARIES})
+add_dependencies(testConvexHullVelocityBounds GTest-ext wb_sot)
 
 ADD_EXECUTABLE(testAggregatedTask src/tests/wb_sot/tasks/TestAggregated.cpp)
-TARGET_LINK_LIBRARIES(testAggregatedTask ${VelBLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testAggregatedTask ${VelocityBoundsLibs} ${PCL_LIBRARIES})
 add_dependencies(testAggregatedTask GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testCartesianTask src/tests/wb_sot/tasks/TestCartesian.cpp)
-TARGET_LINK_LIBRARIES(testCartesianTask ${VelBLibs} ${PCL_LIBRARIES})
+ADD_EXECUTABLE(testCartesianTask src/tests/wb_sot/tasks/velocity/TestCartesian.cpp)
+TARGET_LINK_LIBRARIES(testCartesianTask ${VelocityBoundsLibs} ${PCL_LIBRARIES})
 add_dependencies(testCartesianTask GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testCoMTask src/tests/wb_sot/tasks/TestCoM.cpp)
-TARGET_LINK_LIBRARIES(testCoMTask ${VelBLibs} ${PCL_LIBRARIES})
-add_dependencies(testCoMTask GTest-ext wb_sot)
+ADD_EXECUTABLE(TestComVelocityTask src/tests/wb_sot/tasks/velocity/TestCoM.cpp)
+TARGET_LINK_LIBRARIES(TestComVelocityTask ${VelocityBoundsLibs} ${PCL_LIBRARIES})
+add_dependencies(TestComVelocityTask GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testMinimumEffortTask src/tests/wb_sot/tasks/TestMinimumEffort.cpp)
-TARGET_LINK_LIBRARIES(testMinimumEffortTask ${VelBLibs} ${PCL_LIBRARIES})
-add_dependencies(testMinimumEffortTask GTest-ext wb_sot)
+ADD_EXECUTABLE(testMinimumEffortVelocityTask src/tests/wb_sot/tasks/velocity/TestMinimumEffort.cpp)
+TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${VelocityBoundsLibs} ${PCL_LIBRARIES})
+add_dependencies(testMinimumEffortVelocityTask GTest-ext wb_sot)
 
-ADD_EXECUTABLE(testPosturalTask src/tests/wb_sot/tasks/TestPostural.cpp)
-TARGET_LINK_LIBRARIES(testPosturalTask ${VelBLibs} ${PCL_LIBRARIES})
-add_dependencies(testPosturalTask GTest-ext wb_sot)
+ADD_EXECUTABLE(testPosturalVelocityTask src/tests/wb_sot/tasks/velocity/TestPostural.cpp)
+TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${VelocityBoundsLibs} ${PCL_LIBRARIES})
+add_dependencies(testPosturalVelocityTask GTest-ext wb_sot)
 
 SET(SolverLibs wb_sot qpOASES ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
@@ -161,17 +161,17 @@ TARGET_LINK_LIBRARIES(testSolverQPOases ${SolverLibs})
 add_dependencies(testSolverQPOases GTest-ext wb_sot qpOASES-ext)
 
 
-add_test(wb_sot_bounds_velocity_Aggregated testAggregatedVelB)
-add_test(wb_sot_bounds_velocity_JointLimits  testJointLimitsVelB)
-add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelB)
-add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelB)
-add_test(wb_sot_bounds_velocity_ConvexHull testConvexHullVelB)
+add_test(wb_sot_bounds_Aggregated testAggregatedVelocityBounds)
+add_test(wb_sot_bounds_velocity_JointLimits  testJointLimitsVelocityBounds)
+add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelocityBounds)
+add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelocityBounds)
+add_test(wb_sot_bounds_velocity_ConvexHull testConvexHullVelocityBounds)
 add_test(wb_sot_bounds_solvers_qpOases testSolverQPOases)
 add_test(wb_sot_task_Aggregated testAggregatedTask)
-add_test(wb_sot_task_Cartesian testCartesianTask)
-add_test(wb_sot_task_CoM testCoMTask)
-add_test(wb_sot_task_MinimumEffort testMinimumEffortTask)
-add_test(wb_sot_task_Postural testPosturalTask)
+add_test(wb_sot_task_velocity_Cartesian testCartesianTask)
+add_test(wb_sot_task_velocity_CoM TestComVelocityTask)
+add_test(wb_sot_task_velocity_MinimumEffort testMinimumEffortVelocityTask)
+add_test(wb_sot_task_velocity_Postural testPosturalVelocityTask)
 
 # we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
 add_dependencies(sot_VelKinCon qpOASES-ext)
