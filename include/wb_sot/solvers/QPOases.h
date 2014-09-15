@@ -347,6 +347,11 @@ namespace wb_sot{
         ~QPOases_sot(){}
 
         bool solve(Vector& solution);
+        unsigned int getNumberOfTasks()
+        {
+            assert(_qp_stack_of_tasks.size() == _stack_of_tasks.size());
+            return _qp_stack_of_tasks.size();
+        }
 
     protected:
         vector <boost::shared_ptr< Task<Matrix, Vector> >> _stack_of_tasks;

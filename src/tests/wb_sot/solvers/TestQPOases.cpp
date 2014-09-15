@@ -6,6 +6,8 @@
 #include <drc_shared/tests_utils.h>
 #include <yarp/math/Math.h>
 #include <wb_sot/bounds/Aggregated.h>
+#include <wb_sot/tasks/velocity/Postural.h>
+#include <wb_sot/bounds/velocity/JointLimits.h>
 
 using namespace yarp::math;
 
@@ -93,7 +95,28 @@ protected:
     virtual void TearDown() {
 
     }
+};
 
+class testQPOases_sot: public ::testing::Test
+{
+protected:
+
+    testQPOases_sot()
+    {
+
+    }
+
+    virtual ~testQPOases_sot() {
+
+    }
+
+    virtual void SetUp() {
+
+    }
+
+    virtual void TearDown() {
+
+    }
 };
 
 /**
@@ -271,6 +294,39 @@ TEST_F(testQPOasesTask, testQPOasesTask)
 
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_DOUBLE_EQ(q[i], q_ref[i]);
+
+}
+
+TEST_F(testQPOases_sot, testContructor1Problem)
+{
+    iDynUtils idynutils;
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q_ref(q.size(), M_PI);
+    idynutils.updateiDyn3Model(q, true);
+
+    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
+            new wb_sot::tasks::velocity::Postural(q));
+    postural_task->setReference(q_ref);
+    //wb_sot::bounds::velocity::JointLimits joint_limits(idynutils.coman_iDyn3, q.size());
+    //postural_task->getConstraints().push_back(joint_limits);
+    postural_task->setAlpha(0.1);
+
+    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
+    stack_of_tasks.push_back(postural_task);
+    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+
+    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
+    yarp::sig::Vector dq(q.size(), 0.0);
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        postural_task->update(q);
+        EXPECT_TRUE(sot.solve(dq));
+        q += dq;
+    }
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-4);
+
 
 }
 

@@ -314,10 +314,9 @@ bool QPOases_sot::prepareSoT()
         {
             _qp_stack_of_tasks.push_back(QPOasesTask(_stack_of_tasks[i]));
             expandProblem(i);
-            //so cazzi...
         }
-
     }
+    return true;
 }
 
 bool QPOases_sot::expandProblem(unsigned int i)
@@ -328,23 +327,43 @@ bool QPOases_sot::expandProblem(unsigned int i)
         //1. Prepare new constraints from task j
             wb_sot::bounds::BilateralConstraint task_j_constraint
                     (_stack_of_tasks[j]->getA(),
-                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i]->getSolution(),
-                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i]->getSolution());
+                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution(),
+                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution());
         //2. Get constraints & bounds of task j
             std::list< wb_sot::bounds::velocity::Aggregated::BoundType > constraints_list =
-                _stack_of_tasks[j]->getConstraints().push_back(task_j_constraint);
+                _stack_of_tasks[j]->getConstraints();
+            constraints_list.push_back(task_j_constraint);
             wb_sot::bounds::velocity::Aggregated
                 new_constraints_for_task_i(constraints_list, _stack_of_tasks[j]->getXSize());
         //3. Add new constraints & bounds to problem i
             //3.1 ADD constraints to problem i
-
+                _qp_stack_of_tasks[i].addConstraints(
+                            new_constraints_for_task_i.getAineq(),
+                            new_constraints_for_task_i.getbLowerBound(),
+                            new_constraints_for_task_i.getbUpperBound());
             //3.2 ADD bounds to problem i
-
-
+                _qp_stack_of_tasks[i].addBounds(
+                            new_constraints_for_task_i.getLowerBound(),
+                            new_constraints_for_task_i.getUpperBound());
     }
+    return true;
 }
 
 bool QPOases_sot::solve(Vector &solution)
 {
+    bool solved_task_i = false;
+    for(unsigned int i = 0; i < _stack_of_tasks.size(); ++i)
+    {
+        if(i == 0)
+        {
+           solved_task_i =  _qp_stack_of_tasks[i].solve();
+           solution = _qp_stack_of_tasks[i].getSolution();
+        }
+        else
+        {
+            //...so cazzi...
+        }
 
+    }
+    return solved_task_i;
 }
