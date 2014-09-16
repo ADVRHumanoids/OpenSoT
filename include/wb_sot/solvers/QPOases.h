@@ -323,6 +323,11 @@ namespace wb_sot{
          */
         bool solve();
 
+        /**
+         * @brief printProblemInformation couts some information about the problem
+         */
+        void printProblemInformation(unsigned int i = 0);
+
     protected:
         /**
          * @brief _task pointer to task to optimize

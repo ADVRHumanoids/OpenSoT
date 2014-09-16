@@ -148,6 +148,12 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
             @param x variable state at the current step (input) */
         virtual void _update(const Vector_type &x) = 0;
+
+        /**
+         * @brief getTaskID return the task id
+         * @return a string with the task id
+         */
+        std::string getTaskID(){ return _task_id; };
     };
  }
 

@@ -1,7 +1,8 @@
 #include <wb_sot/solvers/QPOases.h>
 #include <yarp/math/Math.h>
 #include <wb_sot/bounds/BilateralConstraint.h>
-
+#define GREEN "\033[0;32m"
+#define DEFAULT "\033[0m"
 
 using namespace yarp::math;
 
@@ -297,6 +298,15 @@ bool QPOasesTask::solve()
     return this->QPOasesProblem::solve();
 }
 
+void QPOasesTask::printProblemInformation(unsigned int i)
+{
+    std::cout<<std::endl;
+    std::cout<<GREEN<<"PROBLEM "<<i<<" ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
+    std::cout<<GREEN<<"# OF CONSTRAINTS: "<<DEFAULT<<_task->getConstraints().size()<<std::endl;
+    std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_task->getXSize()<<std::endl;
+    std::cout<<std::endl;
+}
+
 /// QPOases_sot ///
 QPOases_sot::QPOases_sot(vector<boost::shared_ptr<Task<Matrix, Vector> > > &stack_of_tasks):
 _stack_of_tasks(stack_of_tasks)
@@ -315,6 +325,7 @@ bool QPOases_sot::prepareSoT()
             _qp_stack_of_tasks.push_back(QPOasesTask(_stack_of_tasks[i]));
             expandProblem(i);
         }
+        _qp_stack_of_tasks[i].printProblemInformation(i);
     }
     return true;
 }

@@ -307,8 +307,8 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
             new wb_sot::tasks::velocity::Postural(q));
     postural_task->setReference(q_ref);
-    //wb_sot::bounds::velocity::JointLimits joint_limits(idynutils.coman_iDyn3, q.size());
-    //postural_task->getConstraints().push_back(joint_limits);
+    wb_sot::bounds::velocity::JointLimits joint_limits(idynutils.coman_iDyn3, q.size());
+    postural_task->getConstraints().push_back(joint_limits);
     postural_task->setAlpha(0.1);
 
     std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
@@ -325,7 +325,21 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-4);
+    {
+        if(q_ref[i] >= idynutils.coman_iDyn3.getJointBoundMax()[i])
+        {
+            std::cout<<GREEN<<"On the Upper Bound!"<<DEFAULT<<std::endl;
+            EXPECT_NEAR( q[i] + dq[i], idynutils.coman_iDyn3.getJointBoundMax()[i], 1E-4);
+        }
+        else if(q_ref[i] <= idynutils.coman_iDyn3.getJointBoundMin()[i])
+        {
+            std::cout<<GREEN<<"On the Lower Bound!"<<DEFAULT<<std::endl;
+            EXPECT_NEAR( q[i] + dq[i], idynutils.coman_iDyn3.getJointBoundMin()[i], 1E-4);
+        }
+        else
+            EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-4);
+
+    }
 
 
 }
