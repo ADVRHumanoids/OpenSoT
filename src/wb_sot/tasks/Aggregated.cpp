@@ -22,7 +22,7 @@
 using namespace wb_sot::tasks;
 using namespace yarp::math;
 
-Aggregated::Aggregated(const std::list< TaskType* >& tasks,
+Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
                        const unsigned int x_size) :
     Task(std::string("aggregated"),x_size), _tasks(tasks)
 {
@@ -41,13 +41,13 @@ void Aggregated::_update(const yarp::sig::Vector& x) {
     this->getConstraints().clear();
     _A.resize(0,x.size());
     _b.resize(0);
-    for(std::list< TaskType *>::iterator i = _tasks.begin();
+    for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
-        TaskType *t = *i;
+        boost::shared_ptr<TaskType> t = *i;
         t->update(x);
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
         _b = yarp::math::cat(_b, t->getWeight()*t->getAlpha()*t->getb());
-        for(std::list< BoundType >::iterator j = t->getConstraints().begin();
+        for(std::list< boost::shared_ptr<BoundType> >::iterator j = t->getConstraints().begin();
             j!= t->getConstraints().end(); ++j) {
             this->getConstraints().push_back(*j);
         }

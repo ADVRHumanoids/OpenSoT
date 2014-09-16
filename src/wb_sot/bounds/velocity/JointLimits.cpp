@@ -21,13 +21,19 @@ using namespace yarp::math;
 
 using namespace wb_sot::bounds::velocity;
 
-JointLimits::JointLimits(   const iCub::iDynTree::DynTree& robot,
-                            const unsigned int x_size,
+JointLimits::JointLimits(   const yarp::sig::Vector& q,
+                            const yarp::sig::Vector& jointBoundMax,
+                            const yarp::sig::Vector& jointBoundMin,
                             const double boundScaling) :
-    Bounds(x_size), _robot(robot), _boundScaling(boundScaling) {
+    Bounds(q.size()),
+    _jointLimitsMax(jointBoundMax),
+    _jointLimitsMin(jointBoundMin),
+    _boundScaling(boundScaling) {
 
+    assert(q.size() == _jointLimitsMax.size());
+    assert(q.size() == _jointLimitsMin.size());
     /* calling update to generate bounds */
-    update(_robot.getAng());
+    update(q);
 }
 
 void JointLimits::update(const yarp::sig::Vector& x)
@@ -35,8 +41,8 @@ void JointLimits::update(const yarp::sig::Vector& x)
 
 /************************ COMPUTING BOUNDS ****************************/
 
-    _upperBound = (_robot.getJointBoundMax() - x)*_boundScaling;
-    _lowerBound = (_robot.getJointBoundMin() - x)*_boundScaling;
+    _upperBound = ( _jointLimitsMax - x)*_boundScaling;
+    _lowerBound = ( _jointLimitsMin - x)*_boundScaling;
 
 /**********************************************************************/
 

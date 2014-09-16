@@ -1,6 +1,7 @@
 #include <drc_shared/tests_utils.h>
 #include <gtest/gtest.h>
 #include <wb_sot/tasks/velocity/Postural.h>
+#include <wb_sot/bounds/velocity/JointLimits.h>
 #include <yarp/math/Math.h>
 
 using namespace yarp::math;
@@ -61,6 +62,47 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_NEAR(q[i], q_ref[i], 1E-3);
+}
+
+TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
+{
+    iDynUtils idynutils;
+    using namespace wb_sot::tasks::velocity;
+    using namespace wb_sot::bounds::velocity;
+
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q_next(q);
+
+    for(unsigned int i = 0; i < q.size(); ++i) {
+        q[i] = tests_utils::getRandomAngle();
+        q_next[i] = tests_utils::getRandomAngle();
+        assert((q[i]!=q_next[i]));
+    }
+    idynutils.updateiDyn3Model(q);
+
+    boost::shared_ptr< Postural::TaskType > postural( new Postural(q) );
+    boost::shared_ptr< Postural::BoundType > bound(
+        new JointLimits(q,
+                        idynutils.coman_iDyn3.getJointBoundMax(),
+                        idynutils.coman_iDyn3.getJointBoundMin())
+    );
+
+    postural->getConstraints().push_back( bound );
+
+    yarp::sig::Vector old_b = postural->getb();
+    yarp::sig::Vector old_LowerBound = bound->getLowerBound();
+    yarp::sig::Vector old_UpperBound = bound->getUpperBound();
+    idynutils.updateiDyn3Model(q_next);
+    postural->update(q_next);
+    bound->update(q_next);
+    yarp::sig::Vector new_b = postural->getb();
+    yarp::sig::Vector new_LowerBound = bound->getLowerBound();
+    yarp::sig::Vector new_UpperBound = bound->getUpperBound();
+
+    EXPECT_FALSE(old_b == new_b);
+    EXPECT_FALSE(old_LowerBound == new_LowerBound);
+    EXPECT_FALSE(old_UpperBound == new_UpperBound);
+
 }
 
 }

@@ -21,6 +21,7 @@
 #include <wb_sot/Task.h>
 
 #include <yarp/sig/all.h>
+#include <boost/shared_ptr.hpp>
 #include <list>
 
 
@@ -35,7 +36,7 @@
 
         private:
 
-            std::list< TaskType* > _tasks;
+            std::list< TaskPointer > _tasks;
             unsigned int _aggregationPolicy;
 
         public:
@@ -43,7 +44,7 @@
              * @brief Aggregated
              * @param bounds a std::list of Tasks
              */
-            Aggregated(const std::list<TaskType *> &tasks,
+            Aggregated(const std::list< TaskPointer > &tasks,
                        const unsigned int x_size);
             ~Aggregated();
 

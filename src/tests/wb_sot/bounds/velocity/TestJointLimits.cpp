@@ -20,12 +20,14 @@ class testJointLimits : public ::testing::Test {
 
   testJointLimits() {
     // You can do set-up work for each test here.
-      jointLimits = new JointLimits(coman.coman_iDyn3,
-                                    coman.coman_iDyn3.getNrOfDOFs());
 
       qLowerBounds = coman.coman_iDyn3.getJointBoundMin();
       qUpperBounds = coman.coman_iDyn3.getJointBoundMax();
       zeros.resize(coman.coman_iDyn3.getNrOfDOFs(),0.0);
+
+      jointLimits = new JointLimits(zeros,
+                                    qUpperBounds,
+                                    qLowerBounds);
   }
 
   virtual ~testJointLimits() {
@@ -42,7 +44,7 @@ class testJointLimits : public ::testing::Test {
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      coman.updateiDyn3Model(zeros,zeros,zeros);
+      coman.updateiDyn3Model(zeros);
       jointLimits->update(zeros);
   }
 
@@ -107,7 +109,7 @@ TEST_F(testJointLimits, BoundsAreCorrect) {
     q[23] = (qUpperBounds[22] + qLowerBounds[22])/2 - 1E-1;
     q[24] = (qUpperBounds[22] + qLowerBounds[22])/2 + 1E-1;
 
-    coman.updateiDyn3Model(q, zeros, zeros);
+    coman.updateiDyn3Model(q);
     jointLimits->update(q);
     yarp::sig::Vector lowerBound = jointLimits->getLowerBound();
     yarp::sig::Vector upperBound = jointLimits->getUpperBound();

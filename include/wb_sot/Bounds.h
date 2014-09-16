@@ -18,6 +18,8 @@
 #ifndef __BOUNDS_H__
 #define __BOUNDS_H__
 
+#include <boost/shared_ptr.hpp>
+
  namespace wb_sot {
 
     /** Task represents
@@ -32,6 +34,7 @@
     class Bounds {
     public:
         typedef Bounds< Matrix_type, Vector_type > BoundType;
+        typedef boost::shared_ptr<BoundType> BoundPointer;
     protected:
         /**
          * @brief _x_size size of the controlled variables
@@ -104,7 +107,7 @@
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
-        virtual void update(const Vector_type& x){}
+        virtual void update(const Vector_type& x) {}
     };
  }
 

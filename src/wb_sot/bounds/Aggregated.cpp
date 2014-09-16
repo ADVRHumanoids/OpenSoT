@@ -24,7 +24,7 @@
 using namespace wb_sot::bounds;
 using namespace yarp::math;
 
-Aggregated::Aggregated(const std::list<BoundType> &bounds,
+Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
                        const unsigned int x_size,
                        const unsigned int aggregationPolicy) :
     Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
@@ -47,10 +47,10 @@ void Aggregated::update(const yarp::sig::Vector& x) {
     _bLowerBound = yarp::sig::Vector(0);
 
     /* iterating on all bounds.. */
-    for(typename std::list< BoundType >::iterator i = _bounds.begin();
+    for(typename std::list< boost::shared_ptr<BoundType> >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
 
-        BoundType* b = &(*i);
+        boost::shared_ptr<BoundType> b = *i;
         /* update bounds */
         b->update(x);
 

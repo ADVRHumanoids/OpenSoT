@@ -21,6 +21,7 @@
 #include <wb_sot/Bounds.h>
 
 #include <yarp/sig/all.h>
+#include <boost/shared_ptr.hpp>
 #include <list>
 
 
@@ -41,7 +42,7 @@
 
         private:
 
-            std::list< BoundType> _bounds;
+            std::list< BoundPointer > _bounds;
             unsigned int _aggregationPolicy;
 
         public:
@@ -49,7 +50,7 @@
              * @brief Aggregated
              * @param bounds a std::list of Bounds
              */
-            Aggregated(const std::list<BoundType> &bounds,
+            Aggregated(const std::list< BoundPointer > &bounds,
                        const unsigned int x_size,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |

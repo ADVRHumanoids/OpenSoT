@@ -325,12 +325,16 @@ bool QPOases_sot::expandProblem(unsigned int i)
     for(unsigned int j = 0; j < i; ++j)
     {
         //1. Prepare new constraints from task j
-            wb_sot::bounds::BilateralConstraint task_j_constraint
-                    (_stack_of_tasks[j]->getA(),
-                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution(),
-                     _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution());
+            boost::shared_ptr<wb_sot::bounds::BilateralConstraint> task_j_constraint(
+                new wb_sot::bounds::BilateralConstraint
+                    (
+                        _stack_of_tasks[j]->getA(),
+                        _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution(),
+                        _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[i].getSolution()
+                     )
+            );
         //2. Get constraints & bounds of task j
-            std::list< wb_sot::bounds::Aggregated::BoundType > constraints_list =
+            std::list< boost::shared_ptr< wb_sot::bounds::Aggregated::BoundType > > constraints_list =
                 _stack_of_tasks[j]->getConstraints();
             constraints_list.push_back(task_j_constraint);
             wb_sot::bounds::Aggregated

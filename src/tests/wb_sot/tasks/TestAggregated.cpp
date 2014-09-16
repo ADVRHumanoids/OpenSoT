@@ -13,7 +13,7 @@ class testAggregatedTask: public ::testing::Test
 {
 protected:
 
-    std::list< Aggregated::TaskType * > _tasks;
+    std::list< boost::shared_ptr<Aggregated::TaskType> > _tasks;
     yarp::sig::Vector q;
 
     testAggregatedTask()
@@ -23,17 +23,18 @@ protected:
         for(unsigned int i = 0; i < q.size(); ++i)
             q[i] = tests_utils::getRandomAngle();
 
-        _tasks.push_back(new velocity::Postural(q));
-        _tasks.push_back(new velocity::Postural(2*q));
+        _tasks.push_back(boost::shared_ptr<Aggregated::TaskType>(new velocity::Postural(q)));
+        _tasks.push_back(boost::shared_ptr<Aggregated::TaskType>(new velocity::Postural(2*q)));
     }
 
     virtual ~testAggregatedTask() {
-        for(std::list< Aggregated::TaskType* >::iterator i = _tasks.begin();
+        /*
+        for(std::list< boost::shared_ptr<Aggregated::TaskType> >::iterator i = _tasks.begin();
             i!=_tasks.end();
             ++i) {
-            Aggregated::TaskType* t = *i;
+            boost::shared_ptr<Aggregated::TaskType> t = *i;
             delete t;
-        }
+        } */
         _tasks.clear();
     }
 

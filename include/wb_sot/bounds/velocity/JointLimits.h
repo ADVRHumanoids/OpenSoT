@@ -28,15 +28,20 @@
         namespace velocity {
             class JointLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
-                iCub::iDynTree::DynTree _robot;
                 double _boundScaling;
+                yarp::sig::Vector _jointLimitsMin;
+                yarp::sig::Vector _jointLimitsMax;
             public:
                 /**
                  * @brief JointLimits constructor
-                 * @param robot the robot model which includes joint limits
+                 * @param q the configuration of the robot when
+                 *          creating the joint limits constraint
+                 * @param jointBoundMax upper bounds for joint limits
+                 * @param jointBounMin lower bounds for joint limits
                  */
-                JointLimits(const iCub::iDynTree::DynTree& robot,
-                            const unsigned int x_size,
+                JointLimits(const yarp::sig::Vector &q,
+                            const yarp::sig::Vector &jointBoundMax,
+                            const yarp::sig::Vector &jointBoundMin,
                             const double boundScaling = 1.0);
 
                 void update(const yarp::sig::Vector &x);

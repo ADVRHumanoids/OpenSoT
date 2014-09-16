@@ -21,7 +21,8 @@
  #include <list>
  #include <string>
  #include <wb_sot/Bounds.h>
-#include <assert.h>
+ #include <assert.h>
+ #include <boost/shared_ptr.hpp>
 
  namespace wb_sot {
 
@@ -46,7 +47,9 @@
 
     public:
         typedef Task< Matrix_type, Vector_type > TaskType;
+        typedef boost::shared_ptr<TaskType> TaskPointer;
         typedef Bounds< Matrix_type, Vector_type > BoundType;
+        typedef boost::shared_ptr<BoundType> BoundPointer;
     protected:
 
         /**
@@ -89,7 +92,7 @@
         /**
          * @brief _bounds related to the Task
          */
-        std::list< BoundType > _bounds;
+        std::list< boost::shared_ptr<BoundType> > _bounds;
 
     public:
 
@@ -125,7 +128,7 @@
          *              task.getConstraints().push_back(new_constraint)
          * @return
          */
-        std::list< BoundType >& getConstraints() { return _bounds; }
+        std::list< boost::shared_ptr<BoundType> >& getConstraints() { return _bounds; }
 
         /** Gets the number of variables for the task.
             @return the number of columns of A */
@@ -138,8 +141,8 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         void update(const Vector_type &x) {
-            for(typename std::list< BoundType >::iterator i = _bounds.begin();
-                i != _bounds.end(); ++i) i->update(x);
+            for(typename std::list< boost::shared_ptr<BoundType> >::iterator i = _bounds.begin();
+                i != _bounds.end(); ++i) (*i)->update(x);
             this->_update(x); }
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices

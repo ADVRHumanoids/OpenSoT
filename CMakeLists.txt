@@ -90,6 +90,8 @@ ADD_LIBRARY(wb_sot src/wb_sot/bounds/Aggregated.cpp
                    src/wb_sot/tasks/velocity/Postural.cpp
                    )
 
+add_dependencies(wb_sot qpOASES-ext)
+
 add_custom_target(  wb_sot_test ALL
                     COMMAND ${CMAKE_CTEST_COMMAND}
                     DEPENDS wb_sot
