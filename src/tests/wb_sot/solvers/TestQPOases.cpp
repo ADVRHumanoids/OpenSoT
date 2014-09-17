@@ -316,21 +316,19 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         wb_sot::solvers::QPOasesTask qp_postural_task(postural_task);
         EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
 
-        yarp::sig::Vector l, u;
-        qp_postural_task.getBounds(l, u);
-        EXPECT_TRUE(l == idynutils.coman_iDyn3.getJointBoundMin());
-        EXPECT_TRUE(u == idynutils.coman_iDyn3.getJointBoundMax());
-
         yarp::sig::Vector l_old, u_old;
+        qp_postural_task.getBounds(l_old, u_old);
+        EXPECT_TRUE(l_old == idynutils.coman_iDyn3.getJointBoundMin());
+        EXPECT_TRUE(u_old == idynutils.coman_iDyn3.getJointBoundMax());
+
+        yarp::sig::Vector l, u;
         for(unsigned int i = 0; i < 100; ++i)
         {
             postural_task->update(q);
-            qp_postural_task.getBounds(l_old, u_old);
             EXPECT_TRUE(qp_postural_task.solve());
+            qp_postural_task.getBounds(l, u);
             q += qp_postural_task.getSolution();
 
-            postural_task->update(q);
-            qp_postural_task.getBounds(l, u);
             EXPECT_FALSE(l == l_old);
             EXPECT_FALSE(u == u_old);
         }
