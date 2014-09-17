@@ -39,13 +39,28 @@
             std::list< TaskPointer > _tasks;
             unsigned int _aggregationPolicy;
 
+            void generateAll();
+
         public:
             /**
              * @brief Aggregated
              * @param bounds a std::list of Tasks
+             * @param x_size the size of the input vector. Notice this constructor will NOT call
+             *               update() on the base tasks
              */
             Aggregated(const std::list< TaskPointer > &tasks,
                        const unsigned int x_size);
+
+            /**
+             * @brief Aggregated
+             * @param bounds a std::list of Tasks
+             * @param q the vector of q at which to create the Aggregated task
+             *          Notice that by specifying q, the Aggregated will automatically call
+             *          update(q) on all tasks he is composed of
+             */
+            Aggregated(const std::list< TaskPointer > &tasks,
+                       const yarp::sig::Vector &q);
+
             ~Aggregated();
 
             void _update(const yarp::sig::Vector &x);

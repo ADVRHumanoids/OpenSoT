@@ -45,13 +45,18 @@
             std::list< BoundPointer > _bounds;
             unsigned int _aggregationPolicy;
 
+            void generateAll();
+
         public:
             /**
              * @brief Aggregated
              * @param bounds a std::list of Bounds
+             * @param q the vector of q at which to create the Aggregated bound
+             *          Notice that by specifying q, the Aggregated will automatically call
+             *          update(q) on all tasks he is composed of
              */
             Aggregated(const std::list< BoundPointer > &bounds,
-                       const yarp::sig::Vector &x,
+                       const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);
@@ -59,6 +64,8 @@
             /**
              * @brief Aggregated
              * @param bounds a std::list of Bounds
+             * @param x_size the size of the x vector. Notice this constructor will NOT call
+             *               update() on the base tasks
              */
             Aggregated(const std::list< BoundPointer > &bounds,
                        const unsigned int &x_size,

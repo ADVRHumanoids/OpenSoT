@@ -25,7 +25,7 @@ using namespace wb_sot::bounds;
 using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
-                       const yarp::sig::Vector &x,
+                       const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy) :
     Bounds(x.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
@@ -39,10 +39,23 @@ Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
     Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     /* calling update to generate bounds */
-    update(yarp::sig::Vector(x_size,0.0));
+    this->generateAll();
 }
 
 void Aggregated::update(const yarp::sig::Vector& x) {
+    /* iterating on all bounds.. */
+    for(typename std::list< BoundPointer >::iterator i = _bounds.begin();
+        i != _bounds.end(); i++) {
+
+        BoundPointer &b = *i;
+        /* update bounds */
+        b->update(x);
+    }
+
+    this->generateAll();
+}
+
+void Aggregated::generateAll() {
     /* resetting all internal data */
     _upperBound.resize(0);
     _lowerBound.resize(0);
@@ -59,8 +72,6 @@ void Aggregated::update(const yarp::sig::Vector& x) {
         i != _bounds.end(); i++) {
 
         BoundPointer &b = *i;
-        /* update bounds */
-        b->update(x);
 
         yarp::sig::Vector boundUpperBound = b->getUpperBound();
         yarp::sig::Vector boundLowerBound = b->getLowerBound();
