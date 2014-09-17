@@ -63,7 +63,6 @@ void Aggregated::generateAll() {
     for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         boost::shared_ptr<TaskType> t = *i;
-        t->update(x);
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
         _b = yarp::math::cat(_b, t->getWeight()*t->getAlpha()*t->getb());
         for(std::list< boost::shared_ptr<BoundType> >::iterator j = t->getConstraints().begin();
