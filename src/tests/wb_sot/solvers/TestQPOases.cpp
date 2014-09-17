@@ -297,52 +297,106 @@ TEST_F(testQPOasesTask, testQPOasesTask)
 
 }
 
-TEST_F(testQPOases_sot, testContructor1Problem)
+using namespace wb_sot::bounds::velocity;
+TEST_F(testQPOasesTask, testProblemWithConstraint)
 {
-    iDynUtils idynutils;
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector q_ref(q.size(), M_PI);
-    idynutils.updateiDyn3Model(q, true);
+        iDynUtils idynutils;
+        yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+        yarp::sig::Vector q_ref(q.size(), M_PI);
+        idynutils.updateiDyn3Model(q, true);
 
-    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
-            new wb_sot::tasks::velocity::Postural(q));
-    postural_task->setReference(q_ref);
-    wb_sot::bounds::velocity::JointLimits joint_limits(idynutils.coman_iDyn3, q.size());
-    postural_task->getConstraints().push_back(joint_limits);
-    postural_task->setAlpha(0.1);
+        boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
+                new wb_sot::tasks::velocity::Postural(q));
+        postural_task->setReference(q_ref);
+        boost::shared_ptr<JointLimits> joint_limits(
+            new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(), idynutils.coman_iDyn3.getJointBoundMin()));
+        postural_task->getConstraints().push_back(joint_limits);
+        postural_task->setAlpha(0.1);
 
-    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
-    stack_of_tasks.push_back(postural_task);
-    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+        wb_sot::solvers::QPOasesTask qp_postural_task(postural_task);
+        EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
 
-    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
-    yarp::sig::Vector dq(q.size(), 0.0);
-    for(unsigned int i = 0; i < 100; ++i)
-    {
-        postural_task->update(q);
-        EXPECT_TRUE(sot.solve(dq));
-        q += dq;
-    }
+        yarp::sig::Vector l, u;
+        qp_postural_task.getBounds(l, u);
+        EXPECT_TRUE(l == idynutils.coman_iDyn3.getJointBoundMin());
+        EXPECT_TRUE(u == idynutils.coman_iDyn3.getJointBoundMax());
 
-    for(unsigned int i = 0; i < q.size(); ++i)
-    {
-        if(q_ref[i] >= idynutils.coman_iDyn3.getJointBoundMax()[i])
+        yarp::sig::Vector l_old, u_old;
+        for(unsigned int i = 0; i < 100; ++i)
         {
-            std::cout<<GREEN<<"On the Upper Bound!"<<DEFAULT<<std::endl;
-            EXPECT_NEAR( q[i] + dq[i], idynutils.coman_iDyn3.getJointBoundMax()[i], 1E-4);
+            postural_task->update(q);
+            qp_postural_task.getBounds(l_old, u_old);
+            EXPECT_TRUE(qp_postural_task.solve());
+            q += qp_postural_task.getSolution();
+
+            postural_task->update(q);
+            qp_postural_task.getBounds(l, u);
+            EXPECT_FALSE(l == l_old);
+            EXPECT_FALSE(u == u_old);
         }
-        else if(q_ref[i] <= idynutils.coman_iDyn3.getJointBoundMin()[i])
-        {
-            std::cout<<GREEN<<"On the Lower Bound!"<<DEFAULT<<std::endl;
-            EXPECT_NEAR( q[i] + dq[i], idynutils.coman_iDyn3.getJointBoundMin()[i], 1E-4);
-        }
-        else
-            EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-4);
 
-    }
-
-
+//        for(unsigned int i = 0; i < q.size(); ++i)
+//        {
+//            if(q_ref[i] >= idynutils.coman_iDyn3.getJointBoundMax()[i])
+//            {
+//                std::cout<<GREEN<<"On the Upper Bound!"<<DEFAULT<<std::endl;
+//                EXPECT_NEAR( q[i], idynutils.coman_iDyn3.getJointBoundMax()[i], 1E-4);
+//            }
+//            else if(q_ref[i] <= idynutils.coman_iDyn3.getJointBoundMin()[i])
+//            {
+//                std::cout<<GREEN<<"On the Lower Bound!"<<DEFAULT<<std::endl;
+//                EXPECT_NEAR( q[i], idynutils.coman_iDyn3.getJointBoundMin()[i], 1E-4);
+//            }
+//            else
+//                EXPECT_NEAR( q[i], q_ref[i], 1E-4);
+//        }
 }
+
+//TEST_F(testQPOases_sot, testContructor1Problem)
+//{
+//    iDynUtils idynutils;
+//    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+//    yarp::sig::Vector q_ref(q.size(), M_PI);
+//    idynutils.updateiDyn3Model(q, true);
+
+//    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
+//            new wb_sot::tasks::velocity::Postural(q));
+//    postural_task->setReference(q_ref);
+//    boost::shared_ptr<JointLimits> joint_limits(
+//        new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(), idynutils.coman_iDyn3.getJointBoundMin()));
+//    postural_task->getConstraints().push_back(joint_limits);
+//    postural_task->setAlpha(0.1);
+
+//    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
+//    stack_of_tasks.push_back(postural_task);
+//    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+
+//    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
+//    yarp::sig::Vector dq(q.size(), 0.0);
+//    for(unsigned int i = 0; i < 100; ++i)
+//    {
+//        postural_task->update(q);
+//        EXPECT_TRUE(sot.solve(dq));
+//        q += dq;
+//    }
+
+//    for(unsigned int i = 0; i < q.size(); ++i)
+//    {
+//        if(q_ref[i] >= idynutils.coman_iDyn3.getJointBoundMax()[i])
+//        {
+//            std::cout<<GREEN<<"On the Upper Bound!"<<DEFAULT<<std::endl;
+//            EXPECT_NEAR( q[i], idynutils.coman_iDyn3.getJointBoundMax()[i], 1E-4);
+//        }
+//        else if(q_ref[i] <= idynutils.coman_iDyn3.getJointBoundMin()[i])
+//        {
+//            std::cout<<GREEN<<"On the Lower Bound!"<<DEFAULT<<std::endl;
+//            EXPECT_NEAR( q[i], idynutils.coman_iDyn3.getJointBoundMin()[i], 1E-4);
+//        }
+//        else
+//            EXPECT_NEAR( q[i], q_ref[i], 1E-4);
+
+//    }
+//}
 
 }
 

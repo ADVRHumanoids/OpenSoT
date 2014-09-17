@@ -307,6 +307,25 @@ void QPOasesTask::printProblemInformation(unsigned int i)
     std::cout<<std::endl;
 }
 
+void QPOasesTask::getCostFunction(Matrix &H, Vector &g)
+{
+    H = _H;
+    g = _g;
+}
+
+void QPOasesTask::getConstraints(Matrix &A, Vector &lA, Vector &uA)
+{
+    A = _A;
+    lA = _lA;
+    uA = _uA;
+}
+
+void QPOasesTask::getBounds(Vector &l, Vector &u)
+{
+    l = _l;
+    u = _u;
+}
+
 /// QPOases_sot ///
 QPOases_sot::QPOases_sot(vector<boost::shared_ptr<Task<Matrix, Vector> > > &stack_of_tasks):
 _stack_of_tasks(stack_of_tasks)

@@ -94,7 +94,6 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     yarp::sig::Vector old_UpperBound = bound->getUpperBound();
     idynutils.updateiDyn3Model(q_next);
     postural->update(q_next);
-    bound->update(q_next);
     yarp::sig::Vector new_b = postural->getb();
     yarp::sig::Vector new_LowerBound = bound->getLowerBound();
     yarp::sig::Vector new_UpperBound = bound->getUpperBound();

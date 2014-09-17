@@ -328,6 +328,10 @@ namespace wb_sot{
          */
         void printProblemInformation(unsigned int i = 0);
 
+        void getCostFunction(Matrix& H, Vector& g);
+        void getConstraints(Matrix& A, Vector& lA, Vector& uA);
+        void getBounds(Vector& l, Vector& u);
+
     protected:
         /**
          * @brief _task pointer to task to optimize
