@@ -26,21 +26,21 @@ Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
                        const unsigned int x_size) :
     Task(std::string("aggregated"),x_size), _tasks(tasks)
 {
+    /* calling update to generate bounds */
+    this->generateAll();
+
     _W.resize(_A.rows(),_A.rows()); _W.eye();
     _hessianType = HST_SEMIDEF;
-
-    /* calling update to generate bounds */
-    this->_update(yarp::sig::Vector(x_size, 0.0));
 }
 
 Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
                        const yarp::sig::Vector& q) :
-    Task(std::string("aggregated"),x_size), _tasks(tasks)
+    Task(std::string("aggregated"),q.size()), _tasks(tasks)
 {
+    this->_update(q);
+
     _W.resize(_A.rows(),_A.rows()); _W.eye();
     _hessianType = HST_SEMIDEF;
-
-    this->generateAll();
 }
 
 Aggregated::~Aggregated()
@@ -63,6 +63,7 @@ void Aggregated::generateAll() {
     for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         boost::shared_ptr<TaskType> t = *i;
+        t->update(x);
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
         _b = yarp::math::cat(_b, t->getWeight()*t->getAlpha()*t->getb());
         for(std::list< boost::shared_ptr<BoundType> >::iterator j = t->getConstraints().begin();

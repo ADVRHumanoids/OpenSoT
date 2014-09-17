@@ -27,10 +27,10 @@ using namespace yarp::math;
 Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
                        const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy) :
-    Bounds(x.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
+    Bounds(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     /* calling update to generate bounds */
-    update(x);
+    update(q);
 }
 
 Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
