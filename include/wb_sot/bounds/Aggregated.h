@@ -51,7 +51,17 @@
              * @param bounds a std::list of Bounds
              */
             Aggregated(const std::list< BoundPointer > &bounds,
-                       const unsigned int x_size,
+                       const yarp::sig::Vector &x,
+                       const unsigned int aggregationPolicy =
+                            EQUALITIES_TO_INEQUALITIES |
+                            UNILATERAL_TO_BILATERAL);
+
+            /**
+             * @brief Aggregated
+             * @param bounds a std::list of Bounds
+             */
+            Aggregated(const std::list< BoundPointer > &bounds,
+                       const unsigned int &x_size,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);

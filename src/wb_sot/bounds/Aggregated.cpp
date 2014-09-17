@@ -25,32 +25,40 @@ using namespace wb_sot::bounds;
 using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
-                       const unsigned int x_size,
+                       const yarp::sig::Vector &x,
+                       const unsigned int aggregationPolicy) :
+    Bounds(x.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
+{
+    /* calling update to generate bounds */
+    update(x);
+}
+
+Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
+                       const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
     Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     /* calling update to generate bounds */
-    update(yarp::sig::Vector(x_size, 0.0));
+    update(yarp::sig::Vector(x_size,0.0));
 }
 
 void Aggregated::update(const yarp::sig::Vector& x) {
-
     /* resetting all internal data */
     _upperBound = yarp::sig::Vector(0);
     _lowerBound = yarp::sig::Vector(0);
 
-    _Aeq = yarp::sig::Matrix(0,0);
+    _Aeq = yarp::sig::Matrix(0,_x_size);
     _beq = yarp::sig::Vector(0);
 
-    _Aineq = yarp::sig::Matrix(0,0);
+    _Aineq = yarp::sig::Matrix(0,_x_size);
     _bUpperBound = yarp::sig::Vector(0);
     _bLowerBound = yarp::sig::Vector(0);
 
     /* iterating on all bounds.. */
-    for(typename std::list< boost::shared_ptr<BoundType> >::iterator i = _bounds.begin();
+    for(typename std::list< BoundPointer >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
 
-        boost::shared_ptr<BoundType> b = *i;
+        BoundPointer &b = *i;
         /* update bounds */
         b->update(x);
 

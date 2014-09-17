@@ -164,6 +164,23 @@ TEST_F(testJointLimits, BoundsAreCorrect) {
                                                         << " and " << upperBound[22] << " respectively";
 }
 
+TEST_F(testJointLimits, boundsDoUpdate) {
+    yarp::sig::Vector q(zeros);
+    yarp::sig::Vector q_next(zeros.size(), 0.1);
+
+    jointLimits->update(q);
+    yarp::sig::Vector oldLowerBound = jointLimits->getLowerBound();
+    yarp::sig::Vector oldUpperBound = jointLimits->getUpperBound();
+
+    jointLimits->update(q_next);
+
+    yarp::sig::Vector newLowerBound = jointLimits->getLowerBound();
+    yarp::sig::Vector newUpperBound = jointLimits->getUpperBound();
+
+    EXPECT_FALSE(oldLowerBound == newLowerBound);
+    EXPECT_FALSE(oldUpperBound == newUpperBound);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
