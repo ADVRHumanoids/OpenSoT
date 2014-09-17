@@ -39,7 +39,7 @@ Aggregated::~Aggregated()
 
 void Aggregated::_update(const yarp::sig::Vector& x) {
     this->getConstraints().clear();
-    _A.resize(0,x.size());
+    _A.resize(0,_x_size);
     _b.resize(0);
     for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {

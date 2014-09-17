@@ -44,15 +44,15 @@ Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
 
 void Aggregated::update(const yarp::sig::Vector& x) {
     /* resetting all internal data */
-    _upperBound = yarp::sig::Vector(0);
-    _lowerBound = yarp::sig::Vector(0);
+    _upperBound.resize(0);
+    _lowerBound.resize(0);
 
-    _Aeq = yarp::sig::Matrix(0,_x_size);
-    _beq = yarp::sig::Vector(0);
+    _Aeq.resize(0,_x_size);
+    _beq.resize(0);
 
-    _Aineq = yarp::sig::Matrix(0,_x_size);
-    _bUpperBound = yarp::sig::Vector(0);
-    _bLowerBound = yarp::sig::Vector(0);
+    _Aineq.resize(0,_x_size);
+    _bUpperBound.resize(0);
+    _bLowerBound.resize(0);
 
     /* iterating on all bounds.. */
     for(typename std::list< BoundPointer >::iterator i = _bounds.begin();
