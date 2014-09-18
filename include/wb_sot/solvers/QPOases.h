@@ -358,9 +358,23 @@ namespace wb_sot{
         bool solve(Vector& solution);
         unsigned int getNumberOfTasks()
         {
-            assert(_qp_stack_of_tasks.size() == _stack_of_tasks.size());
+            if(!(_qp_stack_of_tasks.size() == _stack_of_tasks.size()))
+            {
+                std::cout<<"Stored # QP Problems does not mach stored # tasks"<<std::endl;
+                std::cout<<"# TASKS: "<<_stack_of_tasks.size()<<std::endl;
+                std::cout<<"# QP PROBLEMS: "<<_qp_stack_of_tasks.size()<<std::endl;
+                assert(_qp_stack_of_tasks.size() == _stack_of_tasks.size());
+            }
+
             return _qp_stack_of_tasks.size();
         }
+
+        /**
+         * @brief getNumberOfConstraints return for each task the number of
+         *  constraints contained
+         * @return a vector of std::pair<constrain_id, number_of_constraints>
+         */
+        std::vector<std::pair<std::string, int>> getNumberOfConstraints();
 
     protected:
         vector <boost::shared_ptr< Task<Matrix, Vector> >> _stack_of_tasks;
@@ -368,6 +382,7 @@ namespace wb_sot{
 
         bool prepareSoT();
         bool expandProblem(unsigned int i);
+        bool updateExpandedProblem(unsigned int i);
 
     };
 

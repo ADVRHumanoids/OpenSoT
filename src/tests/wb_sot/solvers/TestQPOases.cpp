@@ -6,8 +6,9 @@
 #include <drc_shared/tests_utils.h>
 #include <yarp/math/Math.h>
 #include <wb_sot/bounds/Aggregated.h>
-#include <wb_sot/tasks/velocity/Postural.h>
 #include <wb_sot/bounds/velocity/JointLimits.h>
+#include <drc_shared/comanutils.h>
+#include <wb_sot/tasks/velocity/Cartesian.h>
 
 using namespace yarp::math;
 
@@ -397,6 +398,54 @@ TEST_F(testQPOases_sot, testContructor1Problem)
             EXPECT_NEAR( q[i], q_ref[i], 1E-4);
 
     }
+}
+
+TEST_F(testQPOases_sot, testContructor2Problems)
+{
+    iDynUtils idynutils;
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 20.0 * M_PI/180.0;
+    arm[1] = 10.0 * M_PI/180.0;
+    arm[3] = -80.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+    arm[1] = -arm[1];
+    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    idynutils.updateiDyn3Model(q, true);
+
+    //2 Tasks: Cartesian & Postural
+    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
+                new wb_sot::tasks::velocity::Cartesian("cartesian::left_arm", q, idynutils,
+                                                       idynutils.left_arm.end_effector_name, "Waist"));
+    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
+                new wb_sot::tasks::velocity::Postural(q));
+
+    //Constraints set to the Cartesian Task
+    boost::shared_ptr<JointLimits> joint_limits(
+        new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
+                           idynutils.coman_iDyn3.getJointBoundMin()));
+    cartesian_task->getConstraints().push_back(joint_limits);
+
+    //Create the SoT
+    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
+    stack_of_tasks.push_back(cartesian_task);
+    stack_of_tasks.push_back(postural_task);
+    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+
+    //Check the SoT
+    EXPECT_TRUE(sot.getNumberOfTasks() == stack_of_tasks.size());
+    std::vector<std::pair<std::string, int>> number_of_constraints =
+            sot.getNumberOfConstraints();
+    EXPECT_TRUE(number_of_constraints.size() == stack_of_tasks.size());
+    EXPECT_TRUE(number_of_constraints[0].first == cartesian_task->getTaskID());
+    EXPECT_TRUE(number_of_constraints[1].first == postural_task->getTaskID());
+
 }
 
 }
