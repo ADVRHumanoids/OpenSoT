@@ -11,7 +11,7 @@ using namespace wb_sot::solvers;
 /// QPOasesProblem ///
 
 QPOasesProblem::QPOasesProblem():
-    _problem(),
+    _problem(new qpOASES::SQProblem()),
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
     _bounds(),
     _constraints(),
@@ -25,7 +25,7 @@ QPOasesProblem::QPOasesProblem():
 QPOasesProblem::QPOasesProblem(const int number_of_variables,
                                const int number_of_constraints,
                                qpOASES::HessianType hessian_type):
-    _problem(number_of_variables, number_of_constraints, hessian_type),
+    _problem(new qpOASES::SQProblem(number_of_variables, number_of_constraints, hessian_type)),
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
     _bounds(),
     _constraints(),
@@ -38,17 +38,17 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     opt.setToReliable();
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= 2E2;
-    _problem.setOptions(opt);
+    _problem->setOptions(opt);
 }
 
-void QPOasesProblem::setProblem(const qpOASES::SQProblem &problem)
+void QPOasesProblem::setProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem)
 {
     _problem = problem;
 }
 
 void QPOasesProblem::setOptions(const qpOASES::Options &options)
 {
-    _problem.setOptions(options);
+    _problem->setOptions(options);
 }
 
 void QPOasesProblem::hack()
@@ -85,7 +85,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
     hack(); //<- PAY ATTENTION!
 
     int nWSR = _nWSR;
-        qpOASES::returnValue val =_problem.init( _H.data(),_g.data(),
+        qpOASES::returnValue val =_problem->init( _H.data(),_g.data(),
                        _A_ptr,
                        _l_ptr, _u_ptr,
                        _lA_ptr,_uA_ptr,
@@ -100,17 +100,17 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         return _is_initialized;
     }
 
-    if(_solution.size() != _problem.getNV())
-        _solution.resize(_problem.getNV());
+    if(_solution.size() != _problem->getNV())
+        _solution.resize(_problem->getNV());
 
-    if(_dual_solution.size() != _problem.getNV() + _problem.getNC())
-        _dual_solution.resize(_problem.getNV() + _problem.getNC());  
+    if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
+        _dual_solution.resize(_problem->getNV() + _problem->getNC());
 
     //We get the solution
-    int success = _problem.getPrimalSolution(_solution.data());
-    _problem.getDualSolution(_dual_solution.data());
-    _problem.getBounds(_bounds);
-    _problem.getConstraints(_constraints);
+    int success = _problem->getPrimalSolution(_solution.data());
+    _problem->getDualSolution(_dual_solution.data());
+    _problem->getBounds(_bounds);
+    _problem->getConstraints(_constraints);
 
     if(success == qpOASES::RET_QP_NOT_SOLVED ||
       (success != qpOASES::RET_QP_SOLVED &&
@@ -170,7 +170,7 @@ bool QPOasesProblem::addTask(const Matrix &H, const Vector &g, const bool init_p
         _H = pile(_H, H);
         _g = cat(_g, g);
         if(init_problem){
-            _problem.reset();
+            _problem->reset();
             return initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
         return true;
     }
@@ -186,7 +186,7 @@ bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vec
         _lA = cat(_lA, lA);
         _uA = cat(_uA, uA);
         if(init_problem){
-            _problem.reset();
+            _problem->reset();
             return initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
         return true;
     }
@@ -200,7 +200,7 @@ bool QPOasesProblem::addBounds(const Vector &l, const Vector &u, const bool init
         _l = cat(_l, l);
         _u = cat(_u, u);
         if(init_problem){
-            _problem.reset();
+            _problem->reset();
             return initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
         return true;
     }
@@ -223,24 +223,24 @@ bool QPOasesProblem::solve()
         hack(); //<- PAY ATTENTION!
 
         int nWSR = _nWSR;
-        _problem.hotstart(_H.data(),_g.data(),
+        _problem->hotstart(_H.data(),_g.data(),
                        _A_ptr,
                        _l_ptr, _u_ptr,
                        _lA_ptr,_uA_ptr,
                        nWSR,0);
 
         // If solution has changed of size we update the size
-        if(_solution.size() != _problem.getNV())
-            _solution.resize(_problem.getNV());
+        if(_solution.size() != _problem->getNV())
+            _solution.resize(_problem->getNV());
 
-        if(_dual_solution.size() != _problem.getNV() + _problem.getNC())
-            _dual_solution.resize(_problem.getNV()+ _problem.getNC());
+        if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
+            _dual_solution.resize(_problem->getNV()+ _problem->getNC());
 
         //We get the solution
-        int success = _problem.getPrimalSolution(_solution.data());
-        _problem.getDualSolution(_dual_solution.data());
-        _problem.getBounds(_bounds);
-        _problem.getConstraints(_constraints);
+        int success = _problem->getPrimalSolution(_solution.data());
+        _problem->getDualSolution(_dual_solution.data());
+        _problem->getBounds(_bounds);
+        _problem->getConstraints(_constraints);
 
         if(success == qpOASES::RET_QP_NOT_SOLVED ||
           (success != qpOASES::RET_QP_SOLVED &&

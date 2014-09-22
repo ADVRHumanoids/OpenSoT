@@ -69,19 +69,19 @@ namespace wb_sot{
          * @brief setProblem copy a QP Problem in the internal object of the class.
          * @param problem to copy
          */
-        void setProblem(const qpOASES::SQProblem& problem);
+        void setProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem);
 
         /**
          * @brief getProblem return the internal QP problem
          * @return reference to internal QP problem
          */
-        const qpOASES::SQProblem& getProblem(){return _problem;}
+        const boost::shared_ptr<qpOASES::SQProblem>& getProblem(){return _problem;}
 
         /**
          * @brief getOptions return the options of the QP problem
          * @return reference to options
          */
-        qpOASES::Options getOptions(){return _problem.getOptions();}
+        qpOASES::Options getOptions(){return _problem->getOptions();}
 
         /**
          * @brief setOptions of the QP problem. Default are set to:
@@ -193,13 +193,13 @@ namespace wb_sot{
          * @brief getHessianType return the hessian type f the problem
          * @return hessian type
          */
-        qpOASES::HessianType getHessianType(){return _problem.getHessianType();}
+        qpOASES::HessianType getHessianType(){return _problem->getHessianType();}
 
         /**
          * @brief setHessianType of the problem
          * @param ht hessian type
          */
-        void setHessianType(const qpOASES::HessianType ht){_problem.setHessianType(ht);}
+        void setHessianType(const qpOASES::HessianType ht){_problem->setHessianType(ht);}
 
         /**
          * @brief getnWSR return maximum number of working set recalculations
@@ -223,7 +223,7 @@ namespace wb_sot{
          * @brief resetProblem call the reset method of the SQProblem
          * @return true if reset
          */
-        bool resetProblem(){return _problem.reset();}
+        bool resetProblem(){return _problem->reset();}
 
         /**
          * @brief getActiveBounds return the active bounds of the solved QP problem
@@ -241,7 +241,7 @@ namespace wb_sot{
         /**
          * @brief _problem is the internal SQProblem
          */
-        qpOASES::SQProblem _problem;
+        boost::shared_ptr<qpOASES::SQProblem> _problem;
 
         /**
          * @brief _bounds are the active bounds of the SQProblem

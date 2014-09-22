@@ -58,7 +58,7 @@ protected:
 
     }
 
-    void setTestProblem(const qpOASES::SQProblem &problem)
+    void setTestProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem)
     {
         this->setProblem(problem);
     }
@@ -129,7 +129,8 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
     yarp::sig::Vector x(2);
     simpleProblem sp;
 
-    qpOASES::SQProblem testProblem(x.size(), sp.A.rows(), sp.ht);
+    boost::shared_ptr<qpOASES::SQProblem> testProblem(
+                new qpOASES::SQProblem(x.size(), sp.A.rows(), sp.ht) );
     this->setTestProblem(testProblem);
 
     this->initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
@@ -159,7 +160,8 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     yarp::sig::Vector x(2);
     simpleProblem sp;
 
-    qpOASES::SQProblem testProblem(x.size(), sp.A.rows(), sp.ht);
+    boost::shared_ptr<qpOASES::SQProblem> testProblem(
+                new qpOASES::SQProblem(x.size(), sp.A.rows(), sp.ht) );
     this->setTestProblem(testProblem);
 
     this->initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
@@ -209,7 +211,8 @@ TEST_F(testQPOasesProblem, testAddProblem)
     qpOASES::HessianType ht = qpOASES::HST_IDENTITY;
 
 
-    qpOASES::SQProblem testProblem(x.size(), A.rows(), ht);
+    boost::shared_ptr<qpOASES::SQProblem> testProblem(
+                new qpOASES::SQProblem(x.size(), A.rows(), ht) );
     this->setTestProblem(testProblem);
 
     this->initProblem(H, g, A, lA, uA, l, u);
@@ -257,14 +260,15 @@ TEST_F(testQPOasesProblem, testTask)
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
 
-    qpOASES::SQProblem testProblem2(q.size(), 0, qpOASES::HST_IDENTITY);
+    boost::shared_ptr<qpOASES::SQProblem> testProblem2(
+                new qpOASES::SQProblem(q.size(), 0, qpOASES::HST_IDENTITY) );
     this->setTestProblem(testProblem2);
     nWSR = 132;
-    val = this->_problem.init(H.data(), g.data(), NULL, NULL, NULL, NULL,
+    val = this->_problem->init(H.data(), g.data(), NULL, NULL, NULL, NULL,
                         NULL, nWSR);
     EXPECT_TRUE(val == qpOASES::SUCCESSFUL_RETURN);
     yarp::sig::Vector sol(q.size(), 0.0);
-    this->_problem.getPrimalSolution(sol.data());
+    this->_problem->getPrimalSolution(sol.data());
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
 }
