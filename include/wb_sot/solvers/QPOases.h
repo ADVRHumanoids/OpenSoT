@@ -168,10 +168,9 @@ namespace wb_sot{
         /*
          * This set of function add input data to the problem
          */
-        bool addTask(const Matrix& H, const Vector& g, const bool init_problem = true);
-        bool addConstraints(const Matrix& A, const Vector& lA, const Vector& uA,
-                            const bool init_problem = true);
-        bool addBounds(const Vector& l, const Vector& u, const bool init_problem = true);
+        bool addTask(const Matrix& H, const Vector& g);
+        bool addConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
+        bool addBounds(const Vector& l, const Vector& u);
         bool addProblem(const Matrix& H, const Vector& g,
                            const Matrix& A,
                            const Vector& lA, const Vector& uA,

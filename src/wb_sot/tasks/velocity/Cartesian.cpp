@@ -44,6 +44,7 @@ Cartesian::Cartesian(std::string task_id,
     _W.resize(_A.rows(), _A.rows());
     _W.eye();
 
+
     _hessianType = HST_SEMIDEF;
 }
 
