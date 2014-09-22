@@ -124,8 +124,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
 
 bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
 {
-    if( (H.rows() == _H.rows() && H.cols() == _H.cols()) &&
-         g.size() == _g.size() && _is_initialized)
+    if(_is_initialized)
     {
         _H = H;
         _g = g;
@@ -136,9 +135,7 @@ bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
 
 bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const Vector &uA)
 {
-    if( (A.rows() == _A.rows() && A.cols() == _A.cols()) &&
-         lA.size() == _lA.size() &&
-         uA.size() == _uA.size() && _is_initialized)
+    if(_is_initialized)
     {
         _A = A;
         _lA = lA;
@@ -150,7 +147,7 @@ bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const 
 
 bool QPOasesProblem::updateBounds(const Vector &l, const Vector &u)
 {
-    if( l.size() == _l.size() && u.size() == _u.size() && _is_initialized)
+    if(_is_initialized)
     {
         _l = l;
         _u = u;
@@ -174,7 +171,7 @@ bool QPOasesProblem::addTask(const Matrix &H, const Vector &g, const bool init_p
         _g = cat(_g, g);
         if(init_problem){
             _problem.reset();
-            initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
+            return initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
         return true;
     }
     return false;
@@ -190,7 +187,7 @@ bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vec
         _uA = cat(_uA, uA);
         if(init_problem){
             _problem.reset();
-            initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
+            return initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
         return true;
     }
     return false;
@@ -204,7 +201,7 @@ bool QPOasesProblem::addBounds(const Vector &l, const Vector &u, const bool init
         _u = cat(_u, u);
         if(init_problem){
             _problem.reset();
-            initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
+            return initProblem(_H, _g, _A, _lA, _uA, _l, _u);}
         return true;
     }
     return false;
@@ -274,27 +271,30 @@ QPOasesTask::~QPOasesTask()
 
 }
 
-void QPOasesTask::prepareData()
+void QPOasesTask::prepareData(bool update_constraints)
 {
     /* Compute cost function */
     _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
     _g = -1.0 * _task->getAlpha() * _task->getA().transposed() * _task->getWeight() * _task->getb();
 
-    /* Compute constraints */
-    using namespace  wb_sot::bounds;
-    Aggregated constraints(_task->getConstraints(), _task->getXSize());
-    _A = constraints.getAineq();
-    _lA = constraints.getbLowerBound();
-    _uA = constraints.getbUpperBound();
+    if(update_constraints)
+    {
+        /* Compute constraints */
+        using namespace  wb_sot::bounds;
+        Aggregated constraints(_task->getConstraints(), _task->getXSize());
+        _A = constraints.getAineq();
+        _lA = constraints.getbLowerBound();
+        _uA = constraints.getbUpperBound();
 
-    /* Compute bounds */
-    _l = constraints.getLowerBound();
-    _u = constraints.getUpperBound();
+        /* Compute bounds */
+        _l = constraints.getLowerBound();
+        _u = constraints.getUpperBound();
+    }
 }
 
-bool QPOasesTask::solve()
+bool QPOasesTask::solve(bool update_constraints)
 {
-    prepareData();
+    prepareData(update_constraints);
     return this->QPOasesProblem::solve();
 }
 
@@ -304,6 +304,13 @@ void QPOasesTask::printProblemInformation(unsigned int i)
     std::cout<<GREEN<<"PROBLEM "<<i<<" ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
     std::cout<<GREEN<<"# OF CONSTRAINTS: "<<DEFAULT<<_task->getConstraints().size()<<std::endl;
     std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_task->getXSize()<<std::endl;
+    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
+    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
+    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
+    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
+    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
+    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
+    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
     std::cout<<std::endl;
 }
 
@@ -373,11 +380,23 @@ bool QPOases_sot::expandProblem(unsigned int i)
                 _qp_stack_of_tasks[i].addConstraints(
                             new_constraints_for_task_i.getAineq(),
                             new_constraints_for_task_i.getbLowerBound(),
-                            new_constraints_for_task_i.getbUpperBound());
+                            new_constraints_for_task_i.getbUpperBound(), true);
             //3.2 ADD bounds to problem i
-                _qp_stack_of_tasks[i].addBounds(
-                            new_constraints_for_task_i.getLowerBound(),
-                            new_constraints_for_task_i.getUpperBound());
+                yarp::sig::Vector li, ui;
+                _qp_stack_of_tasks[i].getBounds(li, ui);
+                if(li.size() == 0)
+                    _qp_stack_of_tasks[i].addBounds(
+                                new_constraints_for_task_i.getLowerBound(),
+                                new_constraints_for_task_i.getUpperBound(), true);
+                else
+                {
+                    for(unsigned int k = 0; k < li.size(); ++k)
+                    {
+                        li[k] = std::max(li[k], new_constraints_for_task_i.getLowerBound()[k]);
+                        ui[k] = std::min(ui[k], new_constraints_for_task_i.getUpperBound()[k]);
+                    }
+                    _qp_stack_of_tasks[i].updateBounds(li, ui);
+                }
     }
     return true;
 }
@@ -385,14 +404,22 @@ bool QPOases_sot::expandProblem(unsigned int i)
 bool QPOases_sot::solve(Vector &solution)
 {
     bool solved_task_i = false;
+    bool expanded = true;
     for(unsigned int i = 0; i < _stack_of_tasks.size(); ++i)
     {
+        bool update_constraints = true;
         if(i > 0)
-            updateExpandedProblem(i);
-        solved_task_i =  _qp_stack_of_tasks[i].solve();
+        {
+            expanded = updateExpandedProblem(i);
+            update_constraints = false;
+        }
+        solved_task_i =  _qp_stack_of_tasks[i].solve(update_constraints);
         solution = _qp_stack_of_tasks[i].getSolution();
+
+        _qp_stack_of_tasks[i].printProblemInformation(i);
+        std::cout<<"SOLUTION PROBLEM i: "<<solution.toString()<<std::endl;
     }
-    return solved_task_i;
+    return solved_task_i && expanded;
 }
 
 bool QPOases_sot::updateExpandedProblem(unsigned int i)
@@ -408,6 +435,7 @@ bool QPOases_sot::updateExpandedProblem(unsigned int i)
     yarp::sig::Vector uA = constraints_task_i.getbUpperBound();
     yarp::sig::Vector l = constraints_task_i.getLowerBound();
     yarp::sig::Vector u = constraints_task_i.getUpperBound();
+
     //2. I got all the updated constraints from the previous tasks
     for(unsigned int j = 0; j < i; ++j)
     {
@@ -421,26 +449,36 @@ bool QPOases_sot::updateExpandedProblem(unsigned int i)
                  )
         );
         //2.2 Get constraints & bounds of task j
-            std::list< boost::shared_ptr< wb_sot::bounds::Aggregated::BoundType > > constraints_list =
-                _stack_of_tasks[j]->getConstraints();
-            constraints_list.push_back(task_j_constraint);
-            wb_sot::bounds::Aggregated
-                updated_constraints_for_task_i(constraints_list, _stack_of_tasks[j]->getXSize());
+        std::list< boost::shared_ptr< wb_sot::bounds::Aggregated::BoundType > > constraints_list =
+            _stack_of_tasks[j]->getConstraints();
+        constraints_list.push_back(task_j_constraint);
+        wb_sot::bounds::Aggregated
+            updated_constraints_for_task_i(constraints_list,
+                                           _stack_of_tasks[j]->getXSize());
 
         //3. Stack updated constraints to constraints in task i
         A = yarp::math::pile(A, updated_constraints_for_task_i.getAineq());
         lA = yarp::math::cat(lA, updated_constraints_for_task_i.getbLowerBound());
         uA = yarp::math::cat(uA, updated_constraints_for_task_i.getbUpperBound());
-        l = yarp::math::cat(l, updated_constraints_for_task_i.getLowerBound());
-        u = yarp::math::cat(u, updated_constraints_for_task_i.getUpperBound());
-    }
+        if(l.size() == 0)
+        {
+            l = updated_constraints_for_task_i.getLowerBound();
+            u = updated_constraints_for_task_i.getUpperBound();
+        }
+        else
+        {
+            for(unsigned int i = 0; i < l.size(); ++i)
+            {
+                l[i] = std::max(l[i], updated_constraints_for_task_i.getLowerBound()[i]);
+                u[i] = std::min(u[i], updated_constraints_for_task_i.getUpperBound()[i]);
+            }
+        }
+   }
     //3. Update constraints matrices of task j
     ///TO DO: check that matrices from point 2. and matrices in _qp_stack_of_tasks[i]
     /// has the same size!
-    _qp_stack_of_tasks[i].updateBounds(l, u);
-    _qp_stack_of_tasks[i].updateConstraints(A, lA, uA);
-
-    return true;
+   return _qp_stack_of_tasks[i].updateConstraints(A, lA, uA) &&
+           _qp_stack_of_tasks[i].updateBounds(l, u);
 }
 
 std::vector<std::pair<std::string, int>> QPOases_sot::getNumberOfConstraints()

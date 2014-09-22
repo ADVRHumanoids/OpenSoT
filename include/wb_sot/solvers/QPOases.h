@@ -318,10 +318,12 @@ namespace wb_sot{
         ~QPOasesTask();
 
         /**
-         * @brief solve
-         * @return
+         * @brief solve the internal qp problem
+         * @param update_constraints if the problem have to update alone its constraints based
+         * on the internal task
+         * @return true if solved/solvable
          */
-        bool solve();
+        bool solve(bool update_constraints = true);
 
         /**
          * @brief printProblemInformation couts some information about the problem
@@ -340,8 +342,9 @@ namespace wb_sot{
 
         /**
          * @brief prepareData compute matrices for QPOases
+         * @param update_constraints if set to false does not update the constraint matrices
          */
-        void prepareData();
+        void prepareData(bool update_constraints = true);
     };
 
 

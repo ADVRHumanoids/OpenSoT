@@ -9,6 +9,7 @@
 #include <wb_sot/bounds/velocity/JointLimits.h>
 #include <drc_shared/comanutils.h>
 #include <wb_sot/tasks/velocity/Cartesian.h>
+#include <kdl/frames.hpp>
 
 using namespace yarp::math;
 
@@ -445,6 +446,74 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     EXPECT_TRUE(number_of_constraints.size() == stack_of_tasks.size());
     EXPECT_TRUE(number_of_constraints[0].first == cartesian_task->getTaskID());
     EXPECT_TRUE(number_of_constraints[1].first == postural_task->getTaskID());
+
+    int constraints_cartesian_task = 0;
+    constraints_cartesian_task = (*(cartesian_task->getConstraints().begin()))->getLowerBound().size();
+    ASSERT_TRUE(number_of_constraints[0].second == constraints_cartesian_task);
+
+    int constraints_postural_task = 0;
+    constraints_postural_task = constraints_cartesian_task + cartesian_task->getA().rows();
+    ASSERT_TRUE(number_of_constraints[1].second == constraints_postural_task);
+
+    //Solve SoT
+    KDL::Frame T_ref_kdl;
+    T_ref_kdl.p[0] = -0.192;
+    T_ref_kdl.p[1] = 0.156;
+    T_ref_kdl.p[2] = 0.131;
+    T_ref_kdl.M.RPY(0.0, 0.0, 0.0);
+
+    yarp::sig::Matrix T_ref;
+    cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
+    cartesian_task->setReference(T_ref);
+    postural_task->setReference(q);
+
+    idynutils.updateiDyn3Model(q);
+    yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(0, idynutils.left_arm.end_effector_index);
+
+    yarp::sig::Vector dq(q.size(), 0.0);
+    for(unsigned int i = 0; i < 4; ++i)
+    {
+        idynutils.updateiDyn3Model(q);
+
+        cartesian_task->update(q);
+        postural_task->update(q);
+
+        ASSERT_TRUE(sot.solve(dq));
+        q += dq;
+//////////////////////////////////////////////////////////
+
+        EXPECT_TRUE(sot.getNumberOfTasks() == stack_of_tasks.size());
+        number_of_constraints = sot.getNumberOfConstraints();
+        EXPECT_TRUE(number_of_constraints.size() == stack_of_tasks.size());
+        EXPECT_TRUE(number_of_constraints[0].first == cartesian_task->getTaskID());
+        EXPECT_TRUE(number_of_constraints[1].first == postural_task->getTaskID());
+
+        constraints_cartesian_task = 0;
+        constraints_cartesian_task = (*(cartesian_task->getConstraints().begin()))->getLowerBound().size();
+        ASSERT_TRUE(number_of_constraints[0].second == constraints_cartesian_task);
+
+        constraints_postural_task = 0;
+        constraints_postural_task = constraints_cartesian_task + cartesian_task->getA().rows();
+        ASSERT_TRUE(number_of_constraints[1].second == constraints_postural_task)
+                <<"EXPECTED # CONSTRAINTS POSTURAL TASK: "<<constraints_postural_task<<std::endl<<
+                  "ACTUAL # CONSTRAINTS POSTURAL TASK: "<<number_of_constraints[1].second<<std::endl;
+    }
+
+    idynutils.updateiDyn3Model(q);
+    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+    yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(0, idynutils.left_arm.end_effector_index);
+    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
+
+    KDL::Frame T_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_kdl);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T_kdl.p[i], T_ref_kdl.p[i], 1E-4);
+//    for(unsigned int i = 0; i < 3; ++i)
+//        for(unsigned int j = 0; j < 3; ++j)
+//            EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-4);
+
+
+
 
 }
 
