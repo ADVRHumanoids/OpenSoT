@@ -53,6 +53,17 @@
 
             /**
              * @brief Aggregated
+             * @param task1 a pointer to the first Task to aggregate
+             * @param task2 a pointer to the second Task to aggregate
+             * @param x_size the size of the input vector. Notice this constructor will NOT call
+             *               update() on the base tasks
+             */
+            Aggregated(TaskPointer &task1,
+                       TaskPointer &task2,
+                       const unsigned int x_size);
+
+            /**
+             * @brief Aggregated
              * @param bounds a std::list of Tasks
              * @param q the vector of q at which to create the Aggregated task
              *          Notice that by specifying q, the Aggregated will automatically call

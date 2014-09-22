@@ -33,6 +33,22 @@ Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
     _hessianType = HST_SEMIDEF;
 }
 
+Aggregated::Aggregated(TaskPointer &task1,
+                       TaskPointer &task2,
+                       const unsigned int x_size) :
+Task(std::string("aggregated"),x_size)
+{
+    _tasks.push_back(task1);
+    _tasks.push_back(task2);
+
+
+    /* calling update to generate bounds */
+    this->generateAll();
+
+    _W.resize(_A.rows(),_A.rows()); _W.eye();
+    _hessianType = HST_SEMIDEF;
+}
+
 Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
                        const yarp::sig::Vector& q) :
     Task(std::string("aggregated"),q.size()), _tasks(tasks)

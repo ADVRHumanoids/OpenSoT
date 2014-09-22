@@ -42,6 +42,18 @@ Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
     this->generateAll();
 }
 
+Aggregated::Aggregated(BoundPointer &bound1,
+                       BoundPointer &bound2,
+                       const unsigned int &x_size,
+                       const unsigned int aggregationPolicy) :
+    Bounds(x_size), _aggregationPolicy(aggregationPolicy)
+{
+    _bounds.push_back(bound1);
+    _bounds.push_back(bound2);
+    /* calling update to generate bounds */
+    this->generateAll();
+}
+
 void Aggregated::update(const yarp::sig::Vector& x) {
     /* iterating on all bounds.. */
     for(typename std::list< BoundPointer >::iterator i = _bounds.begin();
