@@ -96,6 +96,7 @@ add_custom_target(  wb_sot_test ALL
                     COMMAND ${CMAKE_CTEST_COMMAND}
                     DEPENDS wb_sot
                     testAggregatedBounds
+                    testBilateralConstraintBounds
                     testJointLimitsVelocityBounds
                     testVelocityLimitsVelocityBounds
                     testCoMVelocityVelocityBounds
@@ -122,6 +123,10 @@ SET(VelocityBoundsLibs  wb_sot qpOASES ${drc_shared_LIBRARIES}
 ADD_EXECUTABLE(testAggregatedBounds     src/tests/wb_sot/bounds/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedBounds ${VelocityBoundsLibs})
 add_dependencies(testAggregatedBounds GTest-ext wb_sot)
+
+ADD_EXECUTABLE(testBilateralConstraintBounds     src/tests/wb_sot/bounds/TestBilateralConstraint.cpp)
+TARGET_LINK_LIBRARIES(testBilateralConstraintBounds ${VelocityBoundsLibs})
+add_dependencies(testBilateralConstraintBounds GTest-ext wb_sot)
 
 ADD_EXECUTABLE(testJointLimitsVelocityBounds    src/tests/wb_sot/bounds/velocity/TestJointLimits.cpp)
 TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${VelocityBoundsLibs})
@@ -170,6 +175,7 @@ add_dependencies(testSolverQPOases GTest-ext wb_sot qpOASES-ext)
 
 
 add_test(wb_sot_bounds_Aggregated testAggregatedBounds)
+add_test(wb_sot_bounds_BilateralConstraint testBilateralConstraintBounds)
 add_test(wb_sot_bounds_velocity_JointLimits  testJointLimitsVelocityBounds)
 add_test(wb_sot_bounds_velocity_VelocityLimit testVelocityLimitsVelocityBounds)
 add_test(wb_sot_bounds_velocity_CoMVelocity testCoMVelocityVelocityBounds)
