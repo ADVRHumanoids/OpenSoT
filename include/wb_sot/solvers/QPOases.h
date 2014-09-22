@@ -372,11 +372,13 @@ namespace wb_sot{
         }
 
         /**
-         * @brief getNumberOfConstraints return for each task the number of
+         * @brief getNumberOfConstraintsInQP return for each task the number of
          *  constraints contained
          * @return a vector of std::pair<constrain_id, number_of_constraints>
          */
-        std::vector<std::pair<std::string, int>> getNumberOfConstraints();
+        std::vector<std::pair<std::string, int>> getNumberOfConstraintsInQP();
+
+        std::vector<std::pair<std::string, int>> getNumberOfConstraintsInTaskList();
 
     protected:
         vector <boost::shared_ptr< Task<Matrix, Vector> >> _stack_of_tasks;

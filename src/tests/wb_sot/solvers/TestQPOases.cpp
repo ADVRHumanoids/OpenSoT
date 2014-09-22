@@ -10,6 +10,7 @@
 #include <drc_shared/comanutils.h>
 #include <wb_sot/tasks/velocity/Cartesian.h>
 #include <kdl/frames.hpp>
+#include <wb_sot/bounds/velocity/VelocityLimits.h>
 
 using namespace yarp::math;
 
@@ -479,8 +480,6 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
     idynutils.updateiDyn3Model(q, true);
 
-    std::cout<<"q: "<<q.toString()<<std::endl;
-
     //2 Tasks: Cartesian & Postural
     boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
                 new wb_sot::tasks::velocity::Cartesian("cartesian::l_wrist", q, idynutils,
@@ -495,13 +494,26 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
 
     cartesian_task->setReference(T_ref);
+    cartesian_task->setAlpha(1.0);
+    cartesian_task->setOrientationErrorGain(1.0);
+    yarp::sig::Matrix W = yarp::sig::Matrix(6,6).eye();
+    W.submatrix(0,3,0,3) = 100.0 * W.submatrix(0,3,0,3);
+    cartesian_task->setWeight(W);
     postural_task->setReference(q);
+    postural_task->setAlpha(1.0);
 
+
+    int t = 50;
     //Constraints set to the Cartesian Task
-//    boost::shared_ptr<JointLimits> joint_limits(
-//        new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
-//                           idynutils.coman_iDyn3.getJointBoundMin()));
-//    cartesian_task->getConstraints().push_back(joint_limits);
+    boost::shared_ptr<JointLimits> joint_limits(
+        new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
+                           idynutils.coman_iDyn3.getJointBoundMin()));
+    joint_limits->setBoundScaling((double)(0.01/t));
+    //cartesian_task->getConstraints().push_back(joint_limits);
+
+    boost::shared_ptr<VelocityLimits> joint_velocity_limits(
+                new VelocityLimits(0.3, (double)(1.0/t), q.size()));
+    cartesian_task->getConstraints().push_back(joint_velocity_limits);
 
     //Create the SoT
     std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
@@ -511,27 +523,28 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
     //Check the SoT
     EXPECT_TRUE(sot.getNumberOfTasks() == stack_of_tasks.size());
-    std::vector<std::pair<std::string, int>> number_of_constraints =
-            sot.getNumberOfConstraints();
-    EXPECT_TRUE(number_of_constraints.size() == stack_of_tasks.size());
-    EXPECT_TRUE(number_of_constraints[0].first == cartesian_task->getTaskID());
-    EXPECT_TRUE(number_of_constraints[1].first == postural_task->getTaskID());
 
-//    int constraints_cartesian_task = 0;
-//    constraints_cartesian_task = (*(cartesian_task->getConstraints().begin()))->getLowerBound().size();
-//    ASSERT_TRUE(number_of_constraints[0].second == constraints_cartesian_task);
+    std::vector<std::pair<std::string, int>> number_of_constraints_qp =
+            sot.getNumberOfConstraintsInQP();
+    EXPECT_TRUE(number_of_constraints_qp.size() == stack_of_tasks.size());
+    EXPECT_TRUE(number_of_constraints_qp[0].first == cartesian_task->getTaskID());
+    EXPECT_TRUE(number_of_constraints_qp[1].first == postural_task->getTaskID());
+//    ASSERT_TRUE(number_of_constraints_qp[0].second == 0);
+//    ASSERT_TRUE(number_of_constraints_qp[1].second == 6+29);
 
-//    int constraints_postural_task = 0;
-//    constraints_postural_task = constraints_cartesian_task + cartesian_task->getA().rows();
-//    ASSERT_TRUE(number_of_constraints[1].second == constraints_postural_task);
+    std::vector<std::pair<std::string, int>> number_of_constraints_task =
+            sot.getNumberOfConstraintsInTaskList();
+//    EXPECT_TRUE(number_of_constraints_task[0].second == 0);
+//    EXPECT_TRUE(number_of_constraints_task[1].second == 29);
 
     //Solve SoT
     idynutils.updateiDyn3Model(q, true);
     yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(
                 idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
 
+
     yarp::sig::Vector dq(q.size(), 0.0);
-    for(unsigned int i = 0; i < 100; ++i)
+    for(unsigned int i = 0; i < 10*t; ++i)
     {
         idynutils.updateiDyn3Model(q, true);
 
@@ -540,23 +553,13 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
         ASSERT_TRUE(sot.solve(dq));
         q += dq;
-////////////////////////////////////////////////////////////
-
-        EXPECT_TRUE(sot.getNumberOfTasks() == stack_of_tasks.size());
-        number_of_constraints = sot.getNumberOfConstraints();
-        EXPECT_TRUE(number_of_constraints.size() == stack_of_tasks.size());
-        EXPECT_TRUE(number_of_constraints[0].first == cartesian_task->getTaskID());
-        EXPECT_TRUE(number_of_constraints[1].first == postural_task->getTaskID());
-
-//        constraints_cartesian_task = 0;
-//        constraints_cartesian_task = (*(cartesian_task->getConstraints().begin()))->getLowerBound().size();
-//        ASSERT_TRUE(number_of_constraints[0].second == constraints_cartesian_task);
-
-//        constraints_postural_task = 0;
-//        constraints_postural_task = constraints_cartesian_task + cartesian_task->getA().rows();
-//        ASSERT_TRUE(number_of_constraints[1].second == constraints_postural_task)
-//                <<"EXPECTED # CONSTRAINTS POSTURAL TASK: "<<constraints_postural_task<<std::endl<<
-//                  "ACTUAL # CONSTRAINTS POSTURAL TASK: "<<number_of_constraints[1].second<<std::endl;
+////////////////////////////////////////////////////////////////
+        number_of_constraints_qp = sot.getNumberOfConstraintsInQP();
+        number_of_constraints_task = sot.getNumberOfConstraintsInTaskList();
+//        ASSERT_TRUE(number_of_constraints_qp[0].second == 0);
+//        ASSERT_TRUE(number_of_constraints_qp[1].second == 6+29);
+//        EXPECT_TRUE(number_of_constraints_task[0].second == 0);
+//        EXPECT_TRUE(number_of_constraints_task[1].second == 29);
     }
 
     idynutils.updateiDyn3Model(q);
@@ -570,12 +573,10 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     KDL::Frame T_kdl;
     cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_kdl);
     for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(T_kdl.p[i], T_ref_kdl.p[i], 1E-4);
+        EXPECT_NEAR(T_kdl.p[i], T_ref_kdl.p[i], 1E-3);
     for(unsigned int i = 0; i < 3; ++i)
         for(unsigned int j = 0; j < 3; ++j)
-            EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-4);
-
-
+            EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
 
 
 }

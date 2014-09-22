@@ -48,6 +48,11 @@ void JointLimits::update(const yarp::sig::Vector& x)
 
 }
 
+void JointLimits::setBoundScaling(const double boundScaling)
+{
+    _boundScaling = boundScaling;
+}
+
 
 
 

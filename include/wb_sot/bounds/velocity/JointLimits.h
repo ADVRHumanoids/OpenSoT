@@ -45,6 +45,7 @@
                             const double boundScaling = 1.0);
 
                 void update(const yarp::sig::Vector &x);
+                void setBoundScaling(const double boundScaling);
             };
         }
     }
