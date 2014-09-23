@@ -71,7 +71,7 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
     else
         assert(_robot.coman_iDyn3.getRelativeJacobian(_distal_link_index,
                                                       _base_link_index,
-                                                      _A, true));
+                                                      _A));
 
 
 
