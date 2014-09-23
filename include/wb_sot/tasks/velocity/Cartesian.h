@@ -23,7 +23,9 @@
  #include <drc_shared/utils/convex_hull.h>
  #include <kdl/frames.hpp>
  #include <yarp/sig/all.h>
-#include <yarp/os/all.h>
+ #include <yarp/os/all.h>
+
+ #define WORLD_FRAME_NAME "world"
 
  namespace wb_sot {
     namespace tasks {
@@ -40,6 +42,8 @@
 
                 yarp::sig::Matrix _actualPose;
                 yarp::sig::Matrix _desiredPose;
+
+                bool _base_link_is_world;
 
                 void update_b();
 

@@ -5,10 +5,10 @@
 #include <wb_sot/tasks/velocity/Postural.h>
 #include <drc_shared/tests_utils.h>
 #include <yarp/math/Math.h>
-#include <wb_sot/bounds/Aggregated.h>
-#include <wb_sot/bounds/velocity/JointLimits.h>
 #include <drc_shared/comanutils.h>
+#include <wb_sot/bounds/Aggregated.h>
 #include <wb_sot/tasks/velocity/Cartesian.h>
+#include <wb_sot/bounds/velocity/JointLimits.h>
 #include <kdl/frames.hpp>
 #include <wb_sot/bounds/velocity/VelocityLimits.h>
 
@@ -18,6 +18,243 @@ using namespace yarp::math;
 #define DEFAULT "\033[0m"
 
 namespace {
+
+bool solveQP(   const yarp::sig::Matrix &J0,
+                const yarp::sig::Vector &e0,
+                const yarp::sig::Matrix &J1,
+                const yarp::sig::Vector &eq,
+                qpOASES::HessianType t1HessianType,
+                const yarp::sig::Vector &l,
+                const yarp::sig::Vector &u,
+                const yarp::sig::Vector &q,
+                yarp::sig::Vector &dq_ref)
+{
+    int nj = q.size();
+
+    static bool initial_guess = false;
+
+    static yarp::sig::Vector dq0(nj, 0.0);
+    static yarp::sig::Vector dq1(nj, 0.0);;
+    static yarp::sig::Vector y0(nj, 0.0);
+    static yarp::sig::Vector y1(nj, 0.0);
+
+    static qpOASES::Bounds bounds0;
+    static qpOASES::Bounds bounds1;
+    static qpOASES::Constraints constraints0;
+    static qpOASES::Constraints constraints1;
+
+
+    /**
+      We solve a single QP where the priority between
+      different tasks is set by using a weight matrix Q
+
+      min         (Ax - b)'Q(Ax - b)
+      subj to     l <=   x <=  u
+
+      QPOASES::Quadratic_program solves by default a quadratic problem in the form
+      min         x'Hx + x'g
+      subj to  Alb <= Ax <= Aub
+                 l <=  x <= u
+     **/
+
+    int njTask0 = J0.rows();
+
+    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
+    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
+
+    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
+    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
+
+    USING_NAMESPACE_QPOASES
+
+    /** Setting up QProblem object. **/
+    Options qpOasesOptionsqp0;
+    qpOasesOptionsqp0.printLevel = PL_HIGH;
+    qpOasesOptionsqp0.setToReliable();
+    qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
+    qpOasesOptionsqp0.epsRegularisation *= 2E2;
+    QProblem qp0( nj, 0, HST_SEMIDEF);
+    qp0.setOptions( qpOasesOptionsqp0 );
+
+    Options qpOasesOptionsqp1;
+    qpOasesOptionsqp1.printLevel = PL_HIGH;
+    qpOasesOptionsqp1.setToReliable();
+    qpOasesOptionsqp1.enableRegularisation = BT_TRUE;
+    qpOasesOptionsqp1.epsRegularisation *= 2E2;
+    QProblem qp1( nj, njTask0, t1HessianType);
+    qp1.setOptions( qpOasesOptionsqp1 );
+
+    /** Solve zero QP. **/
+    int nWSR = 127;
+    if(initial_guess==true)
+        qp0.init( H0.data(),g0.data(),
+                  NULL,
+                  l.data(), u.data(),
+                  NULL, NULL,
+                  nWSR,0,
+                  dq0.data(), y0.data(),
+                  &bounds0, &constraints0);
+    else {
+        qp0.init( H0.data(),g0.data(),
+                  NULL,
+                  l.data(), u.data(),
+                  NULL, NULL,
+                  nWSR,0);
+        std::cout << GREEN << "Not using initial guess" << DEFAULT;
+    }
+
+    if(dq0.size() != qp0.getNV()) {
+        dq0.resize(qp0.getNV());
+        initial_guess = false;
+    }
+    if(y0.size() != qp0.getNV() + qp0.getNC()) {
+        y0.resize(qp0.getNV()+ qp0.getNC());
+        initial_guess = false;
+    }
+
+    int success0 = qp0.getPrimalSolution( dq0.data() );
+    qp0.getDualSolution(y0.data());
+    qp0.getBounds(bounds0);
+    qp0.getConstraints(constraints0);
+
+    if(success0== RET_QP_NOT_SOLVED ||
+      (success0 != RET_QP_SOLVED && success0 != SUCCESSFUL_RETURN))
+    {
+        std::cout << GREEN <<
+                     "ERROR OPTIMIZING ZERO TASK! ERROR #" <<
+                     success0 <<
+                     "Not using initial guess" << DEFAULT;
+
+        initial_guess = false;
+    }
+    else
+    {
+        /** Solve first QP. **/
+        yarp::sig::Matrix A1 = J0;
+        yarp::sig::Vector b1 = J0*dq0;
+        yarp::sig::Vector lA1 = b1;
+        yarp::sig::Vector uA1 = b1;
+
+        nWSR = 127;
+
+        if(initial_guess == true)
+            qp1.init( H1.data(),g1.data(),
+                      A1.data(),
+                      l.data(), u.data(),
+                      lA1.data(), uA1.data(),
+                      nWSR, 0,
+                      dq1.data(), y1.data(),
+                      &bounds1, &constraints1);
+        else
+            qp1.init( H1.data(),g1.data(),
+                      A1.data(),
+                      l.data(), u.data(),
+                      lA1.data(), uA1.data(),
+                      nWSR, 0);
+
+        if(dq1.size() != qp1.getNV()) {
+            dq1.resize(qp1.getNV());
+            initial_guess = false;
+        }
+        if(y1.size() != qp1.getNV() + qp1.getNC()) {
+            y1.resize(qp1.getNV() + qp1.getNC());
+            initial_guess = false;
+        }
+
+        int success1 = qp1.getPrimalSolution( dq1.data() );
+        qp1.getDualSolution(y1.data());
+        qp1.getBounds(bounds1);
+        qp1.getConstraints(constraints1);
+
+        if(success1 == RET_QP_NOT_SOLVED ||
+          (success1 != RET_QP_SOLVED && success1 != SUCCESSFUL_RETURN))
+        {
+            std::cout << GREEN <<
+                         "ERROR OPTIMIZING POSTURE TASK! ERROR #" <<
+                         success1 << DEFAULT;
+            initial_guess = false;
+        }
+        else
+        {
+            dq_ref = dq1;
+            initial_guess = true;
+            return true;
+       }
+    }
+    return false;
+}
+
+bool solveQPrefactor(   const yarp::sig::Matrix &J0,
+                        const yarp::sig::Vector &e0,
+                        const yarp::sig::Matrix &J1,
+                        const yarp::sig::Vector &eq,
+                        qpOASES::HessianType t1HessianType,
+                        const yarp::sig::Vector &u,
+                        const yarp::sig::Vector &l,
+                        const yarp::sig::Vector &q,
+                        yarp::sig::Vector &dq_ref)
+{
+    int nj = q.size();
+
+    int njTask0 = J0.rows();
+
+    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
+    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
+
+    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
+    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
+
+    yarp::sig::Matrix A0(0,nj);
+    yarp::sig::Vector lA0(0), uA0(0);
+
+    USING_NAMESPACE_QPOASES
+
+    static wb_sot::solvers::QPOasesProblem qp0(nj, 0, HST_SEMIDEF);
+    qp0.setnWSR(127);
+    static bool result0 = false;
+    if(!qp0.isQProblemInitialized())
+        result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
+    else
+    {
+        qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
+        result0 = qp0.solve();
+    }
+
+    if(result0)
+    {
+        yarp::sig::Vector dq0 = qp0.getSolution();
+        yarp::sig::Matrix A1 = J0;
+        yarp::sig::Vector b1 = J0*dq0;
+        yarp::sig::Vector lA1 = b1;
+        yarp::sig::Vector uA1 = b1;
+
+        static wb_sot::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
+        qp1.setnWSR(127);
+        static bool result1 = false;
+        if(!qp1.isQProblemInitialized())
+            result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
+        else
+        {
+            qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
+            result1 = qp1.solve();
+        }
+        if(result1)
+        {
+            dq_ref = qp1.getSolution();
+            return true;
+        }
+        else
+        {
+            std::cout << GREEN << "ERROR OPTIMIZING POSTURE TASK" << DEFAULT;
+            return false;
+        }
+    }
+    else
+    {
+        std::cout << GREEN << "ERROR OPTIMIZING CARTESIAN TASK" << DEFAULT;
+        return false;
+    }
+}
 
 class simpleProblem
 {
@@ -580,6 +817,110 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
 
 }
+
+
+TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
+{
+    iDynUtils idynutils;
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 20.0 * M_PI/180.0;
+    arm[1] = 10.0 * M_PI/180.0;
+    arm[3] = -80.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+    arm[1] = -arm[1];
+    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    idynutils.updateiDyn3Model(q, true);
+
+    yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
+
+    //2 Tasks: Cartesian & Postural
+    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
+                new wb_sot::tasks::velocity::Cartesian("cartesian::l_wrist", q, idynutils,
+                                                       "l_wrist", "Waist"));
+    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
+                new wb_sot::tasks::velocity::Postural(q));
+
+    KDL::Frame T_ref_kdl;
+    T_ref_kdl.p[0] = -0.200; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.112;
+    T_ref_kdl.M.Quaternion(-0.000, 0.027, 0.000, 1.000);
+    yarp::sig::Matrix T_ref;
+    cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
+
+    T_ref = T_init;
+    T_ref(2,3) = T_ref(2,3) + 0.05;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_ref, T_ref_kdl);
+
+    cartesian_task->setReference(T_ref);
+    cartesian_task->setAlpha(0.1);
+    cartesian_task->setOrientationErrorGain(1.0);
+    postural_task->setReference(q);
+    postural_task->setAlpha(0.1);
+
+
+    int t = 50;
+    std::list< wb_sot::bounds::Aggregated::BoundPointer> constraints_list;
+
+    boost::shared_ptr<wb_sot::bounds::Aggregated> aggregated_bounds(
+                new wb_sot::bounds::Aggregated(constraints_list,q.size()));
+
+    //Constraints set to the Cartesian Task
+    boost::shared_ptr<JointLimits> joint_limits(
+        new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
+                           idynutils.coman_iDyn3.getJointBoundMin()));
+    joint_limits->setBoundScaling((double)(1.0/t));
+    constraints_list.push_back(joint_limits);
+
+    boost::shared_ptr<VelocityLimits> joint_velocity_limits(
+                new VelocityLimits(0.3, (double)(1.0/t), q.size()));
+    constraints_list.push_back(joint_velocity_limits);
+
+    //Solve SoT
+    yarp::sig::Vector dq(q.size(), 0.0);
+    for(unsigned int i = 0; i < 10*t; ++i)
+    {
+        idynutils.updateiDyn3Model(q, true);
+
+        cartesian_task->update(q);
+        postural_task->update(q);
+        aggregated_bounds->update(q);
+
+        solveQP(cartesian_task->getA(), cartesian_task->getb(),
+                postural_task->getA(), postural_task->getb(),
+                qpOASES::HST_SEMIDEF,
+                aggregated_bounds->getLowerBound(),
+                aggregated_bounds->getUpperBound(),
+                q, dq);
+
+        q += dq;
+////////////////////////////////////////////////////////////////
+    }
+
+    idynutils.updateiDyn3Model(q);
+    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+    yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
+    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
+    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+
+
+    KDL::Frame T_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_kdl);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T_kdl.p[i], T_ref_kdl.p[i], 1E-3);
+    for(unsigned int i = 0; i < 3; ++i)
+        for(unsigned int j = 0; j < 3; ++j)
+            EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
+
+}
+
 
 }
 

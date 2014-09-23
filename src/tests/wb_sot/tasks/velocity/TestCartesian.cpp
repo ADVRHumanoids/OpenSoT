@@ -50,7 +50,7 @@ TEST_F(testCartesianTask, testCartesianTask_)
                                                  q_whole,
                                                  _robot,
                                                  "l_sole",
-                                                 "Waist");
+                                                 "world");
 
     // setting x_ref with a delta offset along the z axis (-2cm)
     yarp::sig::Matrix delta_x(4,4); delta_x.zero();
