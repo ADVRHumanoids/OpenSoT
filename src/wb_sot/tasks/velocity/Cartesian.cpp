@@ -41,7 +41,7 @@ Cartesian::Cartesian(std::string task_id,
     }
 
     this->_distal_link_index = robot.coman_iDyn3.getLinkIndex(_distal_link);
-    assert(this->_distal_link_index > 0);
+    assert(this->_distal_link_index >= 0);
 
     if(!this->_base_link_is_world)
         assert(this->_distal_link_index != _base_link_index);
