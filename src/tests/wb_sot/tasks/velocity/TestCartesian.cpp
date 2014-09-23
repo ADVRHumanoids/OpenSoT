@@ -86,7 +86,7 @@ TEST_F(testCartesianTask, testCartesianTask_)
     EXPECT_TRUE(cartesian.getb() == cat(positionError, -orientationErrorGain*orientationError));
 
     yarp::sig::Matrix x_now;
-    for(unsigned int i = 0; i < 50; ++i)
+    for(unsigned int i = 0; i < 60; ++i)
     {
         _robot.updateiDyn3Model(q_whole);
         cartesian._update(q_whole);
@@ -101,6 +101,15 @@ TEST_F(testCartesianTask, testCartesianTask_)
 
     EXPECT_LT( findMax((x_ref-x_now).subcol(0,3,3)), 1E-3 );
     EXPECT_LT( abs(findMin((x_ref-x_now).subcol(0,3,3))), 1E-3 );
+    // checking for the position
+    for(unsigned int i = 0; i < 3; ++i) {
+        EXPECT_NEAR(x_ref(i,3),x_now(i,3),1E-4);
+    }
+    for(unsigned int i = 0; i < 3; ++i) {
+        for(unsigned int j = 0; j < 3; ++j) {
+            EXPECT_NEAR(x_ref(i,j),x_now(i,j),1E-4);
+        }
+    }
 
     for(unsigned int i = 0; i < 6; ++i)
         EXPECT_DOUBLE_EQ(q_whole[_robot.right_leg.joint_numbers[i]],0.0);
