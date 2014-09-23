@@ -643,7 +643,7 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     }
 }
 
-TEST_F(testQPOasesTask, testCaresian)
+TEST_F(testQPOasesTask, testCartesian)
 {
     iDynUtils idynutils;
     yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
@@ -725,54 +725,39 @@ TEST_F(testQPOases_sot, testContructor2Problems)
                 new wb_sot::tasks::velocity::Postural(q));
 
     KDL::Frame T_ref_kdl;
-    T_ref_kdl.p[0] = -0.200; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.112;
-    T_ref_kdl.M.Quaternion(-0.000, 0.027, 0.000, 1.000);
+    T_ref_kdl.p[0] = 0.283; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.499;
+    T_ref_kdl.M = T_ref_kdl.M.Quaternion(0.0, 0.975, 0.0, -0.221);
     yarp::sig::Matrix T_ref;
     cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
 
     cartesian_task->setReference(T_ref);
-    cartesian_task->setAlpha(1.0);
-    cartesian_task->setOrientationErrorGain(1.0);
-    yarp::sig::Matrix W = yarp::sig::Matrix(6,6).eye();
-    W.submatrix(0,3,0,3) = 100.0 * W.submatrix(0,3,0,3);
-    cartesian_task->setWeight(W);
     postural_task->setReference(q);
-    postural_task->setAlpha(1.0);
-
 
     int t = 50;
     //Constraints set to the Cartesian Task
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
                            idynutils.coman_iDyn3.getJointBoundMin()));
-    joint_limits->setBoundScaling((double)(0.01/t));
-    //cartesian_task->getConstraints().push_back(joint_limits);
+    joint_limits->setBoundScaling((double)(1.0/t));
 
     boost::shared_ptr<VelocityLimits> joint_velocity_limits(
                 new VelocityLimits(0.3, (double)(1.0/t), q.size()));
-    cartesian_task->getConstraints().push_back(joint_velocity_limits);
+
+    std::list<boost::shared_ptr<wb_sot::Bounds<Matrix, Vector>>> joint_constraints_list;
+    joint_constraints_list.push_back(joint_limits);
+    joint_constraints_list.push_back(joint_velocity_limits);
+
+    boost::shared_ptr<wb_sot::bounds::Aggregated> joint_constraints(
+                new wb_sot::bounds::Aggregated(joint_constraints_list, q.size()));
+
+    cartesian_task->getConstraints().push_back(joint_constraints);
+
 
     //Create the SoT
     std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
-    stack_of_tasks.push_back(postural_task);
+    //stack_of_tasks.push_back(postural_task);
     wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
-
-    //Check the SoT
-    EXPECT_TRUE(sot.getNumberOfTasks() == stack_of_tasks.size());
-
-    std::vector<std::pair<std::string, int>> number_of_constraints_qp =
-            sot.getNumberOfConstraintsInQP();
-    EXPECT_TRUE(number_of_constraints_qp.size() == stack_of_tasks.size());
-    EXPECT_TRUE(number_of_constraints_qp[0].first == cartesian_task->getTaskID());
-    EXPECT_TRUE(number_of_constraints_qp[1].first == postural_task->getTaskID());
-//    ASSERT_TRUE(number_of_constraints_qp[0].second == 0);
-//    ASSERT_TRUE(number_of_constraints_qp[1].second == 6+29);
-
-    std::vector<std::pair<std::string, int>> number_of_constraints_task =
-            sot.getNumberOfConstraintsInTaskList();
-//    EXPECT_TRUE(number_of_constraints_task[0].second == 0);
-//    EXPECT_TRUE(number_of_constraints_task[1].second == 29);
 
     //Solve SoT
     idynutils.updateiDyn3Model(q, true);
@@ -781,7 +766,7 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    for(unsigned int i = 0; i < 10*t; ++i)
+    for(unsigned int i = 0; i < 250; ++i)
     {
         idynutils.updateiDyn3Model(q, true);
 
@@ -790,13 +775,11 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
         ASSERT_TRUE(sot.solve(dq));
         q += dq;
-////////////////////////////////////////////////////////////////
-        number_of_constraints_qp = sot.getNumberOfConstraintsInQP();
-        number_of_constraints_task = sot.getNumberOfConstraintsInTaskList();
-//        ASSERT_TRUE(number_of_constraints_qp[0].second == 0);
-//        ASSERT_TRUE(number_of_constraints_qp[1].second == 6+29);
-//        EXPECT_TRUE(number_of_constraints_task[0].second == 0);
-//        EXPECT_TRUE(number_of_constraints_task[1].second == 29);
+
+
+        std::cout<<"q: "<<q.toString()<<std::endl;
+        std::cout<<"q_min-q: "<<(idynutils.coman_iDyn3.getJointBoundMin()-q).toString()<<std::endl;
+        std::cout<<"q_max-q: "<<(idynutils.coman_iDyn3.getJointBoundMax()-q).toString()<<std::endl;
     }
 
     idynutils.updateiDyn3Model(q);

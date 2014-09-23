@@ -256,6 +256,9 @@ bool QPOasesProblem::solve()
     {
         hack(); //<- PAY ATTENTION!
 
+        std::cout<<"IN SOLVE u: "<<_u.toString()<<std::endl;
+        std::cout<<"IN SOLVE l: "<<_l.toString()<<std::endl;
+
         int nWSR = _nWSR;
         _problem->hotstart(_H.data(),_g.data(),
                        _A_ptr,
