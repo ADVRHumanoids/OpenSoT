@@ -69,7 +69,7 @@ bool solveQP(   const yarp::sig::Matrix &J0,
 
     /** Setting up QProblem object. **/
     Options qpOasesOptionsqp0;
-    qpOasesOptionsqp0.printLevel = PL_HIGH;
+    qpOasesOptionsqp0.printLevel = PL_NONE;
     qpOasesOptionsqp0.setToReliable();
     qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
     qpOasesOptionsqp0.epsRegularisation *= 2E2;
@@ -77,7 +77,7 @@ bool solveQP(   const yarp::sig::Matrix &J0,
     qp0.setOptions( qpOasesOptionsqp0 );
 
     Options qpOasesOptionsqp1;
-    qpOasesOptionsqp1.printLevel = PL_HIGH;
+    qpOasesOptionsqp1.printLevel = PL_NONE;
     qpOasesOptionsqp1.setToReliable();
     qpOasesOptionsqp1.enableRegularisation = BT_TRUE;
     qpOasesOptionsqp1.epsRegularisation *= 2E2;
@@ -85,7 +85,7 @@ bool solveQP(   const yarp::sig::Matrix &J0,
     qp1.setOptions( qpOasesOptionsqp1 );
 
     /** Solve zero QP. **/
-    int nWSR = 127;
+    int nWSR = 132;
     if(initial_guess==true)
         qp0.init( H0.data(),g0.data(),
                   NULL,
@@ -135,7 +135,7 @@ bool solveQP(   const yarp::sig::Matrix &J0,
         yarp::sig::Vector lA1 = b1;
         yarp::sig::Vector uA1 = b1;
 
-        nWSR = 127;
+        nWSR = 132;
 
         if(initial_guess == true)
             qp1.init( H1.data(),g1.data(),
@@ -662,7 +662,8 @@ TEST_F(testQPOasesTask, testCartesian)
     idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
     idynutils.updateiDyn3Model(q, true);
 
-    yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(0,
+    yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(
+                          idynutils.coman_iDyn3.getLinkIndex("Waist"),
                           idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
 
     //2 Tasks: Cartesian & Postural
@@ -689,7 +690,9 @@ TEST_F(testQPOasesTask, testCartesian)
         q += cartesian_qp.getSolution();
     }
 
-    T = idynutils.coman_iDyn3.getPosition(idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
+    T = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex("Waist"),
+                idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
 
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(T(i,3), T_ref(i,3), 1E-4);
@@ -717,6 +720,12 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
     idynutils.updateiDyn3Model(q, true);
 
+    yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex("Waist"),
+                idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
+    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+
+
     //2 Tasks: Cartesian & Postural
     boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
                 new wb_sot::tasks::velocity::Cartesian("cartesian::l_wrist", q, idynutils,
@@ -724,14 +733,8 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
                 new wb_sot::tasks::velocity::Postural(q));
 
-    KDL::Frame T_ref_kdl;
-    T_ref_kdl.p[0] = 0.283; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.499;
-    T_ref_kdl.M = T_ref_kdl.M.Quaternion(0.0, 0.975, 0.0, -0.221);
-    yarp::sig::Matrix T_ref;
-    cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
-
-    cartesian_task->setReference(T_ref);
     postural_task->setReference(q);
+    cartesian_task->setReference(T_init);
 
     int t = 50;
     //Constraints set to the Cartesian Task
@@ -756,17 +759,28 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     //Create the SoT
     std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
-    //stack_of_tasks.push_back(postural_task);
+    stack_of_tasks.push_back(postural_task);
+
+    std::cout<<"Initial Position Error: "<<cartesian_task->positionError.toString()<<std::endl;
+    std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError.toString()<<std::endl;
+
     wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+
+
+    KDL::Frame T_ref_kdl;
+    T_ref_kdl.p[0] = 0.283; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.499;
+    T_ref_kdl.M = T_ref_kdl.M.Quaternion(0.0, 0.975, 0.0, -0.221);
+    yarp::sig::Matrix T_ref;
+    cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
+
+    cartesian_task->setReference(T_ref);
 
     //Solve SoT
     idynutils.updateiDyn3Model(q, true);
-    yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(
-                idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
 
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    for(unsigned int i = 0; i < 250; ++i)
+    for(unsigned int i = 0; i < 10*t; ++i)
     {
         idynutils.updateiDyn3Model(q, true);
 
@@ -775,19 +789,15 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
         ASSERT_TRUE(sot.solve(dq));
         q += dq;
-
-
-        std::cout<<"q: "<<q.toString()<<std::endl;
-        std::cout<<"q_min-q: "<<(idynutils.coman_iDyn3.getJointBoundMin()-q).toString()<<std::endl;
-        std::cout<<"q_max-q: "<<(idynutils.coman_iDyn3.getJointBoundMax()-q).toString()<<std::endl;
-    }
+        }
 
     idynutils.updateiDyn3Model(q);
-    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+//    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
     yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex("Waist"),
                 idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
-    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
-    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+//    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
+//    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
 
 
     KDL::Frame T_kdl;
@@ -822,20 +832,18 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
     idynutils.updateiDyn3Model(q, true);
 
     yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(
-                idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
+                idynutils.coman_iDyn3.getLinkIndex("Waist"),
+                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
 
     //2 Tasks: Cartesian & Postural
     boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::l_wrist", q, idynutils,
-                                                       "l_wrist", "Waist"));
+                new wb_sot::tasks::velocity::Cartesian("cartesian::r_wrist", q, idynutils,
+                                                       "r_wrist", "Waist"));
     boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
                 new wb_sot::tasks::velocity::Postural(q));
 
     KDL::Frame T_ref_kdl;
-    T_ref_kdl.p[0] = -0.200; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.112;
-    T_ref_kdl.M.Quaternion(-0.000, 0.027, 0.000, 1.000);
     yarp::sig::Matrix T_ref;
-    cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
 
     T_ref = T_init;
     T_ref(2,3) = T_ref(2,3) + 0.05;
@@ -851,9 +859,6 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
     int t = 50;
     std::list< wb_sot::bounds::Aggregated::BoundPointer> constraints_list;
 
-    boost::shared_ptr<wb_sot::bounds::Aggregated> aggregated_bounds(
-                new wb_sot::bounds::Aggregated(constraints_list,q.size()));
-
     //Constraints set to the Cartesian Task
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
@@ -865,6 +870,9 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
                 new VelocityLimits(0.3, (double)(1.0/t), q.size()));
     constraints_list.push_back(joint_velocity_limits);
 
+    boost::shared_ptr<wb_sot::bounds::Aggregated> aggregated_bounds(
+                new wb_sot::bounds::Aggregated(constraints_list,q.size()));
+
     //Solve SoT
     yarp::sig::Vector dq(q.size(), 0.0);
     for(unsigned int i = 0; i < 10*t; ++i)
@@ -875,23 +883,24 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
         postural_task->update(q);
         aggregated_bounds->update(q);
 
-        solveQP(cartesian_task->getA(), cartesian_task->getb(),
+        ASSERT_TRUE(solveQP(cartesian_task->getA(), cartesian_task->getb(),
                 postural_task->getA(), postural_task->getb(),
                 qpOASES::HST_SEMIDEF,
                 aggregated_bounds->getLowerBound(),
                 aggregated_bounds->getUpperBound(),
-                q, dq);
+                q, dq));
 
         q += dq;
 ////////////////////////////////////////////////////////////////
     }
 
     idynutils.updateiDyn3Model(q);
-    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+    //std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
     yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(
-                idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
-    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
-    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+                idynutils.coman_iDyn3.getLinkIndex("Waist"),
+                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
+//    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
+//    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
 
 
     KDL::Frame T_kdl;
@@ -901,7 +910,6 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
     for(unsigned int i = 0; i < 3; ++i)
         for(unsigned int j = 0; j < 3; ++j)
             EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
-
 }
 
 

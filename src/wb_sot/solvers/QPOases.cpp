@@ -34,7 +34,7 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _is_initialized(false)
 {
     qpOASES::Options opt;
-    opt.printLevel = qpOASES::PL_HIGH;
+    opt.printLevel = qpOASES::PL_NONE;
     opt.setToReliable();
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= 2E2;
@@ -179,7 +179,7 @@ bool QPOasesProblem::addTask(const Matrix &H, const Vector &g)
                                                               number_of_constraints,
                                                               hessian_type));
         qpOASES::Options opt;
-        opt.printLevel = qpOASES::PL_HIGH;
+        opt.printLevel = qpOASES::PL_NONE;
         opt.setToReliable();
         opt.enableRegularisation = qpOASES::BT_TRUE;
         opt.epsRegularisation *= 2E2;
@@ -206,7 +206,7 @@ bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vec
                                                               number_of_constraints,
                                                               hessian_type));
         qpOASES::Options opt;
-        opt.printLevel = qpOASES::PL_HIGH;
+        opt.printLevel = qpOASES::PL_NONE;
         opt.setToReliable();
         opt.enableRegularisation = qpOASES::BT_TRUE;
         opt.epsRegularisation *= 2E2;
@@ -231,7 +231,7 @@ bool QPOasesProblem::addBounds(const Vector &l, const Vector &u)
                                                               number_of_constraints,
                                                               hessian_type));
         qpOASES::Options opt;
-        opt.printLevel = qpOASES::PL_HIGH;
+        opt.printLevel = qpOASES::PL_NONE;
         opt.setToReliable();
         opt.enableRegularisation = qpOASES::BT_TRUE;
         opt.epsRegularisation *= 2E2;
@@ -255,9 +255,6 @@ bool QPOasesProblem::solve()
     if(_is_initialized)
     {
         hack(); //<- PAY ATTENTION!
-
-        std::cout<<"IN SOLVE u: "<<_u.toString()<<std::endl;
-        std::cout<<"IN SOLVE l: "<<_l.toString()<<std::endl;
 
         int nWSR = _nWSR;
         _problem->hotstart(_H.data(),_g.data(),
@@ -300,6 +297,7 @@ QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
     _task(task)
 {
     prepareData();
+    printProblemInformation();
     assert(initProblem(_H, _g, _A, _lA, _uA, _l, _u));
 }
 
@@ -344,10 +342,10 @@ void QPOasesTask::printProblemInformation(unsigned int i)
 //    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
 //    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
 //    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
-    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
-    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
-    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
-    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
+//    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
+//    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
+//    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
+//    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
     std::cout<<std::endl;
 }
 
@@ -456,7 +454,7 @@ bool QPOases_sot::solve(Vector &solution)
         solved_task_i =  _qp_stack_of_tasks[i].solve(update_constraints);
         solution = _qp_stack_of_tasks[i].getSolution();
 
-        _qp_stack_of_tasks[i].printProblemInformation(i);
+        //_qp_stack_of_tasks[i].printProblemInformation(i);
         //std::cout<<"SOLUTION PROBLEM i: "<<solution.toString()<<std::endl;
     }
     return solved_task_i && expanded;

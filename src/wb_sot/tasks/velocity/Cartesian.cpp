@@ -41,7 +41,10 @@ Cartesian::Cartesian(std::string task_id,
     }
 
     this->_distal_link_index = robot.coman_iDyn3.getLinkIndex(_distal_link);
-    assert(this->_distal_link_index > 0);
+    assert(this->_distal_link_index >= 0);
+
+    if(!this->_base_link_is_world)
+        assert(this->_distal_link_index != _base_link_index);
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
@@ -61,14 +64,17 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
 
     /************************* COMPUTING TASK *****************************/
 
-    if(_base_link_is_world)
+    if(_base_link_is_world){
         assert(_robot.coman_iDyn3.getJacobian(_distal_link_index,_A));
+        _A = _A.removeCols(0,6);    // removing unactuated joints (floating base)
+    }
     else
         assert(_robot.coman_iDyn3.getRelativeJacobian(_distal_link_index,
                                                       _base_link_index,
                                                       _A, true));
 
-    _A = _A.removeCols(0,6);    // removing unactuated joints (floating base)
+
+
 
     if(_base_link_is_world)
         _actualPose = _robot.coman_iDyn3.getPosition(_distal_link_index);
