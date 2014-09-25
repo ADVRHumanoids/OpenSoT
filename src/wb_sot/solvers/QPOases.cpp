@@ -33,17 +33,22 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _solution(number_of_variables), _dual_solution(number_of_variables),
     _is_initialized(false)
 {
-    qpOASES::Options opt;
-    opt.printLevel = qpOASES::PL_NONE;
-    opt.setToReliable();
-    opt.enableRegularisation = qpOASES::BT_TRUE;
-    opt.epsRegularisation *= 2E2;
-    _problem->setOptions(opt);
+    setDefaultOptions();
 }
 
 void QPOasesProblem::setProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem)
 {
     _problem = problem;
+}
+
+void QPOasesProblem::setDefaultOptions()
+{
+    qpOASES::Options opt;
+    opt.setToReliable();
+    opt.printLevel = qpOASES::PL_NONE;
+    opt.enableRegularisation = qpOASES::BT_TRUE;
+    opt.epsRegularisation *= 2E2;
+    _problem->setOptions(opt);
 }
 
 void QPOasesProblem::setOptions(const qpOASES::Options &options)
@@ -97,6 +102,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
     {
         _is_initialized = false;
         std::cout<<"ERROR INITIALIZING QP PROBLEM "<<std::endl;
+        std::cout<<"CODE ERROR: "<<val<<std::endl;
         return _is_initialized;
     }
 
@@ -178,12 +184,7 @@ bool QPOasesProblem::addTask(const Matrix &H, const Vector &g)
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        qpOASES::Options opt;
-        opt.printLevel = qpOASES::PL_NONE;
-        opt.setToReliable();
-        opt.enableRegularisation = qpOASES::BT_TRUE;
-        opt.epsRegularisation *= 2E2;
-        _problem->setOptions(opt);
+        setDefaultOptions();
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
     return false;
@@ -205,12 +206,7 @@ bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vec
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        qpOASES::Options opt;
-        opt.printLevel = qpOASES::PL_NONE;
-        opt.setToReliable();
-        opt.enableRegularisation = qpOASES::BT_TRUE;
-        opt.epsRegularisation *= 2E2;
-        _problem->setOptions(opt);
+        setDefaultOptions();
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
     return false;
@@ -230,12 +226,7 @@ bool QPOasesProblem::addBounds(const Vector &l, const Vector &u)
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        qpOASES::Options opt;
-        opt.printLevel = qpOASES::PL_NONE;
-        opt.setToReliable();
-        opt.enableRegularisation = qpOASES::BT_TRUE;
-        opt.epsRegularisation *= 2E2;
-        _problem->setOptions(opt);
+        setDefaultOptions();
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
     return false;

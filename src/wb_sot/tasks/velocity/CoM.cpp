@@ -50,7 +50,7 @@ CoM::~CoM()
 }
 
 void CoM::_update(const yarp::sig::Vector &x) {
-    _robot.updateiDyn3Model(x);
+    _robot.updateiDyn3Model(x,true);
 
     /************************* COMPUTING TASK *****************************/
 
@@ -75,7 +75,8 @@ void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
 }
 
 void CoM::update_b() {
-    _b = _desiredPosition - _actualPosition;
+    positionError = _desiredPosition - _actualPosition;
+    _b = positionError;
 }
 
 

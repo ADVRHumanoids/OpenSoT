@@ -66,6 +66,11 @@ namespace wb_sot{
         ~QPOasesProblem(){}
 
         /**
+         * @brief setDefaultOptions to internal qpOases problem
+         */
+        void setDefaultOptions();
+
+        /**
          * @brief setProblem copy a QP Problem in the internal object of the class.
          * @param problem to copy
          */

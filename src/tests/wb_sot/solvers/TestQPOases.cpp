@@ -11,6 +11,7 @@
 #include <wb_sot/bounds/velocity/JointLimits.h>
 #include <kdl/frames.hpp>
 #include <wb_sot/bounds/velocity/VelocityLimits.h>
+#include <wb_sot/tasks/velocity/CoM.h>
 
 using namespace yarp::math;
 
@@ -718,6 +719,11 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
     arm[1] = -arm[1];
     idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    yarp::sig::Vector torso(idynutils.torso.getNrOfDOFs(), 0.0);
+    torso[0] = tests_utils::getRandomAngle(-20.0*M_PI/180.0, 20.0*M_PI/180.0);
+    torso[1] = tests_utils::getRandomAngle(0.0, 45.0*M_PI/180.0);
+    torso[2] = tests_utils::getRandomAngle(-30.0*M_PI/180.0, 30.0*M_PI/180.0);
+    idynutils.fromRobotToIDyn(torso, q, idynutils.torso);
     idynutils.updateiDyn3Model(q, true);
 
     yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(
@@ -789,7 +795,7 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
         ASSERT_TRUE(sot.solve(dq));
         q += dq;
-        }
+    }
 
     idynutils.updateiDyn3Model(q);
 //    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
@@ -910,6 +916,92 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
     for(unsigned int i = 0; i < 3; ++i)
         for(unsigned int j = 0; j < 3; ++j)
             EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
+}
+
+TEST_F(testQPOases_sot, test3Problems)
+{
+    iDynUtils idynutils;
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 20.0 * M_PI/180.0;
+    arm[1] = 10.0 * M_PI/180.0;
+    arm[3] = -80.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+    arm[1] = -arm[1];
+    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    idynutils.updateiDyn3Model(q, true);
+
+    yarp::sig::Matrix T_arm_init = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
+    KDL::Frame T_arm_ref_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm_init, T_arm_ref_kdl);
+    yarp::sig::Vector T_com_p_init = idynutils.coman_iDyn3.getCOM();
+    yarp::sig::Matrix T_com_init(4,4); T_com_init.eye();
+    T_com_init(0,3) = T_com_p_init[0];
+    T_com_init(1,3) = T_com_p_init[1];
+    T_com_init(2,3) = T_com_p_init[2];
+    KDL::Frame T_com_ref_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_com_init, T_com_ref_kdl);
+
+    //3 Tasks: CoM & Cartesian & Postural
+    boost::shared_ptr<wb_sot::tasks::velocity::CoM> com_task(
+                new wb_sot::tasks::velocity::CoM(q));
+    std::cout<<"COM INITIAL ERROR: "<<com_task->positionError.toString()<<std::endl;
+
+    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
+                new wb_sot::tasks::velocity::Cartesian("cartesian::r_wrist", q, idynutils,
+                                                       "r_wrist", "world"));
+    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
+                new wb_sot::tasks::velocity::Postural(q));
+
+    //Create the SoT
+    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
+    stack_of_tasks.push_back(com_task);
+    stack_of_tasks.push_back(cartesian_task);
+    stack_of_tasks.push_back(postural_task);
+    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+
+    yarp::sig::Vector dq(q.size(), 0.0);
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        idynutils.updateiDyn3Model(q, true);
+
+        com_task->update(q);
+        cartesian_task->update(q);
+        postural_task->update(q);
+
+        ASSERT_TRUE(sot.solve(dq));
+        q += dq;
+    }
+
+    yarp::sig::Matrix T_arm = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
+    KDL::Frame T_arm_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm, T_arm_kdl);
+    yarp::sig::Vector T_com_p = idynutils.coman_iDyn3.getCOM();
+    yarp::sig::Matrix T_com(4,4); T_com.eye();
+    T_com(0,3) = T_com_p[0];
+    T_com(1,3) = T_com_p[1];
+    T_com(2,3) = T_com_p[2];
+    KDL::Frame T_com_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_com, T_com_kdl);
+
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T_arm_kdl.p[i], T_arm_ref_kdl.p[i], 1E-3);
+    for(unsigned int i = 0; i < 3; ++i)
+        for(unsigned int j = 0; j < 3; ++j)
+            EXPECT_NEAR(T_arm_kdl.M(i,j), T_arm_ref_kdl.M(i,j), 1E-2);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T_com_kdl.p[i], T_com_ref_kdl.p[i], 1E-3);
+
+
 }
 
 

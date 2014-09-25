@@ -15,8 +15,8 @@
  * Public License for more details
 */
 
-#ifndef __TASKS_VELOCITY_CARTESIAN_H__
-#define __TASKS_VELOCITY_CARTESIAN_H__
+#ifndef __TASKS_VELOCITY_COM_H__
+#define __TASKS_VELOCITY_COM_H__
 
  #include <wb_sot/Task.h>
  #include <drc_shared/idynutils.h>
