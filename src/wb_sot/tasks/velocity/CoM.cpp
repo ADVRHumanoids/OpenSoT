@@ -26,7 +26,8 @@ using namespace yarp::math;
 
 CoM::CoM(   const yarp::sig::Vector& x) :
     Task("com", x.size()),
-    _desiredPosition(3,0.0), _actualPosition(3,0.0)
+    _desiredPosition(3,0.0), _actualPosition(3,0.0),
+    positionError(3, 0.0)
 {
     _support_foot_link_index = _robot.left_leg.index;
     _swing_foot_link_index = _robot.right_leg.index;
@@ -38,11 +39,12 @@ CoM::CoM(   const yarp::sig::Vector& x) :
     /* initializing to zero error */
     _desiredPosition = _actualPosition;
     _b.resize(3, 0.0);
+    positionError = _b;
 
     _W.resize(3,3);
     _W.eye();
 
-    _hessianType = HST_POSDEF;
+    _hessianType = HST_SEMIDEF;
 }
 
 CoM::~CoM()
@@ -75,8 +77,8 @@ void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
 }
 
 void CoM::update_b() {
-    positionError = _desiredPosition - _actualPosition;
-    _b = positionError;
+    _b = _desiredPosition - _actualPosition;
+    positionError = _b;
 }
 
 

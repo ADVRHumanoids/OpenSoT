@@ -330,9 +330,17 @@ namespace wb_sot{
         bool solve(bool update_constraints = true);
 
         /**
-         * @brief printProblemInformation couts some information about the problem
+         * @brief printProblemInformation couts some information about the problem.
+         * @param i, if i = -1 the ID is printed without number:
+         * eg:
+         *  printProblemInformation();
+         *      "PROBLEM 0 ID: com"
+         *  printProblemInformation(-1);
+         *      "PROBLEM ID: com"
+         *  printProblemInformation(2);
+         *      "PROBLEM 2 ID: com"
          */
-        void printProblemInformation(unsigned int i = 0);
+        void printProblemInformation(int i = 0);
 
         void getCostFunction(Matrix& H, Vector& g);
         void getConstraints(Matrix& A, Vector& lA, Vector& uA);

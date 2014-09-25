@@ -288,7 +288,7 @@ QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
     _task(task)
 {
     prepareData();
-    printProblemInformation();
+    printProblemInformation(-1);
     assert(initProblem(_H, _g, _A, _lA, _uA, _l, _u));
 }
 
@@ -324,11 +324,15 @@ bool QPOasesTask::solve(bool update_constraints)
     return this->QPOasesProblem::solve();
 }
 
-void QPOasesTask::printProblemInformation(unsigned int i)
+void QPOasesTask::printProblemInformation(int i)
 {
     std::cout<<std::endl;
-    std::cout<<GREEN<<"PROBLEM "<<i<<" ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
+    if(i == -1)
+        std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
+    else
+        std::cout<<GREEN<<"PROBLEM "<<i<<" ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
     std::cout<<GREEN<<"# OF CONSTRAINTS: "<<DEFAULT<<_lA.size()<<std::endl;
+    std::cout<<GREEN<<"# OF BOUNDS: "<<DEFAULT<<_l.size()<<std::endl;
     std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_task->getXSize()<<std::endl;
 //    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
 //    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;

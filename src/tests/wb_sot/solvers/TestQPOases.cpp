@@ -952,7 +952,6 @@ TEST_F(testQPOases_sot, test3Problems)
     //3 Tasks: CoM & Cartesian & Postural
     boost::shared_ptr<wb_sot::tasks::velocity::CoM> com_task(
                 new wb_sot::tasks::velocity::CoM(q));
-    std::cout<<"COM INITIAL ERROR: "<<com_task->positionError.toString()<<std::endl;
 
     boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
                 new wb_sot::tasks::velocity::Cartesian("cartesian::r_wrist", q, idynutils,
