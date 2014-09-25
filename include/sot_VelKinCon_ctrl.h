@@ -60,7 +60,7 @@ namespace wb_sot {
          boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskCartesianAggregated;
          boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskSecondAggregated;
 
-         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > bounds;
+         boost::shared_ptr<wb_sot::bounds::Aggregated > bounds;
          boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointLimits;
          boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointVelocity;
          boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsCoMVelocity;

@@ -167,7 +167,7 @@ bool sot_VelKinCon_ctrl::threadInit()
     boundsJointVelocity = wb_sot::bounds::velocity::VelocityLimits::BoundPointer(
                             new wb_sot::bounds::velocity::VelocityLimits(0.3,_dT,q.size()));
 
-    bounds = wb_sot::bounds::Aggregated::BoundPointer(
+    bounds = boost::shared_ptr<wb_sot::bounds::Aggregated>(
                 new wb_sot::bounds::Aggregated(boundsJointLimits, boundsJointVelocity, q.size()));
 
     taskCartesianLWrist = boost::shared_ptr<wb_sot::tasks::velocity::Cartesian>(
@@ -316,12 +316,12 @@ if(TORSO_IMPEDANCE) {
     if(use_3_stacks)
     {
         qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
-            new wb_sot::solvers::QPOases_sot(stack_of_3_tasks));
+            new wb_sot::solvers::QPOases_sot(stack_of_3_tasks, bounds));
     }
     else
     {
         qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
-            new wb_sot::solvers::QPOases_sot(stack_of_2_tasks));
+            new wb_sot::solvers::QPOases_sot(stack_of_2_tasks, bounds));
     }
 
     return true;
