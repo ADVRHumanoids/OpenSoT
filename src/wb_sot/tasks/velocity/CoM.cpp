@@ -80,6 +80,10 @@ void CoM::update_b() {
     _b = _desiredPosition - _actualPosition;
     positionError = _b;
 }
+int CoM::getLinkWRTCoMIsSpecified()
+{
+    return _support_foot_link_index;
+}
 
 
 

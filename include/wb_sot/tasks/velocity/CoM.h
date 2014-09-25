@@ -60,6 +60,8 @@
                 void _update(const yarp::sig::Vector& x);
 
                 void setReference(const yarp::sig::Vector& desiredPosition);
+
+                int getLinkWRTCoMIsSpecified();
             };
         }
     }
