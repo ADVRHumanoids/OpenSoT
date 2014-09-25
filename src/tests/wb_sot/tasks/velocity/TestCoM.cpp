@@ -55,6 +55,8 @@ TEST_F(testCoMTask, testCoMTask_)
 
     wb_sot::tasks::velocity::CoM CoM(q_whole);
 
+    EXPECT_TRUE(CoM.getb() == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb().toString();
+
     // setting x_ref with a delta offset along the z axis (+2cm)
     yarp::sig::Vector delta_x(3,0.0);
                       delta_x(2) = 0.02;
@@ -100,6 +102,11 @@ TEST_F(testCoMTask, testCoMTask_)
     EXPECT_LT( findMax((x_ref - x_now)), 1E-3 ) << "x_ref:" << x_ref.toString() << std::endl
                                                 << "x_now:" << x_now.toString() << std::endl;
     EXPECT_LT( abs(findMin((x_ref - x_now))), 1E-3 );
+
+    // checking for the position
+    for(unsigned int i = 0; i < 3; ++i) {
+        EXPECT_NEAR(x_ref(i),x_now(i),1E-4);
+    }
 
 }
 
