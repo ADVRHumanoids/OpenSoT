@@ -366,7 +366,8 @@ namespace wb_sot{
     class QPOases_sot: public Solver<Matrix, Vector>
     {
     public:
-        QPOases_sot(vector <boost::shared_ptr< Task<Matrix, Vector> >>& stack_of_tasks);
+        QPOases_sot(vector <boost::shared_ptr< Task<Matrix, Vector> >>& stack_of_tasks,
+                    boost::shared_ptr<wb_sot::bounds::Aggregated>& bounds);
 
         ~QPOases_sot(){}
 
@@ -396,6 +397,7 @@ namespace wb_sot{
     protected:
         vector <boost::shared_ptr< Task<Matrix, Vector> >> _stack_of_tasks;
         vector <QPOasesTask> _qp_stack_of_tasks;
+        boost::shared_ptr<wb_sot::bounds::Aggregated> _bounds;
 
         bool prepareSoT();
         bool expandProblem(unsigned int i);

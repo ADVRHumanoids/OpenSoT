@@ -52,7 +52,7 @@ CoM::~CoM()
 }
 
 void CoM::_update(const yarp::sig::Vector &x) {
-    _robot.updateiDyn3Model(x,true);
+    _robot.updateiDyn3Model(x);
 
     /************************* COMPUTING TASK *****************************/
 
@@ -63,6 +63,8 @@ void CoM::_update(const yarp::sig::Vector &x) {
     _robot.coman_iDyn3.setFloatingBaseLink(_support_foot_link_index);
     assert(_robot.coman_iDyn3.getCOMJacobian(_A));
     _robot.coman_iDyn3.setFloatingBaseLink(floating_base_old_index);
+    _robot.updateiDyn3Model(x);
+    //
 
     _A = _A.removeCols(0,6);    // remove floating base
     _A = _A.removeRows(3,3);    // remove orientation

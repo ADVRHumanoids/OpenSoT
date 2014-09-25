@@ -13,6 +13,7 @@
 #include <wb_sot/bounds/velocity/VelocityLimits.h>
 #include <wb_sot/tasks/velocity/CoM.h>
 
+
 using namespace yarp::math;
 
 #define GREEN "\033[0;32m"
@@ -610,18 +611,25 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     postural_task->setReference(q_ref);
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(), idynutils.coman_iDyn3.getJointBoundMin()));
-    postural_task->getConstraints().push_back(joint_limits);
     postural_task->setAlpha(0.1);
+
+    std::list<boost::shared_ptr<wb_sot::Bounds<Matrix, Vector>>> bounds_list;
+    bounds_list.push_back(joint_limits);
+
+    boost::shared_ptr<wb_sot::bounds::Aggregated> bounds(
+                new wb_sot::bounds::Aggregated(bounds_list, q.size()));
 
     std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
-    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+    wb_sot::solvers::QPOases_sot sot(stack_of_tasks, bounds);
 
     EXPECT_TRUE(sot.getNumberOfTasks() == 1);
     yarp::sig::Vector dq(q.size(), 0.0);
     for(unsigned int i = 0; i < 100; ++i)
     {
         postural_task->update(q);
+        bounds->update(q);
+
         EXPECT_TRUE(sot.solve(dq));
         q += dq;
     }
@@ -759,9 +767,6 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     boost::shared_ptr<wb_sot::bounds::Aggregated> joint_constraints(
                 new wb_sot::bounds::Aggregated(joint_constraints_list, q.size()));
 
-    cartesian_task->getConstraints().push_back(joint_constraints);
-
-
     //Create the SoT
     std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
@@ -770,7 +775,7 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     std::cout<<"Initial Position Error: "<<cartesian_task->positionError.toString()<<std::endl;
     std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError.toString()<<std::endl;
 
-    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+    wb_sot::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
 
     KDL::Frame T_ref_kdl;
@@ -792,6 +797,7 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
         cartesian_task->update(q);
         postural_task->update(q);
+        joint_constraints->update(q);
 
         ASSERT_TRUE(sot.solve(dq));
         q += dq;
@@ -918,8 +924,11 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
             EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
 }
 
-TEST_F(testQPOases_sot, test3Problems)
+TEST_F(testQPOases_sot, testUpTo4Problems)
 {
+    srand(time(NULL));
+    int number_of_tasks = 3;//rand() % 4;  //number between 1 and 3
+
     iDynUtils idynutils;
     yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
     yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
@@ -937,14 +946,29 @@ TEST_F(testQPOases_sot, test3Problems)
     idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
     idynutils.updateiDyn3Model(q, true);
 
+    yarp::sig::Vector q_ref(q.size(), 0.0);
+    q_ref = q;
+
     //3 Tasks: CoM & Cartesian & Postural
     boost::shared_ptr<wb_sot::tasks::velocity::CoM> com_task(
                 new wb_sot::tasks::velocity::CoM(q));
+
+    std::string ee1 = "r_wrist";
+    std::string ee2 = "l_wrist";
     boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::r_wrist", q, idynutils,
-                                                       "r_wrist", "world"));
+                new wb_sot::tasks::velocity::Cartesian("cartesian::"+ee1, q, idynutils,
+                                                       ee1, "world"));
+    cartesian_task->setAlpha(1.0);
+
+    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task2(
+                new wb_sot::tasks::velocity::Cartesian("cartesian::"+ee2, q, idynutils,
+                                                       ee2, "world"));
+    cartesian_task2->setAlpha(1.0);
+
     boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
                 new wb_sot::tasks::velocity::Postural(q));
+    postural_task->setAlpha(1.0);
+
     //Bounds
     int t = 50;
     std::list< wb_sot::bounds::Aggregated::BoundPointer> constraints_list;
@@ -952,7 +976,7 @@ TEST_F(testQPOases_sot, test3Problems)
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
                            idynutils.coman_iDyn3.getJointBoundMin()));
-    joint_limits->setBoundScaling((double)(1.0/t));
+    joint_limits->setBoundScaling((double)(1.0));
     constraints_list.push_back(joint_limits);
 
     boost::shared_ptr<VelocityLimits> joint_velocity_limits(
@@ -963,17 +987,20 @@ TEST_F(testQPOases_sot, test3Problems)
     boost::shared_ptr<wb_sot::bounds::Aggregated> joint_constraints(
                 new wb_sot::bounds::Aggregated(constraints_list, q.size()));
 
-    com_task->getConstraints().push_back(joint_constraints);
-    //cartesian_task->getConstraints().push_back(joint_constraints);
-
-
-
     yarp::sig::Matrix T_arm_init = idynutils.coman_iDyn3.getPosition(
-                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
+                idynutils.coman_iDyn3.getLinkIndex(ee1));
     yarp::sig::Matrix T_arm_ref = T_arm_init;
-    T_arm_ref(0,3) += 0.05;
+    T_arm_ref(2,3) += 0.05;
     KDL::Frame T_arm_ref_kdl;
     cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm_ref, T_arm_ref_kdl);
+
+    yarp::sig::Matrix T_arm2_init = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex(ee2));
+    yarp::sig::Matrix T_arm2_ref = T_arm2_init;
+    T_arm2_ref(0,3) += 0.05;
+    KDL::Frame T_arm2_ref_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2_ref, T_arm2_ref_kdl);
+
 
     yarp::sig::Vector T_com_p_init = idynutils.coman_iDyn3.getCOM("",
                 com_task->getLinkWRTCoMIsSpecified());
@@ -985,16 +1012,24 @@ TEST_F(testQPOases_sot, test3Problems)
     T_com_ref(2,3) = T_com_p_ref[2];
     KDL::Frame T_com_ref_kdl;
     cartesian_utils::fromYARPMatrixtoKDLFrame(T_com_ref, T_com_ref_kdl);
+
     com_task->setReference(T_com_p_ref);
     cartesian_task->setReference(T_arm_ref);
+    cartesian_task2->setReference(T_arm2_ref);
+    postural_task->setReference(q_ref);
 
 
     //Create the SoT
     std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
-    stack_of_tasks.push_back(com_task);
-    stack_of_tasks.push_back(cartesian_task);
+    if(number_of_tasks >= 1)
+        stack_of_tasks.push_back(com_task);
+    if(number_of_tasks >= 2)
+        stack_of_tasks.push_back(cartesian_task);
+    if(number_of_tasks >= 3)
+        stack_of_tasks.push_back(cartesian_task2);
+
     stack_of_tasks.push_back(postural_task);
-    wb_sot::solvers::QPOases_sot sot(stack_of_tasks);
+    wb_sot::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
     yarp::sig::Vector dq(q.size(), 0.0);
     double acc = 0.0;
@@ -1005,23 +1040,31 @@ TEST_F(testQPOases_sot, test3Problems)
 
         com_task->update(q);
         cartesian_task->update(q);
+        cartesian_task2->update(q);
         postural_task->update(q);
+        joint_constraints->update(q);
 
         double tic = yarp::os::Time::now();
         ASSERT_TRUE(sot.solve(dq));
         double toc = yarp::os::Time::now();
         acc += toc - tic;
 
-        std::cout<<"dq: "<<dq.toString()<<std::endl;
+        //std::cout<<"dq: "<<dq.toString()<<std::endl;
         q += dq;
     }
     std::cout<<"Medium Time to Solve sot "<<acc/(double)(s*t)<<"[s]"<<std::endl;
 
 
     yarp::sig::Matrix T_arm = idynutils.coman_iDyn3.getPosition(
-                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
+                idynutils.coman_iDyn3.getLinkIndex(ee1));
     KDL::Frame T_arm_kdl;
     cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm, T_arm_kdl);
+
+    yarp::sig::Matrix T_arm2 = idynutils.coman_iDyn3.getPosition(
+                idynutils.coman_iDyn3.getLinkIndex(ee2));
+    KDL::Frame T_arm2_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2, T_arm2_kdl);
+
     yarp::sig::Vector T_com_p = idynutils.coman_iDyn3.getCOM("",
                 com_task->getLinkWRTCoMIsSpecified());
     yarp::sig::Matrix T_com(4,4); T_com.eye();
@@ -1031,26 +1074,50 @@ TEST_F(testQPOases_sot, test3Problems)
     KDL::Frame T_com_kdl;
     cartesian_utils::fromYARPMatrixtoKDLFrame(T_com, T_com_kdl);
 
+    if(number_of_tasks >= 1)
+    {
+        yarp::sig::Matrix T_com_init(4,4);
+        T_com_init(0,3) = T_com_p_init[0];
+        T_com_init(1,3) = T_com_p_init[1];
+        T_com_init(2,3) = T_com_p_init[2];
+        std::cout<<GREEN<<"CoM Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_com_init);
+        std::cout<<GREEN<<"CoM Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_ref_kdl);
+        std::cout<<GREEN<<"CoM Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_kdl);
+        for(unsigned int i = 0; i < 3; ++i)
+            EXPECT_NEAR(T_com_kdl.p[i], T_com_ref_kdl.p[i], 1E-3)<<"For i: "<<i<<std::endl;
+    }
 
 
-    std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_arm_init);
-    std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_ref_kdl);
-    std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_kdl);
-    for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(T_arm_kdl.p[i], T_arm_ref_kdl.p[i], 1E-3)<<"For i: "<<i<<std::endl;
-    for(unsigned int i = 0; i < 3; ++i)
-        for(unsigned int j = 0; j < 3; ++j)
-            EXPECT_NEAR(T_arm_kdl.M(i,j), T_arm_ref_kdl.M(i,j), 1E-2);
+    if(number_of_tasks >= 2)
+    {
+        std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_arm_init);
+        std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_ref_kdl);
+        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_kdl);
+        for(unsigned int i = 0; i < 3; ++i)
+            EXPECT_NEAR(T_arm_kdl.p[i], T_arm_ref_kdl.p[i], 1E-3);
+        for(unsigned int i = 0; i < 3; ++i)
+            for(unsigned int j = 0; j < 3; ++j)
+                EXPECT_NEAR(T_arm_kdl.M(i,j), T_arm_ref_kdl.M(i,j), 1E-2);
+    }
 
-    yarp::sig::Matrix T_com_init(4,4);
-    T_com_init(0,3) = T_com_p_init[0];
-    T_com_init(1,3) = T_com_p_init[1];
-    T_com_init(2,3) = T_com_p_init[2];
-    std::cout<<GREEN<<"CoM Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_com_init);
-    std::cout<<GREEN<<"CoM Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_ref_kdl);
-    std::cout<<GREEN<<"CoM Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_kdl);
-    for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(T_com_kdl.p[i], T_com_ref_kdl.p[i], 1E-3)<<"For i: "<<i<<std::endl;
+    if(number_of_tasks >= 3)
+    {
+        std::cout<<GREEN<<"Arm2 Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_arm2_init);
+        std::cout<<GREEN<<"Arm2 Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm2_ref_kdl);
+        std::cout<<GREEN<<"Arm2 Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm2_kdl);
+        for(unsigned int i = 0; i < 3; ++i)
+            EXPECT_NEAR(T_arm2_kdl.p[i], T_arm2_ref_kdl.p[i], 1E-3);
+        for(unsigned int i = 0; i < 3; ++i)
+            for(unsigned int j = 0; j < 3; ++j)
+                EXPECT_NEAR(T_arm2_kdl.M(i,j), T_arm2_ref_kdl.M(i,j), 1E-2);
+    }
+
+    if(number_of_tasks == 0)
+    {
+        for(unsigned int i = 0; i < q.size(); ++i)
+            EXPECT_DOUBLE_EQ(q[i], q_ref[i]);
+    }
+
 
 
 }

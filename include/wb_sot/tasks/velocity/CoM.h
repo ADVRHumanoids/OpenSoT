@@ -39,6 +39,7 @@
                  */
                 int _support_foot_link_index;
                 /**
+
                  * @brief _swing_foot_link_index during single foot support phase,
                  *                               the swing foot is considered like an end-effector
                  */
