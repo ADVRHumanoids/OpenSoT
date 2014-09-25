@@ -71,6 +71,10 @@
 
                 void setReference(const yarp::sig::Matrix& desiredPose);
 
+                yarp::sig::Matrix getReference();
+
+                yarp::sig::Matrix getActualPose();
+
                 void setOrientationErrorGain(const double& orientationErrorGain);
             };
         }

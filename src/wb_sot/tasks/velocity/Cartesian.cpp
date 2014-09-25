@@ -93,6 +93,15 @@ void Cartesian::setReference(const yarp::sig::Matrix& desiredPose) {
     this->update_b();
 }
 
+yarp::sig::Matrix Cartesian::getReference() {
+    return _desiredPose;
+}
+
+yarp::sig::Matrix Cartesian::getActualPose()
+{
+    return _actualPose;
+}
+
 void Cartesian::setOrientationErrorGain(const double &orientationErrorGain)
 {
     this->orientationErrorGain = orientationErrorGain;

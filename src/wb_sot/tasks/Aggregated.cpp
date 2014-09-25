@@ -22,7 +22,7 @@
 using namespace wb_sot::tasks;
 using namespace yarp::math;
 
-Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
+Aggregated::Aggregated(const std::list<TaskPointer> tasks,
                        const unsigned int x_size) :
     Task(std::string("aggregated"),x_size), _tasks(tasks)
 {
@@ -33,8 +33,8 @@ Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
     _hessianType = HST_SEMIDEF;
 }
 
-Aggregated::Aggregated(TaskPointer &task1,
-                       TaskPointer &task2,
+Aggregated::Aggregated(TaskPointer task1,
+                       TaskPointer task2,
                        const unsigned int x_size) :
 Task(std::string("aggregated"),x_size)
 {
@@ -49,7 +49,7 @@ Task(std::string("aggregated"),x_size)
     _hessianType = HST_SEMIDEF;
 }
 
-Aggregated::Aggregated(const std::list<TaskPointer> &tasks,
+Aggregated::Aggregated(const std::list<TaskPointer> tasks,
                        const yarp::sig::Vector& q) :
     Task(std::string("aggregated"),q.size()), _tasks(tasks)
 {

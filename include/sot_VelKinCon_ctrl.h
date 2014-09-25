@@ -16,6 +16,14 @@
 #include <moveit/robot_model/robot_model.h>
 #include <drc_shared/idynutils.h>
 #include <drc_shared/utils/convex_hull.h>
+#include <wb_sot/Task.h>
+#include <wb_sot/Bounds.h>
+#include <wb_sot/Solver.h>
+#include <wb_sot/tasks/Aggregated.h>
+#include <wb_sot/tasks/velocity/all.h>
+#include <wb_sot/bounds/Aggregated.h>
+#include <wb_sot/bounds/velocity/all.h>
+#include <wb_sot/solvers/QPOases.h>
 
 namespace wb_sot {
     class sot_VelKinCon_ctrl :  public yarp::os::RateThread,
@@ -37,6 +45,28 @@ namespace wb_sot {
 
      private:
          paramHelp::ParamHelperServer   *paramHelper;
+
+         std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_2_tasks;
+         std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_3_tasks;
+
+         boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> taskCartesianRWrist;
+         boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> taskCartesianLWrist;
+         boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> taskCartesianRSole;
+         boost::shared_ptr<wb_sot::tasks::velocity::CoM> taskCoM;
+         boost::shared_ptr<wb_sot::tasks::velocity::Postural> taskPostural;
+         boost::shared_ptr<wb_sot::tasks::velocity::MinimumEffort> taskMinimumEffort;
+
+         boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskFirstAggregated;
+         boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskCartesianAggregated;
+         boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskSecondAggregated;
+
+         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > bounds;
+         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointLimits;
+         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointVelocity;
+         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsCoMVelocity;
+         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsConvexHullVelocity;
+
+         boost::shared_ptr<wb_sot::Solver<yarp::sig::Matrix, yarp::sig::Vector> > qpOasesSolver;
 
          /** Callback function for parameter updates. */
          void parameterUpdated(const ParamProxyInterface *pd);
@@ -78,6 +108,7 @@ namespace wb_sot {
 
          // how much time did it take to execute run()?
          double t_elapsed;
+         double _dT;
 
          // the gradient of the gravity vector
          yarp::sig::Vector gradientGq;
@@ -127,61 +158,14 @@ namespace wb_sot {
          yarp::sig::Vector zero;
 
          yarp_interface IYarp;
-         iDynUtils idynutils,gravity_compensator_idynutils;
+         iDynUtils idynutils, gravity_compensator_idynutils;
 
          drc_shared::convex_hull _convex_hull;
 
-         void updateiDyn3Model(const bool set_world_pose = false);
          void getFeedBack();
          void checkInput();
          void move();
          bool controlLaw();
-         void computeLastTaskType();
-         void computePosturalWeight();
-         void computeMinEffort();
-
-         /**
-           We use this function to set to zero all the part of the Jacobians that we are not
-           controlling (basically the legs).
-           Each Jacobian contains only waist + arm.
-           **/
-         void extractJacobians(yarp::sig::Matrix& JRWrist, yarp::sig::Matrix& JLWrist)
-         {
-            for(unsigned int i = 0; i < JLWrist.cols(); ++i)
-            {
-                 bool set_zero = true;
-                 for(unsigned int j = 0; j < idynutils.right_arm.joint_names.size(); ++j){
-                     if(i == idynutils.right_arm.joint_numbers[j]){
-                         set_zero = false;
-                         break;}
-                 }
-                 for(unsigned int j = 0; j < idynutils.torso.joint_names.size(); ++j){
-                     if(i == idynutils.torso.joint_numbers[j]){
-                         set_zero = false;
-                         break;}
-                 }
-                 if(set_zero){
-                     for(unsigned int k = 0; k < 6; ++k)
-                         JRWrist(k,i) = 0.0;
-                 }
-
-                 set_zero = true;
-                 for(unsigned int j = 0; j < idynutils.left_arm.joint_names.size(); ++j){
-                     if(i == idynutils.left_arm.joint_numbers[j]){
-                         set_zero = false;
-                         break;}
-                 }
-                 for(unsigned int j = 0; j < idynutils.torso.joint_names.size(); ++j){
-                     if(i == idynutils.torso.joint_numbers[j]){
-                         set_zero = false;
-                         break;}
-                 }
-                 if(set_zero){
-                     for(unsigned int k = 0; k < 6; ++k)
-                         JLWrist(k,i) = 0.0;
-                 }
-            }
-         }
     };
 }
 

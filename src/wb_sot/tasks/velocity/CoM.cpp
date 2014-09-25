@@ -78,6 +78,14 @@ void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
     this->update_b();
 }
 
+yarp::sig::Vector CoM::getReference() {
+    return _desiredPosition;
+}
+
+yarp::sig::Vector CoM::getActualPosition() {
+    return _actualPosition;
+}
+
 void CoM::update_b() {
     _b = _desiredPosition - _actualPosition;
     positionError = _b;

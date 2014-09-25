@@ -24,7 +24,7 @@
 using namespace wb_sot::bounds;
 using namespace yarp::math;
 
-Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
+Aggregated::Aggregated(const std::list<BoundPointer> bounds,
                        const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy) :
     Bounds(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
@@ -33,7 +33,7 @@ Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
     update(q);
 }
 
-Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
+Aggregated::Aggregated(const std::list<BoundPointer> bounds,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
     Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)

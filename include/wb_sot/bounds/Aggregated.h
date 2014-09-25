@@ -55,7 +55,7 @@
              *          Notice that by specifying q, the Aggregated will automatically call
              *          update(q) on all tasks he is composed of
              */
-            Aggregated(const std::list< BoundPointer > &bounds,
+            Aggregated(const std::list< BoundPointer > bounds,
                        const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
@@ -67,7 +67,7 @@
              * @param x_size the size of the x vector. Notice this constructor will NOT call
              *               update() on the base tasks
              */
-            Aggregated(const std::list< BoundPointer > &bounds,
+            Aggregated(const std::list<BoundPointer> bounds,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |

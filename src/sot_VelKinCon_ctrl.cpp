@@ -11,7 +11,6 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <drc_shared/cartesian_utils.h>
-#include "wb_sot/bounds/velocity/ConvexHull.h"
 
 #define toRad(X) (X*M_PI/180.0)
 #define toDeg(X) (X*180.0/M_PI)
@@ -29,6 +28,7 @@ sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM
                                                             const bool _TORSO_IMPEDANCE,
                                                             paramHelp::ParamHelperServer* _ph):
     RateThread(period),
+    _dT((double)period/1000),
     IYarp(),
     q_ref(1),
     dq_ref(1),
@@ -157,22 +157,83 @@ bool sot_VelKinCon_ctrl::threadInit()
     //Here we set as initial reference the measured value: this will be the postural task
     q_ref = q;
 
-    updateiDyn3Model(true);
+    idynutils.updateiDyn3Model(q,true);
+
+    boundsJointLimits = wb_sot::bounds::velocity::JointLimits::BoundPointer(
+                            new wb_sot::bounds::velocity::JointLimits(
+                                q,
+                                idynutils.coman_iDyn3.getJointBoundMax(),
+                                idynutils.coman_iDyn3.getJointBoundMin()));
+    boundsJointVelocity = wb_sot::bounds::velocity::VelocityLimits::BoundPointer(
+                            new wb_sot::bounds::velocity::VelocityLimits(0.3,_dT,q.size()));
+
+    bounds = wb_sot::bounds::Aggregated::BoundPointer(
+                new wb_sot::bounds::Aggregated(boundsJointLimits, boundsJointVelocity, q.size()));
+
+    taskCartesianLWrist = boost::shared_ptr<wb_sot::tasks::velocity::Cartesian>(
+                new wb_sot::tasks::velocity::Cartesian("cartesian::l_wrist",q,idynutils,
+                                                        idynutils.left_arm.end_effector_name,
+                                                        "world"));
+    taskCartesianRWrist = boost::shared_ptr<wb_sot::tasks::velocity::Cartesian>(
+                            new wb_sot::tasks::velocity::Cartesian("cartesian::r_wrist",q,idynutils,
+                                                                    idynutils.right_arm.end_effector_name,
+                                                                    "world"));
+    taskCartesianRSole = boost::shared_ptr<wb_sot::tasks::velocity::Cartesian>(
+                            new wb_sot::tasks::velocity::Cartesian("cartesian::r_sole",q,idynutils,
+                                                                    idynutils.right_leg.end_effector_name,
+                                                                    idynutils.left_leg.end_effector_name));
+    taskCoM = boost::shared_ptr<wb_sot::tasks::velocity::CoM>(
+        new wb_sot::tasks::velocity::CoM(q));
+
+    boundsCoMVelocity = wb_sot::bounds::velocity::CoMVelocity::BoundPointer(
+        new wb_sot::bounds::velocity::CoMVelocity(yarp::sig::Vector(3,0.03),idynutils,_dT,q.size()));
+    taskCoM->getConstraints().push_back(boundsCoMVelocity);
+
+    boundsConvexHullVelocity = wb_sot::bounds::velocity::ConvexHull::BoundPointer(
+        new wb_sot::bounds::velocity::ConvexHull(idynutils,q.size()));
+    taskCoM->getConstraints().push_back(boundsConvexHullVelocity);
+
+
+    std::list<wb_sot::tasks::velocity::Cartesian::TaskPointer> cartesianTask;
+    std::list<wb_sot::tasks::Aggregated::TaskPointer> firstTask;
+    cartesianTask.push_back(taskCartesianLWrist);
+    cartesianTask.push_back(taskCartesianRWrist);
+    cartesianTask.push_back(taskCartesianRSole);
+    firstTask = cartesianTask;
+    firstTask.push_back(taskCoM);
+
+    taskFirstAggregated = wb_sot::tasks::Aggregated::TaskPointer(
+        new wb_sot::tasks::Aggregated(firstTask,q.size()));
+    taskCartesianAggregated = wb_sot::tasks::Aggregated::TaskPointer(
+        new wb_sot::tasks::Aggregated(cartesianTask,q.size()));
+
+    taskMinimumEffort = boost::shared_ptr<wb_sot::tasks::velocity::MinimumEffort>(
+        new wb_sot::tasks::velocity::MinimumEffort(q));
+    taskPostural = boost::shared_ptr<wb_sot::tasks::velocity::Postural>(
+        new wb_sot::tasks::velocity::Postural(q));
+
+    std::list<wb_sot::tasks::Aggregated::TaskPointer> secondTask;
+    secondTask.push_back(taskMinimumEffort);
+    secondTask.push_back(taskPostural);
+
+    taskSecondAggregated = wb_sot::tasks::Aggregated::TaskPointer(
+        new wb_sot::tasks::Aggregated(secondTask,q.size()));
+
+    stack_of_2_tasks.push_back(taskFirstAggregated);
+    stack_of_2_tasks.push_back(taskSecondAggregated);
+
+    stack_of_3_tasks.push_back(taskCoM);
+    stack_of_3_tasks.push_back(taskCartesianAggregated);
+    stack_of_3_tasks.push_back(taskSecondAggregated);
 
     support_foot_LinkIndex = idynutils.left_leg.index;
     swing_foot_LinkIndex = idynutils.right_leg.index;
 
-    right_arm_pos_ref = idynutils.coman_iDyn3.getPosition(idynutils.right_arm.index);
-    left_arm_pos_ref = idynutils.coman_iDyn3.getPosition(idynutils.left_arm.index);
 
-    com_pos_ref = idynutils.coman_iDyn3.getCOM("",support_foot_LinkIndex);
-
-    swing_foot_pos_ref = idynutils.coman_iDyn3.getPosition(support_foot_LinkIndex, swing_foot_LinkIndex);
-
-    ROS_INFO("Initial Pose Ref left_arm:");   cartesian_utils::printHomogeneousTransform(left_arm_pos_ref);std::cout<<std::endl;
-    ROS_INFO("Initial Pose Ref right_arm:");  cartesian_utils::printHomogeneousTransform(right_arm_pos_ref);std::cout<<std::endl;
-    ROS_INFO("Initial Pose Ref swing_foot:"); cartesian_utils::printHomogeneousTransform(swing_foot_pos_ref);std::cout<<std::endl;
-    ROS_INFO("Initial Position Ref CoM: [ %s ]", com_pos_ref.toString().c_str());
+    ROS_INFO("Initial Pose Ref left_arm:");   cartesian_utils::printHomogeneousTransform(taskCartesianLWrist->getReference());std::cout<<std::endl;
+    ROS_INFO("Initial Pose Ref right_arm:");  cartesian_utils::printHomogeneousTransform(taskCartesianRWrist->getReference());std::cout<<std::endl;
+    ROS_INFO("Initial Pose Ref swing_foot:"); cartesian_utils::printHomogeneousTransform(taskCartesianRSole->getReference()); std::cout<<std::endl;
+    ROS_INFO("Initial Position Ref CoM: [ %s ]", taskCoM->getReference().toString().c_str());
 
 if(RIGHT_ARM_IMPEDANCE) {
     ROS_INFO("Setting Impedance Mode for q_right_arm:");
@@ -252,6 +313,17 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
 
 
+    if(use_3_stacks)
+    {
+        qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
+            new wb_sot::solvers::QPOases_sot(stack_of_3_tasks));
+    }
+    else
+    {
+        qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
+            new wb_sot::solvers::QPOases_sot(stack_of_2_tasks));
+    }
+
     return true;
 }
 
@@ -275,7 +347,7 @@ void sot_VelKinCon_ctrl::run()
         q += dq_ref;
 
 
-    updateiDyn3Model(update_world);
+    idynutils.updateiDyn3Model(q,update_world);
 
     if(controlLaw())
         move();
@@ -295,23 +367,6 @@ void sot_VelKinCon_ctrl::run()
     paramHelper->sendStreamParams();
     paramHelper->unlock();
 #endif
-}
-
-void sot_VelKinCon_ctrl::updateiDyn3Model(const bool set_world_pose)
-{
-    static yarp::sig::Vector zeroes(q.size(),0.0);
-    
-    idynutils.updateiDyn3Model(q,zeroes,zeroes);
-if (LEFT_ARM_IMPEDANCE || RIGHT_ARM_IMPEDANCE || TORSO_IMPEDANCE) {
-    idynutils.coman_iDyn3.dynamicRNEA();
-    tau_gravity = idynutils.coman_iDyn3.getTorques();
-}
-
-    // Set World Pose we do it at the beginning
-    if(set_world_pose)
-    {
-        idynutils.setWorldPose();
-    }
 }
 
 //Also here the configurations come in deg so we need to convert to rad!
@@ -390,73 +445,10 @@ void sot_VelKinCon_ctrl::move()
 
 bool sot_VelKinCon_ctrl::controlLaw()
 {
-    yarp::sig::Matrix pos_wrist_R = idynutils.coman_iDyn3.getPosition(idynutils.right_arm.index);
-    yarp::sig::Matrix pos_wrist_L = idynutils.coman_iDyn3.getPosition(idynutils.left_arm.index);
 
-    yarp::sig::Vector pos_CoM = idynutils.coman_iDyn3.getCOM("",support_foot_LinkIndex);
-
-    yarp::sig::Matrix pos_foot_swing = idynutils.coman_iDyn3.getPosition(support_foot_LinkIndex,swing_foot_LinkIndex);
-
-    yarp::sig::Matrix JRWrist;
-    if(!idynutils.coman_iDyn3.getJacobian(idynutils.right_arm.index,JRWrist))
-        ROS_ERROR("Error computing Jacobian for Right Wrist");
-    JRWrist = JRWrist.removeCols(0,6);    // removing unactuated joints (floating base)
-
-    yarp::sig::Matrix JLWrist;
-    if(!idynutils.coman_iDyn3.getJacobian(idynutils.left_arm.index,JLWrist))
-        ROS_ERROR("Error computing Jacobian for Left Wrist");
-    JLWrist = JLWrist.removeCols(0,6);    // removing unactuated joints (floating base)
-
-    yarp::sig::Matrix JSwingFoot; // for now, SwingFoot is Left
-    if(!idynutils.coman_iDyn3.getRelativeJacobian(swing_foot_LinkIndex,support_foot_LinkIndex,JSwingFoot,true))
-        ROS_ERROR("Error computing Jacobian for Left Foot");
-
-    yarp::sig::Matrix JCoM;
-    //This part of code is an HACK due to a bug in iDynTree
-    int floating_base_old_index = idynutils.coman_iDyn3.getFloatingBaseLink();
-
-    idynutils.coman_iDyn3.setFloatingBaseLink(support_foot_LinkIndex);
-    if(!idynutils.coman_iDyn3.getCOMJacobian(JCoM))
-        ROS_ERROR("Error computing CoM Jacobian");
-    idynutils.coman_iDyn3.setFloatingBaseLink(floating_base_old_index);
-    idynutils.updateiDyn3Model(q, yarp::sig::Vector(q.size(), 0.0), yarp::sig::Vector(q.size(), 0.0));
-    JCoM = JCoM.removeCols(0,6);    // remove floating base
-    JCoM = JCoM.removeRows(3,3);    // remove orientation
-
-    extractJacobians(JRWrist, JLWrist);
-
-    cartesian_utils::computeCartesianError(pos_wrist_R, right_arm_pos_ref,
-                                           eRWrist_p, eRWrist_o);
-    cartesian_utils::computeCartesianError(pos_wrist_L, left_arm_pos_ref,
-                                           eLWrist_p, eLWrist_o);
-    cartesian_utils::computeCartesianError(pos_foot_swing, swing_foot_pos_ref,
-                                           eSwingFoot_p, eSwingFoot_o);
-    eCoM = com_pos_ref-pos_CoM;
-
-    yarp::sig::Vector eRWrist = yarp::math::cat(eRWrist_p, -orientation_error_gain*eRWrist_o);
-    yarp::sig::Vector eLWrist = yarp::math::cat(eLWrist_p, -orientation_error_gain*eLWrist_o);
-    yarp::sig::Vector eSwingFoot = yarp::math::cat(eSwingFoot_p, -orientation_error_gain*eSwingFoot_o);
-
-
-    yarp::sig::Matrix JEe;
-    yarp::sig::Vector eEe;
-
-    if(use_3_stacks)
-    {
-        JEe = yarp::math::pile(JRWrist, JLWrist);
-        JEe = yarp::math::pile(JEe, JSwingFoot);
-        eEe = yarp::math::cat(eRWrist, eLWrist);
-        eEe = yarp::math::cat(eEe, eSwingFoot);
-    }
-    else
-    {
-        JEe = yarp::math::pile(JRWrist, JLWrist);
-        JEe = yarp::math::pile(JEe, JSwingFoot);
-        JEe = yarp::math::pile(JEe, JCoM);
-        eEe = yarp::math::cat(eRWrist, eLWrist);
-        eEe = yarp::math::cat(eEe, eSwingFoot);
-        eEe = yarp::math::cat(eEe, eCoM);
-    }
+    taskFirstAggregated->update(q);
+    taskSecondAggregated->update(q);
+    bounds->update(q);
 
     /** Set of last tasks **/
     /**
@@ -466,106 +458,18 @@ bool sot_VelKinCon_ctrl::controlLaw()
     *  (-grad(g(q))/tau_max)dq <-- Min effort
     *
     **/
-    yarp::sig::Vector eq = (q_ref - q);
 
-    // Here I compute if the last task is pure postural, min effort or between
-    computeLastTaskType();
+    double l = postural_weight_coefficient;
+    double l2 = 1.0 - l;
 
-    // Here I compute weights for the postural task if needed
-    if(last_stack_type == LAST_STACK_TYPE_POSTURAL ||
-       last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
-        computePosturalWeight();
-
-    // Here I compute gardient of garvity torques for the min effort task if needed
-    if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT ||
-            last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
-        computeMinEffort();
-
-    // Here I compute Convex Hull Constraints for CoM
-    std::list<KDL::Vector> points;
-    std::vector<KDL::Vector> ch;
-    yarp::sig::Matrix A_ch;
-    yarp::sig::Vector b_ch;
-    drc_shared::convex_hull::getSupportPolygonPoints(idynutils,points);
-    _convex_hull.getConvexHull(points, ch);
-    wb_sot::bounds::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch);
-    ROS_WARN("A: %s", A_ch.toString().c_str());
-    ROS_WARN("b: %s", b_ch.toString().c_str());
-
-
-    // Cartesian Constraints
-    yarp::sig::Matrix cartesian_A;
-    yarp::sig::Vector& cartesian_b = b_ch;
-    cartesian_A = A_ch*JCoM.submatrix(0, 1, 0, JCoM.cols()-1);
-
-    yarp::sig::Matrix F;
-    yarp::sig::Vector f;
-    qpOASES::HessianType qpOasesPosturalHessianType = qpOASES::HST_UNKNOWN;
-    if(last_stack_type == LAST_STACK_TYPE_POSTURAL)
-    {
-        /**
-          *  (dq - e)'Q^2(dq - e)
-          **/
-        eq.zero();
-        F = Q_postural;
-        f = Q_postural * eq;
-        qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
-    }
-    else if(last_stack_type == LAST_STACK_TYPE_MINIMUM_EFFORT)
-    {
-        /**
-          *  (dq + grad(g(q)))'(dq + grad(g(q)))
-          **/
-        unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
-        F.resize(nJ,nJ); F.eye();
-        f = mineffort_weight_coefficient * gradientGq;
-        qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
-    }
-    else if(last_stack_type == LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT)
-    {
-        /**
-          *  (dq - e)'Q^2(dq - e)
-          *  (dq + grad(g(q)))'(dq + grad(g(q)))
-          **/
-        unsigned int nJ = idynutils.coman_iDyn3.getNrOfDOFs();
-        yarp::sig::Matrix I; I.resize(nJ,nJ); I.eye();
-
-        double l = postural_weight_coefficient;
-        double l2 = 1.0 - l;
-        F = yarp::math::pile( l * Q_postural, l2 * I );
-        f = yarp::math::cat( l * Q_postural * eq, l2 * mineffort_weight_coefficient * gradientGq);
-        qpOasesPosturalHessianType = qpOASES::HST_POSDEF;
-    }
+    // TODO: Aggregated has a setBeta(taskIndex,weight)
+    taskPostural->setWeight(l*taskPostural->getWeight());
+    taskMinimumEffort->setWeight(l2*taskMinimumEffort->getWeight());
 
     IYarp.tic();
 
     bool control_computed = false;
-    if(use_3_stacks) {
-        control_computed = task_solver::computeControlHQP(JCoM,eCoM,
-                                                          JEe, eEe,
-                                                          F, f,
-                                                          qpOasesPosturalHessianType,
-                                                          idynutils.coman_iDyn3.getJointBoundMax(),
-                                                          idynutils.coman_iDyn3.getJointBoundMin(),
-                                                          q, max_joint_velocity,
-                                                          JCoM, max_CoM_velocity,
-                                                          cartesian_A, cartesian_b,
-                                                          MilliSecToSec(getRate()),
-                                                          dq_ref, velocity_bounds_scale);
-    }
-    else
-    {
-        control_computed = task_solver::computeControlHQP(JEe, eEe,
-                                                         F, f,
-                                                         qpOasesPosturalHessianType,
-                                                         idynutils.coman_iDyn3.getJointBoundMax(),
-                                                         idynutils.coman_iDyn3.getJointBoundMin(),
-                                                         q, max_joint_velocity,
-                                                         JCoM, max_CoM_velocity,
-                                                         cartesian_A, cartesian_b,
-                                                         MilliSecToSec(getRate()),
-                                                         dq_ref, velocity_bounds_scale);
-    }
+    control_computed = qpOasesSolver->solve(dq_ref);
 
     t_elapsed = IYarp.toc();
     static std::ofstream FILE("time.dat");
@@ -578,6 +482,7 @@ bool sot_VelKinCon_ctrl::controlLaw()
     return control_computed;
 }
 
+
 yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const std::vector<string> &joint_names)
 {
     yarp::sig::Vector tau(joint_names.size(), 0.0);
@@ -589,80 +494,3 @@ yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const std::ve
     }
     return tau;
 }
-
-yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationTorque(const yarp::sig::Vector q)
-{
-    static yarp::sig::Vector zeroes(q.size(),0.0);
-    static yarp::sig::Vector tau(q.size(),0.0);
-
-    gravity_compensator_idynutils.updateiDyn3Model(q,zeroes,zeroes);
-    
-    gravity_compensator_idynutils.coman_iDyn3.dynamicRNEA();
-    tau = gravity_compensator_idynutils.coman_iDyn3.getTorques();
-
-    return tau;
-}
-
-/**
- * Two-point formula: it computes the slope of a nearby secant line through the
- * points (x-h,f(x-h)) and (x+h,f(x+h))
- **/
-yarp::sig::Vector sot_VelKinCon_ctrl::getGravityCompensationGradient(const yarp::sig::Matrix& W)
-{
-    //double start = yarp::os::Time::now();
-    /// cost function is tau_g^t*tau_g
-    static yarp::sig::Vector gradient(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
-    static yarp::sig::Vector deltas(gravity_compensator_idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
-    for(unsigned int i = 0; i < gradient.size(); ++i)
-    {
-        // forward method gradient computation, milligrad
-        const double h = 1E-3;
-        deltas[i] = h;
-        yarp::sig::Vector tau_gravity_q_a = getGravityCompensationTorque(q+deltas);
-        yarp::sig::Vector tau_gravity_q_b = getGravityCompensationTorque(q-deltas);
-
-        double C_g_q_a = yarp::math::dot(tau_gravity_q_a, W*tau_gravity_q_a);
-        double C_g_q_b = yarp::math::dot(tau_gravity_q_b, W*tau_gravity_q_b);
-        gradient[i] = (C_g_q_a - C_g_q_b)/(2*h);
-        deltas[i] = 0;
-    }
-
-    //double elapsed = yarp::os::Time::now() - start;
-    //ROS_WARN(" took %f ms", elapsed);
-    return gradient;
-}
-
-void sot_VelKinCon_ctrl::computeLastTaskType()
-{
-    if(postural_weight_coefficient <= 0.001)
-        last_stack_type = LAST_STACK_TYPE_MINIMUM_EFFORT;
-    else if(postural_weight_coefficient > 0.9)
-        last_stack_type = LAST_STACK_TYPE_POSTURAL;
-    else
-        last_stack_type = LAST_STACK_TYPE_POSTURAL_AND_MINIMUM_EFFORT;
-}
-
-void sot_VelKinCon_ctrl::computePosturalWeight()
-{
-    if(postural_weight_strategy == POSTURAL_WEIGHT_STRATEGY_IDENTITY)
-        Q_postural = Q_postural.eye();
-    else if(postural_weight_strategy == POSTURAL_WEIGHT_STRATEGY_GRAD_G)
-        Q_postural.diagonal(-1.0 * gradientGq);
-    else if(postural_weight_strategy == POSTURAL_WEIGHT_STRATEGY_JOINT_SPACE_INERTIA)
-    {
-        yarp::sig::Matrix M;
-        idynutils.coman_iDyn3.getFloatingBaseMassMatrix(M);
-        M.removeCols(0,6); M.removeRows(0,6);
-        Q_postural = M;
-    }
-}
-
-void sot_VelKinCon_ctrl::computeMinEffort()
-{
-    yarp::sig::Matrix W(idynutils.coman_iDyn3.getJointTorqueMax().size(), idynutils.coman_iDyn3.getJointTorqueMax().size());
-    W.eye();
-    for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
-        W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
-    gradientGq = -1.0 * getGravityCompensationGradient(W);
-}
-

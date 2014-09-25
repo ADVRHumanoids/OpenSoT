@@ -48,7 +48,7 @@
              * @param x_size the size of the input vector. Notice this constructor will NOT call
              *               update() on the base tasks
              */
-            Aggregated(const std::list< TaskPointer > &tasks,
+            Aggregated(const std::list< TaskPointer > tasks,
                        const unsigned int x_size);
 
             /**
@@ -58,8 +58,8 @@
              * @param x_size the size of the input vector. Notice this constructor will NOT call
              *               update() on the base tasks
              */
-            Aggregated(TaskPointer &task1,
-                       TaskPointer &task2,
+            Aggregated(TaskPointer task1,
+                       TaskPointer task2,
                        const unsigned int x_size);
 
             /**
@@ -69,7 +69,7 @@
              *          Notice that by specifying q, the Aggregated will automatically call
              *          update(q) on all tasks he is composed of
              */
-            Aggregated(const std::list< TaskPointer > &tasks,
+            Aggregated(const std::list< TaskPointer > tasks,
                        const yarp::sig::Vector &q);
 
             ~Aggregated();

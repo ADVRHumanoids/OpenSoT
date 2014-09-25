@@ -39,7 +39,6 @@
                  */
                 int _support_foot_link_index;
                 /**
-
                  * @brief _swing_foot_link_index during single foot support phase,
                  *                               the swing foot is considered like an end-effector
                  */
@@ -62,6 +61,9 @@
 
                 void setReference(const yarp::sig::Vector& desiredPosition);
 
+                yarp::sig::Vector getReference();
+
+                yarp::sig::Vector getActualPosition();
                 int getLinkWRTCoMIsSpecified();
             };
         }

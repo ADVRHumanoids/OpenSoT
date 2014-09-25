@@ -28,6 +28,9 @@ using namespace std;
     template < class Matrix_type, class Vector_type >
     class Solver {
     public:
+        typedef Solver< Matrix_type, Vector_type > SolverType;
+        typedef boost::shared_ptr<SolverType> SolverPointer;
+
         Solver(){}
         virtual ~Solver(){}
 
