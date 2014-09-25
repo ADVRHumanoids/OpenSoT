@@ -1,9 +1,13 @@
 #include <gtest/gtest.h>
+#include <drc_shared/tests_utils.h>
 #include <wb_sot/bounds/Aggregated.h>
 #include <wb_sot/bounds/velocity/VelocityLimits.h>
 #include <wb_sot/bounds/BilateralConstraint.h>
 #include <wb_sot/bounds/velocity/JointLimits.h>
+#include <yarp/math/Math.h>
 #include <string>
+
+using namespace yarp::math;
 
 namespace {
 
@@ -84,6 +88,79 @@ TEST_F(testAggregated, AggregatedWorks) {
     yarp::sig::Vector newUpperBound = aggregated->getUpperBound();
     EXPECT_FALSE(oldLowerBound == newLowerBound);
     EXPECT_FALSE(oldUpperBound == newUpperBound);
+}
+
+TEST_F(testAggregated, MultipleAggregationdWork) {
+    using namespace wb_sot::bounds;
+    std::list<Aggregated::BoundPointer> constraints;
+    const unsigned int nJ = 6;
+    const double dT = 1;
+    const double qDotMax = 50;
+    constraints.push_back(  Aggregated::BoundPointer(
+            new velocity::VelocityLimits(qDotMax,dT,nJ)
+                                                    )
+                          );
+
+    yarp::sig::Vector q(nJ);
+    q = tests_utils::getRandomAngles(yarp::sig::Vector(nJ,-M_PI),
+                                     yarp::sig::Vector(nJ,M_PI),
+                                     nJ);
+
+    yarp::sig::Matrix A(nJ,nJ); A.eye();
+    yarp::sig::Vector bUpperBound(nJ,M_PI);
+    yarp::sig::Vector bLowerBound(nJ,0.0);
+    constraints.push_back(Aggregated::BoundPointer(
+        new BilateralConstraint(A, bUpperBound, bLowerBound)
+                                                  )
+                          );
+
+    Aggregated::BoundPointer aggregated(new Aggregated(constraints, q));
+
+    constraints.push_back(  Aggregated::BoundPointer(
+            new velocity::VelocityLimits(qDotMax/2,dT,nJ)                        )
+                          );
+
+    for(typename std::list<Aggregated::BoundPointer>::iterator i = constraints.begin();
+        i != constraints.end(); ++i) {
+        Aggregated::BoundPointer b(*i);
+        if(b->getLowerBound().size() > 0)
+            std::cout << b->getLowerBound().toString() << std::endl;
+    }
+    Aggregated::BoundPointer aggregated2(new Aggregated(constraints, q));
+
+    constraints.push_back(aggregated);
+    constraints.push_back(aggregated2);
+
+    Aggregated::BoundPointer aggregated3(new Aggregated(constraints, q));
+
+    Aggregated::BoundPointer aggregated4(new Aggregated(aggregated2,
+                                                        aggregated3, q.size()));
+
+    Aggregated::BoundPointer aggregated5(new Aggregated(aggregated4,
+                                                        Aggregated::BoundPointer(
+                                        new velocity::JointLimits(q,
+                                                                  yarp::sig::Vector(q.size(),-0.1),
+                                                                  yarp::sig::Vector(q.size(),-0.1))
+                                                        ), q.size()));
+
+
+    /* testing constraints stay put */
+    ASSERT_TRUE(aggregated->getbLowerBound() == aggregated2->getbLowerBound());
+    ASSERT_TRUE(aggregated->getbUpperBound() == aggregated2->getbUpperBound());
+
+    /* testing aggregation rules for multiple bounds */
+    for(unsigned int i = 0; i < aggregated->getLowerBound().size(); ++i) {
+        ASSERT_NEAR(aggregated->getLowerBound()[i], 2*aggregated2->getLowerBound()[i], 1E-16);
+        ASSERT_NEAR(aggregated->getUpperBound()[i], 2*aggregated2->getUpperBound()[i], 1E-16);
+    }
+
+    /* testing bounds don't go into constraints */
+    ASSERT_TRUE(aggregated2->getLowerBound() == aggregated3->getLowerBound());
+    ASSERT_TRUE(aggregated2->getUpperBound() == aggregated3->getUpperBound());
+    // aggregated5->getLowerBound() > aggregated4.getLowerBound()
+    ASSERT_GT(findMin(aggregated5->getLowerBound() - aggregated4->getLowerBound()), 0);
+    // aggregated5->getUpperBound() < aggregated4.getUpperBound()
+    ASSERT_LT(findMax(aggregated5->getUpperBound() - aggregated4->getUpperBound()),0);
 }
 
 

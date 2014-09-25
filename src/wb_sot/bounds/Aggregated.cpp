@@ -42,8 +42,8 @@ Aggregated::Aggregated(const std::list<BoundPointer> &bounds,
     this->generateAll();
 }
 
-Aggregated::Aggregated(BoundPointer &bound1,
-                       BoundPointer &bound2,
+Aggregated::Aggregated(BoundPointer bound1,
+                       BoundPointer bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
     Bounds(x_size), _aggregationPolicy(aggregationPolicy)

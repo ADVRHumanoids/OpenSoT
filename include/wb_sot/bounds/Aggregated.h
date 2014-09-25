@@ -80,8 +80,8 @@
              * @param x_size the size of the x vector. Notice this constructor will NOT call
              *               update() on the base tasks
              */
-            Aggregated(BoundPointer &bound1,
-                       BoundPointer &bound2,
+            Aggregated(BoundPointer bound1,
+                       BoundPointer bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
