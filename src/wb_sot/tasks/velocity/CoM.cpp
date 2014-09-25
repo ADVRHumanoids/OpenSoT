@@ -27,7 +27,7 @@ using namespace yarp::math;
 CoM::CoM(   const yarp::sig::Vector& x) :
     Task("com", x.size()),
     _desiredPosition(3,0.0), _actualPosition(3,0.0),
-    positionError(3, 0.0)
+    positionError(3, 0.0), _b(3,0.0)
 {
     _support_foot_link_index = _robot.left_leg.index;
     _swing_foot_link_index = _robot.right_leg.index;
@@ -38,7 +38,7 @@ CoM::CoM(   const yarp::sig::Vector& x) :
 
     /* initializing to zero error */
     _desiredPosition = _actualPosition;
-    _b.resize(3, 0.0);
+    _b.zero();
     positionError = _b;
 
     _W.resize(3,3);
