@@ -46,6 +46,7 @@
             unsigned int _aggregationPolicy;
 
             void generateAll();
+            void checkSizes();
 
         public:
             /**

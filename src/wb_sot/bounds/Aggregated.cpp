@@ -29,8 +29,9 @@ Aggregated::Aggregated(const std::list<BoundPointer> bounds,
                        const unsigned int aggregationPolicy) :
     Bounds(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
+    this->checkSizes();
     /* calling update to generate bounds */
-    update(q);
+    this->update(q);
 }
 
 Aggregated::Aggregated(const std::list<BoundPointer> bounds,
@@ -38,6 +39,7 @@ Aggregated::Aggregated(const std::list<BoundPointer> bounds,
                        const unsigned int aggregationPolicy) :
     Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
+    this->checkSizes();
     /* calling update to generate bounds */
     this->generateAll();
 }
@@ -50,6 +52,8 @@ Aggregated::Aggregated(BoundPointer bound1,
 {
     _bounds.push_back(bound1);
     _bounds.push_back(bound2);
+
+    this->checkSizes();
     /* calling update to generate bounds */
     this->generateAll();
 }
@@ -206,5 +210,14 @@ void Aggregated::generateAll() {
         assert(_Aineq.rows() == _bLowerBound.size());
     if(_Aineq.rows() > 0)
         assert(_Aineq.cols() == _x_size);
+}
+
+void Aggregated::checkSizes()
+{
+    for(std::list< boost::shared_ptr<BoundType> >::iterator i = _bounds.begin();
+        i != _bounds.end(); ++i) {
+        boost::shared_ptr<BoundType> t = *i;
+        assert(this->getXSize() == t->getXSize());
+    }
 }
 

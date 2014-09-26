@@ -94,6 +94,7 @@
         Bounds(const unsigned int x_size) : _x_size(x_size) {}
         virtual ~Bounds() {}
 
+        const unsigned int getXSize() { return _x_size; }
         virtual const Vector_type& getLowerBound() { return _lowerBound; }
         virtual const Vector_type& getUpperBound() { return _upperBound; }
 

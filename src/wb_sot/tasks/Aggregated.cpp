@@ -26,6 +26,7 @@ Aggregated::Aggregated(const std::list<TaskPointer> tasks,
                        const unsigned int x_size) :
     Task(std::string("aggregated"),x_size), _tasks(tasks)
 {
+    this->checkSizes();
     /* calling update to generate bounds */
     this->generateAll();
 
@@ -41,6 +42,7 @@ Task(std::string("aggregated"),x_size)
     _tasks.push_back(task1);
     _tasks.push_back(task2);
 
+    this->checkSizes();
 
     /* calling update to generate bounds */
     this->generateAll();
@@ -53,6 +55,7 @@ Aggregated::Aggregated(const std::list<TaskPointer> tasks,
                        const yarp::sig::Vector& q) :
     Task(std::string("aggregated"),q.size()), _tasks(tasks)
 {
+    this->checkSizes();
     this->_update(q);
 
     _W.resize(_A.rows(),_A.rows()); _W.eye();
@@ -71,6 +74,16 @@ void Aggregated::_update(const yarp::sig::Vector& x) {
     }
     this->generateAll();
 }
+
+
+void Aggregated::checkSizes() {
+    for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
+        i != _tasks.end(); ++i) {
+        boost::shared_ptr<TaskType> t = *i;
+        assert(this->getXSize() == t->getXSize());
+    }
+}
+
 
 void Aggregated::generateAll() {
     this->getConstraints().clear();
