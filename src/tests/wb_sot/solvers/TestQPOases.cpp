@@ -927,7 +927,7 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 TEST_F(testQPOases_sot, testUpTo4Problems)
 {
     srand(time(NULL));
-    int number_of_tasks = 3;//rand() % 4;  //number between 1 and 3
+    int number_of_tasks = rand() % 4;  //number between 1 and 3
 
     iDynUtils idynutils;
     yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
