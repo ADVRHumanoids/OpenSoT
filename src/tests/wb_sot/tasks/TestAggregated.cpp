@@ -66,8 +66,8 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     EXPECT_TRUE(aggregated.getConstraints().size() == 0);
 
     double K = 0.1;
-    aggregated.setAlpha(K);
-    EXPECT_DOUBLE_EQ(aggregated.getAlpha(), K);
+    aggregated.setLambda(K);
+    EXPECT_DOUBLE_EQ(aggregated.getLambda(), K);
 
     EXPECT_TRUE(aggregated.getWeight() == yarp::sig::Matrix(q.size()*2, q.size()*2).eye());
 }

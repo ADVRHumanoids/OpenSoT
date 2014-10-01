@@ -47,8 +47,8 @@ TEST_F(testPosturalTask, testPosturalTask_)
     EXPECT_TRUE(postural.getConstraints().size() == 0);
 
     double K = 0.1;
-    postural.setAlpha(K);
-    EXPECT_DOUBLE_EQ(postural.getAlpha(), K);
+    postural.setLambda(K);
+    EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
     postural.setReference(q_ref);
     postural.update(q);
@@ -57,7 +57,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
     for(unsigned int i = 0; i < 100; ++i)
     {
         postural.update(q);
-        q += postural.getAlpha()*postural.getb();
+        q += postural.getLambda()*postural.getb();
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)

@@ -87,7 +87,7 @@
          * NOTE:
          *          0.0 <= _alpha <= 1.0
          */
-        double _alpha;
+        double _lambda;
 
         /**
          * @brief _bounds related to the Task
@@ -104,7 +104,7 @@
              const unsigned int x_size) :
             _task_id(task_id), _x_size(x_size)
         {
-            _alpha = 1.0;
+            _lambda = 1.0;
             _hessianType = HST_UNKNOWN;
         }
 
@@ -117,11 +117,11 @@
         const Matrix_type& getWeight() const { return _W; }
         void setWeight(const Matrix_type& W) { _W = W; }
 
-        const double getAlpha() const { return _alpha; }
-        void setAlpha(double alpha)
+        const double getLambda() const { return _lambda; }
+        void setLambda(double lambda)
         {
-            assert(alpha <= 1.0 && alpha > 0.0);
-            _alpha = alpha;
+            assert(lambda <= 1.0 && lambda > 0.0);
+            _lambda = lambda;
         }
         
         /** TODO should we transform the list to a list of pointers?  */

@@ -557,7 +557,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         boost::shared_ptr<JointLimits> joint_limits(
             new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(), idynutils.coman_iDyn3.getJointBoundMin()));
         postural_task->getConstraints().push_back(joint_limits);
-        postural_task->setAlpha(0.1);
+        postural_task->setLambda(0.1);
 
         OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
         EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
@@ -611,7 +611,7 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     postural_task->setReference(q_ref);
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(), idynutils.coman_iDyn3.getJointBoundMin()));
-    postural_task->setAlpha(0.1);
+    postural_task->setLambda(0.1);
 
     std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> bounds_list;
     bounds_list.push_back(joint_limits);
@@ -862,10 +862,10 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
     cartesian_utils::fromYARPMatrixtoKDLFrame(T_ref, T_ref_kdl);
 
     cartesian_task->setReference(T_ref);
-    cartesian_task->setAlpha(0.1);
+    cartesian_task->setLambda(0.1);
     cartesian_task->setOrientationErrorGain(1.0);
     postural_task->setReference(q);
-    postural_task->setAlpha(0.1);
+    postural_task->setLambda(0.1);
 
 
     int t = 50;
@@ -958,16 +958,16 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
     boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee1, q, idynutils,
                                                        ee1, "world"));
-    cartesian_task->setAlpha(1.0);
+    cartesian_task->setLambda(1.0);
 
     boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task2(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee2, q, idynutils,
                                                        ee2, "world"));
-    cartesian_task2->setAlpha(1.0);
+    cartesian_task2->setLambda(1.0);
 
     boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
                 new OpenSoT::tasks::velocity::Postural(q));
-    postural_task->setAlpha(1.0);
+    postural_task->setLambda(1.0);
 
     //Bounds
     int t = 50;

@@ -323,7 +323,7 @@ void QPOasesTask::prepareData(bool update_constraints)
 {
     /* Compute cost function */
     _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
-    _g = -1.0 * _task->getAlpha() * _task->getA().transposed() * _task->getWeight() * _task->getb();
+    _g = -1.0 * _task->getLambda() * _task->getA().transposed() * _task->getWeight() * _task->getb();
 
     if(update_constraints)
     {

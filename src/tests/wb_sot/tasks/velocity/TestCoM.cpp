@@ -76,8 +76,8 @@ TEST_F(testCoMTask, testCoMTask_)
     EXPECT_TRUE(CoM.getConstraints().size() == 0);
 
     double K = 0.8;
-    CoM.setAlpha(K);
-    EXPECT_DOUBLE_EQ(CoM.getAlpha(), K);
+    CoM.setLambda(K);
+    EXPECT_DOUBLE_EQ(CoM.getLambda(), K);
 
     CoM.setReference(x);
     EXPECT_TRUE(CoM.getb() == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb().toString();
@@ -91,7 +91,7 @@ TEST_F(testCoMTask, testCoMTask_)
     {
         CoM.update(q_whole);
 
-        q_whole += pinv(CoM.getA(),1E-6)*CoM.getAlpha()*CoM.getb();
+        q_whole += pinv(CoM.getA(),1E-6)*CoM.getLambda()*CoM.getb();
 
         _robot.updateiDyn3Model(q_whole);
         x_now = _robot.coman_iDyn3.getCOM("",_robot.left_leg.end_effector_index);

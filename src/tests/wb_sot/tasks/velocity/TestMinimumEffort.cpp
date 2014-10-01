@@ -60,8 +60,8 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
     EXPECT_TRUE(minimumEffort.getConstraints().size() == 0);
 
     double K = 0.8;
-    minimumEffort.setAlpha(K);
-    EXPECT_DOUBLE_EQ(minimumEffort.getAlpha(), K);
+    minimumEffort.setLambda(K);
+    EXPECT_DOUBLE_EQ(minimumEffort.getLambda(), K);
     _robot.updateiDyn3Model(q_whole);
     double initial_effort = yarp::math::dot(_robot.coman_iDyn3.getTorques(),
                                     minimumEffort.getWeight()*_robot.coman_iDyn3.getTorques());
@@ -70,7 +70,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
         minimumEffort.update(q_whole);
         double old_effort = minimumEffort.computeEffort();
 
-        q_whole += pinv(minimumEffort.getA(),1E-6)*minimumEffort.getAlpha()*minimumEffort.getb();
+        q_whole += pinv(minimumEffort.getA(),1E-6)*minimumEffort.getLambda()*minimumEffort.getb();
 
         minimumEffort.update(q_whole);
         EXPECT_LE(minimumEffort.computeEffort(), old_effort);

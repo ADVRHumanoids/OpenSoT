@@ -71,8 +71,8 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     EXPECT_TRUE(cartesian.getConstraints().size() == 0);
 
     double K = 0.1;
-    cartesian.setAlpha(K);
-    EXPECT_DOUBLE_EQ(cartesian.getAlpha(), K);
+    cartesian.setLambda(K);
+    EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref);
     cartesian.update(q_whole);
@@ -90,7 +90,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     {
         _robot.updateiDyn3Model(q_whole,true);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getAlpha()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
         _robot.updateiDyn3Model(q_whole,true);
         x_now = _robot.coman_iDyn3.getPosition(
                       _robot.right_leg.end_effector_index);
@@ -160,8 +160,8 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     EXPECT_TRUE(cartesian.getConstraints().size() == 0);
 
     double K = 0.1;
-    cartesian.setAlpha(K);
-    EXPECT_DOUBLE_EQ(cartesian.getAlpha(), K);
+    cartesian.setLambda(K);
+    EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref);
     cartesian.update(q_whole);
@@ -179,7 +179,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     {
         _robot.updateiDyn3Model(q_whole);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getAlpha()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
         _robot.updateiDyn3Model(q_whole);
         x_now = _robot.coman_iDyn3.getPosition(
                       _robot.left_leg.end_effector_index);
@@ -258,8 +258,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
     EXPECT_TRUE(cartesian.getConstraints().size() == 0);
 
     double K = 0.1;
-    cartesian.setAlpha(K);
-    EXPECT_DOUBLE_EQ(cartesian.getAlpha(), K);
+    cartesian.setLambda(K);
+    EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref);
     cartesian.update(q_whole);
@@ -277,7 +277,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getAlpha()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.coman_iDyn3.getPosition(
                     _robot.left_leg.end_effector_index,
@@ -346,8 +346,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
     EXPECT_TRUE(cartesian.getConstraints().size() == 0);
 
     double K = 0.1;
-    cartesian.setAlpha(K);
-    EXPECT_DOUBLE_EQ(cartesian.getAlpha(), K);
+    cartesian.setLambda(K);
+    EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref);
     cartesian.update(q_whole);
@@ -365,7 +365,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getAlpha()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.coman_iDyn3.getPosition(
                       0,
@@ -444,8 +444,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     EXPECT_TRUE(cartesian.getConstraints().size() == 0);
 
     double K = 0.1;
-    cartesian.setAlpha(K);
-    EXPECT_DOUBLE_EQ(cartesian.getAlpha(), K);
+    cartesian.setLambda(K);
+    EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref);
     cartesian.update(q_whole);
@@ -463,7 +463,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getAlpha()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.coman_iDyn3.getPosition(
                       _robot.left_leg.end_effector_index,
@@ -532,8 +532,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     EXPECT_TRUE(cartesian.getConstraints().size() == 0);
 
     double K = 0.1;
-    cartesian.setAlpha(K);
-    EXPECT_DOUBLE_EQ(cartesian.getAlpha(), K);
+    cartesian.setLambda(K);
+    EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref);
     cartesian.update(q_whole);
@@ -551,7 +551,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getAlpha()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.coman_iDyn3.getPosition(
                       0,
