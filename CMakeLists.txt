@@ -10,6 +10,11 @@ endif(COMMAND cmake_policy)
 include(ExternalProject)
 PROJECT(sot_VelKinCon)
 
+set(OPENSOT_MAJOR_VERSION 0)
+set(OPENSOT_MINOR_VERSION 0)
+set(OPENSOT_PATCH_VERSION 1)
+set(OPENSOT_VERSION ${OPENSOT_MAJOR_VERSION}.${OPENSOT_MINOR_VERSION}.${OPENSOT_PATCH_VERSION})
+
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
 check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
@@ -209,6 +214,7 @@ install(TARGETS sot_VelKinCon DESTINATION bin)
 install(TARGETS wb_sot DESTINATION lib)
 
 add_subdirectory(app)
+add_subdirectory(doc)
 
 add_custom_target(  copy_conf_files_to_build ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory

@@ -1,0 +1,24 @@
+/**
+\mainpage
+
+\section opensot_documentation The openSoT library
+
+\image html walkman-logo.png
+
+This documentation is developed by scanning all source code 
+in the src directory of the repository. You can produce this documentation on 
+your computer by running:
+
+\verbatim
+  mkdir build
+  cd build
+  cmake ..
+  make dox
+\endverbatim
+
+locally on your repository, to figure out what's going on.
+The output can be browsed at build/doc/html/index.html.
+
+This page can be edited at doc/main.dox.
+
+*/
