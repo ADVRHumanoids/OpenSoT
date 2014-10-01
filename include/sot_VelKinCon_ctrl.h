@@ -46,6 +46,7 @@ namespace wb_sot {
      private:
          paramHelp::ParamHelperServer   *paramHelper;
 
+         std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> test_stack;
          std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_2_tasks;
          std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_3_tasks;
 

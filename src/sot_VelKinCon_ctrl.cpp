@@ -219,6 +219,8 @@ bool sot_VelKinCon_ctrl::threadInit()
     taskSecondAggregated = wb_sot::tasks::Aggregated::TaskPointer(
         new wb_sot::tasks::Aggregated(secondTask,q.size()));
 
+    test_stack.push_back(taskPostural);
+
     stack_of_2_tasks.push_back(taskFirstAggregated);
     stack_of_2_tasks.push_back(taskSecondAggregated);
 
@@ -312,16 +314,22 @@ if(TORSO_IMPEDANCE) {
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_HELP,           this));
     YARP_ASSERT(paramHelper->registerCommandCallback(COMMAND_ID_SAVE_PARAMS,    this));
 
-
-    if(use_3_stacks)
-    {
+    bool testing = true;
+    if(testing)
         qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
-            new wb_sot::solvers::QPOases_sot(stack_of_3_tasks, bounds));
-    }
+            new wb_sot::solvers::QPOases_sot(test_stack, bounds));
     else
     {
-        qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
-            new wb_sot::solvers::QPOases_sot(stack_of_2_tasks, bounds));
+        if(use_3_stacks)
+        {
+            qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
+                new wb_sot::solvers::QPOases_sot(stack_of_3_tasks, bounds));
+        }
+        else
+        {
+            qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
+                new wb_sot::solvers::QPOases_sot(stack_of_2_tasks, bounds));
+        }
     }
 
     return true;
