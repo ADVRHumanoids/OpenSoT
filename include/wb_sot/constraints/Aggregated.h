@@ -27,6 +27,20 @@
 
  namespace OpenSoT {
     namespace constraints {
+
+        /**
+         * @brief The Aggregated class builds a new Constraing by piling up simpler constraints
+         *        so that:
+         * * For equality constraints:
+         *   Aeq = [Aeq1; Aeq2], beq=[beq1;beq2]
+         * * For inequality constraints:
+         *   Aineq = [Aineq1; Aeq2],
+         *   bLowerBound=[bLowerBound1;bLowerBound2]
+         *   bUpperBound=[bUpperBound1;bUpperBound2]
+         * * For bounds:
+         *   lowerBound = max(bLowerBound1, bLowerBound2),
+         *   upperBound = min(bUpperBound1,bUpperBound2)
+         */
         class Aggregated: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
         public:
             enum AggregationPolicy {
