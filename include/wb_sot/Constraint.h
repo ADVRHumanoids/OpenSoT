@@ -15,25 +15,25 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_H__
-#define __BOUNDS_H__
+#ifndef __CONSTRAINT_H__
+#define __CONSTRAINT_H__
 
 #include <boost/shared_ptr.hpp>
 
- namespace wb_sot {
+ namespace OpenSoT {
 
     /** Task represents
     */
  template <class Matrix_type, class Vector_type>
     /**
-     * @brief The Bounds class describes all the different types of constraints:
+     * @brief The Constraint class describes all the different types of constraints:
      * 1. bounds & bilateral
      * 2. equalities
      * 3. unilateral
      */
-    class Bounds {
+    class Constraint {
     public:
-        typedef Bounds< Matrix_type, Vector_type > BoundType;
+        typedef Constraint< Matrix_type, Vector_type > BoundType;
         typedef boost::shared_ptr<BoundType> BoundPointer;
     protected:
         /**
@@ -91,8 +91,8 @@
         Vector_type _bUpperBound;
 
     public:
-        Bounds(const unsigned int x_size) : _x_size(x_size) {}
-        virtual ~Bounds() {}
+        Constraint(const unsigned int x_size) : _x_size(x_size) {}
+        virtual ~Constraint() {}
 
         const unsigned int getXSize() { return _x_size; }
         virtual const Vector_type& getLowerBound() { return _lowerBound; }

@@ -31,7 +31,7 @@
 using namespace paramHelp;
 using namespace std;
 
-namespace wb_sot
+namespace OpenSoT
 {
 
 enum sot_VelKinCon_last_stack_type {

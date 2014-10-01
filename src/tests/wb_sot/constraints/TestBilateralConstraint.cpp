@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <wb_sot/bounds/velocity/VelocityLimits.h>
-#include <wb_sot/bounds/BilateralConstraint.h>
-#include <wb_sot/bounds/velocity/JointLimits.h>
+#include <wb_sot/constraints/velocity/VelocityLimits.h>
+#include <wb_sot/constraints/BilateralConstraint.h>
+#include <wb_sot/constraints/velocity/JointLimits.h>
 #include <string>
 
 namespace {
@@ -38,7 +38,7 @@ class testBilateralConstraint : public ::testing::Test {
 
 // Tests that the Foo::Bar() method does Abc.
 TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
-    using namespace wb_sot::bounds;
+    using namespace OpenSoT::constraints;
     const unsigned int nJ = 6;
 
     yarp::sig::Vector q(nJ, 0.0);

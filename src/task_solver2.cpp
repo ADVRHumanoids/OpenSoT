@@ -289,7 +289,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
 
     USING_NAMESPACE_QPOASES
 
-    static wb_sot::solvers::QPOasesProblem qp0(nj, A0.rows(), HST_SEMIDEF);
+    static OpenSoT::solvers::QPOasesProblem qp0(nj, A0.rows(), HST_SEMIDEF);
     qp0.setnWSR(127);
     static bool result0 = false;
     if(!qp0.isQProblemInitialized())
@@ -315,7 +315,7 @@ bool task_solver::computeControlHQP(const yarp::sig::Matrix &J0,
             l[i] = std::max(l1[i], -u2[i]);
         }
 
-        static wb_sot::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
+        static OpenSoT::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
         qp1.setnWSR(127);
         static bool result1 = false;
         if(!qp1.isQProblemInitialized())

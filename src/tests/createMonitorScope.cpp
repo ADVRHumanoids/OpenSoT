@@ -17,8 +17,8 @@ const int getStartingPlotIndexById(const ParamProxyInterface *const sot_VelKinCo
 
 int main(int argc, char* argv[]) {
     std::string moduleName = std::string("sot_VelKinCon_DEBUG");
-    const std::string scopeXml = createMonitorScope(wb_sot::sot_VelKinCon_ParamDescr,
-                                                    wb_sot::PARAM_ID_SIZE,
+    const std::string scopeXml = createMonitorScope(OpenSoT::sot_VelKinCon_ParamDescr,
+                                                    OpenSoT::PARAM_ID_SIZE,
                                                     moduleName);
     std::cout << scopeXml;
     return 0;

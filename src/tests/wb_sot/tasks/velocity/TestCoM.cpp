@@ -53,7 +53,7 @@ TEST_F(testCoMTask, testCoMTask_)
     _fixed_robot.coman_iDyn3.setFloatingBaseLink(_fixed_robot.left_leg.end_effector_index);
     _fixed_robot.updateiDyn3Model(q_whole);
 
-    wb_sot::tasks::velocity::CoM CoM(q_whole);
+    OpenSoT::tasks::velocity::CoM CoM(q_whole);
 
     EXPECT_TRUE(CoM.getb() == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb().toString();
 

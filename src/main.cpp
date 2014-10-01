@@ -19,7 +19,7 @@ class sot_VelKinCon_module: public yarp::os::RFModule
     yarp::os::BufferedPort<yarp::os::Bottle> switch_port;
 
     bool ctrl_started;
-    wb_sot::sot_VelKinCon_ctrl *thr;
+    OpenSoT::sot_VelKinCon_ctrl *thr;
 
     int     period;
     double  dT;
@@ -29,12 +29,12 @@ public:
     bool configure(yarp::os::ResourceFinder &rf)
     {
         //--------------------------PARAMETER HELPER--------------------------
-        paramHelper = new ParamHelperServer(wb_sot::sot_VelKinCon_ParamDescr, wb_sot::PARAM_ID_SIZE,
-                                            wb_sot::sot_VelKinCon_CommandDescr, wb_sot::COMMAND_ID_SIZE);
-        paramHelper->linkParam(wb_sot::PARAM_ID_DT, &dT);
-        paramHelper->linkParam(wb_sot::PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL, &left_arm_impedance_control);
-        paramHelper->linkParam(wb_sot::PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL, &right_arm_impedance_control);
-        paramHelper->linkParam(wb_sot::PARAM_ID_TORSO_IMPEDANCE_CONTROL, &torso_impedance_control);
+        paramHelper = new ParamHelperServer(OpenSoT::sot_VelKinCon_ParamDescr, OpenSoT::PARAM_ID_SIZE,
+                                            OpenSoT::sot_VelKinCon_CommandDescr, OpenSoT::COMMAND_ID_SIZE);
+        paramHelper->linkParam(OpenSoT::PARAM_ID_DT, &dT);
+        paramHelper->linkParam(OpenSoT::PARAM_ID_LEFT_ARM_IMPEDANCE_CONTROL, &left_arm_impedance_control);
+        paramHelper->linkParam(OpenSoT::PARAM_ID_RIGHT_ARM_IMPEDANCE_CONTROL, &right_arm_impedance_control);
+        paramHelper->linkParam(OpenSoT::PARAM_ID_TORSO_IMPEDANCE_CONTROL, &torso_impedance_control);
 
         /*
         if(rf.check("dT")) period = rf.find("dT").asDouble()  * 1000;
@@ -53,7 +53,7 @@ public:
         attach(rpcPort);
 
         period = dT*1000.0;
-        thr = new wb_sot::sot_VelKinCon_ctrl(period, left_arm_impedance_control,
+        thr = new OpenSoT::sot_VelKinCon_ctrl(period, left_arm_impedance_control,
                                                      right_arm_impedance_control,
                                                      torso_impedance_control,
                                                      paramHelper);

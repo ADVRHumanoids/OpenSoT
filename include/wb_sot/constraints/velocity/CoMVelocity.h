@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi
- * email:  alessio.rocchi@iit.it
+ * Author: Alessio Rocchi, Enrico Mingo
+ * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -15,28 +15,35 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_VELOCITY_VELOCITYLIMITS_H__
-#define __BOUNDS_VELOCITY_VELOCITYLIMITS_H__
+#ifndef __BOUNDS_VELOCITY_COMVELOCITY_H__
+#define __BOUNDS_VELOCITY_COMVELOCITY_H__
 
- #include <wb_sot/Bounds.h>
+ #include <wb_sot/Constraint.h>
 
  #include <yarp/sig/all.h>
+ #include <drc_shared/idynutils.h>
 
- namespace wb_sot {
-    namespace bounds {
+ namespace OpenSoT {
+    namespace constraints {
         namespace velocity {
-            class VelocityLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
+            class CoMVelocity: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
-                double _qDotLimit;
+                iDynUtils _robot;
+                yarp::sig::Vector _velocityLimits;
+                int _support_foot_linkIndex;
                 double _dT;
             public:
                 /**
-                 * @brief VelocityLimits constructor
+                 * @brief CoMVelocity constructor
+                 * @param robot the robot model
                  * @param dT the time constant at which we are performing velocity control [s]
                  */
-                VelocityLimits(const double qDotLimit,
-                               const double dT,
-                               const unsigned int x_size);
+                CoMVelocity(const yarp::sig::Vector velocityLimits,
+                            const iDynUtils &robot,
+                            const double dT,
+                            const unsigned int x_size);
+
+                virtual void update(const yarp::sig::Vector &x);
             };
         }
     }

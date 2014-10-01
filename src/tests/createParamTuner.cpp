@@ -18,8 +18,8 @@ const std::string createParamTuner(const ParamProxyInterface *const sot_VelKinCo
 
 int main(int argc, char* argv[]) {
     std::string moduleName = std::string("sot_VelKinCon");
-    const std::string scopeXml = createParamTuner(wb_sot::sot_VelKinCon_ParamDescr,
-                                                  wb_sot::PARAM_ID_SIZE,
+    const std::string scopeXml = createParamTuner(OpenSoT::sot_VelKinCon_ParamDescr,
+                                                  OpenSoT::PARAM_ID_SIZE,
                                                   moduleName);
     std::cout << scopeXml;
     return 0;

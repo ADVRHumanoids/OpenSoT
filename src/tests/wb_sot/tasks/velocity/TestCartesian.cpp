@@ -46,7 +46,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.right_leg);
     _robot.updateiDyn3Model(q_whole, true);
 
-    wb_sot::tasks::velocity::Cartesian cartesian("cartesian::right_leg",
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::right_leg",
                                                  q_whole,
                                                  _robot,
                                                  "r_sole",
@@ -135,7 +135,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.left_leg);
     _robot.updateiDyn3Model(q_whole);
 
-    wb_sot::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
                                                  q_whole,
                                                  _robot,
                                                  "l_sole",
@@ -232,7 +232,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    wb_sot::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
                                                  q_whole,
                                                  _robot,
                                                  "l_wrist",
@@ -320,7 +320,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    wb_sot::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
                                                  q_whole,
                                                  _robot,
                                                  "l_wrist",
@@ -418,7 +418,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    wb_sot::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
                                                  q_whole,
                                                  _robot,
                                                  "l_wrist",
@@ -506,7 +506,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    wb_sot::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
                                                  q_whole,
                                                  _robot,
                                                  "l_wrist",

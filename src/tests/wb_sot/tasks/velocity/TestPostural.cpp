@@ -1,7 +1,7 @@
 #include <drc_shared/tests_utils.h>
 #include <gtest/gtest.h>
 #include <wb_sot/tasks/velocity/Postural.h>
-#include <wb_sot/bounds/velocity/JointLimits.h>
+#include <wb_sot/constraints/velocity/JointLimits.h>
 #include <yarp/math/Math.h>
 
 using namespace yarp::math;
@@ -39,7 +39,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     yarp::sig::Vector q_ref(q.size(), 0.0);
 
-    wb_sot::tasks::velocity::Postural postural(q);
+    OpenSoT::tasks::velocity::Postural postural(q);
 
     EXPECT_TRUE(postural.getA() == yarp::sig::Matrix(q.size(), q.size()).eye());
     EXPECT_TRUE(postural.getWeight() == yarp::sig::Matrix(q.size(), q.size()).eye());
@@ -67,8 +67,8 @@ TEST_F(testPosturalTask, testPosturalTask_)
 TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
 {
     iDynUtils idynutils;
-    using namespace wb_sot::tasks::velocity;
-    using namespace wb_sot::bounds::velocity;
+    using namespace OpenSoT::tasks::velocity;
+    using namespace OpenSoT::constraints::velocity;
 
     yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
     yarp::sig::Vector q_next(q);

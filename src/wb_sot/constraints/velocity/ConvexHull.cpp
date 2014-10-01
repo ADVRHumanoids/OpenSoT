@@ -15,18 +15,18 @@
  * Public License for more details
 */
 
-#include <wb_sot/bounds/velocity/ConvexHull.h>
+#include <wb_sot/constraints/velocity/ConvexHull.h>
 #include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 ConvexHull::ConvexHull(iDynUtils &robot,
                        const unsigned int x_size,
                        const double boundScaling) :
-    Bounds(x_size), _robot(robot),
+    Constraint(x_size), _robot(robot),
     _boundScaling(boundScaling),
     _convex_hull() {
 

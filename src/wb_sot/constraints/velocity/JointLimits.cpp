@@ -15,17 +15,17 @@
  * Public License for more details
 */
 
-#include <wb_sot/bounds/velocity/JointLimits.h>
+#include <wb_sot/constraints/velocity/JointLimits.h>
 #include <yarp/math/Math.h>
 using namespace yarp::math;
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 
 JointLimits::JointLimits(   const yarp::sig::Vector& q,
                             const yarp::sig::Vector& jointBoundMax,
                             const yarp::sig::Vector& jointBoundMin,
                             const double boundScaling) :
-    Bounds(q.size()),
+    Constraint(q.size()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
     _boundScaling(boundScaling) {

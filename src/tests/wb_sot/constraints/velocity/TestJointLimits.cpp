@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
-#include <wb_sot/bounds/velocity/JointLimits.h>
+#include <wb_sot/constraints/velocity/JointLimits.h>
 #include <drc_shared/idynutils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <cmath>
 #define  s 1.0
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 namespace {

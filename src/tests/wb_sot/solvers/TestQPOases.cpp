@@ -6,11 +6,11 @@
 #include <drc_shared/tests_utils.h>
 #include <yarp/math/Math.h>
 #include <drc_shared/comanutils.h>
-#include <wb_sot/bounds/Aggregated.h>
+#include <wb_sot/constraints/Aggregated.h>
 #include <wb_sot/tasks/velocity/Cartesian.h>
-#include <wb_sot/bounds/velocity/JointLimits.h>
+#include <wb_sot/constraints/velocity/JointLimits.h>
 #include <kdl/frames.hpp>
-#include <wb_sot/bounds/velocity/VelocityLimits.h>
+#include <wb_sot/constraints/velocity/VelocityLimits.h>
 #include <wb_sot/tasks/velocity/CoM.h>
 
 
@@ -211,7 +211,7 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
 
     USING_NAMESPACE_QPOASES
 
-    static wb_sot::solvers::QPOasesProblem qp0(nj, 0, HST_SEMIDEF);
+    static OpenSoT::solvers::QPOasesProblem qp0(nj, 0, HST_SEMIDEF);
     qp0.setnWSR(127);
     static bool result0 = false;
     if(!qp0.isQProblemInitialized())
@@ -230,7 +230,7 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
         yarp::sig::Vector lA1 = b1;
         yarp::sig::Vector uA1 = b1;
 
-        static wb_sot::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
+        static OpenSoT::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
         qp1.setnWSR(127);
         static bool result1 = false;
         if(!qp1.isQProblemInitialized())
@@ -289,7 +289,7 @@ public:
 };
 
 class testQPOasesProblem: public ::testing::Test,
-        public wb_sot::solvers::QPOasesProblem
+        public OpenSoT::solvers::QPOasesProblem
 {
 protected:
 
@@ -481,7 +481,7 @@ TEST_F(testQPOasesProblem, testTask)
     for(unsigned int i = 0; i < q.size(); ++i)
         q[i] = tests_utils::getRandomAngle();
 
-    wb_sot::tasks::velocity::Postural postural_task(q);
+    OpenSoT::tasks::velocity::Postural postural_task(q);
     postural_task.setReference(q_ref);
     postural_task.update(q);
 
@@ -524,13 +524,13 @@ TEST_F(testQPOasesTask, testQPOasesTask)
         q[i] = tests_utils::getRandomAngle();
     std::cout<<"q: "<<q.toString()<<std::endl;
 
-    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
-                new wb_sot::tasks::velocity::Postural(q));
+    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
+                new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setReference(q_ref);
     postural_task->update(q);
     std::cout<<"error: "<<postural_task->getb().toString()<<std::endl;
 
-    wb_sot::solvers::QPOasesTask qp_postural_task(postural_task);
+    OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
     EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
 
     postural_task->update(q);
@@ -543,7 +543,7 @@ TEST_F(testQPOasesTask, testQPOasesTask)
 
 }
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 TEST_F(testQPOasesTask, testProblemWithConstraint)
 {
         iDynUtils idynutils;
@@ -551,15 +551,15 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         yarp::sig::Vector q_ref(q.size(), M_PI);
         idynutils.updateiDyn3Model(q, true);
 
-        boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
-                new wb_sot::tasks::velocity::Postural(q));
+        boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
+                new OpenSoT::tasks::velocity::Postural(q));
         postural_task->setReference(q_ref);
         boost::shared_ptr<JointLimits> joint_limits(
             new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(), idynutils.coman_iDyn3.getJointBoundMin()));
         postural_task->getConstraints().push_back(joint_limits);
         postural_task->setAlpha(0.1);
 
-        wb_sot::solvers::QPOasesTask qp_postural_task(postural_task);
+        OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
         EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
 
         yarp::sig::Vector l_old, u_old;
@@ -606,22 +606,22 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     yarp::sig::Vector q_ref(q.size(), M_PI);
     idynutils.updateiDyn3Model(q, true);
 
-    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
-            new wb_sot::tasks::velocity::Postural(q));
+    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
+            new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setReference(q_ref);
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(), idynutils.coman_iDyn3.getJointBoundMin()));
     postural_task->setAlpha(0.1);
 
-    std::list<boost::shared_ptr<wb_sot::Bounds<Matrix, Vector>>> bounds_list;
+    std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> bounds_list;
     bounds_list.push_back(joint_limits);
 
-    boost::shared_ptr<wb_sot::bounds::Aggregated> bounds(
-                new wb_sot::bounds::Aggregated(bounds_list, q.size()));
+    boost::shared_ptr<OpenSoT::constraints::Aggregated> bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
-    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
+    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
-    wb_sot::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
 
     EXPECT_TRUE(sot.getNumberOfTasks() == 1);
     yarp::sig::Vector dq(q.size(), 0.0);
@@ -676,8 +676,8 @@ TEST_F(testQPOasesTask, testCartesian)
                           idynutils.coman_iDyn3.getLinkIndex("l_wrist"));
 
     //2 Tasks: Cartesian & Postural
-    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::left_wrist", q, idynutils,
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, idynutils,
                 "l_wrist", "Waist"));
 
 
@@ -687,7 +687,7 @@ TEST_F(testQPOasesTask, testCartesian)
     cartesian_task->setReference(T_ref);
     cartesian_task->update(q);
 
-    wb_sot::solvers::QPOasesTask cartesian_qp(cartesian_task);
+    OpenSoT::solvers::QPOasesTask cartesian_qp(cartesian_task);
 
     for(unsigned int i = 0; i < 100; ++i)
     {
@@ -741,11 +741,11 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
 
     //2 Tasks: Cartesian & Postural
-    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::l_wrist", q, idynutils,
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist", q, idynutils,
                                                        "l_wrist", "Waist"));
-    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
-                new wb_sot::tasks::velocity::Postural(q));
+    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
+                new OpenSoT::tasks::velocity::Postural(q));
 
     postural_task->setReference(q);
     cartesian_task->setReference(T_init);
@@ -760,22 +760,22 @@ TEST_F(testQPOases_sot, testContructor2Problems)
     boost::shared_ptr<VelocityLimits> joint_velocity_limits(
                 new VelocityLimits(0.3, (double)(1.0/t), q.size()));
 
-    std::list<boost::shared_ptr<wb_sot::Bounds<Matrix, Vector>>> joint_constraints_list;
+    std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
     joint_constraints_list.push_back(joint_velocity_limits);
 
-    boost::shared_ptr<wb_sot::bounds::Aggregated> joint_constraints(
-                new wb_sot::bounds::Aggregated(joint_constraints_list, q.size()));
+    boost::shared_ptr<OpenSoT::constraints::Aggregated> joint_constraints(
+                new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
 
     //Create the SoT
-    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
+    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(postural_task);
 
     std::cout<<"Initial Position Error: "<<cartesian_task->positionError.toString()<<std::endl;
     std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError.toString()<<std::endl;
 
-    wb_sot::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
 
     KDL::Frame T_ref_kdl;
@@ -848,11 +848,11 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
                 idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
 
     //2 Tasks: Cartesian & Postural
-    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::r_wrist", q, idynutils,
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::r_wrist", q, idynutils,
                                                        "r_wrist", "Waist"));
-    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
-                new wb_sot::tasks::velocity::Postural(q));
+    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
+                new OpenSoT::tasks::velocity::Postural(q));
 
     KDL::Frame T_ref_kdl;
     yarp::sig::Matrix T_ref;
@@ -869,7 +869,7 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 
 
     int t = 50;
-    std::list< wb_sot::bounds::Aggregated::BoundPointer> constraints_list;
+    std::list< OpenSoT::constraints::Aggregated::BoundPointer> constraints_list;
 
     //Constraints set to the Cartesian Task
     boost::shared_ptr<JointLimits> joint_limits(
@@ -882,8 +882,8 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
                 new VelocityLimits(0.3, (double)(1.0/t), q.size()));
     constraints_list.push_back(joint_velocity_limits);
 
-    boost::shared_ptr<wb_sot::bounds::Aggregated> aggregated_bounds(
-                new wb_sot::bounds::Aggregated(constraints_list,q.size()));
+    boost::shared_ptr<OpenSoT::constraints::Aggregated> aggregated_bounds(
+                new OpenSoT::constraints::Aggregated(constraints_list,q.size()));
 
     //Solve SoT
     yarp::sig::Vector dq(q.size(), 0.0);
@@ -950,28 +950,28 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
     q_ref = q;
 
     //3 Tasks: CoM & Cartesian & Postural
-    boost::shared_ptr<wb_sot::tasks::velocity::CoM> com_task(
-                new wb_sot::tasks::velocity::CoM(q));
+    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com_task(
+                new OpenSoT::tasks::velocity::CoM(q));
 
     std::string ee1 = "r_wrist";
     std::string ee2 = "l_wrist";
-    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::"+ee1, q, idynutils,
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee1, q, idynutils,
                                                        ee1, "world"));
     cartesian_task->setAlpha(1.0);
 
-    boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> cartesian_task2(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::"+ee2, q, idynutils,
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task2(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee2, q, idynutils,
                                                        ee2, "world"));
     cartesian_task2->setAlpha(1.0);
 
-    boost::shared_ptr<wb_sot::tasks::velocity::Postural> postural_task(
-                new wb_sot::tasks::velocity::Postural(q));
+    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
+                new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setAlpha(1.0);
 
     //Bounds
     int t = 50;
-    std::list< wb_sot::bounds::Aggregated::BoundPointer> constraints_list;
+    std::list< OpenSoT::constraints::Aggregated::BoundPointer> constraints_list;
 
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),
@@ -984,8 +984,8 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
     constraints_list.push_back(joint_velocity_limits);
 
 
-    boost::shared_ptr<wb_sot::bounds::Aggregated> joint_constraints(
-                new wb_sot::bounds::Aggregated(constraints_list, q.size()));
+    boost::shared_ptr<OpenSoT::constraints::Aggregated> joint_constraints(
+                new OpenSoT::constraints::Aggregated(constraints_list, q.size()));
 
     yarp::sig::Matrix T_arm_init = idynutils.coman_iDyn3.getPosition(
                 idynutils.coman_iDyn3.getLinkIndex(ee1));
@@ -1020,7 +1020,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
 
 
     //Create the SoT
-    std::vector<boost::shared_ptr<wb_sot::Task<Matrix, Vector> >> stack_of_tasks;
+    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks;
     if(number_of_tasks >= 1)
         stack_of_tasks.push_back(com_task);
     if(number_of_tasks >= 2)
@@ -1029,7 +1029,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         stack_of_tasks.push_back(cartesian_task2);
 
     stack_of_tasks.push_back(postural_task);
-    wb_sot::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
     yarp::sig::Vector dq(q.size(), 0.0);
     double acc = 0.0;

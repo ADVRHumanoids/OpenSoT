@@ -15,19 +15,19 @@
  * Public License for more details
 */
 
-#include <wb_sot/bounds/Aggregated.h>
+#include <wb_sot/constraints/Aggregated.h>
 
 #include <yarp/math/Math.h>
 #include <assert.h>
 #include <limits>
 
-using namespace wb_sot::bounds;
+using namespace OpenSoT::constraints;
 using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<BoundPointer> bounds,
                        const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy) :
-    Bounds(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
+    Constraint(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     this->checkSizes();
     /* calling update to generate bounds */
@@ -37,7 +37,7 @@ Aggregated::Aggregated(const std::list<BoundPointer> bounds,
 Aggregated::Aggregated(const std::list<BoundPointer> bounds,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
-    Bounds(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
+    Constraint(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     this->checkSizes();
     /* calling update to generate bounds */
@@ -48,7 +48,7 @@ Aggregated::Aggregated(BoundPointer bound1,
                        BoundPointer bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
-    Bounds(x_size), _aggregationPolicy(aggregationPolicy)
+    Constraint(x_size), _aggregationPolicy(aggregationPolicy)
 {
     _bounds.push_back(bound1);
     _bounds.push_back(bound2);

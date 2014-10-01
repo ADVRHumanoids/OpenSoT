@@ -27,7 +27,7 @@
 
  #define WORLD_FRAME_NAME "world"
 
- namespace wb_sot {
+ namespace OpenSoT {
     namespace tasks {
         namespace velocity {
             class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {

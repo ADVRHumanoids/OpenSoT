@@ -21,7 +21,7 @@
 #include <exception>
 #include <cmath>
 
-using namespace wb_sot::tasks::velocity;
+using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
 Postural::Postural(   const yarp::sig::Vector& x) :

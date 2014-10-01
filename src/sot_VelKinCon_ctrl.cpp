@@ -21,7 +21,7 @@
 using namespace iCub::iDynTree;
 using namespace yarp::math;
 using namespace yarp::os;
-using namespace wb_sot;
+using namespace OpenSoT;
 
 sot_VelKinCon_ctrl::sot_VelKinCon_ctrl(const int period,    const bool _LEFT_ARM_IMPEDANCE,
                                                             const bool _RIGHT_ARM_IMPEDANCE,
@@ -101,10 +101,10 @@ void sot_VelKinCon_ctrl::commandReceived(const CommandDescription &cd,
 {
     switch(cd.id)
     {
-    case wb_sot::COMMAND_ID_HELP:
+    case OpenSoT::COMMAND_ID_HELP:
         paramHelper->getHelpMessage(reply);
         break;
-    case wb_sot::COMMAND_ID_SAVE_PARAMS:
+    case OpenSoT::COMMAND_ID_SAVE_PARAMS:
         {
             std::string fileName = CONF_NAME;
             yarp::os::ResourceFinder rf;
@@ -159,65 +159,65 @@ bool sot_VelKinCon_ctrl::threadInit()
 
     idynutils.updateiDyn3Model(q,true);
 
-    boundsJointLimits = wb_sot::bounds::velocity::JointLimits::BoundPointer(
-                            new wb_sot::bounds::velocity::JointLimits(
+    boundsJointLimits = OpenSoT::constraints::velocity::JointLimits::BoundPointer(
+                            new OpenSoT::constraints::velocity::JointLimits(
                                 q,
                                 idynutils.coman_iDyn3.getJointBoundMax(),
                                 idynutils.coman_iDyn3.getJointBoundMin()));
-    boundsJointVelocity = wb_sot::bounds::velocity::VelocityLimits::BoundPointer(
-                            new wb_sot::bounds::velocity::VelocityLimits(0.3,_dT,q.size()));
+    boundsJointVelocity = OpenSoT::constraints::velocity::VelocityLimits::BoundPointer(
+                            new OpenSoT::constraints::velocity::VelocityLimits(0.3,_dT,q.size()));
 
-    bounds = boost::shared_ptr<wb_sot::bounds::Aggregated>(
-                new wb_sot::bounds::Aggregated(boundsJointLimits, boundsJointVelocity, q.size()));
+    bounds = boost::shared_ptr<OpenSoT::constraints::Aggregated>(
+                new OpenSoT::constraints::Aggregated(boundsJointLimits, boundsJointVelocity, q.size()));
 
-    taskCartesianLWrist = boost::shared_ptr<wb_sot::tasks::velocity::Cartesian>(
-                new wb_sot::tasks::velocity::Cartesian("cartesian::l_wrist",q,idynutils,
+    taskCartesianLWrist = boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian>(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist",q,idynutils,
                                                         idynutils.left_arm.end_effector_name,
                                                         "world"));
-    taskCartesianRWrist = boost::shared_ptr<wb_sot::tasks::velocity::Cartesian>(
-                            new wb_sot::tasks::velocity::Cartesian("cartesian::r_wrist",q,idynutils,
+    taskCartesianRWrist = boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian>(
+                            new OpenSoT::tasks::velocity::Cartesian("cartesian::r_wrist",q,idynutils,
                                                                     idynutils.right_arm.end_effector_name,
                                                                     "world"));
-    taskCartesianRSole = boost::shared_ptr<wb_sot::tasks::velocity::Cartesian>(
-                            new wb_sot::tasks::velocity::Cartesian("cartesian::r_sole",q,idynutils,
+    taskCartesianRSole = boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian>(
+                            new OpenSoT::tasks::velocity::Cartesian("cartesian::r_sole",q,idynutils,
                                                                     idynutils.right_leg.end_effector_name,
                                                                     idynutils.left_leg.end_effector_name));
-    taskCoM = boost::shared_ptr<wb_sot::tasks::velocity::CoM>(
-        new wb_sot::tasks::velocity::CoM(q));
+    taskCoM = boost::shared_ptr<OpenSoT::tasks::velocity::CoM>(
+        new OpenSoT::tasks::velocity::CoM(q));
 
-    boundsCoMVelocity = wb_sot::bounds::velocity::CoMVelocity::BoundPointer(
-        new wb_sot::bounds::velocity::CoMVelocity(yarp::sig::Vector(3,0.03),idynutils,_dT,q.size()));
+    boundsCoMVelocity = OpenSoT::constraints::velocity::CoMVelocity::BoundPointer(
+        new OpenSoT::constraints::velocity::CoMVelocity(yarp::sig::Vector(3,0.03),idynutils,_dT,q.size()));
     taskCoM->getConstraints().push_back(boundsCoMVelocity);
 
-    boundsConvexHullVelocity = wb_sot::bounds::velocity::ConvexHull::BoundPointer(
-        new wb_sot::bounds::velocity::ConvexHull(idynutils,q.size()));
+    boundsConvexHullVelocity = OpenSoT::constraints::velocity::ConvexHull::BoundPointer(
+        new OpenSoT::constraints::velocity::ConvexHull(idynutils,q.size()));
     taskCoM->getConstraints().push_back(boundsConvexHullVelocity);
 
 
-    std::list<wb_sot::tasks::velocity::Cartesian::TaskPointer> cartesianTask;
-    std::list<wb_sot::tasks::Aggregated::TaskPointer> firstTask;
+    std::list<OpenSoT::tasks::velocity::Cartesian::TaskPointer> cartesianTask;
+    std::list<OpenSoT::tasks::Aggregated::TaskPointer> firstTask;
     cartesianTask.push_back(taskCartesianLWrist);
     cartesianTask.push_back(taskCartesianRWrist);
     cartesianTask.push_back(taskCartesianRSole);
     firstTask = cartesianTask;
     firstTask.push_back(taskCoM);
 
-    taskFirstAggregated = wb_sot::tasks::Aggregated::TaskPointer(
-        new wb_sot::tasks::Aggregated(firstTask,q.size()));
-    taskCartesianAggregated = wb_sot::tasks::Aggregated::TaskPointer(
-        new wb_sot::tasks::Aggregated(cartesianTask,q.size()));
+    taskFirstAggregated = OpenSoT::tasks::Aggregated::TaskPointer(
+        new OpenSoT::tasks::Aggregated(firstTask,q.size()));
+    taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPointer(
+        new OpenSoT::tasks::Aggregated(cartesianTask,q.size()));
 
-    taskMinimumEffort = boost::shared_ptr<wb_sot::tasks::velocity::MinimumEffort>(
-        new wb_sot::tasks::velocity::MinimumEffort(q));
-    taskPostural = boost::shared_ptr<wb_sot::tasks::velocity::Postural>(
-        new wb_sot::tasks::velocity::Postural(q));
+    taskMinimumEffort = boost::shared_ptr<OpenSoT::tasks::velocity::MinimumEffort>(
+        new OpenSoT::tasks::velocity::MinimumEffort(q));
+    taskPostural = boost::shared_ptr<OpenSoT::tasks::velocity::Postural>(
+        new OpenSoT::tasks::velocity::Postural(q));
 
-    std::list<wb_sot::tasks::Aggregated::TaskPointer> secondTask;
+    std::list<OpenSoT::tasks::Aggregated::TaskPointer> secondTask;
     secondTask.push_back(taskMinimumEffort);
     secondTask.push_back(taskPostural);
 
-    taskSecondAggregated = wb_sot::tasks::Aggregated::TaskPointer(
-        new wb_sot::tasks::Aggregated(secondTask,q.size()));
+    taskSecondAggregated = OpenSoT::tasks::Aggregated::TaskPointer(
+        new OpenSoT::tasks::Aggregated(secondTask,q.size()));
 
     test_stack.push_back(taskPostural);
 
@@ -316,19 +316,19 @@ if(TORSO_IMPEDANCE) {
 
     bool testing = true;
     if(testing)
-        qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
-            new wb_sot::solvers::QPOases_sot(test_stack, bounds));
+        qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPointer(
+            new OpenSoT::solvers::QPOases_sot(test_stack, bounds));
     else
     {
         if(use_3_stacks)
         {
-            qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
-                new wb_sot::solvers::QPOases_sot(stack_of_3_tasks, bounds));
+            qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPointer(
+                new OpenSoT::solvers::QPOases_sot(stack_of_3_tasks, bounds));
         }
         else
         {
-            qpOasesSolver = wb_sot::solvers::QPOases_sot::SolverPointer(
-                new wb_sot::solvers::QPOases_sot(stack_of_2_tasks, bounds));
+            qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPointer(
+                new OpenSoT::solvers::QPOases_sot(stack_of_2_tasks, bounds));
         }
     }
 

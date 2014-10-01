@@ -18,7 +18,7 @@
 #ifndef __BOUNDS_VELOCITY_CONVEXHULL_H__
 #define __BOUNDS_VELOCITY_CONVEXHULL_H__
 
- #include <wb_sot/Bounds.h>
+ #include <wb_sot/Constraint.h>
 
  #include <yarp/sig/all.h>
  #include <drc_shared/idynutils.h>
@@ -27,10 +27,10 @@
 
 #define BOUND_SCALING 0.01
 
- namespace wb_sot {
-    namespace bounds {
+ namespace OpenSoT {
+    namespace constraints {
         namespace velocity {
-            class ConvexHull: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
+            class ConvexHull: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
                 iDynUtils& _robot;
                 double _boundScaling;

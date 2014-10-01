@@ -5,7 +5,7 @@
 */
 
 #include <drc_shared/utils/convex_hull.h>
-#include "wb_sot/bounds/velocity/ConvexHull.h"
+#include "wb_sot/constraints/velocity/ConvexHull.h"
 #include <ros/ros.h>
 
 int main()
@@ -46,7 +46,7 @@ int main()
     yarp::sig::Vector b;
 
     huller.getConvexHull(points, ch);
-    wb_sot::bounds::velocity::ConvexHull::getConstraints(ch, A, b);
+    OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A, b);
     ROS_INFO("A: %s", A.toString().c_str());
     ROS_INFO("b: %s", b.toString().c_str());
 

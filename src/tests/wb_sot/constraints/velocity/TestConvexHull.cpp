@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <wb_sot/bounds/velocity/ConvexHull.h>
+#include <wb_sot/constraints/velocity/ConvexHull.h>
 #include <drc_shared/idynutils.h>
 #include <drc_shared/utils/convex_hull.h>
 #include <iCub/iDynTree/yarp_kdl.h>
@@ -13,7 +13,7 @@
 #define  CoMVelocityLimit 0.03 * m_s
 #define toRad(X) (X * M_PI/180.0)
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 namespace {
@@ -353,7 +353,7 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
 
     yarp::sig::Matrix A_ch;
     yarp::sig::Vector b_ch;
-    wb_sot::bounds::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch);
+    OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch);
     EXPECT_EQ(A.rows(), A_ch.rows());
     EXPECT_EQ(A.cols(), A_ch.cols());
     EXPECT_EQ(b.size(), b_ch.size());

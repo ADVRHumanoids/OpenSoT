@@ -49,7 +49,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
     _robot.updateiDyn3Model(q_whole);
 
-    wb_sot::tasks::velocity::MinimumEffort minimumEffort(q_whole);
+    OpenSoT::tasks::velocity::MinimumEffort minimumEffort(q_whole);
 
     EXPECT_EQ(minimumEffort.getA().rows(), nJ);
     EXPECT_EQ(minimumEffort.getb().size(), nJ);

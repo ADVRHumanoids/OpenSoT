@@ -20,11 +20,11 @@
 
  #include <list>
  #include <string>
- #include <wb_sot/Bounds.h>
+ #include <wb_sot/Constraint.h>
  #include <assert.h>
  #include <boost/shared_ptr.hpp>
 
- namespace wb_sot {
+ namespace OpenSoT {
 
     /** Summarises all possible types of the QP's Hessian matrix. From qpOASES/Types.hpp */
     enum HessianType
@@ -48,7 +48,7 @@
     public:
         typedef Task< Matrix_type, Vector_type > TaskType;
         typedef boost::shared_ptr<TaskType> TaskPointer;
-        typedef Bounds< Matrix_type, Vector_type > BoundType;
+        typedef Constraint< Matrix_type, Vector_type > BoundType;
         typedef boost::shared_ptr<BoundType> BoundPointer;
     protected:
 

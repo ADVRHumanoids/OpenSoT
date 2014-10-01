@@ -21,7 +21,7 @@
 #include <exception>
 #include <cmath>
 
-using namespace wb_sot::tasks::velocity;
+using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
 Cartesian::Cartesian(std::string task_id,

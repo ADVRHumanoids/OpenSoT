@@ -15,19 +15,19 @@
  * Public License for more details
 */
 
-#include <wb_sot/bounds/velocity/CoMVelocity.h>
+#include <wb_sot/constraints/velocity/CoMVelocity.h>
 #include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 CoMVelocity::CoMVelocity(const yarp::sig::Vector velocityLimits,
                          const iDynUtils &robot,
                          const double dT,
                          const unsigned int x_size) :
-Bounds(x_size), _robot(robot),_dT(dT), _velocityLimits(velocityLimits) {
+Constraint(x_size), _robot(robot),_dT(dT), _velocityLimits(velocityLimits) {
 
     if(_velocityLimits.size() < 3 )
         throw "Error: velocityLimits for CoM should be a vector of 3 elements";

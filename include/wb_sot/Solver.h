@@ -19,12 +19,12 @@
 #define __SOLVER_H__
 
 #include <wb_sot/Task.h>
-#include <wb_sot/Bounds.h>
+#include <wb_sot/Constraint.h>
 #include <list>
 
 using namespace std;
 
- namespace wb_sot {
+ namespace OpenSoT {
     template < class Matrix_type, class Vector_type >
     class Solver {
     public:

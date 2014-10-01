@@ -17,15 +17,15 @@
 #include <drc_shared/idynutils.h>
 #include <drc_shared/utils/convex_hull.h>
 #include <wb_sot/Task.h>
-#include <wb_sot/Bounds.h>
+#include <wb_sot/Constraint.h>
 #include <wb_sot/Solver.h>
 #include <wb_sot/tasks/Aggregated.h>
 #include <wb_sot/tasks/velocity/all.h>
-#include <wb_sot/bounds/Aggregated.h>
-#include <wb_sot/bounds/velocity/all.h>
+#include <wb_sot/constraints/Aggregated.h>
+#include <wb_sot/constraints/velocity/all.h>
 #include <wb_sot/solvers/QPOases.h>
 
-namespace wb_sot {
+namespace OpenSoT {
     class sot_VelKinCon_ctrl :  public yarp::os::RateThread,
                                 public paramHelp::ParamValueObserver,
                                 public paramHelp::CommandObserver
@@ -46,28 +46,28 @@ namespace wb_sot {
      private:
          paramHelp::ParamHelperServer   *paramHelper;
 
-         std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> test_stack;
-         std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_2_tasks;
-         std::vector<boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_3_tasks;
+         std::vector<boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> >> test_stack;
+         std::vector<boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_2_tasks;
+         std::vector<boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> >> stack_of_3_tasks;
 
-         boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> taskCartesianRWrist;
-         boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> taskCartesianLWrist;
-         boost::shared_ptr<wb_sot::tasks::velocity::Cartesian> taskCartesianRSole;
-         boost::shared_ptr<wb_sot::tasks::velocity::CoM> taskCoM;
-         boost::shared_ptr<wb_sot::tasks::velocity::Postural> taskPostural;
-         boost::shared_ptr<wb_sot::tasks::velocity::MinimumEffort> taskMinimumEffort;
+         boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> taskCartesianRWrist;
+         boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> taskCartesianLWrist;
+         boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> taskCartesianRSole;
+         boost::shared_ptr<OpenSoT::tasks::velocity::CoM> taskCoM;
+         boost::shared_ptr<OpenSoT::tasks::velocity::Postural> taskPostural;
+         boost::shared_ptr<OpenSoT::tasks::velocity::MinimumEffort> taskMinimumEffort;
 
-         boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskFirstAggregated;
-         boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskCartesianAggregated;
-         boost::shared_ptr<wb_sot::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskSecondAggregated;
+         boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskFirstAggregated;
+         boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskCartesianAggregated;
+         boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> > taskSecondAggregated;
 
-         boost::shared_ptr<wb_sot::bounds::Aggregated > bounds;
-         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointLimits;
-         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointVelocity;
-         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsCoMVelocity;
-         boost::shared_ptr<wb_sot::Bounds<yarp::sig::Matrix, yarp::sig::Vector> > boundsConvexHullVelocity;
+         boost::shared_ptr<OpenSoT::constraints::Aggregated > bounds;
+         boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointLimits;
+         boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointVelocity;
+         boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector> > boundsCoMVelocity;
+         boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector> > boundsConvexHullVelocity;
 
-         boost::shared_ptr<wb_sot::Solver<yarp::sig::Matrix, yarp::sig::Vector> > qpOasesSolver;
+         boost::shared_ptr<OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector> > qpOasesSolver;
 
          /** Callback function for parameter updates. */
          void parameterUpdated(const ParamProxyInterface *pd);

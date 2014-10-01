@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <wb_sot/bounds/velocity/VelocityLimits.h>
+#include <wb_sot/constraints/velocity/VelocityLimits.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <cmath>
@@ -8,7 +8,7 @@
 #define  vel_lim 20.0
 #define  dT 0.001*s
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 namespace {

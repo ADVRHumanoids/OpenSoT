@@ -20,7 +20,7 @@
 #include <exception>
 #include <cmath>
 
-using namespace wb_sot::tasks::velocity;
+using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
 MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :

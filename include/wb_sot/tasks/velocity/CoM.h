@@ -25,7 +25,7 @@
  #include <yarp/sig/all.h>
 #include <yarp/os/all.h>
 
- namespace wb_sot {
+ namespace OpenSoT {
     namespace tasks {
         namespace velocity {
             class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {

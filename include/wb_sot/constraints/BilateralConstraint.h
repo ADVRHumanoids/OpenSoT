@@ -18,20 +18,20 @@
 #ifndef __BOUNDS_BILATERALCONSTRAINT_H__
 #define __BOUNDS_BILATERALCONSTRAINT_H__
 
-#include <wb_sot/Bounds.h>
+#include <wb_sot/Constraint.h>
 
 #include <yarp/sig/all.h>
 #include <list>
 
 
- namespace wb_sot {
-    namespace bounds {
+ namespace OpenSoT {
+    namespace constraints {
 
         /**
          * @brief The BilateralConstraint class implements a constraint of the form
          *        bLowerBound <= Aineq*x <= bUpperbound
          */
-        class BilateralConstraint: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
+        class BilateralConstraint: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
         public:
             /**
              * @brief BilateralConstraint a bilateral constraint

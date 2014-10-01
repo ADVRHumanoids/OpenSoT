@@ -25,11 +25,11 @@
 #include <yarp/sig/all.h>
 #include <wb_sot/Task.h>
 #include <boost/shared_ptr.hpp>
-#include <wb_sot/bounds/Aggregated.h>
+#include <wb_sot/constraints/Aggregated.h>
 
 using namespace yarp::sig;
 
-namespace wb_sot{
+namespace OpenSoT{
     namespace solvers{
 
     /**
@@ -367,7 +367,7 @@ namespace wb_sot{
     {
     public:
         QPOases_sot(vector <boost::shared_ptr< Task<Matrix, Vector> >>& stack_of_tasks,
-                    boost::shared_ptr<wb_sot::bounds::Aggregated>& bounds);
+                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& constraints);
 
         ~QPOases_sot(){}
 
@@ -397,7 +397,7 @@ namespace wb_sot{
     protected:
         vector <boost::shared_ptr< Task<Matrix, Vector> >> _stack_of_tasks;
         vector <QPOasesTask> _qp_stack_of_tasks;
-        boost::shared_ptr<wb_sot::bounds::Aggregated> _bounds;
+        boost::shared_ptr<OpenSoT::constraints::Aggregated> _bounds;
 
         bool prepareSoT();
         bool expandProblem(unsigned int i);

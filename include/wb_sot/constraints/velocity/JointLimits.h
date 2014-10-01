@@ -18,15 +18,15 @@
 #ifndef __BOUNDS_VELOCITY_JOINTLIMITS_H__
 #define __BOUNDS_VELOCITY_JOINTLIMITS_H__
 
- #include <wb_sot/Bounds.h>
+ #include <wb_sot/Constraint.h>
 
  #include <yarp/sig/all.h>
  #include <iCub/iDynTree/DynTree.h>
 
- namespace wb_sot {
-    namespace bounds {
+ namespace OpenSoT {
+    namespace constraints {
         namespace velocity {
-            class JointLimits: public Bounds<yarp::sig::Matrix, yarp::sig::Vector> {
+            class JointLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
                 double _boundScaling;
                 yarp::sig::Vector _jointLimitsMin;

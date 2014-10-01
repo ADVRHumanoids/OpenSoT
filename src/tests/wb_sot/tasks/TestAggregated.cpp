@@ -5,7 +5,7 @@
 #include <yarp/math/Math.h>
 
 using namespace yarp::math;
-using namespace wb_sot::tasks;
+using namespace OpenSoT::tasks;
 
 namespace {
 

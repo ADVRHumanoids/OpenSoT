@@ -25,7 +25,7 @@
 #include <list>
 
 
- namespace wb_sot {
+ namespace OpenSoT {
     namespace tasks {
 
         /**

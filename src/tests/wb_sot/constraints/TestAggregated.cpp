@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <drc_shared/tests_utils.h>
-#include <wb_sot/bounds/Aggregated.h>
-#include <wb_sot/bounds/velocity/VelocityLimits.h>
-#include <wb_sot/bounds/BilateralConstraint.h>
-#include <wb_sot/bounds/velocity/JointLimits.h>
+#include <wb_sot/constraints/Aggregated.h>
+#include <wb_sot/constraints/velocity/VelocityLimits.h>
+#include <wb_sot/constraints/BilateralConstraint.h>
+#include <wb_sot/constraints/velocity/JointLimits.h>
 #include <yarp/math/Math.h>
 #include <string>
 
@@ -43,7 +43,7 @@ class testAggregated : public ::testing::Test {
 
 // Tests that the Foo::Bar() method does Abc.
 TEST_F(testAggregated, AggregatedWorks) {
-    using namespace wb_sot::bounds;
+    using namespace OpenSoT::constraints;
     std::list<Aggregated::BoundPointer> constraints;
     const unsigned int nJ = 6;
     const double dT = 0.1;
@@ -91,7 +91,7 @@ TEST_F(testAggregated, AggregatedWorks) {
 }
 
 TEST_F(testAggregated, MultipleAggregationdWork) {
-    using namespace wb_sot::bounds;
+    using namespace OpenSoT::constraints;
     std::list<Aggregated::BoundPointer> constraints;
     const unsigned int nJ = 6;
     const double dT = 1;

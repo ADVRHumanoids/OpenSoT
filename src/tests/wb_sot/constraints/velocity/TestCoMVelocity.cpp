@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <wb_sot/bounds/velocity/CoMVelocity.h>
+#include <wb_sot/constraints/velocity/CoMVelocity.h>
 #include <drc_shared/idynutils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
@@ -10,7 +10,7 @@
 #define  m_s              1.0
 #define  CoMVelocityLimit 0.03 * m_s
 
-using namespace wb_sot::bounds::velocity;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 namespace {

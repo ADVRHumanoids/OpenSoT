@@ -15,27 +15,26 @@
  * Public License for more details
 */
 
-#include <wb_sot/bounds/BilateralConstraint.h>
-
+#include <wb_sot/constraints/velocity/VelocityLimits.h>
 #include <yarp/math/Math.h>
-#include <assert.h>
-#include <limits>
+#include <cmath>
 
-using namespace wb_sot::bounds;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
-BilateralConstraint::BilateralConstraint(const yarp::sig::Matrix &Aineq,
-                                         const yarp::sig::Vector &bLowerBound,
-                                         const yarp::sig::Vector &bUpperBound) :
-    Bounds(Aineq.cols())
-{
-    _Aineq = Aineq;
-    _bLowerBound = bLowerBound;
-    _bUpperBound = bUpperBound;
+VelocityLimits::VelocityLimits(const double qDotLimit,
+                               const double dT,
+                               const unsigned int x_size) :
+    Constraint(x_size), _dT(dT) {
 
-    assert(_Aineq.rows() > 0);
-    assert( (_Aineq.rows() == bLowerBound.size()) &&
-            (_Aineq.rows() == bUpperBound.size()));
+    _qDotLimit = std::abs(qDotLimit)*_dT;
+/************************ COMPUTING BOUNDS ****************************/
+
+    _lowerBound.resize(x_size,-1.0*_qDotLimit);
+    _upperBound.resize(x_size,+1.0*_qDotLimit);
+
+/**********************************************************************/
+
 }
 
 

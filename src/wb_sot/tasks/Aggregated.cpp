@@ -19,7 +19,7 @@
 #include <yarp/math/Math.h>
 #include <assert.h>
 
-using namespace wb_sot::tasks;
+using namespace OpenSoT::tasks;
 using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<TaskPointer> tasks,

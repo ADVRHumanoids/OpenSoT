@@ -27,7 +27,7 @@
 
  using namespace yarp::math;
 
- namespace wb_sot {
+ namespace OpenSoT {
     namespace tasks {
         namespace velocity {
             class MinimumEffort : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
