@@ -94,6 +94,10 @@
          */
         std::list< boost::shared_ptr<ConstraintType> > _constraints;
 
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
+            @param x variable state at the current step (input) */
+        virtual void _update(const Vector_type &x) = 0;
+
     public:
 
         Task(const std::string task_id,
@@ -144,10 +148,6 @@
             for(typename std::list< boost::shared_ptr<ConstraintType> >::iterator i = _constraints.begin();
                 i != _constraints.end(); ++i) (*i)->update(x);
             this->_update(x); }
-
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-            @param x variable state at the current step (input) */
-        virtual void _update(const Vector_type &x) = 0;
 
         /**
          * @brief getTaskID return the task id
