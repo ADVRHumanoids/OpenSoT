@@ -33,8 +33,8 @@
      */
     class Constraint {
     public:
-        typedef Constraint< Matrix_type, Vector_type > BoundType;
-        typedef boost::shared_ptr<BoundType> BoundPointer;
+        typedef Constraint< Matrix_type, Vector_type > ConstraintType;
+        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
         /**
          * @brief _x_size size of the controlled variables

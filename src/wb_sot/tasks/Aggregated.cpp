@@ -22,7 +22,7 @@
 using namespace OpenSoT::tasks;
 using namespace yarp::math;
 
-Aggregated::Aggregated(const std::list<TaskPointer> tasks,
+Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const unsigned int x_size) :
     Task(std::string("aggregated"),x_size), _tasks(tasks)
 {
@@ -34,8 +34,8 @@ Aggregated::Aggregated(const std::list<TaskPointer> tasks,
     _hessianType = HST_SEMIDEF;
 }
 
-Aggregated::Aggregated(TaskPointer task1,
-                       TaskPointer task2,
+Aggregated::Aggregated(TaskPtr task1,
+                       TaskPtr task2,
                        const unsigned int x_size) :
 Task(std::string("aggregated"),x_size)
 {
@@ -51,7 +51,7 @@ Task(std::string("aggregated"),x_size)
     _hessianType = HST_SEMIDEF;
 }
 
-Aggregated::Aggregated(const std::list<TaskPointer> tasks,
+Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const yarp::sig::Vector& q) :
     Task(std::string("aggregated"),q.size()), _tasks(tasks)
 {
@@ -94,7 +94,7 @@ void Aggregated::generateAll() {
         boost::shared_ptr<TaskType> t = *i;
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
         _b = yarp::math::cat(_b, t->getWeight()*t->getAlpha()*t->getb());
-        for(std::list< boost::shared_ptr<BoundType> >::iterator j = t->getConstraints().begin();
+        for(std::list< boost::shared_ptr<ConstraintType> >::iterator j = t->getConstraints().begin();
             j!= t->getConstraints().end(); ++j) {
             this->getConstraints().push_back(*j);
         }

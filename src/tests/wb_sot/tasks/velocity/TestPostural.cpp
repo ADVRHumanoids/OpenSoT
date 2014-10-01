@@ -81,7 +81,7 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     idynutils.updateiDyn3Model(q);
 
     boost::shared_ptr< Postural::TaskType > postural( new Postural(q) );
-    boost::shared_ptr< Postural::BoundType > bound(
+    boost::shared_ptr< Postural::ConstraintType > bound(
         new JointLimits(q,
                         idynutils.coman_iDyn3.getJointBoundMax(),
                         idynutils.coman_iDyn3.getJointBoundMin())

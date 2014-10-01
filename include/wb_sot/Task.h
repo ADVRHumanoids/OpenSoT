@@ -47,9 +47,9 @@
 
     public:
         typedef Task< Matrix_type, Vector_type > TaskType;
-        typedef boost::shared_ptr<TaskType> TaskPointer;
-        typedef Constraint< Matrix_type, Vector_type > BoundType;
-        typedef boost::shared_ptr<BoundType> BoundPointer;
+        typedef boost::shared_ptr<TaskType> TaskPtr;
+        typedef Constraint< Matrix_type, Vector_type > ConstraintType;
+        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
 
         /**
@@ -92,7 +92,7 @@
         /**
          * @brief _bounds related to the Task
          */
-        std::list< boost::shared_ptr<BoundType> > _bounds;
+        std::list< boost::shared_ptr<ConstraintType> > _constraints;
 
     public:
 
@@ -128,7 +128,7 @@
          *              task.getConstraints().push_back(new_constraint)
          * @return
          */
-        std::list< boost::shared_ptr<BoundType> >& getConstraints() { return _bounds; }
+        std::list< boost::shared_ptr<ConstraintType> >& getConstraints() { return _constraints; }
 
         /** Gets the number of variables for the task.
             @return the number of columns of A */
@@ -141,8 +141,8 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         void update(const Vector_type &x) {
-            for(typename std::list< boost::shared_ptr<BoundType> >::iterator i = _bounds.begin();
-                i != _bounds.end(); ++i) (*i)->update(x);
+            for(typename std::list< boost::shared_ptr<ConstraintType> >::iterator i = _constraints.begin();
+                i != _constraints.end(); ++i) (*i)->update(x);
             this->_update(x); }
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices

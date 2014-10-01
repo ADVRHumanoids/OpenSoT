@@ -24,7 +24,7 @@
 using namespace OpenSoT::constraints;
 using namespace yarp::math;
 
-Aggregated::Aggregated(const std::list<BoundPointer> bounds,
+Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy) :
     Constraint(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
@@ -34,7 +34,7 @@ Aggregated::Aggregated(const std::list<BoundPointer> bounds,
     this->update(q);
 }
 
-Aggregated::Aggregated(const std::list<BoundPointer> bounds,
+Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
     Constraint(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
@@ -44,8 +44,8 @@ Aggregated::Aggregated(const std::list<BoundPointer> bounds,
     this->generateAll();
 }
 
-Aggregated::Aggregated(BoundPointer bound1,
-                       BoundPointer bound2,
+Aggregated::Aggregated(ConstraintPtr bound1,
+                       ConstraintPtr bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
     Constraint(x_size), _aggregationPolicy(aggregationPolicy)
@@ -60,10 +60,10 @@ Aggregated::Aggregated(BoundPointer bound1,
 
 void Aggregated::update(const yarp::sig::Vector& x) {
     /* iterating on all bounds.. */
-    for(typename std::list< BoundPointer >::iterator i = _bounds.begin();
+    for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
 
-        BoundPointer &b = *i;
+        ConstraintPtr &b = *i;
         /* update bounds */
         b->update(x);
     }
@@ -84,10 +84,10 @@ void Aggregated::generateAll() {
     _bLowerBound.resize(0);
 
     /* iterating on all bounds.. */
-    for(typename std::list< BoundPointer >::iterator i = _bounds.begin();
+    for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
 
-        BoundPointer &b = *i;
+        ConstraintPtr &b = *i;
 
         yarp::sig::Vector boundUpperBound = b->getUpperBound();
         yarp::sig::Vector boundLowerBound = b->getLowerBound();
@@ -214,9 +214,9 @@ void Aggregated::generateAll() {
 
 void Aggregated::checkSizes()
 {
-    for(std::list< boost::shared_ptr<BoundType> >::iterator i = _bounds.begin();
+    for(std::list< boost::shared_ptr<ConstraintType> >::iterator i = _bounds.begin();
         i != _bounds.end(); ++i) {
-        boost::shared_ptr<BoundType> t = *i;
+        boost::shared_ptr<ConstraintType> t = *i;
         assert(this->getXSize() == t->getXSize());
     }
 }

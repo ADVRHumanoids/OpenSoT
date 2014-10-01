@@ -42,7 +42,7 @@
 
         private:
 
-            std::list< BoundPointer > _bounds;
+            std::list< ConstraintPtr > _bounds;
             unsigned int _aggregationPolicy;
 
             void generateAll();
@@ -56,7 +56,7 @@
              *          Notice that by specifying q, the Aggregated will automatically call
              *          update(q) on all tasks he is composed of
              */
-            Aggregated(const std::list< BoundPointer > constraints,
+            Aggregated(const std::list< ConstraintPtr > constraints,
                        const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
@@ -68,7 +68,7 @@
              * @param x_size the size of the x vector. Notice this constructor will NOT call
              *               update() on the base tasks
              */
-            Aggregated(const std::list<BoundPointer> constraints,
+            Aggregated(const std::list<ConstraintPtr> constraints,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
@@ -81,8 +81,8 @@
              * @param x_size the size of the x vector. Notice this constructor will NOT call
              *               update() on the base tasks
              */
-            Aggregated(BoundPointer bound1,
-                       BoundPointer bound2,
+            Aggregated(ConstraintPtr bound1,
+                       ConstraintPtr bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |

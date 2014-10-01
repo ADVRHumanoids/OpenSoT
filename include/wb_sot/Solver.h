@@ -28,10 +28,32 @@ using namespace std;
     template < class Matrix_type, class Vector_type >
     class Solver {
     public:
+        typedef Task< Matrix_type, Vector_type > TaskType;
+        typedef boost::shared_ptr<TaskType> TaskPtr;
+        typedef Constraint< Matrix_type, Vector_type > ConstraintType;
+        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
         typedef Solver< Matrix_type, Vector_type > SolverType;
-        typedef boost::shared_ptr<SolverType> SolverPointer;
+        typedef boost::shared_ptr<SolverType> SolverPtr;
 
-        Solver(){}
+    protected:
+        vector <TaskPtr> _tasks;
+        ConstraintPtr _bounds;
+
+    public:
+
+        /**
+         * @brief Solver an interface for a generic solver
+         * @param stack a vector of pointers to tasks
+         */
+        Solver(vector <TaskPtr>& stack) : _tasks(stack){}
+
+        /**
+         * @brief Solver an interface for a generic solver
+         * @param stack a vector of pointers to tasks
+         * @param bounds a global bound for the problem
+         */
+        Solver(vector <TaskPtr>& stack,
+               ConstraintPtr bounds) : _tasks(stack), _bounds(bounds) {}
         virtual ~Solver(){}
 
         /**
@@ -40,13 +62,6 @@ using namespace std;
          * @return  true if solved/solvable
          */
         virtual bool solve(Vector_type& solution) = 0;
-
-//        virtual unsigned int addTask() = 0;
-//        const int* getTasks();
-//        const Task<Matrix_type, Vector_type, x_size>* getTask(const unsigned int taskId);
-
-//        void addGlobalLowerBounds(const Vector_type lowerBounds);
-//        void addGlobalUpperBounds(const Vector_type upperBounds);
     };
  }
 

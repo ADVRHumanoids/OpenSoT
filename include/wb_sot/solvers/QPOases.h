@@ -372,18 +372,7 @@ namespace OpenSoT{
         ~QPOases_sot(){}
 
         bool solve(Vector& solution);
-        unsigned int getNumberOfTasks()
-        {
-            if(!(_qp_stack_of_tasks.size() == _stack_of_tasks.size()))
-            {
-                std::cout<<"Stored # QP Problems does not mach stored # tasks"<<std::endl;
-                std::cout<<"# TASKS: "<<_stack_of_tasks.size()<<std::endl;
-                std::cout<<"# QP PROBLEMS: "<<_qp_stack_of_tasks.size()<<std::endl;
-                assert(_qp_stack_of_tasks.size() == _stack_of_tasks.size());
-            }
-
-            return _qp_stack_of_tasks.size();
-        }
+        unsigned int getNumberOfTasks();
 
         /**
          * @brief getNumberOfConstraintsInQP return for each task the number of
@@ -395,9 +384,7 @@ namespace OpenSoT{
         std::vector<std::pair<std::string, int>> getNumberOfConstraintsInTaskList();
 
     protected:
-        vector <boost::shared_ptr< Task<Matrix, Vector> >> _stack_of_tasks;
         vector <QPOasesTask> _qp_stack_of_tasks;
-        boost::shared_ptr<OpenSoT::constraints::Aggregated> _bounds;
 
         bool prepareSoT();
         bool expandProblem(unsigned int i);

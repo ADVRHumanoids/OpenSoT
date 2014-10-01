@@ -47,7 +47,7 @@ TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
     yarp::sig::Matrix A(nJ,nJ); A.eye();
     yarp::sig::Vector bUpperBound(nJ,M_PI);
     yarp::sig::Vector bLowerBound(nJ,0.0);
-    BilateralConstraint::BoundPointer bilateral(BilateralConstraint::BoundPointer(
+    BilateralConstraint::ConstraintPtr bilateral(BilateralConstraint::ConstraintPtr(
         new BilateralConstraint(A, bUpperBound, bLowerBound)
                                                   )
                           );

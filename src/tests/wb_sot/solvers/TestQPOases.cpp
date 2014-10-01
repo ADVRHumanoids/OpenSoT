@@ -869,7 +869,7 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 
 
     int t = 50;
-    std::list< OpenSoT::constraints::Aggregated::BoundPointer> constraints_list;
+    std::list< OpenSoT::constraints::Aggregated::ConstraintPtr> constraints_list;
 
     //Constraints set to the Cartesian Task
     boost::shared_ptr<JointLimits> joint_limits(
@@ -971,7 +971,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
 
     //Bounds
     int t = 50;
-    std::list< OpenSoT::constraints::Aggregated::BoundPointer> constraints_list;
+    std::list< OpenSoT::constraints::Aggregated::ConstraintPtr> constraints_list;
 
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.coman_iDyn3.getJointBoundMax(),

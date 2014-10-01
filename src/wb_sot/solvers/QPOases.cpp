@@ -386,19 +386,19 @@ void QPOasesTask::getBounds(Vector &l, Vector &u)
 }
 
 /// QPOases_sot ///
-QPOases_sot::QPOases_sot(vector<boost::shared_ptr<Task<Matrix, Vector> > > &stack_of_tasks, boost::shared_ptr<constraints::Aggregated> &bounds):
-_stack_of_tasks(stack_of_tasks),
-_bounds(bounds)
+QPOases_sot::QPOases_sot(vector<boost::shared_ptr<Task<Matrix, Vector> > > &stack_of_tasks,
+                         boost::shared_ptr<constraints::Aggregated> &bounds):
+    Solver(stack_of_tasks, bounds)
 {
-    _qp_stack_of_tasks.reserve(_stack_of_tasks.size());
+    _qp_stack_of_tasks.reserve(_tasks.size());
     assert(prepareSoT());
 }
 
 bool QPOases_sot::prepareSoT()
 {
-    for(unsigned int i = 0; i < _stack_of_tasks.size(); ++i)
+    for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        _qp_stack_of_tasks.push_back(QPOasesTask(_stack_of_tasks[i]));
+        _qp_stack_of_tasks.push_back(QPOasesTask(_tasks[i]));
         if(i > 0)
         {
             expandProblem(i);
@@ -430,17 +430,17 @@ bool QPOases_sot::expandProblem(unsigned int i)
             boost::shared_ptr<OpenSoT::constraints::BilateralConstraint> task_j_constraint(
                 new OpenSoT::constraints::BilateralConstraint
                     (
-                        _stack_of_tasks[j]->getA(),
-                        _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution(),
-                        _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution()
+                        _tasks[j]->getA(),
+                        _tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution(),
+                        _tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution()
                      )
             );
         //2. Get constraints of task j
-            std::list< boost::shared_ptr< OpenSoT::constraints::Aggregated::BoundType > > constraints_list =
-                _stack_of_tasks[j]->getConstraints();
+            std::list< boost::shared_ptr< OpenSoT::constraints::Aggregated::ConstraintType > > constraints_list =
+                _tasks[j]->getConstraints();
             constraints_list.push_back(task_j_constraint);
             OpenSoT::constraints::Aggregated
-                new_constraints_for_task_i(constraints_list, _stack_of_tasks[j]->getXSize());
+                new_constraints_for_task_i(constraints_list, _tasks[j]->getXSize());
 
         //3. Add new constraints & bounds to problem i
             //3.1 ADD constraints to problem i
@@ -464,11 +464,24 @@ bool QPOases_sot::expandProblem(unsigned int i)
     return constraints_added && bounds_added;
 }
 
+unsigned int QPOases_sot::getNumberOfTasks()
+{
+    if(!(_qp_stack_of_tasks.size() == _tasks.size()))
+    {
+        std::cout<<"Stored # QP Problems does not mach stored # tasks"<<std::endl;
+        std::cout<<"# TASKS: "<<_tasks.size()<<std::endl;
+        std::cout<<"# QP PROBLEMS: "<<_qp_stack_of_tasks.size()<<std::endl;
+        assert(_qp_stack_of_tasks.size() == _tasks.size());
+    }
+
+    return _qp_stack_of_tasks.size();
+}
+
 bool QPOases_sot::solve(Vector &solution)
 {
     bool solved_task_i = false;
     bool expanded = true;
-    for(unsigned int i = 0; i < _stack_of_tasks.size(); ++i)
+    for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         bool update_constraints = true;
         //if(i > 0)
@@ -491,8 +504,8 @@ bool QPOases_sot::updateExpandedProblem(unsigned int i)
     //I want to update all the constraints of the previous j tasks to task i
     //1. I got all the updated constraints from task i
     OpenSoT::constraints::Aggregated
-        constraints_task_i(_stack_of_tasks[i]->getConstraints(),
-                           _stack_of_tasks[i]->getXSize());
+        constraints_task_i(_tasks[i]->getConstraints(),
+                           _tasks[i]->getXSize());
 
     yarp::sig::Matrix A = constraints_task_i.getAineq();
     yarp::sig::Vector lA = constraints_task_i.getbLowerBound();
@@ -505,18 +518,18 @@ bool QPOases_sot::updateExpandedProblem(unsigned int i)
         boost::shared_ptr<OpenSoT::constraints::BilateralConstraint> task_j_constraint(
             new OpenSoT::constraints::BilateralConstraint
                 (
-                    _stack_of_tasks[j]->getA(),
-                    _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution(),
-                    _stack_of_tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution()
+                    _tasks[j]->getA(),
+                    _tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution(),
+                    _tasks[j]->getA()*_qp_stack_of_tasks[j].getSolution()
                  )
         );
         //2.2 Get constraints & bounds of task j
-        std::list< boost::shared_ptr< OpenSoT::constraints::Aggregated::BoundType > > constraints_list =
-            _stack_of_tasks[j]->getConstraints();
+        std::list< boost::shared_ptr< OpenSoT::constraints::Aggregated::ConstraintType > > constraints_list =
+            _tasks[j]->getConstraints();
         constraints_list.push_back(task_j_constraint);
         OpenSoT::constraints::Aggregated
             updated_constraints_for_task_i(constraints_list,
-                                           _stack_of_tasks[j]->getXSize());
+                                           _tasks[j]->getXSize());
 
         //3. Stack updated constraints to constraints in task i
         A = yarp::math::pile(A, updated_constraints_for_task_i.getAineq());
@@ -538,7 +551,7 @@ std::vector<std::pair<std::string, int>> QPOases_sot::getNumberOfConstraintsInQP
 
     for(unsigned int i = 0; i < getNumberOfTasks(); ++i)
     {
-        a.first = _stack_of_tasks[i]->getTaskID();
+        a.first = _tasks[i]->getTaskID();
         a.second = 0;
         yarp::sig::Vector l,u,lA, uA;
         yarp::sig::Matrix A;
@@ -560,12 +573,12 @@ std::vector<std::pair<std::string, int>> QPOases_sot::getNumberOfConstraintsInTa
 
     for(unsigned int i = 0; i < getNumberOfTasks(); ++i)
     {
-        a.first = _stack_of_tasks[i]->getTaskID();
+        a.first = _tasks[i]->getTaskID();
         a.second = 0;
 
         OpenSoT::constraints::Aggregated
-            constraints_task_i(_stack_of_tasks[i]->getConstraints(),
-                                           _stack_of_tasks[i]->getXSize());
+            constraints_task_i(_tasks[i]->getConstraints(),
+                                           _tasks[i]->getXSize());
         yarp::sig::Vector lA = constraints_task_i.getbLowerBound();
         yarp::sig::Vector l = constraints_task_i.getLowerBound();
         if(lA.size() > 0)

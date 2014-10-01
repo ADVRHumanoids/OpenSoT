@@ -159,12 +159,12 @@ bool sot_VelKinCon_ctrl::threadInit()
 
     idynutils.updateiDyn3Model(q,true);
 
-    boundsJointLimits = OpenSoT::constraints::velocity::JointLimits::BoundPointer(
+    boundsJointLimits = OpenSoT::constraints::velocity::JointLimits::ConstraintPtr(
                             new OpenSoT::constraints::velocity::JointLimits(
                                 q,
                                 idynutils.coman_iDyn3.getJointBoundMax(),
                                 idynutils.coman_iDyn3.getJointBoundMin()));
-    boundsJointVelocity = OpenSoT::constraints::velocity::VelocityLimits::BoundPointer(
+    boundsJointVelocity = OpenSoT::constraints::velocity::VelocityLimits::ConstraintPtr(
                             new OpenSoT::constraints::velocity::VelocityLimits(0.3,_dT,q.size()));
 
     bounds = boost::shared_ptr<OpenSoT::constraints::Aggregated>(
@@ -185,26 +185,26 @@ bool sot_VelKinCon_ctrl::threadInit()
     taskCoM = boost::shared_ptr<OpenSoT::tasks::velocity::CoM>(
         new OpenSoT::tasks::velocity::CoM(q));
 
-    boundsCoMVelocity = OpenSoT::constraints::velocity::CoMVelocity::BoundPointer(
+    boundsCoMVelocity = OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr(
         new OpenSoT::constraints::velocity::CoMVelocity(yarp::sig::Vector(3,0.03),idynutils,_dT,q.size()));
     taskCoM->getConstraints().push_back(boundsCoMVelocity);
 
-    boundsConvexHullVelocity = OpenSoT::constraints::velocity::ConvexHull::BoundPointer(
+    boundsConvexHullVelocity = OpenSoT::constraints::velocity::ConvexHull::ConstraintPtr(
         new OpenSoT::constraints::velocity::ConvexHull(idynutils,q.size()));
     taskCoM->getConstraints().push_back(boundsConvexHullVelocity);
 
 
-    std::list<OpenSoT::tasks::velocity::Cartesian::TaskPointer> cartesianTask;
-    std::list<OpenSoT::tasks::Aggregated::TaskPointer> firstTask;
+    std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTask;
+    std::list<OpenSoT::tasks::Aggregated::TaskPtr> firstTask;
     cartesianTask.push_back(taskCartesianLWrist);
     cartesianTask.push_back(taskCartesianRWrist);
     cartesianTask.push_back(taskCartesianRSole);
     firstTask = cartesianTask;
     firstTask.push_back(taskCoM);
 
-    taskFirstAggregated = OpenSoT::tasks::Aggregated::TaskPointer(
+    taskFirstAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
         new OpenSoT::tasks::Aggregated(firstTask,q.size()));
-    taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPointer(
+    taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
         new OpenSoT::tasks::Aggregated(cartesianTask,q.size()));
 
     taskMinimumEffort = boost::shared_ptr<OpenSoT::tasks::velocity::MinimumEffort>(
@@ -212,11 +212,11 @@ bool sot_VelKinCon_ctrl::threadInit()
     taskPostural = boost::shared_ptr<OpenSoT::tasks::velocity::Postural>(
         new OpenSoT::tasks::velocity::Postural(q));
 
-    std::list<OpenSoT::tasks::Aggregated::TaskPointer> secondTask;
+    std::list<OpenSoT::tasks::Aggregated::TaskPtr> secondTask;
     secondTask.push_back(taskMinimumEffort);
     secondTask.push_back(taskPostural);
 
-    taskSecondAggregated = OpenSoT::tasks::Aggregated::TaskPointer(
+    taskSecondAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
         new OpenSoT::tasks::Aggregated(secondTask,q.size()));
 
     test_stack.push_back(taskPostural);
@@ -316,18 +316,18 @@ if(TORSO_IMPEDANCE) {
 
     bool testing = true;
     if(testing)
-        qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPointer(
+        qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPtr(
             new OpenSoT::solvers::QPOases_sot(test_stack, bounds));
     else
     {
         if(use_3_stacks)
         {
-            qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPointer(
+            qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPtr(
                 new OpenSoT::solvers::QPOases_sot(stack_of_3_tasks, bounds));
         }
         else
         {
-            qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPointer(
+            qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPtr(
                 new OpenSoT::solvers::QPOases_sot(stack_of_2_tasks, bounds));
         }
     }

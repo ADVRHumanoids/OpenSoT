@@ -44,11 +44,11 @@ class testAggregated : public ::testing::Test {
 // Tests that the Foo::Bar() method does Abc.
 TEST_F(testAggregated, AggregatedWorks) {
     using namespace OpenSoT::constraints;
-    std::list<Aggregated::BoundPointer> constraints;
+    std::list<Aggregated::ConstraintPtr> constraints;
     const unsigned int nJ = 6;
     const double dT = 0.1;
     const double qDotMax = 0.5;
-    constraints.push_back(  Aggregated::BoundPointer(
+    constraints.push_back(  Aggregated::ConstraintPtr(
             new velocity::VelocityLimits(qDotMax,dT,nJ)
                                                     )
                           );
@@ -59,16 +59,16 @@ TEST_F(testAggregated, AggregatedWorks) {
     yarp::sig::Matrix A(nJ,nJ); A.eye();
     yarp::sig::Vector bUpperBound(nJ,M_PI);
     yarp::sig::Vector bLowerBound(nJ,0.0);
-    constraints.push_back(Aggregated::BoundPointer(
+    constraints.push_back(Aggregated::ConstraintPtr(
         new BilateralConstraint(A, bUpperBound, bLowerBound)
                                                   )
                           );
 
-    constraints.push_back(Aggregated::BoundPointer(
+    constraints.push_back(Aggregated::ConstraintPtr(
         new velocity::JointLimits(q, bUpperBound, bLowerBound)
                                                   )
                           );
-    Aggregated::BoundPointer aggregated(new Aggregated(constraints, q));
+    Aggregated::ConstraintPtr aggregated(new Aggregated(constraints, q));
 
     /* we should mash joint limits and velocity limits in one */
     EXPECT_TRUE(aggregated->getLowerBound().size() == nJ);
@@ -92,11 +92,11 @@ TEST_F(testAggregated, AggregatedWorks) {
 
 TEST_F(testAggregated, MultipleAggregationdWork) {
     using namespace OpenSoT::constraints;
-    std::list<Aggregated::BoundPointer> constraints;
+    std::list<Aggregated::ConstraintPtr> constraints;
     const unsigned int nJ = 6;
     const double dT = 1;
     const double qDotMax = 50;
-    constraints.push_back(  Aggregated::BoundPointer(
+    constraints.push_back(  Aggregated::ConstraintPtr(
             new velocity::VelocityLimits(qDotMax,dT,nJ)
                                                     )
                           );
@@ -109,35 +109,35 @@ TEST_F(testAggregated, MultipleAggregationdWork) {
     yarp::sig::Matrix A(nJ,nJ); A.eye();
     yarp::sig::Vector bUpperBound(nJ,M_PI);
     yarp::sig::Vector bLowerBound(nJ,0.0);
-    constraints.push_back(Aggregated::BoundPointer(
+    constraints.push_back(Aggregated::ConstraintPtr(
         new BilateralConstraint(A, bUpperBound, bLowerBound)
                                                   )
                           );
 
-    Aggregated::BoundPointer aggregated(new Aggregated(constraints, q));
+    Aggregated::ConstraintPtr aggregated(new Aggregated(constraints, q));
 
-    constraints.push_back(  Aggregated::BoundPointer(
+    constraints.push_back(  Aggregated::ConstraintPtr(
             new velocity::VelocityLimits(qDotMax/2,dT,nJ)                        )
                           );
 
-    for(typename std::list<Aggregated::BoundPointer>::iterator i = constraints.begin();
+    for(typename std::list<Aggregated::ConstraintPtr>::iterator i = constraints.begin();
         i != constraints.end(); ++i) {
-        Aggregated::BoundPointer b(*i);
+        Aggregated::ConstraintPtr b(*i);
         if(b->getLowerBound().size() > 0)
             std::cout << b->getLowerBound().toString() << std::endl;
     }
-    Aggregated::BoundPointer aggregated2(new Aggregated(constraints, q));
+    Aggregated::ConstraintPtr aggregated2(new Aggregated(constraints, q));
 
     constraints.push_back(aggregated);
     constraints.push_back(aggregated2);
 
-    Aggregated::BoundPointer aggregated3(new Aggregated(constraints, q));
+    Aggregated::ConstraintPtr aggregated3(new Aggregated(constraints, q));
 
-    Aggregated::BoundPointer aggregated4(new Aggregated(aggregated2,
+    Aggregated::ConstraintPtr aggregated4(new Aggregated(aggregated2,
                                                         aggregated3, q.size()));
 
-    Aggregated::BoundPointer aggregated5(new Aggregated(aggregated4,
-                                                        Aggregated::BoundPointer(
+    Aggregated::ConstraintPtr aggregated5(new Aggregated(aggregated4,
+                                                        Aggregated::ConstraintPtr(
                                         new velocity::JointLimits(q,
                                                                   yarp::sig::Vector(q.size(),-0.1),
                                                                   yarp::sig::Vector(q.size(),-0.1))
