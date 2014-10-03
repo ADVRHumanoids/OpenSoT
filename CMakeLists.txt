@@ -57,7 +57,6 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 # Find package qpOASES or build it using ExternalProject
 find_package(qpOASES QUIET)
 if(NOT qpOASES_FOUND)
-    message("*********************qpOASES NOT FOUND")
     set(qpOASES_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
     set(qpOASES_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
 
@@ -68,8 +67,6 @@ if(NOT qpOASES_FOUND)
     link_directories("${qpOASES_BINARY_DIR}/libs/")
     set(qpOASES_INCLUDE_DIRS "${qpOASES_SOURCE_DIR}/include")
     set(qpOASES_LIBRARIES qpOASES)
-else()
-    message("********************qpOASES FOUND")
 endif()
 
 include_directories("${qpOASES_INCLUDE_DIRS}")
@@ -90,7 +87,8 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/CoM.cpp
                     src/tasks/velocity/MinimumEffort.cpp
-                    src/tasks/velocity/Postural.cpp)
+                    src/tasks/velocity/Postural.cpp
+                    ${sot_INCLUDES})
 
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT
@@ -102,15 +100,13 @@ endif()
 # ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(OpenSoT ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PCL_LIBRARIES} qpOASES)
+TARGET_LINK_LIBRARIES(OpenSoT ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PCL_LIBRARIES} ${qpOASES_LIBRARIES})
 
 #TARGET_LINK_LIBRARIES(uTest1  wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
 #                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
 #                      qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
 #TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
 #                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-
-# install(TARGETS OpenSoT DESTINATION lib)
 
 #add_custom_target(  copy_conf_files_to_build ALL
 #    COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -137,10 +133,11 @@ include(YCMDefaultDirs)
 ycm_default_dirs(${VARS_PREFIX})
 
 target_include_directories(OpenSoT PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>"
-                                           "$<INSTALL_INTERFACE:${${VARS_PREFIX}_INSTALL_INCLUDEDIR}>")
-                   
+                                          "$<INSTALL_INTERFACE:${${VARS_PREFIX}_INSTALL_INCLUDEDIR}>")
+set_property(TARGET OpenSoT PROPERTY PUBLIC_HEADER ${sot_INCLUDES})
+
 install(TARGETS OpenSoT  
-        EXPORT opensot
+        EXPORT OpenSoT
         ARCHIVE DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT lib
         RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
         LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib
@@ -151,12 +148,10 @@ set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
 
 include(InstallBasicPackageFiles)
 
-install_basic_package_files(opensot VARS_PREFIX ${VARS_PREFIX}
-                                       VERSION "1.0.0"
-                                       TARGETS_PROPERTY ${VARS_PREFIX}_TARGETS
-                                       COMPATIBILITY SameMajorVersion
-
-)
+install_basic_package_files(OpenSoT VARS_PREFIX ${VARS_PREFIX}
+                                    VERSION "1.0.0"
+                                    TARGETS_PROPERTY ${VARS_PREFIX}_TARGETS
+                                    COMPATIBILITY SameMajorVersion)
 
 include(AddUninstallTarget)
 
