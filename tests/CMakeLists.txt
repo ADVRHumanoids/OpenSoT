@@ -3,7 +3,6 @@ include(ExternalProject)
 
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
-#set(TESTSDIR ${CMAKE_BINARY_DIR}/devel/lib/drc_shared)
 
 # compite GTest
 find_package(GTest)
@@ -24,21 +23,23 @@ link_directories(${GTEST_LIB_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} )
 enable_testing()
 
-add_custom_command( TARGET OpenSoT POST_BUILD
-                    COMMAND ${CMAKE_CTEST_COMMAND}
-                    MAIN_DEPENDENCY OpenSoT
-                    DEPENDS
-                    testAggregatedConstraint
-                    testBilateralConstraint
-                    testJointLimitsVelocityBounds
-                    testVelocityLimitsVelocityBounds
-                    testCoMVelocityVelocityConstraint
-                    testConvexHullVelocityConstraint
-                    testAggregatedTask
-                    testCartesianVelocityTask
-                    testComVelocityTask
-                    testMinimumEffortVelocityTask
-                    testPosturalVelocityTask)
+if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
+  add_custom_command( TARGET OpenSoT POST_BUILD
+                      COMMAND ${CMAKE_CTEST_COMMAND}
+                      MAIN_DEPENDENCY OpenSoT
+                      DEPENDS
+                      testAggregatedConstraint
+                      testBilateralConstraint
+                      testJointLimitsVelocityBounds
+                      testVelocityLimitsVelocityBounds
+                      testCoMVelocityVelocityConstraint
+                      testConvexHullVelocityConstraint
+                      testAggregatedTask
+                      testCartesianVelocityTask
+                      testComVelocityTask
+                      testMinimumEffortVelocityTask
+                      testPosturalVelocityTask)
+endif()
 
 # gTests for Velocity constraints
 SET(TestLibs OpenSoT ${drc_shared_LIBRARIES} ${idynutils_LIBRARIES}
@@ -95,15 +96,15 @@ ADD_EXECUTABLE(testSolverQPOases solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testSolverQPOases ${TestLibs})
 add_dependencies(testSolverQPOases GTest-ext OpenSoT)
 
-add_test(OpenSoT_constraints_Aggregated testAggregatedConstraint)
-add_test(OpenSoT_constraints_BilateralConstraint testBilateralConstraint)
-add_test(OpenSoT_constraints_velocity_JointLimits  testJointLimitsVelocityBounds)
-add_test(OpenSoT_constraints_velocity_VelocityLimit testVelocityLimitsVelocityBounds)
-add_test(OpenSoT_constraints_velocity_CoMVelocity testCoMVelocityVelocityConstraint)
-add_test(OpenSoT_constraints_velocity_ConvexHull testConvexHullVelocityConstraint)
-add_test(OpenSoT_solvers_qpOases testSolverQPOases)
-add_test(OpenSoT_task_Aggregated testAggregatedTask)
-add_test(OpenSoT_task_velocity_Cartesian testCartesianVelocityTask)
-add_test(OpenSoT_task_velocity_CoM testComVelocityTask)
-add_test(OpenSoT_task_velocity_MinimumEffort testMinimumEffortVelocityTask)
-add_test(OpenSoT_task_velocity_Postural testPosturalVelocityTask)
+add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
+add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
+add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
+add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
+add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
+add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
+add_test(NAME OpenSoT_solvers_qpOases COMMAND testSolverQPOases)
+add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
+add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
+add_test(NAME OpenSoT_task_velocity_CoM COMMAND testComVelocityTask)
+add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
+add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)

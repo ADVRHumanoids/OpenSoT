@@ -9,7 +9,7 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0017 NEW) # prefer files in cmake/ rather than in CMAKE_MODULE_PATH
 endif(COMMAND cmake_policy)
 include(ExternalProject)
-PROJECT(sot_VelKinCon)
+PROJECT(OpenSoT)
 
 set(OPENSOT_MAJOR_VERSION 0)
 set(OPENSOT_MINOR_VERSION 0)
@@ -55,8 +55,8 @@ if(NOT qpOASES_FOUND)
 
     ExternalProject_Add(qpOASES-ext SOURCE_DIR "${qpOASES_SOURCE_DIR}"
                                     PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
-                                    INSTALL_COMMAND "")
-                                    #CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
+                                    INSTALL_COMMAND ""
+                                    CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
     link_directories("${qpOASES_BINARY_DIR}/libs/")
     set(qpOASES_INCLUDE_DIRS "${qpOASES_SOURCE_DIR}/include")
     set(qpOASES_LIBRARIES qpOASES)
@@ -92,7 +92,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/Postural.cpp)
 
 
-# we must wait for qpOASES-ext to be ready before building sot_VelKinCon_ctrl
+# we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
     add_dependencies(OpenSoT qpOASES-ext)
 endif()
@@ -101,7 +101,7 @@ endif()
 # ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(OpenSoT ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(OpenSoT ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PCL_LIBRARIES} qpOASES)
 
 #TARGET_LINK_LIBRARIES(uTest1  wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
 #                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
@@ -165,4 +165,5 @@ add_subdirectory(doc)
 #######################
 # Add Testing target  #
 #######################
+enable_testing()
 add_subdirectory(tests)
