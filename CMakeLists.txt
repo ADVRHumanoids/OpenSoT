@@ -2,11 +2,10 @@
 # Authors: Enrico Mingo, Alessio Rocchi
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 OLD)
     cmake_policy(SET CMP0005 NEW)
-    cmake_policy(SET CMP0017 NEW) # prefer files in cmake/ rather than in CMAKE_MODULE_PATH
 endif(COMMAND cmake_policy)
 include(ExternalProject)
 PROJECT(OpenSoT)
@@ -27,7 +26,7 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(YARP REQUIRED)
 FIND_PACKAGE(ICUB REQUIRED)
@@ -46,10 +45,19 @@ FIND_PACKAGE(moveit_core REQUIRED)
 FIND_PACKAGE(PCL 1.2 REQUIRED)
 FIND_PACKAGE(tf REQUIRED)
 
+# add include directories
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
+                    ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS})
+
+ADD_DEFINITIONS(${PCL_DEFINITIONS})
+
+# add required linker flags
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 
 # Find package qpOASES or build it using ExternalProject
 find_package(qpOASES QUIET)
 if(NOT qpOASES_FOUND)
+    message("*********************qpOASES NOT FOUND")
     set(qpOASES_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
     set(qpOASES_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
 
@@ -60,18 +68,11 @@ if(NOT qpOASES_FOUND)
     link_directories("${qpOASES_BINARY_DIR}/libs/")
     set(qpOASES_INCLUDE_DIRS "${qpOASES_SOURCE_DIR}/include")
     set(qpOASES_LIBRARIES qpOASES)
+else()
+    message("********************qpOASES FOUND")
 endif()
 
 include_directories("${qpOASES_INCLUDE_DIRS}")
-
-# add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
-                    ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS})
-
-ADD_DEFINITIONS(${PCL_DEFINITIONS})
-
-# add required linker flags
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
