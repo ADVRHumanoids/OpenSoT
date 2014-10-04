@@ -257,12 +257,12 @@ namespace OpenSoT{
         /**
          * @brief _bounds are the active bounds of the SQProblem
          */
-        qpOASES::Bounds* _bounds;
+        boost::shared_ptr<qpOASES::Bounds> _bounds;
 
         /**
          * @brief _constraints are the active constraints of the SQProblem
          */
-        qpOASES::Constraints* _constraints;
+        boost::shared_ptr<qpOASES::Constraints> _constraints;
 
         /**
          * @brief _nWSR is the maximum number of working set recalculations

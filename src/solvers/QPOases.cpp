@@ -41,8 +41,6 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
 
 QPOasesProblem::~QPOasesProblem()
 {
-    delete _bounds; _bounds = NULL;
-    delete _constraints; _constraints = NULL;
 }
 
 void QPOasesProblem::setProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem)
