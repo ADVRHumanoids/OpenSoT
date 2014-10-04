@@ -1,5 +1,6 @@
-#include <OpenSoT/solvers/QPOases.h>
+#include <qpOASES.hpp>
 #include <yarp/math/Math.h>
+#include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -13,8 +14,8 @@ using namespace OpenSoT::solvers;
 QPOasesProblem::QPOasesProblem():
     _problem(new qpOASES::SQProblem()),
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
-    _bounds(),
-    _constraints(),
+    _bounds(new qpOASES::Bounds()),
+    _constraints(new qpOASES::Constraints()),
     _nWSR(132),
     _solution(0), _dual_solution(0),
     _is_initialized(false)
@@ -24,16 +25,24 @@ QPOasesProblem::QPOasesProblem():
 
 QPOasesProblem::QPOasesProblem(const int number_of_variables,
                                const int number_of_constraints,
-                               qpOASES::HessianType hessian_type):
-    _problem(new qpOASES::SQProblem(number_of_variables, number_of_constraints, hessian_type)),
+                               OpenSoT::HessianType hessian_type):
+    _problem(new qpOASES::SQProblem(number_of_variables, 
+                                    number_of_constraints, 
+                                    (qpOASES::HessianType)(hessian_type))),
     _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
-    _bounds(),
-    _constraints(),
+    _bounds(new qpOASES::Bounds()),
+    _constraints(new qpOASES::Constraints()),
     _nWSR(132),
     _solution(number_of_variables), _dual_solution(number_of_variables),
     _is_initialized(false)
 {
     setDefaultOptions();
+}
+
+QPOasesProblem::~QPOasesProblem()
+{
+    delete _bounds; _bounds = NULL;
+    delete _constraints; _constraints = NULL;
 }
 
 void QPOasesProblem::setProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem)
@@ -80,6 +89,11 @@ void QPOasesProblem::hack()
         _A_ptr = NULL;
 }
 
+boost::shared_ptr<qpOASES::Options> QPOasesProblem::getOptions(){
+    boost::shared_ptr<qpOASES::Options> options(new qpOASES::Options(_problem->getOptions()));
+    return options; 
+}
+
 bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
                                  const Matrix &A,
                                  const Vector &lA, const Vector &uA,
@@ -119,8 +133,8 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
     //We get the solution
     int success = _problem->getPrimalSolution(_solution.data());
     _problem->getDualSolution(_dual_solution.data());
-    _problem->getBounds(_bounds);
-    _problem->getConstraints(_constraints);
+    _problem->getBounds(*_bounds);
+    _problem->getConstraints(*_constraints);
 
     if(success == qpOASES::RET_QP_NOT_SOLVED ||
       (success != qpOASES::RET_QP_SOLVED &&
@@ -286,8 +300,8 @@ bool QPOasesProblem::solve()
         //We get the solution
         int success = _problem->getPrimalSolution(_solution.data());
         _problem->getDualSolution(_dual_solution.data());
-        _problem->getBounds(_bounds);
-        _problem->getConstraints(_constraints);
+        _problem->getBounds(*_bounds);
+        _problem->getConstraints(*_constraints);
 
         if(success == qpOASES::RET_QP_NOT_SOLVED ||
           (success != qpOASES::RET_QP_SOLVED &&
@@ -301,12 +315,17 @@ bool QPOasesProblem::solve()
     return false;
 }
 
+OpenSoT::HessianType QPOasesProblem::getHessianType() {return (OpenSoT::HessianType)(_problem->getHessianType());}
+
+void QPOasesProblem::setHessianType(const OpenSoT::HessianType ht){_problem->setHessianType((qpOASES::HessianType)(ht));}
+
+bool QPOasesProblem::resetProblem(){return _problem->reset();}
+
 /// QPOasesTask ///
 QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
     QPOasesProblem(task->getXSize(),
                    OpenSoT::constraints::Aggregated(task->getConstraints(), task->getXSize()).getAineq().rows(),
-                   (qpOASES::HessianType)task->getHessianAtype()),
-
+                   (OpenSoT::HessianType)(task->getHessianAtype())),
     _task(task)
 {
     prepareData();

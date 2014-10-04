@@ -1,17 +1,18 @@
-#include <gtest/gtest.h>
-#include <OpenSoT/solvers/QPOases.h>
-#include <yarp/sig/all.h>
 #include <drc_shared/idynutils.h>
-#include <OpenSoT/tasks/velocity/Postural.h>
 #include <drc_shared/tests_utils.h>
-#include <yarp/math/Math.h>
 #include <drc_shared/comanutils.h>
+#include <gtest/gtest.h>
+#include <kdl/frames.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <kdl/frames.hpp>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
+#include <qpOASES.hpp>
+#include <yarp/math/Math.h>
+#include <yarp/sig/all.h>
 
 
 using namespace yarp::math;
@@ -190,7 +191,7 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
                         const yarp::sig::Vector &e0,
                         const yarp::sig::Matrix &J1,
                         const yarp::sig::Vector &eq,
-                        qpOASES::HessianType t1HessianType,
+                        OpenSoT::HessianType t1HessianType,
                         const yarp::sig::Vector &u,
                         const yarp::sig::Vector &l,
                         const yarp::sig::Vector &q,
@@ -211,7 +212,7 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
 
     USING_NAMESPACE_QPOASES
 
-    static OpenSoT::solvers::QPOasesProblem qp0(nj, 0, HST_SEMIDEF);
+    static OpenSoT::solvers::QPOasesProblem qp0(nj, 0, OpenSoT::HST_SEMIDEF);
     qp0.setnWSR(127);
     static bool result0 = false;
     if(!qp0.isQProblemInitialized())

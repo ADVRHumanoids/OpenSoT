@@ -18,7 +18,6 @@
 #ifndef _WB_SOT_SOLVERS_QP_OASES_H_
 #define _WB_SOT_SOLVERS_QP_OASES_H_
 
-#include <qpOASES.hpp>
 #include <vector>
 #include <iostream>
 #include <yarp/sig/all.h>
@@ -28,6 +27,14 @@
 #include <OpenSoT/constraints/Aggregated.h>
 
 using namespace yarp::sig;
+
+namespace qpOASES {
+    class SQProblem;
+    class Options;
+    class Bounds;
+    class Constraints;
+}
+
 
 namespace OpenSoT{
     namespace solvers{
@@ -58,12 +65,12 @@ namespace OpenSoT{
          */
         QPOasesProblem(const int number_of_variables,
                        const int number_of_constraints,
-                       qpOASES::HessianType hessian_type = qpOASES::HST_UNKNOWN);
+                       OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN);
 
         /**
           * @brief ~QPOasesProblem destructor
           */
-        ~QPOasesProblem(){}
+        ~QPOasesProblem();
 
         /**
          * @brief setDefaultOptions to internal qpOases problem
@@ -86,7 +93,7 @@ namespace OpenSoT{
          * @brief getOptions return the options of the QP problem
          * @return reference to options
          */
-        qpOASES::Options getOptions(){return _problem->getOptions();}
+        boost::shared_ptr<qpOASES::Options> getOptions();
 
         /**
          * @brief setOptions of the QP problem. Default are set to:
@@ -197,13 +204,13 @@ namespace OpenSoT{
          * @brief getHessianType return the hessian type f the problem
          * @return hessian type
          */
-        qpOASES::HessianType getHessianType(){return _problem->getHessianType();}
+        OpenSoT::HessianType getHessianType();
 
         /**
          * @brief setHessianType of the problem
          * @param ht hessian type
          */
-        void setHessianType(const qpOASES::HessianType ht){_problem->setHessianType(ht);}
+        void setHessianType(const OpenSoT::HessianType ht);
 
         /**
          * @brief getnWSR return maximum number of working set recalculations
@@ -227,19 +234,19 @@ namespace OpenSoT{
          * @brief resetProblem call the reset method of the SQProblem
          * @return true if reset
          */
-        bool resetProblem(){return _problem->reset();}
+        bool resetProblem();
 
         /**
          * @brief getActiveBounds return the active bounds of the solved QP problem
          * @return active bounds
          */
-        const qpOASES::Bounds& getActiveBounds(){return _bounds;}
+        const qpOASES::Bounds& getActiveBounds(){return *_bounds;}
 
         /**
          * @brief getActiveConstraints return the active constraints of the solved QP problem
          * @return active constraints
          */
-        const qpOASES::Constraints& getActiveConstraints(){return _constraints;}
+        const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
 
     protected:
         /**
@@ -250,12 +257,12 @@ namespace OpenSoT{
         /**
          * @brief _bounds are the active bounds of the SQProblem
          */
-        qpOASES::Bounds _bounds;
+        qpOASES::Bounds* _bounds;
 
         /**
          * @brief _constraints are the active constraints of the SQProblem
          */
-        qpOASES::Constraints _constraints;
+        qpOASES::Constraints* _constraints;
 
         /**
          * @brief _nWSR is the maximum number of working set recalculations
