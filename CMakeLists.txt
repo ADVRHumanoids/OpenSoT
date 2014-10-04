@@ -6,14 +6,10 @@ cmake_minimum_required(VERSION 2.8)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 OLD)
     cmake_policy(SET CMP0005 NEW)
+    cmake_policy(SET CMP0017 NEW)
 endif(COMMAND cmake_policy)
 include(ExternalProject)
 PROJECT(OpenSoT)
-
-set(OPENSOT_MAJOR_VERSION 0)
-set(OPENSOT_MINOR_VERSION 0)
-set(OPENSOT_PATCH_VERSION 1)
-set(OPENSOT_VERSION ${OPENSOT_MAJOR_VERSION}.${OPENSOT_MINOR_VERSION}.${OPENSOT_PATCH_VERSION})
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -131,12 +127,22 @@ TARGET_LINK_LIBRARIES(OpenSoT ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PC
 ########################################################################
 
 set(VARS_PREFIX "OPENSOT")
+
+set(OPENSOT_MAJOR_VERSION 0)
+set(OPENSOT_MINOR_VERSION 0)
+set(OPENSOT_PATCH_VERSION 1)
+set(OPENSOT_VERSION ${OPENSOT_MAJOR_VERSION}.${OPENSOT_MINOR_VERSION}.${OPENSOT_PATCH_VERSION})
+
 find_package(YCM REQUIRED)
 include(YCMDefaultDirs)
 ycm_default_dirs(${VARS_PREFIX})
 
-#target_include_directories(OpenSoT PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>"
-#                                          "$<INSTALL_INTERFACE:${${VARS_PREFIX}_INSTALL_INCLUDEDIR}>")
+target_include_directories(OpenSoT PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>"
+                                          "$<INSTALL_INTERFACE:${${VARS_PREFIX}_INSTALL_INCLUDEDIR}>")
+
+set_target_properties(OpenSoT PROPERTIES VERSION ${${VARS_PREFIX}_VERSION}
+                              SOVERSION ${${VARS_PREFIX}_VERSION}
+                              PUBLIC_HEADER "${sot_INCLUDES}")
 install(DIRECTORY include/ 
         DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
         FILES_MATCHING PATTERN "*.h")
@@ -148,15 +154,15 @@ install(TARGETS OpenSoT
         LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
         
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
-#set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
+set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
 
 
 include(InstallBasicPackageFiles)
-
 install_basic_package_files(OpenSoT VARS_PREFIX ${VARS_PREFIX}
-                                    VERSION "1.0.0"
+                                    VERSION ${${VARS_PREFIX}_VERSION}
+                                    COMPATIBILITY SameMajorVersion
                                     TARGETS_PROPERTY ${VARS_PREFIX}_TARGETS
-                                    COMPATIBILITY SameMajorVersion)
+                                    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 include(AddUninstallTarget)
 
