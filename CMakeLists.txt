@@ -142,12 +142,13 @@ install(DIRECTORY include/
         FILES_MATCHING PATTERN "*.h")
 
 install(TARGETS OpenSoT  
-        EXPORT OpenSoT
+        EXPORT opensot
         ARCHIVE DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT lib
         RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
         LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
         
-set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
+#enabling it will add all OpenSoT dependencies as dependencies for third party users
+#set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
 
 
 include(InstallBasicPackageFiles)
