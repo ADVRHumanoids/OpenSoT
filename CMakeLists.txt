@@ -65,8 +65,6 @@ if(NOT qpOASES_FOUND)
     set(qpOASES_LIBRARIES qpOASES)
 endif()
 
-SET(qpOASES_LIBRARIES_WHOLE_ARCHIVE -Wl,--whole-archive ${qpOASES_LIBRARIES} -Wl,--no-whole-archive)
-
 include_directories("${qpOASES_INCLUDE_DIRS}")
 
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
@@ -99,7 +97,7 @@ endif()
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PCL_LIBRARIES}
-                              ${qpOASES_LIBRARIES_WHOLE_ARCHIVE})
+                              ${qpOASES_LIBRARIES})
 
 #TARGET_LINK_LIBRARIES(uTest1  wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
 #                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
@@ -141,14 +139,14 @@ target_include_directories(OpenSoT PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}
                                           "$<INSTALL_INTERFACE:${${VARS_PREFIX}_INSTALL_INCLUDEDIR}>")
 
 set_target_properties(OpenSoT PROPERTIES VERSION ${${VARS_PREFIX}_VERSION}
-                              SOVERSION ${${VARS_PREFIX}_VERSION}
-                              PUBLIC_HEADER "${sot_INCLUDES}")
+                              SOVERSION ${${VARS_PREFIX}_VERSION})
+
 install(DIRECTORY include/ 
         DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
         FILES_MATCHING PATTERN "*.h")
 
 install(TARGETS OpenSoT  
-        EXPORT opensot
+        EXPORT OpenSoT
         ARCHIVE DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT lib
         RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
         LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
