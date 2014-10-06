@@ -2,7 +2,7 @@
 # Authors: Enrico Mingo, Alessio Rocchi
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 OLD)
     cmake_policy(SET CMP0005 NEW)
@@ -96,8 +96,8 @@ endif()
 # ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(OpenSoT ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES} ${PCL_LIBRARIES}
-                              ${qpOASES_LIBRARIES})
+TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES}
+                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES})
 
 #TARGET_LINK_LIBRARIES(uTest1  wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
 #                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
