@@ -1,4 +1,8 @@
 /**
+
+\defgroup walkman_open_sot OpenSoT
+\ingroup walkman_libraries
+
 \mainpage
 
 \section opensot_documentation The OpenSoT library
