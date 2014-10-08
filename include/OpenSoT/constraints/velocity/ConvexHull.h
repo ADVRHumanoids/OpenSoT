@@ -19,7 +19,7 @@
 #define __BOUNDS_VELOCITY_CONVEXHULL_H__
 
  #include <OpenSoT/Constraint.h>
-
+ #include <OpenSoT/tasks/velocity/CoM.h>
  #include <yarp/sig/all.h>
  #include <drc_shared/idynutils.h>
  #include <drc_shared/utils/convex_hull.h>
@@ -32,6 +32,7 @@
         namespace velocity {
             class ConvexHull: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
+                OpenSoT::tasks::velocity::CoM*    _com;
                 iDynUtils& _robot;
                 double _boundScaling;
                 drc_shared::convex_hull _convex_hull;
@@ -44,6 +45,14 @@
                 ConvexHull( iDynUtils& robot,
                             const unsigned int x_size,
                             const double boundScaling = BOUND_SCALING);
+
+                /**
+                 * @brief ConvexHull constructor
+                 * @param com the CoM task that provides us with CoM jacobian
+                 */
+                ConvexHull(OpenSoT::tasks::velocity::CoM& com,
+                           const unsigned int x_size,
+                           const double boundScaling = BOUND_SCALING);
 
                 void update();
 

@@ -78,6 +78,10 @@ void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
     this->update_b();
 }
 
+iDynUtils& CoM::getModel() {
+    return _robot;
+}
+
 yarp::sig::Vector CoM::getReference() {
     return _desiredPosition;
 }

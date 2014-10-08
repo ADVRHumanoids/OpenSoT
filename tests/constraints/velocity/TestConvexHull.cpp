@@ -320,20 +320,29 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     std::list<KDL::Vector> points;
     old_convex_hull::getSupportPolygonPoints(coman, points);
     yarp::sig::Matrix A;
+    yarp::sig::Matrix A_JCoM;
     yarp::sig::Vector b;
     oldConvexHull.getConvexHull(points, A, b);
 
     yarp::sig::Matrix Aineq = convexHull->getAineq();
     yarp::sig::Vector bUpperBound = convexHull->getbUpperBound();
 
-    EXPECT_EQ(A.rows(), Aineq.rows());
-    EXPECT_EQ(A.cols(), Aineq.cols());
+
+    // multiplying A by JCoM
+    yarp::sig::Matrix JCoM;
+    coman.coman_iDyn3.getCOMJacobian(JCoM);
+    JCoM = JCoM.removeCols(0,6);    // remove floating base
+    JCoM = JCoM.removeRows(2,4);    // remove orientation
+    A_JCoM = A * JCoM;
+
+    EXPECT_EQ(A_JCoM.rows(), Aineq.rows());
+    EXPECT_EQ(A_JCoM.cols(), Aineq.cols());
     EXPECT_EQ(b.size(), bUpperBound.size());
 
-    for(unsigned int i = 0; i < A.rows(); ++i)
+    for(unsigned int i = 0; i < A_JCoM.rows(); ++i)
     {
-        for(unsigned j = 0; j < A.cols(); ++j)
-            EXPECT_DOUBLE_EQ(A(i,j), Aineq(i,j));
+        for(unsigned j = 0; j < A_JCoM.cols(); ++j)
+            EXPECT_DOUBLE_EQ(A_JCoM(i,j), Aineq(i,j));
     }
 
     for(unsigned int i = 0; i < b.size(); ++i)
@@ -354,6 +363,7 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     yarp::sig::Matrix A_ch;
     yarp::sig::Vector b_ch;
     OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch);
+
     EXPECT_EQ(A.rows(), A_ch.rows());
     EXPECT_EQ(A.cols(), A_ch.cols());
     EXPECT_EQ(b.size(), b_ch.size());
@@ -396,11 +406,11 @@ TEST_F(testConvexHull, sizesAreCorrect) {
                                               <<  convexHull->getbeq().size();
 
 
-    EXPECT_EQ(2,convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
-                                               << 2
-                                               << " but has has "
-                                               << convexHull->getAeq().cols()
-                                               << " columns instead";
+    EXPECT_EQ(coman.coman_iDyn3.getNrOfDOFs(),convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
+                                                                             << coman.coman_iDyn3.getNrOfDOFs()
+                                                                             << " but has has "
+                                                                             << convexHull->getAeq().cols()
+                                                                             << " columns instead";
 
     EXPECT_EQ(0,convexHull->getbLowerBound().size()) << "beq should have size 3"
                                                      << "but has size"

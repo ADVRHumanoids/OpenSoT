@@ -64,7 +64,10 @@
                 yarp::sig::Vector getReference();
 
                 yarp::sig::Vector getActualPosition();
+
                 int getLinkWRTCoMIsSpecified();
+
+                iDynUtils &getModel();
             };
         }
     }

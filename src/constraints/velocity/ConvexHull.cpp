@@ -26,7 +26,17 @@ using namespace yarp::math;
 ConvexHull::ConvexHull(iDynUtils &robot,
                        const unsigned int x_size,
                        const double boundScaling) :
-    Constraint(x_size), _robot(robot),
+    Constraint(x_size), _robot(robot), _com(NULL),
+    _boundScaling(boundScaling),
+    _convex_hull() {
+
+    this->update();
+}
+
+ConvexHull::ConvexHull(OpenSoT::tasks::velocity::CoM &com,
+                       const unsigned int x_size,
+                       const double boundScaling) :
+    Constraint(x_size), _robot(com.getModel()), _com(&com),
     _boundScaling(boundScaling),
     _convex_hull() {
 
@@ -42,6 +52,17 @@ void ConvexHull::update() {
     getConvexHull(ch);
     this->getConstraints(ch, _Aineq, _bUpperBound, _boundScaling);
 
+    yarp::sig::Matrix JCoM;
+    if(_com == NULL) {
+        _robot.coman_iDyn3.getCOMJacobian(JCoM);
+        _robot.coman_iDyn3.getCOMJacobian(JCoM);
+        JCoM.removeRows(3,3);
+        JCoM.removeCols(0,6);
+    } else {
+        JCoM = _com->getA();
+    }
+    JCoM.removeRows(2,1);
+    _Aineq = _Aineq * JCoM;
     /**********************************************************************/
 }
 

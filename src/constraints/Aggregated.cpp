@@ -130,6 +130,7 @@ void Aggregated::generateAll() {
                 Aeq*x = beq becomes
                 beq <= Aeq*x <= beq */
             if(_aggregationPolicy & EQUALITIES_TO_INEQUALITIES) {
+                assert(_Aineq.cols() == boundAeq.cols());
                 _Aineq = yarp::math::pile(_Aineq, boundAeq);
                 _bUpperBound = yarp::math::cat(_bUpperBound,
                                                boundbeq);
@@ -140,11 +141,13 @@ void Aggregated::generateAll() {
                    beq <= Aeq*x <= beq becomes
                    -Aeq*x <= -beq && Aeq*x <= beq */
                 } else {
+                    assert(_Aineq.cols() == boundAeq.cols());
                     _Aineq = yarp::math::pile(_Aineq, -1.0 * boundAeq);
                     _bUpperBound = yarp::math::cat(_bUpperBound,
                                                    -1.0 * boundbeq);
                 }
             } else {
+                assert(_Aeq.cols() == boundAeq.cols());
                 _Aeq = yarp::math::pile(_Aeq, boundAeq);
                 _beq = yarp::math::cat(_beq, boundbeq);
             }
@@ -154,6 +157,11 @@ void Aggregated::generateAll() {
         if( boundAineq.rows() != 0 ||
             boundbUpperBound.size() != 0 ||
             boundbLowerBound.size() != 0) {
+
+            assert(boundAineq.rows() > 0);
+            assert(boundbLowerBound.size() > 0 ||
+                   boundbUpperBound.size() > 0);
+            assert(boundAineq.cols() == _x_size);
 
             /* if we need to transform all unilateral bounds to bilateral.. */
             if(_aggregationPolicy & UNILATERAL_TO_BILATERAL) {
@@ -188,6 +196,7 @@ void Aggregated::generateAll() {
                 }
             }
 
+            assert(_Aineq.cols() == boundAineq.cols());
             _Aineq = yarp::math::pile(_Aineq, boundAineq);
             _bUpperBound = yarp::math::cat(_bUpperBound, boundbUpperBound);
             /*  if using UNILATERAL_TO_BILATERAL we always have lower bounds,
