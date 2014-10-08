@@ -510,7 +510,7 @@ bool QPOases_sot::solve(Vector &solution)
         solved_task_i =  _qp_stack_of_tasks[i].solve(update_constraints);
         solution = _qp_stack_of_tasks[i].getSolution();
 
-        _qp_stack_of_tasks[i].printProblemInformation(i);
+        //_qp_stack_of_tasks[i].printProblemInformation(i);
         //std::cout<<"SOLUTION PROBLEM i: "<<solution.toString()<<std::endl;
     }
     return solved_task_i && expanded;
