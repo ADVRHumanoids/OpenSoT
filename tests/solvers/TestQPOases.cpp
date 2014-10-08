@@ -4,14 +4,10 @@
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
-#include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/Aggregated.h>
+#include <OpenSoT/constraints/velocity/all.h>
 #include <OpenSoT/solvers/QPOases.h>
-#include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/tasks/velocity/CoM.h>
+#include <OpenSoT/tasks/velocity/all.h>
 #include <qpOASES.hpp>
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
@@ -1201,7 +1197,62 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 
 }
 
+TEST_F(testQPOases_sot, testMinEffort)
+{
+    iDynUtils idynutils;
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 20.0 * M_PI/180.0;
+    arm[1] = 10.0 * M_PI/180.0;
+    arm[3] = -80.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+    arm[1] = -arm[1];
+    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
 
+    boost::shared_ptr<OpenSoT::tasks::velocity::MinimumEffort> min_effort_task(
+            new OpenSoT::tasks::velocity::MinimumEffort(q));
+
+    std::list<boost::shared_ptr<OpenSoT::Task<Matrix, Vector>>> task_list;
+    task_list.push_back(min_effort_task);
+
+    boost::shared_ptr<OpenSoT::tasks::Aggregated> joint_space_task(
+                new OpenSoT::tasks::Aggregated(task_list, q.size()));
+
+
+    boost::shared_ptr<OpenSoT::constraints::velocity::VelocityLimits> joint_vel_limits(
+        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
+
+    std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> bounds_list;
+    bounds_list.push_back(joint_vel_limits);
+
+    boost::shared_ptr<OpenSoT::constraints::Aggregated> bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+
+
+    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks;
+    stack_of_tasks.push_back(joint_space_task);
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+
+    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
+    yarp::sig::Vector dq(q.size(), 0.0);
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        joint_space_task->update(q);
+        bounds->update(q);
+        EXPECT_TRUE(sot.solve(dq));
+        q += dq;
+    }
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_NEAR( q[i], 0.0, 1E-4);
+
+}
 
 }
 

@@ -16,7 +16,6 @@
 */
 
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
-#include <drc_shared/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
@@ -29,7 +28,7 @@ MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
     _W.resize(_x_size, _x_size);
     _W.eye();
 
-    _hessianType = HST_SEMIDEF;
+    _hessianType = HST_POSDEF;
 
     for(unsigned int i = 0; i < _x_size; ++i)
         _W(i,i) = 1.0 / (_robot.coman_iDyn3.getJointTorqueMax()[i]
@@ -47,7 +46,7 @@ MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
 
 MinimumEffort::~MinimumEffort()
 {
-   //_referenceInputPort.close();
+
 }
 
 void MinimumEffort::_update(const yarp::sig::Vector &x) {
