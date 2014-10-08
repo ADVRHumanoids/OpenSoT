@@ -43,7 +43,7 @@
                         _W(q.size(),q.size())
                     { _W.eye(); this->update(q); }
                     double compute(const yarp::sig::Vector &q) {
-                        _robot.updateiDyn3Model(q);
+                        _robot.updateiDyn3Model(q, true);
                         yarp::sig::Vector tau = _robot.coman_iDyn3.getTorques();
                         return yarp::math::dot(tau, _W * tau);
                     }

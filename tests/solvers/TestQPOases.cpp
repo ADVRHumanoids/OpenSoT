@@ -1249,8 +1249,13 @@ TEST_F(testQPOases_sot, testMinEffort)
         q += dq;
     }
 
-    for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_NEAR( q[i], 0.0, 1E-4);
+
+    //We are not sure about the rest of the body, but the arm should stay near 0.0 consfiguration
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        EXPECT_NEAR( q[idynutils.left_arm.joint_numbers[i]], 0.0, 1E-4);
+        EXPECT_NEAR( q[idynutils.right_arm.joint_numbers[i]], 0.0, 1E-4);
+    }
 
 }
 
