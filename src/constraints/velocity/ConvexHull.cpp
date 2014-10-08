@@ -33,10 +33,10 @@ ConvexHull::ConvexHull(iDynUtils &robot,
     this->update();
 }
 
-ConvexHull::ConvexHull(OpenSoT::tasks::velocity::CoM &com,
+ConvexHull::ConvexHull(boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com,
                        const unsigned int x_size,
                        const double boundScaling) :
-    Constraint(x_size), _robot(com.getModel()), _com(&com),
+    Constraint(x_size), _robot(com->getModel()), _com(com),
     _boundScaling(boundScaling),
     _convex_hull() {
 
@@ -53,7 +53,7 @@ void ConvexHull::update() {
     this->getConstraints(ch, _Aineq, _bUpperBound, _boundScaling);
 
     yarp::sig::Matrix JCoM;
-    if(_com == NULL) {
+    if(!_com) {
         _robot.coman_iDyn3.getCOMJacobian(JCoM);
         _robot.coman_iDyn3.getCOMJacobian(JCoM);
         JCoM.removeRows(3,3);

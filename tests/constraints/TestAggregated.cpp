@@ -1,9 +1,11 @@
 #include <gtest/gtest.h>
 #include <drc_shared/tests_utils.h>
+#include <drc_shared/idynutils.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <yarp/math/Math.h>
 #include <string>
 
@@ -88,6 +90,29 @@ TEST_F(testAggregated, AggregatedWorks) {
     yarp::sig::Vector newUpperBound = aggregated->getUpperBound();
     EXPECT_FALSE(oldLowerBound == newLowerBound);
     EXPECT_FALSE(oldUpperBound == newUpperBound);
+}
+
+TEST_F(testAggregated, UnilateralToBilateralWorks) {
+    using namespace yarp::sig;
+    iDynUtils robot;
+    OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr convexHull(
+                new OpenSoT::constraints::velocity::ConvexHull(robot,
+                                                               robot.coman_iDyn3.getNrOfDOFs()));
+    std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> constraints;
+    constraints.push_back(convexHull);
+    OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr aggregated(
+                new OpenSoT::constraints::Aggregated(constraints,
+                                                     robot.coman_iDyn3.getNrOfDOFs()));
+
+    EXPECT_TRUE(aggregated->getbLowerBound().size() == aggregated->getbUpperBound().size()) <<
+                "bLowerBound:" << aggregated->getbLowerBound().toString() << std::endl <<
+                "bUpperBound " << aggregated->getbUpperBound().toString();
+    EXPECT_TRUE(aggregated->getAineq().rows() == aggregated->getbLowerBound().size());
+
+}
+
+/// TODO implement
+TEST_F(testAggregated, EqualityToInequalityWorks) {
 }
 
 TEST_F(testAggregated, MultipleAggregationdWork) {

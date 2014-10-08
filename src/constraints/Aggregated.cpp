@@ -166,12 +166,12 @@ void Aggregated::generateAll() {
             /* if we need to transform all unilateral bounds to bilateral.. */
             if(_aggregationPolicy & UNILATERAL_TO_BILATERAL) {
                 if(boundbUpperBound.size() == 0) {
+                    assert(boundAineq.rows() == boundbLowerBound.size());
                     boundbUpperBound.resize(boundAineq.rows(),
                                             std::numeric_limits<double>::infinity());
-                    assert(boundAineq.rows() == boundbLowerBound.size());
                 } else if(boundbLowerBound.size() == 0) {
                     assert(boundAineq.rows() == boundbUpperBound.size());
-                    boundbUpperBound.resize(boundAineq.rows(),
+                    boundbLowerBound.resize(boundAineq.rows(),
                                             std::numeric_limits<double>::lowest());
                 } else {
                     assert(boundAineq.rows() == boundbLowerBound.size());
