@@ -41,7 +41,7 @@
                     yarp::sig::Matrix _W;
                     ComputeGTauGradient(const yarp::sig::Vector& q) :
                         _W(q.size(),q.size())
-                    { _W.eye(); }
+                    { _W.eye(); this->update(q); }
                     double compute(const yarp::sig::Vector &q) {
                         _robot.updateiDyn3Model(q);
                         yarp::sig::Vector tau = _robot.coman_iDyn3.getTorques();
