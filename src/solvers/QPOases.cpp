@@ -114,7 +114,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
 
     _is_initialized = true;
 
-    if(!(val == qpOASES::SUCCESSFUL_RETURN))
+    if(val != qpOASES::SUCCESSFUL_RETURN)
     {
         _is_initialized = false;
         std::cout<<"ERROR INITIALIZING QP PROBLEM "<<std::endl;
@@ -129,16 +129,14 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         _dual_solution.resize(_problem->getNV() + _problem->getNC());
 
     //We get the solution
-    int success = _problem->getPrimalSolution(_solution.data());
+    qpOASES::returnValue success = _problem->getPrimalSolution(_solution.data());
     _problem->getDualSolution(_dual_solution.data());
     _problem->getBounds(*_bounds);
     _problem->getConstraints(*_constraints);
 
-    if(success == qpOASES::RET_QP_NOT_SOLVED ||
-      (success != qpOASES::RET_QP_SOLVED &&
-       success != qpOASES::SUCCESSFUL_RETURN))
+    if(success != qpOASES::SUCCESSFUL_RETURN)
     {
-        std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<success<<std::endl;
+        std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
         _is_initialized = false;
     }
     return _is_initialized;
@@ -282,33 +280,39 @@ bool QPOasesProblem::solve()
         hack(); //<- PAY ATTENTION!
 
         int nWSR = _nWSR;
-        _problem->hotstart(_H.data(),_g.data(),
+        qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
                        _A_ptr,
                        _l_ptr, _u_ptr,
                        _lA_ptr,_uA_ptr,
                        nWSR,0);
 
-        // If solution has changed of size we update the size
-        if(_solution.size() != _problem->getNV())
-            _solution.resize(_problem->getNV());
-
-        if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
-            _dual_solution.resize(_problem->getNV()+ _problem->getNC());
-
-        //We get the solution
-        int success = _problem->getPrimalSolution(_solution.data());
-        _problem->getDualSolution(_dual_solution.data());
-        _problem->getBounds(*_bounds);
-        _problem->getConstraints(*_constraints);
-
-        if(success == qpOASES::RET_QP_NOT_SOLVED ||
-          (success != qpOASES::RET_QP_SOLVED &&
-           success != qpOASES::SUCCESSFUL_RETURN))
+        if(val != qpOASES::SUCCESSFUL_RETURN)
         {
-            std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<success<<std::endl;
+            std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<val<<std::endl;
             return false;
         }
-        return true;
+        else
+        {
+                // If solution has changed of size we update the size
+            if(_solution.size() != _problem->getNV())
+                _solution.resize(_problem->getNV());
+
+            if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
+                _dual_solution.resize(_problem->getNV()+ _problem->getNC());
+
+            //We get the solution
+            qpOASES::returnValue success = _problem->getPrimalSolution(_solution.data());
+            _problem->getDualSolution(_dual_solution.data());
+            _problem->getBounds(*_bounds);
+            _problem->getConstraints(*_constraints);
+
+            if(success != qpOASES::SUCCESSFUL_RETURN)
+            {
+                std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
+                return false;
+            }
+            return true;
+        }
     }
     return false;
 }
@@ -470,7 +474,6 @@ bool QPOases_sot::expandProblem(unsigned int i)
             {
                 yarp::sig::Vector li, ui;
                 _qp_stack_of_tasks[i].getBounds(li, ui);
-                std::cout<<"AAA li size: "<<li.size()<<std::endl;
                 assert(li.size() == 0);
                 assert(ui.size() == 0);
                 bounds_added = _qp_stack_of_tasks[i].addBounds(

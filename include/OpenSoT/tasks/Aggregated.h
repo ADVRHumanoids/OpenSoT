@@ -40,6 +40,7 @@
             unsigned int _aggregationPolicy;
 
             void generateAll();
+            HessianType computeHessianType();
             void checkSizes();
         public:
             /**

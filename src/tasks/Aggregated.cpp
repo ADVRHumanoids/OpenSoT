@@ -31,7 +31,8 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
     this->generateAll();
 
     _W.resize(_A.rows(),_A.rows()); _W.eye();
-    _hessianType = HST_SEMIDEF;
+
+    _hessianType = this->computeHessianType();
 }
 
 Aggregated::Aggregated(TaskPtr task1,
@@ -48,7 +49,7 @@ Task(std::string("aggregated"),x_size)
     this->generateAll();
 
     _W.resize(_A.rows(),_A.rows()); _W.eye();
-    _hessianType = HST_SEMIDEF;
+    _hessianType = this->computeHessianType();
 }
 
 Aggregated::Aggregated(const std::list<TaskPtr> tasks,
@@ -59,7 +60,7 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
     this->_update(q);
 
     _W.resize(_A.rows(),_A.rows()); _W.eye();
-    _hessianType = HST_SEMIDEF;
+    _hessianType = this->computeHessianType();
 }
 
 Aggregated::~Aggregated()
@@ -99,4 +100,26 @@ void Aggregated::generateAll() {
             this->getConstraints().push_back(*j);
         }
     }
+}
+
+OpenSoT::HessianType OpenSoT::tasks::Aggregated::computeHessianType()
+{
+    if(_tasks.size() == 1)
+        return (*_tasks.begin())->getHessianAtype();
+
+    // we make a guess: all tasks are HST_POSDEF
+    bool allZero = true;
+    for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
+        i != _tasks.end(); ++i) {
+        boost::shared_ptr<TaskType> t = *i;
+        // if at least a task has HST_UNKNOWN, propagate that
+        if(t->getHessianAtype() == HST_UNKNOWN) return HST_UNKNOWN;
+        if(t->getHessianAtype() != HST_ZERO) allZero = false;
+    }
+
+    if(allZero)
+        return HST_ZERO;
+
+    // we assume an hessian type HST_SEMIDEF
+    return HST_SEMIDEF;
 }

@@ -85,7 +85,6 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     boost::shared_ptr<OpenSoT::tasks::Aggregated> aggregated_task(
                 new OpenSoT::tasks::Aggregated(task_list, q.size()));
     aggregated_task->setLambda(0.1);
-
     boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setReference(q_ref);

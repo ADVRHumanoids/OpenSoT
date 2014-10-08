@@ -1124,30 +1124,42 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
 
 TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 {
-    iDynUtils idynutils;
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    int n_dofs = 5;
+    yarp::sig::Vector q(n_dofs, 0.0);
     yarp::sig::Vector q_ref(q.size(), M_PI);
-    idynutils.updateiDyn3Model(q, true);
-    yarp::sig::Vector q2 = q;
+
+    yarp::sig::Vector q2(n_dofs, 0.0);
+    yarp::sig::Vector q_ref2(q2.size(), M_PI);
+
 
     boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setReference(q_ref);
 
+    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task2(
+            new OpenSoT::tasks::velocity::Postural(q2));
+    postural_task2->setReference(q_ref2);
     std::list<boost::shared_ptr<OpenSoT::Task<Matrix, Vector>>> task_list;
-    task_list.push_back(postural_task);
+    task_list.push_back(postural_task2);
     boost::shared_ptr<OpenSoT::tasks::Aggregated> joint_space_task(
-                new OpenSoT::tasks::Aggregated(task_list, q.size()));
+                new OpenSoT::tasks::Aggregated(task_list, q2.size()));
 
 
     boost::shared_ptr<OpenSoT::constraints::velocity::VelocityLimits> joint_vel_limits(
         new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
+    boost::shared_ptr<OpenSoT::constraints::velocity::VelocityLimits> joint_vel_limits2(
+        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q2.size()));
 
     std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> bounds_list;
     bounds_list.push_back(joint_vel_limits);
+    std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> bounds_list2;
+    bounds_list2.push_back(joint_vel_limits2);
+
 
     boost::shared_ptr<OpenSoT::constraints::Aggregated> bounds(
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+    boost::shared_ptr<OpenSoT::constraints::Aggregated> bounds2(
+                new OpenSoT::constraints::Aggregated(bounds_list2, q2.size()));
 
 //1. Here we use postural_task
     std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks;
@@ -1170,23 +1182,22 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 
 
 ////2. Here we use joint_space_task
-//    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks2;
-//    stack_of_tasks.push_back(joint_space_task);
-//    OpenSoT::solvers::QPOases_sot sot2(stack_of_tasks2, bounds);
+    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks2;
+    stack_of_tasks2.push_back(joint_space_task);
+    OpenSoT::solvers::QPOases_sot sot2(stack_of_tasks2, bounds2);
 
-//    EXPECT_TRUE(sot2.getNumberOfTasks() == 1);
-//    yarp::sig::Vector dq2(q2.size(), 0.0);
-//    for(unsigned int i = 0; i < 100; ++i)
-//    {
-//        joint_space_task->update(q2);
-//        bounds->update(q2);
+    EXPECT_TRUE(sot2.getNumberOfTasks() == 1);
+    yarp::sig::Vector dq2(q2.size(), 0.0);
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        joint_space_task->update(q2);
+        bounds2->update(q2);
+        EXPECT_TRUE(sot2.solve(dq2));
+        q2 += dq2;
+    }
 
-//        EXPECT_TRUE(sot2.solve(dq2));
-//        q2 += dq2;
-//    }
-
-//    for(unsigned int i = 0; i < q.size(); ++i)
-//        EXPECT_NEAR( q2[i], q_ref[i], 1E-4);
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_NEAR( q2[i], q_ref2[i], 1E-4);
 
 }
 
