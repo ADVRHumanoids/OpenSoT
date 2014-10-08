@@ -48,6 +48,14 @@
                         return yarp::math::dot(tau, _W * tau);
                     }
 
+                    /**
+                     * @brief update updates the robot model to the current posture
+                     * @param q the initial posture of the robot
+                     */
+                    void update(const yarp::sig::Vector &q) {
+                        _robot.updateiDyn3Model(q,true);
+                    }
+
                     void setW(const yarp::sig::Matrix& W) { _W = W; }
                 };
 
