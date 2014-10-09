@@ -289,10 +289,10 @@ bool QPOasesProblem::solve()
         if(val != qpOASES::SUCCESSFUL_RETURN)
         {
             std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<val<<std::endl;
-            return false;
+            //return false;
         }
-        else
-        {
+        //else
+        //{
                 // If solution has changed of size we update the size
             if(_solution.size() != _problem->getNV())
                 _solution.resize(_problem->getNV());
@@ -312,7 +312,7 @@ bool QPOasesProblem::solve()
                 return false;
             }
             return true;
-        }
+        //}
     }
     return false;
 }
@@ -380,10 +380,10 @@ void QPOasesTask::printProblemInformation(int i)
 //    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
 //    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
 //    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
-    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
-    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
-    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
-    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
+//    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
+//    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
+//    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
+//    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
     std::cout<<std::endl;
 }
 
