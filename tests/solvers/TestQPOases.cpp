@@ -20,6 +20,60 @@ using namespace yarp::math;
 
 namespace {
 
+class old_gravity_gradient
+{
+public:
+    old_gravity_gradient(){}
+
+    static yarp::sig::Vector getGravityCompensationTorque(const yarp::sig::Vector q, iDynUtils& idynutils)
+    {
+        static yarp::sig::Vector zeroes(q.size(),0.0);
+        static yarp::sig::Vector tau(q.size(),0.0);
+
+        idynutils.updateiDyn3Model(q,zeroes,zeroes, true);
+
+        idynutils.coman_iDyn3.dynamicRNEA();
+        tau = idynutils.coman_iDyn3.getTorques();
+
+        return tau;
+    }
+
+    static yarp::sig::Vector getGravityCompensationGradient(const yarp::sig::Matrix& W, iDynUtils& idynutils, const yarp::sig::Vector& q)
+    {
+
+        /// cost function is tau_g^t*tau_g
+        static yarp::sig::Vector gradient(idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
+        static yarp::sig::Vector deltas(idynutils.coman_iDyn3.getNrOfDOFs(),0.0);
+        for(unsigned int i = 0; i < gradient.size(); ++i)
+        {
+            // forward method gradient computation, milligrad
+            const double h = 1E-3;
+            deltas[i] = h;
+            yarp::sig::Vector tau_gravity_q_a = getGravityCompensationTorque(q+deltas, idynutils);
+            yarp::sig::Vector tau_gravity_q_b = getGravityCompensationTorque(q-deltas, idynutils);
+
+            double C_g_q_a = yarp::math::dot(tau_gravity_q_a, W*tau_gravity_q_a);
+            double C_g_q_b = yarp::math::dot(tau_gravity_q_b, W*tau_gravity_q_b);
+            gradient[i] = (C_g_q_a - C_g_q_b)/(2*h);
+            deltas[i] = 0;
+        }
+
+        return gradient;
+    }
+
+    static yarp::sig::Vector computeMinEffort(const yarp::sig::Vector& q)
+    {
+        iDynUtils idynutils;
+        yarp::sig::Matrix W(idynutils.coman_iDyn3.getJointTorqueMax().size(), idynutils.coman_iDyn3.getJointTorqueMax().size());
+        W.eye();
+        for(unsigned int i = 0; i < idynutils.coman_iDyn3.getJointTorqueMax().size(); ++i)
+            W(i,i) = 1.0 / (idynutils.coman_iDyn3.getJointTorqueMax()[i]*idynutils.coman_iDyn3.getJointTorqueMax()[i]);
+        yarp::sig::Vector gradientGq = -1.0 * getGravityCompensationGradient(W, idynutils, q);
+        return gradientGq;
+    }
+
+};
+
 bool solveQP(   const yarp::sig::Matrix &J0,
                 const yarp::sig::Vector &e0,
                 const yarp::sig::Matrix &J1,
@@ -1241,10 +1295,16 @@ TEST_F(testQPOases_sot, testMinEffort)
 
     EXPECT_TRUE(sot.getNumberOfTasks() == 1);
     yarp::sig::Vector dq(q.size(), 0.0);
-    for(unsigned int i = 0; i < 1000; ++i)
+    old_gravity_gradient oldGravityGradient;
+    for(unsigned int i = 0; i < 5; ++i)
     {
         joint_space_task->update(q);
         bounds->update(q);
+
+        std::cout<<"OLD GRAVITY GRAD: "<<oldGravityGradient.computeMinEffort(q).toString()<<std::endl;
+        std::cout<<"GRAVITY GRAD: "<<joint_space_task->getb().toString()<<std::endl;
+
+
         EXPECT_TRUE(sot.solve(dq));
         q += dq;
     }
