@@ -54,7 +54,6 @@ void MinimumEffort::_update(const yarp::sig::Vector &x) {
     _x = x;
     /************************* COMPUTING TASK *****************************/
 
-    _gTauGradientWorker.update(x);
     _b = -1.0 * cartesian_utils::computeGradient(x, _gTauGradientWorker);
 
     /**********************************************************************/
