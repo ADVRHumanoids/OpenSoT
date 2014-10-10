@@ -34,7 +34,7 @@
              * @brief The MinimumEffort class implements a task that tries to bring the robot in a minimum-effort posture.
              * Notice that the weight of the robot is not taken into account when computing effort on the legs
              * (that is, the forces on the floating base are not projected on the contact points jacobians).
-             * Also, the minimum effort task is using a simple gradient worker, which does not satisfy contact points constraints
+             * Also, the minimum effort task is using a simple gradient worker, ComputeGTauGradient, which does not satisfy contact points constraints
              * while performing the configuration vector needed to numerically compute the gradient. In particular, the gravity vector
              * is computed considering a support foot always in contact with the ground.
              * This means in general the minimum effort task should be used together with a cartesian task on the swing foot, imeplemented
