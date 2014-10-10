@@ -74,6 +74,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
         minimumEffort.update(q_whole);
         EXPECT_LE(minimumEffort.computeEffort(), old_effort);
+        std::cout << "Effort at step" << i << ": " << minimumEffort.computeEffort() << std::endl;
 
     }
     _robot.updateiDyn3Model(q_whole, true);

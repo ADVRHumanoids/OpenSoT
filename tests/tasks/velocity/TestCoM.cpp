@@ -87,7 +87,7 @@ TEST_F(testCoMTask, testCoMTask_)
     EXPECT_TRUE(CoM.getb() == positionError) << "b = " << CoM.getb().toString();
 
     yarp::sig::Vector x_now;
-    for(unsigned int i = 0; i < 25; ++i)
+    for(unsigned int i = 0; i < 100; ++i)
     {
         CoM.update(q_whole);
 
