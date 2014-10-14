@@ -22,15 +22,13 @@
 
  namespace OpenSoT {
 
-    /** Task represents
-    */
+ /**
+  * @brief The Constraint class describes all the different types of constraints:
+  * 1. bounds & bilateral
+  * 2. equalities
+  * 3. unilateral
+  */
  template <class Matrix_type, class Vector_type>
-    /**
-     * @brief The Constraint class describes all the different types of constraints:
-     * 1. bounds & bilateral
-     * 2. equalities
-     * 3. unilateral
-     */
     class Constraint {
     public:
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
