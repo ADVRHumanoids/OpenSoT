@@ -1,7 +1,9 @@
 #include <drc_shared/comanutils.h>
 #include "OpenSoT/tasks/velocity/CoM.h"
 #include "OpenSoT/solvers/QPOases.h"
+#include <yarp/math/Math.h>
 
+using namespace yarp::sig::Math;
 using namespace OpenSoT;
 namespace vTasks = OpenSoT::tasks::velocity;
 
@@ -14,17 +16,27 @@ void main(int argc, char* argv[]) {
 
     vTasks::CoM::Ptr com(new vTasks::CoM(q));
 
-    solver::QPOases_sot::Stack stack;
+    solvers::QPOases_sot::Stack stack;
     stack.push_bask(com);
-    solvers::QPOases_sot solver(com);
+    solvers::QPOases_sot solver(stack);
 
-    double t_now = yarp::os::Time::now();
-    while(yarp::os::Time::now() - t_now < 10.0) {
-        q = robot.sensePosition();
+    yarp::sig::Vector comInitialP = com->getActualPosition();
+
+    double t_start = yarp::os::Time::now();
+    double t = t_start;
+    while(t - t_start < 10.0) {
+        double delta = cos(0.1*t);
+
+        yarp::sig::Vector comReference = comInitialP;
+        comReference += yarp::sig::Vector(3,delta);
+
+        com->setReference(comReference);
         com->update(q);
         solver.solve(dq);
+
         q += dq;
         yarp::os::Time::delay(0.01);
+        t = yarp::os::Time::now();
     }
     return;
 }

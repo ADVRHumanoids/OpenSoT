@@ -30,10 +30,11 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
-FIND_PACKAGE(YARP REQUIRED)
-FIND_PACKAGE(ICUB REQUIRED)
+FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(drc_shared REQUIRED)
+FIND_PACKAGE(ICUB REQUIRED)
 FIND_PACKAGE(PCL 1.2 REQUIRED)
+FIND_PACKAGE(YARP REQUIRED)
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
@@ -47,9 +48,10 @@ include_directories("${qpOASES_INCLUDE_DIRS}")
 
 ADD_EXECUTABLE(example_cartesian example_cartesian.cpp)
 ADD_EXECUTABLE(example_com example_com.cpp)
-ADD_EXECUTABLE(example_mininum_effort example_minimum_effort.cpp)
+ADD_EXECUTABLE(example_minimum_effort example_minimum_effort.cpp)
 ADD_EXECUTABLE(example_postural example_postural.cpp)
 
-TARGET_LINK_LIBRARIES(example_cartesian PUBLIC  OpenSoT ${drc_shared_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${PCL_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${drc_shared_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_cartesian PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_minimum_effort PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES})

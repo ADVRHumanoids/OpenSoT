@@ -92,33 +92,10 @@ if(TARGET qpOASES-ext)
     add_dependencies(OpenSoT qpOASES-ext)
 endif()
 
-# ADD_EXECUTABLE(uTest1 src/sot_VelKinCon_ctrl.cpp src/yarp_interface.cpp src/tests/unitTest1.cpp src/task_solver2.cpp)
-# ADD_EXECUTABLE(uTest2 src/tests/unitTest2.cpp)
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES}
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES})
-
-#TARGET_LINK_LIBRARIES(uTest1  wb_sot ${drc_shared_LIBRARIES} ${moveit_core_LIBRARIES} ${srdfdom_LIBRARIES} ${rospack_LIBRARIES} ${rosconsole_LIBRARIES} ${roslib_LIBRARIES}
-#                              ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${paramHelp_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
-#                      qpOASES ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-#TARGET_LINK_LIBRARIES(uTest2 ${drc_shared_LIBRARIES} ${kdl_codyco_LIBRARIES} ${iDynTree_LIBRARIES} ${orocos_kdl_LIBRARIES} ${urdf_LIBRARIES} ${kdl_parser_LIBRARIES} ${PCL_LIBRARIES}
-#                      ${YARP_LIBRARIES} icubmod ${ICUB_LIBRARIES})
-
-#add_custom_target(  copy_conf_files_to_build ALL
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory
-#        "${PROJECT_SOURCE_DIR}/app/conf"
-#        "${CMAKE_BINARY_DIR}/")
-
-#add_custom_target( copy_python_to_build ALL
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory
-#        "${CMAKE_CURRENT_SOURCE_DIR}/python"
-#        "${CMAKE_BINARY_DIR}/")
-
-#add_custom_target(generate_paramsTuner_gui ALL
-#    COMMAND "${CMAKE_BINARY_DIR}/createParamTuner" > "${CMAKE_CURRENT_SOURCE_DIR}/app/resources/tuner.xml")
-#add_dependencies(generate_paramsTuner_gui createParamTuner)
-
 
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
@@ -166,6 +143,7 @@ include(AddUninstallTarget)
 
 add_subdirectory(app)
 add_subdirectory(doc)
+#add_subdirectory(examples)
 
 #######################
 # Add Testing target  #
