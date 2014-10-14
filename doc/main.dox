@@ -1,26 +1,18 @@
 /**
-*
-* \defgroup walkman_open_sot OpenSoT
-* \ingroup walkman_libraries
-*
-* \section walkman_open_sot_documentation The OpenSoT library
-*
-* \image html openSoT-logo.png
-*
-* This documentation is developed by scanning all source code 
-* in the src directory of the repository. You can produce this documentation on 
-* your computer by running:
-*
-* \verbatim
-*   mkdir build
-*   cd build
-*   cmake ..
-*   make dox
-* \endverbatim
-*
-* locally on your repository, to figure out what's going on.
-* The output can be browsed at build/doc/html/index.html.
-*
-* This page can be edited at doc/main.dox.
-*
+\defgroup walkman_opensot OpenSoT
+\ingroup walkman_libraries
+
+\author Alessio Rocchi <alessio.rocchi@iit.it>, Enrico Mingo <enrico.mingo@iit.it>
+\copyright Released under the terms of the GNU GPL v2.0
+
+\section walkman_open_sot_introduction Description
+
+An Open Source Task Solving library with Constraints
+
+OpenSoT is a library dedicated to control robots under constraints such as joint limits, joint velocities, etc. 
+The main idea under OpenSoT is to decouple Task and Constraints description with Solver and Type of Control.
+ 
+OpenSoT is developed under the European Project WALK-MAN: http://www.walk-man.eu/.
+
+\ref index
 */
