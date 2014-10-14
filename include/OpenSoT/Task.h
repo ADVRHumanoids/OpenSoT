@@ -38,7 +38,7 @@
     };
 
     /**
-     * @brief Task represents a task in the form \f$T(A,b)\f$ where \f$A$\f is the task error jacobian and \f$b$\f is the task error
+     * @brief Task represents a task in the form \f$T(A,b)\f$ where \f$A\f$ is the task error jacobian and \f$b\f$ is the task error
     */
     template <class Matrix_type, class Vector_type>
     class Task {
