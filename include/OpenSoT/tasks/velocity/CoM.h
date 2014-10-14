@@ -29,6 +29,8 @@
     namespace tasks {
         namespace velocity {
             class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            public:
+                typedef boost::shared_ptr<CoM> Ptr;
             private:
                 iDynUtils _robot;
 

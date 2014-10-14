@@ -72,6 +72,8 @@
              * @endcode
              */
             class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            public:
+                typedef boost::shared_ptr<Cartesian> Ptr;
             private:
                 iDynUtils& _robot;
 

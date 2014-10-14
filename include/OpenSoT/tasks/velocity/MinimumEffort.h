@@ -65,6 +65,8 @@
              * @endcode
              */
             class MinimumEffort : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            public:
+                typedef boost::shared_ptr<MinimumEffort> Ptr;
             protected:
                 yarp::sig::Vector _x;
 

@@ -29,6 +29,8 @@
     namespace tasks {
         namespace velocity {
             class Postural : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            public:
+                typedef boost::shared_ptr<Postural> Ptr;
             protected:
                 yarp::sig::Vector _x_desired;
                 yarp::sig::Vector _x;
