@@ -373,8 +373,6 @@ namespace OpenSoT{
     class QPOases_sot: public Solver<Matrix, Vector>
     {
     public:
-        typedef vector <boost::shared_ptr< Task<Matrix, Vector> >>& Stack;
-
         QPOases_sot(Stack& stack_of_tasks,
                     boost::shared_ptr<OpenSoT::constraints::Aggregated>& constraints);
 

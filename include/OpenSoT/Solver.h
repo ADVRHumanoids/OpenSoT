@@ -34,6 +34,7 @@ using namespace std;
         typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
         typedef Solver< Matrix_type, Vector_type > SolverType;
         typedef boost::shared_ptr<SolverType> SolverPtr;
+        typedef vector <boost::shared_ptr< Task<Matrix_type, Vector_type> >> Stack;
 
     protected:
         vector <TaskPtr> _tasks;
