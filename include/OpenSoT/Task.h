@@ -115,10 +115,10 @@
         const Vector_type& getb() const { return _b; }
 
         const Matrix_type& getWeight() const { return _W; }
-        void setWeight(const Matrix_type& W) { _W = W; }
+        virtual void setWeight(const Matrix_type& W) { _W = W; }
 
         const double getLambda() const { return _lambda; }
-        void setLambda(double lambda)
+        virtual void setLambda(double lambda)
         {
             assert(lambda <= 1.0 && lambda > 0.0);
             _lambda = lambda;

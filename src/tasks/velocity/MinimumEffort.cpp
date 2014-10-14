@@ -30,13 +30,6 @@ MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
 
     _hessianType = HST_POSDEF;
 
-    for(unsigned int i = 0; i < _x_size; ++i)
-        _W(i,i) = 1.0 / (_robot.coman_iDyn3.getJointTorqueMax()[i]
-                                        *
-                        _robot.coman_iDyn3.getJointTorqueMax()[i]);
-
-    _gTauGradientWorker.setW(_W);
-
     _A.resize(_x_size, _x_size);
     _A.eye();
 

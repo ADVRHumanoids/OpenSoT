@@ -37,7 +37,7 @@
              * Also, the minimum effort task is using a simple gradient worker, ComputeGTauGradient, which does not satisfy contact points constraints
              * while performing the configuration vector needed to numerically compute the gradient. In particular, the gravity vector
              * is computed considering a support foot always in contact with the ground.
-             * This means in general the minimum effort task should be used together with a cartesian task on the swing foot, implemented
+             * This means in general the minimum effort task should be used together with a cartesian task on the swing foot, imeplemented
              * through the OpenSoT::tasks::velocity::Cartesian class.
              * @code
              *
@@ -66,7 +66,6 @@
              */
             class MinimumEffort : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             protected:
-                iDynUtils _robot;
                 yarp::sig::Vector _x;
 
                 /**
@@ -80,16 +79,30 @@
                     public:
                     iDynUtils _robot;
                     yarp::sig::Matrix _W;
+                    yarp::sig::Vector _zeros;
+
                     ComputeGTauGradient(const yarp::sig::Vector& q) :
-                        _W(q.size(),q.size())
-                    { _W.eye(); }
-                    double compute(const yarp::sig::Vector &q) {
-                        _robot.updateiDyn3Model(q, true);
+                        _W(q.size(),q.size()),
+                        _zeros(q.size(), 0.0)
+                    {
+                        _W.eye();
+
+                        for(unsigned int i = 0; i < q.size(); ++i)
+                            _W(i,i) = 1.0 / (_robot.coman_iDyn3.getJointTorqueMax()[i]
+                                                            *
+                                             _robot.coman_iDyn3.getJointTorqueMax()[i]);
+                    }
+
+                    double compute(const yarp::sig::Vector &q)
+                    {
+                        _robot.updateiDyn3Model(q, _zeros, _zeros, true);
                         yarp::sig::Vector tau = _robot.coman_iDyn3.getTorques();
                         return yarp::math::dot(tau, _W * tau);
                     }
 
                     void setW(const yarp::sig::Matrix& W) { _W = W; }
+
+                    yarp::sig::Matrix& getW() {return _W;}
                 };
 
                 ComputeGTauGradient _gTauGradientWorker;
