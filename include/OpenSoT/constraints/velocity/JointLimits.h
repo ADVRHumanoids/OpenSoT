@@ -26,6 +26,9 @@
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
+            /**
+             * @brief The JointLimits class implements bounds on joints positions
+             */
             class JointLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
                 double _boundScaling;

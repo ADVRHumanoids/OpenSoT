@@ -137,7 +137,6 @@
                  * @return the $R^{4x4} homogeneous transform matrix describing the actual pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                 */
                 yarp::sig::Matrix getActualPose();
 
                 void setOrientationErrorGain(const double& orientationErrorGain);

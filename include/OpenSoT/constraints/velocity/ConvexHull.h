@@ -30,6 +30,11 @@
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
+            /**
+             * @brief The ConvexHull class implements a constraint of the type
+             * $A_{\text{CH}}J_{\text{CoM}}\dot{q} \lte b_{\text{CH}}$, where every row in
+             * $\left[ A_{\text{CH}} , -b_{\text{CH}\right]
+            */
             class ConvexHull: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
                 boost::shared_ptr<OpenSoT::tasks::velocity::CoM> _com;

@@ -25,6 +25,9 @@
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
+            /**
+             * @brief The VelocityLimits class implements a bound on joint velocities
+             */
             class VelocityLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
                 double _qDotLimit;
