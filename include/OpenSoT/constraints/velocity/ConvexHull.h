@@ -32,8 +32,8 @@
         namespace velocity {
             /**
              * @brief The ConvexHull class implements a constraint of the type
-             * $A_{\text{CH}}J_{\text{CoM}}\dot{q} \lte b_{\text{CH}}$, where every row in
-             * $\left[ A_{\text{CH}} , -b_{\text{CH}\right]
+             * \f$A_{\text{CH}}J_{\text{CoM}}\dot{q} \leq b_{\text{CH}}\f$, where every row in
+             * \f$\left[ A_{\text{CH}} , -b_{\text{CH}\right]\f$
             */
             class ConvexHull: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
