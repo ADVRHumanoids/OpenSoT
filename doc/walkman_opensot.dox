@@ -13,4 +13,5 @@ OpenSoT is a library dedicated to control robots under constraints such as joint
 The main idea under OpenSoT is to decouple Task and Constraints description with Solver and Type of Control.
  
 OpenSoT is developed under the European Project WALK-MAN: http://www.walk-man.eu/.
+An online verion of this documentation can be found at https://wiki.icub.org/walkman/dox/html/group__walkman__libraries.html
 */
