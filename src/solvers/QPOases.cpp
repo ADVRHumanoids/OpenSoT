@@ -407,7 +407,15 @@ void QPOasesTask::getBounds(Vector &l, Vector &u)
 }
 
 /// QPOases_sot ///
-QPOases_sot::QPOases_sot(vector<boost::shared_ptr<Task<Matrix, Vector> > > &stack_of_tasks,
+QPOases_sot::QPOases_sot(Stack &stack_of_tasks):
+    Solver(stack_of_tasks)
+{
+    _qp_stack_of_tasks.reserve(_tasks.size());
+    assert(prepareSoT());
+}
+
+/// QPOases_sot ///
+QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
                          boost::shared_ptr<constraints::Aggregated> &bounds):
     Solver(stack_of_tasks, bounds)
 {
