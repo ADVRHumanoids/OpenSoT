@@ -28,6 +28,12 @@
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
+            /**
+             * @brief The CoM class implements a task that tries to impose a position
+             * of the CoM w.r.t. the support foot.
+             *
+             * @example example_com.cpp
+             */
             class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:
                 typedef boost::shared_ptr<CoM> Ptr;

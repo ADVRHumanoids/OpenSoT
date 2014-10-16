@@ -35,41 +35,7 @@
              * of a distal link w.r.t. a base link. The reference for the cartesian task is set in base link
              * coordinate frame, or in world if the base link name is set to "world".
              *
-             * @code
-             *
-             *    iDynUtils robot;
-             *    yarp::sig Vector q(nJ,0.0),dq(nJ,0.0);
-             *    taskCartesianRSole = boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian>(
-             *                            new OpenSoT::tasks::velocity::Cartesian("cartesian::r_sole",q,robot,
-             *                                                                    robot.right_leg.end_effector_name,
-             *                                                                    robot.left_leg.end_effector_name));
-             *    swing_foot_pos_ref = taskCartesianRSole->getActualPose();
-             *    // setting x_ref with a delta offset along the z axis (-2cm)
-             *    swing_foot_pos_ref(2,3) = swing_foot_pos_ref(2,3) - 0.02;
-             *
-             *    taskCartesianRSole->setReference(swing_foot_pos_ref);
-             *
-             *    boost::shared_ptr<OpenSoT::constraints::velocity::VelocityLimits> joint_vel_limits(
-             *      new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
-             *
-             * /// SOT
-             *    stack_of_tasks.push_back(taskCartesianRSole);
-             *    stack_of_tasks.push_back(taskMinimumEffort);
-             *
-             *    qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPtr(
-             *            new OpenSoT::solvers::QPOases_sot(stack_of_tasks, joint_vel_limits));
-             *
-             * // we simulate the robot reaching the desired pose
-             *    while(true) {
-             *      robot.update(q);
-             *      taskCartesianRSole->update(q);
-             *      joint_vel_limits->update(q);
-             *      control_computed = qpOasesSolver->solve(dq_ref);
-             *      q += dq_ref;
-             *    }
-             *
-             *
-             * @endcode
+             * @example example_cartesian.cpp
              */
             class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:

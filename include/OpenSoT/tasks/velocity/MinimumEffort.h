@@ -39,30 +39,8 @@
              * is computed considering a support foot always in contact with the ground.
              * This means in general the minimum effort task should be used together with a cartesian task on the swing foot, imeplemented
              * through the OpenSoT::tasks::velocity::Cartesian class.
-             * @code
              *
-             *    iDynUtils robot;
-             *    yarp::sig Vector q(nJ,0.0),dq(nJ,0.0);
-             *    taskCartesianRSole = boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian>(
-             *                            new OpenSoT::tasks::velocity::Cartesian("cartesian::r_sole",q,robot,
-             *                                                                    robot.right_leg.end_effector_name,
-             *                                                                    robot.left_leg.end_effector_name));
-             *    swing_foot_pos_ref = taskCartesianRSole->getReference();
-             *
-             * /// JOINT SPACE TASKS
-             *    taskMinimumEffort = boost::shared_ptr<OpenSoT::tasks::velocity::MinimumEffort>(
-             *        new OpenSoT::tasks::velocity::MinimumEffort(q));
-             *
-             * /// SOT
-             *    stack_of_tasks.push_back(taskCartesianRSole);
-             *    stack_of_tasks.push_back(taskMinimumEffort);
-             *
-             *    qpOasesSolver = OpenSoT::solvers::QPOases_sot::SolverPtr(
-             *            new OpenSoT::solvers::QPOases_sot(stack_of_tasks));
-             *    control_computed = qpOasesSolver->solve(dq_ref);
-             *
-             *
-             * @endcode
+             * @example example_minimum_effort.cpp
              */
             class MinimumEffort : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:

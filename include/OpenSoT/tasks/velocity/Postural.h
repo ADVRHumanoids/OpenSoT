@@ -28,6 +28,11 @@
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
+            /**
+             * @brief The Postural class implements a task that tries to bring the robust posture to a reference posture.
+             *
+             * @example example_postural.cpp
+             */
             class Postural : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:
                 typedef boost::shared_ptr<Postural> Ptr;
