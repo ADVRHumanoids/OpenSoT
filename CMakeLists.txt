@@ -143,7 +143,7 @@ include(AddUninstallTarget)
 
 add_subdirectory(app)
 add_subdirectory(doc)
-#add_subdirectory(examples)
+add_subdirectory(examples)
 
 #######################
 # Add Testing target  #
