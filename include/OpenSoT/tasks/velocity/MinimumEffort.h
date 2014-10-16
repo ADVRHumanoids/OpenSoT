@@ -27,6 +27,10 @@
 
  using namespace yarp::math;
 
+/**
+  * @example example_minimum_effort.cpp
+  * The MinimumEffort class implements a task that tries to bring the robot in a minimum-effort posture.
+  */
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
@@ -39,8 +43,7 @@
              * is computed considering a support foot always in contact with the ground.
              * This means in general the minimum effort task should be used together with a cartesian task on the swing foot, imeplemented
              * through the OpenSoT::tasks::velocity::Cartesian class.
-             *
-             * @example example_minimum_effort.cpp
+             * You can take a look at an implementation example in @ref example_minimum_effort.cpp
              */
             class MinimumEffort : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:

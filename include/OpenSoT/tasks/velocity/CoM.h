@@ -24,15 +24,18 @@
 #include <kdl/frames.hpp>
 #include <yarp/sig/all.h>
 #include <yarp/os/all.h>
-
+/**
+  * @example example_com.cpp
+  * The CoM class implements a task that tries to impose a position
+  * of the CoM w.r.t. the support foot.
+  */
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
             /**
              * @brief The CoM class implements a task that tries to impose a position
              * of the CoM w.r.t. the support foot.
-             *
-             * @example example_com.cpp
+             * You can see an example in @ref example_com.cpp
              */
             class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:

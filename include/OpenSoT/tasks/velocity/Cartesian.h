@@ -27,6 +27,12 @@
 
  #define WORLD_FRAME_NAME "world"
 
+/**
+ * @example example_cartesian.cpp
+ * The Cartesian class implements a task that tries to impose a pose (position and orientation)
+ * of a distal link w.r.t. a base link.
+ */
+
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
@@ -35,7 +41,7 @@
              * of a distal link w.r.t. a base link. The reference for the cartesian task is set in base link
              * coordinate frame, or in world if the base link name is set to "world".
              *
-             * @example example_cartesian.cpp
+             * You can see an example in @ref example_cartesian.cpp
              */
             class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:
