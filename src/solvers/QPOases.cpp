@@ -52,9 +52,9 @@ void QPOasesProblem::setDefaultOptions()
 {
     qpOASES::Options opt;
     opt.setToReliable();
-    opt.printLevel = qpOASES::PL_NONE;
+    opt.printLevel = qpOASES::PL_LOW;
     opt.enableRegularisation = qpOASES::BT_TRUE;
-    opt.epsRegularisation *= 2E2;
+    opt.epsRegularisation *= 2E1;//2E2
     _problem->setOptions(opt);
 }
 
@@ -63,33 +63,8 @@ void QPOasesProblem::setOptions(const qpOASES::Options &options)
     _problem->setOptions(options);
 }
 
-void QPOasesProblem::hack()
-{
-    if(_l.size() > 0)
-        _l_ptr = _l.data();
-    else
-        _l_ptr = NULL;
-    if(_u.size() > 0)
-        _u_ptr = _u.data();
-    else
-        _u_ptr = NULL;
-    if(_lA.size() > 0)
-        _lA_ptr = _lA.data();
-    else
-        _lA_ptr = NULL;
-    if(_uA.size() > 0)
-        _uA_ptr = _uA.data();
-    else
-        _uA_ptr = NULL;
-    if(_A.rows() > 0)
-        _A_ptr = _A.data();
-    else
-        _A_ptr = NULL;
-}
-
-boost::shared_ptr<qpOASES::Options> QPOasesProblem::getOptions(){
-    boost::shared_ptr<qpOASES::Options> options(new qpOASES::Options(_problem->getOptions()));
-    return options; 
+qpOASES::Options QPOasesProblem::getOptions(){
+    return _problem->getOptions();
 }
 
 bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
@@ -103,13 +78,11 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
     assert(_lA.size() == _A.rows());
     assert(_l.size() == _u.size());
 
-    hack(); //<- PAY ATTENTION!
-
     int nWSR = _nWSR;
         qpOASES::returnValue val =_problem->init( _H.data(),_g.data(),
-                       _A_ptr,
-                       _l_ptr, _u_ptr,
-                       _lA_ptr,_uA_ptr,
+                       _A.data(),
+                       _l.data(), _u.data(),
+                       _lA.data(),_uA.data(),
                        nWSR,0);
 
     _is_initialized = true;
@@ -136,7 +109,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
 
     if(success != qpOASES::SUCCESSFUL_RETURN)
     {
-        std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
+        std::cout<<"ERROR GETTING PRIMAL SOLUTION IN INITIALIZATION! ERROR "<<success<<std::endl;
         _is_initialized = false;
     }
     return _is_initialized;
@@ -277,13 +250,11 @@ bool QPOasesProblem::solve()
         assert(_lA.size() == _A.rows());
         assert(_l.size() == _u.size());
 
-        hack(); //<- PAY ATTENTION!
-
         int nWSR = _nWSR;
         qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
-                       _A_ptr,
-                       _l_ptr, _u_ptr,
-                       _lA_ptr,_uA_ptr,
+                       _A.data(),
+                       _l.data(), _u.data(),
+                       _lA.data(),_uA.data(),
                        nWSR,0);
 
         if(val != qpOASES::SUCCESSFUL_RETURN)
@@ -507,20 +478,15 @@ unsigned int QPOases_sot::getNumberOfTasks()
 
 bool QPOases_sot::solve(Vector &solution)
 {
-    bool solved_task_i = false;
+    bool solved_task_i = true;
     bool expanded = true;
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        bool update_constraints = true;
-        //if(i > 0)
-        //{
-            expanded = updateExpandedProblem(i);
-            update_constraints = false;
-        //}
-
-        solved_task_i =  _qp_stack_of_tasks[i].solve(update_constraints);
+        expanded = expanded && updateExpandedProblem(i);
+        bool a = _qp_stack_of_tasks[i].solve(false);
+        if(!a) std::cout<<"TASK "<<i<<std::endl;
+        solved_task_i =  solved_task_i && a;
         solution = _qp_stack_of_tasks[i].getSolution();
-
         //_qp_stack_of_tasks[i].printProblemInformation(i);
         //std::cout<<"SOLUTION PROBLEM i: "<<solution.toString()<<std::endl;
     }
@@ -616,4 +582,29 @@ std::vector<std::pair<std::string, int>> QPOases_sot::getNumberOfConstraintsInTa
         v.push_back(a);
     }
     return v;
+}
+
+bool QPOases_sot::setOptions(const unsigned int i, const qpOASES::Options &opt)
+{
+    if(i > _qp_stack_of_tasks.size())
+    {
+        std::cout<<"Index out of range!"<<std::endl;
+        return false;
+    }
+
+    _qp_stack_of_tasks[i].setOptions(opt);
+    return true;
+}
+
+bool QPOases_sot::getOptions(const unsigned int i, qpOASES::Options& opt)
+{
+
+    if(i > _qp_stack_of_tasks.size())
+    {
+        std::cout<<"Index out of range!"<<std::endl;
+        return false;
+    }
+
+    opt = _qp_stack_of_tasks[i].getOptions();
+    return true;
 }

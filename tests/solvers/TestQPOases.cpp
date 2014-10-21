@@ -899,14 +899,16 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
     idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
     idynutils.updateiDyn3Model(q, true);
 
+    std::string ee = "l_wrist"; //r_wrist
+
     yarp::sig::Matrix T_init = idynutils.coman_iDyn3.getPosition(
                 idynutils.coman_iDyn3.getLinkIndex("Waist"),
-                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
+                idynutils.coman_iDyn3.getLinkIndex(ee));
 
     //2 Tasks: Cartesian & Postural
     boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> cartesian_task(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::r_wrist", q, idynutils,
-                                                       "r_wrist", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee, q, idynutils,
+                                                       ee, "Waist"));
     boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
                 new OpenSoT::tasks::velocity::Postural(q));
 
@@ -966,7 +968,7 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
     //std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
     yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(
                 idynutils.coman_iDyn3.getLinkIndex("Waist"),
-                idynutils.coman_iDyn3.getLinkIndex("r_wrist"));
+                idynutils.coman_iDyn3.getLinkIndex(ee));
 //    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
 //    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
 

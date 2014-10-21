@@ -91,9 +91,9 @@ namespace OpenSoT{
 
         /**
          * @brief getOptions return the options of the QP problem
-         * @return reference to options
+         * @return options
          */
-        boost::shared_ptr<qpOASES::Options> getOptions();
+        qpOASES::Options getOptions();
 
         /**
          * @brief setOptions of the QP problem. Default are set to:
@@ -286,18 +286,12 @@ namespace OpenSoT{
         Matrix _A;
         Vector _lA;
         Vector _uA;
-        double * _A_ptr;
-        double *_lA_ptr;
-        double *_uA_ptr;
-
 
         /**
          * Define a set of bounds on solution: l <= x <= u
          */
         Vector _l;
         Vector _u;
-        double *_l_ptr;
-        double *_u_ptr;
 
         /**
          * Solution and dual solution of the QP problem
@@ -390,6 +384,9 @@ namespace OpenSoT{
         std::vector<std::pair<std::string, int>> getNumberOfConstraintsInQP();
 
         std::vector<std::pair<std::string, int>> getNumberOfConstraintsInTaskList();
+
+        bool setOptions(const unsigned int i, const qpOASES::Options &opt);
+        bool getOptions(const unsigned int i, qpOASES::Options& opt);
 
     protected:
         vector <QPOasesTask> _qp_stack_of_tasks;
