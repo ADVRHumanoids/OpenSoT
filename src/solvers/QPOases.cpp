@@ -313,6 +313,9 @@ QPOasesTask::~QPOasesTask()
 
 void QPOasesTask::prepareData(bool update_constraints)
 {
+    /* Set Hessian Type */
+    setHessianType(_task->getHessianAtype());
+
     /* Compute cost function */
     _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
     _g = -1.0 * _task->getLambda() * _task->getA().transposed() * _task->getWeight() * _task->getb();
@@ -482,6 +485,13 @@ bool QPOases_sot::solve(Vector &solution)
     bool expanded = true;
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
+        if(i == _tasks.size()-1)
+        {
+            if(_tasks[i]->getHessianAtype() == HST_SEMIDEF)
+                std::cout<<"Task "<<i<<"HAS HST_SEMIDEF Hessian"<<std::endl;
+        }
+
+
         expanded = expanded && updateExpandedProblem(i);
         bool a = _qp_stack_of_tasks[i].solve(false);
         if(!a) std::cout<<"TASK "<<i<<std::endl;

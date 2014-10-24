@@ -23,7 +23,7 @@ using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
 MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
-    Task("posture", x.size()), _gTauGradientWorker(x), _x(x)
+    Task("min_effort", x.size()), _gTauGradientWorker(x), _x(x)
 {
     _W.resize(_x_size, _x_size);
     _W.eye();

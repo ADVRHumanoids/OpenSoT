@@ -115,6 +115,7 @@ OpenSoT::HessianType OpenSoT::tasks::Aggregated::computeHessianType()
         // if at least a task has HST_UNKNOWN, propagate that
         if(t->getHessianAtype() == HST_UNKNOWN) return HST_UNKNOWN;
         if(t->getHessianAtype() != HST_ZERO) allZero = false;
+        if(t->getHessianAtype() == HST_POSDEF) return HST_POSDEF;
     }
 
     if(allZero)
