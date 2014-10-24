@@ -66,9 +66,10 @@
              * nonnegative linear combination of positive semidefinite matrices is positive semidefinite (Roger A. Horn and Charles R. Johnson,
              * Matrix Analysis, Cambridge University Press, 1996, p.398).
              * With these considerations in mind, the method will return:
-             *      HST_UNKNOWN if at least one of the Hessians in HST_UNKNOWN or all Hessians are HST_SEMIDEF
+             *      HST_UNKNOWN if at least one of the Hessians in HST_UNKNOWN
              *      HST_ZERO if all the Hessians are HST_ZERO
              *      HST_POSDEF if at least one Hessian is HST_POSDEF (and none HST_UNKNOWN)
+             *      HST_SEMIDEF if all one Hessian is HST_SEMIDEF (and none HST_UNKNOWN)
              *
              * TO DO: Take in consideration also \f$\beta\f$ and \f$\W\f$!
              * @return the Hessian type
