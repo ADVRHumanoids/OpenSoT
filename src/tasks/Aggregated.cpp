@@ -122,5 +122,5 @@ OpenSoT::HessianType OpenSoT::tasks::Aggregated::computeHessianType()
         return HST_ZERO;
 
     // we assume an hessian type HST_SEMIDEF
-    return HST_SEMIDEF;
+    return HST_UNKNOWN;
 }

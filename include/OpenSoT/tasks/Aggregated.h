@@ -41,6 +41,38 @@
             unsigned int _aggregationPolicy;
 
             void generateAll();
+            /**
+             * @brief computeHessianType compute the new Hessian type associated to the Aggregated version of the Tasks.
+             *
+             * In OpenSoT, all the considered Hessians \f$H\f$ are in particular Hermitians and positive semidefinite/definite.
+             * Let consider two matrices \f$A\f$ and \f$B\f$ with Hessians \f$H_A = A^TA\f$ and \f$H_B=B^TB\f$, the Aggregated Task
+             * \f$C\f$ is computed as:
+             * \f$
+             *   \begin{equation}
+             *     C = \left[A^T \quad B^T\right]^T
+             *   \end{equation}
+             * \f$
+             * and the associated Hessian \f$H_C\f$ is computed as:
+             * \f$
+             *   \begin{equation}
+             *     H_C = \left[A^T \quad B^T\right]\left[A^T \quad B^T\right]^T \\
+             *         = A^TA + B^TB = H_A + H_B
+             *   \end{equation}
+             * \f$
+             * In general for an arbitrary number of tasks we can say \f$H_{Agg} = \displaystyle\sum_{i}^{n} H_i\f$. Therefore the problem of
+             * determine the new Hessian type for the Aggregated Task can be considered as the problem to determine the Hessian type of the
+             * sum of different matrices with known Hessian type.
+             * Observation: The sum of any two positive definite matrices of the same size is positive definite. More generally, any
+             * nonnegative linear combination of positive semidefinite matrices is positive semidefinite (Roger A. Horn and Charles R. Johnson,
+             * Matrix Analysis, Cambridge University Press, 1996, p.398).
+             * With these considerations in mind, the method will return:
+             *      HST_UNKNOWN if at least one of the Hessians in HST_UNKNOWN or all Hessians are HST_SEMIDEF
+             *      HST_ZERO if all the Hessians are HST_ZERO
+             *      HST_POSDEF if at least one Hessian is HST_POSDEF (and none HST_UNKNOWN)
+             *
+             * TO DO: Take in consideration also \f$\beta\f$ and \f$\W\f$!
+             * @return the Hessian type
+             */
             HessianType computeHessianType();
             void checkSizes();
         public:
