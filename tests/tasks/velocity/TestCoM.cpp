@@ -14,7 +14,7 @@ class testCoMTask: public ::testing::Test
 {
 protected:
     iDynUtils _robot;
-    iDynUtils _fixed_robot;
+    iDynUtils _test_robot;
 
     testCoMTask()
     {
@@ -47,11 +47,9 @@ TEST_F(testCoMTask, testCoMTask_)
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.left_leg);
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.right_leg);
 
-    _robot.updateiDyn3Model(q_whole);
+    _robot.updateiDyn3Model(q_whole, true);
 
-    _fixed_robot.updateiDyn3Model(q_whole);
-    _fixed_robot.coman_iDyn3.setFloatingBaseLink(_fixed_robot.left_leg.end_effector_index);
-    _fixed_robot.updateiDyn3Model(q_whole);
+    _test_robot.updateiDyn3Model(q_whole, true);
 
     OpenSoT::tasks::velocity::CoM CoM(q_whole, _robot);
 
@@ -60,11 +58,11 @@ TEST_F(testCoMTask, testCoMTask_)
     // setting x_ref with a delta offset along the z axis (+2cm)
     yarp::sig::Vector delta_x(3,0.0);
                       delta_x(2) = 0.02;
-    yarp::sig::Vector x = _robot.coman_iDyn3.getCOM("",_robot.left_leg.end_effector_index);
+    yarp::sig::Vector x = _robot.coman_iDyn3.getCOM();
     yarp::sig::Vector x_ref = x + delta_x;
 
     yarp::sig::Matrix J;
-    _fixed_robot.coman_iDyn3.getCOMJacobian(J);
+    _test_robot.coman_iDyn3.getCOMJacobian(J);
     J.removeCols(0,6);
     J.removeRows(3,3);
     EXPECT_TRUE(CoM.getA() == J);
@@ -75,7 +73,7 @@ TEST_F(testCoMTask, testCoMTask_)
 
     EXPECT_TRUE(CoM.getConstraints().size() == 0);
 
-    double K = 0.8;
+    double K = 0.7;
     CoM.setLambda(K);
     EXPECT_DOUBLE_EQ(CoM.getLambda(), K);
 
@@ -86,15 +84,20 @@ TEST_F(testCoMTask, testCoMTask_)
     yarp::sig::Vector positionError = x_ref - x;
     EXPECT_TRUE(CoM.getb() == positionError) << "b = " << CoM.getb().toString();
 
+    _robot.updateiDyn3Model(q_whole, true);
+    EXPECT_TRUE(CoM.getb() == positionError) << "b = " << CoM.getb().toString();
+
     yarp::sig::Vector x_now;
     for(unsigned int i = 0; i < 100; ++i)
     {
+        _robot.updateiDyn3Model(q_whole, true);
+
         CoM.update(q_whole);
 
         q_whole += pinv(CoM.getA(),1E-6)*CoM.getLambda()*CoM.getb();
 
-        _robot.updateiDyn3Model(q_whole);
-        x_now = _robot.coman_iDyn3.getCOM("",_robot.left_leg.end_effector_index);
+        _robot.updateiDyn3Model(q_whole, true);
+        x_now = _robot.coman_iDyn3.getCOM();
         std::cout << "Current error after iteration " << i << " is " << x_ref(2) - x_now(2) << std::endl;
     }
 
