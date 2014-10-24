@@ -314,7 +314,7 @@ QPOasesTask::~QPOasesTask()
 void QPOasesTask::prepareData(bool update_constraints)
 {
     /* Set Hessian Type */
-    setHessianType(_task->getHessianAtype());
+    //setHessianType(_task->getHessianAtype());
 
     /* Compute cost function */
     _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
