@@ -19,7 +19,7 @@
 #define __BOUNDS_VELOCITY_COMVELOCITY_H__
 
  #include <OpenSoT/Constraint.h>
-
+ #include <OpenSoT/tasks/velocity/CoM.h>
  #include <yarp/sig/all.h>
  #include <drc_shared/idynutils.h>
 
@@ -28,20 +28,24 @@
         namespace velocity {
             class CoMVelocity: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
-                iDynUtils _robot;
+                iDynUtils& _robot;
                 yarp::sig::Vector _velocityLimits;
-                int _support_foot_linkIndex;
                 double _dT;
+
+                void generatebBounds();
+
             public:
                 /**
                  * @brief CoMVelocity constructor
-                 * @param robot the robot model
+                 * @param velocityLimits a vector of 3 elements describing the maximum velocity along x,y,z of the CoM.
+                 * The CoM frame of reference is that of the support foot
                  * @param dT the time constant at which we are performing velocity control [s]
+                 * @param x_size the size of the x (unknowns) vector - i.e. the number of joints
                  */
                 CoMVelocity(const yarp::sig::Vector velocityLimits,
-                            const iDynUtils &robot,
                             const double dT,
-                            const unsigned int x_size);
+                            const yarp::sig::Vector& x,
+                            iDynUtils& robot);
 
                 virtual void update(const yarp::sig::Vector &x);
             };

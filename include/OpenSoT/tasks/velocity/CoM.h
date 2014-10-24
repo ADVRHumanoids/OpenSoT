@@ -41,19 +41,7 @@
             public:
                 typedef boost::shared_ptr<CoM> Ptr;
             private:
-                iDynUtils _robot;
-
-                /**
-                 * @brief _support_foot_link_index in fixed base systems,
-                 *                                 we want to specify the CoM wrt
-                 *                                 a fixed root.
-                 */
-                int _support_foot_link_index;
-                /**
-                 * @brief _swing_foot_link_index during single foot support phase,
-                 *                               the swing foot is considered like an end-effector
-                 */
-                int _swing_foot_link_index;
+                iDynUtils& _robot;
 
                 yarp::sig::Vector _actualPosition;
                 yarp::sig::Vector _desiredPosition;
@@ -64,7 +52,8 @@
 
                 yarp::sig::Vector positionError;
 
-                CoM(const yarp::sig::Vector& x);
+                CoM(const yarp::sig::Vector& x,
+                    iDynUtils& robot);
 
                 ~CoM();
 
@@ -75,10 +64,6 @@
                 yarp::sig::Vector getReference();
 
                 yarp::sig::Vector getActualPosition();
-
-                int getLinkWRTCoMIsSpecified();
-
-                iDynUtils &getModel();
             };
         }
     }

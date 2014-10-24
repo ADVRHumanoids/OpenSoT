@@ -24,42 +24,45 @@ using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 CoMVelocity::CoMVelocity(const yarp::sig::Vector velocityLimits,
-                         const iDynUtils &robot,
                          const double dT,
-                         const unsigned int x_size) :
-Constraint(x_size), _robot(robot),_dT(dT), _velocityLimits(velocityLimits) {
+                         const yarp::sig::Vector& x,
+                         iDynUtils &robot) :
+Constraint(x.size()), _dT(dT), _velocityLimits(velocityLimits),
+_robot(robot) {
 
     if(_velocityLimits.size() < 3 )
         throw "Error: velocityLimits for CoM should be a vector of 3 elements";
 
-    _Aineq.resize(3, x_size);
-    _bLowerBound.resize(x_size);
-    _bUpperBound.resize(x_size);
-    this->_support_foot_linkIndex = _robot.left_leg.index;
-    _robot.coman_iDyn3.setFloatingBaseLink(_support_foot_linkIndex);
-    this->update(yarp::sig::Vector(x_size, 0.0));
+    _Aineq.resize(3, x.size());
+    _bLowerBound.resize(x.size());
+    _bUpperBound.resize(x.size());
+
+    this->generatebBounds();
+
+    this->update(x);
+}
+
+void CoMVelocity::update(const yarp::sig::Vector &x) {
+
+    yarp::sig::Matrix JCoM;
+    if(!_robot.coman_iDyn3.getCOMJacobian(JCoM))
+        throw "Error computing CoM Jacobian";
+    JCoM.removeRows(3,3);       // remove orientation
+    JCoM.removeCols(0,6);       // remove floating base
+
+    /************************ COMPUTING BOUNDS ****************************/
+
+    _Aineq = JCoM;
+
+    /**********************************************************************/
+}
+
+void CoMVelocity::generatebBounds() {
 
     /******************** COMPUTING CONSTANT BOUNDS ***********************/
 
     _bLowerBound = -1.0*_velocityLimits*_dT;
     _bUpperBound = +1.0*_velocityLimits*_dT;
-
-    /**********************************************************************/
-}
-
-void CoMVelocity::update(const yarp::sig::Vector &x) {
-    yarp::sig::Matrix JCoM;
-    _robot.updateiDyn3Model(x);
-
-    if(!_robot.coman_iDyn3.getCOMJacobian(JCoM))
-        throw "Error computing CoM Jacobian";
-
-    JCoM = JCoM.removeCols(0,6);    // remove floating base
-    JCoM = JCoM.removeRows(3,3);    // remove orientation
-
-    /************************ COMPUTING BOUNDS ****************************/
-
-    _Aineq = JCoM;
 
     /**********************************************************************/
 }

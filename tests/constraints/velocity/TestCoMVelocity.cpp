@@ -29,9 +29,9 @@ class testCoMVelocity : public ::testing::Test {
       zeros.resize(coman.coman_iDyn3.getNrOfDOFs(),0.0);
 
       comVelocity = new CoMVelocity(velocityLimits,
-                                    coman,
                                     dT,
-                                    coman.coman_iDyn3.getNrOfDOFs());
+                                    zeros,
+                                    coman);
   }
 
   virtual ~testCoMVelocity() {

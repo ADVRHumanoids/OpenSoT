@@ -37,29 +37,20 @@
             */
             class ConvexHull: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             private:
-                boost::shared_ptr<OpenSoT::tasks::velocity::CoM> _com;
-                iDynUtils& _robot;
+                iDynUtils &_robot;
                 double _boundScaling;
                 drc_shared::convex_hull _convex_hull;
-                int _support_foot_linkIndex;
             public:
                 /**
                  * @brief ConvexHull constructor
-                 * @param robot the robot model
+                 * @param x the robot configuration vector
+                 * @param boundScaling the margin, in percentage, of the bounds margins
                  */
-                ConvexHull( iDynUtils& robot,
-                            const unsigned int x_size,
+                ConvexHull( const yarp::sig::Vector& x,
+                            iDynUtils& robot,
                             const double boundScaling = BOUND_SCALING);
 
-                /**
-                 * @brief ConvexHull constructor
-                 * @param com the CoM task that provides us with CoM jacobian
-                 */
-                ConvexHull(boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com,
-                           const unsigned int x_size,
-                           const double boundScaling = BOUND_SCALING);
-
-                void update();
+                void update(const yarp::sig::Vector &x);
 
                 /**
                  * @brief getConstraints returns A and b such that A*\delta q < b implies staying in the convex hull

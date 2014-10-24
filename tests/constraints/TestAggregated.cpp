@@ -95,9 +95,10 @@ TEST_F(testAggregated, AggregatedWorks) {
 TEST_F(testAggregated, UnilateralToBilateralWorks) {
     using namespace yarp::sig;
     iDynUtils robot;
+    Vector q(0.0,robot.coman_iDyn3.getNrOfDOFs());
+
     OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr convexHull(
-                new OpenSoT::constraints::velocity::ConvexHull(robot,
-                                                               robot.coman_iDyn3.getNrOfDOFs()));
+                new OpenSoT::constraints::velocity::ConvexHull(q,robot));
     std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> constraints;
     constraints.push_back(convexHull);
     OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr aggregated(

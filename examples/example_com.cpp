@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq(q.size(),0.0);
 
-    vTasks::CoM::Ptr com(new vTasks::CoM(q));
+    vTasks::CoM::Ptr com(new vTasks::CoM(q, robot.idynutils));
 
     solvers::QPOases_sot::Stack stack;
     stack.push_back(com);

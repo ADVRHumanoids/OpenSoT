@@ -1011,7 +1011,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
 
         //3 Tasks: CoM & Cartesian & Postural
         boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com_task(
-                    new OpenSoT::tasks::velocity::CoM(q));
+                    new OpenSoT::tasks::velocity::CoM(q, idynutils));
 
         std::string ee1 = "r_wrist";
         std::string ee2 = "l_wrist";
@@ -1062,8 +1062,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2_ref, T_arm2_ref_kdl);
 
 
-        yarp::sig::Vector T_com_p_init = idynutils.coman_iDyn3.getCOM("",
-                    com_task->getLinkWRTCoMIsSpecified());
+        yarp::sig::Vector T_com_p_init = idynutils.coman_iDyn3.getCOM();
         yarp::sig::Vector T_com_p_ref = T_com_p_init;
         T_com_p_ref[1] += 0.1;
         yarp::sig::Matrix T_com_ref(4,4); T_com_ref.eye();
@@ -1125,8 +1124,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         KDL::Frame T_arm2_kdl;
         cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2, T_arm2_kdl);
 
-        yarp::sig::Vector T_com_p = idynutils.coman_iDyn3.getCOM("",
-                    com_task->getLinkWRTCoMIsSpecified());
+        yarp::sig::Vector T_com_p = idynutils.coman_iDyn3.getCOM();
         yarp::sig::Matrix T_com(4,4); T_com.eye();
         T_com(0,3) = T_com_p[0];
         T_com(1,3) = T_com_p[1];

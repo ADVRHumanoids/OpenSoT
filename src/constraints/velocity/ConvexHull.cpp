@@ -23,45 +23,32 @@
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
-ConvexHull::ConvexHull(iDynUtils &robot,
-                       const unsigned int x_size,
+ConvexHull::ConvexHull(const yarp::sig::Vector& x,
+                       iDynUtils& robot,
                        const double boundScaling) :
-    Constraint(x_size), _robot(robot), _com(NULL),
+    Constraint(x.size()), _robot(robot),
     _boundScaling(boundScaling),
     _convex_hull() {
 
-    this->update();
+    this->update(x);
 }
 
-ConvexHull::ConvexHull(boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com,
-                       const unsigned int x_size,
-                       const double boundScaling) :
-    Constraint(x_size), _robot(com->getModel()), _com(com),
-    _boundScaling(boundScaling),
-    _convex_hull() {
-
-    this->update();
-}
-
-void ConvexHull::update() {
+void ConvexHull::update(const yarp::sig::Vector &x) {
 
     /************************ COMPUTING BOUNDS ****************************/
 
+    yarp::sig::Matrix JCoM;
+    _robot.updateiDyn3Model(x);
+    _robot.coman_iDyn3.getCOMJacobian(JCoM);
+    JCoM.removeCols(0,6);
+    JCoM.removeRows(2,4);
 
     std::vector<KDL::Vector> ch;
     getConvexHull(ch);
     this->getConstraints(ch, _Aineq, _bUpperBound, _boundScaling);
 
-    yarp::sig::Matrix JCoM;
-    if(!_com) {
-        _robot.coman_iDyn3.getCOMJacobian(JCoM);
-        _robot.coman_iDyn3.getCOMJacobian(JCoM);
-        JCoM.removeRows(3,3);
-        JCoM.removeCols(0,6);
-    } else {
-        JCoM = _com->getA();
-    }
-    JCoM.removeRows(2,1);
+    assert(JCoM.rows() == _Aineq.cols());
+
     _Aineq = _Aineq * JCoM;
     /**********************************************************************/
 }
@@ -70,6 +57,7 @@ void ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 {
     std::list<KDL::Vector> points;
     drc_shared::convex_hull::getSupportPolygonPoints(_robot, points);
+
     _convex_hull.getConvexHull(points, ch);
 }
 

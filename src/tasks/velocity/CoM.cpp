@@ -24,13 +24,12 @@
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
-CoM::CoM(   const yarp::sig::Vector& x) :
-    Task("com", x.size()),
+CoM::CoM(   const yarp::sig::Vector& x,
+            iDynUtils &robot) :
+    Task("com", x.size()), _robot(robot),
     _desiredPosition(3,0.0), _actualPosition(3,0.0),
     positionError(3, 0.0)
 {
-    _support_foot_link_index = _robot.left_leg.index;
-    _swing_foot_link_index = _robot.right_leg.index;
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
@@ -52,12 +51,10 @@ CoM::~CoM()
 }
 
 void CoM::_update(const yarp::sig::Vector &x) {
-    _robot.coman_iDyn3.setFloatingBaseLink(_support_foot_link_index);
-    _robot.updateiDyn3Model(x, true);
 
     /************************* COMPUTING TASK *****************************/
 
-    _actualPosition = _robot.coman_iDyn3.getCOM("",_support_foot_link_index);
+    _actualPosition = _robot.coman_iDyn3.getCOM();
 
     //This part of code is an HACK due to a bug in iDynTree
     assert(_robot.coman_iDyn3.getCOMJacobian(_A));
@@ -74,10 +71,6 @@ void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
     this->update_b();
 }
 
-iDynUtils& CoM::getModel() {
-    return _robot;
-}
-
 yarp::sig::Vector CoM::getReference() {
     return _desiredPosition;
 }
@@ -90,10 +83,3 @@ void CoM::update_b() {
     _b = _desiredPosition - _actualPosition;
     positionError = _b;
 }
-int CoM::getLinkWRTCoMIsSpecified()
-{
-    return _support_foot_link_index;
-}
-
-
-

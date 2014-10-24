@@ -220,8 +220,7 @@ class testConvexHull : public ::testing::Test{
       velocityLimits.resize(3,CoMVelocityLimit);
       zeros.resize(coman.coman_iDyn3.getNrOfDOFs(),0.0);
 
-      convexHull = new ConvexHull(  coman,
-                                    coman.coman_iDyn3.getNrOfDOFs());
+      convexHull = new ConvexHull(  zeros, coman );
   }
 
   virtual ~testConvexHull() {
@@ -238,8 +237,8 @@ class testConvexHull : public ::testing::Test{
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      convexHull->update();
-      coman.updateiDyn3Model(zeros,zeros,zeros);
+      convexHull->update(zeros);
+      coman.updateiDyn3Model(zeros,true);
   }
 
   virtual void TearDown() {
@@ -313,7 +312,7 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
 
     updateiDyn3Model(true, q, coman);
-    convexHull->update();
+    convexHull->update(q);
 
     old_convex_hull oldConvexHull;
 
@@ -332,7 +331,8 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     yarp::sig::Matrix JCoM;
     coman.coman_iDyn3.getCOMJacobian(JCoM);
     JCoM = JCoM.removeCols(0,6);    // remove floating base
-    JCoM = JCoM.removeRows(2,4);    // remove orientation
+    JCoM = JCoM.removeRows(2,4);    // remove orientation + z
+    assert(A.cols() == JCoM.rows());
     A_JCoM = A * JCoM;
 
     EXPECT_EQ(A_JCoM.rows(), Aineq.rows());
@@ -452,7 +452,7 @@ TEST_F(testConvexHull, BoundsAreCorrect) {
     q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
 
     updateiDyn3Model(true, q, coman);
-    convexHull->update();
+    convexHull->update(q);
 
     // Get Vector of CH's points from coman
     std::list<KDL::Vector> points;
