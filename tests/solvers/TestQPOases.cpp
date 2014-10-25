@@ -708,6 +708,27 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     }
 }
 
+TEST_F(testQPOasesTask, testCoMTask)
+{
+    iDynUtils idynutils;
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    idynutils.updateiDyn3Model(q, true);
+
+    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com_task(
+                new OpenSoT::tasks::velocity::CoM(q, idynutils));
+
+    EXPECT_EQ(com_task->getA().cols(), idynutils.coman_iDyn3.getNrOfDOFs());
+    EXPECT_EQ(com_task->getA().rows(), 3);
+
+    for(unsigned int i = 0; i < com_task->getb().size(); ++i)
+        EXPECT_DOUBLE_EQ(com_task->getb()[i],0.0);
+
+
+    OpenSoT::solvers::QPOasesTask qp_CoM_task(com_task);
+    EXPECT_TRUE(qp_CoM_task.isQProblemInitialized());
+
+}
+
 TEST_F(testQPOasesTask, testCartesian)
 {
     iDynUtils idynutils;
