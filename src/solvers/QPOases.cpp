@@ -485,13 +485,6 @@ bool QPOases_sot::solve(Vector &solution)
     bool expanded = true;
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        if(i == _tasks.size()-1)
-        {
-            if(_tasks[i]->getHessianAtype() == HST_SEMIDEF)
-                std::cout<<"Task "<<i<<"HAS HST_SEMIDEF Hessian"<<std::endl;
-        }
-
-
         expanded = expanded && updateExpandedProblem(i);
         bool a = _qp_stack_of_tasks[i].solve(false);
         if(!a) std::cout<<"TASK "<<i<<std::endl;
