@@ -34,7 +34,8 @@
         namespace velocity {
             /**
              * @brief The CoM class implements a task that tries to impose a position
-             * of the CoM w.r.t. the support foot.
+             * of the CoM w.r.t. the support foot. Notice how you need to use it with a model with
+             * the floating base link set as the support foot.
              * You can see an example in @ref example_com.cpp
              */
             class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
@@ -52,6 +53,11 @@
 
                 yarp::sig::Vector positionError;
 
+                /**
+                 * @brief CoM
+                 * @param x the initial configuration of the robot
+                 * @param robot the robot model, with floating base link set on the support foot
+                 */
                 CoM(const yarp::sig::Vector& x,
                     iDynUtils& robot);
 

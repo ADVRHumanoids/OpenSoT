@@ -11,6 +11,7 @@ int main(int argc, char* argv[]) {
     yarp::os::Network::init();
 
     ComanUtils robot("example_com");
+    robot.idynutils.coman_iDyn3.setFloatingBaseLink(robot.idynutils.left_leg.index);
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq(q.size(),0.0);
 
