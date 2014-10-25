@@ -711,21 +711,42 @@ TEST_F(testQPOases_sot, testContructor1Problem)
 TEST_F(testQPOasesTask, testCoMTask)
 {
     iDynUtils idynutils;
+    idynutils.coman_iDyn3.setFloatingBaseLink(idynutils.left_leg.index);
     yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
     idynutils.updateiDyn3Model(q, true);
 
     boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com_task(
                 new OpenSoT::tasks::velocity::CoM(q, idynutils));
 
-    EXPECT_EQ(com_task->getA().cols(), idynutils.coman_iDyn3.getNrOfDOFs());
-    EXPECT_EQ(com_task->getA().rows(), 3);
-
-    for(unsigned int i = 0; i < com_task->getb().size(); ++i)
-        EXPECT_DOUBLE_EQ(com_task->getb()[i],0.0);
-
+    boost::shared_ptr<OpenSoT::constraints::velocity::CoMVelocity> com_vel_constr(
+                new OpenSoT::constraints::velocity::CoMVelocity(
+                    yarp::sig::Vector(3,0.05),1.0,q,idynutils));
+    com_task->getConstraints().push_back(com_vel_constr);
 
     OpenSoT::solvers::QPOasesTask qp_CoM_task(com_task);
     EXPECT_TRUE(qp_CoM_task.isQProblemInitialized());
+
+    yarp::sig::Vector com_i = com_task->getActualPosition();
+    yarp::sig::Vector com_f = com_i;
+    com_f[0] += 0.05;
+    com_f[1] += 0.05;
+    com_f[2] -= 0.05;
+    com_task->setReference(com_f);
+
+
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        idynutils.updateiDyn3Model(q,true);
+        com_task->update(q);
+
+        ASSERT_TRUE(qp_CoM_task.solve());
+        yarp::sig::Vector dq = qp_CoM_task.getSolution();
+        q += dq;
+    }
+
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR( com_task->getb()[i], 0.0, 1E-4);
 
 }
 
