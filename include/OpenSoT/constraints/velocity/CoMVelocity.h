@@ -40,7 +40,8 @@
                  * @param velocityLimits a vector of 3 elements describing the maximum velocity along x,y,z of the CoM.
                  * The CoM frame of reference is that of the support foot
                  * @param dT the time constant at which we are performing velocity control [s]
-                 * @param x_size the size of the x (unknowns) vector - i.e. the number of joints
+                 * @param x initial configuration of the robot when creating the constraint
+                 * @param robot the robot model, with floating base link set on the support foot
                  */
                 CoMVelocity(const yarp::sig::Vector velocityLimits,
                             const double dT,

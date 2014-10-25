@@ -44,6 +44,7 @@
                 /**
                  * @brief ConvexHull constructor
                  * @param x the robot configuration vector
+                 * @param robot the robot model, with floating base link set on the support foot
                  * @param boundScaling the margin, in percentage, of the bounds margins
                  */
                 ConvexHull( const yarp::sig::Vector& x,
