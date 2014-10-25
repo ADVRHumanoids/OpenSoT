@@ -14,7 +14,8 @@ class testCoMTask: public ::testing::Test
 {
 protected:
     iDynUtils _robot;
-    iDynUtils _test_robot;
+    iDynUtils _fixed_robot;
+    iDynUtils _normal_robot;
 
     testCoMTask()
     {
@@ -47,10 +48,30 @@ TEST_F(testCoMTask, testCoMTask_)
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.left_leg);
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.right_leg);
 
+    _robot.coman_iDyn3.setFloatingBaseLink(_robot.left_leg.index);
     _robot.updateiDyn3Model(q_whole, true);
 
-    _test_robot.coman_iDyn3.setFloatingBaseLink(_test_robot.left_leg.index);
-    _test_robot.updateiDyn3Model(q_whole);
+    _fixed_robot.coman_iDyn3.setFloatingBaseLink(_fixed_robot.left_leg.index);
+    _fixed_robot.updateiDyn3Model(q_whole);
+
+    _normal_robot.updateiDyn3Model(q_whole);
+
+    std::cout << "_robot.getCoM() is: " << _robot.coman_iDyn3.getCOM().toString() << std::endl;
+    std::cout << "_robot.getCoM(_robot.left_leg.index) is: " << _robot.coman_iDyn3.getCOM("",_robot.left_leg.end_effector_index).toString() << std::endl;
+
+    std::cout << "_fixed_robot.getCoM() is: " << _fixed_robot.coman_iDyn3.getCOM().toString() << std::endl;
+    std::cout << "_fixed_robot.getCoM(_fixed_robot.left_leg.index) is: " << _fixed_robot.coman_iDyn3.getCOM("",_fixed_robot.left_leg.end_effector_index).toString() << std::endl;
+
+    std::cout << "computing _normal_robot with world in waist.." << std::endl;
+    std::cout << "_normal_robot.getCoM() is: " << _normal_robot.coman_iDyn3.getCOM().toString() << std::endl;
+    std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.coman_iDyn3.getCOM("",_normal_robot.left_leg.end_effector_index).toString() << std::endl;
+
+    _normal_robot.updateiDyn3Model(q_whole, true);
+
+    std::cout << "computing _normal_robot with proper world.." << std::endl;
+    std::cout << "_normal_robot.getCoM() is: " << _normal_robot.coman_iDyn3.getCOM().toString() << std::endl;
+    std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.coman_iDyn3.getCOM("",_normal_robot.left_leg.end_effector_index).toString() << std::endl;
+
 
     OpenSoT::tasks::velocity::CoM CoM(q_whole, _robot);
 
@@ -63,7 +84,9 @@ TEST_F(testCoMTask, testCoMTask_)
     yarp::sig::Vector x_ref = x + delta_x;
 
     yarp::sig::Matrix J;
-    _test_robot.coman_iDyn3.getCOMJacobian(J);
+    // hack! we need to compute world position in a smarter way....
+    _fixed_robot.updateiDyn3Model(q_whole,true);
+    _fixed_robot.coman_iDyn3.getCOMJacobian(J);
     J.removeCols(0,6);
     J.removeRows(3,3);
     EXPECT_TRUE(CoM.getA() == J);

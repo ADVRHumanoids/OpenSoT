@@ -219,7 +219,7 @@ class testConvexHull : public ::testing::Test{
 
       velocityLimits.resize(3,CoMVelocityLimit);
       zeros.resize(coman.coman_iDyn3.getNrOfDOFs(),0.0);
-
+      coman.coman_iDyn3.setFloatingBaseLink(coman.left_leg.index);
       convexHull = new ConvexHull(  zeros, coman );
   }
 

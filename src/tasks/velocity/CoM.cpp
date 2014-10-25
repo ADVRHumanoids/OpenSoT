@@ -55,26 +55,18 @@ void CoM::_update(const yarp::sig::Vector &x) {
 
     /************************* COMPUTING TASK *****************************/
 
-    _actualPosition = _robot.coman_iDyn3.getCOM("", _robot.left_leg.index);
+    _actualPosition = _robot.coman_iDyn3.getCOM();
 
     assert(_robot.coman_iDyn3.getCOMJacobian(_A));
-    KDL::Frame leftLegFrame = _robot.coman_iDyn3.getPositionKDL(_robot.left_leg.index, true);
     _A = _A.removeRows(3,3);    // remove orientation
-    std::cout << "A_full=" << _A.toString() << std::endl;
-    _A.setSubmatrix(-1*_A.submatrix(0,5,0,2)+_A.submatrix(6,11,0,2),0,0);
     _A = _A.removeCols(0,6);    // remove floating base
-
-    _A = KDLtoYarp_position(leftLegFrame).submatrix(0,2,0,2) * _A;
 
     this->update_b();
     /**********************************************************************/
 }
 
 void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
-    KDL::Frame leftLegFrame = _robot.coman_iDyn3.getPositionKDL(_robot.left_leg.index, true);
-    _desiredPosition = KDLtoYarp_position(leftLegFrame).submatrix(0,2,0,2) * (desiredPosition +
-                       KDLtoYarp_position(leftLegFrame).getCol(3).subVector(0,2));
-
+	_desiredPosition = desiredPosition;
     this->update_b();
 }
 

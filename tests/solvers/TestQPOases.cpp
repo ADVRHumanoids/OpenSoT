@@ -990,6 +990,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         int number_of_tasks = jj;//rand() % 4;  //number between 1 and 3
 
         iDynUtils idynutils;
+        iDynUtils idynutils_com;
         yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
         yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
         leg[0] = -25.0 * M_PI/180.0;
@@ -1005,13 +1006,14 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         arm[1] = -arm[1];
         idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
         idynutils.updateiDyn3Model(q, true);
+        idynutils_com.updateiDyn3Model(q, true);
 
         yarp::sig::Vector q_ref(q.size(), 0.0);
         q_ref = q;
 
         //3 Tasks: CoM & Cartesian & Postural
         boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com_task(
-                    new OpenSoT::tasks::velocity::CoM(q, idynutils));
+                    new OpenSoT::tasks::velocity::CoM(q, idynutils_com));
 
         std::string ee1 = "r_wrist";
         std::string ee2 = "l_wrist";
@@ -1096,6 +1098,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         for(unsigned int i = 0; i < s*t; ++i)
         {
             idynutils.updateiDyn3Model(q, true);
+            idynutils_com.updateiDyn3Model(q,true);
 
             com_task->update(q);
             cartesian_task->update(q);
