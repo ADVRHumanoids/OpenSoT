@@ -417,6 +417,26 @@ protected:
     }
 };
 
+
+yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
+    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 20.0 * M_PI/180.0;
+    arm[1] = 10.0 * M_PI/180.0;
+    arm[3] = -80.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+    arm[1] = -arm[1];
+    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    return q;
+}
+
+
 /**
  * @brief TEST_F testSimpleProblem test solution of a simple CONSTANT QP problem
  */
@@ -712,7 +732,7 @@ TEST_F(testQPOasesTask, testCoMTask)
 {
     iDynUtils idynutils;
     idynutils.coman_iDyn3.setFloatingBaseLink(idynutils.left_leg.index);
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
 
     boost::shared_ptr<OpenSoT::tasks::velocity::CoM> com_task(
@@ -753,20 +773,7 @@ TEST_F(testQPOasesTask, testCoMTask)
 TEST_F(testQPOasesTask, testCartesian)
 {
     iDynUtils idynutils;
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-    leg[0] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[5] = -25.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-    arm[1] = -arm[1];
-    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
 
     yarp::sig::Matrix T = idynutils.coman_iDyn3.getPosition(
@@ -811,20 +818,7 @@ TEST_F(testQPOasesTask, testCartesian)
 TEST_F(testQPOases_sot, testContructor2Problems)
 {
     iDynUtils idynutils;
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-    leg[0] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[5] = -25.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-    arm[1] = -arm[1];
-    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     yarp::sig::Vector torso(idynutils.torso.getNrOfDOFs(), 0.0);
     torso[0] = tests_utils::getRandomAngle(-20.0*M_PI/180.0, 20.0*M_PI/180.0);
     torso[1] = tests_utils::getRandomAngle(0.0, 45.0*M_PI/180.0);
@@ -925,20 +919,7 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 {
     iDynUtils idynutils;
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-    leg[0] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[5] = -25.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-    arm[1] = -arm[1];
-    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
 
     std::string ee = "l_wrist"; //r_wrist
@@ -1034,20 +1015,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         iDynUtils idynutils;
         iDynUtils idynutils_com;
         idynutils_com.coman_iDyn3.setFloatingBaseLink(idynutils_com.left_leg.index);
-        yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
-        yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-        leg[0] = -25.0 * M_PI/180.0;
-        leg[3] =  50.0 * M_PI/180.0;
-        leg[5] = -25.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-        idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-        yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-        arm[0] = 20.0 * M_PI/180.0;
-        arm[1] = 10.0 * M_PI/180.0;
-        arm[3] = -80.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-        arm[1] = -arm[1];
-        idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+        yarp::sig::Vector q = getGoodInitialPosition(idynutils);
         idynutils.updateiDyn3Model(q, true);
         idynutils_com.updateiDyn3Model(q, true);
 
