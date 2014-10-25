@@ -78,14 +78,17 @@ TEST_F(testCoMTask, testCoMTask_)
     EXPECT_DOUBLE_EQ(CoM.getLambda(), K);
 
     CoM.setReference(x);
-    EXPECT_TRUE(CoM.getb() == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb().toString();
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
     CoM.setReference(x_ref);
     yarp::sig::Vector positionError = x_ref - x;
-    EXPECT_TRUE(CoM.getb() == positionError) << "b = " << CoM.getb().toString();
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(CoM.getb()[i],positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
     _robot.updateiDyn3Model(q_whole, true);
-    EXPECT_TRUE(CoM.getb() == positionError) << "b = " << CoM.getb().toString();
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(CoM.getb()[i],positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
     yarp::sig::Vector x_now;
     for(unsigned int i = 0; i < 100; ++i)

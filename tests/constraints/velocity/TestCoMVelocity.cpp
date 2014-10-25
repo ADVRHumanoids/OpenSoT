@@ -151,7 +151,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     // integrate 1s of moving right
     for(unsigned int i = 0; i < 1/dT; ++i) {
         yarp::sig::Matrix JCoM;
-        coman.updateiDyn3Model(qRight,zeros,zeros);
+        coman.updateiDyn3Model(qRight,true);
         coman.coman_iDyn3.getCOMJacobian(JCoM);
         JCoM = JCoM.removeCols(0,6);
         JCoM = JCoM.removeRows(3,3);
@@ -185,7 +185,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     // integrate 1s of moving left
     for(unsigned int i = 0; i < 1/dT; ++i) {
         yarp::sig::Matrix JCoM;
-        coman.updateiDyn3Model(qLeft,zeros,zeros);
+        coman.updateiDyn3Model(qLeft,true);
         coman.coman_iDyn3.getCOMJacobian(JCoM);
         JCoM = JCoM.removeCols(0,6);
         JCoM = JCoM.removeRows(3,3);

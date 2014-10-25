@@ -20,6 +20,7 @@
 #include <drc_shared/cartesian_utils.h>
 #include <exception>
 #include <cmath>
+#include <iCub/iDynTree/yarp_kdl.h>
 
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
@@ -54,20 +55,26 @@ void CoM::_update(const yarp::sig::Vector &x) {
 
     /************************* COMPUTING TASK *****************************/
 
-    _actualPosition = _robot.coman_iDyn3.getCOM();
+    _actualPosition = _robot.coman_iDyn3.getCOM("", _robot.left_leg.index);
 
-    //This part of code is an HACK due to a bug in iDynTree
     assert(_robot.coman_iDyn3.getCOMJacobian(_A));
+    KDL::Frame leftLegFrame = _robot.coman_iDyn3.getPositionKDL(_robot.left_leg.index, true);
+    _A = _A.removeRows(3,3);    // remove orientation
+
+    _A = KDLtoYarp_position(leftLegFrame).submatrix(0,2,0,2) * _A;
 
     _A = _A.removeCols(0,6);    // remove floating base
-    _A = _A.removeRows(3,3);    // remove orientation
+
 
     this->update_b();
     /**********************************************************************/
 }
 
 void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
-    _desiredPosition = desiredPosition;
+    KDL::Frame leftLegFrame = _robot.coman_iDyn3.getPositionKDL(_robot.left_leg.index, true);
+    _desiredPosition = KDLtoYarp_position(leftLegFrame).submatrix(0,2,0,2) * (desiredPosition +
+                       KDLtoYarp_position(leftLegFrame).getCol(3).subVector(0,2));
+
     this->update_b();
 }
 
