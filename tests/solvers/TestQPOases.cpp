@@ -991,6 +991,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
 
         iDynUtils idynutils;
         iDynUtils idynutils_com;
+        idynutils_com.coman_iDyn3.setFloatingBaseLink(idynutils_com.left_leg.index);
         yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
         yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
         leg[0] = -25.0 * M_PI/180.0;
@@ -1127,7 +1128,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         KDL::Frame T_arm2_kdl;
         cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2, T_arm2_kdl);
 
-        yarp::sig::Vector T_com_p = idynutils.coman_iDyn3.getCOM();
+        yarp::sig::Vector T_com_p = idynutils_com.coman_iDyn3.getCOM();
         yarp::sig::Matrix T_com(4,4); T_com.eye();
         T_com(0,3) = T_com_p[0];
         T_com(1,3) = T_com_p[1];
