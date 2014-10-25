@@ -54,7 +54,7 @@ void QPOasesProblem::setDefaultOptions()
     opt.setToReliable();
     opt.printLevel = qpOASES::PL_LOW;
     opt.enableRegularisation = qpOASES::BT_TRUE;
-    opt.epsRegularisation *= 2E1;//2E2
+    opt.epsRegularisation *= 1E1;//2E2
     _problem->setOptions(opt);
 }
 
