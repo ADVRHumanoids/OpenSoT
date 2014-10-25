@@ -49,7 +49,8 @@ TEST_F(testCoMTask, testCoMTask_)
 
     _robot.updateiDyn3Model(q_whole, true);
 
-    _test_robot.updateiDyn3Model(q_whole, true);
+    _test_robot.coman_iDyn3.setFloatingBaseLink(_test_robot.left_leg.index);
+    _test_robot.updateiDyn3Model(q_whole);
 
     OpenSoT::tasks::velocity::CoM CoM(q_whole, _robot);
 
