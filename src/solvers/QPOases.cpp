@@ -54,7 +54,7 @@ void QPOasesProblem::setDefaultOptions()
     opt.setToReliable();
     opt.printLevel = qpOASES::PL_LOW;
     opt.enableRegularisation = qpOASES::BT_TRUE;
-    opt.epsRegularisation *= 1E1;//2E2
+    opt.epsRegularisation *= 2E2;//1E1
     _problem->setOptions(opt);
 }
 
@@ -388,7 +388,6 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks):
     assert(prepareSoT());
 }
 
-/// QPOases_sot ///
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
                          boost::shared_ptr<constraints::Aggregated> &bounds):
     Solver(stack_of_tasks, bounds)
