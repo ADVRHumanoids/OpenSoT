@@ -17,6 +17,7 @@ QPOasesProblem::QPOasesProblem():
     _bounds(new qpOASES::Bounds()),
     _constraints(new qpOASES::Constraints()),
     _nWSR(132),
+    _epsRegularisation(2E2),
     _solution(0), _dual_solution(0),
     _is_initialized(false)
 {
@@ -25,7 +26,7 @@ QPOasesProblem::QPOasesProblem():
 
 QPOasesProblem::QPOasesProblem(const int number_of_variables,
                                const int number_of_constraints,
-                               OpenSoT::HessianType hessian_type):
+                               OpenSoT::HessianType hessian_type, const double eps_regularisation):
     _problem(new qpOASES::SQProblem(number_of_variables, 
                                     number_of_constraints, 
                                     (qpOASES::HessianType)(hessian_type))),
@@ -33,6 +34,7 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _bounds(new qpOASES::Bounds()),
     _constraints(new qpOASES::Constraints()),
     _nWSR(132),
+    _epsRegularisation(eps_regularisation),
     _solution(number_of_variables), _dual_solution(number_of_variables),
     _is_initialized(false)
 {
@@ -54,7 +56,7 @@ void QPOasesProblem::setDefaultOptions()
     opt.setToReliable();
     opt.printLevel = qpOASES::PL_LOW;
     opt.enableRegularisation = qpOASES::BT_TRUE;
-    opt.epsRegularisation *= 2E2;//1E1
+    opt.epsRegularisation *= _epsRegularisation;
     _problem->setOptions(opt);
 }
 
@@ -295,10 +297,10 @@ void QPOasesProblem::setHessianType(const OpenSoT::HessianType ht){_problem->set
 bool QPOasesProblem::resetProblem(){return _problem->reset();}
 
 /// QPOasesTask ///
-QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task):
+QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task, const double eps_regularisation):
     QPOasesProblem(task->getXSize(),
                    OpenSoT::constraints::Aggregated(task->getConstraints(), task->getXSize()).getAineq().rows(),
-                   (OpenSoT::HessianType)(task->getHessianAtype())),
+                   (OpenSoT::HessianType)(task->getHessianAtype()), eps_regularisation),
     _task(task)
 {
     prepareData();
@@ -348,6 +350,7 @@ void QPOasesTask::printProblemInformation(int i)
         std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
     else
         std::cout<<GREEN<<"PROBLEM "<<i<<" ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
+    std::cout<<GREEN<<"eps Regularisation factor: "<<DEFAULT<<getOptions().epsRegularisation<<std::endl;
     std::cout<<GREEN<<"# OF CONSTRAINTS: "<<DEFAULT<<_lA.size()<<std::endl;
     std::cout<<GREEN<<"# OF BOUNDS: "<<DEFAULT<<_l.size()<<std::endl;
     std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_task->getXSize()<<std::endl;
@@ -381,16 +384,18 @@ void QPOasesTask::getBounds(Vector &l, Vector &u)
 }
 
 /// QPOases_sot ///
-QPOases_sot::QPOases_sot(Stack &stack_of_tasks):
-    Solver(stack_of_tasks)
+QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation):
+    Solver(stack_of_tasks),
+    _epsRegularisation(eps_regularisation)
 {
     _qp_stack_of_tasks.reserve(_tasks.size());
     assert(prepareSoT());
 }
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
-                         boost::shared_ptr<constraints::Aggregated> &bounds):
-    Solver(stack_of_tasks, bounds)
+                         boost::shared_ptr<constraints::Aggregated> &bounds, const double eps_regularisation):
+    Solver(stack_of_tasks, bounds),
+    _epsRegularisation(eps_regularisation)
 {
     _qp_stack_of_tasks.reserve(_tasks.size());
     assert(prepareSoT());
@@ -400,7 +405,7 @@ bool QPOases_sot::prepareSoT()
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        _qp_stack_of_tasks.push_back(QPOasesTask(_tasks[i]));
+        _qp_stack_of_tasks.push_back(QPOasesTask(_tasks[i], _epsRegularisation));
         if(i > 0)
         {
             expandProblem(i);
@@ -411,9 +416,10 @@ bool QPOases_sot::prepareSoT()
             _qp_stack_of_tasks[i].getBounds(li, ui);
             assert(li.size() == 0);
             assert(ui.size() == 0);
-            _qp_stack_of_tasks[i].addBounds(
-                            _bounds->getLowerBound(),
-                            _bounds->getUpperBound());
+            if(_bounds)
+                _qp_stack_of_tasks[i].addBounds(
+                                _bounds->getLowerBound(),
+                                _bounds->getUpperBound());
         }
         _qp_stack_of_tasks[i].printProblemInformation(i);
     }
@@ -457,9 +463,10 @@ bool QPOases_sot::expandProblem(unsigned int i)
                 _qp_stack_of_tasks[i].getBounds(li, ui);
                 assert(li.size() == 0);
                 assert(ui.size() == 0);
-                bounds_added = _qp_stack_of_tasks[i].addBounds(
-                                _bounds->getLowerBound(),
-                                _bounds->getUpperBound());
+                if(_bounds)
+                    bounds_added = _qp_stack_of_tasks[i].addBounds(
+                                    _bounds->getLowerBound(),
+                                    _bounds->getUpperBound());
             }
     }
     return constraints_added && bounds_added;
@@ -535,9 +542,11 @@ bool QPOases_sot::updateExpandedProblem(unsigned int i)
     //3. Update constraints matrices of task j
     ///TO DO: check that matrices from point 2. and matrices in _qp_stack_of_tasks[i]
     /// has the same size!
-   return _qp_stack_of_tasks[i].updateConstraints(A, lA, uA) &&
-           _qp_stack_of_tasks[i].updateBounds(_bounds->getLowerBound(),
+   bool problem_updated = _qp_stack_of_tasks[i].updateConstraints(A, lA, uA);
+   if(_bounds)
+        problem_updated = problem_updated && _qp_stack_of_tasks[i].updateBounds(_bounds->getLowerBound(),
                                               _bounds->getUpperBound());
+    return problem_updated;
 }
 
 std::vector<std::pair<std::string, int>> QPOases_sot::getNumberOfConstraintsInQP()

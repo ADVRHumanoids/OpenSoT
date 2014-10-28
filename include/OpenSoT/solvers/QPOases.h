@@ -26,6 +26,8 @@
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
 
+#define DEFAULT_EPS_REGULARISATION 2E2
+
 using namespace yarp::sig;
 
 namespace qpOASES {
@@ -62,10 +64,14 @@ namespace OpenSoT{
          * @param number_of_variables of the QP problem
          * @param number_of_constraints of the QP problem
          * @param hessian_type of the QP problem
+         * @param eps_regularization set the Scaling factor of identity matrix used for Hessian regularisation.
+         *             final_eps_regularisation = standard_eps_regularisation * eps_regularisation
+         *        this parameter is particular important for the optimization!
          */
         QPOasesProblem(const int number_of_variables,
                        const int number_of_constraints,
-                       OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN);
+                       OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
+                       const double eps_regularisation = DEFAULT_EPS_REGULARISATION); //2E2
 
         /**
           * @brief ~QPOasesProblem destructor
@@ -74,6 +80,7 @@ namespace OpenSoT{
 
         /**
          * @brief setDefaultOptions to internal qpOases problem
+         * @param eps_regularisation set the Scaling factor of identity matrix used for Hessian regularisation.
          */
         void setDefaultOptions();
 
@@ -269,6 +276,8 @@ namespace OpenSoT{
          */
         int _nWSR;
 
+        double _epsRegularisation;
+
         /**
          * @brief _is_initialized is set to true when the problem is initialized
          */
@@ -298,12 +307,6 @@ namespace OpenSoT{
          */
         Vector _solution;
         Vector _dual_solution;
-
-        /**
-         * @brief hack take care of the problem of yarp::sig::Matrix and yarp::sig::Vector
-         * that does not return NULL when empty!
-         */
-        void hack();
     };
 
 
@@ -318,7 +321,7 @@ namespace OpenSoT{
          * updated task matrices
          * @param task task to solve
          */
-        QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task);
+        QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
 
         ~QPOasesTask();
 
@@ -367,9 +370,10 @@ namespace OpenSoT{
     class QPOases_sot: public Solver<Matrix, Vector>
     {
     public:
-        QPOases_sot(Stack& stack_of_tasks);
+        QPOases_sot(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
         QPOases_sot(Stack& stack_of_tasks,
-                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& constraints);
+                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& constraints,
+                    const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
 
         ~QPOases_sot(){}
 
@@ -390,6 +394,7 @@ namespace OpenSoT{
 
     protected:
         vector <QPOasesTask> _qp_stack_of_tasks;
+        double _epsRegularisation;
 
         bool prepareSoT();
         bool expandProblem(unsigned int i);
