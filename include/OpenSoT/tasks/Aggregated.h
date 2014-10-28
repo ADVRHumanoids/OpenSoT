@@ -76,6 +76,8 @@
              */
             HessianType computeHessianType();
             void checkSizes();
+
+            static std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
         public:
             /**
              * @brief Aggregated

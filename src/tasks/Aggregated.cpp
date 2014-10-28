@@ -24,7 +24,7 @@ using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const unsigned int x_size) :
-    Task(std::string("aggregated"),x_size), _tasks(tasks)
+    Task(concatenateTaskIds(tasks),x_size), _tasks(tasks)
 {
     this->checkSizes();
     /* calling update to generate bounds */
@@ -123,4 +123,15 @@ OpenSoT::HessianType OpenSoT::tasks::Aggregated::computeHessianType()
 
     // we assume an hessian type HST_SEMIDEF
     return HST_SEMIDEF;
+}
+
+std::string Aggregated::concatenateTaskIds(const std::list<TaskPtr> tasks) {
+    std::string concatenatedId;
+    for(std::list<TaskPtr>::const_iterator i = tasks.begin(); i != tasks.end(); ++i) {
+        concatenatedId += (*i)->getTaskID();
+
+        if(++i != tasks.end()) {
+            concatenatedId += "+";
+        } --i;
+    }
 }
