@@ -49,6 +49,17 @@ protected:
 
 };
 
+TEST_F(testAggregatedTask, testConcatenateTaskIds)
+{
+    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_in_aggregated(
+            new OpenSoT::tasks::velocity::Postural(q));
+    std::list<OpenSoT::Task<yarp::sig::Matrix,yarp::sig::Vector>::TaskPtr> task_list;
+    task_list.push_back(postural_in_aggregated);
+    task_list.push_back(postural_in_aggregated);
+
+    EXPECT_TRUE(Aggregated::concatenateTaskIds(task_list) == postural_in_aggregated->getTaskID()+"+"+postural_in_aggregated->getTaskID());
+}
+
 TEST_F(testAggregatedTask, testAggregatedTask_)
 {
 

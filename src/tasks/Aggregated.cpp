@@ -38,7 +38,7 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
 Aggregated::Aggregated(TaskPtr task1,
                        TaskPtr task2,
                        const unsigned int x_size) :
-Task(std::string("aggregated"),x_size)
+Task(task1->getTaskID()+task2->getTaskID(),x_size)
 {
     _tasks.push_back(task1);
     _tasks.push_back(task2);
@@ -54,7 +54,7 @@ Task(std::string("aggregated"),x_size)
 
 Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const yarp::sig::Vector& q) :
-    Task(std::string("aggregated"),q.size()), _tasks(tasks)
+    Task(concatenateTaskIds(tasks),q.size()), _tasks(tasks)
 {
     this->checkSizes();
     this->_update(q);
@@ -125,13 +125,13 @@ OpenSoT::HessianType OpenSoT::tasks::Aggregated::computeHessianType()
     return HST_SEMIDEF;
 }
 
-std::string Aggregated::concatenateTaskIds(const std::list<TaskPtr> tasks) {
+const std::string Aggregated::concatenateTaskIds(const std::list<TaskPtr> tasks) {
     std::string concatenatedId;
+    int taskSize = tasks.size();
     for(std::list<TaskPtr>::const_iterator i = tasks.begin(); i != tasks.end(); ++i) {
         concatenatedId += (*i)->getTaskID();
-
-        if(++i != tasks.end()) {
+        if(--taskSize > 0)
             concatenatedId += "+";
-        } --i;
     }
+    return concatenatedId;
 }

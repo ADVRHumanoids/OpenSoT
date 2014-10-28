@@ -35,7 +35,7 @@
         class Aggregated: public Task<yarp::sig::Matrix, yarp::sig::Vector> {
         public:
             typedef boost::shared_ptr<Aggregated> Ptr;
-        private:
+        protected:
 
             std::list< TaskPtr > _tasks;
             unsigned int _aggregationPolicy;
@@ -76,8 +76,6 @@
              */
             HessianType computeHessianType();
             void checkSizes();
-
-            static std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
         public:
             /**
              * @brief Aggregated
@@ -112,6 +110,8 @@
             ~Aggregated();
 
             void _update(const yarp::sig::Vector &x);
+
+            static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
         };
 
     }
