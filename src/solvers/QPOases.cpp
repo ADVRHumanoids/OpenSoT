@@ -135,10 +135,15 @@ bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
 
 bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const Vector &uA)
 {
-    assert(_A.rows() == A.rows());
-    assert(_A.cols() == A.cols());
-    assert(_lA.size() == _uA.size());
+
     assert(_lA.size() == _A.rows());
+    if(_A.rows() != A.rows() || _A.cols() != A.cols())
+        _A.resize(A.cols(), A.rows());
+    if(_lA.size() != lA.size())
+        _lA.resize(lA.size());
+    if(_uA.size() != uA.size())
+        _uA.resize(uA.size());
+
 
     if(_is_initialized)
     {
