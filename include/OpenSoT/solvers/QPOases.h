@@ -370,6 +370,8 @@ namespace OpenSoT{
     class QPOases_sot: public Solver<Matrix, Vector>
     {
     public:
+	typedef boost::shared_ptr<QPOases_sot> Ptr;
+
         QPOases_sot(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
         QPOases_sot(Stack& stack_of_tasks,
                     boost::shared_ptr<OpenSoT::constraints::Aggregated>& constraints,
