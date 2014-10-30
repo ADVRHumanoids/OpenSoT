@@ -43,6 +43,8 @@
          */
         class Aggregated: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
         public:
+	    typedef boost::shared_ptr<Aggregated> Ptr;
+
             enum AggregationPolicy {
                 /** transform equalities Ax = b to inequalities b <= Ax <= b */
                 EQUALITIES_TO_INEQUALITIES = 0x001,
