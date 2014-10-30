@@ -27,6 +27,8 @@
     namespace constraints {
         namespace velocity {
             class CoMVelocity: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            public:
+                typedef boost::shared_ptr<CoMVelocity> Ptr;
             private:
                 iDynUtils& _robot;
                 yarp::sig::Vector _velocityLimits;

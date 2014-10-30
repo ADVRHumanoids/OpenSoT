@@ -36,6 +36,8 @@
              * \f$\left[ A_{\text{CH}} , -b_{\text{CH}\right]\f$
             */
             class ConvexHull: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            public:
+                typedef boost::shared_ptr<ConvexHull> Ptr;
             private:
                 iDynUtils &_robot;
                 double _boundScaling;
