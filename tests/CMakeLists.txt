@@ -38,7 +38,8 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCartesianVelocityTask
                       testCoMVelocityTask
                       testMinimumEffortVelocityTask
-                      testPosturalVelocityTask)
+                      testPosturalVelocityTask
+                      testYCartesian)
 endif()
 
 # gTests for Velocity constraints
@@ -96,6 +97,10 @@ ADD_EXECUTABLE(testSolverQPOases solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testSolverQPOases ${TestLibs})
 add_dependencies(testSolverQPOases GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
+TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
+add_dependencies(testYCartesian GTest-ext OpenSoT)
+
 add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
@@ -108,3 +113,4 @@ add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
+add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)

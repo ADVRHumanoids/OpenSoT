@@ -114,6 +114,9 @@
                 yarp::sig::Matrix getActualPose();
 
                 void setOrientationErrorGain(const double& orientationErrorGain);
+
+                std::string getDistalLink(){ return _distal_link;}
+                std::string getBaseLink(){ return _base_link;}
             };
         }
     }
