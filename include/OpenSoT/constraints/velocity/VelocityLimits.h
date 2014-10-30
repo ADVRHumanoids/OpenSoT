@@ -29,6 +29,8 @@
              * @brief The VelocityLimits class implements a bound on joint velocities
              */
             class VelocityLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            public:
+                typedef boost::shared_ptr<VelocityLimits> Ptr;
             private:
                 double _qDotLimit;
                 double _dT;

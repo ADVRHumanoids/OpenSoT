@@ -30,6 +30,8 @@
              * @brief The JointLimits class implements bounds on joints positions
              */
             class JointLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            public:
+                typedef boost::shared_ptr<JointLimits> Ptr;
             private:
                 double _boundScaling;
                 yarp::sig::Vector _jointLimitsMin;
