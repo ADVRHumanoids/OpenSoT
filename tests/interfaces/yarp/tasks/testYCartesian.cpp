@@ -60,24 +60,18 @@ TEST_F(testYTask, testConstructors)
             EXPECT_EQ(y_cartesian_l_arm.getPortPrefix(), port_prefix);
 
             EXPECT_TRUE(yarp_network.exists(port_prefix+"set_ref:i"));
+            y_cartesian_l_arm.cleanPorts();
 
+            robot_name = "";
             OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_l_arm(
                         new OpenSoT::tasks::velocity::Cartesian(task_id, q, robot, distal_link, base_link));
             OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm2(robot_name, module_prefix, cartesian_l_arm);
             EXPECT_EQ(y_cartesian_l_arm2.getBaseLink(), base_link);
             EXPECT_EQ(y_cartesian_l_arm2.getDistalLink(), distal_link);
             EXPECT_EQ(y_cartesian_l_arm2.getTaskID(), task_id);
-            EXPECT_EQ(y_cartesian_l_arm2.getPortPrefix(), port_prefix);
-
-            robot_name = "";
-            module_prefix = "sot_velkincon";
-            task_id = "cartesian::left_arm";
-            OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm3(robot_name, module_prefix, task_id, q, robot, distal_link, base_link);
-            EXPECT_EQ(y_cartesian_l_arm3.getBaseLink(), base_link);
-            EXPECT_EQ(y_cartesian_l_arm3.getDistalLink(), distal_link);
-            EXPECT_EQ(y_cartesian_l_arm3.getTaskID(), task_id);
             port_prefix = "/"+module_prefix+"/"+task_id+"/";
-            EXPECT_EQ(y_cartesian_l_arm3.getPortPrefix(), port_prefix);
+            EXPECT_EQ(y_cartesian_l_arm2.getPortPrefix(), port_prefix);
+            y_cartesian_l_arm2.cleanPorts();
 
             robot_name = "";
             module_prefix = "";
@@ -88,6 +82,40 @@ TEST_F(testYTask, testConstructors)
             EXPECT_EQ(y_cartesian_l_arm4.getTaskID(), task_id);
             port_prefix = "/"+task_id+"/";
             EXPECT_EQ(y_cartesian_l_arm4.getPortPrefix(), port_prefix);
+            y_cartesian_l_arm4.cleanPorts();
+
+            std::cout<<"INIT FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(y_cartesian_l_arm4.taskCartesian->getReference());
+            std::cout<<"base_frame: "<<y_cartesian_l_arm4.taskCartesian->getBaseLink()<<std::endl;
+            std::cout<<"distal_frame: "<<y_cartesian_l_arm4.taskCartesian->getDistalLink()<<std::endl;std::cout<<std::endl;
+
+            yarp::os::BufferedPort<OpenSoT::interfaces::yarp::msgs::yarp_trj_msg_portable> trj_msg_port;
+            trj_msg_port.open("/test_port:o");
+            sleep(1);
+            yarp_network.connect("/test_port:o", y_cartesian_l_arm4.getPortPrefix()+"set_ref:i");
+            sleep(1);
+            OpenSoT::interfaces::yarp::msgs::yarp_trj_msg_portable& trj_msg = trj_msg_port.prepare();
+            trj_msg.base_frame = base_link;
+            trj_msg.distal_frame = distal_link;
+            trj_msg.pose.p[0] = 1.0;
+            trj_msg.pose.p[1] = 2.0;
+            trj_msg.pose.p[2] = 3.0;
+            trj_msg.pose.M.DoRotX(M_PI);
+            trj_msg_port.write();
+            sleep(1);
+
+            std::cout<<"SENT FRAME: "<<std::endl;cartesian_utils::printKDLFrame(trj_msg.pose);
+            std::cout<<"base_frame: "<<trj_msg.base_frame<<std::endl;
+            std::cout<<"distal_frame: "<<trj_msg.distal_frame<<std::endl;std::cout<<std::endl;
+
+            std::cout<<"RECEIVED FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(y_cartesian_l_arm4.taskCartesian->getReference());
+            std::cout<<"base_frame: "<<y_cartesian_l_arm4.taskCartesian->getBaseLink()<<std::endl;
+            std::cout<<"distal_frame: "<<y_cartesian_l_arm4.taskCartesian->getDistalLink()<<std::endl;std::cout<<std::endl;
+
+            KDL::Frame tmp;
+            cartesian_utils::fromYARPMatrixtoKDLFrame(y_cartesian_l_arm4.taskCartesian->getReference(), tmp);
+            EXPECT_TRUE(tmp == trj_msg.pose);
+            EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getBaseLink() == trj_msg.base_frame);
+            EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getDistalLink() == trj_msg.distal_frame);
         }
         tests_utils::stopYarpServer();
 

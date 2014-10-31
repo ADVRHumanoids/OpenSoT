@@ -3,6 +3,8 @@
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <boost/smart_ptr/scoped_ptr.hpp>
+#include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_trj_msg.h>
+
 
 namespace OpenSoT {
     using namespace tasks::velocity;
@@ -10,7 +12,7 @@ namespace OpenSoT {
         namespace yarp {
             namespace tasks{
 
-class YCartesian
+class YCartesian : public ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>
 {
 public:
     YCartesian(const std::string& robot_name,
@@ -24,7 +26,8 @@ public:
                iDynUtils &robot,
                std::string distal_link,
                std::string base_link);
-    ~YCartesian();
+
+    void cleanPorts();
 
     Cartesian::Ptr taskCartesian;
 
@@ -36,12 +39,11 @@ public:
 private:
     std::string _port_prefix;
 
-    ::yarp::os::BufferedPort<::yarp::os::Bottle> _cart_ref_port;
-    boost::scoped_ptr<::yarp::os::Bottle> _bot;
-
     bool computePortPrefix(const std::string& robot_name,
                            const std::string& module_prefix,
                            const std::string& task_id);
+
+    void onRead(msgs::yarp_trj_msg_portable& ref_trj_msg);
 };
 
             }

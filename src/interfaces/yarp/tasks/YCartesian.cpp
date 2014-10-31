@@ -4,33 +4,36 @@ using namespace OpenSoT::interfaces::yarp::tasks;
 
 YCartesian::YCartesian(const std::string &robot_name, const std::string &module_prefix, std::string task_id,
                        const ::yarp::sig::Vector &x, iDynUtils &robot, std::string distal_link, std::string base_link):
+    ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>(),
     taskCartesian(new Cartesian(task_id,x,robot, distal_link, base_link)),
-    _port_prefix(),
-    _bot(new ::yarp::os::Bottle())
+    _port_prefix()
 {
     assert(computePortPrefix(robot_name, module_prefix, task_id));
-    _cart_ref_port.open(_port_prefix+"set_ref:i");
+    open(_port_prefix+"set_ref:i");
+    useCallback();
 }
 
 YCartesian::YCartesian(const std::string& robot_name,
                        const std::string& module_prefix,
                        Cartesian::Ptr cartesian_task):
+    ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>(),
     taskCartesian(cartesian_task),
-    _bot(new ::yarp::os::Bottle())
+    _port_prefix()
 {
     assert(computePortPrefix(robot_name, module_prefix, cartesian_task->getTaskID()));
-    _cart_ref_port.open(_port_prefix+"set_ref:i");
+    open(_port_prefix+"set_ref:i");
+    useCallback();
 }
 
-YCartesian::~YCartesian()
+void YCartesian::cleanPorts()
 {
     std::cout<<"Cleaning Ports for "<<taskCartesian->getTaskID()<<"...";
 
     ::yarp::os::Bottle* foo;
 
-    int pendings = _cart_ref_port.getPendingReads();
+    int pendings = getPendingReads();
     for(unsigned int i = 0; i < pendings; ++i)
-        _cart_ref_port.read(foo);
+        read(foo);
 
     std::cout<<"clean!"<<std::endl;
 }
@@ -49,4 +52,23 @@ bool YCartesian::computePortPrefix(const std::string& robot_name, const std::str
     }
     _port_prefix += task_id+"/";
     return true;
+}
+
+void YCartesian::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
+{
+    if(!(ref_trj_msg.base_frame == taskCartesian->getBaseLink()))
+        std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.base_frame<<
+                   " instead of "<<taskCartesian->getBaseLink()<<" as base_frame"<<std::endl;
+    else
+    {
+        if(!(ref_trj_msg.distal_frame == taskCartesian->getDistalLink()))
+            std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.distal_frame<<
+                       " instead of "<<taskCartesian->getDistalLink()<<" as distal_frame"<<std::endl;
+        else
+        {
+            ::yarp::sig::Matrix tmp;
+            cartesian_utils::fromKDLFrameToYARPMatrix(ref_trj_msg.pose, tmp);
+            taskCartesian->setReference(tmp);
+        }
+    }
 }
