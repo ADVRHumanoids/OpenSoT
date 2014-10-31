@@ -93,6 +93,15 @@ void Cartesian::setReference(const yarp::sig::Matrix& desiredPose) {
     this->update_b();
 }
 
+void OpenSoT::tasks::velocity::Cartesian::setReference(const yarp::sig::Matrix &desiredPose,
+                                                       const yarp::sig::Vector &desiredVelocity)
+{
+    assert(desiredVelocity.size() == 6);
+    _desiredPose = desiredPose;
+    this->update_b();
+    _b = _b + desiredVelocity/_lambda;
+}
+
 yarp::sig::Matrix Cartesian::getReference() {
     return _desiredPose;
 }

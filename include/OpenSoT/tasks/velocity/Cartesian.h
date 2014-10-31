@@ -100,6 +100,17 @@
                 void setReference(const yarp::sig::Matrix& desiredPose);
 
                 /**
+                 * @brief setReference sets a new reference for the Cartesian task.
+                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
+                 * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
+                 * for the distal_link in the base_link frame of reference.
+                 * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
+                 * a feed-forward term in the cartesian task computation
+                 */
+                void setReference(const yarp::sig::Matrix& desiredPose,
+                                  const yarp::sig::Vector& desiredVelocity);
+
+                /**
                  * @brief getReference returns the Cartesian task reference
                  * @return the Cartesian task reference $R^{4x4} homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
