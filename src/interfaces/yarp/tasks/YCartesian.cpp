@@ -6,11 +6,16 @@ YCartesian::YCartesian(const std::string &robot_name, const std::string &module_
                        const ::yarp::sig::Vector &x, iDynUtils &robot, std::string distal_link, std::string base_link):
     ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>(),
     taskCartesian(new Cartesian(task_id,x,robot, distal_link, base_link)),
-    _port_prefix()
+    _port_prefix(),
+    _rpc_cb(taskCartesian),
+    _rpc()
 {
     assert(computePortPrefix(robot_name, module_prefix, task_id));
     open(_port_prefix+"set_ref:i");
+
     useCallback();
+    _rpc.setReader(_rpc_cb);
+    _rpc.open(_port_prefix+"rpc");
 }
 
 YCartesian::YCartesian(const std::string& robot_name,
@@ -18,11 +23,16 @@ YCartesian::YCartesian(const std::string& robot_name,
                        Cartesian::Ptr cartesian_task):
     ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>(),
     taskCartesian(cartesian_task),
-    _port_prefix()
+    _port_prefix(),
+    _rpc_cb(taskCartesian),
+    _rpc()
 {
     assert(computePortPrefix(robot_name, module_prefix, cartesian_task->getTaskID()));
     open(_port_prefix+"set_ref:i");
     useCallback();
+
+    _rpc.setReader(_rpc_cb);
+    _rpc.open(_port_prefix+"rpc");
 }
 
 void YCartesian::cleanPorts()

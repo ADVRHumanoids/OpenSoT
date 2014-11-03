@@ -31,7 +31,7 @@ Cartesian::Cartesian(std::string task_id,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    orientationErrorGain(1.0)
+    _orientationErrorGain(1.0)
 {
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
@@ -104,12 +104,12 @@ yarp::sig::Matrix Cartesian::getActualPose()
 
 void Cartesian::setOrientationErrorGain(const double &orientationErrorGain)
 {
-    this->orientationErrorGain = orientationErrorGain;
+    this->_orientationErrorGain = orientationErrorGain;
 }
 
 void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
-    _b = yarp::math::cat(positionError, -orientationErrorGain*orientationError);
+    _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError);
 }

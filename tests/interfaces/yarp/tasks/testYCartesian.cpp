@@ -2,6 +2,9 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/interfaces/yarp/tasks/YCartesian.h>
 #include <drc_shared/tests_utils.h>
+#include <yarp/math/Math.h>
+
+using namespace yarp::math;
 
 namespace {
 
@@ -27,7 +30,7 @@ class testYTask : public ::testing::Test{
   yarp::sig::Vector q;
 };
 
-TEST_F(testYTask, testConstructors)
+TEST_F(testYTask, testYTASK)
 {
     std::string robot_name = "coman";
     std::string module_prefix = "sot_velkincon";
@@ -60,6 +63,109 @@ TEST_F(testYTask, testConstructors)
             EXPECT_EQ(y_cartesian_l_arm.getPortPrefix(), port_prefix);
 
             EXPECT_TRUE(yarp_network.exists(port_prefix+"set_ref:i"));
+            EXPECT_TRUE(yarp_network.exists(port_prefix+"rpc"));
+
+            double lambda = 0.5;
+            yarp::os::RpcClient rpc;
+            rpc.open("/rpc_test");
+            EXPECT_TRUE(yarp_network.connect("/rpc_test", port_prefix+"rpc"));
+            yarp::os::Bottle b_in, b_out;
+            b_out.addString("set lambda");
+            b_out.addDouble(lambda);
+            sleep(1);
+            rpc.write(b_out, b_in);
+            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::SUCCEED);
+            b_out.clear();b_in.clear();
+            b_out.addString("get lambda");
+            rpc.write(b_out, b_in);
+            sleep(1);
+            EXPECT_DOUBLE_EQ(b_in.get(0).asDouble(), lambda);
+            b_out.clear();b_in.clear();
+            b_out.addString("set lambda");
+            b_out.addDouble(2.0);
+            rpc.write(b_out, b_in);
+            sleep(1);
+            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_LAMBA_GAIN_MORE_THAN_1);
+            b_out.clear();b_in.clear();
+            b_out.addString("get lambda");
+            rpc.write(b_out, b_in);
+            sleep(1);
+            EXPECT_DOUBLE_EQ(b_in.get(0).asDouble(), lambda);
+            b_out.clear();b_in.clear();
+            b_out.addString("set lambda");
+            b_out.addDouble(-0.5);
+            rpc.write(b_out, b_in);
+            sleep(1);
+            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_NEGATIVE_LAMBDA_GAIN);
+
+            double orientation_gain = 10.5;
+            yarp::os::Bottle b_in2, b_out2;
+            b_out2.addString("set orientation_gain");
+            b_out2.addDouble(orientation_gain);
+            sleep(1);
+            rpc.write(b_out2, b_in2);
+            EXPECT_TRUE(b_in2.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::SUCCEED);
+            b_out2.clear();b_in2.clear();
+            b_out2.addString("get orientation_gain");
+            rpc.write(b_out2, b_in2);
+            sleep(1);
+            EXPECT_DOUBLE_EQ(b_in2.get(0).asDouble(), orientation_gain);
+            b_out2.clear();b_in2.clear();
+            b_out2.addString("set orientation_gain");
+            b_out2.addDouble(-2.0);
+            rpc.write(b_out2, b_in2);
+            sleep(1);
+            EXPECT_TRUE(b_in2.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_NEGATIVE_ORIENTATION_GAIN);
+            b_out2.clear();b_in2.clear();
+            b_out2.addString("get orientation_gain");
+            rpc.write(b_out2, b_in2);
+            sleep(1);
+            EXPECT_DOUBLE_EQ(b_in2.get(0).asDouble(), orientation_gain);
+
+            yarp::sig::Matrix W(2, 2);
+            W = 2.0*W.eye();
+            yarp::os::Bottle b_in3, b_out3;
+            b_out3.addString("set W");
+            for(unsigned int i = 0; i < W.rows(); ++i)
+                b_out3.addDouble(W(i,i));
+            rpc.write(b_out3, b_in3);
+            sleep(1);
+            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_WRONG_VECTOR_SIZE);
+            b_out3.clear();b_in3.clear();
+            b_out3.addString("get W");
+            rpc.write(b_out3, b_in3);
+            sleep(1);
+            W.resize(b_in3.size(), b_in3.size());
+            W.zero();
+            for(unsigned int i = 0; i < b_in3.size(); ++i)
+                W(i,i) = b_in3.get(i).asDouble();
+            EXPECT_TRUE(W == y_cartesian_l_arm.taskCartesian->getWeight());
+            b_out3.clear();b_in3.clear();
+            b_out3.addString("set W");
+            W = -1.0*W;
+            for(unsigned int i = 0; i < W.rows(); ++i)
+                b_out3.addDouble(W(i,i));
+            rpc.write(b_out3, b_in3);
+            sleep(1);
+            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_NEGATIVE_W_GAIN);
+            b_out3.clear();b_in3.clear();
+            b_out3.addString("set W");
+            W = -2.0*W;
+            for(unsigned int i = 0; i < W.rows(); ++i)
+                b_out3.addDouble(W(i,i));
+            rpc.write(b_out3, b_in3);
+            sleep(1);
+            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::SUCCEED);
+            b_out3.clear();b_in3.clear();
+            b_out3.addString("get W");
+            rpc.write(b_out3, b_in3);
+            sleep(1);
+            W.resize(b_in3.size(), b_in3.size());
+            W.zero();
+            for(unsigned int i = 0; i < b_in3.size(); ++i)
+                W(i,i) = b_in3.get(i).asDouble();
+            EXPECT_TRUE(W == y_cartesian_l_arm.taskCartesian->getWeight());
+
             y_cartesian_l_arm.cleanPorts();
 
             robot_name = "";
@@ -116,6 +222,8 @@ TEST_F(testYTask, testConstructors)
             EXPECT_TRUE(tmp == trj_msg.pose);
             EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getBaseLink() == trj_msg.base_frame);
             EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getDistalLink() == trj_msg.distal_frame);
+
+
         }
         tests_utils::stopYarpServer();
 

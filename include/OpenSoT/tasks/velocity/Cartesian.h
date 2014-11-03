@@ -62,6 +62,8 @@
 
                 void update_b();
 
+                double _orientationErrorGain;
+
             public:
 
                 yarp::sig::Vector positionError;
@@ -69,7 +71,7 @@
 
                 /*********** TASK PARAMETERS ************/
 
-                double orientationErrorGain;
+
 
                 /****************************************/
 
@@ -114,6 +116,7 @@
                 yarp::sig::Matrix getActualPose();
 
                 void setOrientationErrorGain(const double& orientationErrorGain);
+                double getOrientationErrorGain(){ return _orientationErrorGain;}
 
                 std::string getDistalLink(){ return _distal_link;}
                 std::string getBaseLink(){ return _base_link;}
