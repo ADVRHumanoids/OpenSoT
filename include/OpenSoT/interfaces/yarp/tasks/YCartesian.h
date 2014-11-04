@@ -252,6 +252,7 @@ private:
                            const std::string& task_id);
 
     void onRead(msgs::yarp_trj_msg_portable& ref_trj_msg);
+    void printInitialError();
 };
 
             }

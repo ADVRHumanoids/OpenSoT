@@ -16,6 +16,8 @@ YCartesian::YCartesian(const std::string &robot_name, const std::string &module_
     useCallback();
     _rpc.setReader(_rpc_cb);
     _rpc.open(_port_prefix+"rpc");
+
+    printInitialError();
 }
 
 YCartesian::YCartesian(const std::string& robot_name,
@@ -33,6 +35,8 @@ YCartesian::YCartesian(const std::string& robot_name,
 
     _rpc.setReader(_rpc_cb);
     _rpc.open(_port_prefix+"rpc");
+
+    printInitialError();
 }
 
 void YCartesian::cleanPorts()
@@ -81,4 +85,11 @@ void YCartesian::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
             taskCartesian->setReference(tmp);
         }
     }
+}
+
+void YCartesian::printInitialError()
+{
+    std::cout<<"Initial Reference for "<<taskCartesian->getTaskID()<<":"<<std::endl;
+    cartesian_utils::printHomogeneousTransform(taskCartesian->getReference());
+    std::cout<<std::endl;
 }
