@@ -12,7 +12,7 @@ class testYTask : public ::testing::Test{
  protected:
 
   testYTask():
-      q(robot.coman_iDyn3.getNrOfDOFs(), 0.0)
+      q(robot.iDyn3_model.getNrOfDOFs(), 0.0)
   {
       robot.updateiDyn3Model(q, true);
   }

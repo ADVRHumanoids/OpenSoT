@@ -71,15 +71,15 @@
                         _W.eye();
 
                         for(unsigned int i = 0; i < q.size(); ++i)
-                            _W(i,i) = 1.0 / (_robot.coman_iDyn3.getJointTorqueMax()[i]
+                            _W(i,i) = 1.0 / (_robot.iDyn3_model.getJointTorqueMax()[i]
                                                             *
-                                             _robot.coman_iDyn3.getJointTorqueMax()[i]);
+                                             _robot.iDyn3_model.getJointTorqueMax()[i]);
                     }
 
                     double compute(const yarp::sig::Vector &q)
                     {
                         _robot.updateiDyn3Model(q, _zeros, _zeros, true);
-                        yarp::sig::Vector tau = _robot.coman_iDyn3.getTorques();
+                        yarp::sig::Vector tau = _robot.iDyn3_model.getTorques();
                         return yarp::math::dot(tau, _W * tau);
                     }
 

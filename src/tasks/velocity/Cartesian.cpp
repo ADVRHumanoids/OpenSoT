@@ -36,11 +36,11 @@ Cartesian::Cartesian(std::string task_id,
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
     if(!this->_base_link_is_world) {
-        this->_base_link_index = robot.coman_iDyn3.getLinkIndex(_base_link);
+        this->_base_link_index = robot.iDyn3_model.getLinkIndex(_base_link);
         assert(this->_base_link_index >= 0);
     }
 
-    this->_distal_link_index = robot.coman_iDyn3.getLinkIndex(_distal_link);
+    this->_distal_link_index = robot.iDyn3_model.getLinkIndex(_distal_link);
     assert(this->_distal_link_index >= 0);
 
     if(!this->_base_link_is_world)
@@ -65,17 +65,17 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world) {
-        assert(_robot.coman_iDyn3.getJacobian(_distal_link_index,_A));
+        assert(_robot.iDyn3_model.getJacobian(_distal_link_index,_A));
         _A = _A.removeCols(0,6);    // removing unactuated joints (floating base)
     } else
-        assert(_robot.coman_iDyn3.getRelativeJacobian(_distal_link_index,
+        assert(_robot.iDyn3_model.getRelativeJacobian(_distal_link_index,
                                                       _base_link_index,
                                                       _A, true));
 
     if(_base_link_is_world)
-        _actualPose = _robot.coman_iDyn3.getPosition(_distal_link_index);
+        _actualPose = _robot.iDyn3_model.getPosition(_distal_link_index);
     else
-        _actualPose = _robot.coman_iDyn3.getPosition(_base_link_index, _distal_link_index);
+        _actualPose = _robot.iDyn3_model.getPosition(_base_link_index, _distal_link_index);
 
     if(_desiredPose.rows() == 0) {
         /* initializing to zero error */

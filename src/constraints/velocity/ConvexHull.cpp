@@ -38,7 +38,7 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
     /************************ COMPUTING BOUNDS ****************************/
 
     yarp::sig::Matrix JCoM;
-    _robot.coman_iDyn3.getCOMJacobian(JCoM);
+    _robot.iDyn3_model.getCOMJacobian(JCoM);
     JCoM.removeCols(0,6);
     JCoM.removeRows(2,4);
 

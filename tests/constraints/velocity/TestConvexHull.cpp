@@ -90,9 +90,9 @@ public:
      for(unsigned int i = 0; i < names.size(); ++i)
      {
          // get points in world frame
-         waist_T_point = robot.coman_iDyn3.getPositionKDL(robot.coman_iDyn3.getLinkIndex(names[i]));
+         waist_T_point = robot.iDyn3_model.getPositionKDL(robot.iDyn3_model.getLinkIndex(names[i]));
          // get CoM in the world frame
-         YarptoKDL(robot.coman_iDyn3.getCOM(), waist_T_CoM.p);
+         YarptoKDL(robot.iDyn3_model.getCOM(), waist_T_CoM.p);
 
          CoM_T_point = waist_T_CoM.Inverse() * waist_T_point;
          points.push_back(CoM_T_point.p);
@@ -218,8 +218,8 @@ class testConvexHull : public ::testing::Test{
     // You can do set-up work for each test here.
 
       velocityLimits.resize(3,CoMVelocityLimit);
-      zeros.resize(coman.coman_iDyn3.getNrOfDOFs(),0.0);
-      coman.coman_iDyn3.setFloatingBaseLink(coman.left_leg.index);
+      zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
+      coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
       convexHull = new ConvexHull(  zeros, coman );
   }
 
@@ -296,7 +296,7 @@ void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, iDy
 
 TEST_F(testConvexHull, comparisonWithOldImplementation) {
     // ------- Set The robot in a certain configuration ---------
-    yarp::sig::Vector q(coman.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q(coman.iDyn3_model.getNrOfDOFs(), 0.0);
     q[coman.left_leg.joint_numbers[0]] = toRad(-23.5);
     q[coman.left_leg.joint_numbers[1]] = toRad(2.0);
     q[coman.left_leg.joint_numbers[2]] = toRad(-4.0);
@@ -329,7 +329,7 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
 
     // multiplying A by JCoM
     yarp::sig::Matrix JCoM;
-    coman.coman_iDyn3.getCOMJacobian(JCoM);
+    coman.iDyn3_model.getCOMJacobian(JCoM);
     JCoM = JCoM.removeCols(0,6);    // remove floating base
     JCoM = JCoM.removeRows(2,4);    // remove orientation + z
     assert(A.cols() == JCoM.rows());
@@ -388,7 +388,7 @@ TEST_F(testConvexHull, sizesAreCorrect) {
 
     unsigned int hullSize = ch.size();
 
-    unsigned int x_size = coman.coman_iDyn3.getNrOfDOFs();
+    unsigned int x_size = coman.iDyn3_model.getNrOfDOFs();
 
     EXPECT_EQ(0, convexHull->getLowerBound().size()) << "lowerBound should have size 0"
                                                      << "but has size"
@@ -406,8 +406,8 @@ TEST_F(testConvexHull, sizesAreCorrect) {
                                               <<  convexHull->getbeq().size();
 
 
-    EXPECT_EQ(coman.coman_iDyn3.getNrOfDOFs(),convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
-                                                                             << coman.coman_iDyn3.getNrOfDOFs()
+    EXPECT_EQ(coman.iDyn3_model.getNrOfDOFs(),convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
+                                                                             << coman.iDyn3_model.getNrOfDOFs()
                                                                              << " but has has "
                                                                              << convexHull->getAeq().cols()
                                                                              << " columns instead";
@@ -436,7 +436,7 @@ TEST_F(testConvexHull, sizesAreCorrect) {
 TEST_F(testConvexHull, BoundsAreCorrect) {
 
     // ------- Set The robot in a certain configuration ---------
-    yarp::sig::Vector q(coman.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q(coman.iDyn3_model.getNrOfDOFs(), 0.0);
     q[coman.left_leg.joint_numbers[0]] = toRad(-23.5);
     q[coman.left_leg.joint_numbers[1]] = toRad(2.0);
     q[coman.left_leg.joint_numbers[2]] = toRad(-4.0);

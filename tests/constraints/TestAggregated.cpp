@@ -95,7 +95,7 @@ TEST_F(testAggregated, AggregatedWorks) {
 TEST_F(testAggregated, UnilateralToBilateralWorks) {
     using namespace yarp::sig;
     iDynUtils robot;
-    Vector q(robot.coman_iDyn3.getNrOfDOFs(),0.0);
+    Vector q(robot.iDyn3_model.getNrOfDOFs(),0.0);
 
     OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr convexHull(
                 new OpenSoT::constraints::velocity::ConvexHull(q,robot));
@@ -103,7 +103,7 @@ TEST_F(testAggregated, UnilateralToBilateralWorks) {
     constraints.push_back(convexHull);
     OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr aggregated(
                 new OpenSoT::constraints::Aggregated(constraints,
-                                                     robot.coman_iDyn3.getNrOfDOFs()));
+                                                     robot.iDyn3_model.getNrOfDOFs()));
 
     EXPECT_TRUE(aggregated->getbLowerBound().size() == aggregated->getbUpperBound().size()) <<
                 "bLowerBound:" << aggregated->getbLowerBound().toString() << std::endl <<

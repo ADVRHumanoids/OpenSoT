@@ -84,7 +84,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     EXPECT_TRUE(aggregated.getWeight() == yarp::sig::Matrix(q.size()*2, q.size()*2).eye());
 
     iDynUtils idynutils;
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     idynutils.updateiDyn3Model(q, true);
     yarp::sig::Vector q_ref(q.size(), M_PI);
 

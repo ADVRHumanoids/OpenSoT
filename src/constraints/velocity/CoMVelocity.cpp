@@ -45,7 +45,7 @@ _robot(robot) {
 void CoMVelocity::update(const yarp::sig::Vector &x) {
 
     yarp::sig::Matrix JCoM;
-    if(!_robot.coman_iDyn3.getCOMJacobian(JCoM))
+    if(!_robot.iDyn3_model.getCOMJacobian(JCoM))
         throw "Error computing CoM Jacobian";
     JCoM.removeRows(3,3);       // remove orientation
     JCoM.removeCols(0,6);       // remove floating base

@@ -26,9 +26,9 @@ class testCoMVelocity : public ::testing::Test {
     // You can do set-up work for each test here.
 
       velocityLimits.resize(3,CoMVelocityLimit);
-      zeros.resize(coman.coman_iDyn3.getNrOfDOFs(),0.0);
+      zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
 
-      coman.coman_iDyn3.setFloatingBaseLink(coman.left_leg.index);
+      coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
 
       comVelocity = new CoMVelocity(velocityLimits,
                                     dT,
@@ -69,7 +69,7 @@ class testCoMVelocity : public ::testing::Test {
 };
 
 TEST_F(testCoMVelocity, sizesAreCorrect) {
-    unsigned int x_size = coman.coman_iDyn3.getNrOfDOFs();
+    unsigned int x_size = coman.iDyn3_model.getNrOfDOFs();
 
     yarp::sig::Vector bLowerBound = comVelocity->getbLowerBound();
     yarp::sig::Vector bUpperBound = comVelocity->getbUpperBound();
@@ -154,7 +154,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     for(unsigned int i = 0; i < 1/dT; ++i) {
         yarp::sig::Matrix JCoM;
         coman.updateiDyn3Model(qRight,true);
-        coman.coman_iDyn3.getCOMJacobian(JCoM);
+        coman.iDyn3_model.getCOMJacobian(JCoM);
         JCoM = JCoM.removeCols(0,6);
         JCoM = JCoM.removeRows(3,3);
         qRight += pinv(JCoM) * dT * velocityLimits;
@@ -188,7 +188,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     for(unsigned int i = 0; i < 1/dT; ++i) {
         yarp::sig::Matrix JCoM;
         coman.updateiDyn3Model(qLeft,true);
-        coman.coman_iDyn3.getCOMJacobian(JCoM);
+        coman.iDyn3_model.getCOMJacobian(JCoM);
         JCoM = JCoM.removeCols(0,6);
         JCoM = JCoM.removeRows(3,3);
         qLeft -= pinv(JCoM) * dT * velocityLimits;

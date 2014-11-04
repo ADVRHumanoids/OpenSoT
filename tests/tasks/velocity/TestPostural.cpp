@@ -70,7 +70,7 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     using namespace OpenSoT::tasks::velocity;
     using namespace OpenSoT::constraints::velocity;
 
-    yarp::sig::Vector q(idynutils.coman_iDyn3.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     yarp::sig::Vector q_next(q);
 
     for(unsigned int i = 0; i < q.size(); ++i) {
@@ -83,8 +83,8 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     boost::shared_ptr< Postural::TaskType > postural( new Postural(q) );
     boost::shared_ptr< Postural::ConstraintType > bound(
         new JointLimits(q,
-                        idynutils.coman_iDyn3.getJointBoundMax(),
-                        idynutils.coman_iDyn3.getJointBoundMin())
+                        idynutils.iDyn3_model.getJointBoundMax(),
+                        idynutils.iDyn3_model.getJointBoundMin())
     );
 
     postural->getConstraints().push_back( bound );

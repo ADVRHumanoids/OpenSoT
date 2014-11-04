@@ -18,7 +18,7 @@ protected:
 
     testMinimumEffortTask()
     {
-        nJ = _robot.coman_iDyn3.getNrOfDOFs();
+        nJ = _robot.iDyn3_model.getNrOfDOFs();
     }
 
     virtual ~testMinimumEffortTask() {
@@ -63,8 +63,8 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
     minimumEffort.setLambda(K);
     EXPECT_DOUBLE_EQ(minimumEffort.getLambda(), K);
     _robot.updateiDyn3Model(q_whole, true);
-    double initial_effort = yarp::math::dot(_robot.coman_iDyn3.getTorques(),
-                                    minimumEffort.getWeight()*_robot.coman_iDyn3.getTorques());
+    double initial_effort = yarp::math::dot(_robot.iDyn3_model.getTorques(),
+                                    minimumEffort.getWeight()*_robot.iDyn3_model.getTorques());
     for(unsigned int i = 0; i < 25; ++i)
     {
         minimumEffort.update(q_whole);
@@ -78,8 +78,8 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
     }
     _robot.updateiDyn3Model(q_whole, true);
-    double final_effort = yarp::math::dot(_robot.coman_iDyn3.getTorques(),
-                                    minimumEffort.getWeight()*_robot.coman_iDyn3.getTorques());
+    double final_effort = yarp::math::dot(_robot.iDyn3_model.getTorques(),
+                                    minimumEffort.getWeight()*_robot.iDyn3_model.getTorques());
     EXPECT_LT(final_effort, initial_effort);
 }
 
