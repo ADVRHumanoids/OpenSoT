@@ -31,7 +31,7 @@ Cartesian::Cartesian(std::string task_id,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    orientationErrorGain(1.0)
+    orientationErrorGain(1.0), _desiredVelocity(6, 0.0)
 {
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
@@ -85,11 +85,17 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
 
     this->update_b();
 
+    this->_desiredVelocity.zero();
+
     /**********************************************************************/
 }
 
 void Cartesian::setReference(const yarp::sig::Matrix& desiredPose) {
+    assert(desiredPose.rows() == 4);
+    assert(desiredPose.cols() == 4);
+
     _desiredPose = desiredPose;
+    _desiredVelocity.zero();
     this->update_b();
 }
 
@@ -97,16 +103,26 @@ void OpenSoT::tasks::velocity::Cartesian::setReference(const yarp::sig::Matrix &
                                                        const yarp::sig::Vector &desiredVelocity)
 {
     assert(desiredVelocity.size() == 6);
+    assert(desiredPose.rows() == 4);
+    assert(desiredPose.cols() == 4);
+
     _desiredPose = desiredPose;
+    _desiredVelocity = desiredVelocity;
     this->update_b();
-    _b = _b + desiredVelocity/_lambda;
 }
 
-yarp::sig::Matrix Cartesian::getReference() {
+const yarp::sig::Matrix Cartesian::getReference() const {
     return _desiredPose;
 }
 
-yarp::sig::Matrix Cartesian::getActualPose()
+void OpenSoT::tasks::velocity::Cartesian::getReference(const yarp::sig::Matrix &desiredPose,
+                                                       const yarp::sig::Vector &desiredVelocity) const
+{
+    desiredPose = _desiredPose;
+    desiredVelocity = _desiredVelocity;
+}
+
+const yarp::sig::Matrix Cartesian::getActualPose() const
 {
     return _actualPose;
 }
@@ -116,9 +132,25 @@ void Cartesian::setOrientationErrorGain(const double &orientationErrorGain)
     this->orientationErrorGain = orientationErrorGain;
 }
 
+const std::string OpenSoT::tasks::velocity::Cartesian::getDistalLink() const
+{
+    return _distal_link;
+}
+
+const std::string OpenSoT::tasks::velocity::Cartesian::getBaseLink() const
+{
+    return _base_link;
+}
+
+void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
+{
+    this->_lambda = lambda;
+    this->update_b();
+}
+
 void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
-    _b = yarp::math::cat(positionError, -orientationErrorGain*orientationError);
+    _b = yarp::math::cat(positionError, -orientationErrorGain*orientationError) + desiredVelocity/_lambda;
 }
