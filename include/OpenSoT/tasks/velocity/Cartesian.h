@@ -40,6 +40,10 @@
              * @brief The Cartesian class implements a task that tries to impose a pose (position and orientation)
              * of a distal link w.r.t. a base link. The reference for the cartesian task is set in base link
              * coordinate frame, or in world if the base link name is set to "world".
+             * The Cartesian Task is implemented so that
+             * \f$A={}^\text{base}J_\text{distal}\f$
+             * and
+             * \f$b=K_p*e+\frac{1}{\lambda}\xi_d\f$
              *
              * You can see an example in @ref example_cartesian.cpp
              */
@@ -57,6 +61,7 @@
 
                 yarp::sig::Matrix _actualPose;
                 yarp::sig::Matrix _desiredPose;
+                yarp::sig::Vector _desiredVelocity;
 
                 bool _base_link_is_world;
 
@@ -95,31 +100,58 @@
 
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.
-                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
+                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function.
+                 * It also assumes a null desired velocity at the desired pose, meaning we are trying to achieve a regulation task.
                  * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
                 void setReference(const yarp::sig::Matrix& desiredPose);
 
                 /**
+                 * @brief setReference sets a new reference for the Cartesian task.
+                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
+                 * Notice how the setReference(desiredPose, desiredVelocity) needs to be called before each _update(x) of the Cartesian task,
+                 * since the _update() resets the feed-forward velocity term for safety reasons.
+                 * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
+                 * for the distal_link in the base_link frame of reference.
+                 * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
+                 * a feed-forward term in the cartesian task computation
+                 */
+                void setReference(const yarp::sig::Matrix& desiredPose,
+                                  const yarp::sig::Vector& desiredVelocity);
+
+                /**
                  * @brief getReference returns the Cartesian task reference
                  * @return the Cartesian task reference $R^{4x4} homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                yarp::sig::Matrix getReference();
+                const yarp::sig::Matrix getReference() const;
+
+                /**
+                 * @brief getReference gets the current reference and feed-forward velocity for the Cartesian task.
+                 * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
+                 * for the distal_link in the base_link frame of reference.
+                 * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
+                 * a feed-forward term in the cartesian task computation
+                 */
+                void getReference(yarp::sig::Matrix& desiredPose,
+                                  yarp::sig::Vector& desiredVelocity) const;
+
 
                 /**
                  * @brief getActualPose returns the distal_link actual pose. You need to call _update(x) for the actual pose to change
                  * @return the $R^{4x4} homogeneous transform matrix describing the actual pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                yarp::sig::Matrix getActualPose();
+                const yarp::sig::Matrix getActualPose() const;
 
                 void setOrientationErrorGain(const double& orientationErrorGain);
-                double getOrientationErrorGain(){ return _orientationErrorGain;}
+                const double getOrientationErrorGain() const;
 
-                std::string getDistalLink(){ return _distal_link;}
-                std::string getBaseLink(){ return _base_link;}
+                const std::string getDistalLink() const;
+                const std::string getBaseLink() const;
+
+                void setLambda(double lambda);
             };
         }
     }
