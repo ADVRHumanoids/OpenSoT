@@ -85,6 +85,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/Postural.cpp
                     src/interfaces/yarp/tasks/YCartesian.cpp
+                    src/interfaces/yarp/tasks/YCoM.cpp
                     ${sot_INCLUDES})
 
 

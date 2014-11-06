@@ -382,14 +382,6 @@ namespace OpenSoT{
         bool solve(Vector& solution);
         unsigned int getNumberOfTasks();
 
-        /**
-         * @brief getNumberOfConstraintsInQP return for each task the number of
-         *  constraints contained
-         * @return a vector of std::pair<constrain_id, number_of_constraints>
-         */
-        std::vector<std::pair<std::string, int>> getNumberOfConstraintsInQP();
-
-        std::vector<std::pair<std::string, int>> getNumberOfConstraintsInTaskList();
 
         bool setOptions(const unsigned int i, const qpOASES::Options &opt);
         bool getOptions(const unsigned int i, qpOASES::Options& opt);

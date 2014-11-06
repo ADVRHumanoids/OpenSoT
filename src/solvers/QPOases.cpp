@@ -76,9 +76,16 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
-    assert(_lA.size() == _uA.size());
-    assert(_lA.size() == _A.rows());
     assert(_l.size() == _u.size());
+
+    if(!(_lA.size() == _A.rows())){
+        std::cout<<"_lA size: "<<_lA.size()<<std::endl;
+        std::cout<<"_A rows: "<<_A.rows()<<std::endl;
+        assert(_lA.size() == _A.rows());}
+    if(!(_lA.size() == _uA.size())){
+        std::cout<<"_lA size: "<<_lA.size()<<std::endl;
+        std::cout<<"_uA size: "<<_uA.size()<<std::endl;
+        assert(_lA.size() == _uA.size());}
 
     int nWSR = _nWSR;
         qpOASES::returnValue val =_problem->init( _H.data(),_g.data(),
@@ -135,9 +142,18 @@ bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
 
 bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const Vector &uA)
 {
+    assert(_A.cols() == _A.cols());
 
-    assert(_lA.size() == _A.rows());
-    if(_A.rows() != A.rows() || _A.cols() != A.cols())
+    if(!(_lA.size() == _A.rows())){
+        std::cout<<"_lA size: "<<_lA.size()<<std::endl;
+        std::cout<<"_A rows: "<<_A.rows()<<std::endl;
+        assert(_lA.size() == _A.rows());}
+    if(!(_lA.size() == _uA.size())){
+        std::cout<<"_lA size: "<<_lA.size()<<std::endl;
+        std::cout<<"_uA size: "<<_uA.size()<<std::endl;
+        assert(_lA.size() == _uA.size());}
+
+    if(_A.rows() != A.rows())
         _A.resize(A.cols(), A.rows());
     if(_lA.size() != lA.size())
         _lA.resize(lA.size());
@@ -253,9 +269,18 @@ bool QPOasesProblem::solve()
     // To solve the problem it has to be initialized
     if(_is_initialized)
     {
-        assert(_lA.size() == _uA.size());
-        assert(_lA.size() == _A.rows());
-        assert(_l.size() == _u.size());
+        if(!(_lA.size() == _uA.size())){
+            std::cout<<"_lA size: "<<_lA.size()<<std::endl;
+            std::cout<<"_uA size: "<<_uA.size()<<std::endl;
+            assert(_lA.size() == _uA.size());}
+        if(!(_lA.size() == _A.rows())){
+            std::cout<<"_lA size: "<<_lA.size()<<std::endl;
+            std::cout<<"_A rows: "<<_A.rows()<<std::endl;
+            assert(_lA.size() == _A.rows());}
+        if(!(_l.size() == _u.size())){
+            std::cout<<"_l size: "<<_l.size()<<std::endl;
+            std::cout<<"_u size: "<<_u.size()<<std::endl;
+            assert(_l.size() == _u.size());}
 
         int nWSR = _nWSR;
         qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
@@ -287,7 +312,9 @@ bool QPOasesProblem::solve()
             if(success != qpOASES::SUCCESSFUL_RETURN)
             {
                 std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
-                return false;
+                //return false;
+                resetProblem();
+                return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);
             }
             return true;
         //}
@@ -308,7 +335,7 @@ QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task, c
                    (OpenSoT::HessianType)(task->getHessianAtype()), eps_regularisation),
     _task(task)
 {
-    prepareData();
+    prepareData(true);
     printProblemInformation(-1);
     assert(initProblem(_H, _g, _A, _lA, _uA, _l, _u));
 }
@@ -554,51 +581,9 @@ bool QPOases_sot::updateExpandedProblem(unsigned int i)
     return problem_updated;
 }
 
-std::vector<std::pair<std::string, int>> QPOases_sot::getNumberOfConstraintsInQP()
-{
-    std::vector<std::pair<std::string, int>> v;
-    std::pair<std::string, int> a;
 
-    for(unsigned int i = 0; i < getNumberOfTasks(); ++i)
-    {
-        a.first = _tasks[i]->getTaskID();
-        a.second = 0;
-        yarp::sig::Vector l,u,lA, uA;
-        yarp::sig::Matrix A;
-        _qp_stack_of_tasks[i].getConstraints(A, lA, uA);
-        _qp_stack_of_tasks[i].getBounds(l, u);
-        if(lA.size() > 0)
-            a.second = lA.size();
-        if(l.size() > 0)
-            a.second += l.size();
-        v.push_back(a);
-    }
-    return v;
-}
 
-std::vector<std::pair<std::string, int>> QPOases_sot::getNumberOfConstraintsInTaskList()
-{
-    std::vector<std::pair<std::string, int>> v;
-    std::pair<std::string, int> a;
 
-    for(unsigned int i = 0; i < getNumberOfTasks(); ++i)
-    {
-        a.first = _tasks[i]->getTaskID();
-        a.second = 0;
-
-        OpenSoT::constraints::Aggregated
-            constraints_task_i(_tasks[i]->getConstraints(),
-                                           _tasks[i]->getXSize());
-        yarp::sig::Vector lA = constraints_task_i.getbLowerBound();
-        yarp::sig::Vector l = constraints_task_i.getLowerBound();
-        if(lA.size() > 0)
-            a.second = lA.size();
-        if(l.size() > 0)
-            a.second += l.size();
-        v.push_back(a);
-    }
-    return v;
-}
 
 bool QPOases_sot::setOptions(const unsigned int i, const qpOASES::Options &opt)
 {

@@ -74,7 +74,7 @@ TEST_F(testYTask, testYTASK)
             b_out.addDouble(lambda);
             sleep(1);
             rpc.write(b_out, b_in);
-            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::SUCCEED);
+            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::SUCCEED);
             b_out.clear();b_in.clear();
             b_out.addString("get lambda");
             rpc.write(b_out, b_in);
@@ -85,7 +85,7 @@ TEST_F(testYTask, testYTASK)
             b_out.addDouble(2.0);
             rpc.write(b_out, b_in);
             sleep(1);
-            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_LAMBA_GAIN_MORE_THAN_1);
+            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::ERROR_LAMBA_GAIN_MORE_THAN_1);
             b_out.clear();b_in.clear();
             b_out.addString("get lambda");
             rpc.write(b_out, b_in);
@@ -96,7 +96,7 @@ TEST_F(testYTask, testYTASK)
             b_out.addDouble(-0.5);
             rpc.write(b_out, b_in);
             sleep(1);
-            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_NEGATIVE_LAMBDA_GAIN);
+            EXPECT_TRUE(b_in.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::ERROR_NEGATIVE_LAMBDA_GAIN);
 
             double orientation_gain = 10.5;
             yarp::os::Bottle b_in2, b_out2;
@@ -104,7 +104,7 @@ TEST_F(testYTask, testYTASK)
             b_out2.addDouble(orientation_gain);
             sleep(1);
             rpc.write(b_out2, b_in2);
-            EXPECT_TRUE(b_in2.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::SUCCEED);
+            EXPECT_TRUE(b_in2.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::SUCCEED);
             b_out2.clear();b_in2.clear();
             b_out2.addString("get orientation_gain");
             rpc.write(b_out2, b_in2);
@@ -115,7 +115,7 @@ TEST_F(testYTask, testYTASK)
             b_out2.addDouble(-2.0);
             rpc.write(b_out2, b_in2);
             sleep(1);
-            EXPECT_TRUE(b_in2.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_NEGATIVE_ORIENTATION_GAIN);
+            EXPECT_TRUE(b_in2.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::ERROR_NEGATIVE_ORIENTATION_GAIN);
             b_out2.clear();b_in2.clear();
             b_out2.addString("get orientation_gain");
             rpc.write(b_out2, b_in2);
@@ -130,7 +130,7 @@ TEST_F(testYTask, testYTASK)
                 b_out3.addDouble(W(i,i));
             rpc.write(b_out3, b_in3);
             sleep(1);
-            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_WRONG_VECTOR_SIZE);
+            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::ERROR_WRONG_VECTOR_SIZE);
             b_out3.clear();b_in3.clear();
             b_out3.addString("get W");
             rpc.write(b_out3, b_in3);
@@ -147,7 +147,7 @@ TEST_F(testYTask, testYTASK)
                 b_out3.addDouble(W(i,i));
             rpc.write(b_out3, b_in3);
             sleep(1);
-            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::ERROR_NEGATIVE_W_GAIN);
+            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::ERROR_NEGATIVE_W_GAIN);
             b_out3.clear();b_in3.clear();
             b_out3.addString("set W");
             W = -2.0*W;
@@ -155,7 +155,7 @@ TEST_F(testYTask, testYTASK)
                 b_out3.addDouble(W(i,i));
             rpc.write(b_out3, b_in3);
             sleep(1);
-            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBack::SUCCEED);
+            EXPECT_TRUE(b_in3.get(0).asInt() == OpenSoT::interfaces::yarp::tasks::RPCCallBackCartesian::SUCCEED);
             b_out3.clear();b_in3.clear();
             b_out3.addString("get W");
             rpc.write(b_out3, b_in3);

@@ -24,6 +24,9 @@
 #include <kdl/frames.hpp>
 #include <yarp/sig/all.h>
 #include <yarp/os/all.h>
+
+
+
 /**
   * @example example_com.cpp
   * The CoM class implements a task that tries to impose a position
@@ -32,6 +35,13 @@
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
+
+        /**
+          * Note that this is the frame where you have to specify the velocity for the DISTAL_LINK_COM.
+          * The floating_base_link instead is placed in the idynutils model!
+          */
+        #define BASE_LINK_COM "world"
+        #define DISTAL_LINK_COM "CoM"
             /**
              * @brief The CoM class implements a task that tries to impose a position
              * of the CoM w.r.t. the support foot. Notice how you need to use it with a model with
@@ -70,6 +80,10 @@
                 yarp::sig::Vector getReference();
 
                 yarp::sig::Vector getActualPosition();
+
+                std::string getBaseLink(){return BASE_LINK_COM;}
+                std::string getDistalLink(){return DISTAL_LINK_COM;}
+
             };
         }
     }

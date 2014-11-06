@@ -27,7 +27,7 @@ using namespace yarp::math;
 
 CoM::CoM(   const yarp::sig::Vector& x,
             iDynUtils &robot) :
-    Task("com", x.size()), _robot(robot),
+    Task("CoM", x.size()), _robot(robot),
     _desiredPosition(3,0.0), _actualPosition(3,0.0),
     positionError(3, 0.0)
 {

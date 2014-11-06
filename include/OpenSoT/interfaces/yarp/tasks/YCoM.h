@@ -1,7 +1,7 @@
-#ifndef __INTERFACES_YCARTESIAN_H__
-#define __INTERFACES_YCARTESIAN_H__
+#ifndef __INTERFACES_YCOM_H__
+#define __INTERFACES_YCOM_H__
 
-#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
 #include <boost/smart_ptr/scoped_ptr.hpp>
 #include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_trj_msg.h>
 #include <mutex>
@@ -13,7 +13,7 @@ namespace OpenSoT {
         namespace yarp {
             namespace tasks{
 
-class RPCCallBackCartesian : public ::yarp::os::PortReader
+class RPCCallBackCoM : public ::yarp::os::PortReader
 {
 public:
     enum output_type{
@@ -21,18 +21,15 @@ public:
         ERROR_NEGATIVE_W_GAIN,
         ERROR_WRONG_VECTOR_SIZE,
         ERROR_NEGATIVE_LAMBDA_GAIN,
-        ERROR_LAMBA_GAIN_MORE_THAN_1,
-        ERROR_NEGATIVE_ORIENTATION_GAIN
+        ERROR_LAMBA_GAIN_MORE_THAN_1
     };
 
-    RPCCallBackCartesian(Cartesian::Ptr task):
+    RPCCallBackCoM(CoM::Ptr task):
         _W(task->getWeight()),
         _lambda(task->getLambda()),
-        _orientation_gain(task->getOrientationErrorGain()),
         _help_string("help"),
         _W_string("W"),
         _lambda_string("lambda"),
-        _orientation_gain_string("orientation_gain"),
         _set_string("set "),
         _get_string("get "),
         _task(task)
@@ -63,17 +60,15 @@ private:
     ::yarp::os::Bottle _out;
     ::yarp::sig::Matrix _W;
     double _lambda;
-    double _orientation_gain;
     std::mutex _mtx;
 
     std::string _help_string;
     std::string _W_string;
     std::string _lambda_string;
-    std::string _orientation_gain_string;
     std::string _set_string;
     std::string _get_string;
 
-    Cartesian::Ptr _task;
+    CoM::Ptr _task;
 
     void prepareInputAndOutput()
     {
@@ -84,14 +79,10 @@ private:
             setW();
         else if(command == (_set_string + _lambda_string))
             setLambda();
-        else if(command == (_set_string + _orientation_gain_string))
-            setOrientationGain();
         else if(command == (_get_string + _W_string))
             getW();
         else if(command == (_get_string + _lambda_string))
             getLambda();
-        else if(command == (_get_string + _orientation_gain_string))
-            getOrientationGain();
         else
             std::cout<<"Unknown command! Run help instead!"<<std::endl;
     }
@@ -128,24 +119,6 @@ private:
             return false;
         }
 
-    }
-
-    bool setOrientationGain()
-    {
-        std::unique_lock<std::mutex>lck(_mtx);
-
-        double orientation_gain = _in.get(1).asDouble();
-
-        if(orientation_gain < 0.0)
-        {
-            _out.addInt(output_type::ERROR_NEGATIVE_ORIENTATION_GAIN);
-            return false;
-        }
-
-        _orientation_gain = orientation_gain;
-        _task->setOrientationErrorGain(_orientation_gain);
-        _out.addInt(output_type::SUCCEED);
-        return true;
     }
 
     bool setLambda()
@@ -185,12 +158,6 @@ private:
         _out.addDouble(_lambda);
     }
 
-    void getOrientationGain()
-    {
-        _orientation_gain = _task->getOrientationErrorGain();
-        _out.addDouble(_orientation_gain);
-    }
-
     void help()
     {
         std::cout<<"help: "<<std::endl;
@@ -201,9 +168,6 @@ private:
         std::cout<<"    set lambda:"<<std::endl;
         std::cout<<"        in: lambda"<<std::endl;
         std::cout<<"        out: 0 if succeed, ERROR # otherwise"<<std::endl;
-        std::cout<<"    set orientation_gain:"<<std::endl;
-        std::cout<<"        in: orientation_gain"<<std::endl;
-        std::cout<<"        out: 0 if succeed, ERROR # otherwise"<<std::endl;
         std::cout<<std::endl;
         std::cout<<"    get W:"<<std::endl;
         std::cout<<"        in: "<<std::endl;
@@ -211,40 +175,34 @@ private:
         std::cout<<"    get lambda:"<<std::endl;
         std::cout<<"        in: "<<std::endl;
         std::cout<<"        out: lambda as double"<<std::endl;
-        std::cout<<"    get orientation_gain:"<<std::endl;
-        std::cout<<"        in: "<<std::endl;
-        std::cout<<"        out: orientation_gain as double"<<std::endl;
         std::cout<<std::endl;
     }
 };
 
-class YCartesian : public ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>
+class YCoM : public ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>
 {
 public:
-    YCartesian(const std::string& robot_name,
+    YCoM(const std::string& robot_name,
                const std::string& module_prefix,
-               Cartesian::Ptr cartesian_task);
+               CoM::Ptr cartesian_task);
 
-    YCartesian(const std::string& robot_name,
+    YCoM(const std::string& robot_name,
                const std::string& module_prefix,
-               std::string task_id,
                const ::yarp::sig::Vector& x,
-               iDynUtils &robot,
-               std::string distal_link,
-               std::string base_link);
+               iDynUtils &robot);
 
     void cleanPorts();
 
-    Cartesian::Ptr taskCartesian;
+    CoM::Ptr taskCoM;
 
-    std::string getDistalLink(){return taskCartesian->getDistalLink();}
-    std::string getBaseLink(){return taskCartesian->getBaseLink();}
-    std::string getTaskID(){return taskCartesian->getTaskID();}
+    std::string getDistalLink(){return taskCoM->getDistalLink();}
+    std::string getBaseLink(){return taskCoM->getBaseLink();}
+    std::string getTaskID(){return taskCoM->getTaskID();}
     std::string getPortPrefix(){return _port_prefix;}
 
 private:
     std::string _port_prefix;
-    RPCCallBackCartesian _rpc_cb;
+    RPCCallBackCoM _rpc_cb;
     ::yarp::os::RpcServer _rpc;
 
     bool computePortPrefix(const std::string& robot_name,
