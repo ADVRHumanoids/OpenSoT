@@ -54,8 +54,7 @@ namespace OpenSoT {
                 /**
                  * @brief bottle_msg_size contains the lenght of the bottle created by the serializePoseMsg.
                  */
-                static const unsigned int bottle_msg_size = 7;
-
+                static const unsigned int bottle_msg_size = 9;
                 /**
                  * @brief serializePoseMsg push in a bottle data contained in a KDL::Frame. Data are serialized as:
                  * [x,y,z] + [qx,qy,qz,qw] + base_frame + distal_frame
