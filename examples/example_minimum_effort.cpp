@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
     stack.push_back(minimumEffort);
     solvers::QPOases_sot solver(stack);
 
+    robot.setPositionDirectMode();
     double t_start = yarp::os::Time::now();
     double t = t_start;
     while(t - t_start < 10.0) {

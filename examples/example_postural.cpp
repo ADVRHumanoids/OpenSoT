@@ -12,6 +12,7 @@ int main(int argc, char* argv[]) {
     yarp::os::Network::init();
 
     ComanUtils robot("example_com");
+
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq(q.size(),0.0);
 
@@ -28,6 +29,7 @@ int main(int argc, char* argv[]) {
     yarp::sig::Vector initialTorsoPosture = q.subVector(firstTorsoId,firstTorsoId+torsoDoFs-1);
     yarp::sig::Vector initialPosture = q;
 
+    robot.setPositionDirectMode();
     double t_start = yarp::os::Time::now();
     double t = t_start;
     while(t - t_start < 10.0) {

@@ -33,6 +33,7 @@ int main(int argc, char* argv[]) {
     // setting a lower gain for orientation error: we care about position
     cartesian->setOrientationErrorGain(.1);
 
+    robot.setPositionDirectMode();
     double t_start = yarp::os::Time::now();
     double t = t_start;
     while(t - t_start < 10.0) {
