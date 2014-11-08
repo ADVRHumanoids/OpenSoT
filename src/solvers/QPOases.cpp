@@ -154,7 +154,7 @@ bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const 
         assert(_lA.size() == _uA.size());}
 
     if(_A.rows() != A.rows())
-        _A.resize(A.cols(), A.rows());
+        _A.resize(A.rows(), A.cols());
     if(_lA.size() != lA.size())
         _lA.resize(lA.size());
     if(_uA.size() != uA.size())
@@ -435,12 +435,13 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
 
 bool QPOases_sot::prepareSoT()
 {
+    bool prepared = true;
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         _qp_stack_of_tasks.push_back(QPOasesTask(_tasks[i], _epsRegularisation));
         if(i > 0)
         {
-            expandProblem(i);
+            prepared = prepared && expandProblem(i);
         }
         else //add to first task only bounds
         {
@@ -449,13 +450,16 @@ bool QPOases_sot::prepareSoT()
             assert(li.size() == 0);
             assert(ui.size() == 0);
             if(_bounds)
-                _qp_stack_of_tasks[i].addBounds(
+                prepared = prepared && _qp_stack_of_tasks[i].addBounds(
                                 _bounds->getLowerBound(),
                                 _bounds->getUpperBound());
         }
-        _qp_stack_of_tasks[i].printProblemInformation(i);
+        if(prepared)
+            _qp_stack_of_tasks[i].printProblemInformation(i);
+        else
+            std::cout<<"ERROR Occurered preparing task "<<_qp_stack_of_tasks[i].getTaskID()<<std::endl;
     }
-    return true;
+    return prepared;
 }
 
 bool QPOases_sot::expandProblem(unsigned int i)
@@ -488,19 +492,17 @@ bool QPOases_sot::expandProblem(unsigned int i)
                             new_constraints_for_task_i.getAineq(),
                             new_constraints_for_task_i.getbLowerBound(),
                             new_constraints_for_task_i.getbUpperBound());
-            //3.2 ADD bounds to problem i
-            if(j == i-1)
-            {
-                yarp::sig::Vector li, ui;
-                _qp_stack_of_tasks[i].getBounds(li, ui);
-                assert(li.size() == 0);
-                assert(ui.size() == 0);
-                if(_bounds)
-                    bounds_added = _qp_stack_of_tasks[i].addBounds(
-                                    _bounds->getLowerBound(),
-                                    _bounds->getUpperBound());
-            }
     }
+        //4 ADD bounds to problem i
+        yarp::sig::Vector li, ui;
+        _qp_stack_of_tasks[i].getBounds(li, ui);
+        assert(li.size() == 0);
+        assert(ui.size() == 0);
+        if(_bounds)
+            bounds_added = _qp_stack_of_tasks[i].addBounds(
+                            _bounds->getLowerBound(),
+                            _bounds->getUpperBound());
+
     return constraints_added && bounds_added;
 }
 

@@ -349,6 +349,7 @@ namespace OpenSoT{
         void getCostFunction(Matrix& H, Vector& g);
         void getConstraints(Matrix& A, Vector& lA, Vector& uA);
         void getBounds(Vector& l, Vector& u);
+        std::string getTaskID(){return _task->getTaskID();}
 
     protected:
         /**

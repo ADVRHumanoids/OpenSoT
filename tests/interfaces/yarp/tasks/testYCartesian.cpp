@@ -109,7 +109,7 @@ TEST_F(testYTask, testPoseTwistMsgs)
 
             std::cout<<"SENT TRJ: "<<std::endl;
             cartesian_utils::printKDLFrame(trj_msg.pose);
-            cartesian_utils::printKDLTwist(trj_msg.twist);
+            //cartesian_utils::printKDLTwist(trj_msg.twist);
             std::cout<<"base_frame: "<<trj_msg.base_frame<<std::endl;
             std::cout<<"distal_frame: "<<trj_msg.distal_frame<<std::endl;std::cout<<std::endl;
 
