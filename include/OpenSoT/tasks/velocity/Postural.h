@@ -55,6 +55,8 @@
                 void _update(const yarp::sig::Vector& x);
 
                 void setReference(const yarp::sig::Vector& x_desired);
+
+                const yarp::sig::Vector getReference(){return _x_desired;}
             };
         }
     }
