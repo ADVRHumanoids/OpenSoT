@@ -1,4 +1,4 @@
-#include <drc_shared/comanutils.h>
+#include <idynutils/comanutils.h>
 #include "OpenSoT/tasks/velocity/Postural.h"
 #include "OpenSoT/solvers/QPOases.h"
 #include <yarp/math/Math.h>

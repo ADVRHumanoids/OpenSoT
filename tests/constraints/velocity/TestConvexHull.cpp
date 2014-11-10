@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
-#include <drc_shared/idynutils.h>
-#include <drc_shared/utils/convex_hull.h>
+#include <idynutils/idynutils.h>
+#include <idynutils/utils/convex_hull.h>
 #include <iCub/iDynTree/yarp_kdl.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
@@ -354,9 +354,9 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     std::cout<<"bUpperBound: "<<bUpperBound.toString()<<std::endl;
 
     std::list<KDL::Vector> points2;
-    drc_shared::convex_hull::getSupportPolygonPoints(coman, points2);
+    idynutils::convex_hull::getSupportPolygonPoints(coman, points2);
 
-    drc_shared::convex_hull _convex_hull;
+    idynutils::convex_hull _convex_hull;
     std::vector<KDL::Vector> ch;
     _convex_hull.getConvexHull(points2, ch);
 
@@ -382,8 +382,8 @@ TEST_F(testConvexHull, sizesAreCorrect) {
 
     std::list<KDL::Vector> points;
     std::vector<KDL::Vector> ch;
-    drc_shared::convex_hull huller;
-    drc_shared::convex_hull::getSupportPolygonPoints(coman, points);
+    idynutils::convex_hull huller;
+    idynutils::convex_hull::getSupportPolygonPoints(coman, points);
     huller.getConvexHull(points, ch);
 
     unsigned int hullSize = ch.size();
@@ -456,11 +456,11 @@ TEST_F(testConvexHull, BoundsAreCorrect) {
 
     // Get Vector of CH's points from coman
     std::list<KDL::Vector> points;
-    drc_shared::convex_hull::getSupportPolygonPoints(coman, points);
+    idynutils::convex_hull::getSupportPolygonPoints(coman, points);
 
     // Compute CH from previous points
     std::vector<KDL::Vector> ch;
-    drc_shared::convex_hull huller;
+    idynutils::convex_hull huller;
     huller.getConvexHull(points, ch);
 
     //Compute CH from internal

@@ -30,7 +30,7 @@ FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(kdl_codyco REQUIRED)
 FIND_PACKAGE(orocos_kdl REQUIRED)
-FIND_PACKAGE(drc_shared REQUIRED)
+FIND_PACKAGE(idynutils REQUIRED)
 FIND_PACKAGE(roslib REQUIRED)
 FIND_PACKAGE(rospack REQUIRED)
 FIND_PACKAGE(rosconsole REQUIRED)
@@ -38,7 +38,7 @@ FIND_PACKAGE(urdf REQUIRED)
 FIND_PACKAGE(kdl_parser REQUIRED)
 FIND_PACKAGE(srdfdom REQUIRED)
 FIND_PACKAGE(moveit_core REQUIRED)
-FIND_PACKAGE(PCL 1.2 REQUIRED)
+FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 
 # add include directories
@@ -97,7 +97,7 @@ endif()
 
 
 # we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${drc_shared_LIBRARIES} ${iDynTree_LIBRARIES}
+TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES}
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES})
 
 ########################################################################

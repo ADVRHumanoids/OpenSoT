@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
-#include <drc_shared/idynutils.h>
+#include <idynutils/idynutils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>

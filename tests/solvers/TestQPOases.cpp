@@ -1,6 +1,6 @@
-#include <drc_shared/idynutils.h>
-#include <drc_shared/tests_utils.h>
-#include <drc_shared/comanutils.h>
+#include <idynutils/idynutils.h>
+#include <idynutils/tests_utils.h>
+#include <idynutils/comanutils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
