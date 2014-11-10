@@ -29,14 +29,13 @@ namespace OpenSoT {
                  * @param joints_map
                  */
                 yarp_position_joint_msg(const std::map<std::string, double>& joints_map):
-                joints(joints_map),
-                bottle_msg_size(2*joints_map.size())
+                joints(joints_map)
                 {}
 
                 /**
                  * @brief joints is a map <joint_name, joint_value>, joint values are in [rad]!
                  */
-                const std::map<std::string, double> joints;
+                std::map<std::string, double> joints;
 
                 /**
                  * @brief bottle_msg_size contains the lenght of the bottle created by the serializeMsg.
@@ -50,10 +49,10 @@ namespace OpenSoT {
                  */
                 void serializeMsg(::yarp::os::Bottle& tmp_b)
                 {
-                    for(unsigned int i = 0; i < joints.size(); ++i)
+                    for(std::map<std::string, double>::iterator i = joints.begin(); i != joints.end(); ++i)
                     {
-                        tmp_b.addDouble(joints.at(i).second);
-                        tmp_b.addString(joints.at(i).first);
+                        tmp_b.addDouble(i->second);
+                        tmp_b.addString(i->first);
                     }
                 }
 
