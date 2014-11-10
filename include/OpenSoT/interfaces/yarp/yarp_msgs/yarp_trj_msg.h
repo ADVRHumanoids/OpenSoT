@@ -68,9 +68,14 @@ namespace OpenSoT {
                     if(!tmp_bot.read(connection))
                         return false;
 
+                    /**
+                     * If a pose_msg is recived then the twist is automatically set to zero
+                     */
                     yarp_pose_msg::deserializeMsg(tmp_bot);
                     if(!(tmp_bot.size() == yarp_pose_msg::bottle_msg_size))
                         yarp_twist_msg::deserializeMsg(tmp_bot, yarp_pose_msg::bottle_msg_size);
+                    else
+                        twist = KDL::Twist::Zero();
 
                     return true;
                 }

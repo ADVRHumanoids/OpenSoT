@@ -76,13 +76,20 @@ TEST_F(testYTask, testPoseTwistMsgs)
             std::cout<<"base_frame: "<<pose_msg.base_frame<<std::endl;
             std::cout<<"distal_frame: "<<pose_msg.distal_frame<<std::endl;std::cout<<std::endl;
 
-            std::cout<<"RECEIVED FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(y_cartesian_l_arm.taskCartesian->getReference());
+            yarp::sig::Matrix T(4,4);
+            yarp::sig::Vector v(6, 1.0);
+            y_cartesian_l_arm.taskCartesian->getReference(T, v);
+
+            std::cout<<"RECEIVED FRAME: "<<std::endl;
+            cartesian_utils::printHomogeneousTransform(T);
+            cartesian_utils::printVelocityVector(v);
             std::cout<<"base_frame: "<<y_cartesian_l_arm.taskCartesian->getBaseLink()<<std::endl;
             std::cout<<"distal_frame: "<<y_cartesian_l_arm.taskCartesian->getDistalLink()<<std::endl;std::cout<<std::endl;
 
             KDL::Frame tmp;
-            cartesian_utils::fromYARPMatrixtoKDLFrame(y_cartesian_l_arm.taskCartesian->getReference(), tmp);
+            cartesian_utils::fromYARPMatrixtoKDLFrame(T, tmp);
             EXPECT_TRUE(tmp == pose_msg.pose);
+            EXPECT_TRUE(v == yarp::sig::Vector(6, 0.0));
             EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getBaseLink() == pose_msg.base_frame);
             EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getDistalLink() == pose_msg.distal_frame);
 
@@ -109,22 +116,54 @@ TEST_F(testYTask, testPoseTwistMsgs)
 
             std::cout<<"SENT TRJ: "<<std::endl;
             cartesian_utils::printKDLFrame(trj_msg.pose);
-            //cartesian_utils::printKDLTwist(trj_msg.twist);
+            cartesian_utils::printKDLTwist(trj_msg.twist);
             std::cout<<"base_frame: "<<trj_msg.base_frame<<std::endl;
             std::cout<<"distal_frame: "<<trj_msg.distal_frame<<std::endl;std::cout<<std::endl;
 
             std::cout<<"RECEIVED TRJ: "<<std::endl;
-            cartesian_utils::printHomogeneousTransform(y_cartesian_l_arm.taskCartesian->getReference());
+            y_cartesian_l_arm.taskCartesian->getReference(T, v);
+            cartesian_utils::printHomogeneousTransform(T);
+            cartesian_utils::printVelocityVector(v);
             std::cout<<"base_frame: "<<y_cartesian_l_arm.taskCartesian->getBaseLink()<<std::endl;
             std::cout<<"distal_frame: "<<y_cartesian_l_arm.taskCartesian->getDistalLink()<<std::endl;std::cout<<std::endl;
 
             KDL::Frame tmp2;
-            cartesian_utils::fromYARPMatrixtoKDLFrame(y_cartesian_l_arm.taskCartesian->getReference(), tmp2);
+            KDL::Twist tmp3;
+            cartesian_utils::fromYARPMatrixtoKDLFrame(T, tmp2);
+            cartesian_utils::fromYARPVectortoKDLTwist(v, tmp3);
             EXPECT_TRUE(tmp2 == trj_msg.pose);
+            EXPECT_TRUE(tmp3 == trj_msg.twist);
             EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getBaseLink() == trj_msg.base_frame);
             EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getDistalLink() == trj_msg.distal_frame);
 
+            pose_msg = pose_msg_port.prepare();
+            pose_msg.base_frame = base_link;
+            pose_msg.distal_frame = distal_link;
+            pose_msg.pose.p[0] = 12.0;
+            pose_msg.pose.p[1] = 13.0;
+            pose_msg.pose.p[2] = 14.0;
+            pose_msg.pose.M.DoRotY(M_PI);
+            pose_msg_port.write();
+            sleep(1);
 
+            std::cout<<"SENT POSE: "<<std::endl;
+            cartesian_utils::printKDLFrame(pose_msg.pose);
+            std::cout<<"base_frame: "<<pose_msg.base_frame<<std::endl;
+            std::cout<<"distal_frame: "<<pose_msg.distal_frame<<std::endl;std::cout<<std::endl;
+
+            std::cout<<"RECEIVED TRJ: "<<std::endl;
+            y_cartesian_l_arm.taskCartesian->getReference(T, v);
+            cartesian_utils::printHomogeneousTransform(T);
+            cartesian_utils::printVelocityVector(v);
+            std::cout<<"base_frame: "<<y_cartesian_l_arm.taskCartesian->getBaseLink()<<std::endl;
+            std::cout<<"distal_frame: "<<y_cartesian_l_arm.taskCartesian->getDistalLink()<<std::endl;std::cout<<std::endl;
+
+            cartesian_utils::fromYARPMatrixtoKDLFrame(T, tmp2);
+            cartesian_utils::fromYARPVectortoKDLTwist(v, tmp3);
+            EXPECT_TRUE(tmp2 == pose_msg.pose);
+            EXPECT_TRUE(tmp3 == KDL::Twist::Zero());
+            EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getBaseLink() == trj_msg.base_frame);
+            EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getDistalLink() == trj_msg.distal_frame);
 
         }
         tests_utils::stopYarpServer();

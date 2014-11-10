@@ -84,6 +84,12 @@ void YCoM::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
             tmp[0] = ref_trj_msg.pose.p.x();
             tmp[1] = ref_trj_msg.pose.p.y();
             tmp[2] = ref_trj_msg.pose.p.z();
+
+//            ::yarp::sig::Vector tmp2(6, 0.0);
+//            tmp2[0] = ref_trj_msg.twist.vel.x();
+//            tmp2[1] = ref_trj_msg.twist.vel.y();
+//            tmp2[2] = ref_trj_msg.twist.vel.z();
+
             taskCoM->setReference(tmp);
         }
     }

@@ -82,8 +82,16 @@ void YCartesian::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
         {
             ::yarp::sig::Matrix tmp;
             cartesian_utils::fromKDLFrameToYARPMatrix(ref_trj_msg.pose, tmp);
-            /// TO DO: set also the twist!
-            taskCartesian->setReference(tmp);
+
+            ::yarp::sig::Vector tmp2(6, 0.0);
+            tmp2[0] = ref_trj_msg.twist.vel.x();
+            tmp2[1] = ref_trj_msg.twist.vel.y();
+            tmp2[2] = ref_trj_msg.twist.vel.z();
+            tmp2[3] = ref_trj_msg.twist.rot.x();
+            tmp2[4] = ref_trj_msg.twist.rot.y();
+            tmp2[5] = ref_trj_msg.twist.rot.z();
+
+            taskCartesian->setReference(tmp, tmp2);
         }
     }
 }
