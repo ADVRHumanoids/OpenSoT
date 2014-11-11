@@ -19,8 +19,8 @@
 #define __TASKS_VELOCITY_CARTESIAN_H__
 
  #include <OpenSoT/Task.h>
- #include <drc_shared/idynutils.h>
- #include <drc_shared/utils/convex_hull.h>
+ #include <idynutils/idynutils.h>
+ #include <idynutils/convex_hull.h>
  #include <kdl/frames.hpp>
  #include <yarp/sig/all.h>
  #include <yarp/os/all.h>

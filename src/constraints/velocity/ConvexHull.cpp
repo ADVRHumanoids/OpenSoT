@@ -55,7 +55,7 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
 void ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 {
     std::list<KDL::Vector> points;
-    drc_shared::convex_hull::getSupportPolygonPoints(_robot, points);
+    idynutils::convex_hull::getSupportPolygonPoints(_robot, points);
 
     _convex_hull.getConvexHull(points, ch);
 }

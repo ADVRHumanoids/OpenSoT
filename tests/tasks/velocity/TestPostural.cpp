@@ -1,4 +1,4 @@
-#include <drc_shared/tests_utils.h>
+#include <idynutils/tests_utils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>

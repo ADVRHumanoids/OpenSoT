@@ -4,7 +4,7 @@
 #include <kdl/frames.hpp>
 #include <string>
 #include <yarp/os/all.h>
-#include <drc_shared/cartesian_utils.h>
+#include <idynutils/cartesian_utils.h>
 
 namespace OpenSoT {
     namespace interfaces {

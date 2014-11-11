@@ -20,8 +20,8 @@
 #define __TASKS_VELOCITY_MINIMUMEFFORT_H__
 
  #include <OpenSoT/Task.h>
- #include <drc_shared/idynutils.h>
- #include <drc_shared/cartesian_utils.h>
+ #include <idynutils/idynutils.h>
+ #include <idynutils/cartesian_utils.h>
  #include <yarp/sig/all.h>
  #include <yarp/math/Math.h>
 

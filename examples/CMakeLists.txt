@@ -31,9 +31,9 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(Boost REQUIRED)
-FIND_PACKAGE(drc_shared REQUIRED)
+FIND_PACKAGE(idynutils REQUIRED)
 FIND_PACKAGE(ICUB REQUIRED)
-FIND_PACKAGE(PCL 1.2 REQUIRED)
+FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(YARP REQUIRED)
 
 # add include directories
@@ -51,7 +51,7 @@ ADD_EXECUTABLE(example_com example_com.cpp)
 ADD_EXECUTABLE(example_minimum_effort example_minimum_effort.cpp)
 ADD_EXECUTABLE(example_postural example_postural.cpp)
 
-TARGET_LINK_LIBRARIES(example_cartesian PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES} ${PCL_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_minimum_effort PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${drc_shared_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_cartesian PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_minimum_effort PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})

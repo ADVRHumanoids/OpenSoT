@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/interfaces/yarp/tasks/YCartesian.h>
-#include <drc_shared/tests_utils.h>
+#include <idynutils/tests_utils.h>
 #include <yarp/math/Math.h>
 
 using namespace yarp::math;

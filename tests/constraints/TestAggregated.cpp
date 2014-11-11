@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <drc_shared/tests_utils.h>
-#include <drc_shared/idynutils.h>
+#include <idynutils/tests_utils.h>
+#include <idynutils/idynutils.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>

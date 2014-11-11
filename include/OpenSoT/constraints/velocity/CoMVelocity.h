@@ -21,7 +21,7 @@
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/CoM.h>
  #include <yarp/sig/all.h>
- #include <drc_shared/idynutils.h>
+ #include <idynutils/idynutils.h>
 
  namespace OpenSoT {
     namespace constraints {

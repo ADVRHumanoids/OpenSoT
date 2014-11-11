@@ -21,8 +21,8 @@
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/CoM.h>
  #include <yarp/sig/all.h>
- #include <drc_shared/idynutils.h>
- #include <drc_shared/utils/convex_hull.h>
+ #include <idynutils/idynutils.h>
+ #include <idynutils/convex_hull.h>
  #include <kdl/frames.hpp>
 
 #define BOUND_SCALING 0.01
@@ -41,7 +41,7 @@
             private:
                 iDynUtils &_robot;
                 double _boundScaling;
-                drc_shared::convex_hull _convex_hull;
+                idynutils::convex_hull _convex_hull;
             public:
                 /**
                  * @brief ConvexHull constructor
