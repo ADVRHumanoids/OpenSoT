@@ -260,13 +260,7 @@ void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, iDy
 {
     static yarp::sig::Vector zeroes(q.size(),0.0);
 
-    idynutils.updateiDyn3Model(q,zeroes,zeroes);
-
-    // Set World Pose we do it at the beginning
-    if(set_world_pose)
-    {
-        idynutils.setWorldPose();
-    }
+    idynutils.updateiDyn3Model(q,zeroes,zeroes, set_world_pose);
 }
 
 //void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
