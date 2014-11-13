@@ -75,7 +75,7 @@ void YPostural::onRead(msgs::yarp_position_joint_msg_portable& ref_position_join
     ::yarp::sig::Vector q_ref = taskPostural->getReference();
 
     for(std::map<std::string, double>::iterator i = ref_position_joint_msg.joints.begin(); i != ref_position_joint_msg.joints.end(); ++i)
-        q_ref[_idynutils.iDyn3_model.getDOFIndex(i->first)] = i->second;
+       q_ref[_idynutils.iDyn3_model.getDOFIndex(i->first)] = i->second;
 
     taskPostural->setReference(q_ref);
 }
