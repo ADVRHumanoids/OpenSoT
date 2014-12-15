@@ -37,6 +37,16 @@ def twist_msg(kdlTwist, base_frame, distal_frame, bottle):
 
     return bottle
 
+def position_joint_msg(joint_name_list, joint_value_list, bottle):
+    if(len(joint_name_list) == len(joint_value_list)):
+        bottle.clear()
+
+        for i in range(len(joint_name_list)):
+            bottle.addString(joint_name_list[i])
+            bottle.addDouble(joint_value_list[i])
+
+        return bottle
+
 def trj_msg(kdlFrame, kdlTwist, base_frame, distal_frame, bottle):
     bottle.clear()
 
