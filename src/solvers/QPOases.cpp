@@ -351,6 +351,8 @@ void QPOasesTask::prepareData(bool update_constraints)
     //setHessianType(_task->getHessianAtype());
 
     /* Compute cost function */
+    std::cout << "Preparing task: " << _task->getTaskID() << std::endl;
+    std::cout.flush();
     _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
     _g = -1.0 * _task->getLambda() * _task->getA().transposed() * _task->getWeight() * _task->getb();
 
