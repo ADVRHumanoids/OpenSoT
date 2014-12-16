@@ -26,6 +26,8 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const unsigned int x_size) :
     Task(concatenateTaskIds(tasks),x_size), _tasks(tasks)
 {
+    assert(tasks.size()>0);
+
     this->checkSizes();
     /* calling update to generate bounds */
     this->generateAll();

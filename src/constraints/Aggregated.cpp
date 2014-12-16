@@ -29,6 +29,8 @@ Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const unsigned int aggregationPolicy) :
     Constraint(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
+    assert(bounds.size()>0);
+
     this->checkSizes();
     /* calling update to generate bounds */
     this->update(q);

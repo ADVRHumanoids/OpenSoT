@@ -151,7 +151,7 @@
          * @brief getTaskID return the task id
          * @return a string with the task id
          */
-        std::string getTaskID(){ return _task_id; };
+        std::string getTaskID(){ return _task_id; }
     };
  }
 
