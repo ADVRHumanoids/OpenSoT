@@ -583,6 +583,79 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
 
 }
 
+TEST_F(testCartesianTask, testActiveJointsMask)
+{
+    bool update_world = true;
+    // setting initial position with bent legs
+    yarp::sig::Vector q_whole(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
+
+    _robot.setFloatingBaseLink(_robot.left_leg.end_effector_name);
+
+    yarp::sig::Vector l_leg(_robot.left_leg.getNrOfDOFs(), 0.0);
+    l_leg[0] = -20.0 * M_PI/180.0;
+    l_leg[1] = 10.0 * M_PI/180.0;
+    l_leg[2] = 10.0 * M_PI/180.0;
+    l_leg[3] = -80.0 * M_PI/180.0;
+    l_leg[4] = -10.0 * M_PI/180.0;
+    l_leg[5] = -10.0 * M_PI/180.0;
+    _robot.fromRobotToIDyn(l_leg, q_whole, _robot.left_leg);
+    yarp::sig::Vector torso(_robot.torso.getNrOfDOFs(), 0.0);
+    torso[0] = -10.0 * M_PI/180.0;
+    torso[1] = -10.0 * M_PI/180.0;
+    torso[2] = -10.0 * M_PI/180.0;
+    _robot.fromRobotToIDyn(torso, q_whole, _robot.torso);
+
+    _robot.updateiDyn3Model(q_whole, update_world);
+
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
+                                                 q_whole,
+                                                 _robot,
+                                                 "torso",
+                                                 "world");
+    cartesian.update(q_whole);
+    std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
+    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
+        EXPECT_TRUE(active_joint_mask[i]);
+
+    yarp::sig::Matrix J = cartesian.getA();
+
+    yarp::sig::Matrix J_torso(6,_robot.torso.getNrOfDOFs());
+    for(unsigned int i = 0; i < _robot.torso.getNrOfDOFs(); ++i)
+        J_torso.setCol(i, J.getCol((int)_robot.torso.joint_numbers[i]));
+    //std::cout<<"J_torso:\n "<<J_torso.toString()<<std::cout;
+    std::cout<<std::endl;
+    EXPECT_FALSE(J_torso == yarp::sig::Matrix(J_torso.rows(), J_torso.cols()));
+
+    yarp::sig::Matrix J_left_leg(6,_robot.left_leg.getNrOfDOFs());
+    for(unsigned int i = 0; i < _robot.left_leg.getNrOfDOFs(); ++i)
+        J_left_leg.setCol(i, J.getCol((int)_robot.left_leg.joint_numbers[i]));
+    //std::cout<<"J_left_leg:\n "<<J_left_leg.toString()<<std::cout;
+    EXPECT_FALSE(J_left_leg == yarp::sig::Matrix(J_left_leg.rows(), J_left_leg.cols()));
+
+    for(unsigned int i = 0; i < _robot.left_leg.getNrOfDOFs(); ++i)
+        active_joint_mask[_robot.left_leg.joint_numbers[i]] = false;
+
+    cartesian.setActiveJointsMask(active_joint_mask);
+
+    J = cartesian.getA();
+
+    yarp::sig::Matrix J_torso2(6,_robot.torso.getNrOfDOFs());
+    for(unsigned int i = 0; i < _robot.torso.getNrOfDOFs(); ++i)
+        J_torso2.setCol(i, J.getCol((int)_robot.torso.joint_numbers[i]));
+    //std::cout<<"J_torso:\n "<<J_torso2.toString()<<std::cout;
+    std::cout<<std::endl;
+    EXPECT_FALSE(J_torso2 == yarp::sig::Matrix(J_torso.rows(), J_torso.cols()));
+    EXPECT_TRUE(J_torso == J_torso2);
+
+    for(unsigned int i = 0; i < _robot.left_leg.getNrOfDOFs(); ++i)
+        J_left_leg.setCol(i, J.getCol((int)_robot.left_leg.joint_numbers[i]));
+    //std::cout<<"J_left_leg:\n "<<J_left_leg.toString()<<std::cout;
+    EXPECT_TRUE(J_left_leg == yarp::sig::Matrix(J_left_leg.rows(), J_left_leg.cols()));
+
+
+
+}
+
 }
 
 int main(int argc, char **argv) {
