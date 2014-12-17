@@ -292,7 +292,7 @@ bool QPOasesProblem::solve()
         if(val != qpOASES::SUCCESSFUL_RETURN)
         {
             std::cout<<"ERROR OPTIMIZING TASK! ERROR "<<val<<std::endl;
-            //return false;
+            return false;
         }
         //else
         //{
