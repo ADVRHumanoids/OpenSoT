@@ -25,7 +25,7 @@ alt="OpenSoT + PI" width="480" height="360" border="10" /></a>
 alt="Minimum Effort + Drawing Task" width="480" height="360" border="10" /></a>
 
 <a href="https://www.youtube.com/watch?v=U1FcIq15jg4&feature=youtu.be
-" target="_blank"><img src="http://img.youtube.com/vi/cBggRy7WPUE/0.jpg" 
+" target="_blank"><img src="http://img.youtube.com/vi/U1FcIq15jg4/0.jpg" 
 alt="Minimum Effort + Drawing Task" width="480" height="360" border="10" /></a>
 
 Installation
