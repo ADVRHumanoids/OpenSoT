@@ -80,6 +80,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/VelocityLimits.cpp
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
+                    src/solvers/QPOasesTask.cpp
                     src/tasks/Aggregated.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/CoM.cpp

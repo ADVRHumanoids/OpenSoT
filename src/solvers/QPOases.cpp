@@ -6,109 +6,7 @@
 #define DEFAULT "\033[0m"
 
 using namespace yarp::math;
-
 using namespace OpenSoT::solvers;
-
-/// QPOasesTask ///
-QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task, const double eps_regularisation):
-    QPOasesProblem(task->getXSize(),
-                   OpenSoT::constraints::Aggregated(task->getConstraints(), task->getXSize()).getAineq().rows(),
-                   (OpenSoT::HessianType)(task->getHessianAtype()), eps_regularisation),
-    _task(task)
-{
-    prepareData(true);
-    printProblemInformation(-1);
-    assert(initProblem(_H, _g, _A, _lA, _uA, _l, _u));
-}
-
-OpenSoT::solvers::QPOasesTask::QPOasesTask(const boost::shared_ptr<Task<Matrix, Vector> > &task, const boost::shared_ptr<Constraint<Matrix, Vector> > &bounds,
-                                           const double eps_regularisation):
-    QPOasesProblem(task->getXSize(),
-                   OpenSoT::constraints::Aggregated(task->getConstraints(), task->getXSize()).getAineq().rows(),
-                   (OpenSoT::HessianType)(task->getHessianAtype()), eps_regularisation),
-    _task(task)
-{
-    prepareData(true);
-    _l = bounds->getLowerBound();
-    _u = bounds->getUpperBound();
-    printProblemInformation(-1);
-    assert(initProblem(_H, _g, _A, _lA, _uA, _l, _u));
-}
-
-QPOasesTask::~QPOasesTask()
-{
-
-}
-
-void QPOasesTask::prepareData(bool update_constraints)
-{
-    /* Set Hessian Type */
-    //setHessianType(_task->getHessianAtype());
-
-    /* Compute cost function */
-    _H = _task->getA().transposed() * _task->getWeight() * _task->getA();
-    _g = -1.0 * _task->getLambda() * _task->getA().transposed() * _task->getWeight() * _task->getb();
-
-    if(update_constraints)
-    {
-        /* Compute constraints */
-        using namespace  OpenSoT::constraints;
-        Aggregated constraints(_task->getConstraints(), _task->getXSize());
-        _A = constraints.getAineq();
-        _lA = constraints.getbLowerBound();
-        _uA = constraints.getbUpperBound();
-
-        /* Compute bounds */
-        _l = constraints.getLowerBound();
-        _u = constraints.getUpperBound();
-    }
-}
-
-bool QPOasesTask::solve(bool update_constraints)
-{
-    prepareData(update_constraints);
-    return this->QPOasesProblem::solve();
-}
-
-void QPOasesTask::printProblemInformation(int i)
-{
-    std::cout<<std::endl;
-    if(i == -1)
-        std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
-    else
-        std::cout<<GREEN<<"PROBLEM "<<i<<" ID: "<<DEFAULT<<_task->getTaskID()<<std::endl;
-    std::cout<<GREEN<<"eps Regularisation factor: "<<DEFAULT<<getOptions().epsRegularisation<<std::endl;
-    std::cout<<GREEN<<"# OF CONSTRAINTS: "<<DEFAULT<<_lA.size()<<std::endl;
-    std::cout<<GREEN<<"# OF BOUNDS: "<<DEFAULT<<_l.size()<<std::endl;
-    std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_task->getXSize()<<std::endl;
-//    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
-//    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
-//    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
-//    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
-//    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
-//    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
-//    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
-    std::cout<<std::endl;
-}
-
-void QPOasesTask::getCostFunction(Matrix &H, Vector &g)
-{
-    H = _H;
-    g = _g;
-}
-
-void QPOasesTask::getConstraints(Matrix &A, Vector &lA, Vector &uA)
-{
-    A = _A;
-    lA = _lA;
-    uA = _uA;
-}
-
-void QPOasesTask::getBounds(Vector &l, Vector &u)
-{
-    l = _l;
-    u = _u;
-}
 
 /// QPOases_sot ///
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation):
@@ -133,22 +31,14 @@ bool QPOases_sot::prepareSoT()
     bool prepared = true;
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        _qp_stack_of_tasks.push_back(QPOasesTask(_tasks[i], _bounds, _epsRegularisation));
+        if(_bounds)
+            _qp_stack_of_tasks.push_back(QPOasesTask(_tasks[i], _bounds, _epsRegularisation));
+        else
+            _qp_stack_of_tasks.push_back(QPOasesTask(_tasks[i], _epsRegularisation));
+
         if(i > 0)
-        {
             prepared = prepared && expandProblem(i);
-        }
-//        else //add to first task only bounds
-//        {
-//            yarp::sig::Vector li, ui;
-//            _qp_stack_of_tasks[i].getBounds(li, ui);
-//            assert(li.size() == 0);
-//            assert(ui.size() == 0);
-//            if(_bounds)
-//                prepared = prepared && _qp_stack_of_tasks[i].addBounds(
-//                                _bounds->getLowerBound(),
-//                                _bounds->getUpperBound());
-//        }
+
         if(prepared)
             _qp_stack_of_tasks[i].printProblemInformation(i);
         else
@@ -159,8 +49,7 @@ bool QPOases_sot::prepareSoT()
 
 bool QPOases_sot::expandProblem(unsigned int i)
 {
-    bool constraints_added = false;
-    bool bounds_added = true;
+    bool constraints_added = true;
 
     //I want to add all the constraints of the previous j tasks to task i
     for(unsigned int j = 0; j < i; ++j)
@@ -183,26 +72,18 @@ bool QPOases_sot::expandProblem(unsigned int i)
 
         //3. Add new constraints & bounds to problem i
             //3.1 ADD constraints to problem i
-//                constraints_added = _qp_stack_of_tasks[i].addConstraints(
+//                constraints_added = constraints_added &&
+//                        _qp_stack_of_tasks[i].addConstraints(
 //                            new_constraints_for_task_i.getAineq(),
 //                            new_constraints_for_task_i.getbLowerBound(),
 //                            new_constraints_for_task_i.getbUpperBound());
-            constraints_added = _qp_stack_of_tasks[i].addConstraints(
+            constraints_added = constraints_added &&
+                    _qp_stack_of_tasks[i].addConstraints(
                         task_j_constraint->getAineq(),
                         task_j_constraint->getbLowerBound(),
                         task_j_constraint->getbUpperBound());
     }
-        //4 ADD bounds to problem i
-//        yarp::sig::Vector li, ui;
-//        _qp_stack_of_tasks[i].getBounds(li, ui);
-//        assert(li.size() == 0);
-//        assert(ui.size() == 0);
-//        if(_bounds)
-//            bounds_added = _qp_stack_of_tasks[i].addBounds(
-//                            _bounds->getLowerBound(),
-//                            _bounds->getUpperBound());
-
-    return constraints_added && bounds_added;
+    return constraints_added;
 }
 
 unsigned int QPOases_sot::getNumberOfTasks()
@@ -268,9 +149,12 @@ bool QPOases_sot::updateExpandedProblem(unsigned int i)
                                            _tasks[j]->getXSize());
 
         //3. Stack updated constraints to constraints in task i
-        A = yarp::math::pile(A, updated_constraints_for_task_i.getAineq());
-        lA = yarp::math::cat(lA, updated_constraints_for_task_i.getbLowerBound());
-        uA = yarp::math::cat(uA, updated_constraints_for_task_i.getbUpperBound());
+//        A = yarp::math::pile(A, updated_constraints_for_task_i.getAineq());
+//        lA = yarp::math::cat(lA, updated_constraints_for_task_i.getbLowerBound());
+//        uA = yarp::math::cat(uA, updated_constraints_for_task_i.getbUpperBound());
+        A = yarp::math::pile(A, task_j_constraint->getAineq());
+        lA = yarp::math::cat(lA, task_j_constraint->getbLowerBound());
+        uA = yarp::math::cat(uA, task_j_constraint->getbUpperBound());
    }
     //3. Update constraints matrices of task j
     ///TO DO: check that matrices from point 2. and matrices in _qp_stack_of_tasks[i]

@@ -26,6 +26,7 @@
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include "QPOasesProblem.h"
+#include "QPOasesTask.h"
 
 
 
@@ -42,83 +43,30 @@ namespace qpOASES {
 namespace OpenSoT{
     namespace solvers{
 
-
-
     /**
-     * @brief The QPOasesTask class wrapper around QPOasesProblem to easily pass a Task
+     * @brief The QPOases_sot class implement a solver that accept a Stack of Tasks with Bounds and Constraints
      */
-    class QPOasesTask: public QPOasesProblem
-    {
-    public:
-        /**
-         * @brief QPOasesTask constructor takes a shared_ptr to have automatically
-         * updated task matrices
-         * @param task task to solve
-         */
-        QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
-
-        /**
-         * @brief QPOasesTask constructor takes a shared_ptr to have automatically
-         * updated task matrices
-         * @param task task to solve
-         */
-        QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task,
-                    const boost::shared_ptr< Constraint<Matrix, Vector> >& bounds, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
-
-        ~QPOasesTask();
-
-        /**
-         * @brief solve the internal qp problem
-         * @param update_constraints if the problem have to update alone its constraints based
-         * on the internal task
-         * @return true if solved/solvable
-         */
-        bool solve(bool update_constraints = true);
-
-        /**
-         * @brief printProblemInformation couts some information about the problem.
-         * @param i, if i = -1 the ID is printed without number:
-         * eg:
-         *  printProblemInformation();
-         *      "PROBLEM 0 ID: com"
-         *  printProblemInformation(-1);
-         *      "PROBLEM ID: com"
-         *  printProblemInformation(2);
-         *      "PROBLEM 2 ID: com"
-         */
-        void printProblemInformation(int i = 0);
-
-        void getCostFunction(Matrix& H, Vector& g);
-        void getConstraints(Matrix& A, Vector& lA, Vector& uA);
-        void getBounds(Vector& l, Vector& u);
-        std::string getTaskID(){return _task->getTaskID();}
-
-    protected:
-        /**
-         * @brief _task pointer to task to optimize
-         */
-        boost::shared_ptr< Task<Matrix, Vector> > _task;
-
-        /**
-         * @brief prepareData compute matrices for QPOases
-         * @param update_constraints if set to false does not update the constraint matrices
-         */
-        void prepareData(bool update_constraints = true);
-    };
-
-
-
-
-
     class QPOases_sot: public Solver<Matrix, Vector>
     {
     public:
 	typedef boost::shared_ptr<QPOases_sot> Ptr;
-
+        /**
+         * @brief QPOases_sot constructor of the problem
+         * @param stack_of_tasks a vector of tasks
+         * @param eps_regularisation regularisation factor
+         */
         QPOases_sot(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+
+        /**
+         * @brief QPOases_sot constructor of the problem
+         * @param stack_of_tasks a vector of tasks
+         * @param bounds a vector of bounds passed to all the stacks
+         * @param eps_regularisation regularisation factor
+         */
         QPOases_sot(Stack& stack_of_tasks,
-                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& constraints,
+                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& bounds,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+
 
         ~QPOases_sot(){}
 

@@ -1305,10 +1305,13 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
 {
     iDynUtils idynutils;
     iDynUtils idynutils_com;
-    idynutils_com.iDyn3_model.setFloatingBaseLink(idynutils_com.left_leg.index);
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
     idynutils_com.updateiDyn3Model(q, true);
+    idynutils_com.iDyn3_model.setFloatingBaseLink(idynutils_com.left_leg.index);
+    idynutils.updateiDyn3Model(q, true);
+    idynutils_com.updateiDyn3Model(q, true);
+
 
     // BOUNDS
         boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointLimits = OpenSoT::constraints::velocity::JointLimits::ConstraintPtr(
@@ -1356,6 +1359,7 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
     boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setReference(q);
+    postural_task->getConstraints().push_back(boundsCoMVelocity);
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> jointTasks;
     jointTasks.push_back(postural_task);
@@ -1371,7 +1375,7 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
     //std::cout<<"Aineq1 = ["<<(*(taskCartesianAggregated->getConstraints().begin()))->getAineq().toString()<<"]"<<std::endl;
 
     boost::shared_ptr<OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector> > sot = OpenSoT::solvers::QPOases_sot::SolverPtr(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, 1E0));
+        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, 2E2));
 
 
     //SET SOME REFERENCES
