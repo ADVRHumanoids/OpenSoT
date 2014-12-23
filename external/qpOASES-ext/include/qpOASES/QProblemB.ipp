@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/QProblemB.ipp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of inlined member functions of the QProblemB class which
@@ -251,6 +251,7 @@ inline returnValue QProblemB::setH( const real_t* const H_new )
 
 		if ( ( freeHessian == BT_TRUE ) && ( H != 0 ) )
 			delete H;
+
 		H = 0;
 		freeHessian = BT_FALSE;
 	}
@@ -272,7 +273,7 @@ inline returnValue QProblemB::setH( const real_t* const H_new )
  */
 inline returnValue QProblemB::setG( const real_t* const g_new )
 {
-	int nV = getNV( );
+	unsigned int nV = getNV( );
 
 	if ( nV == 0 )
 		return THROWERROR( RET_QPOBJECT_NOT_SETUP );
@@ -291,15 +292,22 @@ inline returnValue QProblemB::setG( const real_t* const g_new )
  */
 inline returnValue QProblemB::setLB( const real_t* const lb_new )
 {
-	int nV = getNV( );
+	unsigned int i;
+	unsigned int nV = getNV( );
 
 	if ( nV == 0 )
 		return THROWERROR( RET_QPOBJECT_NOT_SETUP );
 
-	if ( lb_new == 0 )
-		return THROWERROR( RET_INVALID_ARGUMENTS );
-
-	memcpy( lb,lb_new,nV*sizeof(real_t) );
+	if ( lb_new != 0 )
+	{
+		memcpy( lb,lb_new,nV*sizeof(real_t) );
+	}
+	else
+	{
+		/* if no lower bounds are specified, set them to -infinity */
+		for( i=0; i<nV; ++i )
+			lb[i] = -INFTY;
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -332,15 +340,22 @@ inline returnValue QProblemB::setLB( int number, real_t value )
  */
 inline returnValue QProblemB::setUB( const real_t* const ub_new )
 {
-	int nV = getNV( );
+	unsigned int i;
+	unsigned int nV = getNV( );
 
 	if ( nV == 0 )
 		return THROWERROR( RET_QPOBJECT_NOT_SETUP );
 
-	if ( ub_new == 0 )
-		return THROWERROR( RET_INVALID_ARGUMENTS );
-
-	memcpy( ub,ub_new,nV*sizeof(real_t) );
+	if ( ub_new != 0 )
+	{
+		memcpy( ub,ub_new,nV*sizeof(real_t) );
+	}
+	else
+	{
+		/* if no upper bounds are specified, set them to infinity */
+		for( i=0; i<nV; ++i )
+			ub[i] = INFTY;
+	}
 
 	return SUCCESSFUL_RETURN;
 }

@@ -25,7 +25,7 @@
 /**
  *	\file src/Matrices.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the matrix classes.
@@ -36,12 +36,6 @@
 
 
 BEGIN_NAMESPACE_QPOASES
-
-/** String for calling LAPACK/BLAS routines with transposed matrices. */
-const char * const TRANS = "TRANS";
-
-/** String for calling LAPACK/BLAS routines without transposing the matrix. */
-const char * const NOTRANS = "NOTRANS";
 
 
 
@@ -71,7 +65,7 @@ Matrix *DenseMatrix::duplicate( ) const
 	if ( needToFreeMemory( ) == BT_TRUE )
 	{
 		real_t* val_new = new real_t[nRows*nCols];
-		memcpy( val_new,val, nRows*nCols*sizeof(real_t) );
+		memcpy( val_new,val, ((unsigned int)(nRows*nCols))*sizeof(real_t) );
 		dupl = new DenseMatrix(nRows, nCols, nCols, val_new);
 		dupl->doFreeMemory( );
 	}
@@ -114,11 +108,6 @@ real_t DenseMatrix::getNorm(	int type
 
 real_t DenseMatrix::getRowNorm( int rNum, int type ) const
 {
-    /*int j;
-    real_t norm = 0.0;
-    for ( j=0; j < nCols; ++j )
-        norm += val[rNum*leaDim+j]*val[rNum*leaDim+j];
-    return getSqrt (norm);*/
 	return REFER_NAMESPACE_QPOASES getNorm( &(val[rNum*leaDim]),nCols,type ); 
 }
 
@@ -171,19 +160,31 @@ returnValue DenseMatrix::getCol(int cNum, const Indexlist* const irows, real_t a
 }
 
 
-returnValue DenseMatrix::times( int xN, real_t alpha, const real_t *x, int xLD, real_t beta, real_t *y, int yLD) const
+returnValue DenseMatrix::times(	int xN, real_t alpha, const real_t *x, int xLD, real_t beta, real_t *y, int yLD) const
 {
-	unsigned long _xN=xN, _nRows=nRows, _nCols=nCols, _leaDim=getMax(1,_nCols), _xLD=getMax(1,xLD), _yLD=getMax(1,yLD);
+	unsigned long _xN     = (unsigned long)xN;
+	unsigned long _nRows  = (unsigned long)nRows;
+	unsigned long _nCols  = (unsigned long)nCols;
+	unsigned long _leaDim = (unsigned long)getMax(1,nCols);
+	unsigned long _xLD    = (unsigned long)getMax(1,xLD);
+	unsigned long _yLD    = (unsigned long)getMax(1,yLD);
+
 	/* Call BLAS. Mind row major format! */
-	GEMM(TRANS, NOTRANS, &_nRows, &_xN, &_nCols, &alpha, val, &_leaDim, x, &_xLD, &beta, y, &_yLD);
+	GEMM("TRANS", "NOTRANS", &_nRows, &_xN, &_nCols, &alpha, val, &_leaDim, x, &_xLD, &beta, y, &_yLD);
 	return SUCCESSFUL_RETURN;
 }
 
 returnValue DenseMatrix::transTimes( int xN, real_t alpha, const real_t *x, int xLD, real_t beta, real_t *y, int yLD) const
 {
+	unsigned long _xN     = (unsigned long)xN;
+	unsigned long _nRows  = (unsigned long)nRows;
+	unsigned long _nCols  = (unsigned long)nCols;
+	unsigned long _leaDim = (unsigned long)getMax(1,nCols);
+	unsigned long _xLD    = (unsigned long)getMax(1,xLD);
+	unsigned long _yLD    = (unsigned long)getMax(1,yLD);
+
 	/* Call BLAS. Mind row major format! */
-	unsigned long _xN=xN, _nRows=nRows, _nCols=nCols, _leaDim=getMax(1,_nCols), _xLD=getMax(1,xLD), _yLD=getMax(1,yLD);
-	GEMM(NOTRANS, NOTRANS, &_nCols, &_xN, &_nRows, &alpha, val, &_leaDim, x, &_xLD, &beta, y, &_yLD);
+	GEMM("NOTRANS", "NOTRANS", &_nCols, &_xN, &_nRows, &alpha, val, &_leaDim, x, &_xLD, &beta, y, &_yLD);
 	return SUCCESSFUL_RETURN;
 }
 
@@ -440,7 +441,7 @@ returnValue DenseMatrix::addToDiag( real_t alpha )
 real_t* DenseMatrix::full() const
 {
 	real_t* v = new real_t[nRows*nCols];
-	memcpy( v,val, nRows*nCols*sizeof(real_t) );
+	memcpy( v,val, ((unsigned int)(nRows*nCols))*sizeof(real_t) );
 	return v;
 }
 
@@ -466,7 +467,7 @@ SymmetricMatrix *SymDenseMat::duplicateSym( ) const
 	if ( needToFreeMemory( ) == BT_TRUE )
 	{
 		real_t* val_new = new real_t[nRows*nCols];
-		memcpy( val_new,val, nRows*nCols*sizeof(real_t) );
+		memcpy( val_new,val, ((unsigned int)(nRows*nCols))*sizeof(real_t) );
 		dupl = new SymDenseMat(nRows, nCols, nCols, val_new);
 		dupl->doFreeMemory( );
 	}
@@ -523,8 +524,8 @@ returnValue SymDenseMat::bilinear(	const Indexlist* const icols,
 SparseMatrix::SparseMatrix() : nRows(0), nCols(0), ir(0), jc(0), jd(0), val(0) {}
 
 
-SparseMatrix::SparseMatrix( int nr, int nc, sparse_int_t *r, sparse_int_t *c, real_t *v, sparse_int_t *d )
-								: nRows(nr), nCols(nc), ir(r), jc(c), jd(d), val(v) { doNotFreeMemory(); }
+SparseMatrix::SparseMatrix( int nr, int nc, sparse_int_t *r, sparse_int_t *c, real_t *v )
+								: nRows(nr), nCols(nc), ir(r), jc(c), jd(0), val(v) { doNotFreeMemory(); }
 
 
 SparseMatrix::SparseMatrix( int nr, int nc, int ld, const real_t * const v ) 
@@ -555,6 +556,12 @@ SparseMatrix::SparseMatrix( int nr, int nc, int ld, const real_t * const v )
 
 SparseMatrix::~SparseMatrix()
 {
+	if (jd != 0)
+	{
+		delete[] jd;
+		jd = 0;
+	}
+
 	if ( needToFreeMemory() == BT_TRUE )
 		free( );
 }
@@ -566,10 +573,9 @@ void SparseMatrix::free( )
 	ir = 0;
 	if (jc != 0) delete[] jc;
 	jc = 0;
-	if (jd != 0) delete[] jd;
-	jd = 0;
 	if (val != 0) delete[] val;
 	val = 0;
+
 	doNotFreeMemory( );
 }
 
@@ -582,14 +588,20 @@ Matrix *SparseMatrix::duplicate() const
 	dupl->nCols = nCols;
 	dupl->ir = new sparse_int_t[length];
 	dupl->jc = new sparse_int_t[nCols+1];
-	dupl->jd = new sparse_int_t[nCols];
 	dupl->val = new real_t[length];
 
 	for (i = 0; i < length; i++) dupl->ir[i] = ir[i];
 	for (i = 0; i <= nCols; i++) dupl->jc[i] = jc[i];
-	for (i = 0; i < nCols; i++) dupl->jd[i] = jd[i];
 	for (i = 0; i < length; i++) dupl->val[i] = val[i];
 
+	if ( jd != 0 )
+	{
+		dupl->jd = new sparse_int_t[nCols];
+		for (i = 0; i < nCols; i++) dupl->jd[i] = jd[i];
+	}
+	else
+		dupl->jd = 0;
+	
 	dupl->doFreeMemory( );
 
 	return dupl;
@@ -601,7 +613,7 @@ real_t SparseMatrix::diag(int i) const
 {
 	if ( jd == 0 )
 	{
-		THROWERROR( RET_NO_DIAGONAL_AVAILABLE );
+		THROWERROR( RET_DIAGONAL_NOT_INITIALISED );
 		return INFTY;
 	}
 
@@ -612,7 +624,21 @@ real_t SparseMatrix::diag(int i) const
 
 BooleanType SparseMatrix::isDiag() const
 {
-	return BT_FALSE;
+	int j;
+	
+	if ( nCols != nRows )
+		return BT_FALSE;
+	
+	for (j = 0; j < nCols; ++j)
+	{
+		if ( jc[j+1] > jc[j]+1 )
+			return BT_FALSE;
+		
+		if ( ( jc[j+1] == jc[j]+1 ) && ( ir[jc[j]] != j ) )
+			return BT_FALSE;
+	}
+	
+	return BT_TRUE;
 }
 
 
@@ -1128,6 +1154,9 @@ returnValue SparseMatrix::transTimes(const Indexlist* const irows, const Indexli
 returnValue SparseMatrix::addToDiag(real_t alpha)
 {
 	long i;
+	
+	if ( jd == 0 )
+		return THROWERROR( RET_DIAGONAL_NOT_INITIALISED );
 
 	if ( isZero( alpha ) == BT_FALSE )
 		for (i = 0; i < nRows && i < nCols; i++)
@@ -1187,8 +1216,8 @@ returnValue SparseMatrix::print( const char* name ) const
 SparseMatrixRow::SparseMatrixRow() : nRows(0), nCols(0), jr(0), ic(0), jd(0), val(0) {}
 
 
-SparseMatrixRow::SparseMatrixRow(int nr, int nc, sparse_int_t *r, sparse_int_t *c, real_t *v, sparse_int_t *d)
-	: nRows(nr), nCols(nc), jr(r), ic(c), jd(d), val(v) { doNotFreeMemory(); }
+SparseMatrixRow::SparseMatrixRow(int nr, int nc, sparse_int_t *r, sparse_int_t *c, real_t *v)
+	: nRows(nr), nCols(nc), jr(r), ic(c), jd(0), val(v) { doNotFreeMemory(); }
 
 
 SparseMatrixRow::SparseMatrixRow(int nr, int nc, int ld, const real_t * const v) : nRows(nr), nCols(nc), jd(0)
@@ -1218,6 +1247,12 @@ SparseMatrixRow::SparseMatrixRow(int nr, int nc, int ld, const real_t * const v)
 
 SparseMatrixRow::~SparseMatrixRow()
 {
+	if (jd != 0)
+	{
+		delete[] jd;
+		jd = 0;
+	}
+
 	if ( needToFreeMemory() == BT_TRUE )
 		free( );
 }
@@ -1229,10 +1264,9 @@ void SparseMatrixRow::free( )
 	jr = 0;
 	if (ic != 0) delete[] ic;
 	ic = 0;
-	if (jd != 0) delete[] jd;
-	jd = 0;
 	if (val != 0) delete[] val;
 	val = 0;
+
 	doNotFreeMemory( );
 }
 
@@ -1246,15 +1280,19 @@ Matrix *SparseMatrixRow::duplicate() const
 	dupl->nCols = nCols;
 	dupl->jr = new sparse_int_t[nRows+1];
 	dupl->ic = new sparse_int_t[length];
-	if (jd)
-		dupl->jd = new sparse_int_t[nRows];
 	dupl->val = new real_t[length];
 
 	for (i = 0; i < length; i++) dupl->jr[i] = jr[i];
 	for (i = 0; i <= nCols; i++) dupl->ic[i] = ic[i];
-	if (jd != 0)
-		for (i = 0; i < nCols; i++) dupl->jd[i] = jd[i];
 	for (i = 0; i < length; i++) dupl->val[i] = val[i];
+
+	if ( jd != 0 )
+	{
+		dupl->jd = new sparse_int_t[nRows];
+		for (i = 0; i < nCols; i++) dupl->jd[i] = jd[i];
+	}
+	else
+		dupl->jd = 0;
 
 	dupl->doFreeMemory( );
 
@@ -1267,7 +1305,7 @@ real_t SparseMatrixRow::diag(int i) const
 {
 	if ( jd == 0 )
 	{
-		THROWERROR( RET_NO_DIAGONAL_AVAILABLE );
+		THROWERROR( RET_DIAGONAL_NOT_INITIALISED );
 		return INFTY;
 	}
 
@@ -1278,7 +1316,21 @@ real_t SparseMatrixRow::diag(int i) const
 
 BooleanType SparseMatrixRow::isDiag() const
 {
-	return BT_FALSE;
+	int i;
+	
+	if ( nCols != nRows )
+		return BT_FALSE;
+	
+	for (i = 0; i < nRows; ++i)
+	{
+		if ( jr[i+1] > jr[i]+1 )
+			return BT_FALSE;
+		
+		if ( ( jr[i+1] == jr[i]+1 ) && ( ic[jr[i]] != i ) )
+			return BT_FALSE;
+	}
+	
+	return BT_TRUE;
 }
 
 
@@ -1294,11 +1346,6 @@ real_t SparseMatrixRow::getNorm(	int type
 
 real_t SparseMatrixRow::getRowNorm( int rNum, int type ) const
 {
-    /*int j;
-    real_t norm = 0.0;
-    for (j=jr[rNum]; j < jr[rNum+1]; ++j)
-        norm += val[j]*val[j];
-    return getSqrt (norm);*/
 	long length = jr[rNum+1] - jr[rNum];
 	return REFER_NAMESPACE_QPOASES getNorm( &(val[jr[rNum]]),length,type );
 }
@@ -1769,6 +1816,9 @@ returnValue SparseMatrixRow::transTimes(const Indexlist* const irows, const Inde
 returnValue SparseMatrixRow::addToDiag(real_t alpha)
 {
 	long i;
+	
+	if ( jd == 0 )
+		return THROWERROR( RET_DIAGONAL_NOT_INITIALISED );
 
 	if ( isZero(alpha) == BT_FALSE )
 		for (i = 0; i < nRows && i < nCols; i++)
@@ -1840,13 +1890,19 @@ SymmetricMatrix *SymSparseMat::duplicateSym() const
 	dupl->nCols = nCols;
 	dupl->ir = new sparse_int_t[length];
 	dupl->jc = new sparse_int_t[nCols+1];
-	dupl->jd = new sparse_int_t[nCols];
 	dupl->val = new real_t[length];
 
 	for (i = 0; i < length; i++) dupl->ir[i] = ir[i];
 	for (i = 0; i <= nCols; i++) dupl->jc[i] = jc[i];
-	for (i = 0; i < nCols; i++) dupl->jd[i] = jd[i];
 	for (i = 0; i < length; i++) dupl->val[i] = val[i];
+
+	if ( jd != 0 )
+	{
+		dupl->jd = new sparse_int_t[nCols];
+		for (i = 0; i < nCols; i++) dupl->jd[i] = jd[i];
+	}
+	else
+		dupl->jd = 0;
 
 	dupl->doFreeMemory( );
 
@@ -1858,6 +1914,9 @@ returnValue SymSparseMat::bilinear(const Indexlist* const icols,
 		int xN, const real_t *x, int xLD, real_t *y, int yLD) const
 {
 	int i, j, k, l, idx, row, col;
+
+	if ( jd == 0 )
+		return THROWERROR( RET_DIAGONAL_NOT_INITIALISED );
 
 	/* clear output */
 	for (i = 0; i < xN*xN; i++)

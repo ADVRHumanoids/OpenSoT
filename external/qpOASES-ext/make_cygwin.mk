@@ -23,9 +23,9 @@
 
 
 ##
-##	Filename:  make_linux.mk
+##	Filename:  make_cygwin.mk
 ##	Author:    Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
-##	Version:   3.0beta
+##	Version:   3.0
 ##	Date:      2007-2014
 ##
 
@@ -33,7 +33,7 @@
 # user configuration
 
 # include directories, relative
-IDIR = ${TOP}/include
+IDIR =   ${TOP}/include
 SRCDIR = ${TOP}/src
 BINDIR = ${TOP}/bin
 
@@ -68,8 +68,10 @@ CP = cp
 OBJEXT = o
 LIBEXT = a
 DLLEXT = so
+EXE = .exe
 MEXOCTEXT = mex
 DEF_TARGET = -o $@
+SHARED = -shared
 
 # 32 or 64 depending on target platform
 BITS = $(shell getconf LONG_BIT)
@@ -81,7 +83,7 @@ else
 	MEXEXT = mexw64
 endif
 
-CPPFLAGS = -Wall -pedantic -Wshadow -Wfloat-equal -O3 -finline-functions -DWIN32 -D_NO_COPYRIGHT__ 
+CPPFLAGS = -Wall -pedantic -Wshadow -Wfloat-equal -Wconversion -Wsign-conversion -O3 -finline-functions -DWIN32 
 #          -g -D__DEBUG__ -D__NO_COPYRIGHT__ -D__SUPPRESSANYOUTPUT__ -D__USE_SINGLE_PRECISION__ 
 
 FFLAGS = -Wall -O3 -fPIC -DLINUX -Wno-uninitialized
@@ -94,6 +96,10 @@ LINK_LIBRARIES_AW = ${LIB_LAPACK} ${LIB_BLAS} -lm -lgfortran
 # how to link against the qpOASES shared library
 QPOASES_LINK = -L${BINDIR} -Wl,-rpath=${BINDIR} -lqpOASES 
 QPOASES_AW_LINK = -L${BINDIR} -Wl,-rpath=${BINDIR} -lqpOASES_aw
+
+# link dependencies when creating executables
+LINK_DEPENDS = ${LIB_LAPACK} ${LIB_BLAS} ${BINDIR}/libqpOASES.${LIBEXT} ${BINDIR}/libqpOASES.${DLLEXT}
+
 
 ##
 ##	end of file

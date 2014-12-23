@@ -42,9 +42,8 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
     JCoM.removeCols(0,6);
     JCoM.removeRows(2,4);
 
-    std::vector<KDL::Vector> ch;
-    getConvexHull(ch);
-    this->getConstraints(ch, _Aineq, _bUpperBound, _boundScaling);
+    getConvexHull(_ch);
+    this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
 
     assert(JCoM.rows() == _Aineq.cols());
 
@@ -57,7 +56,11 @@ void ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
     std::list<KDL::Vector> points;
     idynutils::convex_hull::getSupportPolygonPoints(_robot, points);
 
-    _convex_hull.getConvexHull(points, ch);
+    std::vector<KDL::Vector> tmp_ch;
+    if(_convex_hull.getConvexHull(points, tmp_ch))
+        ch = tmp_ch;
+    else
+        std::cout<<"Problems computing Convex Hull, old Convex Hull will be used"<<std::endl;
 }
 
 
@@ -88,6 +91,7 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
             b[z] =   + _c;
         }
 
+
         double normalizedBoundScaling = boundScaling * sqrt(_a*_a + _b*_b); //boundScaling Normalization
         if(fabs(_c) <= normalizedBoundScaling)
             b[z] = 0.0;
@@ -95,6 +99,8 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
             b[z] -= normalizedBoundScaling;
         z++;
     }
+    std::cout<<"A_ch: "<<A.toString()<<std::endl;
+    std::cout<<"b_ch: "<<b.toString()<<std::endl;
 }
 
 void ConvexHull::getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,

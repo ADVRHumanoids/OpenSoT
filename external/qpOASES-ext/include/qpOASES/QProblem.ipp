@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/QProblem.ipp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of inlined member functions of the QProblem class which
@@ -133,7 +133,7 @@ inline returnValue QProblem::setA( Matrix *A_new )
 		Ax_l[j] = Ax[j] - lbA[j];
 		
 		// (ckirches) disable constraints with empty rows	
-		if ( isZero( A->getRowNorm (j) ) == BT_TRUE)
+		if ( isZero( A->getRowNorm (j) ) == BT_TRUE )
 			constraints.setType ( j, ST_DISABLED );
 	}
 
@@ -184,18 +184,23 @@ inline returnValue QProblem::setA( const real_t* const A_new )
  */
 inline returnValue QProblem::setLBA( const real_t* const lbA_new )
 {
-	int i;
-	int nV = getNV( );
-	int nC = getNC( );
+	unsigned int i;
+	unsigned int nV = (unsigned int)getNV( );
+	unsigned int nC = (unsigned int)getNC( );
 
 	if ( nV == 0 )
 		return THROWERROR( RET_QPOBJECT_NOT_SETUP );
 
-	if ( lbA_new == 0 )
-		return THROWERROR( RET_INVALID_ARGUMENTS );
-
-	for( i=0; i<nC; ++i )
-		lbA[i] = lbA_new[i];
+	if ( lbA_new != 0 )
+	{	
+		memcpy( lbA,lbA_new,nC*sizeof(real_t) );
+	}
+	else
+	{
+		/* if no lower constraints' bounds are specified, set them to -infinity */
+		for( i=0; i<nC; ++i )
+			lbA[i] = -INFTY;
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -227,18 +232,23 @@ inline returnValue QProblem::setLBA( int number, real_t value )
  */
 inline returnValue QProblem::setUBA( const real_t* const ubA_new )
 {
-	int i;
-	int nV = getNV( );
-	int nC = getNC( );
+	unsigned int i;
+	unsigned int nV = (unsigned int)getNV( );
+	unsigned int nC = (unsigned int)getNC( );
 
 	if ( nV == 0 )
 		return THROWERROR( RET_QPOBJECT_NOT_SETUP );
 
-	if ( ubA_new == 0 )
-		return THROWERROR( RET_INVALID_ARGUMENTS );
-
-	for( i=0; i<nC; ++i )
-		ubA[i] = ubA_new[i];
+	if ( ubA_new != 0 )
+	{
+		memcpy( ubA,ubA_new,nC*sizeof(real_t) );
+	}
+	else
+	{
+		/* if no upper constraints' bounds are specified, set them to infinity */
+		for( i=0; i<nC; ++i )
+			ubA[i] = INFTY;
+	}
 
 	return SUCCESSFUL_RETURN;
 }

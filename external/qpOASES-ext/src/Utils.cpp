@@ -24,8 +24,8 @@
 
 /**
  *	\file src/Utils.cpp
- *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches, Eckhard Arnold
- *	\version 3.0beta
+ *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches (thanks to Eckhard Arnold)
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of some utility functions for working with qpOASES.
@@ -53,6 +53,20 @@
 #include <qpOASES/Utils.hpp>
 
 
+#ifdef __NO_SNPRINTF__
+#if (!defined(_MSC_VER)) || defined(__DSPACE__)
+/* If snprintf is not available, provide an empty implementation. */
+int snprintf( char* s, size_t n, const char* format, ... )
+{
+	if ( n > 0 )
+		s[0] = '\0';
+
+	return 0;
+}
+#endif
+#endif /* __NO_SNPRINTF__ */
+
+
 BEGIN_NAMESPACE_QPOASES
 
 
@@ -64,24 +78,24 @@ returnValue print( const real_t* const v, int n, const char* name )
 	#ifndef __SUPPRESSANYOUTPUT__
 	#ifndef __XPCTARGET__
 	int i;
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	/* Print vector name. */
 	if ( name != 0 )
 	{
-		snprintf( myPrintfString,160,"%s = \n", name );
+		snprintf( myPrintfString,MAX_STRING_LENGTH,"%s = \n", name );
 		myPrintf( myPrintfString );
 	}
 
 	/* Print vector data. */
 	for( i=0; i<n; ++i )
 	{
-		snprintf( myPrintfString,160," %.16e\t", v[i] );
+		snprintf( myPrintfString,MAX_STRING_LENGTH," %.16e\t", v[i] );
 		myPrintf( myPrintfString );
 	}
 	myPrintf( "\n" );
-	#endif
-	#endif
+	#endif /* __XPCTARGET__ */
+	#endif /* __SUPPRESSANYOUTPUT__ */
 
 	return SUCCESSFUL_RETURN;
 }
@@ -95,24 +109,24 @@ returnValue print(	const real_t* const v, int n, const int* const V_idx, const c
 	#ifndef __SUPPRESSANYOUTPUT__
 	#ifndef __XPCTARGET__
 	int i;
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	/* Print vector name. */
 	if ( name != 0 )
 	{
-		snprintf( myPrintfString,160,"%s = \n", name );
+		snprintf( myPrintfString,MAX_STRING_LENGTH,"%s = \n", name );
 		myPrintf( myPrintfString );
 	}
 
 	/* Print a permuted vector data. */
 	for( i=0; i<n; ++i )
 	{
-		snprintf( myPrintfString,160," %.16e\t", v[ V_idx[i] ] );
+		snprintf( myPrintfString,MAX_STRING_LENGTH," %.16e\t", v[ V_idx[i] ] );
 		myPrintf( myPrintfString );
 	}
 	myPrintf( "\n" );
-	#endif
-	#endif
+	#endif /* __XPCTARGET__ */
+	#endif /* __SUPPRESSANYOUTPUT__ */
 
 	return SUCCESSFUL_RETURN;
 }
@@ -126,12 +140,12 @@ returnValue print( const real_t* const M, int nrow, int ncol, const char* name )
 	#ifndef __SUPPRESSANYOUTPUT__
 	#ifndef __XPCTARGET__
 	int i;
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	/* Print matrix name. */
 	if ( name != 0 )
 	{
-		snprintf( myPrintfString,160,"%s = \n", name );
+		snprintf( myPrintfString,MAX_STRING_LENGTH,"%s = \n", name );
 		myPrintf( myPrintfString );
 	}
 
@@ -139,8 +153,8 @@ returnValue print( const real_t* const M, int nrow, int ncol, const char* name )
 	for( i=0; i<nrow; ++i )
 		print( &(M[i*ncol]), ncol );
 	myPrintf( "\n" );
-	#endif
-	#endif
+	#endif /* __XPCTARGET__ */
+	#endif /* __SUPPRESSANYOUTPUT__ */
 
 	return SUCCESSFUL_RETURN;
 }
@@ -154,12 +168,12 @@ returnValue print(	const real_t* const M, int nrow, int ncol, const int* const R
 	#ifndef __SUPPRESSANYOUTPUT__
 	#ifndef __XPCTARGET__
 	int i;
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	/* Print matrix name. */
 	if ( name != 0 )
 	{
-		snprintf( myPrintfString,160,"%s = \n", name );
+		snprintf( myPrintfString,MAX_STRING_LENGTH,"%s = \n", name );
 		myPrintf( myPrintfString );
 	}
 
@@ -167,8 +181,8 @@ returnValue print(	const real_t* const M, int nrow, int ncol, const int* const R
 	for( i=0; i<nrow; ++i )
 		print( &( M[ ROW_idx[i]*ncol ] ), ncol, COL_idx );
 	myPrintf( "\n" );
-	#endif
-	#endif
+	#endif /* __XPCTARGET__ */
+	#endif /* __SUPPRESSANYOUTPUT__ */
 
 	return SUCCESSFUL_RETURN;
 }
@@ -182,24 +196,24 @@ returnValue print( const int* const index, int n, const char* name )
 	#ifndef __SUPPRESSANYOUTPUT__
 	#ifndef __XPCTARGET__
 	int i;
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	/* Print indexlist name. */
 	if ( name != 0 )
 	{
-		snprintf( myPrintfString,160,"%s = \n", name );
+		snprintf( myPrintfString,MAX_STRING_LENGTH,"%s = \n", name );
 		myPrintf( myPrintfString );
 	}
 
 	/* Print a indexlist data. */
 	for( i=0; i<n; ++i )
 	{
-		snprintf( myPrintfString,160," %d\t", index[i] );
+		snprintf( myPrintfString,MAX_STRING_LENGTH," %d\t", index[i] );
 		myPrintf( myPrintfString );
 	}
 	myPrintf( "\n" );
-	#endif
-	#endif
+	#endif /* __XPCTARGET__ */
+	#endif /* __SUPPRESSANYOUTPUT__ */
 
 	return SUCCESSFUL_RETURN;
 }
@@ -246,9 +260,9 @@ returnValue printCopyrightNotice( )
 		#ifndef __DSPACE__
 		#ifndef __NO_COPYRIGHT__
 		myPrintf( "\nqpOASES -- An Implementation of the Online Active Set Strategy.\nCopyright (C) 2007-2014 by Hans Joachim Ferreau, Andreas Potschka,\nChristian Kirches et al. All rights reserved.\n\nqpOASES is distributed under the terms of the \nGNU Lesser General Public License 2.1 in the hope that it will be \nuseful, but WITHOUT ANY WARRANTY; without even the implied warranty \nof MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. \nSee the GNU Lesser General Public License for more details.\n\n" );
-		#endif
-		#endif
-		#endif
+		#endif /* __NO_COPYRIGHT__ */
+		#endif /* __DSPACE__ */
+		#endif /* __XPCTARGET__ */
 	#endif /* __SUPPRESSANYOUTPUT__ */
 	return SUCCESSFUL_RETURN;
 }
@@ -269,8 +283,8 @@ returnValue readFromFile(	real_t* data, int nrow, int ncol,
 	/* 1) Open file. */
 	if ( ( datafile = fopen( datafilename, "r" ) ) == 0 )
 	{
-		char errstr[80];
-		snprintf( errstr,80,"(%s)",datafilename );
+		char errstr[MAX_STRING_LENGTH];
+		snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 		return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_OPEN_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 	}
 
@@ -286,8 +300,8 @@ returnValue readFromFile(	real_t* data, int nrow, int ncol,
 			//#endif /* __USE_SINGLE_PRECISION__ */
 			{
 				fclose( datafile );
-				char errstr[80];
-				snprintf( errstr,80,"(%s)",datafilename );
+				char errstr[MAX_STRING_LENGTH];
+				snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 				return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_READ_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 			}
 			data[i*ncol + j] = ( (real_t) float_data );
@@ -298,11 +312,11 @@ returnValue readFromFile(	real_t* data, int nrow, int ncol,
 	fclose( datafile );
 
 	return SUCCESSFUL_RETURN;
-	#else
+	#else /* __XPCTARGET__ */
 
 	return RET_NOT_YET_IMPLEMENTED;
 
-	#endif
+	#endif /* __XPCTARGET__ */
 }
 
 
@@ -332,8 +346,8 @@ returnValue readFromFile(	int* data, int n,
 	/* 1) Open file. */
 	if ( ( datafile = fopen( datafilename, "r" ) ) == 0 )
 	{
-		char errstr[80];
-		snprintf( errstr,80,"(%s)",datafilename );
+		char errstr[MAX_STRING_LENGTH];
+		snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 		return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_OPEN_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 	}
 
@@ -343,8 +357,8 @@ returnValue readFromFile(	int* data, int n,
 		if ( fscanf( datafile, "%d\n", &(data[i]) ) == 0 )
 		{
 			fclose( datafile );
-			char errstr[80];
-			snprintf( errstr,80,"(%s)",datafilename );
+			char errstr[MAX_STRING_LENGTH];
+			snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 			return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_READ_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 		}
 	}
@@ -353,11 +367,11 @@ returnValue readFromFile(	int* data, int n,
 	fclose( datafile );
 
 	return SUCCESSFUL_RETURN;
-	#else
+	#else /* __XPCTARGET__ */
 
 	return RET_NOT_YET_IMPLEMENTED;
 
-	#endif
+	#endif /* __XPCTARGET__ */
 }
 
 
@@ -378,8 +392,8 @@ returnValue writeIntoFile(	const real_t* const data, int nrow, int ncol,
 		/* append data */
 		if ( ( datafile = fopen( datafilename, "a" ) ) == 0 )
 		{
-			char errstr[80];
-			snprintf( errstr,80,"(%s)",datafilename );
+			char errstr[MAX_STRING_LENGTH];
+			snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 			return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_OPEN_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 		}
 	}
@@ -388,8 +402,8 @@ returnValue writeIntoFile(	const real_t* const data, int nrow, int ncol,
 		/* do not append data */
 		if ( ( datafile = fopen( datafilename, "w" ) ) == 0 )
 		{
-			char errstr[80];
-			snprintf( errstr,80,"(%s)",datafilename );
+			char errstr[MAX_STRING_LENGTH];
+			snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 			return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_OPEN_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 		}
 	}
@@ -407,11 +421,11 @@ returnValue writeIntoFile(	const real_t* const data, int nrow, int ncol,
 	fclose( datafile );
 
 	return SUCCESSFUL_RETURN;
-	#else
+	#else /* __XPCTARGET__ */
 
 	return RET_NOT_YET_IMPLEMENTED;
 
-	#endif
+	#endif /* __XPCTARGET__ */
 }
 
 
@@ -444,8 +458,8 @@ returnValue writeIntoFile(	const int* const integer, int n,
 		/* append data */
 		if ( ( datafile = fopen( datafilename, "a" ) ) == 0 )
 		{
-			char errstr[80];
-			snprintf( errstr,80,"(%s)",datafilename );
+			char errstr[MAX_STRING_LENGTH];
+			snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 			return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_OPEN_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 		}
 	}
@@ -454,8 +468,8 @@ returnValue writeIntoFile(	const int* const integer, int n,
 		/* do not append data */
 		if ( ( datafile = fopen( datafilename, "w" ) ) == 0 )
 		{
-			char errstr[80];
-			snprintf( errstr,80,"(%s)",datafilename );
+			char errstr[MAX_STRING_LENGTH];
+			snprintf( errstr,MAX_STRING_LENGTH,"(%s)",datafilename );
 			return getGlobalMessageHandler( )->throwError( RET_UNABLE_TO_OPEN_FILE,errstr,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 		}
 	}
@@ -468,11 +482,11 @@ returnValue writeIntoFile(	const int* const integer, int n,
 	fclose( datafile );
 
 	return SUCCESSFUL_RETURN;
-	#else
+	#else /* __XPCTARGET__ */
 
 	return RET_NOT_YET_IMPLEMENTED;
 
-	#endif
+	#endif /* __XPCTARGET__ */
 }
 
 
@@ -486,6 +500,7 @@ returnValue writeIntoMatFile(	FILE* const matFile,
 	/*  Note, this code snippet has been inspired from the document
 	 *  "Matlab(R) MAT-file Format, R2013b" by MathWorks */
 
+	#ifndef __XPCTARGET__
 	if ( ( matFile == 0 ) || ( data == 0 ) || ( nRows < 0 ) || ( nCols < 0 ) || ( name == 0 ) )
 		return RET_INVALID_ARGUMENTS;
 
@@ -496,13 +511,13 @@ returnValue writeIntoMatFile(	FILE* const matFile,
 	var.nRows         = nRows; /* number of rows */
 	var.nCols         = nCols; /* number of columns */
 	var.imaginaryPart = 0;     /* no imaginary part */
-	var.nCharName     = (long)(strlen(name)+1); /* matrix name length */
+	var.nCharName     = (long)(strlen(name))+1; /* matrix name length */
 	
 	/* write variable header to mat file */
 	if ( fwrite( &var, sizeof(MatMatrixHeader),1,  matFile ) < 1 )
 		return RET_UNABLE_TO_WRITE_FILE;
 
-	if ( fwrite( name, sizeof(char),var.nCharName, matFile ) < 1 )
+	if ( fwrite( name, sizeof(char),(unsigned long)(var.nCharName), matFile ) < 1 )
 		return RET_UNABLE_TO_WRITE_FILE;
 
 	int ii, jj;
@@ -517,6 +532,11 @@ returnValue writeIntoMatFile(	FILE* const matFile,
 		}
 
 	return SUCCESSFUL_RETURN;
+	#else /* __XPCTARGET__ */
+
+	return RET_NOT_YET_IMPLEMENTED;
+
+	#endif /* __XPCTARGET__ */
 }
 
 
@@ -592,7 +612,6 @@ real_t getNorm( const real_t* const v, int n, int type )
 }
 
 
-
 /*
  *	g e t K K T R e s i d u a l
  */
@@ -617,7 +636,10 @@ void getKKTResidual(	int nV, int nC,
 	for (i = 0; i < nV; i++)
 	{
 		/* g term and variable bounds dual term */
-		sum = g[i] - y[i];
+		if ( g != 0 )
+			sum = g[i] - y[i];
+		else
+			sum = 0.0 - y[i];
 
 		/* H*x term */
 		if ( H != 0 )
@@ -625,7 +647,7 @@ void getKKTResidual(	int nV, int nC,
 
 		/* A'*y term */
 		if ( A != 0 )
-			for (j = 0; j < nC; j++) sum -= A[j*nV+i] * y[j+nV];
+			for (j = 0; j < nC; j++) sum -= A[j*nV+i] * y[nV+j];
 		
 		/* update stat */
 		if (getAbs(sum) > stat) stat = getAbs(sum);
@@ -709,19 +731,28 @@ void getKKTResidual(	int nV,
 }
 
 
+/*
+ *	c o n v e r t B o o l e a n T y p e T o S t r i n g
+ */
 returnValue convertBooleanTypeToString( BooleanType value, char* const string )
 {
+	#ifndef __XPCTARGET__
 	if ( value == BT_FALSE )
 		snprintf( string,20,"BT_FALSE" );
 	else
 		snprintf( string,20,"BT_TRUE" );
+	#endif /* __XPCTARGET__ */
 
 	return SUCCESSFUL_RETURN;
 }
 
 
+/*
+ *	c o n v e r t S u b j e c t T o S t a t u s T o S t r i n g
+ */
 returnValue convertSubjectToStatusToString( SubjectToStatus value, char* const string )
 {
+	#ifndef __XPCTARGET__
 	switch( value )
 	{
 		case ST_INACTIVE:
@@ -752,13 +783,18 @@ returnValue convertSubjectToStatusToString( SubjectToStatus value, char* const s
 			snprintf( string,20,"<invalid value>" );
 			break;
 	}
+	#endif /* __XPCTARGET__ */
 
 	return SUCCESSFUL_RETURN;
 }
 
 
+/*
+ *	c o n v e r t P r i n t L e v e l T o S t r i n g
+ */
 returnValue convertPrintLevelToString( PrintLevel value, char* const string )
 {
+	#ifndef __XPCTARGET__
 	switch( value )
 	{
 		case PL_NONE:
@@ -789,11 +825,15 @@ returnValue convertPrintLevelToString( PrintLevel value, char* const string )
 			snprintf( string,20,"<invalid value>" );
 			break;
 	}
+	#endif /* __XPCTARGET__ */
 
 	return SUCCESSFUL_RETURN;
 }
 
 
+/*
+ *	g e t S i m p l e S t a t u s
+ */
 int getSimpleStatus(	returnValue returnvalue,
 						BooleanType doPrintStatus
 						)
@@ -842,9 +882,65 @@ int getSimpleStatus(	returnValue returnvalue,
 }
 
 
+/*
+ *	n o r m a l i s e C o n s t r a i n t s
+ */
+returnValue normaliseConstraints(	int nV, int nC,
+									real_t* A, real_t* lbA, real_t* ubA,
+									int type
+									)
+{
+	int ii, jj;
+	real_t curNorm;
+
+	if ( ( nV <= 0 ) || ( nC <= 0 ) || ( A == 0 ) )
+		return THROWERROR( RET_INVALID_ARGUMENTS );
+
+	for( ii=0; ii<nC; ++ii )
+	{
+		/* get row norm */
+		curNorm = getNorm( &(A[ii*nV]),nV,type );
+
+		if ( curNorm > EPS )
+		{
+			/* normalise if norm is positive */
+			for( jj=0; jj<nV; ++jj )
+				A[ii*nV + jj] /= curNorm;
+
+			if ( lbA != 0 ) lbA[ii] /= curNorm;
+			if ( ubA != 0 ) ubA[ii] /= curNorm;
+		}
+		else
+		{
+			/* if row norm is (close to) zero, kind of erase constraint */
+			if ( type == 1 )
+			{
+				for( jj=0; jj<nV; ++jj )
+					A[ii*nV + jj] = 1.0 / ((real_t)nV);
+			}
+			else
+			{
+				/* assume type == 2 */
+				for( jj=0; jj<nV; ++jj )
+					A[ii*nV + jj] = 1.0 / getSqrt((real_t)nV);
+			}
+
+			if ( lbA != 0 ) lbA[ii] = -INFTY;
+			if ( ubA != 0 ) ubA[ii] =  INFTY;
+		}
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 #ifdef __DEBUG__
+/*
+ *	g d b _ p r i n t m at
+ */
 extern "C" void gdb_printmat(const char *fname, real_t *M, int n, int m, int ldim)
 {
+	#ifndef __XPCTARGET__
 	int i, j;
 	FILE *fid;
 
@@ -862,8 +958,21 @@ extern "C" void gdb_printmat(const char *fname, real_t *M, int n, int m, int ldi
 		fprintf(fid, "\n");
 	}
 	fclose(fid);
+	#endif /* __XPCTARGET__ */
 }
 #endif /* __DEBUG__ */
+
+
+
+#if defined(__DSPACE__) || defined(__XPCTARGET__) 
+/*
+ *	_ _ c x a _ p u r e _ v i r t u a l
+ */
+void __cxa_pure_virtual( void )
+{
+	/* put your customized implementation here! */
+}
+#endif /* __DSPACE__ || __XPCTARGET__*/ 
 
 
 

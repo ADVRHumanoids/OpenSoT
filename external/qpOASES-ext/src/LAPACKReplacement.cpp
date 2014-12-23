@@ -25,7 +25,7 @@
 /**
  *	\file src/LAPACKReplacement.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *  LAPACK replacement routines.
@@ -39,10 +39,10 @@ extern "C" void dpotrf_(	const char *uplo, const unsigned long *_n, double *a,
 							const unsigned long *_lda, long *info
 							)
 {
-	unsigned long n = *_n, lda = *_lda;
 	double sum;
-	unsigned long i, j;
-	int k;
+	long i, j, k;
+	long n = (long)(*_n);
+	long lda = (long)(*_lda);
 
 	for( i=0; i<n; ++i )
 	{
@@ -58,7 +58,7 @@ extern "C" void dpotrf_(	const char *uplo, const unsigned long *_n, double *a,
 		{
 			a[0] = sum; /* tunnel negative diagonal element to caller */
 			if (info != 0)
-				*info = i+1;
+				*info = (long)i+1;
 			return;
 		}
 
@@ -81,10 +81,10 @@ extern "C" void spotrf_(	const char *uplo, const unsigned long *_n, float *a,
 							const unsigned long *_lda, long *info
 							)
 {
-	unsigned long n = *_n, lda = *_lda;
 	float sum;
-	unsigned long i, j;
-	int k;
+	long i, j, k;
+	long n = (long)(*_n);
+	long lda = (long)(*_lda);
 
 	for( i=0; i<n; ++i )
 	{
@@ -100,7 +100,7 @@ extern "C" void spotrf_(	const char *uplo, const unsigned long *_n, float *a,
 		{
 			a[0] = sum; /* tunnel negative diagonal element to caller */
 			if (info != 0)
-				*info = i+1;
+				*info = (long)i+1;
 			return;
 		}
 

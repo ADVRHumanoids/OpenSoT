@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/SubjectTo.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the SubjectTo class designed to manage working sets of
@@ -50,7 +50,7 @@ BEGIN_NAMESPACE_QPOASES
  *	index sets and other status information.
  *
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class SubjectTo
@@ -141,7 +141,7 @@ class SubjectTo
 		 *  offset. This offset has to lie within the range [0,n/2] and has to
 		 *  be an integer divisor of the total number of constraints/bounds n.
 		 *  Type and status of the first \<offset\> constraints/bounds is thrown away,
-		 *  type and status of the last \<offset\> constraints/bounds is real_td,
+		 *  type and status of the last \<offset\> constraints/bounds is doubled,
 		 *  e.g. for offset = 2: \n
 		 *  shift( {c/b1,c/b2,c/b3,c/b4,c/b5,c/b6} ) = {c/b3,c/b4,c/b5,c/b6,c/b5,c/b6}
 		 *	\return SUCCESSFUL_RETURN \n

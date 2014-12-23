@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/Indexlist.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the Indexlist class designed to manage index lists of
@@ -49,7 +49,7 @@ BEGIN_NAMESPACE_QPOASES
  *	This class manages index lists of active/inactive bounds/constraints.
  *
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class Indexlist
@@ -97,6 +97,12 @@ class Indexlist
 		 *	\return SUCCESSFUL_RETURN \n
 		 			RET_INDEXLIST_CORRUPTED */
 		returnValue	getNumberArray(	int** const numberarray	/**< Output: Array of numbers (NULL on error). */
+									) const;
+
+		/** Creates an array of all numbers within the index set in correct order.
+		 *	\return SUCCESSFUL_RETURN \n
+					RET_INDEXLIST_CORRUPTED */
+		returnValue	getISortArray(	int** const iSortArray	/**< Output: iSort Array. */
 									) const;
 
 

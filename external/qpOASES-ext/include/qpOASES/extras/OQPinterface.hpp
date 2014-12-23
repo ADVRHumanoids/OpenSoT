@@ -25,11 +25,13 @@
 /**
  *	\file include/qpOASES/extras/OQPinterface.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of an interface comprising several utility functions
- *	for solving test problems from the Online QP Benchmark Collection.
+ *	for solving test problems from the Online QP Benchmark Collection
+ *	(This collection is no longer maintained, see 
+ *	http://www.qpOASES.org/onlineQP for a backup).
  */
 
 

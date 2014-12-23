@@ -19,8 +19,8 @@ License along with qpOASES; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 author Manuel Kudruss
-version 3.0beta
-date 2013
+version 3.0
+date 2013-2014
 """
 
 import os

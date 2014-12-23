@@ -25,7 +25,7 @@
 /**
  *	\file src/Bounds.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the Bounds class designed to manage working sets of
@@ -404,7 +404,7 @@ returnValue Bounds::print( )
 
 	#ifndef __XPCTARGET__
 	#ifndef __DSPACE__
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	int nFR = getNFR( );
 	int nFX = getNFX( );
@@ -415,7 +415,7 @@ returnValue Bounds::print( )
 	int* FX_idx;
 	getFixed( )->getNumberArray( &FX_idx );
 
-	snprintf( myPrintfString,160,"Bounds object comprising %d variables (%d free, %d fixed):\n",n,nFR,nFX );
+	snprintf( myPrintfString,MAX_STRING_LENGTH,"Bounds object comprising %d variables (%d free, %d fixed):\n",n,nFR,nFX );
 	myPrintf( myPrintfString );
 
 	REFER_NAMESPACE_QPOASES print( FR_idx,nFR,"free " );

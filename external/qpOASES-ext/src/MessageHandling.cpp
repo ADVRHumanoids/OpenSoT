@@ -25,7 +25,7 @@
 /**
  *	\file src/MessageHandling.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the MessageHandling class including global return values.
@@ -47,6 +47,7 @@ BEGIN_NAMESPACE_QPOASES
 
 
 
+#ifndef __XPCTARGET__
 /** Defines pairs of global return values and messages. */
 MessageHandling::ReturnValueList returnValueList[] =
 {
@@ -60,7 +61,7 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_INFO_UNDEFINED, "Info number undefined", VS_VISIBLE },
 { RET_EWI_UNDEFINED, "Error/warning/info number undefined", VS_VISIBLE },
 { RET_AVAILABLE_WITH_LINUX_ONLY, "This function is available under Linux only", VS_HIDDEN },
-{ RET_UNKNOWN_BUG, "The error occured is not yet known", VS_VISIBLE },
+{ RET_UNKNOWN_BUG, "The error occurred is not yet known", VS_VISIBLE },
 { RET_PRINTLEVEL_CHANGED, "Print level changed", VS_VISIBLE },
 { RET_NOT_YET_IMPLEMENTED, "Requested function is not yet implemented.", VS_VISIBLE },
 /* Indexlist */
@@ -101,9 +102,9 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_NO_EXTERN_SOLVER, "No extern QP solver available", VS_VISIBLE },
 { RET_QP_UNBOUNDED, "QP is unbounded", VS_VISIBLE },
 { RET_QP_INFEASIBLE, "QP is infeasible", VS_VISIBLE },
-{ RET_QP_NOT_SOLVED, "Problems occured while solving QP with standard solver", VS_VISIBLE },
+{ RET_QP_NOT_SOLVED, "Problems occurred while solving QP with standard solver", VS_VISIBLE },
 { RET_QP_SOLVED, "QP successfully solved", VS_VISIBLE },
-{ RET_UNABLE_TO_SOLVE_QP, "Problems occured while solving QP", VS_VISIBLE },
+{ RET_UNABLE_TO_SOLVE_QP, "Problems occurred while solving QP", VS_VISIBLE },
 { RET_INITIALISATION_STARTED, "Starting problem initialisation...", VS_VISIBLE },
 { RET_HOTSTART_FAILED, "Unable to perform homotopy due to internal error", VS_VISIBLE },
 { RET_HOTSTART_FAILED_TO_INIT, "Unable to initialise problem", VS_VISIBLE },
@@ -143,8 +144,8 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_ALL_CONSTRAINTS_ACTIVE, "All constraints are active, no further constraint can be added", VS_VISIBLE },
 { RET_LINEARLY_DEPENDENT, "New bound/constraint is linearly dependent", VS_VISIBLE },
 { RET_LINEARLY_INDEPENDENT, "New bound/constraint is linearly independent", VS_VISIBLE },
-{ RET_LI_RESOLVED, "Linear indepence of active contraint matrix successfully resolved", VS_VISIBLE },
-{ RET_ENSURELI_FAILED, "Failed to ensure linear indepence of active contraint matrix", VS_VISIBLE },
+{ RET_LI_RESOLVED, "Linear independence of active constraint matrix successfully resolved", VS_VISIBLE },
+{ RET_ENSURELI_FAILED, "Failed to ensure linear independence of active constraint matrix", VS_VISIBLE },
 { RET_ENSURELI_FAILED_TQ, "Abnormal termination due to TQ factorisation", VS_VISIBLE },
 { RET_ENSURELI_FAILED_NOINDEX, "QP is infeasible", VS_VISIBLE },
 { RET_ENSURELI_FAILED_CYCLING, "QP is infeasible", VS_VISIBLE },
@@ -158,7 +159,7 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_MATRIX_FACTORISATION_FAILED, "Unable to calculate new matrix factorisations", VS_VISIBLE },
 { RET_PRINT_ITERATION_FAILED, "Unable to print information on current iteration", VS_VISIBLE },
 { RET_NO_GLOBAL_MESSAGE_OUTPUTFILE, "No global message output file initialised", VS_VISIBLE },
-{ RET_DISABLECONSTRAINTS_FAILED, "Unable to disbable constraints", VS_VISIBLE },
+{ RET_DISABLECONSTRAINTS_FAILED, "Unable to disable constraints", VS_VISIBLE },
 { RET_ENABLECONSTRAINTS_FAILED, "Unable to enable constraints", VS_VISIBLE },
 { RET_ALREADY_ENABLED, "Bound or constraint is already enabled", VS_VISIBLE },
 { RET_ALREADY_DISABLED, "Bound or constraint is already disabled", VS_VISIBLE },
@@ -172,9 +173,11 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_NO_REGSTEP_NWSR, "No additional regularisation step could be performed due to limits", VS_VISIBLE },
 { RET_FEWER_REGSTEPS_NWSR, "Fewer additional regularisation steps have been performed due to limits", VS_VISIBLE },
 { RET_CHOLESKY_OF_ZERO_HESSIAN, "Cholesky decomposition of (unregularised) zero Hessian matrix", VS_VISIBLE },
-{ RET_CONSTRAINTS_ARE_NOT_SCALED, "When defining __MANY_CONSTRAINTS__, L1 norm of each constraint must be not greater than one", VS_VISIBLE },
-{ RET_INITIAL_BOUNDS_STATUS_NYI, "Initial status of bounds must be inactive when defining __MANY_CONSTRAINTS__", VS_VISIBLE },
+{ RET_CONSTRAINTS_ARE_NOT_SCALED, "(should not be thrown, no longer in use)", VS_VISIBLE },
+{ RET_INITIAL_BOUNDS_STATUS_NYI, "(should not be thrown, no longer in use)", VS_VISIBLE },
 { RET_ERROR_IN_CONSTRAINTPRODUCT, "Error in user-defined constraint product function", VS_VISIBLE },
+{ RET_FIX_BOUNDS_FOR_LP, "All initial bounds must be fixed when solving an (unregularised) LP", VS_VISIBLE },
+{ RET_USE_REGULARISATION_FOR_LP, "Set options.enableRegularisation=BT_TRUE for solving LPs", VS_VISIBLE },
 /* SQProblem */
 { RET_UPDATEMATRICES_FAILED, "Unable to update QP matrices", VS_VISIBLE },
 { RET_UPDATEMATRICES_FAILED_AS_QP_NOT_SOLVED, "Unable to update matrices as previous QP is not solved", VS_VISIBLE },
@@ -183,6 +186,8 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_UNABLE_TO_WRITE_FILE, "Unable to write into file", VS_VISIBLE },
 { RET_UNABLE_TO_READ_FILE, "Unable to read from file", VS_VISIBLE },
 { RET_FILEDATA_INCONSISTENT, "File contains inconsistent data", VS_VISIBLE },
+/* Options */
+{ RET_OPTIONS_ADJUSTED,	"Options needed to be adjusted for consistency reasons", VS_VISIBLE },
 /* SolutionAnalysis */
 { RET_UNABLE_TO_ANALYSE_QPROBLEM, "Unable to analyse (S)QProblem(B) object", VS_VISIBLE },
 /* Benchmark */
@@ -192,15 +197,23 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_INITIAL_QP_SOLVED, "Initial QP solved", VS_VISIBLE },
 { RET_QP_SOLUTION_STARTED, "Solving QP no.", VS_VISIBLE },
 { RET_BENCHMARK_SUCCESSFUL, "Benchmark terminated successfully", VS_VISIBLE },
-{ RET_ENSURELI_DROPPED, "Linear independence resolved by dropping blocking constraint", VS_VISIBLE },
+/* Sparse matrices */
 { RET_NO_DIAGONAL_AVAILABLE, "Sparse matrix does not have entries on full diagonal", VS_VISIBLE },
+{ RET_DIAGONAL_NOT_INITIALISED, "Diagonal data of sparse matrix has not been initialised", VS_VISIBLE },
+/* Dropping of infeasible constraints */
+{ RET_ENSURELI_DROPPED, "Linear independence resolved by dropping blocking constraint", VS_VISIBLE },
+/* Simple exitflags */
 { RET_SIMPLE_STATUS_P1, "QP problem could not be solved within given number of iterations", VS_VISIBLE },
 { RET_SIMPLE_STATUS_P0, "QP problem solved", VS_VISIBLE },
 { RET_SIMPLE_STATUS_M1, "QP problem could not be solved due to an internal error", VS_VISIBLE },
 { RET_SIMPLE_STATUS_M2, "QP problem is infeasible (and thus could not be solved)", VS_VISIBLE },
 { RET_SIMPLE_STATUS_M3, "QP problem is unbounded (and thus could not be solved)", VS_VISIBLE },
-{ TERMINAL_LIST_ELEMENT, "", VS_HIDDEN } /* IMPORTANT: Terminal list element! */
+/* IMPORTANT: Terminal list element! */
+{ TERMINAL_LIST_ELEMENT, "", VS_HIDDEN }
 };
+#else
+MessageHandling::ReturnValueList returnValueList[1]; /* Do not use messages for embedded platforms! */
+#endif
 
 
 
@@ -288,8 +301,10 @@ MessageHandling::MessageHandling( const MessageHandling& rhs )
  */
 MessageHandling::~MessageHandling( )
 {
-	if ( outputFile != 0 )
+	#ifndef __XPCTARGET__
+	if ( ( outputFile != 0 ) && ( outputFile != stdout ) && ( outputFile != stderr ) )
 		fclose( outputFile );
+	#endif /* __XPCTARGET__ */
 }
 
 
@@ -407,12 +422,12 @@ returnValue MessageHandling::listAllMessages( )
 {
 	#ifndef __XPCTARGET__
 	int keypos = 0;
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	/* Run through whole returnValueList and print each item. */
 	while ( returnValueList[keypos].key != TERMINAL_LIST_ELEMENT )
 	{
-		snprintf( myPrintfString,160," %d - %s \n",keypos,returnValueList[keypos].data );
+		snprintf( myPrintfString,MAX_STRING_LENGTH," %d - %s \n",keypos,returnValueList[keypos].data );
 		myPrintf( myPrintfString );
 
 		++keypos;
@@ -445,10 +460,10 @@ returnValue MessageHandling::throwMessage(
 	#ifndef __SUPPRESSANYOUTPUT__
 	#ifndef __XPCTARGET__
 	int keypos = 0;
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	/* 1) Determine number of whitespace for output. */
-	char whitespaces[41];
+	char whitespaces[MAX_STRING_LENGTH];
 	int numberOfWhitespaces = (errorCount-1)*2;
 
 	if ( numberOfWhitespaces < 0 )
@@ -456,6 +471,9 @@ returnValue MessageHandling::throwMessage(
 
 	if ( numberOfWhitespaces > 40 )
 		numberOfWhitespaces = 40;
+
+	if ( numberOfWhitespaces >= (int)MAX_STRING_LENGTH )
+		numberOfWhitespaces = (int)MAX_STRING_LENGTH-1;
 
 	memset( whitespaces, ' ', (size_t) numberOfWhitespaces );
 	whitespaces[numberOfWhitespaces] = '\0';
@@ -486,18 +504,18 @@ returnValue MessageHandling::throwMessage(
 
 		if ( errorCount > 0 )
 		{
-			snprintf( myPrintfString,160,"%s->", whitespaces );
+			snprintf( myPrintfString,MAX_STRING_LENGTH,"%s->", whitespaces );
 			myPrintf( myPrintfString );
 		}
 
 		if ( additionaltext == 0 )
 		{
 			#ifdef __DEBUG__
-			snprintf(	myPrintfString,160,"%s (%s, %s:%d): \t%s\n",
+			snprintf(	myPrintfString,MAX_STRING_LENGTH,"%s (%s, %s:%d): \t%s\n",
 						RETstring,functionname,filename,(int)linenumber,returnValueList[keypos].data
 						);
 			#else
-			snprintf(	myPrintfString,160,"%s:  %s\n",
+			snprintf(	myPrintfString,MAX_STRING_LENGTH,"%s:  %s\n",
 						RETstring,returnValueList[keypos].data
 						);
 			#endif
@@ -506,11 +524,11 @@ returnValue MessageHandling::throwMessage(
 		else
 		{
 			#ifdef __DEBUG__
-			snprintf(	myPrintfString,160,"%s (%s, %s:%d): \t%s %s\n",
+			snprintf(	myPrintfString,MAX_STRING_LENGTH,"%s (%s, %s:%d): \t%s %s\n",
 						RETstring,functionname,filename,(int)linenumber,returnValueList[keypos].data,additionaltext
 						);
 			#else
-			snprintf(	myPrintfString,160,"%s:  %s %s\n",
+			snprintf(	myPrintfString,MAX_STRING_LENGTH,"%s:  %s %s\n",
 						RETstring,returnValueList[keypos].data,additionaltext
 						);
 			#endif
@@ -542,6 +560,7 @@ returnValue MessageHandling::throwMessage(
 const char* MessageHandling::getErrorCodeMessage(	const returnValue _returnValue
 													)
 {
+	#ifndef __XPCTARGET__
 	int keypos = 0;
 	
 	/* 2) Find error/warning/info in list. */
@@ -559,6 +578,11 @@ const char* MessageHandling::getErrorCodeMessage(	const returnValue _returnValue
 	}
 
 	return (returnValueList[keypos].data != 0) ? returnValueList[keypos].data : "No message for this error code";
+	#else /* __XPCTARGET__ */
+
+	return "No message for this error code";
+
+	#endif /* __XPCTARGET__ */
 }
 
 

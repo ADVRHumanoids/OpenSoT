@@ -25,7 +25,8 @@
 MAIN AUTHORS
 ============
 
-qpOASES is maintained by the following main developers (in alphabetical order):
+qpOASES's core functionality and software design have been developed by the 
+following main developers (in alphabetical order):
 
     Hans Joachim Ferreau
     Christian Kirches
@@ -33,21 +34,31 @@ qpOASES is maintained by the following main developers (in alphabetical order):
 
 
 
+FURTHER AUTHORS
+===============
+
+Moreover, the following developers have contributed code to qpOASES's 
+third-party interfaces (in alphabetical order):
+
+    Alexander Buchner
+    Holger Diedam
+    Manuel Kudruss
+    Sebastian F. Walter
+
+
+
 CONTRIBUTORS
 ============
 
-Moreover, the following people have contributed to make qpOASES even more 
-useful and easy-to-use (in alphabetical order):
+Finally, the following people have not contributed to the source code,
+but have helped making qpOASES even more useful by testing, reporting 
+bugs or proposing algorithmic improvements (in alphabetical order):
 
     Eckhard Arnold
-    Alexander Buchner
-    Holger Diedam
     Boris Houska
-    Manuel Kudruss
     Aude Perrin
     Milan Vukov
     Thomas Wiese
-    Sebastian F. Walter
     Leonard Wirsching
 
 

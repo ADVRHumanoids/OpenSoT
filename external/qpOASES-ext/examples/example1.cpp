@@ -25,7 +25,7 @@
 /**
  *	\file examples/example1.cpp
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Very simple example for testing qpOASES using the QProblem class.

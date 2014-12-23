@@ -25,13 +25,13 @@
 ##
 ##	Filename:  make.mk
 ##	Author:    Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
-##	Version:   3.0beta
+##	Version:   3.0
 ##	Date:      2007-2014
 ##
 
 
 TOP = $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
-BINDIR = ${TOP}/bin
+
 include ${TOP}/make_linux.mk
 #include ${TOP}/make_cygwin.mk
 #include ${TOP}/make_windows.mk

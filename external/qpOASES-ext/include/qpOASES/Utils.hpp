@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/Utils.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of some utility functions for working with qpOASES.
@@ -37,6 +37,17 @@
 
 
 #include <qpOASES/MessageHandling.hpp>
+
+
+#ifdef __NO_SNPRINTF__
+  #if (!defined(_MSC_VER)) || defined(__DSPACE__)
+    /* If snprintf is not available, provide an empty implementation... */
+    int snprintf( char* s, size_t n, const char* format, ... );
+  #else
+	/* ... or substitute snprintf by _snprintf for Microsoft compilers. */
+    #define snprintf _snprintf    
+  #endif
+#endif /* __NO_SNPRINTF__ */
 
 
 BEGIN_NAMESPACE_QPOASES
@@ -180,7 +191,7 @@ real_t getCPUtime( );
 
 
 /** Returns the N-norm of a vector.
- * \return 0: successful */
+ * \return >= 0.0: successful */
 real_t getNorm(	const real_t* const v,	/**< Vector. */
 				int n,					/**< Vector's dimension. */
 				int type = 2			/**< Norm type, 1: one-norm, 2: Euclidean norm. */
@@ -196,7 +207,7 @@ inline BooleanType isEqual(	real_t x,			/**< First real number. */
 							);
 
 
-/** Tests whether a real_t-valued argument is (numerically) zero.
+/** Tests whether a real-valued argument is (numerically) zero.
  * \return	BT_TRUE:  argument differs from 0.0 not more than TOL \n
 		 	BT_FALSE: argument differs from 0.0 more than TOL */
 inline BooleanType isZero(	real_t x,			/**< Real number. */
@@ -204,10 +215,10 @@ inline BooleanType isZero(	real_t x,			/**< Real number. */
 							);
 
 
-/** Returns sign of a real_t-valued argument.
+/** Returns sign of a real-valued argument.
  * \return	 1.0: argument is non-negative \n
 		 	-1.0: argument is negative */
-inline real_t getSign(	real_t arg	/** real_t valued argument whose sign is to be determined. */
+inline real_t getSign(	real_t arg	/**< real-valued argument whose sign is to be determined. */
 						);
 
 
@@ -223,7 +234,7 @@ inline int getMin(	int x,	/**< First integer. */
 					int y	/**< Second integer. */
 					);
 
-					
+	
 /** Returns maximum of two reals.
  * \return	Maximum of two reals */
 inline real_t getMax(	real_t x,	/**< First real number. */
@@ -314,6 +325,19 @@ int getSimpleStatus(	returnValue returnvalue, 				/**< ReturnValue to be analyse
 						);
 
 
+/** Normalises QP constraints.
+ * \return SUCCESSFUL_RETURN \n
+ *		   RET_INVALID_ARGUMENTS */
+returnValue normaliseConstraints(	int nV,			/**< Number of variables. */
+									int nC, 		/**< Number of constraints. */
+									real_t* A,		/**< Input:  Constraint matrix, \n
+														 Output: Normalised constraint matrix. */
+									real_t* lbA,	/**< Input:  Constraints' lower bound vector, \n
+														 Output: Normalised constraints' lower bound vector. */
+									real_t* ubA,	/**< Input:  Constraints' upper bound vector, \n
+														 Output: Normalised constraints' upper bound vector. */
+									int type = 1	/**< Norm type, 1: one-norm, 2: Euclidean norm. */
+									);
 
 
 #ifdef __DEBUG__
@@ -325,6 +349,12 @@ extern "C" void gdb_printmat(	const char *fname,			/**< File name. */
 								int ldim					/**< Leading dimension. */
 								);
 #endif /* __DEBUG__ */
+
+
+#if defined(__DSPACE__) || defined(__XPCTARGET__) 
+extern "C" void __cxa_pure_virtual( void );
+#endif /* __DSPACE__ || __XPCTARGET__*/ 
+
 
 
 END_NAMESPACE_QPOASES

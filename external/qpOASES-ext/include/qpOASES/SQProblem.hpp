@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/SQProblem.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the SQProblem class which is able to use the newly
@@ -53,7 +53,7 @@ BEGIN_NAMESPACE_QPOASES
  *	for parametric quadratic programming.
  *
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class SQProblem : public QProblem
@@ -103,10 +103,10 @@ class SQProblem : public QProblem
 					RET_HOTSTART_STOPPED_INFEASIBILITY \n
 					RET_HOTSTART_STOPPED_UNBOUNDEDNESS \n
 					RET_SETUP_AUXILIARYQP_FAILED */
-		returnValue hotstart(	const real_t* const H_new,	/**< Hessian matrix of neighbouring QP to be solved. \n
+		returnValue hotstart(	const real_t* const H_new,	/**< Hessian matrix of neighbouring QP to be solved (a shallow copy is made). \n
 																 If Hessian matrix is trivial, a NULL pointer can be passed. */
 								const real_t* const g_new,	/**< Gradient of neighbouring QP to be solved. */
-								const real_t* const A_new,	/**< Constraint matrix of neighbouring QP to be solved. \n
+								const real_t* const A_new,	/**< Constraint matrix of neighbouring QP to be solved (a shallow copy is made). \n
 																 If QP sequence does not involve constraints, a NULL pointer can be passed. */
 								const real_t* const lb_new,	/**< Lower bounds of neighbouring QP to be solved. \n
 													 		 	 If no lower bounds exist, a NULL pointer can be passed. */
@@ -170,10 +170,10 @@ class SQProblem : public QProblem
 					RET_HOTSTART_STOPPED_INFEASIBILITY \n
 					RET_HOTSTART_STOPPED_UNBOUNDEDNESS \n
 					RET_SETUP_AUXILIARYQP_FAILED */
-		returnValue hotstart(	SymmetricMatrix *H_new,	/**< Hessian matrix of neighbouring QP to be solved. \n
+		returnValue hotstart(	SymmetricMatrix *H_new,		/**< Hessian matrix of neighbouring QP to be solved (a shallow copy is made). \n
 																 If Hessian matrix is trivial, a NULL pointer can be passed. */
 								const real_t* const g_new,	/**< Gradient of neighbouring QP to be solved. */
-								Matrix *A_new,	/**< Constraint matrix of neighbouring QP to be solved. \n
+								Matrix *A_new,				/**< Constraint matrix of neighbouring QP to be solved (a shallow copy is made). \n
 																 If QP sequence does not involve constraints, a NULL pointer can be passed. */
 								const real_t* const lb_new,	/**< Lower bounds of neighbouring QP to be solved. \n
 													 		 	 If no lower bounds exist, a NULL pointer can be passed. */
@@ -185,7 +185,7 @@ class SQProblem : public QProblem
 												 			 	 If no upper constraints' bounds exist, a NULL pointer can be passed. */
 								int& nWSR,					/**< Input: Maximum number of working set recalculations; \n
 																 Output: Number of performed working set recalculations. */
-								real_t* const cputime		/**< Input: Maximum CPU time allowed for QP solution. \n
+								real_t* const cputime = 0	/**< Input: Maximum CPU time allowed for QP solution. \n
 																 Output: CPU time spend for QP solution (or to perform nWSR iterations). */
 								);
 

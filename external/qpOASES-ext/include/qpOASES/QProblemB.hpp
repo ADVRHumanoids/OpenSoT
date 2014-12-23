@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/QProblemB.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the QProblemB class which is able to use the newly
@@ -57,7 +57,7 @@ class SolutionAnalysis;
  *	for parametric quadratic programming.
  *
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class QProblemB
@@ -110,7 +110,7 @@ class QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	SymmetricMatrix *_H,	 	/**< Hessian matrix. */
+		returnValue init(	SymmetricMatrix *_H,	 	/**< Hessian matrix (a shallow copy is made). */
 							const real_t* const _g,		/**< Gradient vector. */
 							const real_t* const _lb,	/**< Lower bounds (on variables). \n
 															 If no lower bounds exist, a NULL pointer can be passed. */
@@ -133,7 +133,7 @@ class QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	const real_t* const _H, 	/**< Hessian matrix. \n
+		returnValue init(	const real_t* const _H, 	/**< Hessian matrix (a shallow copy is made). \n
 															 If Hessian matrix is trivial, a NULL pointer can be passed. */
 							const real_t* const _g,		/**< Gradient vector. */
 							const real_t* const _lb,	/**< Lower bounds (on variables). \n
@@ -188,7 +188,7 @@ class QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	SymmetricMatrix *_H,				/**< Hessian matrix. */
+		returnValue init(	SymmetricMatrix *_H,				/**< Hessian matrix (a shallow copy is made). */
 							const real_t* const _g,				/**< Gradient vector. */
 							const real_t* const _lb,			/**< Lower bounds (on variables). \n
 																	 If no lower bounds exist, a NULL pointer can be passed. */
@@ -224,7 +224,7 @@ class QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	const real_t* const _H, 			/**< Hessian matrix. \n
+		returnValue init(	const real_t* const _H, 			/**< Hessian matrix (a shallow copy is made). \n
 																     If Hessian matrix is trivial, a NULL pointer can be passed. */
 							const real_t* const _g,				/**< Gradient vector. */
 							const real_t* const _lb,			/**< Lower bounds (on variables). \n
@@ -618,7 +618,7 @@ class QProblemB
 										);
 
 
-		/** Setups internal QP data. 
+		/** Sets up internal QP data. 
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_INVALID_ARGUMENTS */
 		returnValue setupQPdata(	SymmetricMatrix *_H,	 	/**< Hessian matrix.*/
@@ -629,7 +629,7 @@ class QProblemB
 																	 If no upper bounds exist, a NULL pointer can be passed. */
 									);
 
-		/** Setups internal QP data. If the current Hessian is trivial
+		/** Sets up internal QP data. If the current Hessian is trivial
 		 *  (i.e. HST_ZERO or HST_IDENTITY) but a non-trivial one is given,
 		 *  memory for Hessian is allocated and it is set to the given one.
 		 *	\return SUCCESSFUL_RETURN \n
@@ -644,7 +644,7 @@ class QProblemB
 																	 If no upper bounds exist, a NULL pointer can be passed. */
 									);
 
-		/** Setups internal QP data by loading it from files. If the current Hessian
+		/** Sets up internal QP data by loading it from files. If the current Hessian
 		 *  is trivial (i.e. HST_ZERO or HST_IDENTITY) but a non-trivial one is given,
 		 *  memory for Hessian is allocated and it is set to the given one.
 		 *	\return SUCCESSFUL_RETURN \n
@@ -704,7 +704,7 @@ class QProblemB
 
 		/** Sets Hessian matrix of the QP.
 		 *	\return SUCCESSFUL_RETURN */
-		inline returnValue setH(	SymmetricMatrix* H_new	/**< New Hessian matrix. */
+		inline returnValue setH(	SymmetricMatrix* H_new	/**< New Hessian matrix (a shallow copy is made). */
 									);
 									
 		/** Sets dense Hessian matrix of the QP.
@@ -712,7 +712,7 @@ class QProblemB
 		 *  a) hessianType is HST_IDENTITY, nothing is done,
 		 *  b) hessianType is not HST_IDENTITY, Hessian matrix is set to zero.
 		 *	\return SUCCESSFUL_RETURN */
-		inline returnValue setH(	const real_t* const H_new	/**< New dense Hessian matrix (with correct dimension!). */
+		inline returnValue setH(	const real_t* const H_new	/**< New dense Hessian matrix (with correct dimension!), a shallow copy is made. */
 									);
 
 		/** Changes gradient vector of the QP.
@@ -723,26 +723,28 @@ class QProblemB
 
 		/** Changes lower bound vector of the QP.
 		 *	\return SUCCESSFUL_RETURN \n
-		 *			RET_INVALID_ARGUMENTS */
+		 *			RET_QPOBJECT_NOT_SETUP */
 		inline returnValue setLB(	const real_t* const lb_new	/**< New lower bound vector (with correct dimension!). */
 									);
 
 		/** Changes single entry of lower bound vector of the QP.
-		 *	\return SUCCESSFUL_RETURN  \n
-					RET_INDEX_OUT_OF_BOUNDS */
+		 *	\return SUCCESSFUL_RETURN \n
+		 *			RET_QPOBJECT_NOT_SETUP \n
+		 *			RET_INDEX_OUT_OF_BOUNDS */
 		inline returnValue setLB(	int number,		/**< Number of entry to be changed. */
 									real_t value	/**< New value for entry of lower bound vector. */
 									);
 
 		/** Changes upper bound vector of the QP.
 		 *	\return SUCCESSFUL_RETURN \n
-		 *			RET_INVALID_ARGUMENTS */
+		 *			RET_QPOBJECT_NOT_SETUP */
 		inline returnValue setUB(	const real_t* const ub_new	/**< New upper bound vector (with correct dimension!). */
 									);
 
 		/** Changes single entry of upper bound vector of the QP.
-		 *	\return SUCCESSFUL_RETURN  \n
-					RET_INDEX_OUT_OF_BOUNDS */
+		 *	\return SUCCESSFUL_RETURN \n
+		 *			RET_QPOBJECT_NOT_SETUP \n
+		 *			RET_INDEX_OUT_OF_BOUNDS */
 		inline returnValue setUB(	int number,		/**< Number of entry to be changed. */
 									real_t value	/**< New value for entry of upper bound vector. */
 									);
@@ -823,6 +825,16 @@ class QProblemB
 										real_t& t							/**< Input: Current maximum step length along the homotopy path,
 																			 *   Output: Updated maximum possible step length along the homotopy path. */
 										) const;
+
+
+		/** Creates a sparse diagonal (square-)matrix which is a given 
+		 *  multiple of the identity matrix.
+		 *  \return Diagonal matrix \n
+		 */
+		SymSparseMat* createDiagSparseMat(	int n,					/**< Row/column dimension of matrix to be created. */
+											real_t diagVal = 1.0	/**< Value of all diagonal entries. */
+											);
+
 
 	/*
 	 *	PRIVATE MEMBER FUNCTIONS
@@ -906,7 +918,7 @@ class QProblemB
 										);
 
 
-		/** Setups bound data structure according to auxiliaryBounds.
+		/** Sets up bound data structure according to auxiliaryBounds.
 		 *  (If the working set shall be setup afresh, make sure that
 		 *  bounds data structure has been resetted!)
 		 *	\return SUCCESSFUL_RETURN \n
@@ -918,7 +930,7 @@ class QProblemB
 																						 *    setup afresh or by updating the current one. */
 												);
 
-		/** Setups the optimal primal/dual solution of the auxiliary initial QP.
+		/** Sets up the optimal primal/dual solution of the auxiliary initial QP.
 		 *	\return SUCCESSFUL_RETURN */
 		returnValue setupAuxiliaryQPsolution(	const real_t* const xOpt,			/**< Optimal primal solution vector.
 																				 	*	 If a NULL pointer is passed, all entries are set to zero. */
@@ -926,13 +938,13 @@ class QProblemB
 																					 *	 If a NULL pointer is passed, all entries are set to zero. */
 												);
 
-		/** Setups gradient of the auxiliary initial QP for given
+		/** Sets up gradient of the auxiliary initial QP for given
 		 *  optimal primal/dual solution and given initial working set
 		 *  (assumes that members X, Y and BOUNDS have already been initialised!).
 		 *	\return SUCCESSFUL_RETURN */
 		returnValue setupAuxiliaryQPgradient( );
 
-		/** Setups bounds of the auxiliary initial QP for given
+		/** Sets up bounds of the auxiliary initial QP for given
 		 *  optimal primal/dual solution and given initial working set
 		 *  (assumes that members X, Y and BOUNDS have already been initialised!).
 		 *	\return SUCCESSFUL_RETURN \n

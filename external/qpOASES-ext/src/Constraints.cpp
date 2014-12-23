@@ -25,7 +25,7 @@
 /**
  *	\file src/Constraints.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the Constraints class designed to manage working sets of
@@ -388,7 +388,7 @@ returnValue Constraints::print( )
 
 	#ifndef __XPCTARGET__
 	#ifndef __DSPACE__
-	char myPrintfString[160];
+	char myPrintfString[MAX_STRING_LENGTH];
 
 	int nIAC = getNIAC( );
 	int nAC  = getNAC( );
@@ -399,7 +399,7 @@ returnValue Constraints::print( )
 	int* AC_idx;
 	getActive( )->getNumberArray( &AC_idx );
 
-	snprintf( myPrintfString,160,"Constraints object comprising %d constraints (%d inactive, %d active):\n",n,nIAC,nAC );
+	snprintf( myPrintfString,MAX_STRING_LENGTH,"Constraints object comprising %d constraints (%d inactive, %d active):\n",n,nIAC,nAC );
 	myPrintf( myPrintfString );
 
 	REFER_NAMESPACE_QPOASES print( IAC_idx,nIAC,"inactive" );

@@ -25,13 +25,13 @@
 /**
  *	\file examples/example3.cpp
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2008-2014
  *
  *	Example demonstrating usage of qpOASES for solving a QP sequence of the
  *	Online QP Benchmark Collection. In order to run it, you have to download
- *	"Example 02" from http://homes.esat.kuleuven.be/~optec/software/onlineQP/
- *	and store it into the directory EXAMPLES/chain80w/.
+ *	"Example 02" from from http://www.qpOASES.org/onlineQP/ and store it into 
+ *	the directory bin/chain80w/.
  */
 
 
@@ -48,11 +48,11 @@ int main( )
 	BooleanType isSparse = BT_FALSE;
 	Options options;
 	options.setToMPC();
-// 	options.setToReliable();
+	options.printLevel = PL_NONE;
 
 	int nWSR = 600;
 	real_t maxCPUtime = 10.0; /* seconds */
-	real_t maxPrimalDeviation, maxDualDeviation, maxObjDeviation;
+	real_t maxStationarity, maxFeasibility, maxComplementarity;
 
 	/* 2) Run benchmark. */
 	if ( runOQPbenchmark(	"./chain80w/",
@@ -60,9 +60,9 @@ int main( )
 							options,
 							nWSR,
 							maxCPUtime,
-							maxPrimalDeviation,
-							maxDualDeviation,
-							maxObjDeviation
+							maxStationarity,
+							maxFeasibility,
+							maxComplementarity
 							) != SUCCESSFUL_RETURN )
 	{
 		myPrintf( "In order to run this example, you need to download example no. 02\nfrom the Online QP Benchmark Collection website first!\n" );
@@ -73,9 +73,9 @@ int main( )
 	printf( "\n\n" );
 	printf( "OQP Benchmark Results:\n" );
 	printf( "======================\n\n" );
-	printf( "maximum primal deviation:     %.3e\n",maxPrimalDeviation );
-	printf( "maximum dual deviation:       %.3e\n",maxDualDeviation );
-	printf( "maximum objective deviation:  %.3e\n",maxObjDeviation );
+	printf( "maximum violation stationarity:     %.3e\n",maxStationarity );
+	printf( "maximum violation feasibility:      %.3e\n",maxFeasibility );
+	printf( "maximum violation complementarity:  %.3e\n",maxComplementarity );
 	printf( "\n" );
 	printf( "maximum CPU time:             %.3f milliseconds\n\n",1000.0*maxCPUtime );
 

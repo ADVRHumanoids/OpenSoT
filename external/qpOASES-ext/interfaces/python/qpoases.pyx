@@ -53,6 +53,7 @@ cdef class PyHessianType:
     POSDEF             = HST_POSDEF
     POSDEF_NULLSPACE   = HST_POSDEF_NULLSPACE
     SEMIDEF            = HST_SEMIDEF
+    INDEF              = HST_INDEF
     UNKNOWN            = HST_UNKNOWN
 
 cdef class PySubjectToStatus:
@@ -186,6 +187,8 @@ cdef class PyReturnValue:
     CONSTRAINTS_ARE_NOT_SCALED            = RET_CONSTRAINTS_ARE_NOT_SCALED
     INITIAL_BOUNDS_STATUS_NYI             = RET_INITIAL_BOUNDS_STATUS_NYI
     ERROR_IN_CONSTRAINTPRODUCT            = RET_ERROR_IN_CONSTRAINTPRODUCT
+    FIX_BOUNDS_FOR_LP                     = RET_FIX_BOUNDS_FOR_LP
+    USE_REGULARISATION_FOR_LP             = RET_USE_REGULARISATION_FOR_LP
     UPDATEMATRICES_FAILED                 = RET_UPDATEMATRICES_FAILED
     UPDATEMATRICES_FAILED_AS_QP_NOT_SOLVED= RET_UPDATEMATRICES_FAILED_AS_QP_NOT_SOLVED
     UNABLE_TO_OPEN_FILE                   = RET_UNABLE_TO_OPEN_FILE
@@ -193,6 +196,7 @@ cdef class PyReturnValue:
     UNABLE_TO_READ_FILE                   = RET_UNABLE_TO_READ_FILE
     FILEDATA_INCONSISTENT                 = RET_FILEDATA_INCONSISTENT
     UNABLE_TO_ANALYSE_QPROBLEM            = RET_UNABLE_TO_ANALYSE_QPROBLEM
+    OPTIONS_ADJUSTED                      = RET_OPTIONS_ADJUSTED
     NWSR_SET_TO_ONE                       = RET_NWSR_SET_TO_ONE
     UNABLE_TO_READ_BENCHMARK              = RET_UNABLE_TO_READ_BENCHMARK
     BENCHMARK_ABORTED                     = RET_BENCHMARK_ABORTED
@@ -200,6 +204,7 @@ cdef class PyReturnValue:
     QP_SOLUTION_STARTED                   = RET_QP_SOLUTION_STARTED
     BENCHMARK_SUCCESSFUL                  = RET_BENCHMARK_SUCCESSFUL
     NO_DIAGONAL_AVAILABLE                 = RET_NO_DIAGONAL_AVAILABLE
+    DIAGONAL_NOT_INITIALISED              = RET_DIAGONAL_NOT_INITIALISED
     ENSURELI_DROPPED                      = RET_ENSURELI_DROPPED
     SIMPLE_STATUS_P1                      = RET_SIMPLE_STATUS_P1
     SIMPLE_STATUS_P0                      = RET_SIMPLE_STATUS_P0
@@ -547,7 +552,7 @@ cdef class PySQProblem:
              np.ndarray[np.double_t, ndim=1] ub,
              np.ndarray[np.double_t, ndim=1] lbA,
              np.ndarray[np.double_t, ndim=1] ubA,
-             nWSR,
+             int    nWSR,
              double cputime=0):
 
         # FIXME: add asserts
@@ -562,8 +567,8 @@ cdef class PySQProblem:
                         <double*> lbA.data,
                         <double*> ubA.data,
                         nWSR,
-                        &cputime)
-
+                        &cputime
+            )
 
         return self.thisptr.init(
                     <double*> H.data,
@@ -573,7 +578,8 @@ cdef class PySQProblem:
                     <double*> ub.data,
                     <double*> lbA.data,
                     <double*> ubA.data,
-                    nWSR)
+                    nWSR
+        )
 
     cpdef hotstart(self,
              np.ndarray[np.double_t, ndim=2] H,
@@ -583,7 +589,7 @@ cdef class PySQProblem:
              np.ndarray[np.double_t, ndim=1] ub,
              np.ndarray[np.double_t, ndim=1] lbA,
              np.ndarray[np.double_t, ndim=1] ubA,
-             nWSR,
+             int    nWSR,
              double cputime=0):
 
         # FIXME: add asserts
@@ -598,7 +604,8 @@ cdef class PySQProblem:
                     <double*> lbA.data,
                     <double*> ubA.data,
                     nWSR,
-                    &cputime)
+                    &cputime
+            )
 
         return self.thisptr.hotstart(
                     <double*> H.data,
@@ -608,7 +615,8 @@ cdef class PySQProblem:
                     <double*> ub.data,
                     <double*> lbA.data,
                     <double*> ubA.data,
-                    nWSR)
+                    nWSR
+        )
 
     cpdef getPrimalSolution(self, np.ndarray[np.double_t, ndim=1] xOpt):
         return self.thisptr.getPrimalSolution(<double*> xOpt.data)

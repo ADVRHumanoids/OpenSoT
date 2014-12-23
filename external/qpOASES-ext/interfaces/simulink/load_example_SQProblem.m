@@ -24,8 +24,8 @@
 
 %%
 %%	Filename:  interfaces/simulink/load_example_SQProblem.m
-%%	Author:    Aude Perrin, Hans Joachim Ferreau
-%%	Version:   3.0beta
+%%	Author:    Hans Joachim Ferreau (thanks to Aude Perrin)
+%%	Version:   3.0
 %%	Date:      2007-2014
 %%
 
@@ -41,43 +41,43 @@ H.time = simulationTime;
 data1 = [1.0,0.0,0.0,0.5];
 data2 = [1.0,0.5,0.5,0.5];
 H.signals.values = [data1; data2];
-H.signals.dimensions = 4;
+H.signals.dimensions = length(data1);
 
 g.time = simulationTime;
 data1 = [1.5,1.0];
 data2 = [1.0,1.5];
 g.signals.values = [data1; data2];
-g.signals.dimensions = 2;
+g.signals.dimensions = length(data1);
 
 A.time = simulationTime;
 data1 = [1.0,1.0];
 data2 = [1.0,5.0];
 A.signals.values = [data1; data2];
-A.signals.dimensions = 2;
+A.signals.dimensions = length(data1);
 
 lb.time = simulationTime;
 data1 = [0.5,-2.0];
 data2 = [0.0,-1.0];
 lb.signals.values = [data1; data2];
-lb.signals.dimensions = 2;
+lb.signals.dimensions = length(data1);
 
 ub.time = simulationTime;
 data1 = [5.0,2.0];
 data2 = [5.0,-0.5];
 ub.signals.values = [data1; data2];
-ub.signals.dimensions = 2;
+ub.signals.dimensions = length(data1);
 
 lbA.time = simulationTime;
 data1 = [-1.0];
 data2 = [-2.0];
 lbA.signals.values = [data1; data2];
-lbA.signals.dimensions = 1;
+lbA.signals.dimensions = length(data1);
 
 ubA.time = simulationTime;
 data1 = [2.0];
 data2 = [1.0];
 ubA.signals.values = [data1; data2];
-ubA.signals.dimensions = 1;
+ubA.signals.dimensions = length(data1);
 
 
 clear simulationTime data1 data2
