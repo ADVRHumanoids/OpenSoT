@@ -89,12 +89,12 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         std::cout<<RED<<"ERROR INITIALIZING QP PROBLEM "<<DEFAULT<<std::endl;
         std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
 
-
         std::time_t now = std::time(0);
         std::string file_name = "qp_problem_log_";
         file_name.append(ctime(&now));
         file_name = file_name + ".mat";
         _problem->writeQpDataIntoMatFile(file_name.c_str());
+
         return false;
     }
 
