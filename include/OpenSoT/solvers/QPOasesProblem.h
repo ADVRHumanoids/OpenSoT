@@ -109,6 +109,7 @@ namespace OpenSoT{
          * for now is not possible to have different size of H and g wrt internal ones
          * @param H updated task matrix
          * @param g updated reference vector
+         * @return true if task is correctly updated
          */
         bool updateTask(const Matrix& H, const Vector& g);
 
@@ -121,6 +122,7 @@ namespace OpenSoT{
          * @param A update constraint matrix
          * @param lA update lower constraint vector
          * @param uA update upper constraint vector
+         * @return true if constraints are correctly updated
          */
         bool updateConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
 
@@ -130,6 +132,7 @@ namespace OpenSoT{
          * _u = u
          * @param l update lower bounds
          * @param u update upper bounds
+         * @return true if bounds are correctly updated
          */
         bool updateBounds(const Vector& l, const Vector& u);
 
@@ -142,6 +145,7 @@ namespace OpenSoT{
          * @param uA update upper constraint vector
          * @param l update lower bounds
          * @param u update upper bounds
+         * @return if the problem is correctly updated
          */
         bool updateProblem(const Matrix& H, const Vector& g,
                            const Matrix& A,
@@ -216,8 +220,7 @@ namespace OpenSoT{
         const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
 
         /**
-         * @brief getH return Hessian
-         * @return a matrix
+         * Getters for internal matrices and vectors
          */
         const yarp::sig::Matrix& getH(){return _H;}
         const yarp::sig::Vector& getg(){return _g;}
@@ -227,7 +230,11 @@ namespace OpenSoT{
         const yarp::sig::Vector& getl(){return _l;}
         const yarp::sig::Vector& getu(){return _u;}
 
-
+        /**
+         * @brief printProblemInformation print some extra information about the problem
+         * @param problem_number a number to identify the problem
+         * @param problem_id a string to identify the problem
+         */
         void printProblemInformation(const int problem_number, const std::string problem_id);
 
     protected:
@@ -286,8 +293,6 @@ namespace OpenSoT{
         Vector _solution;
         Vector _dual_solution;
     };
-
-
     }
 }
 #endif
