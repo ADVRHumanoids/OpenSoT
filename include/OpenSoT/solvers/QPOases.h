@@ -54,6 +54,7 @@ namespace OpenSoT{
          * @brief QPOases_sot constructor of the problem
          * @param stack_of_tasks a vector of tasks
          * @param eps_regularisation regularisation factor
+         * @throw exception if the stack can not be initialized
          */
         QPOases_sot(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
 
@@ -62,6 +63,7 @@ namespace OpenSoT{
          * @param stack_of_tasks a vector of tasks
          * @param bounds a vector of bounds passed to all the stacks
          * @param eps_regularisation regularisation factor
+         * @throw exception if the stack can not be initialized
          */
         QPOases_sot(Stack& stack_of_tasks,
                     boost::shared_ptr<OpenSoT::constraints::Aggregated>& bounds,
@@ -70,19 +72,70 @@ namespace OpenSoT{
 
         ~QPOases_sot(){}
 
+        /**
+         * @brief solve a stack of tasks
+         * @param solution vector
+         * @return true if all the stack is solved
+         */
         bool solve(Vector& solution);
+
+        /**
+         * @brief getNumberOfTasks
+         * @return lenght of the stack
+         */
         unsigned int getNumberOfTasks(){return _qp_stack_of_tasks.size();}
 
+        /**
+         * @brief setOptions set option to a particular task
+         * @param i number of task to set the option
+         * @param opt options for task i
+         * @return true if succeed
+         */
         bool setOptions(const unsigned int i, const qpOASES::Options &opt);
+
+        /**
+         * @brief getOptions
+         * @param i
+         * @param opt
+         * @return
+         */
         bool getOptions(const unsigned int i, qpOASES::Options& opt);
 
     protected:
+        /**
+         * @brief _qp_stack_of_tasks vector of QPOases Problem
+         */
         vector <QPOasesProblem> _qp_stack_of_tasks;
+
+        /**
+         * @brief _epsRegularisation regularisation factor for dumped least squares
+         */
         double _epsRegularisation;
 
+        /**
+         * @brief prepareSoT initialize the complete stack
+         * @return true if stack is correctly initialized
+         */
         bool prepareSoT();
 
+        /**
+         * @brief computeVelCtrlCostFunction compute a cost function for velocity control:
+         *          F = ||Jdq - v||
+         * @param task to get Jacobian and reference
+         * @param H Hessian matrix computed as J'J
+         * @param g reference vector computed as J'v
+         */
         void computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g);
+
+        /**
+         * @brief computeVelCtrlOptimalityConstraint compute optimality constraint for velocity control:
+         *      Jj*dqj = Jj*dqi
+         * @param task to get Jacobian of the previous task
+         * @param problem to get solution of the previous task
+         * @param A constraint matrix
+         * @param lA lower bounds
+         * @param uA upper bounds
+         */
         void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
                                                 yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA);
 
