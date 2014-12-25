@@ -868,16 +868,17 @@ TEST_F(testQPOases_sot, testContructor2Problems)
         joint_constraints->update(q);
 
         ASSERT_TRUE(sot.solve(dq));
+        //std::cout<<"Solution: ["<<dq.toString()<<"]"<<std::endl;
         q += dq;
     }
 
     idynutils.updateiDyn3Model(q);
-//    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
     yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
                 idynutils.iDyn3_model.getLinkIndex("Waist"),
                 idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-//    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
-//    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
+    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
 
 
     KDL::Frame T_kdl;

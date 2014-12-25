@@ -240,6 +240,26 @@ namespace OpenSoT{
          */
         const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
 
+        void printProblemInformation(int i)
+        {
+            std::cout<<std::endl;
+            //if(i == -1)
+                //std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<task->getTaskID()<<std::endl;
+            //else
+                std::cout<<"PROBLEM "<<i<<std::endl;//<<" ID: "<<DEFAULT<<task->getTaskID()<<std::endl;
+            //std::cout<<"eps Regularisation factor: "<<_problem->getOptions().epsRegularisation<<std::endl;
+            std::cout<<"# OF CONSTRAINTS: "<<_lA.size()<<std::endl;
+            std::cout<<"# OF BOUNDS: "<<_l.size()<<std::endl;
+        //    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
+        //    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
+        //    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
+        //    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
+        //    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
+        //    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
+        //    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
+            std::cout<<std::endl;
+        }
+
     protected:
         /**
          * @brief checkInfeasibility function that print informations when the problem is not feasible

@@ -71,19 +71,20 @@ namespace OpenSoT{
         ~QPOases_sot(){}
 
         bool solve(Vector& solution);
-        unsigned int getNumberOfTasks();
-
+        unsigned int getNumberOfTasks(){return _qp_stack_of_tasks.size();}
 
         bool setOptions(const unsigned int i, const qpOASES::Options &opt);
         bool getOptions(const unsigned int i, qpOASES::Options& opt);
 
     protected:
-        vector <QPOasesTask> _qp_stack_of_tasks;
+        vector <QPOasesProblem> _qp_stack_of_tasks;
         double _epsRegularisation;
 
-        bool prepareSoT();
-        bool expandProblem(unsigned int i);
-        bool updateExpandedProblem(unsigned int i);
+        void prepareSoT();
+
+        void computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g);
+        void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
+                                                yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA);
 
     };
 
