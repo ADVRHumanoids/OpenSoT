@@ -4,8 +4,10 @@ QP based Solver
 This solver is based on a cascade of Quadratic Programming (QP) optimization problems. Each problem is solved using
 a QP solver called [qpOASES](https://projects.coin-or.org/qpOASES).
 
-Despite the commented code, there are some internal mechanism (or state machines) that could be not clear at 
+Despite the comments in the code, there are some internal mechanism (or state machines) that could be not clear at 
 first sight. 
+
+The QP solver is based on two main classes: <em>QPOasesProblem</em> and <em>QPOases_sot</em>. 
 
 QPOasesProblem:
 ---------------
@@ -29,6 +31,14 @@ When the problem is solved, the following state machine is used:
 
 In the solve, the first solution is attempted using the <em>hotstart</em> functionality of qpOASES. If it fails, a second soluton is attempted with the initialization with initial guess given from the previous bounds, constraints and solution. If also this fails the init is called as last attempt.
 
+QPOases_sot:
+------------
+This class implements the state machine dedicated to solve the Stack of Tasks. There are some important aspects to be noticed: first the solver takes a vector of tasks and a list of bounds. The assumption done here is that each task in the vector may contains or not some constraints. These constraints are NOT passed to the following task. This means that, if a constraint is present in two different tasks at a differen level in the stack, it has to be added explicitely before the creation of the solver. Second, the bounds are applied to ALL the stacks since they regards directly the variables of all the problems.
 
+The stack is created and initialized in the constructor and if something goes wrong, an exception is thrown. 
 
+When solved, the following state machine is used:
 
+![QPOases_sot::solve()](https://github.com/robotology-playground/OpenSoT/blob/qp_solver/doc/QPOases_sot.solve.png)
+
+<em>Optimality</em> and <em>Cost Function</em> depends on the type of control. 
