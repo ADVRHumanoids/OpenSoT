@@ -4,17 +4,19 @@
 #include <OpenSoT/constraints/BilateralConstraint.h>
 
 #define GREEN "\033[0;32m"
+#define YELLOW "\033[0;33m"
+#define RED "\033[0;31m"
 #define DEFAULT "\033[0m"
 
 using namespace yarp::math;
 using namespace OpenSoT::solvers;
 
-/// QPOases_sot ///
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation):
     Solver(stack_of_tasks),
     _epsRegularisation(eps_regularisation)
 {
-    prepareSoT();
+    if(!prepareSoT())
+        throw "Can Not initizalize SoT!";
 }
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
@@ -22,7 +24,8 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
     Solver(stack_of_tasks, bounds),
     _epsRegularisation(eps_regularisation)
 {
-    prepareSoT();
+    if(!prepareSoT())
+        throw "Can Not initizalize SoT with bounds!";
 }
 
 void QPOases_sot::computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g)
@@ -44,7 +47,7 @@ void QPOases_sot::computeVelCtrlOptimalityConstraint(const TaskPtr& task, OpenSo
     uA = optimality_bilateral_constraint->getbUpperBound();
 }
 
-void QPOases_sot::prepareSoT()
+bool QPOases_sot::prepareSoT()
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
@@ -81,9 +84,11 @@ void QPOases_sot::prepareSoT()
 
         if(problem_i.initProblem(H, g, A, lA, uA, l, u))
             _qp_stack_of_tasks.push_back(problem_i);
-        else
-            std::cout<<"ERROR INITIALIZING TASK "<<i<<std::endl;
+        else{
+            std::cout<<RED<<"ERROR: INITIALIZING TASK "<<i<<DEFAULT<<std::endl;
+            return false;}
     }
+    return true;
 }
 
 bool QPOases_sot::solve(Vector &solution)
@@ -93,7 +98,8 @@ bool QPOases_sot::solve(Vector &solution)
         yarp::sig::Matrix H;
         yarp::sig::Vector g;
         computeVelCtrlCostFunction(_tasks[i], H, g);
-        _qp_stack_of_tasks[i].updateTask(H, g);
+        if(!_qp_stack_of_tasks[i].updateTask(H, g))
+            return false;
 
         OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
         yarp::sig::Matrix A = constraints_task_i.getAineq();
@@ -111,10 +117,12 @@ bool QPOases_sot::solve(Vector &solution)
                 uA = yarp::math::cat(uA, tmp_uA);
             }
         }
-        _qp_stack_of_tasks[i].updateConstraints(A, lA, uA);
+        if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
+            return false;
 
         if(_bounds)
-            _qp_stack_of_tasks[i].updateBounds(_bounds->getLowerBound(), _bounds->getUpperBound());
+            if(!_qp_stack_of_tasks[i].updateBounds(_bounds->getLowerBound(), _bounds->getUpperBound()))
+                return false;
 
         if(!_qp_stack_of_tasks[i].solve())
             return false;
@@ -126,11 +134,9 @@ bool QPOases_sot::solve(Vector &solution)
 
 bool QPOases_sot::setOptions(const unsigned int i, const qpOASES::Options &opt)
 {
-    if(i > _qp_stack_of_tasks.size())
-    {
-        std::cout<<"Index out of range!"<<std::endl;
-        return false;
-    }
+    if(i > _qp_stack_of_tasks.size()){
+        std::cout<<RED<<"ERROR Index out of range!"<<DEFAULT<<std::endl;
+        return false;}
 
     _qp_stack_of_tasks[i].setOptions(opt);
     return true;
@@ -139,11 +145,9 @@ bool QPOases_sot::setOptions(const unsigned int i, const qpOASES::Options &opt)
 bool QPOases_sot::getOptions(const unsigned int i, qpOASES::Options& opt)
 {
 
-    if(i > _qp_stack_of_tasks.size())
-    {
-        std::cout<<"Index out of range!"<<std::endl;
-        return false;
-    }
+    if(i > _qp_stack_of_tasks.size()){
+        std::cout<<RED<<"Index out of range!"<<DEFAULT<<std::endl;
+        return false;}
 
     opt = _qp_stack_of_tasks[i].getOptions();
     return true;

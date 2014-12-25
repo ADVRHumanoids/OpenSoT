@@ -80,7 +80,7 @@ namespace OpenSoT{
         vector <QPOasesProblem> _qp_stack_of_tasks;
         double _epsRegularisation;
 
-        void prepareSoT();
+        bool prepareSoT();
 
         void computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g);
         void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
