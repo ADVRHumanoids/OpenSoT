@@ -489,58 +489,6 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     EXPECT_EQ(-sp.g[1], s[1]);
 }
 
-///**
-// * @brief TEST_F testAddProblem test solution of a simple NON-CONSTANT QP problem
-// * with variable size of H, g, A, lA, uA, l and u.
-// */
-//TEST_F(testQPOasesProblem, testAddProblem)
-//{
-//    yarp::sig::Vector x(3);
-
-//    yarp::sig::Matrix H(2,3); H.zero(); H(0,0) = 1.0; H(1,1) = 1.0;
-//    yarp::sig::Matrix H_new(1,3); H_new.zero(); H_new(0,2) = 1.0;
-
-//    yarp::sig::Vector g(2); g[0] = 5.0; g[1] = -5.0;
-//    yarp::sig::Vector g_new(1); g_new[0] = 2.0;
-
-//    yarp::sig::Matrix A(2,3); A.zero();
-//    yarp::sig::Matrix A_new(1,3); A_new.zero();
-
-//    yarp::sig::Vector l(2, -10.0);
-//    yarp::sig::Vector l_new(1, -10.0);
-
-//    yarp::sig::Vector u(2, 10.0);
-//    yarp::sig::Vector u_new(1, 10.0);
-
-//    yarp::sig::Vector lA; lA = l;
-//    yarp::sig::Vector lA_new; lA_new = l_new;
-
-//    yarp::sig::Vector uA; uA = u;
-//    yarp::sig::Vector uA_new; uA_new = u_new;
-//    qpOASES::HessianType ht = qpOASES::HST_IDENTITY;
-
-
-//    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), A.rows(), (OpenSoT::HessianType)ht);
-
-//    testProblem.initProblem(H, g, A, lA, uA, l, u);
-
-//    testProblem.solve();
-//    yarp::sig::Vector s1 = testProblem.getSolution();
-//    EXPECT_NEAR(-g[0], s1[0], 1E-6);
-//    EXPECT_NEAR(-g[1], s1[1], 1E-6);
-//    std::cout<<GREEN<<"s1 size: "<<s1.size()<<DEFAULT<<std::endl;
-//    std::cout<<GREEN<<"s1 solution: ["<<s1[0]<<" "<<s1[1]<<" "<<s1[2]<<"]"<<DEFAULT<<std::endl;
-
-//    testProblem.setnWSR(127);
-//    testProblem.addProblem(H_new, g_new, A_new, lA_new, uA_new, l_new, u_new);
-//    yarp::sig::Vector s2 = testProblem.getSolution();
-//    EXPECT_NEAR(-g[0], s2[0], 1E-6);
-//    EXPECT_NEAR(-g[1], s2[1], 1E-6);
-//    EXPECT_NEAR(-g_new[0], s2[2], 1E-6);
-//    std::cout<<GREEN<<"s2 size: "<<s2.size()<<DEFAULT<<std::endl;
-//    std::cout<<GREEN<<"s2 solution: ["<<s2[0]<<" "<<s2[1]<<" "<<s2[2]<<"]"<<DEFAULT<<std::endl;
-//}
-
 TEST_F(testQPOasesProblem, testTask)
 {
     yarp::sig::Vector q_ref(10, 0.0);
@@ -585,12 +533,14 @@ TEST_F(testQPOasesTask, testQPOasesTask)
     postural_task->update(q);
     std::cout<<"error: "<<postural_task->getb().toString()<<std::endl;
 
-    OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
+    OpenSoT::solvers::QPOasesProblem qp_postural_problem(postural_task->getXSize(), 0,
+                                                         postural_task->getHessianAtype());
 
-    postural_task->update(q);
-    EXPECT_TRUE(qp_postural_task.solve());
-    std::cout<<"solution: "<<qp_postural_task.getSolution().toString()<<std::endl;
-    q += qp_postural_task.getSolution();
+    EXPECT_TRUE(qp_postural_problem.initProblem(postural_task->getA(), -1.0*postural_task->getb(),
+                                                yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                                yarp::sig::Vector(), yarp::sig::Vector()));
+    std::cout<<"solution: "<<qp_postural_problem.getSolution().toString()<<std::endl;
+    q += qp_postural_problem.getSolution();
 
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_DOUBLE_EQ(q[i], q_ref[i]);

@@ -73,17 +73,16 @@ bool QPOases_sot::prepareSoT()
         }
 
         yarp::sig::Vector l,u;
-        if(_bounds)
-        {
+        if(_bounds){
             l = _bounds->getLowerBound();
-            u = _bounds->getUpperBound();
-        }
+            u = _bounds->getUpperBound();}
 
         QPOasesProblem problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                  _epsRegularisation);
 
-        if(problem_i.initProblem(H, g, A, lA, uA, l, u))
+        if(problem_i.initProblem(H, g, A, lA, uA, l, u)){
             _qp_stack_of_tasks.push_back(problem_i);
+            _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID());}
         else{
             std::cout<<RED<<"ERROR: INITIALIZING TASK "<<i<<DEFAULT<<std::endl;
             return false;}

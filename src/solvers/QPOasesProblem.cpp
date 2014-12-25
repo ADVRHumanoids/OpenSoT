@@ -359,7 +359,7 @@ OpenSoT::HessianType QPOasesProblem::getHessianType() {return (OpenSoT::HessianT
 
 void QPOasesProblem::setHessianType(const OpenSoT::HessianType ht){_problem->setHessianType((qpOASES::HessianType)(ht));}
 
-void OpenSoT::solvers::QPOasesProblem::checkInfeasibility()
+void QPOasesProblem::checkInfeasibility()
 {
     qpOASES::Constraints infeasibleConstraints;
     _problem->getConstraints(infeasibleConstraints);
@@ -381,4 +381,25 @@ void OpenSoT::solvers::QPOasesProblem::checkInfeasibility()
     std::cout<<"--------------------------------------------"<<std::endl;
     for(unsigned int i = 0; i < _lA.size(); ++i)
         std::cout<<i<<": "<<_lA[i]<<" <= "<<_A.getRow(i).toString()<<" <= "<<_uA[i]<<std::endl;
+}
+
+void QPOasesProblem::printProblemInformation(const int problem_number, const std::string problem_id)
+{
+    std::cout<<std::endl;
+    if(problem_number == -1)
+        std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<problem_id<<std::endl;
+    else
+        std::cout<<GREEN<<"PROBLEM "<<problem_number<<" ID: "<<DEFAULT<<problem_id<<std::endl;
+    std::cout<<GREEN<<"eps Regularisation factor: "<<_problem->getOptions().epsRegularisation<<DEFAULT<<std::endl;
+    std::cout<<GREEN<<"# OF CONSTRAINTS: "<<_problem->getNC()<<DEFAULT<<std::endl;
+    std::cout<<GREEN<<"# OF BOUNDS: "<<_l.size()<<DEFAULT<<std::endl;
+    std::cout<<GREEN<<"# OF VARIABLES: "<<_problem->getNV()<<DEFAULT<<std::endl;
+//    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
+//    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
+//    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
+//    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
+//    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
+//    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
+//    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
+    std::cout<<std::endl;
 }
