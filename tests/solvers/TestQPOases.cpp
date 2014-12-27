@@ -1476,6 +1476,87 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
 
 }
 
+TEST_F(testQPOases_sot, tryFollowingBounds) {
+
+    iDynUtils idynutils_com;
+
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
+    idynutils_com.updateiDyn3Model(q, true);
+    idynutils_com.setFloatingBaseLink(idynutils_com.left_leg.chain_name);
+
+    // BOUNDS
+
+    OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
+            new velocity::JointLimits( q,
+                                       idynutils_com.iDyn3_model.getJointBoundMax(),
+                                       idynutils_com.iDyn3_model.getJointBoundMin());
+
+    std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
+    bounds_list.push_back(boundsJointLimits);
+
+    OpenSoT::constraints::Aggregated::Ptr bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+
+    OpenSoT::tasks::velocity::CoM::Ptr com_task(
+                new OpenSoT::tasks::velocity::CoM(q, idynutils_com));
+    com_task->setLambda(1.0);
+    OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
+                new OpenSoT::constraints::velocity::CoMVelocity(
+                    yarp::sig::Vector(3, 0.05), 0.01 , q, idynutils_com));
+    com_task->getConstraints().push_back(boundsCoMVelocity);
+    OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsConvexHull(
+                new OpenSoT::constraints::velocity::ConvexHull(q, idynutils_com));
+    com_task->getConstraints().push_back(boundsConvexHull);
+
+    // Postural Task
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+            new OpenSoT::tasks::velocity::Postural(q));
+    postural_task->setReference(q);
+
+    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(com_task);
+    stack_of_tasks.push_back(postural_task);
+
+    penSoT::solvers::QPOases_sot::::Ptr sot(
+        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, 1E0));
+
+
+    //SET SOME REFERENCES
+    yarp::sig::Vector T_com_p_init = idynutils.iDyn3_model.getCOM();
+    yarp::sig::Vector T_com_p_ref = T_com_p_init;
+    T_com_p_ref[1] += 0.1;
+    yarp::sig::Matrix T_com_ref(4,4); T_com_ref.eye();
+    T_com_ref(0,3) = T_com_p_ref[0];
+    T_com_ref(1,3) = T_com_p_ref[1];
+    T_com_ref(2,3) = T_com_p_ref[2];
+    KDL::Frame T_com_ref_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T_com_ref, T_com_ref_kdl);
+
+    com_task->setReference(T_com_p_ref);
+
+    yarp::sig::Vector dq(q.size(), 0.0);
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        idynutils_com.updateiDyn3Model(q, true);
+
+        com_task->update(q);
+        taskJointAggregated->update(q);
+        bounds->update(q);
+
+        EXPECT_TRUE(sot->solve(dq));
+        q += dq;
+    }
+
+    updateiDyn3Model(true, q, coman);
+    convexHull->update(q);
+    std::vector<KDL::Vector> points;
+    convexHull->getConvexHull(points);
+
+    for(auto points : points) {
+
+    }
+}
+
 }
 
 int main(int argc, char **argv) {
