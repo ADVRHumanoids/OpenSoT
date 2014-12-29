@@ -680,19 +680,16 @@ TEST_F(testQPOasesTask, testCoMTask)
 
     boost::shared_ptr<OpenSoT::constraints::velocity::CoMVelocity> com_vel_constr(
                 new OpenSoT::constraints::velocity::CoMVelocity(
-                    yarp::sig::Vector(3,0.05),1.0,q,idynutils));
+                    yarp::sig::Vector(3,0.06),1.0,q,idynutils));
     com_task->getConstraints().push_back(com_vel_constr);
 
     std::list< boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >>> constraint_list =
             com_task->getConstraints();
     boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >> constraint = constraint_list.front();
 
-    std::cout<<"lA: ["<<constraint->getbLowerBound().toString()<<"]"<<std::endl;
-    std::cout<<"uA: ["<<constraint->getbUpperBound().toString()<<"]"<<std::endl;
-
-    OpenSoT::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), 2.0*constraint->getbLowerBound().size(),
+    OpenSoT::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
                                                     com_task->getHessianAtype());
-    EXPECT_TRUE(qp_CoM_problem.initProblem(com_task->getA(), -1.0*com_task->getb(),
+    ASSERT_TRUE(qp_CoM_problem.initProblem(com_task->getA().transposed()*com_task->getA(), -1.0*com_task->getA().transposed()*com_task->getb(),
                                                 constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
                                                 yarp::sig::Vector(), yarp::sig::Vector()));
 
@@ -710,7 +707,7 @@ TEST_F(testQPOasesTask, testCoMTask)
         idynutils.updateiDyn3Model(q,true);
         com_task->update(q);
 
-        qp_CoM_problem.updateProblem(com_task->getA(), -1.0*com_task->getb(),
+        qp_CoM_problem.updateProblem(com_task->getA().transposed()*com_task->getA(), -1.0*com_task->getA().transposed()*com_task->getb(),
                                           constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
                                           yarp::sig::Vector(), yarp::sig::Vector());
 
