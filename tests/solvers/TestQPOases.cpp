@@ -744,16 +744,19 @@ TEST_F(testQPOasesTask, testCartesian)
     cartesian_task->setReference(T_ref);
     cartesian_task->update(q);
 
-    OpenSoT::solvers::QPOasesTask cartesian_qp(cartesian_task);
+    OpenSoT::solvers::QPOasesProblem qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
+    ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transposed()*cartesian_task->getA(), -1.0*cartesian_task->getA().transposed()*cartesian_task->getb(),
+                                                yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                                yarp::sig::Vector(), yarp::sig::Vector()));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
         idynutils.updateiDyn3Model(q, true);
 
         cartesian_task->update(q);
-
-        ASSERT_TRUE(cartesian_qp.solve());
-        q += cartesian_qp.getSolution();
+        qp_cartesian_problem.updateTask(cartesian_task->getA().transposed()*cartesian_task->getA(), -1.0*cartesian_task->getA().transposed()*cartesian_task->getb());
+        ASSERT_TRUE(qp_cartesian_problem.solve());
+        q += qp_cartesian_problem.getSolution();
     }
 
     T = idynutils.iDyn3_model.getPosition(
