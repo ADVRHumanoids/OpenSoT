@@ -563,10 +563,18 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         postural_task->getConstraints().push_back(joint_limits);
         postural_task->setLambda(0.1);
 
-        OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
+        OpenSoT::solvers::QPOasesProblem qp_postural_problem(postural_task->getXSize(), 0,
+                                                             postural_task->getHessianAtype());
+        std::list< boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >>> constraint_list =
+                postural_task->getConstraints();
+        boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >> constraint = constraint_list.front();
+        EXPECT_TRUE(qp_postural_problem.initProblem(postural_task->getA(), -1.0*postural_task->getb(),
+                                                    yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                                    constraint->getLowerBound(), constraint->getUpperBound()));
 
-        yarp::sig::Vector l_old, u_old;
-        qp_postural_task.getBounds(l_old, u_old);
+        yarp::sig::Vector l_old = qp_postural_problem.getl();
+        yarp::sig::Vector u_old = qp_postural_problem.getu();
+
         EXPECT_TRUE(l_old == idynutils.iDyn3_model.getJointBoundMin());
         EXPECT_TRUE(u_old == idynutils.iDyn3_model.getJointBoundMax());
 
@@ -574,9 +582,14 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         for(unsigned int i = 0; i < 100; ++i)
         {
             postural_task->update(q);
-            EXPECT_TRUE(qp_postural_task.solve());
-            qp_postural_task.getBounds(l, u);
-            q += qp_postural_task.getSolution();
+
+            qp_postural_problem.updateProblem(postural_task->getA(), -1.0*postural_task->getb(),
+                                              yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                              constraint->getLowerBound(), constraint->getUpperBound());
+            EXPECT_TRUE(qp_postural_problem.solve());
+            l = qp_postural_problem.getl();
+            u = qp_postural_problem.getu();
+            q += qp_postural_problem.getSolution();
 
             if(i > 1)
             {
