@@ -55,10 +55,10 @@ bool QPOases_sot::prepareSoT()
         yarp::sig::Vector g;
         computeVelCtrlCostFunction(_tasks[i], H, g);
 
-        OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
-        yarp::sig::Matrix A = constraints_task_i.getAineq();
-        yarp::sig::Vector lA = constraints_task_i.getbLowerBound();
-        yarp::sig::Vector uA = constraints_task_i.getbUpperBound();
+        OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
+        yarp::sig::Matrix A = constraints_task_i->getAineq();
+        yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
+        yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
@@ -72,10 +72,10 @@ bool QPOases_sot::prepareSoT()
             }
         }
 
-        yarp::sig::Vector l,u;
-        if(_bounds){
-            l = _bounds->getLowerBound();
-            u = _bounds->getUpperBound();}
+        if(_bounds)
+            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
+        yarp::sig::Vector l = constraints_task_i->getLowerBound();
+        yarp::sig::Vector u = constraints_task_i->getUpperBound();
 
         QPOasesProblem problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                  _epsRegularisation);
@@ -100,10 +100,10 @@ bool QPOases_sot::solve(Vector &solution)
         if(!_qp_stack_of_tasks[i].updateTask(H, g))
             return false;
 
-        OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
-        yarp::sig::Matrix A = constraints_task_i.getAineq();
-        yarp::sig::Vector lA = constraints_task_i.getbLowerBound();
-        yarp::sig::Vector uA = constraints_task_i.getbUpperBound();
+        OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
+        yarp::sig::Matrix A = constraints_task_i->getAineq();
+        yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
+        yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
@@ -119,9 +119,10 @@ bool QPOases_sot::solve(Vector &solution)
         if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
             return false;
 
-        if(_bounds)
-            if(!_qp_stack_of_tasks[i].updateBounds(_bounds->getLowerBound(), _bounds->getUpperBound()))
-                return false;
+        if(_bounds){
+            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
+            if(!_qp_stack_of_tasks[i].updateBounds(constraints_task_i->getLowerBound(), constraints_task_i->getUpperBound()))
+                return false;}
 
         if(!_qp_stack_of_tasks[i].solve())
             return false;
