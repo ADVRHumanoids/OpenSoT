@@ -122,7 +122,7 @@
 
                 /**
                  * @brief getReference returns the Cartesian task reference
-                 * @return the Cartesian task reference $R^{4x4} homogeneous transform matrix describing the desired pose
+                 * @return the Cartesian task reference \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
                 const yarp::sig::Matrix getReference() const;
@@ -140,7 +140,7 @@
 
                 /**
                  * @brief getActualPose returns the distal_link actual pose. You need to call _update(x) for the actual pose to change
-                 * @return the $R^{4x4} homogeneous transform matrix describing the actual pose
+                 * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
                  * for the distal_link in the base_link frame of reference.
                  */
                 const yarp::sig::Matrix getActualPose() const;
