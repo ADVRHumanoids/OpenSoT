@@ -683,7 +683,19 @@ TEST_F(testQPOasesTask, testCoMTask)
                     yarp::sig::Vector(3,0.05),1.0,q,idynutils));
     com_task->getConstraints().push_back(com_vel_constr);
 
-    OpenSoT::solvers::QPOasesTask qp_CoM_task(com_task);
+    std::list< boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >>> constraint_list =
+            com_task->getConstraints();
+    boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >> constraint = constraint_list.front();
+
+    std::cout<<"lA: ["<<constraint->getbLowerBound().toString()<<"]"<<std::endl;
+    std::cout<<"uA: ["<<constraint->getbUpperBound().toString()<<"]"<<std::endl;
+
+    OpenSoT::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), 2.0*constraint->getbLowerBound().size(),
+                                                    com_task->getHessianAtype());
+    EXPECT_TRUE(qp_CoM_problem.initProblem(com_task->getA(), -1.0*com_task->getb(),
+                                                constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
+                                                yarp::sig::Vector(), yarp::sig::Vector()));
+
 
     yarp::sig::Vector com_i = com_task->getActualPosition();
     yarp::sig::Vector com_f = com_i;
@@ -698,8 +710,12 @@ TEST_F(testQPOasesTask, testCoMTask)
         idynutils.updateiDyn3Model(q,true);
         com_task->update(q);
 
-        ASSERT_TRUE(qp_CoM_task.solve());
-        yarp::sig::Vector dq = qp_CoM_task.getSolution();
+        qp_CoM_problem.updateProblem(com_task->getA(), -1.0*com_task->getb(),
+                                          constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
+                                          yarp::sig::Vector(), yarp::sig::Vector());
+
+        ASSERT_TRUE(qp_CoM_problem.solve());
+        yarp::sig::Vector dq = qp_CoM_problem.getSolution();
         q += dq;
     }
 

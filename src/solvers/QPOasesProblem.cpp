@@ -2,7 +2,8 @@
 #include <yarp/math/Math.h>
 #include <qpOASES.hpp>
 #include <ctime>
-
+#include <qpOASES/Utils.hpp>
+#include <fstream>
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -89,11 +90,19 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         std::cout<<RED<<"ERROR INITIALIZING QP PROBLEM "<<DEFAULT<<std::endl;
         std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
 
-        std::time_t now = std::time(0);
+        time_t rawtime;
+        struct tm * timeinfo;
+        char buffer [80];
+        time (&rawtime);
+        timeinfo = localtime (&rawtime);
+        strftime (buffer,80,"%Y%m%d_%H%M%S",timeinfo);
         std::string file_name = "qp_problem_log_";
-        file_name.append(ctime(&now));
-        file_name = file_name + ".mat";
-        _problem->writeQpDataIntoMatFile(file_name.c_str());
+        file_name.append(buffer);
+        file_name = file_name + ".m";
+        if(writeQPIntoMFile(file_name.c_str()))
+            std::cout<<"Wrote QP problem into mat file "<<file_name<<std::endl;
+        else
+            std::cout<<RED<<"ERROR while writing QP problem into mat file!"<<DEFAULT<<std::endl;
 
         return false;
     }
@@ -411,4 +420,24 @@ void QPOasesProblem::printProblemInformation(const int problem_number, const std
 //    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
 //    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
     std::cout<<std::endl;
+}
+
+bool QPOasesProblem::writeQPIntoMFile(const std::string& file_name)
+{
+    std::ofstream file;
+    file.open(file_name);
+    if(file.is_open())
+    {
+        file<<"H = [\n"<<_H.toString()<<"\n]\n\n";
+        file<<"g = [\n"<<_g.toString()<<"\n]\n\n";
+        file<<"A = [\n"<<_A.toString()<<"\n]\n\n";
+        file<<"lA = [\n"<<_lA.toString()<<"\n]\n\n";
+        file<<"uA = [\n"<<_uA.toString()<<"\n]\n\n";
+        file<<"l = [\n"<<_l.toString()<<"\n]\n\n";
+        file<<"u = [\n"<<_u.toString()<<"\n]";
+
+        file.close();
+        return true;
+    }
+    return false;
 }

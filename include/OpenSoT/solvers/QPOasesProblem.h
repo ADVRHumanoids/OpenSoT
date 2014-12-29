@@ -237,6 +237,8 @@ namespace OpenSoT{
          */
         void printProblemInformation(const int problem_number, const std::string problem_id);
 
+        bool writeQPIntoMFile(const std::string& file_name);
+
     protected:
         /**
          * @brief checkInfeasibility function that print informations when the problem is not feasible
