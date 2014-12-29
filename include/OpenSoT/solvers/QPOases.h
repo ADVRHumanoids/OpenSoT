@@ -26,7 +26,6 @@
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include "QPOasesProblem.h"
-#include "QPOasesTask.h"
 
 
 
