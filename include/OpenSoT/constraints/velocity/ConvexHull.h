@@ -56,7 +56,7 @@
                 void update(const yarp::sig::Vector &x);
 
                 /**
-                 * @brief getConstraints returns A and b such that A*\delta q < b implies staying in the convex hull
+                 * @brief getConstraints returns A and b such that \f$A*\delta q < b\f$ implies staying in the convex hull
                  * @param points a list of points representing the convex hull
                  * @param A the matrix of constraints
                  * @param b the vector of coefficients
