@@ -25,7 +25,7 @@
 ##
 ##	Filename:  make_windows.mk
 ##	Author:    Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
-##	Version:   3.0beta
+##	Version:   3.0
 ##	Date:      2007-2014
 ##
 
@@ -34,28 +34,79 @@
 ##	definitions for compiling with Visual Studio under Windows
 ##
 
+
+################################################################################
+# user configuration
+
+# include directories, relative
+IDIR =   ${TOP}/include
+SRCDIR = ${TOP}/src
+BINDIR = ${TOP}/bin
+
+# Matlab include directory (ADAPT TO YOUR LOCAL SETTINGS!)
+#MATLAB_IDIR   = ${HOME}/Programs/matlab/extern/include/
+MATLAB_IDIR = /usr/local/matlab/extern/include/
+MATLAB_LIBDIR = /usr/local/matlab/bin/glnxa64/
+
+
+# system or replacement BLAS/LAPACK
+REPLACE_LINALG = 1
+
+ifeq ($(REPLACE_LINALG), 1)
+	LIB_BLAS =   ${SRCDIR}/BLASReplacement.o
+	LIB_LAPACK = ${SRCDIR}/LAPACKReplacement.o
+else
+	LIB_BLAS =   /usr/lib/libblas.so
+	LIB_LAPACK = /usr/lib/liblapack.so
+endif
+
+
+################################################################################
+# do not touch this
+
 CPP = cl
 AR  = ar
 RM  = rm
+F77 = gfortran
+ECHO = echo
+CD = cd
+CP = copy
 
+# file extensions
 OBJEXT = obj
 LIBEXT = lib
+DLLEXT = so
 EXE = .exe
-DEF_TARGET =
+MEXOCTEXT = mex
+DEF_TARGET = 
+SHARED = /LD
+
+# 32 or 64 depending on target platform
+BITS = $(shell getconf LONG_BIT)
+
+# decide on MEX interface extension
+ifeq ($(BITS), 32)
+	MEXEXT = mexglx
+else
+	MEXEXT = mexa64
+endif
 
 CPPFLAGS = -nologo -EHsc -DWIN32 -Dsnprintf=_snprintf
 #-g -D__DEBUG__ -D__NO_COPYRIGHT__ -D__SUPPRESSANYOUTPUT__
 
-QPOASES_LIB         =  ${SRCDIR}/libqpOASES.${LIBEXT}
-QPOASES_EXTRAS_LIB  =  ${SRCDIR}/libqpOASESextras.${LIBEXT}
+FFLAGS = -Wall -O3 -fPIC -DWIN32 -Wno-uninitialized
+#        -g
 
-## system BLAS or qpOASES replacement BLAS
-#LIB_BLAS = /usr/lib/libblas.so
-LIB_BLAS = ${SRCDIR}/BLASReplacement.o
+# libraries to link against when building qpOASES .so files
+LINK_LIBRARIES = ${LIB_LAPACK} ${LIB_BLAS}
+LINK_LIBRARIES_AW = ${LIB_LAPACK} ${LIB_BLAS} -lm -lgfortran -lhsl_ma57 -lfakemetis
 
-## system LAPACK or qpOASES replacement LAPACK
-#LIB_LAPACK = /usr/lib/liblapack.so
-LIB_LAPACK = ${SRCDIR}/LAPACKReplacement.o
+# how to link against the qpOASES shared library
+QPOASES_LINK = /I${BINDIR} /WL /link ${BINDIR}/libqpOASES.lib
+QPOASES_AW_LINK = /I${BINDIR} /WL /link ${BINDIR}/libqpOASES_aw.lib
+
+# link dependencies when creating executables
+LINK_DEPENDS = ${LIB_LAPACK} ${LIB_BLAS} ${BINDIR}/libqpOASES.${LIBEXT} ${BINDIR}/libqpOASES.${DLLEXT}
 
 
 ##

@@ -20,8 +20,12 @@
 ##  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ##
 
-## author: Sebastian F. Walter, Manuel Kudruss
-
+##
+##    Filename:  qpoases.pxd
+##    Author:    Sebastian F. Walter, Manuel Kudruss
+##    Version:   3.0
+##    Date:      2013-2014
+##
 
 cdef extern from "qpOASES.hpp" namespace "qpOASES":
 
@@ -64,6 +68,7 @@ cdef extern from "qpOASES.hpp" namespace "qpOASES":
         HST_POSDEF
         HST_POSDEF_NULLSPACE
         HST_SEMIDEF
+        HST_INDEF
         HST_UNKNOWN
 
     cdef enum SubjectToType:
@@ -206,6 +211,8 @@ cdef extern from "qpOASES.hpp" namespace "qpOASES":
         RET_CONSTRAINTS_ARE_NOT_SCALED
         RET_INITIAL_BOUNDS_STATUS_NYI
         RET_ERROR_IN_CONSTRAINTPRODUCT
+        RET_FIX_BOUNDS_FOR_LP
+        RET_USE_REGULARISATION_FOR_LP
         RET_UPDATEMATRICES_FAILED
         RET_UPDATEMATRICES_FAILED_AS_QP_NOT_SOLVED
         RET_UNABLE_TO_OPEN_FILE
@@ -213,6 +220,7 @@ cdef extern from "qpOASES.hpp" namespace "qpOASES":
         RET_UNABLE_TO_READ_FILE
         RET_FILEDATA_INCONSISTENT
         RET_UNABLE_TO_ANALYSE_QPROBLEM
+        RET_OPTIONS_ADJUSTED
         RET_NWSR_SET_TO_ONE
         RET_UNABLE_TO_READ_BENCHMARK
         RET_BENCHMARK_ABORTED
@@ -220,6 +228,7 @@ cdef extern from "qpOASES.hpp" namespace "qpOASES":
         RET_QP_SOLUTION_STARTED
         RET_BENCHMARK_SUCCESSFUL
         RET_NO_DIAGONAL_AVAILABLE
+        RET_DIAGONAL_NOT_INITIALISED
         RET_ENSURELI_DROPPED
         RET_SIMPLE_STATUS_P1
         RET_SIMPLE_STATUS_P0

@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/Flipper.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the Options class designed to manage user-specified
@@ -51,7 +51,7 @@ BEGIN_NAMESPACE_QPOASES
  *	is used by the classe QProblemB and QProblem in case flipping bounds are enabled.
  *
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class Flipper
@@ -67,8 +67,8 @@ class Flipper
 		Flipper( );
 
 		/** Constructor which takes the number of bounds and constraints. */
-		Flipper(	int _nV,		/**< Number of bounds. */
-					int _nC = 0		/**< Number of constraints. */
+		Flipper(	unsigned int _nV,		/**< Number of bounds. */
+					unsigned int _nC = 0		/**< Number of constraints. */
 					);
 
 		/** Copy constructor (deep copy). */
@@ -86,8 +86,8 @@ class Flipper
 		/** Initialises object with given number of bounds and constraints.
 		 *	\return SUCCESSFUL_RETURN \n
 		 			RET_INVALID_ARGUMENTS */
-		returnValue init(	int _nV = 0,	/**< Number of bounds. */
-							int _nC = 0		/**< Number of constraints. */
+		returnValue init(	unsigned int _nV = 0,	/**< Number of bounds. */
+							unsigned int _nC = 0		/**< Number of constraints. */
 							);
 
 
@@ -125,15 +125,15 @@ class Flipper
 
 		/** Returns dimension of matrix T.
 		 *  \return Dimension of matrix T. */
-		int getDimT( ) const;
+		unsigned int getDimT( ) const;
 
 
 	/*
 	 *	PROTECTED MEMBER VARIABLES
 	 */
 	protected:
-		int nV;							/**< Number of variables. */
-		int nC;							/**< Number of constraints. */
+		unsigned int nV;				/**< Number of variables. */
+		unsigned int nC;				/**< Number of constraints. */
 
 		Bounds      bounds;				/**< Data structure for problem's bounds. */
 		Constraints constraints;		/**< Data structure for problem's constraints. */

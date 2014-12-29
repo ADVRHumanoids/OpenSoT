@@ -25,7 +25,7 @@
 ##
 ##	Filename:  src/interfaces/matlab/Makefile
 ##	Author:    Christian Kirches, Hans Joachim Ferreau, Andreas Potschka
-##	Version:   3.0beta
+##	Version:   3.0
 ##	Date:      2007-2013
 ##
 

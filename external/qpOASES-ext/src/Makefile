@@ -25,7 +25,7 @@
 ##
 ##	Filename:  src/Makefile
 ##	Author:    Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
-##	Version:   3.0beta
+##	Version:   3.0
 ##	Date:      2007-2014
 ##
 
@@ -81,9 +81,8 @@ QPOASES_DEPENDS = \
 ##	targets
 ##
 
-all: ${LIB_LAPACK} ${LIB_BLAS} ${BINDIR}/libqpOASES.${LIBEXT} ${BINDIR}/libqpOASES.${DLLEXT}
+all: ${LINK_DEPENDS}
 
-withextras: libqpOASESextras.${LIBEXT}
 
 ${BINDIR}/libqpOASES.${LIBEXT}: ${QPOASES_OBJECTS} ${QPOASES_EXTRAS_OBJECTS}
 	@${ECHO} "Creating" $@
@@ -91,7 +90,7 @@ ${BINDIR}/libqpOASES.${LIBEXT}: ${QPOASES_OBJECTS} ${QPOASES_EXTRAS_OBJECTS}
 
 ${BINDIR}/libqpOASES.${DLLEXT}: ${QPOASES_OBJECTS} ${QPOASES_EXTRAS_OBJECTS}
 	@${ECHO} "Creating" $@
-	@${CPP} -shared -o $@ $^ ${LINK_LIBRARIES}
+	@${CPP} ${SHARED} ${DEF_TARGET} $^ ${LINK_LIBRARIES}
 
 clean:
 	@${ECHO} "Cleaning up (src)"

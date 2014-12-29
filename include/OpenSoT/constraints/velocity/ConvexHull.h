@@ -42,6 +42,7 @@
                 iDynUtils &_robot;
                 double _boundScaling;
                 idynutils::convex_hull _convex_hull;
+                std::vector<KDL::Vector> _ch;
             public:
                 /**
                  * @brief ConvexHull constructor

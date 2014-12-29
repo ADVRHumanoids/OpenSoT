@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/MessageHandling.ipp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of inlined member functions of the MessageHandling class.

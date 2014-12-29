@@ -40,6 +40,8 @@
 %qpOASES features the following options:
 %  maxIter                    -  Maximum number of iterations (if set
 %                                to -1, a value is chosen heuristically)
+%  maxCpuTime                 -  Maximum CPU time in seconds (if set
+%                                to -1, only iteration limit is used)
 %  printLevel                 -  0: no printed output,
 %                                1: only error messages are printed,
 %                                2: iterations and error messages are printed,
@@ -99,7 +101,7 @@
 %  epsNZCTests                -  Tolerance for nonzero curvature tests.
 %
 %
-%See also QPOASES, QPOASES_SEQUENCE, QPOASES_SEQUENCESB, QPOASES_SEQUENCEVM
+%See also QPOASES, QPOASES_SEQUENCE
 %
 %
 %For additional information see the qpOASES User's Manual or
@@ -133,10 +135,8 @@ function [ options ] = qpOASES_options( varargin )
 							options = qpOASES_default_options();
 						case 'reliable'
 							options = qpOASES_reliable_options();
-						case 'MPC'
+						case {'MPC','mpc','fast'}
 							options = qpOASES_MPC_options();
-						case 'fast'
-							options = qpOASES_MPC_options(); %% backwards compatibility
 						otherwise
 							error( ['ERROR (qpOASES_options): Only the following option schemes are defined: ''default'', ''reliable'', ''MPC''!'] );
 							
@@ -178,6 +178,7 @@ function [ options ] = qpOASES_default_options( )
 
 	% setup options struct with default values
 	options = struct(	'maxIter',                       -1, ...
+						'maxCpuTime',                    -1, ...
 						'printLevel',                     1, ...
 						...
 						'enableRamping',                  1, ...

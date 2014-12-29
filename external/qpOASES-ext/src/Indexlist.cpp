@@ -25,7 +25,7 @@
 /**
  *	\file src/Indexlist.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the Indexlist class designed to manage index lists of
@@ -135,6 +135,17 @@ returnValue Indexlist::getNumberArray( int** const numberarray ) const
 		return THROWERROR( RET_INVALID_ARGUMENTS );
 
 	*numberarray = number;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+/*
+ *	g e t I S o r t A r r a y
+ */
+returnValue Indexlist::getISortArray( int** const iSortArray ) const
+{
+	*iSortArray = iSort;
 
 	return SUCCESSFUL_RETURN;
 }

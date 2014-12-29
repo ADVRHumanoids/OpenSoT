@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/Types.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of all non-built-in types (except for classes).
@@ -38,7 +38,7 @@
 
 /* If your compiler does not support the snprintf() function,
  * uncomment the following line and try to compile again. */
-/* #define snprintf _snprintf */
+/* #define __NO_SNPRINTF__ */
 
 
 /* Uncomment the following line for setting the __DSPACE__ flag. */
@@ -62,10 +62,6 @@
  *  into the initial working set when setting up an auxiliary QP. */
 #define __ALWAYS_INITIALISE_WITH_ALL_EQUALITIES__
 
-/* Uncomment the following line to activate the use of a special treatment of 
- * inactive constraints that is more efficient in case of QP formulations 
- * comprising many constraints. */
-/* #define __MANY_CONSTRAINTS__ */
 
 /* Uncomment the following line to activate the use of an alternative Givens 
  * plane rotation requiring only three multiplications. */
@@ -86,18 +82,14 @@
 
 /* Work-around for Microsoft compilers. */
 #ifdef _MSC_VER
-  #define snprintf _snprintf
+  #define __NO_SNPRINTF__
   #pragma warning( disable : 4061 4100 4250 4514 4996 )
 #endif
 
 
 #ifdef __DSPACE__
-  /* This fix ensures a compilable code only,
-   * but all snprintf commands won't work. */
-  #define snprintf printf
-#endif
 
-#ifdef __DSPACE__
+	#define __NO_SNPRINTF__
 
 	/** Macro for switching on/off the beginning of the qpOASES namespace definition. */
 	#define BEGIN_NAMESPACE_QPOASES
@@ -203,6 +195,7 @@ enum HessianType
 	HST_POSDEF,				/**< Hessian is (strictly) positive definite. */
 	HST_POSDEF_NULLSPACE,	/**< Hessian is positive definite on null space of active bounds/constraints. */
 	HST_SEMIDEF,			/**< Hessian is positive semi-definite. */
+	HST_INDEF,				/**< Hessian is indefinite. */
 	HST_UNKNOWN				/**< Hessian type is unknown. */
 };
 
@@ -236,7 +229,7 @@ enum SubjectToStatus
  *	when using the (S)QProblem(B) objects.
  *
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2013-2014
  */
 struct TabularOutput {
@@ -263,7 +256,7 @@ struct TabularOutput {
  *  "Matlab(R) MAT-file Format, R2013b" by MathWorks
  *
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2013-2014
  */ 
 typedef struct {

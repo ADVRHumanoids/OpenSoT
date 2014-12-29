@@ -24,8 +24,8 @@
 
 /**
  *	\file include/qpOASES/extras/SolutionAnalysis.hpp
- *	\author Boris Houska, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\author Hans Joachim Ferreau (thanks to Boris Houska)
+ *	\version 3.0
  *	\date 2008-2014
  *
  *	Declaration of the SolutionAnalysis class designed to perform
@@ -43,14 +43,14 @@
 BEGIN_NAMESPACE_QPOASES
 
 
-/** 
+/**
  *	\brief Provides additional tools for analysing QP solutions.
  *
  *	This class is intended to provide additional tools for analysing
  *  a QP solution obtained with qpOASES.
  *
- *	\author Boris Houska, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\author Hans Joachim Ferreau (thanks to Boris Houska)
+ *	\version 3.0
  *	\date 2007-2014
  */
 class SolutionAnalysis
@@ -69,7 +69,7 @@ class SolutionAnalysis
 		/** Destructor. */
 		~SolutionAnalysis( );
 
-		/** Copy asingment operator (deep copy). */
+		/** Assignment operator (deep copy). */
 		SolutionAnalysis& operator=(	const SolutionAnalysis& rhs		/**< Rhs object. */
 										);
 
@@ -99,7 +99,7 @@ class SolutionAnalysis
 										) const;
 
 
-		/** Computes the variance-covariance matrix of the QP output for uncertain	\n
+		/** Computes the variance-covariance matrix of the QP output for uncertain 
 			inputs.
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_HOTSTART_FAILED \n
@@ -110,7 +110,7 @@ class SolutionAnalysis
 											real_t* Primal_Dual_VAR	/**< OUTPUT: The result for the variance-covariance of the primal and dual variables. Dimension: 2nV x 2nV */
 											) const;
 
-		/** Computes the variance-covariance matrix of the QP output for uncertain	\n
+		/** Computes the variance-covariance matrix of the QP output for uncertain 
 			inputs.
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_HOTSTART_FAILED \n
@@ -121,7 +121,7 @@ class SolutionAnalysis
 											real_t* Primal_Dual_VAR	/**< OUTPUT: The result for the variance-covariance of the primal and dual variables. Dimension:  (2nV+nC) x (2nV+nC) */
 											) const;
 
-		/** Computes the variance-covariance matrix of the QP output for uncertain	\n
+		/** Computes the variance-covariance matrix of the QP output for uncertain 
 			inputs.
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_HOTSTART_FAILED \n
@@ -131,6 +131,8 @@ class SolutionAnalysis
 											real_t* g_b_bA_VAR,		/**< INPUT : Variance-covariance of g, the bounds lb and ub, and lbA and ubA respectively. Dimension:  (2nV+nC) x (2nV+nC) */
 											real_t* Primal_Dual_VAR	/**< OUTPUT: The result for the variance-covariance of the primal and dual variables. Dimension:  (2nV+nC) x (2nV+nC) */
 											) const;
+
+		/** Checks if a direction of negative curvature shows up if we remove all bounds that just recently became active */
 
 
 	/*

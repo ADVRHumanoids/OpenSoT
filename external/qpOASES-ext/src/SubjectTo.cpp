@@ -25,7 +25,7 @@
 /**
  *	\file src/SubjectTo.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the SubjectTo class designed to manage working sets of

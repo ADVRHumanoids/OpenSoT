@@ -7,9 +7,9 @@ function [] = make( varargin )
 %type  make clean all  to first delete and then compile 
 %                      all interfaces,
 %type  make 'name'     to compile only the interface with
-%                      the given name (if is has been modified),
+%                      the given name (if it has been modified),
 %type  make 'opt'      to compile all interfaces using the 
-%                      given compiler options
+%                      given compiler options.
 %
 %Copyright (C) 2013-2014 by Hans Joachim Ferreau, Andreas Potschka,
 %Christian Kirches et al. All rights reserved.
@@ -39,7 +39,7 @@ function [] = make( varargin )
 %%
 %%	Filename:  interfaces/matlab/make.m
 %%	Author:    Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
-%%	Version:   3.0beta
+%%	Version:   3.0
 %%	Date:      2007-2014
 %%
 
@@ -66,7 +66,7 @@ function [] = make( varargin )
 
     IFLAGS = [ '-I. -I',QPOASESPATH,'include',' -I',QPOASESPATH,'src',' ' ];
     CPPFLAGS = [ IFLAGS, DEBUGFLAGS, '-largeArrayDims -D__cpluplus -D__MATLAB__ -D__SINGLE_OBJECT__',' ' ];
-    defaultFlags = '-O '; %% -D__NO_COPYRIGHT__ -D__SUPPRESSANYOUTPUT__ -D__MANY_CONSTRAINTS__ 
+    defaultFlags = '-O -D__NO_COPYRIGHT__ '; %% -D__SUPPRESSANYOUTPUT__
 
     if ( ispc == 0 )
         CPPFLAGS  = [ CPPFLAGS, '-DLINUX ',' ' ]; 
@@ -81,6 +81,12 @@ function [] = make( varargin )
     end
 
     mexExt = eval('mexext');
+    
+    
+    %% ensure copyright notice is displayed
+    if ~isempty( strfind( CPPFLAGS,'-D__NO_COPYRIGHT__' ) )
+        printCopyrightNotice( );
+    end
     
     
     %% clean if desired
@@ -113,17 +119,17 @@ function [] = make( varargin )
             
             % check modification time of source/Make files and compiled mex file
             cppFile = dir( [pwd,'/',fcnNames{ii},'.cpp'] );
-            cppFileTimestamp = getTimestamp( cppFile.date ); 
+            cppFileTimestamp = getTimestamp( cppFile );
             
             utilsFile = dir( [pwd,'/qpOASES_matlab_utils.cpp'] );
-            utilsFileTimestamp = getTimestamp( utilsFile.date );
+            utilsFileTimestamp = getTimestamp( utilsFile );
             
             makeFile = dir( [pwd,'/make.m'] );
-            makeFileTimestamp = getTimestamp( makeFile.date );
+            makeFileTimestamp = getTimestamp( makeFile );
             
             mexFile = dir( [pwd,'/',fcnNames{ii},'.',mexExt] );
             if ( isempty(mexFile) == 0 )
-                mexFileTimestamp = getTimestamp( mexFile.date );
+                mexFileTimestamp = getTimestamp( mexFile );
             else
                 mexFileTimestamp = 0;
             end
@@ -201,10 +207,28 @@ end
 function [ timestamp ] = getTimestamp( dateString )
 
     try 
-        timestamp = datenum( dateString );
+        timestamp = dateString.datenum;
     catch
         timestamp = Inf;
     end
+
+end
+
+
+function [ ] = printCopyrightNotice( )
+
+    disp( ' ' );
+    disp( 'qpOASES -- An Implementation of the Online Active Set Strategy.' );
+    disp( 'Copyright (C) 2007-2014 by Hans Joachim Ferreau, Andreas Potschka,' );
+    disp( 'Christian Kirches et al. All rights reserved.' );
+    disp( ' ' );
+    disp( 'qpOASES is distributed under the terms of the' );
+    disp( 'GNU Lesser General Public License 2.1 in the hope that it will be' );
+    disp( 'useful, but WITHOUT ANY WARRANTY; without even the implied warranty' );
+    disp( 'of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.' );
+    disp( 'See the GNU Lesser General Public License for more details.' );
+    disp( ' ' );
+    disp( ' ' );
 
 end
 

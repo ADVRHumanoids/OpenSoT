@@ -25,7 +25,7 @@
 /**
  *	\file examples/example5.cpp
  *	\author Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  *
  *	Very simple example for testing qpOASES (using the possibility to

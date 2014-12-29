@@ -19,26 +19,26 @@
 %
 %I) Call
 %
-%    [QP,x,fval,exitflag,iter,lambda,workingSet] = ...
-%               qpOASES_sequence( 'i',H,g,A,lb,ub,lbA,ubA{,options{,x0{,workingSet}}} )
+%    [QP,x,fval,exitflag,iter,lambda,auxOutput] = ...
+%               qpOASES_sequence( 'i',H,g,A,lb,ub,lbA,ubA{,options{,auxInput} )
 %or 
-%    [QP,x,fval,exitflag,iter,lambda,workingSet] = ...
-%               qpOASES_sequence( 'i',H,g,lb,ub{,options{,x0{,workingSet}}} )
+%    [QP,x,fval,exitflag,iter,lambda,auxOutput] = ...
+%               qpOASES_sequence( 'i',H,g,lb,ub{,options{,auxInput} )
 %
 %for initialising and solving the first above-mentioned QP of the sequence
 %starting from an initial guess x0. H must be a symmetric (possibly indefinite) 
 %matrix and all vectors g, lb, ub, lbA, ubA have to be given as column vectors. 
 %Options can be generated using the qpOASES_options command, otherwise default
-%values are used. Optionally, an initial guess x0 or an initial guess for
-%the working set can be specified. If no initial guesses are provided,
-%iterations start from the origin. 
+%values are used. Optionally, further auxiliary inputs may be generated 
+%using qpOASES_auxInput command and passed to the solver.
+%Both matrices H or A may be passed in sparse matrix format.
 %
 %II) Call
 %
-%     [x,fval,exitflag,iter,lambda,workingSet] = ...
+%     [x,fval,exitflag,iter,lambda,auxOutput] = ...
 %                      qpOASES_sequence( 'h',QP,g,lb,ub,lbA,ubA{,options} )
 %or
-%     [x,fval,exitflag,iter,lambda,workingSet] = ...
+%     [x,fval,exitflag,iter,lambda,auxOutput] = ...
 %                      qpOASES_sequence( 'h',QP,g,lb,ub{,options} )
 %
 %for hotstarting from the previous QP solution to the one of the next QP
@@ -47,7 +47,7 @@
 %
 %III) Call
 %
-%     [x,fval,exitflag,iter,lambda,workingSet] = ...
+%     [x,fval,exitflag,iter,lambda,auxOutput] = ...
 %                     qpOASES_sequence( 'm',QP,H,g,A,lb,ub,lbA,ubA{,options} )
 %
 %for hotstarting from the previous QP solution to the one of the next QP
@@ -77,29 +77,33 @@
 %in order to cleanup the internal memory.
 %
 %
-%Optional Outputs (only obj is mandatory):
-%    x          -  optimal primal solution vector   (if status==0)
-%    fval       -  optimal objective function value (if status==0)
-%    exitflag   -   0: QP solved
-%                   1: QP could not be solved within given number of iterations
-%                  -1: QP could not be solved due to an internal error
-%                  -2: QP is infeasible (and thus could not be solved)
-%                  -3: QP is unbounded (and thus could not be solved)
-%    iter       -  number of active set iterations actually performed
-%    lambda     -  optimal dual solution vector (if status==0)
-%    workingSet -  the working set at point x. The working set is a subset
+%Optional outputs (only x is mandatory):
+%    x          -  Optimal primal solution vector (if exitflag==0).
+%    fval       -  Optimal objective function value (if exitflag==0).
+%    exitflag   -   0: QP solved,
+%                   1: QP could not be solved within given number of iterations,
+%                  -1: QP could not be solved due to an internal error,
+%                  -2: QP is infeasible (and thus could not be solved),
+%                  -3: QP is unbounded (and thus could not be solved).
+%    iter       -  Number of active set iterations actually performed.
+%    lambda     -  Optimal dual solution vector (if status==0).
+%    auxOutput  -  Struct containing auxiliary outputs as described below.
+%
+%The auxOutput struct contains the following entries:
+%    workingSet -  The working set at point x. The working set is a subset
 %                  of the active set (which is the set of all indices
 %                  corresponding to bounds/constraints that hold with 
 %                  equality). The working set corresponds to bound/
-%                  constraint row vectors forming alinear independent set.
-%                  The first nV entries correspond to the bounds, the last
-%                  nC to the constraints.
+%                  constraint row vectors forming a linear independent set.
+%                  The first nV elements correspond to the bounds, the last
+%                  nC elements to the constraints.
 %                  The working set is encoded as follows:
 %                   1: bound/constraint at its upper bound
 %                   0: bound/constraint not at any bound
 %                  -1: bound/constraint at its lower bound
+%    cpuTime    -  Internally measured CPU time for solving QP.
 %
-%See also QPOASES_OPTIONS, QPOASES
+%See also QPOASES_OPTIONS, QPOASES_AUXINPUT, QPOASES
 %
 %
 %For additional information see the qpOASES User's Manual or

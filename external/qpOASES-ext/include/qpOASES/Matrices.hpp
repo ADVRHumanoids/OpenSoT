@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/Matrices.hpp
  *	\author Andreas Potschka, Hans Joachim Ferreau, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2009-2014
  *
  *  Various matrix classes: Abstract base matrix class, dense and sparse matrices,
@@ -118,7 +118,7 @@ typedef int sparse_int_t;
  *  index lists (see \a SubjectTo).
  *
  *	\author Andreas Potschka, Christian Kirches, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  */
 class Matrix
@@ -271,7 +271,7 @@ class Matrix
  *  bilinear form evaluation.
  *
  *	\author Andreas Potschka, Christian Kirches, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  */
 class SymmetricMatrix : public virtual Matrix
@@ -285,14 +285,13 @@ class SymmetricMatrix : public virtual Matrix
 
 		/** Compute bilinear form y = x'*H*x using submatrix given by index list.
 		 *	\return SUCCESSFUL_RETURN */
-		virtual returnValue bilinear(
-				const Indexlist* const icols,	/**< Index list specifying columns of x. */
-				int xN,							/**< Number of vectors to multiply. */
-				const real_t *x,				/**< Input vector to be multiplied (uncompressed). */
-				int xLD,						/**< Leading dimension of input x. */
-				real_t *y,						/**< Output vector of results (compressed). */
-				int yLD							/**< Leading dimension of output y. */
-				) const = 0;
+		virtual returnValue bilinear(	const Indexlist* const icols,	/**< Index list specifying columns of x. */
+										int xN,							/**< Number of vectors to multiply. */
+										const real_t *x,				/**< Input vector to be multiplied (uncompressed). */
+										int xLD,						/**< Leading dimension of input x. */
+										real_t *y,						/**< Output vector of results (compressed). */
+										int yLD							/**< Leading dimension of output y. */
+										) const = 0;
 
 };
 
@@ -303,7 +302,7 @@ class SymmetricMatrix : public virtual Matrix
  *	Dense matrix class (row major format).
  *
  *	\author Andreas Potschka, Christian Kirches, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  */
 class DenseMatrix : public virtual Matrix
@@ -458,7 +457,7 @@ class DenseMatrix : public virtual Matrix
  *	Symmetric dense matrix class.
  *
  *	\author Andreas Potschka, Christian Kirches, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  */
 class SymDenseMat : public DenseMatrix, public SymmetricMatrix
@@ -501,7 +500,7 @@ class SymDenseMat : public DenseMatrix, public SymmetricMatrix
  *	Sparse matrix class (col compressed format).
  *
  *	\author Andreas Potschka, Christian Kirches, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  */
 class SparseMatrix : public virtual Matrix
@@ -515,8 +514,7 @@ class SparseMatrix : public virtual Matrix
 						int nc, 			/**< Number of columns. */
 						sparse_int_t *r, 	/**< Row indices (length). */
 						sparse_int_t *c, 	/**< Indices to first entry of columns (nCols+1). */
-						real_t *v,			/**< Vector of entries (length). */
-						sparse_int_t *d = 0	/**< Indices to first entry of lower triangle (including diagonal) (nCols). */
+						real_t *v			/**< Vector of entries (length). */
 						);
 
 		/** Constructor from dense matrix. */
@@ -561,7 +559,7 @@ class SparseMatrix : public virtual Matrix
 									) const;
 
 		/** Retrieve indexed entries of matrix row multiplied by alpha. */
-		virtual returnValue getRow(	int rNum,							/**< Row number. */
+		virtual returnValue getRow(	int rNum,						/**< Row number. */
 									const Indexlist* const icols,	/**< Index list specifying columns. */
 									real_t alpha,					/**< Scalar factor. */
 									real_t *row						/**< Output row vector. */
@@ -659,7 +657,7 @@ class SparseMatrix : public virtual Matrix
  *	Sparse matrix class (row compressed format).
  *
  *	\author Andreas Potschka, Christian Kirches, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  */
 class SparseMatrixRow : public virtual Matrix
@@ -673,8 +671,7 @@ class SparseMatrixRow : public virtual Matrix
 							int nc, 			/**< Number of columns. */
 							sparse_int_t *r, 	/**< Indices to first entry of rows (nRows+1). */
 							sparse_int_t *c, 	/**< Column indices (length). */
-							real_t *v,			/**< Vector of entries (length). */
-							sparse_int_t *d = 0	/**< Indices to first entry of upper triangle (including diagonal) (nRows). */
+							real_t *v			/**< Vector of entries (length). */
 							);
 
 		/** Constructor from dense matrix. */
@@ -819,7 +816,7 @@ class SparseMatrixRow : public virtual Matrix
  *	Symmetric sparse matrix class (column compressed format).
  *
  *	\author Andreas Potschka, Christian Kirches, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2011-2014
  */
 class SymSparseMat : public SymmetricMatrix, public SparseMatrix
@@ -833,9 +830,8 @@ class SymSparseMat : public SymmetricMatrix, public SparseMatrix
 						int nc, 			/**< Number of columns. */
 						sparse_int_t *r, 	/**< Row indices (length). */
 						sparse_int_t *c, 	/**< Indices to first entry of columns (nCols+1). */
-						real_t *v,			/**< Vector of entries (length). */
-						sparse_int_t *d = 0	/**< Indices to first entry of lower triangle (including diagonal) (nCols). */
-						) : SparseMatrix(nr, nc, r, c, v, d) {}
+						real_t *v			/**< Vector of entries (length). */
+						) : SparseMatrix(nr, nc, r, c, v) {}
 
 		/** Constructor from dense matrix. */
 		SymSparseMat(	int nr, 				/**< Number of rows. */

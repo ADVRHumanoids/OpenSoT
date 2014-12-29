@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/Bounds.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the Bounds class designed to manage working sets of
@@ -50,7 +50,7 @@ BEGIN_NAMESPACE_QPOASES
  *	by storing index sets and other status information.
  *
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class Bounds : public SubjectTo
@@ -184,9 +184,9 @@ class Bounds : public SubjectTo
 		 *  offset. This offset has to lie within the range [0,n/2] and has to
 		 *  be an integer divisor of the total number of bounds n.
 		 *  Type and status of the first \<offset\> bounds is thrown away,
-		 *  type and status of the last \<offset\> bounds is real_td,
+		 *  type and status of the last \<offset\> bounds is doubled,
 		 *  e.g. for offset = 2: \n
-		 *  shift( {c/b1,c/b2,c/b3,c/b4,c/b5,c/b6} ) = {c/b3,c/b4,c/b5,c/b6,c/b5,c/b6}
+		 *  shift( {b1,b2,b3,b4,b5,b6} ) = {b3,b4,b5,b6,b5,b6}
 		 *	\return SUCCESSFUL_RETURN \n
 		 			RET_INDEX_OUT_OF_BOUNDS \n
 		 			RET_INVALID_ARGUMENTS \n
@@ -197,7 +197,7 @@ class Bounds : public SubjectTo
 		/** Rotates forward type and status of all bounds by a given
 		 *  offset. This offset has to lie within the range [0,n].
 		 *  Example for offset = 2: \n
-		 *  rotate( {c/b1,c/b2,c/b3,c/b4,c/b5,c/b6} ) = {c/b3,c/b4,c/b5,c/b6,c/b1,c/b2}
+		 *  rotate( {b1,b2,b3,b4,b5,b6} ) = {b3,b4,b5,b6,b1,b2}
 		 *	\return SUCCESSFUL_RETURN \n
 		 			RET_INDEX_OUT_OF_BOUNDS \n
 		 			RET_ROTATING_FAILED */

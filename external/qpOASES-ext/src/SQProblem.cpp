@@ -25,7 +25,7 @@
 /**
  *	\file src/SQProblem.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the SQProblem class which is able to use the newly
@@ -496,14 +496,26 @@ returnValue SQProblem::setupAuxiliaryQP ( SymmetricMatrix *H_new, Matrix *A_new,
         if ( setupTQfactorisation( ) != SUCCESSFUL_RETURN )
             return THROWERROR( RET_SETUP_AUXILIARYQP_FAILED );
 
-		// check for equality that have become bounds
-		for (int ii = 0; ii < nC; ++ii)
+		// check for equalities that have become bounds ...
+		for (int ii = 0; ii < nC; ++ii) {
 			if (oldConstraints.getType (ii) == ST_EQUALITY && constraints.getType (ii) == ST_BOUNDED) {
 				if (oldConstraints.getStatus (ii) == ST_LOWER && y[nV+ii] < 0.0)
 					oldConstraints.setStatus (ii, ST_UPPER);
 				else if (oldConstraints.getStatus (ii) == ST_UPPER && y[nV+ii] > 0.0)
 					oldConstraints.setStatus (ii, ST_LOWER);
 			}
+		}
+
+		// ... and do the same also for the bounds!
+		for (int ii = 0; ii < nV; ++ii) {
+			if (oldBounds.getType(ii) == ST_EQUALITY
+					&& bounds.getType(ii) == ST_BOUNDED) {
+				if (oldBounds.getStatus(ii) == ST_LOWER && y[ii] < 0.0)
+					oldBounds.setStatus(ii, ST_UPPER);
+				else if (oldBounds.getStatus(ii) == ST_UPPER && y[ii] > 0.0)
+					oldBounds.setStatus(ii, ST_LOWER);
+			}
+		}
 
         /* 3) Setup old working sets afresh (updating TQ factorisation). */
         if ( setupAuxiliaryWorkingSet( &oldBounds,&oldConstraints,BT_TRUE ) != SUCCESSFUL_RETURN )

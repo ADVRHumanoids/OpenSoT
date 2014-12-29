@@ -270,8 +270,10 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
     static OpenSoT::solvers::QPOasesProblem qp0(nj, 0, OpenSoT::HST_SEMIDEF);
     qp0.setnWSR(127);
     static bool result0 = false;
-    if(!qp0.isQProblemInitialized())
+    static bool isQProblemInitialized0 = false;
+    if(!isQProblemInitialized0){
         result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
+        isQProblemInitialized0 = true;}
     else
     {
         qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
@@ -289,8 +291,10 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
         static OpenSoT::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
         qp1.setnWSR(127);
         static bool result1 = false;
-        if(!qp1.isQProblemInitialized())
+        static bool isQProblemInitialized1 = false;
+        if(!isQProblemInitialized1){
             result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
+            isQProblemInitialized1 = true;}
         else
         {
             qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
@@ -344,19 +348,13 @@ public:
     qpOASES::HessianType ht;
 };
 
-class testQPOasesProblem: public ::testing::Test,
-        public OpenSoT::solvers::QPOasesProblem
+class testQPOasesProblem: public ::testing::Test
 {
 protected:
 
     testQPOasesProblem()
     {
 
-    }
-
-    void setTestProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem)
-    {
-        this->setProblem(problem);
     }
 
     virtual ~testQPOasesProblem() {
@@ -445,23 +443,20 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
     yarp::sig::Vector x(2);
     simpleProblem sp;
 
-    boost::shared_ptr<qpOASES::SQProblem> testProblem(
-                new qpOASES::SQProblem(x.size(), sp.A.rows(), sp.ht) );
-    this->setTestProblem(testProblem);
+    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
 
-    this->initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
+    testProblem.initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
 
-    EXPECT_TRUE(this->solve());
-    EXPECT_TRUE(this->isQProblemInitialized());
-    yarp::sig::Vector s = this->getSolution();
+    EXPECT_TRUE(testProblem.solve());
+    yarp::sig::Vector s = testProblem.getSolution();
     EXPECT_EQ(-sp.g[0], s[0]);
     EXPECT_EQ(-sp.g[1], s[1]);
 
     for(unsigned int i = 0; i < 10; ++i)
     {
-        EXPECT_TRUE(this->solve());
+        EXPECT_TRUE(testProblem.solve());
 
-        yarp::sig::Vector s = this->getSolution();
+        yarp::sig::Vector s = testProblem.getSolution();
         EXPECT_EQ(-sp.g[0], s[0]);
         EXPECT_EQ(-sp.g[1], s[1]);
     }
@@ -476,22 +471,20 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     yarp::sig::Vector x(2);
     simpleProblem sp;
 
-    boost::shared_ptr<qpOASES::SQProblem> testProblem(
-                new qpOASES::SQProblem(x.size(), sp.A.rows(), sp.ht) );
-    this->setTestProblem(testProblem);
+    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
 
-    this->initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
+    testProblem.initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
 
-    EXPECT_TRUE(this->solve());
-    yarp::sig::Vector s = this->getSolution();
+    EXPECT_TRUE(testProblem.solve());
+    yarp::sig::Vector s = testProblem.getSolution();
     EXPECT_EQ(-sp.g[0], s[0]);
     EXPECT_EQ(-sp.g[1], s[1]);
 
     sp.g[0] = -1.0; sp.g[1] = 1.0;
-    EXPECT_TRUE(this->updateTask(sp.H, sp.g));
-    EXPECT_TRUE(this->solve());
+    testProblem.updateTask(sp.H, sp.g);
+    EXPECT_TRUE(testProblem.solve());
 
-    s = this->getSolution();
+    s = testProblem.getSolution();
     EXPECT_EQ(-sp.g[0], s[0]);
     EXPECT_EQ(-sp.g[1], s[1]);
 }
@@ -527,25 +520,23 @@ TEST_F(testQPOasesProblem, testAddProblem)
     qpOASES::HessianType ht = qpOASES::HST_IDENTITY;
 
 
-    boost::shared_ptr<qpOASES::SQProblem> testProblem(
-                new qpOASES::SQProblem(x.size(), A.rows(), ht) );
-    this->setTestProblem(testProblem);
+    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), A.rows(), (OpenSoT::HessianType)ht);
 
-    this->initProblem(H, g, A, lA, uA, l, u);
+    testProblem.initProblem(H, g, A, lA, uA, l, u);
 
-    EXPECT_TRUE(this->solve());
-    yarp::sig::Vector s1 = this->getSolution();
-    EXPECT_EQ(-g[0], s1[0]);
-    EXPECT_EQ(-g[1], s1[1]);
+    testProblem.solve();
+    yarp::sig::Vector s1 = testProblem.getSolution();
+    EXPECT_NEAR(-g[0], s1[0], 1E-6);
+    EXPECT_NEAR(-g[1], s1[1], 1E-6);
     std::cout<<GREEN<<"s1 size: "<<s1.size()<<DEFAULT<<std::endl;
     std::cout<<GREEN<<"s1 solution: ["<<s1[0]<<" "<<s1[1]<<" "<<s1[2]<<"]"<<DEFAULT<<std::endl;
 
-    this->setnWSR(127);
-    EXPECT_TRUE(this->addProblem(H_new, g_new, A_new, lA_new, uA_new, l_new, u_new));
-    yarp::sig::Vector s2 = this->getSolution();
-    EXPECT_EQ(-g[0], s2[0]);
-    EXPECT_EQ(-g[1], s2[1]);
-    EXPECT_EQ(-g_new[0], s2[2]);
+    testProblem.setnWSR(127);
+    testProblem.addProblem(H_new, g_new, A_new, lA_new, uA_new, l_new, u_new);
+    yarp::sig::Vector s2 = testProblem.getSolution();
+    EXPECT_NEAR(-g[0], s2[0], 1E-6);
+    EXPECT_NEAR(-g[1], s2[1], 1E-6);
+    EXPECT_NEAR(-g_new[0], s2[2], 1E-6);
     std::cout<<GREEN<<"s2 size: "<<s2.size()<<DEFAULT<<std::endl;
     std::cout<<GREEN<<"s2 solution: ["<<s2[0]<<" "<<s2[1]<<" "<<s2[2]<<"]"<<DEFAULT<<std::endl;
 }
@@ -575,18 +566,6 @@ TEST_F(testQPOasesProblem, testTask)
     testProblem.getPrimalSolution(dq.data());
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
-
-    boost::shared_ptr<qpOASES::SQProblem> testProblem2(
-                new qpOASES::SQProblem(q.size(), 0, qpOASES::HST_IDENTITY) );
-    this->setTestProblem(testProblem2);
-    nWSR = 132;
-    val = this->_problem->init(H.data(), g.data(), NULL, NULL, NULL, NULL,
-                        NULL, nWSR);
-    EXPECT_TRUE(val == qpOASES::SUCCESSFUL_RETURN);
-    yarp::sig::Vector sol(q.size(), 0.0);
-    this->_problem->getPrimalSolution(sol.data());
-    for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
 }
 
 TEST_F(testQPOasesTask, testQPOasesTask)
@@ -607,7 +586,6 @@ TEST_F(testQPOasesTask, testQPOasesTask)
     std::cout<<"error: "<<postural_task->getb().toString()<<std::endl;
 
     OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
-    EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
 
     postural_task->update(q);
     EXPECT_TRUE(qp_postural_task.solve());
@@ -636,7 +614,6 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         postural_task->setLambda(0.1);
 
         OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
-        EXPECT_TRUE(qp_postural_task.isQProblemInitialized());
 
         yarp::sig::Vector l_old, u_old;
         qp_postural_task.getBounds(l_old, u_old);
@@ -744,7 +721,6 @@ TEST_F(testQPOasesTask, testCoMTask)
     com_task->getConstraints().push_back(com_vel_constr);
 
     OpenSoT::solvers::QPOasesTask qp_CoM_task(com_task);
-    EXPECT_TRUE(qp_CoM_task.isQProblemInitialized());
 
     yarp::sig::Vector com_i = com_task->getActualPosition();
     yarp::sig::Vector com_f = com_i;
@@ -1119,7 +1095,7 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
             joint_constraints->update(q);
 
             double tic = yarp::os::Time::now();
-            ASSERT_TRUE(sot.solve(dq));
+            sot.solve(dq);
             double toc = yarp::os::Time::now();
             acc += toc - tic;
 
@@ -1329,10 +1305,13 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
 {
     iDynUtils idynutils;
     iDynUtils idynutils_com;
-    idynutils_com.iDyn3_model.setFloatingBaseLink(idynutils_com.left_leg.index);
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
     idynutils_com.updateiDyn3Model(q, true);
+    idynutils_com.iDyn3_model.setFloatingBaseLink(idynutils_com.left_leg.index);
+    idynutils.updateiDyn3Model(q, true);
+    idynutils_com.updateiDyn3Model(q, true);
+
 
     // BOUNDS
         boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector> > boundsJointLimits = OpenSoT::constraints::velocity::JointLimits::ConstraintPtr(
@@ -1380,6 +1359,7 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
     boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setReference(q);
+    postural_task->getConstraints().push_back(boundsCoMVelocity);
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> jointTasks;
     jointTasks.push_back(postural_task);
@@ -1395,7 +1375,7 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
     //std::cout<<"Aineq1 = ["<<(*(taskCartesianAggregated->getConstraints().begin()))->getAineq().toString()<<"]"<<std::endl;
 
     boost::shared_ptr<OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector> > sot = OpenSoT::solvers::QPOases_sot::SolverPtr(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, 1E0));
+        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, 2E2));
 
 
     //SET SOME REFERENCES
@@ -1438,7 +1418,7 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
         taskJointAggregated->update(q);
         bounds->update(q);
 
-        EXPECT_TRUE(sot->solve(dq));
+        sot->solve(dq);
         q += dq;
     }
 

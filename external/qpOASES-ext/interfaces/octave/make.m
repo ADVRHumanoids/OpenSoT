@@ -7,13 +7,12 @@ function [] = make( varargin )
 %type  make clean all  to first delete and then compile 
 %                      all interfaces,
 %type  make 'name'     to compile only the interface with
-%                      the given name (if is has been modified),
+%                      the given name (if it has been modified),
 %type  make 'opt'      to compile all interfaces using the 
-%                      given compiler options
+%                      given compiler options.
 %
 %Copyright (C) 2013-2014 by Hans Joachim Ferreau, Andreas Potschka,
 %Christian Kirches et al. All rights reserved.
-
 
 %%
 %%	This file is part of qpOASES.
@@ -40,7 +39,7 @@ function [] = make( varargin )
 %%
 %%	Filename:  interfaces/octave/make.m
 %%	Author:    Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
-%%	Version:   3.0beta
+%%	Version:   3.0
 %%	Date:      2007-2014
 %%
 
@@ -67,7 +66,7 @@ function [] = make( varargin )
 
     IFLAGS = [ '-I. -I',QPOASESPATH,'include',' -I',QPOASESPATH,'src',' ' ];
     CPPFLAGS = [ IFLAGS, DEBUGFLAGS, '-D__cpluplus -D__MATLAB__ -D__SINGLE_OBJECT__',' ' ];  %%removed: -largeArrayDims
-    defaultFlags = ' '; %% -D__NO_COPYRIGHT__ -D__SUPPRESSANYOUTPUT__ -D__MANY_CONSTRAINTS__ %%removed: -O
+    defaultFlags = '-D__NO_COPYRIGHT__ '; %% -D__NO_COPYRIGHT__ -D__SUPPRESSANYOUTPUT__                        %%removed: -O
 
     if ( ispc == 0 )
         CPPFLAGS  = [ CPPFLAGS, '-DLINUX ',' ' ]; 
@@ -82,6 +81,12 @@ function [] = make( varargin )
     end
 
     mexExt = mexext();
+    
+    
+    %% ensure copyright notice is displayed
+    if ~isempty( strfind( CPPFLAGS,'-D__NO_COPYRIGHT__' ) )
+        printCopyrightNotice( );
+    end
     
     
     %% clean if desired
@@ -99,7 +104,7 @@ function [] = make( varargin )
         disp( [ 'INFO (',mfilename '.m): Compiling all files with user-defined compiler flags (''',userFlags,''')...'] );
     end
     
-        
+
     %% call mex compiler
     for ii=1:length(fcnNames)
         
@@ -206,6 +211,24 @@ function [ timestamp ] = getTimestamp( dateString )
     catch
         timestamp = Inf;
     end
+
+end
+
+
+function [ ] = printCopyrightNotice( )
+
+    disp( ' ' );
+    disp( 'qpOASES -- An Implementation of the Online Active Set Strategy.' );
+    disp( 'Copyright (C) 2007-2014 by Hans Joachim Ferreau, Andreas Potschka,' );
+    disp( 'Christian Kirches et al. All rights reserved.' );
+    disp( ' ' );
+    disp( 'qpOASES is distributed under the terms of the' );
+    disp( 'GNU Lesser General Public License 2.1 in the hope that it will be' );
+    disp( 'useful, but WITHOUT ANY WARRANTY; without even the implied warranty' );
+    disp( 'of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.' );
+    disp( 'See the GNU Lesser General Public License for more details.' );
+    disp( ' ' );
+    disp( ' ' );
 
 end
 
