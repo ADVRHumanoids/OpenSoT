@@ -42,6 +42,7 @@
                 typedef boost::shared_ptr<Postural> Ptr;
             protected:
                 yarp::sig::Vector _x_desired;
+                yarp::sig::Vector _xdot_desired;
                 yarp::sig::Vector _x;
 
                 void update_b();
@@ -54,9 +55,43 @@
 
                 void _update(const yarp::sig::Vector& x);
 
+                /**
+                 * @brief setReference sets a new reference for the Postural task.
+                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function.
+                 * It also assumes a null desired velocity at the desired position, meaning we are trying to achieve a regulation task.
+                 * @param x_desired the \f$R^{n_x}\f$ vector describing the desired joint position
+                 */
                 void setReference(const yarp::sig::Vector& x_desired);
 
-                const yarp::sig::Vector getReference(){return _x_desired;}
+                /**
+                 * @brief setReference sets a new reference for the Postural task.
+                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
+                 * Notice how the setReference(x_desired, xdot_desired) needs to be called before each _update(x)
+                 * of the Postural task, since the _update() resets the feed-forward velocity term for safety reasons.
+                 * @param x_desired the \f$R^{n_x}\f$ vector of desired joint positions.
+                 * @param xdot_desired is a \f$R^{n_x}\f$ vector describing the desired joint velocities,
+                 * and it represents a feed-forward term in the Postural task computation
+                 */
+                void setReference(const yarp::sig::Vector& x_desired,
+                                  const yarp::sig::Vector& xdot_desired);
+
+                /**
+                 * @brief getReference returns the Postural task reference
+                 * @return the \f$R^{n_x}\f$ Postural task reference
+                 */
+                yarp::sig::Vector getReference() const;
+
+                /**
+                 * @brief getReference gets the current reference and feed-forward velocity for the Postural task.
+                 * @param x_desired the \f$R^{n_x}\f$ vector describing the desired position of the COM
+                 * in the world coordinate frame.
+                 * @param xdot_desired is a \f$R^{n_x}\f$ twist describing the desired trajectory velocity,
+                 * and it represents a feed-forward term in the task computation
+                 */
+                void getReference(yarp::sig::Vector& x_desired,
+                                  yarp::sig::Vector& xdot_desired) const;
+
+                void setLambda(double lambda);
             };
         }
     }

@@ -25,7 +25,8 @@ using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
 Postural::Postural(   const yarp::sig::Vector& x) :
-    Task("Postural", x.size()), _x(x)
+    Task("Postural", x.size()), _x(x),
+    _x_desired(x.size(),0.0), _xdot_desired(x.size(),0.0)
 {
     _W.resize(_x_size, _x_size);
     _W.eye();
@@ -48,17 +49,53 @@ void Postural::_update(const yarp::sig::Vector &x) {
     _x = x;
 
     /************************* COMPUTING TASK *****************************/
+
     this->update_b();
+
+    _xdot_desired.zero();
+
     /**********************************************************************/
 }
 
 void Postural::setReference(const yarp::sig::Vector& x_desired) {
+    assert(x_desired.size() == _x_size);
+
     _x_desired = x_desired;
+    _xdot_desired.zero();
     this->update_b();
 }
 
+void OpenSoT::tasks::velocity::Postural::setReference(const yarp::sig::Vector &x_desired,
+                                                      const yarp::sig::Vector &xdot_desired)
+{
+    assert(x_desired.size() == _x_size);
+    assert(xdot_desired.size() == _x_size);
+
+    _x_desired = x_desired;
+    _xdot_desired = xdot_desired;
+    this->update_b();
+}
+
+yarp::sig::Vector OpenSoT::tasks::velocity::Postural::getReference() const
+{
+    return _x_desired;
+}
+
+void OpenSoT::tasks::velocity::Postural::getReference(yarp::sig::Vector &x_desired,
+                                                      yarp::sig::Vector &xdot_desired) const
+{
+    x_desired = _x_desired;
+    xdot_desired = _xdot_desired;
+}
+
 void Postural::update_b() {
-    _b = _x_desired - _x;
+    _b = (_x_desired - _x) + _xdot_desired/_lambda;
+}
+
+void OpenSoT::tasks::velocity::Postural::setLambda(double lambda)
+{
+    this->_lambda = lambda;
+    this->update_b();
 }
 
 
