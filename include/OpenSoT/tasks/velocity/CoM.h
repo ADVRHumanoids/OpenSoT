@@ -56,6 +56,7 @@
 
                 yarp::sig::Vector _actualPosition;
                 yarp::sig::Vector _desiredPosition;
+                yarp::sig::Vector _desiredVelocity;
 
                 void update_b();
 
@@ -75,15 +76,65 @@
 
                 void _update(const yarp::sig::Vector& x);
 
+                /**
+                 * @brief setReference sets a new reference for the CoM task.
+                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function.
+                 * It also assumes a null desired velocity at the desired position, meaning we are trying to achieve a regulation task.
+                 * @param desiredPose the \f$R^{3}\f$ vector describing the desired position for the CoM
+                 * in the world coordinate frame
+                 */
                 void setReference(const yarp::sig::Vector& desiredPosition);
 
-                yarp::sig::Vector getReference();
+                /**
+                 * @brief setReference sets a new reference for the CoM task.
+                 * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
+                 * Notice how the setReference(desiredPosition, desiredVelocity) needs to be called before each _update(x)
+                 * of the CoM task, since the _update() resets the feed-forward velocity term for safety reasons.
+                 * @param desiredPosition the \f$R^{3}\f$ vector describing the desired position of the CoM wrt world.
+                 * @param desireVelocity is a \f$R^{3}\f$ linear velocity vector describing the desired trajectory velocity,
+                 * and it represents a feed-forward term in the CoM task computation
+                 */
+                void setReference(const yarp::sig::Vector& desiredPosition,
+                                  const yarp::sig::Vector& desiredVelocity);
 
-                yarp::sig::Vector getActualPosition();
 
-                std::string getBaseLink(){return BASE_LINK_COM;}
-                std::string getDistalLink(){return DISTAL_LINK_COM;}
+                /**
+                 * @brief getReference returns the CoM task reference
+                 * @return the CoM task reference \f$R^3\f$ vector describing the actual
+                 * CoM position in the world coordinate frame
+                 */
+                yarp::sig::Vector getReference() const;
 
+                /**
+                 * @brief getReference gets the current reference and feed-forward velocity for the CoM task.
+                 * @param desiredPosition the \f$R^{3}\f$ vector describing the desired position of the CoM
+                 * in the world coordinate frame.
+                 * @param desireVelocity is a \f$R^{3}\f$ twist describing the desired trajectory velocity,
+                 * and it represents a feed-forward term in the task computation
+                 */
+                void getReference(yarp::sig::Vector& desiredPosition,
+                                  yarp::sig::Vector& desiredVelocity) const;
+
+
+                /**
+                 * @brief getActualPosition returns the CoM actual position. You need to call _update(x) for the position to change
+                 * @return the \f$R^{3}\f$ vector describing the actual CoM position in the world coordinate frame
+                 */
+                yarp::sig::Vector getActualPosition() const;
+
+                /**
+                 * @brief getBaseLink an utility function that always returns "world"
+                 * @return "world"
+                 */
+                std::string getBaseLink();
+
+                /**
+                 * @brief getDistalLink an utility function that always
+                 * @return
+                 */
+                std::string getDistalLink();
+
+                void setLambda(double lambda);
             };
         }
     }

@@ -29,7 +29,7 @@ CoM::CoM(   const yarp::sig::Vector& x,
             iDynUtils &robot) :
     Task("CoM", x.size()), _robot(robot),
     _desiredPosition(3,0.0), _actualPosition(3,0.0),
-    positionError(3, 0.0)
+    positionError(3, 0.0), _desiredVelocity(3,0.0)
 {
 
     /* first update. Setting desired pose equal to the actual pose */
@@ -51,7 +51,8 @@ CoM::~CoM()
 {
 }
 
-void CoM::_update(const yarp::sig::Vector &x) {
+void CoM::_update(const yarp::sig::Vector &x)
+{
 
     /************************* COMPUTING TASK *****************************/
 
@@ -62,23 +63,66 @@ void CoM::_update(const yarp::sig::Vector &x) {
     _A = _A.removeCols(0,6);    // remove floating base
 
     this->update_b();
+
+    this->_desiredVelocity.zero();
+
     /**********************************************************************/
 }
 
-void CoM::setReference(const yarp::sig::Vector& desiredPosition) {
+void CoM::setReference(const yarp::sig::Vector& desiredPosition)
+{
+    assert(desiredPosition.size() == 3);
+
 	_desiredPosition = desiredPosition;
+    _desiredVelocity.zero();
     this->update_b();
 }
 
-yarp::sig::Vector CoM::getReference() {
+void OpenSoT::tasks::velocity::CoM::setReference(const yarp::sig::Vector &desiredPosition,
+                                                 const yarp::sig::Vector &desiredVelocity)
+{
+    assert(desiredPosition.size() == 3);
+    assert(desiredVelocity.size() == 3);
+
+    _desiredPosition = desiredPosition;
+    _desiredVelocity = desiredVelocity;
+    this->update_b();
+}
+
+yarp::sig::Vector CoM::getReference() const
+{
     return _desiredPosition;
 }
 
-yarp::sig::Vector CoM::getActualPosition() {
+void OpenSoT::tasks::velocity::CoM::getReference(yarp::sig::Vector &desiredPosition, yarp::sig::Vector &desiredVelocity) const
+{
+    desiredPosition = _desiredPosition;
+    desiredVelocity = _desiredVelocity;
+}
+
+yarp::sig::Vector CoM::getActualPosition() const
+{
     return _actualPosition;
 }
 
-void CoM::update_b() {
-    _b = _desiredPosition - _actualPosition;
-    positionError = _b;
+std::string OpenSoT::tasks::velocity::CoM::getBaseLink()
+{
+    return BASE_LINK_COM;
+}
+
+std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
+{
+    return DISTAL_LINK_COM;
+}
+
+void CoM::update_b()
+{
+    positionError = _desiredPosition - _actualPosition;
+    _b = positionError + _desiredVelocity/_lambda;
+}
+
+void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
+{
+    this->_lambda = lambda;
+    this->update_b();
 }
