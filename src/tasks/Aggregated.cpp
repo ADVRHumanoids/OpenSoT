@@ -99,6 +99,7 @@ void Aggregated::generateAll() {
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
         _b = yarp::math::cat(_b, t->getWeight()*t->getLambda()*t->getb());
     }
+    generateConstraints();
 }
 
 void OpenSoT::tasks::Aggregated::generateConstraints()

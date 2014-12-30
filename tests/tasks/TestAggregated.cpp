@@ -170,8 +170,9 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
     taskList.push_back(taskCartesianWaist);
     boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> > _task1(
             new OpenSoT::tasks::Aggregated(taskList, q.size()));
+    EXPECT_EQ(_task1->getConstraints().size(), 1)<<"3.1"<<std::endl;
     _task1->getConstraints().push_back(constraintConvexHull);
-    EXPECT_EQ(_task1->getConstraints().size(), 2)<<"3"<<std::endl;
+    EXPECT_EQ(_task1->getConstraints().size(), 2)<<"3.2"<<std::endl;
 
     _task0->update(q);
     EXPECT_EQ(_task0->getConstraints().size(), 2)<<"4"<<std::endl;
@@ -201,7 +202,6 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
     yarp::sig::Vector lA1_comvel = constraints1.back()->getbLowerBound();
     yarp::sig::Vector uA1_comvel = constraints1.back()->getbUpperBound();
 
-
     EXPECT_TRUE(Aineq0_ch == Aineq1_ch);
     EXPECT_TRUE(Aineq0_comvel == Aineq1_comvel);
     EXPECT_TRUE(lA1_ch == lA0_ch);
@@ -209,9 +209,42 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
     EXPECT_TRUE(lA1_comvel == lA0_comvel);
     EXPECT_TRUE(uA1_comvel == uA0_comvel);
 
+    for(unsigned int i = 0; i < q.size(); ++i)
+        q[i] = tests_utils::getRandomAngle();
+    robot.updateiDyn3Model(q, true);
 
+    _task0->update(q);
+    EXPECT_EQ(_task0->getConstraints().size(), 2)<<"6"<<std::endl;
+    _task1->update(q);
+    EXPECT_EQ(_task1->getConstraints().size(), 2)<<"7"<<std::endl;
 
+    A0 = _task0->getA();
+    b0 = _task0->getb();
+    constraints0 = _task0->getConstraints();
+    ASSERT_EQ(constraints0.size(), 2);
+    Aineq0_ch = constraints0.front()->getAineq();
+    lA0_ch = constraints0.front()->getbLowerBound();
+    uA0_ch = constraints0.front()->getbUpperBound();
+    Aineq0_comvel = constraints0.back()->getAineq();
+    lA0_comvel = constraints0.back()->getbLowerBound();
+    uA0_comvel = constraints0.back()->getbUpperBound();
 
+    A1 = _task1->getA();
+    b1 = _task1->getb();
+    constraints1 = _task1->getConstraints();
+    Aineq1_ch = constraints1.front()->getAineq();
+    lA1_ch = constraints1.front()->getbLowerBound();
+    uA1_ch = constraints1.front()->getbUpperBound();
+    Aineq1_comvel = constraints1.back()->getAineq();
+    lA1_comvel = constraints1.back()->getbLowerBound();
+    uA1_comvel = constraints1.back()->getbUpperBound();
+
+    EXPECT_TRUE(Aineq0_ch == Aineq1_ch);
+    EXPECT_TRUE(Aineq0_comvel == Aineq1_comvel);
+    EXPECT_TRUE(lA1_ch == lA0_ch);
+    EXPECT_TRUE(uA1_ch == uA0_ch);
+    EXPECT_TRUE(lA1_comvel == lA0_comvel);
+    EXPECT_TRUE(uA1_comvel == uA0_comvel);
 }
 
 }
