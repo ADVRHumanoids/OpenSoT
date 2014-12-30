@@ -148,15 +148,14 @@
             _lambda = lambda;
         }
         
-        /** TODO should we transform the list to a list of pointers?  */
         /**
          * @brief getConstraints return a reference to the constraint list. Use the standard list methods
          * to add, remove, clear, ... the constraints list.
-         * i.e.:
+         * e.g.:
          *              task.getConstraints().push_back(new_constraint)
          * @return
          */
-        std::list< boost::shared_ptr<ConstraintType> >& getConstraints() { return _constraints; }
+        std::list< ConstraintPtr >& getConstraints() { return _constraints; }
 
         /** Gets the number of variables for the task.
             @return the number of columns of A */
@@ -169,7 +168,7 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         void update(const Vector_type &x) {
-            for(typename std::list< boost::shared_ptr<ConstraintType> >::iterator i = _constraints.begin();
+            for(typename std::list< ConstraintPtr >::iterator i = _constraints.begin();
                 i != _constraints.end(); ++i) (*i)->update(x);
             this->_update(x); }
 
