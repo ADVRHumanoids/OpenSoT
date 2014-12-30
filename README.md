@@ -1,4 +1,4 @@
-OpenSoT
+OpenSoT v0.1
 =========
 
 An Open Source Task Solving library with Constraints
