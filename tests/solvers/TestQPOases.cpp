@@ -3,6 +3,7 @@
 #include <idynutils/comanutils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
+#include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/all.h>
@@ -11,6 +12,7 @@
 #include <qpOASES.hpp>
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
+#include <fstream>
 
 
 using namespace yarp::math;
@@ -19,6 +21,40 @@ using namespace yarp::math;
 #define DEFAULT "\033[0m"
 
 namespace {
+
+void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
+                              const yarp::sig::Vector& b_ch,
+                              std::vector<KDL::Vector>& points) {
+    unsigned int nRects = A_ch.rows();
+
+    std::cout << "Computing intersection points between " << nRects << " lines" << std::endl;
+    std::cout << "A:" << A_ch.toString() << std::endl;
+    std::cout << "b:" << b_ch.toString() << std::endl;
+    for(unsigned int j = 0; j < nRects; ++j) {
+        int i;
+
+        // intersection from line i to line j
+        if(j == 0) i = nRects-1;
+        else       i = (j-1);
+
+        std::cout << "Computing intersection between line " << i << " and line " << j << ": ";
+        // get coefficients for i-th line
+        double a_i = A_ch(i,0);
+        double b_i = A_ch(i,1);
+        double c_i = b_ch(i);
+
+        // get coefficients for j-th line
+        double a_j = A_ch(j,0);
+        double b_j = A_ch(j,1);
+        double c_j = b_ch(j);
+
+        /** Kramer rule to find intersection between two lines */
+        double x = (c_i*b_j-b_i*c_j)/(a_i*b_j-b_i*a_j);
+        double y = (a_i*c_j-c_i*a_j)/(a_i*b_j-b_i*a_j);
+        std::cout << "(" << x << "," << y << ")" << std::endl;
+        points.push_back(KDL::Vector(x,y,0.0));
+    }
+}
 
 class old_gravity_gradient
 {
@@ -396,14 +432,15 @@ protected:
 class testQPOases_sot: public ::testing::Test
 {
 protected:
+    std::ofstream _log;
 
     testQPOases_sot()
     {
-
+        _log.open("testQPOases_sot.m");
     }
 
     virtual ~testQPOases_sot() {
-
+        _log.close();
     }
 
     virtual void SetUp() {
@@ -1476,20 +1513,33 @@ TEST_F(testQPOases_sot, testAggregated2Tasks)
 
 }
 
+
+//#define TRY_ON_SIMULATOR
 TEST_F(testQPOases_sot, tryFollowingBounds) {
+
+#ifdef TRY_ON_SIMULATOR
+    yarp::os::Network init;
+    ComanUtils robot("tryFollowingBounds");
+#endif
 
     iDynUtils idynutils_com;
 
-    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils_com);
     idynutils_com.updateiDyn3Model(q, true);
-    idynutils_com.setFloatingBaseLink(idynutils_com.left_leg.chain_name);
+    idynutils_com.switchAnchorAndFloatingBase(idynutils_com.left_leg.end_effector_name);
+
+#ifdef TRY_ON_SIMULATOR
+    robot.setPositionDirectMode();
+    robot.move(q);
+    yarp::os::Time::delay(3);
+#endif
 
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new velocity::JointLimits( q,
-                                       idynutils_com.iDyn3_model.getJointBoundMax(),
-                                       idynutils_com.iDyn3_model.getJointBoundMin());
+            new OpenSoT::constraints::velocity::JointLimits( q,
+                        idynutils_com.iDyn3_model.getJointBoundMax(),
+                        idynutils_com.iDyn3_model.getJointBoundMin()));
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
     bounds_list.push_back(boundsJointLimits);
@@ -1499,14 +1549,32 @@ TEST_F(testQPOases_sot, tryFollowingBounds) {
 
     OpenSoT::tasks::velocity::CoM::Ptr com_task(
                 new OpenSoT::tasks::velocity::CoM(q, idynutils_com));
-    com_task->setLambda(1.0);
+    com_task->setLambda(.6);
+
+    yarp::sig::Matrix W(3,3);
+    W.eye(); W(2,2) = .1;
+    com_task->setWeight(W);
+
     OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
                 new OpenSoT::constraints::velocity::CoMVelocity(
-                    yarp::sig::Vector(3, 0.05), 0.01 , q, idynutils_com));
+                    yarp::sig::Vector(3, 0.05), 0.004 , q, idynutils_com));
     com_task->getConstraints().push_back(boundsCoMVelocity);
-    OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsConvexHull(
-                new OpenSoT::constraints::velocity::ConvexHull(q, idynutils_com));
+    OpenSoT::constraints::velocity::ConvexHull::Ptr boundsConvexHull(
+                new OpenSoT::constraints::velocity::ConvexHull(q, idynutils_com, 0.01));
     com_task->getConstraints().push_back(boundsConvexHull);
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr right_foot_task(
+                new OpenSoT::tasks::velocity::Cartesian("world::right_foot",
+                                                        q, idynutils_com,
+                                                        idynutils_com.right_leg.end_effector_name,
+                                                        "world"));
+    right_foot_task->setLambda(.6);
+    right_foot_task->setOrientationErrorGain(.5);
+
+    OpenSoT::tasks::Aggregated::Ptr first_task(
+                new OpenSoT::tasks::Aggregated( com_task,
+                                                right_foot_task,
+                                                q.size()));
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
@@ -1514,48 +1582,200 @@ TEST_F(testQPOases_sot, tryFollowingBounds) {
     postural_task->setReference(q);
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(right_foot_task);
     stack_of_tasks.push_back(com_task);
     stack_of_tasks.push_back(postural_task);
 
-    penSoT::solvers::QPOases_sot::::Ptr sot(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, 1E0));
+    OpenSoT::solvers::QPOases_sot::Ptr sot(
+        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
 
 
     //SET SOME REFERENCES
-    yarp::sig::Vector T_com_p_init = idynutils.iDyn3_model.getCOM();
+    yarp::sig::Vector T_com_p_init = idynutils_com.iDyn3_model.getCOM();
     yarp::sig::Vector T_com_p_ref = T_com_p_init;
-    T_com_p_ref[1] += 0.1;
-    yarp::sig::Matrix T_com_ref(4,4); T_com_ref.eye();
-    T_com_ref(0,3) = T_com_p_ref[0];
-    T_com_ref(1,3) = T_com_p_ref[1];
-    T_com_ref(2,3) = T_com_p_ref[2];
-    KDL::Frame T_com_ref_kdl;
-    cartesian_utils::fromYARPMatrixtoKDLFrame(T_com_ref, T_com_ref_kdl);
+    T_com_p_ref[0] = 0.0;
+    T_com_p_ref[1] = 0.0;
+
+    std::cout << "Initial CoM position is " << T_com_p_init.toString() << std::endl;
+    std::cout << "Moving to (0,0)" << std::endl;
 
     com_task->setReference(T_com_p_ref);
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    for(unsigned int i = 0; i < 1000; ++i)
+    double e = norm(T_com_p_ref - com_task->getActualPosition());
+    double previous_e = 0.0;
+
+    unsigned int i = 0;
+    const unsigned int n_iterations = 10000;
+    _log << "com_traj = [";
+
+    yarp::sig::Matrix right_foot_pose = right_foot_task->getActualPose();
+
+    for(i = 0; i < n_iterations; ++i)
     {
         idynutils_com.updateiDyn3Model(q, true);
 
-        com_task->update(q);
-        taskJointAggregated->update(q);
+        first_task->update(q);
+        postural_task->update(q);
         bounds->update(q);
+
+        _log << com_task->getActualPosition()[0] << ","
+            << com_task->getActualPosition()[1] <<";";
+        e = norm(T_com_p_ref - com_task->getActualPosition());
+
+        if(fabs(previous_e - e) < 1e-13) {
+            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - com_task->getActualPosition()) << " . Error not decreasing. CONVERGED." << std::endl;
+            break;
+        }
+        previous_e = e;
 
         EXPECT_TRUE(sot->solve(dq));
         q += dq;
+
+        yarp::sig::Matrix right_foot_pose_now = right_foot_task->getActualPose();
+        for(unsigned int r = 0; r < 4; ++r)
+            for(unsigned int c = 0; c < 4; ++c)
+                ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-6);
+
+#ifdef TRY_ON_SIMULATOR
+        robot.move(q);
+#endif
     }
 
-    updateiDyn3Model(true, q, coman);
-    convexHull->update(q);
+    ASSERT_NEAR(norm(T_com_p_ref - com_task->getActualPosition()),0,1E-9);
+
+    idynutils_com.updateiDyn3Model(q, true);
+    boundsConvexHull->update(q);
     std::vector<KDL::Vector> points;
-    convexHull->getConvexHull(points);
+    std::vector<KDL::Vector> points_inner;
+    boundsConvexHull->getConvexHull(points);
 
-    for(auto points : points) {
+    KDL::Vector point_old;
+    yarp::sig::Matrix A_ch, A_ch_outer;
+    yarp::sig::Vector b_ch, b_ch_outer;
+    boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
+    boundsConvexHull->getConstraints(points, A_ch_outer, b_ch_outer, 0.0);
+    std::cout << std::endl << "A_ch: " << std::endl << A_ch.toString() << std::endl;
+    std::cout << std::endl << "b_ch: " << std::endl << b_ch.toString() << std::endl;
+    std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer.toString() << std::endl;
+    std::cout << std::endl << "b_ch_outer: " << std::endl << b_ch_outer.toString() << std::endl;
+    std::cout << std::endl << "@q: " << std::endl << q.toString() << std::endl << std::endl;
+    getPointsFromConstraints(A_ch,
+                             b_ch,
+                             points_inner);
 
+    points.push_back(points.front());
+    points_inner.push_back(points_inner.front());
+    for(KDL::Vector point : points) {
+        std::cout << std::endl
+                  << "=================" << std::endl
+                  << "Moving from ("
+                  << point_old.x() << "," << point_old.y()
+                  << ") to ("
+                  << point.x() << "," << point.y()
+                  <<")" << std::endl;
+
+        T_com_p_ref[0] = point.x();
+        T_com_p_ref[1] = point.y();
+
+        com_task->setReference(T_com_p_ref);
+
+        yarp::sig::Vector dq(q.size(), 0.0);
+        double e = norm(T_com_p_ref - com_task->getActualPosition());
+        double previous_e = 0.0;
+        double oscillation_check_e = 0.0;
+        for(i = 0; i < n_iterations; ++i)
+        {
+            idynutils_com.updateiDyn3Model(q, true);
+
+            first_task->update(q);
+            right_foot_task->update(q);
+            com_task->update(q);
+            postural_task->update(q);
+            bounds->update(q);
+
+            _log << com_task->getActualPosition()[0] << ","
+                << com_task->getActualPosition()[1] <<";";
+            e = norm(T_com_p_ref - com_task->getActualPosition());
+
+            if(fabs(e - oscillation_check_e) < 1e-9)
+            {
+                std::cout << "i: " << i << " e: " << e << " -- Oscillation detected. Stopping." << std::endl;
+                break;
+            }
+
+            //std::cout << "i: " << i << " e: " << e << std::endl;
+            if(fabs(previous_e - e) < 1e-12) {
+                std::cout << "i: " << i << " e: " << e << " -- Error not decreasing. CONVERGED." << std::endl;
+                break;
+            }
+            oscillation_check_e = previous_e;
+            previous_e = e;
+
+            if(e < 1e-3) {  // what if we get too close?!?
+                boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
+                std::cout << "A_ch:" << A_ch.toString() << std::endl;
+                std::cout << "b_ch:" << b_ch.toString() << std::endl;
+            }
+
+            EXPECT_TRUE(sot->solve(dq));
+            q += dq;
+
+            yarp::sig::Matrix right_foot_pose_now = right_foot_task->getActualPose();
+            for(unsigned int r = 0; r < 4; ++r)
+                for(unsigned int c = 0; c < 4; ++c)
+                    ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-3) << "Error at iteration "
+                                                                                    << i
+                                                                                    << " at position "
+                                                                                    << "(" << r
+                                                                                    << "," << c << ")"
+                                                                                    << " with cartesian error equal to "
+                                                                                    << norm(right_foot_task->getb()) << std::endl;
+
+#ifdef TRY_ON_SIMULATOR
+            robot.move(q);
+#endif
+        }
+        if(i == n_iterations)
+            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - com_task->getActualPosition()) << " -- Error not decreasing. STOPPING." << std::endl;
+
+        yarp::sig::Vector distance = T_com_p_ref - com_task->getActualPosition();
+        double d = norm(distance);
+        yarp::sig::Vector exp_distance(2,0.01);
+        double expected_d = norm(exp_distance);
+
+        std::vector<KDL::Vector> points_check;
+        boundsConvexHull->getConvexHull(points_check);
+        yarp::sig::Matrix A_ch_check;
+        yarp::sig::Vector b_ch_check;
+        boundsConvexHull->getConstraints(points_check, A_ch_check, b_ch_check, 0.01);
+
+        EXPECT_NEAR(d, expected_d, (expected_d-0.01)*1.01) << "Failed to reach point "
+                                                           << point
+                                                           << " in the allocated threshold (0.01m)." << std::endl;
+        EXPECT_TRUE(A_ch == A_ch_check) << "Convex Hull changed!" << std::endl;
+        if(! (A_ch == A_ch_check) )
+        {
+            std::cout << "Old A:" << std::endl << A_ch.toString() << std::endl;
+            std::cout << "New A:" << std::endl << A_ch_check.toString() << std::endl;
+            std::cout << "Had originally " << points.size() -1 << " points in the Convex Hull, "
+                      << " now we have " << points_check.size() << std::endl;
+        }
+        point_old = point;
     }
+
+    _log << "];" << std::endl;
+    _log << "points=[";
+    for(KDL::Vector point : points)
+        _log << point.x() << "," << point.y() << ";";
+    _log << "];" << std::endl;
+    _log << "points_inner=[";
+    for(KDL::Vector point : points_inner)
+        _log << point.x() << "," << point.y() << ";";
+    _log << "];" << std::endl;
+    _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); plot2(com_traj); axis equal;" << std::endl;
 }
+
 
 }
 

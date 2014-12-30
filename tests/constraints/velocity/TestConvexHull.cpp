@@ -2,6 +2,7 @@
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <idynutils/idynutils.h>
 #include <idynutils/convex_hull.h>
+#include <idynutils/tests_utils.h>
 #include <iCub/iDynTree/yarp_kdl.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
@@ -195,7 +196,7 @@ public:
                         A(z,1) = - _b;
                         b[z] =   + _c;
                     }
-                    double ch_boundary = 1e-2;
+                    double ch_boundary = 0;
                     if(fabs(_c) <= ch_boundary)
                         b[z] = 0.0;
                     else
@@ -220,14 +221,14 @@ class testConvexHull : public ::testing::Test{
       velocityLimits.resize(3,CoMVelocityLimit);
       zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
       coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
-      convexHull = new ConvexHull(  zeros, coman );
+      _convexHull = new ConvexHull(  zeros, coman );
   }
 
   virtual ~testConvexHull() {
     // You can do clean-up work that doesn't throw exceptions here.
-      if(convexHull != NULL) {
-        delete convexHull;
-        convexHull = NULL;
+      if(_convexHull != NULL) {
+        delete _convexHull;
+        _convexHull = NULL;
       }
   }
 
@@ -237,7 +238,7 @@ class testConvexHull : public ::testing::Test{
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      convexHull->update(zeros);
+      _convexHull->update(zeros);
       coman.updateiDyn3Model(zeros,true);
   }
 
@@ -249,7 +250,7 @@ class testConvexHull : public ::testing::Test{
   // Objects declared here can be used by all tests in the test case for ConvexHull.
 
   iDynUtils coman;
-  ConvexHull* convexHull;
+  ConvexHull* _convexHull;
 
   yarp::sig::Vector velocityLimits;
   yarp::sig::Vector zeros;
@@ -288,6 +289,9 @@ void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, iDy
 //    }
 //}
 
+// we need to check the old implementation with the new.
+// notice how the two implementatios are equal only when boundScaling = 0.0
+// In fact, the old implementation was bogus...
 TEST_F(testConvexHull, comparisonWithOldImplementation) {
     // ------- Set The robot in a certain configuration ---------
     yarp::sig::Vector q(coman.iDyn3_model.getNrOfDOFs(), 0.0);
@@ -306,7 +310,8 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
 
     updateiDyn3Model(true, q, coman);
-    convexHull->update(q);
+    ConvexHull localConvexHull( q, coman, 0.00);
+    localConvexHull.update(q);
 
     old_convex_hull oldConvexHull;
 
@@ -317,8 +322,8 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     yarp::sig::Vector b;
     oldConvexHull.getConvexHull(points, A, b);
 
-    yarp::sig::Matrix Aineq = convexHull->getAineq();
-    yarp::sig::Vector bUpperBound = convexHull->getbUpperBound();
+    yarp::sig::Matrix Aineq = localConvexHull.getAineq();
+    yarp::sig::Vector bUpperBound = localConvexHull.getbUpperBound();
 
 
     // multiplying A by JCoM
@@ -340,7 +345,7 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     }
 
     for(unsigned int i = 0; i < b.size(); ++i)
-        EXPECT_EQ(b[i], bUpperBound[i]);
+        EXPECT_DOUBLE_EQ(b[i], bUpperBound[i]);
 
     std::cout<<"A: "<<A.toString()<<std::endl;
     std::cout<<"Aineq: "<<Aineq.toString()<<std::endl;
@@ -350,13 +355,13 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     std::list<KDL::Vector> points2;
     idynutils::convex_hull::getSupportPolygonPoints(coman, points2);
 
-    idynutils::convex_hull _convex_hull;
+    idynutils::convex_hull idyn_convex_hull;
     std::vector<KDL::Vector> ch;
-    _convex_hull.getConvexHull(points2, ch);
+    idyn_convex_hull.getConvexHull(points2, ch);
 
     yarp::sig::Matrix A_ch;
     yarp::sig::Vector b_ch;
-    OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch);
+    ConvexHull::getConstraints(ch, A_ch, b_ch, 0.0);
 
     EXPECT_EQ(A.rows(), A_ch.rows());
     EXPECT_EQ(A.cols(), A_ch.cols());
@@ -368,8 +373,33 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     }
 
     for(unsigned int i = 0; i < b.size(); ++i)
-        EXPECT_EQ(b[i], b_ch[i]);
+        EXPECT_DOUBLE_EQ(b[i], b_ch[i]);
+}
 
+TEST_F(testConvexHull, checkBoundsScaling) {
+    // ------- Set The robot in a certain configuration ---------
+
+    std::list<KDL::Vector> chPoints;
+    idynutils::convex_hull::getSupportPolygonPoints(coman, chPoints);
+
+    idynutils::convex_hull idyn_convex_hull;
+    std::vector<KDL::Vector> ch;
+    idyn_convex_hull.getConvexHull(chPoints, ch);
+
+    yarp::sig::Matrix A_ch;
+    yarp::sig::Vector b_ch;
+    yarp::sig::Matrix A_ch_1cm_scaling;
+    yarp::sig::Vector b_ch_1cm_scaling;
+    ConvexHull::getConstraints(ch, A_ch, b_ch, 0.0);
+    ConvexHull::getConstraints(ch, A_ch_1cm_scaling, b_ch_1cm_scaling, 0.01);
+
+    EXPECT_TRUE(A_ch == A_ch_1cm_scaling);
+
+    for(unsigned int i = 0; i < b_ch.size(); ++i) {
+        double norm_i = sqrt(A_ch(i,0)*A_ch(i,0) + A_ch(i,1)*A_ch(i,1));
+        double distance_i = fabs(b_ch_1cm_scaling[i]-b_ch[i])/norm_i;
+        EXPECT_DOUBLE_EQ(distance_i,.01);
+    }
 }
 
 TEST_F(testConvexHull, sizesAreCorrect) {
@@ -384,47 +414,69 @@ TEST_F(testConvexHull, sizesAreCorrect) {
 
     unsigned int x_size = coman.iDyn3_model.getNrOfDOFs();
 
-    EXPECT_EQ(0, convexHull->getLowerBound().size()) << "lowerBound should have size 0"
-                                                     << "but has size"
-                                                     <<  convexHull->getLowerBound().size();
-    EXPECT_EQ(0, convexHull->getUpperBound().size()) << "upperBound should have size 0"
-                                                     << "but has size"
-                                                     << convexHull->getUpperBound().size();
+    EXPECT_EQ(0, _convexHull->getLowerBound().size()) << "lowerBound should have size 0"
+                                                      << "but has size"
+                                                      <<  _convexHull->getLowerBound().size();
+    EXPECT_EQ(0, _convexHull->getUpperBound().size()) << "upperBound should have size 0"
+                                                      << "but has size"
+                                                      << _convexHull->getUpperBound().size();
 
-    EXPECT_EQ(0, convexHull->getAeq().rows()) << "Aeq should have size 0"
-                                              << "but has size"
-                                              << convexHull->getAeq().rows();
+    EXPECT_EQ(0, _convexHull->getAeq().rows()) << "Aeq should have size 0"
+                                               << "but has size"
+                                               << _convexHull->getAeq().rows();
 
-    EXPECT_EQ(0, convexHull->getbeq().size()) << "beq should have size 0"
-                                              << "but has size"
-                                              <<  convexHull->getbeq().size();
-
-
-    EXPECT_EQ(coman.iDyn3_model.getNrOfDOFs(),convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
-                                                                             << coman.iDyn3_model.getNrOfDOFs()
-                                                                             << " but has has "
-                                                                             << convexHull->getAeq().cols()
-                                                                             << " columns instead";
-
-    EXPECT_EQ(0,convexHull->getbLowerBound().size()) << "beq should have size 3"
-                                                     << "but has size"
-                                                     << convexHull->getbLowerBound().size();
+    EXPECT_EQ(0, _convexHull->getbeq().size()) << "beq should have size 0"
+                                               << "but has size"
+                                               <<  _convexHull->getbeq().size();
 
 
+    EXPECT_EQ(coman.iDyn3_model.getNrOfDOFs(),_convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
+                                                                              << coman.iDyn3_model.getNrOfDOFs()
+                                                                              << " but has has "
+                                                                              << _convexHull->getAeq().cols()
+                                                                              << " columns instead";
+
+    EXPECT_EQ(0,_convexHull->getbLowerBound().size()) << "beq should have size 3"
+                                                      << "but has size"
+                                                      << _convexHull->getbLowerBound().size();
 
 
-    EXPECT_EQ(hullSize,convexHull->getAineq().rows()) << "Aineq should have size "
-                                                      << hullSize
-                                                      << " but has size"
-                                                      << convexHull->getAineq().rows();
 
 
-    EXPECT_EQ(hullSize,convexHull->getbUpperBound().size()) << "beq should have size "
-                                                            << hullSize
-                                                            << " but has size"
-                                                            << convexHull->getbUpperBound().size();
+    EXPECT_EQ(hullSize,_convexHull->getAineq().rows()) << "Aineq should have size "
+                                                       << hullSize
+                                                       << " but has size"
+                                                       << _convexHull->getAineq().rows();
+
+
+    EXPECT_EQ(hullSize,_convexHull->getbUpperBound().size()) << "beq should have size "
+                                                             << hullSize
+                                                             << " but has size"
+                                                             << _convexHull->getbUpperBound().size();
 }
 
+TEST_F(testConvexHull, NoZeroRowsPreset) {
+    double qVector[29] = {-0.431797,	 0.005336,	 0.000954,	 0.878479,	-0.000438,	-0.417689,	-0.435283,	-0.000493,	 0.000097,	 0.873527,	-0.000018,	-0.436310,	 0.000606,	-0.002125,	 0.000050,	 0.349666,	 0.174536,	 0.000010,	-1.396576,	-0.000000,	-0.000029,	-0.000000,	 0.349665,	-0.174895,	-0.000196,	-1.396547,	-0.000000,	-0.000026,	-0.000013};
+    yarp::sig::Vector q(29, qVector);
+    // TODO implement a test that checks, for this specific configuration,
+    // that the solution for the convex null does not contain a row full of zeroes
+    for(unsigned int i = 0; i < 10000; ++i)
+    {
+        if(i>1)
+            q = tests_utils::getRandomAngles(coman.iDyn3_model.getJointBoundMin(),
+                                             coman.iDyn3_model.getJointBoundMax(),
+                                             coman.iDyn3_model.getNrOfDOFs());
+        coman.updateiDyn3Model(q, true);
+        _convexHull->update(q);
+        std::vector<KDL::Vector> ch;
+        _convexHull->getConvexHull(ch);
+        yarp::sig::Matrix A_ch;
+        yarp::sig::Vector b_ch;
+        _convexHull->getConstraints(ch,A_ch,b_ch,0.01);
+        for(unsigned int i = 0; i < A_ch.rows(); ++i)
+            EXPECT_GT(norm(A_ch.getRow(i)),1E-5);
+    }
+}
 
 // Tests that the Foo::getLowerBounds() are zero at the bounds
 TEST_F(testConvexHull, BoundsAreCorrect) {
@@ -446,7 +498,7 @@ TEST_F(testConvexHull, BoundsAreCorrect) {
     q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
 
     updateiDyn3Model(true, q, coman);
-    convexHull->update(q);
+    _convexHull->update(q);
 
     // Get Vector of CH's points from coman
     std::list<KDL::Vector> points;
@@ -459,7 +511,7 @@ TEST_F(testConvexHull, BoundsAreCorrect) {
 
     //Compute CH from internal
     std::vector<KDL::Vector> ch2;
-    convexHull->getConvexHull(ch2);
+    _convexHull->getConvexHull(ch2);
 
     std::cout << "CH:"<<std::endl;
     for(unsigned int i = 0; i < ch.size(); ++i)
