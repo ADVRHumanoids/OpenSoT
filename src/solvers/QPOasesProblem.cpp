@@ -34,7 +34,7 @@ void QPOasesProblem::setDefaultOptions()
 {
     qpOASES::Options opt;
     opt.setToMPC();
-    opt.printLevel = qpOASES::PL_LOW;
+    opt.printLevel = qpOASES::PL_NONE;
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= _epsRegularisation;
 
@@ -408,10 +408,10 @@ void QPOasesProblem::printProblemInformation(const int problem_number, const std
         std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<problem_id<<std::endl;
     else
         std::cout<<GREEN<<"PROBLEM "<<problem_number<<" ID: "<<DEFAULT<<problem_id<<std::endl;
-    std::cout<<GREEN<<"eps Regularisation factor: "<<_problem->getOptions().epsRegularisation<<DEFAULT<<std::endl;
-    std::cout<<GREEN<<"# OF CONSTRAINTS: "<<_problem->getNC()<<DEFAULT<<std::endl;
-    std::cout<<GREEN<<"# OF BOUNDS: "<<_l.size()<<DEFAULT<<std::endl;
-    std::cout<<GREEN<<"# OF VARIABLES: "<<_problem->getNV()<<DEFAULT<<std::endl;
+    std::cout<<GREEN<<"eps Regularisation factor: "<<DEFAULT<<_problem->getOptions().epsRegularisation<<std::endl;
+    std::cout<<GREEN<<"# OF CONSTRAINTS: "<<DEFAULT<<_problem->getNC()<<std::endl;
+    std::cout<<GREEN<<"# OF BOUNDS: "<<DEFAULT<<_l.size()<<std::endl;
+    std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_problem->getNV()<<std::endl;
 //    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
 //    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
 //    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
