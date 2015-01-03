@@ -1548,8 +1548,8 @@ TEST_F(testQPOases_sot, tryFollowingBounds) {
                                                         q, idynutils_com,
                                                         idynutils_com.right_leg.end_effector_name,
                                                         "world"));
-    right_foot_task->setLambda(.6);
-    right_foot_task->setOrientationErrorGain(.5);
+    right_foot_task->setLambda(.2);
+    right_foot_task->setOrientationErrorGain(1);
 
     OpenSoT::tasks::Aggregated::Ptr first_task(
                 new OpenSoT::tasks::Aggregated( com_task,
@@ -1568,7 +1568,6 @@ TEST_F(testQPOases_sot, tryFollowingBounds) {
 
     OpenSoT::solvers::QPOases_sot::Ptr sot(
         new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
-
 
     //SET SOME REFERENCES
     yarp::sig::Vector T_com_p_init = idynutils_com.iDyn3_model.getCOM();
@@ -1704,13 +1703,18 @@ TEST_F(testQPOases_sot, tryFollowingBounds) {
             yarp::sig::Matrix right_foot_pose_now = right_foot_task->getActualPose();
             for(unsigned int r = 0; r < 4; ++r)
                 for(unsigned int c = 0; c < 4; ++c)
-                    ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-3) << "Error at iteration "
+                    EXPECT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-3) << "Error at iteration "
                                                                                     << i
                                                                                     << " at position "
                                                                                     << "(" << r
                                                                                     << "," << c << ")"
                                                                                     << " with cartesian error equal to "
                                                                                     << norm(right_foot_task->getb()) << std::endl;
+            EXPECT_LT(norm(right_foot_task->getA()*dq),1E-6) << "Error at iteration "
+                                                             << i
+                                                             << " J_foot*dq = "
+                                                             << (right_foot_task->getA()*dq).toString()
+                                                             << std::endl;
 
 #ifdef TRY_ON_SIMULATOR
             robot.move(q);
