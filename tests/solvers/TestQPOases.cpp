@@ -489,58 +489,6 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     EXPECT_EQ(-sp.g[1], s[1]);
 }
 
-/**
- * @brief TEST_F testAddProblem test solution of a simple NON-CONSTANT QP problem
- * with variable size of H, g, A, lA, uA, l and u.
- */
-TEST_F(testQPOasesProblem, testAddProblem)
-{
-    yarp::sig::Vector x(3);
-
-    yarp::sig::Matrix H(2,3); H.zero(); H(0,0) = 1.0; H(1,1) = 1.0;
-    yarp::sig::Matrix H_new(1,3); H_new.zero(); H_new(0,2) = 1.0;
-
-    yarp::sig::Vector g(2); g[0] = 5.0; g[1] = -5.0;
-    yarp::sig::Vector g_new(1); g_new[0] = 2.0;
-
-    yarp::sig::Matrix A(2,3); A.zero();
-    yarp::sig::Matrix A_new(1,3); A_new.zero();
-
-    yarp::sig::Vector l(2, -10.0);
-    yarp::sig::Vector l_new(1, -10.0);
-
-    yarp::sig::Vector u(2, 10.0);
-    yarp::sig::Vector u_new(1, 10.0);
-
-    yarp::sig::Vector lA; lA = l;
-    yarp::sig::Vector lA_new; lA_new = l_new;
-
-    yarp::sig::Vector uA; uA = u;
-    yarp::sig::Vector uA_new; uA_new = u_new;
-    qpOASES::HessianType ht = qpOASES::HST_IDENTITY;
-
-
-    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), A.rows(), (OpenSoT::HessianType)ht);
-
-    testProblem.initProblem(H, g, A, lA, uA, l, u);
-
-    testProblem.solve();
-    yarp::sig::Vector s1 = testProblem.getSolution();
-    EXPECT_NEAR(-g[0], s1[0], 1E-6);
-    EXPECT_NEAR(-g[1], s1[1], 1E-6);
-    std::cout<<GREEN<<"s1 size: "<<s1.size()<<DEFAULT<<std::endl;
-    std::cout<<GREEN<<"s1 solution: ["<<s1[0]<<" "<<s1[1]<<" "<<s1[2]<<"]"<<DEFAULT<<std::endl;
-
-    testProblem.setnWSR(127);
-    testProblem.addProblem(H_new, g_new, A_new, lA_new, uA_new, l_new, u_new);
-    yarp::sig::Vector s2 = testProblem.getSolution();
-    EXPECT_NEAR(-g[0], s2[0], 1E-6);
-    EXPECT_NEAR(-g[1], s2[1], 1E-6);
-    EXPECT_NEAR(-g_new[0], s2[2], 1E-6);
-    std::cout<<GREEN<<"s2 size: "<<s2.size()<<DEFAULT<<std::endl;
-    std::cout<<GREEN<<"s2 solution: ["<<s2[0]<<" "<<s2[1]<<" "<<s2[2]<<"]"<<DEFAULT<<std::endl;
-}
-
 TEST_F(testQPOasesProblem, testTask)
 {
     yarp::sig::Vector q_ref(10, 0.0);
@@ -585,12 +533,14 @@ TEST_F(testQPOasesTask, testQPOasesTask)
     postural_task->update(q);
     std::cout<<"error: "<<postural_task->getb().toString()<<std::endl;
 
-    OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
+    OpenSoT::solvers::QPOasesProblem qp_postural_problem(postural_task->getXSize(), 0,
+                                                         postural_task->getHessianAtype());
 
-    postural_task->update(q);
-    EXPECT_TRUE(qp_postural_task.solve());
-    std::cout<<"solution: "<<qp_postural_task.getSolution().toString()<<std::endl;
-    q += qp_postural_task.getSolution();
+    EXPECT_TRUE(qp_postural_problem.initProblem(postural_task->getA(), -1.0*postural_task->getb(),
+                                                yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                                yarp::sig::Vector(), yarp::sig::Vector()));
+    std::cout<<"solution: "<<qp_postural_problem.getSolution().toString()<<std::endl;
+    q += qp_postural_problem.getSolution();
 
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_DOUBLE_EQ(q[i], q_ref[i]);
@@ -613,10 +563,18 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         postural_task->getConstraints().push_back(joint_limits);
         postural_task->setLambda(0.1);
 
-        OpenSoT::solvers::QPOasesTask qp_postural_task(postural_task);
+        OpenSoT::solvers::QPOasesProblem qp_postural_problem(postural_task->getXSize(), 0,
+                                                             postural_task->getHessianAtype());
+        std::list< boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >>> constraint_list =
+                postural_task->getConstraints();
+        boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >> constraint = constraint_list.front();
+        EXPECT_TRUE(qp_postural_problem.initProblem(postural_task->getA(), -1.0*postural_task->getb(),
+                                                    yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                                    constraint->getLowerBound(), constraint->getUpperBound()));
 
-        yarp::sig::Vector l_old, u_old;
-        qp_postural_task.getBounds(l_old, u_old);
+        yarp::sig::Vector l_old = qp_postural_problem.getl();
+        yarp::sig::Vector u_old = qp_postural_problem.getu();
+
         EXPECT_TRUE(l_old == idynutils.iDyn3_model.getJointBoundMin());
         EXPECT_TRUE(u_old == idynutils.iDyn3_model.getJointBoundMax());
 
@@ -624,9 +582,14 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         for(unsigned int i = 0; i < 100; ++i)
         {
             postural_task->update(q);
-            EXPECT_TRUE(qp_postural_task.solve());
-            qp_postural_task.getBounds(l, u);
-            q += qp_postural_task.getSolution();
+
+            qp_postural_problem.updateProblem(postural_task->getA(), -1.0*postural_task->getb(),
+                                              yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                              constraint->getLowerBound(), constraint->getUpperBound());
+            EXPECT_TRUE(qp_postural_problem.solve());
+            l = qp_postural_problem.getl();
+            u = qp_postural_problem.getu();
+            q += qp_postural_problem.getSolution();
 
             if(i > 1)
             {
@@ -717,10 +680,19 @@ TEST_F(testQPOasesTask, testCoMTask)
 
     boost::shared_ptr<OpenSoT::constraints::velocity::CoMVelocity> com_vel_constr(
                 new OpenSoT::constraints::velocity::CoMVelocity(
-                    yarp::sig::Vector(3,0.05),1.0,q,idynutils));
+                    yarp::sig::Vector(3,0.06),1.0,q,idynutils));
     com_task->getConstraints().push_back(com_vel_constr);
 
-    OpenSoT::solvers::QPOasesTask qp_CoM_task(com_task);
+    std::list< boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >>> constraint_list =
+            com_task->getConstraints();
+    boost::shared_ptr<OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector >> constraint = constraint_list.front();
+
+    OpenSoT::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
+                                                    com_task->getHessianAtype());
+    ASSERT_TRUE(qp_CoM_problem.initProblem(com_task->getA().transposed()*com_task->getA(), -1.0*com_task->getA().transposed()*com_task->getb(),
+                                                constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
+                                                yarp::sig::Vector(), yarp::sig::Vector()));
+
 
     yarp::sig::Vector com_i = com_task->getActualPosition();
     yarp::sig::Vector com_f = com_i;
@@ -735,8 +707,12 @@ TEST_F(testQPOasesTask, testCoMTask)
         idynutils.updateiDyn3Model(q,true);
         com_task->update(q);
 
-        ASSERT_TRUE(qp_CoM_task.solve());
-        yarp::sig::Vector dq = qp_CoM_task.getSolution();
+        qp_CoM_problem.updateProblem(com_task->getA().transposed()*com_task->getA(), -1.0*com_task->getA().transposed()*com_task->getb(),
+                                          constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
+                                          yarp::sig::Vector(), yarp::sig::Vector());
+
+        ASSERT_TRUE(qp_CoM_problem.solve());
+        yarp::sig::Vector dq = qp_CoM_problem.getSolution();
         q += dq;
     }
 
@@ -768,16 +744,19 @@ TEST_F(testQPOasesTask, testCartesian)
     cartesian_task->setReference(T_ref);
     cartesian_task->update(q);
 
-    OpenSoT::solvers::QPOasesTask cartesian_qp(cartesian_task);
+    OpenSoT::solvers::QPOasesProblem qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
+    ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transposed()*cartesian_task->getA(), -1.0*cartesian_task->getA().transposed()*cartesian_task->getb(),
+                                                yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
+                                                yarp::sig::Vector(), yarp::sig::Vector()));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
         idynutils.updateiDyn3Model(q, true);
 
         cartesian_task->update(q);
-
-        ASSERT_TRUE(cartesian_qp.solve());
-        q += cartesian_qp.getSolution();
+        qp_cartesian_problem.updateTask(cartesian_task->getA().transposed()*cartesian_task->getA(), -1.0*cartesian_task->getA().transposed()*cartesian_task->getb());
+        ASSERT_TRUE(qp_cartesian_problem.solve());
+        q += qp_cartesian_problem.getSolution();
     }
 
     T = idynutils.iDyn3_model.getPosition(
@@ -868,16 +847,17 @@ TEST_F(testQPOases_sot, testContructor2Problems)
         joint_constraints->update(q);
 
         ASSERT_TRUE(sot.solve(dq));
+        //std::cout<<"Solution: ["<<dq.toString()<<"]"<<std::endl;
         q += dq;
     }
 
     idynutils.updateiDyn3Model(q);
-//    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
     yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
                 idynutils.iDyn3_model.getLinkIndex("Waist"),
                 idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-//    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
-//    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
+    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
 
 
     KDL::Frame T_kdl;

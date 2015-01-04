@@ -109,8 +109,9 @@ namespace OpenSoT{
          * for now is not possible to have different size of H and g wrt internal ones
          * @param H updated task matrix
          * @param g updated reference vector
+         * @return true if task is correctly updated
          */
-        void updateTask(const Matrix& H, const Vector& g);
+        bool updateTask(const Matrix& H, const Vector& g);
 
         /**
          * @brief updateConstraints update internal A, lA and uA
@@ -121,8 +122,9 @@ namespace OpenSoT{
          * @param A update constraint matrix
          * @param lA update lower constraint vector
          * @param uA update upper constraint vector
+         * @return true if constraints are correctly updated
          */
-        void updateConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
+        bool updateConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
 
         /**
          * @brief updateBounds update internal l and u
@@ -130,8 +132,9 @@ namespace OpenSoT{
          * _u = u
          * @param l update lower bounds
          * @param u update upper bounds
+         * @return true if bounds are correctly updated
          */
-        void updateBounds(const Vector& l, const Vector& u);
+        bool updateBounds(const Vector& l, const Vector& u);
 
         /**
          * @brief updateProblem update the whole problem see updateTask(), updateConstraints() and updateBounds()
@@ -142,8 +145,9 @@ namespace OpenSoT{
          * @param uA update upper constraint vector
          * @param l update lower bounds
          * @param u update upper bounds
+         * @return if the problem is correctly updated
          */
-        void updateProblem(const Matrix& H, const Vector& g,
+        bool updateProblem(const Matrix& H, const Vector& g,
                            const Matrix& A,
                            const Vector& lA, const Vector& uA,
                            const Vector& l, const Vector& u);
@@ -166,31 +170,6 @@ namespace OpenSoT{
          * @return true if the problem is initiazlized correctly
          */
         bool addConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
-
-        /**
-         * @brief addBounds pile a vector l/u to internal _l/_u
-         * so that _l = [_l; l] and _u = [_u; u]
-         * @param l extra lower bounds
-         * @param u extra upper bounds
-         * @return true if the problem is initiazlized correctly
-         */
-        bool addBounds(const Vector& l, const Vector& u);
-
-        /**
-         * @brief addProblem add a whole problem, see addTask(), addConstraints() and addBounds()
-         * @param H extra Task Matrix
-         * @param g extra reference vector
-         * @param A extra constraint matrix
-         * @param lA extra lower constraint vector
-         * @param uA extra upper constraint vector
-         * @param l extra lower bounds
-         * @param u extra upper bounds
-         * @return true if the problem is initiazlized correctly
-         */
-        bool addProblem(const Matrix& H, const Vector& g,
-                           const Matrix& A,
-                           const Vector& lA, const Vector& uA,
-                           const Vector& l, const Vector& u);
 
         /**
          * @brief solve the QP problem
@@ -239,6 +218,26 @@ namespace OpenSoT{
          * @return active constraints
          */
         const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
+
+        /**
+         * Getters for internal matrices and vectors
+         */
+        const yarp::sig::Matrix& getH(){return _H;}
+        const yarp::sig::Vector& getg(){return _g;}
+        const yarp::sig::Matrix& getA(){return _A;}
+        const yarp::sig::Vector& getlA(){return _lA;}
+        const yarp::sig::Vector& getuA(){return _uA;}
+        const yarp::sig::Vector& getl(){return _l;}
+        const yarp::sig::Vector& getu(){return _u;}
+
+        /**
+         * @brief printProblemInformation print some extra information about the problem
+         * @param problem_number a number to identify the problem
+         * @param problem_id a string to identify the problem
+         */
+        void printProblemInformation(const int problem_number, const std::string problem_id);
+
+        bool writeQPIntoMFile(const std::string& file_name);
 
     protected:
         /**
@@ -296,8 +295,6 @@ namespace OpenSoT{
         Vector _solution;
         Vector _dual_solution;
     };
-
-
     }
 }
 #endif
