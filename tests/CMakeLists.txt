@@ -34,6 +34,8 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testVelocityLimitsVelocityBounds
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
+                      testSolverQPOases
+                      testSolverQPOases_ConvexHull
                       testAggregatedTask
                       testCartesianVelocityTask
                       testCoMVelocityTask
@@ -73,6 +75,14 @@ ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexH
 TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testSolverQPOases solvers/TestQPOases.cpp)
+TARGET_LINK_LIBRARIES(testSolverQPOases ${TestLibs})
+add_dependencies(testSolverQPOases GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testSolverQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testSolverQPOases_ConvexHull ${TestLibs})
+add_dependencies(testSolverQPOases_ConvexHull GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testAggregatedTask GTest-ext OpenSoT)
@@ -93,11 +103,6 @@ ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
-
-ADD_EXECUTABLE(testSolverQPOases solvers/TestQPOases.cpp)
-TARGET_LINK_LIBRARIES(testSolverQPOases ${TestLibs})
-add_dependencies(testSolverQPOases GTest-ext OpenSoT)
-
 ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
 TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
 add_dependencies(testYCartesian GTest-ext OpenSoT)
@@ -113,6 +118,7 @@ add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLim
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testSolverQPOases)
+add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testSolverQPOases_ConvexHull)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
