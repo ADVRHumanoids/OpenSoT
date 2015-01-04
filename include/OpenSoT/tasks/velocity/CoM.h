@@ -20,7 +20,6 @@
 
 #include <OpenSoT/Task.h>
 #include <idynutils/idynutils.h>
-#include <idynutils/convex_hull.h>
 #include <kdl/frames.hpp>
 #include <yarp/sig/all.h>
 #include <yarp/os/all.h>
