@@ -5,6 +5,7 @@
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
+#include <OpenSoT/constraints/TaskToConstraint.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/all.h>
 #include <OpenSoT/solvers/QPOases.h>
@@ -297,7 +298,14 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
     }
 }
 
-class testQPOases_ConvexHull: public ::testing::Test
+enum useFootTaskOrConstraint {
+    USE_TASK = 1,
+    USE_CONSTRAINT = 2
+};
+
+class testQPOases_ConvexHull:
+        public ::testing::Test,
+        public ::testing::WithParamInterface<useFootTaskOrConstraint>
 {
 protected:
     std::ofstream _log;
@@ -340,7 +348,9 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 }
 
 //#define TRY_ON_SIMULATOR
-TEST_F(testQPOases_ConvexHull, tryFollowingBounds) {
+TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
+
+    useFootTaskOrConstraint footStrategy = GetParam();
 
 #ifdef TRY_ON_SIMULATOR
     yarp::os::Network init;
@@ -407,7 +417,18 @@ TEST_F(testQPOases_ConvexHull, tryFollowingBounds) {
     postural_task->setReference(q);
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-    stack_of_tasks.push_back(right_foot_task);
+    if(footStrategy == USE_TASK)
+        stack_of_tasks.push_back(right_foot_task);
+    else if (footStrategy == USE_CONSTRAINT)
+    {
+        using namespace OpenSoT::constraints;
+        TaskToConstraint::Ptr right_foot_constraint(new TaskToConstraint(right_foot_task));
+
+        com_task->getConstraints().push_back(right_foot_constraint);
+        postural_task->getConstraints().push_back(right_foot_constraint);
+
+    }
+
     stack_of_tasks.push_back(com_task);
     stack_of_tasks.push_back(postural_task);
 
@@ -431,7 +452,10 @@ TEST_F(testQPOases_ConvexHull, tryFollowingBounds) {
 
     unsigned int i = 0;
     const unsigned int n_iterations = 10000;
-    _log << "com_traj = [";
+    if(footStrategy == USE_TASK)
+        _log << "com_traj = [";
+    else if(footStrategy == USE_CONSTRAINT)
+        _log << "com_traj_constraint = [";
 
     yarp::sig::Matrix right_foot_pose = right_foot_task->getActualPose();
 
@@ -594,17 +618,27 @@ TEST_F(testQPOases_ConvexHull, tryFollowingBounds) {
     }
 
     _log << "];" << std::endl;
-    _log << "points=[";
-    for(KDL::Vector point : points)
-        _log << point.x() << "," << point.y() << ";";
-    _log << "];" << std::endl;
-    _log << "points_inner=[";
-    for(KDL::Vector point : points_inner)
-        _log << point.x() << "," << point.y() << ";";
-    _log << "];" << std::endl;
-    _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); plot2(com_traj); axis equal;" << std::endl;
+
+    if(footStrategy == USE_TASK)
+    {
+        _log << "points=[";
+        for(KDL::Vector point : points)
+            _log << point.x() << "," << point.y() << ";";
+        _log << "];" << std::endl;
+        _log << "points_inner=[";
+        for(KDL::Vector point : points_inner)
+            _log << point.x() << "," << point.y() << ";";
+        _log << "];" << std::endl;
+
+        _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); plot2(com_traj); axis equal;" << std::endl;
+    }
+    else if(footStrategy==USE_CONSTRAINT)
+        _log << "plot2(com_traj_constraint);" << std::endl;
 }
 
+INSTANTIATE_TEST_CASE_P(tryDifferentFootTaskStrategies,
+                        testQPOases_ConvexHull,
+                        ::testing::Values(USE_TASK, USE_CONSTRAINT));
 
 }
 
