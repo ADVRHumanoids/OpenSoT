@@ -312,7 +312,7 @@ protected:
 
     testQPOases_ConvexHull()
     {
-        _log.open("testQPOases_ConvexHull.m");
+        _log.open("testQPOases_ConvexHull.m", std::ofstream::app);
     }
 
     virtual ~testQPOases_ConvexHull() {
@@ -418,7 +418,12 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
     if(footStrategy == USE_TASK)
+    {
+        _log.close();
+        _log.open("testQPOases_ConvexHull.m");
+
         stack_of_tasks.push_back(right_foot_task);
+    }
     else if (footStrategy == USE_CONSTRAINT)
     {
         using namespace OpenSoT::constraints;
@@ -630,10 +635,15 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             _log << point.x() << "," << point.y() << ";";
         _log << "];" << std::endl;
 
-        _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); plot2(com_traj); axis equal;" << std::endl;
+        _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); axis equal;" << std::endl;
+        _log << "ct = plot2(com_traj,'b');" << std::endl;
     }
     else if(footStrategy==USE_CONSTRAINT)
-        _log << "plot2(com_traj_constraint);" << std::endl;
+    {
+        _log << "ctc = plot2(com_traj_constraint,'m');" << std::endl;
+        _log << "legend([ct,ctc], 'CoM Traj, r_sole ctrl as task', 'CoM Traj, r_sole ctrl as constraint');" << std::endl;
+    }
+
 }
 
 INSTANTIATE_TEST_CASE_P(tryDifferentFootTaskStrategies,
