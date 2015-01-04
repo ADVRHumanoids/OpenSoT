@@ -33,9 +33,8 @@ BilateralConstraint::BilateralConstraint(const yarp::sig::Matrix &Aineq,
     _bLowerBound = bLowerBound;
     _bUpperBound = bUpperBound;
 
-    assert(_Aineq.rows() > 0);
-    assert( (_Aineq.rows() == bLowerBound.size()) &&
-            (_Aineq.rows() == bUpperBound.size()));
+    assert( (_Aineq.rows() == _bLowerBound.size()) &&
+            (_Aineq.rows() == _bUpperBound.size()));
 }
 
 
