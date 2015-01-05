@@ -92,8 +92,8 @@ namespace OpenSoT{
          * @param u upper bounds
          * @return true if the problem can be solved
          */
-        bool initProblem(const Matrix& H, const Vector& g,
-                        const Matrix& A,
+        bool initProblem(const yarp::sig::Matrix& H, const Vector& g,
+                        const yarp::sig::Matrix& A,
                         const Vector& lA, const Vector& uA,
                         const Vector& l, const Vector& u);
 
@@ -111,7 +111,7 @@ namespace OpenSoT{
          * @param g updated reference vector
          * @return true if task is correctly updated
          */
-        bool updateTask(const Matrix& H, const Vector& g);
+        bool updateTask(const yarp::sig::Matrix& H, const Vector& g);
 
         /**
          * @brief updateConstraints update internal A, lA and uA
@@ -124,7 +124,7 @@ namespace OpenSoT{
          * @param uA update upper constraint vector
          * @return true if constraints are correctly updated
          */
-        bool updateConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
+        bool updateConstraints(const yarp::sig::Matrix& A, const Vector& lA, const Vector& uA);
 
         /**
          * @brief updateBounds update internal l and u
@@ -147,8 +147,8 @@ namespace OpenSoT{
          * @param u update upper bounds
          * @return if the problem is correctly updated
          */
-        bool updateProblem(const Matrix& H, const Vector& g,
-                           const Matrix& A,
+        bool updateProblem(const yarp::sig::Matrix& H, const Vector& g,
+                           const yarp::sig::Matrix& A,
                            const Vector& lA, const Vector& uA,
                            const Vector& l, const Vector& u);
 
@@ -159,7 +159,7 @@ namespace OpenSoT{
          * @param g extra reference vector
          * @return true if the problem is initiazlized correctly
          */
-        bool addTask(const Matrix& H, const Vector& g);
+        bool addTask(const yarp::sig::Matrix& H, const Vector& g);
 
         /**
          * @brief addConstraints pile a matrix A to internal _A and lA/uA to internal _lA/_uA
@@ -169,7 +169,7 @@ namespace OpenSoT{
          * @param uA extra upper constraint vector
          * @return true if the problem is initiazlized correctly
          */
-        bool addConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
+        bool addConstraints(const yarp::sig::Matrix& A, const Vector& lA, const Vector& uA);
 
         /**
          * @brief solve the QP problem
@@ -273,13 +273,13 @@ namespace OpenSoT{
         /**
          * Define a cost function: ||Hx - g||
          */
-        Matrix _H;
+        yarp::sig::Matrix _H;
         Vector _g;
 
         /**
          * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
-        Matrix _A;
+        yarp::sig::Matrix _A;
         Vector _lA;
         Vector _uA;
 
