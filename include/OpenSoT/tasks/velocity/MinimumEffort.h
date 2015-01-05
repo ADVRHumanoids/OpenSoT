@@ -64,7 +64,8 @@
                     yarp::sig::Matrix _W;
                     yarp::sig::Vector _zeros;
 
-                    ComputeGTauGradient(const yarp::sig::Vector& q) :
+                    ComputeGTauGradient(const yarp::sig::Vector& q, const iDynUtils robot_model) :
+                        _robot(robot_model),
                         _W(q.size(),q.size()),
                         _zeros(q.size(), 0.0)
                     {
@@ -92,7 +93,7 @@
 
             public:
 
-                MinimumEffort(const yarp::sig::Vector& x);
+                MinimumEffort(const yarp::sig::Vector& x, const iDynUtils& robot_model);
 
                 ~MinimumEffort();
 
