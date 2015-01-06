@@ -1238,7 +1238,7 @@ TEST_F(testQPOases_sot, testMinEffort)
     idynutils.updateiDyn3Model(q,true);
 
     boost::shared_ptr<OpenSoT::tasks::velocity::MinimumEffort> min_effort_task(
-            new OpenSoT::tasks::velocity::MinimumEffort(q));
+            new OpenSoT::tasks::velocity::MinimumEffort(q, idynutils));
 
     std::list<boost::shared_ptr<OpenSoT::Task<Matrix, Vector>>> task_list;
     task_list.push_back(min_effort_task);
