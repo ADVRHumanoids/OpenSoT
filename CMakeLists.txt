@@ -85,6 +85,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/tasks/Aggregated.cpp
+                    src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/CoM.cpp
                     src/tasks/velocity/MinimumEffort.cpp
