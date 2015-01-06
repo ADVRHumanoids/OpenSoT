@@ -44,15 +44,15 @@ namespace OpenSoT {
 
                 /**
                  * @brief serializeMsg push in a bottle data contained in the std::map. Data are serialized as:
-                 * [j0, name0, j1, name1, ..., jn, namen]
+                 * [name0, j0, name1, j1, ..., namen, jn]
                  * @param tmp_b bottle
                  */
                 void serializeMsg(::yarp::os::Bottle& tmp_b)
                 {
                     for(std::map<std::string, double>::iterator i = joints.begin(); i != joints.end(); ++i)
                     {
-                        tmp_b.addDouble(i->second);
                         tmp_b.addString(i->first);
+                        tmp_b.addDouble(i->second);                        
                     }
                 }
 
@@ -63,14 +63,12 @@ namespace OpenSoT {
                  */
                 void deserializeMsg(::yarp::os::Bottle& tmp_b, unsigned int i = 0)
                 {
-                    if(tmp_b.size() > 2)
+                    if(tmp_b.size() >= 2)
                     {
-                        joints.clear();
-
                         unsigned int j = 0;
                         for(unsigned int k = 0; k < tmp_b.size()/2; ++k)
                         {
-                            joints[tmp_b.get(j+1+i).asString()] = tmp_b.get(j+i).asDouble();
+                            joints[tmp_b.get(j+i).asString()] = tmp_b.get(j+1+i).asDouble();
                             j = j+2;
                         }
                     }
@@ -111,8 +109,8 @@ namespace OpenSoT {
                     ::yarp::os::Bottle tmp_bot;
                     serializeMsg(tmp_bot);
 
-                    if(tmp_bot.write(connection))
-                        return true;
+                    if(tmp_bot.write(connection)){
+                        return true;}
                     return false;
                 }
             };

@@ -25,7 +25,7 @@
 /**
  *	\file src/Flipper.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of the Flipper class designed to manage working sets of
@@ -60,8 +60,8 @@ Flipper::Flipper( )
 /*
  *	F l i p p e r
  */
-Flipper::Flipper(	int _nV,
-					int _nC
+Flipper::Flipper(	unsigned int _nV,
+					unsigned int _nC
 					)
 {
 	R = 0;
@@ -113,8 +113,8 @@ Flipper& Flipper::operator=( const Flipper& rhs )
 /*
  *	i n i t
  */
-returnValue Flipper::init(	int _nV,
-							int _nC
+returnValue Flipper::init(	unsigned int _nV,
+							unsigned int _nC
 							)
 {
 	if ( ( _nV < 0 ) || ( _nC < 0 ) )
@@ -256,7 +256,7 @@ returnValue Flipper::copy(	const Flipper& rhs
 }
 
 
-int Flipper::getDimT( ) const
+unsigned int Flipper::getDimT( ) const
 {
 	if ( nV > nC )
 		return nC*nC;

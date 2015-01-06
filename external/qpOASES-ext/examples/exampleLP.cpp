@@ -25,7 +25,7 @@
 /**
  *	\file examples/exampleLP.cpp
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2008-2014
  *
  *	Very simple example for solving a LP sequence using qpOASES.

@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/Options.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the Options class designed to manage user-specified
@@ -43,14 +43,14 @@
 BEGIN_NAMESPACE_QPOASES
 
 
-/** 
+/**
  *	\brief Manages all user-specified options for solving QPs.
  *
  *	This class manages all user-specified options used for solving
  *	quadratic programs.
  *
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class Options
@@ -85,17 +85,18 @@ class Options
 		/** Sets all options to values resulting in minimum solution time.
  		 *	\return SUCCESSFUL_RETURN */
 		returnValue setToMPC( );
-		
+
 		/** Same as setToMPC( ), for ensuring backwards compatibility.
  		 *	\return SUCCESSFUL_RETURN */
 		returnValue setToFast( );
 
 
 		/** Ensures that all options have consistent values by automatically
-		 *	correcting inconsistent ones.
+		 *	adjusting inconsistent ones.
 		 *	Note: This routine cannot (and does not try to) ensure that values
 		 *	      are set to reasonable values that make the QP solution work!
-		 *	\return SUCCESSFUL_RETURN */
+		 *	\return SUCCESSFUL_RETURN \n 
+		 *          RET_OPTIONS_ADJUSTED */
 		returnValue ensureConsistency( );
 
 

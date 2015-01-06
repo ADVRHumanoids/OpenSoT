@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/UnitTesting.hpp
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2014
  *
  *	Definition of auxiliary functions/macros for unit testing.
@@ -36,14 +36,32 @@
 #define QPOASES_UNIT_TESTING_HPP
 
 
+#ifndef TEST_TOL_FACTOR
+#define TEST_TOL_FACTOR 1
+#endif
+
+
+/** Return value for tests that passed. */
+#define TEST_PASSED 0
+
+/** Return value for tests that failed. */
+#define TEST_FAILED 1
+
+/** Return value for tests that could not run due to missing external data. */
+#define TEST_DATA_NOT_FOUND 99
+
+
 /** Macro verifying that two numerical values are equal in order to pass unit test. */
-#define QPOASES_TEST_FOR_EQUAL( x,y ) if ( REFER_NAMESPACE_QPOASES isEqual( (x),(y) ) == BT_FALSE ) { return 1; }
+#define QPOASES_TEST_FOR_EQUAL( x,y ) if ( REFER_NAMESPACE_QPOASES isEqual( (x),(y) ) == BT_FALSE ) { return TEST_FAILED; }
 
 /** Macro verifying that two numerical values are close to each other in order to pass unit test. */
-#define QPOASES_TEST_FOR_NEAR( x,y )  if ( REFER_NAMESPACE_QPOASES getAbs((x)-(y)) / REFER_NAMESPACE_QPOASES getMax( 1.0,REFER_NAMESPACE_QPOASES getAbs(x) ) >= 1e-10 ) { return 1; }
+#define QPOASES_TEST_FOR_NEAR( x,y )  if ( REFER_NAMESPACE_QPOASES getAbs((x)-(y)) / REFER_NAMESPACE_QPOASES getMax( 1.0,REFER_NAMESPACE_QPOASES getAbs(x) ) >= 1e-10 ) { return TEST_FAILED; }
+
+/** Macro verifying that first quantity is lower or equal than second one in order to pass unit test. */
+#define QPOASES_TEST_FOR_TOL( x,tol )  if ( (x) > (tol)*(TEST_TOL_FACTOR) ) { return TEST_FAILED; }
 
 /** Macro verifying that a logical expression holds in order to pass unit test. */
-#define QPOASES_TEST_FOR_TRUE( x )  if ( (x) == false ) { return 1; }
+#define QPOASES_TEST_FOR_TRUE( x )  if ( (x) == false ) { return TEST_FAILED; }
 
 
 

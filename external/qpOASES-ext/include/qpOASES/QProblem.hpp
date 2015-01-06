@@ -25,7 +25,7 @@
 /**
  *	\file include/qpOASES/QProblem.hpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the QProblem class which is able to use the newly
@@ -46,7 +46,7 @@
 BEGIN_NAMESPACE_QPOASES
 
 
-/** 
+/**
  *	\brief Implements the online active set strategy for QPs with general constraints.
  *
  *	A class for setting up and solving quadratic programs. The main feature is
@@ -54,7 +54,7 @@ BEGIN_NAMESPACE_QPOASES
  * 	parametric quadratic programming.
  *
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class QProblem : public QProblemB
@@ -109,9 +109,9 @@ class QProblem : public QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	SymmetricMatrix *_H,		/**< Hessian matrix. */
+		returnValue init(	SymmetricMatrix *_H,		/**< Hessian matrix (a shallow copy is made). */
 							const real_t* const _g, 	/**< Gradient vector. */
-							Matrix *_A,  				/**< Constraint matrix. */
+							Matrix *_A,  				/**< Constraint matrix (a shallow copy is made). */
 							const real_t* const _lb,	/**< Lower bound vector (on variables). \n
 															 If no lower bounds exist, a NULL pointer can be passed. */
 							const real_t* const _ub,	/**< Upper bound vector (on variables). \n
@@ -139,10 +139,10 @@ class QProblem : public QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	const real_t* const _H, 	/**< Hessian matrix. \n
+		returnValue init(	const real_t* const _H, 	/**< Hessian matrix (a shallow copy is made). \n
 															 If Hessian matrix is trivial, a NULL pointer can be passed. */
 							const real_t* const _g, 	/**< Gradient vector. */
-							const real_t* const _A,  	/**< Constraint matrix. */
+							const real_t* const _A,  	/**< Constraint matrix (a shallow copy is made). */
 							const real_t* const _lb,	/**< Lower bound vector (on variables). \n
 															 If no lower bounds exist, a NULL pointer can be passed. */
 							const real_t* const _ub,	/**< Upper bound vector (on variables). \n
@@ -206,9 +206,9 @@ class QProblem : public QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	SymmetricMatrix *_H, 						/**< Hessian matrix. */
+		returnValue init(	SymmetricMatrix *_H, 						/**< Hessian matrix (a shallow copy is made). */
 							const real_t* const _g, 					/**< Gradient vector. */
-							Matrix *_A, 			 					/**< Constraint matrix. */
+							Matrix *_A, 			 					/**< Constraint matrix (a shallow copy is made). */
 							const real_t* const _lb,					/**< Lower bound vector (on variables). \n
 																			 If no lower bounds exist, a NULL pointer can be passed. */
 							const real_t* const _ub,					/**< Upper bound vector (on variables). \n
@@ -248,10 +248,10 @@ class QProblem : public QProblemB
 					RET_INIT_FAILED_UNBOUNDEDNESS \n
 					RET_MAX_NWSR_REACHED \n
 					RET_INVALID_ARGUMENTS */
-		returnValue init(	const real_t* const _H, 					/**< Hessian matrix. \n
+		returnValue init(	const real_t* const _H, 					/**< Hessian matrix (a shallow copy is made). \n
 																     		 If Hessian matrix is trivial, a NULL pointer can be passed. */
 							const real_t* const _g, 					/**< Gradient vector. */
-							const real_t* const _A,  					/**< Constraint matrix. */
+							const real_t* const _A,  					/**< Constraint matrix (a shallow copy is made). */
 							const real_t* const _lb,					/**< Lower bound vector (on variables). \n
 																			 If no lower bounds exist, a NULL pointer can be passed. */
 							const real_t* const _ub,					/**< Upper bound vector (on variables). \n
@@ -667,7 +667,7 @@ class QProblem : public QProblemB
 																								 *	 Ouput: Working set for auxiliary QP. */
 												) const;
 
-		/** Setups bound and constraints data structures according to auxiliaryBounds/Constraints.
+		/** Sets up bound and constraints data structures according to auxiliaryBounds/Constraints.
 		 *  (If the working set shall be setup afresh, make sure that
 		 *  bounds and constraints data structure have been resetted
 		 *  and the TQ factorisation has been initialised!)
@@ -681,7 +681,7 @@ class QProblem : public QProblemB
 																								 *    setup afresh or by updating the current one. */
 												);
 
-		/** Setups the optimal primal/dual solution of the auxiliary initial QP.
+		/** Sets up the optimal primal/dual solution of the auxiliary initial QP.
 		 *	\return SUCCESSFUL_RETURN */
 		returnValue setupAuxiliaryQPsolution(	const real_t* const xOpt,			/**< Optimal primal solution vector.
 																				 	*	 If a NULL pointer is passed, all entries are set to zero. */
@@ -689,13 +689,13 @@ class QProblem : public QProblemB
 																					 *	 If a NULL pointer is passed, all entries are set to zero. */
 												);
 
-		/** Setups gradient of the auxiliary initial QP for given
+		/** Sets up gradient of the auxiliary initial QP for given
 		 *  optimal primal/dual solution and given initial working set
 		 *  (assumes that members X, Y and BOUNDS, CONSTRAINTS have already been initialised!).
 		 *	\return SUCCESSFUL_RETURN */
 		returnValue setupAuxiliaryQPgradient( );
 
-		/** Setups (constraints') bounds of the auxiliary initial QP for given
+		/** Sets up (constraints') bounds of the auxiliary initial QP for given
 		 *  optimal primal/dual solution and given initial working set
 		 *  (assumes that members X, Y and BOUNDS, CONSTRAINTS have already been initialised!).
 		 *	\return SUCCESSFUL_RETURN \n
@@ -942,7 +942,7 @@ class QProblem : public QProblemB
 										const Constraints* const guessedConstraints	/**< Guessed new working set of constraints. */
 										) const;
 
-		/** Setups internal QP data. 
+		/** Sets up internal QP data.
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_INVALID_ARGUMENTS \n
 					RET_UNKNONW_BUG */
@@ -961,7 +961,7 @@ class QProblem : public QProblemB
 									);
 
 
-		/** Setups dense internal QP data. If the current Hessian is trivial
+		/** Sets up dense internal QP data. If the current Hessian is trivial
 		 *  (i.e. HST_ZERO or HST_IDENTITY) but a non-trivial one is given,
 		 *  memory for Hessian is allocated and it is set to the given one.
 		 *	\return SUCCESSFUL_RETURN \n
@@ -981,7 +981,7 @@ class QProblem : public QProblemB
 																	 If no lower constraints' bounds exist, a NULL pointer can be passed. */
 									);
 
-		/** Setups internal QP data by loading it from files. If the current Hessian
+		/** Sets up internal QP data by loading it from files. If the current Hessian
 		 *  is trivial (i.e. HST_ZERO or HST_IDENTITY) but a non-trivial one is given,
 		 *  memory for Hessian is allocated and it is set to the given one.
 		 *	\return SUCCESSFUL_RETURN \n
@@ -1039,44 +1039,46 @@ class QProblem : public QProblemB
 			Note: Also internal vector Ax is recomputed!
 		 *	\return SUCCESSFUL_RETURN \n
 		 *			RET_INVALID_ARGUMENTS */
-		inline returnValue setA(	Matrix *A_new	/**< New constraint matrix. */
+		inline returnValue setA(	Matrix *A_new	/**< New constraint matrix (a shallow copy is made). */
 									);
 
 		/** Sets dense constraint matrix of the QP. \n
 			Note: Also internal vector Ax is recomputed!
 		 *	\return SUCCESSFUL_RETURN \n
 		 *			RET_INVALID_ARGUMENTS */
-		inline returnValue setA(	const real_t* const A_new	/**< New dense constraint matrix (with correct dimension!). */
+		inline returnValue setA(	const real_t* const A_new	/**< New dense constraint matrix (with correct dimension!), a shallow copy is made. */
 									);
 
 
 		/** Sets constraints' lower bound vector of the QP.
 		 *	\return SUCCESSFUL_RETURN \n
-		 *			RET_INVALID_ARGUMENTS */
+		 *			RET_QPOBJECT_NOT_SETUP */
 		inline returnValue setLBA(	const real_t* const lbA_new	/**< New constraints' lower bound vector (with correct dimension!). */
 									);
 
 		/** Changes single entry of lower constraints' bound vector of the QP.
-		 *	\return SUCCESSFUL_RETURN  \n
-					RET_INDEX_OUT_OF_BOUNDS */
+		 *	\return SUCCESSFUL_RETURN \n
+		 *			RET_QPOBJECT_NOT_SETUP \n
+		 *			RET_INDEX_OUT_OF_BOUNDS */
 		inline returnValue setLBA(	int number,		/**< Number of entry to be changed. */
 									real_t value	/**< New value for entry of lower constraints' bound vector (with correct dimension!). */
 									);
 
 		/** Sets constraints' upper bound vector of the QP.
 		 *	\return SUCCESSFUL_RETURN \n
-		 *			RET_INVALID_ARGUMENTS */
+		 *			RET_QPOBJECT_NOT_SETUP */
 		inline returnValue setUBA(	const real_t* const ubA_new	/**< New constraints' upper bound vector (with correct dimension!). */
 									);
 
 		/** Changes single entry of upper constraints' bound vector of the QP.
-		 *	\return SUCCESSFUL_RETURN  \n
-					RET_INDEX_OUT_OF_BOUNDS */
+		 *	\return SUCCESSFUL_RETURN \n
+		 *			RET_QPOBJECT_NOT_SETUP \n
+		 *			RET_INDEX_OUT_OF_BOUNDS */
 		inline returnValue setUBA(	int number,		/**< Number of entry to be changed. */
 									real_t value	/**< New value for entry of upper constraints' bound vector (with correct dimension!). */
 									);
 
-		
+
 		/** Drops the blocking bound/constraint that led to infeasibility, or finds another
 		 *  bound/constraint to drop according to drop priorities.
 		 *  \return SUCCESSFUL_RETURN \n
@@ -1099,14 +1101,6 @@ class QProblem : public QProblemB
 												const real_t* const ubA  /**< Vector of upper constraints*/
 												) const;
 
-		/** Creates a sparse diagonal (square-)matrix which is a given 
-		 *  multiple of the identity matrix.
-		 *  \return Diagonal matrix \n
-		 */
-		SymSparseMat* createDiagSparseMat(	int n,					/**< Row/column dimension of matrix to be created. */
-											real_t diagVal = 1.0	/**< Value of all diagonal entries. */
-											);
-
 
 	public:
 		/** ...
@@ -1122,7 +1116,7 @@ class QProblem : public QProblemB
 													);
 
 
-		
+
 	/*
 	 *	PROTECTED MEMBER VARIABLES
 	 */

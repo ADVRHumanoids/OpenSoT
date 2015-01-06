@@ -1,4 +1,4 @@
-OpenSoT
+OpenSoT v0.1
 =========
 
 An Open Source Task Solving library with Constraints
@@ -22,6 +22,10 @@ alt="OpenSoT + PI" width="480" height="360" border="10" /></a>
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=cBggRy7WPUE&list=UUkkZXunCN6eJwww1CeK7DrA
 " target="_blank"><img src="http://img.youtube.com/vi/cBggRy7WPUE/0.jpg" 
+alt="Minimum Effort + Drawing Task" width="480" height="360" border="10" /></a>
+
+<a href="https://www.youtube.com/watch?v=U1FcIq15jg4&feature=youtu.be
+" target="_blank"><img src="http://img.youtube.com/vi/U1FcIq15jg4/0.jpg" 
 alt="Minimum Effort + Drawing Task" width="480" height="360" border="10" /></a>
 
 Installation

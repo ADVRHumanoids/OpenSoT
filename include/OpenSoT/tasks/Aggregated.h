@@ -30,7 +30,13 @@
 
         /**
          * @brief The Aggregated class builds a new Task by piling up simpler tasks
-         *        so that A = [W1*A1; W2*A2], b=[W1*alpha1*b1;W2*alpha2*b2]
+         *        so that \f$A = [W_1*A_1; W_2*A_2]\f$, \f$b=\lambda*[W_1*\lambda_1*b_1;W_2*\lambda_2*b_2]\f$
+         * If the tasks are modified (through their methods, or constraints are added to the tasks),
+         * the Aggregated gets updated accordingly (after calling the _update() function), and during the update
+         * it will automatically call update() on every single task of which is comprised.
+         * It is possible to add constraints to the Aggregated task which are not constraints to the Tasks of which
+         * it is comprised. Take a look at getConstraints(), getAggregatedConstraints(), getOwnConstraints() for more infos.
+         *
          */
         class Aggregated: public Task<yarp::sig::Matrix, yarp::sig::Vector> {
         public:
@@ -38,9 +44,18 @@
         protected:
 
             std::list< TaskPtr > _tasks;
+
+            std::list< ConstraintPtr > _ownConstraints;
+            std::list< ConstraintPtr > _aggregatedConstraints;
+
             unsigned int _aggregationPolicy;
 
             void generateAll();
+
+            void generateConstraints();
+
+            void generateAggregatedConstraints();
+
             /**
              * @brief computeHessianType compute the new Hessian type associated to the Aggregated version of the Tasks.
              *
@@ -110,6 +125,47 @@
             ~Aggregated();
 
             void _update(const yarp::sig::Vector &x);
+
+
+            /**
+             * @brief getConstraints return a reference to the constraint list.
+             * Use the standard list methods to add to the constraints list.
+             * i.e.:
+             *              task.getConstraints().push_back(new_constraint)
+             * Notice that the constraints that getConstraints returns are regenerated
+             * after each call to the _update() function. A simple check is made before regenerating
+             * the constraints, so that if a new constraints gets added to the list before the update,
+             * if the constraint is added with a push_back (i.e., at the back of the list), it will be
+             * copied to the ownConstraints list of constraints permanently.
+             * Notice however that adding constraints in this way is not considered efficient, you should
+             * directly add them to the ownConstraints list, by calling,
+             * i.e.:
+             *              task.getOwnConstraints().push_back(new_constraint)
+             * If you want to remove constraints which are not ownConstraints, please remove them
+             * from the Tasks of which the Aggregated is composed from.
+             * @return a generated list of pointers to constraints
+             */
+
+            /**
+             * @brief getOwnConstraints return a reference to the Aggregated task own constraints list.
+             * The ownConstraints list is used together with all the constraints of every task to generate the
+             * final constraints list.
+             * Use the standard list methods
+             * to add, remove, clear, ... the constraints list.
+             * e.g.:
+             *              task.getConstraints().push_back(new_constraint)
+             * @return the list of constraints for this task
+             */
+            std::list< ConstraintPtr >& getOwnConstraints() { return _ownConstraints; }
+
+            /**
+             * @brief getAggregatedConstraints return a reference to the aggregation of the tasks constraint list.
+             * The list cannot be modified, as it is generated starting from all the constraints.
+             * If you need to modify this list, you can do it indirectly by modifying the list of constraints
+             * of the tasks that compose this Aggregated, and calling _update() on the Aggregated
+             * @return the list composed of the constraints for all the tasks included in this Aggregated
+             */
+            const std::list< ConstraintPtr >& getAggregatedConstraints() { return _aggregatedConstraints; }
 
             static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
         };

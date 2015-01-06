@@ -25,8 +25,9 @@
 #include <OpenSoT/Task.h>
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
+#include "QPOasesProblem.h"
 
-#define DEFAULT_EPS_REGULARISATION 2E2
+
 
 using namespace yarp::sig;
 
@@ -42,358 +43,100 @@ namespace OpenSoT{
     namespace solvers{
 
     /**
-     * @brief The QPOasesProblem class handle variables, options and execution of a
-     * single qpOases problem. Is implemented using yarp::sig Matrix and Vector.
+     * @brief The QPOases_sot class implement a solver that accept a Stack of Tasks with Bounds and Constraints
      */
-    class QPOasesProblem {
-    public:
-        /**
-         * @brief QPOasesProblem Default constructor. If used remember to use
-         * setProblem(const qpOASES::SQProblem& problem) to add a QP problem to
-         * the class!
-         * Ex.
-         *
-         *  QPOasesProblem p;
-         *  qpOASES::SQProblem testProblem(2, 2, HST_IDENTITY);
-         *  p.setProblem(testProblem);
-         */
-        QPOasesProblem();
-
-        /**
-         * @brief QPOasesProblem constructor with creation of a QP problem.
-         * @param number_of_variables of the QP problem
-         * @param number_of_constraints of the QP problem
-         * @param hessian_type of the QP problem
-         * @param eps_regularization set the Scaling factor of identity matrix used for Hessian regularisation.
-         *             final_eps_regularisation = standard_eps_regularisation * eps_regularisation
-         *        this parameter is particular important for the optimization!
-         */
-        QPOasesProblem(const int number_of_variables,
-                       const int number_of_constraints,
-                       OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
-                       const double eps_regularisation = DEFAULT_EPS_REGULARISATION); //2E2
-
-        /**
-          * @brief ~QPOasesProblem destructor
-          */
-        ~QPOasesProblem();
-
-        /**
-         * @brief setDefaultOptions to internal qpOases problem
-         * @param eps_regularisation set the Scaling factor of identity matrix used for Hessian regularisation.
-         */
-        void setDefaultOptions();
-
-        /**
-         * @brief setProblem copy a QP Problem in the internal object of the class.
-         * @param problem to copy
-         */
-        void setProblem(const boost::shared_ptr<qpOASES::SQProblem> &problem);
-
-        /**
-         * @brief getProblem return the internal QP problem
-         * @return reference to internal QP problem
-         */
-        const boost::shared_ptr<qpOASES::SQProblem>& getProblem(){return _problem;}
-
-        /**
-         * @brief getOptions return the options of the QP problem
-         * @return options
-         */
-        qpOASES::Options getOptions();
-
-        /**
-         * @brief setOptions of the QP problem. Default are set to:
-         *      qpOASES::Options opt;
-         *      opt.printLevel = qpOASES::PL_HIGH;
-         *      opt.setToReliable();
-         *      opt.enableRegularisation = qpOASES::BT_TRUE;
-         *      opt.epsRegularisation *= 2E2;
-         * @param options
-         */
-        void setOptions(const qpOASES::Options& options);
-
-        /**
-         * @brief initProblem initialize the QP problem and get the solution, the dual solution,
-         * bounds and constraints.
-         * The QP problem has the following structure:
-         *
-         *      min = ||Hx - g||
-         *  st.     lA <= Ax <= uA
-         *           l <=  x <= u
-         * @param H
-         * @param g
-         * @param A
-         * @param lA
-         * @param uA
-         * @param l
-         * @param u
-         * @return true if the problem can be solved
-         */
-        bool initProblem(const Matrix& H, const Vector& g,
-                        const Matrix& A,
-                        const Vector& lA, const Vector& uA,
-                        const Vector& l, const Vector& u);
-
-        /**
-         * This set of function update current problem copying input data. Use these
-         * methods to update existing matrices of the QP problem.
-         */
-
-        /**
-         * @brief updateTask update H and g
-         * @param H
-         * @param g
-         * @return true if the Problem has been initialized using initProblem( ... ) and
-         * if the size of H and g is the same as the one in the QP problem.
-         */
-        bool updateTask(const Matrix& H, const Vector& g);
-
-        /**
-         * @brief updateConstraints update A, lA and uA
-         * @param A
-         * @param lA
-         * @param uA
-         * @return true if the Problem has been initialized using initProblem( ... ) and
-         * if the size of A, lA and uA is the same as the one in the QP problem.
-         */
-        bool updateConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
-
-        /**
-         * @brief updateBounds update l and u
-         * @param l
-         * @param u
-         * @return rue if the Problem has been initialized using initProblem( ... ) and
-         * if the size of l and u is the same as the one in the QP problem.
-         */
-        bool updateBounds(const Vector& l, const Vector& u);
-
-        /**
-         * @brief updateProblem update the whole problem
-         * @param H
-         * @param g
-         * @param A
-         * @param lA
-         * @param uA
-         * @param l
-         * @param u
-         * @return true if the previous update methods return true
-         */
-        bool updateProblem(const Matrix& H, const Vector& g,
-                           const Matrix& A,
-                           const Vector& lA, const Vector& uA,
-                           const Vector& l, const Vector& u);
-
-        /*
-         * This set of function add input data to the problem
-         */
-        bool addTask(const Matrix& H, const Vector& g);
-        bool addConstraints(const Matrix& A, const Vector& lA, const Vector& uA);
-        bool addBounds(const Vector& l, const Vector& u);
-        bool addProblem(const Matrix& H, const Vector& g,
-                           const Matrix& A,
-                           const Vector& lA, const Vector& uA,
-                           const Vector& l, const Vector& u);
-
-        /**
-         * @brief solve the QP problem
-         * @return true if the QP problem is initialized and solved
-         */
-        bool solve();
-
-        /**
-         * @brief getSolution return the actual solution of the QP problem
-         * @return solution
-         */
-        const Vector& getSolution(){return _solution;}
-
-        /**
-         * @brief getHessianType return the hessian type f the problem
-         * @return hessian type
-         */
-        OpenSoT::HessianType getHessianType();
-
-        /**
-         * @brief setHessianType of the problem
-         * @param ht hessian type
-         */
-        void setHessianType(const OpenSoT::HessianType ht);
-
-        /**
-         * @brief getnWSR return maximum number of working set recalculations
-         * @return maximum number of working set recalculations
-         */
-        int getnWSR(){return _nWSR;}
-
-        /**
-         * @brief setnWSR set maximum number of working set recalculations
-         * @param nWSR Maximum number of working set recalculations
-         */
-        void setnWSR(const int nWSR){_nWSR = nWSR;}
-
-        /**
-         * @brief isQProblemInitialized
-         * @return true if the internal problem is initialized
-         */
-        bool isQProblemInitialized(){return _is_initialized;}
-
-        /**
-         * @brief resetProblem call the reset method of the SQProblem
-         * @return true if reset
-         */
-        bool resetProblem();
-
-        /**
-         * @brief getActiveBounds return the active bounds of the solved QP problem
-         * @return active bounds
-         */
-        const qpOASES::Bounds& getActiveBounds(){return *_bounds;}
-
-        /**
-         * @brief getActiveConstraints return the active constraints of the solved QP problem
-         * @return active constraints
-         */
-        const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
-
-    protected:
-        /**
-         * @brief _problem is the internal SQProblem
-         */
-        boost::shared_ptr<qpOASES::SQProblem> _problem;
-
-        /**
-         * @brief _bounds are the active bounds of the SQProblem
-         */
-        boost::shared_ptr<qpOASES::Bounds> _bounds;
-
-        /**
-         * @brief _constraints are the active constraints of the SQProblem
-         */
-        boost::shared_ptr<qpOASES::Constraints> _constraints;
-
-        /**
-         * @brief _nWSR is the maximum number of working set recalculations
-         */
-        int _nWSR;
-
-        double _epsRegularisation;
-
-        /**
-         * @brief _is_initialized is set to true when the problem is initialized
-         */
-        bool _is_initialized;
-
-        /**
-         * Define a cost function: ||Hx - g||
-         */
-        Matrix _H;
-        Vector _g;
-
-        /**
-         * Define a set of constraints weighted with A: lA <= Ax <= uA
-         */
-        Matrix _A;
-        Vector _lA;
-        Vector _uA;
-
-        /**
-         * Define a set of bounds on solution: l <= x <= u
-         */
-        Vector _l;
-        Vector _u;
-
-        /**
-         * Solution and dual solution of the QP problem
-         */
-        Vector _solution;
-        Vector _dual_solution;
-    };
-
-
-    /**
-     * @brief The QPOasesTask class wrapper around QPOasesProblem to easily pass a Task
-     */
-    class QPOasesTask: public QPOasesProblem
-    {
-    public:
-        /**
-         * @brief QPOasesTask constructor takes a shared_ptr to have automatically
-         * updated task matrices
-         * @param task task to solve
-         */
-        QPOasesTask(const boost::shared_ptr< Task<Matrix, Vector> >& task, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
-
-        ~QPOasesTask();
-
-        /**
-         * @brief solve the internal qp problem
-         * @param update_constraints if the problem have to update alone its constraints based
-         * on the internal task
-         * @return true if solved/solvable
-         */
-        bool solve(bool update_constraints = true);
-
-        /**
-         * @brief printProblemInformation couts some information about the problem.
-         * @param i, if i = -1 the ID is printed without number:
-         * eg:
-         *  printProblemInformation();
-         *      "PROBLEM 0 ID: com"
-         *  printProblemInformation(-1);
-         *      "PROBLEM ID: com"
-         *  printProblemInformation(2);
-         *      "PROBLEM 2 ID: com"
-         */
-        void printProblemInformation(int i = 0);
-
-        void getCostFunction(Matrix& H, Vector& g);
-        void getConstraints(Matrix& A, Vector& lA, Vector& uA);
-        void getBounds(Vector& l, Vector& u);
-        std::string getTaskID(){return _task->getTaskID();}
-
-    protected:
-        /**
-         * @brief _task pointer to task to optimize
-         */
-        boost::shared_ptr< Task<Matrix, Vector> > _task;
-
-        /**
-         * @brief prepareData compute matrices for QPOases
-         * @param update_constraints if set to false does not update the constraint matrices
-         */
-        void prepareData(bool update_constraints = true);
-    };
-
-
-
-
-
-    class QPOases_sot: public Solver<Matrix, Vector>
+    class QPOases_sot: public Solver<yarp::sig::Matrix, Vector>
     {
     public:
 	typedef boost::shared_ptr<QPOases_sot> Ptr;
-
+        /**
+         * @brief QPOases_sot constructor of the problem
+         * @param stack_of_tasks a vector of tasks
+         * @param eps_regularisation regularisation factor
+         * @throw exception if the stack can not be initialized
+         */
         QPOases_sot(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+
+        /**
+         * @brief QPOases_sot constructor of the problem
+         * @param stack_of_tasks a vector of tasks
+         * @param bounds a vector of bounds passed to all the stacks
+         * @param eps_regularisation regularisation factor
+         * @throw exception if the stack can not be initialized
+         */
         QPOases_sot(Stack& stack_of_tasks,
-                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& constraints,
+                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& bounds,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+
 
         ~QPOases_sot(){}
 
+        /**
+         * @brief solve a stack of tasks
+         * @param solution vector
+         * @return true if all the stack is solved
+         */
         bool solve(Vector& solution);
-        unsigned int getNumberOfTasks();
 
+        /**
+         * @brief getNumberOfTasks
+         * @return lenght of the stack
+         */
+        unsigned int getNumberOfTasks(){return _qp_stack_of_tasks.size();}
 
+        /**
+         * @brief setOptions set option to a particular task
+         * @param i number of task to set the option
+         * @param opt options for task i
+         * @return true if succeed
+         */
         bool setOptions(const unsigned int i, const qpOASES::Options &opt);
+
+        /**
+         * @brief getOptions
+         * @param i
+         * @param opt
+         * @return
+         */
         bool getOptions(const unsigned int i, qpOASES::Options& opt);
 
     protected:
-        vector <QPOasesTask> _qp_stack_of_tasks;
+        /**
+         * @brief _qp_stack_of_tasks vector of QPOases Problem
+         */
+        vector <QPOasesProblem> _qp_stack_of_tasks;
+
+        /**
+         * @brief _epsRegularisation regularisation factor for dumped least squares
+         */
         double _epsRegularisation;
 
+        /**
+         * @brief prepareSoT initialize the complete stack
+         * @return true if stack is correctly initialized
+         */
         bool prepareSoT();
-        bool expandProblem(unsigned int i);
-        bool updateExpandedProblem(unsigned int i);
+
+        /**
+         * @brief computeVelCtrlCostFunction compute a cost function for velocity control:
+         *          F = ||Jdq - v||
+         * @param task to get Jacobian and reference
+         * @param H Hessian matrix computed as J'J
+         * @param g reference vector computed as J'v
+         */
+        void computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g);
+
+        /**
+         * @brief computeVelCtrlOptimalityConstraint compute optimality constraint for velocity control:
+         *      Jj*dqj = Jj*dqi
+         * @param task to get Jacobian of the previous task
+         * @param problem to get solution of the previous task
+         * @param A constraint matrix
+         * @param lA lower bounds
+         * @param uA upper bounds
+         */
+        void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
+                                                yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA);
 
     };
 

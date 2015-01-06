@@ -22,8 +22,8 @@
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
-MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x) :
-    Task("min_effort", x.size()), _gTauGradientWorker(x), _x(x)
+MinimumEffort::MinimumEffort(   const yarp::sig::Vector& x, const iDynUtils& robot_model) :
+    Task("min_effort", x.size()), _gTauGradientWorker(x, robot_model), _x(x)
 {
     _W.resize(_x_size, _x_size);
     _W.eye();

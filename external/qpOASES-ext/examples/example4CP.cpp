@@ -25,7 +25,7 @@
 /**
  *	\file examples/example4CP.cpp
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2009-2014
  *
  *	Sample implementation of the ConstraintProduct class tailored for Example4.
@@ -41,7 +41,7 @@ BEGIN_NAMESPACE_QPOASES
  *	Example illustrating the use of the \a ConstraintProduct class.
  *
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  */
 class MyConstraintProduct : public ConstraintProduct
@@ -85,7 +85,7 @@ class MyConstraintProduct : public ConstraintProduct
 			}
 			else
 				return *this;
-		}
+		};
 
 		virtual int operator() (	int constrIndex,
 									const real_t* const x,

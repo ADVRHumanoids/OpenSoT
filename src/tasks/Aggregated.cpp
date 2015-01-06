@@ -17,6 +17,8 @@
 
 #include <OpenSoT/tasks/Aggregated.h>
 #include <yarp/math/Math.h>
+#include <algorithm>
+#include <exception>
 #include <assert.h>
 
 using namespace OpenSoT::tasks;
@@ -26,6 +28,8 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const unsigned int x_size) :
     Task(concatenateTaskIds(tasks),x_size), _tasks(tasks)
 {
+    assert(tasks.size()>0);
+
     this->checkSizes();
     /* calling update to generate bounds */
     this->generateAll();
@@ -68,9 +72,9 @@ Aggregated::~Aggregated()
 }
 
 void Aggregated::_update(const yarp::sig::Vector& x) {
-    for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
+    for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
-        boost::shared_ptr<TaskType> t = *i;
+        TaskPtr t = *i;
         t->update(x);
     }
     this->generateAll();
@@ -78,27 +82,88 @@ void Aggregated::_update(const yarp::sig::Vector& x) {
 
 
 void Aggregated::checkSizes() {
-    for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
+    for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
-        boost::shared_ptr<TaskType> t = *i;
+        TaskPtr t = *i;
         assert(this->getXSize() == t->getXSize());
     }
 }
 
 
 void Aggregated::generateAll() {
-    this->getConstraints().clear();
     _A.resize(0,_x_size);
     _b.resize(0);
     for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
-        boost::shared_ptr<TaskType> t = *i;
+        TaskPtr t = *i;
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
         _b = yarp::math::cat(_b, t->getWeight()*t->getLambda()*t->getb());
-        for(std::list< boost::shared_ptr<ConstraintType> >::iterator j = t->getConstraints().begin();
-            j!= t->getConstraints().end(); ++j) {
-            this->getConstraints().push_back(*j);
+    }
+    generateConstraints();
+}
+
+void OpenSoT::tasks::Aggregated::generateConstraints()
+{
+    int constraintsSize = this->_constraints.size();
+    int expectedConstraintsSize = this->_aggregatedConstraints.size() + this->_ownConstraints.size();
+    if(constraintsSize >= expectedConstraintsSize)
+    {
+        if(constraintsSize > expectedConstraintsSize) // checking whether the user really added only constraints
+        {
+            this->_constraints.sort();
+            this->_aggregatedConstraints.sort();
+
+            std::vector< ConstraintPtr > diffs;
+            diffs.resize( constraintsSize + expectedConstraintsSize );
+
+            std::vector< ConstraintPtr >::iterator diffs_end = std::set_symmetric_difference( _constraints.begin(),
+                                                                                              _constraints.end(),
+                                                                                              _aggregatedConstraints.begin(),
+                                                                                              _aggregatedConstraints.end(),
+                                                                                              diffs.begin() );
+            diffs.resize(diffs_end - diffs.begin());
+
+            // checking the differences between the two lists are only additions
+            if(diffs.size() != (constraintsSize - expectedConstraintsSize))
+                throw std::runtime_error("ERROR. The constraints list has grown since last update, "
+                                         "but the changes are not coherent.\n"
+                                         "You probably tried deleting some constraints, or you added "
+                                         "to the constraints something which was already in the tasks "
+                                         "constraints.\n");
+            else // saving the added constraints to the ownConstraints list
+            {
+                for( std::vector< ConstraintPtr >::iterator i = diffs.begin() ; i != diffs.end() ; ++i)
+                    _ownConstraints.push_back(*i);
+            }
         }
+        else
+        {
+            // notice how there might be a case where constraintsSize == expectedConstraintsSize,
+            // but the list has been modified. These changes are discarded without notifying the user
+            // for efficiency reasons. This is unforgiving and a bad design decision.
+            // TODO We should therefore change this in the future.
+        }
+
+    } else throw std::runtime_error("ERROR. You can only add constraints through getConstraints, "
+                                    "not remove them. Look at the documentation for more details.\n");
+
+    this->generateAggregatedConstraints();
+
+    this->_constraints.clear();
+    _constraints.insert(_constraints.end(), _aggregatedConstraints.begin(), _aggregatedConstraints.end());
+    _constraints.insert(_constraints.end(), _ownConstraints.begin(), _ownConstraints.end());
+
+}
+
+void OpenSoT::tasks::Aggregated::generateAggregatedConstraints()
+{
+    _aggregatedConstraints.clear();
+    for(std::list< TaskPtr >::iterator i = _tasks.begin();
+        i != _tasks.end(); ++i) {
+        TaskPtr t = *i;
+        _aggregatedConstraints.insert(_aggregatedConstraints.end(),
+                                      t->getConstraints().begin(),
+                                      t->getConstraints().end());
     }
 }
 

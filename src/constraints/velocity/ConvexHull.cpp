@@ -42,9 +42,8 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
     JCoM.removeCols(0,6);
     JCoM.removeRows(2,4);
 
-    std::vector<KDL::Vector> ch;
-    getConvexHull(ch);
-    this->getConstraints(ch, _Aineq, _bUpperBound, _boundScaling);
+    getConvexHull(_ch);
+    this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
 
     assert(JCoM.rows() == _Aineq.cols());
 
@@ -57,7 +56,11 @@ void ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
     std::list<KDL::Vector> points;
     idynutils::convex_hull::getSupportPolygonPoints(_robot, points);
 
-    _convex_hull.getConvexHull(points, ch);
+    std::vector<KDL::Vector> tmp_ch;
+    if(_convex_hull.getConvexHull(points, tmp_ch))
+        ch = tmp_ch;
+    else
+        std::cout<<"Problems computing Convex Hull, old Convex Hull will be used"<<std::endl;
 }
 
 
@@ -75,19 +78,25 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
     {
         unsigned int k = (j + 1)%convex_hull.size();
         getLineCoefficients(convex_hull[j], convex_hull[k], _a, _b, _c);
-        if(_c <= 0.0) { // see Moleskine
+
+        //Where is the line w.r.t. the robot?
+        //We consider that the constraint is feasable at the beginning (the robot is in the convex hull)
+        if(_c <= 0.0) { // c < 0 --> AJdq < -c w/ -c > 0
             A(z,0) = + _a;
             A(z,1) = + _b;
             b[z] =   - _c;
-        } else {
+        } else { // c > 0 --> -AJdq < c
             A(z,0) = - _a;
             A(z,1) = - _b;
             b[z] =   + _c;
         }
-        if(fabs(_c) <= boundScaling)
+
+
+        double normalizedBoundScaling = boundScaling * sqrt(_a*_a + _b*_b); //boundScaling Normalization
+        if(fabs(_c) <= normalizedBoundScaling)
             b[z] = 0.0;
         else
-            b[z] -= boundScaling;
+            b[z] -= normalizedBoundScaling;
         z++;
     }
 }

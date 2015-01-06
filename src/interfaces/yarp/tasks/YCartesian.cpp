@@ -22,7 +22,7 @@ YCartesian::YCartesian(const std::string &robot_name, const std::string &module_
 
 YCartesian::YCartesian(const std::string& robot_name,
                        const std::string& module_prefix,
-                       Cartesian::Ptr cartesian_task):
+                       OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task):
     ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>(),
     taskCartesian(cartesian_task),
     _port_prefix(),

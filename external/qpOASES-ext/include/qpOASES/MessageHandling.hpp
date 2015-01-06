@@ -24,8 +24,8 @@
 
 /**
  *	\file include/qpOASES/MessageHandling.hpp
- *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches (thanks to Leonard Wirsching)
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Declaration of the MessageHandling class including global return values.
@@ -38,6 +38,10 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#ifdef __DEBUG__
+#include <assert.h>
+#endif
 
 #include <qpOASES/Constants.hpp>
 
@@ -182,9 +186,11 @@ RET_CANNOT_REGULARISE_SPARSE,					/**< Sparse matrix cannot be regularised as di
 RET_NO_REGSTEP_NWSR,							/**< No additional regularisation step could be performed due to limits. */
 RET_FEWER_REGSTEPS_NWSR,						/**< Fewer additional regularisation steps have been performed due to limits. */
 RET_CHOLESKY_OF_ZERO_HESSIAN, 					/**< Cholesky decomposition of (unregularised) zero Hessian matrix. */
-RET_CONSTRAINTS_ARE_NOT_SCALED, 				/**< When defining __MANY_CONSTRAINTS__, L1 norm of each constraint must be not greater than one. */
-RET_INITIAL_BOUNDS_STATUS_NYI, 					/**< Initial status of bounds must be inactive when defining __MANY_CONSTRAINTS__. */
+RET_CONSTRAINTS_ARE_NOT_SCALED, 				/**< (no longer in use) */
+RET_INITIAL_BOUNDS_STATUS_NYI, 					/**< (no longer in use) */
 RET_ERROR_IN_CONSTRAINTPRODUCT,					/**< Error in user-defined constraint product function. */
+RET_FIX_BOUNDS_FOR_LP,							/**< All initial bounds must be fixed when solving an (unregularised) LP. */
+RET_USE_REGULARISATION_FOR_LP,					/**< Set options.enableRegularisation=BT_TRUE for solving LPs. */
 /* SQProblem */
 RET_UPDATEMATRICES_FAILED,						/**< Unable to update QP matrices. */
 RET_UPDATEMATRICES_FAILED_AS_QP_NOT_SOLVED,		/**< Unable to update matrices as previous QP is not solved. */
@@ -193,6 +199,8 @@ RET_UNABLE_TO_OPEN_FILE,						/**< Unable to open file. (120) */
 RET_UNABLE_TO_WRITE_FILE,						/**< Unable to write into file. */
 RET_UNABLE_TO_READ_FILE,						/**< Unable to read from file. */
 RET_FILEDATA_INCONSISTENT,						/**< File contains inconsistent data. */
+/* Options */
+RET_OPTIONS_ADJUSTED,							/**< Options needed to be adjusted for consistency reasons. */
 /* SolutionAnalysis */
 RET_UNABLE_TO_ANALYSE_QPROBLEM, 				/**< Unable to analyse (S)QProblem(B) object. */
 /* Benchmark */
@@ -204,8 +212,10 @@ RET_QP_SOLUTION_STARTED,						/**< Solving QP... */
 RET_BENCHMARK_SUCCESSFUL,						/**< Benchmark terminated successfully. (130) */
 /* Sparse matrices */
 RET_NO_DIAGONAL_AVAILABLE,						/**< Sparse matrix does not have entries on full diagonal. */
+RET_DIAGONAL_NOT_INITIALISED,					/**< Diagonal data of sparse matrix has not been initialised. */
 /* Dropping of infeasible constraints */
 RET_ENSURELI_DROPPED,							/**< Linear independence resolved by dropping blocking constraint. */
+/* Simple exitflags */
 RET_SIMPLE_STATUS_P1,							/**< QP problem could not be solved within given number of iterations. */
 RET_SIMPLE_STATUS_P0,							/**< QP problem solved. */
 RET_SIMPLE_STATUS_M1,							/**< QP problem could not be solved due to an internal error. */
@@ -220,8 +230,8 @@ RET_SIMPLE_STATUS_M3 							/**< QP problem is unbounded (and thus could not be 
  *	This class handles all kinds of messages (errors, warnings, infos) initiated
  *  by qpOASES modules and stores the corresponding global preferences.
  *
- *	\author Hans Joachim Ferreau (special thanks to Leonard Wirsching)
- *	\version 3.0beta
+ *	\author Hans Joachim Ferreau (thanks to Leonard Wirsching)
+ *	\version 3.0
  *	\date 2007-2014
  */
 class MessageHandling

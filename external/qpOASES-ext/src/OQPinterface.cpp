@@ -25,11 +25,13 @@
 /**
  *	\file src/OQPinterface.cpp
  *	\author Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2008-2014
  *
  *	Implementation of an interface comprising several utility functions
- *	for solving test problems from the Online QP Benchmark Collection.
+ *	for solving test problems from the Online QP Benchmark Collection
+ *	(This collection is no longer maintained, see 
+ *	http://www.qpOASES.org/onlineQP for a backup).
  *
  */
 
@@ -49,8 +51,8 @@ returnValue readOQPdimensions(	const char* path,
 								)
 {
 	/* 1) Setup file name where dimensions are stored. */
-	char filename[160];
-	snprintf( filename,160,"%sdims.oqp",path );
+	char filename[MAX_STRING_LENGTH];
+	snprintf( filename,MAX_STRING_LENGTH,"%sdims.oqp",path );
 
 	/* 2) Load dimensions from file. */
 	int dims[4];
@@ -80,7 +82,7 @@ returnValue readOQPdata(	const char* path,
 							real_t** xOpt, real_t** yOpt, real_t** objOpt
 							)
 {
-	char filename[160];
+	char filename[MAX_STRING_LENGTH];
 
 	/* consistency check */
 	if ( ( H == 0 ) || ( g == 0 ) || ( lb == 0 ) || ( ub == 0 ) )
@@ -100,7 +102,7 @@ returnValue readOQPdata(	const char* path,
 	/* 2) Allocate memory and load OQP data: */
 	/* Hessian matrix */
 	*H  = new real_t[nV*nV];
-	snprintf( filename,160,"%sH.oqp",path );
+	snprintf( filename,MAX_STRING_LENGTH,"%sH.oqp",path );
 	if ( readFromFile( *H,nV,nV,filename ) != SUCCESSFUL_RETURN )
 	{
 		delete[] *H;
@@ -109,7 +111,7 @@ returnValue readOQPdata(	const char* path,
 
 	/* gradient vector sequence */
 	*g  = new real_t[nQP*nV];
-	snprintf( filename,160,"%sg.oqp",path );
+	snprintf( filename,MAX_STRING_LENGTH,"%sg.oqp",path );
 	if ( readFromFile( *g,nQP,nV,filename ) != SUCCESSFUL_RETURN )
 	{
 		delete[] *g; delete[] *H;
@@ -118,7 +120,7 @@ returnValue readOQPdata(	const char* path,
 
 	/* lower bound vector sequence */
 	*lb  = new real_t[nQP*nV];
-	snprintf( filename,160,"%slb.oqp",path );
+	snprintf( filename,MAX_STRING_LENGTH,"%slb.oqp",path );
 	if ( readFromFile( *lb,nQP,nV,filename ) != SUCCESSFUL_RETURN )
 	{
 		delete[] *lb; delete[] *g; delete[] *H;
@@ -127,7 +129,7 @@ returnValue readOQPdata(	const char* path,
 
 	/* upper bound vector sequence */
 	*ub  = new real_t[nQP*nV];
-	snprintf( filename,160,"%sub.oqp",path );
+	snprintf( filename,MAX_STRING_LENGTH,"%sub.oqp",path );
 	if ( readFromFile( *ub,nQP,nV,filename ) != SUCCESSFUL_RETURN )
 	{
 		delete[] *ub; delete[] *lb; delete[] *g; delete[] *H;
@@ -138,7 +140,7 @@ returnValue readOQPdata(	const char* path,
 	{
 		/* Constraint matrix */
 		*A   = new real_t[nC*nV];
-		snprintf( filename,160,"%sA.oqp",path );
+		snprintf( filename,MAX_STRING_LENGTH,"%sA.oqp",path );
 		if ( readFromFile( *A,nC,nV,filename ) != SUCCESSFUL_RETURN )
 		{
 			delete[] *A;
@@ -148,7 +150,7 @@ returnValue readOQPdata(	const char* path,
 
 		/* lower constraints' bound vector sequence */
 		*lbA = new real_t[nQP*nC];
-		snprintf( filename,160,"%slbA.oqp",path );
+		snprintf( filename,MAX_STRING_LENGTH,"%slbA.oqp",path );
 		if ( readFromFile( *lbA,nQP,nC,filename ) != SUCCESSFUL_RETURN )
 		{
 			delete[] *lbA; delete[] *A;
@@ -158,7 +160,7 @@ returnValue readOQPdata(	const char* path,
 
 		/* upper constraints' bound vector sequence */
 		*ubA = new real_t[nQP*nC];
-		snprintf( filename,160,"%subA.oqp",path );
+		snprintf( filename,MAX_STRING_LENGTH,"%subA.oqp",path );
 		if ( readFromFile( *ubA,nQP,nC,filename ) != SUCCESSFUL_RETURN )
 		{
 			delete[] *ubA; delete[] *lbA; delete[] *A;
@@ -177,7 +179,7 @@ returnValue readOQPdata(	const char* path,
 	{
 		/* primal solution vector sequence */
 		*xOpt = new real_t[nQP*nV];
-		snprintf( filename,160,"%sx_opt.oqp",path );
+		snprintf( filename,MAX_STRING_LENGTH,"%sx_opt.oqp",path );
 		if ( readFromFile( *xOpt,nQP,nV,filename ) != SUCCESSFUL_RETURN )
 		{
 			delete[] xOpt;
@@ -191,7 +193,7 @@ returnValue readOQPdata(	const char* path,
 	{
 		/* dual solution vector sequence */
 		*yOpt = new real_t[nQP*(nV+nC)];
-		snprintf( filename,160,"%sy_opt.oqp",path );
+		snprintf( filename,MAX_STRING_LENGTH,"%sy_opt.oqp",path );
 		if ( readFromFile( *yOpt,nQP,nV+nC,filename ) != SUCCESSFUL_RETURN )
 		{
 			delete[] yOpt;
@@ -206,7 +208,7 @@ returnValue readOQPdata(	const char* path,
 	{
 		/* dual solution vector sequence */
 		*objOpt = new real_t[nQP];
-		snprintf( filename,160,"%sobj_opt.oqp",path );
+		snprintf( filename,MAX_STRING_LENGTH,"%sobj_opt.oqp",path );
 		if ( readFromFile( *objOpt,nQP,1,filename ) != SUCCESSFUL_RETURN )
 		{
 			delete[] objOpt;
@@ -300,9 +302,9 @@ returnValue solveOQPbenchmark(	int nQP, int nV, int nC, int nEC,
 	Matrix *A;
 
 	real_t* H_cpy = new real_t[nV*nV];
-	memcpy( H_cpy,_H, nV*nV*sizeof(real_t) );
+	memcpy( H_cpy,_H, ((unsigned int)(nV*nV))*sizeof(real_t) );
 	real_t* A_cpy = new real_t[nC*nV];
-	memcpy( A_cpy,_A, nC*nV*sizeof(real_t) );
+	memcpy( A_cpy,_A, ((unsigned int)(nC*nV))*sizeof(real_t) );
 
 	if ( isSparse == BT_TRUE )
 	{
@@ -470,7 +472,7 @@ returnValue solveOQPbenchmark(	int nQP, int nV,
 	/* 4) Prepare matrix objects */
 	SymmetricMatrix *H; 
 	real_t* H_cpy = new real_t[nV*nV];
-	memcpy( H_cpy,_H, nV*nV*sizeof(real_t) );
+	memcpy( H_cpy,_H, ((unsigned int)(nV*nV))*sizeof(real_t) );
 
 	if ( isSparse == BT_TRUE )
 	{
@@ -537,7 +539,7 @@ returnValue solveOQPbenchmark(	int nQP, int nV,
 		//obj = qp.getObjVal( );
 
 		/* 5) Compute KKT residuals */
-		getKKTResidual( nV,0, _H,gCur,0,lbCur,ubCur,0,0, x,y, stat,feas,cmpl );
+		getKKTResidual( nV, _H,gCur,lbCur,ubCur, x,y, stat,feas,cmpl );
 
 		/* 6) update maximum values. */
 		if ( nWSRcur > maxNWSR )
@@ -615,9 +617,7 @@ returnValue runOQPbenchmark(	const char* path, BooleanType isSparse, BooleanType
 		return THROWERROR( RET_UNABLE_TO_READ_BENCHMARK );
 	}
 
-	/* ignore constraints for debugging purposes
-	nC = 0;
-	nEC = 0;*/
+	// normaliseConstraints( nV,nC,A,lbA,ubA ); //only works when nP==1
 
 	/* II) SOLVE BENCHMARK */
 	if ( nC > 0 )

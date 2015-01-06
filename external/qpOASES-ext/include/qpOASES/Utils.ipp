@@ -26,7 +26,7 @@
 /**
  *	\file include/qpOASES/Utils.ipp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Implementation of some inlined utilities for working with the different QProblem classes.
@@ -158,7 +158,7 @@ inline real_t getSqrt(	real_t x
 						)
 {
 	#ifdef __NO_FMATH__
-    return sqrt(x); /* put your custom sqrt-replacement here */
+	return sqrt(x); /* put your custom sqrt-replacement here */
 	#else
 	return sqrt(x);
 	#endif

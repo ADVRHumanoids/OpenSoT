@@ -38,7 +38,7 @@ TEST_F(testYTask, testPoseTwistMsgs)
     std::string base_link = "Waist";
     std::string distal_link = "l_wrist";
 
-    if(tests_utils::startYarpServer())
+    if(tests_utils::startYarpServer() || ::yarp::os::Network::checkNetwork())
     {
         ::yarp::os::Network yarp_network;
 
@@ -178,7 +178,7 @@ TEST_F(testYTask, testYTASK)
     std::string base_link = "Waist";
     std::string distal_link = "l_wrist";
 
-    if(tests_utils::startYarpServer())
+    if(tests_utils::startYarpServer() || ::yarp::os::Network::checkNetwork())
     {
         ::yarp::os::Network yarp_network;
 

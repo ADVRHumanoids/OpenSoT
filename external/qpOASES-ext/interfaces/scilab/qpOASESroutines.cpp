@@ -25,7 +25,7 @@
 /**
  *	\file interfaces/scilab/qpOASESroutines.cpp
  *	\author Holger Diedam, Hans Joachim Ferreau
- *	\version 3.0beta
+ *	\version 3.0
  *	\date 2007-2014
  *
  *	Interface that enables to call qpOASES from scilab

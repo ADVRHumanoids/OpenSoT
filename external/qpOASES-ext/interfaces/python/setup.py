@@ -22,7 +22,13 @@
 ##  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ##
 
-## author: Sebastian F. Walter, Manuel Kudruss
+##
+##	Filename:  setup.py
+##	Author:    Sebastian F. Walter, Manuel Kudruss
+##	Version:   3.0
+##	Date:      2013-2014
+##
+
 
 from distutils.core import setup
 from distutils.extension import Extension
