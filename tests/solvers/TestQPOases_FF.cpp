@@ -255,6 +255,7 @@ TEST_F(testQPOases_sot, testCartesianFF)
         // also velocities and accelerations are available !
         previous_pose = current_pose;
         EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],5e-5);
+        EXPECT_NEAR(norm(l_arm_task->getb()), 0, 3e-4);
     }
 
     _log << "];" << std::endl;
@@ -266,6 +267,7 @@ TEST_F(testQPOases_sot, testCartesianFF)
     _log << "subplot(2,1,2);" << std::endl;
     _log << "plot(pos_des_x(:,1),pos_des_x(:,4:5));" << std::endl;
     _log << "legend('Desired Position', 'Actual Position','Location','SouthEast');" << std::endl;
+    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,6:7)); title('Computation time'); legend('Solve time','loop time (1Khz)');" << std::endl;
 
 
 //    yarp::sig::Matrix right_foot_pose = right_foot_task->getActualPose();
