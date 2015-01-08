@@ -194,6 +194,13 @@ TEST_F(testQPOases_sot, testCartesianFF)
 
     double dt=1e-3;
 
+    _log << "% t,\t"
+         << "estimated_twist,\t"
+         << "desired_twist,\t"
+         << "current_pose,\t"
+         << "desired_pose,\t"
+         << "t_update_and_solve,\t"
+         << "t_loop(1Khz)" << std::endl;
     _log << "pos_des_x = [" << std::endl;
     KDL::Frame current_pose, previous_pose, desired_pose;
     KDL::Twist estimated_twist, desired_twist;
@@ -206,9 +213,7 @@ TEST_F(testQPOases_sot, testCartesianFF)
     desired_twist = trajectory->Vel(0.0);
 
     double t_loop = dt;
-    /* THIS IS A AS-FAST-AS-POSSIBLE LOOP */
-    /* TODO parameterize this in order to have it implemented as a
-     * real time-thread and as a as-fast-as-possible thread*/
+    double t_compute = 0;
     for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
     {
         double t_begin = yarp::os::SystemClock::nowSystem();
@@ -234,21 +239,22 @@ TEST_F(testQPOases_sot, testCartesianFF)
         YarptoKDL(current_pose_y,current_pose);
 
 
-
-
+        t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
+        yarp::os::SystemClock::delaySystem(dt-t_compute);
         t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
 
         estimated_twist[0] = (current_pose.p[0] - previous_pose.p[0])/t_loop;
 
-        _log << t << ", "
-             << estimated_twist[0] << ", "
-             << desired_twist[0]   << ","
-             << current_pose.p[0]  << ","
-             << desired_pose.p[0]  << ","
+        _log << t << ",\t"
+             << estimated_twist[0] << ",\t"
+             << desired_twist[0]   << ",\t"
+             << current_pose.p[0]  << ",\t"
+             << desired_pose.p[0]  << ",\t"
+             << t_compute          << ",\t"
              << t_loop             << ";" << std::endl;
         // also velocities and accelerations are available !
         previous_pose = current_pose;
-
+        EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],5e-5);
     }
 
     _log << "];" << std::endl;
