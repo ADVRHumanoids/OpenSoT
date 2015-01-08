@@ -20,40 +20,70 @@
 
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/Aggregated.h>
+#include <OpenSoT/solvers/QPOases.h>
 
-// namespace OpenSoT {
-//     /*TODO check constructor on CIK*/
-//     class AutoStack 
-//     {
-//         std::vector<OpenSoT::tasks::Aggregated::TaskPtr> _stack;
-//         OpenSoT::consraints::Aggregated::ConstraintPtr _bounds;
-//         public:
-//             operator std::vector<OpenSoT::Aggregated::TaskPtr>();
-//             void update(const yarp::sig::Vector & state);
-//     };    
-// }
+namespace OpenSoT {
+    /*TODO check constructor on CIK*/
+    class AutoStack 
+    {
+        public:
+        typedef boost::shared_ptr<OpenSoT::AutoStack> Ptr;
+        private:
+        OpenSoT::solvers::QPOases_sot::Stack _stack;
+        std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> _bounds;
+        public:
+            AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack);
+
+            AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
+                      std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
+
+            /*AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
+                      OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
+
+            void update(const yarp::sig::Vector & state);
+
+            OpenSoT::solvers::QPOases_sot::Stack& getStack();
+
+            std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& getBoundsList();
+
+            OpenSoT::constraints::Aggregated::ConstraintPtr getBounds(  const unsigned int aggregationPolicy =
+                                                                        OpenSoT::constraints::Aggregated::EQUALITIES_TO_INEQUALITIES |
+                                                                        OpenSoT::constraints::Aggregated::UNILATERAL_TO_BILATERAL);
+    };    
+}
 
 
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
                                             const OpenSoT::tasks::Aggregated::TaskPtr task2);
 
+
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ptr aggregated,
                                             const OpenSoT::tasks::Aggregated::TaskPtr task);
 
+OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task,
+                                            const OpenSoT::tasks::Aggregated::Ptr aggregated);
 
-OpenSoT::utils::AutoStack::Ptr operator/(   const OpenSoT::tasks::Aggregated::TaskPtr task1,
-                                            const OpenSoT::tasks::Aggregated::TaskPtr task2);
+OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ptr aggregated1,
+                                            const OpenSoT::tasks::Aggregated::Ptr aggregated2);
 
-OpenSoT::utils::AutoStack::Ptr operator/(   const OpenSoT::utils::AutoStack::Ptr stack,
-                                            const OpenSoT::tasks::Aggregated::TaskPtr task);
 
-OpenSoT::utils::AutoStack::Ptr operator/(   const OpenSoT::utils::AutoStack::Ptr stack1,
-                                            const OpenSoT::utils::AutoStack::Ptr stack2);
+OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
+                                    const OpenSoT::tasks::Aggregated::TaskPtr task2);
 
-OpenSoT::tasks::Aggregated::TaskPtr& operator<<(const OpenSoT::tasks::Aggregated::TaskPtr task,
+OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack,
+                                    const OpenSoT::tasks::Aggregated::TaskPtr task);
+
+OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task,
+                                    OpenSoT::AutoStack::Ptr stack);
+
+OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
+                                    const OpenSoT::AutoStack::Ptr stack2);
+
+
+OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
                                                 const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
 
-OpenSoT::utils::AutoStack::Ptr& operator<<( const OpenSoT::utils::AutoStack::Ptr stack1,
-                                            const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
+OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
+                                    const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
 
 #endif

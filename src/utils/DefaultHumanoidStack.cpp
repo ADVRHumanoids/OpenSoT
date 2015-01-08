@@ -1,6 +1,6 @@
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 
-using namespace OpenSoT;
+// using namespace OpenSoT;
 
 // Factory::DefaultHumanoidStack::Ptr Factory::getDefaultHumanoidStack(std::string srdfModelFileName,
 //                                                                     const double dT) {

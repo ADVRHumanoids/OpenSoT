@@ -37,7 +37,7 @@ Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
 }
 
 Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
-                       const unsigned int &x_size,
+                       const unsigned int x_size,
                        const unsigned int aggregationPolicy) :
     Constraint(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
