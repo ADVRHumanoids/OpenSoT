@@ -98,6 +98,10 @@ ADD_EXECUTABLE(testSolverQPOases solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testSolverQPOases ${TestLibs})
 add_dependencies(testSolverQPOases GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testQPOasesSolverFF solvers/TestQPOases_FF.cpp)
+TARGET_LINK_LIBRARIES(testQPOasesSolverFF ${TestLibs})
+add_dependencies(testQPOasesSolverFF GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
 TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
 add_dependencies(testYCartesian GTest-ext OpenSoT)
@@ -113,6 +117,7 @@ add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLim
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testSolverQPOases)
+add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOasesSolverFF)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
