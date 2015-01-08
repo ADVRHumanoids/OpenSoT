@@ -218,7 +218,7 @@ TEST_F(testQPOases_sot, testCartesianFF)
         desired_twist = trajectory->Vel(t);
         KDLtoYarp_position(desired_pose, desired_pose_y);
         KDLtoYarp(desired_twist, desired_twist_y);
-        l_arm_task->setReference(desired_pose_y, desired_twist_y);
+        l_arm_task->setReference(desired_pose_y, desired_twist_y*t_loop);
 
 
         model.updateiDyn3Model(q, true);
