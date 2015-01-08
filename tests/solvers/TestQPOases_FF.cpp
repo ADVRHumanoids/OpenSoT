@@ -195,24 +195,72 @@ TEST_F(testQPOases_sot, testCartesianFF)
     double dt=1e-3;
 
     _log << "pos_des_x = [" << std::endl;
-    KDL::Frame current_pose, previous_pose;
-    KDL::Twist current_twist, estimated_twist;
+    KDL::Frame current_pose, previous_pose, desired_pose;
+    KDL::Twist estimated_twist, desired_twist;
 
+    yarp::sig::Matrix current_pose_y = l_arm_task->getActualPose();
+    YarptoKDL(current_pose_y,current_pose);
     get5cmFwdLinearTraj(current_pose);
-    current_pose = trajectory->Pos(0.0);
+    desired_pose = trajectory->Pos(0.0);
     previous_pose = current_pose;
-    current_twist = trajectory->Vel(0.0);
-    for (double t=0.0; t <= trajectory->Duration(); t+= dt) {
-        current_pose = trajectory->Pos(t);
-        current_twist = trajectory->Vel(t);
-        estimated_twist[0] = (current_pose.p[0] - previous_pose.p[0])/dt;
+    desired_twist = trajectory->Vel(0.0);
+
+    double t_loop = dt;
+    /* THIS IS A AS-FAST-AS-POSSIBLE LOOP */
+    /* TODO parameterize this in order to have it implemented as a
+     * real time-thread and as a as-fast-as-possible thread*/
+    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
+    {
+        double t_begin = yarp::os::SystemClock::nowSystem();
+        yarp::sig::Matrix desired_pose_y(4,0.0);
+        yarp::sig::Vector desired_twist_y(6,0.0);
+        desired_pose = trajectory->Pos(t);
+        desired_twist = trajectory->Vel(t);
+        KDLtoYarp_position(desired_pose, desired_pose_y);
+        KDLtoYarp(desired_twist, desired_twist_y);
+        l_arm_task->setReference(desired_pose_y, desired_twist_y);
+
+
+        model.updateiDyn3Model(q, true);
+
+        l_arm_task->update(q);
+        postural_task->update(q);
+        bounds->update(q);
+
+        EXPECT_TRUE(sot->solve(dq));
+        q += dq;
+
+        current_pose_y = l_arm_task->getActualPose();
+        YarptoKDL(current_pose_y,current_pose);
+
+
+
+
+        t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
+
+        estimated_twist[0] = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+
         _log << t << ", "
              << estimated_twist[0] << ", "
-             << current_twist[0] << ";" << std::endl;
+             << desired_twist[0]   << ","
+             << current_pose.p[0]  << ","
+             << desired_pose.p[0]  << ","
+             << t_loop             << ";" << std::endl;
         // also velocities and accelerations are available !
         previous_pose = current_pose;
+
     }
-    _log << "];";
+
+    _log << "];" << std::endl;
+
+    _log << "figure" << std::endl;
+    _log << "subplot(2,1,1);" << std::endl;
+    _log << "plot(pos_des_x(:,1),pos_des_x(:,2:3));" << std::endl;
+    _log << "legend('Desired Velocity Profile', 'Actual Velocity Profile');" << std::endl;
+    _log << "subplot(2,1,2);" << std::endl;
+    _log << "plot(pos_des_x(:,1),pos_des_x(:,4:5));" << std::endl;
+    _log << "legend('Desired Position', 'Actual Position','Location','SouthEast');" << std::endl;
+
 
 //    yarp::sig::Matrix right_foot_pose = right_foot_task->getActualPose();
 
