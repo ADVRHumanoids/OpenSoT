@@ -32,7 +32,10 @@ using namespace yarp::math;
 
 namespace {
 
-class testQPOases_sot: public ::testing::Test
+typedef std::pair<KDL::Path::IdentifierType,bool> testType;
+
+class testQPOases_sot: public ::testing::Test,
+        public ::testing::WithParamInterface<testType>
 {
 protected:
     typedef boost::shared_ptr<KDL::Trajectory> TrajPtr;
@@ -55,12 +58,8 @@ protected:
 
     virtual ~testQPOases_sot() {
         _log.close();
-
-        trajectory.reset();
-        velocityProfile.reset();
-        path.reset();
-        rotationInterpolationMethod.reset();
     }
+
 
     virtual void SetUp() {
 
@@ -130,8 +129,12 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 }
 
 
-TEST_F(testQPOases_sot, testCartesianFF) 
+TEST_P(testQPOases_sot, testCartesianFF)
 {
+
+    KDL::Path::IdentifierType  trajType = GetParam().first;
+    bool hasInitialError = GetParam().second;
+
 #ifdef TRY_ON_SIMULATOR
     yarp::os::Network init;
     ComanUtils robot("testCartesianFF");
@@ -170,17 +173,12 @@ TEST_F(testQPOases_sot, testCartesianFF)
                 new OpenSoT::tasks::velocity::Cartesian("l_arm",q, model,
                                                         model.left_arm.end_effector_name,
                                                         "world"));
-    l_arm_task->setLambda(.6);
-    l_arm_task->setOrientationErrorGain(.1);
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-
-    _log.close();
-    _log.open("testQPOases_FF.m");
 
     stack_of_tasks.push_back(l_arm_task);
     stack_of_tasks.push_back(postural_task);
@@ -190,9 +188,72 @@ TEST_F(testQPOases_sot, testCartesianFF)
 
 
 
-    yarp::sig::Vector dq(q.size(), 0.0);
+    yarp::sig::Vector dq;
 
-    double dt=1e-3;
+    double dt=3e-3;
+
+    KDL::Frame current_pose, previous_pose, desired_pose;
+    KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
+    yarp::sig::Matrix current_pose_y;
+
+
+    dq = yarp::sig::Vector(q.size(), 0.0);
+    q = getGoodInitialPosition(model);
+    model.updateiDyn3Model(q, true);
+    l_arm_task->update(q);
+    postural_task->update(q);
+    bounds->update(q);
+
+
+    if(!hasInitialError) {
+        /**********************************************
+         * COMMANDING 5cm FORWARD FROM CURRENT POSITION
+         * meaning zero error at trajectory begin
+         ********************************************/
+
+        _log.close();
+        _log.open("testQPOases_FF_Cartesian_5cmfw_noerr.m");
+
+        current_pose_y = l_arm_task->getActualPose();
+        YarptoKDL(current_pose_y,current_pose);
+        get5cmFwdLinearTraj(current_pose);
+        desired_pose = trajectory->Pos(0.0);
+
+        l_arm_task->setLambda(.6);
+        l_arm_task->setOrientationErrorGain(.1);
+
+    } else {
+        /**********************************************
+         * COMMANDING 5cm FORWARD FROM PERTURBED POSITION
+         * 1cm error at trajectory startup
+         ********************************************/
+
+        _log.close();
+        _log.open("testQPOases_FF_Cartesian_5cmfw_1cmerr.m");
+
+        current_pose_y = l_arm_task->getActualPose();
+        YarptoKDL(current_pose_y,current_pose);
+        desired_pose = current_pose;
+        desired_pose.p[0] = current_pose.p[0] + .01;
+        get5cmFwdLinearTraj(desired_pose);
+        desired_pose = trajectory->Pos(0.0);
+
+        /* setting lambda lower than this can cause tracking problems
+         * along the trajectory on secondary variables (e.g. the one that
+         * we want fixed at 0) */
+        l_arm_task->setLambda(.1);
+        l_arm_task->setOrientationErrorGain(.1);
+    }
+
+    previous_pose = current_pose;
+    desired_twist = trajectory->Vel(0.0);
+
+    double t_loop = dt;
+    double t_compute = 0;
+
+    double previous_norm = -1;
+    double current_norm;
+    double previous_error = desired_pose.p[0] - current_pose.p[0];
 
     _log << "% t,\t"
          << "estimated_twist,\t"
@@ -200,20 +261,9 @@ TEST_F(testQPOases_sot, testCartesianFF)
          << "current_pose,\t"
          << "desired_pose,\t"
          << "t_update_and_solve,\t"
-         << "t_loop(1Khz)" << std::endl;
+         << "t_loop(333Hz)" << std::endl;
     _log << "pos_des_x = [" << std::endl;
-    KDL::Frame current_pose, previous_pose, desired_pose;
-    KDL::Twist estimated_twist, desired_twist;
 
-    yarp::sig::Matrix current_pose_y = l_arm_task->getActualPose();
-    YarptoKDL(current_pose_y,current_pose);
-    get5cmFwdLinearTraj(current_pose);
-    desired_pose = trajectory->Pos(0.0);
-    previous_pose = current_pose;
-    desired_twist = trajectory->Vel(0.0);
-
-    double t_loop = dt;
-    double t_compute = 0;
     for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
     {
         double t_begin = yarp::os::SystemClock::nowSystem();
@@ -225,6 +275,13 @@ TEST_F(testQPOases_sot, testCartesianFF)
         KDLtoYarp(desired_twist, desired_twist_y);
         l_arm_task->setReference(desired_pose_y, desired_twist_y*t_loop);
 
+        // initializing previous norm
+        if(previous_norm < 0)
+            previous_norm = norm(l_arm_task->getb());
+
+        // checking variation of gain during trajectory following
+        if(t>=6)
+            l_arm_task->setLambda(.6);
 
         model.updateiDyn3Model(q, true);
 
@@ -243,217 +300,85 @@ TEST_F(testQPOases_sot, testCartesianFF)
         yarp::os::SystemClock::delaySystem(dt-t_compute);
         t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
 
-        estimated_twist[0] = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        /* first order fading filter -> to implement in Matlab
+        double beta = 0.3; double G = 1-beta;
+        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
+        */
+        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        twist_estimate[0] = twist_measure;
+
+        current_norm = norm(l_arm_task->getb());
 
         _log << t << ",\t"
-             << estimated_twist[0] << ",\t"
+             << twist_estimate[0] << ",\t"
              << desired_twist[0]   << ",\t"
              << current_pose.p[0]  << ",\t"
              << desired_pose.p[0]  << ",\t"
              << t_compute          << ",\t"
-             << t_loop             << ";" << std::endl;
+             << t_loop             << ",\t"
+             << current_norm       << ";" << std::endl;
         // also velocities and accelerations are available !
         previous_pose = current_pose;
-        EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],5e-5);
-        EXPECT_NEAR(norm(l_arm_task->getb()), 0, 3e-4);
+        previous_twist_estimate[0] = twist_estimate[0];
+
+        if(!hasInitialError) {
+            EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4);
+            EXPECT_NEAR(norm(l_arm_task->getb()), 0, 5e-4);
+        } else {
+            if(t<=1.3) {
+                double current_error = desired_pose.p[0] - current_pose.p[0];
+
+                /* error should always decrease, or at least accept
+                 * a local increment of 1e-4 */
+                EXPECT_GE(previous_error - current_error, -1e-4) << " @t= " << t;
+                EXPECT_GE(previous_norm - current_norm, -8e-4) << " @t= " << t;
+
+                previous_error = current_error;
+                previous_norm = current_norm;
+            } else {
+
+                EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;
+                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 8e-4) << " @t= " << t;
+            }
+        }
     }
 
     _log << "];" << std::endl;
 
     _log << "figure" << std::endl;
     _log << "subplot(2,1,1);" << std::endl;
-    _log << "plot(pos_des_x(:,1),pos_des_x(:,2:3));" << std::endl;
+    _log << "%moving average filter" << std::endl;
+    _log << "filt_window = 25;" << std::endl;
+    _log << "a = 1; b = 1/filt_window*ones(1,filt_window);" << std::endl;
+    _log << "twist_estimate = filter(b,a,pos_des_x(:,2));" << std::endl;
+    _log << "plot(pos_des_x(:,1),[twist_estimate, pos_des_x(:,3)]);" << std::endl;
     _log << "legend('Desired Velocity Profile', 'Actual Velocity Profile');" << std::endl;
     _log << "subplot(2,1,2);" << std::endl;
     _log << "plot(pos_des_x(:,1),pos_des_x(:,4:5));" << std::endl;
     _log << "legend('Desired Position', 'Actual Position','Location','SouthEast');" << std::endl;
-    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,6:7)); title('Computation time'); legend('Solve time','loop time (1Khz)');" << std::endl;
+    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,6:7)); title('Computation time'); legend('Solve time','loop time (333Hz)');" << std::endl;
 
-
-//    yarp::sig::Matrix right_foot_pose = right_foot_task->getActualPose();
-
-//    for(i = 0; i < n_iterations; ++i)
-//    {
-//        model.updateiDyn3Model(q, true);
-
-//        l_arm_task->update(q);
-//        postural_task->update(q);
-//        bounds->update(q);
-
-//        _log << com_task->getActualPosition()[0] << ","
-//            << com_task->getActualPosition()[1] <<";";
-//        e = norm(T_com_p_ref - com_task->getActualPosition());
-
-//        if(fabs(previous_e - e) < 1e-13) {
-//            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - com_task->getActualPosition()) << " . Error not decreasing. CONVERGED." << std::endl;
-//            break;
-//        }
-//        previous_e = e;
-
-//        EXPECT_TRUE(sot->solve(dq));
-//        q += dq;
-
-//        yarp::sig::Matrix right_foot_pose_now = right_foot_task->getActualPose();
-//        for(unsigned int r = 0; r < 4; ++r)
-//            for(unsigned int c = 0; c < 4; ++c)
-//                ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-6);
-
-//#ifdef TRY_ON_SIMULATOR
-//        robot.move(q);
-//#endif
-//    }
-
-//    ASSERT_NEAR(norm(T_com_p_ref - com_task->getActualPosition()),0,1E-9);
-
-//    model.updateiDyn3Model(q, true);
-//    boundsConvexHull->update(q);
-//    std::vector<KDL::Vector> points;
-//    std::vector<KDL::Vector> points_inner;
-//    boundsConvexHull->getConvexHull(points);
-
-//    KDL::Vector point_old;
-//    yarp::sig::Matrix A_ch, A_ch_outer;
-//    yarp::sig::Vector b_ch, b_ch_outer;
-//    boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
-//    boundsConvexHull->getConstraints(points, A_ch_outer, b_ch_outer, 0.0);
-//    std::cout << std::endl << "A_ch: " << std::endl << A_ch.toString() << std::endl;
-//    std::cout << std::endl << "b_ch: " << std::endl << b_ch.toString() << std::endl;
-//    std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer.toString() << std::endl;
-//    std::cout << std::endl << "b_ch_outer: " << std::endl << b_ch_outer.toString() << std::endl;
-//    std::cout << std::endl << "@q: " << std::endl << q.toString() << std::endl << std::endl;
-//    getPointsFromConstraints(A_ch,
-//                             b_ch,
-//                             points_inner);
-
-//    points.push_back(points.front());
-//    points_inner.push_back(points_inner.front());
-//    for(KDL::Vector point : points) {
-//        std::cout << std::endl
-//                  << "=================" << std::endl
-//                  << "Moving from ("
-//                  << point_old.x() << "," << point_old.y()
-//                  << ") to ("
-//                  << point.x() << "," << point.y()
-//                  <<")" << std::endl;
-
-//        T_com_p_ref[0] = point.x();
-//        T_com_p_ref[1] = point.y();
-
-//        com_task->setReference(T_com_p_ref);
-
-//        yarp::sig::Vector dq(q.size(), 0.0);
-//        double e = norm(T_com_p_ref - com_task->getActualPosition());
-//        double previous_e = 0.0;
-//        double oscillation_check_e = 0.0;
-//        for(i = 0; i < n_iterations; ++i)
-//        {
-//            model.updateiDyn3Model(q, true);
-
-//            first_task->update(q);
-//            right_foot_task->update(q);
-//            com_task->update(q);
-//            postural_task->update(q);
-//            bounds->update(q);
-
-//            _log << com_task->getActualPosition()[0] << ","
-//                << com_task->getActualPosition()[1] <<";";
-//            e = norm(T_com_p_ref - com_task->getActualPosition());
-
-//            if(fabs(e - oscillation_check_e) < 1e-9)
-//            {
-//                std::cout << "i: " << i << " e: " << e << " -- Oscillation detected. Stopping." << std::endl;
-//                break;
-//            }
-
-//            //std::cout << "i: " << i << " e: " << e << std::endl;
-//            if(fabs(previous_e - e) < 1e-12) {
-//                std::cout << "i: " << i << " e: " << e << " -- Error not decreasing. CONVERGED." << std::endl;
-//                break;
-//            }
-//            oscillation_check_e = previous_e;
-//            previous_e = e;
-
-//            if(e < 1e-3) {  // what if we get too close?!?
-//                boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
-//                std::cout << "A_ch:" << A_ch.toString() << std::endl;
-//                std::cout << "b_ch:" << b_ch.toString() << std::endl;
-//            }
-
-//            EXPECT_TRUE(sot->solve(dq));
-//            q += dq;
-
-//            yarp::sig::Matrix right_foot_pose_now = right_foot_task->getActualPose();
-//            for(unsigned int r = 0; r < 4; ++r)
-//                for(unsigned int c = 0; c < 4; ++c)
-//                    EXPECT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-3) << "Error at iteration "
-//                                                                                    << i
-//                                                                                    << " at position "
-//                                                                                    << "(" << r
-//                                                                                    << "," << c << ")"
-//                                                                                    << " with cartesian error equal to "
-//                                                                                    << norm(right_foot_task->getb()) << std::endl;
-//            EXPECT_LT(norm(right_foot_task->getA()*dq),1E-6) << "Error at iteration "
-//                                                             << i
-//                                                             << " J_foot*dq = "
-//                                                             << (right_foot_task->getA()*dq).toString()
-//                                                             << std::endl;
-
-//#ifdef TRY_ON_SIMULATOR
-//            robot.move(q);
-//#endif
-//        }
-//        if(i == n_iterations)
-//            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - com_task->getActualPosition()) << " -- Error not decreasing. STOPPING." << std::endl;
-
-//        yarp::sig::Vector distance = T_com_p_ref - com_task->getActualPosition();
-//        double d = norm(distance);
-//        yarp::sig::Vector exp_distance(2,0.01);
-//        double expected_d = norm(exp_distance);
-
-//        std::vector<KDL::Vector> points_check;
-//        boundsConvexHull->getConvexHull(points_check);
-//        yarp::sig::Matrix A_ch_check;
-//        yarp::sig::Vector b_ch_check;
-//        boundsConvexHull->getConstraints(points_check, A_ch_check, b_ch_check, 0.01);
-
-//        EXPECT_NEAR(d, expected_d, (expected_d-0.01)*1.01) << "Failed to reach point "
-//                                                           << point
-//                                                           << " in the allocated threshold (0.01m)." << std::endl;
-//        EXPECT_TRUE(A_ch == A_ch_check) << "Convex Hull changed!" << std::endl;
-//        if(! (A_ch == A_ch_check) )
-//        {
-//            std::cout << "Old A:" << std::endl << A_ch.toString() << std::endl;
-//            std::cout << "New A:" << std::endl << A_ch_check.toString() << std::endl;
-//            std::cout << "Had originally " << points.size() -1 << " points in the Convex Hull, "
-//                      << " now we have " << points_check.size() << std::endl;
-//        }
-//        point_old = point;
-//    }
-
-//    _log << "];" << std::endl;
-
-//    _log << "points=[";
-//    for(KDL::Vector point : points)
-//        _log << point.x() << "," << point.y() << ";";
-//    _log << "];" << std::endl;
-//    _log << "points_inner=[";
-//    for(KDL::Vector point : points_inner)
-//        _log << point.x() << "," << point.y() << ";";
-//    _log << "];" << std::endl;
-
-//    _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); axis equal;" << std::endl;
-//    _log << "ct = plot2(com_traj,'b');" << std::endl;
 }
 
-TEST_F(testQPOases_sot, testPosturalFF)
+
+TEST_P(testQPOases_sot, testCoMFF)
 {
 
 }
 
-TEST_F(testQPOases_sot, testCoMFF)
+TEST_P(testQPOases_sot, testPosturalFF)
 {
 
 }
+
+INSTANTIATE_TEST_CASE_P(FFTests,
+                        testQPOases_sot,
+                        ::testing::Values(
+    std::make_pair(KDL::Path::ID_LINE,false),
+    std::make_pair(KDL::Path::ID_LINE, true),
+    std::make_pair(KDL::Path::ID_CIRCLE, true),
+    std::make_pair(KDL::Path::ID_CIRCLE, false)));
 
 }
 
