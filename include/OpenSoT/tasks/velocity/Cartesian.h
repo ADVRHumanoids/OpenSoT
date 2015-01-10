@@ -60,7 +60,7 @@
 
                 yarp::sig::Matrix _actualPose;
                 yarp::sig::Matrix _desiredPose;
-                yarp::sig::Vector _desiredVelocity;
+                yarp::sig::Vector _desiredTwist;
 
                 bool _base_link_is_world;
 
@@ -109,15 +109,17 @@
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.
                  * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
-                 * Notice how the setReference(desiredPose, desiredVelocity) needs to be called before each _update(x) of the Cartesian task,
+                 * Notice how the setReference(desiredPose, desiredTwist) needs to be called before each _update(x) of the Cartesian task,
                  * since the _update() resets the feed-forward velocity term for safety reasons.
                  * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
-                 * a feed-forward term in the cartesian task computation
+                 * a feed-forward term in the cartesian task computation. NOTICE how the velocities are in units/sample,
+                 * instead of units/s. This means that if you have a twist expressed in SI units, you have to call the function as
+                 * setReference(desiredPose, desiredTwist*dt)
                  */
                 void setReference(const yarp::sig::Matrix& desiredPose,
-                                  const yarp::sig::Vector& desiredVelocity);
+                                  const yarp::sig::Vector& desiredTwist);
 
                 /**
                  * @brief getReference returns the Cartesian task reference
@@ -134,7 +136,7 @@
                  * a feed-forward term in the cartesian task computation
                  */
                 void getReference(yarp::sig::Matrix& desiredPose,
-                                  yarp::sig::Vector& desiredVelocity) const;
+                                  yarp::sig::Vector& desiredTwist) const;
 
 
                 /**

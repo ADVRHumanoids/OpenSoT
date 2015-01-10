@@ -91,7 +91,9 @@
                  * of the CoM task, since the _update() resets the feed-forward velocity term for safety reasons.
                  * @param desiredPosition the \f$R^{3}\f$ vector describing the desired position of the CoM wrt world.
                  * @param desireVelocity is a \f$R^{3}\f$ linear velocity vector describing the desired trajectory velocity,
-                 * and it represents a feed-forward term in the CoM task computation
+                 * and it represents a feed-forward term in the CoM task computation. NOTICE how the velocities are in m/sample,
+                 * instead of m/s. This means that if you have a linear velocity expressed in SI units, you have to call the function as
+                 * setReference(desiredPosition, desiredVelocity*dt)
                  */
                 void setReference(const yarp::sig::Vector& desiredPosition,
                                   const yarp::sig::Vector& desiredVelocity);

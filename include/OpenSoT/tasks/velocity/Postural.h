@@ -69,7 +69,9 @@
                  * of the Postural task, since the _update() resets the feed-forward velocity term for safety reasons.
                  * @param x_desired the \f$R^{n_x}\f$ vector of desired joint positions.
                  * @param xdot_desired is a \f$R^{n_x}\f$ vector describing the desired joint velocities,
-                 * and it represents a feed-forward term in the Postural task computation
+                 * and it represents a feed-forward term in the Postural task computation NOTICE how the velocities are in rad/sample,
+                 * instead of rad/s. This means that if you have a velocity expressed in SI units, you have to call the function as
+                 * setReference(x_desired, xdot_desired*dt)
                  */
                 void setReference(const yarp::sig::Vector& x_desired,
                                   const yarp::sig::Vector& xdot_desired);

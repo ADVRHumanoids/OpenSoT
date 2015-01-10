@@ -31,7 +31,7 @@ Cartesian::Cartesian(std::string task_id,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _orientationErrorGain(1.0), _desiredVelocity(6, 0.0)
+    _orientationErrorGain(1.0), _desiredTwist(6, 0.0)
 {
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
@@ -85,7 +85,7 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
 
     this->update_b();
 
-    this->_desiredVelocity.zero();
+    this->_desiredTwist.zero();
 
     /**********************************************************************/
 }
@@ -95,19 +95,19 @@ void Cartesian::setReference(const yarp::sig::Matrix& desiredPose) {
     assert(desiredPose.cols() == 4);
 
     _desiredPose = desiredPose;
-    _desiredVelocity.zero();
+    _desiredTwist.zero();
     this->update_b();
 }
 
 void OpenSoT::tasks::velocity::Cartesian::setReference(const yarp::sig::Matrix &desiredPose,
-                                                       const yarp::sig::Vector &desiredVelocity)
+                                                       const yarp::sig::Vector &desiredTwist)
 {
-    assert(desiredVelocity.size() == 6);
+    assert(desiredTwist.size() == 6);
     assert(desiredPose.rows() == 4);
     assert(desiredPose.cols() == 4);
 
     _desiredPose = desiredPose;
-    _desiredVelocity = desiredVelocity;
+    _desiredTwist = desiredTwist;
     this->update_b();
 }
 
@@ -116,10 +116,10 @@ const yarp::sig::Matrix Cartesian::getReference() const {
 }
 
 void OpenSoT::tasks::velocity::Cartesian::getReference(yarp::sig::Matrix &desiredPose,
-                                                       yarp::sig::Vector &desiredVelocity) const
+                                                       yarp::sig::Vector &desiredTwist) const
 {
     desiredPose = _desiredPose;
-    desiredVelocity = _desiredVelocity;
+    desiredTwist = _desiredTwist;
 }
 
 const yarp::sig::Matrix Cartesian::getActualPose() const
@@ -157,5 +157,5 @@ void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
-    _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError) + _desiredVelocity/_lambda;
+    _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError) + _desiredTwist/_lambda;
 }
