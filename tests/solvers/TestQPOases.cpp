@@ -3,6 +3,7 @@
 #include <idynutils/comanutils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
+#include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/all.h>
@@ -11,6 +12,7 @@
 #include <qpOASES.hpp>
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
+#include <fstream>
 
 
 using namespace yarp::math;
@@ -396,14 +398,15 @@ protected:
 class testQPOases_sot: public ::testing::Test
 {
 protected:
+    std::ofstream _log;
 
     testQPOases_sot()
     {
-
+        _log.open("testQPOases_sot.m");
     }
 
     virtual ~testQPOases_sot() {
-
+        _log.close();
     }
 
     virtual void SetUp() {

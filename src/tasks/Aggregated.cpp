@@ -110,14 +110,15 @@ void OpenSoT::tasks::Aggregated::generateConstraints()
     {
         if(constraintsSize > expectedConstraintsSize) // checking whether the user really added only constraints
         {
-            this->_constraints.sort();
+            std::list < ConstraintPtr > orderedConstraints = this->_constraints;
+            orderedConstraints.sort();
             this->_aggregatedConstraints.sort();
 
             std::vector< ConstraintPtr > diffs;
             diffs.resize( constraintsSize + expectedConstraintsSize );
 
-            std::vector< ConstraintPtr >::iterator diffs_end = std::set_symmetric_difference( _constraints.begin(),
-                                                                                              _constraints.end(),
+            std::vector< ConstraintPtr >::iterator diffs_end = std::set_symmetric_difference( orderedConstraints.begin(),
+                                                                                              orderedConstraints.end(),
                                                                                               _aggregatedConstraints.begin(),
                                                                                               _aggregatedConstraints.end(),
                                                                                               diffs.begin() );
@@ -130,10 +131,12 @@ void OpenSoT::tasks::Aggregated::generateConstraints()
                                          "You probably tried deleting some constraints, or you added "
                                          "to the constraints something which was already in the tasks "
                                          "constraints.\n");
-            else // saving the added constraints to the ownConstraints list
+            else // saving the added constraints to the ownConstraints list, in the original order
             {
-                for( std::vector< ConstraintPtr >::iterator i = diffs.begin() ; i != diffs.end() ; ++i)
-                    _ownConstraints.push_back(*i);
+                for (std::list<ConstraintPtr>::iterator j = _constraints.begin(); j!=_constraints.end(); ++j)
+                    for( std::vector< ConstraintPtr >::iterator i = diffs.begin() ; i != diffs.end() ; ++i)
+                        if(*i==*j)
+                            _ownConstraints.push_back(*i);
             }
         }
         else

@@ -99,6 +99,8 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
             b[z] -= normalizedBoundScaling;
         z++;
     }
+    //std::cout<<"A_ch: "<<A.toString()<<std::endl;
+    //std::cout<<"b_ch: "<<b.toString()<<std::endl;
 }
 
 void ConvexHull::getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,

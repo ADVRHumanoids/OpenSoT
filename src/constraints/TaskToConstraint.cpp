@@ -15,7 +15,7 @@
  * Public License for more details
 */
 
-#include <OpenSoT/constraints/BilateralConstraint.h>
+#include <OpenSoT/constraints/TaskToConstraint.h>
 
 #include <yarp/math/Math.h>
 #include <assert.h>
@@ -24,17 +24,25 @@
 using namespace OpenSoT::constraints;
 using namespace yarp::math;
 
-BilateralConstraint::BilateralConstraint(const yarp::sig::Matrix &Aineq,
-                                         const yarp::sig::Vector &bLowerBound,
-                                         const yarp::sig::Vector &bUpperBound) :
-    Constraint(Aineq.cols())
+TaskToConstraint::TaskToConstraint(TaskPtr task) :
+    BilateralConstraint(task->getA(), task->getb(), task->getb()), _task(task)
 {
-    _Aineq = Aineq;
-    _bLowerBound = bLowerBound;
-    _bUpperBound = bUpperBound;
+    this->generateAll();
+}
+
+void TaskToConstraint::update(const yarp::sig::Vector &q)
+{
+    assert(q.size() == _task->getXSize());
+
+    _task->update(q);
+    this->generateAll();
+}
+
+void TaskToConstraint::generateAll() {
+    _Aineq = _task->getA();
+    _bLowerBound = _task->getb();
+    _bUpperBound = _bLowerBound;
 
     assert( (_Aineq.rows() == _bLowerBound.size()) &&
             (_Aineq.rows() == _bUpperBound.size()));
 }
-
-
