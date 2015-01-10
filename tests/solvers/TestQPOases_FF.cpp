@@ -110,19 +110,19 @@ protected:
                                                           velocityProfile.get()->Clone()));
     }
 
-    void getdot1radCircularTraj(KDL::Frame& start) {
+    void get1radCircularTraj(KDL::Frame& start) {
         // 5 cm forward
         KDL::Frame end = start;
-        end.M.DoRotX(.1);
+        end.M.DoRotX(1);
 
         // construct an equivalent radius so that the length
         // of the path along the arc of .1rad will be .05m
         // .05 = (eqRad*.1);
-        double eqRad = .05/.1;
+        double eqRad = .05/1;
         path = PathPtr( new KDL::Path_Line(start, end,
                                            rotationInterpolationMethod.get()->Clone(),
                                            eqRad));
-        velocityProfile = VelProfPtr( new KDL::VelocityProfile_Trap(.02,.01));
+        velocityProfile = VelProfPtr( new KDL::VelocityProfile_Trap(.2,.1));
         velocityProfile->SetProfile(0,path->PathLength());
         trajectory = TrajPtr( new KDL::Trajectory_Segment(path.get()->Clone(),
                                                           velocityProfile.get()->Clone()));
@@ -139,6 +139,8 @@ protected:
         _log.open("testQPOases_CartesianFF.m");
         _log << "testQPOases_FF_Cartesian_5cmfw_noerr" << std::endl;
         _log << "testQPOases_FF_Cartesian_5cmfw_1cmerr" << std::endl;
+        _log << "testQPOases_FF_Cartesian_1rad_noerr" << std::endl;
+        _log << "testQPOases_FF_Cartesian_1rad_1draderr" << std::endl;
     }
 
     virtual ~testQPOases_CartesianFF() {
@@ -269,6 +271,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     KDL::Frame current_pose, previous_pose, desired_pose;
     KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
     yarp::sig::Matrix current_pose_y;
+    double R, Rdes, Rprev, P, Pdes, Pprev, Y, Ydes, Yprev;
 
 
     dq = yarp::sig::Vector(q.size(), 0.0);
@@ -278,45 +281,79 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     postural_task->update(q);
     bounds->update(q);
 
+    current_pose_y = l_arm_task->getActualPose();
+    YarptoKDL(current_pose_y,current_pose);
 
     if(!hasInitialError) {
-        /************************************************
-         * COMMANDING 5cm FORWARD FROM CURRENT POSITION
-         * meaning zero error at trajectory begin
-         ***********************************************/
 
-        _log.close();
-        _log.open("testQPOases_FF_Cartesian_5cmfw_noerr.m");
+        if(trajType == KDL::Path::ID_LINE) {
+            /************************************************
+             * COMMANDING 5cm FORWARD FROM CURRENT POSITION
+             * meaning zero error at trajectory begin
+             ***********************************************/
 
-        current_pose_y = l_arm_task->getActualPose();
-        YarptoKDL(current_pose_y,current_pose);
-        get5cmFwdLinearTraj(current_pose);
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_5cmfw_noerr.m");
+
+
+            get5cmFwdLinearTraj(current_pose);
+
+            l_arm_task->setOrientationErrorGain(.1);
+        } else {
+            /************************************************
+             * COMMANDING 1rad CLOCKWISE FROM CURRENT POSITION
+             * meaning zero error at trajectory begin
+             ***********************************************/
+
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_5cmfw_noerr.m");
+
+            get1radCircularTraj(current_pose);
+
+            l_arm_task->setOrientationErrorGain(.1);
+        }
+
         desired_pose = trajectory->Pos(0.0);
 
         l_arm_task->setLambda(.6);
-        l_arm_task->setOrientationErrorGain(.1);
 
     } else {
-        /*************************************************
-         * COMMANDING 5cm FORWARD FROM PERTURBED POSITION
-         * 1cm error at trajectory startup
-         *************************************************/
+        if(trajType == KDL::Path::ID_LINE) {
+            /*************************************************
+             * COMMANDING 5cm FORWARD FROM PERTURBED POSITION
+             * 1cm error at trajectory startup
+             *************************************************/
 
-        _log.close();
-        _log.open("testQPOases_FF_Cartesian_5cmfw_1cmerr.m");
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_5cmfw_1cmerr.m");
 
-        current_pose_y = l_arm_task->getActualPose();
-        YarptoKDL(current_pose_y,current_pose);
-        desired_pose = current_pose;
-        desired_pose.p[0] = current_pose.p[0] + .01;
-        get5cmFwdLinearTraj(desired_pose);
-        desired_pose = trajectory->Pos(0.0);
+            desired_pose = current_pose;
+            desired_pose.p[0] = current_pose.p[0] + .01;
+            get5cmFwdLinearTraj(desired_pose);
+            desired_pose = trajectory->Pos(0.0);
+
+            l_arm_task->setOrientationErrorGain(.5);
+        } else {
+            /*************************************************
+             * COMMANDING 1rad CLOCKWISE FROM PERTURBED POSITION
+             * 1e-1rad error at trajectory startup
+             *************************************************/
+
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_5cmfw_1cmerr.m");
+
+            desired_pose = current_pose;
+            desired_pose.M.DoRotX(.1);
+            get5cmFwdLinearTraj(desired_pose);
+            desired_pose = trajectory->Pos(0.0);
+
+            l_arm_task->setOrientationErrorGain(.5);
+        }
 
         /* setting lambda lower than this can cause tracking problems
          * along the trajectory on secondary variables (e.g. the one that
          * we want fixed at 0) */
         l_arm_task->setLambda(.1);
-        l_arm_task->setOrientationErrorGain(.1);
     }
 
     previous_pose = current_pose;
@@ -327,7 +364,14 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
     double previous_norm = -1;
     double current_norm;
-    double previous_error = desired_pose.p[0] - current_pose.p[0];
+    double previous_error;
+    if(trajType == KDL::Path::ID_LINE) {
+        previous_error = desired_pose.p[0] - current_pose.p[0];
+    } else {
+        desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
+        current_pose.M.GetRPY(R,P,Y);
+        previous_error = Rdes - R;
+    }
 
     _log << "% t,\t"
          << "estimated_twist,\t"
@@ -379,29 +423,63 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
         twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
         */
-        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        double twist_measure;
+        if(trajType == KDL::Path::ID_LINE) {
+            twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        } else {
+            current_pose.M.GetRPY(R,P,Y);
+            previous_pose.M.GetRPY(Rprev,Pprev,Yprev);
+            twist_measure = (R - Rprev)/t_loop;
+        }
+
         twist_estimate[0] = twist_measure;
 
         current_norm = norm(l_arm_task->getb());
 
-        _log << t << ",\t"
-             << twist_estimate[0] << ",\t"
-             << desired_twist[0]   << ",\t"
-             << current_pose.p[0]  << ",\t"
-             << desired_pose.p[0]  << ",\t"
-             << t_compute          << ",\t"
-             << t_loop             << ",\t"
-             << current_norm       << ";" << std::endl;
+        if(trajType == KDL::Path::ID_LINE) {
+            _log << t << ",\t"
+                 << twist_estimate[0] << ",\t"
+                 << desired_twist[0]   << ",\t"
+                 << current_pose.p[0]  << ",\t"
+                 << desired_pose.p[0]  << ",\t"
+                 << t_compute          << ",\t"
+                 << t_loop             << ",\t"
+                 << current_norm       << ";" << std::endl;
+        } else {
+            desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
+            _log << t << ",\t"
+                 << twist_estimate[0] << ",\t"
+                 << desired_twist[0]   << ",\t"
+                 << R  << ",\t"
+                 << Rdes  << ",\t"
+                 << t_compute          << ",\t"
+                 << t_loop             << ",\t"
+                 << current_norm       << ";" << std::endl;
+        }
+
         // also velocities and accelerations are available !
         previous_pose = current_pose;
         previous_twist_estimate[0] = twist_estimate[0];
 
         if(!hasInitialError) {
-            EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4);
-            EXPECT_NEAR(norm(l_arm_task->getb()), 0, 5e-4);
+            if(trajType == KDL::Path::ID_LINE) {
+                EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;;
+                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 5e-4) << " @t= " << t;;
+            } else {
+                EXPECT_NEAR(R, Rdes,2e-3) << " @t= " << t;;
+                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1e-2) << " @t= " << t;;
+            }
         } else {
             if(t<=1.3) {
-                double current_error = desired_pose.p[0] - current_pose.p[0];
+                double current_error;
+
+                if(trajType == KDL::Path::ID_LINE) {
+                    current_error = desired_pose.p[0] - current_pose.p[0];
+                } else {
+                    desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
+                    current_pose.M.GetRPY(R,P,Y);
+                    current_error = Rdes - R;
+                }
 
                 /* error should always decrease, or at least accept
                  * a local increment of 1e-4 */
@@ -411,9 +489,13 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
                 previous_error = current_error;
                 previous_norm = current_norm;
             } else {
-
-                EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1.5e-4) << " @t= " << t;
-                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1.5e-3) << " @t= " << t;
+                if(trajType == KDL::Path::ID_LINE) {
+                    EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1.5e-4) << " @t= " << t;
+                    EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1.5e-3) << " @t= " << t;
+                } else {
+                    EXPECT_NEAR(R, Rdes,2e-3);
+                    EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1e-2);
+                }
             }
         }
     }
@@ -876,7 +958,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 
         if(!hasInitialError) {
             EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],2e-3);
-            EXPECT_NEAR(current_norm, 0, 2e-3);
+            EXPECT_NEAR(current_norm, 0, 3e-3);
         } else {
             if(t<=1.3) {
                 double current_error = desired_pose.p[0] - current_pose.p[0];
@@ -891,7 +973,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
             } else {
 
                 EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],2e-3) << " @t= " << t;
-                EXPECT_NEAR(current_norm, 0, 2e-3) << " @t= " << t;
+                EXPECT_NEAR(current_norm, 0, 3e-3) << " @t= " << t;
             }
         }
     }
