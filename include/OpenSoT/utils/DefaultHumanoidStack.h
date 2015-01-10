@@ -18,69 +18,38 @@
 #ifndef __DEFAULTHUMANOIDSTACK_H__
 #define __DEFAULTHUMANOIDSTACK_H__
 
-// namespace OpenSoT {
+#include <OpenSoT/OpenSoT.h>
 
-//     class Factory {
-//     private:
+ namespace OpenSoT {
 
-//         template <class Matrix_type, class Vector_type>
-//         class Stack {
-//             friend class OpenSoT::Factory;
-//             typename OpenSoT::Solver<Matrix_type, Vector_type>::Stack stack;
-//             virtual void update(const Vector_type& q);
-//             operator typename OpenSoT::Solver<Matrix_type, Vector_type>::Stack();
-//             virtual ~Stack() {}
-//         protected:
-//             Stack();
-//             Stack(typename OpenSoT::Solver<Matrix_type, Vector_type>::Stack stack);
-//         };
+     class DefaultHumanoidStack
+     {
+        public:
 
-//         Factory();
+         DefaultHumanoidStack(iDynUtils &model,
+                              const double dT,
+                              const yarp::sig::Vector& state);
 
-//     public:
-//         ~Factory() {}
+         virtual ~DefaultHumanoidStack() {}
 
-//         class DefaultHumanoidStack : public Stack<yarp::sig::Matrix, yarp::sig::Vector>
-//         {
-//         private:
-//             iDynUtils model;
-//             iDynUtils model_com;
+         // tasks
+         const tasks::velocity::Cartesian::Ptr leftArm;
+         const tasks::velocity::Cartesian::Ptr rightArm;
+         const tasks::velocity::Cartesian::Ptr waist2LeftArm;
+         const tasks::velocity::Cartesian::Ptr waist2RightArm;
+         const tasks::velocity::Cartesian::Ptr leftLeg;
+         const tasks::velocity::Cartesian::Ptr rightLeg;
+         const tasks::velocity::Cartesian::Ptr waist;
+         const tasks::velocity::CoM::Ptr com;
+         const tasks::velocity::MinimumEffort::Ptr minimumEffort;
+         const tasks::velocity::Postural::Ptr postural;
 
-//             DefaultHumanoidStack(std::string srdfModelFileName,
-//                                  const double dT);
-
-//         public:
-//             ~DefaultHumanoidStack() {}
-//             friend class OpenSoT::Factory;
-//             typedef boost::shared_ptr<OpenSoT::Factory::DefaultHumanoidStack> Ptr;
-
-//             // tasks
-//             const tasks::velocity::Cartesian::Ptr leftArm;
-//             const tasks::velocity::Cartesian::Ptr rightArm;
-//             const tasks::velocity::Cartesian::Ptr waist2LeftArm;
-//             const tasks::velocity::Cartesian::Ptr waist2RightArm;
-//             const tasks::velocity::Cartesian::Ptr leftLeg;
-//             const tasks::velocity::Cartesian::Ptr rightLeg;
-//             const tasks::velocity::Cartesian::Ptr rightLeg2LeftLeg;
-//             const tasks::velocity::Cartesian::Ptr leftLeg2RightLeg;
-//             const tasks::velocity::CoM::Ptr com;
-//             const tasks::velocity::MinimumEffort::Ptr minimumEffort;
-//             const tasks::velocity::Postural::Ptr postural;
-
-//             // constraints
-//             const constraints::velocity::CoMVelocity::Ptr comVelocity;
-//             const constraints::velocity::ConvexHull::Ptr convexHull;
-//             const constraints::velocity::JointLimits::Ptr jointLimits;
-//             const constraints::velocity::VelocityLimits::Ptr velocityLimits;
-
-//             void update(const yarp::sig::Vector& q);
-//         };
-
-//         DefaultHumanoidStack::Ptr getDefaultHumanoidStack(std::string srdfModelFileName,
-//                                                           const double dT);
-//     private:
-//         static DefaultHumanoidStack::Ptr defaultHumanoidStack;
-//     };
-// }
+         // constraints
+         const constraints::velocity::CoMVelocity::Ptr comVelocity;
+         const constraints::velocity::ConvexHull::Ptr convexHull;
+         const constraints::velocity::JointLimits::Ptr jointLimits;
+         const constraints::velocity::VelocityLimits::Ptr velocityLimits;
+     };
+ };
 
 #endif

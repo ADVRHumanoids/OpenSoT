@@ -37,4 +37,14 @@ VelocityLimits::VelocityLimits(const double qDotLimit,
 
 }
 
+double OpenSoT::constraints::velocity::VelocityLimits::getVelocityLimits()
+{
+    return _qDotLimit;
+}
+
+void OpenSoT::constraints::velocity::VelocityLimits::setVelocityLimits(const double qDotLimit)
+{
+    _qDotLimit = qDotLimit;
+}
+
 

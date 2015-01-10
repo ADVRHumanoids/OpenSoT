@@ -28,4 +28,7 @@
  #include "tasks/Aggregated.h"
  #include "tasks/velocity/all.h"
 
+ #include "utils/AutoStack.h"
+ #include "utils/DefaultHumanoidStack.h"
+
 #endif

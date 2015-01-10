@@ -51,6 +51,9 @@
                             iDynUtils& robot);
 
                 virtual void update(const yarp::sig::Vector &x);
+
+                yarp::sig::Vector getVelocityLimits();
+                void setVelocityLimits(const yarp::sig::Vector velocityLimits);
             };
         }
     }
