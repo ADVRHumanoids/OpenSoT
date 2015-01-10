@@ -15,9 +15,16 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
 {
     std::list<OpenSoT::tasks::Aggregated::TaskPtr> taskList = aggregated->getTaskList();
     taskList.push_back(task);
-    return OpenSoT::tasks::Aggregated::Ptr(
+    OpenSoT::tasks::Aggregated::Ptr outAggregated(
         new OpenSoT::tasks::Aggregated(taskList,
                                        task->getXSize()));
+
+    yarp::sig::Matrix W = outAggregated->getWeight();
+    W.setSubmatrix(aggregated->getWeight(),0,0);
+    outAggregated->setWeight(W);
+    outAggregated->setLambda(aggregated->getLambda());
+
+    return outAggregated;
 }
 
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task,
@@ -25,9 +32,18 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ta
 {
     std::list<OpenSoT::tasks::Aggregated::TaskPtr> taskList = aggregated->getTaskList();
     taskList.push_front(task);
-    return OpenSoT::tasks::Aggregated::Ptr(
+    OpenSoT::tasks::Aggregated::Ptr outAggregated(
         new OpenSoT::tasks::Aggregated(taskList,
                                        task->getXSize()));
+
+    yarp::sig::Matrix W = outAggregated->getWeight();
+    yarp::sig::Matrix W_aggregated = aggregated->getWeight();
+    W.setSubmatrix(W_aggregated,W.rows()-W_aggregated.rows(),
+                                W.cols()-W_aggregated.cols());
+    outAggregated->setWeight(W);
+    outAggregated->setLambda(aggregated->getLambda());
+
+    return outAggregated;
 }
 
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ptr aggregated1,
@@ -46,12 +62,20 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
         outAggregated = OpenSoT::tasks::Aggregated::Ptr(
                     new OpenSoT::tasks::Aggregated( taskList,
                                                     aggregated1->getXSize()));
+
+        outAggregated->setLambda(aggregated1->getLambda());
     } else {
         outAggregated = OpenSoT::tasks::Aggregated::Ptr(
             new OpenSoT::tasks::Aggregated( aggregated1,
                                             aggregated2,
                                             aggregated1->getXSize()));
     }
+
+    yarp::sig::Matrix W = outAggregated->getWeight();
+    yarp::sig::Matrix W1 = aggregated1->getWeight();
+    yarp::sig::Matrix W2 = aggregated2->getWeight();
+    W.setSubmatrix(W1,0,0);
+    W.setSubmatrix(W1,W1.rows(), W1.cols());
 
     return outAggregated;
 }
@@ -71,9 +95,6 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack,
                                     const OpenSoT::tasks::Aggregated::TaskPtr task)
 {
     OpenSoT::solvers::QPOases_sot::Stack outStack(stack->getStack());
-    outStack.insert(outStack.end(),
-                    stack->getStack().begin(),
-                    stack->getStack().end());
     outStack.push_back(task);
     if(stack->getBoundsList().size() > 0)
         return OpenSoT::AutoStack::Ptr(
@@ -87,14 +108,18 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack,
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task,
                                     OpenSoT::AutoStack::Ptr stack)
 {
-    OpenSoT::solvers::QPOases_sot::Stack taskVector;
-    taskVector.push_back(task);
-    taskVector.insert(taskVector.end(),
-                      stack->getStack().begin(),
-                      stack->getStack().end());
-    return OpenSoT::AutoStack::Ptr(
-            new OpenSoT::AutoStack(taskVector,
-                                   stack->getBoundsList()));
+    OpenSoT::solvers::QPOases_sot::Stack outStack;
+    outStack.push_back(task);
+    outStack.insert(outStack.end(),
+                    stack->getStack().begin(),
+                    stack->getStack().end());
+    if(stack->getBoundsList().size() > 0)
+        return OpenSoT::AutoStack::Ptr(
+                new OpenSoT::AutoStack(outStack,
+                                       stack->getBoundsList()));
+    else
+        return OpenSoT::AutoStack::Ptr(
+                new OpenSoT::AutoStack(outStack));
 
 }
 
@@ -131,8 +156,15 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
 }
 
 
-OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr& task,
+OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
                                                 const OpenSoT::constraints::Aggregated::ConstraintPtr constraint)
+{
+    task->getConstraints().push_back(constraint);
+    return task;
+}
+
+OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
+                                            const OpenSoT::constraints::Aggregated::ConstraintPtr constraint)
 {
     task->getConstraints().push_back(constraint);
     return task;
@@ -141,10 +173,16 @@ OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::Task
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
                                     const OpenSoT::constraints::Aggregated::ConstraintPtr constraint)
 {
-    if(std::find(autoStack->getBoundsList().begin(),
+    // check both pointers are valid
+    assert(autoStack && constraint);
+
+    if((autoStack->getBoundsList().size() == 0) ||
+       (std::find(autoStack->getBoundsList().begin(),
                  autoStack->getBoundsList().end(),
-                 constraint) == autoStack->getBoundsList().end())
+                 constraint) == autoStack->getBoundsList().end()))
         autoStack->getBoundsList().push_back(constraint);
+
+    return autoStack;
 }
 
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack) :

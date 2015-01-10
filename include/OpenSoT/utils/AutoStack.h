@@ -22,8 +22,22 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/solvers/QPOases.h>
 
+/**
+ * @example example_autostack.cpp
+ * The AutoStack class allows to use the MOT (Math of Tasks)
+ * to define stacks.
+ */
+
 namespace OpenSoT {
-    /*TODO check constructor on CIK*/
+    /**
+     * @brief The AutoStack class eases the managing of a stack of task,
+     *        by automatically calling the update() function on all
+     *        tasks of the stack. Many operators are defined for the
+     *        AutoStack, so that it's possible to concisely write
+     *        stacks. Together with OpenSoT::DefaultHumanoidStack
+     *        it allows to use the MOT (Math of Tasks) to define stacks, e.g.:
+     * AutoStack = (T1 + T2) / (T3 << ConstraintT3 + T4) << Bounds
+     */
     class AutoStack 
     {
         public:
@@ -82,6 +96,9 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
 
 OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
                                                 const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
+
+OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
+                                            const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
 
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
                                     const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
