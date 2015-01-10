@@ -90,7 +90,11 @@
              * @return the Hessian type
              */
             HessianType computeHessianType();
+
             void checkSizes();
+
+            static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
+
         public:
             /**
              * @brief Aggregated
@@ -167,7 +171,7 @@
              */
             const std::list< ConstraintPtr >& getAggregatedConstraints() { return _aggregatedConstraints; }
 
-            static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
+            const std::list< TaskPtr >& getTaskList() { return _tasks; }
         };
 
     }

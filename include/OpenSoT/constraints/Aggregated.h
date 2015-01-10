@@ -85,7 +85,7 @@
              *               update() on the base tasks
              */
             Aggregated(const std::list<ConstraintPtr> constraints,
-                       const unsigned int &x_size,
+                       const unsigned int x_size,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);
@@ -105,6 +105,8 @@
                             UNILATERAL_TO_BILATERAL);
 
             void update(const yarp::sig::Vector &x);
+
+            const std::list< ConstraintPtr >& getConstraintsList() { return _bounds; }
         };
     }
  }

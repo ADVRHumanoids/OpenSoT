@@ -57,6 +57,18 @@ void CoMVelocity::update(const yarp::sig::Vector &x) {
     /**********************************************************************/
 }
 
+yarp::sig::Vector OpenSoT::constraints::velocity::CoMVelocity::getVelocityLimits()
+{
+    return _velocityLimits;
+}
+
+void OpenSoT::constraints::velocity::CoMVelocity::setVelocityLimits(const yarp::sig::Vector velocityLimits)
+{
+    if(_velocityLimits.size() < 3 )
+        throw "Error: velocityLimits for CoM should be a vector of 3 elements";
+    _velocityLimits = velocityLimits;
+}
+
 void CoMVelocity::generatebBounds() {
 
     /******************** COMPUTING CONSTANT BOUNDS ***********************/
