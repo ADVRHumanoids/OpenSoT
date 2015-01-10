@@ -37,6 +37,8 @@ namespace OpenSoT {
      *        stacks. Together with OpenSoT::DefaultHumanoidStack
      *        it allows to use the MOT (Math of Tasks) to define stacks, e.g.:
      * AutoStack = (T1 + T2) / (T3 << ConstraintT3 + T4) << Bounds
+     *
+     * You can see an example in @ref example_autostack.cpp
      */
     class AutoStack 
     {
