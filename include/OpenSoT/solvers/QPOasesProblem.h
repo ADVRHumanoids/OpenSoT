@@ -246,6 +246,13 @@ namespace OpenSoT{
         void checkInfeasibility();
 
         /**
+         * @brief checkINFTY if a bound/constraint is set to a value less than -INFTY then the bound/constraint is
+         * set to -INFTY, if a bound/constraint is set to a value more than INFTY then the bound/constraint is
+         * set to INFTY.
+         */
+        void checkINFTY();
+
+        /**
          * @brief _problem is the internal SQProblem
          */
         boost::shared_ptr<qpOASES::SQProblem> _problem;

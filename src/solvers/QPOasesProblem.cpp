@@ -58,6 +58,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
                                  const Vector &l, const Vector &u)
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
+    checkINFTY();
 
 
     if(!(_l.size() == _u.size())){
@@ -304,6 +305,7 @@ bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vec
 bool QPOasesProblem::solve()
 {
     int nWSR = _nWSR;
+    checkINFTY();
 
     qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
                        _A.data(),
@@ -440,4 +442,21 @@ bool QPOasesProblem::writeQPIntoMFile(const std::string& file_name)
         return true;
     }
     return false;
+}
+
+void QPOasesProblem::checkINFTY()
+{
+    unsigned int constraints_size = _lA.size();
+    for(unsigned int i = 0; i < constraints_size; ++i){
+        if(_lA[i] < -qpOASES::INFTY)
+            _lA[i] = -qpOASES::INFTY;
+        if(_uA[i] > qpOASES::INFTY)
+            _uA[i] = qpOASES::INFTY;}
+
+    unsigned int bounds_size = _l.size();
+    for(unsigned int i = 0; i < bounds_size; ++i){
+        if(_l[i] < -qpOASES::INFTY)
+            _l[i] = -qpOASES::INFTY;
+        if(_u[i] > qpOASES::INFTY)
+            _u[i] = qpOASES::INFTY;}
 }

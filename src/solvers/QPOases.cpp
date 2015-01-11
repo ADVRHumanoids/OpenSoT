@@ -84,7 +84,7 @@ bool QPOases_sot::prepareSoT()
             _qp_stack_of_tasks.push_back(problem_i);
             _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID());}
         else{
-            std::cout<<RED<<"ERROR: INITIALIZING TASK "<<i<<DEFAULT<<std::endl;
+            std::cout<<RED<<"ERROR: INITIALIZING STAK "<<i<<DEFAULT<<std::endl;
             return false;}
     }
     return true;

@@ -41,7 +41,7 @@ TEST_F(testYTask, testYPostural)
         bool check = false;
         for(unsigned int i = 0; i < number_of_trials; ++i)
         {
-            if(yarp_network.checkNetwork())
+            if(yarp_network.checkNetwork() || ::yarp::os::Network::checkNetwork())
             {
                 check = true;
                 break;
