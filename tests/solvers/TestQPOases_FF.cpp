@@ -111,13 +111,13 @@ protected:
     }
 
     void get1radCircularTraj(KDL::Frame& start) {
-        // 5 cm forward
+        // 1rad clocwise rotation
         KDL::Frame end = start;
         end.M.DoRotX(1);
 
         // construct an equivalent radius so that the length
         // of the path along the arc of .1rad will be .05m
-        // .05 = (eqRad*.1);
+        // .05 = (eqRad*.1); .. but make it faster! (nd Alessio)
         double eqRad = .05/1;
         path = PathPtr( new KDL::Path_Line(start, end,
                                            rotationInterpolationMethod.get()->Clone(),
@@ -306,11 +306,11 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
              ***********************************************/
 
             _log.close();
-            _log.open("testQPOases_FF_Cartesian_5cmfw_noerr.m");
+            _log.open("testQPOases_FF_Cartesian_1rad_noerr.m");
 
             get1radCircularTraj(current_pose);
 
-            l_arm_task->setOrientationErrorGain(.1);
+            l_arm_task->setOrientationErrorGain(.5);
         }
 
         desired_pose = trajectory->Pos(0.0);
@@ -332,7 +332,11 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
             get5cmFwdLinearTraj(desired_pose);
             desired_pose = trajectory->Pos(0.0);
 
-            l_arm_task->setOrientationErrorGain(.5);
+            l_arm_task->setOrientationErrorGain(.1);
+            /* setting lambda lower than this can cause tracking problems
+             * along the trajectory on secondary variables (e.g. the one that
+             * we want fixed at 0) */
+            l_arm_task->setLambda(.1);
         } else {
             /*************************************************
              * COMMANDING 1rad CLOCKWISE FROM PERTURBED POSITION
@@ -340,20 +344,19 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
              *************************************************/
 
             _log.close();
-            _log.open("testQPOases_FF_Cartesian_5cmfw_1cmerr.m");
+            _log.open("testQPOases_FF_Cartesian_1rad_1draderr.m");
 
             desired_pose = current_pose;
             desired_pose.M.DoRotX(.1);
-            get5cmFwdLinearTraj(desired_pose);
+            get1radCircularTraj(desired_pose);
             desired_pose = trajectory->Pos(0.0);
 
-            l_arm_task->setOrientationErrorGain(.5);
+            l_arm_task->setOrientationErrorGain(.4);
+            /* setting lambda lower than this can cause tracking problems
+             * along the trajectory on secondary variables (e.g. the one that
+             * we want fixed at 0) */
+            l_arm_task->setLambda(.3);
         }
-
-        /* setting lambda lower than this can cause tracking problems
-         * along the trajectory on secondary variables (e.g. the one that
-         * we want fixed at 0) */
-        l_arm_task->setLambda(.1);
     }
 
     previous_pose = current_pose;
@@ -449,7 +452,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
             desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
             _log << t << ",\t"
                  << twist_estimate[0] << ",\t"
-                 << desired_twist[0]   << ",\t"
+                 << desired_twist.rot.x()   << ",\t"
                  << R  << ",\t"
                  << Rdes  << ",\t"
                  << t_compute          << ",\t"
@@ -466,8 +469,8 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
                 EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;;
                 EXPECT_NEAR(norm(l_arm_task->getb()), 0, 5e-4) << " @t= " << t;;
             } else {
-                EXPECT_NEAR(R, Rdes,2e-3) << " @t= " << t;;
-                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1e-2) << " @t= " << t;;
+                EXPECT_NEAR(R, Rdes,3e-3) << " @t= " << t;;
+                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1.5e-2) << " @t= " << t;;
             }
         } else {
             if(t<=1.3) {
@@ -475,16 +478,22 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
                 if(trajType == KDL::Path::ID_LINE) {
                     current_error = desired_pose.p[0] - current_pose.p[0];
+
+                    /* error should always decrease, or at least accept
+                     * a local increment of 1e-4 */
+                    EXPECT_GE(previous_error - current_error, -1e-4) << " @t= " << t;
+                    EXPECT_GE(previous_norm - current_norm, -8e-4) << " @t= " << t;
+
                 } else {
                     desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
                     current_pose.M.GetRPY(R,P,Y);
                     current_error = Rdes - R;
-                }
 
-                /* error should always decrease, or at least accept
-                 * a local increment of 1e-4 */
-                EXPECT_GE(previous_error - current_error, -1e-4) << " @t= " << t;
-                EXPECT_GE(previous_norm - current_norm, -8e-4) << " @t= " << t;
+                    /* error should always decrease, or at least accept
+                     * a local increment of 1e-4 */
+                    EXPECT_GE(previous_error - current_error, -3e-3) << " @t= " << t;
+                    EXPECT_GE(previous_norm - current_norm, -2.4e-2) << " @t= " << t;
+                }
 
                 previous_error = current_error;
                 previous_norm = current_norm;
@@ -973,7 +982,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
             } else {
 
                 EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],2e-3) << " @t= " << t;
-                EXPECT_NEAR(current_norm, 0, 3e-3) << " @t= " << t;
+                EXPECT_NEAR(current_norm, 0, 4e-3) << " @t= " << t;
             }
         }
     }
