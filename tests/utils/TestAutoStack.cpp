@@ -63,6 +63,25 @@ TEST_F(testAutoStack, testOperatorPlus )
     tasks::Aggregated::Ptr aggr7 = DHS.leftLeg + aggr1;
     EXPECT_EQ(aggr7->getTaskList().size(), 3);
 
+    /*
+     * checking constraints are carried over in the right way
+     */
+    tasks::Aggregated::Ptr aggr8 = DHS.leftLeg + DHS.rightLeg;
+    aggr8->getConstraints().push_back(DHS.convexHull);
+
+    tasks::Aggregated::Ptr aggr9 = DHS.leftLeg + DHS.rightLeg;
+    aggr9->getConstraints().push_back(DHS.comVelocity);
+
+    tasks::Aggregated::Ptr aggr10 = DHS.leftLeg + DHS.rightLeg;
+    aggr10->getConstraints().push_back(DHS.velocityLimits);
+    aggr10->getConstraints().push_back(DHS.comVelocity);
+
+    EXPECT_EQ(aggr8->getConstraints().size(),1);
+    EXPECT_EQ(aggr9->getConstraints().size(),1);
+    EXPECT_EQ(aggr10->getConstraints().size(),2);
+    EXPECT_EQ((aggr8+aggr9)->getConstraints().size(),2);
+    EXPECT_EQ((aggr8+aggr10)->getConstraints().size(),3);
+    EXPECT_EQ((aggr9+aggr10)->getConstraints().size(),2);
 }
 
 TEST_F(testAutoStack, testOperatorFraction)

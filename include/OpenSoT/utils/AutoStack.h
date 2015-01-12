@@ -68,41 +68,146 @@ namespace OpenSoT {
     };    
 }
 
-
+/**
+ * @brief operator + takes two tasks, generates a new Aggregated task
+ * @param task1 a task pointer
+ * @param task2 a task pointer
+ * @return a pointer to a new Aggregated task
+ */
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
                                             const OpenSoT::tasks::Aggregated::TaskPtr task2);
 
-
+/**
+ * @brief operator + takes an aggregated and a task, generates a new Aggregated task
+ * containing the new task and all the tasks from the old aggregated.
+ * It also copies the lambda, the weight matrix and the constraints of the old aggregated.
+ * In fact, the new aggregated is a copy of the old aggregated, with a new task,
+ * and an adapted weight matrix (its size is increased to take into account the new task)
+ * @param aggregated a pointer to an Aggregated task
+ * @param task a task pointer pointer
+ * @return a pointer to a new Aggregated task
+ */
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ptr aggregated,
                                             const OpenSoT::tasks::Aggregated::TaskPtr task);
 
+/**
+ * @brief operator + takes an aggregated and a task, generates a new Aggregated task
+ * containing the new task and all the tasks from the old aggregated.
+ * It also copies the lambda, the weight matrix and the constraints of the old aggregated.
+ * In fact, the new aggregated is a copy of the old aggregated, with a new task,
+ * and an adapted weight matrix (its size is increased to take into account the new task)
+ * @param task a task pointer pointer
+ * @param aggregated a pointer to an Aggregated task
+ * @return a pointer to a new Aggregated task
+ */
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task,
                                             const OpenSoT::tasks::Aggregated::Ptr aggregated);
 
+/**
+ * @brief operator + takes two Aggregated tasks, and creates a new Aggregated task.
+ * The way the new Aggregated is created, depends on the two Aggregated tasks that we want to merge.
+ * If aggregated1 and aggregated2 hav different lambdas, the new Aggregated will have aggregated1
+ * and aggregated2 as tasks.
+ * If, on the other side, the two Aggregateds have different Lambdas, a new Aggregated will be created
+ * containing ALL the tasks in aggregated1 plus ALL the tasks in aggregated2.
+ * In any case, the weight matrix of the new Aggregated will be a block-diagonal matrix where the diagonal
+ * blocks are the weight matrices of aggregated1 and aggregated2.
+ * The constraints of the Aggregated are the union of the constraints of aggregated1 and aggregated2.
+ * (NOTICE that the equality test for the constraints is on pointers, so you can have duplicated constraints
+ * if you made multiple instances of the same constraints)
+ * @param aggregated1 the first Aggregated task
+ * @param aggregated2 the second Aggregated task
+ * @return a new Aggregated task containing the tasks in aggregated1 and aggregated2,
+ * or containing aggregated1 and aggregated2 as tasks if they have different lambdas in the moment
+ * when the + operator is called.
+ */
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ptr aggregated1,
                                             const OpenSoT::tasks::Aggregated::Ptr aggregated2);
 
 
+/**
+ * @brief operator / creates a new AutoStack with task1 at the first level and task2 at the second
+ * @param task1 a pointer to the first task
+ * @param task2 a pointer to the second task
+ * @return a new Autostack
+ */
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
                                     const OpenSoT::tasks::Aggregated::TaskPtr task2);
 
+
+/**
+ * @brief operator / creates a new AutoStack that is a copy of an autostack with
+ * a new task piled at lowest priority.
+ * NOTICE that the bounds of the original AutoStack are carried over.
+ * @param stack a pointer to an Autostack
+ * @param task a pointer to a task
+ * @return a new Autostack
+ */
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack,
                                     const OpenSoT::tasks::Aggregated::TaskPtr task);
 
+/**
+ * @brief operator / creates a new AutoStack that is a copy of an autostack with
+ * a new task piled at highest priority.
+ * NOTICE that the bounds of the original AutoStack are carried over.
+ * @param task a pointer to a task
+ * @param stack a pointer to an Autostack
+ * @return a new Autostack
+ */
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task,
                                     OpenSoT::AutoStack::Ptr stack);
 
+/**
+ * @brief operator / creates a new AutoStack that stacks all tasks
+ * a of stack1, followed by all tasks of stack2. That is, the priority of the tasks
+ * in stack1 and in stack2 are preserved, and all tasks from stack1 will be of higher
+ * priority w.r.t. all tasks in stack2.
+ * NOTICE that the bounds of the new AutoStack will be the union of the bounds
+ * of stack1 and stack2.
+ * (Also NOTICE that the equality test for the bounds is on pointers, so you can have duplicated
+ * bounds if you made multiple instances of the same bounds/constraints)
+ * @param stack1 a pointer to the first stack
+ * @param stack2 a pointer to the second stack
+ * @return a new AutoStack
+ */
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
                                     const OpenSoT::AutoStack::Ptr stack2);
 
-
+/**
+ * @brief operator << adds a new constraint to the task specified
+ * @param task a pointer to the task
+ * @param constraint a pointer to the constraint
+ * @return a pointer to the same input task, with a constraint added
+ * (NOTICE the task is NOT a copy, it's the input task to which we
+ * added a new constraint)
+ */
 OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
                                                 const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
 
+/**
+ * @brief operator << adds a new constraint to the task specified
+ * @param task a pointer to the task
+ * @param constraint a pointer to the constraint
+ * @return a pointer to the same input task, with a constraint added
+ * (NOTICE the task is NOT a copy, it's the input task to which we
+ * added a new constraint)
+ */
 OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
                                             const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
 
+/**
+ * @brief operator << adds a new constraint/bound to the stack specified.
+ * A unicity test will be made, so that if the stack already has the input
+ * bound in the list of bounds, it will not get added.
+ * (NOTICE that the equality test for the bounds is on pointers, so you can have duplicated
+ * bounds if you made multiple instances of the same bounds/constraints)
+ * @param task a pointer to the task
+ * @param bound a pointer to the bound/constraint
+ * @return a pointer to the same input stack, with a constraint/bound added
+ * (NOTICE the stack is NOT a copy, it's the input stack to which we
+ * added a new constraint)
+ */
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
-                                    const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
+                                    const OpenSoT::constraints::Aggregated::ConstraintPtr bound);
 
 #endif
