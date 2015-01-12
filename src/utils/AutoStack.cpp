@@ -23,6 +23,7 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
     W.setSubmatrix(aggregated->getWeight(),0,0);
     outAggregated->setWeight(W);
     outAggregated->setLambda(aggregated->getLambda());
+    outAggregated->getConstraints() = aggregated->getConstraints();
 
     return outAggregated;
 }
@@ -42,6 +43,7 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ta
                                 W.cols()-W_aggregated.cols());
     outAggregated->setWeight(W);
     outAggregated->setLambda(aggregated->getLambda());
+    outAggregated->getConstraints() = aggregated->getConstraints();
 
     return outAggregated;
 }
@@ -76,6 +78,13 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
     yarp::sig::Matrix W2 = aggregated2->getWeight();
     W.setSubmatrix(W1,0,0);
     W.setSubmatrix(W1,W1.rows(), W1.cols());
+    outAggregated->getConstraints() = aggregated1->getConstraints();
+    for(auto constraint : aggregated2->getConstraints()) {
+        if(find(outAggregated->getConstraints().begin(),
+                outAggregated->getConstraints().end(), constraint)
+           == outAggregated->getConstraints().end())
+            outAggregated->getConstraints().push_back(constraint);
+    }
 
     return outAggregated;
 }
@@ -171,16 +180,16 @@ OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task
 }
 
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
-                                    const OpenSoT::constraints::Aggregated::ConstraintPtr constraint)
+                                    const OpenSoT::constraints::Aggregated::ConstraintPtr bound)
 {
     // check both pointers are valid
-    assert(autoStack && constraint);
+    assert(autoStack && bound);
 
     if((autoStack->getBoundsList().size() == 0) ||
        (std::find(autoStack->getBoundsList().begin(),
                  autoStack->getBoundsList().end(),
-                 constraint) == autoStack->getBoundsList().end()))
-        autoStack->getBoundsList().push_back(constraint);
+                 bound) == autoStack->getBoundsList().end()))
+        autoStack->getBoundsList().push_back(bound);
 
     return autoStack;
 }
