@@ -42,8 +42,12 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
     JCoM.removeCols(0,6);
     JCoM.removeRows(2,4);
 
-    getConvexHull(_ch);
-    this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
+    if(getConvexHull(_ch))
+        this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
+    else
+    {
+        _Aineq.resize(0,_Aineq.cols());
+        _bUpperBound.resize(0);}
 
     assert(JCoM.rows() == _Aineq.cols());
 
@@ -51,16 +55,20 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
     /**********************************************************************/
 }
 
-void ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
-{
+bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
+{   
     std::list<KDL::Vector> points;
-    idynutils::convex_hull::getSupportPolygonPoints(_robot, points);
-
-    std::vector<KDL::Vector> tmp_ch;
-    if(_convex_hull.getConvexHull(points, tmp_ch))
-        ch = tmp_ch;
+    if(_robot.getSupportPolygonPoints(points)){
+        std::vector<KDL::Vector> tmp_ch;
+        if(_convex_hull.getConvexHull(points, tmp_ch)){
+            ch = tmp_ch;
+            return true;}
+        else
+            std::cout<<"Problems computing Convex Hull, old Convex Hull will be used"<<std::endl;
+    }
     else
-        std::cout<<"Problems computing Convex Hull, old Convex Hull will be used"<<std::endl;
+        std::cout<<"Problems getting Points for Convex Hull computation!, old Convex Hull will be used"<<std::endl;
+    return false;
 }
 
 
