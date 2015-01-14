@@ -43,7 +43,8 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testMinimumEffortVelocityTask
                       testPosturalVelocityTask
                       testYCartesian
-                      testYPostural)
+                      testYPostural
+                      testMinimizeAccelerationTask)
 endif()
 
 # gTests for Velocity constraints
@@ -108,6 +109,10 @@ ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testMinimizeAccelerationTask tasks/velocity/TestMinimizeAcceleration.cpp)
+TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
+add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
 TARGET_LINK_LIBRARIES(testAutoStack ${TestLibs})
 add_dependencies(testAutoStack GTest-ext OpenSoT)
@@ -140,5 +145,6 @@ add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
+add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
