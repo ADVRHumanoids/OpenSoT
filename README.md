@@ -5,7 +5,7 @@ An Open Source Task Solving library with Constraints
 
 Introduction
 ------------
-OpenSoT is a library dedicated to the control of robots subject to constraints such as joint limits, joint velocities, cartesian constraints... The main idea under OpenSoT is to decouple Task and Constraints description from the Solver used to compute the robot commands and the Type of Control available on the robot to perform them.
+OpenSoT is a library dedicated to hierarchical whole-body control of robots subject to constraints such as joint limits, joint velocities, cartesian constraints... The main idea behind OpenSoT is to decouple Task and Constraints description from the Solver used to compute the robot commands and the Type of Control available on the robot to perform them.
 
 OpenSoT is developed under the European Project WALK-MAN: http://www.walk-man.eu/.
 
