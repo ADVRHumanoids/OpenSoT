@@ -162,14 +162,15 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
         sot.solve(dq);
         q += dq;
         ddq = dq - dq_old;
-        integrator1 = integrator1 + ddq;
 
         yarp::sig::Vector dq_old2(q.size(), 0.0);
         dq_old2 = dq2;
         sot2.solve(dq2);
         q2 += dq2;
         ddq2 = dq2 - dq_old2;
-        integrator2 = integrator2 + ddq2;
+        for(unsigned int i = 0; i < integrator1.size(); ++i){
+            integrator1[i] = integrator1[i] + ddq[i]*ddq[i];
+            integrator2[i] = integrator2[i] + ddq2[i]*ddq2[i];}
     }
 
     for(unsigned int i = 0; i < integrator1.size(); ++i){
@@ -177,7 +178,7 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
         std::cout<<"integrator2["<<i<<"]: "<<integrator2[i]<<std::endl;
         ASSERT_TRUE(integrator2[i]*integrator2[i] <= integrator1[i]*integrator1[i]);}
 
-
+    std::cout<<"**************T1*************"<<std::endl;
     idynutils.updateiDyn3Model(q);
     std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
     yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
@@ -191,6 +192,9 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
             EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-3);
     }
 
+    std::cout<<std::endl;
+
+    std::cout<<"**************T2*************"<<std::endl;
     idynutils2.updateiDyn3Model(q2);
     std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
     yarp::sig::Matrix T2 = idynutils2.iDyn3_model.getPosition(
