@@ -17,18 +17,20 @@
 
 using namespace OpenSoT::constraints::velocity;
 using namespace OpenSoT::tasks::velocity;
+using namespace yarp::math;
 
 class testMinimizeAcceleration: public ::testing::Test
 {
 protected:
+    std::ofstream _log;
 
     testMinimizeAcceleration()
     {
-
+         _log.open("testMinimizeAcceleration.m");
     }
 
     virtual ~testMinimizeAcceleration() {
-
+         _log.close();
     }
 
     virtual void SetUp() {
@@ -99,14 +101,16 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     /// Constraints set to the Cartesian Task
     boost::shared_ptr<JointLimits> joint_limits(
         new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(),
-                           idynutils.iDyn3_model.getJointBoundMin()));
+                           idynutils.iDyn3_model.getJointBoundMin(), 0.2));
 
     boost::shared_ptr<JointLimits> joint_limits2(
-        new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(),
-                           idynutils.iDyn3_model.getJointBoundMin()));
+        new JointLimits(q, idynutils2.iDyn3_model.getJointBoundMax(),
+                           idynutils2.iDyn3_model.getJointBoundMin(), 0.2));
 
     boost::shared_ptr<VelocityLimits> joint_velocity_limits(
-                new VelocityLimits(M_PI, (double)(1.0/t), q.size()));
+                new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
+    boost::shared_ptr<VelocityLimits> joint_velocity_limits2(
+                new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
 
     std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
@@ -114,6 +118,7 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
 
     std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> joint_constraints_list2;
     joint_constraints_list2.push_back(joint_limits2);
+    joint_constraints_list2.push_back(joint_velocity_limits2);
 
     boost::shared_ptr<OpenSoT::constraints::Aggregated> joint_constraints(
                 new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
@@ -127,8 +132,8 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     stack_of_tasks.push_back(postural_task);
 
     std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks2;
-    stack_of_tasks.push_back(cartesian_task2);
-    stack_of_tasks.push_back(minacc_task);
+    stack_of_tasks2.push_back(cartesian_task2);
+    stack_of_tasks2.push_back(minacc_task);
 
     OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
@@ -142,10 +147,19 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     yarp::sig::Vector ddq(q.size(), 0.0); ddq = dq;
     yarp::sig::Vector ddq2(q.size(), 0.0); ddq2 = dq2;
 
-    yarp::sig::Vector integrator1(q.size(), 0.0);
-    yarp::sig::Vector integrator2(q.size(), 0.0);
-    for(unsigned int i = 0; i < 10*t; ++i)
+    double integrator1 = 0.0;
+    double integrator2 = 0.0;
+
+    this->_log<<"clear all; clc"<<std::endl;
+    this->_log<<"display('ddq1[1:10] ddq2[11:20] b1[21:26] b1[27:32]')"<<std::endl;
+    this->_log<<"ddq = ["<<std::endl;
+    for(unsigned int i = 0; i < 5*t; ++i)
     {
+        yarp::sig::Vector dq_old(q.size(), 0.0);
+        dq_old = dq;
+        yarp::sig::Vector dq_old2(q.size(), 0.0);
+        dq_old2 = dq2;
+
         idynutils.updateiDyn3Model(q, true);
         idynutils2.updateiDyn3Model(q2, true);
 
@@ -155,28 +169,51 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
 
         cartesian_task2->update(q2);
         minacc_task->update(q2);
+        for(unsigned int i = 0; i < dq_old2.size(); ++i)
+            ASSERT_NEAR(minacc_task->getb()[i], dq_old2[i], 1E-14);
         joint_constraints2->update(q2);
 
-        yarp::sig::Vector dq_old(q.size(), 0.0);
-        dq_old = dq;
         sot.solve(dq);
         q += dq;
         ddq = dq - dq_old;
+        this->_log<<ddq.subVector(idynutils.torso.joint_numbers[0],
+                idynutils.torso.joint_numbers[idynutils.torso.joint_numbers.size()-1]).toString()
+                <<" "<<
+                ddq.subVector(idynutils.left_arm.joint_numbers[0],
+                idynutils.left_arm.joint_numbers[idynutils.left_arm.joint_numbers.size()-1]).toString()<<" ";
 
-        yarp::sig::Vector dq_old2(q.size(), 0.0);
-        dq_old2 = dq2;
+
         sot2.solve(dq2);
         q2 += dq2;
         ddq2 = dq2 - dq_old2;
-        for(unsigned int i = 0; i < integrator1.size(); ++i){
-            integrator1[i] = integrator1[i] + ddq[i]*ddq[i];
-            integrator2[i] = integrator2[i] + ddq2[i]*ddq2[i];}
-    }
+        this->_log<<ddq2.subVector(idynutils2.torso.joint_numbers[0],
+                idynutils2.torso.joint_numbers[idynutils2.torso.joint_numbers.size()-1]).toString()
+                <<" "<<
+                ddq2.subVector(idynutils2.left_arm.joint_numbers[0],
+                idynutils2.left_arm.joint_numbers[idynutils.left_arm.joint_numbers.size()-1]).toString()<<" ";
 
-    for(unsigned int i = 0; i < integrator1.size(); ++i){
-        std::cout<<"integrator1["<<i<<"]: "<<integrator1[i]<<std::endl;
-        std::cout<<"integrator2["<<i<<"]: "<<integrator2[i]<<std::endl;
-        ASSERT_TRUE(integrator2[i]*integrator2[i] <= integrator1[i]*integrator1[i]);}
+
+        this->_log<<cartesian_task->getb().toString()<<" "<<cartesian_task2->getb().toString()<<std::endl;
+
+        for(unsigned int j = 0; j < ddq.size(); ++j){
+            integrator1 += yarp::math::norm(ddq);
+            integrator2 += yarp::math::norm(ddq2);
+        }
+    }
+    this->_log<<"]"<<std::endl;
+
+    this->_log<<"for i=1:1:size(ddq,1);"<<
+                "nddq1(i) = norm(ddq(i,1:10));"<<
+                "nddq2(i) = norm(ddq(i,11:20));"<<
+                "nb1(i) = norm(ddq(i,21:26));"<<
+                "nb2(i) = norm(ddq(i,27:32));"<<
+                "end"<<std::endl;
+    this->_log<<"figure(); plot(nddq1, '-r'); hold on; plot(nddq2,'--b'); legend('norm(ddq1)', 'norm(ddq2)');";
+    this->_log<<"figure(); plot(nb1, '-r'); hold on; plot(nb2,'--b'); legend('norm(cartesian_error1)', 'norm(cartesian_error2)');";
+
+    std::cout<<"integrator 1 = "<<integrator1<<std::endl;
+    std::cout<<"integrator 2 = "<<integrator2<<std::endl;
+    ASSERT_TRUE(integrator2 <= integrator1);
 
     std::cout<<"**************T1*************"<<std::endl;
     idynutils.updateiDyn3Model(q);
@@ -187,8 +224,8 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
     std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
 
-    for(unsigned int i = 0; i < 3; ++i){
-        for(unsigned int j = 0; j < 3; ++j)
+    for(unsigned int i = 0; i <= 3; ++i){
+        for(unsigned int j = 0; j <= 3; ++j)
             EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-3);
     }
 
@@ -203,8 +240,8 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T2);
     std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
 
-    for(unsigned int i = 0; i < 3; ++i){
-        for(unsigned int j = 0; j < 3; ++j)
+    for(unsigned int i = 0; i <= 3; ++i){
+        for(unsigned int j = 0; j <= 3; ++j)
             EXPECT_NEAR(T2(i,j), T_ref(i,j), 1E-3);
     }
 
