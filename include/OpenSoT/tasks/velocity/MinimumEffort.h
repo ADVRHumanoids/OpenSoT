@@ -61,11 +61,15 @@
                 class ComputeGTauGradient : public cartesian_utils::CostFunction {
                     public:
                     iDynUtils _robot;
+                    const iDynUtils& _model;
                     yarp::sig::Matrix _W;
                     yarp::sig::Vector _zeros;
 
-                    ComputeGTauGradient(const yarp::sig::Vector& q, const iDynUtils robot_model) :
-                        _robot(robot_model),
+                    ComputeGTauGradient(const yarp::sig::Vector& q, const iDynUtils& robot_model) :
+                        _robot(robot_model.getRobotName(),
+                               robot_model.getRobotURDFPath(),
+                               robot_model.getRobotSRDFPath()),
+                        _model(robot_model),
                         _W(q.size(),q.size()),
                         _zeros(q.size(), 0.0)
                     {
@@ -75,11 +79,28 @@
                             _W(i,i) = 1.0 / (_robot.iDyn3_model.getJointTorqueMax()[i]
                                                             *
                                              _robot.iDyn3_model.getJointTorqueMax()[i]);
+
+                        _robot.updateiDyn3Model(_model.iDyn3_model.getAng(),
+                                                _model.iDyn3_model.getDAng(),
+                                                _model.iDyn3_model.getD2Ang(), true);
+                        _robot.switchAnchor(_model.getAnchor());
+                        _robot.setAnchor_T_World(_model.getAnchor_T_World());
                     }
 
                     double compute(const yarp::sig::Vector &q)
                     {
-                        _robot.updateiDyn3Model(q, _zeros, _zeros, true);
+                        if(_robot.getAnchor() != _model.getAnchor())
+                            _robot.switchAnchor(_model.getAnchor());
+
+                        _robot.updateiDyn3Model(q, true);
+
+                        if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
+                        {
+                            assert("if q and anchor are the same, anchor_t_world should be the same!");
+
+                            _robot.setAnchor_T_World(_model.getAnchor_T_World());
+                        }
+
                         yarp::sig::Vector tau = _robot.iDyn3_model.getTorques();
                         return yarp::math::dot(tau, _W * tau);
                     }
