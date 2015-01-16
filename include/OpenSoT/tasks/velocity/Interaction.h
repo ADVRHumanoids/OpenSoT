@@ -10,6 +10,12 @@
 
  #define WORLD_FRAME_NAME "world"
 
+/**
+ * @example example_interaction.cpp
+ * The Interaction class implements a task that tries to impose a wrench (force and torque)
+ * of a distal link w.r.t. a base link.
+ */
+
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
