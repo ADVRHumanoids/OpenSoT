@@ -90,6 +90,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/Postural.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
+                    src/tasks/velocity/Interaction.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
                     ${sot_INCLUDES})

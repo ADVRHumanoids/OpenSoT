@@ -34,6 +34,7 @@ protected:
 
 };
 
+
 TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
 {
     // setting initial position with bent legs
