@@ -67,6 +67,7 @@
 
             ChunkList _contiguousChunks;
             std::list<unsigned int> _rowsList;
+            std::vector<unsigned int> _rowsVector;
 
             /**
              * @brief getNextAdjacentChunk returns an iterator pointing to the last element of a chunk
@@ -90,7 +91,17 @@
 
             const ChunkList &getChunks() const;
 
+            /**
+             * @brief getRowsList returns the list of all rows as a list (first row has index 1)
+             * @return a list of row indices (starting from 1)
+             */
             const std::list<unsigned int> &getRowsList() const;
+
+            /**
+             * @brief getRowsVector returns the list of all rows as a vector (first row has index 1)
+             * @return  a vector of row indices (starting from 1)
+             */
+            const std::vector<unsigned int> &getRowsVector() const;
 
             bool isContiguous() const;
 

@@ -29,6 +29,11 @@ std::list<unsigned int>::iterator OpenSoT::SubTask::SubTaskMap::getNextAdjacentC
 void OpenSoT::SubTask::SubTaskMap::generateChunks()
 {
     _rowsList.sort(); _rowsList.unique();
+
+    this->_rowsVector.clear();
+    this->_rowsVector.insert(this->_rowsVector.end(),
+                             this->_rowsList.begin(),
+                             this->_rowsList.end());
     this->_contiguousChunks.clear();
 
     for(std::list<unsigned int>::iterator i = _rowsList.begin();
@@ -76,6 +81,11 @@ const OpenSoT::SubTask::SubTaskMap::ChunkList& OpenSoT::SubTask::SubTaskMap::get
 const std::list<unsigned int>& OpenSoT::SubTask::SubTaskMap::getRowsList() const
 {
     return _rowsList;
+}
+
+const std::vector<unsigned int> &OpenSoT::SubTask::SubTaskMap::getRowsVector() const
+{
+    return _rowsVector;
 }
 
 bool OpenSoT::SubTask::SubTaskMap::isContiguous() const
@@ -211,17 +221,13 @@ const yarp::sig::Vector &OpenSoT::SubTask::getb()
 }
 
 const yarp::sig::Matrix &OpenSoT::SubTask::getWeight() {
-    this->_W.resize(0, this->getXSize());
+    this->_W.resize(this->getTaskSize(), this->getTaskSize());
+    this->_W.zero();
 
-    for(SubTaskMap::ChunkList::const_iterator i = _subTaskMap.getChunks().begin();
-        i != _subTaskMap.getChunks().end();
-        ++i) {
-        using namespace yarp::math;
-        if(_taskPtr->getWeight().rows() >= i->back() - 1)
-            this->_W = pile(this->_W, _taskPtr->getWeight().submatrix(i->front() - 1,
-                                                                      i->back() - 1,
-                                                                      0, _x_size-1));
-    }
+    for(unsigned int r = 0; r < this->getTaskSize(); ++r)
+        for(unsigned int c = 0; c < this->getTaskSize(); ++c)
+            this->_W(r,c) = _taskPtr->getWeight()(this->_subTaskMap.getRowsVector()[r]-1,
+                                                  this->_subTaskMap.getRowsVector()[c]-1);
 
     return this->_W;
 }
@@ -229,24 +235,14 @@ const yarp::sig::Matrix &OpenSoT::SubTask::getWeight() {
 void OpenSoT::SubTask::setWeight(const yarp::sig::Matrix &W)
 {
     assert(W.rows() == this->getTaskSize());
-    assert(W.cols() == this->getXSize());
+    assert(W.cols() == W.rows());
 
     this->_W = W;
-
     yarp::sig::Matrix fullW = _taskPtr->getWeight();
-    unsigned int offset = 0;
-    for(SubTaskMap::ChunkList::const_iterator i = _subTaskMap.getChunks().begin();
-        i != _subTaskMap.getChunks().end();
-        ++i) {
-        using namespace yarp::math;
-        if(fullW.rows() >= i->back() - 1) {
-            fullW.setSubmatrix(W.submatrix(offset,
-                                           offset + i->size() - 1,
-                                           0, _x_size-1),
-                               i->front() - 1, 0);
-            offset += i->size();
-        }
-    }
+    for(unsigned int r = 0; r < this->getTaskSize(); ++r)
+        for(unsigned int c = 0; c < this->getTaskSize(); ++c)
+            fullW(this->_subTaskMap.getRowsVector()[r]-1,
+                  this->_subTaskMap.getRowsVector()[c]-1) = this->_W(r,c);
 
     _taskPtr->setWeight(fullW);
 }
@@ -261,7 +257,8 @@ const unsigned int OpenSoT::SubTask::getTaskSize() const
     unsigned int size = 0;
     for(SubTaskMap::ChunkList::const_iterator i = _subTaskMap.getChunks().begin();
         i != _subTaskMap.getChunks().end();
-        ++i) {
+        ++i)
+    {
         using namespace yarp::math;
         if(_taskPtr->getTaskSize() >= i->back()) {
             size += i->size();

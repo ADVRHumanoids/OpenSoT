@@ -109,6 +109,10 @@ TEST_F(TestSubTaskMap, testSubMapConstructor)
 
     ASSERT_TRUE(i != subTaskMap.getChunks().end());
     EXPECT_EQ(i->size(), 3);
+
+    ASSERT_EQ(subTaskMap.getRowsList().size(), 11);
+    ASSERT_EQ(subTaskMap.getRowsVector().size(), 11);
+    ASSERT_EQ(subTaskMap.size(), 11);
 }
 
 TEST_F(TestSubTaskMap, testSubMapToString)
@@ -285,18 +289,20 @@ TEST_F(TestSubTask, testgetWeight)
 
     SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
     ASSERT_EQ(subTask->getWeight().rows(), 3);
-    ASSERT_EQ(subTask->getWeight().cols(), _postural->getXSize());
+    ASSERT_EQ(subTask->getWeight().cols(), 3);
 
-    W = _postural->getWeight().submatrix(0,2,0,_postural->getXSize()-1);
+    W = _postural->getWeight().submatrix(0,2,0,2);
     EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getWeight(),W));
 
     subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(1,3) +
                                                  SubTask::SubTaskMap::range(6,7)));
     ASSERT_EQ(subTask->getWeight().rows(), 5);
-    ASSERT_EQ(subTask->getWeight().cols(), _postural->getXSize());
-    W.resize(5, _postural->getXSize());
-    W = _postural->getWeight().submatrix(0,2,0,_postural->getXSize()-1);
-    W = yarp::math::pile(W, _postural->getWeight().submatrix(5,6,0,_postural->getXSize()-1));
+    ASSERT_EQ(subTask->getWeight().cols(), 5);
+    W.resize(5, 5);
+    std::vector<unsigned int> indices = {0, 1, 2, 5, 6};
+    for(unsigned int r = 0; r < indices.size(); ++r)
+        for(unsigned int c = 0; c < indices.size(); ++c)
+            W(r,c) = _postural->getWeight()(indices[r], indices[c]);
     EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getWeight(),W));
 }
 
@@ -307,29 +313,29 @@ TEST_F(TestSubTask, testsetWeight)
     yarp::sig::Vector W_diag(3);
     yarp::sig::Matrix fullW = _postural->getWeight();
     for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
-    yarp::sig::Matrix W(3,10); W.diagonal(W_diag);
+    yarp::sig::Matrix W(3,3); W.diagonal(W_diag);
 
     SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
     subTask->setWeight(W);
 
     ASSERT_EQ(subTask->getWeight().rows(), 3);
-    ASSERT_EQ(subTask->getWeight().cols(), _postural->getXSize());
+    ASSERT_EQ(subTask->getWeight().cols(), 3);
 
     EXPECT_TRUE(tests_utils::matrixAreEqual(_postural->getWeight(),fullW))  <<
         "_postural->getWeight() is:\n" << _postural->getWeight().toString() <<
         "\nshould be:\n" << fullW.toString();
     EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getWeight(),W));
 
-    W.resize(5,10); W_diag.resize(5);
+    W.resize(5,5); W_diag.resize(5);
     for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
-    for(unsigned int i = 3; i < 5 ; ++i) { W_diag(i) = i+1; fullW(i+2,i) = i+1; fullW(i+2,i+2) = 0.0; }
+    for(unsigned int i = 3; i < 5 ; ++i) { W_diag(i) = i+1; fullW(i+2,i+2) = i+1; }
     W.diagonal(W_diag);
 
     subTask = SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(1,3) +
                                                   SubTask::SubTaskMap::range(6,7)));
     subTask->setWeight(W);
     ASSERT_EQ(subTask->getWeight().rows(), 5);
-    ASSERT_EQ(subTask->getWeight().cols(), _postural->getXSize());
+    ASSERT_EQ(subTask->getWeight().cols(), 5);
 
     EXPECT_TRUE(tests_utils::matrixAreEqual(_postural->getWeight(),fullW)) << "\n"    << _postural->getWeight().toString()
                                                                            << "\nto\n" << fullW.toString() << "\n";

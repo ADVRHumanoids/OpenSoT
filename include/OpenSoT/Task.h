@@ -152,7 +152,7 @@
          */
         virtual void setWeight(const Matrix_type& W) {
             assert(W.rows() == this->getTaskSize());
-            assert(W.cols() == this->getXSize());
+            assert(W.cols() == W.rows());
             _W = W;
         }
 
