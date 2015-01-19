@@ -19,15 +19,24 @@
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
-            class Interaction : protected Cartesian {
+            class Interaction : public Cartesian {
             public:
                 typedef boost::shared_ptr<Interaction> Ptr;
             private:
+                /**
+                 * @brief _deisredWrench desired Wrench in the base_link reference frame
+                 */
                 yarp::sig::Vector _desiredWrench;
+
+                /**
+                 * @brief _actualWrench measured Wrench in the base_link reference frame
+                 */
                 yarp::sig::Vector _actualWrench;
                 std::string _ft_frame;
                 int _ft_index;
                 yarp::sig::Matrix _C;
+
+                void updateActualWrench();
 
 
             public:
@@ -53,16 +62,41 @@
 
                 void _update(const yarp::sig::Vector& x);
 
+                /**
+                 * @brief setReferenceWrench set desired Wrench in the specified base_link reference frame
+                 * @param desiredWrench [6x1] forces and torques
+                 */
                 void setReferenceWrench(const yarp::sig::Vector& desiredWrench);
 
+                /**
+                 * @brief getReferenceWrench get specified reference wrench
+                 * @return [6x1] forces and torques
+                 */
                 const yarp::sig::Vector getReferenceWrench() const;
 
+                /**
+                 * @brief getActualWrench return measured wrench in the specified base_link reference frame
+                 * @return [6x1] forces and torques
+                 */
                 const yarp::sig::Vector getActualWrench() const;
 
+                /**
+                 * @brief getForceTorqueReferenceFrame return the reference frame of the ft sensor
+                 * @return ft frame
+                 */
                 const std::string getForceTorqueReferenceFrame() const;
 
+                /**
+                 * @brief getCompliance a Compliance matrix
+                 * @return [6x6] pd compliance Matrix
+                 */
                 const yarp::sig::Matrix getCompliance() const;
 
+                /**
+                 * @brief setCompliance set a pd Compliance Matrix. If the compliance matrix is not pd the old one
+                 * will be used.
+                 * @param C [6x6] pd compliance Matrix
+                 */
                 void setCompliance(const yarp::sig::Matrix& C);
 
                 };
