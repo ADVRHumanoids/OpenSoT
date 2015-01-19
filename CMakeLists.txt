@@ -42,7 +42,7 @@ FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${idynutils_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
                     ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS})
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
@@ -89,6 +89,8 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/CoM.cpp
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/Postural.cpp
+                    src/tasks/velocity/SelfCollisionAvoidance.cpp
+                    src/tasks/velocity/Self_collision_avoidance.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp

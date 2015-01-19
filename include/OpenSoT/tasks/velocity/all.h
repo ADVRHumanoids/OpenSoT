@@ -3,3 +3,4 @@
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
+#include <OpenSoT/tasks/velocity/SelfCollisionAvoidance.h>
