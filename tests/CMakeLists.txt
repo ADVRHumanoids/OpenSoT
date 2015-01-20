@@ -35,8 +35,10 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
                       testQPOasesSolver
+                      testQPOases_AutoStack
                       testQPOases_ConvexHull
                       testQPOases_FF
+                      testQPOases_SubTask
                       testAggregatedTask
                       testSubTask
                       testCartesianVelocityTask
@@ -83,13 +85,23 @@ ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 
-ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
-TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
-add_dependencies(testQPOases_FF GTest-ext OpenSoT)
+ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
+add_dependencies(testQPOases_AutoStack GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
 add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
+
+
+ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
+add_dependencies(testQPOases_FF GTest-ext OpenSoT)
+
+
+ADD_EXECUTABLE(testQPOases_SubTask solvers/TestQPOases_SubTask.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_SubTask ${TestLibs})
+add_dependencies(testQPOases_SubTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs} ${PCL_LIBRARIES})
@@ -148,8 +160,10 @@ add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelo
 add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
 add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
-add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
+add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
+add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
+add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
