@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Walkman
- * Authors:Alessio Rocchi, Enrico Mingo
- * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+ * Authors:Cheng Fang, Jinoh Lee, Arash Ajoudani
+ * email:  Cheng.Fang@iit.it, Jinoh.Lee@iit.it, Arash.Ajoudani@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.

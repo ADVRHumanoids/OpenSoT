@@ -268,25 +268,6 @@ MatrixXd Self_collision_avoidance::jointangle2position (const VectorXd &Q){
         std::cout << "Failed to get link index for right_wrist" << std::endl;
 
 
-//    yarp::sig::Vector q_29;
-//    q_29.resize(29);
-
-//    q_29[robot_col.iDyn3_model.getDOFIndex(waist_joint_names[0])] = Q(0);
-//    q_29[robot_col.iDyn3_model.getDOFIndex(waist_joint_names[1])] = Q(1);
-//    q_29[robot_col.iDyn3_model.getDOFIndex(waist_joint_names[2])] = Q(2);
-
-
-//    for(unsigned int i = 0; i < 7; ++i)
-//    {
-//        q_29[robot_col.iDyn3_model.getDOFIndex(right_arm_joint_names[i])] = Q(i+3);
-//        q_29[robot_col.iDyn3_model.getDOFIndex(left_arm_joint_names[i])] =  Q(i+10);
-//    }
-
-//    q_29[robot_col.iDyn3_model.getDOFIndex(right_arm_joint_names[1])] = Q(4) - M_PI/2.0;
-//    q_29[robot_col.iDyn3_model.getDOFIndex(left_arm_joint_names[1])] = Q(11) + M_PI/2.0;
-
-//    robot_col.iDyn3_model.setAng(q_29);
-
     yarp::sig::Vector Q_updated;
     Q_updated = from_Eigen_to_Yarp_vector( Q );
     robot_col.updateiDyn3Model(Q_updated, false);
@@ -319,18 +300,6 @@ MatrixXd Self_collision_avoidance::jointangle2position (const VectorXd &Q){
     right_upperarm_B = right_elbow_torso.block(0,3,3,1);
     right_lowerarm_A = right_elbow_torso.block(0,3,3,1);
     right_lowerarm_B = right_wrist_torso.block(0,3,3,1);
-
-
-    /*
-    //test
-    left_upperarm_A.print("left_upperarm_A=");
-    left_upperarm_B.print("left_upperarm_B=");
-    left_lowerarm_B.print("left_lowerarm_B=");
-    right_upperarm_A.print("right_upperarm_A=");
-    right_upperarm_B.print("right_upperarm_B=");
-    right_lowerarm_B.print("right_lowerarm_B=");
-    //test
-    */
 
 
     torso_left_A = left_shoulder_torso.block(0,3,3,1);
@@ -1357,6 +1326,9 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
     Dm_Gradient(0) = Dm;
     Dm_Gradient.block(1,0,gra_dim,1) = Gradient;
 
+    std::cout << "Dm_Gradient" << std::endl;
+    std::cout << min_i << std::endl;
+    std::cout << Dm_Gradient << std::endl;
 
     return Dm_Gradient;
 
