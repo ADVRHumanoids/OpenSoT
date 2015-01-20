@@ -88,7 +88,7 @@ void Interaction::_update(const yarp::sig::Vector &x)
     cartesian_utils::fromKDLFrameToYARPMatrix(actual_ref_KDL, actual_ref);
 
 //    std::cout<<"xd: "<<std::endl;
-    cartesian_utils::printHomogeneousTransform(actual_ref);
+//    cartesian_utils::printHomogeneousTransform(actual_ref);
 
     // We consider the delta_x as a feed_forward in velocity!
     setReference(actual_ref, delta_x);
