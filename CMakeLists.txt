@@ -22,6 +22,10 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type -Werror=address -Werror=parentheses " )
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(YARP REQUIRED)
@@ -85,6 +89,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/tasks/Aggregated.cpp
+                    src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/CoM.cpp
                     src/tasks/velocity/MinimumEffort.cpp

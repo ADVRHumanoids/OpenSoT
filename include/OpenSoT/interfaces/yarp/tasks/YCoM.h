@@ -119,6 +119,7 @@ private:
             return false;
         }
 
+        return true;
     }
 
     bool setLambda()

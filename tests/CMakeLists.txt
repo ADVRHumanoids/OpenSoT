@@ -38,6 +38,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_ConvexHull
                       testQPOases_FF
                       testAggregatedTask
+                      testSubTask
                       testCartesianVelocityTask
                       testCoMVelocityTask
                       testMinimumEffortVelocityTask
@@ -94,6 +95,10 @@ ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testAggregatedTask GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
+TARGET_LINK_LIBRARIES(testSubTask ${TestLibs} ${PCL_LIBRARIES})
+add_dependencies(testSubTask GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
 TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
@@ -146,6 +151,7 @@ add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
+add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)

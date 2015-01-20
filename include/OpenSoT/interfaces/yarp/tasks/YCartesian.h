@@ -128,6 +128,7 @@ private:
             return false;
         }
 
+        return true;
     }
 
     bool setOrientationGain()
