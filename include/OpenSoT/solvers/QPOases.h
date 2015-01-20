@@ -65,7 +65,7 @@ namespace OpenSoT{
          * @throw exception if the stack can not be initialized
          */
         QPOases_sot(Stack& stack_of_tasks,
-                    boost::shared_ptr<OpenSoT::constraints::Aggregated>& bounds,
+                    ConstraintPtr bounds,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
 
 
