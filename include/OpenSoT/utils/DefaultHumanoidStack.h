@@ -34,13 +34,39 @@
 
          // tasks
          const tasks::velocity::Cartesian::Ptr leftArm;
+         const SubTask::Ptr leftArm_Position;
+         const SubTask::Ptr leftArm_Orientation;
+
          const tasks::velocity::Cartesian::Ptr rightArm;
+         const SubTask::Ptr rightArm_Position;
+         const SubTask::Ptr rightArm_Orientation;
+
          const tasks::velocity::Cartesian::Ptr waist2LeftArm;
+         const SubTask::Ptr  waist2LeftArm_Position;
+         const SubTask::Ptr  waist2LeftArm_Orientation;
+
          const tasks::velocity::Cartesian::Ptr waist2RightArm;
+         const SubTask::Ptr   waist2RightArm_Position;
+         const SubTask::Ptr   waist2RightArm_Orientation;
+
          const tasks::velocity::Cartesian::Ptr leftLeg;
+         const SubTask::Ptr   leftLeg_Position;
+         const SubTask::Ptr   leftLeg_Orientation;
+
          const tasks::velocity::Cartesian::Ptr rightLeg;
+         const SubTask::Ptr   rightLeg_Position;
+         const SubTask::Ptr   rightLeg_Orientation;
+
          const tasks::velocity::Cartesian::Ptr waist;
+         const SubTask::Ptr waist_Position;
+         const SubTask::Ptr waist_Position_XY;
+         const SubTask::Ptr waist_Position_Z;
+         const SubTask::Ptr waist_Orientation;
+
          const tasks::velocity::CoM::Ptr com;
+         const SubTask::Ptr com_XY;
+         const SubTask::Ptr com_Z;
+
          const tasks::velocity::MinimumEffort::Ptr minimumEffort;
          const tasks::velocity::Postural::Ptr postural;
 
