@@ -260,7 +260,7 @@ const unsigned int OpenSoT::SubTask::getTaskSize() const
         ++i)
     {
         using namespace yarp::math;
-        if(_taskPtr->getTaskSize() >= i->back()) {
+        if(_taskPtr->getTaskSize() > i->back()) {
             size += i->size();
         }
     }
