@@ -362,7 +362,7 @@ TEST_F(TestSubTask, testGetConstraints)
     lowerBounds = subTask->getConstraints().front()->getLowerBound();
     b = subTask->getb();
 
-    _postural->update(yarp::sig::Vector(DOFS, 0.5));
+    subTask->update(yarp::sig::Vector(DOFS, 0.5));
 
     EXPECT_FALSE( b == subTask->getb());
     EXPECT_FALSE( lowerBounds == subTask->getConstraints().front()->getLowerBound());

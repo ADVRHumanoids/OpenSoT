@@ -131,16 +131,14 @@
 
         virtual ~Task(){}
 
-        virtual const Matrix_type& getA() {
-            if(!(std::all_of(_active_joints_mask.begin(), _active_joints_mask.end(), istrue())))
-                applyActiveJointsMask(_A);
+        const Matrix_type& getA() const {
             return _A;
         }
 
-        virtual const HessianType getHessianAtype() { return _hessianType; }
-        virtual const Vector_type& getb() const { return _b; }
+        const HessianType getHessianAtype() { return _hessianType; }
+        const Vector_type& getb() const { return _b; }
 
-        virtual const Matrix_type& getWeight() const { return _W; }
+        const Matrix_type& getWeight() const { return _W; }
 
         /**
          * @brief setWeight sets the task weight.
@@ -157,9 +155,9 @@
         }
 
 
-        virtual const double getLambda() const { return _lambda; }
+        const double getLambda() const { return _lambda; }
 
-        virtual void setLambda(double lambda)
+        void setLambda(double lambda)
         {
             assert(lambda <= 1.0 && lambda > 0.0);
             _lambda = lambda;
@@ -188,6 +186,9 @@
             for(typename std::list< ConstraintPtr >::iterator i = this->getConstraints().begin();
                 i != this->getConstraints().end(); ++i) (*i)->update(x);
             this->_update(x);
+
+            if(!(std::all_of(_active_joints_mask.begin(), _active_joints_mask.end(), istrue())))
+                applyActiveJointsMask(_A);
         }
 
         /**
@@ -204,7 +205,7 @@
         virtual std::vector<bool> getActiveJointsMask(){return _active_joints_mask;}
 
         /**
-         * @brief setActiveJointsMask set a mask on the jacobian
+         * @brief setActiveJointsMask set a mask on the Jacobian. The changes take effect immediately.
          * @param active_joints_mask
          * @return true if success
          */
@@ -213,6 +214,9 @@
             if(active_joints_mask.size() == _active_joints_mask.size())
             {
                 _active_joints_mask = active_joints_mask;
+
+                applyActiveJointsMask(_A);
+
                 return true;
             }
             return false;

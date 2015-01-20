@@ -37,10 +37,8 @@
      * in the form \f$T(A_s,b_s)\f$,
      * where \f$A_s\f$ is a reduced task error jacobian
      * and \f$b_s\f$ its corresponding task error.
-     * Updating a SubTask merely calls the update method for the corresponding father
-     * task which it reduces, so when multiple SubTasks are created from the same
-     * Task, it is sufficient to update the full Task, and all the corresponding
-     * SubTasks will get automatically updated.
+     * Updating a SubTask calls the update method for the corresponding father
+     * task which it reduces, and recreates the reduced A,b and Weight matrices.
      * In the same way, the constraints of the SubTask are those of the father Task,
      * as well as the weight matrix W (the \f$W_\text{subtask}\f$ is a submatrix of \f$W\f$)
      * On the other side, the \f$\lambda\f$ for the SubTask is unique to the SubTask.
@@ -137,13 +135,13 @@
 
         virtual ~SubTask(){}
 
-        virtual const yarp::sig::Matrix& getA();
+        void generateA();
 
-        virtual const HessianType getHessianAtype();
+        void generateHessianAtype();
 
-        virtual const yarp::sig::Vector& getb();
+        void generateb();
 
-        virtual const yarp::sig::Matrix& getWeight();
+        void generateWeight();
 
         /**
          * @brief setWeight sets the task weight.

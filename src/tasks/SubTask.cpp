@@ -171,14 +171,18 @@ int OpenSoT::SubTask::SubTaskMap::size() const
  ***************/
 
 OpenSoT::SubTask::SubTask(OpenSoT::SubTask::TaskPtr taskPtr, const std::list<unsigned int> rowIndices) :
-    Task(taskPtr->getTaskID() + std::string(SubTaskMap(rowIndices)),
+    Task(taskPtr->getTaskID() + "::" + std::string(SubTaskMap(rowIndices)),
          taskPtr->getXSize()),
     _subTaskMap(rowIndices),
     _taskPtr(taskPtr)
 {
+    this->generateA();
+    this->generateb();
+    this->generateHessianAtype();
+    this->generateWeight();
 }
 
-const yarp::sig::Matrix &OpenSoT::SubTask::getA()
+void OpenSoT::SubTask::generateA()
 {
     this->_A.resize(0, this->getXSize());
 
@@ -191,20 +195,18 @@ const yarp::sig::Matrix &OpenSoT::SubTask::getA()
                                                                  i->back(),
                                                                  0, _x_size-1));
     }
-
-    return this->_A;
 }
 
-const OpenSoT::HessianType OpenSoT::SubTask::getHessianAtype()
+void OpenSoT::SubTask::generateHessianAtype()
 {
     OpenSoT::HessianType fatherHessianType = _taskPtr->getHessianAtype();
 
     if ( fatherHessianType == HST_IDENTITY)
-        return HST_POSDEF;
-    else return fatherHessianType;
+        this->_hessianType = HST_POSDEF;
+    else this->_hessianType = fatherHessianType;
 }
 
-const yarp::sig::Vector &OpenSoT::SubTask::getb()
+void OpenSoT::SubTask::generateb()
 {
     this->_b.resize(0);
 
@@ -216,20 +218,17 @@ const yarp::sig::Vector &OpenSoT::SubTask::getb()
             this->_b = cat(this->_b, _taskPtr->getb().subVector(i->front(),
                                                                 i->back()));
     }
-
-    return this->_b;
 }
 
-const yarp::sig::Matrix &OpenSoT::SubTask::getWeight() {
-    this->_W.resize(this->getTaskSize(), this->getTaskSize());
-    this->_W.zero();
+void OpenSoT::SubTask::generateWeight()
+{
+        this->_W.resize(this->getTaskSize(), this->getTaskSize());
+        this->_W.zero();
 
-    for(unsigned int r = 0; r < this->getTaskSize(); ++r)
-        for(unsigned int c = 0; c < this->getTaskSize(); ++c)
-            this->_W(r,c) = _taskPtr->getWeight()(this->_subTaskMap.getRowsVector()[r],
-                                                  this->_subTaskMap.getRowsVector()[c]);
-
-    return this->_W;
+        for(unsigned int r = 0; r < this->getTaskSize(); ++r)
+            for(unsigned int c = 0; c < this->getTaskSize(); ++c)
+                this->_W(r,c) = _taskPtr->getWeight()(this->_subTaskMap.getRowsVector()[r],
+                                                      this->_subTaskMap.getRowsVector()[c]);
 }
 
 void OpenSoT::SubTask::setWeight(const yarp::sig::Matrix &W)
@@ -270,6 +269,10 @@ const unsigned int OpenSoT::SubTask::getTaskSize() const
 void OpenSoT::SubTask::_update(const yarp::sig::Vector &x)
 {
     _taskPtr->update(x);
+    this->generateA();
+    this->generateb();
+    this->generateHessianAtype();
+    this->generateWeight();
 }
 
 std::vector<bool> OpenSoT::SubTask::getActiveJointsMask()

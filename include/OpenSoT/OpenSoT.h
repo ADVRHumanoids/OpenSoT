@@ -25,6 +25,7 @@
  #include "Solver.h"
  #include "solvers/QPOases.h"
  #include "Task.h"
+ #include "SubTask.h"
  #include "tasks/Aggregated.h"
  #include "tasks/velocity/all.h"
 
