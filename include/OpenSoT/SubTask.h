@@ -92,14 +92,14 @@
             const ChunkList &getChunks() const;
 
             /**
-             * @brief getRowsList returns the list of all rows as a list (first row has index 1)
-             * @return a list of row indices (starting from 1)
+             * @brief getRowsList returns the list of all rows as a list (first row has index 0)
+             * @return a list of row indices (starting from 0)
              */
             const std::list<unsigned int> &getRowsList() const;
 
             /**
-             * @brief getRowsVector returns the list of all rows as a vector (first row has index 1)
-             * @return  a vector of row indices (starting from 1)
+             * @brief getRowsVector returns the list of all rows as a vector (first row has index 0)
+             * @return  a vector of row indices (starting from 0)
              */
             const std::vector<unsigned int> &getRowsVector() const;
 
@@ -129,9 +129,9 @@
     public:
         /**
          * @brief SubTask create a SubTask object by specifying the father Task through a pointer,
-         * and a list of row indices. Notice the row indices start from 1 (Matlab style, rather than c style)
+         * and a list of row indices. Notice the row indices start from 0 (c style)
          * @param taskPtr a pointer to the father task
-         * @param rowIndices a list of indices. The index to the first row is 1, not 0.
+         * @param rowIndices a list of indices. The index to the first row is 0.
          */
         SubTask(TaskPtr taskPtr, const std::list<unsigned int> rowIndices);
 

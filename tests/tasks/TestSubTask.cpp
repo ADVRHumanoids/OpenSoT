@@ -233,15 +233,15 @@ TEST_F(TestSubTask, testgetA)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
     ASSERT_EQ(subTask->getA().rows(), 3);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     yarp::sig::Matrix A(3, _postural->getXSize());
     A = _postural->getA().submatrix(0,2,0,_postural->getXSize()-1);
     EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getA(),A));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(1,3) +
-                                                 SubTask::SubTaskMap::range(6,7)));
+    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
+                                                 SubTask::SubTaskMap::range(5,6)));
     ASSERT_EQ(subTask->getA().rows(), 5);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     A.resize(5, _postural->getXSize());
@@ -262,14 +262,14 @@ TEST_F(TestSubTask, testgetb)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
     ASSERT_EQ(subTask->getb().size(), 3);
     yarp::sig::Vector b(3);
     b = _postural->getb().subVector(0,2);
     EXPECT_TRUE(tests_utils::vectorAreEqual(subTask->getb(),b));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(1,3) +
-                                                 SubTask::SubTaskMap::range(6,7)));
+    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
+                                                 SubTask::SubTaskMap::range(5,6)));
     ASSERT_EQ(subTask->getb().size(), 5);
     b.resize(5);
     b = _postural->getb().subVector(0,2);
@@ -287,15 +287,15 @@ TEST_F(TestSubTask, testgetWeight)
     _postural->setWeight(W);
 
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
 
     W = _postural->getWeight().submatrix(0,2,0,2);
     EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getWeight(),W));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(1,3) +
-                                                 SubTask::SubTaskMap::range(6,7)));
+    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
+                                                 SubTask::SubTaskMap::range(5,6)));
     ASSERT_EQ(subTask->getWeight().rows(), 5);
     ASSERT_EQ(subTask->getWeight().cols(), 5);
     W.resize(5, 5);
@@ -315,7 +315,7 @@ TEST_F(TestSubTask, testsetWeight)
     for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
     yarp::sig::Matrix W(3,3); W.diagonal(W_diag);
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
     subTask->setWeight(W);
 
     ASSERT_EQ(subTask->getWeight().rows(), 3);
@@ -331,8 +331,8 @@ TEST_F(TestSubTask, testsetWeight)
     for(unsigned int i = 3; i < 5 ; ++i) { W_diag(i) = i+1; fullW(i+2,i+2) = i+1; }
     W.diagonal(W_diag);
 
-    subTask = SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(1,3) +
-                                                  SubTask::SubTaskMap::range(6,7)));
+    subTask = SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
+                                                  SubTask::SubTaskMap::range(5,6)));
     subTask->setWeight(W);
     ASSERT_EQ(subTask->getWeight().rows(), 5);
     ASSERT_EQ(subTask->getWeight().cols(), 5);

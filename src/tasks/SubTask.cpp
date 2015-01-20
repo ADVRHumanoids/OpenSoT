@@ -186,9 +186,9 @@ const yarp::sig::Matrix &OpenSoT::SubTask::getA()
         i != _subTaskMap.getChunks().end();
         ++i) {
         using namespace yarp::math;
-        if(_taskPtr->getA().rows() >= i->back() - 1)
-            this->_A = pile(this->_A, _taskPtr->getA().submatrix(i->front() - 1,
-                                                                 i->back() - 1,
+        if(_taskPtr->getA().rows() > i->back())
+            this->_A = pile(this->_A, _taskPtr->getA().submatrix(i->front(),
+                                                                 i->back(),
                                                                  0, _x_size-1));
     }
 
@@ -212,9 +212,9 @@ const yarp::sig::Vector &OpenSoT::SubTask::getb()
         i != _subTaskMap.getChunks().end();
         ++i) {
         using namespace yarp::math;
-        if(_taskPtr->getb().size() >= i->back() - 1)
-            this->_b = cat(this->_b, _taskPtr->getb().subVector(i->front() - 1,
-                                                                i->back() - 1));
+        if(_taskPtr->getb().size() > i->back())
+            this->_b = cat(this->_b, _taskPtr->getb().subVector(i->front(),
+                                                                i->back()));
     }
 
     return this->_b;
@@ -226,8 +226,8 @@ const yarp::sig::Matrix &OpenSoT::SubTask::getWeight() {
 
     for(unsigned int r = 0; r < this->getTaskSize(); ++r)
         for(unsigned int c = 0; c < this->getTaskSize(); ++c)
-            this->_W(r,c) = _taskPtr->getWeight()(this->_subTaskMap.getRowsVector()[r]-1,
-                                                  this->_subTaskMap.getRowsVector()[c]-1);
+            this->_W(r,c) = _taskPtr->getWeight()(this->_subTaskMap.getRowsVector()[r],
+                                                  this->_subTaskMap.getRowsVector()[c]);
 
     return this->_W;
 }
@@ -241,8 +241,8 @@ void OpenSoT::SubTask::setWeight(const yarp::sig::Matrix &W)
     yarp::sig::Matrix fullW = _taskPtr->getWeight();
     for(unsigned int r = 0; r < this->getTaskSize(); ++r)
         for(unsigned int c = 0; c < this->getTaskSize(); ++c)
-            fullW(this->_subTaskMap.getRowsVector()[r]-1,
-                  this->_subTaskMap.getRowsVector()[c]-1) = this->_W(r,c);
+            fullW(this->_subTaskMap.getRowsVector()[r],
+                  this->_subTaskMap.getRowsVector()[c]) = this->_W(r,c);
 
     _taskPtr->setWeight(fullW);
 }
