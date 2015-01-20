@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi, Enrico Mingo
- * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+ * Author: Cheng Fang, Jinoh Lee, Arash Ajoudani
+ * email:  Cheng.Fang@iit.it, Jinoh.Lee@iit.it, Arash.Ajoudani@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -83,6 +83,11 @@ void SelfCollisionAvoidance::update_b(const yarp::sig::Vector& x) {
      _b_E_temp = Gradient.shortest_distance_gradient(Q);
      _b_E = _b_E_temp.block(1,0,x_dim,1);
      _b = _Alpha * Gradient.from_Eigen_to_Yarp_vector(_b_E);
+
+//         VectorXd _b_fc;
+//         _b_fc = Gradient.from_yarp_to_Eigen_vector(_b);
+//         std::cout << "Dm_Gradient" << std::endl;
+//         std::cout << _b_fc << std::endl;
 
 
 }
