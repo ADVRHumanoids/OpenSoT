@@ -7,6 +7,8 @@
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
+#define COMPLIANCE_INITIAL_VALUE 1E-6 //[m/N] & [rad/Nm]
+
 Interaction::Interaction(std::string task_id,
                      const yarp::sig::Vector& x,
                      iDynUtils &robot,
@@ -24,7 +26,8 @@ Interaction::Interaction(std::string task_id,
     if(_ft_index == -1)
         throw "Passed ft_frame is not in model!";
 
-    _C = 1E-6*_C.eye();
+    _C = _C.eye();
+    _C = COMPLIANCE_INITIAL_VALUE*_C;
 
     updateActualWrench();
 
@@ -66,8 +69,13 @@ void Interaction::_update(const yarp::sig::Vector &x)
 {
     updateActualWrench();
 
+//    std::cout<<"desired_wrench: ["<<_desiredWrench.toString()<<"]"<<std::endl;
+//    std::cout<<"actual_wrench: ["<<_actualWrench.toString()<<"]"<<std::endl;
+//    std::cout<<"C: "<<"["<<_C.toString()<<"]"<<std::endl;
+
     yarp::sig::Vector delta_x = _C * (_desiredWrench - _actualWrench);
-    std::cout<<"delta_x: ["<<delta_x.toString()<<"]"<<std::endl;
+
+//    std::cout<<"delta_x: ["<<delta_x.toString()<<"]"<<std::endl;
 
     KDL::Twist delta_x_KDL;
     cartesian_utils::fromYARPVectortoKDLTwist(delta_x, delta_x_KDL);
@@ -78,6 +86,9 @@ void Interaction::_update(const yarp::sig::Vector &x)
     actual_ref_KDL.Integrate(delta_x_KDL, 1.0);
     yarp::sig::Matrix actual_ref(4,4);
     cartesian_utils::fromKDLFrameToYARPMatrix(actual_ref_KDL, actual_ref);
+
+//    std::cout<<"xd: "<<std::endl;
+    cartesian_utils::printHomogeneousTransform(actual_ref);
 
     // We consider the delta_x as a feed_forward in velocity!
     setReference(actual_ref, delta_x);
@@ -106,6 +117,6 @@ const yarp::sig::Matrix Interaction::getCompliance() const
 void Interaction::setCompliance(const yarp::sig::Matrix& C)
 {
     // Check size  [6x6] and if Positive Definite
-    //if(C.rows() == 6 && C.cols() == 6 && det(C) > 1E-12)
+    if(C.rows() == 6 && C.cols() == 6 && det(C) >= 0.0)
         _C = C;
 }

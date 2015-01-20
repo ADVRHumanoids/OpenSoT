@@ -10,15 +10,20 @@
 
  #define WORLD_FRAME_NAME "world"
 
-/**
- * @example example_cartesian.cpp
- * The Cartesian class implements a task that tries to impose a pose (position and orientation)
- * of a distal link w.r.t. a base link.
- */
-
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
+            /**
+             * @brief The Interaction class implement an Admittance based force control using the admittance law:
+             *
+             *      dx = C * (wd - w)
+             *      xd = x + dx
+             *
+             * where wd is the desired wrench in some base_link frame, w is the measured wrench transformed from the
+             * Force/Torque sensor frame to the base_link frame. The displacement dx is integrated using the previous
+             * position x and a new desired position xd is computed. The reference xd and dx are then used inside a
+             * Cartesian task.
+             */
             class Interaction : public Cartesian {
             public:
                 typedef boost::shared_ptr<Interaction> Ptr;
@@ -63,19 +68,19 @@
                 void _update(const yarp::sig::Vector& x);
 
                 /**
-                 * @brief setReferenceWrench set desired Wrench in the specified base_link reference frame
+                 * @brief setReferenceWrench set desired Wrench in base_link reference frame
                  * @param desiredWrench [6x1] forces and torques
                  */
                 void setReferenceWrench(const yarp::sig::Vector& desiredWrench);
 
                 /**
-                 * @brief getReferenceWrench get specified reference wrench
+                 * @brief getReferenceWrench get specified reference wrench in base_link reference frame
                  * @return [6x1] forces and torques
                  */
                 const yarp::sig::Vector getReferenceWrench() const;
 
                 /**
-                 * @brief getActualWrench return measured wrench in the specified base_link reference frame
+                 * @brief getActualWrench return measured wrench in base_link reference frame
                  * @return [6x1] forces and torques
                  */
                 const yarp::sig::Vector getActualWrench() const;
@@ -87,13 +92,13 @@
                 const std::string getForceTorqueReferenceFrame() const;
 
                 /**
-                 * @brief getCompliance a Compliance matrix
+                 * @brief getCompliance get Compliance matrix in base_link frame.
                  * @return [6x6] pd compliance Matrix
                  */
                 const yarp::sig::Matrix getCompliance() const;
 
                 /**
-                 * @brief setCompliance set a pd Compliance Matrix. If the compliance matrix is not pd the old one
+                 * @brief setCompliance set a pd Compliance Matrix in base_link frame. If the compliance matrix is not pd the old one
                  * will be used.
                  * @param C [6x6] pd compliance Matrix
                  */
