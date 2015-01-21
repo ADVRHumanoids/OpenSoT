@@ -69,13 +69,10 @@ void Interaction::_update(const yarp::sig::Vector &x)
 {
     updateActualWrench();
 
-//    std::cout<<"desired_wrench: ["<<_desiredWrench.toString()<<"]"<<std::endl;
-//    std::cout<<"actual_wrench: ["<<_actualWrench.toString()<<"]"<<std::endl;
-//    std::cout<<"C: "<<"["<<_C.toString()<<"]"<<std::endl;
-
-    yarp::sig::Vector delta_x = _C * (_desiredWrench - _actualWrench);
-
-//    std::cout<<"delta_x: ["<<delta_x.toString()<<"]"<<std::endl;
+    yarp::sig::Vector wrench_error = _desiredWrench - _actualWrench;
+    forceError = wrench_error.subVector(0, 2);
+    torqueError = wrench_error.subVector(3, 5);
+    yarp::sig::Vector delta_x = _C * wrench_error;
 
     KDL::Twist delta_x_KDL;
     cartesian_utils::fromYARPVectortoKDLTwist(delta_x, delta_x_KDL);
@@ -117,6 +114,6 @@ const yarp::sig::Matrix Interaction::getCompliance() const
 void Interaction::setCompliance(const yarp::sig::Matrix& C)
 {
     // Check size  [6x6] and if Positive Definite
-    if(C.rows() == 6 && C.cols() == 6 && det(C) >= 0.0)
+    //if(C.rows() == 6 && C.cols() == 6 && det(C) >= 0.0)
         _C = C;
 }

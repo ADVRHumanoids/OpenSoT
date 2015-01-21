@@ -29,6 +29,8 @@
              * Force/Torque sensor frame to the base_link frame. The displacement dx is integrated using the previous
              * position x and a new desired position xd is computed. The reference xd and dx are then used inside a
              * Cartesian task.
+             * IMPORTANT: the wd is the desired wrench that the robot has to produce to the ambient, so the measured
+             * wrench w is the wrench produced by the robot to the ambient!
              */
             class Interaction : public Cartesian {
             public:
