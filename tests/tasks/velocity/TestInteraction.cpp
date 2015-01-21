@@ -82,11 +82,11 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
     yarp::sig::Vector q = getGoodInitialPosition(_robot);
     _robot.updateiDyn3Model(q, true);
 
-    _robot.setFloatingBaseLink(_robot.left_leg.end_effector_name);
-
     std::string distal_link = "l_wrist";
     std::string ft_sensor_link = "l_arm_ft";
     std::string base_link = "torso";
+
+    _robot.switchAnchor(base_link);
 
     // We consider the robot in contact with the wall, with 0 contact force:
     yarp::sig::Matrix xWall = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(base_link),
@@ -113,23 +113,21 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 
     ASSERT_EQ(yarp::math::norm(sensor_WallWrench),0.0);
 
-    Interaction::Ptr interactionTask(new Interaction("interaction::l_wrist", q, _robot, distal_link,
-                                                     base_link, ft_sensor_link));
+    Interaction::Ptr interactionTask(new Interaction("interaction::l_wrist", q, _robot,
+                                                     distal_link,
+                                                     base_link,
+                                                     ft_sensor_link));
 
     interactionTask->setCompliance(C);
 
     EXPECT_TRUE(C == interactionTask->getCompliance());
 
-    std::vector<bool> active_joint_mask = interactionTask->getActiveJointsMask();
-    for(unsigned int i = 0; i < _robot.left_leg.getNrOfDOFs(); ++i)
-        active_joint_mask[_robot.left_leg.joint_numbers[i]] = false;
-    interactionTask->setActiveJointsMask(active_joint_mask);
-
     int T = 1000;
-    VelocityLimits::Ptr joint_velocity_limits(new VelocityLimits(0.1, (double)(1.0/T), q.size()));
+    VelocityLimits::Ptr joint_velocity_limits(new VelocityLimits(0.3, (double)(1.0/T), q.size()));
 
-    JointLimits::Ptr joint_limits(new JointLimits(q, _robot.iDyn3_model.getJointBoundMax(),
-                           _robot.iDyn3_model.getJointBoundMin()));
+    JointLimits::Ptr joint_limits(new JointLimits(q,
+                                                _robot.iDyn3_model.getJointBoundMax(),
+                                                _robot.iDyn3_model.getJointBoundMin()));
 
     //Create the SoT
     std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks;
@@ -160,10 +158,13 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
     interactionTask->setReferenceWrench(base_WallWrenchDesired);
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    unsigned int max_iterations = 5000;
+    unsigned int max_iterations = 50000;
     for(unsigned int i = 0; i < max_iterations; ++i)
     {
-        _robot.updateiDyn3Model(q, false);
+        _robot.updateiDyn3Model(q, true);
+        SensorTDistal_KDL = _robot.iDyn3_model.getPositionKDL(_robot.iDyn3_model.getLinkIndex(ft_sensor_link),
+                                                              _robot.iDyn3_model.getLinkIndex(distal_link));
+
         yarp::sig::Matrix xEE = interactionTask->getActualPose();
         std::cout<<"\n\n---@t"<<double(i)/T<<"------------\n";
         std::cout<<distal_link<<" actual position in world: "<<std::endl;
@@ -187,8 +188,6 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 
          sot.solve(dq);
          q += dq;
-
-         std::cout<<std::endl;
     }
 
     EXPECT_LT(norm(interactionTask->forceError),1e-3);
