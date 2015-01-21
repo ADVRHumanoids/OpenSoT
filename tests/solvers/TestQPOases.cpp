@@ -27,7 +27,10 @@ class old_gravity_gradient
 public:
     iDynUtils idynutils;
 
-    old_gravity_gradient(){}
+    old_gravity_gradient() :
+        idynutils("coman",
+                  std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                  std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"){}
 
     yarp::sig::Vector computeMinEffort(const yarp::sig::Vector& q)
     {
@@ -553,7 +556,9 @@ TEST_F(testQPOasesTask, testQPOasesTask)
 using namespace OpenSoT::constraints::velocity;
 TEST_F(testQPOasesTask, testProblemWithConstraint)
 {
-        iDynUtils idynutils;
+        iDynUtils idynutils("coman",
+                  std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                  std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
         yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
         yarp::sig::Vector q_ref(q.size(), M_PI);
         idynutils.updateiDyn3Model(q, true);
@@ -620,7 +625,9 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
 
 TEST_F(testQPOases_sot, testContructor1Problem)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     yarp::sig::Vector q_ref(q.size(), M_PI);
     idynutils.updateiDyn3Model(q, true);
@@ -673,7 +680,9 @@ TEST_F(testQPOases_sot, testContructor1Problem)
 
 TEST_F(testQPOasesTask, testCoMTask)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     idynutils.iDyn3_model.setFloatingBaseLink(idynutils.left_leg.index);
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
@@ -727,7 +736,9 @@ TEST_F(testQPOasesTask, testCoMTask)
 
 TEST_F(testQPOasesTask, testCartesian)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
 
@@ -775,7 +786,9 @@ TEST_F(testQPOasesTask, testCartesian)
 
 TEST_F(testQPOases_sot, testContructor2Problems)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     yarp::sig::Vector torso(idynutils.torso.getNrOfDOFs(), 0.0);
     torso[0] = tests_utils::getRandomAngle(-20.0*M_PI/180.0, 20.0*M_PI/180.0);
@@ -877,7 +890,9 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
 TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
 
@@ -971,8 +986,12 @@ TEST_F(testQPOases_sot, testUpTo4Problems)
         //srand(time(NULL));
         int number_of_tasks = jj;//rand() % 4;  //number between 1 and 3
 
-        iDynUtils idynutils;
-        iDynUtils idynutils_com;
+        iDynUtils idynutils("coman",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+        iDynUtils idynutils_com("coman",
+                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
         idynutils_com.iDyn3_model.setFloatingBaseLink(idynutils_com.left_leg.index);
         yarp::sig::Vector q = getGoodInitialPosition(idynutils);
         idynutils.updateiDyn3Model(q, true);
@@ -1233,7 +1252,9 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 
 TEST_F(testQPOases_sot, testMinEffort)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
     leg[5] = 45.0 * M_PI/180.0;
@@ -1286,8 +1307,12 @@ TEST_F(testQPOases_sot, testMinEffort)
 
 TEST_F(testQPOases_sot, testAggregated2Tasks)
 {
-    iDynUtils idynutils;
-    iDynUtils idynutils_com;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    iDynUtils idynutils_com("coman",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
     idynutils_com.updateiDyn3Model(q, true);

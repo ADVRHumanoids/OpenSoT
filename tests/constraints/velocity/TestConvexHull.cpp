@@ -214,7 +214,10 @@ class testConvexHull : public ::testing::Test{
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testConvexHull()
+  testConvexHull() :
+      coman("coman",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
   {
     // You can do set-up work for each test here.
 

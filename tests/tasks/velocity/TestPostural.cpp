@@ -66,7 +66,9 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
 TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     using namespace OpenSoT::tasks::velocity;
     using namespace OpenSoT::constraints::velocity;
 

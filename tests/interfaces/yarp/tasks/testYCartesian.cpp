@@ -11,7 +11,10 @@ namespace {
 class testYTask : public ::testing::Test{
  protected:
 
-  testYTask():
+  testYTask() :
+      robot("coman",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
       q(robot.iDyn3_model.getNrOfDOFs(), 0.0)
   {
       robot.updateiDyn3Model(q, true);

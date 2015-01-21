@@ -16,7 +16,9 @@ protected:
     iDynUtils _robot;
     int nJ;
 
-    testMinimumEffortTask()
+    testMinimumEffortTask() : _robot("coman",
+                                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
     {
         nJ = _robot.iDyn3_model.getNrOfDOFs();
     }

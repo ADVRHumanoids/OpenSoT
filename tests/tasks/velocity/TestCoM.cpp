@@ -18,6 +18,15 @@ protected:
     iDynUtils _normal_robot;
 
     testCoMTask()
+        : _robot("coman",
+                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
+          _fixed_robot("coman",
+                       std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                       std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
+          _normal_robot("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
     {
 
     }

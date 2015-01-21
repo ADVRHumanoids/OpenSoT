@@ -4,7 +4,9 @@
 
 int main(int argc, char **argv) {
 
-    iDynUtils _robot;
+    iDynUtils _robot("coman",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     OpenSoT::DefaultHumanoidStack DHS(_robot, 3e-3, _robot.zeros);
 
     // defining a stack composed of size two,

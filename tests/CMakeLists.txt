@@ -57,6 +57,8 @@ SET(TestLibs OpenSoT ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ICUB_LIBRARIES}
                ${GTEST_BOTH_LIBRARIES})
 
+add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
+
 ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
 add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
@@ -174,3 +176,6 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
+
+add_custom_target(copy_robot_model_files ALL
+                  ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")
