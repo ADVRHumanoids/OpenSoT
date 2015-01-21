@@ -33,6 +33,8 @@
          */
         class BilateralConstraint: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
         public:
+            typedef boost::shared_ptr<BilateralConstraint> Ptr;
+
             /**
              * @brief BilateralConstraint a bilateral constraint
              * @param Aineq constraint matrix. Number of columns must be > 0

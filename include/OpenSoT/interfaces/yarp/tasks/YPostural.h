@@ -183,6 +183,8 @@ private:
 class YPostural : public ::yarp::os::BufferedPort<msgs::yarp_position_joint_msg_portable>
 {
 public:
+    typedef boost::shared_ptr<YPostural> Ptr;
+
     YPostural(const std::string& robot_name,
                const std::string& module_prefix,
                iDynUtils& idynutils,

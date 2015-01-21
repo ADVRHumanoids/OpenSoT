@@ -93,7 +93,7 @@
         /**
          * @brief _bounds related to the Task
          */
-        std::list< boost::shared_ptr<ConstraintType> > _constraints;
+        std::list< ConstraintPtr > _constraints;
 
         /**
          * @brief _active_joint_mask is vector of bool that represent the active joints of the task.

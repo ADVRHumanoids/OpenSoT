@@ -93,7 +93,7 @@ void Aggregated::checkSizes() {
 void Aggregated::generateAll() {
     _A.resize(0,_x_size);
     _b.resize(0);
-    for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
+    for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
@@ -177,9 +177,9 @@ OpenSoT::HessianType OpenSoT::tasks::Aggregated::computeHessianType()
 
     // we make a guess: all tasks are HST_POSDEF
     bool allZero = true;
-    for(std::list< boost::shared_ptr<TaskType> >::iterator i = _tasks.begin();
+    for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
-        boost::shared_ptr<TaskType> t = *i;
+        TaskPtr t = *i;
         // if at least a task has HST_UNKNOWN, propagate that
         if(t->getHessianAtype() == HST_UNKNOWN) return HST_UNKNOWN;
         if(t->getHessianAtype() != HST_ZERO) allZero = false;

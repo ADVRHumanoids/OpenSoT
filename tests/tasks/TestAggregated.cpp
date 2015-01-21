@@ -19,7 +19,7 @@ class testAggregatedTask: public ::testing::Test
 {
 protected:
 
-    std::list< boost::shared_ptr<Aggregated::TaskType> > _tasks;
+    std::list< OpenSoT::tasks::Aggregated::TaskPtr > _tasks;
     yarp::sig::Vector q;
 
     testAggregatedTask()
@@ -29,18 +29,11 @@ protected:
         for(unsigned int i = 0; i < q.size(); ++i)
             q[i] = tests_utils::getRandomAngle();
 
-        _tasks.push_back(boost::shared_ptr<Aggregated::TaskType>(new velocity::Postural(q)));
-        _tasks.push_back(boost::shared_ptr<Aggregated::TaskType>(new velocity::Postural(2*q)));
+        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(q)));
+        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(2*q)));
     }
 
     virtual ~testAggregatedTask() {
-        /*
-        for(std::list< boost::shared_ptr<Aggregated::TaskType> >::iterator i = _tasks.begin();
-            i!=_tasks.end();
-            ++i) {
-            boost::shared_ptr<Aggregated::TaskType> t = *i;
-            delete t;
-        } */
         _tasks.clear();
     }
 
@@ -56,9 +49,9 @@ protected:
 
 TEST_F(testAggregatedTask, testConcatenateTaskIds)
 {
-    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_in_aggregated(
+    OpenSoT::tasks::velocity::Postural::Ptr postural_in_aggregated(
             new OpenSoT::tasks::velocity::Postural(q));
-    std::list<OpenSoT::Task<yarp::sig::Matrix,yarp::sig::Vector>::TaskPtr> task_list;
+    std::list<Aggregated::TaskPtr> task_list;
     task_list.push_back(postural_in_aggregated);
     task_list.push_back(postural_in_aggregated);
 
@@ -95,15 +88,15 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     idynutils.updateiDyn3Model(q, true);
     yarp::sig::Vector q_ref(q.size(), M_PI);
 
-    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_in_aggregated(
+    OpenSoT::tasks::velocity::Postural::Ptr postural_in_aggregated(
             new OpenSoT::tasks::velocity::Postural(q));
     postural_in_aggregated->setReference(q_ref);
     std::list<OpenSoT::Task<yarp::sig::Matrix,yarp::sig::Vector>::TaskPtr> task_list;
     task_list.push_back(postural_in_aggregated);
-    boost::shared_ptr<OpenSoT::tasks::Aggregated> aggregated_task(
+    OpenSoT::tasks::Aggregated::Ptr aggregated_task(
                 new OpenSoT::tasks::Aggregated(task_list, q.size()));
     aggregated_task->setLambda(0.1);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Postural> postural_task(
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
     postural_task->setReference(q_ref);
     postural_task->setLambda(0.1);
@@ -154,20 +147,20 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
                                          robot.iDyn3_model.getNrOfDOFs());
         robot.updateiDyn3Model(q, true);
 
-        boost::shared_ptr<OpenSoT::tasks::velocity::Postural> taskPostural(new OpenSoT::tasks::velocity::Postural(q));
-        boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> taskCartesianWaist(
+        OpenSoT::tasks::velocity::Postural::Ptr taskPostural(new OpenSoT::tasks::velocity::Postural(q));
+        OpenSoT::tasks::velocity::Cartesian::Ptr taskCartesianWaist(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",q,robot, "Waist", "world"));
 
-        boost::shared_ptr<OpenSoT::constraints::velocity::ConvexHull> constraintConvexHull(
+        OpenSoT::constraints::velocity::ConvexHull::Ptr constraintConvexHull(
                 new OpenSoT::constraints::velocity::ConvexHull(q, robot, 0.05));
-        boost::shared_ptr<OpenSoT::constraints::velocity::CoMVelocity> constraintCoMVelocity(
+        OpenSoT::constraints::velocity::CoMVelocity::Ptr constraintCoMVelocity(
                 new OpenSoT::constraints::velocity::CoMVelocity(yarp::sig::Vector(3,0.03), 0.01, q, robot));
 
         taskCartesianWaist->getConstraints().push_back(constraintConvexHull);
 
         std::list<OpenSoT::tasks::Aggregated::TaskPtr> taskList;
         taskList.push_back(taskPostural);
-        boost::shared_ptr<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> > _task0(
+        OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr _task0(
                 new OpenSoT::tasks::Aggregated(taskList, q.size()));
         _task0->getConstraints().push_back(constraintConvexHull);
         EXPECT_EQ(_task0->getConstraints().size(), 1)<<"1"<<std::endl;
@@ -191,7 +184,7 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
 
         yarp::sig::Matrix A0 = _task0->getA();
         yarp::sig::Vector b0 = _task0->getb();
-        std::list<boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>>> constraints0 =
+        std::list<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr> constraints0 =
                 _task0->getConstraints();
         ASSERT_EQ(constraints0.size(), 2);
         yarp::sig::Matrix Aineq0_ch = constraints0.front()->getAineq();
@@ -203,7 +196,7 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
 
         yarp::sig::Matrix A1 = _task1->getA();
         yarp::sig::Vector b1 = _task1->getb();
-        std::list<boost::shared_ptr<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>>> constraints1 =
+        std::list<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr> constraints1 =
                 _task1->getConstraints();
         yarp::sig::Matrix Aineq1_ch = constraints1.front()->getAineq();
         yarp::sig::Vector lA1_ch = constraints1.front()->getbLowerBound();

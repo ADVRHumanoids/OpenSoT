@@ -225,9 +225,9 @@ void Aggregated::generateAll() {
 
 void Aggregated::checkSizes()
 {
-    for(std::list< boost::shared_ptr<ConstraintType> >::iterator i = _bounds.begin();
+    for(std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); ++i) {
-        boost::shared_ptr<ConstraintType> t = *i;
+        ConstraintPtr t = *i;
         assert(this->getXSize() == t->getXSize());
     }
 }

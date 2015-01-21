@@ -37,7 +37,7 @@ void QPOases_sot::computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Mat
 void QPOases_sot::computeVelCtrlOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
                                                      yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA)
 {
-    boost::shared_ptr<OpenSoT::constraints::BilateralConstraint> optimality_bilateral_constraint(
+    OpenSoT::constraints::BilateralConstraint::Ptr optimality_bilateral_constraint(
         new OpenSoT::constraints::BilateralConstraint(
                 task->getA(),
                 task->getA()*problem.getSolution(),

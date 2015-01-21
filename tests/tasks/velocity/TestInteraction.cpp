@@ -124,14 +124,14 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
                            _robot.iDyn3_model.getJointBoundMin()));
 
     //Create the SoT
-    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks;
+    std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks;
     stack_of_tasks.push_back(interactionTask);
 
-    std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> joint_constraints_list;
+    std::list< OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr > joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
     joint_constraints_list.push_back(joint_velocity_limits);
 
-    boost::shared_ptr<OpenSoT::constraints::Aggregated> joint_constraints(
+    OpenSoT::constraints::Aggregated::Ptr joint_constraints(
                 new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
 
     OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
