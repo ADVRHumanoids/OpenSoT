@@ -67,7 +67,10 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 
 TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
 {
-    iDynUtils model; yarp::sig::Vector q, dq;
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q, dq;
     q = getGoodInitialPosition(model);
     model.updateiDyn3Model(q,true);
     OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);

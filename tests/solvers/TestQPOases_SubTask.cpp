@@ -67,7 +67,10 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 
 TEST_F(testQPOases_SubTask, testSolveUsingSubTasks)
 {
-    iDynUtils model; yarp::sig::Vector q, dq;
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q, dq;
     q = model.iDyn3_model.getAng();
     OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);
 
@@ -111,7 +114,10 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasks)
 
 TEST_F(testQPOases_SubTask, testSolveUsingSubTasksAndAggregated)
 {
-    iDynUtils model; yarp::sig::Vector q, dq;
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q, dq;
     q = model.iDyn3_model.getAng();
     OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);
 
@@ -130,7 +136,10 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasksAndAggregated)
 
 TEST_F(testQPOases_SubTask, testSolveCartesianThroughSubTasksAndAggregated)
 {
-    iDynUtils model; yarp::sig::Vector q, dq;
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q, dq;
     q = getGoodInitialPosition(model);
     model.updateiDyn3Model(q,true);
     OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);
