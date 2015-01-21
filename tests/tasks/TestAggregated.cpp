@@ -88,7 +88,9 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
 
     EXPECT_TRUE(aggregated.getWeight() == yarp::sig::Matrix(q.size()*2, q.size()*2).eye());
 
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     idynutils.updateiDyn3Model(q, true);
     yarp::sig::Vector q_ref(q.size(), M_PI);
@@ -141,7 +143,9 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
 
 TEST_F(testAggregatedTask, testConstraintsUpdate)
 {
-    iDynUtils robot;
+    iDynUtils robot("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q(robot.iDyn3_model.getNrOfDOFs(), 0.0);
     for(unsigned int r = 0; r < 1e3; ++r)
     {

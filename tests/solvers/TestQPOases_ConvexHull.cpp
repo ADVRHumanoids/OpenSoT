@@ -357,7 +357,9 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     ComanUtils robot("tryFollowingBounds");
 #endif
 
-    iDynUtils idynutils_com;
+    iDynUtils idynutils_com("coman",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(idynutils_com);
     idynutils_com.updateiDyn3Model(q, true);

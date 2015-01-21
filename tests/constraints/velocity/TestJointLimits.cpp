@@ -18,7 +18,11 @@ class testJointLimits : public ::testing::Test {
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testJointLimits() {
+  testJointLimits()  :
+      coman("coman",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
+  {
     // You can do set-up work for each test here.
 
       qLowerBounds = coman.iDyn3_model.getJointBoundMin();

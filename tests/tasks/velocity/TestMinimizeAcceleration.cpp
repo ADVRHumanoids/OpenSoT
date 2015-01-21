@@ -63,8 +63,12 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 
 TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
 {
-    iDynUtils idynutils;
-    iDynUtils idynutils2;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    iDynUtils idynutils2("coman",
+                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
