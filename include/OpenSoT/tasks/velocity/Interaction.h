@@ -20,7 +20,7 @@
     namespace tasks {
         namespace velocity {
             /**
-             * @brief The Interaction class implement an Admittance based force control using the admittance law:
+             * @brief The Interaction class implements an Admittance based force control using the admittance law:
              *
              *      dx = C * (wd - w)
              *      xd = x + dx
@@ -29,8 +29,8 @@
              * Force/Torque sensor frame to the base_link frame. The displacement dx is integrated using the previous
              * position x and a new desired position xd is computed. The reference xd and dx are then used inside a
              * Cartesian task.
-             * IMPORTANT: the wd is the desired wrench that the robot has to produce to the ambient, so the measured
-             * wrench w is the wrench produced by the robot to the ambient!
+             * IMPORTANT: the wd is the desired wrench that the robot has to exert on the environment, so the measured
+             * wrench w is the wrench produced by the robot on the environment!
              */
             class Interaction : public Cartesian {
             public:
@@ -45,8 +45,10 @@
                  * @brief _actualWrench measured Wrench in the base_link reference frame
                  */
                 yarp::sig::Vector _actualWrench;
+
                 std::string _ft_frame;
                 int _ft_index;
+
                 yarp::sig::Matrix _C;
 
                 void updateActualWrench();

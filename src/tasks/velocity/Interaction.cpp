@@ -94,6 +94,7 @@ void Interaction::_update(const yarp::sig::Vector &x)
 }
 
 void Interaction::setReferenceWrench(const yarp::sig::Vector &desiredWrench) {
+    assert(desiredWrench.size() == 6 && "Desired wrench musth be a 6-element vector");
     _desiredWrench = desiredWrench;
 }
 
@@ -113,6 +114,8 @@ const yarp::sig::Matrix Interaction::getCompliance() const
 
 void Interaction::setCompliance(const yarp::sig::Matrix& C)
 {
+    assert(C.rows() == 6 && C.cols() == 6 && C.transposed() == C &&
+           "Matrix C must be 6x6 positive definite matrix");
     // Check size  [6x6] and if Positive Definite
     //if(C.rows() == 6 && C.cols() == 6 && det(C) >= 0.0)
         _C = C;

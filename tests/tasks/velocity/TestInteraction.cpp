@@ -57,18 +57,25 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     return q;
 }
 
-yarp::sig::Vector computeWallForce(yarp::sig::Matrix& xd, yarp::sig::Matrix& x, const yarp::sig::Matrix& Kw)
+/**
+ * @brief computeWallForce computes the wrench performed by a spring attached to the wall and the robot ee
+ * @param xEE the current position of the end effector of the robot
+ * @param xWall the rest position of the wall
+ * @param Kw the cartesian stiffness in the end effector frame of reference
+ * @return
+ */
+yarp::sig::Vector computeWallForce(yarp::sig::Matrix& xEE, yarp::sig::Matrix& xWall, const yarp::sig::Matrix& Kw)
 {
     yarp::sig::Vector pe, oe;
-    cartesian_utils::computeCartesianError(x, xd, pe, oe);
+    cartesian_utils::computeCartesianError(xEE, xWall, pe, oe);
 
     return Kw * yarp::math::cat(pe, oe);
 }
 
 TEST_F(testInteractionTask, testInteractionTask_wrench)
 {
-    std::string urdf_file = std::string(getenv("WALKMAN_ROOT")) + "/drc/OpenSoT/tests/tasks/velocity/bigman.urdf";
-    std::string srdf_file = std::string(getenv("WALKMAN_ROOT")) + "/drc/OpenSoT/tests/tasks/velocity/bigman.srdf";
+    std::string urdf_file = std::string(OPENSOT_TESTS_ROBOTS_DIR) + "bigman/bigman.urdf";
+    std::string srdf_file = std::string(OPENSOT_TESTS_ROBOTS_DIR) + "bigman/bigman.srdf";
 
     iDynUtils _robot("bigman", urdf_file, srdf_file);
 
@@ -81,24 +88,30 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
     std::string ft_sensor_link = "l_arm_ft";
     std::string base_link = "torso";
 
-    // We consider the robot sturting already in contact:
-    yarp::sig::Matrix xw = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(ft_sensor_link));
+    // We consider the robot in contact with the wall, with 0 contact force:
+    yarp::sig::Matrix xWall = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(base_link),
+                                                             _robot.iDyn3_model.getLinkIndex(distal_link));
+    KDL::Frame SensorTDistal_KDL = _robot.iDyn3_model.getPositionKDL(_robot.iDyn3_model.getLinkIndex(ft_sensor_link),
+                                                                     _robot.iDyn3_model.getLinkIndex(distal_link));
     // The robot has a certain Compliance:
+
     yarp::sig::Matrix C(6,6); C = C.eye();
     for(unsigned int i = 0; i < 3; ++i){
         C(i,i) = 1E-4;
-        C(i+3, i+3) = 1E-1;}
+        C(i+3, i+3) = 1E-1;
+    }
     // We compute the contact force as:
-    yarp::sig::Vector base_link_Ww = computeWallForce(xw, xw, yarp::math::pinv(C));
+    yarp::sig::Vector distal_WallWrench = computeWallForce(xWall, xWall, yarp::math::pinv(C));
     // We have to report the wrench in sensor frame
-    KDL::Frame xw_KDL; cartesian_utils::fromYARPMatrixtoKDLFrame(xw, xw_KDL);
-    KDL::Wrench base_link_Ww_KDL; cartesian_utils::fromYarpVectortoKDLWrench(base_link_Ww, base_link_Ww_KDL);
-    KDL::Wrench sensor_Ww_KDL = xw_KDL.Inverse()*base_link_Ww_KDL;
-    yarp::sig::Vector sensor_Ww; cartesian_utils::fromKDLWrenchtoYarpVector(sensor_Ww_KDL, sensor_Ww);
+    KDL::Wrench distal_WallWrench_KDL; cartesian_utils::fromYarpVectortoKDLWrench(distal_WallWrench, distal_WallWrench_KDL);
+    KDL::Wrench sensor_WallWrench_KDL = SensorTDistal_KDL*distal_WallWrench_KDL;
+    yarp::sig::Vector sensor_WallWrench; cartesian_utils::fromKDLWrenchtoYarpVector(sensor_WallWrench_KDL, sensor_WallWrench);
 
     // And we set as a feedback
     for(unsigned int i = 0; i < 4; ++i)
-        _robot.iDyn3_model.setSensorMeasurement(i, -1.0*sensor_Ww);
+        _robot.iDyn3_model.setSensorMeasurement(i, -1.0*sensor_WallWrench);
+
+    ASSERT_EQ(yarp::math::norm(sensor_WallWrench),0.0);
 
     Interaction::Ptr interactionTask(new Interaction("interaction::l_wrist", q, _robot, distal_link,
                                                      base_link, ft_sensor_link));
@@ -112,8 +125,8 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
         active_joint_mask[_robot.left_leg.joint_numbers[i]] = false;
     interactionTask->setActiveJointsMask(active_joint_mask);
 
-    int t = 1000;
-    VelocityLimits::Ptr joint_velocity_limits(new VelocityLimits(0.1, (double)(1.0/t), q.size()));
+    int T = 1000;
+    VelocityLimits::Ptr joint_velocity_limits(new VelocityLimits(0.1, (double)(1.0/T), q.size()));
 
     JointLimits::Ptr joint_limits(new JointLimits(q, _robot.iDyn3_model.getJointBoundMax(),
                            _robot.iDyn3_model.getJointBoundMin()));
@@ -131,37 +144,44 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 
     OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
-    yarp::sig::Vector base_link_Wd = interactionTask->getActualWrench();
-    base_link_Wd[0] += 20.0;
-    base_link_Wd[1] += 10.0;
-    base_link_Wd[2] += 10.0;
-    base_link_Wd[3] += 5.0;
-    base_link_Wd[4] += 1.0;
-    base_link_Wd[5] += 5.0;
-    interactionTask->setReferenceWrench(base_link_Wd);
+
+    std::cout<<distal_link<<" actual position in world@t0: "<<std::endl;
+    cartesian_utils::printHomogeneousTransform(interactionTask->getActualPose());
+    std::cout <<"Applied wrench@t0: ["<<interactionTask->getActualWrench().toString()<<"]"<<std::endl;
+    ASSERT_EQ(yarp::math::norm(interactionTask->getActualWrench()),0.0);
+
+    yarp::sig::Vector base_WallWrenchDesired = interactionTask->getActualWrench();
+    base_WallWrenchDesired[0] += 20.0;
+    base_WallWrenchDesired[1] += 5.0;
+    base_WallWrenchDesired[2] += 5.0;
+//    base_WallWrenchDesired[3] += 5.0;
+//    base_WallWrenchDesired[4] += 1.0;
+//    base_WallWrenchDesired[5] += 5.0;
+    interactionTask->setReferenceWrench(base_WallWrenchDesired);
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    //for(unsigned int i = 0; i < 20*t; ++i)
-    for(unsigned int i = 0; i < 20; ++i)
+    unsigned int max_iterations = 5000;
+    for(unsigned int i = 0; i < max_iterations; ++i)
     {
         _robot.updateiDyn3Model(q, false);
-        yarp::sig::Matrix xd = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(ft_sensor_link));
-        std::cout<<ft_sensor_link<<" desired in world: "<<std::endl;
-        cartesian_utils::printHomogeneousTransform(xd);
-        base_link_Ww = computeWallForce(xd, xw, pinv(C));
-        // We have to report the wrench in sensor frame
-        cartesian_utils::fromYARPMatrixtoKDLFrame(xw, xw_KDL);
-        cartesian_utils::fromYarpVectortoKDLWrench(base_link_Ww, base_link_Ww_KDL);
-        sensor_Ww_KDL = xw_KDL.Inverse()*base_link_Ww_KDL;
-        cartesian_utils::fromKDLWrenchtoYarpVector(sensor_Ww_KDL, sensor_Ww);
-        std::cout<<"Wall Wrench in sensor frame: ["<<sensor_Ww.toString()<<"]"<<std::endl;
+        yarp::sig::Matrix xEE = interactionTask->getActualPose();
+        std::cout<<"\n\n---@t"<<double(i)/T<<"------------\n";
+        std::cout<<distal_link<<" actual position in world: "<<std::endl;
+        cartesian_utils::printHomogeneousTransform(xEE);
+        distal_WallWrench = computeWallForce(xEE, xWall, pinv(C));
+        // We have to transform the wrench in sensor frame
+        cartesian_utils::fromYarpVectortoKDLWrench(distal_WallWrench, distal_WallWrench_KDL);
+        sensor_WallWrench_KDL = SensorTDistal_KDL*distal_WallWrench_KDL;
+        cartesian_utils::fromKDLWrenchtoYarpVector(sensor_WallWrench_KDL, sensor_WallWrench);
+        std::cout<<"Wall Wrench in sensor frame: ["<<sensor_WallWrench.toString()<<"]"<<std::endl;
 
          for(unsigned int i = 0; i < _robot.iDyn3_model.getNrOfFTSensors(); ++i)
-             _robot.iDyn3_model.setSensorMeasurement(i, -1.0*sensor_Ww);
+             _robot.iDyn3_model.setSensorMeasurement(i, -1.0*sensor_WallWrench);
 
          interactionTask->update(q);
          joint_constraints->update(q);
 
+         std::cout <<"Applied wrench: ["<<interactionTask->getActualWrench().toString()<<"]"<<std::endl;
          std::cout<<"Force error: ["<<interactionTask->forceError.toString()<<"]"<<std::endl;
          std::cout<<"Torque error: ["<<interactionTask->torqueError.toString()<<"]"<<std::endl;
 
@@ -171,14 +191,24 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
          std::cout<<std::endl;
     }
 
-    _robot.updateiDyn3Model(q, true);
-    yarp::sig::Vector expected = C * base_link_Wd;
+    EXPECT_LT(norm(interactionTask->forceError),1e-3);
+    EXPECT_LT(norm(interactionTask->torqueError),1e-3);
+
+/*    _robot.updateiDyn3Model(q, true);
+    yarp::sig::Vector expected = C * base_WallWrenchDesired;
     yarp::sig::Vector pe, oe;
     yarp::sig::Matrix x = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(ft_sensor_link));
-    cartesian_utils::computeCartesianError(x, xw, pe, oe);
+    cartesian_utils::computeCartesianError(x, xWall, pe, oe);
     yarp::sig::Vector solution = yarp::math::cat(pe, oe);
 
     std::cout<<"EXPECTED:   "<<expected.toString()<<std::endl;
-    std::cout<<"ACTUAL:     "<<solution.toString()<<std::endl;
+    std::cout<<"ACTUAL:     "<<solution.toString()<<std::endl;*/
 }
+
+}
+
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
