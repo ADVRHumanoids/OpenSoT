@@ -55,8 +55,8 @@ void Interaction::updateActualWrench()
         ft_frame_in_base_link = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(_ft_frame));
     else
         ft_frame_in_base_link = _robot.iDyn3_model.getPosition(
-                _robot.iDyn3_model.getLinkIndex(_ft_frame),
-                _robot.iDyn3_model.getLinkIndex(_base_link));
+                _robot.iDyn3_model.getLinkIndex(_base_link),
+                _robot.iDyn3_model.getLinkIndex(_ft_frame));
 
     KDL::Frame ft_frame_in_base_link_KDL;
     cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
