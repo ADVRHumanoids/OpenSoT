@@ -1326,9 +1326,15 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
     Dm_Gradient(0) = Dm;
     Dm_Gradient.block(1,0,gra_dim,1) = Gradient;
 
-    std::cout << "Dm_Gradient" << std::endl;
-    std::cout << min_i << std::endl;
-    std::cout << Dm_Gradient << std::endl;
+    if (Dm > 3.0)
+    {
+
+        Dm_Gradient.setZero();
+    }
+
+//    std::cout << "Dm_Gradient" << std::endl;
+//    std::cout << min_i << std::endl;
+//    std::cout << Dm_Gradient << std::endl;
 
     return Dm_Gradient;
 
