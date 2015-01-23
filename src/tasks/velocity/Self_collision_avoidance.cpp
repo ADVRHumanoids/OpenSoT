@@ -13,10 +13,10 @@ Self_collision_avoidance::Self_collision_avoidance(iDynUtils &robot):
 
         R_u = 0.05;
         R_l = 0.05;
-        R_torso_le_u = 0.02;
-        R_torso_ri_u = 0.02;
-        R_torso_le_l = 0.02;
-        R_torso_ri_l = 0.02;
+        R_torso_le_u = 0.03;
+        R_torso_ri_u = 0.03;
+        R_torso_le_l = 0.03;
+        R_torso_ri_l = 0.03;
 
         // unit: rad
         q_step = 0.1;
@@ -240,13 +240,13 @@ MatrixXd Self_collision_avoidance::jointangle2position (const VectorXd &Q){
     if(Torso_index == -1)
         std::cout << "Failed to get link index for torso" << std::endl;
 
-    std::string Upper_left_torso_name = "LShp";
+    std::string Upper_left_torso_name = "LShr";
     int Upper_left_torso_index = robot_col.iDyn3_model.getLinkIndex(Upper_left_torso_name);
 
     if(Upper_left_torso_index == -1)
         std::cout << "Failed to get link index for Upper left torso" << std::endl;
 
-    std::string Upper_right_torso_name = "RShp";
+    std::string Upper_right_torso_name = "RShr";
     int Upper_right_torso_index = robot_col.iDyn3_model.getLinkIndex(Upper_right_torso_name);
 
     if(Upper_right_torso_index == -1)
@@ -276,13 +276,13 @@ MatrixXd Self_collision_avoidance::jointangle2position (const VectorXd &Q){
     if(Right_elbow_center_index == -1)
         std::cout << "Failed to get link index for Right_elbow" << std::endl;
 
-    std::string Left_wrist_center_name = "l_wrist";
+    std::string Left_wrist_center_name = "LWrMot2";
     int Left_wrist_center_index = robot_col.iDyn3_model.getLinkIndex(Left_wrist_center_name);
 
     if(Left_wrist_center_index == -1)
         std::cout << "Failed to get link index for left_wrist" << std::endl;
 
-    std::string Right_wrist_center_name = "r_wrist";
+    std::string Right_wrist_center_name = "RWrMot2";
     int Right_wrist_center_index = robot_col.iDyn3_model.getLinkIndex(Right_wrist_center_name);
 
     if(Right_wrist_center_index == -1)
@@ -360,6 +360,10 @@ MatrixXd Self_collision_avoidance::jointangle2position (const VectorXd &Q){
     right_lowerarm_A = right_elbow_base.block(0,3,3,1);
     right_lowerarm_B = right_wrist_base.block(0,3,3,1);
 
+    lower_right_torso_B(1) = lower_right_torso_B(1) - 0.12;
+    lower_left_torso_B(1) = lower_left_torso_B(1) + 0.12;
+
+
     position_mat.col(0) = upper_left_torso_A;
     position_mat.col(1) = upper_left_torso_B;
     position_mat.col(2) = upper_right_torso_A;
@@ -423,6 +427,47 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
     left_upperarm_B = Position_mat.col(13);
     left_lowerarm_A = Position_mat.col(14);
     left_lowerarm_B = Position_mat.col(15);
+
+//        std::cout << "upper_left_torso_A" << std::endl;
+//        std::cout << upper_left_torso_A << std::endl;
+//        std::cout << "upper_left_torso_B" << std::endl;
+//        std::cout << upper_left_torso_B << std::endl;
+
+//        std::cout << "upper_right_torso_A" << std::endl;
+//        std::cout << upper_right_torso_A << std::endl;
+//        std::cout << "upper_right_torso_B" << std::endl;
+//        std::cout << upper_right_torso_B << std::endl;
+
+//        std::cout << "lower_left_torso_A" << std::endl;
+//        std::cout << lower_left_torso_A << std::endl;
+//        std::cout << "lower_left_torso_B" << std::endl;
+//        std::cout << lower_left_torso_B << std::endl;
+
+//        std::cout << "lower_right_torso_A" << std::endl;
+//        std::cout << lower_right_torso_A << std::endl;
+//        std::cout << "lower_right_torso_B" << std::endl;
+//        std::cout << lower_right_torso_B << std::endl;
+
+//        std::cout << "right_upperarm_A" << std::endl;
+//        std::cout << right_upperarm_A << std::endl;
+//        std::cout << "right_upperarm_B" << std::endl;
+//        std::cout << right_upperarm_B << std::endl;
+
+//        std::cout << "right_lowerarm_A" << std::endl;
+//        std::cout << right_lowerarm_A << std::endl;
+//        std::cout << "right_lowerarm_B" << std::endl;
+//        std::cout << right_lowerarm_B << std::endl;
+
+//        std::cout << "left_upperarm_A" << std::endl;
+//        std::cout << left_upperarm_A << std::endl;
+//        std::cout << "left_upperarm_B" << std::endl;
+//        std::cout << left_upperarm_B << std::endl;
+
+//        std::cout << "left_lowerarm_A" << std::endl;
+//        std::cout << left_lowerarm_A << std::endl;
+//        std::cout << "left_lowerarm_B" << std::endl;
+//        std::cout << left_lowerarm_B << std::endl;
+
 
 
     // calculate the shortest distances between each pair of segments which could collide
@@ -1539,9 +1584,15 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
     Dm_Gradient(0) = Dm;
     Dm_Gradient.block(1,0,gra_dim,1) = Gradient;
 
-    std::cout << "Dm_Gradient" << std::endl;
-    std::cout << min_i << std::endl;
-    std::cout << Dm_Gradient << std::endl;
+    if ( Dm > 0.3 )
+    {
+        Dm_Gradient.setZero();
+
+    }
+
+//    std::cout << "Dm_Gradient" << std::endl;
+//    std::cout << min_i << std::endl;
+//    std::cout << Dm_Gradient << std::endl;
 
     return Dm_Gradient;
 
