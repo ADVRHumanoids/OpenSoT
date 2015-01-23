@@ -10,6 +10,7 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/tasks/velocity/all.h>
+#include <fstream>
 
 using namespace yarp::math;
 using namespace OpenSoT::tasks::velocity;
@@ -140,6 +141,10 @@ TEST_F(testInteractionTask, testComputeWallForce)
 
 TEST_F(testInteractionTask, testInteractionTask_wrench)
 {
+    ofstream file;
+    file.open("TestInteraction_testInteractionTask_wrench_error_wrench.m");
+
+
     std::string urdf_file = std::string(OPENSOT_TESTS_ROBOTS_DIR) + "bigman/bigman.urdf";
     std::string srdf_file = std::string(OPENSOT_TESTS_ROBOTS_DIR) + "bigman/bigman.srdf";
 
@@ -167,7 +172,7 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
     yarp::sig::Matrix C(6,6); C = C.eye();
     for(unsigned int i = 0; i < 3; ++i){
         C(i,i) = 1E-2;
-        C(i+3, i+3) = 1E2;}
+        C(i+3, i+3) = 1E-2;}
 
     // We compute the applied contact force as:
     yarp::sig::Vector base_link_WallWrench = -1.0*computeWallForce(base_link_T_Wall, base_link_T_Wall, yarp::math::pinv(C));
@@ -227,13 +232,14 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
     base_WallWrenchDesired[0] = 10.0;
     base_WallWrenchDesired[1] = 5.0;
     base_WallWrenchDesired[2] = -1.0;
-//    base_WallWrenchDesired[3] += 5.0;
-//    base_WallWrenchDesired[4] += 1.0;
-//    base_WallWrenchDesired[5] += 5.0;
+    base_WallWrenchDesired[3] = 1.5;
+    base_WallWrenchDesired[4] = -1.1;
+    base_WallWrenchDesired[5] = 1.2;
     interactionTask->setReferenceWrench(base_WallWrenchDesired);
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    unsigned int max_iterations = 50000;
+    unsigned int max_iterations = 10000;
+    file<<"error_wrench = ["<<std::endl;
     for(unsigned int i = 0; i < max_iterations; ++i)
     {
         _robot.updateiDyn3Model(q, true);
@@ -254,11 +260,8 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
         yarp::sig::Vector sensor_WallWrench; cartesian_utils::fromKDLWrenchtoYarpVector(sensor_WallWrench_KDL, sensor_WallWrench);
         std::cout<<"Measured Applied Wall Wrench in sensor frame: ["<<sensor_WallWrench.toString()<<"]"<<std::endl;
 
-         for(unsigned int i = 0; i < _robot.iDyn3_model.getNrOfFTSensors(); ++i){
+         for(unsigned int i = 0; i < _robot.iDyn3_model.getNrOfFTSensors(); ++i)
              _robot.iDyn3_model.setSensorMeasurement(i, sensor_WallWrench);
-             yarp::sig::Vector wrench(6,0.0);
-             _robot.iDyn3_model.getSensorMeasurement(i, wrench);
-             std::cout<<"getSensorMesurement "<<wrench.toString()<<std::endl;}
 
 
 
@@ -269,22 +272,21 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
          std::cout<<"Force error: ["<<interactionTask->forceError.toString()<<"]"<<std::endl;
          std::cout<<"Torque error: ["<<interactionTask->torqueError.toString()<<"]"<<std::endl;
 
+         file<<interactionTask->forceError.toString()<<" "<<interactionTask->torqueError.toString()<<std::endl;
+
          sot.solve(dq);
          q += dq;
     }
+    file<<"]"<<std::endl;
+    file.close();
 
-////    EXPECT_LT(norm(interactionTask->forceError),1e-3);
-////    EXPECT_LT(norm(interactionTask->torqueError),1e-3);
+    EXPECT_NEAR(interactionTask->getActualWrench()[0], base_WallWrenchDesired[0], 1E-1);
+    EXPECT_NEAR(interactionTask->getActualWrench()[1], base_WallWrenchDesired[1], 1E-1);
+    EXPECT_NEAR(interactionTask->getActualWrench()[2], base_WallWrenchDesired[2], 1E-1);
+    EXPECT_NEAR(interactionTask->getActualWrench()[3], base_WallWrenchDesired[3], 2E-1);
+    EXPECT_NEAR(interactionTask->getActualWrench()[4], base_WallWrenchDesired[4], 2E-1);
+    EXPECT_NEAR(interactionTask->getActualWrench()[5], base_WallWrenchDesired[5], 2E-1);
 
-/////*    _robot.updateiDyn3Model(q, true);
-////    yarp::sig::Vector expected = C * base_WallWrenchDesired;
-////    yarp::sig::Vector pe, oe;
-////    yarp::sig::Matrix x = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(ft_sensor_link));
-////    cartesian_utils::computeCartesianError(x, xWall, pe, oe);
-////    yarp::sig::Vector solution = yarp::math::cat(pe, oe);
-
-////    std::cout<<"EXPECTED:   "<<expected.toString()<<std::endl;
-////    std::cout<<"ACTUAL:     "<<solution.toString()<<std::endl;*/
 }
 
 }

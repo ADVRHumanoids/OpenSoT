@@ -122,7 +122,7 @@ protected:
         path = PathPtr( new KDL::Path_Line(start, end,
                                            rotationInterpolationMethod.get()->Clone(),
                                            eqRad));
-        velocityProfile = VelProfPtr( new KDL::VelocityProfile_Trap(.2,.1));
+        velocityProfile = VelProfPtr( new KDL::VelocityProfile_Trap(.01,.1));
         velocityProfile->SetProfile(0,path->PathLength());
         trajectory = TrajPtr( new KDL::Trajectory_Segment(path.get()->Clone(),
                                                           velocityProfile.get()->Clone()));
