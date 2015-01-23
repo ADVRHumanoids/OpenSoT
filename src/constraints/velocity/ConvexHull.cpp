@@ -58,7 +58,8 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
 bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 {   
     std::list<KDL::Vector> points;
-    if(_robot.getSupportPolygonPoints(points)){
+    // get support polygon points w.r.t. COM
+    if(_robot.getSupportPolygonPoints(points,"COM")){
         std::vector<KDL::Vector> tmp_ch;
         if(_convex_hull.getConvexHull(points, tmp_ch)){
             ch = tmp_ch;
