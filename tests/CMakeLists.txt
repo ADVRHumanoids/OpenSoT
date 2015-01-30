@@ -41,11 +41,14 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testSubTask
                       testCartesianVelocityTask
                       testCoMVelocityTask
+                      testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
                       testPosturalVelocityTask
+                      testAutoStack
+                      testDefaultHumanoidStack
+                      testVelocityAllocation
                       testYCartesian
-                      testYPostural
-                      testMinimizeAccelerationTask)
+                      testYPostural)
 endif()
 
 # gTests for Velocity constraints
@@ -128,6 +131,10 @@ ADD_EXECUTABLE(testDefaultHumanoidStack utils/TestDefaultHumanoidStack.cpp)
 TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
 add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
+TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
+add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
 TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
 add_dependencies(testYCartesian GTest-ext OpenSoT)
@@ -156,6 +163,7 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
+add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 add_custom_target(copy_robot_model_files ALL
                   ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")
