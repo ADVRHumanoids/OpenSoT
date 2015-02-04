@@ -37,15 +37,34 @@
             public:
                 /**
                  * @brief VelocityLimits constructor
+                 * @param qDotLimit the joint velocity limit. It is always a positive number [rad/s]
                  * @param dT the time constant at which we are performing velocity control [s]
+                 * @param x_size the size of the unknowns that we want to bound (it CANNOT be a subset)
                  */
                 VelocityLimits(const double qDotLimit,
                                const double dT,
                                const unsigned int x_size);
 
+                /**
+                 * @brief getVelocityLimits returns the current velocity limits.
+                 * @return the joint velocity limits. It is always a positive double [rad/s]
+                 */
                 double getVelocityLimits();
+
+                /**
+                 * @brief setVelocityLimits
+                 * @param qDotLimit the joint velocity limits. It needs be a positive number [rad/s]
+                 */
                 void setVelocityLimits(const double qDotLimit);
+
+                /**
+                 * @brief getDT returns the (constant) sample time we assume on the system.
+                 * @return the system sample time in [s]
+                 */
                 double getDT();
+
+            private:
+                void generateBounds();
             };
         }
     }

@@ -27,14 +27,12 @@ VelocityLimits::VelocityLimits(const double qDotLimit,
                                const unsigned int x_size) :
     Constraint(x_size), _dT(dT) {
 
-    _qDotLimit = std::abs(qDotLimit)*_dT;
-/************************ COMPUTING BOUNDS ****************************/
+    _lowerBound.resize(_x_size, 0.0);
+    _upperBound.resize(_x_size, 0.0);
 
-    _lowerBound.resize(x_size,-1.0*_qDotLimit);
-    _upperBound.resize(x_size,+1.0*_qDotLimit);
+   this->setVelocityLimits(qDotLimit);
 
-/**********************************************************************/
-
+    this->generateBounds();
 }
 
 double OpenSoT::constraints::velocity::VelocityLimits::getVelocityLimits()
@@ -44,13 +42,22 @@ double OpenSoT::constraints::velocity::VelocityLimits::getVelocityLimits()
 
 void OpenSoT::constraints::velocity::VelocityLimits::setVelocityLimits(const double qDotLimit)
 {
-    _qDotLimit = qDotLimit;
+    _qDotLimit = std::abs(qDotLimit);
+
+    this->generateBounds();
 }
-
-
-
 
 double OpenSoT::constraints::velocity::VelocityLimits::getDT()
 {
     return _dT;
+}
+
+void VelocityLimits::generateBounds()
+{
+    /************************ COMPUTING BOUNDS ****************************/
+
+        _lowerBound = -1.0*_qDotLimit*_dT;
+        _upperBound = +1.0*_qDotLimit*_dT;
+
+    /**********************************************************************/
 }
