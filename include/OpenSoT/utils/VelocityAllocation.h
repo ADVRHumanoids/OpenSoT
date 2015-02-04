@@ -50,6 +50,7 @@ namespace OpenSoT
      */
     class VelocityAllocation
     {
+    public:
         /**
          * @brief VelocityAllocation creates a VelocityAllocation object.
          * The constructor will go through all levels of the stack and add
@@ -61,11 +62,13 @@ namespace OpenSoT
          * the lowest priority task will get max_velocity velocity bounds,
          * the reamining tasks will have velocity bounds computed as
          * min_velocity + task_index*(max_velocity - min_velocity)/(stack_size-1)
-         * @param stack
+         * @param stack the tasks stack
+         * @param dT sample time
          * @param min_velocity the velocity bounds for the maximum priority task
          * @param max_velocity the velocity bounds for the lowest priority task
          */
         VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack,
+                           const double dT,
                            const double min_velocity,
                            const double max_velocity);
 
@@ -76,20 +79,31 @@ namespace OpenSoT
          * increasing for each level of the stack.
          * If the velocity bounds already exist for a task, it will just update
          * the velocity limits.
-         * Tt will also check that the AutoStack bounds don't already
-         * include a velocity bound, and if yes, it will delete it.
+         * It will also check that the AutoStack bounds don't already
+         * include a velocity bound, and if yes, it will set its velocity limit
+         * to max_velocity.
          * The highest priority task will get min_velocity velocity bounds,
          * the lowest priority task will get max_velocity velocity bounds,
          * the reamining tasks will have velocity bounds computed as
          * min_velocity + task_index*(max_velocity - min_velocity)/(stack_size-1)
-         * @param stack
+         * @param autoStack
+         * @param dT sample time
          * @param min_velocity the velocity bounds for the maximum priority task
          * @param max_velocity the velocity bounds for the lowest priority task
          */
-        VelocityAllocation(OpenSoT::AutoStack::Ptr& stack,
+        VelocityAllocation(OpenSoT::AutoStack::Ptr autoStack,
+                           const double dT,
                            const double min_veloicity,
                            const double max_velocity);
 
+    private:
+        double _dT;
+        double _min_velocity;
+        double _max_velocity;
+
+        void processStack(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack);
+        double computeVelocityLimit(const unsigned int taskIndex,
+                                    const unsigned int stackSize);
     };
 }
 

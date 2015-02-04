@@ -48,3 +48,9 @@ void OpenSoT::constraints::velocity::VelocityLimits::setVelocityLimits(const dou
 }
 
 
+
+
+double OpenSoT::constraints::velocity::VelocityLimits::getDT()
+{
+    return _dT;
+}

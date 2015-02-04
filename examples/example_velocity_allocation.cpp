@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
     autoStack << DHS.jointLimits;
 
     OpenSoT::VelocityAllocation(autoStack,
+                                3e-3,
                                 0.1,
                                 0.3);
     unsigned int i = 0;

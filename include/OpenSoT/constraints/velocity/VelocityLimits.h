@@ -45,6 +45,7 @@
 
                 double getVelocityLimits();
                 void setVelocityLimits(const double qDotLimit);
+                double getDT();
             };
         }
     }
