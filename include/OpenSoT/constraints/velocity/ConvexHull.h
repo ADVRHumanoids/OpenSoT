@@ -22,10 +22,14 @@
  #include <OpenSoT/tasks/velocity/CoM.h>
  #include <yarp/sig/all.h>
  #include <idynutils/idynutils.h>
- #include <idynutils/convex_hull.h>
  #include <kdl/frames.hpp>
 
 #define BOUND_SCALING 0.01
+
+ // idynutils::convex_hull forward declaration
+ namespace idynutils {
+     class convex_hull;
+ }
 
  namespace OpenSoT {
     namespace constraints {
@@ -41,7 +45,7 @@
             private:
                 iDynUtils &_robot;
                 double _boundScaling;
-                idynutils::convex_hull _convex_hull;
+                boost::shared_ptr<idynutils::convex_hull> _convex_hull;
                 std::vector<KDL::Vector> _ch;
             public:
                 /**

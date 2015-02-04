@@ -16,6 +16,7 @@
 */
 
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
+#include <idynutils/convex_hull.h>
 #include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
@@ -28,7 +29,8 @@ ConvexHull::ConvexHull(const yarp::sig::Vector& x,
                        const double boundScaling) :
     Constraint(x.size()), _robot(robot),
     _boundScaling(boundScaling),
-    _convex_hull() {
+    _convex_hull(new idynutils::convex_hull())
+{
 
     this->update(x);
 }
@@ -61,7 +63,7 @@ bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
     // get support polygon points w.r.t. COM
     if(_robot.getSupportPolygonPoints(points,"COM")){
         std::vector<KDL::Vector> tmp_ch;
-        if(_convex_hull.getConvexHull(points, tmp_ch)){
+        if(_convex_hull->getConvexHull(points, tmp_ch)){
             ch = tmp_ch;
             return true;}
         else
