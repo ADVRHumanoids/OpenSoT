@@ -47,7 +47,8 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
     else
     {
         _Aineq.resize(0,_Aineq.cols());
-        _bUpperBound.resize(0);}
+        _bUpperBound.resize(0);
+    }
 
     assert(JCoM.rows() == _Aineq.cols());
 
