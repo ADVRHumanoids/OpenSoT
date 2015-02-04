@@ -102,7 +102,7 @@ TEST_F(testVelocityAllocation, testConstructorStack)
                 OpenSoT::constraints::velocity::VelocityLimits>(
                     task->getConstraints().front()
                             )->getVelocityLimits(),
-                minimum_velocity+i*(maximum_velocity - minimum_velocity)/(stack.size()-1));
+                minimum_velocity+i*(maximum_velocity - minimum_velocity)/(autoStack->getStack().size()-1));
             if(i == 0)
                 EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
                                     OpenSoT::constraints::velocity::VelocityLimits>(
@@ -114,13 +114,13 @@ TEST_F(testVelocityAllocation, testConstructorStack)
                                     OpenSoT::constraints::velocity::VelocityLimits>(
                                         task->getConstraints().front()
                                                 )->getVelocityLimits(),
-                                 0.1666666666666666666666666667);
+                                 0.16666666666666666);
             else if(i == 2)
                 EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
                                     OpenSoT::constraints::velocity::VelocityLimits>(
                                         task->getConstraints().front()
                                                 )->getVelocityLimits(),
-                                 0.2333333333333333333333333334);
+                                 0.23333333333333334);
             else if(i == 3)
                 EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
                                     OpenSoT::constraints::velocity::VelocityLimits>(
@@ -150,24 +150,29 @@ TEST_F(testVelocityAllocation, testConstructorStack)
                                                                DHS.postural->getXSize())));
 
         OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack stack = autoStack->getStack();
-        ASSERT_EQ(stack[3]->getConstraints().size(),1);
-
+        ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
+        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
+                        OpenSoT::constraints::velocity::VelocityLimits>(
+                            autoStack->getStack()[3]->getConstraints().front()));
         ASSERT_DOUBLE_EQ(boost::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
-                        stack[3])->getVelocityLimits(),high_velocity);
+                        autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),high_velocity);
 
         const double minimum_velocity = 0.1;
         const double maximum_velocity = 0.3;
 
-        OpenSoT::VelocityAllocation(stack,
+        OpenSoT::VelocityAllocation(autoStack,
                                     3e-3,
                                     minimum_velocity,
                                     maximum_velocity);
 
-        ASSERT_EQ(stack[3]->getConstraints().size(),1);
+        ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
+        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
+                    OpenSoT::constraints::velocity::VelocityLimits>(
+                        autoStack->getStack()[3]->getConstraints().front()));
         ASSERT_DOUBLE_EQ(boost::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
-                        stack[3])->getVelocityLimits(),maximum_velocity);
+                        autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),maximum_velocity);
 
     }
 }
@@ -205,7 +210,9 @@ TEST_F(testVelocityAllocation, testConstructorAutoStack)
         for(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task :
             stack)
         {
-            ASSERT_EQ(task->getConstraints().size(),1);
+            ASSERT_EQ(task->getConstraints().size(),1) << "Task "
+                                                       << task->getTaskID()
+                                                       << " should have 1 constraint";
             EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
                 OpenSoT::constraints::velocity::VelocityLimits>(
                     task->getConstraints().front()
@@ -236,24 +243,30 @@ TEST_F(testVelocityAllocation, testConstructorAutoStack)
                                                                DHS.postural->getXSize())));
 
         OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack stack = autoStack->getStack();
-        ASSERT_EQ(stack[3]->getConstraints().size(),1);
-
+        ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
+        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
+                        OpenSoT::constraints::velocity::VelocityLimits>(
+                            autoStack->getStack()[3]->getConstraints().front()));
         ASSERT_EQ(boost::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
-                        stack[3])->getVelocityLimits(),high_velocity);
+                        autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),high_velocity);
 
         const double minimum_velocity = 0.1;
         const double maximum_velocity = 0.3;
 
-        OpenSoT::VelocityAllocation(stack,
+        OpenSoT::VelocityAllocation(autoStack,
                                     3e-3,
                                     minimum_velocity,
                                     maximum_velocity);
 
-        ASSERT_EQ(stack[3]->getConstraints().size(),1);
-        ASSERT_EQ(boost::dynamic_pointer_cast<
+        ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
+        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
-                        stack[3])->getVelocityLimits(),maximum_velocity);
+                        autoStack->getStack()[3]->getConstraints().front()));
+        ASSERT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+                            OpenSoT::constraints::velocity::VelocityLimits>(
+                                autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),
+                        maximum_velocity);
     }
 
     // testing constructor applies velocity bounds correctly when no velocity bounds exist on tasks,

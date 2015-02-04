@@ -42,12 +42,11 @@ VelocityAllocation::VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::
 
 void VelocityAllocation::processStack(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack)
 {
-    OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits;
-
     for(unsigned int i = 0; i < stack.size(); ++i)
     {
         const double velocityLimit = this->computeVelocityLimit(i, stack.size());
         OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task = stack[i];
+        OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits;
 
         for(auto constraint : task->getConstraints())
             if(boost::dynamic_pointer_cast<
