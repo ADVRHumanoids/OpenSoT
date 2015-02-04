@@ -4,8 +4,8 @@ OpenSoT v0.2
 New Features Includes:
 -----------------------
 - SubTasks: to consider only some rows of Tasks Jacobians/Errors
-- Active Joint Mask: to cut columns in the Task Jacobians
-- Rewritten QP Solver: this version does not explicitely pass Constraints of high priority Tasks to low priority Tasks
+- Active Joint Mask: to zero columns in the Task Jacobians
+- Rewritten QP Solver: this version does not explicitly pass Constraints of high priority Tasks to low priority Tasks
 - MinAcc task
 - Cartesian Interaction Task
 - Math of Tasks (aka write IK problem in a more easy way)
