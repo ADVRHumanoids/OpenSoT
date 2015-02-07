@@ -196,7 +196,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     center.p.y(start.p.y()-radius);
 
     // rotating along the x axis
-    CircularTrajectory traj1(start, center, KDL::Vector(1.0,0.0,0.0), 0.3);
+    CircularTrajectory traj1(start, center, KDL::Vector(1.0,0.0,0.0), 0.05);
     ASSERT_TRUE(traj1.Pos(0.0) == start) << start << "\nis different than\n"
                                          << traj1.Pos(0.0);
 
