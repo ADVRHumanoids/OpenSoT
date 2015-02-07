@@ -32,9 +32,18 @@
         namespace velocity {
             /**
              * @brief The CartesianPositionConstraint class implements a constraint of the type
-             * \f$A_{\text{Cartesian}}J_{\text{EE}}\dot{q} \leq b_{\text{Cartesian}}\f$, where every row in
-             * \f$\left[ A_{\text{CH}} , -b_{\text{CH}\right]\f$
-            */
+             * \f$A_{\text{Cartesian}}J_{\text{EE}}\dot{q} \leq b_{\text{Cartesian}}-A_{\text{Cartesian}}x_{\text{Cartesian}}\f$
+             * where \f$x \in \mathbb{R}^3\f$ is the position of the link controlled by the Cartesian task,
+             * \f$A_{\text{Cartesian}} \in \mathbb{R}^{n\times3}\f$ and \f$b_{\text{Cartesian}} \in \mathbb{R}^{n}\f$
+             * The matrix \f$A_{\text{Cartesian}}\f$ and the vector \f$b_{\text{Cartesian}}\f$ together represent
+             * a plane expressed in the \emph{Cartesian} task frame of reference. We constraint therefore
+             * implies we restrict the link movements to be on one side of such plane.
+             * In particular, each plane (constraint) can be described as a row of plane coefficients
+             * in the matrix \f$D=\left[ A_{\text{Cartesian}} , -b_{\text{Cartesian}}\right]\f$, with
+             * \f$D\in\mathbb{R}^{n\times4}\f$.
+             * NOTICE It is adviced to apply this constraint only to \emph{Cartesian} tasks that are
+             * expressed in the \emph{world} frame of reference, to avoid unexpected behaviors.
+             */
             class CartesianPositionConstraint: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             public:
                 typedef boost::shared_ptr<CartesianPositionConstraint> Ptr;
@@ -42,6 +51,8 @@
                 OpenSoT::tasks::velocity::Cartesian::Ptr _cartesianTask;
                 yarp::sig::Matrix _A_Cartesian;
                 yarp::sig::Vector _b_Cartesian;
+                double _boundScaling;
+
             public:
                 /**
                  * @brief CartesianPositionConstraint

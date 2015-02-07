@@ -26,13 +26,16 @@ using namespace yarp::math;
 CartesianPositionConstraint::CartesianPositionConstraint(const yarp::sig::Vector &x,
                                                          OpenSoT::tasks::velocity::Cartesian::Ptr cartesianTask,
                                                          const yarp::sig::Matrix &A_Cartesian,
-                                                         const yarp::sig::Vector &b_Cartesian) :
+                                                         const yarp::sig::Vector &b_Cartesian,
+                                                         const double boundScaling) :
     Constraint(x.size()),
     _cartesianTask(cartesianTask),
     _A_Cartesian(A_Cartesian),
-    _b_Cartesian(b_Cartesian)
+    _b_Cartesian(b_Cartesian),
+    _boundScaling(boundScaling)
 {
     assert(_A_Cartesian.rows() == _b_Cartesian.size() && "A and b must have the same size");
+    assert(_A_Cartesian.cols() == 3 && "A must have 3 columns");
 
     this->update(x);
 }
@@ -42,12 +45,15 @@ void CartesianPositionConstraint::update(const yarp::sig::Vector &x) {
     /************************ COMPUTING BOUNDS ****************************/
 
     yarp::sig::Matrix J = _cartesianTask->getA();
-    J.removeRows(2,4);
+    assert(J.rows() == 6 && "Jacobian doesn't have 6 rows. Is this a cartesian task?");
+    J.removeRows(2,3);
+    assert(J.rows() == 3 && "Jacobian doesn't have 3 rows. Something went wrong.");
 
-    _Aineq = _Aineq * J;
+    _Aineq = _A_Cartesian * J;
 
     yarp::sig::Vector currentPosition = _cartesianTask->getActualPose().getCol(3).subVector(0,2);
+    assert(currentPosition.size() == 3 && "Current position doesn't have size 3. Something went wrong.");
 
-    _bUpperBounds = ( _b_Cartesian - currentPosition)*_boundScaling;
+    _bUpperBound = ( _b_Cartesian - _A_Cartesian*currentPosition)*_boundScaling;
     /**********************************************************************/
 }
