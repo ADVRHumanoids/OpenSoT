@@ -4,6 +4,17 @@
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>
+#include <kdl/trajectory.hpp>
+#include <kdl/trajectory_segment.hpp>
+#include <kdl/trajectory_stationary.hpp>
+#include <kdl/trajectory_composite.hpp>
+#include <kdl/velocityprofile_trap.hpp>
+#include <kdl/path_line.hpp>
+#include <kdl/path_circle.hpp>
+#include <kdl/path_cyclic_closed.hpp>
+#include <kdl/path_roundedcomposite.hpp>
+#include <kdl/rotational_interpolation_sa.hpp>
+#include <kdl/utilities/error.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <OpenSoT/tasks/Aggregated.h>
@@ -23,299 +34,29 @@ using namespace yarp::math;
 
 namespace {
 
-void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
-                              const yarp::sig::Vector& b_ch,
-                              std::vector<KDL::Vector>& points) {
-    unsigned int nRects = A_ch.rows();
-
-    std::cout << "Computing intersection points between " << nRects << " lines" << std::endl;
-    std::cout << "A:" << A_ch.toString() << std::endl;
-    std::cout << "b:" << b_ch.toString() << std::endl;
-    for(unsigned int j = 0; j < nRects; ++j) {
-        int i;
-
-        // intersection from line i to line j
-        if(j == 0) i = nRects-1;
-        else       i = (j-1);
-
-        std::cout << "Computing intersection between line " << i << " and line " << j << ": ";
-        // get coefficients for i-th line
-        double a_i = A_ch(i,0);
-        double b_i = A_ch(i,1);
-        double c_i = b_ch(i);
-
-        // get coefficients for j-th line
-        double a_j = A_ch(j,0);
-        double b_j = A_ch(j,1);
-        double c_j = b_ch(j);
-
-        /** Kramer rule to find intersection between two lines */
-        double x = (c_i*b_j-b_i*c_j)/(a_i*b_j-b_i*a_j);
-        double y = (a_i*c_j-c_i*a_j)/(a_i*b_j-b_i*a_j);
-        std::cout << "(" << x << "," << y << ")" << std::endl;
-        points.push_back(KDL::Vector(x,y,0.0));
-    }
-}
-
-bool solveQP(   const yarp::sig::Matrix &J0,
-                const yarp::sig::Vector &e0,
-                const yarp::sig::Matrix &J1,
-                const yarp::sig::Vector &eq,
-                qpOASES::HessianType t1HessianType,
-                const yarp::sig::Vector &l,
-                const yarp::sig::Vector &u,
-                const yarp::sig::Vector &q,
-                yarp::sig::Vector &dq_ref)
-{
-    int nj = q.size();
-
-    static bool initial_guess = false;
-
-    static yarp::sig::Vector dq0(nj, 0.0);
-    static yarp::sig::Vector dq1(nj, 0.0);;
-    static yarp::sig::Vector y0(nj, 0.0);
-    static yarp::sig::Vector y1(nj, 0.0);
-
-    static qpOASES::Bounds bounds0;
-    static qpOASES::Bounds bounds1;
-    static qpOASES::Constraints constraints0;
-    static qpOASES::Constraints constraints1;
-
-
-    /**
-      We solve a single QP where the priority between
-      different tasks is set by using a weight matrix Q
-
-      min         (Ax - b)'Q(Ax - b)
-      subj to     l <=   x <=  u
-
-      QPOASES::Quadratic_program solves by default a quadratic problem in the form
-      min         x'Hx + x'g
-      subj to  Alb <= Ax <= Aub
-                 l <=  x <= u
-     **/
-
-    int njTask0 = J0.rows();
-
-    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
-
-    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
-
-    USING_NAMESPACE_QPOASES
-
-    /** Setting up QProblem object. **/
-    Options qpOasesOptionsqp0;
-    qpOasesOptionsqp0.printLevel = PL_NONE;
-    qpOasesOptionsqp0.setToReliable();
-    qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
-    qpOasesOptionsqp0.epsRegularisation *= 2E2;
-    QProblem qp0( nj, 0, HST_SEMIDEF);
-    qp0.setOptions( qpOasesOptionsqp0 );
-
-    Options qpOasesOptionsqp1;
-    qpOasesOptionsqp1.printLevel = PL_NONE;
-    qpOasesOptionsqp1.setToReliable();
-    qpOasesOptionsqp1.enableRegularisation = BT_TRUE;
-    qpOasesOptionsqp1.epsRegularisation *= 2E2;
-    QProblem qp1( nj, njTask0, t1HessianType);
-    qp1.setOptions( qpOasesOptionsqp1 );
-
-    /** Solve zero QP. **/
-    int nWSR = 132;
-    if(initial_guess==true)
-        qp0.init( H0.data(),g0.data(),
-                  NULL,
-                  l.data(), u.data(),
-                  NULL, NULL,
-                  nWSR,0,
-                  dq0.data(), y0.data(),
-                  &bounds0, &constraints0);
-    else {
-        qp0.init( H0.data(),g0.data(),
-                  NULL,
-                  l.data(), u.data(),
-                  NULL, NULL,
-                  nWSR,0);
-        std::cout << GREEN << "Not using initial guess" << DEFAULT;
-    }
-
-    if(dq0.size() != qp0.getNV()) {
-        dq0.resize(qp0.getNV());
-        initial_guess = false;
-    }
-    if(y0.size() != qp0.getNV() + qp0.getNC()) {
-        y0.resize(qp0.getNV()+ qp0.getNC());
-        initial_guess = false;
-    }
-
-    int success0 = qp0.getPrimalSolution( dq0.data() );
-    qp0.getDualSolution(y0.data());
-    qp0.getBounds(bounds0);
-    qp0.getConstraints(constraints0);
-
-    if(success0== RET_QP_NOT_SOLVED ||
-      (success0 != RET_QP_SOLVED && success0 != SUCCESSFUL_RETURN))
-    {
-        std::cout << GREEN <<
-                     "ERROR OPTIMIZING ZERO TASK! ERROR #" <<
-                     success0 <<
-                     "Not using initial guess" << DEFAULT;
-
-        initial_guess = false;
-    }
-    else
-    {
-        /** Solve first QP. **/
-        yarp::sig::Matrix A1 = J0;
-        yarp::sig::Vector b1 = J0*dq0;
-        yarp::sig::Vector lA1 = b1;
-        yarp::sig::Vector uA1 = b1;
-
-        nWSR = 132;
-
-        if(initial_guess == true)
-            qp1.init( H1.data(),g1.data(),
-                      A1.data(),
-                      l.data(), u.data(),
-                      lA1.data(), uA1.data(),
-                      nWSR, 0,
-                      dq1.data(), y1.data(),
-                      &bounds1, &constraints1);
-        else
-            qp1.init( H1.data(),g1.data(),
-                      A1.data(),
-                      l.data(), u.data(),
-                      lA1.data(), uA1.data(),
-                      nWSR, 0);
-
-        if(dq1.size() != qp1.getNV()) {
-            dq1.resize(qp1.getNV());
-            initial_guess = false;
-        }
-        if(y1.size() != qp1.getNV() + qp1.getNC()) {
-            y1.resize(qp1.getNV() + qp1.getNC());
-            initial_guess = false;
-        }
-
-        int success1 = qp1.getPrimalSolution( dq1.data() );
-        qp1.getDualSolution(y1.data());
-        qp1.getBounds(bounds1);
-        qp1.getConstraints(constraints1);
-
-        if(success1 == RET_QP_NOT_SOLVED ||
-          (success1 != RET_QP_SOLVED && success1 != SUCCESSFUL_RETURN))
-        {
-            std::cout << GREEN <<
-                         "ERROR OPTIMIZING POSTURE TASK! ERROR #" <<
-                         success1 << DEFAULT;
-            initial_guess = false;
-        }
-        else
-        {
-            dq_ref = dq1;
-            initial_guess = true;
-            return true;
-       }
-    }
-    return false;
-}
-
-bool solveQPrefactor(   const yarp::sig::Matrix &J0,
-                        const yarp::sig::Vector &e0,
-                        const yarp::sig::Matrix &J1,
-                        const yarp::sig::Vector &eq,
-                        OpenSoT::HessianType t1HessianType,
-                        const yarp::sig::Vector &u,
-                        const yarp::sig::Vector &l,
-                        const yarp::sig::Vector &q,
-                        yarp::sig::Vector &dq_ref)
-{
-    int nj = q.size();
-
-    int njTask0 = J0.rows();
-
-    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
-
-    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
-
-    yarp::sig::Matrix A0(0,nj);
-    yarp::sig::Vector lA0(0), uA0(0);
-
-    USING_NAMESPACE_QPOASES
-
-    static OpenSoT::solvers::QPOasesProblem qp0(nj, 0, OpenSoT::HST_SEMIDEF);
-    qp0.setnWSR(127);
-    static bool result0 = false;
-    static bool isQProblemInitialized0 = false;
-    if(!isQProblemInitialized0){
-        result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
-        isQProblemInitialized0 = true;}
-    else
-    {
-        qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
-        result0 = qp0.solve();
-    }
-
-    if(result0)
-    {
-        yarp::sig::Vector dq0 = qp0.getSolution();
-        yarp::sig::Matrix A1 = J0;
-        yarp::sig::Vector b1 = J0*dq0;
-        yarp::sig::Vector lA1 = b1;
-        yarp::sig::Vector uA1 = b1;
-
-        static OpenSoT::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
-        qp1.setnWSR(127);
-        static bool result1 = false;
-        static bool isQProblemInitialized1 = false;
-        if(!isQProblemInitialized1){
-            result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
-            isQProblemInitialized1 = true;}
-        else
-        {
-            qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
-            result1 = qp1.solve();
-        }
-        if(result1)
-        {
-            dq_ref = qp1.getSolution();
-            return true;
-        }
-        else
-        {
-            std::cout << GREEN << "ERROR OPTIMIZING POSTURE TASK" << DEFAULT;
-            return false;
-        }
-    }
-    else
-    {
-        std::cout << GREEN << "ERROR OPTIMIZING CARTESIAN TASK" << DEFAULT;
-        return false;
-    }
-}
-
-enum useFootTaskOrConstraint {
-    USE_TASK = 1,
-    USE_CONSTRAINT = 2
-};
-
-class testQPOases_ConvexHull:
-        public ::testing::Test,
-        public ::testing::WithParamInterface<useFootTaskOrConstraint>
+class testQPOases_CartesianPositionConstraint:
+        public ::testing::Test
 {
 protected:
+    typedef boost::shared_ptr<KDL::Trajectory> TrajPtr;
+    typedef boost::shared_ptr<KDL::Path_RoundedComposite> PathPtr;
+    typedef boost::shared_ptr<KDL::VelocityProfile> VelProfPtr;
+    typedef boost::shared_ptr<KDL::RotationalInterpolation> RotIntPtr;
     std::ofstream _log;
 
-    testQPOases_ConvexHull()
+    RotIntPtr rotationInterpolationMethod;
+    PathPtr path;
+    VelProfPtr velocityProfile;
+    TrajPtr trajectory;
+
+    testQPOases_CartesianPositionConstraint() :
+        rotationInterpolationMethod(
+            new KDL::RotationalInterpolation_SingleAxis())
     {
-        _log.open("testQPOases_ConvexHull.m", std::ofstream::app);
+        _log.open("testQPOases_CartesianPositionConstraint.m");
     }
 
-    virtual ~testQPOases_ConvexHull() {
+    virtual ~testQPOases_CartesianPositionConstraint() {
         _log.close();
     }
 
@@ -325,6 +66,46 @@ protected:
 
     virtual void TearDown() {
 
+    }
+
+    void getCircularTraj(KDL::Frame& start, const double radius) {
+        // 1rad clocwise rotation
+        KDL::Frame end = start;
+        KDL::Frame center = start; center.p.y(start.p.y() - radius);
+
+        try {
+            path = PathPtr( new KDL::Path_RoundedComposite(radius/12, radius/12,
+                                                           rotationInterpolationMethod.get()->Clone()) );
+        } catch (...) { std::cout << "Error creating the path!" << std::endl; }
+
+        const double n_steps = 12;
+        double start_angle = 0;
+        unsigned int i;
+        try {
+            for(i = 1; i < n_steps; ++i)
+            {
+                double step = i*2.0*M_PI/n_steps;
+                KDL::Frame intermediate = center;
+                intermediate.p = center.p+KDL::Vector(0,
+                                                      radius*cos(start_angle+step),
+                                                      radius*sin(start_angle+step));
+                path->Add(intermediate);
+            }
+        } catch(KDL::Error_MotionPlanning_Not_Feasible e) {
+            std::cout << "Error adding waypoints "
+                      << i << " to path: "
+                      << e.GetType() << std::endl;
+            assert("Error");
+        }
+
+        try {
+            path->Finish();
+        } catch(...) { std::cout << "Error finalizing path" << std::endl; }
+
+        velocityProfile = VelProfPtr( new KDL::VelocityProfile_Trap(.5,.1));
+        velocityProfile->SetProfile(0,path->PathLength());
+        trajectory = TrajPtr( new KDL::Trajectory_Segment(path.get()->Clone(),
+                                                          velocityProfile.get()->Clone()));
     }
 };
 
@@ -348,22 +129,43 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 }
 
 //#define TRY_ON_SIMULATOR
-TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
+TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 
-    useFootTaskOrConstraint footStrategy = GetParam();
+    KDL::Frame start;
+    try {
+        start.p.y(0.05);
+        this->getCircularTraj(start, .05);
+    } catch(...) { std::cout << "Error while initializing trajectory!" << std::endl; }
+
+    try {
+        double t_loop = 0.0;
+        for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
+        {
+            double t_begin = yarp::os::SystemClock::nowSystem();
+            KDL::Frame desired_pose = trajectory->Pos(t);
+            KDL::Twist desired_twist = trajectory->Vel(t);
+
+            std::cout << desired_pose.p << std::endl;
+
+            ASSERT_TRUE(desired_pose.M.GetRot() == start.M.GetRot());
+
+            t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
+        }
+    } catch(...) { std::cout << "Unknown error!" << std::endl; }
+
 
 #ifdef TRY_ON_SIMULATOR
     yarp::os::Network init;
-    ComanUtils robot("tryFollowingBounds");
+    ComanUtils robot("hitTheBounds");
 #endif
 
-    iDynUtils idynutils_com("coman",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-
-    yarp::sig::Vector q = getGoodInitialPosition(idynutils_com);
-    idynutils_com.updateiDyn3Model(q, true);
-    idynutils_com.switchAnchorAndFloatingBase(idynutils_com.left_leg.end_effector_name);
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+/*
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
+    idynutils.updateiDyn3Model(q, true);
+    idynutils.switchAnchorAndFloatingBase(idynutils.left_leg.end_effector_name);
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -375,8 +177,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
             new OpenSoT::constraints::velocity::JointLimits( q,
-                        idynutils_com.iDyn3_model.getJointBoundMax(),
-                        idynutils_com.iDyn3_model.getJointBoundMin()));
+                        idynutils.iDyn3_model.getJointBoundMax(),
+                        idynutils.iDyn3_model.getJointBoundMin()));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr velocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits(0.3,
@@ -393,7 +195,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::CoM::Ptr com_task(
-                new OpenSoT::tasks::velocity::CoM(q, idynutils_com));
+                new OpenSoT::tasks::velocity::CoM(q, idynutils));
     com_task->setLambda(.6);
 
     yarp::sig::Matrix W(3,3);
@@ -402,16 +204,16 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
                 new OpenSoT::constraints::velocity::CoMVelocity(
-                    yarp::sig::Vector(3, 0.05), 0.004 , q, idynutils_com));
+                    yarp::sig::Vector(3, 0.05), 0.004 , q, idynutils));
     com_task->getConstraints().push_back(boundsCoMVelocity);
-    OpenSoT::constraints::velocity::ConvexHull::Ptr boundsConvexHull(
-                new OpenSoT::constraints::velocity::ConvexHull(q, idynutils_com, 0.01));
-    com_task->getConstraints().push_back(boundsConvexHull);
+    OpenSoT::constraints::velocity::CartesianPositionConstraint::Ptr boundsCartesianPositionConstraint(
+                new OpenSoT::constraints::velocity::CartesianPositionConstraint(q, idynutils, 0.01));
+    com_task->getConstraints().push_back(boundsCartesianPositionConstraint);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr right_foot_task(
                 new OpenSoT::tasks::velocity::Cartesian("world::right_foot",
-                                                        q, idynutils_com,
-                                                        idynutils_com.right_leg.end_effector_name,
+                                                        q, idynutils,
+                                                        idynutils.right_leg.end_effector_name,
                                                         "world"));
     right_foot_task->setLambda(.2);
     right_foot_task->setOrientationErrorGain(.1);
@@ -429,7 +231,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     if(footStrategy == USE_TASK)
     {
         _log.close();
-        _log.open("testQPOases_ConvexHull.m");
+        _log.open("testQPOases_CartesianPositionConstraint.m");
 
         stack_of_tasks.push_back(right_foot_task);
     }
@@ -451,7 +253,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                                           bounds));
 
     //SET SOME REFERENCES
-    yarp::sig::Vector T_com_p_init = idynutils_com.iDyn3_model.getCOM();
+    yarp::sig::Vector T_com_p_init = idynutils.iDyn3_model.getCOM();
     yarp::sig::Vector T_com_p_ref = T_com_p_init;
     T_com_p_ref[0] = 0.0;
     T_com_p_ref[1] = 0.0;
@@ -476,7 +278,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     for(i = 0; i < n_iterations; ++i)
     {
-        idynutils_com.updateiDyn3Model(q, true);
+        idynutils.updateiDyn3Model(q, true);
 
         right_foot_task->update(q);
         com_task->update(q);
@@ -509,17 +311,17 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     ASSERT_NEAR(norm(T_com_p_ref - com_task->getActualPosition()),0,1E-9);
 
-    idynutils_com.updateiDyn3Model(q, true);
-    boundsConvexHull->update(q);
+    idynutils.updateiDyn3Model(q, true);
+    boundsCartesianPositionConstraint->update(q);
     std::vector<KDL::Vector> points;
     std::vector<KDL::Vector> points_inner;
-    boundsConvexHull->getConvexHull(points);
+    boundsCartesianPositionConstraint->getCartesianPositionConstraint(points);
 
     KDL::Vector point_old;
     yarp::sig::Matrix A_ch, A_ch_outer;
     yarp::sig::Vector b_ch, b_ch_outer;
-    boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
-    boundsConvexHull->getConstraints(points, A_ch_outer, b_ch_outer, 0.0);
+    boundsCartesianPositionConstraint->getConstraints(points, A_ch, b_ch, 0.01);
+    boundsCartesianPositionConstraint->getConstraints(points, A_ch_outer, b_ch_outer, 0.0);
     std::cout << std::endl << "A_ch: " << std::endl << A_ch.toString() << std::endl;
     std::cout << std::endl << "b_ch: " << std::endl << b_ch.toString() << std::endl;
     std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer.toString() << std::endl;
@@ -551,7 +353,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         double oscillation_check_e = 0.0;
         for(i = 0; i < n_iterations; ++i)
         {
-            idynutils_com.updateiDyn3Model(q, true);
+            idynutils.updateiDyn3Model(q, true);
 
             first_task->update(q);
             right_foot_task->update(q);
@@ -578,7 +380,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             previous_e = e;
 
             if(e < 1e-3) {  // what if we get too close?!?
-                boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
+                boundsCartesianPositionConstraint->getConstraints(points, A_ch, b_ch, 0.01);
                 std::cout << "A_ch:" << A_ch.toString() << std::endl;
                 std::cout << "b_ch:" << b_ch.toString() << std::endl;
             }
@@ -616,10 +418,10 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         double expected_d = norm(exp_distance);
 
         std::vector<KDL::Vector> points_check;
-        boundsConvexHull->getConvexHull(points_check);
+        boundsCartesianPositionConstraint->getCartesianPositionConstraint(points_check);
         yarp::sig::Matrix A_ch_check;
         yarp::sig::Vector b_ch_check;
-        boundsConvexHull->getConstraints(points_check, A_ch_check, b_ch_check, 0.01);
+        boundsCartesianPositionConstraint->getConstraints(points_check, A_ch_check, b_ch_check, 0.01);
 
         EXPECT_NEAR(d, expected_d, (expected_d-0.01)*1.01) << "Failed to reach point "
                                                            << point
@@ -656,12 +458,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _log << "ctc = plot2(com_traj_constraint,'m');" << std::endl;
         _log << "legend([ct,ctc], 'CoM Traj, r_sole ctrl as task', 'CoM Traj, r_sole ctrl as constraint');" << std::endl;
     }
-
+*/
 }
-
-INSTANTIATE_TEST_CASE_P(tryDifferentFootTaskStrategies,
-                        testQPOases_ConvexHull,
-                        ::testing::Values(USE_TASK, USE_CONSTRAINT));
 
 }
 
