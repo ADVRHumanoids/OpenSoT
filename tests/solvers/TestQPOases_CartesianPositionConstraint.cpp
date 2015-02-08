@@ -138,8 +138,8 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(model);
-    model.updateiDyn3Model(q, true);
     model.switchAnchorAndFloatingBase(model.left_leg.end_effector_name);
+    model.updateiDyn3Model(q, true);
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -171,12 +171,14 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     yarp::sig::Matrix W(3,3);
     W.eye(); W(2,2) = .1;
     DHS.com->setWeight(W);
-    DHS.leftArm->setLambda(0.6);
-    DHS.leftArm->setOrientationErrorGain(0.1);
+    W.resize(6,6);
+    W.eye(); W(0,0) = .5;
+    DHS.leftArm->setLambda(0.3);
+    DHS.leftArm->setOrientationErrorGain(0.05);
 
-    stack = (DHS.leftLeg + DHS.rightLeg) /
-             //(DHS.leftArm << cartesianConstraint) /
-             DHS.leftArm /
+    stack =  (DHS.leftLeg + DHS.rightLeg) /
+             ((DHS.leftArm << cartesianConstraint) + DHS.rightArm) /
+             //(DHS.leftArm + DHS.rightArm) /
              DHS.com / DHS.postural;
     stack << DHS.jointLimits << DHS.velocityLimits;
 
@@ -219,10 +221,18 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
         model.updateiDyn3Model(q, true);
         stack->update(q);
 
+        // setting left arm reference
         KDL::Frame traj_pose = traj1.Pos(t);
         yarp::sig::Matrix traj_pose_y;
         KDLtoYarp_position(traj_pose, traj_pose_y);
         DHS.leftArm->setReference(traj_pose_y);
+
+        // setting postural reference to have minimum velocity
+        // on left arm, postural on the rest of the body
+        yarp::sig::Vector q_postural = DHS.postural->getReference();
+        for(unsigned int i = 0; i < model.left_arm.joint_numbers.size(); ++i)
+            q_postural[model.left_arm.joint_numbers[i]] = q[model.left_arm.joint_numbers[i]];
+        DHS.postural->setReference(q_postural);
 
         // we get only the position, the orientation remains fixed
         KDL::Frame desired_pose = start;
@@ -244,6 +254,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 
 #ifdef TRY_ON_SIMULATOR
             robot.move(q);
+            yarp::os::Time::delay(0.05);
 #endif
 
         t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
