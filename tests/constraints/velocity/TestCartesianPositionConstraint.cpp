@@ -40,7 +40,7 @@ class testCartesianPositionConstraint : public ::testing::Test{
       // A,b represent a plane with normal along the z axis. We are imposing the z coordinate of the right_arm
       // should be greater than 0.5
       _A.zero(); _A(0,2) = -1.0;
-      _cartesianPositionConstraint = new CartesianPositionConstraint(zeros, _DHS.rightArm, _A, _b);
+      _cartesianPositionConstraint = new CartesianPositionConstraint(zeros, _DHS.leftArm, _A, _b);
   }
 
   virtual ~testCartesianPositionConstraint() {
@@ -79,6 +79,23 @@ class testCartesianPositionConstraint : public ::testing::Test{
   yarp::sig::Vector _b;
 };
 
+yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
+    yarp::sig::Vector q(model.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(model.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    model.fromRobotToIDyn(leg, q, model.left_leg);
+    model.fromRobotToIDyn(leg, q, model.right_leg);
+    yarp::sig::Vector arm(model.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 20.0 * M_PI/180.0;
+    arm[1] = 10.0 * M_PI/180.0;
+    arm[3] = -80.0 * M_PI/180.0;
+    model.fromRobotToIDyn(arm, q, model.left_arm);
+    arm[1] = -arm[1];
+    model.fromRobotToIDyn(arm, q, model.right_arm);
+    return q;
+}
 
 TEST_F(testCartesianPositionConstraint, checkBoundsScaling) {
     // ------- Set The robot in a certain configuration ---------
@@ -88,7 +105,7 @@ TEST_F(testCartesianPositionConstraint, checkBoundsScaling) {
       delete _cartesianPositionConstraint;
       _cartesianPositionConstraint = NULL;
     }
-    _cartesianPositionConstraint = new CartesianPositionConstraint(zeros, _DHS.rightArm, _A, _b, 0.5);
+    _cartesianPositionConstraint = new CartesianPositionConstraint(zeros, _DHS.leftArm, _A, _b, 0.5);
 
     double boundSmall = _cartesianPositionConstraint->getbUpperBound()[0];
 
@@ -141,7 +158,57 @@ TEST_F(testCartesianPositionConstraint, sizesAreCorrect) {
 
 // Tests that the Foo::getLowerBounds() are zero at the bounds
 TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
+    // left arm z coordinate is at .52 m, the bound implies z > .50 m
+    _DHS.leftArm->setLambda(0.3);
+    q = getGoodInitialPosition(coman);
+    coman.updateiDyn3Model(q, true);
+    _DHS.leftArm->update(q);
+    _cartesianPositionConstraint->update(q);
 
+    yarp::sig::Matrix p = _DHS.leftArm->getActualPose();
+    p(2,3) = 0.5;
+    _DHS.leftArm->setReference(p);
+
+    double e = 0.0;
+    unsigned int i = 0;
+
+    // when above the position bound, z_dot > z_dot_limit = -bUpperBound
+    // and we expect z_dot_limit to be NEGATIVE (we can go up, but also down)
+    EXPECT_LT(-_cartesianPositionConstraint->getbUpperBound()(0),0.0);
+    do {
+        e = norm(_DHS.leftArm->getb());
+        double previous_bUpperBound = -_cartesianPositionConstraint->getbUpperBound()(0);
+        q += pinv(_DHS.leftArm->getA(),1E-7)*_DHS.leftArm->getLambda()*_DHS.leftArm->getb();
+        coman.updateiDyn3Model(q, true);
+        _DHS.leftArm->update(q);
+        _cartesianPositionConstraint->update(q);
+        EXPECT_GE(-_cartesianPositionConstraint->getbUpperBound()(0), previous_bUpperBound) << "@i=" << i;
+        ++i;
+    } while ( e > 1e-6 && i < 1000);
+    ASSERT_TRUE(e < 1.51e-6);
+    ASSERT_NEAR(_DHS.leftArm->getActualPose().getCol(3).subVector(0,2)(2),0.5,1.5e-6);
+    // when at the bound, z_dot > z_dot_limit = -bUpperBound
+    // and we expect z_dot_limit to be ZERO (we can go up, but not down)
+    EXPECT_NEAR(-_cartesianPositionConstraint->getbUpperBound()(0),0.0,1.5e-6);
+
+
+    p(2,3) = 0.45;
+    _DHS.leftArm->setReference(p);
+
+    e = 0.0;
+    i = 0;
+    do {
+        e = norm(_DHS.leftArm->getb());
+        q += pinv(_DHS.leftArm->getA(),1E-7)*_DHS.leftArm->getLambda()*_DHS.leftArm->getb();
+        coman.updateiDyn3Model(q, true);
+        _DHS.leftArm->update(q);
+        _cartesianPositionConstraint->update(q);
+        ++i;
+    } while ( e > 1e-6 && i < 1000);
+    ASSERT_TRUE(e < 1.51e-6);
+    // when below the bound, z_dot > z_dot_limit = -bUpperBound
+    // and we expect z_dot_limit to be POSITIVE (we MUST go up, quickly!!!)
+    EXPECT_GT(-_cartesianPositionConstraint->getbUpperBound()(0),0.0);
 }
 
 }  // namespace
