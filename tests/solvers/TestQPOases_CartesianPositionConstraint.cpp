@@ -125,7 +125,7 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
     return q;
 }
 
-#define TRY_ON_SIMULATOR
+//#define TRY_ON_SIMULATOR
 TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 
 #ifdef TRY_ON_SIMULATOR
@@ -218,7 +218,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 #else
     double t_test = yarp::os::SystemClock::nowSystem();
 #endif
-    for (double t=0.0; t <= 5.0*traj1.Duration(); t+= t_loop)
+    for (double t=1e-3; t <= 5.0*traj1.Duration(); t+= t_loop)
     {
 #ifdef TRY_ON_SIMULATOR
         double t_begin = yarp::os::Time::now();
@@ -256,6 +256,13 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
             expected_pose.p.z(-b_Cartesian(1));
 
         e = norm(DHS.leftArm->getb());
+
+        double distanceBetweenExpectedAndActualPosition =
+            (KDL::Vector2(expected_pose.p.y(),expected_pose.p.z()) -
+             KDL::Vector2(actual_pose.p.y(), actual_pose.p.z())).Norm();
+        EXPECT_LT(distanceBetweenExpectedAndActualPosition, 1.5e-3)
+            << "@t "<< t << " expected small distance between expected and actual position,"
+            <<" getting "<< distanceBetweenExpectedAndActualPosition << " instead";
 
         EXPECT_TRUE(sot->solve(dq));
         q += dq;
