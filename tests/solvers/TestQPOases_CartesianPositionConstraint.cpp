@@ -138,8 +138,8 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(model);
-    model.switchAnchorAndFloatingBase(model.left_leg.end_effector_name);
     model.updateiDyn3Model(q, true);
+    model.switchAnchorAndFloatingBase(model.left_leg.end_effector_name);
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -165,7 +165,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
         new vConstraints::CartesianPositionConstraint(q,
                                                       DHS.leftArm,
                                                       A_Cartesian,
-                                                      b_Cartesian, 0.5));
+                                                      b_Cartesian, 0.09));
     DHS.velocityLimits->setVelocityLimits(0.3);
     DHS.com->setLambda(0.6);
     yarp::sig::Matrix W(3,3);
@@ -174,11 +174,11 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     W.resize(6,6);
     W.eye(); W(0,0) = .5;
     DHS.leftArm->setLambda(0.3);
-    DHS.leftArm->setOrientationErrorGain(0.05);
+    DHS.leftArm->setOrientationErrorGain(0.1);
 
     stack =  (DHS.leftLeg + DHS.rightLeg) /
-             //((DHS.leftArm << cartesianConstraint) + DHS.rightArm) /
-             (DHS.leftArm + DHS.rightArm) /
+             ((DHS.leftArm << cartesianConstraint) + DHS.rightArm) /
+             //(DHS.leftArm + DHS.rightArm) /
              DHS.com / DHS.postural;
     stack << DHS.jointLimits << DHS.velocityLimits;
 
@@ -198,7 +198,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     center.p.y(start.p.y()-radius);
 
     // rotating along the x axis
-    CircularTrajectory traj1(start, center, KDL::Vector(1.0,0.0,0.0), 0.05);
+    CircularTrajectory traj1(start, center, KDL::Vector(1.0,0.0,0.0), 0.04);
     ASSERT_TRUE(traj1.Pos(0.0) == start) << start << "\nis different than\n"
                                          << traj1.Pos(0.0);
 
@@ -209,7 +209,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     unsigned int i = 0;
     _log << "start = [" << start.p.y() << "," << start.p.z() << "];" << std::endl;
     _log << "center = [" << center.p.y() << "," << center.p.z() << "];" << std::endl;
-    _log << "%t, des_y, des_z, act_y, act_z, expected_y, expected_z, e, t_loop" << std::endl;
+    _log << "%t, des_y, des_z, act_y, act_z, expected_y, expected_z, e, t_loop, bUpperBounds(0), bUpperBounds(1), xdot, ydot, zdot" << std::endl;
     _log << "test_data = [";
 
     double t_loop = 0.0;
@@ -275,7 +275,11 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
              << desired_pose.p.y() << "," << desired_pose.p.z() << ","
              << actual_pose.p.y() << "," << actual_pose.p.z() << ","
              << expected_pose.p.y() << "," << expected_pose.p.z() << ","
-             << e << "," << t_loop << ";" << std::endl;
+             << e << "," << t_loop << ","  << cartesianConstraint->getbUpperBound()(0) << ","
+                                           << cartesianConstraint->getbUpperBound()(1) << ","
+             << (DHS.leftArm->getA()*dq)[0] << ","
+             << (DHS.leftArm->getA()*dq)[1] << ","
+             << (DHS.leftArm->getA()*dq)[2] << ";" << std::endl;
     }
 
     _log << "];" << std::endl;
@@ -291,7 +295,12 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     _log << "title('End Effector Trajectories on the YZ plane');" << std::endl;
     _log << "legend('Desired','Actual','Expected');" << std::endl;
     _log << "figure; plot(test_data(:,1),test_data(:,9)); title('Computation time'); legend('Solve time');" << std::endl;
-    _log << "figure; plot(test_data(:,1),test_data(:,8)); title('Tracking Error'); legend('Left Arm Trajectory tracking error');" << std::endl;
+    _log << "figure; subplot(3,1,1); plot(test_data(:,1),test_data(:,[2,4,6,3,5,7])); title('Tracking Error');" << std::endl;
+    _log << "legend('Desired Y', 'Actual Y', 'Expected Y', 'Desired Z', 'Actual Z', 'Expected Z');" << std::endl;
+    _log << "subplot(3,1,2); plot(test_data(:,1),[test_data(:,10),-test_data(:,11)]); title('Bounds');" << std::endl;
+    _log << "legend('Velocity Bounds for Upper Position Bound', 'Velocity limits for Lower Position Bound');" << std::endl;
+    _log << "subplot(3,1,3); plot(test_data(:,1),test_data(:,8)); title('Tracking Error');" << std::endl;
+    _log << "legend('Left Arm Trajectory tracking error');" << std::endl;
 }
 
 }

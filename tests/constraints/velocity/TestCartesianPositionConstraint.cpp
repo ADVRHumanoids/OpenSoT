@@ -172,6 +172,11 @@ TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
     double e = 0.0;
     unsigned int i = 0;
 
+    EXPECT_TRUE(_cartesianPositionConstraint->getAineq() == -1.0*_DHS.leftArm->getA().submatrix(2,2,0,28))
+        << "Aineq is \n"            << _cartesianPositionConstraint->getAineq().toString()
+        << "\n while J(2,:) is \n"  << (-1.0 * _DHS.leftArm->getA().submatrix(2,2,0,28)).toString();
+
+                                                                                                              ;
     // when above the position bound, z_dot > z_dot_limit = -bUpperBound
     // and we expect z_dot_limit to be NEGATIVE (we can go up, but also down)
     EXPECT_LT(-_cartesianPositionConstraint->getbUpperBound()(0),0.0);

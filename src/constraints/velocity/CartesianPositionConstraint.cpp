@@ -46,7 +46,7 @@ void CartesianPositionConstraint::update(const yarp::sig::Vector &x) {
 
     yarp::sig::Matrix J = _cartesianTask->getA();
     assert(J.rows() == 6 && "Jacobian doesn't have 6 rows. Is this a cartesian task?");
-    J.removeRows(2,3);
+    J.removeRows(3,3);
     assert(J.rows() == 3 && "Jacobian doesn't have 3 rows. Something went wrong.");
 
     _Aineq = _A_Cartesian * J;
