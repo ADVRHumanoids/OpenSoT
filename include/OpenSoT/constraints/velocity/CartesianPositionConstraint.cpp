@@ -22,14 +22,10 @@
  #include <OpenSoT/tasks/velocity/CoM.h>
  #include <yarp/sig/all.h>
  #include <idynutils/idynutils.h>
+ #include <idynutils/convex_hull.h>
  #include <kdl/frames.hpp>
 
 #define BOUND_SCALING 0.01
-
- // idynutils::convex_hull forward declaration
- namespace idynutils {
-     class convex_hull;
- }
 
  namespace OpenSoT {
     namespace constraints {
@@ -37,7 +33,7 @@
             /**
              * @brief The ConvexHull class implements a constraint of the type
              * \f$A_{\text{CH}}J_{\text{CoM}}\dot{q} \leq b_{\text{CH}}\f$, where every row in
-             * \f$\left[ A_{\text{CH}} , -b_{\text{CH}}\right]\f$
+             * \f$\left[ A_{\text{CH}} , -b_{\text{CH}\right]\f$
             */
             class ConvexHull: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             public:
@@ -45,7 +41,7 @@
             private:
                 iDynUtils &_robot;
                 double _boundScaling;
-                boost::shared_ptr<idynutils::convex_hull> _convex_hull;
+                idynutils::convex_hull _convex_hull;
                 std::vector<KDL::Vector> _ch;
             public:
                 /**
