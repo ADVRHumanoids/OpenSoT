@@ -116,8 +116,8 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
     model.fromRobotToIDyn(leg, q, model.left_leg);
     model.fromRobotToIDyn(leg, q, model.right_leg);
     yarp::sig::Vector arm(model.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
+    arm[0] = -10.0 * M_PI/180.0;
+    arm[1] = 30.0 * M_PI/180.0;
     arm[3] = -80.0 * M_PI/180.0;
     model.fromRobotToIDyn(arm, q, model.left_arm);
     arm[1] = -arm[1];
@@ -125,7 +125,7 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
     return q;
 }
 
-//#define TRY_ON_SIMULATOR
+#define TRY_ON_SIMULATOR
 TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 
 #ifdef TRY_ON_SIMULATOR
@@ -177,8 +177,8 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     DHS.leftArm->setOrientationErrorGain(0.05);
 
     stack =  (DHS.leftLeg + DHS.rightLeg) /
-             ((DHS.leftArm << cartesianConstraint) + DHS.rightArm) /
-             //(DHS.leftArm + DHS.rightArm) /
+             //((DHS.leftArm << cartesianConstraint) + DHS.rightArm) /
+             (DHS.leftArm + DHS.rightArm) /
              DHS.com / DHS.postural;
     stack << DHS.jointLimits << DHS.velocityLimits;
 
@@ -194,7 +194,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     YarptoKDL(start_y,start);
     center = start;
 
-    double radius = 0.05;
+    double radius = 0.06;
     center.p.y(start.p.y()-radius);
 
     // rotating along the x axis
@@ -213,10 +213,18 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     _log << "test_data = [";
 
     double t_loop = 0.0;
+#ifdef TRY_ON_SIMULATOR
+    double t_test = yarp::os::Time::now();
+#else
     double t_test = yarp::os::SystemClock::nowSystem();
-    for (double t=0.0; t <= traj1.Duration(); t+= t_loop)
+#endif
+    for (double t=0.0; t <= 5.0*traj1.Duration(); t+= t_loop)
     {
+#ifdef TRY_ON_SIMULATOR
+        double t_begin = yarp::os::Time::now();
+#else
         double t_begin = yarp::os::SystemClock::nowSystem();
+#endif
 
         model.updateiDyn3Model(q, true);
         stack->update(q);
@@ -253,13 +261,17 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
         q += dq;
 
 #ifdef TRY_ON_SIMULATOR
-            robot.move(q);
-            yarp::os::Time::delay(0.05);
-#endif
+        robot.move(q);
+        yarp::os::Time::delay(0.005);
 
+        t_loop = yarp::os::Time::now() - t_begin;
+
+        _log << yarp::os::Time::now() - t_test << ","
+#else
         t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
 
         _log << yarp::os::SystemClock::nowSystem() - t_test << ","
+#endif
              << desired_pose.p.y() << "," << desired_pose.p.z() << ","
              << actual_pose.p.y() << "," << actual_pose.p.z() << ","
              << expected_pose.p.y() << "," << expected_pose.p.z() << ","
