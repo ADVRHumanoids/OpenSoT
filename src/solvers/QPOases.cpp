@@ -20,7 +20,8 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation)
 }
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
-                         boost::shared_ptr<constraints::Aggregated> &bounds, const double eps_regularisation):
+                         ConstraintPtr bounds,
+                         const double eps_regularisation):
     Solver(stack_of_tasks, bounds),
     _epsRegularisation(eps_regularisation)
 {
