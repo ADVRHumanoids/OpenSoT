@@ -169,7 +169,7 @@ TEST_F(TestSubTaskMap, testSubMapOperatorPlus)
     indices1_plus_3.insert(indices1_plus_3.end(), indices3.begin(), indices3.end());
     indices1_plus_3.sort(); indices1_plus_3.unique();
 
-    OpenSoT::SubTask::SubTaskMap subTaskMap(indices);
+    OpenSoT::SubTask::SubTaskMap subTaskMap(indices.begin(),indices.end());
     OpenSoT::SubTask::SubTaskMap subTaskMap2(indices2);
     OpenSoT::SubTask::SubTaskMap subTaskMap3(indices3);
 
