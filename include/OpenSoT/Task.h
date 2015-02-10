@@ -84,9 +84,9 @@
         Matrix_type _W;
 
         /**
-         * @brief _alpha error scaling,
+         * @brief _lambda error scaling,
          * NOTE:
-         *          0.0 <= _alpha <= 1.0
+         *          _lambda >= 0.0
          */
         double _lambda;
 
@@ -159,7 +159,7 @@
 
         void setLambda(double lambda)
         {
-            assert(lambda <= 1.0 && lambda > 0.0);
+            assert(lambda >= 0.0);
             _lambda = lambda;
         }
         
