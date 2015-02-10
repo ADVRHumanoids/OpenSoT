@@ -67,6 +67,18 @@ OpenSoT::SubTask::SubTaskMap::SubTaskMap(const std::list<unsigned int> &rowsList
     this->generateChunks();
 }
 
+OpenSoT::SubTask::SubTaskMap::SubTaskMap(const std::vector<unsigned int> &rowsVector)
+{
+    for(std::vector<unsigned int>::const_iterator it = rowsVector.begin();
+        it != rowsVector.end();
+        ++it)
+    {
+        _rowsList.push_back(*it);
+    }
+
+    this->generateChunks();
+}
+
 OpenSoT::SubTask::SubTaskMap::SubTaskMap(const OpenSoT::SubTask::SubTaskMap &subTaskMap)
     : _rowsList(subTaskMap.getRowsList())
 {

@@ -41,12 +41,17 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_ConvexHull
                       testQPOases_FF
                       testQPOases_SubTask
+                      testQPOases_VelocityAllocation
                       testAggregatedTask
                       testSubTask
                       testCartesianVelocityTask
                       testCoMVelocityTask
+                      testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
                       testPosturalVelocityTask
+                      testAutoStack
+                      testDefaultHumanoidStack
+                      testVelocityAllocation
                       testYCartesian
                       testYPostural
                       testMinimizeAccelerationTask
@@ -109,10 +114,13 @@ ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
 add_dependencies(testQPOases_FF GTest-ext OpenSoT)
 
-
 ADD_EXECUTABLE(testQPOases_SubTask solvers/TestQPOases_SubTask.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_SubTask ${TestLibs})
 add_dependencies(testQPOases_SubTask GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
+add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs} ${PCL_LIBRARIES})
@@ -154,6 +162,10 @@ ADD_EXECUTABLE(testDefaultHumanoidStack utils/TestDefaultHumanoidStack.cpp)
 TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
 add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
+TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
+add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
 TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
 add_dependencies(testYCartesian GTest-ext OpenSoT)
@@ -177,6 +189,7 @@ add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQP
 add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
+add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
@@ -187,6 +200,7 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
+add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 add_custom_target(copy_robot_model_files ALL
                   ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")

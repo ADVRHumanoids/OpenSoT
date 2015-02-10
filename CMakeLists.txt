@@ -99,6 +99,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/Interaction.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
+                    src/utils/VelocityAllocation.cpp
                     ${sot_INCLUDES})
 
 

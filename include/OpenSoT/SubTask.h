@@ -29,6 +29,7 @@
  #include <yarp/math/Math.h>
  #include <yarp/math/SVD.h>
  #include <sstream>
+ #include <iterator>
 
  namespace OpenSoT {
 
@@ -84,6 +85,17 @@
             SubTaskMap(unsigned int i);
 
             SubTaskMap(const std::list<unsigned int>& rowsList);
+
+            SubTaskMap(const std::vector<unsigned int> &rowsVector);
+
+            template<class Iterator>
+            SubTaskMap(Iterator it, const Iterator end) {
+                while( it != end)
+                {
+                    _rowsList.push_back(*it);
+                    ++it;
+                }
+            }
 
             SubTaskMap(const SubTaskMap& subTaskMap);
 
