@@ -7,14 +7,6 @@
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
-#include <pcl/surface/convex_hull.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/ModelCoefficients.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/project_inliers.h>
 #include <cmath>
 #define  s                1.0
 #define  dT               0.001* s
@@ -26,194 +18,6 @@ using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 namespace {
-
-class old_convex_hull
-{
-public:
-    double _ransac_distance_thr;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr _pointCloud;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr _projectedPointCloud;
-
-    old_convex_hull():
-        _ransac_distance_thr(0.001),
-        _pointCloud(new pcl::PointCloud<pcl::PointXYZ>()),
-        _projectedPointCloud(new pcl::PointCloud<pcl::PointXYZ>()){}
-    ~old_convex_hull(){}
-
-    void getConvexHull(const std::list<KDL::Vector>& points, yarp::sig::Matrix& A, yarp::sig::Vector& b)
-    {
-        fromSTDList2PCLPointCloud(points, _pointCloud);
-
-            //Filtering
-            projectPCL2Plane(_pointCloud, _ransac_distance_thr, _projectedPointCloud);
-
-
-            pcl::PointCloud<pcl::PointXYZ> pointsInConvexHull;
-            std::vector<pcl::Vertices> indicesOfVertexes;
-
-            // hullVertices.vertices is the list of vertices...
-            // by taking each point and the consequent in the list
-            // (i.e. vertices[1]-vertices[0] it is possible to compute
-            // bounding segments for the hull
-            pcl::ConvexHull<pcl::PointXYZ> huller;
-            huller.setInputCloud (_projectedPointCloud);
-            huller.reconstruct(pointsInConvexHull, indicesOfVertexes);
-            if(indicesOfVertexes.size() != 1) {
-                std::cout<<"Error: more than one polygon found!"<<std::endl;
-                return;
-            } else
-                pcl::Vertices hullVertices = indicesOfVertexes[0];
-
-            //printIndexAndPointsInfo(pointsInConvexHull, indicesOfVertexes);
-
-            getConstraints(pointsInConvexHull, indicesOfVertexes, A, b);
-
-            _pointCloud->clear();
-            _projectedPointCloud->clear();
-    }
-
-    //void setRansacDistanceThr(const double x){_ransac_distance_thr = x;}
-
-/**
-  * @brief getSupportPolygonPoints
-  * @param points return a list of points express in a frame F
-  *        oriented like the world frame and with origin
-  *        on the CoM projection in the support polygon
-  */
- static void getSupportPolygonPoints( iDynUtils &robot,
-                                      std::list<KDL::Vector>& points)
- {
-     std::vector<std::string> names;
-     names.push_back("l_foot_lower_left_link");
-     names.push_back("l_foot_lower_right_link");
-     names.push_back("l_foot_upper_left_link");
-     names.push_back("l_foot_upper_right_link");
-     names.push_back("r_foot_lower_left_link");
-     names.push_back("r_foot_lower_right_link");
-     names.push_back("r_foot_upper_left_link");
-     names.push_back("r_foot_upper_right_link");
-
-     KDL::Frame waist_T_CoM;
-     KDL::Frame waist_T_point;
-     KDL::Frame CoM_T_point;
-     for(unsigned int i = 0; i < names.size(); ++i)
-     {
-         // get points in world frame
-         waist_T_point = robot.iDyn3_model.getPositionKDL(robot.iDyn3_model.getLinkIndex(names[i]));
-         // get CoM in the world frame
-         YarptoKDL(robot.iDyn3_model.getCOM(), waist_T_CoM.p);
-
-         CoM_T_point = waist_T_CoM.Inverse() * waist_T_point;
-         points.push_back(CoM_T_point.p);
-     }
- }
-
-    pcl::PointXYZ fromKDLVector2PCLPointXYZ(const KDL::Vector& point)
-    {
-        pcl::PointXYZ p;
-        p.x = point.x();
-        p.y = point.y();
-        p.z = point.z();
-        return p;
-    }
-
-    void fromSTDList2PCLPointCloud(const std::list<KDL::Vector>& points, pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud)
-    {
-        for(std::list<KDL::Vector>::const_iterator i = points.begin(); i != points.end(); ++i)
-               point_cloud->push_back(fromKDLVector2PCLPointXYZ(*i));
-    }
-
-    void projectPCL2Plane(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud, const double ransac_distance_thr,
-                          pcl::PointCloud<pcl::PointXYZ>::Ptr projected_point_cloud)
-    {
-        pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-
-            //We projects ALL the points in the plane (0 0 1)
-            coefficients->values.clear();
-            coefficients->values.resize(4, 0.0);
-            coefficients->values[0] = 0.0;
-            coefficients->values[1] = 0.0;
-            coefficients->values[2] = 1.0;
-            coefficients->values[3] = 0.0;
-
-        //    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-        //    // Create the segmentation object
-        //    pcl::SACSegmentation<pcl::PointXYZ> seg;
-        //    // Optional
-        //    seg.setOptimizeCoefficients (true);
-        //    // Mandatory
-        //    seg.setModelType (pcl::SACMODEL_PLANE);
-        //    seg.setMethodType (pcl::SAC_RANSAC);
-        //    seg.setDistanceThreshold (ransac_distance_thr);
-        //    seg.setInputCloud (cloud);
-        //    seg.segment (*inliers, *coefficients);
-
-
-            pcl::ProjectInliers<pcl::PointXYZ> proj;
-            proj.setModelType (pcl::SACMODEL_PLANE);
-            proj.setInputCloud (cloud);
-            proj.setModelCoefficients (coefficients);
-            proj.filter (*projected_point_cloud);
-    }
-
-    void printIndexAndPointsInfo(const pcl::PointCloud<pcl::PointXYZ>& pointsInConvexHull, const std::vector<pcl::Vertices>& indicesOfVertexes)
-    {
-        std::cout<<"Indices of vertex has size "<< indicesOfVertexes.size()<<std::endl;
-//        for(unsigned int i = 0; i < indicesOfVertexes.size(); ++i){
-//            pcl::Vertices vertices = indicesOfVertexes[i];
-//            for(unsigned int ii = 0; ii < vertices.vertices.size(); ++ii)
-//                ROS_INFO("vertex %i (%f, %f, %f) has index %i ", ii,
-//                         pointsInConvexHull.at(vertices.vertices[ii]).x, pointsInConvexHull.at(vertices.vertices[ii]).y, pointsInConvexHull.at(vertices.vertices[ii]).z,
-//                         vertices.vertices[ii]);
-//        }
-    }
-
-    void getLineCoefficients(const pcl::PointXYZ& p0, const pcl::PointXYZ& p1, double &a, double& b, double &c)
-    {
-        double x1 = p0.x;
-        double x2 = p1.x;
-        double y1 = p0.y;
-        double y2 = p1.y;
-
-        a = y1 - y2;
-        b = x2 - x1;
-        c = -b*y1 -a*x1;
-    }
-
-    void getConstraints(const pcl::PointCloud<pcl::PointXYZ>& pointsInConvexHull, const std::vector<pcl::Vertices>& indicesOfVertexes,
-                        yarp::sig::Matrix& A, yarp::sig::Vector& b)
-    {
-        double _a, _b, _c;
-            A.resize(pointsInConvexHull.size() ,2);
-            b.resize(pointsInConvexHull.size());
-
-            unsigned int z = 0;
-            for(unsigned int i = 0; i < indicesOfVertexes.size(); ++i)
-            {
-                const pcl::Vertices& vs = indicesOfVertexes[i];
-                for(unsigned int j = 0; j < vs.vertices.size(); ++j)
-                {
-                    unsigned int k = (j + 1)%vs.vertices.size();
-                    getLineCoefficients(pointsInConvexHull[vs.vertices[j]], pointsInConvexHull[vs.vertices[k]], _a, _b, _c);
-                    if(_c <= 0.0) { // see Moleskine
-                        A(z,0) = + _a;
-                        A(z,1) = + _b;
-                        b[z] =   - _c;
-                    } else {
-                        A(z,0) = - _a;
-                        A(z,1) = - _b;
-                        b[z] =   + _c;
-                    }
-                    double ch_boundary = 0;
-                    if(fabs(_c) <= ch_boundary)
-                        b[z] = 0.0;
-                    else
-                        b[z] -= ch_boundary;
-                    z++;
-                }
-            }
-    }
-};
 
 // The fixture for testing class ConvexHull.
 class testConvexHull : public ::testing::Test{
@@ -303,7 +107,7 @@ void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, iDy
 // we need to check the old implementation with the new.
 // notice how the two implementatios are equal only when boundScaling = 0.0
 // In fact, the old implementation was bogus...
-TEST_F(testConvexHull, comparisonWithOldImplementation) {
+TEST_F(testConvexHull, checkImplementation) {
     // ------- Set The robot in a certain configuration ---------
     yarp::sig::Vector q(coman.iDyn3_model.getNrOfDOFs(), 0.0);
     q[coman.left_leg.joint_numbers[0]] = toRad(-23.5);
@@ -324,14 +128,21 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     ConvexHull localConvexHull( q, coman, 0.00);
     localConvexHull.update(q);
 
-    old_convex_hull oldConvexHull;
-
     std::list<KDL::Vector> points;
-    old_convex_hull::getSupportPolygonPoints(coman, points);
-    yarp::sig::Matrix A;
+    std::vector<KDL::Vector> ch;
+    idynutils::convex_hull huller;
     yarp::sig::Matrix A_JCoM;
+    yarp::sig::Matrix A;
     yarp::sig::Vector b;
-    oldConvexHull.getConvexHull(points, A, b);
+
+    coman.getSupportPolygonPoints(points,"COM");
+    huller.getConvexHull(points, ch);
+    ConvexHull::getConstraints(ch, A, b, 0.00);
+
+    EXPECT_EQ(ch.size(),A.rows());
+    EXPECT_EQ(b.size(), A.rows());
+    EXPECT_EQ(A.cols(), 2);
+
 
     yarp::sig::Matrix Aineq = localConvexHull.getAineq();
     yarp::sig::Vector bUpperBound = localConvexHull.getbUpperBound();
@@ -362,29 +173,6 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     std::cout<<"Aineq: "<<Aineq.toString()<<std::endl;
     std::cout<<"b: "<<b.toString()<<std::endl;
     std::cout<<"bUpperBound: "<<bUpperBound.toString()<<std::endl;
-
-    std::list<KDL::Vector> points2;
-    coman.getSupportPolygonPoints(points2,"COM");
-
-    idynutils::convex_hull idyn_convex_hull;
-    std::vector<KDL::Vector> ch;
-    idyn_convex_hull.getConvexHull(points2, ch);
-
-    yarp::sig::Matrix A_ch;
-    yarp::sig::Vector b_ch;
-    ConvexHull::getConstraints(ch, A_ch, b_ch, 0.0);
-
-    EXPECT_EQ(A.rows(), A_ch.rows());
-    EXPECT_EQ(A.cols(), A_ch.cols());
-    EXPECT_EQ(b.size(), b_ch.size());
-    for(unsigned int i = 0; i < A.rows(); ++i)
-    {
-        for(unsigned j = 0; j < A.cols(); ++j)
-            EXPECT_DOUBLE_EQ(A(i,j), A_ch(i,j));
-    }
-
-    for(unsigned int i = 0; i < b.size(); ++i)
-        EXPECT_DOUBLE_EQ(b[i], b_ch[i]);
 }
 
 TEST_F(testConvexHull, checkBoundsScaling) {
@@ -409,7 +197,7 @@ TEST_F(testConvexHull, checkBoundsScaling) {
     for(unsigned int i = 0; i < b_ch.size(); ++i) {
         double norm_i = sqrt(A_ch(i,0)*A_ch(i,0) + A_ch(i,1)*A_ch(i,1));
         double distance_i = fabs(b_ch_1cm_scaling[i]-b_ch[i])/norm_i;
-        EXPECT_DOUBLE_EQ(distance_i,.01);
+        EXPECT_NEAR(distance_i,.01,1e-16);
     }
 }
 
