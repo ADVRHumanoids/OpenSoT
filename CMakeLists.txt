@@ -111,7 +111,7 @@ endif()
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES}
-                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES})
+                              PRIVATE ${qpOASES_LIBRARIES})
 
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #

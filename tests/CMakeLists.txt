@@ -83,7 +83,7 @@ TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
 add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
-TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
 add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
@@ -91,7 +91,7 @@ TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
 add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
-TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
 add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
@@ -123,35 +123,35 @@ TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
 add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
-TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
 add_dependencies(testAggregatedTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
-TARGET_LINK_LIBRARIES(testSubTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
 add_dependencies(testSubTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
-TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
-TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
 add_dependencies(testInteractionVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
-TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
 add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
-TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
 add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
-TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
 add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testMinimizeAccelerationTask tasks/velocity/TestMinimizeAcceleration.cpp)
-TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs})
 add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
