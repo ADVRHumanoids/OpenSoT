@@ -1,2 +1,2 @@
-testQPOases_VelocityAllocation.m
-testQPOases_ConvexHull.m
+testQPOases_VelocityAllocation
+testQPOases_ConvexHull
