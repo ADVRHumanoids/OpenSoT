@@ -648,14 +648,15 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             _log << point.x() << "," << point.y() << ";";
         _log << "];" << std::endl;
 
-        _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); axis equal;" << std::endl;
-        _log << "ct = plot2(com_traj,'b');" << std::endl;
+        _log << "ch_figure = figure('Position',[0 0 1027 768]); hold on; plot(points(:,1), points(:,2), 'r'); plot(points_inner(:,1), points_inner(:,2), 'g'); axis equal;" << std::endl;
+        _log << "ct = plot(com_traj(:,1), com_traj(:,2), 'b');" << std::endl;
     }
     else if(footStrategy==USE_CONSTRAINT)
     {
-        _log << "ctc = plot2(com_traj_constraint,'m');" << std::endl;
+        _log << "ctc = plot(com_traj_constraint(:,1), com_traj_constraint(:,2), 'm');" << std::endl;
         _log << "legend([ct,ctc], 'CoM Traj, r_sole ctrl as task', 'CoM Traj, r_sole ctrl as constraint');" << std::endl;
     }
+    _log << "print(ch_figure,'-depsc','testQPOases_ConvexHull_followingBounds');" << std::endl;
 
 }
 
