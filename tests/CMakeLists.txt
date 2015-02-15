@@ -203,9 +203,10 @@ add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStac
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 
-find_package(Matlab QUIET)
+find_package(MATLAB QUIET)
 if(MATLAB_FOUND)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_CURRENT_BINARY_DIR}/../CTestCustom.cmake)
+else()
 endif()
 
 
@@ -213,4 +214,4 @@ add_custom_target(copy_robot_model_files ALL
                   ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")
 
 add_custom_target(copy_test_plotter ALL
-                  ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.m" "${CMAKE_CURRENT_BINARY_DIR}/tests/")
+                  ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.m" "${CMAKE_CURRENT_BINARY_DIR}/")
