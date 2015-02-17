@@ -22,6 +22,7 @@ namespace OpenSoT {
              *              w = sqrt(det(J*W*J'))
              *
              * The gradient of w is then computed and projected using the gardient projection method.
+             * W is a CONSTANT weight matrix.
              */
             class Manipulability : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:
@@ -41,7 +42,7 @@ namespace OpenSoT {
                 double ComputeManipulabilityIndex();
 
                 /**
-                 * @brief setW set a Weight matrix for the manipulability index
+                 * @brief setW set a CONSTANT Weight matrix for the manipulability index
                  * @param W weight matrix
                  */
                 void setW(const yarp::sig::Matrix& W){
