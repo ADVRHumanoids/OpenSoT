@@ -151,6 +151,7 @@
 
                 const std::string getDistalLink() const;
                 const std::string getBaseLink() const;
+                const bool baseLinkIsWorld() const;
 
                 void setLambda(double lambda);
             };

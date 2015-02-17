@@ -55,7 +55,8 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testYCartesian
                       testYPostural
                       testMinimizeAccelerationTask
-                      testInteractionVelocityTask)
+                      testInteractionVelocityTask
+                      TestManipulabilityTask)
 endif()
 
 # gTests for Velocity constraints
@@ -146,6 +147,10 @@ ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cp
 TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
+TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${PCL_LIBRARIES})
+add_dependencies(testManipulabilityTask GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
@@ -196,6 +201,7 @@ add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
+add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)

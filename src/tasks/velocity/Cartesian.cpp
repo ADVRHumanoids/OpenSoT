@@ -149,6 +149,11 @@ const std::string OpenSoT::tasks::velocity::Cartesian::getBaseLink() const
     return _base_link;
 }
 
+const bool OpenSoT::tasks::velocity::Cartesian::baseLinkIsWorld() const
+{
+    return _base_link_is_world;
+}
+
 void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
 {
     if(lambda >= 0.0){

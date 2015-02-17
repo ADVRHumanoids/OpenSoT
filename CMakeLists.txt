@@ -97,6 +97,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/Postural.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
                     src/tasks/velocity/Interaction.cpp
+                    src/tasks/velocity/Manipulability.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/VelocityAllocation.cpp
