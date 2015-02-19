@@ -28,11 +28,17 @@ An online version of this documentation can be obtained in http://opensot.github
 
 Some videos from OpenSoT channel in YouTube:
 
-[[embed url=http://www.youtube.com/watch?v=Avs6pqUCqVo]]
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=Avs6pqUCqVo
+" target="_blank"><img src="http://img.youtube.com/vi/Avs6pqUCqVo/0.jpg" 
+alt="OpenSoT + PI" width="480" height="360" border="10" />OpenSoT + PI</a>
 
-[[embed url=http://www.youtube.com/watch?v=cBggRy7WPUE]]
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=cBggRy7WPUE&list=UUkkZXunCN6eJwww1CeK7DrA
+" target="_blank"><img src="http://img.youtube.com/vi/cBggRy7WPUE/0.jpg" 
+alt="Minimum Effort + Drawing Task" width="480" height="360" border="10" />Minimum Effort + Drawing Task</a>
 
-[[embed url=http://www.youtube.com/watch?v=U1FcIq15jg4]]
+<a href="https://www.youtube.com/watch?v=U1FcIq15jg4&feature=youtu.be
+" target="_blank"><img src="http://img.youtube.com/vi/U1FcIq15jg4/0.jpg" 
+alt="Static Walking with the SoT" width="480" height="360" border="10" />Static Walking with the SoT</a>
 
 Installation
 ------------
