@@ -49,7 +49,7 @@
             class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:
                 typedef boost::shared_ptr<Cartesian> Ptr;
-            private:
+            protected:
                 iDynUtils& _robot;
 
                 std::string _distal_link;
@@ -151,6 +151,7 @@
 
                 const std::string getDistalLink() const;
                 const std::string getBaseLink() const;
+                const bool baseLinkIsWorld() const;
 
                 void setLambda(double lambda);
             };

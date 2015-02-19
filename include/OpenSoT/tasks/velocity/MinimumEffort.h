@@ -131,6 +131,21 @@
                  * @return the effort at the actual configuration q (ast from latest update(q))
                  */
                 double computeEffort();
+
+                /**
+                 * @brief setW set a CONSTANT Weight matrix for the manipulability index
+                 * @param W weight matrix
+                 */
+                void setW(const yarp::sig::Matrix& W){
+                    _gTauGradientWorker.setW(W);
+                }
+
+                /**
+                 * @brief getW get a Weight matrix for the manipulability index
+                 */
+                yarp::sig::Matrix getW(){
+                    return _gTauGradientWorker.getW();
+                }
             };
         }
     }

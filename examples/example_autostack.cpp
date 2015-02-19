@@ -4,7 +4,11 @@
 
 int main(int argc, char **argv) {
 
-    iDynUtils _robot;
+    iDynUtils _robot("coman",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q = _robot.iDyn3_model.getAng();
+
     OpenSoT::DefaultHumanoidStack DHS(_robot, 3e-3, _robot.zeros);
 
     // defining a stack composed of size two,
@@ -15,4 +19,10 @@ int main(int argc, char **argv) {
     OpenSoT::AutoStack::Ptr autoStack = 
         ((DHS.leftArm + (DHS.rightArm << DHS.convexHull))
         / (DHS.rightLeg + DHS.leftLeg)) << DHS.jointLimits << DHS.velocityLimits;
+
+    q += .01*q;
+    _robot.updateiDyn3Model(q,true);
+
+    // automatically update all tasks and constraints in the autostack
+    autoStack->update(q);
 }

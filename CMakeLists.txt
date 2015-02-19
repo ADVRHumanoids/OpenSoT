@@ -22,6 +22,10 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type -Werror=address -Werror=parentheses " )
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(YARP REQUIRED)
@@ -75,6 +79,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/Aggregated.cpp
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
+                    src/constraints/velocity/CartesianPositionConstraint.cpp
                     src/constraints/velocity/CoMVelocity.cpp
                     src/constraints/velocity/ConvexHull.cpp
                     src/constraints/velocity/JointLimits.cpp
@@ -85,6 +90,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/tasks/Aggregated.cpp
+                    src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/CoM.cpp
                     src/tasks/velocity/MinimumEffort.cpp
@@ -92,8 +98,11 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/SelfCollisionAvoidance.cpp
                     src/tasks/velocity/Self_collision_avoidance.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
+                    src/tasks/velocity/Interaction.cpp
+                    src/tasks/velocity/Manipulability.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
+                    src/utils/VelocityAllocation.cpp
                     ${sot_INCLUDES})
 
 

@@ -24,6 +24,8 @@
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
+#define LAMBDA_THS 1E-12
+
 Cartesian::Cartesian(std::string task_id,
                      const yarp::sig::Vector& x,
                      iDynUtils &robot,
@@ -147,15 +149,25 @@ const std::string OpenSoT::tasks::velocity::Cartesian::getBaseLink() const
     return _base_link;
 }
 
+const bool OpenSoT::tasks::velocity::Cartesian::baseLinkIsWorld() const
+{
+    return _base_link_is_world;
+}
+
 void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
 {
-    this->_lambda = lambda;
-    this->update_b();
+    if(lambda >= 0.0){
+        this->_lambda = lambda;
+        this->update_b();
+    }
 }
 
 void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
-    _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError) + _desiredTwist/_lambda;
+    if(_lambda >= LAMBDA_THS)
+        _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError) + _desiredTwist/_lambda;
+    else
+        _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError);
 }

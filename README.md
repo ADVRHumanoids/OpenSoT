@@ -1,5 +1,17 @@
-OpenSoT v0.1
+OpenSoT v0.2
 =========
+
+New Features Includes:
+-----------------------
+- SubTasks: to consider only some rows of Tasks Jacobians/Errors
+- Active Joint Mask: to zero columns in the Task Jacobians
+- Rewritten QP Solver: this version does not explicitly pass Constraints of high priority Tasks to low priority Tasks
+- MinAcc task
+- Cartesian Interaction Task
+- Math of Tasks (aka write IK problem in a more easy way)
+- Autostack 
+- Many Bug Fixes
+- Improved documentation (we hope!)
 
 An Open Source Task Solving library with Constraints
 

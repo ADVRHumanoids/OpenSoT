@@ -15,7 +15,9 @@ class testCartesianTask: public ::testing::Test
 protected:
     iDynUtils _robot;
 
-    testCartesianTask()
+    testCartesianTask() : _robot("coman",
+                                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
     {
 
     }
@@ -33,6 +35,7 @@ protected:
     }
 
 };
+
 
 TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
 {

@@ -22,7 +22,11 @@ class testCoMVelocity : public ::testing::Test {
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testCoMVelocity() {
+  testCoMVelocity() :
+      coman("coman",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
+  {
     // You can do set-up work for each test here.
 
       velocityLimits.resize(3,CoMVelocityLimit);

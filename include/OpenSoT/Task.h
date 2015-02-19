@@ -23,7 +23,9 @@
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
  #include <boost/shared_ptr.hpp>
-#include <yarp/sig/Matrix.h>
+ #include <yarp/sig/Matrix.h>
+ #include <yarp/math/Math.h>
+ #include <yarp/math/SVD.h>
 
  namespace OpenSoT {
 
@@ -82,16 +84,16 @@
         Matrix_type _W;
 
         /**
-         * @brief _alpha error scaling,
+         * @brief _lambda error scaling,
          * NOTE:
-         *          0.0 <= _alpha <= 1.0
+         *          _lambda >= 0.0
          */
         double _lambda;
 
         /**
          * @brief _bounds related to the Task
          */
-        std::list< boost::shared_ptr<ConstraintType> > _constraints;
+        std::list< ConstraintPtr > _constraints;
 
         /**
          * @brief _active_joint_mask is vector of bool that represent the active joints of the task.
@@ -129,9 +131,7 @@
 
         virtual ~Task(){}
 
-        const Matrix_type& getA() {
-            if(!(std::all_of(_active_joints_mask.begin(), _active_joints_mask.end(), istrue())))
-                applyActiveJointsMask(_A);
+        const Matrix_type& getA() const {
             return _A;
         }
 
@@ -139,12 +139,27 @@
         const Vector_type& getb() const { return _b; }
 
         const Matrix_type& getWeight() const { return _W; }
-        virtual void setWeight(const Matrix_type& W) { _W = W; }
+
+        /**
+         * @brief setWeight sets the task weight.
+         * Note the Weight needs to be positive definite.
+         * If your original intent was to get a subtask
+         * (i.e., reduce the number of rows of the task Jacobian),
+         * please use the class SubTask
+         * @param W matrix weight
+         */
+        virtual void setWeight(const Matrix_type& W) {
+            assert(W.rows() == this->getTaskSize());
+            assert(W.cols() == W.rows());
+            _W = W;
+        }
+
 
         const double getLambda() const { return _lambda; }
-        virtual void setLambda(double lambda)
+
+        void setLambda(double lambda)
         {
-            assert(lambda <= 1.0 && lambda > 0.0);
+            assert(lambda >= 0.0);
             _lambda = lambda;
         }
         
@@ -155,7 +170,7 @@
          *              task.getConstraints().push_back(new_constraint)
          * @return
          */
-        std::list< ConstraintPtr >& getConstraints() { return _constraints; }
+        virtual std::list< ConstraintPtr >& getConstraints() { return _constraints; }
 
         /** Gets the number of variables for the task.
             @return the number of columns of A */
@@ -163,14 +178,18 @@
 
         /** Gets the task size.
             @return the number of rows of A */
-        const unsigned int getTaskSize() const { return _A.rows(); }
+        virtual const unsigned int getTaskSize() const { return _A.rows(); }
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         void update(const Vector_type &x) {
-            for(typename std::list< ConstraintPtr >::iterator i = _constraints.begin();
-                i != _constraints.end(); ++i) (*i)->update(x);
-            this->_update(x); }
+            for(typename std::list< ConstraintPtr >::iterator i = this->getConstraints().begin();
+                i != this->getConstraints().end(); ++i) (*i)->update(x);
+            this->_update(x);
+
+            if(!(std::all_of(_active_joints_mask.begin(), _active_joints_mask.end(), istrue())))
+                applyActiveJointsMask(_A);
+        }
 
         /**
          * @brief getTaskID return the task id
@@ -183,18 +202,21 @@
          * If an element is false the corresponding column of the task jacobian is set to 0.
          * @return a vector of bool
          */
-        std::vector<bool> getActiveJointsMask(){return _active_joints_mask;}
+        virtual std::vector<bool> getActiveJointsMask(){return _active_joints_mask;}
 
         /**
-         * @brief setActiveJointsMask set a mask on the jacobian
+         * @brief setActiveJointsMask set a mask on the Jacobian. The changes take effect immediately.
          * @param active_joints_mask
          * @return true if success
          */
-        bool setActiveJointsMask(const std::vector<bool>& active_joints_mask)
+        virtual bool setActiveJointsMask(const std::vector<bool>& active_joints_mask)
         {
             if(active_joints_mask.size() == _active_joints_mask.size())
             {
                 _active_joints_mask = active_joints_mask;
+
+                applyActiveJointsMask(_A);
+
                 return true;
             }
             return false;

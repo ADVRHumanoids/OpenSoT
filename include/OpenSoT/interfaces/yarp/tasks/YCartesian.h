@@ -128,6 +128,7 @@ private:
             return false;
         }
 
+        return true;
     }
 
     bool setOrientationGain()
@@ -221,6 +222,8 @@ private:
 class YCartesian : public ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>
 {
 public:
+    typedef boost::shared_ptr<YCartesian> Ptr;
+
     YCartesian(const std::string& robot_name,
                const std::string& module_prefix,
                Cartesian::Ptr cartesian_task);

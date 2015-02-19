@@ -14,9 +14,13 @@ protected:
     iDynUtils _robot;
     OpenSoT::DefaultHumanoidStack DHS;
 
-    testAutoStack() : DHS(_robot,
-                          3e-3,
-                          _robot.zeros)
+    testAutoStack() :
+        _robot("coman",
+                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
+        DHS(_robot,
+              3e-3,
+              _robot.zeros)
     {
 
     }
