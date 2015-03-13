@@ -9,7 +9,7 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0017 NEW)
 endif(COMMAND cmake_policy)
 include(ExternalProject)
-PROJECT(OpenSoT)
+PROJECT(open_sot)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -44,10 +44,12 @@ FIND_PACKAGE(srdfdom REQUIRED)
 FIND_PACKAGE(moveit_core REQUIRED)
 FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
+FIND_PACKAGE(interactive_markers REQUIRED)
+FIND_PACKAGE(catkin REQUIRED)
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS}
-                    ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS})
+                    ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS} ${tf_INCLUDE_DIRS} ${interactive_markers_INDCLUDE_DIRS})
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
@@ -103,6 +105,8 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/utils/VelocityAllocation.cpp
                     ${sot_INCLUDES})
 
+ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
+ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
@@ -112,7 +116,11 @@ endif()
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES}
-                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES})
+                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
 
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
@@ -139,11 +147,24 @@ install(DIRECTORY include/
         DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
         FILES_MATCHING PATTERN "*.h")
 
-install(TARGETS OpenSoT  
+install(TARGETS OpenSoT
         EXPORT OpenSoT
         ARCHIVE DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT lib
         RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
         LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
+
+catkin_package(
+ INCLUDE_DIRS include
+ LIBRARIES idyn_ros_interface
+ CATKIN_DEPENDS roscpp rospy roslib
+ DEPENDS system_lib TinyXML
+)
+
+install(TARGETS ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
         
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
 set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)

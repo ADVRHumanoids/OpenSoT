@@ -1,0 +1,21 @@
+<launch>
+     	
+     <node pkg="open_sot" type="ros_yarp_Cartesian_interactive_marker" name="ros_yarp_Cartesian_interactive_marker_RArm" output="screen" >
+       <param name="base_link" type="string" value="/Waist" />
+       <param name="distal_link" type="string" value="/RSoftHand" />
+       <param name="port_name" type="string" value="/bigman/drc_valve/6d::r_arm::Waist/set_ref:i" />
+     </node>
+
+     <node pkg="open_sot" type="ros_yarp_Cartesian_interactive_marker" name="ros_yarp_Cartesian_interactive_marker_LArm" output="screen" >
+       <param name="base_link" type="string" value="/Waist" />
+       <param name="distal_link" type="string" value="/LSoftHand" />
+       <param name="port_name" type="string" value="/bigman/drc_valve/6d::l_arm::Waist/set_ref:i" />
+     </node>
+
+     <node pkg="open_sot" type="ros_yarp_gaze_interactive_marker" name="ros_yarp_gaze_interactive_marker" output="screen" >
+       <param name="base_link" type="string" value="/Waist" />
+       <param name="distal_link" type="string" value="/gaze" />
+       <param name="port_name" type="string" value="/bigman/drc_valve/6d::torso::gaze/set_ref:i" />
+     </node>
+
+</launch>
