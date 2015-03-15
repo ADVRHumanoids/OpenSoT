@@ -42,6 +42,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_FF
                       testQPOases_SubTask
                       testQPOases_VelocityAllocation
+                      testQPOases_Options
                       testAggregatedTask
                       testSubTask
                       testCartesianVelocityTask
@@ -123,6 +124,10 @@ ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAlloca
 TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
 add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
+add_dependencies(testQPOases_Options GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testAggregatedTask GTest-ext OpenSoT)
@@ -195,6 +200,7 @@ add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
+add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
