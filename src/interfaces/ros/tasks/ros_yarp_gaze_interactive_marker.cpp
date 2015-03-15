@@ -9,7 +9,11 @@
 #include <yarp/os/BufferedPort.h>
 
 using namespace visualization_msgs;
-
+/**
+ * @brief The GazeMarker class implements a 2DoF-Pan/Tilt interactive marker with a menu for reset the orientation of
+ * the marker. The marker works from base_link to distal_link sending position references to a port opened by a
+ * YCartesian interface.
+ */
 class GazeMarker
 {
 public:

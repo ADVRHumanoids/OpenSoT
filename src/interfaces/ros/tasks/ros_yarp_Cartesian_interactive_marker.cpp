@@ -9,7 +9,11 @@
 #include <yarp/os/BufferedPort.h>
 
 using namespace visualization_msgs;
-
+/**
+ * @brief The SPhereMarker6DoF class implements a 6DoF interactive marker with a menu for reset the position of
+ * the marker. The marker works from base_link to distal_link sending position references to a port opened by a
+ * YCartesian interface.
+ */
 class SPhereMarker6DoF
 {
 public:

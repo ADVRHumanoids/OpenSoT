@@ -1,5 +1,5 @@
 # Copyright: (C) 2014 Walkman Consortium
-# Authors: Enrico Mingo, Alessio Rocchi
+# Authors: Enrico Mingo Hoffman, Alessio Rocchi
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
 cmake_minimum_required(VERSION 2.8.12)
@@ -156,15 +156,18 @@ install(TARGETS OpenSoT
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES idyn_ros_interface
- CATKIN_DEPENDS roscpp rospy roslib
+ CATKIN_DEPENDS roscpp rospy roslib srdfdom
  DEPENDS system_lib TinyXML
 )
 
-install(TARGETS ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
+install(TARGETS OpenSoT ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
         
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
 set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
