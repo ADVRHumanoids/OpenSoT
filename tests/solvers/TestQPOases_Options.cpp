@@ -21,6 +21,12 @@ using namespace yarp::math;
 
 namespace{
 
+/** The logged file is organized as:
+ *
+ *  data = [error_x error_y error_z error_ox error_oy error_oz solve_time]
+ *
+**/
+
 class testIKProblem
 {
 public:
@@ -37,8 +43,9 @@ public:
     OpenSoT::solvers::QPOases_sot::Ptr _sot;
     yarp::sig::Vector q;
     yarp::sig::Matrix T_ref_0;
+    std::ofstream _log;
 
-    testIKProblem(const double t, const qpOASES::Options &options):
+    testIKProblem(const double t, const qpOASES::Options &options, const std::string file_name):
         _idynutils("coman", std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
         _base_link_0("Waist"),
@@ -83,6 +90,9 @@ public:
 
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i)
             _sot->setOptions(i, options);
+
+        _log.open(file_name);
+        _log<<"data = ["<<std::endl;
     }
 
     double solve(yarp::sig::Vector& dq, bool& solved)
@@ -90,12 +100,25 @@ public:
         double tic = yarp::os::Time::now();
         solved = _sot->solve(dq);
         double toc = yarp::os::Time::now();
-        return toc - tic;
+
+        double dt = toc - tic;
+        _log<<dt<<std::endl;
+        return dt;
+    }
+
+    void update(const yarp::sig::Vector& q)
+    {
+        _cartesian_task_0->update(q);
+        _postural_task->update(q);
+        _joint_constraints->update(q);
+
+        _log<<_cartesian_task_0->getb().toString()<<" ";
     }
 
     ~testIKProblem()
     {
-
+        _log<<" ]"<<std::endl;
+        _log.close();
     }
 
 
@@ -138,15 +161,13 @@ public:
 class testQPOases_Options: public ::testing::Test
 {
 protected:
-    std::ofstream _log;
-
     testQPOases_Options()
     {
-        _log.open("testQPOases_Options.m");
+
     }
 
     virtual ~testQPOases_Options() {
-        _log.close();
+
     }
 
     virtual void SetUp() {
@@ -170,7 +191,7 @@ TEST_F(testQPOases_Options, testOptionMPC)
 
     opt0.ensureConsistency();
 
-    testIKProblem test0(double(T), opt0);
+    testIKProblem test0(double(T), opt0, "test_option_mpc_0.m");
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
     opt0.print();
@@ -181,9 +202,7 @@ TEST_F(testQPOases_Options, testOptionMPC)
     {
         test0._idynutils.updateiDyn3Model(test0.q, true);
 
-        test0._cartesian_task_0->update(test0.q);
-        test0._postural_task->update(test0.q);
-        test0._joint_constraints->update(test0.q);
+        test0.update(test0.q);
 
         bool solved;
         acc += test0.solve(dq, solved);
@@ -210,7 +229,7 @@ TEST_F(testQPOases_Options, testOptionReliable)
 
     opt0.ensureConsistency();
 
-    testIKProblem test0(double(T), opt0);
+    testIKProblem test0(double(T), opt0,"test_option_reliable_0.m");
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
     opt0.print();
@@ -221,9 +240,7 @@ TEST_F(testQPOases_Options, testOptionReliable)
     {
         test0._idynutils.updateiDyn3Model(test0.q, true);
 
-        test0._cartesian_task_0->update(test0.q);
-        test0._postural_task->update(test0.q);
-        test0._joint_constraints->update(test0.q);
+        test0.update(test0.q);
 
         bool solved;
         acc += test0.solve(dq, solved);
@@ -250,7 +267,7 @@ TEST_F(testQPOases_Options, testOptionDefault)
 
     opt0.ensureConsistency();
 
-    testIKProblem test0(double(T), opt0);
+    testIKProblem test0(double(T), opt0, "test_option_default_0.m");
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
     opt0.print();
@@ -261,9 +278,7 @@ TEST_F(testQPOases_Options, testOptionDefault)
     {
         test0._idynutils.updateiDyn3Model(test0.q, true);
 
-        test0._cartesian_task_0->update(test0.q);
-        test0._postural_task->update(test0.q);
-        test0._joint_constraints->update(test0.q);
+        test0.update(test0.q);
 
         bool solved;
         acc += test0.solve(dq, solved);
