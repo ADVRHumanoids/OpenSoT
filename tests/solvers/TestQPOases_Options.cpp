@@ -91,8 +91,11 @@ public:
 
         _sot = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(_stack_of_tasks, _joint_constraints));
 
-        for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i)
+        for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
+            qpOASES::Options opti;
+            _sot->getOptions(i, opti);
+            opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
         _log.open(file_name);
@@ -259,8 +262,11 @@ public:
 
         _sot = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(_stack_of_tasks, _joint_constraints));
 
-        for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i)
+        for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
+            qpOASES::Options opti;
+            _sot->getOptions(i, opti);
+            opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
         _log.open(file_name);
@@ -454,8 +460,11 @@ public:
 
         _sot = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(_stack_of_tasks, _joint_constraints));
 
-        for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i)
+        for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
+            qpOASES::Options opti;
+            _sot->getOptions(i, opti);
+            opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
         _log.open(file_name);
@@ -588,7 +597,6 @@ TEST_F(testQPOases_Options, testOptionMPC)
     testIKProblem test0(double(T), opt0, "mpc_cartesian");
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     yarp::sig::Vector dq(test0.q.size(), 0.0);
     double acc = 0.0;
@@ -614,7 +622,6 @@ TEST_F(testQPOases_Options, testOptionMPC)
     testIKProblem2 test1(double(T), opt0, "mpc_2cartesians_stacked");
 
     std::cout<<GREEN<<"test1 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     dq.zero();
     acc = 0.0;
@@ -640,7 +647,6 @@ TEST_F(testQPOases_Options, testOptionMPC)
     testIKProblem3 test2(double(T), opt0, "mpc_2cartesians_augmented");
 
     std::cout<<GREEN<<"test2 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     dq.zero();
     acc = 0.0;
@@ -678,7 +684,6 @@ TEST_F(testQPOases_Options, testOptionReliable)
     testIKProblem test0(double(T), opt0,"reliable_cartesian");
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     yarp::sig::Vector dq(test0.q.size(), 0.0);
     double acc = 0.0;
@@ -703,7 +708,6 @@ TEST_F(testQPOases_Options, testOptionReliable)
     testIKProblem2 test1(double(T), opt0, "reliable_2cartesians_stacked");
 
     std::cout<<GREEN<<"test1 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     dq.zero();
     acc = 0.0;
@@ -728,7 +732,6 @@ TEST_F(testQPOases_Options, testOptionReliable)
     testIKProblem3 test2(double(T), opt0, "reliable_2cartesians_augmented");
 
     std::cout<<GREEN<<"test2 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     dq.zero();
     acc = 0.0;
@@ -766,7 +769,6 @@ TEST_F(testQPOases_Options, testOptionDefault)
     testIKProblem test0(double(T), opt0, "default_cartesian");
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     yarp::sig::Vector dq(test0.q.size(), 0.0);
     double acc = 0.0;
@@ -791,7 +793,6 @@ TEST_F(testQPOases_Options, testOptionDefault)
     testIKProblem2 test1(double(T), opt0, "default_2cartesians_stacked");
 
     std::cout<<GREEN<<"test1 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     dq.zero();
     acc = 0.0;
@@ -816,7 +817,6 @@ TEST_F(testQPOases_Options, testOptionDefault)
     testIKProblem3 test2(double(T), opt0, "default_2cartesians_augmented");
 
     std::cout<<GREEN<<"test2 options:"<<DEFAULT<<std::endl;
-    opt0.print();
 
     dq.zero();
     acc = 0.0;
