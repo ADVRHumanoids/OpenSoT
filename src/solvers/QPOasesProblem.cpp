@@ -33,7 +33,7 @@ QPOasesProblem::~QPOasesProblem()
 void QPOasesProblem::setDefaultOptions()
 {
     qpOASES::Options opt;
-    opt.setToReliable();
+    opt.setToMPC();
     opt.printLevel = qpOASES::PL_NONE;
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= _epsRegularisation;
