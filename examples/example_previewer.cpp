@@ -55,5 +55,22 @@ int main(int argc, char **argv) {
 
     Previewer::Ptr previewer(new Previewer(dT, _robot, autoStack, bindings));
 
-    previewer->check();
+    Previewer::Results results;
+    previewer->check(1.0,3,&results);
+
+    std::cout << "Logged " << results.failures.size() << " failures:" << std::endl;
+    for(unsigned int i = 0; i < results.failures.size(); ++i)
+    {
+        std::cout << "@t:" << results.failures[i].t
+                  << " - " << Previewer::Results::reasonToString(results.failures[i].reason)
+                  << std::endl;
+    }
+
+    std::cout << "Logged " << results.trajectory.size() << " trajectory nodes:" << std::endl;
+    for(unsigned int i = 0; i < results.trajectory.size(); ++i)
+    {
+        std::cout << "@t:" << results.trajectory[i].t
+                  << " - " << results.trajectory[i].q.toString()
+                  << std::endl;
+    }
 }

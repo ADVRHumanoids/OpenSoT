@@ -27,6 +27,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
+#include <utility>
 
 /**
  * @example example_previwer.cpp
@@ -46,6 +47,55 @@ namespace OpenSoT {
     {
         public:
             typedef boost::shared_ptr<TrajectoryGenerator> TrajGenPtr;
+
+            struct Results
+            {
+                enum Reason { COLLISION_EVENT, ERROR_UNBOUNDED };
+                static std::string reasonToString(Reason reason) {
+                    switch(reason)
+                    {
+                        case COLLISION_EVENT:
+                            return "Collision Occured";
+                        case ERROR_UNBOUNDED:
+                            return "Unbounded Cartesian Error";
+                        default:
+                            return "Unknown error";
+                    }
+                }
+
+                struct TrajectoryLogEntry   { double t; yarp::sig::Vector q;
+                                              TrajectoryLogEntry(double t, const yarp::sig::Vector& q) :
+                                                t(t), q(q) {} };
+                struct FailuresLogEntry     { double t; Reason reason;
+                                              OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
+                                              FailuresLogEntry(double t, Reason reason) :
+                                                t(t), reason(reason) {}
+                                              FailuresLogEntry(double t, Reason reason,
+                                                               OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task) :
+                                                t(t), reason(reason), task(task) {} };
+
+                std::vector <TrajectoryLogEntry> trajectory;
+                std::vector <FailuresLogEntry> failures;
+
+                void logFailure(double time, Reason reason)
+                {
+                    failures.push_back(
+                        FailuresLogEntry(time, reason));
+                }
+
+                void logFailure(double time, Reason reason,
+                                OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+                {
+                    failures.push_back(
+                        FailuresLogEntry(time, reason, task));
+                }
+
+                void logTrajectory(double time, const yarp::sig::Vector& q)
+                {
+                    trajectory.push_back(
+                        TrajectoryLogEntry(time, q));
+                }
+            };
 
             class TrajBinding
             {
@@ -508,7 +558,8 @@ namespace OpenSoT {
              *              and no self-collisions were detected
              */
             bool check(const double time = std::numeric_limits<double>::infinity(),
-                       const unsigned int max_retries = 3)
+                       const unsigned int max_retries = 3,
+                       Results* results = NULL)
             {
                 this->reset();
 
@@ -541,10 +592,21 @@ namespace OpenSoT {
                     // update the stack to update the references
                     autostack->update(q);
 
-                    if(shouldCheckSelfCollision())
-                        check_ok = check_ok && !model.checkSelfCollision();
+                    if(shouldCheckSelfCollision()) {
+                        if(!model.checkSelfCollision())
+                        {
+                            check_ok = false;
+                            if(results != NULL)
+                                results->logFailure(t, Results::Results::COLLISION_EVENT);
+                        }
+                    }
 
-                    check_ok = check_ok && cartesianErrorIsBounded();
+                    if(!cartesianErrorIsBounded())
+                    {
+                        check_ok = false;
+                        if(results != NULL)
+                            results->logFailure(t, Results::ERROR_UNBOUNDED);
+                    }
 
                     if(solver->solve(dq))
                     {
@@ -552,6 +614,11 @@ namespace OpenSoT {
 
                         q += dq;
                         t += dT;
+
+                        if(results != NULL) {
+                            results->logTrajectory(t, q);
+                        }
+
                     } else ++retries;
                 }
 
