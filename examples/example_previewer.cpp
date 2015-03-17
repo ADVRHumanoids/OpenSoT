@@ -1,23 +1,23 @@
+#include <iCub/iDynTree/yarp_kdl.h>
 #include <idynutils/idynutils.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/Previewer.h>
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/rolling_mean.hpp>
-
 /**
  * @brief The MyTrajGen class dummy trajectory generator:
  *        it creates a constant trajectory that lasts one second.
- *        The goal pose is with p={0,0,0}, R=I
+ *        The goal pose is with p=initialPose, R=I
  */
 class MyTrajGen
 {
+    KDL::Frame f;
 public:
     typedef boost::shared_ptr<MyTrajGen> Ptr;
-    KDL::Frame Pos(double time) { return KDL::Frame(); }
+    MyTrajGen(yarp::sig::Matrix yf) { assert(YarptoKDL(yf, f) &&
+                                             "Error converting yarp::Matrix to kdl::Frame"); }
+    KDL::Frame Pos(double time) { return f; }
     KDL::Twist Vel(double time) { return KDL::Twist(); }
     double Duration() { return 1.0; }
 };
@@ -46,8 +46,8 @@ int main(int argc, char **argv) {
         ((DHS.leftArm + (DHS.rightArm << DHS.convexHull))
         / (DHS.rightLeg + DHS.leftLeg)) << DHS.jointLimits << DHS.velocityLimits;
 
-    MyTrajGen::Ptr trajLeftArm(new MyTrajGen());
-    MyTrajGen::Ptr trajRightArm(new MyTrajGen());
+    MyTrajGen::Ptr trajLeftArm(new MyTrajGen(DHS.leftArm->getActualPose()));
+    MyTrajGen::Ptr trajRightArm(new MyTrajGen(DHS.rightArm->getActualPose()));
 
     Previewer::TrajectoryBindings bindings;
     bindings.push_back(Previewer::TrajBinding(trajLeftArm, DHS.leftArm));
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     Previewer::Ptr previewer(new Previewer(dT, _robot, autoStack, bindings));
 
     Previewer::Results results;
-    previewer->check(1.0,3,&results);
+    previewer->check(0.1,3,&results);
 
     std::cout << "Logged " << results.failures.size() << " failures:" << std::endl;
     for(unsigned int i = 0; i < results.failures.size(); ++i)

@@ -567,12 +567,17 @@ namespace OpenSoT {
                 unsigned int retries = 0;
                 bool check_ok = true;
 
+                // logging initial trajectory node
+                if(results != NULL) {
+                    results->logTrajectory(t, q);
+                }
+
                 while(!finished) {
                     if(time == std::numeric_limits<double>::infinity())
                         finished =  trajectoriesCompleted() ||
                                     (cartesianErrorOK() && jointSpaceConfigurationOK());
                     else
-                        finished = (t <= time);
+                        finished = (t >= time);
 
                     if(retries >= max_retries) {
                         finished = true;
