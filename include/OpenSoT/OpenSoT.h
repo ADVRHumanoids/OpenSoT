@@ -31,5 +31,7 @@
 
  #include "utils/AutoStack.h"
  #include "utils/DefaultHumanoidStack.h"
+ #include "utils/Previewer.h"
+ #include "utils/VelocityAllocation.h"
 
 #endif
