@@ -596,7 +596,7 @@ namespace OpenSoT {
                                                          autostack->getBounds()))
             {
                 if(!checkConsistency()) throw new std::runtime_error("Uncoherent bindings");
-                this->reset(idyn);
+                this->reset();
             }
 
             /**
@@ -619,7 +619,7 @@ namespace OpenSoT {
                 solver(solver)
             {
                 if(!checkConsistency()) throw new std::runtime_error("Uncoherent bindings");
-                this->reset(idyn);
+                this->reset();
             }
 
             /**
