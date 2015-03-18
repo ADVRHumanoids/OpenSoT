@@ -163,7 +163,7 @@ namespace OpenSoT {
             OpenSoT::AutoStack::Ptr autostack;
             TrajectoryBindings bindings;
             double dT;
-            iDynUtils model;
+            iDynUtils& model;
             OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr solver;
             double t;
 
@@ -497,9 +497,7 @@ namespace OpenSoT {
                 autostack(autostack),
                 bindings(bindings),
                 dT(dT),
-                model(idyn.getRobotName(),
-                      idyn.getRobotURDFPath(),
-                      idyn.getRobotSRDFPath()),
+                model(idyn),
                 solver(new OpenSoT::solvers::QPOases_sot(autostack->getStack(),
                                                          autostack->getBounds()))
             {
@@ -523,9 +521,7 @@ namespace OpenSoT {
                 autostack(autostack),
                 bindings(bindings),
                 dT(dT),
-                model(idyn.getRobotName(),
-                      idyn.getRobotURDFPath(),
-                      idyn.getRobotSRDFPath()),
+                model(idyn),
                 solver(solver)
             {
                 if(!checkConsistency()) throw new std::runtime_error("Uncoherent bindings");
