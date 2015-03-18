@@ -48,6 +48,12 @@ namespace OpenSoT {
         public:
             typedef boost::shared_ptr<TrajectoryGenerator> TrajGenPtr;
 
+
+
+            /**
+             * @brief The Results struct is used to store information about the preview.
+             *        We store the trajectory and all detected failures
+             */
             struct Results
             {
                 enum Reason { COLLISION_EVENT, ERROR_UNBOUNDED };
@@ -63,9 +69,18 @@ namespace OpenSoT {
                     }
                 }
 
+                /**
+                 * @brief The TrajectoryLogEntry struct is used to store time, joint configuration pairs,
+                 *        as used by the Results struct
+                 */
                 struct TrajectoryLogEntry   { double t; yarp::sig::Vector q;
                                               TrajectoryLogEntry(double t, const yarp::sig::Vector& q) :
                                                 t(t), q(q) {} };
+
+                /**
+                 * @brief The FailuresLogEntry struct
+                 *        as used by the Results struct
+                 */
                 struct FailuresLogEntry     { double t; Reason reason;
                                               OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
                                               FailuresLogEntry(double t, Reason reason) :
@@ -97,22 +112,53 @@ namespace OpenSoT {
                 }
             };
 
+            /**
+             * @brief The TrajBinding class represent an entry in a list of bindings needed for cartesian control.
+             *        In every TrajBinding instance we specify a trajectory generator and a task.
+             *        For every previewer simulation step, we compute a pose from the trajectory generator
+             *        and assign it as a reference pose for the task which is bound to that trajectory generator.
+             *        For every binding we also define error bounds that are checked at every simulation step
+             *        and a convergence threshold which gets checked if the previewer is asked to simulate to infinity
+             *        for early termination of the preview
+             */
             class TrajBinding
             {
             public:
+                enum ConvergencePolicy {
+                    // converges when cartesian error wrt goal goes below a certain threshold
+                    CONVERGE_ON_CARTESIAN_ERROR_SMALL,
+                    // converges when cartesian error wrt goal goes below a certain threshold AND error is not decreasing
+                    CONVERGE_ON_CARTESIAN_ERROR_SMALL_AND_NOT_DECREASING,
+                    // converges when cartesian error wrt goal goes below a certain threshold
+                    CONVERGE_ON_CARTESIAN_ERROR_AND_NULL_STABLE };
+
+                ConvergencePolicy convergencePolicy;
                 double convergenceTolerance;
                 double maximumAllowedError;
                 OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
                 TrajGenPtr trajectoryGenerator;
 
+                /**
+                 * @brief TrajBinding binds a trajectory generator to a task
+                 * @param trajectoryGenerator a pointer to a trajectory generator
+                 * @param task a pointer to a task (either Cartesian or CoM)
+                 * @param maximumAllowedError maximum error, in norm (R^6 or R^3), during tracking
+                 *          Notice that the norm of the R^6 error gets checked, so the
+                 *          orientationErrorGain of the Task is used when we use the Cartesian task
+                 * @param convergenceTolerance maximum error, in norm (R^3), to the goal.
+                 *          Notice that convergenceTolerance gets checked separately
+                 *          from positionError and orientationError (if orientationError exists)
+                 */
                 TrajBinding(TrajGenPtr trajectoryGenerator,
                             OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
                             double maximumAllowedError = 1e-1,
-                            double convergenceTolerance = 1e-4) :
+                            double convergenceTolerance = 1e-4,
+                            ConvergencePolicy convergencePolicy = CONVERGE_ON_CARTESIAN_ERROR_SMALL) :
                     convergenceTolerance(convergenceTolerance),
                     maximumAllowedError(maximumAllowedError),
                     task(task),
-                    trajectoryGenerator(trajectoryGenerator)
+                    trajectoryGenerator(trajectoryGenerator),
+                    convergencePolicy(convergencePolicy)
                 {}
             };
 
@@ -121,10 +167,20 @@ namespace OpenSoT {
             typedef boost::accumulators::accumulator_set<double,
                                                         boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                                         > Accumulator;
+
+            struct CartesianError { double positionError; double orientationError; double Ko;
+                                    CartesianError() :
+                                        positionError(0.0), orientationError(0.0), Ko(1.0) {}
+                                    double getNorm() {
+                                        return std::sqrt(std::pow(positionError,2) +
+                                                         std::pow(Ko*orientationError,2)); }
+                                  };
+
             struct ErrorLog {
                 Accumulator accumulator;
                 double previousMean;
                 double lastError;
+                CartesianError errorToGoal;
 
                 ErrorLog(int window_size = 100) :
                     accumulator(boost::accumulators::tag::rolling_mean::window_size = window_size),
@@ -135,6 +191,12 @@ namespace OpenSoT {
                     lastError = error;
                     previousMean = this->getRollingMean();
                     accumulator(lastError);
+                }
+
+                void update(double error, CartesianError toGoal)
+                {
+                    this->update(error);
+                    errorToGoal = toGoal;
                 }
 
                 double getRollingMean()
@@ -213,40 +275,27 @@ namespace OpenSoT {
              * @param threshold the minimum decrease we detect. If we converge slower than this, it will not get detected
              * @return true if error is decreasing on all tasks
              */
-            bool cartesianErrorDecreasing(double threshold = 1e-9)
+            bool cartesianErrorDecreasing(const TrajBinding& b, double threshold = 1e-9)
             {
-                bool allTasksDecreasing = true;
-                for(typename TrajectoryBindings::iterator b = bindings.begin();
-                    b != bindings.end();
-                    ++b)
-                {
-                    if(cartesianErrors[b->task].previousMean - cartesianErrors[b->task].getRollingMean() < threshold)
-                        allTasksDecreasing = false;
-                }
-                return allTasksDecreasing;
+                if(cartesianErrors[b.task].previousMean - cartesianErrors[b.task].getRollingMean() < threshold)
+                    return false;
+                return true;
             }
 
             /**
              * @brief cartesianErrorConverged checks whether cartesian error is smaller
-             *        than the convergence tolerance
+             *        than the convergence tolerance.
+             *        We check position error and orientation error separately
+             *        against the threshold, so that we detect convergence when
+             *        positionError <= threshold && orientationError <= threshold
              * @return true if cartesian error converged on all tasks
              */
-            bool cartesianErrorConverged()
+            bool cartesianErrorConverged(const TrajBinding& b)
             {
-                bool allTasksConverged = true;
-                for(typename TrajectoryBindings::iterator b = bindings.begin();
-                    b != bindings.end();
-                    ++b)
-                {
-                    if(cartesianErrors[b->task].lastError > b->convergenceTolerance)
-                        allTasksConverged = false;
-                }
-                return allTasksConverged;
-            }
-
-            bool cartesianErrorOK()
-            {
-                return (cartesianErrorConverged() && !cartesianErrorDecreasing());
+                if(cartesianErrors[b.task].errorToGoal.positionError > b.convergenceTolerance ||
+                   cartesianErrors[b.task].errorToGoal.orientationError > b.convergenceTolerance)
+                    return false;
+                return true;
             }
 
             /**
@@ -347,6 +396,30 @@ namespace OpenSoT {
             }
 
             /**
+             * @brief converged checks whether all tasks succesfully converged according on convergence policy
+             * @return true if all tasks converged according to their convergence policy and cartesian/joint space errors
+             */
+            bool converged()
+            {
+                bool allTasksConverged = true;
+                for(typename TrajectoryBindings::iterator b = bindings.begin();
+                    b != bindings.end();
+                    ++b)
+                {
+                    if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_SMALL)
+                        if(!cartesianErrorConverged(*b))
+                            allTasksConverged = false;
+                    else if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_SMALL_AND_NOT_DECREASING)
+                         if(!(cartesianErrorConverged(*b) && !cartesianErrorDecreasing(*b)))
+                             allTasksConverged = false;
+                    else if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_AND_NULL_STABLE)
+                         if(!((cartesianErrorConverged(*b) && !cartesianErrorDecreasing(*b)) && jointSpaceConfigurationConverged()))
+                             allTasksConverged = false;
+                }
+                return allTasksConverged;
+            }
+
+            /**
              * @brief shouldCheckSelfCollision checks whether cartesian poses changed or
              * joint position changed too much; in which case, we force a collision check
              * @return true if we need to call a self-collision check
@@ -374,15 +447,6 @@ namespace OpenSoT {
             bool jointSpaceConfigurationConverged(double threshold = 1e-9)
             {
                 return yarp::math::norm(dq) < threshold;
-            }
-
-            /**
-             * @brief jointSpaceConfigurationOK checks whether the solver has converged
-             * @return true if the robot is stable (converged also to its null-space goals)
-             */
-            bool jointSpaceConfigurationOK()
-            {
-                return jointSpaceConfigurationConverged();
             }
 
 
@@ -423,12 +487,12 @@ namespace OpenSoT {
             }
 
             /**
-             * @brief trajectoriesCompleted checks whether we simulated forward in time enough
+             * @brief trajectoriesExpired checks whether we simulated forward in time enough
              *        to ecompass the duratino of all trajectories.
              * @param safetyMargin a percentage of the longest trajectory duration we wish to wait for.
              * @return true if t has surpassed the longest trajectory duration by safetyMargin (in percentage)
              */
-            bool trajectoriesCompleted(double safetyMargin = 1.5)
+            bool trajectoriesExpired(double safetyMargin = 1.5)
             {
                 bool trajCompleted = true;
 
@@ -451,10 +515,40 @@ namespace OpenSoT {
                     ++b)
                 {
                     if(cartesianErrors.count(b->task) == 0)
+                    {
                         cartesianErrors[b->task] =
                             ErrorLog(std::ceil(windowSizeInSecs/dT));
+                    }
 
-                    cartesianErrors[b->task].update(yarp::math::norm(b->task->getb()));
+                    KDL::Frame goal = b->trajectoryGenerator->Pos(
+                        b->trajectoryGenerator->Duration());
+
+                    if(isCartesian(b->task))
+                    {
+                        CartesianError toGoal;
+                        yarp::sig::Vector positionError(3,0.0), orientationError(3,0.0);
+
+                        cartesian_utils::computeCartesianError(asCartesian(b->task)->getActualPose(), KDLtoYarp_position(goal),
+                                                               positionError,
+                                                               orientationError);
+
+                        toGoal.positionError = yarp::math::norm(positionError);
+                        toGoal.orientationError = yarp::math::norm(orientationError);
+                        toGoal.Ko = asCartesian(b->task)->getOrientationErrorGain();
+
+                        cartesianErrors[b->task].update(yarp::math::norm(b->task->getb()),
+                                                        toGoal);
+                    }
+
+                    else if(isCoM(b->task))
+                    {
+                        CartesianError toGoal;
+
+                        toGoal.positionError = yarp::math::norm(asCoM(b->task)->getActualPosition() - KDLtoYarp(goal.p));
+
+                        cartesianErrors[b->task].update(yarp::math::norm(b->task->getb()),
+                                                        toGoal);
+                    }
                 }
             }
 
@@ -570,8 +664,8 @@ namespace OpenSoT {
 
                 while(!finished) {
                     if(time == std::numeric_limits<double>::infinity())
-                        finished =  trajectoriesCompleted() ||
-                                    (cartesianErrorOK() && jointSpaceConfigurationOK());
+                        finished =  trajectoriesExpired() ||
+                                    converged();
                     else
                         finished = (t >= time);
 
