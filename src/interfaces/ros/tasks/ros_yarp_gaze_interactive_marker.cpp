@@ -24,17 +24,13 @@ public:
         server( new interactive_markers::InteractiveMarkerServer(server_name, server_name+"_id") ),
         _yarp_network(yarp_network)
     {
-        tf::StampedTransform base_link_T_distal_link_0;
+        _rpc.open("/"+server_name+"/rpc");
+        yarp_network.connect("/"+server_name+"/rpc", port_name+"/rpc");
+        yarp::os::Bottle b_in, b_out;
+        b_out.addString("get actual_pose");
+        _rpc.write(b_out, b_in);
 
-        try{
-                ros::Time now = ros::Time::now();
-                _listener.waitForTransform(base_link, distal_link, now, ros::Duration(3.0));
-                _listener.lookupTransform(base_link, distal_link, ros::Time(0), base_link_T_distal_link_0);
-            }
-            catch (tf::TransformException ex){
-              ROS_ERROR("%s",ex.what());
-              ros::Duration(1.0).sleep();
-            }
+        tf::StampedTransform base_link_T_distal_link_0 = fromBottleToTFStampedTransform(b_in);
 
         ROS_INFO("Creating Cartesian Interactive Marker Server for:\n    base_link: %s\n    distal_link: %s",
                  base_link.c_str(), distal_link.c_str());
@@ -42,9 +38,31 @@ public:
         makeGazeMarker(false, base_link_T_distal_link_0, base_link, distal_link, true);
 
         _port.open(server_name);
-        yarp_network.connect(_port.getName(), port_name);
+        yarp_network.connect(_port.getName(), port_name+"/set_ref:i");
 
         server->applyChanges();
+    }
+
+    tf::StampedTransform fromBottleToTFStampedTransform(const yarp::os::Bottle& bot)
+    {
+        yarp::sig::Matrix T(4,4); T.eye();
+        for(unsigned int i = 0; i < 4; ++i)
+        {
+            T(0,i) = bot.get(i).asDouble();
+            T(1,i) = bot.get(i+4).asDouble();
+            T(2,i) = bot.get(i+8).asDouble();
+            T(3,i) = bot.get(i+12).asDouble();
+        }
+        KDL::Frame T_KDL;
+        cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_KDL);
+
+        tf::StampedTransform T_TF;
+        T_TF.setOrigin(tf::Vector3(T_KDL.p[0], T_KDL.p[1], T_KDL.p[2]));
+
+        double qx, qy, qz, qw;
+        T_KDL.M.GetQuaternion(qx, qy, qz, qw);
+        T_TF.setRotation(tf::Quaternion(qx, qy, qz, qw));
+        return T_TF;
     }
 
     ~GazeMarker()
@@ -57,9 +75,9 @@ private:
     std::string _distal_link;
 public: boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
     interactive_markers::MenuHandler _menu_handler;
-    tf::TransformListener _listener;
     yarp::os::BufferedPort<OpenSoT::interfaces::yarp::msgs::yarp_pose_msg_portable> _port;
     yarp::os::Network& _yarp_network;
+    yarp::os::RpcClient _rpc;
 
     Marker makeSphere( InteractiveMarker &msg )
     {
@@ -99,7 +117,11 @@ public: boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
       {
         case visualization_msgs::InteractiveMarkerFeedback::MENU_SELECT:
           if(feedback->menu_entry_id){
-              _listener.lookupTransform(_base_link, _distal_link, ros::Time(0), T);
+              yarp::os::Bottle b_in, b_out;
+              b_out.addString("get actual_pose");
+              _rpc.write(b_out, b_in);
+
+              T = fromBottleToTFStampedTransform(b_in);
               tf::poseTFToMsg(T, pose);
               server->setPose(_distal_link, pose);
 //              pose_msg.pose.M = KDL::Rotation::Quaternion(T.getRotation().x(), T.getRotation().y(),T.getRotation().z(),T.getRotation().w());

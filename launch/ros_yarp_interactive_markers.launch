@@ -6,14 +6,14 @@
      <node pkg="open_sot" type="ros_yarp_Cartesian_interactive_marker" name="ros_yarp_Cartesian_interactive_marker_RArm" output="screen" >
        <param name="base_link" type="string" value="/Waist" />
        <param name="distal_link" type="string" value="/RSoftHand" />
-       <param name="port_name" type="string" value="/bigman/drc_valve/6d::r_arm::Waist/set_ref:i" />
+       <param name="port_name" type="string" value="/bigman/drc_valve/6d::r_arm::Waist" />
      </node>
 
      <!-- Similar to the previous one -->
      <node pkg="open_sot" type="ros_yarp_Cartesian_interactive_marker" name="ros_yarp_Cartesian_interactive_marker_LArm" output="screen" >
        <param name="base_link" type="string" value="/Waist" />
        <param name="distal_link" type="string" value="/LSoftHand" />
-       <param name="port_name" type="string" value="/bigman/drc_valve/6d::l_arm::Waist/set_ref:i" />
+       <param name="port_name" type="string" value="/bigman/drc_valve/6d::l_arm::Waist" />
      </node>
 
      <!-- Launch a node ros_yarp_gaze_interactive_marker named ros_yarp_gaze_interactive_marker for a task
@@ -21,7 +21,7 @@
      <node pkg="open_sot" type="ros_yarp_gaze_interactive_marker" name="ros_yarp_gaze_interactive_marker" output="screen" >
        <param name="base_link" type="string" value="/Waist" />
        <param name="distal_link" type="string" value="/gaze" />
-       <param name="port_name" type="string" value="/bigman/drc_valve/6d::torso::gaze/set_ref:i" />
+       <param name="port_name" type="string" value="/bigman/drc_valve/6d::torso::gaze" />
      </node>
 
 </launch>
