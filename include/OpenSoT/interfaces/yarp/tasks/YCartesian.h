@@ -32,6 +32,7 @@ public:
         _help_string("help"),
         _W_string("W"),
         _lambda_string("lambda"),
+        _actual_pose_string("actual_pose"),
         _orientation_gain_string("orientation_gain"),
         _set_string("set "),
         _get_string("get "),
@@ -64,11 +65,13 @@ private:
     ::yarp::sig::Matrix _W;
     double _lambda;
     double _orientation_gain;
+    ::yarp::sig::Matrix _task_pose;
     std::mutex _mtx;
 
     std::string _help_string;
     std::string _W_string;
     std::string _lambda_string;
+    std::string _actual_pose_string;
     std::string _orientation_gain_string;
     std::string _set_string;
     std::string _get_string;
@@ -92,6 +95,8 @@ private:
             getLambda();
         else if(command == (_get_string + _orientation_gain_string))
             getOrientationGain();
+        else if(command == (_get_string + _actual_pose_string))
+            getActualPose();
         else
             std::cout<<"Unknown command! Run help instead!"<<std::endl;
     }
@@ -192,6 +197,16 @@ private:
         _out.addDouble(_orientation_gain);
     }
 
+    void getActualPose()
+    {
+        _task_pose = _task->getActualPose();
+
+        for(unsigned int i = 0; i < 4; ++i){
+            for(unsigned int j = 0; j < 4; ++j)
+                _out.addDouble(_task_pose(i,j));
+        }
+    }
+
     void help()
     {
         std::cout<<"help: "<<std::endl;
@@ -215,6 +230,9 @@ private:
         std::cout<<"    get orientation_gain:"<<std::endl;
         std::cout<<"        in: "<<std::endl;
         std::cout<<"        out: orientation_gain as double"<<std::endl;
+        std::cout<<"    get actual_pose:"<<std::endl;
+        std::cout<<"        in: "<<std::endl;
+        std::cout<<"        out: homogeneous matrix serialized rows first of actual task pose"<<std::endl;
         std::cout<<std::endl;
     }
 };

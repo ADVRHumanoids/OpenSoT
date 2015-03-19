@@ -102,9 +102,9 @@ public: boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
               _listener.lookupTransform(_base_link, _distal_link, ros::Time(0), T);
               tf::poseTFToMsg(T, pose);
               server->setPose(_distal_link, pose);
-              pose_msg.pose.M = KDL::Rotation::Quaternion(T.getRotation().x(), T.getRotation().y(),T.getRotation().z(),T.getRotation().w());
-              pose_msg.pose.p = KDL::Vector(T.getOrigin().x(), T.getOrigin().y(), T.getOrigin().z());
-              _port.write();
+//              pose_msg.pose.M = KDL::Rotation::Quaternion(T.getRotation().x(), T.getRotation().y(),T.getRotation().z(),T.getRotation().w());
+//              pose_msg.pose.p = KDL::Vector(T.getOrigin().x(), T.getOrigin().y(), T.getOrigin().z());
+//              _port.write();
           }
           break;
 
