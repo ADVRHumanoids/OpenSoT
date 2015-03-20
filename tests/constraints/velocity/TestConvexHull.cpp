@@ -214,7 +214,10 @@ class testConvexHull : public ::testing::Test{
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testConvexHull()
+  testConvexHull() :
+      coman("coman",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
   {
     // You can do set-up work for each test here.
 
@@ -353,7 +356,7 @@ TEST_F(testConvexHull, comparisonWithOldImplementation) {
     std::cout<<"bUpperBound: "<<bUpperBound.toString()<<std::endl;
 
     std::list<KDL::Vector> points2;
-    coman.getSupportPolygonPoints(points2);
+    coman.getSupportPolygonPoints(points2,"COM");
 
     idynutils::convex_hull idyn_convex_hull;
     std::vector<KDL::Vector> ch;
@@ -380,7 +383,7 @@ TEST_F(testConvexHull, checkBoundsScaling) {
     // ------- Set The robot in a certain configuration ---------
 
     std::list<KDL::Vector> chPoints;
-    coman.getSupportPolygonPoints(chPoints);
+    coman.getSupportPolygonPoints(chPoints,"COM");
 
     idynutils::convex_hull idyn_convex_hull;
     std::vector<KDL::Vector> ch;
@@ -407,7 +410,7 @@ TEST_F(testConvexHull, sizesAreCorrect) {
     std::list<KDL::Vector> points;
     std::vector<KDL::Vector> ch;
     idynutils::convex_hull huller;
-    coman.getSupportPolygonPoints(points);
+    coman.getSupportPolygonPoints(points,"COM");
     huller.getConvexHull(points, ch);
 
     unsigned int hullSize = ch.size();
@@ -502,7 +505,7 @@ TEST_F(testConvexHull, BoundsAreCorrect) {
 
     // Get Vector of CH's points from coman
     std::list<KDL::Vector> points;
-    coman.getSupportPolygonPoints(points);
+    coman.getSupportPolygonPoints(points,"COM");
 
     // Compute CH from previous points
     std::vector<KDL::Vector> ch;

@@ -63,8 +63,12 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 
 TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
 {
-    iDynUtils idynutils;
-    iDynUtils idynutils2;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    iDynUtils idynutils2("coman",
+                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
     idynutils.updateiDyn3Model(q, true);
@@ -74,7 +78,7 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     yarp::sig::Matrix T_init = idynutils.iDyn3_model.getPosition(
                           idynutils.iDyn3_model.getLinkIndex("Waist"),
                           idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-    boost::shared_ptr<Cartesian> cartesian_task(new Cartesian("cartesian::left_wrist", q, idynutils,"l_wrist", "Waist"));
+    Cartesian::Ptr cartesian_task(new Cartesian("cartesian::left_wrist", q, idynutils,"l_wrist", "Waist"));
     yarp::sig::Matrix T_ref = T_init;
     T_ref(0,3) = T_ref(0,3) + 0.1;
     T_ref(1,3) = T_ref(1,3) + 0.1;
@@ -82,7 +86,7 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     cartesian_task->setReference(T_ref);
     cartesian_task->update(q);
 
-    boost::shared_ptr<Cartesian> cartesian_task2(new Cartesian("cartesian::left_wrist", q, idynutils2,"l_wrist", "Waist"));
+    Cartesian::Ptr cartesian_task2(new Cartesian("cartesian::left_wrist", q, idynutils2,"l_wrist", "Waist"));
     yarp::sig::Matrix T_ref2 = T_init;
     T_ref2(0,3) = T_ref2(0,3) + 0.1;
     T_ref2(1,3) = T_ref2(1,3) + 0.1;
@@ -91,47 +95,47 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     cartesian_task2->update(q);
 
     /// Postural Task
-    boost::shared_ptr<Postural> postural_task(new Postural(q));
+    Postural::Ptr postural_task(new Postural(q));
     postural_task->setReference(q);
 
     /// MinAcc Task
-    boost::shared_ptr<MinimizeAcceleration> minacc_task(new MinimizeAcceleration(q));
+    MinimizeAcceleration::Ptr minacc_task(new MinimizeAcceleration(q));
 
     int t = 100;
     /// Constraints set to the Cartesian Task
-    boost::shared_ptr<JointLimits> joint_limits(
+    JointLimits::Ptr joint_limits(
         new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(),
                            idynutils.iDyn3_model.getJointBoundMin(), 0.2));
 
-    boost::shared_ptr<JointLimits> joint_limits2(
+    JointLimits::Ptr joint_limits2(
         new JointLimits(q, idynutils2.iDyn3_model.getJointBoundMax(),
                            idynutils2.iDyn3_model.getJointBoundMin(), 0.2));
 
-    boost::shared_ptr<VelocityLimits> joint_velocity_limits(
+    VelocityLimits::Ptr joint_velocity_limits(
                 new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
-    boost::shared_ptr<VelocityLimits> joint_velocity_limits2(
+    VelocityLimits::Ptr joint_velocity_limits2(
                 new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
 
-    std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> joint_constraints_list;
+    std::list< OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr > joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
     joint_constraints_list.push_back(joint_velocity_limits);
 
-    std::list<boost::shared_ptr<OpenSoT::Constraint<Matrix, Vector>>> joint_constraints_list2;
+    std::list< OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr > joint_constraints_list2;
     joint_constraints_list2.push_back(joint_limits2);
     joint_constraints_list2.push_back(joint_velocity_limits2);
 
-    boost::shared_ptr<OpenSoT::constraints::Aggregated> joint_constraints(
+    OpenSoT::constraints::Aggregated::Ptr joint_constraints(
                 new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
 
-    boost::shared_ptr<OpenSoT::constraints::Aggregated> joint_constraints2(
+    OpenSoT::constraints::Aggregated::Ptr joint_constraints2(
                 new OpenSoT::constraints::Aggregated(joint_constraints_list2, q.size()));
 
     //Create the SoT
-    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks;
+    std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(postural_task);
 
-    std::vector<boost::shared_ptr<OpenSoT::Task<Matrix, Vector> >> stack_of_tasks2;
+    std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks2;
     stack_of_tasks2.push_back(cartesian_task2);
     stack_of_tasks2.push_back(minacc_task);
 
@@ -245,4 +249,9 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
             EXPECT_NEAR(T2(i,j), T_ref(i,j), 1E-3);
     }
 
+}
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

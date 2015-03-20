@@ -55,6 +55,7 @@ using namespace std;
          */
         Solver(vector <TaskPtr>& stack,
                ConstraintPtr bounds) : _tasks(stack), _bounds(bounds) {}
+
         virtual ~Solver(){}
 
         /**

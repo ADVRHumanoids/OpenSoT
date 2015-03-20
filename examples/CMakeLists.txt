@@ -41,6 +41,8 @@ INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
+add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
+
 # add required linker flags
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
 
@@ -52,9 +54,11 @@ ADD_EXECUTABLE(example_cartesian example_cartesian.cpp)
 ADD_EXECUTABLE(example_com example_com.cpp)
 ADD_EXECUTABLE(example_minimum_effort example_minimum_effort.cpp)
 ADD_EXECUTABLE(example_postural example_postural.cpp)
+ADD_EXECUTABLE(example_velocity_allocation example_velocity_allocation.cpp)
 
 TARGET_LINK_LIBRARIES(example_autostack PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_cartesian PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES} ${PCL_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_minimum_effort PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_velocity_allocation PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})

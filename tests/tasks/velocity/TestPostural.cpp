@@ -66,7 +66,9 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
 TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
 {
-    iDynUtils idynutils;
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     using namespace OpenSoT::tasks::velocity;
     using namespace OpenSoT::constraints::velocity;
 
@@ -80,8 +82,8 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     }
     idynutils.updateiDyn3Model(q);
 
-    boost::shared_ptr< Postural::TaskType > postural( new Postural(q) );
-    boost::shared_ptr< Postural::ConstraintType > bound(
+    Postural::TaskPtr postural( new Postural(q) );
+    Postural::ConstraintPtr bound(
         new JointLimits(q,
                         idynutils.iDyn3_model.getJointBoundMax(),
                         idynutils.iDyn3_model.getJointBoundMin())

@@ -122,7 +122,7 @@ protected:
         path = PathPtr( new KDL::Path_Line(start, end,
                                            rotationInterpolationMethod.get()->Clone(),
                                            eqRad));
-        velocityProfile = VelProfPtr( new KDL::VelocityProfile_Trap(.2,.1));
+        velocityProfile = VelProfPtr( new KDL::VelocityProfile_Trap(.01,.1));
         velocityProfile->SetProfile(0,path->PathLength());
         trajectory = TrajPtr( new KDL::Trajectory_Segment(path.get()->Clone(),
                                                           velocityProfile.get()->Clone()));
@@ -216,7 +216,9 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     ComanUtils robot("testCartesianFF");
 #endif
 
-    iDynUtils model;
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(model);
     model.updateiDyn3Model(q, true);
@@ -546,7 +548,9 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     ComanUtils robot("testCoMFF");
 #endif
 
-    iDynUtils model;
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(model);
     model.updateiDyn3Model(q, true);
@@ -791,7 +795,9 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     ComanUtils robot("testCoMFF");
 #endif
 
-    iDynUtils model;
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
     double j_index = model.left_arm.joint_numbers[1];
     std::cout << "Applying trajectory to joint "

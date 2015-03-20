@@ -119,6 +119,7 @@ private:
             return false;
         }
 
+        return true;
     }
 
     bool setLambda()
@@ -182,6 +183,8 @@ private:
 class YCoM : public ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>
 {
 public:
+    typedef boost::shared_ptr<YCoM> Ptr;
+
     YCoM(const std::string& robot_name,
                const std::string& module_prefix,
                CoM::Ptr cartesian_task);

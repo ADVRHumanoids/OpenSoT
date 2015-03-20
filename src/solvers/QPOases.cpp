@@ -20,7 +20,8 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation)
 }
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
-                         boost::shared_ptr<constraints::Aggregated> &bounds, const double eps_regularisation):
+                         ConstraintPtr bounds,
+                         const double eps_regularisation):
     Solver(stack_of_tasks, bounds),
     _epsRegularisation(eps_regularisation)
 {
@@ -37,7 +38,7 @@ void QPOases_sot::computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Mat
 void QPOases_sot::computeVelCtrlOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
                                                      yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA)
 {
-    boost::shared_ptr<OpenSoT::constraints::BilateralConstraint> optimality_bilateral_constraint(
+    OpenSoT::constraints::BilateralConstraint::Ptr optimality_bilateral_constraint(
         new OpenSoT::constraints::BilateralConstraint(
                 task->getA(),
                 task->getA()*problem.getSolution(),
