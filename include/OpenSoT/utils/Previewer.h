@@ -81,7 +81,7 @@ namespace OpenSoT {
                  * @brief The FailuresLogEntry struct
                  *        as used by the Results struct
                  */
-                struct FailuresLogEntry     { double t; Reason reason;
+                struct FailuresLogEntry     { double t; Reason reason; std::string details;
                                               OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
                                               FailuresLogEntry(double t, Reason reason) :
                                                 t(t), reason(reason) {}
@@ -407,14 +407,20 @@ namespace OpenSoT {
                     ++b)
                 {
                     if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_SMALL)
+                    {
                         if(!cartesianErrorConverged(*b))
                             allTasksConverged = false;
+                    }
                     else if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_SMALL_AND_NOT_DECREASING)
+                    {
                          if(!(cartesianErrorConverged(*b) && !cartesianErrorDecreasing(*b)))
                              allTasksConverged = false;
+                    }
                     else if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_AND_NULL_STABLE)
+                    {
                          if(!((cartesianErrorConverged(*b) && !cartesianErrorDecreasing(*b)) && jointSpaceConfigurationConverged()))
                              allTasksConverged = false;
+                    }
                 }
                 return allTasksConverged;
             }
@@ -688,7 +694,7 @@ namespace OpenSoT {
                     autostack->update(q);
 
                     if(shouldCheckSelfCollision()) {
-                        if(!model.checkSelfCollision())
+                        if(model.checkSelfCollision())
                         {
                             check_ok = false;
                             if(results != NULL)
