@@ -408,17 +408,17 @@ namespace OpenSoT {
                 {
                     if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_SMALL)
                     {
-                        if(!cartesianErrorConverged(*b))
+                        if(!trajectoryCompleted(*b) || !cartesianErrorConverged(*b))
                             allTasksConverged = false;
                     }
                     else if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_SMALL_AND_NOT_DECREASING)
                     {
-                         if(!(cartesianErrorConverged(*b) && !cartesianErrorDecreasing(*b)))
+                         if(!trajectoryCompleted(*b) || cartesianErrorDecreasing(*b) || !(cartesianErrorConverged(*b)))
                              allTasksConverged = false;
                     }
                     else if(b->convergencePolicy == TrajBinding::CONVERGE_ON_CARTESIAN_ERROR_AND_NULL_STABLE)
                     {
-                         if(!((cartesianErrorConverged(*b) && !cartesianErrorDecreasing(*b)) && jointSpaceConfigurationConverged()))
+                         if(!trajectoryCompleted(*b) || !((cartesianErrorConverged(*b) && !cartesianErrorDecreasing(*b)) && jointSpaceConfigurationConverged()))
                              allTasksConverged = false;
                     }
                 }
@@ -506,12 +506,23 @@ namespace OpenSoT {
                     b != bindings.end();
                     ++b)
                 {
-                    if(b->trajectoryGenerator->Duration() < t*safetyMargin)
+                    if(t < b->trajectoryGenerator->Duration()*safetyMargin)
                         trajCompleted = false;
 
                 }
 
                 return trajCompleted;
+            }
+
+            /**
+             * @brief trajectoryCompleted returns true when the trajectory has been played to the end
+             * @return true if current simulation time is equal or greated than trajectory duration
+             */
+            bool trajectoryCompleted(const TrajBinding& b)
+            {
+                if(t >= b.trajectoryGenerator->Duration())
+                    return true;
+                return false;
             }
 
             void updateErrorsStatistics(double windowSizeInSecs = .1)
@@ -670,8 +681,16 @@ namespace OpenSoT {
 
                 while(!finished) {
                     if(time == std::numeric_limits<double>::infinity())
-                        finished =  trajectoriesExpired() ||
-                                    converged();
+                    {
+                        bool trajectoriesCheck = trajectoriesExpired();
+                        bool convergenceCheck = converged();
+                        if(trajectoriesCheck)
+                            std::cout << "Trajectories are expired. Stopping." << std::endl;
+                        if(convergenceCheck)
+                            std::cout << "IK Converged. Stopping." << std::endl;
+                        finished =  trajectoriesCheck ||
+                                    convergenceCheck;
+                    }
                     else
                         finished = (t >= time);
 
