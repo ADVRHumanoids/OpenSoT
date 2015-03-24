@@ -21,6 +21,30 @@ Self_collision_avoidance::Self_collision_avoidance(iDynUtils &robot):
         // unit: rad
         q_step = 0.1;
 
+        R_Opening = 0.01;
+        Opening_height = 0.8;
+        Opening_width = 0.8;
+        Opening_depth = 0.1;
+
+        valve_pos << 0.55,
+                     0.0,
+                     0.2;
+
+        Opening_Upperright << valve_pos(0)-Opening_depth,
+                              valve_pos(1)-Opening_width/2,
+                              valve_pos(2)+Opening_height/2;
+        Opening_Upperleft  << valve_pos(0)-Opening_depth,
+                              valve_pos(1)+Opening_width/2,
+                              valve_pos(2)+Opening_height/2;
+        Opening_lowerright << valve_pos(0)-Opening_depth,
+                              valve_pos(1)-Opening_width/2,
+                              valve_pos(2)-Opening_height/2;
+        Opening_lowerleft  << valve_pos(0)-Opening_depth,
+                              valve_pos(1)+Opening_width/2,
+                              valve_pos(2)-Opening_height/2;
+
+
+
     }
 
 
@@ -401,6 +425,8 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
         left_l2torso_le_u, left_l2torso_ri_u, left_l2torso_le_l, left_l2torso_ri_l,
         right_l2torso_le_u, right_l2torso_ri_u, right_l2torso_le_l, right_l2torso_ri_l;
 
+    double left_l2frame_le, left_l2frame_to, left_l2frame_bo, right_l2frame_ri, right_l2frame_to, right_l2frame_bo;
+
     int gra_dim = Q.rows();
     VectorXd Dm_Gradient(gra_dim+1), Gradient(gra_dim);
     MatrixXd Position_mat(3,16);
@@ -486,8 +512,16 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
     right_l2torso_le_l = Dmin( right_lowerarm_A, right_lowerarm_B, lower_left_torso_A, lower_left_torso_B ) - R_u - R_torso_le_l;
     right_l2torso_ri_l = Dmin( right_lowerarm_A, right_lowerarm_B, lower_right_torso_A, lower_right_torso_B ) - R_u - R_torso_ri_l;
 
+    left_l2frame_le = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+    left_l2frame_to = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+    left_l2frame_bo = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+
+    right_l2frame_ri = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+    right_l2frame_to = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+    right_l2frame_bo = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+
     // find the shortest distances between the dual arms and the torso, and where the shortest distance occur
-    VectorXd temp(12);
+    VectorXd temp(18);
     double Dm;
     std::ptrdiff_t min_i, min_j;
 
@@ -502,8 +536,13 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
            right_l2torso_le_u,
            right_l2torso_ri_u,
            right_l2torso_le_l,
-           right_l2torso_ri_l;
-
+           right_l2torso_ri_l,
+           left_l2frame_le,
+           left_l2frame_to,
+           left_l2frame_bo,
+           right_l2frame_ri,
+           right_l2frame_to,
+           right_l2frame_bo;
     Dm = temp.minCoeff(&min_i,&min_j);
 
     //test
@@ -1574,6 +1613,366 @@ VectorXd Self_collision_avoidance::shortest_distance_gradient(const VectorXd &Q)
               lower_right_torso_A = Position_mat.col(6);
               lower_right_torso_B = Position_mat.col(7);
               Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, lower_right_torso_A, lower_right_torso_B ) - R_l - R_torso_ri_l;
+              Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+              break;
+
+              // the minimum distance will take place between the left lowerarm and the left bar of the frame
+        case 12:
+            Q_temp = Q;
+            index_temp = robot_col.left_arm.joint_numbers[0];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            Q_temp = Q;
+            index_temp = robot_col.left_arm.joint_numbers[1];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            Q_temp = Q;
+            index_temp = robot_col.left_arm.joint_numbers[2];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            Q_temp = Q;
+            index_temp = robot_col.left_arm.joint_numbers[3];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            left_lowerarm_A = Position_mat.col(14);
+            left_lowerarm_B = Position_mat.col(15);
+            Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_lowerleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            break;
+
+            // the minimum distance will take place between the left lowerarm and the top bar of the frame
+      case 13:
+          Q_temp = Q;
+          index_temp = robot_col.left_arm.joint_numbers[0];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          Q_temp = Q;
+          index_temp = robot_col.left_arm.joint_numbers[1];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          Q_temp = Q;
+          index_temp = robot_col.left_arm.joint_numbers[2];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          Q_temp = Q;
+          index_temp = robot_col.left_arm.joint_numbers[3];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          left_lowerarm_A = Position_mat.col(14);
+          left_lowerarm_B = Position_mat.col(15);
+          Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_Upperleft, Opening_Upperright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          break;
+
+          // the minimum distance will take place between the left lowerarm and the bottom bar of the frame
+    case 14:
+        Q_temp = Q;
+        index_temp = robot_col.left_arm.joint_numbers[0];
+        Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+        Q_temp = Q;
+        index_temp = robot_col.left_arm.joint_numbers[1];
+        Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+        Q_temp = Q;
+        index_temp = robot_col.left_arm.joint_numbers[2];
+        Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+        Q_temp = Q;
+        index_temp = robot_col.left_arm.joint_numbers[3];
+        Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm1 = Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+        Position_mat = jointangle2position (Q_temp);
+        left_lowerarm_A = Position_mat.col(14);
+        left_lowerarm_B = Position_mat.col(15);
+        Dm2 =  Dmin( left_lowerarm_A, left_lowerarm_B, Opening_lowerleft, Opening_lowerright ) - R_l - R_Opening;
+        Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+        break;
+
+        // the shortest distance occurs between the right lowerarm and the right bar of the frame
+    case 15:
+          Q_temp = Q;
+          index_temp = robot_col.right_arm.joint_numbers[0];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          Q_temp = Q;
+          index_temp = robot_col.right_arm.joint_numbers[1];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          Q_temp = Q;
+          index_temp = robot_col.right_arm.joint_numbers[2];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          Q_temp = Q;
+          index_temp = robot_col.right_arm.joint_numbers[3];
+          Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+          Position_mat = jointangle2position (Q_temp);
+          right_lowerarm_A = Position_mat.col(10);
+          right_lowerarm_B = Position_mat.col(11);
+          Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_lowerright ) - R_l - R_Opening;
+          Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+          break;
+
+          // the shortest distance occurs between the right lowerarm and the top bar of the frame
+      case 16:
+            Q_temp = Q;
+            index_temp = robot_col.right_arm.joint_numbers[0];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            Q_temp = Q;
+            index_temp = robot_col.right_arm.joint_numbers[1];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            Q_temp = Q;
+            index_temp = robot_col.right_arm.joint_numbers[2];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            Q_temp = Q;
+            index_temp = robot_col.right_arm.joint_numbers[3];
+            Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+            Position_mat = jointangle2position (Q_temp);
+            right_lowerarm_A = Position_mat.col(10);
+            right_lowerarm_B = Position_mat.col(11);
+            Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_Upperright, Opening_Upperleft ) - R_l - R_Opening;
+            Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+            break;
+
+            // the shortest distance occurs between the right lowerarm and the bottom bar of the frame
+        case 17:
+              Q_temp = Q;
+              index_temp = robot_col.right_arm.joint_numbers[0];
+              Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+              Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+              Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+              Q_temp = Q;
+              index_temp = robot_col.right_arm.joint_numbers[1];
+              Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+              Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+              Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+              Q_temp = Q;
+              index_temp = robot_col.right_arm.joint_numbers[2];
+              Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+              Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+              Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
+
+              Q_temp = Q;
+              index_temp = robot_col.right_arm.joint_numbers[3];
+              Q_temp(index_temp) = Q_temp(index_temp) + q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm1 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
+              Q_temp(index_temp) = Q_temp(index_temp) - 2 * q_step;
+              Position_mat = jointangle2position (Q_temp);
+              right_lowerarm_A = Position_mat.col(10);
+              right_lowerarm_B = Position_mat.col(11);
+              Dm2 = Dmin( right_lowerarm_A, right_lowerarm_B, Opening_lowerright, Opening_lowerleft ) - R_l - R_Opening;
               Gradient(index_temp) = (Dm1 - Dm2) / q_step / 2;
 
               break;

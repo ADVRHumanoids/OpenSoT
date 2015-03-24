@@ -32,6 +32,11 @@ private:
     double R_u, R_l, R_torso_le_u, R_torso_ri_u, R_torso_le_l, R_torso_ri_l;
     double q_step;
 
+    Eigen::Vector3d Opening_Upperright, Opening_Upperleft, Opening_lowerright, Opening_lowerleft;
+    double R_Opening;
+    Eigen::Vector3d valve_pos;
+    double Opening_height, Opening_width, Opening_depth;
+
     iDynUtils robot_col;
 };
 
