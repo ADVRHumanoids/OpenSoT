@@ -101,5 +101,10 @@ void OpenSoT::tasks::velocity::Postural::setLambda(double lambda)
     this->update_b();
 }
 
+yarp::sig::Vector OpenSoT::tasks::velocity::Postural::getActualPositions()
+{
+    return _x;
+}
+
 
 

@@ -32,6 +32,7 @@ public:
         _lambda_string("lambda"),
         _set_string("set "),
         _get_string("get "),
+        _actual_position("actual_position"),
         _task(task)
     {
 
@@ -67,6 +68,7 @@ private:
     std::string _lambda_string;
     std::string _set_string;
     std::string _get_string;
+    std::string _actual_position;
 
     Postural::Ptr _task;
 
@@ -83,6 +85,8 @@ private:
             getW();
         else if(command == (_get_string + _lambda_string))
             getLambda();
+        else if(command == (_get_string + _actual_position))
+            getActualPositions();
         else
             std::cout<<"Unknown command! Run help instead!"<<std::endl;
     }
@@ -159,6 +163,13 @@ private:
         _out.addDouble(_lambda);
     }
 
+    void getActualPositions()
+    {
+        ::yarp::sig::Vector q = _task->getActualPositions();
+        for(unsigned int i = 0; i < q.size(); ++i)
+            _out.addDouble(q[i]);
+    }
+
     void help()
     {
         std::cout<<"help: "<<std::endl;
@@ -176,6 +187,9 @@ private:
         std::cout<<"    get lambda:"<<std::endl;
         std::cout<<"        in: "<<std::endl;
         std::cout<<"        out: lambda as double"<<std::endl;
+        std::cout<<"    get actual_position:"<<std::endl;
+        std::cout<<"        in: "<<std::endl;
+        std::cout<<"        out: vector of actual joint positions"<<std::endl;
         std::cout<<std::endl;
     }
 };
