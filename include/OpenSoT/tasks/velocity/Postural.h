@@ -93,6 +93,12 @@
                                   yarp::sig::Vector& xdot_desired) const;
 
                 void setLambda(double lambda);
+
+                /**
+                 * @brief getActualPositions return the actual state position of the task
+                 * @return vector of joints positions
+                 */
+                yarp::sig::Vector getActualPositions();
             };
         }
     }
