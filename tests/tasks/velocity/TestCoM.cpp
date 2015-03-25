@@ -66,20 +66,20 @@ TEST_F(testCoMTask, testCoMTask_)
     _normal_robot.updateiDyn3Model(q_whole);
 
     std::cout << "_robot.getCoM() is: " << _robot.iDyn3_model.getCOM().toString() << std::endl;
-    std::cout << "_robot.getCoM(_robot.left_leg.index) is: " << _robot.iDyn3_model.getCOM("",_robot.left_leg.end_effector_index).toString() << std::endl;
+    std::cout << "_robot.getCoM(_robot.left_leg.index) is: " << _robot.iDyn3_model.getCOM(_robot.left_leg.end_effector_index).toString() << std::endl;
 
     std::cout << "_fixed_robot.getCoM() is: " << _fixed_robot.iDyn3_model.getCOM().toString() << std::endl;
-    std::cout << "_fixed_robot.getCoM(_fixed_robot.left_leg.index) is: " << _fixed_robot.iDyn3_model.getCOM("",_fixed_robot.left_leg.end_effector_index).toString() << std::endl;
+    std::cout << "_fixed_robot.getCoM(_fixed_robot.left_leg.index) is: " << _fixed_robot.iDyn3_model.getCOM(_fixed_robot.left_leg.end_effector_index).toString() << std::endl;
 
     std::cout << "computing _normal_robot with world in waist.." << std::endl;
     std::cout << "_normal_robot.getCoM() is: " << _normal_robot.iDyn3_model.getCOM().toString() << std::endl;
-    std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.iDyn3_model.getCOM("",_normal_robot.left_leg.end_effector_index).toString() << std::endl;
+    std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.iDyn3_model.getCOM(_normal_robot.left_leg.end_effector_index).toString() << std::endl;
 
     _normal_robot.updateiDyn3Model(q_whole, true);
 
     std::cout << "computing _normal_robot with proper world.." << std::endl;
     std::cout << "_normal_robot.getCoM() is: " << _normal_robot.iDyn3_model.getCOM().toString() << std::endl;
-    std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.iDyn3_model.getCOM("",_normal_robot.left_leg.end_effector_index).toString() << std::endl;
+    std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.iDyn3_model.getCOM(_normal_robot.left_leg.end_effector_index).toString() << std::endl;
 
 
     OpenSoT::tasks::velocity::CoM CoM(q_whole, _robot);
