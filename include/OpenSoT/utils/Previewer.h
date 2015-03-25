@@ -438,10 +438,19 @@ namespace OpenSoT {
                 for(typename TrajectoryBindings::iterator b = bindings.begin();
                     b != bindings.end();
                     ++b)
-                    if(cartesianPoseChanged(b->task)) cartesianPosesChanged = true;
+                {
+                    if(cartesianPoseChanged(b->task),5e-3)
+                    {
+                        cartesianPosesChanged = true;
+                        std::cout << b->task->getTaskID()
+                                  << ".DeltaX > " << 5e-3 << " ";
 
-                qChanged = jointSpaceConfigurationChanged();
+                    }
+                }
 
+                qChanged = jointSpaceConfigurationChanged(1e-3);
+                if(qChanged)
+                    std::cout << "; DeltaQ > " << 1e-3 << " ";
                 return cartesianPosesChanged || qChanged;
             }
 
@@ -698,6 +707,7 @@ namespace OpenSoT {
                         finished = true;
                         check_ok = false;
                         std::cerr << "Error with solver: could not solve" << std::endl;
+                        continue;
                     }
 
                     model.updateiDyn3Model(q, true);
@@ -713,6 +723,7 @@ namespace OpenSoT {
                     autostack->update(q);
 
                     if(shouldCheckSelfCollision()) {
+                        std::cout << " collision check ";
                         if(model.checkSelfCollision())
                         {
                             check_ok = false;
@@ -734,6 +745,9 @@ namespace OpenSoT {
 
                         q += dq;
                         t += dT;
+
+                        std::cout << std::endl << "t:" << t;
+                        std::cout.flush();
 
                         if(results != NULL) {
                             results->logTrajectory(t, q);
