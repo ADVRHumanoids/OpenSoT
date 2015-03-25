@@ -14,10 +14,10 @@ using namespace visualization_msgs;
  * the marker. The marker works from base_link to distal_link sending position references to a port opened by a
  * YCartesian interface.
  */
-class SPhereMarker6DoF
+class SphereMarker6DoF
 {
 public:
-    SPhereMarker6DoF(const std::string& base_link, const std::string& distal_link, const std::string& server_name,
+    SphereMarker6DoF(const std::string& base_link, const std::string& distal_link, const std::string& server_name,
                      const std::string& port_name, yarp::os::Network& yarp_network):
         _base_link(base_link),
         _distal_link(distal_link),
@@ -65,9 +65,10 @@ public:
         return T_TF;
     }
 
-    ~SPhereMarker6DoF()
+    ~SphereMarker6DoF()
     {
         _port.close();
+        _rpc.close();
     }
 
 private:
@@ -154,7 +155,7 @@ public: boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
       int_marker.description = distal_link;
 
       // insert a sphere + menu
-      _menu_handler.insert( "Reset pose", boost::bind(&SPhereMarker6DoF::processFeedback, this, _1) );
+      _menu_handler.insert( "Reset pose", boost::bind(&SphereMarker6DoF::processFeedback, this, _1) );
       makeSphereControl(int_marker);
       int_marker.controls[0].interaction_mode = InteractiveMarkerControl::MENU;
 
@@ -204,7 +205,7 @@ public: boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
       }
 
       server->insert(int_marker);
-      server->setCallback(int_marker.name, boost::bind(&SPhereMarker6DoF::processFeedback, this, _1));
+      server->setCallback(int_marker.name, boost::bind(&SphereMarker6DoF::processFeedback, this, _1));
       _menu_handler.apply( *server, int_marker.name );
     }
 
@@ -247,7 +248,7 @@ int main(int argc, char** argv)
         return 0;}
 
     std::string node_name = ros::this_node::getName();
-    SPhereMarker6DoF marker(base_link, distal_link, node_name, port_name, yarp_network);
+    SphereMarker6DoF marker(base_link, distal_link, node_name, port_name, yarp_network);
 
     ros::spin();
 

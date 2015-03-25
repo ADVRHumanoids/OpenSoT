@@ -68,6 +68,7 @@ public:
     ~GazeMarker()
     {
         _port.close();
+        _rpc.close();
     }
 
 private:
