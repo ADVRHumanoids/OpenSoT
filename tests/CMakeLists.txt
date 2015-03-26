@@ -60,10 +60,9 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 endif()
 
 # gTests for Velocity constraints
-SET(TestLibs OpenSoT ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
+SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ICUB_LIBRARIES}
-               ${GTEST_BOTH_LIBRARIES})
+               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ICUB_LIBRARIES})
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
