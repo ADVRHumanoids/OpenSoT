@@ -209,7 +209,11 @@ public: boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
         tf::Vector3 rot_axis = v.cross(x);
         rot_axis.normalized();
 
-        tf::Quaternion q(rot_axis, -1.0*acos(v.dot(x)));
+        tf::Quaternion q;
+        if(rot_axis.length() <= 1E-12)
+            q = tf::Quaternion(0.0, 0.0, 0.0, 1.0);
+        else
+            q = tf::Quaternion(rot_axis, -1.0*acos(v.dot(x)));
 
         control.orientation.w = q.w();
         control.orientation.x = q.x();
