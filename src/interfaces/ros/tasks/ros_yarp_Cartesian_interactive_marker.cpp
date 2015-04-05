@@ -135,7 +135,7 @@ public: boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
           tf::poseMsgToTF(feedback->pose, T);
           pose_msg.pose.M = KDL::Rotation::Quaternion(T.getRotation().x(), T.getRotation().y(),T.getRotation().z(),T.getRotation().w());
           pose_msg.pose.p = KDL::Vector(T.getOrigin().x(), T.getOrigin().y(), T.getOrigin().z());
-          cartesian_utils::printKDLFrame(pose_msg.pose); std::cout<<std::endl;
+          //cartesian_utils::printKDLFrame(pose_msg.pose); std::cout<<std::endl;
           _port.write();
           break;
       }
