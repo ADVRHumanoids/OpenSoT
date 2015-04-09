@@ -46,6 +46,7 @@ namespace OpenSoT {
     class Previewer
     {
         public:
+            friend class testPreviewer;
             typedef boost::shared_ptr<TrajectoryGenerator> TrajGenPtr;
 
 

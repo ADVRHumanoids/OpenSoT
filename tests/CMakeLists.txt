@@ -51,6 +51,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testPosturalVelocityTask
                       testAutoStack
                       testDefaultHumanoidStack
+                      testPreviewer
                       testVelocityAllocation
                       testYCartesian
                       testYPostural
@@ -166,6 +167,10 @@ ADD_EXECUTABLE(testDefaultHumanoidStack utils/TestDefaultHumanoidStack.cpp)
 TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
 add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testPreviewer utils/TestPreviewer.cpp)
+TARGET_LINK_LIBRARIES(testPreviewer ${TestLibs})
+add_dependencies(testPreviewer GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
 TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
@@ -205,6 +210,7 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
+add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 add_custom_target(copy_robot_model_files ALL
