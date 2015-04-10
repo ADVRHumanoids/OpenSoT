@@ -303,7 +303,8 @@ namespace OpenSoT {
              * @brief cartesianPoseChanged checks whether the cartesian pose for a certain task changed too much
              * @param task the task for which to check the cartesian pose or position
              * @param threshold the threshold in norm
-             * @return true if the cartesian pose or position changed more than threshold, in norm
+             * @return true if the cartesian pose or position changed more than threshold, in norm.
+             * Notice it will also return true if it was never called, i.e. the first time it gets called.
              */
             bool cartesianPoseChanged(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
                                       double threshold=1e-3)
@@ -751,6 +752,8 @@ namespace OpenSoT {
 
                     } else ++retries;
                 }
+
+                if(!converged()) check_ok = false;
 
                 return check_ok;
             }
