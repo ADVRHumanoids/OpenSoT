@@ -206,9 +206,9 @@ namespace OpenSoT {
                 }
             };
 
-            typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr,
+            typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
                              ErrorLog> ErrorMap;
-            typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr,
+            typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
                              KDL::Frame>  CartesianNodes;
 
         private:
@@ -263,7 +263,7 @@ namespace OpenSoT {
                     b != bindings.end();
                     ++b)
                 {
-                    if(cartesianErrors[b->task].lastError > b->maximumAllowedError)
+                    if(cartesianErrors[b->task.get()].lastError > b->maximumAllowedError)
                         bounded = false;
                 }
 
@@ -278,7 +278,7 @@ namespace OpenSoT {
              */
             bool cartesianErrorDecreasing(const TrajBinding& b, double threshold = 1e-9)
             {
-                if(cartesianErrors[b.task].previousMean - cartesianErrors[b.task].getRollingMean() < threshold)
+                if(cartesianErrors[b.task.get()].previousMean - cartesianErrors[b.task.get()].getRollingMean() < threshold)
                     return false;
                 return true;
             }
@@ -293,8 +293,8 @@ namespace OpenSoT {
              */
             bool cartesianErrorConverged(const TrajBinding& b)
             {
-                if(cartesianErrors[b.task].errorToGoal.positionError > b.convergenceTolerance ||
-                   cartesianErrors[b.task].errorToGoal.orientationError > b.convergenceTolerance)
+                if(cartesianErrors[b.task.get()].errorToGoal.positionError > b.convergenceTolerance ||
+                   cartesianErrors[b.task.get()].errorToGoal.orientationError > b.convergenceTolerance)
                     return false;
                 return true;
             }
@@ -320,42 +320,26 @@ namespace OpenSoT {
                 if(isCartesian(task))
                 {
                     yf = asCartesian(task)->getActualPose();
-                }
-                else if(isCoM(task))
-                {
-                    yv = asCoM(task)->getActualPosition();
-                }
-
-                if(isCartesian(task))
-                {
                     assert(YarptoKDL(yf,f) && "error converting from yarp frame to kdl::Frame");
                 }
                 else if(isCoM(task))
                 {
+                    yv = asCoM(task)->getActualPosition();
                     f.p.x(yv(0));
                     f.p.y(yv(1));
                     f.p.z(yv(2));
                 }
 
-                if(cartesianNodes.count(task) == 0)
+                if(cartesianNodes.count(task.get()) == 0)
                 {
-                    if(isCartesian(task))
-                    {
-                        cartesianNodes[task] = f;
-                        return true;
-                    }
-                    else if(isCoM(task))
-                    {
-                        cartesianNodes[task] = f;
-                        return true;
-                    }
-                    else return false;
+                    cartesianNodes[task.get()] = f;
+                    return true;
                 } else {
 
                     yfOld.resize(4,4);
-                    assert(KDLtoYarp_position(cartesianNodes[task], yfOld) &&
+                    assert(KDLtoYarp_position(cartesianNodes[task.get()], yfOld) &&
                           "Error transforming a kdl::Frame into  a yarp 4x4 matrix");
-                    assert(KDLtoYarp(cartesianNodes[task].p, yvOld) &&
+                    assert(KDLtoYarp(cartesianNodes[task.get()].p, yvOld) &&
                            "Error transforming a kdl::Vector into a yarp vector");
 
                     if(isCartesian(task))
@@ -371,14 +355,14 @@ namespace OpenSoT {
                     {
                         using namespace yarp::math;
                         error = norm(yv - yvOld);
-                    } else return false;
+                    };
 
                     if(error > threshold)
-                        cartesianNodes[task] = f;
+                        cartesianNodes[task.get()] = f;
 
                 }
 
-                return error > threshold;
+                return (error > threshold);
             }
 
             /**
@@ -427,46 +411,6 @@ namespace OpenSoT {
             }
 
             /**
-             * @brief shouldCheckSelfCollision checks whether cartesian poses changed or
-             * joint position changed too much; in which case, we force a collision check
-             * @return true if we need to call a self-collision check
-             */
-            bool shouldCheckSelfCollision()
-            {
-                bool cartesianPosesChanged = false;
-                bool qChanged = false;
-
-                for(typename TrajectoryBindings::iterator b = bindings.begin();
-                    b != bindings.end();
-                    ++b)
-                {
-                    if(cartesianPoseChanged(b->task),5e-3)
-                    {
-                        cartesianPosesChanged = true;
-                        std::cout << b->task->getTaskID()
-                                  << ".DeltaX > " << 5e-3 << " ";
-
-                    }
-                }
-
-                qChanged = jointSpaceConfigurationChanged(1e-3);
-                if(qChanged)
-                    std::cout << "; DeltaQ > " << 1e-3 << " ";
-                return cartesianPosesChanged || qChanged;
-            }
-
-            /**
-             * @brief jointSpaceConfigurationConverged checks whether the solver has converged
-             * @param threshold comparable with the norm of the joint position change dq
-             * @return true if the robot is stable (converged also to its null-space goals)
-             */
-            bool jointSpaceConfigurationConverged(double threshold = 1e-9)
-            {
-                return yarp::math::norm(dq) < threshold;
-            }
-
-
-            /**
              * @brief jointSpaceConfigurationChanged checks whether joint space configuration changed
              *        with respect to last check (done by calling this function)
              * @param threshold comparable with the norm of joint space movements
@@ -487,10 +431,20 @@ namespace OpenSoT {
             }
 
             /**
-             * @brief reset clears the history of cartesian errors,
+             * @brief jointSpaceConfigurationConverged checks whether the solver has converged
+             * @param threshold comparable with the norm of the joint position change dq
+             * @return true if the robot is stable (converged also to its null-space goals)
+             */
+            bool jointSpaceConfigurationConverged(double threshold = 1e-9)
+            {
+                return yarp::math::norm(dq) < threshold;
+            }
+
+            /**
+             * @brief resetPreviewer clears the history of cartesian errors,
              * cartesian nodes, joint space node, resets q, dq, t
              */
-            void reset()
+            void resetPreviewer()
             {
                 cartesianErrors.clear();
                 cartesianNodes.clear();
@@ -500,6 +454,46 @@ namespace OpenSoT {
                 q = model.iDyn3_model.getAng();
                 dq.resize(q.size()); dq.zero();
                 qNode.resize(q.size()); qNode.zero();
+            }
+
+            /**
+             * @brief shouldCheckSelfCollision checks whether cartesian poses changed or
+             * joint position changed too much; in which case, we force a collision check
+             * @return true if we need to call a self-collision check
+             */
+            bool shouldCheckSelfCollision(double threshold = 1e-2)
+            {
+                bool cartesianPosesChanged = false;
+                bool qChanged = false;
+
+                for(typename TrajectoryBindings::iterator b = bindings.begin();
+                    b != bindings.end();
+                    ++b)
+                {
+                    if(cartesianPoseChanged(b->task,threshold))
+                    {
+                        cartesianPosesChanged = true;
+                        std::cout << b->task->getTaskID()
+                                  << ".DeltaX > " << threshold << " - ";
+
+                    }
+                }
+
+                qChanged = jointSpaceConfigurationChanged(threshold);
+                if(qChanged)
+                    std::cout << "DeltaQ > " << threshold << " - ";
+                return cartesianPosesChanged || qChanged;
+            }
+
+            /**
+             * @brief trajectoryCompleted returns true when the trajectory has been played to the end
+             * @return true if current simulation time is equal or greated than trajectory duration
+             */
+            bool trajectoryCompleted(const TrajBinding& b)
+            {
+                if(t >= b.trajectoryGenerator->Duration())
+                    return true;
+                return false;
             }
 
             /**
@@ -524,26 +518,15 @@ namespace OpenSoT {
                 return trajCompleted;
             }
 
-            /**
-             * @brief trajectoryCompleted returns true when the trajectory has been played to the end
-             * @return true if current simulation time is equal or greated than trajectory duration
-             */
-            bool trajectoryCompleted(const TrajBinding& b)
-            {
-                if(t >= b.trajectoryGenerator->Duration())
-                    return true;
-                return false;
-            }
-
             void updateErrorsStatistics(double windowSizeInSecs = .1)
             {
                 for(typename TrajectoryBindings::iterator b = bindings.begin();
                     b != bindings.end();
                     ++b)
                 {
-                    if(cartesianErrors.count(b->task) == 0)
+                    if(cartesianErrors.count(b->task.get()) == 0)
                     {
-                        cartesianErrors[b->task] =
+                        cartesianErrors[b->task.get()] =
                             ErrorLog(std::ceil(windowSizeInSecs/dT));
                     }
 
@@ -563,7 +546,7 @@ namespace OpenSoT {
                         toGoal.orientationError = yarp::math::norm(orientationError);
                         toGoal.Ko = asCartesian(b->task)->getOrientationErrorGain();
 
-                        cartesianErrors[b->task].update(yarp::math::norm(b->task->getb()),
+                        cartesianErrors[b->task.get()].update(yarp::math::norm(b->task->getb()),
                                                         toGoal);
                     }
 
@@ -573,7 +556,7 @@ namespace OpenSoT {
 
                         toGoal.positionError = yarp::math::norm(asCoM(b->task)->getActualPosition() - KDLtoYarp(goal.p));
 
-                        cartesianErrors[b->task].update(yarp::math::norm(b->task->getb()),
+                        cartesianErrors[b->task.get()].update(yarp::math::norm(b->task->getb()),
                                                         toGoal);
                     }
                 }
@@ -597,7 +580,6 @@ namespace OpenSoT {
                         asCartesian(b->task)->setReference(yf,yt*dT);
                     else if(isCoM(b->task))
                         asCoM(b->task)->setReference(yv, yt*dT);
-                    else return false;
                 }
                 return true;
             }
@@ -623,7 +605,7 @@ namespace OpenSoT {
                                                          autostack->getBounds()))
             {
                 if(!checkConsistency()) throw new std::runtime_error("Uncoherent bindings");
-                this->reset();
+                this->resetPreviewer();
             }
 
             /**
@@ -646,14 +628,14 @@ namespace OpenSoT {
                 solver(solver)
             {
                 if(!checkConsistency()) throw new std::runtime_error("Uncoherent bindings");
-                this->reset();
+                this->resetPreviewer();
             }
 
             /**
-             * @brief reset resets the internal model with the status of the specified one, and resets internal time.
+             * @brief resetModel resets the internal model with the status of the specified one, and resets internal time.
              * @param idyn the model representing the current status of the robot
              */
-            void reset(iDynUtils& idyn)
+            void resetModel(iDynUtils& idyn)
             {
 
                 model.updateiDyn3Model( idyn.iDyn3_model.getAng(),
@@ -663,22 +645,26 @@ namespace OpenSoT {
                 model.iDyn3_model.setFloatingBaseLink(idyn.iDyn3_model.getFloatingBaseLink());
                 model.setAnchor_T_World(idyn.getAnchor_T_World());
 
-                this->reset();
+                this->resetPreviewer();
             }
 
             /**
              * @brief check simulates forward for time seconds. If time is infinity, it will simulate forward
              *              till the task converges in task space and joint space
-             * @param time the time to simulate, in seconds
+             * @param time the time to simulate, in seconds. Notice that if the time is smaller than the trajectory time,
+             *        the previewer will return false, since we didn't complete the trajectory.
+             *        You can still check the results to see if any fault occured
              * @param max_retries maximum number of times to retries solve() if errors occur
              * @return true if during the whole trajectory the tracking was always lower than the specified threshold,
-             *              and no self-collisions were detected
+             *              and no self-collisions were detected.
+             *              If the previewer is asked to simulate for a time lower than the longest trajectory duration,
+             *              false will be returned. To get finer informations you should check the results structure
              */
             bool check(const double time = std::numeric_limits<double>::infinity(),
                        const unsigned int max_retries = 3,
                        Results* results = NULL)
             {
-                this->reset();
+                this->resetPreviewer();
 
                 bool finished = false;
                 unsigned int retries = 0;
@@ -716,12 +702,21 @@ namespace OpenSoT {
                     // update the stack to get new error statistics
                     autostack->update(q);
 
+                    // ps: notice that here, when getting cartesian->b I also get the FF term!
+                    // TODO fix this
                     updateErrorsStatistics();
 
                     updateReferences();
 
-                    // update the stack to update the references
-                    autostack->update(q);
+                    /**
+                      Update the tasks to refresh the reference
+                      */
+                    for(typename TrajectoryBindings::iterator b = bindings.begin();
+                        b != bindings.end();
+                        ++b)
+                    {
+                        b->task->update(q);
+                    }
 
                     if(shouldCheckSelfCollision()) {
                         std::cout << " collision check ";
