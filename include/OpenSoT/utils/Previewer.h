@@ -152,8 +152,8 @@ namespace OpenSoT {
                  */
                 TrajBinding(TrajGenPtr trajectoryGenerator,
                             OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
-                            double maximumAllowedError = 1e-1,
-                            double convergenceTolerance = 1e-4,
+                            double maximumAllowedError = 5e-2,
+                            double convergenceTolerance = 5e-4,
                             ConvergencePolicy convergencePolicy = CONVERGE_ON_CARTESIAN_ERROR_SMALL) :
                     convergenceTolerance(convergenceTolerance),
                     maximumAllowedError(maximumAllowedError),
