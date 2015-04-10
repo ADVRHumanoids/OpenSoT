@@ -136,6 +136,12 @@
                 std::string getDistalLink();
 
                 void setLambda(double lambda);
+
+                /**
+                 * @brief getError returns the position error between actual and reference positions
+                 * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
+                 */
+                yarp::sig::Vector getError();
             };
         }
     }

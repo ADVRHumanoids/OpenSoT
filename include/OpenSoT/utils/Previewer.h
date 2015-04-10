@@ -547,7 +547,7 @@ namespace OpenSoT {
                         toGoal.orientationError = yarp::math::norm(orientationError);
                         toGoal.Ko = asCartesian(b->task)->getOrientationErrorGain();
 
-                        cartesianErrors[b->task.get()].update(yarp::math::norm(b->task->getb()),
+                        cartesianErrors[b->task.get()].update(yarp::math::norm(asCartesian(b->task)->getError()),
                                                         toGoal);
                     }
 
@@ -557,7 +557,7 @@ namespace OpenSoT {
 
                         toGoal.positionError = yarp::math::norm(asCoM(b->task)->getActualPosition() - KDLtoYarp(goal.p));
 
-                        cartesianErrors[b->task.get()].update(yarp::math::norm(b->task->getb()),
+                        cartesianErrors[b->task.get()].update(yarp::math::norm(asCoM(b->task)->getError()),
                                                         toGoal);
                     }
                 }

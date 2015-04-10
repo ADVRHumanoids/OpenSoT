@@ -25,6 +25,8 @@
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
+#define LAMBDA_THS 1E-12
+
 CoM::CoM(   const yarp::sig::Vector& x,
             iDynUtils &robot) :
     Task("CoM", x.size()), _robot(robot),
@@ -117,12 +119,19 @@ std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
 
 void CoM::update_b()
 {
-    positionError = _desiredPosition - _actualPosition;
-    _b = positionError + _desiredVelocity/_lambda;
+    if(_lambda >= LAMBDA_THS)
+        _b = this->getError() + _desiredVelocity/_lambda;
+    else
+        _b = this->getError();
 }
 
 void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
 {
     this->_lambda = lambda;
     this->update_b();
+}
+
+yarp::sig::Vector OpenSoT::tasks::velocity::CoM::getError()
+{
+    return _desiredPosition - _actualPosition;
 }
