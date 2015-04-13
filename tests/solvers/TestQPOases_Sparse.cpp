@@ -94,6 +94,28 @@ namespace
                                                      3, sym_sparse_mat_yarp2.data());
         std::cout<<"SymSparseMat3:"<<std::endl;
         sym_sparse_mat_qpoases3.print();
+
+
+        yarp::sig::Matrix sparse_mat_yarp(2,4);
+        sparse_mat_yarp.zero();
+        sparse_mat_yarp(0,0) = 5.0;
+        sparse_mat_yarp(0,2) = 3.0;
+        sparse_mat_yarp(1,0) = 6.0;
+        sparse_mat_yarp(1,2) = 7.0;
+
+        qpOASES::SparseMatrix sparse_mat_qpoases(sparse_mat_yarp.rows(), sparse_mat_yarp.cols(),
+                                                 sparse_mat_yarp.cols(), sparse_mat_yarp.data());
+
+        std::cout<<"SparseMat1:"<<std::endl;
+        sparse_mat_qpoases.print();
+
+        yarp::sig::Matrix sparse_mat_yarp2;
+
+        qpOASES::SparseMatrix sparse_mat_qpoases2(sparse_mat_yarp2.rows(), sparse_mat_yarp2.cols(),
+                                                 sparse_mat_yarp2.cols(), sparse_mat_yarp2.data());
+
+        std::cout<<"SparseMat2:"<<std::endl;
+        sparse_mat_qpoases2.print();
     }
 }
 

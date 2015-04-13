@@ -79,8 +79,15 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         assert(_lA.size() == _uA.size());}
 
     int nWSR = _nWSR;
-        qpOASES::returnValue val =_problem->init( _H.data(),_g.data(),
-                       _A.data(),
+        boost::shared_ptr<qpOASES::SymSparseMat> H_sparse(
+                    new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+        H_sparse->createDiagInfo();
+        boost::shared_ptr<qpOASES::SparseMatrix> A_sparse;
+        if(!(_A.data() == NULL))
+            A_sparse.reset(new qpOASES::SparseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+
+        qpOASES::returnValue val =_problem->init(H_sparse.get(),_g.data(),
+                       A_sparse.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -311,8 +318,15 @@ bool QPOasesProblem::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
-                       _A.data(),
+    boost::shared_ptr<qpOASES::SymSparseMat> H_sparse(
+                new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    H_sparse->createDiagInfo();
+    boost::shared_ptr<qpOASES::SparseMatrix> A_sparse;
+    if(!(_A.data() == NULL))
+        A_sparse.reset(new qpOASES::SparseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+
+    qpOASES::returnValue val =_problem->hotstart(H_sparse.get(),_g.data(),
+                       A_sparse.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -331,8 +345,8 @@ bool QPOasesProblem::solve()
                                                               number_of_constraints,
                                                               hessian_type));
         _problem->setOptions(*_opt.get());
-        val =_problem->init(_H.data(),_g.data(),
-                           _A.data(),
+        val =_problem->init(H_sparse.get(),_g.data(),
+                           A_sparse.get(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,
