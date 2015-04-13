@@ -24,7 +24,8 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _constraints(new qpOASES::Constraints()),
     _nWSR(132),
     _epsRegularisation(eps_regularisation),
-    _solution(number_of_variables), _dual_solution(number_of_variables)
+    _solution(number_of_variables), _dual_solution(number_of_variables),
+    _opt(new qpOASES::Options())
 { setDefaultOptions();}
 
 QPOasesProblem::~QPOasesProblem()
@@ -44,9 +45,12 @@ void QPOasesProblem::setDefaultOptions()
 
     std::cout<<GREEN<<"Solver Default Options:"<<DEFAULT<<std::endl;
     opt.print();
+
+    _opt.reset(new qpOASES::Options(opt));
 }
 
 void QPOasesProblem::setOptions(const qpOASES::Options &options){
+    _opt.reset(new qpOASES::Options(options));
     _problem->setOptions(options);}
 
 qpOASES::Options QPOasesProblem::getOptions(){
@@ -159,7 +163,7 @@ bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
 }
@@ -203,7 +207,7 @@ bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const 
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
 }
@@ -260,7 +264,7 @@ bool QPOasesProblem::addTask(const Matrix &H, const Vector &g)
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
 
@@ -294,7 +298,7 @@ bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vec
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
     std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
@@ -326,6 +330,7 @@ bool QPOasesProblem::solve()
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
+        _problem->setOptions(*_opt.get());
         val =_problem->init(_H.data(),_g.data(),
                            _A.data(),
                            _l.data(), _u.data(),
@@ -343,6 +348,7 @@ bool QPOasesProblem::solve()
                                                                   number_of_variables,
                                                                   number_of_constraints,
                                                                   hessian_type));
+            _problem->setOptions(*_opt.get());
             return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);}
     }
 

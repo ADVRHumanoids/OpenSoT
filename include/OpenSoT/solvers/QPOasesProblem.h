@@ -301,6 +301,11 @@ namespace OpenSoT{
          */
         Vector _solution;
         Vector _dual_solution;
+
+        /**
+         * @brief _opt solver options
+         */
+        boost::shared_ptr<qpOASES::Options> _opt;
     };
     }
 }
