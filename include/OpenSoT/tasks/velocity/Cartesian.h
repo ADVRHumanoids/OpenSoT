@@ -154,6 +154,12 @@
                 const bool baseLinkIsWorld() const;
 
                 void setLambda(double lambda);
+
+                /**
+                 * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
+                 * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
+                 */
+                yarp::sig::Vector getError();
             };
         }
     }

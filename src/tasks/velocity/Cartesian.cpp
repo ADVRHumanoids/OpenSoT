@@ -162,12 +162,17 @@ void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
     }
 }
 
+yarp::sig::Vector OpenSoT::tasks::velocity::Cartesian::getError()
+{
+    return yarp::math::cat(positionError, -_orientationErrorGain*orientationError);
+}
+
 void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
     if(_lambda >= LAMBDA_THS)
-        _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError) + _desiredTwist/_lambda;
+        _b = this->getError() + _desiredTwist/_lambda;
     else
-        _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError);
+        _b = this->getError();
 }
