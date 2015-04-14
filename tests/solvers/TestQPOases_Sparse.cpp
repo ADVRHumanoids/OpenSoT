@@ -14,11 +14,24 @@
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <OpenSoT/constraints/Aggregated.h>
+#include <OpenSoT/constraints/velocity/ConvexHull.h>
+#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/tasks/Aggregated.h>
+#include <OpenSoT/solvers/QPOases.h>
+#include <idynutils/cartesian_utils.h>
+#include <qpOASES/Utils.hpp>
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
 #define RED "\033[0;31m"
 #define DEFAULT "\033[0m"
+
+#define mSecToSec(X) (X*0.001)
 
 using namespace yarp::sig;
 using namespace yarp::math;
@@ -35,9 +48,9 @@ namespace
             HST_UNKNOWN                 /**< Hessian type is unknown. */
         };
 
-             class QPOasesProblem4Test {
+             class QPOasesProblemDense {
              public:
-                 QPOasesProblem4Test(const int number_of_variables, const int number_of_constraints,
+                 QPOasesProblemDense(const int number_of_variables, const int number_of_constraints,
                                 OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
                                 const double eps_regularisation = 2E2):
                     _problem(new qpOASES::SQProblem(number_of_variables, number_of_constraints,
@@ -51,7 +64,7 @@ namespace
                     _opt(new qpOASES::Options())
                 { setDefaultOptions();}
 
-                 ~QPOasesProblem4Test(){}
+                 ~QPOasesProblemDense(){}
 
                  void setDefaultOptions()
                  {
@@ -538,12 +551,12 @@ namespace
                  boost::shared_ptr<qpOASES::Options> _opt;
              };
 
-             class QPOases_sot4Test: public OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>
+             class QPOases_sotDense: public OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>
              {
              public:
-                 typedef boost::shared_ptr<QPOases_sot4Test> Ptr;
+                 typedef boost::shared_ptr<QPOases_sotDense> Ptr;
 
-                 QPOases_sot4Test(Stack& stack_of_tasks, const double eps_regularisation = 2E2):
+                 QPOases_sotDense(Stack& stack_of_tasks, const double eps_regularisation = 2E2):
                      Solver(stack_of_tasks),
                      _epsRegularisation(eps_regularisation)
                  {
@@ -551,7 +564,7 @@ namespace
                          throw "Can Not initizalize SoT!";
                  }
 
-                 QPOases_sot4Test(Stack& stack_of_tasks,
+                 QPOases_sotDense(Stack& stack_of_tasks,
                                  ConstraintPtr bounds,
                                  const double eps_regularisation = 2E2):
                      Solver(stack_of_tasks, bounds),
@@ -561,7 +574,7 @@ namespace
                          throw "Can Not initizalize SoT with bounds!";
                  }
 
-                 ~QPOases_sot4Test(){}
+                 ~QPOases_sotDense(){}
 
                  bool solve(Vector& solution)
                  {
@@ -629,7 +642,7 @@ namespace
                  }
 
              protected:
-                 vector <QPOasesProblem4Test> _qp_stack_of_tasks;
+                 vector <QPOasesProblemDense> _qp_stack_of_tasks;
 
                  double _epsRegularisation;
 
@@ -663,7 +676,7 @@ namespace
                          yarp::sig::Vector l = constraints_task_i->getLowerBound();
                          yarp::sig::Vector u = constraints_task_i->getUpperBound();
 
-                         QPOasesProblem4Test problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
+                         QPOasesProblemDense problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                                   _epsRegularisation);
 
                          if(problem_i.initProblem(H, g, A, lA, uA, l, u)){
@@ -682,7 +695,7 @@ namespace
                      g = -1.0 * task->getLambda() * task->getA().transposed() * task->getWeight() * task->getb();
                  }
 
-                 void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblem4Test& problem,
+                 void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblemDense& problem,
                                         yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA)
                  {
                      OpenSoT::constraints::BilateralConstraint::Ptr optimality_bilateral_constraint(
@@ -770,8 +783,8 @@ namespace
 
         std::cout<<std::endl;
         qpOASES::SymSparseMat sym_sparse_mat_qpoases2(180, 180, H_ir, H_jc, H_val);
-        std::cout<<"SymSparseMat2:"<<std::endl;
-        sym_sparse_mat_qpoases2.print();
+        //std::cout<<"SymSparseMat2:"<<std::endl;
+        //sym_sparse_mat_qpoases2.print();
 
 
         std::cout<<std::endl;
@@ -813,6 +826,235 @@ namespace
 
         std::cout<<"SparseMat2:"<<std::endl;
         sparse_mat_qpoases2.print();
+    }
+
+
+    yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
+        yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+        yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+        leg[0] = -25.0 * M_PI/180.0;
+        leg[3] =  50.0 * M_PI/180.0;
+        leg[5] = -25.0 * M_PI/180.0;
+        idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+        idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+        yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+        arm[0] = 20.0 * M_PI/180.0;
+        arm[1] = 10.0 * M_PI/180.0;
+        arm[3] = -80.0 * M_PI/180.0;
+        idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+        arm[1] = -arm[1];
+        idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+        return q;
+    }
+
+    struct ik_problem
+    {
+        std::vector<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr> stack_of_tasks;
+        OpenSoT::constraints::Aggregated::Ptr bounds;
+        double damped_least_square_eps;
+    };
+
+    TEST_F(testqpOASESSparseMatrices, testSparseVSDenseSolver)
+    {
+        std::vector<double> mean_time_solver;
+        for(unsigned int i = 0; i < 2; ++i){
+            iDynUtils robot_model("coman",
+                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+            robot_model.iDyn3_model.setFloatingBaseLink(robot_model.left_leg.index);
+            yarp::sig::Vector state = getGoodInitialPosition(robot_model);
+            robot_model.updateiDyn3Model(state, true);
+
+            double dT = 2.0;
+
+            using namespace OpenSoT::constraints::velocity;
+            using namespace OpenSoT::tasks::velocity;
+            /** Create Constraints **/
+                /** 1) Constraint Convex Hull **/
+                ConvexHull::Ptr constraintConvexHull(ConvexHull::Ptr(new ConvexHull(state, robot_model, 0.02)));
+
+                /** 2) CoM Velocity **/
+                CoMVelocity::Ptr constraintCoMVel(CoMVelocity::Ptr(
+                                            new CoMVelocity(Vector(3,0.9), mSecToSec(dT), state, robot_model)));
+
+            /** Create tasks **/
+                /** 1) Cartesian RSole **/
+                Cartesian::Ptr taskRSole(Cartesian::Ptr(new Cartesian("cartesian::r_sole",state,robot_model,
+                                                                  robot_model.right_leg.end_effector_name,"world")));
+
+                /** 2) Cartesian Waist **/
+                Cartesian::Ptr taskWaist(Cartesian::Ptr(
+                                             new Cartesian("cartesian::Waist",state,robot_model,"Waist","world")));
+                yarp::sig::Matrix waistInit = taskWaist->getActualPose();
+                yarp::sig::Matrix waistRef = waistInit;
+                waistRef(0,3) += 0.07;
+                taskWaist->setReference(waistRef);
+                taskWaist->update(state);
+
+                /** 3) Cartesian Torso **/
+                Cartesian::Ptr taskTorso(Cartesian::Ptr(
+                                             new Cartesian("cartesian::torso",state,robot_model,"torso","world")));
+                    /** 3.1) We want to control torso in /world frame using only the three joints in the torso **/
+                    std::vector<bool> active_joint_mask = taskTorso->getActiveJointsMask();
+                    for(unsigned int i = 0; i < robot_model.left_leg.getNrOfDOFs(); ++i)
+                        active_joint_mask[robot_model.left_leg.joint_numbers[i]] = false;
+                    taskTorso->setActiveJointsMask(active_joint_mask);
+
+                    /** 3.2) We are interested only in the orientation of the torso **/
+                    yarp::sig::Matrix W_torso(6,6); W_torso = W_torso.eye();
+                    W_torso(0,0) = 0.0; W_torso(1,1) = 0.0; W_torso(2,2) = 0.0;
+                    taskTorso->setWeight(W_torso);
+        //            OpenSoT::SubTask::Ptr taskTorsoPosition(OpenSoT::SubTask::Ptr(
+        //                                            new OpenSoT::SubTask(taskTorso, OpenSoT::SubTask::SubTaskMap::range(3,5))));
+                    Cartesian::Ptr taskRArm(Cartesian::Ptr(new Cartesian("cartesian::r_arm",state,robot_model,
+                                                                      robot_model.right_arm.end_effector_name,"Waist")));
+                    Cartesian::Ptr taskLArm(Cartesian::Ptr(new Cartesian("cartesian::l_arm",state,robot_model,
+                                                                      robot_model.left_arm.end_effector_name,"Waist")));
+
+                /** 4) Postural **/
+                Postural::Ptr taskPostural(Postural::Ptr(new Postural(state)));
+                //taskPostural->setLambda(0.0);
+
+                /** 5) Mininimize Acceleration **/
+                MinimizeAcceleration::Ptr taskMinimizeAcceleration(MinimizeAcceleration::Ptr(
+                                                                       new MinimizeAcceleration(state)));
+
+                /** Create bounds **/
+                /** 1) bounds joint limits **/
+                JointLimits::ConstraintPtr boundJointLimits(JointLimits::ConstraintPtr(new JointLimits(state,
+                                                                    robot_model.iDyn3_model.getJointBoundMax(),
+                                                                    robot_model.iDyn3_model.getJointBoundMin())));
+                /** 2) bounds joint velocities **/
+                VelocityLimits::ConstraintPtr boundsJointVelLimits(VelocityLimits::ConstraintPtr(
+                                                            new VelocityLimits(0.1, mSecToSec(dT), state.size())));
+
+
+                boost::shared_ptr<ik_problem> problem(new ik_problem());
+
+
+                /** Create Augmented (aggregated) tasks  and stack of tasks**/
+                /** 1) Higher priority Stack **/
+                std::list<OpenSoT::tasks::Aggregated::TaskPtr> taskList;
+                taskList.push_back(taskRSole);
+                problem->stack_of_tasks.push_back(OpenSoT::tasks::Aggregated::TaskPtr(
+                                                      new OpenSoT::tasks::Aggregated(taskList, state.size())));
+                /** 1.1) Add constraints to the stack **/
+                problem->stack_of_tasks[0]->getConstraints().push_back(constraintConvexHull);
+                problem->stack_of_tasks[0]->getConstraints().push_back(constraintCoMVel);
+
+                /** 2) Second stack **/
+                taskList.clear();
+                taskList.push_back(taskWaist);
+                taskList.push_back(taskTorso);
+                taskList.push_back(taskRArm);
+                taskList.push_back(taskLArm);
+                problem->stack_of_tasks.push_back(OpenSoT::tasks::Aggregated::TaskPtr(
+                                                      new OpenSoT::tasks::Aggregated(taskList, state.size())));
+                /** 2.1) Add constraints to the stack **/
+                problem->stack_of_tasks[1]->getConstraints().push_back(constraintConvexHull);
+                problem->stack_of_tasks[1]->getConstraints().push_back(constraintCoMVel);
+
+
+
+                /** 3) Third stack **/
+                taskList.clear();
+                taskList.push_back(taskPostural);
+                taskList.push_back(taskMinimizeAcceleration);
+                problem->stack_of_tasks.push_back(OpenSoT::tasks::Aggregated::TaskPtr(
+                                                      new OpenSoT::tasks::Aggregated(taskList, state.size())));
+                /** 3.1) Add constraints to the stack **/
+                problem->stack_of_tasks[2]->getConstraints().push_back(constraintConvexHull);
+                problem->stack_of_tasks[2]->getConstraints().push_back(constraintCoMVel);
+
+                /** Add bounds to problem **/
+                std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds;
+                bounds.push_back(boundJointLimits);
+                bounds.push_back(boundsJointVelLimits);
+                problem->bounds = OpenSoT::constraints::Aggregated::Ptr(
+                            new OpenSoT::constraints::Aggregated(bounds, state.size()));
+
+                /** Set damped leas squares fator **/
+                problem->damped_least_square_eps = 2E2;
+
+                boost::shared_ptr<OpenSoT::solvers::QPOases_sot> qp_solver_sparse;
+                boost::shared_ptr<QPOases_sotDense> qp_solver_dense;
+
+                if(i == 0){
+                    std::cout<<GREEN<<"SPARSE SOLVER"<<DEFAULT<<std::endl;
+                    qp_solver_sparse = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(
+                                                                             problem->stack_of_tasks,
+                                                                             problem->bounds,
+                                                                             problem->damped_least_square_eps));
+
+                    yarp::sig::Vector dq(state.size(), 0.0);
+                    double acc = 0.0;
+                    for(unsigned int i = 0; i < 5000; ++i)
+                    {
+                        robot_model.updateiDyn3Model(state, true);
+
+                        for(unsigned int j = 0; j < problem->stack_of_tasks.size(); ++j)
+                            problem->stack_of_tasks[j]->update(state);
+                        problem->bounds->update(state);
+
+                        double tic = qpOASES::getCPUtime();
+                        ASSERT_TRUE(qp_solver_sparse->solve(dq));
+                        double toc = qpOASES::getCPUtime();
+                        acc += toc - tic;
+                        state += dq;
+                    }
+                    double t = acc/(double)(5000);
+                    std::cout<<"Medium Time to Solve sot "<<acc/(double)(5000)<<"[s]"<<std::endl;
+                    mean_time_solver.push_back(t);
+
+                    yarp::sig::Matrix waistActual = taskWaist->getActualPose();
+                    std::cout<<GREEN<<"Waist Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistInit);
+                    std::cout<<GREEN<<"Waist Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistRef);
+                    std::cout<<GREEN<<"Waist Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistActual);
+                    for(unsigned int ii = 0; ii < 3; ++ii)
+                        EXPECT_NEAR(waistActual(ii,3), waistRef(ii,3), 1E-3);
+                    for(unsigned int ii = 0; ii < 3; ++ii)
+                        for(unsigned int jj = 0; jj < 3; ++jj)
+                            EXPECT_NEAR(waistActual(ii,jj), waistRef(ii,jj), 1E-2);
+                }
+                else if(i == 1){
+                    std::cout<<GREEN<<"DENSE SOLVER"<<DEFAULT<<std::endl;
+                    qp_solver_dense = QPOases_sotDense::Ptr(new QPOases_sotDense(problem->stack_of_tasks,
+                                                                         problem->bounds,
+                                                                         problem->damped_least_square_eps));
+                    yarp::sig::Vector dq(state.size(), 0.0);
+                    double acc = 0.0;
+                    for(unsigned int i = 0; i < 5000; ++i)
+                    {
+                        robot_model.updateiDyn3Model(state, true);
+
+                        for(unsigned int j = 0; j < problem->stack_of_tasks.size(); ++j)
+                            problem->stack_of_tasks[j]->update(state);
+                        problem->bounds->update(state);
+
+                        double tic = qpOASES::getCPUtime();
+                        ASSERT_TRUE(qp_solver_dense->solve(dq));
+                        double toc = qpOASES::getCPUtime();
+                        acc += toc - tic;
+                        state += dq;
+                    }
+                    double t = acc/(double)(5000);
+                    std::cout<<"Medium Time to Solve sot "<<acc/(double)(5000)<<"[s]"<<std::endl;
+                    mean_time_solver.push_back(t);
+
+                    yarp::sig::Matrix waistActual = taskWaist->getActualPose();
+                    std::cout<<GREEN<<"Waist Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistInit);
+                    std::cout<<GREEN<<"Waist Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistRef);
+                    std::cout<<GREEN<<"Waist Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistActual);
+                    for(unsigned int ii = 0; ii < 3; ++ii)
+                        EXPECT_NEAR(waistActual(ii,3), waistRef(ii,3), 1E-3);
+                    for(unsigned int ii = 0; ii < 3; ++ii)
+                        for(unsigned int jj = 0; jj < 3; ++jj)
+                            EXPECT_NEAR(waistActual(ii,jj), waistRef(ii,jj), 1E-2);
+                }
+        }
+        std::cout<<GREEN<<"SPARSE SOLVER needs: "<<DEFAULT<<mean_time_solver[0]<<" [s]"<<std::endl;
+        std::cout<<GREEN<<"DENSE SOLVER needs: "<<DEFAULT<<mean_time_solver[1]<<" [s]"<<std::endl;
+
     }
 }
 

@@ -5,6 +5,7 @@
 #include <yarp/sig/Matrix.h>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
+#include <qpOASES/Matrices.hpp>
 
 using namespace yarp::sig;
 
@@ -281,6 +282,7 @@ namespace OpenSoT{
          * Define a cost function: ||Hx - g||
          */
         yarp::sig::Matrix _H;
+        boost::shared_ptr<qpOASES::SymSparseMat> H_sparse;
         Vector _g;
 
         /**
