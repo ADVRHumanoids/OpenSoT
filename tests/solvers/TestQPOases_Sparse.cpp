@@ -857,6 +857,7 @@ namespace
     TEST_F(testqpOASESSparseMatrices, testSparseVSDenseSolver)
     {
         std::vector<double> mean_time_solver;
+        std::vector<double> init_time_solver;
         for(unsigned int i = 0; i < 2; ++i){
             iDynUtils robot_model("coman",
                                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
@@ -979,16 +980,20 @@ namespace
                 boost::shared_ptr<OpenSoT::solvers::QPOases_sot> qp_solver_sparse;
                 boost::shared_ptr<QPOases_sotDense> qp_solver_dense;
 
+                int step = 3000;
                 if(i == 0){
                     std::cout<<GREEN<<"SPARSE SOLVER"<<DEFAULT<<std::endl;
+                    double tic = qpOASES::getCPUtime();
                     qp_solver_sparse = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(
                                                                              problem->stack_of_tasks,
                                                                              problem->bounds,
                                                                              problem->damped_least_square_eps));
+                    double toc = qpOASES::getCPUtime();
+                    init_time_solver.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
                     double acc = 0.0;
-                    for(unsigned int i = 0; i < 5000; ++i)
+                    for(unsigned int i = 0; i < step; ++i)
                     {
                         robot_model.updateiDyn3Model(state, true);
 
@@ -1002,8 +1007,8 @@ namespace
                         acc += toc - tic;
                         state += dq;
                     }
-                    double t = acc/(double)(5000);
-                    std::cout<<"Medium Time to Solve sot "<<acc/(double)(5000)<<"[s]"<<std::endl;
+                    double t = acc/(double)(step);
+                    std::cout<<"Medium Time to Solve sot "<<acc/(double)(step)<<"[s]"<<std::endl;
                     mean_time_solver.push_back(t);
 
                     yarp::sig::Matrix waistActual = taskWaist->getActualPose();
@@ -1018,12 +1023,16 @@ namespace
                 }
                 else if(i == 1){
                     std::cout<<GREEN<<"DENSE SOLVER"<<DEFAULT<<std::endl;
+                    double tic = qpOASES::getCPUtime();
                     qp_solver_dense = QPOases_sotDense::Ptr(new QPOases_sotDense(problem->stack_of_tasks,
                                                                          problem->bounds,
                                                                          problem->damped_least_square_eps));
+                    double toc = qpOASES::getCPUtime();
+                    init_time_solver.push_back(toc-tic);
+
                     yarp::sig::Vector dq(state.size(), 0.0);
                     double acc = 0.0;
-                    for(unsigned int i = 0; i < 5000; ++i)
+                    for(unsigned int i = 0; i < step; ++i)
                     {
                         robot_model.updateiDyn3Model(state, true);
 
@@ -1037,8 +1046,8 @@ namespace
                         acc += toc - tic;
                         state += dq;
                     }
-                    double t = acc/(double)(5000);
-                    std::cout<<"Medium Time to Solve sot "<<acc/(double)(5000)<<"[s]"<<std::endl;
+                    double t = acc/(double)(step);
+                    std::cout<<"Medium Time to Solve sot "<<acc/(double)(step)<<"[s]"<<std::endl;
                     mean_time_solver.push_back(t);
 
                     yarp::sig::Matrix waistActual = taskWaist->getActualPose();
@@ -1052,6 +1061,8 @@ namespace
                             EXPECT_NEAR(waistActual(ii,jj), waistRef(ii,jj), 1E-2);
                 }
         }
+        std::cout<<GREEN<<"SPARSE SOLVER init needs: "<<DEFAULT<<init_time_solver[0]<<" [s]"<<std::endl;
+        std::cout<<GREEN<<"DENSE SOLVER init needs: "<<DEFAULT<<init_time_solver[1]<<" [s]"<<std::endl;
         std::cout<<GREEN<<"SPARSE SOLVER needs: "<<DEFAULT<<mean_time_solver[0]<<" [s]"<<std::endl;
         std::cout<<GREEN<<"DENSE SOLVER needs: "<<DEFAULT<<mean_time_solver[1]<<" [s]"<<std::endl;
 

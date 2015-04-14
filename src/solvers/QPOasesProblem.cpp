@@ -4,6 +4,7 @@
 #include <ctime>
 #include <qpOASES/Utils.hpp>
 #include <fstream>
+#include <boost/make_shared.hpp>
 
 
 #define GREEN "\033[0;32m"
@@ -80,12 +81,13 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         assert(_lA.size() == _uA.size());}
 
     int nWSR = _nWSR;
-        H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
-        H_sparse->createDiagInfo();
-        boost::shared_ptr<qpOASES::SparseMatrix> A_sparse;
+        H_sparse = boost::make_shared<qpOASES::SymDenseMat>(
+                    qpOASES::SymDenseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+        //H_sparse->createDiagInfo();
+        A_sparse = NULL;
         if(!(_A.data() == NULL))
-            A_sparse.reset(new qpOASES::SparseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
-
+            A_sparse = boost::make_shared<qpOASES::DenseMatrix>(
+                        qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
 
         qpOASES::returnValue val =_problem->init(H_sparse.get(),_g.data(),
                        A_sparse.get(),
@@ -319,11 +321,13 @@ bool QPOasesProblem::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
-    H_sparse->createDiagInfo();
-    boost::shared_ptr<qpOASES::SparseMatrix> A_sparse;
+    H_sparse = boost::make_shared<qpOASES::SymDenseMat>(
+                qpOASES::SymDenseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    //H_sparse->createDiagInfo();
+    A_sparse = NULL;
     if(!(_A.data() == NULL))
-        A_sparse.reset(new qpOASES::SparseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+        A_sparse = boost::make_shared<qpOASES::DenseMatrix>(
+                    qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
 
 
     qpOASES::returnValue val =_problem->hotstart(H_sparse.get(),_g.data(),
