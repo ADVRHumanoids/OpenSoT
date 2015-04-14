@@ -109,7 +109,12 @@ namespace
         std::cout<<"SparseMat1:"<<std::endl;
         sparse_mat_qpoases.print();
 
-        yarp::sig::Matrix sparse_mat_yarp2;
+        yarp::sig::Matrix sparse_mat_yarp2(5,3);
+        sparse_mat_yarp2.zero();
+        sparse_mat_yarp2(0,0) = 5.0;
+        sparse_mat_yarp2(1,0) = 3.0;
+        sparse_mat_yarp2(2,0) = 7.0;
+        sparse_mat_yarp2(3,0) = 8.0;
 
         qpOASES::SparseMatrix sparse_mat_qpoases2(sparse_mat_yarp2.rows(), sparse_mat_yarp2.cols(),
                                                  sparse_mat_yarp2.cols(), sparse_mat_yarp2.data());
