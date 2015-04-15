@@ -2,7 +2,7 @@
  *	This file is part of qpOASES.
  *
  *	qpOASES -- An Implementation of the Online Active Set Strategy.
- *	Copyright (C) 2007-2014 by Hans Joachim Ferreau, Andreas Potschka,
+ *	Copyright (C) 2007-2015 by Hans Joachim Ferreau, Andreas Potschka,
  *	Christian Kirches et al. All rights reserved.
  *
  *	qpOASES is free software; you can redistribute it and/or
@@ -25,8 +25,8 @@
 /**
  *	\file src/MessageHandling.cpp
  *	\author Hans Joachim Ferreau, Andreas Potschka, Christian Kirches
- *	\version 3.0
- *	\date 2007-2014
+ *	\version 3.1
+ *	\date 2007-2015
  *
  *	Implementation of the MessageHandling class including global return values.
  *
@@ -44,6 +44,9 @@
 
 
 BEGIN_NAMESPACE_QPOASES
+
+/** Default file to display messages. */
+FILE* stdFile = stdout;
 
 
 
@@ -99,6 +102,7 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_OBTAINING_WORKINGSET_FAILED, "Failed to obtain working set for auxiliary QP", VS_VISIBLE },
 { RET_SETUP_WORKINGSET_FAILED, "Failed to setup working set for auxiliary QP", VS_VISIBLE },
 { RET_SETUP_AUXILIARYQP_FAILED, "Failed to setup auxiliary QP for initialised homotopy", VS_VISIBLE },
+{ RET_NO_CHOLESKY_WITH_INITIAL_GUESS, "Externally computed Cholesky factor cannot be combined with an initial guess", VS_VISIBLE },
 { RET_NO_EXTERN_SOLVER, "No extern QP solver available", VS_VISIBLE },
 { RET_QP_UNBOUNDED, "QP is unbounded", VS_VISIBLE },
 { RET_QP_INFEASIBLE, "QP is infeasible", VS_VISIBLE },
@@ -173,6 +177,7 @@ MessageHandling::ReturnValueList returnValueList[] =
 { RET_NO_REGSTEP_NWSR, "No additional regularisation step could be performed due to limits", VS_VISIBLE },
 { RET_FEWER_REGSTEPS_NWSR, "Fewer additional regularisation steps have been performed due to limits", VS_VISIBLE },
 { RET_CHOLESKY_OF_ZERO_HESSIAN, "Cholesky decomposition of (unregularised) zero Hessian matrix", VS_VISIBLE },
+{ RET_ZERO_HESSIAN_ASSUMED, "Zero Hessian matrix assumed as null pointer passed without specifying hessianType", VS_VISIBLE },
 { RET_CONSTRAINTS_ARE_NOT_SCALED, "(should not be thrown, no longer in use)", VS_VISIBLE },
 { RET_INITIAL_BOUNDS_STATUS_NYI, "(should not be thrown, no longer in use)", VS_VISIBLE },
 { RET_ERROR_IN_CONSTRAINTPRODUCT, "Error in user-defined constraint product function", VS_VISIBLE },

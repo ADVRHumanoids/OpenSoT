@@ -2,7 +2,7 @@
  *	This file is part of qpOASES.
  *
  *	qpOASES -- An Implementation of the Online Active Set Strategy.
- *	Copyright (C) 2007-2014 by Hans Joachim Ferreau, Andreas Potschka,
+ *	Copyright (C) 2007-2015 by Hans Joachim Ferreau, Andreas Potschka,
  *	Christian Kirches et al. All rights reserved.
  *
  *	qpOASES is free software; you can redistribute it and/or
@@ -25,8 +25,8 @@
 /**
  *	\file src/OQPinterface.cpp
  *	\author Hans Joachim Ferreau
- *	\version 3.0
- *	\date 2008-2014
+ *	\version 3.1
+ *	\date 2008-2015
  *
  *	Implementation of an interface comprising several utility functions
  *	for solving test problems from the Online QP Benchmark Collection
@@ -377,7 +377,7 @@ returnValue solveOQPbenchmark(	int nQP, int nV, int nC, int nEC,
 		//obj = qp.getObjVal( );
 
 		/* 5) Compute KKT residuals */
-		getKKTResidual( nV, nC, _H,gCur,_A,lbCur,ubCur,lbACur,ubACur, x, y, stat, feas, cmpl );
+		getKktViolation( nV,nC, _H,gCur,_A,lbCur,ubCur,lbACur,ubACur, x,y, stat,feas,cmpl );
 		
 		/* 6) Update maximum and average values. */
 		if ( ((double)nWSRcur) > maxNWSR )
@@ -539,7 +539,7 @@ returnValue solveOQPbenchmark(	int nQP, int nV,
 		//obj = qp.getObjVal( );
 
 		/* 5) Compute KKT residuals */
-		getKKTResidual( nV, _H,gCur,lbCur,ubCur, x,y, stat,feas,cmpl );
+		getKktViolation( nV, _H,gCur,lbCur,ubCur, x,y, stat,feas,cmpl );
 
 		/* 6) update maximum values. */
 		if ( nWSRcur > maxNWSR )

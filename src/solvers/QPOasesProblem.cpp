@@ -4,6 +4,8 @@
 #include <ctime>
 #include <qpOASES/Utils.hpp>
 #include <fstream>
+#include <boost/make_shared.hpp>
+
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -79,8 +81,15 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         assert(_lA.size() == _uA.size());}
 
     int nWSR = _nWSR;
-        qpOASES::returnValue val =_problem->init( _H.data(),_g.data(),
-                       _A.data(),
+    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    H_sparse->createDiagInfo();
+    A_dense = NULL;
+    if(!(_A.data() == NULL))
+        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
+                qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+
+        qpOASES::returnValue val =_problem->init(H_sparse.get(),_g.data(),
+                       A_dense.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -311,8 +320,16 @@ bool QPOasesProblem::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
-                       _A.data(),
+    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    H_sparse->createDiagInfo();
+    A_dense = NULL;
+    if(!(_A.data() == NULL))
+        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
+                    qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+
+
+    qpOASES::returnValue val =_problem->hotstart(H_sparse.get(),_g.data(),
+                       A_dense.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -331,8 +348,8 @@ bool QPOasesProblem::solve()
                                                               number_of_constraints,
                                                               hessian_type));
         _problem->setOptions(*_opt.get());
-        val =_problem->init(_H.data(),_g.data(),
-                           _A.data(),
+        val =_problem->init(H_sparse.get(),_g.data(),
+                           A_dense.get(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,
