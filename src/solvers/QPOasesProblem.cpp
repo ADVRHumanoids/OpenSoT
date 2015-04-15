@@ -81,16 +81,15 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         assert(_lA.size() == _uA.size());}
 
     int nWSR = _nWSR;
-        H_sparse = boost::make_shared<qpOASES::SymDenseMat>(
-                    qpOASES::SymDenseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
-        //H_sparse->createDiagInfo();
-        A_sparse = NULL;
-        if(!(_A.data() == NULL))
-            A_sparse = boost::make_shared<qpOASES::DenseMatrix>(
-                        qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    H_sparse->createDiagInfo();
+    A_dense = NULL;
+    if(!(_A.data() == NULL))
+        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
+                qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
 
         qpOASES::returnValue val =_problem->init(H_sparse.get(),_g.data(),
-                       A_sparse.get(),
+                       A_dense.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -321,17 +320,16 @@ bool QPOasesProblem::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    H_sparse = boost::make_shared<qpOASES::SymDenseMat>(
-                qpOASES::SymDenseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
-    //H_sparse->createDiagInfo();
-    A_sparse = NULL;
+    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    H_sparse->createDiagInfo();
+    A_dense = NULL;
     if(!(_A.data() == NULL))
-        A_sparse = boost::make_shared<qpOASES::DenseMatrix>(
+        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
                     qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
 
 
     qpOASES::returnValue val =_problem->hotstart(H_sparse.get(),_g.data(),
-                       A_sparse.get(),
+                       A_dense.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -351,7 +349,7 @@ bool QPOasesProblem::solve()
                                                               hessian_type));
         _problem->setOptions(*_opt.get());
         val =_problem->init(H_sparse.get(),_g.data(),
-                           A_sparse.get(),
+                           A_dense.get(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,

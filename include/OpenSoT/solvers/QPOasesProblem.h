@@ -282,14 +282,14 @@ namespace OpenSoT{
          * Define a cost function: ||Hx - g||
          */
         yarp::sig::Matrix _H;
-        boost::shared_ptr<qpOASES::SymDenseMat> H_sparse;
+        boost::shared_ptr<qpOASES::SymSparseMat> H_sparse;
         Vector _g;
 
         /**
          * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
         yarp::sig::Matrix _A;
-        boost::shared_ptr<qpOASES::DenseMatrix> A_sparse;
+        boost::shared_ptr<qpOASES::DenseMatrix> A_dense;
         Vector _lA;
         Vector _uA;
 
