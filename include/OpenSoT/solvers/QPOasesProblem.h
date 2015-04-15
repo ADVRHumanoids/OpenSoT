@@ -5,7 +5,6 @@
 #include <yarp/sig/Matrix.h>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
-#include <qpOASES/Matrices.hpp>
 
 using namespace yarp::sig;
 
@@ -16,6 +15,8 @@ namespace qpOASES {
     class Options;
     class Bounds;
     class Constraints;
+    class SymSparseMat;
+    class DenseMatrix;
 }
 
 namespace OpenSoT{
