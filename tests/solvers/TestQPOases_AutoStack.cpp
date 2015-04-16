@@ -72,6 +72,7 @@ TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q, dq;
     q = getGoodInitialPosition(model);
+    dq = q; q.zero();
     model.updateiDyn3Model(q,true);
     OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);
 
@@ -85,8 +86,14 @@ TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
     unsigned int iterations = 10000;
     while(yarp::math::norm(DHS.leftArm->getb()) > 1e-4 && iterations > 0)
     {
+        double oldBoundsNorm = yarp::math::norm(DHS.jointLimits->getbLowerBound());
         model.updateiDyn3Model(q, true);
         subTaskTest->update(model.iDyn3_model.getAng());
+
+        if(yarp::math::norm(dq) > 1e-3)
+            EXPECT_NE(oldBoundsNorm,
+                      yarp::math::norm(DHS.jointLimits->getbLowerBound()));
+
         ASSERT_TRUE(solver->solve(dq));
         q += dq;
     }

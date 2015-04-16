@@ -46,7 +46,8 @@ namespace OpenSoT {
         typedef boost::shared_ptr<OpenSoT::AutoStack> Ptr;
         private:
         OpenSoT::solvers::QPOases_sot::Stack _stack;
-        std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> _bounds;
+
+        OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
         public:
             AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack);
 
@@ -62,9 +63,20 @@ namespace OpenSoT {
 
             std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& getBoundsList();
 
-            OpenSoT::constraints::Aggregated::ConstraintPtr getBounds(  const unsigned int aggregationPolicy =
-                                                                        OpenSoT::constraints::Aggregated::EQUALITIES_TO_INEQUALITIES |
-                                                                        OpenSoT::constraints::Aggregated::UNILATERAL_TO_BILATERAL);
+            /**
+             * @brief setBoundsAggregationPolicy changes the aggregation policy of the bounds as
+             * returned by the getBounds() function. Notice calling this will create a new bounds
+             * object (an instance of OpenSoT::constraints::Aggregated), so that the update()
+             * function of this AutoStack will then update only the new instance. If you have
+             * another instance of those Bounds lying around, you should then manually update that
+             * before using it.
+             * @param aggregationPolicy the new aggregation policy for this AutoStack's bounds
+             */
+            void setBoundsAggregationPolicy(const unsigned int aggregationPolicy =
+                OpenSoT::constraints::Aggregated::EQUALITIES_TO_INEQUALITIES |
+                OpenSoT::constraints::Aggregated::UNILATERAL_TO_BILATERAL);
+
+            OpenSoT::constraints::Aggregated::ConstraintPtr getBounds();
     };    
 }
 

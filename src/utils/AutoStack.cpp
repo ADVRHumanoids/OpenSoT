@@ -195,41 +195,51 @@ OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
 }
 
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack) :
-    _stack(stack)
+    _stack(stack),
+    _boundsAggregated(
+        new OpenSoT::constraints::Aggregated(
+            std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>(),
+            stack.front()->getXSize()))
 {
 
 }
 
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
                               std::list<OpenSoT::solvers::QPOases_sot::ConstraintPtr> bounds) :
-    _stack(stack), _bounds(bounds)
+    _stack(stack),
+    _boundsAggregated(
+        new OpenSoT::constraints::Aggregated(
+            bounds,
+            bounds.front()->getXSize()))
 {
 
 }
 
 void OpenSoT::AutoStack::update(const Vector &state)
 {
-    for(auto bound:_bounds)
-        bound->update(state);
+    _boundsAggregated->update(state);
     for(auto task: _stack)
         task->update(state);
 }
 
 std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& OpenSoT::AutoStack::getBoundsList()
 {
-    return _bounds;
+    return _boundsAggregated->getConstraintsList();
 }
 
-OpenSoT::constraints::Aggregated::ConstraintPtr OpenSoT::AutoStack::getBounds(const unsigned int aggregationPolicy)
+void OpenSoT::AutoStack::setBoundsAggregationPolicy(const unsigned int aggregationPolicy)
 {
-    if(_bounds.size() == 0) {
-        OpenSoT::constraints::Aggregated::ConstraintPtr empty;
-        return empty;
-    } else
-        return OpenSoT::constraints::Aggregated::ConstraintPtr(
-                new OpenSoT::constraints::Aggregated(_bounds,
-                                                     _bounds.front()->getXSize(),
-                                                     aggregationPolicy));
+    std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>
+        bounds = _boundsAggregated->getConstraintsList();
+    _boundsAggregated.reset(
+        new OpenSoT::constraints::Aggregated(
+            bounds,
+            bounds.front()->getXSize()));
+}
+
+OpenSoT::constraints::Aggregated::ConstraintPtr OpenSoT::AutoStack::getBounds()
+{
+    return _boundsAggregated;
 }
 
 OpenSoT::solvers::QPOases_sot::Stack& OpenSoT::AutoStack::getStack()
