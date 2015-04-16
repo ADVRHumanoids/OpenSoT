@@ -48,6 +48,10 @@ namespace OpenSoT {
         OpenSoT::solvers::QPOases_sot::Stack _stack;
 
         OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
+
+        protected:
+            AutoStack(const double x_size);
+
         public:
             AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack);
 

@@ -194,6 +194,16 @@ OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
     return autoStack;
 }
 
+OpenSoT::AutoStack::AutoStack(const double x_size) :
+    _stack(),
+    _boundsAggregated(
+        new OpenSoT::constraints::Aggregated(
+            std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>(),
+            x_size))
+{
+
+}
+
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack) :
     _stack(stack),
     _boundsAggregated(
