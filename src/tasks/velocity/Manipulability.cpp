@@ -52,7 +52,7 @@ void Manipulability::_update(const yarp::sig::Vector &x) {
     _x = x;
     /************************* COMPUTING TASK *****************************/
 
-    _b = cartesian_utils::computeGradient(x, _manipulabilityIndexGradientWorker);
+    _b = cartesian_utils::computeGradient(x, _manipulabilityIndexGradientWorker, this->getActiveJointsMask());
 
     /**********************************************************************/
 }
