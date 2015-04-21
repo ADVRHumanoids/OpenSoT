@@ -67,12 +67,14 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world) {
-        assert(_robot.iDyn3_model.getJacobian(_distal_link_index,_A));
+        bool res = _robot.iDyn3_model.getJacobian(_distal_link_index,_A);
+        assert(res);
         _A = _A.removeCols(0,6);    // removing unactuated joints (floating base)
-    } else
-        assert(_robot.iDyn3_model.getRelativeJacobian(_distal_link_index,
-                                                      _base_link_index,
-                                                      _A, true));
+    } else{
+        bool res = _robot.iDyn3_model.getRelativeJacobian(_distal_link_index,
+                                                          _base_link_index,
+                                                          _A, true);
+        assert(res);}
 
     if(_base_link_is_world)
         _actualPose = _robot.iDyn3_model.getPosition(_distal_link_index);

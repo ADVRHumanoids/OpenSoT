@@ -10,7 +10,8 @@ YCoM::YCoM(const std::string &robot_name, const std::string &module_prefix,
     _rpc_cb(taskCoM),
     _rpc()
 {
-    assert(computePortPrefix(robot_name, module_prefix, taskCoM->getTaskID()));
+    bool res = computePortPrefix(robot_name, module_prefix, taskCoM->getTaskID());
+    assert(res);
     open(_port_prefix+"set_ref:i");
 
     useCallback();
@@ -29,7 +30,8 @@ YCoM::YCoM(const std::string& robot_name,
     _rpc_cb(taskCoM),
     _rpc()
 {
-    assert(computePortPrefix(robot_name, module_prefix, com_task->getTaskID()));
+    bool res = computePortPrefix(robot_name, module_prefix, com_task->getTaskID());
+    assert(res);
     open(_port_prefix+"set_ref:i");
     useCallback();
 

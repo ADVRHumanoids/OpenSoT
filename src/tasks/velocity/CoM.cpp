@@ -60,7 +60,8 @@ void CoM::_update(const yarp::sig::Vector &x)
 
     _actualPosition = _robot.iDyn3_model.getCOM();
 
-    assert(_robot.iDyn3_model.getCOMJacobian(_A));
+    bool res = _robot.iDyn3_model.getCOMJacobian(_A);
+    assert(res);
     _A = _A.removeRows(3,3);    // remove orientation
     _A = _A.removeCols(0,6);    // remove floating base
 
