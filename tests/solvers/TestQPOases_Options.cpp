@@ -675,6 +675,7 @@ TEST_F(testQPOases_Options, testOptionReliable)
 
     qpOASES::Options opt0;
     opt0.setToReliable();
+    opt0.initialStatusBounds = qpOASES::ST_INACTIVE;
     opt0.printLevel = qpOASES::PL_NONE;
     opt0.enableRegularisation = qpOASES::BT_TRUE;
     opt0.epsRegularisation *= 2E-2;
@@ -761,6 +762,7 @@ TEST_F(testQPOases_Options, testOptionDefault)
     qpOASES::Options opt0;
     opt0.setToDefault();
     opt0.printLevel = qpOASES::PL_NONE;
+    opt0.initialStatusBounds = qpOASES::ST_INACTIVE;
     opt0.enableRegularisation = qpOASES::BT_TRUE;
     opt0.epsRegularisation *= 2E-2;
 

@@ -74,7 +74,13 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
         bool res = _robot.iDyn3_model.getRelativeJacobian(_distal_link_index,
                                                           _base_link_index,
                                                           _A, true);
-        assert(res);}
+        assert(res);
+        yarp::sig::Matrix base_R_world = _robot.iDyn3_model.getPosition(_base_link_index).submatrix(0,2,0,2).transposed();
+        yarp::sig::Matrix Adj(6,6); Adj = Adj.eye();
+        Adj.setSubmatrix(base_R_world, 0,0);
+        Adj.setSubmatrix(base_R_world, 3,3);
+        _A = Adj*_A;
+    }
 
     if(_base_link_is_world)
         _actualPose = _robot.iDyn3_model.getPosition(_distal_link_index);
