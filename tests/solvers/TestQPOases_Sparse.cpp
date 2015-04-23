@@ -69,10 +69,12 @@ namespace
                  void setDefaultOptions()
                  {
                      qpOASES::Options opt;
-                     opt.setToMPC();
                      opt.printLevel = qpOASES::PL_NONE;
                      opt.enableRegularisation = qpOASES::BT_TRUE;
                      opt.epsRegularisation *= _epsRegularisation;
+                     opt.numRegularisationSteps = 2;
+                     opt.numRefinementSteps = 1;
+                     opt.enableFlippingBounds = qpOASES::BT_TRUE;
 
                      opt.ensureConsistency();
 
