@@ -29,10 +29,23 @@
 #include <Eigen/Dense>
 
 
-
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
+
+
+        struct Capsule{
+            Eigen::Vector3d P0;
+            Eigen::Vector3d P1;
+            double radius;
+        };
+
+        struct CapsulePair{
+            Capsule S1;
+            int S1_index;
+            Capsule S2;
+            int S2_index;
+        };
             /**
              * @brief The SelfCollisionAvoidance class implements a constraint of full-body Self-Collision Avoidance for Walkman
              *
@@ -48,6 +61,9 @@
                 yarp::sig::Matrix from_Eigen_to_Yarp_matrix(const Eigen::MatrixXd &E_M);
                 Eigen::VectorXd from_yarp_to_Eigen_vector(const yarp::sig::Vector &Y_V);
                 yarp::sig::Vector from_Eigen_to_Yarp_vector(const Eigen::VectorXd &E_V);
+
+                Eigen::Vector3d Transform_name_to_point (std::string Link_name, int base_index, int & Link_index);
+                CapsulePair Generate_CapsulePair (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, int S1P1_index, double radius_1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, int S2P1_index, double radius_2);
 
                 double dist3D_Segment_to_Segment (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, Eigen::Vector3d & CP1, Eigen::Vector3d & CP2);
                 Eigen::MatrixXd Skew_symmetric_operator (const Eigen::Vector3d & r_cp);
