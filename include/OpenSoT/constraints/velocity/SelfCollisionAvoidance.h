@@ -56,6 +56,7 @@
             private:
                 double _Capsule_threshold;
                 iDynUtils& robot_col;
+                int base_index;
 
                 Eigen::MatrixXd from_yarp_to_Eigen_matrix(const yarp::sig::Matrix &Y_M);
                 yarp::sig::Matrix from_Eigen_to_Yarp_matrix(const Eigen::MatrixXd &E_M);
@@ -71,13 +72,8 @@
 
             public:
                 /**
-                 * @brief CartesianPositionConstraint
-                 * @param x the current joint position of the robot
-                 * @param cartesianTask the cartesian task which we want to bound
-                 * @param A_Cartesian a matrix nx3 specifying the cartesian limits
-                 * @param b_Cartesian a vector of size n specifying the cartesian limits
-                 * @param boundScaling a parameter which is inversely proportional to the number of steps
-                 * needed to reach the cartesian task limits.
+                 * @brief SelfCollisionAvoidanceConstraint
+
                  */
                 SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                        iDynUtils &robot,

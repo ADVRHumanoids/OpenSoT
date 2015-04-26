@@ -33,6 +33,12 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     _Capsule_threshold(Capsule_threshold),
     robot_col(robot){
 
+    std::string base_name = "Waist";
+    base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
+
+    if(base_index == -1)
+        std::cout << "Failed to get base_index" << std::endl;
+
     update(x);
 
 }
@@ -186,59 +192,11 @@ CapsulePair SelfCollisionAvoidance::Generate_CapsulePair (const Eigen::Vector3d 
 void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & x, yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc )
 {
 
-
-//    std::string Left_wrist_center_name = "LWrMot2";
-//    int Left_wrist_center_index = robot_col.iDyn3_model.getLinkIndex(Left_wrist_center_name);
-
-//    if(Left_wrist_center_index == -1)
-//        std::cout << "Failed to get link index for left_wrist" << std::endl;
-
-//    std::string Left_hand_center_name = "LWrMot3";
-//    int Left_hand_center_index = robot_col.iDyn3_model.getLinkIndex(Left_hand_center_name);
-
-//    if(Left_hand_center_index == -1)
-//        std::cout << "Failed to get link index for left_hand" << std::endl;
-
-//    std::string Right_wrist_center_name = "RWrMot2";
-//    int Right_wrist_center_index = robot_col.iDyn3_model.getLinkIndex(Right_wrist_center_name);
-
-//    if(Right_wrist_center_index == -1)
-//        std::cout << "Failed to get link index for right_wrist" << std::endl;
-
-//    std::string Right_hand_center_name = "RWrMot3";
-//    int Right_hand_center_index = robot_col.iDyn3_model.getLinkIndex(Right_hand_center_name);
-
-//    if(Right_hand_center_index == -1)
-//        std::cout << "Failed to get link index for right_hand" << std::endl;
-
-//    yarp::sig::Matrix left_wrist = robot_col.iDyn3_model.getPosition(base_index,Left_wrist_center_index);
-//    MatrixXd left_wrist_base = from_yarp_to_Eigen_matrix(left_wrist);
-
-//    yarp::sig::Matrix left_hand = robot_col.iDyn3_model.getPosition(base_index,Left_hand_center_index);
-//    MatrixXd left_hand_base = from_yarp_to_Eigen_matrix(left_hand);
-
-//    yarp::sig::Matrix right_wrist = robot_col.iDyn3_model.getPosition(base_index,Right_wrist_center_index);
-//    MatrixXd right_wrist_base = from_yarp_to_Eigen_matrix(right_wrist);
-
-//    yarp::sig::Matrix right_hand = robot_col.iDyn3_model.getPosition(base_index,Right_hand_center_index);
-//    MatrixXd right_hand_base = from_yarp_to_Eigen_matrix(right_hand);
-
-//    left_hand_A = left_wrist_base.block(0,3,3,1);
-//    left_hand_B = left_hand_base.block(0,3,3,1);
-//    right_hand_A = right_wrist_base.block(0,3,3,1);
-//    right_hand_B = right_hand_base.block(0,3,3,1);
-
-
-
     robot_col.updateiDyn3Model(x, false);
 
     std::vector<CapsulePair> CapsulePair_vec;
 
-    std::string base_name = "Waist";
-    int base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
-
-    if(base_index == -1)
-        std::cout << "Failed to get base_index" << std::endl;
+    /*//////////////please insert capsule pairs here////////////*/
 
     Vector3d left_hand_P0, left_hand_P1, right_hand_P0, right_hand_P1;
     int left_hand_P0_index, left_hand_P1_index, right_hand_P0_index, right_hand_P1_index;
@@ -257,16 +215,17 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     MatrixXd Aineq_fc_Eigen(CapsulePair_vec.size(), robot_col.iDyn3_model.getNrOfDOFs());
     VectorXd bUpperB_fc_Eigen(CapsulePair_vec.size());
 
+
     Vector3d Capsule1_P0, Capsule1_P1, Capsule2_P0, Capsule2_P1;
     double Capsule1_R, Capsule2_R;
+    int Capsule1_P1_index, Capsule2_P1_index;
 
     double Dm_CapsulePair;
     Vector3d CP1_Capsule1, CP2_Capsule2, closepoint_dir;
-
     Vector3d CP1_Capsule1_border, CP2_Capsule2_border;
 
-    MatrixXd CP1_Capsule1_border_Jaco, CP2_Capsule2_border_Jaco;
     yarp::sig::Matrix CP1_Capsule1_border_Jaco_temp, CP2_Capsule2_border_Jaco_temp;
+    MatrixXd CP1_Capsule1_border_Jaco, CP2_Capsule2_border_Jaco;
 
     yarp::sig::Matrix Waist_frame_world = robot_col.iDyn3_model.getPosition(base_index, true);
     MatrixXd Waist_frame_world_Eigen = from_yarp_to_Eigen_matrix(Waist_frame_world);
@@ -277,7 +236,6 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     temp_trans_matrix.block(0,3,3,3) = MatrixXd::Zero(3,3);
     temp_trans_matrix.block(3,0,3,3) = MatrixXd::Zero(3,3);
 
-    int Capsule1_P1_index, Capsule2_P1_index;
 
     for (unsigned int j = 0; j < CapsulePair_vec.size(); ++j)
     {
