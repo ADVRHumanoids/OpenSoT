@@ -35,6 +35,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCartesianPositionVelocityConstraint
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
+                      testCollisionAvoidanceVelocityConstraint
                       testQPOasesSolver
                       testQPOases_AutoStack
                       testQPOases_CartesianPositionConstraint
@@ -96,6 +97,10 @@ add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
 ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
 TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
+TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} ${PCL_LIBRARIES})
+add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
@@ -200,6 +205,7 @@ add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLim
 add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
+add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
 add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)

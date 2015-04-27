@@ -57,13 +57,13 @@
             class SelfCollisionAvoidance: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             public:
                 typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
-            private:
+            protected:
                 // _CapsulePair_threshold is the allowable minimum distance between every capsule pair
                 double _CapsulePair_threshold;
                 iDynUtils& robot_col;
                 // all the calculation and expression is described in a base link frame which is "waist" link frame
                 int base_index;
-
+            public:
                 // the following four functions are responsible for the transformation between the yarp data type and Eigen data type
                 Eigen::MatrixXd from_yarp_to_Eigen_matrix(const yarp::sig::Matrix &Y_M);
                 yarp::sig::Matrix from_Eigen_to_Yarp_matrix(const Eigen::MatrixXd &E_M);
