@@ -28,9 +28,9 @@ const double SMALL_NUM = pow(10.0, -5);
 
 SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                                iDynUtils &robot,
-                                               const double Capsule_threshold):
+                                               const double CapsulePair_threshold):
     Constraint(x.size()),
-    _Capsule_threshold(Capsule_threshold),
+    _CapsulePair_threshold(CapsulePair_threshold),
     robot_col(robot){
 
     std::string base_name = "Waist";
@@ -43,14 +43,14 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
 
 }
 
-double SelfCollisionAvoidance::get_Capsule_threshold()
+double SelfCollisionAvoidance::get_CapsulePair_threshold()
 {
-    return _Capsule_threshold;
+    return _CapsulePair_threshold;
 }
 
-void SelfCollisionAvoidance::set_Capsule_threshold(const double Capsule_threshold)
+void SelfCollisionAvoidance::set_CapsulePair_threshold(const double CapsulePair_threshold)
 {
-    _Capsule_threshold = std::fabs(Capsule_threshold);
+    _CapsulePair_threshold = std::fabs(CapsulePair_threshold);
     //this->update();
 }
 
@@ -137,6 +137,7 @@ double SelfCollisionAvoidance::dist3D_Segment_to_Segment (const Eigen::Vector3d 
 
     double Dm = dP.norm();   // return the closest distance
 
+    // I leave the line here for observing the minimum distance between the inner line segments of the corresponding capsule pair
     std::cout << "Dm: " << std::endl << Dm << std::endl;
 
     return Dm;
@@ -196,7 +197,9 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
 
     std::vector<CapsulePair> CapsulePair_vec;
 
-    /*//////////////please insert capsule pairs here////////////*/
+    /*////////////// please insert capsule pairs here ////////////*/
+
+    /*////////////// capsule pair: LeftHand_vs_RightHand ////////////*/
 
     Vector3d left_hand_P0, left_hand_P1, right_hand_P0, right_hand_P1;
     int left_hand_P0_index, left_hand_P1_index, right_hand_P0_index, right_hand_P1_index;
@@ -206,9 +209,37 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     right_hand_P1 = Transform_name_to_point ("RWrMot3", base_index, right_hand_P1_index);
 
     CapsulePair lefthand_vs_righthand;
-    lefthand_vs_righthand = Generate_CapsulePair (left_hand_P0, left_hand_P1, left_hand_P1_index, 0.2, right_hand_P0, right_hand_P1, right_hand_P1_index, 0.2);
+    lefthand_vs_righthand = Generate_CapsulePair (left_hand_P0, left_hand_P1, left_hand_P1_index, 0.15, right_hand_P0, right_hand_P1, right_hand_P1_index, 0.15);
 
     CapsulePair_vec.push_back(lefthand_vs_righthand);
+
+    /*////////////// capsule pair: LeftHip_vs_LeftUpperarm ////////////*/
+
+    Vector3d left_hip_P0, left_hip_P1, left_upperarm_P0, left_upperarm_P1;
+    int left_hip_P0_index, left_hip_P1_index, left_upperarm_P0_index, left_upperarm_P1_index;
+    left_hip_P0 = Transform_name_to_point ("DWL", base_index, left_hip_P0_index);
+    left_hip_P1 = Transform_name_to_point ("LHipMot", base_index, left_hip_P1_index);
+    left_upperarm_P0 = Transform_name_to_point ("LShr", base_index, left_upperarm_P0_index);
+    left_upperarm_P1 = Transform_name_to_point ("LElb", base_index, left_upperarm_P1_index);
+
+    CapsulePair lefthip_vs_leftupperarm;
+    lefthip_vs_leftupperarm = Generate_CapsulePair (left_hip_P0, left_hip_P1, left_hip_P1_index, 0.17, left_upperarm_P0, left_upperarm_P1, left_upperarm_P1_index, 0.17);
+
+    CapsulePair_vec.push_back(lefthip_vs_leftupperarm);
+
+    /*////////////// capsule pair: RightHip_vs_RightUpperarm ////////////*/
+
+    Vector3d right_hip_P0, right_hip_P1, right_upperarm_P0, right_upperarm_P1;
+    int right_hip_P0_index, right_hip_P1_index, right_upperarm_P0_index, right_upperarm_P1_index;
+    right_hip_P0 = Transform_name_to_point ("DWL", base_index, right_hip_P0_index);
+    right_hip_P1 = Transform_name_to_point ("RHipMot", base_index, right_hip_P1_index);
+    right_upperarm_P0 = Transform_name_to_point ("RShr", base_index, right_upperarm_P0_index);
+    right_upperarm_P1 = Transform_name_to_point ("RElb", base_index, right_upperarm_P1_index);
+
+    CapsulePair righthip_vs_rightupperarm;
+    righthip_vs_rightupperarm = Generate_CapsulePair (right_hip_P0, right_hip_P1, right_hip_P1_index, 0.17, right_upperarm_P0, right_upperarm_P1, right_upperarm_P1_index, 0.17);
+
+    CapsulePair_vec.push_back(righthip_vs_rightupperarm);
 
     /*//////////////////////////////////////////////////////////*/
 
@@ -270,7 +301,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
 
 
         Aineq_fc_Eigen.row(j) = closepoint_dir.transpose() * ( CP1_Capsule1_border_Jaco - CP2_Capsule2_border_Jaco );
-        bUpperB_fc_Eigen(j) = Dm_CapsulePair - Capsule1_R - Capsule2_R - 2 * _Capsule_threshold;
+        bUpperB_fc_Eigen(j) = Dm_CapsulePair - Capsule1_R - Capsule2_R - _CapsulePair_threshold;
 
     }
 
