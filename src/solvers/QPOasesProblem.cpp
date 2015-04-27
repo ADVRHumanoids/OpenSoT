@@ -109,7 +109,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
 
 
-#ifdef NDEBUG //Log is generated only in DEBUG Mode!
+#ifndef NDEBUG //Log is generated only in DEBUG Mode!
         time_t rawtime;
         struct tm * timeinfo;
         char buffer [80];
