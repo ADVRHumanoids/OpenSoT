@@ -172,19 +172,19 @@ Eigen::Vector3d SelfCollisionAvoidance::Transform_name_to_point (std::string Lin
     return Link_reference_origin;
 }
 
-CapsulePair SelfCollisionAvoidance::Generate_CapsulePair (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, int S1P1_index,  double radius_1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, int S2P1_index, double radius_2)
+CapsulePair SelfCollisionAvoidance::Generate_CapsulePair (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, int S1_index,  double radius_1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, int S2_index, double radius_2)
 {
     CapsulePair _CapsulePair;
 
     _CapsulePair.S1.P0 = S1P0;
     _CapsulePair.S1.P1 = S1P1;
     _CapsulePair.S1.radius = radius_1;
-    _CapsulePair.S1_index = S1P1_index;
+    _CapsulePair.S1_index = S1_index;
 
     _CapsulePair.S2.P0 = S2P0;
     _CapsulePair.S2.P1 = S2P1;
     _CapsulePair.S2.radius = radius_2;
-    _CapsulePair.S2_index = S2P1_index;
+    _CapsulePair.S2_index = S2_index;
 
     return _CapsulePair;
 }
@@ -209,7 +209,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     right_hand_P1 = Transform_name_to_point ("RWrMot3", base_index, right_hand_P1_index);
 
     CapsulePair lefthand_vs_righthand;
-    lefthand_vs_righthand = Generate_CapsulePair (left_hand_P0, left_hand_P1, left_hand_P1_index, 0.15, right_hand_P0, right_hand_P1, right_hand_P1_index, 0.15);
+    lefthand_vs_righthand = Generate_CapsulePair (left_hand_P0, left_hand_P1, left_hand_P0_index, 0.15, right_hand_P0, right_hand_P1, right_hand_P0_index, 0.15);
 
     CapsulePair_vec.push_back(lefthand_vs_righthand);
 
@@ -223,7 +223,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     left_upperarm_P1 = Transform_name_to_point ("LElb", base_index, left_upperarm_P1_index);
 
     CapsulePair lefthip_vs_leftupperarm;
-    lefthip_vs_leftupperarm = Generate_CapsulePair (left_hip_P0, left_hip_P1, left_hip_P1_index, 0.17, left_upperarm_P0, left_upperarm_P1, left_upperarm_P1_index, 0.17);
+    lefthip_vs_leftupperarm = Generate_CapsulePair (left_hip_P1, left_hip_P0, left_hip_P1_index, 0.17, left_upperarm_P0, left_upperarm_P1, left_upperarm_P0_index, 0.17);
 
     CapsulePair_vec.push_back(lefthip_vs_leftupperarm);
 
@@ -237,7 +237,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     right_upperarm_P1 = Transform_name_to_point ("RElb", base_index, right_upperarm_P1_index);
 
     CapsulePair righthip_vs_rightupperarm;
-    righthip_vs_rightupperarm = Generate_CapsulePair (right_hip_P0, right_hip_P1, right_hip_P1_index, 0.17, right_upperarm_P0, right_upperarm_P1, right_upperarm_P1_index, 0.17);
+    righthip_vs_rightupperarm = Generate_CapsulePair (right_hip_P1, right_hip_P0, right_hip_P1_index, 0.17, right_upperarm_P0, right_upperarm_P1, right_upperarm_P0_index, 0.17);
 
     CapsulePair_vec.push_back(righthip_vs_rightupperarm);
 
@@ -291,13 +291,13 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
         robot_col.iDyn3_model.getRelativeJacobian( Capsule1_P1_index, base_index, CP1_Capsule1_border_Jaco_temp, true);
         CP1_Capsule1_border_Jaco = from_yarp_to_Eigen_matrix (CP1_Capsule1_border_Jaco_temp);
         CP1_Capsule1_border_Jaco = temp_trans_matrix * CP1_Capsule1_border_Jaco;
-        CP1_Capsule1_border_Jaco = Skew_symmetric_operator(CP1_Capsule1_border - Capsule1_P1) * CP1_Capsule1_border_Jaco;
+        CP1_Capsule1_border_Jaco = Skew_symmetric_operator(CP1_Capsule1_border - Capsule1_P0) * CP1_Capsule1_border_Jaco;
 
 
         robot_col.iDyn3_model.getRelativeJacobian( Capsule2_P1_index, base_index, CP2_Capsule2_border_Jaco_temp, true);
         CP2_Capsule2_border_Jaco = from_yarp_to_Eigen_matrix (CP2_Capsule2_border_Jaco_temp);
         CP2_Capsule2_border_Jaco = temp_trans_matrix * CP2_Capsule2_border_Jaco;
-        CP2_Capsule2_border_Jaco = Skew_symmetric_operator(CP2_Capsule2_border - Capsule2_P1) * CP2_Capsule2_border_Jaco;
+        CP2_Capsule2_border_Jaco = Skew_symmetric_operator(CP2_Capsule2_border - Capsule2_P0) * CP2_Capsule2_border_Jaco;
 
 
         Aineq_fc_Eigen.row(j) = closepoint_dir.transpose() * ( CP1_Capsule1_border_Jaco - CP2_Capsule2_border_Jaco );
