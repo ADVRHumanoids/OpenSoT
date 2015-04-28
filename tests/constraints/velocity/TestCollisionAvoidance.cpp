@@ -31,7 +31,7 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
       q(robot.iDyn3_model.getNrOfDOFs(), 0.0),
-      sc_constraint(q, robot)
+      sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(q, robot))
   {}
 
   virtual ~testSelfCollisionAvoidanceConstraint() {
@@ -45,7 +45,7 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
 
   iDynUtils robot;
   yarp::sig::Vector q;
-  OpenSoT::constraints::velocity::SelfCollisionAvoidance sc_constraint;
+  OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sc_constraint;
 };
 
 
@@ -56,8 +56,8 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
         for(unsigned int j = 0; j < testMatrix.cols(); ++j)
             testMatrix(i,j) = i*j+1;
 
-    Eigen::MatrixXd testEigenMatrix = sc_constraint.from_yarp_to_Eigen_matrix(testMatrix);
-    yarp::sig::Matrix resultMatrix = sc_constraint.from_Eigen_to_Yarp_matrix(testEigenMatrix);
+    Eigen::MatrixXd testEigenMatrix = sc_constraint->from_yarp_to_Eigen_matrix(testMatrix);
+    yarp::sig::Matrix resultMatrix = sc_constraint->from_Eigen_to_Yarp_matrix(testEigenMatrix);
 
     for(unsigned int i = 0; i < testMatrix.rows(); ++i)
         for(unsigned int j = 0; j < testMatrix.cols(); ++j)
@@ -174,6 +174,14 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
     for(unsigned int i = 0; i < 4; ++i)
         for(unsigned int j = 0; j < 4; ++j)
             EXPECT_NEAR(task_right_arm->getActualPose()(i,j), T_reference_r_arm(i,j), 1E-4);
+
+    int link_index_l = 0;
+    sc_constraint->Transform_name_to_point("LSoftHand", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_l);
+
+
+
+    Eigen::Vector3d CP1, CP2;
+    //double min_distance = sc_constraint->dist3D_Segment_to_Segment()
 
   }
 

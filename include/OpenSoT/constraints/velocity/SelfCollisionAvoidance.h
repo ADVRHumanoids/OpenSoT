@@ -70,7 +70,14 @@
                 Eigen::VectorXd from_yarp_to_Eigen_vector(const yarp::sig::Vector &Y_V);
                 yarp::sig::Vector from_Eigen_to_Yarp_vector(const Eigen::VectorXd &E_V);
 
-                // function "Transform_name_to_point" is used to get the position of the origin of the link frame from the given link frame name
+                /**
+                 * @brief Transform_name_to_point is used to get the position of the origin of the link
+                 * frame from the given link frame name
+                 * @param Link_name name of the link wich you want to get the position of the origin
+                 * @param base_index base_link used for the control
+                 * @param Link_index return the index of the link name
+                 * @return position of the origin of the link frame
+                 */
                 Eigen::Vector3d Transform_name_to_point (std::string Link_name, int base_index, int & Link_index);
 
                 /* function "Generate_CapsulePair" is used to generate a capsule pair which needs to be detected and constrained
@@ -81,8 +88,18 @@
                  */ 
                 CapsulePair Generate_CapsulePair (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, int S1P1_index, double radius_1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, int S2P1_index, double radius_2);
 
-                // function "dist3D_Segment_to_Segment" is used to calculate the minimum distance between any spatial line segments
-                // return the minimum distance and the position of the closest point on each capsule
+                /**
+                 * @brief dist3D_Segment_to_Segment is used to calculate the minimum distance between any spatial line
+                 * segments return the minimum distance and the position of the closest point on each capsule.
+                 * (Joseph O'Rourke, "Search and  Intersection" in Computational Geometry in C (2nd Edition) (1998))
+                 * @param S1P0 Initial Point in line segment S1
+                 * @param S1P1 End Point in line segment S1
+                 * @param S2P0 Initial Point in line segment S2
+                 * @param S2P1 End Point in line segment S2
+                 * @param CP1 Closest Point (between S1 and S2) in line segment S1
+                 * @param CP2 Closest Point (between S1 and S2) in line segment S2
+                 * @return minimum distance between S1 and S2
+                 */
                 double dist3D_Segment_to_Segment (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, Eigen::Vector3d & CP1, Eigen::Vector3d & CP2);
                 
                 /* function "Skew_symmetric_operator" is used to get the transformation matrix which is used to transform the base Jacobian to goal Jacobian
