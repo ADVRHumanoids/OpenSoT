@@ -57,19 +57,27 @@
             class SelfCollisionAvoidance: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             public:
                 typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
-            protected:
-                // _CapsulePair_threshold is the allowable minimum distance between every capsule pair
+            protected: 
+                /**
+                 * @brief _CapsulePair_threshold is the allowable minimum distance between every capsule pair
+                 */
                 double _CapsulePair_threshold;
                 iDynUtils& robot_col;
-                // all the calculation and expression is described in a base link frame which is "waist" link frame
+
+                /**
+                 * @brief base_index all the calculation and expression is described in
+                 * a base link frame which is "waist" link frame
+                 */
                 int base_index;
             public:
+                ///TODO: Move in cartesian utils
                 // the following four functions are responsible for the transformation between the yarp data type and Eigen data type
                 Eigen::MatrixXd from_yarp_to_Eigen_matrix(const yarp::sig::Matrix &Y_M);
                 yarp::sig::Matrix from_Eigen_to_Yarp_matrix(const Eigen::MatrixXd &E_M);
                 Eigen::VectorXd from_yarp_to_Eigen_vector(const yarp::sig::Vector &Y_V);
                 yarp::sig::Vector from_Eigen_to_Yarp_vector(const Eigen::VectorXd &E_V);
 
+                ///TODO: Move in cartesian utils
                 /**
                  * @brief Transform_name_to_point is used to get the position of the origin of the specified link
                  * frame from the given link frame name
@@ -102,6 +110,7 @@
                  */
                 CapsulePair Generate_CapsulePair (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, int S1_index, double radius_1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, int S2_index, double radius_2);
 
+                ///TODO: move in cartesian utils
                 /**
                  * @brief dist3D_Segment_to_Segment is used to calculate the minimum distance between any spatial line
                  * segments return the minimum distance and the position of the closest point on each capsule.
@@ -144,9 +153,16 @@
                 SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                        iDynUtils &robot,
                                        const double CapsulePair_threshold = 0.0);
-
+                /**
+                 * @brief get_CapsulePair_threshold
+                 * @return _CapsulePair_threshold
+                 */
                 double get_CapsulePair_threshold();
 
+                /**
+                 * @brief set_CapsulePair_threshold set _CapsulePair_threshold
+                 * @param CapsulePair_threshold (always positive)
+                 */
                 void set_CapsulePair_threshold(const double CapsulePair_threshold);
 
                 void update(const yarp::sig::Vector &x);
