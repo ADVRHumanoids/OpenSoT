@@ -31,7 +31,7 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
       q(robot.iDyn3_model.getNrOfDOFs(), 0.0),
-      sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(q, robot))
+      sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(q, robot, 0.005))
   {}
 
   virtual ~testSelfCollisionAvoidanceConstraint() {
@@ -90,11 +90,11 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
     this->robot.updateiDyn3Model(this->q, true);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", this->q, this->robot,"l_wrist", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", this->q, this->robot,"LWrMot3", "Waist"));
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", this->q, this->robot,"r_wrist", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", this->q, this->robot,"RWrMot3", "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     yarp::sig::Matrix T_init_l_arm(4,4);
@@ -121,7 +121,9 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(this->q));
 
+
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
@@ -153,16 +155,22 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
             std::cout<<"error"<<std::endl;
             dq = 0.0;}
         this->q += dq;
+
     }
 
     std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_l_arm);
+        std::cout<<std::endl;
     std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_l_arm);
+        std::cout<<std::endl;
     std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_left_arm->getActualPose());
 
     std::cout<<std::endl;
+    std::cout<<std::endl;
 
     std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_r_arm);
+        std::cout<<std::endl;
     std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_r_arm);
+        std::cout<<std::endl;
     std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_right_arm->getActualPose());
 
     std::cout<<std::endl;
@@ -175,13 +183,106 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
         for(unsigned int j = 0; j < 4; ++j)
             EXPECT_NEAR(task_right_arm->getActualPose()(i,j), T_reference_r_arm(i,j), 1E-4);
 
-    int link_index_l = 0;
-    sc_constraint->Transform_name_to_point("LSoftHand", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_l);
-
+    int link_index_Lhand, link_index_Lwrist, link_index_Rhand, link_index_Rwrist;
+    Eigen::Vector3d Lhand, Lwrist, Rhand, Rwrist;
+    Lhand = sc_constraint->Transform_name_to_point("LWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lhand);
+    Lwrist = sc_constraint->Transform_name_to_point("LWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lwrist);
+    Rhand = sc_constraint->Transform_name_to_point("RWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rhand);
+    Rwrist = sc_constraint->Transform_name_to_point("RWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rwrist);
 
 
     Eigen::Vector3d CP1, CP2;
-    //double min_distance = sc_constraint->dist3D_Segment_to_Segment()
+    double min_distance;
+    min_distance = this->sc_constraint->dist3D_Segment_to_Segment(Lwrist, Lhand, Rwrist, Rhand, CP1, CP2);
+    EXPECT_NEAR(0.0, min_distance, 1E-4);
+
+    //Now we add the constraint
+
+    this->q = getGoodInitialPosition(this->robot);
+    this->robot.updateiDyn3Model(this->q, true);
+
+    task_left_arm.reset();
+    task_left_arm.reset(new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", this->q, this->robot,"LWrMot3", "Waist"));
+    task_left_arm->setOrientationErrorGain(0.3);
+    task_left_arm->setReference(T_reference_l_arm);
+
+    task_right_arm.reset();
+    task_right_arm.reset(new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", this->q, this->robot,"RWrMot3", "Waist"));
+    task_right_arm->setOrientationErrorGain(0.3);
+    task_right_arm->setReference(T_reference_r_arm);
+
+    cartesianTasks.clear();
+    cartesianTasks.push_back(task_left_arm);
+    cartesianTasks.push_back(task_right_arm);
+
+    taskCartesianAggregated.reset();
+    taskCartesianAggregated.reset(new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
+    taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
+
+    postural_task.reset();
+    postural_task.reset(new OpenSoT::tasks::velocity::Postural(this->q));
+    postural_task->getConstraints().push_back(this->sc_constraint);
+
+    stack_of_tasks.clear();
+    stack_of_tasks.push_back(taskCartesianAggregated);
+    stack_of_tasks.push_back(postural_task);
+
+    joint_limits.reset();
+    joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(this->q,
+                                                        this->robot.iDyn3_model.getJointBoundMax(),
+                                                        this->robot.iDyn3_model.getJointBoundMin()));
+
+    joint_velocity_limits.reset();
+    joint_velocity_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
+
+    bounds.reset();
+    bounds.reset(new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
+
+    sot.reset();
+    sot.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
+
+    dq.zero();
+    for(unsigned int i = 0; i < 100*t; ++i)
+    {
+        this->robot.updateiDyn3Model(this->q, true);
+
+        taskCartesianAggregated->update(this->q);
+        postural_task->update(this->q);
+        bounds->update(this->q);
+
+        if(!sot->solve(dq)){
+            std::cout<<"error"<<std::endl;
+            dq = 0.0;}
+        this->q += dq;
+    }
+
+    std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_l_arm);
+        std::cout<<std::endl;
+    std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_l_arm);
+        std::cout<<std::endl;
+    std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_left_arm->getActualPose());
+
+    std::cout<<std::endl;
+    std::cout<<std::endl;
+
+    std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_r_arm);
+        std::cout<<std::endl;
+    std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_r_arm);
+        std::cout<<std::endl;
+    std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_right_arm->getActualPose());
+
+    std::cout<<std::endl;
+
+    Lhand = sc_constraint->Transform_name_to_point("LWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lhand);
+    Lwrist = sc_constraint->Transform_name_to_point("LWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lwrist);
+    Rhand = sc_constraint->Transform_name_to_point("RWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rhand);
+    Rwrist = sc_constraint->Transform_name_to_point("RWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rwrist);
+    Eigen::Vector3d CP1_, CP2_;
+    double min_distance_;
+    min_distance_ = this->sc_constraint->dist3D_Segment_to_Segment(Lwrist, Lhand, Rwrist, Rhand, CP1_, CP2_);
+    EXPECT_NEAR(0.105, min_distance_, 1e-3);
+    EXPECT_TRUE(min_distance < min_distance_);
+    std::cout<<"min_distance - min_distance_ = "<<min_distance<<"-"<<min_distance_<<"="<<min_distance-min_distance_<<std::endl;
 
   }
 

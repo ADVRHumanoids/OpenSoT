@@ -138,7 +138,7 @@ double SelfCollisionAvoidance::dist3D_Segment_to_Segment (const Eigen::Vector3d 
     double Dm = dP.norm();   // return the closest distance
 
     // I leave the line here for observing the minimum distance between the inner line segments of the corresponding capsule pair
-    std::cout << "Dm: " << std::endl << Dm << std::endl;
+    //std::cout << "Dm: " << std::endl << Dm << std::endl;
 
     return Dm;
 }
@@ -209,7 +209,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     right_hand_P1 = Transform_name_to_point ("RWrMot3", base_index, right_hand_P1_index);
 
     CapsulePair lefthand_vs_righthand;
-    lefthand_vs_righthand = Generate_CapsulePair (left_hand_P0, left_hand_P1, left_hand_P0_index, 0.15, right_hand_P0, right_hand_P1, right_hand_P0_index, 0.15);
+    lefthand_vs_righthand = Generate_CapsulePair (left_hand_P0, left_hand_P1, left_hand_P0_index, 0.05, right_hand_P0, right_hand_P1, right_hand_P0_index, 0.05);
 
     CapsulePair_vec.push_back(lefthand_vs_righthand);
 
@@ -223,7 +223,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     left_upperarm_P1 = Transform_name_to_point ("LElb", base_index, left_upperarm_P1_index);
 
     CapsulePair lefthip_vs_leftupperarm;
-    lefthip_vs_leftupperarm = Generate_CapsulePair (left_hip_P1, left_hip_P0, left_hip_P1_index, 0.17, left_upperarm_P0, left_upperarm_P1, left_upperarm_P0_index, 0.17);
+    lefthip_vs_leftupperarm = Generate_CapsulePair (left_hip_P1, left_hip_P0, left_hip_P1_index, 0.05, left_upperarm_P0, left_upperarm_P1, left_upperarm_P0_index, 0.05);
 
     CapsulePair_vec.push_back(lefthip_vs_leftupperarm);
 
@@ -237,7 +237,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     right_upperarm_P1 = Transform_name_to_point ("RElb", base_index, right_upperarm_P1_index);
 
     CapsulePair righthip_vs_rightupperarm;
-    righthip_vs_rightupperarm = Generate_CapsulePair (right_hip_P1, right_hip_P0, right_hip_P1_index, 0.17, right_upperarm_P0, right_upperarm_P1, right_upperarm_P0_index, 0.17);
+    righthip_vs_rightupperarm = Generate_CapsulePair (right_hip_P1, right_hip_P0, right_hip_P1_index, 0.05, right_upperarm_P0, right_upperarm_P1, right_upperarm_P0_index, 0.05);
 
     CapsulePair_vec.push_back(righthip_vs_rightupperarm);
 
