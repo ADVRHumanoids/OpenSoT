@@ -17,6 +17,7 @@
 
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 #include <yarp/math/Math.h>
+#include <eigen_conversions/eigen_kdl.h>
 
 using namespace yarp::math;
 
@@ -28,9 +29,12 @@ const double SMALL_NUM = pow(10.0, -5);
 
 SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                                iDynUtils &robot,
-                                               const double CapsulePair_threshold):
+                                               double Detection_threshold,
+                                               double LinkPair_threshold):
     Constraint(x.size()),
-    _CapsulePair_threshold(CapsulePair_threshold),
+    _Detection_threshold(Detection_threshold),
+    _LinkPair_threshold(LinkPair_threshold),
+    ComputeLinksDistance_object(robot),
     robot_col(robot){
 
     std::string base_name = "Waist";
@@ -43,104 +47,35 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
 
 }
 
-double SelfCollisionAvoidance::get_CapsulePair_threshold()
+double SelfCollisionAvoidance::get_LinkPair_threshold()
 {
-    return _CapsulePair_threshold;
+    return _LinkPair_threshold;
 }
 
-void SelfCollisionAvoidance::set_CapsulePair_threshold(const double CapsulePair_threshold)
+double SelfCollisionAvoidance::get_Detection_threshold()
 {
-    _CapsulePair_threshold = std::fabs(CapsulePair_threshold);
+    return _Detection_threshold;
+}
+
+
+void SelfCollisionAvoidance::set_LinkPair_threshold(const double LinkPair_threshold)
+{
+    _LinkPair_threshold = std::fabs(LinkPair_threshold);
     //this->update();
 }
+
+void SelfCollisionAvoidance::set_Detection_threshold(const double Detection_threshold)
+{
+    _Detection_threshold = std::fabs(Detection_threshold);
+    //this->update();
+}
+
 
 void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
 {
     Calculate_Aineq_bUpperB ( x, _Aineq, _bUpperBound );
 //    std::cout << "_Aineq" << _Aineq.toString() << std::endl << std::endl;
 //    std::cout << "_bUpperBound" << _bUpperBound.toString() << std::endl << std::endl;
-}
-
-double SelfCollisionAvoidance::dist3D_Segment_to_Segment (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, Eigen::Vector3d & CP1, Eigen::Vector3d & CP2)
-{
-
-    Vector3d   u = S1P1 - S1P0;
-    Vector3d   v = S2P1 - S2P0;
-    Vector3d   w = S1P0 - S2P0;
-    double    a = u.dot(u);         // always >= 0
-    double    b = u.dot(v);
-    double    c = v.dot(v);         // always >= 0
-    double    d = u.dot(w);
-    double    e = v.dot(w);
-    double    D = a*c - b*b;        // always >= 0
-    double    sc, sN, sD = D;       // sc = sN / sD, default sD = D >= 0
-    double    tc, tN, tD = D;       // tc = tN / tD, default tD = D >= 0
-
-    // compute the line parameters of the two closest points
-    if (D < SMALL_NUM) { // the lines are almost parallel
-        sN = 0.0;         // force using point P0 on segment S1
-        sD = 1.0;         // to prevent possible division by 0.0 later
-        tN = e;
-        tD = c;
-    }
-    else {                 // get the closest points on the infinite lines
-        sN = (b*e - c*d);
-        tN = (a*e - b*d);
-        if (sN < 0.0) {        // sc < 0 => the s=0 edge is visible
-            sN = 0.0;
-            tN = e;
-            tD = c;
-        }
-        else if (sN > sD) {  // sc > 1  => the s=1 edge is visible
-            sN = sD;
-            tN = e + b;
-            tD = c;
-        }
-    }
-
-    if (tN < 0.0) {            // tc < 0 => the t=0 edge is visible
-        tN = 0.0;
-        // recompute sc for this edge
-        if (-d < 0.0)
-            sN = 0.0;
-        else if (-d > a)
-            sN = sD;
-        else {
-            sN = -d;
-            sD = a;
-        }
-    }
-    else if (tN > tD) {      // tc > 1  => the t=1 edge is visible
-        tN = tD;
-        // recompute sc for this edge
-        if ((-d + b) < 0.0)
-            sN = 0;
-        else if ((-d + b) > a)
-            sN = sD;
-        else {
-            sN = (-d + b);
-            sD = a;
-        }
-    }
-    // finally do the division to get sc and tc
-    sc = (std::fabs(sN) < SMALL_NUM ? 0.0 : sN / sD);
-    tc = (std::fabs(tN) < SMALL_NUM ? 0.0 : tN / tD);
-
-    CP1 = S1P0 + sc * u;
-    CP2 = S2P0 + tc * v;
-
-//    std::cout << "CP1: " << std::endl << CP1 << std::endl;
-//    std::cout << "CP2: " << std::endl << CP2 << std::endl;
-
-    // get the difference of the two closest points
-    Vector3d   dP = CP1 - CP2;  // =  S1(sc) - S2(tc)
-
-    double Dm = dP.norm();   // return the closest distance
-
-    // I leave the line here for observing the minimum distance between the inner line segments of the corresponding capsule pair
-    //std::cout << "Dm: " << std::endl << Dm << std::endl;
-
-    return Dm;
 }
 
 Eigen::MatrixXd SelfCollisionAvoidance::Skew_symmetric_operator (const Eigen::Vector3d & r_cp)
@@ -157,37 +92,6 @@ Eigen::MatrixXd SelfCollisionAvoidance::Skew_symmetric_operator (const Eigen::Ve
     return J_transform;
 }
 
-Eigen::Vector3d SelfCollisionAvoidance::Transform_name_to_point (std::string Link_name, int base_index, int & Link_index)
-{
-    Vector3d Link_reference_origin;
-
-    Link_index = robot_col.iDyn3_model.getLinkIndex(Link_name);
-    if(Link_index == -1)
-        std::cout << "Failed to get link index for " << Link_name << std::endl;
-
-    yarp::sig::Matrix Link_transformation = robot_col.iDyn3_model.getPosition(base_index,Link_index);
-    MatrixXd Link_transformation_base = from_yarp_to_Eigen_matrix(Link_transformation);
-    Link_reference_origin = Link_transformation_base.block(0,3,3,1);
-
-    return Link_reference_origin;
-}
-
-CapsulePair SelfCollisionAvoidance::Generate_CapsulePair (const Eigen::Vector3d & S1P0, const Eigen::Vector3d & S1P1, int S1_index,  double radius_1, const Eigen::Vector3d & S2P0, const Eigen::Vector3d & S2P1, int S2_index, double radius_2)
-{
-    CapsulePair _CapsulePair;
-
-    _CapsulePair.S1.P0 = S1P0;
-    _CapsulePair.S1.P1 = S1P1;
-    _CapsulePair.S1.radius = radius_1;
-    _CapsulePair.S1_index = S1_index;
-
-    _CapsulePair.S2.P0 = S2P0;
-    _CapsulePair.S2.P1 = S2P1;
-    _CapsulePair.S2.radius = radius_2;
-    _CapsulePair.S2_index = S2_index;
-
-    return _CapsulePair;
-}
 
 
 void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & x, yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc )
@@ -195,68 +99,29 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
 
     robot_col.updateiDyn3Model(x, false);
 
-    std::vector<CapsulePair> CapsulePair_vec;
-
-    /*////////////// please insert capsule pairs here ////////////*/
-
-    /*////////////// capsule pair: LeftHand_vs_RightHand ////////////*/
-
-    Vector3d left_hand_P0, left_hand_P1, right_hand_P0, right_hand_P1;
-    int left_hand_P0_index, left_hand_P1_index, right_hand_P0_index, right_hand_P1_index;
-    left_hand_P0 = Transform_name_to_point ("LWrMot2", base_index, left_hand_P0_index);
-    left_hand_P1 = Transform_name_to_point ("LWrMot3", base_index, left_hand_P1_index);
-    right_hand_P0 = Transform_name_to_point ("RWrMot2", base_index, right_hand_P0_index);
-    right_hand_P1 = Transform_name_to_point ("RWrMot3", base_index, right_hand_P1_index);
-
-    CapsulePair lefthand_vs_righthand;
-    lefthand_vs_righthand = Generate_CapsulePair (left_hand_P0, left_hand_P1, left_hand_P0_index, 0.05, right_hand_P0, right_hand_P1, right_hand_P0_index, 0.05);
-
-    CapsulePair_vec.push_back(lefthand_vs_righthand);
-
-    /*////////////// capsule pair: LeftHip_vs_LeftUpperarm ////////////*/
-
-    Vector3d left_hip_P0, left_hip_P1, left_upperarm_P0, left_upperarm_P1;
-    int left_hip_P0_index, left_hip_P1_index, left_upperarm_P0_index, left_upperarm_P1_index;
-    left_hip_P0 = Transform_name_to_point ("DWL", base_index, left_hip_P0_index);
-    left_hip_P1 = Transform_name_to_point ("LHipMot", base_index, left_hip_P1_index);
-    left_upperarm_P0 = Transform_name_to_point ("LShr", base_index, left_upperarm_P0_index);
-    left_upperarm_P1 = Transform_name_to_point ("LElb", base_index, left_upperarm_P1_index);
-
-    CapsulePair lefthip_vs_leftupperarm;
-    lefthip_vs_leftupperarm = Generate_CapsulePair (left_hip_P1, left_hip_P0, left_hip_P1_index, 0.05, left_upperarm_P0, left_upperarm_P1, left_upperarm_P0_index, 0.05);
-
-    CapsulePair_vec.push_back(lefthip_vs_leftupperarm);
-
-    /*////////////// capsule pair: RightHip_vs_RightUpperarm ////////////*/
-
-    Vector3d right_hip_P0, right_hip_P1, right_upperarm_P0, right_upperarm_P1;
-    int right_hip_P0_index, right_hip_P1_index, right_upperarm_P0_index, right_upperarm_P1_index;
-    right_hip_P0 = Transform_name_to_point ("DWL", base_index, right_hip_P0_index);
-    right_hip_P1 = Transform_name_to_point ("RHipMot", base_index, right_hip_P1_index);
-    right_upperarm_P0 = Transform_name_to_point ("RShr", base_index, right_upperarm_P0_index);
-    right_upperarm_P1 = Transform_name_to_point ("RElb", base_index, right_upperarm_P1_index);
-
-    CapsulePair righthip_vs_rightupperarm;
-    righthip_vs_rightupperarm = Generate_CapsulePair (right_hip_P1, right_hip_P0, right_hip_P1_index, 0.05, right_upperarm_P0, right_upperarm_P1, right_upperarm_P0_index, 0.05);
-
-    CapsulePair_vec.push_back(righthip_vs_rightupperarm);
+    std::list<LinkPairDistance> Interested_LinkPair;
+    std::list<LinkPairDistance>::iterator j;
+    Interested_LinkPair = ComputeLinksDistance_object.getLinkDistances(_Detection_threshold);
 
     /*//////////////////////////////////////////////////////////*/
 
-    MatrixXd Aineq_fc_Eigen(CapsulePair_vec.size(), robot_col.iDyn3_model.getNrOfDOFs());
-    VectorXd bUpperB_fc_Eigen(CapsulePair_vec.size());
+    MatrixXd Aineq_fc_Eigen(Interested_LinkPair.size(), robot_col.iDyn3_model.getNrOfDOFs());
+    VectorXd bUpperB_fc_Eigen(Interested_LinkPair.size());
 
+    double Dm_LinkPair;
+    KDL::Frame Link1_T_CP,Link2_T_CP;
+    std::string Link1_name, Link2_name;
 
-    Vector3d Capsule1_P0, Capsule1_P1, Capsule2_P0, Capsule2_P1;
-    double Capsule1_R, Capsule2_R;
-    int Capsule1_P1_index, Capsule2_P1_index;
+    int Link1_index, Link2_index;
 
-    double Dm_CapsulePair;
-    Vector3d CP1_Capsule1, CP2_Capsule2, closepoint_dir;
-    Vector3d CP1_Capsule1_border, CP2_Capsule2_border;
+    KDL::Frame Waist_T_Link1, Waist_T_Link2, Waist_T_Link1_CP, Waist_T_Link2_CP;
+    KDL::Vector Link1_origin_kdl, Link2_origin_kdl, Link1_CP_kdl, Link2_CP_kdl;
+    Eigen::Matrix<double, 3, 1> Link1_origin, Link2_origin, Link1_CP, Link2_CP;
 
-    yarp::sig::Matrix CP1_Capsule1_border_Jaco_temp, CP2_Capsule2_border_Jaco_temp;
-    MatrixXd CP1_Capsule1_border_Jaco, CP2_Capsule2_border_Jaco;
+    Vector3d closepoint_dir;
+
+    yarp::sig::Matrix Link1_CP_Jaco_temp, Link2_CP_Jaco_temp;
+    MatrixXd Link1_CP_Jaco, Link2_CP_Jaco;
 
     yarp::sig::Matrix Waist_frame_world = robot_col.iDyn3_model.getPosition(base_index, true);
     MatrixXd Waist_frame_world_Eigen = from_yarp_to_Eigen_matrix(Waist_frame_world);
@@ -267,41 +132,60 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     temp_trans_matrix.block(0,3,3,3) = MatrixXd::Zero(3,3);
     temp_trans_matrix.block(3,0,3,3) = MatrixXd::Zero(3,3);
 
-
-    for (unsigned int j = 0; j < CapsulePair_vec.size(); ++j)
+    int linkPairIndex = 0;
+    for (j = Interested_LinkPair.begin(); j != Interested_LinkPair.end(); ++j)
     {
 
-        Capsule1_P0 = CapsulePair_vec[j].S1.P0;
-        Capsule1_P1 = CapsulePair_vec[j].S1.P1;
-        Capsule2_P0 = CapsulePair_vec[j].S2.P0;
-        Capsule2_P1 = CapsulePair_vec[j].S2.P1;
-        Capsule1_R = CapsulePair_vec[j].S1.radius;
-        Capsule2_R = CapsulePair_vec[j].S2.radius;
-        Capsule1_P1_index = CapsulePair_vec[j].S1_index;
-        Capsule2_P1_index = CapsulePair_vec[j].S2_index;
+        LinkPairDistance& linkPair(*j);
+
+        Dm_LinkPair = linkPair.getDistance();
+        Link1_T_CP = linkPair.getTransforms().first;
+        Link2_T_CP = linkPair.getTransforms().second;
+        Link1_name = linkPair.getLinkNames().first;
+        Link2_name = linkPair.getLinkNames().second;
+
+        Link1_index = robot_col.iDyn3_model.getLinkIndex(Link1_name);
+        if(Link1_index == -1)
+            std::cout << "Failed to get " << Link1_name << std::endl;
+        Link2_index = robot_col.iDyn3_model.getLinkIndex(Link2_name);
+        if(Link2_index == -1)
+            std::cout << "Failed to get " << Link2_name << std::endl;
+
+        Waist_T_Link1 = robot_col.iDyn3_model.getPositionKDL( base_index , Link1_index );
+        Waist_T_Link2 = robot_col.iDyn3_model.getPositionKDL( base_index , Link2_index );
+        Waist_T_Link1_CP = Waist_T_Link1 * Link1_T_CP;
+        Waist_T_Link2_CP = Waist_T_Link2 * Link2_T_CP;
+        Link1_origin_kdl = Waist_T_Link1.p;
+        Link2_origin_kdl = Waist_T_Link2.p;
+        Link1_CP_kdl = Waist_T_Link1_CP.p;
+        Link2_CP_kdl = Waist_T_Link2_CP.p;
+
+        tf::vectorKDLToEigen(Link1_origin_kdl, Link1_origin);
+        tf::vectorKDLToEigen(Link2_origin_kdl, Link2_origin);
+        tf::vectorKDLToEigen(Link1_CP_kdl, Link1_CP);
+        tf::vectorKDLToEigen(Link2_CP_kdl, Link2_CP);
 
 
-        Dm_CapsulePair = dist3D_Segment_to_Segment(Capsule1_P0, Capsule1_P1, Capsule2_P0, Capsule2_P1, CP1_Capsule1, CP2_Capsule2);
-        closepoint_dir = CP2_Capsule2 - CP1_Capsule1;
-        closepoint_dir = closepoint_dir / Dm_CapsulePair;
-        CP1_Capsule1_border = CP1_Capsule1 + Capsule1_R * closepoint_dir;
-        CP2_Capsule2_border = CP2_Capsule2 - Capsule2_R * closepoint_dir;
+        closepoint_dir = Link2_CP - Link1_CP;
+        closepoint_dir = closepoint_dir / Dm_LinkPair;
 
 
-        robot_col.iDyn3_model.getRelativeJacobian( Capsule1_P1_index, base_index, CP1_Capsule1_border_Jaco_temp, true);
-        CP1_Capsule1_border_Jaco = from_yarp_to_Eigen_matrix (CP1_Capsule1_border_Jaco_temp);
-        CP1_Capsule1_border_Jaco = temp_trans_matrix * CP1_Capsule1_border_Jaco;
-        CP1_Capsule1_border_Jaco = Skew_symmetric_operator(CP1_Capsule1_border - Capsule1_P0) * CP1_Capsule1_border_Jaco;
+        robot_col.iDyn3_model.getRelativeJacobian( Link1_index, base_index, Link1_CP_Jaco_temp, true);
+        Link1_CP_Jaco = from_yarp_to_Eigen_matrix (Link1_CP_Jaco_temp);
+        Link1_CP_Jaco = temp_trans_matrix * Link1_CP_Jaco;
+        Link1_CP_Jaco = Skew_symmetric_operator(Link1_CP - Link1_origin) * Link1_CP_Jaco;
 
 
-        robot_col.iDyn3_model.getRelativeJacobian( Capsule2_P1_index, base_index, CP2_Capsule2_border_Jaco_temp, true);
-        CP2_Capsule2_border_Jaco = from_yarp_to_Eigen_matrix (CP2_Capsule2_border_Jaco_temp);
-        CP2_Capsule2_border_Jaco = temp_trans_matrix * CP2_Capsule2_border_Jaco;
-        CP2_Capsule2_border_Jaco = Skew_symmetric_operator(CP2_Capsule2_border - Capsule2_P0) * CP2_Capsule2_border_Jaco;
+        robot_col.iDyn3_model.getRelativeJacobian( Link2_index, base_index, Link2_CP_Jaco_temp, true);
+        Link2_CP_Jaco = from_yarp_to_Eigen_matrix (Link2_CP_Jaco_temp);
+        Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
+        Link2_CP_Jaco = Skew_symmetric_operator(Link2_CP - Link2_origin) * Link2_CP_Jaco;
 
 
-        Aineq_fc_Eigen.row(j) = closepoint_dir.transpose() * ( CP1_Capsule1_border_Jaco - CP2_Capsule2_border_Jaco );
-        bUpperB_fc_Eigen(j) = Dm_CapsulePair - Capsule1_R - Capsule2_R - _CapsulePair_threshold;
+        Aineq_fc_Eigen.row(linkPairIndex) = closepoint_dir.transpose() * ( Link1_CP_Jaco - Link2_CP_Jaco );
+        bUpperB_fc_Eigen(linkPairIndex) = Dm_LinkPair - _LinkPair_threshold;
+
+        ++linkPairIndex;
 
     }
 

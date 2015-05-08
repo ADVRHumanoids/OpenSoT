@@ -185,15 +185,15 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
 
     int link_index_Lhand, link_index_Lwrist, link_index_Rhand, link_index_Rwrist;
     Eigen::Vector3d Lhand, Lwrist, Rhand, Rwrist;
-    Lhand = sc_constraint->Transform_name_to_point("LWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lhand);
-    Lwrist = sc_constraint->Transform_name_to_point("LWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lwrist);
-    Rhand = sc_constraint->Transform_name_to_point("RWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rhand);
-    Rwrist = sc_constraint->Transform_name_to_point("RWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rwrist);
+//    Lhand = sc_constraint->Transform_name_to_point("LWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lhand);
+//    Lwrist = sc_constraint->Transform_name_to_point("LWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lwrist);
+//    Rhand = sc_constraint->Transform_name_to_point("RWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rhand);
+//    Rwrist = sc_constraint->Transform_name_to_point("RWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rwrist);
 
 
     Eigen::Vector3d CP1, CP2;
     double min_distance;
-    min_distance = this->sc_constraint->dist3D_Segment_to_Segment(Lwrist, Lhand, Rwrist, Rhand, CP1, CP2);
+//    min_distance = this->sc_constraint->dist3D_Segment_to_Segment(Lwrist, Lhand, Rwrist, Rhand, CP1, CP2);
     EXPECT_NEAR(0.0, min_distance, 1E-4);
 
     //Now we add the constraint
@@ -273,13 +273,13 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
 
     std::cout<<std::endl;
 
-    Lhand = sc_constraint->Transform_name_to_point("LWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lhand);
-    Lwrist = sc_constraint->Transform_name_to_point("LWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lwrist);
-    Rhand = sc_constraint->Transform_name_to_point("RWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rhand);
-    Rwrist = sc_constraint->Transform_name_to_point("RWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rwrist);
+//    Lhand = sc_constraint->Transform_name_to_point("LWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lhand);
+//    Lwrist = sc_constraint->Transform_name_to_point("LWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Lwrist);
+//    Rhand = sc_constraint->Transform_name_to_point("RWrMot3", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rhand);
+//    Rwrist = sc_constraint->Transform_name_to_point("RWrMot2", this->robot.iDyn3_model.getLinkIndex("Waist"), link_index_Rwrist);
     Eigen::Vector3d CP1_, CP2_;
     double min_distance_;
-    min_distance_ = this->sc_constraint->dist3D_Segment_to_Segment(Lwrist, Lhand, Rwrist, Rhand, CP1_, CP2_);
+//    min_distance_ = this->sc_constraint->dist3D_Segment_to_Segment(Lwrist, Lhand, Rwrist, Rhand, CP1_, CP2_);
     EXPECT_NEAR(0.105, min_distance_, 1e-3);
     EXPECT_TRUE(min_distance < min_distance_);
     std::cout<<"min_distance - min_distance_ = "<<min_distance<<"-"<<min_distance_<<"="<<min_distance-min_distance_<<std::endl;
