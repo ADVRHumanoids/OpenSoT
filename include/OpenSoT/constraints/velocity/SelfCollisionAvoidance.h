@@ -49,13 +49,13 @@
                 /**
                  * @brief _LinkPair_threshold is the allowable minimum distance between every Link pair
                  */
-                double _LinkPair_threshold;
+                double _linkPair_threshold;
                 /**
                  * @brief all the link pairs whose minimum distance are smaller than this "_Detection_threshold" would be dealt with further
                  */
-                double _Detection_threshold;
+                double _detection_threshold;
                 iDynUtils& robot_col;
-                ComputeLinksDistance ComputeLinksDistance_object;
+                ComputeLinksDistance computeLinksDistance;
 
                 /**
                  * @brief base_index all the calculation and expression is described in
@@ -80,13 +80,13 @@
                 Eigen::MatrixXd Skew_symmetric_operator (const Eigen::Vector3d & r_cp);
 
                 /**
-                 * @brief Calculate_Aineq_bUpperB the core function which is used to update the variables Aineq and
+                 * @brief calculate_Aineq_bUpperB the core function which is used to update the variables Aineq and
                  * bUpperBound for this constraint
                  * @param x the robot current configuration vector
                  * @param Aineq_fc Aineq matrix of this constraint
                  * @param bUpperB_fc bUpperBound of this constraint
                  */
-                void Calculate_Aineq_bUpperB (const yarp::sig::Vector & x, yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc );
+                void calculate_Aineq_bUpperB (const yarp::sig::Vector & x, yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc );
 
             public:
                 /**
@@ -95,12 +95,12 @@
                  * @param robot the robot model reference
                  * @param Detection_threshold all the link pairs whose minimum distance are smaller than this Detection_threshold
                  * would be dealt with further
-                 * @param LinkPair_threshold the minimum distance between each Link pair
+                 * @param linkPair_threshold the minimum distance between each Link pair
                  */
                 SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                        iDynUtils &robot,
-                                       double Detection_threshold = std::numeric_limits<double>::infinity(),
-                                       double LinkPair_threshold = 0.0);
+                                       double detection_threshold = std::numeric_limits<double>::infinity(),
+                                       double linkPair_threshold = 0.0);
                 /**
                  * @brief get_LinkPair_threshold
                  * @return _LinkPair_threshold
@@ -115,15 +115,15 @@
 
                 /**
                  * @brief set_LinkPair_threshold set _LinkPair_threshold
-                 * @param LinkPair_threshold (always positive)
+                 * @param linkPair_threshold (always positive)
                  */
-                void set_LinkPair_threshold(const double LinkPair_threshold);
+                void set_LinkPair_threshold(const double linkPair_threshold);
 
                 /**
                  * @brief set_Detection_threshold set _Detection_threshold
-                 * @param Detection_threshold (always positive)
+                 * @param detection_threshold (always positive)
                  */
-                void set_Detection_threshold(const double Detection_threshold);
+                void set_Detection_threshold(const double detection_threshold);
 
                 void update(const yarp::sig::Vector &x);
             };

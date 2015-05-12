@@ -29,12 +29,12 @@ const double SMALL_NUM = pow(10.0, -5);
 
 SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                                iDynUtils &robot,
-                                               double Detection_threshold,
-                                               double LinkPair_threshold):
+                                               double detection_threshold,
+                                               double linkPair_threshold):
     Constraint(x.size()),
-    _Detection_threshold(Detection_threshold),
-    _LinkPair_threshold(LinkPair_threshold),
-    ComputeLinksDistance_object(robot),
+    _detection_threshold(detection_threshold),
+    _linkPair_threshold(linkPair_threshold),
+    computeLinksDistance_object(robot),
     robot_col(robot){
 
     std::string base_name = "Waist";
@@ -49,31 +49,31 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
 
 double SelfCollisionAvoidance::get_LinkPair_threshold()
 {
-    return _LinkPair_threshold;
+    return _linkPair_threshold;
 }
 
 double SelfCollisionAvoidance::get_Detection_threshold()
 {
-    return _Detection_threshold;
+    return _detection_threshold;
 }
 
 
-void SelfCollisionAvoidance::set_LinkPair_threshold(const double LinkPair_threshold)
+void SelfCollisionAvoidance::set_LinkPair_threshold(const double linkPair_threshold)
 {
-    _LinkPair_threshold = std::fabs(LinkPair_threshold);
+    _linkPair_threshold = std::fabs(linkPair_threshold);
     //this->update();
 }
 
-void SelfCollisionAvoidance::set_Detection_threshold(const double Detection_threshold)
+void SelfCollisionAvoidance::set_Detection_threshold(const double detection_threshold)
 {
-    _Detection_threshold = std::fabs(Detection_threshold);
+    _detection_threshold = std::fabs(detection_threshold);
     //this->update();
 }
 
 
 void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
 {
-    Calculate_Aineq_bUpperB ( x, _Aineq, _bUpperBound );
+    calculate_Aineq_bUpperB ( x, _Aineq, _bUpperBound );
 //    std::cout << "_Aineq" << _Aineq.toString() << std::endl << std::endl;
 //    std::cout << "_bUpperBound" << _bUpperBound.toString() << std::endl << std::endl;
 }
@@ -94,14 +94,16 @@ Eigen::MatrixXd SelfCollisionAvoidance::Skew_symmetric_operator (const Eigen::Ve
 
 
 
-void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & x, yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc )
+void SelfCollisionAvoidance::calculate_Aineq_bUpperB (const yarp::sig::Vector & x,
+                                                      yarp::sig::Matrix & Aineq_fc,
+                                                      yarp::sig::Vector & bUpperB_fc )
 {
 
-    robot_col.updateiDyn3Model(x, false);
+//    robot_col.updateiDyn3Model(x, false);
 
     std::list<LinkPairDistance> Interested_LinkPair;
     std::list<LinkPairDistance>::iterator j;
-    Interested_LinkPair = ComputeLinksDistance_object.getLinkDistances(_Detection_threshold);
+    Interested_LinkPair = computeLinksDistance_object.getLinkDistances(_detection_threshold);
 
     /*//////////////////////////////////////////////////////////*/
 
@@ -183,7 +185,7 @@ void SelfCollisionAvoidance::Calculate_Aineq_bUpperB (const yarp::sig::Vector & 
 
 
         Aineq_fc_Eigen.row(linkPairIndex) = closepoint_dir.transpose() * ( Link1_CP_Jaco - Link2_CP_Jaco );
-        bUpperB_fc_Eigen(linkPairIndex) = Dm_LinkPair - _LinkPair_threshold;
+        bUpperB_fc_Eigen(linkPairIndex) = Dm_LinkPair - _linkPair_threshold;
 
         ++linkPairIndex;
 
