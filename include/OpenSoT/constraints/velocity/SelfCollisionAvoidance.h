@@ -102,30 +102,50 @@
                                        double detection_threshold = std::numeric_limits<double>::infinity(),
                                        double linkPair_threshold = 0.0);
                 /**
-                 * @brief get_LinkPair_threshold
+                 * @brief getLinkPairThreshold
                  * @return _LinkPair_threshold
                  */
-                double get_LinkPair_threshold();
+                double getLinkPairThreshold();
 
                 /**
-                 * @brief get_Detection_threshold
+                 * @brief getDetectionThreshold
                  * @return _Detection_threshold
                  */
-                double get_Detection_threshold();
+                double getDetectionThreshold();
 
                 /**
-                 * @brief set_LinkPair_threshold set _LinkPair_threshold
+                 * @brief setLinkPairThreshold set _LinkPair_threshold
                  * @param linkPair_threshold (always positive)
                  */
-                void set_LinkPair_threshold(const double linkPair_threshold);
+                void setLinkPairThreshold(const double linkPair_threshold);
 
                 /**
-                 * @brief set_Detection_threshold set _Detection_threshold
+                 * @brief setDetectionThreshold set _Detection_threshold
                  * @param detection_threshold (always positive)
                  */
-                void set_Detection_threshold(const double detection_threshold);
+                void setDetectionThreshold(const double detection_threshold);
 
                 void update(const yarp::sig::Vector &x);
+
+
+                /**
+                 * @brief setCollisionWhiteListresets the allowed collision matrix by setting all collision pairs as disabled.
+                 *        It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs
+                 *        which are disabled in the SRDF
+                 * @param whiteList a list of links pairs for which to not check collision detection
+                 * @return true on success
+                 */
+                bool setCollisionWhiteList(std::list< LinkPairDistance::LinksPair > whiteList);
+
+                /**
+                 * @brief setCollisionBlackList resets the allowed collision matrix by setting all collision pairs
+                 *        (for which collision geometries are avaiable) as enabled.
+                 *        It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs
+                 *        which are disabled in the SRDF
+                 * @param blackList a list of links pairs for which to not check collision detection
+                 * @return true on success
+                 */
+                bool setCollisionBlackList(std::list< LinkPairDistance::LinksPair > blackList);
             };
         }
     }
