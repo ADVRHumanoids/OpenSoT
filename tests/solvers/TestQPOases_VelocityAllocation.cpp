@@ -38,7 +38,7 @@ protected:
 
     testQPOases_VelocityAllocation()
     {
-        _log.open("testQPOases_VelocityAllocation.m");
+        _log.open("testQPOases_VelocityAllocation.py");
     }
 
     virtual ~testQPOases_VelocityAllocation() {
@@ -182,17 +182,22 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
     double e, enva, epost, epostnva, epost_max, epostnva_max;
 
     unsigned int i = 0;
-    _log << "%t, xdot, ydot, zdot, xdotnva, ydotnva, zdotnva,"  // 1-7
+    _log << "#! /usr/bin/env python" << std::endl
+         << std::endl
+         << "import numpy as np" << std::endl
+         << "import matplotlib" << std::endl
+         << "from matplotlib.pyplot import *" << std::endl;
+    _log << "#t, xdot, ydot, zdot, xdotnva, ydotnva, zdotnva,"  // 1-7
          << " q0dot_torso, q1dot_torso, q2dot_torso,"           // 8-10
          << " q0dotnva_torso, q1dotnva_torso, q2dotnva_torso,"  // 11-13
          << " e, e_nva, epost, epost_nva,"                      // 14-17
          << " t_loop, t_loop_nva" << std::endl;                 // 18-19
-    _log << "test_data = [";
+    _log << "test_data = np.array((";
 
     double t_loop = 0.0;
     double t_loopnva = 0.0;
     bool settled = false;
-    double settling_counter = 15.0;
+    double settling_counter = 1.0;
     bool converged_event = false;
 
     DHS.leftArm->setReference(desired_pose_y);
@@ -269,9 +274,9 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 
 
 #ifdef TRY_ON_SIMULATOR
-        _log << yarp::os::Time::now() - t_test << ","
+        _log << "(" << yarp::os::Time::now() - t_test << ","
 #else
-        _log << yarp::os::SystemClock::nowSystem() - t_test << ","
+        _log << "(" << yarp::os::SystemClock::nowSystem() - t_test << ","
 #endif
             << (DHS.leftArm->getA()*dq)[0] << ","
             << (DHS.leftArm->getA()*dq)[1] << ","
@@ -286,7 +291,7 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
             << dqnva[model.torso.joint_numbers[1]]  << ","
             << dqnva[model.torso.joint_numbers[2]]  << ","
             << e << "," << enva << "," << epost << "," << epostnva << ","
-            << t_loop << "," << t_loopnva << ";" << std::endl;
+            << t_loop << "," << t_loopnva << ")," << std::endl;
 
         if(e < 1.5e-3 && enva < 1.5e-3 && !converged_event)
         {
@@ -324,19 +329,20 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
         << "error for the postural to be higher without VA.";
 
 
-    _log << "];" << std::endl;
+    _log << "));" << std::endl;
 
-    _log << "ct = figure('Position',[0 0 800 600]); plot(test_data(:,1),test_data(:,[18, 19])); title('Computation time with and without Velocity Allocation'); legend('Solve time (VA)', 'Solve time (no VA)');" << std::endl;
-    _log << "vae = figure('Position',[0 0 1027 768]); subplot(3,1,1); plot(test_data(:,1),test_data(:,[3,4,6,7])); title('Hand Velocity');" << std::endl;
-    _log << "legend('y dot (VA)', 'z dot (VA)', 'y dot (no VA)', 'z dot (no VA)');" << std::endl;
+    _log << "ct = figure(figsize=(8,6)); p = plot(test_data[:,0],test_data[:,(17, 18)]); title('Computation time with and without Velocity Allocation'); legend(p,('Solve time (VA)', 'Solve time (no VA)'));" << std::endl;
+    _log << "vae = figure(figsize=(10.27,7.68)); subplot(3,1,1); p = plot(test_data[:,0],test_data[:,(2,3,5,6)]); title('Hand Velocity');" << std::endl;
+    _log << "legend(p,('y dot (VA)', 'z dot (VA)', 'y dot (no VA)', 'z dot (no VA)'));" << std::endl;
     _log << "ylabel('Hand Velocity [m/s]'); xlabel('t [s]');" << std::endl;
-    _log << "subplot(3,1,2); plot(test_data(:,1), [sum(test_data(:,[8,9,10]).*test_data(:,[8,9,10]),2), sum(test_data(:,[11,12,13]).*test_data(:,[11,12,13]),2)]); title('Torso Joints Velocity');" << std::endl;
+    _log << "subplot(3,1,2); p = plot(test_data[:,0], np.transpose(np.vstack(((test_data[:,(7,8,9)]**2).sum(1),(test_data[:,(10,11,12)]**2).sum(1))))); title('Torso Joints Velocity');" << std::endl;
     _log << "ylabel('Torso Joint Velocity [rad/s]'); xlabel('t [s]');" << std::endl;
-    _log << "legend('Norm of Joint Velocity (VA)', 'Norm of Joint Velocity (no VA)');" << std::endl;
-    _log << "subplot(3,1,3); plot(test_data(:,1),test_data(:,[14,15,16,17])); title('Tracking Error');" << std::endl;
-    _log << "legend('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)');" << std::endl;
-    _log << "print(ct,'-depsc','testQPOases_VelocityAllocation_computationTime');" << std::endl;
-    _log << "print(vae,'-depsc','testQPOases_VelocityAllocation_velocitiesAndErrors');" << std::endl;
+    _log << "legend(p,('Norm of Joint Velocity (VA)', 'Norm of Joint Velocity (no VA)'));" << std::endl;
+    _log << "subplot(3,1,3); p = plot(test_data[:,0],test_data[:,(13,14,15,16)]); title('Tracking Error');" << std::endl;
+    _log << "legend(p,('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)'));" << std::endl;
+    _log << "ct.savefig('testQPOases_VelocityAllocation_computationTime.eps', format='eps', transparent=True);" << std::endl;
+    _log << "vae.savefig('testQPOases_VelocityAllocation_velocitiesAndErrors.eps',format='eps',transparent=True);" << std::endl;
+    _log << "show(block=True)" << std::endl;
 }
 
 }
