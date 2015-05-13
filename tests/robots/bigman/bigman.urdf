@@ -16,30 +16,143 @@
   Velocity and effort limits are fake!
 -->
   <!-- ************ MODEL CONFIGURATION ************ -->
-  <!-- Head -->
-  <!-- This links are defined in order to be compliant with http://www.ros.org/reps/rep-0120.html#coordinate-frames
-and to define the end effectors of the robot.
-The coordinate frame called gaze defines the head position and orientation. The orientation indicates in which direction the head appears to be looking regardless of any sensors (camera for instance). -->
-  <link name="gaze"/>
-  <joint name="gaze_joint" type="fixed">
-    <parent link="torso"/>
-    <child link="gaze"/>
-    <origin rpy="0 0 0" xyz="0 0 0.1"/>
-  </joint>
+  <!--
+####################################################
+##
+##  BIGMAN_UPPER_BODY
+##  if "true" the kinematic chains of the arms and torso 
+##  will be used to generate the model
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_LEGS
+##  if "true" the kinematic chains of the legs
+##  will be used to generate the model
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_OLD_CHEST
+##  if "true" the old version of the chest will be
+##  used.
+##  
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_FIXED_HANDS
+##  if "true" a fixed joint between wrist and hand 
+##  will be used otherwise a rotative joints will
+##  be used.
+##  
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_FIXED_MULTISENSE
+##  if "true" a fixed joint between "head" and 
+##  "hokuyo_link" will be used otherwise a continuous 
+##  joints will be used.
+##  
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_HEAD
+##  if "true" a fixed joint between "NeckPitch" and
+##  "head" will be used to connect the head to the rest
+##  of the body. If "false" the head will not be added 
+##  to the model (this is the case when the multisense
+##  from the launch file is used). 
+##  
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_ADD_PROTECTIONS
+##  if "true" the protections are added to the model.
+##  
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_ADD_BACKPACK
+##  if "true" the backpack is added to the model.
+##  
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_ADD_RAISING_SUPPORT
+##  if "true" the raising support are added to the model.
+##  
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  BIGMAN_NEW_FEET
+##  if "true" the new feet with the joint in the middle
+##  are used to the model.
+##  
+##
+####################################################
+-->
+  <!-- ***********  MODEL COLORS *********** -->
+  <material name="grey">
+    <color rgba="0.5 0.5 0.5 1"/>
+  </material>
+  <material name="dark_grey">
+    <color rgba="0.3 0.3 0.3 1"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.0 0.2 0.3 1"/>
+  </material>
   <!-- ************ BIGMAN BASE ************** -->
+  <!-- 
+  ROS urdf definition of the BIGMAN humanoid robot by Istituto Italiano di Tecnologia
+  
+  DO NOT INCLUDE THIS FILE DIRECTLY! USE bigman_robot.urdf.xacro INSTEAD!
+
+  Author: Enrico Mingo & Alessio Rocchi
+
+  Inertial matrix has to be in CoM frame (URDF specs)
+
+  Velocity and effort limits are fake!
+-->
+  <!--
+The coordinate frame called base_link is rigidly attached to the robot root body. It is recommended to choose the robot waist as its root body. The base_link can be attached to the root in any arbitrary position or orientation; for every hardware platform there will be a different place on the base that provides an obvious point of reference. Note that REP 103 [1] specifies a preferred orientation for frames. -->
   <link name="base_link"/>
-  <link name="torso"/>
   <link name="Waist">
     <inertial>
-      <origin rpy="0.0 0.0 0.0" xyz="-0.032862932 -0.00050930727 -0.0012899617"/>
-      <mass value="6.4080904"/>
-      <inertia ixx="0.038826078" ixy="0.00029047605" ixz="0.00068975598" iyy="0.025050374" iyz="-1.3370623e-05" izz="0.048055286"/>
+      <origin rpy="0.0 0.0 0.0" xyz="-0.022813402 -0.00073935443 0.030422909"/>
+      <mass value="1.1046081e+01"/>
+      <inertia ixx="0.096207978" ixy="0.00014081043" ixz="0.0031258127" iyy="0.098511158" iyz="0.00013938149" izz="0.086541531"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry name="Waist_visual">
         <mesh filename="package://bigman_urdf/meshes/Waist.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -48,6 +161,19 @@ The coordinate frame called gaze defines the head position and orientation. The 
       </geometry>
     </collision>
   </link>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="Waist"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <!-- ********************TORSO******************** -->
+  <!-- first real link of the robot, inertial reference frame -->
+  <!-- Scale factor for meshes -->
+  <!-- LINKS -->
+  <!-- This links are defined in order to be compliant with http://www.ros.org/reps/rep-0120.html#coordinate-frames
+and to define the end effectors of the robot-->
+  <!-- The coordinate frame called torso is attached to the lowest body of the model which is a parent of l_gripper, r_gripper and gaze. -->
+  <link name="torso"/>
   <link name="DWL">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.04610869 0.02232230 -0.02249514"/>
@@ -59,6 +185,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="DWL_visual">
         <mesh filename="package://bigman_urdf/meshes/TorsoRoll.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -78,6 +205,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="DWS_visual">
         <mesh filename="package://bigman_urdf/meshes/TorsoYawPitch.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -88,27 +216,76 @@ The coordinate frame called gaze defines the head position and orientation. The 
   </link>
   <link name="DWYTorso">
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.10981228 -0.00551229 -0.06272896"/>
-      <mass value="22.38913469"/>
-      <inertia ixx="0.15989993" ixy="0.00087514" ixz="0.01598045" iyy="0.11274359" iyz="0.00019540" izz="0.21318148"/>
+      <origin rpy="0 0 0" xyz="0.0 0.00 0.3"/>
+      <mass value="26"/>
+      <inertia ixx="0.18629757" ixy="0.00008160" ixz="0.00030250" iyy="0.02013829" iyz="-0.00001790" izz="0.18850541"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
       <geometry name="DWYTorso_visual">
-        <mesh filename="package://bigman_urdf/meshes/Chest.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/NewChest.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
       <geometry name="DWYTorso_collision">
-        <mesh filename="package://bigman_urdf/meshes/simple/Chest.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/simple/NewChest.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
-  <joint name="base_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="Waist"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+  <!-- UPDATE DATA FOR TORSO PROTECTION! -->
+  <link name="TorsoProtections">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.082963193 7.0747291e-07 0.075409106"/>
+      <mass value="4.7"/>
+      <inertia ixx="0.14773769" ixy="0.0" ixz="-0.029780072" iyy="0.16085511" iyz="0.0" izz="0.15409381"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="TorsoProtections_visual">
+        <mesh filename="package://bigman_urdf/meshes/ProtectionSystem.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="TorsoProtections_collision">
+        <mesh filename="package://bigman_urdf/meshes/simple/ProtectionSystem.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- UPDATE DATA FOR TORSO PROTECTION! -->
+  <link name="backpack">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 -0.065"/>
+      <mass value="10.0"/>
+      <inertia ixx="0.0890833333333" ixy="0.0" ixz="0.0" iyy="0.0354166666667" iyz="0.0" izz="0.0963333333333"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="backpack_visual">
+        <box size="0.16 0.3 0.22"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="backpack_collision">
+        <box size="0.16 0.3 0.22"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- JOINTS -->
+  <joint name="backpack_joint" type="fixed">
+    <parent link="DWYTorso"/>
+    <child link="backpack"/>
+    <origin rpy="0 0 0" xyz="-0.185 0 -0.025"/>
+  </joint>
+  <joint name="torso_protection_joint" type="fixed">
+    <parent link="DWYTorso"/>
+    <child link="TorsoProtections"/>
+    <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
   </joint>
   <joint name="torso_joint" type="fixed">
     <parent link="DWYTorso"/>
@@ -118,10 +295,9 @@ The coordinate frame called gaze defines the head position and orientation. The 
   <joint name="WaistLat" type="revolute">
     <parent link="Waist"/>
     <child link="DWL"/>
-    <origin rpy="0 0 0" xyz="0.0715192 0 0.195982"/>
+    <origin rpy="0 0 0" xyz="0.1115 0 0.195982"/>
     <axis xyz="0.89879991307 0 0.43835911792"/>
-    <limit effort="120" lower="-0.610" upper="0.610" velocity="6.283"/>
-    <!-- dynamics friction="0" damping="0.3"/ -->
+    <limit effort="120" lower="-0.261799387798" upper="0.261799387798" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="WaistSag" type="revolute">
@@ -129,7 +305,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="DWS"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit effort="220" lower="-0.349" upper="1.396" velocity="6.283"/>
+    <limit effort="220" lower="-0.174532925199" upper="0.698131700796" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="WaistYaw" type="revolute">
@@ -137,15 +313,84 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="DWYTorso"/>
     <origin rpy="0 0 0" xyz="0 0 0.22275"/>
     <axis xyz="0 0 1"/>
-    <limit effort="120" lower="-2.844" upper="2.844" velocity="6.283"/>
+    <limit effort="120" lower="-1.74532925199" upper="1.74532925199" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
+  <!-- ********************NECK********************* -->
+  <!-- LINKS -->
+  <link name="NeckYaw">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.1155"/>
+      <mass value="0.35"/>
+      <inertia ixx="0.00032840119" ixy="0.0" ixz="0.0" iyy="7.0371675e-05" iyz="0.0" izz="0.00032840111"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="NeckYaw_visual">
+        <mesh filename="package://bigman_urdf/meshes/NeckYaw.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="NeckYaw_collision">
+        <mesh filename="package://bigman_urdf/meshes/simple/NeckYaw.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="NeckPitch">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.102 0.0 0.26575"/>
+      <mass value="0.623"/>
+      <inertia ixx="0.0010388333" ixy="0.0" ixz="0.0" iyy="0.00054689381" iyz="0.0" izz="0.00054689381"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="NeckPitch_visual">
+        <mesh filename="package://bigman_urdf/meshes/NeckPitch.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry name="NeckPitch_collision">
+        <mesh filename="package://bigman_urdf/meshes/simple/NeckPitch.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- JOINTS -->
+  <joint name="NeckYawj" type="revolute">
+    <parent link="DWYTorso"/>
+    <child link="NeckYaw"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <!--     <limit velocity="6.283" effort="120" lower="${(-175.0)*toRad}" upper="${(175.0)*toRad}" /> -->
+    <limit effort="120" lower="-0.610865238196" upper="0.610865238196" velocity="6.283"/>
+    <dynamics damping="3.0" friction="0"/>
+  </joint>
+  <joint name="NeckPitchj" type="revolute">
+    <parent link="NeckYaw"/>
+    <child link="NeckPitch"/>
+    <origin rpy="0 0 0" xyz="0 0 0.1155"/>
+    <axis xyz="0 1 0"/>
+    <!--limit velocity="6.283" effort="120" lower="${(-30.0)*toRad}" upper="${(70.0)*toRad}" /-->
+    <limit effort="120" lower="-0.261799387798" upper="1.04719755119" velocity="6.283"/>
+    <dynamics damping="3.0" friction="0"/>
+  </joint>
+  <!-- ********************LEGS******************** -->
+  <!-- This links are defined in order to be compliant with http://www.ros.org/reps/rep-0120.html#coordinate-frames
+	and to define the end effectors of the robot -->
+  <!--  position and orientation of the leg regardless of the support body geometry -->
   <link name="l_ankle"/>
   <link name="r_ankle"/>
+  <!-- position and orientation of the left leg support body. The (X,Y) plane of this frame must be coplanar with the support body contact surface. It is recommended to choose the origin as the projection of the support body origin on the contact surface. The Z coordinate of this frame should be on the ground level when standing. -->
   <link name="l_sole"/>
   <link name="r_sole"/>
+  <!--  position and orientation of the leg toe body. The (X,Y) plan of this frame must be coplanar with the toe body contact surface. It is recommended to choose the origin as the projection of the body center on the contact surface. -->
   <link name="l_toe"/>
   <link name="r_toe"/>
+  <!-- LINKS -->
+  <!-- ********************RIGHT LEG******************** -->
   <link name="RHipMot">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.10348188 -0.10919813 -0.064924056"/>
@@ -157,6 +402,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RHipMot_visual">
         <mesh filename="package://bigman_urdf/meshes/HipRoll.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -176,6 +422,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RThighUpLeg_visual">
         <mesh filename="package://bigman_urdf/meshes/HipYaw.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -195,6 +442,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RThighLowLeg_visual">
         <mesh filename="package://bigman_urdf/meshes/HipPitch.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -212,13 +460,14 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry name="RLowLeg_visual">
-        <mesh filename="package://bigman_urdf/meshes/KneePitch.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/KneePitchCalf.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry name="RLowLeg_collision">
-        <mesh filename="package://bigman_urdf/meshes/simple/KneePitch.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/simple/KneePitchCalf.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -233,6 +482,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RFootmot_visual">
         <mesh filename="package://bigman_urdf/meshes/AnklePitch.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -252,14 +502,20 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RFoot_visual">
         <mesh filename="package://bigman_urdf/meshes/Foot.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!--<origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="RFoot_collision">
         <mesh filename="package://bigman_urdf/meshes/simple/Foot.STL" scale="0.001 -0.001 0.001"/>
+      </geometry>-->
+      <origin rpy="0 0 0" xyz="0.047 -0.01 -0.1359"/>
+      <geometry>
+        <box size="0.306 0.16 0.015"/>
       </geometry>
     </collision>
   </link>
+  <!-- ********************LEFT LEG******************** -->
   <link name="LHipMot">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.10348188 0.10919813 -0.064924056"/>
@@ -271,6 +527,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LHipMot_visual">
         <mesh filename="package://bigman_urdf/meshes/HipRoll.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -290,6 +547,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LThighUpLeg_visual">
         <mesh filename="package://bigman_urdf/meshes/HipYaw.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -309,6 +567,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LThighLowLeg_visual">
         <mesh filename="package://bigman_urdf/meshes/HipPitch.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -326,13 +585,14 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry name="LLowLeg_visual">
-        <mesh filename="package://bigman_urdf/meshes/KneePitch.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/KneePitchCalf.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry name="LLowLeg_collision">
-        <mesh filename="package://bigman_urdf/meshes/simple/KneePitch.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/simple/KneePitchCalf.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -347,6 +607,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LFootmot_visual">
         <mesh filename="package://bigman_urdf/meshes/AnklePitch.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -357,7 +618,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
   </link>
   <link name="LFoot">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.01282904 -0.00463694 -0.10109499"/>
+      <origin rpy="0 0 0" xyz="0.01282904 0.00463694 -0.10109499"/>
       <mass value="3.33109981"/>
       <inertia ixx="0.01006627" ixy="0.00051955" ixz="-0.00374069" iyy="0.02882577" iyz="-0.00044505" izz="0.02819025"/>
     </inertial>
@@ -366,14 +627,23 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LFoot_visual">
         <mesh filename="package://bigman_urdf/meshes/Foot.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!--
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="LFoot_collision">
         <mesh filename="package://bigman_urdf/meshes/simple/Foot.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      -->
+      <origin rpy="0 0 0" xyz="0.047 0.01 -0.1359"/>
+      <geometry>
+        <box size="0.306 0.16 0.015"/>
+      </geometry>
     </collision>
   </link>
+  <!-- JOINTS -->
+  <!-- ********************RIGHT LEG******************** -->
   <joint name="RHipLat" type="revolute">
     <parent link="Waist"/>
     <child link="RHipMot"/>
@@ -422,6 +692,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <limit effort="120" lower="-0.785" upper="0.785" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
+  <!-- ********************LEFT LEG******************** -->
   <joint name="LHipLat" type="revolute">
     <parent link="Waist"/>
     <child link="LHipMot"/>
@@ -500,54 +771,68 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="r_toe"/>
     <origin rpy="0 0 0" xyz="0.195 0 0"/>
   </joint>
+  <!-- Reference frames in feet -->
+  <!-- macro for reference frames in foot -->
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_upper_right_link"/>
   <joint name="l_foot_upper_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.195 -0.09 0"/>
+    <origin rpy="0 0 0" xyz="0.195 -0.07 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_upper_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_upper_left_link"/>
   <joint name="l_foot_upper_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.195 0.07 0"/>
+    <origin rpy="0 0 0" xyz="0.195 0.09 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_upper_left_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_lower_right_link"/>
   <joint name="l_foot_lower_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.111 -0.09 0"/>
+    <origin rpy="0 0 0" xyz="-0.111 -0.07 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_lower_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_lower_left_link"/>
   <joint name="l_foot_lower_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.111 0.07 0"/>
+    <origin rpy="0 0 0" xyz="-0.111 0.09 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_lower_left_link"/>
   </joint>
+  <!-- macro for reference frames in foot -->
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_upper_right_link"/>
   <joint name="r_foot_upper_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.195 0.09 0"/>
+    <origin rpy="0 0 0" xyz="0.195 0.07 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_upper_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_upper_left_link"/>
   <joint name="r_foot_upper_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.195 -0.07 0"/>
+    <origin rpy="0 0 0" xyz="0.195 -0.09 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_upper_left_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_lower_right_link"/>
   <joint name="r_foot_lower_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.111 0.09 0"/>
+    <origin rpy="0 0 0" xyz="-0.111 0.07 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_lower_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_lower_left_link"/>
   <joint name="r_foot_lower_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.111 -0.07 0"/>
+    <origin rpy="0 0 0" xyz="-0.111 -0.09 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_lower_left_link"/>
   </joint>
+  <!-- ********************ARMS******************** -->
+  <!-- LINKS -->
+  <!-- RIGHT ARM -->
   <link name="RShp">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00543349 -0.04480023 0.01581062"/>
@@ -559,6 +844,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RShp_visual">
         <mesh filename="package://bigman_urdf/meshes/ShoulderPitch.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -578,6 +864,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RShr_visual">
         <mesh filename="package://bigman_urdf/meshes/TopUpperArm.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -597,6 +884,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RShy_visual">
         <mesh filename="package://bigman_urdf/meshes/BottomUpperArm.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -616,6 +904,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="RElb_visual">
         <mesh filename="package://bigman_urdf/meshes/Elbow.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -624,6 +913,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       </geometry>
     </collision>
   </link>
+  <!-- LEFT ARM -->
   <link name="LShp">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00543349 0.04480023 0.01581062"/>
@@ -635,6 +925,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LShp_visual">
         <mesh filename="package://bigman_urdf/meshes/ShoulderPitch.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -654,6 +945,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LShr_visual">
         <mesh filename="package://bigman_urdf/meshes/TopUpperArm.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -673,6 +965,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LShy_visual">
         <mesh filename="package://bigman_urdf/meshes/BottomUpperArm.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -692,6 +985,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <geometry name="LElb_visual">
         <mesh filename="package://bigman_urdf/meshes/Elbow.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -700,12 +994,16 @@ The coordinate frame called gaze defines the head position and orientation. The 
       </geometry>
     </collision>
   </link>
+  <!-- JOINTS -->
+  <!-- RIGHT ARM -->
   <joint name="RShSag" type="revolute">
     <parent link="DWYTorso"/>
     <child link="RShp"/>
-    <origin rpy="0 0 0" xyz="0.0 -0.2 0.0"/>
+    <origin rpy="0 0 0.3491" xyz="0.045646 -0.219164 0.001531"/>
     <axis xyz="0 0.743144825 -0.669130606"/>
-    <limit effort="120" lower="-2.844" upper="2.844" velocity="6.283"/>
+    <!--limit velocity="6.283" effort="120" lower="${-163*toRad}" upper="${161.0*toRad}" /-->
+    <limit effort="120" lower="-0.959931088595" upper="1.48352986419" velocity="6.283"/>
+    <!-- <limit velocity="6.283" effort="120" lower="${-57*toRad}" upper="${89.0*toRad}" /> -->
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="RShLat" type="revolute">
@@ -713,7 +1011,8 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="RShr"/>
     <origin rpy="0 0 0" xyz="0.0 -0.116568264 0.03364"/>
     <axis xyz="1 0 0"/>
-    <limit effort="120" lower="-3.699" upper="-0.052" velocity="6.283"/>
+    <!--limit velocity="6.283" effort="120" lower="${-221.0*toRad}" upper="${-7.0*toRad}" /-->
+    <limit effort="120" lower="-2.09439510239" upper="-0.122173047639" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="RShYaw" type="revolute">
@@ -721,7 +1020,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="RShy"/>
     <origin rpy="0 0 0" xyz="0.0 0.0 -0.222"/>
     <axis xyz="0 0 1"/>
-    <limit effort="120" lower="-2.844" upper="2.844" velocity="6.283"/>
+    <limit effort="120" lower="-2.86233997326" upper="2.82743338822" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="RElbj" type="revolute">
@@ -729,15 +1028,18 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="RElb"/>
     <origin rpy="0 0 0" xyz="0.036 0.0 -0.15"/>
     <axis xyz="0 1 0"/>
-    <limit effort="60" lower="-2.966" upper="0.523" velocity="6.283"/>
+    <limit effort="60" lower="-2.96705972838" upper="0.593411945677" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
+  <!-- LEFT ARM -->
   <joint name="LShSag" type="revolute">
     <parent link="DWYTorso"/>
     <child link="LShp"/>
-    <origin rpy="0 0 0" xyz="0.0 0.2 0.0"/>
-    <axis xyz="0 0.743144825 0.669130606"/>
-    <limit effort="120" lower="-2.844" upper="2.844" velocity="6.283"/>
+    <origin rpy="0 0 -0.3491" xyz="0.045646 0.219164 0.001531"/>
+    <axis xyz="0.0 0.743144825 0.669130606"/>
+    <!--limit velocity="6.283" effort="120" lower="${-165.0*toRad}" upper="${160.0*toRad}" /-->
+    <limit effort="120" lower="-0.959931088595" upper="1.48352986419" velocity="6.283"/>
+    <!-- <limit velocity="6.283" effort="120" lower="${-57*toRad}" upper="${89.0*toRad}" /> -->
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="LShLat" type="revolute">
@@ -745,7 +1047,8 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="LShr"/>
     <origin rpy="0 0 0" xyz="0.0 0.116568264 0.03364"/>
     <axis xyz="1 0 0"/>
-    <limit effort="120" lower="0.052" upper="3.699" velocity="6.283"/>
+    <!--limit velocity="6.283" effort="120" lower="${5.0*toRad}" upper="${221.0*toRad}" /-->
+    <limit effort="120" lower="0.0872664625995" upper="2.09439510239" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="LShYaw" type="revolute">
@@ -753,7 +1056,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="LShy"/>
     <origin rpy="0 0 0" xyz="0.0 0.0 -0.222"/>
     <axis xyz="0 0 1"/>
-    <limit effort="120" lower="-2.844" upper="2.844" velocity="6.283"/>
+    <limit effort="120" lower="-2.84488668074" upper="2.84488668074" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <joint name="LElbj" type="revolute">
@@ -761,19 +1064,19 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="LElb"/>
     <origin rpy="0 0 0" xyz="0.036 0.0 -0.15"/>
     <axis xyz="0 1 0"/>
-    <limit effort="60" lower="-2.966" upper="0.523" velocity="6.283"/>
+    <limit effort="60" lower="-2.96705972838" upper="0.593411945677" velocity="6.283"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
   <!-- ***** LEGS F/T SENSOR REF FRAMES *******-->
   <link name="l_leg_ft"/>
   <link name="r_leg_ft"/>
   <joint name="l_leg_ft_joint" type="fixed">
-    <parent link="LFootmot"/>
+    <parent link="LFoot"/>
     <child link="l_leg_ft"/>
     <origin rpy="0 0 0" xyz="0.005 0 -0.107"/>
   </joint>
   <joint name="r_leg_ft_joint" type="fixed">
-    <parent link="RFootmot"/>
+    <parent link="RFoot"/>
     <child link="r_leg_ft"/>
     <origin rpy="0 0 0" xyz="0.005 0 -0.107"/>
   </joint>
@@ -791,10 +1094,12 @@ The coordinate frame called gaze defines the head position and orientation. The 
   </joint>
   <!-- ************ FOREARMS ************ -->
   <!-- This links are defined in order to be compliant with http://www.ros.org/reps/rep-0120.html#coordinate-frames
-and to define the end effectors of the robot -->
+	and to define the end effectors of the robot -->
   <!-- position and orientation of the arm regardless of the tool (grasping device for instance) attached to it -->
   <link name="l_wrist"/>
   <link name="r_wrist"/>
+  <!-- ****************LINKS**************** -->
+  <!-- ****************LEFT FOREARM**************** -->
   <link name="LForearm">
     <inertial>
       <origin rpy="0 0 0" xyz="1.2625599e-05 0.0042975381 0.044717986"/>
@@ -806,6 +1111,7 @@ and to define the end effectors of the robot -->
       <geometry name="LForearm_visual">
         <mesh filename="package://bigman_urdf/meshes/Forearm.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -825,6 +1131,7 @@ and to define the end effectors of the robot -->
       <geometry name="LWrMot2_visual">
         <mesh filename="package://bigman_urdf/meshes/ForearmPitch.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -844,6 +1151,7 @@ and to define the end effectors of the robot -->
       <geometry name="LWrMot3_visual">
         <mesh filename="package://bigman_urdf/meshes/ForearmRoll.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -852,6 +1160,7 @@ and to define the end effectors of the robot -->
       </geometry>
     </collision>
   </link>
+  <!-- ****************RIGHT FOREARM**************** -->
   <link name="RForearm">
     <inertial>
       <origin rpy="0 0 0" xyz="1.2625599e-05 -0.0042975381 0.044717986"/>
@@ -863,6 +1172,7 @@ and to define the end effectors of the robot -->
       <geometry name="RForearm_visual">
         <mesh filename="package://bigman_urdf/meshes/Forearm.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -882,6 +1192,7 @@ and to define the end effectors of the robot -->
       <geometry name="RWrMot2_visual">
         <mesh filename="package://bigman_urdf/meshes/ForearmPitch.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="dark_grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -901,6 +1212,7 @@ and to define the end effectors of the robot -->
       <geometry name="RWrMot3_visual">
         <mesh filename="package://bigman_urdf/meshes/ForearmRoll.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -909,6 +1221,8 @@ and to define the end effectors of the robot -->
       </geometry>
     </collision>
   </link>
+  <!-- ****************JOINTS**************** -->
+  <!-- ****************LEFT FOREARM**************** -->
   <joint name="LForearmPlate" type="revolute">
     <parent link="LElb"/>
     <child link="LForearm"/>
@@ -938,6 +1252,7 @@ and to define the end effectors of the robot -->
     <child link="l_wrist"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
+  <!-- ****************RIGHT FOREARM**************** -->
   <joint name="RForearmPlate" type="revolute">
     <parent link="RElb"/>
     <child link="RForearm"/>
@@ -968,102 +1283,392 @@ and to define the end effectors of the robot -->
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
   <!-- ************ HANDS ************ -->
-  <link name="RSoftHand">
+  <!-- For the hand we use the inertia of a parallelepiped -->
+  <!-- LINKS -->
+  <link name="RSoftHand"/>
+  <link name="RSoftHandLink">
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="0.3"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      <origin rpy="0 0 0" xyz="0 0 -0.17"/>
+      <mass value="1.2"/>
+      <inertia ixx="0.00232" ixy="0" ixz="0" iyy="0.00296" iyz="0" izz="0.00136"/>
     </inertial>
     <visual>
-      <origin rpy="-1.5707963268 0 3.14159265359" xyz="0.007 0.01 -0.04"/>
-      <geometry name="RSoftHand_visual">
-        <mesh filename="package://bigman_urdf/meshes/collada/forearms/R_soft_hand_open_lowpoly.dae" scale="0.1 0.1 0.1"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry name="RSoftHandLink_visual">
+        <mesh filename="package://bigman_urdf/meshes/SoftHandOpen.STL" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="grey"/>
     </visual>
     <collision>
-      <origin rpy="0 0 3.14159265359" xyz="0 0.01 -0.04"/>
-      <geometry name="RSoftHand_collision">
-        <mesh filename="package://bigman_urdf/meshes/collada/simple/forearms/R_soft_hand_open.stl" scale="1E-3 1E-3 1E-3"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry name="RSoftHandLink_collision">
+        <mesh filename="package://bigman_urdf/meshes/simple/SoftHandOpen.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
-  <link name="LSoftHand">
+  <link name="LSoftHand"/>
+  <link name="LSoftHandLink">
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="0.3"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      <origin rpy="0 0 0" xyz="0 0 -0.17"/>
+      <mass value="1.2"/>
+      <inertia ixx="0.00232" ixy="0" ixz="0" iyy="0.00296" iyz="0" izz="0.00136"/>
     </inertial>
     <visual>
-      <origin rpy="-1.5707963268 0 1.5707963268" xyz="0.007 -0.012 -0.04"/>
-      <geometry name="LSoftHand_visual">
-        <mesh filename="package://bigman_urdf/meshes/collada/forearms/L_soft_hand_open_lowpoly.dae" scale="0.1 0.1 0.1"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry name="LSoftHandLink_visual">
+        <mesh filename="package://bigman_urdf/meshes/SoftHandOpen.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
+      <material name="grey"/>
     </visual>
     <collision>
-      <origin rpy="0 0 1.5707963268" xyz="0.007 -0.012 -0.04"/>
-      <geometry name="LSoftHand_collision">
-        <mesh filename="package://bigman_urdf/meshes/collada/simple/forearms/L_soft_hand_open.stl" scale="1E-3 1E-3 1E-3"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry name="LSoftHandLink_collision">
+        <mesh filename="package://bigman_urdf/meshes/simple/SoftHandOpen.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
     </collision>
   </link>
+  <!-- JOINTS -->
   <joint name="r_handj" type="fixed">
     <parent link="RWrMot3"/>
+    <child link="RSoftHandLink"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <joint name="r_handj2" type="fixed">
+    <parent link="RSoftHandLink"/>
     <child link="RSoftHand"/>
-    <origin rpy="0 0 0" xyz="0 0 -0.11"/>
+    <origin rpy="0 0 0" xyz="0 0.0305 -0.21"/>
   </joint>
   <joint name="l_handj" type="fixed">
     <parent link="LWrMot3"/>
+    <child link="LSoftHandLink"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <joint name="l_handj2" type="fixed">
+    <parent link="LSoftHandLink"/>
     <child link="LSoftHand"/>
-    <origin rpy="0 0 0" xyz="0 0 -0.11"/>
+    <origin rpy="0 0 0" xyz="0 -0.0305 -0.21"/>
   </joint>
-  <!-- Reference frames in hands -->
-  <link name="l_hand_upper_right_link"/>
-  <joint name="l_hand_upper_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.04 0 -0.03"/>
-    <parent link="LSoftHand"/>
-    <child link="l_hand_upper_right_link"/>
+  <!-- multisense_sl_v4 with fixed joints (NOT FOR SIMULATION) -->
+  <!-- 
+       Based on multisense_sl_v4.urdf in multisense_sl_description (DRCSIM) 
+-->
+  <!-- Head Link Simple Collision Meshes -->
+  <link name="multisense/head">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.075493 3.3383E-05 0.02774"/>
+      <mass value="1.41984"/>
+      <inertia ixx="0.0039688" ixy="-1.5797E-06" ixz="-0.00089293" iyy="0.0041178" iyz="-6.8415E-07" izz="0.0035243"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://bigman_urdf/meshes/Head.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://bigman_urdf/meshes/simple/Head.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="multisense/hokuyo_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.032428 0.0004084 -0.0041835"/>
+      <mass value="0.057654"/>
+      <inertia ixx="3.7174E-05" ixy="4.9927E-08" ixz="1.1015E-05" iyy="4.2412E-05" iyz="-9.8165E-09" izz="4.167E-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="1.5707963267949 0 1.5707963267949" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://bigman_urdf/meshes/hokuyo_link.STL"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.01885 0 -0.02119"/>
+      <geometry>
+        <box size="0.08 0.06 0.04238"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.03 0 0.0235"/>
+      <geometry>
+        <cylinder length="0.047" radius="0.024425"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Remove frome here!  
+<gazebo reference="head">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+  <gazebo reference="hokuyo_link">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+-->
+  <joint name="hokuyo_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.0446 0 0.0880"/>
+    <parent link="multisense/head"/>
+    <child link="multisense/hokuyo_link"/>
   </joint>
-  <link name="l_hand_upper_left_link"/>
-  <joint name="l_hand_upper_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.04 0 0.03"/>
-    <parent link="LSoftHand"/>
-    <child link="l_hand_upper_left_link"/>
+  <!-- Remove frome here!
+  <gazebo reference="hokuyo_joint">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+-->
+  <!-- Hokuyo Laser -->
+  <joint name="head_hokuyo_joint" type="fixed">
+    <axis xyz="0 1 0"/>
+    <origin rpy="0 0 0" xyz="0.03 0 0.015"/>
+    <parent link="multisense/hokuyo_link"/>
+    <child link="multisense/head_hokuyo_frame"/>
   </joint>
-  <link name="l_hand_lower_right_link"/>
-  <joint name="l_hand_lower_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.04 0 -0.03"/>
-    <parent link="LSoftHand"/>
-    <child link="l_hand_lower_right_link"/>
+  <link name="multisense/head_hokuyo_frame"/>
+  <!-- Remove frome here!
+  <gazebo reference="head_hokuyo_frame">
+    <sensor type="gpu_ray" name="head_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>-->
+  <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+  <!-- <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+        <topicName>/multisense/lidar_scan</topicName>
+        <frameName>head_hokuyo_frame</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+-->
+  <!-- Stereo Camera -->
+  <joint name="left_camera_frame_joint" type="fixed">
+    <!-- optical frame collocated with tilting DOF -->
+    <origin xyz="0.0 0.035 -0.002"/>
+    <parent link="multisense/head"/>
+    <child link="multisense/left_camera_frame"/>
   </joint>
-  <link name="l_hand_lower_left_link"/>
-  <joint name="l_hand_lower_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.04 0 0.03"/>
-    <parent link="LSoftHand"/>
-    <child link="l_hand_lower_left_link"/>
+  <link name="multisense/left_camera_frame"/>
+  <joint name="left_camera_optical_frame_joint" type="fixed">
+    <origin rpy="-1.5708 0.0 -1.5708" xyz="0 0 0"/>
+    <parent link="multisense/left_camera_frame"/>
+    <child link="multisense/left_camera_optical_frame"/>
   </joint>
-  <link name="r_hand_upper_right_link"/>
-  <joint name="r_hand_upper_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.04 0 -0.03"/>
-    <parent link="RSoftHand"/>
-    <child link="r_hand_upper_right_link"/>
+  <link name="multisense/left_camera_optical_frame"/>
+  <!--
+  <gazebo reference="left_camera_frame">
+    <sensor type="multicamera" name="stereo_camera">-->
+  <!-- see MultiSenseSLPlugin.h for available modes -->
+  <!--<update_rate>30.0</update_rate>
+      <camera name="left">-->
+  <!-- Spec sheet says 80deg X 45deg @ 1024x544pix.  Based on feedback
+             from teams, we're instead doing 80deg X 80deg @ 800x800pix. -->
+  <!-- <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>-->
+  <!-- Noise is sampled independently per pixel on each frame.  
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1].
+               The stddev value of 0.007 is based on experimental data 
+               from a camera in a Sandia hand pointed at a static scene
+               in a couple of different lighting conditions.  -->
+  <!-- <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <camera name="right">
+        <pose>0 -0.07 0 0 0 0</pose>-->
+  <!-- Spec sheet says 80deg X 45deg @ 1024x544pix.  Based on feedback
+             from teams, we're instead doing 80deg X 80deg @ 800x800pix. -->
+  <!-- <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>-->
+  <!-- Noise is sampled independently per pixel on each frame.  
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1].
+               The stddev value of 0.007 is based on experimental data 
+               from a camera in a Sandia hand pointed at a static scene
+               in a couple of different lighting conditions.  -->
+  <!--  <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>multisense/camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>left_camera_optical_frame</frameName>-->
+  <!-- <rightFrameName>right_camera_optical_frame</rightFrameName> -->
+  <!--  <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+-->
+  <joint name="right_camera_frame_joint" type="fixed">
+    <origin xyz="0.0 -0.035 -0.002"/>
+    <parent link="multisense/head"/>
+    <child link="multisense/right_camera_frame"/>
   </joint>
-  <link name="r_hand_upper_left_link"/>
-  <joint name="r_hand_upper_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.04 0 0.03"/>
-    <parent link="RSoftHand"/>
-    <child link="r_hand_upper_left_link"/>
+  <link name="multisense/right_camera_frame"/>
+  <joint name="right_camera_optical_frame_joint" type="fixed">
+    <origin rpy="-1.5708 0.0 -1.5708" xyz="0 0 0"/>
+    <parent link="multisense/right_camera_frame"/>
+    <child link="multisense/right_camera_optical_frame"/>
   </joint>
-  <link name="r_hand_lower_right_link"/>
-  <joint name="r_hand_lower_right_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.04 0 -0.03"/>
-    <parent link="RSoftHand"/>
-    <child link="r_hand_lower_right_link"/>
+  <link name="multisense/right_camera_optical_frame"/>
+  <joint name="center_top_led_frame_joint" type="fixed">
+    <origin xyz="0.01125 0.0 0.0105"/>
+    <parent link="multisense/head"/>
+    <child link="multisense/center_top_led_frame"/>
   </joint>
-  <link name="r_hand_lower_left_link"/>
-  <joint name="r_hand_lower_left_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.04 0 0.03"/>
-    <parent link="RSoftHand"/>
-    <child link="r_hand_lower_left_link"/>
+  <link name="multisense/center_top_led_frame"/>
+  <joint name="center_bottom_led_frame_joint" type="fixed">
+    <origin xyz="0.01125 0.0 -0.0155"/>
+    <parent link="multisense/head"/>
+    <child link="multisense/center_bottom_led_frame"/>
+  </joint>
+  <link name="multisense/center_bottom_led_frame"/>
+  <joint name="left_led_frame_joint" type="fixed">
+    <origin rpy="0 0 0.6" xyz="-0.01443 0.07452 0.050346"/>
+    <parent link="multisense/head"/>
+    <child link="multisense/left_led_frame"/>
+  </joint>
+  <link name="multisense/left_led_frame"/>
+  <joint name="right_led_frame_joint" type="fixed">
+    <origin rpy="0 0 -0.6" xyz="-0.01443 -0.07452 0.050346"/>
+    <parent link="multisense/head"/>
+    <child link="multisense/right_led_frame"/>
+  </joint>
+  <link name="multisense/right_led_frame"/>
+  <!--
+  <gazebo>
+    <plugin filename="libMultiSenseSLPlugin.so" name="multisense_plugin"/>
+  </gazebo>
+-->
+  <!-- imu link -->
+  <link name="multisense/head_imu_link">
+    <inertial>
+      <mass value="1e-5"/>
+      <!-- collocate with parent link and remove mass from it -->
+      <origin rpy="0 0 0" xyz="-0.122993 0.035033383 0.02774"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="head_imu_joint" type="fixed">
+    <parent link="multisense/head"/>
+    <child link="multisense/head_imu_link"/>
+    <!-- putting it at the same z-level as the stereo -->
+    <origin rpy="0 0 0" xyz="-0.0475 0.035 0.0"/>
+  </joint>
+  <!--
+  <gazebo reference="head_imu_link">-->
+  <!-- this is expected to be reparented to head with appropriate offset
+         when head_imu_link is reduced by fixed joint reduction -->
+  <!-- todo: this is working with gazebo 1.4, need to write a unit test -->
+  <!--<sensor name="head_imu_sensor" type="imu">
+      <always_on>1</always_on>
+      <update_rate>1000.0</update_rate>
+      <imu>
+        <noise>
+          <type>gaussian</type>-->
+  <!-- Noise parameters from Boston Dynamics
+               (http://gazebosim.org/wiki/Sensor_noise):
+                 rates (rad/s): mean=0, stddev=2e-4
+                 accels (m/s/s): mean=0, stddev=1.7e-2
+                 rate bias (rad/s): 5e-6 - 1e-5
+                 accel bias (m/s/s): 1e-1
+               Experimentally, simulation provide rates with noise of
+               about 1e-3 rad/s and accels with noise of about 1e-1 m/s/s.
+               So we don't expect to see the noise unless number of inner iterations
+               are increased.
+
+               We will add bias.  In this model, bias is sampled once for rates
+               and once for accels at startup; the sign (negative or positive)
+               of each bias is then switched with equal probability.  Thereafter,
+               the biases are fixed additive offsets.  We choose
+               bias means and stddevs to produce biases close to the provided
+               data. -->
+  <!--  <rate>
+            <mean>0.0</mean>
+            <stddev>2e-4</stddev>
+            <bias_mean>0.0000075</bias_mean>
+            <bias_stddev>0.0000008</bias_stddev>
+          </rate>
+          <accel>
+            <mean>0.0</mean>
+            <stddev>1.7e-2</stddev>
+            <bias_mean>0.1</bias_mean>
+            <bias_stddev>0.001</bias_stddev>
+          </accel>
+        </noise>
+      </imu>
+    </sensor>
+  </gazebo>
+-->
+  <joint name="neck_joint" type="fixed">
+    <parent link="NeckPitch"/>
+    <child link="multisense/head"/>
+    <origin rpy="0 0 0" xyz="0.08765 0 0.06475"/>
+  </joint>
+  <link name="gaze"/>
+  <joint name="gaze_joint" type="fixed">
+    <parent link="multisense/head"/>
+    <child link="gaze"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
   <!-- IMU -->
   <link name="imu_link">
@@ -1079,184 +1684,11 @@ and to define the end effectors of the robot -->
       </geometry>
     </visual>
   </link>
-  <joint name="imu_joint" type="fixed">
-    <parent link="Waist"/>
-    <child link="imu_link"/>
-    <origin rpy="0 3.14159265359 0" xyz="-0.072 -0.0068 0.044"/>
-  </joint>
-  <!-- multisense_sl_v4 with fixed joints (NOT FOR SIMULATION) -->
-  <link name="head">
+  <link name="imu_link2">
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.075493 3.3383E-05 0.02774"/>
-      <mass value="1.41984"/>
-      <inertia ixx="0.0039688" ixy="-1.5797E-06" ixz="-0.00089293" iyy="0.0041178" iyz="-6.8415E-07" izz="0.0035243"/>
-    </inertial>
-    <visual>
-      <origin rpy="0 0 1.570795" xyz="-0.0446 0 0.0880"/>
-      <geometry>
-        <mesh filename="package://bigman_urdf/meshes/multisense.STL"/>
-      </geometry>
-      <material name="">
-        <color rgba="0.9098 0.44314 0.031373 1"/>
-      </material>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="-0.0503 0 -0.00195"/>
-      <geometry>
-        <box size="0.1311 0.12 0.0591"/>
-      </geometry>
-    </collision>
-    <collision>
-      <origin rpy="0 0 0" xyz="-0.093 0 0.0868"/>
-      <geometry>
-        <box size="0.0468 0.12 0.1184"/>
-      </geometry>
-    </collision>
-  </link>
-  <link name="hokuyo_link">
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.032428 0.0004084 -0.0041835"/>
-      <mass value="0.057654"/>
-      <inertia ixx="3.7174E-05" ixy="4.9927E-08" ixz="1.1015E-05" iyy="4.2412E-05" iyz="-9.8165E-09" izz="4.167E-05"/>
-    </inertial>
-    <visual>
-      <origin rpy="1.5707963267949 0 1.5707963267949" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="package://bigman_urdf/meshes/hokuyo_link.STL"/>
-      </geometry>
-      <material name="">
-        <color rgba="0.72941 0.35686 0.023529 1"/>
-      </material>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.01885 0 -0.02119"/>
-      <geometry>
-        <box size="0.08 0.06 0.04238"/>
-      </geometry>
-    </collision>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.03 0 0.0235"/>
-      <geometry>
-        <cylinder length="0.047" radius="0.024425"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="hokuyo_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.0446 0 0.0880"/>
-    <parent link="head"/>
-    <child link="hokuyo_link"/>
-  </joint>
-  <joint name="head_hokuyo_joint" type="fixed">
-    <axis xyz="0 1 0"/>
-    <origin rpy="0 0 0" xyz="0.03 0 0.015"/>
-    <parent link="hokuyo_link"/>
-    <child link="head_hokuyo_frame"/>
-  </joint>
-  <link name="head_hokuyo_frame">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin rpy="0 0 0" xyz="0.042428 0.0004084 0.0108165"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-  </link>
-  <joint name="left_camera_frame_joint" type="fixed">
-    <!-- optical frame collocated with tilting DOF -->
-    <origin xyz="0.0 0.035 -0.002"/>
-    <parent link="head"/>
-    <child link="left_camera_frame"/>
-  </joint>
-  <link name="left_camera_frame">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin xyz="-0.075493 0.035033383 0.02574"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-  </link>
-  <joint name="left_camera_optical_frame_joint" type="fixed">
-    <origin rpy="-1.5708 0.0 -1.5708" xyz="0 0 0"/>
-    <parent link="left_camera_frame"/>
-    <child link="left_camera_optical_frame"/>
-  </joint>
-  <link name="left_camera_optical_frame"/>
-  <joint name="right_camera_frame_joint" type="fixed">
-    <origin xyz="0.0 -0.035 -0.002"/>
-    <parent link="head"/>
-    <child link="right_camera_frame"/>
-  </joint>
-  <link name="right_camera_frame">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin xyz="-0.075493 -0.034966617 0.02574"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-  </link>
-  <joint name="right_camera_optical_frame_joint" type="fixed">
-    <origin rpy="-1.5708 0.0 -1.5708" xyz="0 0 0"/>
-    <parent link="right_camera_frame"/>
-    <child link="right_camera_optical_frame"/>
-  </joint>
-  <link name="right_camera_optical_frame"/>
-  <joint name="center_top_led_frame_joint" type="fixed">
-    <origin xyz="0.01125 0.0 0.0105"/>
-    <parent link="head"/>
-    <child link="center_top_led_frame"/>
-  </joint>
-  <link name="center_top_led_frame">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin rpy="0 0 0" xyz="-0.064243 0.000033383 0.03824"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-  </link>
-  <joint name="center_bottom_led_frame_joint" type="fixed">
-    <origin xyz="0.01125 0.0 -0.0155"/>
-    <parent link="head"/>
-    <child link="center_bottom_led_frame"/>
-  </joint>
-  <link name="center_bottom_led_frame">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin rpy="0 0 0" xyz="-0.064243 0.000033383 0.01224"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-  </link>
-  <joint name="left_led_frame_joint" type="fixed">
-    <origin rpy="0 -0.15 0.53" xyz="-0.01443 0.07452 0.050346"/>
-    <parent link="head"/>
-    <child link="left_led_frame"/>
-  </joint>
-  <link name="left_led_frame">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin rpy="0 -0.15 0.53" xyz="-0.089923 0.074553383 0.078086"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-  </link>
-  <joint name="right_led_frame_joint" type="fixed">
-    <origin rpy="0 -0.15 -0.53" xyz="-0.01443 -0.07452 0.050346"/>
-    <parent link="head"/>
-    <child link="right_led_frame"/>
-  </joint>
-  <link name="right_led_frame">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin rpy="0 -0.15 -0.53" xyz="-0.089923 -0.074486617 0.07908"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-  </link>
-  <link name="head_imu_link">
-    <inertial>
-      <mass value="1e-5"/>
-      <!-- collocate with parent link and remove mass from it -->
-      <origin rpy="0 0 0" xyz="-0.122993 0.035033383 0.02774"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="1.0E-6" ixy="0" ixz="0" iyy="1.0E-6" iyz="0" izz="1.0E-6"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -1265,16 +1697,15 @@ and to define the end effectors of the robot -->
       </geometry>
     </visual>
   </link>
-  <joint name="head_imu_joint" type="fixed">
-    <parent link="head"/>
-    <child link="head_imu_link"/>
-    <!-- putting it at the same z-level as the stereo -->
-    <origin rpy="0 0 0" xyz="-0.0475 0.035 0.0"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="Waist"/>
+    <child link="imu_link"/>
+    <origin rpy="0 0 0" xyz="-0.072 -0.0068 0.044"/>
   </joint>
-  <joint name="neck_joint" type="fixed">
-    <parent link="DWYTorso"/>
-    <child link="head"/>
-    <origin rpy="0 0 0" xyz="0.05 0 0.05"/>
+  <joint name="imu_joint2" type="fixed">
+    <parent link="imu_link"/>
+    <child link="imu_link2"/>
+    <origin rpy="0 0 0" xyz="0 0 0.01"/>
   </joint>
 </robot>
 
