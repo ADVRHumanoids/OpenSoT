@@ -80,12 +80,16 @@ void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
 
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
-    return computeLinksDistance.setCollisionWhiteList(whiteList);
+    bool ok = computeLinksDistance.setCollisionWhiteList(whiteList);
+    this->update(yarp::sig::Vector(this->getXSize()));
+    return ok;
 }
 
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
-    return computeLinksDistance.setCollisionBlackList(blackList);
+    bool ok = computeLinksDistance.setCollisionBlackList(blackList);
+    this->update(yarp::sig::Vector(this->getXSize()));
+    return ok;
 }
 
 Eigen::MatrixXd SelfCollisionAvoidance::Skew_symmetric_operator (const Eigen::Vector3d & r_cp)
@@ -116,6 +120,8 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     Interested_LinkPair = computeLinksDistance.getLinkDistances(_detection_threshold);
 
     /*//////////////////////////////////////////////////////////*/
+
+    std::cout << "size: " << Interested_LinkPair.size() << std::endl;
 
     MatrixXd Aineq_fc_Eigen(Interested_LinkPair.size(), robot_col.iDyn3_model.getNrOfDOFs());
     VectorXd bUpperB_fc_Eigen(Interested_LinkPair.size());

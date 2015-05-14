@@ -23,7 +23,6 @@
  #include <OpenSoT/tasks/velocity/Cartesian.h>
  #include <yarp/sig/all.h>
  #include <idynutils/idynutils.h>
- #include <idynutils/convex_hull.h>
  #include <idynutils/collision_utils.h>
  #include <kdl/frames.hpp>
 
@@ -129,7 +128,7 @@
 
 
                 /**
-                 * @brief setCollisionWhiteListresets the allowed collision matrix by setting all collision pairs as disabled.
+                 * @brief setCollisionWhiteList resets the allowed collision matrix by setting all collision pairs as disabled.
                  *        It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs
                  *        which are disabled in the SRDF
                  * @param whiteList a list of links pairs for which to not check collision detection
