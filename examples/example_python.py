@@ -4,17 +4,20 @@ __author__ = ('Alessio Rocchi', 'Enrico Mingo')
 
 import yarp
 import numpy as np
+import PyKDL as kdl
+import pYTask
 import rospy
 import tf
-import PyKDL as kdl
-from pydrc import pydrc
-import pYTask
+import subprocess
+
 
 
 print "OpenSoT python Example using pYTask"
 
 if __name__ == '__main__':
     rospy.init_node('wall_task')
+
+    p = subprocess.Popen(["./example_python"])
 
     yarp.Network.init()
 
@@ -98,3 +101,5 @@ if __name__ == '__main__':
 #    bottle_world_pos_r_wrist.clear()
 #    pYTask.pose_msg(r_wrist_pos_d, source_frame, target_frame, bottle_world_pos_r_wrist)
 #    port_r_wrist.write() 
+
+    p.terminate()

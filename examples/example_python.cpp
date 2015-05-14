@@ -16,6 +16,7 @@ typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                             > Accumulator;
 int main(int argc, char **argv) {
+    yarp::os::Network::init();
     Accumulator time_accumulator(boost::accumulators::tag::rolling_mean::window_size = 1000);
     RobotUtils robot( MODULE_NAME, "bigman",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
@@ -43,7 +44,7 @@ int main(int argc, char **argv) {
     DHS.velocityLimits->setVelocityLimits(0.9);
 
     OpenSoT::VelocityAllocation(autoStack,
-                                3e-3,
+                                dT,
                                 0.7,
                                 1.0);
 
@@ -65,10 +66,12 @@ int main(int argc, char **argv) {
                                                          MODULE_NAME, DHS.leftArm);
     OpenSoT::interfaces::yarp::tasks::YCartesian rightArm(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.rightArm);
+    /*
     OpenSoT::interfaces::yarp::tasks::YCartesian leftLeg(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.leftLeg);
     OpenSoT::interfaces::yarp::tasks::YCartesian rightLeg(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.rightLeg);
+    */
 
     OpenSoT::interfaces::yarp::tasks::YCoM com(robot.idynutils.getRobotName(),
                                                MODULE_NAME, DHS.com);
