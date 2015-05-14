@@ -241,9 +241,9 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
   yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
       yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
       yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-      leg[0] = -25.0 * M_PI/180.0;
+      leg[2] = -25.0 * M_PI/180.0;
       leg[3] =  50.0 * M_PI/180.0;
-      leg[5] = -25.0 * M_PI/180.0;
+      leg[4] = -25.0 * M_PI/180.0;
       idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
       idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
       yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
