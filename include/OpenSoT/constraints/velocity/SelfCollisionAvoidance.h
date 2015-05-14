@@ -57,6 +57,14 @@
                 ComputeLinksDistance computeLinksDistance;
 
                 /**
+                 * @brief _x_cache is a copy of last q vector used to update the constraints.
+                 * It is used in order to avoid multiple updated when the constraint is present
+                 * in multiple tasks in the same stack. It is a simple speedup waiting for the stack system to support
+                 * constraint caching - or for idynutils to support some form of cache system
+                 */
+                yarp::sig::Vector _x_cache;
+
+                /**
                  * @brief base_index all the calculation and expression is described in
                  * a base link frame which is "waist" link frame
                  */
@@ -76,16 +84,15 @@
                  * @return Skew symmetric matrix of the input vector
                  * NOTE: the base Jacobian should be multiplied by the output matrix on its left side.
                  */
-                Eigen::MatrixXd Skew_symmetric_operator (const Eigen::Vector3d & r_cp);
+                Eigen::MatrixXd skewSymmetricOperator (const Eigen::Vector3d & r_cp);
 
                 /**
                  * @brief calculate_Aineq_bUpperB the core function which is used to update the variables Aineq and
                  * bUpperBound for this constraint
-                 * @param x the robot current configuration vector
                  * @param Aineq_fc Aineq matrix of this constraint
                  * @param bUpperB_fc bUpperBound of this constraint
                  */
-                void calculate_Aineq_bUpperB (const yarp::sig::Vector & x, yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc );
+                void calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc );
 
             public:
                 /**
@@ -124,6 +131,14 @@
                  */
                 void setDetectionThreshold(const double detection_threshold);
 
+                /**
+                 * @brief update recomputes Aineq and bUpperBound if x is different than the previously stored value
+                 * @param x the state vector. It gets cached so that we won't recompute capsules distances if x didn't change
+                 * TODO if the capsules distances are given by a server (i.e. a separate thread updaing capsules at a given rate)
+                 * then the inelegant caching of x is not needed anymore (notice that, however, it would be nice to have a caching system
+                 * at the stack level so that, if two tasks in the same stack are constrained by the same constraint, this constraint
+                 * gets updated only once per stack update)
+                 */
                 void update(const yarp::sig::Vector &x);
 
 

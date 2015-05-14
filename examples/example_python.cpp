@@ -16,7 +16,7 @@ typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                             > Accumulator;
 int main(int argc, char **argv) {
-    Accumulator time_accumulator;
+    Accumulator time_accumulator(boost::accumulators::tag::rolling_mean::window_size = 1000);
     RobotUtils robot( MODULE_NAME, "bigman",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
     DHS.rightArm->setLambda(0.6);   DHS.rightArm->setOrientationErrorGain(0.1);
     DHS.leftArm->setLambda(0.6);    DHS.leftArm->setOrientationErrorGain(0.1);
-    DHS.comVelocity->setVelocityLimits(0.1);
+    DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
     DHS.velocityLimits->setVelocityLimits(0.9);
 
     OpenSoT::VelocityAllocation(autoStack,
@@ -55,10 +55,10 @@ int main(int argc, char **argv) {
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
                 OpenSoT::constraints::velocity::VelocityLimits>(
-                    *ic))
+                    *i_c))
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
-                                *ic)->setVelocityLimits(2.0);
+                                *i_c)->setVelocityLimits(2.0);
     }
 
     OpenSoT::interfaces::yarp::tasks::YCartesian leftArm(robot.idynutils.getRobotName(),
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
         tic = yarp::os::Time::now();
         robot.idynutils.updateiDyn3Model(q, true);
         autoStack->update(q);
-        if(solver->solve(dq))
+        if(solver.solve(dq))
             q+=dq;
         toc = yarp::os::Time::now();
         time_accumulator(toc-tic);
