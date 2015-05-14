@@ -41,6 +41,9 @@ void QPOasesProblem::setDefaultOptions()
     opt.printLevel = qpOASES::PL_NONE;
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= _epsRegularisation;
+    opt.numRegularisationSteps = 2;
+    opt.numRefinementSteps = 1;
+    opt.enableFlippingBounds = qpOASES::BT_TRUE;
 
     opt.ensureConsistency();
 
@@ -105,6 +108,8 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         std::cout<<RED<<"ERROR INITIALIZING QP PROBLEM "<<DEFAULT<<std::endl;
         std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
 
+
+#ifndef NDEBUG //Log is generated only in DEBUG Mode!
         time_t rawtime;
         struct tm * timeinfo;
         char buffer [80];
@@ -118,6 +123,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
             std::cout<<"Wrote QP problem into mat file "<<file_name<<std::endl;
         else
             std::cout<<RED<<"ERROR while writing QP problem into mat file!"<<DEFAULT<<std::endl;
+#endif
 
         return false;
     }

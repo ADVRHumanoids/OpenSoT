@@ -51,6 +51,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCoMVelocityTask
                       testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
+                      testMinimumVelocityTask
                       testPosturalVelocityTask
                       testAutoStack
                       testDefaultHumanoidStack
@@ -158,21 +159,25 @@ ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
 TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
 
-ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
-TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs} ${PCL_LIBRARIES})
-add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
-
 ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
 TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testManipulabilityTask GTest-ext OpenSoT)
 
-ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
-TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs} ${PCL_LIBRARIES})
-add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
-
 ADD_EXECUTABLE(testMinimizeAccelerationTask tasks/velocity/TestMinimizeAcceleration.cpp)
 TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
+TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testMinimumVelocityTask tasks/velocity/TestMinimumVelocity.cpp)
+TARGET_LINK_LIBRARIES(testMinimumVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+add_dependencies(testMinimumVelocityTask GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
+TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
 TARGET_LINK_LIBRARIES(testAutoStack ${TestLibs})
@@ -222,10 +227,11 @@ add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
-add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
-add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
+add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
+add_test(NAME OpenSoT_task_velocity_MinimumVelocity COMMAND testMinimumVelocityTask)
+add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)

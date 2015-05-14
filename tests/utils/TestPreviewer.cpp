@@ -28,8 +28,8 @@ class MyTrajGen
 public:
     typedef boost::shared_ptr<MyTrajGen> Ptr;
     MyTrajGen(yarp::sig::Matrix yb,
-              yarp::sig::Matrix yf, double t) : t(t) { assert(YarptoKDL(yb, b) &&
-                                             YarptoKDL(yf, f) &&
+              yarp::sig::Matrix yf, double t) : t(t) { bool res = YarptoKDL(yb, b) &&
+                                             YarptoKDL(yf, f); assert( res &&
                                              "Error converting yarp::Matrix to kdl::Frame"); }
     KDL::Frame Pos(double time) {
         KDL::Frame ref = b;

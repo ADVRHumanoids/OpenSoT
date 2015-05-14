@@ -50,12 +50,14 @@ namespace OpenSoT{
         /**
          * @brief setDefaultOptions to internal qpOases problem.
          * Default are set to:
-         *      opt.setToMPC();
-         *      opt.printLevel = qpOASES::PL_LOW;
-         *      opt.enableRegularisation = qpOASES::BT_TRUE;
-         *      opt.epsRegularisation *= _epsRegularisation;
+         *  opt.setToMPC();
+         *  opt.printLevel = qpOASES::PL_NONE;
+         *  opt.enableRegularisation = qpOASES::BT_TRUE;
+         *  opt.epsRegularisation *= _epsRegularisation;
+         *  opt.numRegularisationSteps = 2;
+         *  opt.numRefinementSteps = 1;
+         *  opt.enableFlippingBounds = qpOASES::BT_TRUE;
          *
-         *       opt.ensureConsistency();
          */
         void setDefaultOptions();
 

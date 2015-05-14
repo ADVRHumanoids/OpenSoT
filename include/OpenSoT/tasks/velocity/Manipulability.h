@@ -118,7 +118,8 @@ namespace OpenSoT {
                         if(_robot.getAnchor() != _model.getAnchor())
                             _robot.switchAnchor(_model.getAnchor());
 
-                        _robot.updateiDyn3Model(q, true);
+                        _robot.iDyn3_model.setAng(q);
+                        _robot.iDyn3_model.kinematicRNEA();
 
                         if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
                         {

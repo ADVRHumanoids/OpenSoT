@@ -321,7 +321,8 @@ namespace OpenSoT {
                 if(isCartesian(task))
                 {
                     yf = asCartesian(task)->getActualPose();
-                    assert(YarptoKDL(yf,f) && "error converting from yarp frame to kdl::Frame");
+                    bool res = YarptoKDL(yf,f);
+                    assert(res && "error converting from yarp frame to kdl::Frame");
                 }
                 else if(isCoM(task))
                 {
@@ -338,10 +339,10 @@ namespace OpenSoT {
                 } else {
 
                     yfOld.resize(4,4);
-                    assert(KDLtoYarp_position(cartesianNodes[task.get()], yfOld) &&
-                          "Error transforming a kdl::Frame into  a yarp 4x4 matrix");
-                    assert(KDLtoYarp(cartesianNodes[task.get()].p, yvOld) &&
-                           "Error transforming a kdl::Vector into a yarp vector");
+                    bool res = KDLtoYarp_position(cartesianNodes[task.get()], yfOld);
+                    assert(res && "Error transforming a kdl::Frame into  a yarp 4x4 matrix");
+                    res = KDLtoYarp(cartesianNodes[task.get()].p, yvOld);
+                    assert(res && "Error transforming a kdl::Vector into a yarp vector");
 
                     if(isCartesian(task))
                     {
@@ -574,8 +575,8 @@ namespace OpenSoT {
                     yarp::sig::Matrix yf = KDLtoYarp_position(f);
                     yarp::sig::Vector yt(6, 0.0);  KDLtoYarp(tw, yt);
                     yarp::sig::Vector yv(3,0.0);
-                    assert(KDLtoYarp(f.p, yv) &&
-                           "Error converting kdl::Vector in yarp::sig::Vector");
+                    bool res = KDLtoYarp(f.p, yv);
+                    assert(res && "Error converting kdl::Vector in yarp::sig::Vector");
 
                     if(isCartesian(b->task))
                         asCartesian(b->task)->setReference(yf,yt*dT);

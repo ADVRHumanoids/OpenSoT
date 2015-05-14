@@ -249,6 +249,7 @@ void OpenSoT::AutoStack::setBoundsAggregationPolicy(const unsigned int aggregati
 
 OpenSoT::constraints::Aggregated::ConstraintPtr OpenSoT::AutoStack::getBounds()
 {
+    _boundsAggregated->generateAll();
     return _boundsAggregated;
 }
 
