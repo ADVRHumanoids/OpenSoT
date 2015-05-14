@@ -76,6 +76,7 @@
          const constraints::velocity::CoMVelocity::Ptr comVelocity;
          const constraints::velocity::ConvexHull::Ptr convexHull;
          const constraints::velocity::JointLimits::Ptr jointLimits;
+         const constraints::velocity::SelfCollisionAvoidance::Ptr selfCollisionAvoidance;
          const constraints::velocity::VelocityLimits::Ptr velocityLimits;
      };
  };
