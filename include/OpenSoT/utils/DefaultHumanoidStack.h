@@ -68,7 +68,9 @@
          const SubTask::Ptr com_Z;
 
          const tasks::velocity::MinimumEffort::Ptr minimumEffort;
+         const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
          const tasks::velocity::Postural::Ptr postural;
+
 
          // constraints
          const constraints::velocity::CoMVelocity::Ptr comVelocity;
