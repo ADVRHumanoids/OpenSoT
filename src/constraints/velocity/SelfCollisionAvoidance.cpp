@@ -35,7 +35,8 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     _detection_threshold(detection_threshold),
     _linkPair_threshold(linkPair_threshold),
     computeLinksDistance(robot),
-    robot_col(robot) {
+    robot_col(robot),
+    _x_cache(x) {
 
     std::string base_name = "Waist";
     base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
@@ -73,7 +74,11 @@ void SelfCollisionAvoidance::setDetectionThreshold(const double detection_thresh
 
 void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
 {
-    calculate_Aineq_bUpperB ( x, _Aineq, _bUpperBound );
+    // we update _Aineq and _bupperBound only if x has changed
+    if(!(x == _x_cache)) {
+        _x_cache = x;
+        calculate_Aineq_bUpperB (_Aineq, _bUpperBound );
+    }
 //    std::cout << "_Aineq" << _Aineq.toString() << std::endl << std::endl;
     //    std::cout << "_bUpperBound" << _bUpperBound.toString() << std::endl << std::endl;
 }
@@ -81,18 +86,18 @@ void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
     bool ok = computeLinksDistance.setCollisionWhiteList(whiteList);
-    this->update(yarp::sig::Vector(this->getXSize()));
+    this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
     return ok;
 }
 
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
     bool ok = computeLinksDistance.setCollisionBlackList(blackList);
-    this->update(yarp::sig::Vector(this->getXSize()));
+    this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
     return ok;
 }
 
-Eigen::MatrixXd SelfCollisionAvoidance::Skew_symmetric_operator (const Eigen::Vector3d & r_cp)
+Eigen::MatrixXd SelfCollisionAvoidance::skewSymmetricOperator (const Eigen::Vector3d & r_cp)
 {
     MatrixXd J_transform(3,6);
     Matrix3d left_part, right_part;
@@ -108,23 +113,22 @@ Eigen::MatrixXd SelfCollisionAvoidance::Skew_symmetric_operator (const Eigen::Ve
 
 
 
-void SelfCollisionAvoidance::calculate_Aineq_bUpperB (const yarp::sig::Vector & x,
-                                                      yarp::sig::Matrix & Aineq_fc,
+void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_fc,
                                                       yarp::sig::Vector & bUpperB_fc )
 {
 
 //    robot_col.updateiDyn3Model(x, false);
 
-    std::list<LinkPairDistance> Interested_LinkPair;
+    std::list<LinkPairDistance> interested_LinkPairs;
     std::list<LinkPairDistance>::iterator j;
-    Interested_LinkPair = computeLinksDistance.getLinkDistances(_detection_threshold);
+    interested_LinkPairs = computeLinksDistance.getLinkDistances(_detection_threshold);
 
     /*//////////////////////////////////////////////////////////*/
 
-    std::cout << "size: " << Interested_LinkPair.size() << std::endl;
+    std::cout << "size: " << interested_LinkPairs.size() << std::endl;
 
-    MatrixXd Aineq_fc_Eigen(Interested_LinkPair.size(), robot_col.iDyn3_model.getNrOfDOFs());
-    VectorXd bUpperB_fc_Eigen(Interested_LinkPair.size());
+    MatrixXd Aineq_fc_Eigen(interested_LinkPairs.size(), robot_col.iDyn3_model.getNrOfDOFs());
+    VectorXd bUpperB_fc_Eigen(interested_LinkPairs.size());
 
     double Dm_LinkPair;
     KDL::Frame Link1_T_CP,Link2_T_CP;
@@ -151,7 +155,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (const yarp::sig::Vector & 
     temp_trans_matrix.block(3,0,3,3) = MatrixXd::Zero(3,3);
 
     int linkPairIndex = 0;
-    for (j = Interested_LinkPair.begin(); j != Interested_LinkPair.end(); ++j)
+    for (j = interested_LinkPairs.begin(); j != interested_LinkPairs.end(); ++j)
     {
 
         LinkPairDistance& linkPair(*j);
@@ -191,13 +195,13 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (const yarp::sig::Vector & 
         robot_col.iDyn3_model.getRelativeJacobian( Link1_index, base_index, Link1_CP_Jaco_temp, true);
         Link1_CP_Jaco = from_yarp_to_Eigen_matrix (Link1_CP_Jaco_temp);
         Link1_CP_Jaco = temp_trans_matrix * Link1_CP_Jaco;
-        Link1_CP_Jaco = Skew_symmetric_operator(Link1_CP - Link1_origin) * Link1_CP_Jaco;
+        Link1_CP_Jaco = skewSymmetricOperator(Link1_CP - Link1_origin) * Link1_CP_Jaco;
 
 
         robot_col.iDyn3_model.getRelativeJacobian( Link2_index, base_index, Link2_CP_Jaco_temp, true);
         Link2_CP_Jaco = from_yarp_to_Eigen_matrix (Link2_CP_Jaco_temp);
         Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
-        Link2_CP_Jaco = Skew_symmetric_operator(Link2_CP - Link2_origin) * Link2_CP_Jaco;
+        Link2_CP_Jaco = skewSymmetricOperator(Link2_CP - Link2_origin) * Link2_CP_Jaco;
 
 
         Aineq_fc_Eigen.row(linkPairIndex) = closepoint_dir.transpose() * ( Link1_CP_Jaco - Link2_CP_Jaco );

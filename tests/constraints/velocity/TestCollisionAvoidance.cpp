@@ -275,7 +275,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_", this->q, this->robot, linkB, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_hand", this->q, this->robot, linkB, "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     yarp::sig::Matrix T_init_l_arm(4,4);
@@ -298,7 +298,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     cartesianTasks.push_back(task_left_arm);
     cartesianTasks.push_back(task_right_arm);
     OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
-                new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
+       new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(this->q));
 
@@ -310,9 +310,9 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
 
     int t = 100;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-                new OpenSoT::constraints::velocity::JointLimits(this->q,
-                                                                this->robot.iDyn3_model.getJointBoundMax(),
-                                                                this->robot.iDyn3_model.getJointBoundMin()));
+        new OpenSoT::constraints::velocity::JointLimits(this->q,
+                                                        this->robot.iDyn3_model.getJointBoundMax(),
+                                                        this->robot.iDyn3_model.getJointBoundMin()));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
                 new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
@@ -321,7 +321,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
                 new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
 
     OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
-                new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
+        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
 
     yarp::sig::Vector dq(this->q.size(), 0.0);
     for(unsigned int i = 0; i < 50*t; ++i)
