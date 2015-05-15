@@ -10,96 +10,78 @@ import rospy
 import tf
 import subprocess
 
+def generate_random_pose_msg(source_frame, target_frame, current_position, current_orientation_quaternion, msg_port)
+    r = np.random.rand(6,1)
+    r -= .5
+    max_variation = np.array((1,2,2,1,1,1)) #x [m],y [m],z [m],r [rad],p [rad], y [rad]
+    r *= max_variation
+
+    desired_pose = kdl.Frame()
+    desired_pose.p = kdl.Vector(current_position[0]+r[0],
+                                current_position[1]+r[1],
+                                current_position[2]+r[2])
+    desired_pose.M = kdl.Rotation.Quaternion(current_orientation_quaternion[0],
+                                             current_orientation_quaternion[1],
+                                             current_orientation_quaternion[2],
+                                             current_orientation_quaternion[3])
+    desired_pose.M.DoRotX(r[3]).DoRotY(r[4]).DoRotZ(r[5])
+
+    bottle_desired_pose_msg = msg_port.prepare()
+    bottle_desired_pose_msg.clear()
+    pYTask.pose_msg(desired_pose, source_frame, target_frame, bottle_desired_pose_msg)
+    return bottle_desired_pose_msg
 
 
-print "OpenSoT python Example using pYTask"
+print "OpenSoT python Example using pYTask. Please run the executable example_python before running this script"
 
 if __name__ == '__main__':
     rospy.init_node('wall_task')
 
-    p = subprocess.Popen(["./example_python"])
+    #p = subprocess.Popen(["./example_python"])
 
-    yarp.Network.init()
-
-    port_posture = yarp.BufferedPortBottle()
-    port_posture.open("/desired/posture/position/ref:o")
-    yarp.Network.connect("/desired/posture/position/ref:o", "/bigman/centralized_inverse_kinematics/Postural/set_ref:i")
+    yarp.Network.init()    
 
     port_r_wrist = yarp.BufferedPortBottle()
-    port_r_wrist.open("/bigman/centralized_inverse_kinematics/cartesian::r_arm/set_ref:o")
-    yarp.Network.connect("/bigman/centralized_inverse_kinematics/cartesian::r_arm/set_ref:o",
-                         "/bigman/centralized_inverse_kinematics/cartesian::r_arm/set_ref:i")
+    port_r_wrist.open("/bigman/example_python/cartesian::r_arm/set_ref:o")
+    yarp.Network.connect("/bigman/example_python/cartesian::r_arm/set_ref:o",
+                         "/bigman/example_python/cartesian::r_arm/set_ref:i")
+
+    port_l_wrist = yarp.BufferedPortBottle()
+    port_l_wrist.open("/bigman/example_python/cartesian::l_arm/set_ref:o")
+    yarp.Network.connect("/bigman/example_python/cartesian::l_arm/set_ref:o",
+                         "/bigman/example_python/cartesian::l_arm/set_ref:i")
 
     listener = tf.TransformListener()
 
     timeoutDuration = rospy.Duration(secs=10)
     source_frame='world'
-    target_frame='r_wrist'
-    listener.waitForTransform(source_frame, target_frame, time=rospy.Time(0), timeout=timeoutDuration)
+    target_frame_r='r_wrist'
+    target_frame_l='l_wrist'
+    listener.waitForTransform(source_frame, target_frame_r, time=rospy.Time(0), timeout=timeoutDuration)
+    listener.waitForTransform(source_frame, target_frame_l, time=rospy.Time(0), timeout=timeoutDuration)
 
     success = False
     while not success:
         try:
-            (world_pos_r_wrist, world_rot_r_wrist) = listener.lookupTransform(source_frame, target_frame, rospy.Time(0))
+            (world_pos_r_wrist, world_rot_r_wrist) = listener.lookupTransform(source_frame, target_frame_r, rospy.Time(0))
+            (world_pos_l_wrist, world_rot_l_wrist) = listener.lookupTransform(source_frame, target_frame_l, rospy.Time(0))
             success = True
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             print("ERROR on lookupTransform")
             continue
 
-    r_wrist_pos_d = kdl.Frame()
-   # r_wrist_pos_d.M.DoRotY(-90.0*3.1415/180.0)
-    r_wrist_pos_d.M.DoRotY(-45.0*3.1415/180.0)
-   # r_wrist_pos_d.p = kdl.Vector(world_pos_r_wrist[0]+0.2, world_pos_r_wrist[1], world_pos_r_wrist[2]+0.4)
-    r_wrist_pos_d.p = kdl.Vector(world_pos_r_wrist[0]+0.2, world_pos_r_wrist[1], world_pos_r_wrist[2]-1.0)
 
-    bottle_world_pos_r_wrist = port_r_wrist.prepare()
-    bottle_world_pos_r_wrist.clear()
-    pYTask.pose_msg(r_wrist_pos_d, source_frame, target_frame, bottle_world_pos_r_wrist)
-    port_r_wrist.write()
+    for i in range(30):
+        generate_random_pose_msg(source_frame, target_frame_r,
+                                 world_pos_r_wrist, world_rot_r_wrist,
+                                 port_r_wrist)
+        port_r_wrist.write()
 
-#    yarp.Time.delay(5)
+        generate_random_pose_msg(source_frame, target_frame_l,
+                                 world_pos_l_wrist, world_rot_l_wrist,
+                                 port_l_wrist)
+        port_l_wrist.write()
 
-#    r_wrist_pos_d.p = kdl.Vector(r_wrist_pos_d.p[0]+0.1, r_wrist_pos_d.p[1], r_wrist_pos_d.p[2])
+        yarp.Time.delay(5)
 
-#    bottle_world_pos_r_wrist = port_r_wrist.prepare()
-#    bottle_world_pos_r_wrist.clear()
-#    pYTask.pose_msg(r_wrist_pos_d, source_frame, target_frame, bottle_world_pos_r_wrist)
-#    port_r_wrist.write()
-
-#    yarp.Time.delay(5)
-
-#    r_wrist_pos_d.p = kdl.Vector(r_wrist_pos_d.p[0], r_wrist_pos_d.p[1]-0.4, r_wrist_pos_d.p[2])
-
-#    bottle_world_pos_r_wrist = port_r_wrist.prepare()
-#    bottle_world_pos_r_wrist.clear()
-#    pYTask.pose_msg(r_wrist_pos_d, source_frame, target_frame, bottle_world_pos_r_wrist)
-#    port_r_wrist.write()
-
-#    yarp.Time.delay(5)
-
-#    r_wrist_pos_d.p = kdl.Vector(r_wrist_pos_d.p[0], r_wrist_pos_d.p[1], r_wrist_pos_d.p[2]-1.0)
-
-#    bottle_world_pos_r_wrist = port_r_wrist.prepare()
-#    bottle_world_pos_r_wrist.clear()
-#    pYTask.pose_msg(r_wrist_pos_d, source_frame, target_frame, bottle_world_pos_r_wrist)
-#    port_r_wrist.write()
-
-#    yarp.Time.delay(5)
-
-#    r_wrist_pos_d.p = kdl.Vector(r_wrist_pos_d.p[0], r_wrist_pos_d.p[1]+0.4, r_wrist_pos_d.p[2])
-
-#    bottle_world_pos_r_wrist = port_r_wrist.prepare()
-#    bottle_world_pos_r_wrist.clear()
-#    pYTask.pose_msg(r_wrist_pos_d, source_frame, target_frame, bottle_world_pos_r_wrist)
-#    port_r_wrist.write() 
-
- #   yarp.Time.delay(5)
-
- #   r_wrist_pos_d.p = kdl.Vector(r_wrist_pos_d.p[0], r_wrist_pos_d.p[1], r_wrist_pos_d.p[2]+1.0)
-
-#    bottle_world_pos_r_wrist = port_r_wrist.prepare()
-#    bottle_world_pos_r_wrist.clear()
-#    pYTask.pose_msg(r_wrist_pos_d, source_frame, target_frame, bottle_world_pos_r_wrist)
-#    port_r_wrist.write() 
-
-    p.terminate()
+    #p.terminate()

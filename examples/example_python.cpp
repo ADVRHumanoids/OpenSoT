@@ -23,6 +23,8 @@ int main(int argc, char **argv) {
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
     yarp::os::Time::delay(1.0);
     yarp::sig::Vector q = robot.sensePosition();
+    robot.idynutils.setFloatingBaseLink(robot.idynutils.left_leg.end_effector_name);
+    robot.idynutils.updateiDyn3Model(q,true);
     OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
 
     // defining a stack composed of size two,
@@ -30,10 +32,10 @@ int main(int argc, char **argv) {
     // task of priority two is leftArm and rightArm,
     // and the stack is subject to bounds jointLimits and velocityLimits
     OpenSoT::AutoStack::Ptr autoStack = 
-        ( (DHS.rightLeg + DHS.leftLeg) << DHS.selfCollisionAvoidance ) /
+        ( (DHS.rightLeg) << DHS.selfCollisionAvoidance ) /
         ( (DHS.leftArm + DHS.rightArm) << DHS.selfCollisionAvoidance ) /
-        (DHS.com << DHS.comVelocity << DHS.selfCollisionAvoidance ) /
-        DHS.minimumVelocity << DHS.selfCollisionAvoidance;
+        (DHS.com << DHS.selfCollisionAvoidance ) /
+        DHS.postural << DHS.selfCollisionAvoidance;
     autoStack << DHS.jointLimits << DHS.velocityLimits;
 
     DHS.rightLeg->setLambda(0.6);   DHS.rightLeg->setOrientationErrorGain(1.0);
@@ -42,6 +44,54 @@ int main(int argc, char **argv) {
     DHS.leftArm->setLambda(0.6);    DHS.leftArm->setOrientationErrorGain(0.1);
     DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
     DHS.velocityLimits->setVelocityLimits(0.9);
+
+    yarp::sig::Matrix pW = DHS.postural->getWeight();
+    for(unsigned int i_t = 0; i_t < 3; ++i_t)
+        pW(robot.idynutils.torso.joint_numbers[i_t],
+            robot.idynutils.torso.joint_numbers[i_t]) *= 1e2;
+    for(unsigned int i_t = 0; i_t < 2; ++i_t)
+    {
+        pW(robot.idynutils.left_leg.joint_numbers[i_t],
+           robot.idynutils.left_leg.joint_numbers[i_t]) *= 1e1;
+        pW(robot.idynutils.right_leg.joint_numbers[i_t],
+           robot.idynutils.right_leg.joint_numbers[i_t]) *= 1e1;
+    }
+    postural->setWeight(pW);
+
+    std::list<std::pair<std::string,std::string>> whiteList;
+    // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
+    whiteList.push_back(std::pair<std::string,std::string>("LLowLeg","LSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("LHipMot","LSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("RLowLeg","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("RHipMot","RSoftHandLink"));
+
+    // torso - arms collision whitelist for WalkMan
+    whiteList.push_back(std::pair<std::string,std::string>("DWS","LSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("DWS","LWrMot2"));
+    whiteList.push_back(std::pair<std::string,std::string>("DWS","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("DWS","RWrMot2"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","LElb"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","LSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","RElb"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("Waist","LSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("Waist","LWrMot2"));
+    whiteList.push_back(std::pair<std::string,std::string>("Waist","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("Waist","RWrMot2"));
+
+    // arm - am collision whitelist for WalkMan
+    whiteList.push_back(std::pair<std::string,std::string>("LShr","RShr"));
+    whiteList.push_back(std::pair<std::string,std::string>("LShr","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("LShr","RWrMot2"));
+    whiteList.push_back(std::pair<std::string,std::string>("LSoftHandLink","RShr"));
+    whiteList.push_back(std::pair<std::string,std::string>("LSoftHandLink","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("LSoftHandLink","RWrMot2"));
+    whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RShr"));
+    whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RWrMot2"));
+
+
+    DHS.selfCollisionAvoidance->setCollisionWhiteList(whiteList);
 
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
