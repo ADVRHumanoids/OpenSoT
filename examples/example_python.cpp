@@ -27,6 +27,11 @@ int main(int argc, char **argv) {
     robot.idynutils.updateiDyn3Model(q,true);
     OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
 
+
+    /*                            */
+    /*       CREATING STACK       */
+    /*                            */
+
     // defining a stack composed of size two,
     // where the task of first priority is an aggregated of leftLeg and rightLeg,
     // task of priority two is leftArm and rightArm,
@@ -37,6 +42,11 @@ int main(int argc, char **argv) {
         (DHS.com << DHS.selfCollisionAvoidance ) /
         DHS.postural << DHS.selfCollisionAvoidance;
     autoStack << DHS.jointLimits << DHS.velocityLimits;
+
+
+    /*                            */
+    /*      CONFIGURING STACK     */
+    /*                            */
 
     DHS.rightLeg->setLambda(0.6);   DHS.rightLeg->setOrientationErrorGain(1.0);
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
@@ -56,7 +66,7 @@ int main(int argc, char **argv) {
         pW(robot.idynutils.right_leg.joint_numbers[i_t],
            robot.idynutils.right_leg.joint_numbers[i_t]) *= 1e1;
     }
-    postural->setWeight(pW);
+    DHS.postural->setWeight(pW);
 
     std::list<std::pair<std::string,std::string>> whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
@@ -70,10 +80,10 @@ int main(int argc, char **argv) {
     whiteList.push_back(std::pair<std::string,std::string>("DWS","LWrMot2"));
     whiteList.push_back(std::pair<std::string,std::string>("DWS","RSoftHandLink"));
     whiteList.push_back(std::pair<std::string,std::string>("DWS","RWrMot2"));
-    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","LElb"));
-    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","LSoftHandLink"));
-    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","RElb"));
-    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtection","RSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtections","LElb"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtections","LSoftHandLink"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtections","RElb"));
+    whiteList.push_back(std::pair<std::string,std::string>("TorsoProtections","RSoftHandLink"));
     whiteList.push_back(std::pair<std::string,std::string>("Waist","LSoftHandLink"));
     whiteList.push_back(std::pair<std::string,std::string>("Waist","LWrMot2"));
     whiteList.push_back(std::pair<std::string,std::string>("Waist","RSoftHandLink"));
@@ -89,7 +99,6 @@ int main(int argc, char **argv) {
     whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RShr"));
     whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RSoftHandLink"));
     whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RWrMot2"));
-
 
     DHS.selfCollisionAvoidance->setCollisionWhiteList(whiteList);
 
@@ -111,6 +120,11 @@ int main(int argc, char **argv) {
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 *i_c)->setVelocityLimits(2.0);
     }
+
+
+    /*                            */
+    /*  CREATING TASK INTERFACES  */
+    /*                            */
 
     OpenSoT::interfaces::yarp::tasks::YCartesian leftArm(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.leftArm);
