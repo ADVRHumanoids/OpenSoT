@@ -26,14 +26,17 @@
 
 /**
  * @example example_MinimumVelocity.cpp
- * The MinimumVelocity class implements a task that tries to minimize the velocity.
+ * The MinimumVelocity class implements a task that tries to minimize joints velocities.
  */
 
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
             /**
-             * @brief The MinimumVelocity class implements a task that tries to bring the robust posture to a reference posture.
+             * @brief The MinimumVelocity class implements a task that tries to minimize joints velocities.
+             * Notice that you can implement task space minimum velocity tasks by setting lambda to 0 in the corresponding tasks, i.e.:
+                MinimumCOMVelocity
+                MinimumCartesianVelocity
              * You can see an example of it in @ref example_MinimumVelocity.cpp
              */
             class MinimumVelocity : public Task < yarp::sig::Matrix, yarp::sig::Vector > {

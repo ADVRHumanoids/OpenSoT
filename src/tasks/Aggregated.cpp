@@ -42,7 +42,7 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
 Aggregated::Aggregated(TaskPtr task1,
                        TaskPtr task2,
                        const unsigned int x_size) :
-Task(task1->getTaskID()+task2->getTaskID(),x_size)
+Task(task1->getTaskID()+"+"+task2->getTaskID(),x_size)
 {
     _tasks.push_back(task1);
     _tasks.push_back(task2);
