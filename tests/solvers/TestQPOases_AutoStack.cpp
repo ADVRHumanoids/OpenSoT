@@ -154,6 +154,13 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
     OpenSoT::solvers::QPOases_sot::Ptr solver(
         new OpenSoT::solvers::QPOases_sot(AutoStack->getStack(), AutoStack->getBounds()));
 
+    typedef OpenSoT::solvers::QPOases_sot::Stack::iterator it_stack;
+    for(it_stack i0 = AutoStack->getStack().begin();
+        i0 != AutoStack->getStack().end(); ++i0)
+    {
+        ASSERT_EQ((*i0)->getConstraints().size(),1);
+    }
+
     unsigned int iterations = 5000;
     for(unsigned int i = 0; i < iterations; ++i)
     {
