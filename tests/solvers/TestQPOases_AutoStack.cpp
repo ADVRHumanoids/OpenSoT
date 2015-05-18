@@ -149,6 +149,7 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
                                          ((postural)<<convex_hull_constraint));
     AutoStack->getBoundsList().push_back(joint_bounds);
     AutoStack->getBoundsList().push_back(velocity_bounds);
+    AutoStack->getBounds()->update(q);
 
     OpenSoT::solvers::QPOases_sot::Ptr solver(
         new OpenSoT::solvers::QPOases_sot(AutoStack->getStack(), AutoStack->getBounds()));
