@@ -101,6 +101,76 @@ TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
     ASSERT_TRUE(yarp::math::norm(DHS.leftArm->getb()) <= 1e-4);
 }
 
+TEST_F(testQPOases_AutoStack, testComplexAutoStack)
+{
+    iDynUtils model("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q, dq;
+    q = getGoodInitialPosition(model);
+    dq = q; dq.zero();
+    model.updateiDyn3Model(q,true);
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_leg(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::r_leg",q,model,"r_sole", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::l_arm",q,model,"LSoftHand", "world"));
+    yarp::sig::Matrix l_arm_ref = l_arm->getActualPose();
+    l_arm_ref(2,3) += 0.1;
+    l_arm->setReference(l_arm_ref);
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_arm(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::r_arm",q,model,"RSoftHand", "world"));
+    yarp::sig::Matrix r_arm_ref = r_arm->getActualPose();
+    r_arm_ref(2,3) += 0.1;
+    r_arm->setReference(r_arm_ref);
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(q));
+
+    yarp::sig::Vector joint_bound_max = model.iDyn3_model.getJointBoundMax();
+    yarp::sig::Vector joint_bound_min = model.iDyn3_model.getJointBoundMin();
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_bounds(
+        new OpenSoT::constraints::velocity::JointLimits(q,joint_bound_max,joint_bound_min));
+
+    double sot_speed_limit = 0.5;
+    double dT = 0.001;
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr velocity_bounds(
+        new OpenSoT::constraints::velocity::VelocityLimits(
+            sot_speed_limit,
+            dT,
+            q.size()));
+
+    OpenSoT::constraints::velocity::ConvexHull::Ptr convex_hull_constraint(
+                new OpenSoT::constraints::velocity::ConvexHull(q, model, 0.02));
+
+    OpenSoT::AutoStack::Ptr AutoStack = (((r_leg)<<convex_hull_constraint)/
+                                         ((l_arm+r_arm)<<convex_hull_constraint)/
+                                         ((postural)<<convex_hull_constraint));
+    AutoStack->getBoundsList().push_back(joint_bounds);
+    AutoStack->getBoundsList().push_back(velocity_bounds);
+
+    OpenSoT::solvers::QPOases_sot::Ptr solver(
+        new OpenSoT::solvers::QPOases_sot(AutoStack->getStack(), AutoStack->getBounds()));
+
+    unsigned int iterations = 5000;
+    for(unsigned int i = 0; i < iterations; ++i)
+    {
+        model.updateiDyn3Model(q, true);
+        AutoStack->update(q);
+
+        ASSERT_TRUE(solver->solve(dq));
+        q += dq;
+    }
+
+    EXPECT_TRUE(yarp::math::norm(l_arm->getb()) <= 1e-4);
+    std::cout<<"l_arm getb norm "<<yarp::math::norm(l_arm->getb())<<std::endl;
+    EXPECT_TRUE(yarp::math::norm(r_arm->getb()) <= 1e-4);
+    std::cout<<"r_arm getb norm "<<yarp::math::norm(r_arm->getb())<<std::endl;
+    EXPECT_TRUE(yarp::math::norm(r_leg->getb()) <= 1e-4);
+
+}
+
 }
 
 int main(int argc, char **argv) {
