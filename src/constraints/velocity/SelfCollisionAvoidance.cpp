@@ -125,8 +125,6 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
 
     /*//////////////////////////////////////////////////////////*/
 
-    std::cout << "size: " << interested_LinkPairs.size() << std::endl;
-
     MatrixXd Aineq_fc_Eigen(interested_LinkPairs.size(), robot_col.iDyn3_model.getNrOfDOFs());
     VectorXd bUpperB_fc_Eigen(interested_LinkPairs.size());
 

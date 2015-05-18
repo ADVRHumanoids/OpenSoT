@@ -31,9 +31,11 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(idynutils REQUIRED)
 FIND_PACKAGE(ICUB REQUIRED)
 FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
+FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(YARP REQUIRED)
 
 # add include directories
@@ -55,6 +57,7 @@ ADD_EXECUTABLE(example_com example_com.cpp)
 ADD_EXECUTABLE(example_minimum_effort example_minimum_effort.cpp)
 ADD_EXECUTABLE(example_postural example_postural.cpp)
 ADD_EXECUTABLE(example_python example_python.cpp)
+ADD_EXECUTABLE(example_python_distance_query example_python_distance_query.cpp)
 ADD_EXECUTABLE(example_previewer example_previewer.cpp)
 ADD_EXECUTABLE(example_velocity_allocation example_velocity_allocation.cpp)
 
@@ -64,5 +67,7 @@ TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost
 TARGET_LINK_LIBRARIES(example_minimum_effort PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_python PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_python_distance_query ${iDynTree_LIBRARIES} ${idynutils_LIBRARIES} 
+                                                    ${Boost_LIBRARIES} ${tf_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_previewer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_velocity_allocation PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})

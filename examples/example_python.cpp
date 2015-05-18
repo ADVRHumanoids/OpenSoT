@@ -49,11 +49,11 @@ int main(int argc, char **argv) {
     /*                            */
 
     DHS.rightLeg->setLambda(0.6);   DHS.rightLeg->setOrientationErrorGain(1.0);
-    DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
-    DHS.rightArm->setLambda(0.6);   DHS.rightArm->setOrientationErrorGain(0.1);
+    DHS.leftLeg->setLambda(0.1);    DHS.leftLeg->setOrientationErrorGain(1.0);
+    DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.1);
     DHS.leftArm->setLambda(0.6);    DHS.leftArm->setOrientationErrorGain(0.1);
     DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
-    DHS.velocityLimits->setVelocityLimits(0.9);
+    DHS.velocityLimits->setVelocityLimits(0.3);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
@@ -104,13 +104,13 @@ int main(int argc, char **argv) {
 
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
-                                0.7,
-                                1.0);
+                                0.3,
+                                0.3);
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
     typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = autoStack->getStack().back();
+    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = autoStack->getStack()[3];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
@@ -119,6 +119,17 @@ int main(int argc, char **argv) {
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 *i_c)->setVelocityLimits(2.0);
+    }
+                            
+    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr beforeLastTask = autoStack->getStack()[2];
+        for(it_constraint i_c = beforeLastTask->getConstraints().begin() ;
+            i_c != beforeLastTask->getConstraints().end() ; ++i_c) {
+            if( boost::dynamic_pointer_cast<
+                    OpenSoT::constraints::velocity::VelocityLimits>(
+                        *i_c))
+                boost::dynamic_pointer_cast<
+                                OpenSoT::constraints::velocity::VelocityLimits>(
+                                    *i_c)->setVelocityLimits(2.0);
     }
 
 
@@ -143,6 +154,7 @@ int main(int argc, char **argv) {
     OpenSoT::solvers::QPOases_sot solver(autoStack->getStack(),
                                          autoStack->getBounds());
 
+    robot.setPositionDirectMode();
     yarp::sig::Vector dq;
     double tic, toc;
     int print_mean = 0;
@@ -152,6 +164,9 @@ int main(int argc, char **argv) {
         autoStack->update(q);
         if(solver.solve(dq))
             q+=dq;
+        else
+            std::cout << "Error computing solve()" << std::endl;
+        robot.move(q);
         toc = yarp::os::Time::now();
         time_accumulator(toc-tic);
 
@@ -160,6 +175,11 @@ int main(int argc, char **argv) {
             print_mean = 0;
             std::cout << "dt = "
                       << boost::accumulators::extract::rolling_mean(time_accumulator) << std::endl;
+
+            std::cout << "l_wrist reference:" << DHS.leftArm->getReference().toString() << std::endl;
+            std::cout << "r_wrist reference:" << DHS.rightArm->getReference().toString() << std::endl;
+            std::cout << "Active Capsules Pairs: " << DHS.selfCollisionAvoidance->getbUpperBound().size() << std::endl;
+
         }
         yarp::os::Time::delay(dT-(toc-tic));
     }
