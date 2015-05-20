@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     // and the stack is subject to bounds jointLimits and velocityLimits
     OpenSoT::AutoStack::Ptr autoStack = 
         ( DHS.rightLeg ) /
-        (DHS.waist_Position_Z + DHS.com_XY << DHS.selfCollisionAvoidance ) /
+        ( (DHS.waist_Position_Z + DHS.com_XY) ) /
         ( (DHS.leftArm ) << DHS.selfCollisionAvoidance ) /
         ( (DHS.postural) << DHS.selfCollisionAvoidance );
     autoStack << DHS.jointLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
@@ -52,7 +52,6 @@ int main(int argc, char **argv) {
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
     DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.1);
     DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.1);
-    DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
     DHS.velocityLimits->setVelocityLimits(0.3);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();

@@ -62,9 +62,9 @@ if __name__ == '__main__':
                          "/bigman/example_python/cartesian::r_wrist/set_ref:i")
 
     port_waist = yarp.BufferedPortBottle()
-    port_waist.open("/bigman/example_python/cartesian::Waist/set_ref:o")
-    yarp.Network.connect("/bigman/example_python/cartesian::Waist/set_ref:o",
-                         "/bigman/example_python/cartesian::Waist/set_ref:i")
+    port_waist.open("/bigman/example_python/cartesian::waist/set_ref:o")
+    yarp.Network.connect("/bigman/example_python/cartesian::waist/set_ref:o",
+                         "/bigman/example_python/cartesian::waist/set_ref:i")
 
     port_l_wrist = yarp.BufferedPortBottle()
     port_l_wrist.open("/bigman/example_python/cartesian::l_wrist/set_ref:o")
@@ -77,10 +77,12 @@ if __name__ == '__main__':
     source_frame='world'
     target_frame_l='l_wrist'
     target_frame_r='r_wrist'
+    target_frame_waist='Waist'
 
     try:
         listener.waitForTransform(source_frame, target_frame_l, time=rospy.Time(0), timeout=timeoutDuration)
         listener.waitForTransform(source_frame, target_frame_r, time=rospy.Time(0), timeout=timeoutDuration)
+        listener.waitForTransform(source_frame, target_frame_waist, time=rospy.Time(0), timeout=timeoutDuration)
     except tf.Exception as e:
         print("Error on waitForTransform:%s"%e.message)
 
@@ -89,6 +91,7 @@ if __name__ == '__main__':
         try:
             (world_pos_l_wrist, world_rot_l_wrist) = listener.lookupTransform(source_frame, target_frame_l, rospy.Time(0))
             (world_pos_r_wrist, world_rot_r_wrist) = listener.lookupTransform(source_frame, target_frame_r, rospy.Time(0))
+            (world_pos_waist, world_rot_waist) = listener.lookupTransform(source_frame, target_frame_waist, rospy.Time(0))
             success = True
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             print("Error on lookupTransform")
@@ -108,6 +111,13 @@ if __name__ == '__main__':
                                    kdl.Vector(world_pos_r_wrist[0],
                                               world_pos_r_wrist[1],
                                               world_pos_r_wrist[2]))
+    world_waist_pose = kdl.Frame(kdl.Rotation.Quaternion(world_rot_waist[0],
+                                                         world_rot_waist[1],
+                                                         world_rot_waist[2],
+                                                         world_rot_waist[3]),
+                                 kdl.Vector(world_pos_waist[0],
+                                            world_pos_waist[1],
+                                            world_pos_waist[2]))
 
 
     world_l_wrist_desired = world_l_wrist_pose
@@ -119,6 +129,8 @@ if __name__ == '__main__':
     world_r_wrist_desired.p[1] += 0.4
     world_r_wrist_desired.p[1] -= 0.15
     world_r_wrist_desired.p[2] -= 0.3
+    world_waist_desired = world_waist_pose
+    world_waist_desired.p[2] -= 0.4
     #world_r_wrist_desired.M.DoRotY(np.pi/2)
 
     duration = 100000.0  # apparently. yarp.os.Time is not working properly...
@@ -126,6 +138,7 @@ if __name__ == '__main__':
     t_elapsed = 0.0
     l_wrist_traj_gen = TrajectoryGenerator(duration, world_l_wrist_pose, world_l_wrist_desired)
     r_wrist_traj_gen = TrajectoryGenerator(duration, world_r_wrist_pose, world_r_wrist_desired)
+    waist_traj_gen = TrajectoryGenerator(duration, world_waist_pose, world_waist_desired)
     while t_elapsed < duration:
         generate_traj_msg(source_frame, target_frame_l,
                           l_wrist_traj_gen, t_elapsed,
@@ -136,6 +149,11 @@ if __name__ == '__main__':
                           r_wrist_traj_gen, t_elapsed,
                           port_r_wrist)
         port_r_wrist.write()
+
+        generate_traj_msg(source_frame, target_frame_waist,
+                          waist_traj_gen, t_elapsed,
+                          port_waist)
+        port_waist.write()
 
         t_elapsed = yarp.Time.now() - t_init
         yarp.Time.delay(0.01)
