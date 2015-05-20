@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
     // and the stack is subject to bounds jointLimits and velocityLimits
     OpenSoT::AutoStack::Ptr autoStack = 
         ( DHS.rightLeg ) /
-        ( (DHS.com_XY) << DHS.selfCollisionAvoidance ) /
-        ( (DHS.leftArm + DHS.rightArm ) << DHS.selfCollisionAvoidance ) /
+        (DHS.waist_Position_Z + DHS.com_XY << DHS.selfCollisionAvoidance ) /
+        ( (DHS.leftArm ) << DHS.selfCollisionAvoidance ) /
         ( (DHS.postural) << DHS.selfCollisionAvoidance );
     autoStack << DHS.jointLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
 
@@ -142,8 +142,9 @@ int main(int argc, char **argv) {
 
     OpenSoT::interfaces::yarp::tasks::YCartesian leftArm(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.leftArm);
-    OpenSoT::interfaces::yarp::tasks::YCartesian rightArm(robot.idynutils.getRobotName(),
-                                                         MODULE_NAME, DHS.rightArm);
+
+    OpenSoT::interfaces::yarp::tasks::YCartesian waist(robot.idynutils.getRobotName(),
+                                                         MODULE_NAME, DHS.waist);
     /*
     OpenSoT::interfaces::yarp::tasks::YCartesian leftLeg(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.leftLeg);
