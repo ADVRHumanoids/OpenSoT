@@ -120,16 +120,15 @@ std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
 
 void CoM::update_b()
 {
-    if(_lambda >= LAMBDA_THS)
-        _b = this->getError() + _desiredVelocity/_lambda;
-    else
-        _b = this->getError();
+    _b = _desiredVelocity + _lambda*this->getError();
 }
 
 void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
 {
-    this->_lambda = lambda;
-    this->update_b();
+    if(lambda >= 0.0){
+        this->_lambda = lambda;
+        this->update_b();
+    }
 }
 
 yarp::sig::Vector OpenSoT::tasks::velocity::CoM::getError()

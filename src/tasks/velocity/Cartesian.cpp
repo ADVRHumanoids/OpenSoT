@@ -179,8 +179,5 @@ void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
-    if(_lambda >= LAMBDA_THS)
-        _b = this->getError() + _desiredTwist/_lambda;
-    else
-        _b = this->getError();
+    _b = _desiredTwist + _lambda*this->getError();
 }

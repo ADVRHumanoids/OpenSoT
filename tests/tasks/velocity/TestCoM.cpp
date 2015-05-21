@@ -117,11 +117,11 @@ TEST_F(testCoMTask, testCoMTask_)
     CoM.setReference(x_ref);
     yarp::sig::Vector positionError = x_ref - x;
     for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(CoM.getb()[i],positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
+        EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
     _robot.updateiDyn3Model(q_whole, true);
     for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(CoM.getb()[i],positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
+        EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
     yarp::sig::Vector x_now;
     for(unsigned int i = 0; i < 100; ++i)
@@ -130,7 +130,7 @@ TEST_F(testCoMTask, testCoMTask_)
 
         CoM.update(q_whole);
 
-        q_whole += pinv(CoM.getA(),1E-6)*CoM.getLambda()*CoM.getb();
+        q_whole += pinv(CoM.getA(),1E-6)*CoM.getb();
 
         _robot.updateiDyn3Model(q_whole, true);
         x_now = _robot.iDyn3_model.getCOM();

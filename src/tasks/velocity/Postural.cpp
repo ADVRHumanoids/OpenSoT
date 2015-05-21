@@ -89,16 +89,15 @@ void OpenSoT::tasks::velocity::Postural::getReference(yarp::sig::Vector &x_desir
 }
 
 void Postural::update_b() {
-    if(_lambda < 1E-9)
-        _b = (_x_desired - _x);
-    else
-        _b = (_x_desired - _x) + _xdot_desired/_lambda;
+    _b = _xdot_desired + _lambda*(_x_desired - _x);
 }
 
 void OpenSoT::tasks::velocity::Postural::setLambda(double lambda)
 {
-    this->_lambda = lambda;
-    this->update_b();
+    if(lambda >= 0.0){
+        this->_lambda = lambda;
+        this->update_b();
+    }
 }
 
 yarp::sig::Vector OpenSoT::tasks::velocity::Postural::getActualPositions()

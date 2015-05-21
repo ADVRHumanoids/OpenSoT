@@ -183,7 +183,7 @@ TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
     do {
         e = norm(_DHS.leftArm->getb());
         double previous_bUpperBound = -_cartesianPositionConstraint->getbUpperBound()(0);
-        q += pinv(_DHS.leftArm->getA(),1E-7)*_DHS.leftArm->getLambda()*_DHS.leftArm->getb();
+        q += pinv(_DHS.leftArm->getA(),1E-7)*_DHS.leftArm->getb();
         coman.updateiDyn3Model(q, true);
         _DHS.leftArm->update(q);
         _cartesianPositionConstraint->update(q);

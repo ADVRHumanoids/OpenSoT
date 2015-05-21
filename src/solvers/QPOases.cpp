@@ -32,7 +32,7 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
 void QPOases_sot::computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g)
 {
     H = task->getA().transposed() * task->getWeight() * task->getA();
-    g = -1.0 * task->getLambda() * task->getA().transposed() * task->getWeight() * task->getb();
+    g = -1.0 * task->getA().transposed() * task->getWeight() * task->getb();
 }
 
 void QPOases_sot::computeVelCtrlOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
