@@ -100,6 +100,11 @@ void OpenSoT::tasks::velocity::Postural::setLambda(double lambda)
     }
 }
 
+yarp::sig::Vector Postural::getError()
+{
+    return _x_desired - _x;
+}
+
 yarp::sig::Vector OpenSoT::tasks::velocity::Postural::getActualPositions()
 {
     return _x;

@@ -99,6 +99,13 @@
                  * @return vector of joints positions
                  */
                 yarp::sig::Vector getActualPositions();
+
+                /**
+                 * @brief getError return the error between the desired and actual joint position values
+                 * @return vector of errors
+                 */
+                yarp::sig::Vector getError();
+
             };
         }
     }
