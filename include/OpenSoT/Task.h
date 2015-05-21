@@ -157,10 +157,11 @@
 
         const double getLambda() const { return _lambda; }
 
-        void setLambda(double lambda)
+        virtual void setLambda(double lambda)
         {
-            assert(lambda >= 0.0);
-            _lambda = lambda;
+            if(lambda >= 0.0){
+                _lambda = lambda;
+            }
         }
         
         /**
