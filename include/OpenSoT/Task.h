@@ -159,6 +159,7 @@
 
         virtual void setLambda(double lambda)
         {
+            assert(lambda >= 0.0);
             if(lambda >= 0.0){
                 _lambda = lambda;
             }
