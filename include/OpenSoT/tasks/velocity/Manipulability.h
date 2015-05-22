@@ -56,6 +56,14 @@ namespace OpenSoT {
                     return _manipulabilityIndexGradientWorker.getW();
                 }
 
+                void setLambda(double lambda)
+                {
+                    if(lambda >= 0.0){
+                        _lambda = lambda;
+                        this->_update(_x);
+                    }
+                }
+
             protected:
 
                 yarp::sig::Vector _x;

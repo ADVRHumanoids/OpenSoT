@@ -146,6 +146,14 @@
                 yarp::sig::Matrix getW(){
                     return _gTauGradientWorker.getW();
                 }
+
+                void setLambda(double lambda)
+                {
+                    if(lambda >= 0.0){
+                        _lambda = lambda;
+                        this->_update(_x);
+                    }
+                }
             };
         }
     }
