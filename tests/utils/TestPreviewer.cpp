@@ -91,7 +91,7 @@ protected:
         OpenSoT::AutoStack::Ptr temp = ( (DHS.leftArm + DHS.rightArm) /
                                          (DHS.rightLeg + DHS.leftLeg) ) << DHS.jointLimits << DHS.velocityLimits;
         autostack = temp;
-        autostack->update(q);
+        //autostack->update(q);
 
         /* by default, we have constant references */
         MyTrajGen::Ptr trajLeftArm(new MyTrajGen(DHS.leftArm->getActualPose(),
@@ -392,6 +392,7 @@ TEST_F(testPreviewer, checkFeasibleConvergence)
     bindings.push_back(Previewer::TrajBinding(trajLeftArm, DHS.leftArm, 1e-2, 1e-3));
     bindings.push_back(Previewer::TrajBinding(trajRightArm, DHS.rightArm, 1e-2, 1e-3));
 
+    previewer.reset(); // TODO create issue to find out the causes of conflict when two solvers are created at the same time
     previewer.reset(new Previewer(dT, _robot, autostack, bindings));
 
     eL = yarp::math::norm(
@@ -433,6 +434,7 @@ TEST_F(testPreviewer, checkAutoConvergenceCheck)
     bindings.push_back(Previewer::TrajBinding(trajLeftArm, DHS.leftArm));
     bindings.push_back(Previewer::TrajBinding(trajRightArm, DHS.rightArm));
 
+    previewer.reset();
     previewer.reset(new Previewer(dT, _robot, autostack, bindings));
 
     Previewer::Results results;
@@ -444,7 +446,7 @@ TEST_F(testPreviewer, checkAutoConvergenceCheck)
 
 TEST_F(testPreviewer, checkUnfeasibleConvergence)
 {
-    /* feasible trajectory: 1 cm in .2sec */
+    /* feasible trajectory: 1 cm in .2sec -> commanding 10cmin .2sec (too fast) */
     yarp::sig::Matrix lb = DHS.leftArm->getActualPose();
     yarp::sig::Matrix lf = lb; lf(0,3) = lb(0,3)+.1;
     yarp::sig::Matrix rb = DHS.rightArm->getActualPose();
@@ -459,6 +461,7 @@ TEST_F(testPreviewer, checkUnfeasibleConvergence)
     bindings.push_back(Previewer::TrajBinding(trajLeftArm, DHS.leftArm,.1));
     bindings.push_back(Previewer::TrajBinding(trajRightArm, DHS.rightArm,.1));
 
+    previewer.reset();
     previewer.reset(new Previewer(dT, _robot, autostack, bindings));
 
     eL = yarp::math::norm(
@@ -484,6 +487,7 @@ TEST_F(testPreviewer, checkUnfeasibleConvergence)
 
     ASSERT_FALSE(preview_success);
     EXPECT_EQ(results.failures.size(), 0);
+    EXPECT_DOUBLE_EQ(results.trajectory.back().t, duration);
 }
 
 TEST_F(testPreviewer, checkUnfeasibleBoundedness)
@@ -503,6 +507,7 @@ TEST_F(testPreviewer, checkUnfeasibleBoundedness)
     bindings.push_back(Previewer::TrajBinding(trajLeftArm, DHS.leftArm, 5.e-2));
     bindings.push_back(Previewer::TrajBinding(trajRightArm, DHS.rightArm, 5.e-2));
 
+    previewer.reset();
     previewer.reset(new Previewer(dT, _robot, autostack, bindings));
 
     eL = yarp::math::norm(
@@ -554,6 +559,7 @@ TEST_F(testPreviewer, checkSelfCollision)
     bindings.push_back(Previewer::TrajBinding(trajLeftArm, DHS.leftArm));
     bindings.push_back(Previewer::TrajBinding(trajRightArm, DHS.rightArm));
 
+    previewer.reset();
     previewer.reset(new Previewer(dT, _robot, autostack, bindings));
 
     Previewer::Results results;
