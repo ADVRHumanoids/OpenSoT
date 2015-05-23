@@ -27,11 +27,12 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
+#include <yarp/math/Math.h>
 #include <map>
 #include <utility>
 
 /**
- * @example example_previwer.cpp
+ * @example example_previewer.cpp
  * The Previwer class allows to check the SoT is able to perform a trajectory
  * using a defined stack without (self-) collisions and with limited tracking error.
  */
@@ -117,6 +118,7 @@ namespace OpenSoT {
                                     double getOrientationErrorNorm() {
                                         return yarp::math::norm(orientationError); }
                                     double getNorm() {
+                                        using namespace yarp::math;
                                         return std::sqrt(std::pow(getPositionErrorNorm(),2) +
                                                          std::pow(Ko*getOrientationErrorNorm(),2)); }
                                   };
@@ -416,6 +418,7 @@ namespace OpenSoT {
 
                     if(isCartesian(task))
                     {
+                        using namespace yarp::math;
                         cartesian_utils::computeCartesianError(yf, yfOld,
                                                                positionError, orientationError);
                         double Ko = asCartesian(task)->getOrientationErrorGain();
@@ -677,10 +680,13 @@ namespace OpenSoT {
                     bool res = KDLtoYarp(f.p, yv);
                     assert(res && "Error converting kdl::Vector in yarp::sig::Vector");
 
-                    if(isCartesian(b->task))
-                        asCartesian(b->task)->setReference(yf,yt*dT);
-                    else if(isCoM(b->task))
-                        asCoM(b->task)->setReference(yv, yt*dT);
+                    {
+                    using namespace yarp::math;
+                        if(isCartesian(b->task))
+                            asCartesian(b->task)->setReference(yf,yt*dT);
+                        else if(isCoM(b->task))
+                            asCoM(b->task)->setReference(yv, yt*dT);
+                    }
                 }
                 return true;
             }

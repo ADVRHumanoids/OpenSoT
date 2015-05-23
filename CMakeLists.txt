@@ -42,6 +42,7 @@ FIND_PACKAGE(urdf REQUIRED)
 FIND_PACKAGE(kdl_parser REQUIRED)
 FIND_PACKAGE(srdfdom REQUIRED)
 FIND_PACKAGE(moveit_core REQUIRED)
+FIND_PACKAGE(PythonLibs)
 FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(interactive_markers REQUIRED)
@@ -49,8 +50,10 @@ FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
-                    ${kdl_codyco_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS} ${tf_INCLUDE_DIRS} ${interactive_markers_INDCLUDE_DIRS})
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
+                            ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS} ${kdl_codyco_INCLUDE_DIRS}
+                            ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS} ${tf_INCLUDE_DIRS}
+                            ${interactive_markers_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
@@ -105,6 +108,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/Postural.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
+                    src/utils/PreviewerUtils.cpp
                     src/utils/VelocityAllocation.cpp
                     ${sot_INCLUDES})
 
@@ -120,7 +124,7 @@ endif()
 
 # we now add the YARP and iCub libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
-                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
 TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
 TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}

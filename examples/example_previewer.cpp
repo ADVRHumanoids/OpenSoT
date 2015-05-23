@@ -4,6 +4,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/Previewer.h>
+#include <OpenSoT/utils/PreviewerUtils.h>
 
 /**
  * @brief The MyTrajGen class dummy trajectory generator:
@@ -77,4 +78,5 @@ int main(int argc, char **argv) {
                       << std::endl;
         }
     }
+    OpenSoT::PreviewerUtils::plotPreviewerTrajectory(results);
 }
