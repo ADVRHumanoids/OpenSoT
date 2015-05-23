@@ -27,6 +27,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
+#include <map>
 #include <utility>
 
 /**
@@ -48,70 +49,6 @@ namespace OpenSoT {
         public:
             friend class testPreviewer;
             typedef boost::shared_ptr<TrajectoryGenerator> TrajGenPtr;
-
-
-
-            /**
-             * @brief The Results struct is used to store information about the preview.
-             *        We store the trajectory and all detected failures
-             */
-            struct Results
-            {
-                enum Reason { COLLISION_EVENT, ERROR_UNBOUNDED };
-                static std::string reasonToString(Reason reason) {
-                    switch(reason)
-                    {
-                        case COLLISION_EVENT:
-                            return "Collision Occured";
-                        case ERROR_UNBOUNDED:
-                            return "Unbounded Cartesian Error";
-                        default:
-                            return "Unknown error";
-                    }
-                }
-
-                /**
-                 * @brief The TrajectoryLogEntry struct is used to store time, joint configuration pairs,
-                 *        as used by the Results struct
-                 */
-                struct TrajectoryLogEntry   { double t; yarp::sig::Vector q;
-                                              TrajectoryLogEntry(double t, const yarp::sig::Vector& q) :
-                                                t(t), q(q) {} };
-
-                /**
-                 * @brief The FailuresLogEntry struct
-                 *        as used by the Results struct
-                 */
-                struct FailuresLogEntry     { double t; Reason reason; std::string details;
-                                              OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
-                                              FailuresLogEntry(double t, Reason reason) :
-                                                t(t), reason(reason) {}
-                                              FailuresLogEntry(double t, Reason reason,
-                                                               OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task) :
-                                                t(t), reason(reason), task(task) {} };
-
-                std::vector <TrajectoryLogEntry> trajectory;
-                std::vector <FailuresLogEntry> failures;
-
-                void logFailure(double time, Reason reason)
-                {
-                    failures.push_back(
-                        FailuresLogEntry(time, reason));
-                }
-
-                void logFailure(double time, Reason reason,
-                                OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-                {
-                    failures.push_back(
-                        FailuresLogEntry(time, reason, task));
-                }
-
-                void logTrajectory(double time, const yarp::sig::Vector& q)
-                {
-                    trajectory.push_back(
-                        TrajectoryLogEntry(time, q));
-                }
-            };
 
             /**
              * @brief The TrajBinding class represent an entry in a list of bindings needed for cartesian control.
@@ -148,7 +85,7 @@ namespace OpenSoT {
                  *          orientationErrorGain of the Task is used when we use the Cartesian task
                  * @param convergenceTolerance maximum error, in norm (R^3), to the goal.
                  *          Notice that convergenceTolerance gets checked separately
-                 *          from positionError and orientationError (if orientationError exists)
+                 *          from positionErrorNorm and orientationErrorNorm (if orientationErrorNorm exists)
                  */
                 TrajBinding(TrajGenPtr trajectoryGenerator,
                             OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
@@ -169,18 +106,51 @@ namespace OpenSoT {
                                                         boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                                         > Accumulator;
 
-            struct CartesianError { double positionError; double orientationError; double Ko;
+            /**
+             * @brief The CartesianError struct is an utility struct to store cartesian errors
+             */
+            struct CartesianError { yarp::sig::Vector positionError; yarp::sig::Vector orientationError; double Ko;
                                     CartesianError() :
-                                        positionError(0.0), orientationError(0.0), Ko(1.0) {}
+                                        positionError(3,0.0), orientationError(3,0.0), Ko(1.0) {}
+                                    double getPositionErrorNorm() {
+                                        return yarp::math::norm(positionError); }
+                                    double getOrientationErrorNorm() {
+                                        return yarp::math::norm(orientationError); }
                                     double getNorm() {
-                                        return std::sqrt(std::pow(positionError,2) +
-                                                         std::pow(Ko*orientationError,2)); }
+                                        return std::sqrt(std::pow(getPositionErrorNorm(),2) +
+                                                         std::pow(Ko*getOrientationErrorNorm(),2)); }
                                   };
-
+            /**
+             * @brief The ErrorLog struct is an utility struct that logs at every update step
+             *        the distance to the goal as a CartesianError (i.e., desired pose at the
+             *        final time of the trajectory) and the norm of the current error between
+             *        actual pose and desired pose at the current time for a single task for
+             *        which a trajectory binding exists
+             */
             struct ErrorLog {
+                /**
+                 * @brief accumulator an accumulator that stores error values at every instant and computes
+                 *        the moving average of the error norms over a window set by window_size
+                 */
                 Accumulator accumulator;
+                /**
+                 * @brief previousMean moving average of the error norms for each task
+                 */
                 double previousMean;
+
+                /**
+                 * @brief lastError previous error in norm
+                 */
                 double lastError;
+
+                /**
+                 * @brief lastCartesianError previous cartesian error
+                 */
+                CartesianError lastCartesianError;
+
+                /**
+                 * @brief errorToGoal cartesian error to goal
+                 */
                 CartesianError errorToGoal;
 
                 ErrorLog(int window_size = 100) :
@@ -194,9 +164,9 @@ namespace OpenSoT {
                     accumulator(lastError);
                 }
 
-                void update(double error, CartesianError toGoal)
+                void update(CartesianError error, CartesianError toGoal)
                 {
-                    this->update(error);
+                    this->update(error.getNorm());
                     errorToGoal = toGoal;
                 }
 
@@ -210,6 +180,106 @@ namespace OpenSoT {
                              ErrorLog> ErrorMap;
             typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
                              KDL::Frame>  CartesianNodes;
+
+            /**
+             * @brief The Results struct is used to store information about the preview.
+             *        We store the trajectory and all detected failures
+             */
+            struct Results
+            {
+                /**
+                 * @brief The ErrorsLogEntry struct holds error information
+                 *        about every task for which we set a trajectory binding
+                 */
+                struct ErrorsLogEntry {
+                    std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
+                             CartesianError> errors;
+                    ErrorsLogEntry() {}
+                    ErrorsLogEntry(ErrorMap errorMap) {
+                        for(typename ErrorMap::iterator it = errorMap.begin();
+                            it != errorMap.end(); ++it) {
+                            errors[it->first] = it->second.lastCartesianError;
+                        } } };
+
+                enum Reason { COLLISION_EVENT, ERROR_UNBOUNDED };
+                static std::string reasonToString(Reason reason) {
+                    switch(reason)
+                    {
+                        case COLLISION_EVENT:
+                            return "Collision Occured";
+                        case ERROR_UNBOUNDED:
+                            return "Unbounded Cartesian Error";
+                        default:
+                            return "Unknown error";
+                    }
+                }
+
+                /**
+                 * @brief The FailuresLogEntry struct
+                 *        as used by the Results struct
+                 */
+                struct FailuresLogEntry     { double t; Reason reason; std::string details;
+                                              OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
+                                              FailuresLogEntry(double t, Reason reason) :
+                                                t(t), reason(reason) {}
+                                              FailuresLogEntry(double t, Reason reason,
+                                                               OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task) :
+                                                t(t), reason(reason), task(task) {} };
+
+                /**
+                 * @brief The TrajectoryLogEntry struct is used to store time, joint configuration pairs,
+                 *        as used by the Results struct
+                 */
+                struct TrajectoryLogEntry   { double t; yarp::sig::Vector q;
+                                              TrajectoryLogEntry(double t, const yarp::sig::Vector& q) :
+                                                t(t), q(q) {} };
+
+                std::vector <TrajectoryLogEntry> trajectory;
+                // redundant data for easy lookup
+                std::map <double, yarp::sig::Vector> trajectoryMap;
+
+                std::vector <FailuresLogEntry> failures;
+                // redundant data for easy lookup
+                std::multimap <double, FailuresLogEntry> failuresMap;
+
+                std::map <double, ErrorsLogEntry> errorsMap;
+
+                void logFailure(double time, Reason reason)
+                {
+                    FailuresLogEntry failure(time,reason);
+
+                    failures.push_back(failure);
+
+                    failuresMap.insert(
+                        std::make_pair(
+                            time, failure));
+                }
+
+                void logFailure(double time, Reason reason,
+                                OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+                {
+                    FailuresLogEntry failure(time, reason, task);
+
+                    failures.push_back(failure);
+
+                    failuresMap.insert(
+                        std::make_pair(
+                            time, failure));
+                }
+
+                void logTrajectory(double time, const yarp::sig::Vector& q)
+                {
+                    trajectory.push_back(
+                        TrajectoryLogEntry(time, q));
+
+                    trajectoryMap[time] = q;
+                }
+
+                void logErrors(double time, ErrorMap errors)
+                {
+                    errorsMap[time] = ErrorsLogEntry(errors);
+                }
+            };
 
         private:
             ErrorMap cartesianErrors;
@@ -288,13 +358,13 @@ namespace OpenSoT {
              *        than the convergence tolerance.
              *        We check position error and orientation error separately
              *        against the threshold, so that we detect convergence when
-             *        positionError <= threshold && orientationError <= threshold
+             *        positionErrorNorm <= threshold && orientationErrorNorm <= threshold
              * @return true if cartesian error converged on all tasks
              */
             bool cartesianErrorConverged(const TrajBinding& b)
             {
-                if(cartesianErrors[b.task.get()].errorToGoal.positionError > b.convergenceTolerance ||
-                   cartesianErrors[b.task.get()].errorToGoal.orientationError > b.convergenceTolerance)
+                if(cartesianErrors[b.task.get()].errorToGoal.getPositionErrorNorm() > b.convergenceTolerance ||
+                   cartesianErrors[b.task.get()].errorToGoal.getOrientationErrorNorm() > b.convergenceTolerance)
                     return false;
                 return true;
             }
@@ -535,31 +605,60 @@ namespace OpenSoT {
                     KDL::Frame goal = b->trajectoryGenerator->Pos(
                         b->trajectoryGenerator->Duration());
 
+                    double previousTime = t;
+                    if(previousTime > 0) previousTime -= dT;
+
+                    KDL::Frame desired = b->trajectoryGenerator->Pos(previousTime);
+
                     if(isCartesian(b->task))
                     {
                         CartesianError toGoal;
+                        CartesianError toDesired;
                         yarp::sig::Vector positionError(3,0.0), orientationError(3,0.0);
 
+                        /* updating CartesianError to goal */
                         cartesian_utils::computeCartesianError(asCartesian(b->task)->getActualPose(), KDLtoYarp_position(goal),
                                                                positionError,
                                                                orientationError);
 
-                        toGoal.positionError = yarp::math::norm(positionError);
-                        toGoal.orientationError = yarp::math::norm(orientationError);
+                        toGoal.positionError = positionError;
+                        toGoal.orientationError = orientationError;
                         toGoal.Ko = asCartesian(b->task)->getOrientationErrorGain();
 
-                        cartesianErrors[b->task.get()].update(yarp::math::norm(asCartesian(b->task)->getError()),
-                                                        toGoal);
+                        /* updating CartesianError to desired pose at previous time step */
+                        cartesian_utils::computeCartesianError(asCartesian(b->task)->getActualPose(), KDLtoYarp_position(desired),
+                                                               positionError,
+                                                               orientationError);
+
+                        toDesired.positionError = positionError;
+                        toDesired.orientationError = orientationError;
+                        toDesired.Ko = asCartesian(b->task)->getOrientationErrorGain();
+
+                        if(std::fabs(toDesired.getNorm() - yarp::math::norm(asCartesian(b->task)->getError())) > 1e-12) {
+                            std::cout << std::endl << toDesired.getNorm() << " vs " << yarp::math::norm(asCartesian(b->task)->getError()) << std::endl;
+                            std::cout << std::endl << KDLtoYarp_position(desired).toString()
+                                      << std::endl << " vs "
+                                      << std::endl << asCartesian(b->task)->getReference().toString()
+                                      << "@t" << previousTime << std::endl;
+                        }
+                        assert(std::fabs(toDesired.getNorm() - yarp::math::norm(asCartesian(b->task)->getError())) < 1e-12 &&
+                               "Error: discrepancy between CartesianError and error computed by Cartesian->getError()");
+
+                        cartesianErrors[b->task.get()].update(toDesired, toGoal);
                     }
 
                     else if(isCoM(b->task))
                     {
                         CartesianError toGoal;
+                        CartesianError toDesired;
 
-                        toGoal.positionError = yarp::math::norm(asCoM(b->task)->getActualPosition() - KDLtoYarp(goal.p));
+                        toGoal.positionError = asCoM(b->task)->getActualPosition() - KDLtoYarp(goal.p);
+                        toDesired.positionError = (asCoM(b->task)->getActualPosition() - KDLtoYarp(desired.p));
 
-                        cartesianErrors[b->task.get()].update(yarp::math::norm(asCoM(b->task)->getError()),
-                                                        toGoal);
+                        assert(std::fabs(toDesired.getNorm() - yarp::math::norm(asCoM(b->task)->getError())) < 1e-12 &&
+                               "Error: discrepancy between CartesianError and error computed by CoM->getError()");
+
+                        cartesianErrors[b->task.get()].update(toDesired, toGoal);
                     }
                 }
             }
@@ -672,9 +771,16 @@ namespace OpenSoT {
                 unsigned int retries = 0;
                 bool check_ok = true;
 
-                // logging initial trajectory node
-                if(results != NULL) {
-                    results->logTrajectory(t, q);
+                // updating references for correct initial error display
+                updateReferences();
+                /**
+                  Update the tasks to refresh the reference
+                  */
+                for(typename TrajectoryBindings::iterator b = bindings.begin();
+                    b != bindings.end();
+                    ++b)
+                {
+                    b->task->update(q);
                 }
 
                 while(!finished) {
@@ -692,24 +798,14 @@ namespace OpenSoT {
                     else
                         finished = (t >= time);
 
-                    if(retries >= max_retries) {
-                        finished = true;
-                        check_ok = false;
-                        std::cerr << "Error with solver: could not solve" << std::endl;
-                        continue;
-                    }
-
                     model.updateiDyn3Model(q, true);
 
                     // update the stack to get new error statistics
                     autostack->update(q);
 
-                    // ps: notice that here, when getting cartesian->b I also get the FF term!
-                    // TODO fix this
                     updateErrorsStatistics();
 
                     updateReferences();
-
                     /**
                       Update the tasks to refresh the reference
                       */
@@ -737,22 +833,37 @@ namespace OpenSoT {
                             results->logFailure(t, Results::ERROR_UNBOUNDED);
                     }
 
-                    if(solver->solve(dq))
-                    {
-                        retries = 0;
+                    do {
+                        if(solver->solve(dq))
+                        {
+                            retries = 0;
 
-                        q += dq;
-                        t += dT;
+                            q += dq;
+                            std::cout << std::endl << "t:" << t << " ";
+                            std::cout.flush();
 
-                        std::cout << std::endl << "t:" << t;
-                        std::cout.flush();
+                            if(results != NULL) {
+                                results->logErrors(t, cartesianErrors);
+                                results->logTrajectory(t, q);
+                            }
 
-                        if(results != NULL) {
-                            results->logTrajectory(t, q);
-                        }
+                            t += dT;
 
-                    } else ++retries;
+                        } else ++retries;
+                      // do not cycle if retries == 0 (success),
+                      // but also cycle for a maximum of max_retries times
+                    } while(retries > 0 && retries <= max_retries);
+
+                    if(retries >= max_retries) {
+                        finished = true;
+                        check_ok = false;
+                        std::cerr << "Error with solver: could not solve" << std::endl;
+                        continue;
+                    }
                 }
+
+                std::cout << std::endl;
+                std::cout.flush();
 
                 if(!converged()) check_ok = false;
 
