@@ -34,8 +34,9 @@ int main(int argc, char **argv) {
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q = _robot.iDyn3_model.getAng();
+    _robot.updateiDyn3Model(q,true);
 
-    OpenSoT::DefaultHumanoidStack DHS(_robot, dT, _robot.zeros);
+    OpenSoT::DefaultHumanoidStack DHS(_robot, dT, q);
 
     // defining a stack composed of size two,
     // where the task of first priority is an aggregated of leftArm and rightArm,
@@ -56,9 +57,9 @@ int main(int argc, char **argv) {
     Previewer::Ptr previewer(new Previewer(dT, _robot, autoStack, bindings));
 
     Previewer::Results results;
-    if(!previewer->check(0.1,3,&results))
+    if(!previewer->check(1.0,3,&results))
     {
-        std::cout << "Trajectory unfeasible!";
+        std::cout << "Trajectory unfeasible!" << std::endl;
 
         std::cout << "Logged " << results.failures.size() << " failures:" << std::endl;
         for(unsigned int i = 0; i < results.failures.size(); ++i)
@@ -78,5 +79,6 @@ int main(int argc, char **argv) {
                       << std::endl;
         }
     }
+    OpenSoT::PreviewerUtils::plotPreviewerErrors(results);
     OpenSoT::PreviewerUtils::plotPreviewerTrajectory(results);
 }

@@ -19,8 +19,9 @@
 #ifndef __PREVIEWER_UTILS_H__
 #define __PREVIEWER_UTILS_H__
 
-
+#include <boost/functional/hash.hpp>
 #include <OpenSoT/utils/Previewer.h>
+#include <yarp/math/Math.h>
 
 namespace OpenSoT {
     namespace PreviewerUtils
@@ -103,11 +104,65 @@ namespace OpenSoT {
             return PyRunner::getInstance()->numpyRun(_src.str());
         }
 
-//        /**
-//         *  plots all cartesian errors from the Previewer
-//         */
-//        template <class TrajectoryGenerator>
-//        void plotPreviewerErrors(OpenSoT::Previewer<TrajectoryGenerator>::Results& results);
+        /**
+         *  plots all cartesian errors from the Previewer
+         */
+        template <class PreviewerResults>
+        bool plotPreviewerErrors(PreviewerResults& results)
+        {
+            typedef typename PreviewerResults::ErrorsLogEntry ErrorsLogEntry;
+            typedef typename ErrorsLogEntry::CartesianError CartesianError;
+            typedef OpenSoT::Task<yarp::sig::Matrix,yarp::sig::Vector> Task;
+            typedef map< double, ErrorsLogEntry > ErrorsLog;
+            typedef map< Task*, CartesianError > ErrorsMap;
+
+            std::ostringstream _src;
+            for(typename ErrorsLog::iterator it_time =
+                    results.errorsMap.begin();
+                it_time != results.errorsMap.end();
+                ++it_time)
+            {
+                ErrorsLogEntry errorLogEntry = it_time->second;
+                boost::hash<std::string> string_hash;
+                for(typename ErrorsMap::iterator it_task =
+                        errorLogEntry.errors.begin();
+                    it_task != errorLogEntry.errors.end();
+                    ++it_task)
+                {
+                    Task* task = it_task->first;
+                    std::string taskName = task->getTaskID();
+                    std::size_t taskHash = string_hash(taskName);
+
+                    _src << "t_" << taskHash << "_err = np.array((";
+
+                    for(typename ErrorsLog::iterator it_time_inner =
+                            results.errorsMap.begin();
+                        it_time_inner != results.errorsMap.end();
+                        ++it_time_inner)
+                    {
+                        double time = it_time_inner->first;
+                        CartesianError error = it_time_inner->second.errors[task];
+
+                        std::string errString(yarp::math::cat(error.positionError, error.orientationError).toString());
+                        std::replace(errString.begin(), errString.end(), '\t', ',');
+                        _src << "(" << time << "," << errString << ")";
+                        typename ErrorsLog::iterator it_time_inner_next = it_time_inner; ++it_time_inner_next;
+                        if(it_time_inner_next != results.errorsMap.end())
+                            _src << "," << std::endl;
+                    }
+                    _src << "))" << std::endl;
+
+                    _src << "figure(figsize=(8,6)); pos_err = plot(t_" << taskHash << "_err[:,0],t_" << taskHash << "_err[:,1:4]); title('Task " << taskName << " Position Errors'); legend(pos_err,('x', 'y', 'z'))" << std::endl;
+                    if(dynamic_cast<OpenSoT::tasks::velocity::Cartesian*>(task))
+                        _src << "figure(figsize=(8,6)); orient_err = plot(t_" << taskHash << "_err[:,0],t_" << taskHash << "_err[:,4:7]); title('Task " << taskName << " Orientation Errors'); legend(orient_err,('x', 'y', 'z'))" << std::endl;
+                }
+                break;  // just take first element, if it exists
+            }
+
+            _src << "show(block=True)" << std::endl;
+
+            return PyRunner::getInstance()->numpyRun(_src.str());
+        }
 
 //        /**
 //         *  plots all results from Previewer (trajectory, velocities, cartesian errors)

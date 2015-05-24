@@ -170,6 +170,7 @@ namespace OpenSoT {
                 {
                     this->update(error.getNorm());
                     errorToGoal = toGoal;
+                    lastCartesianError = error;
                 }
 
                 double getRollingMean()
@@ -194,6 +195,7 @@ namespace OpenSoT {
                  *        about every task for which we set a trajectory binding
                  */
                 struct ErrorsLogEntry {
+                    typedef typename OpenSoT::Previewer<TrajectoryGenerator>::CartesianError CartesianError;
                     std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
                              CartesianError> errors;
                     ErrorsLogEntry() {}
