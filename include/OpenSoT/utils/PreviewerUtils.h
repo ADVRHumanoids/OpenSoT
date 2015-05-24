@@ -32,6 +32,9 @@ namespace OpenSoT {
         class PyRunner {
         private:
             static boost::shared_ptr<PyRunner> instance;
+
+            map<std::string,bool> importedModules;
+
             PyRunner();
         public:
             ~PyRunner();
@@ -50,6 +53,20 @@ namespace OpenSoT {
              * @return true on success
              */
             bool numpyRun(std::string script);
+
+            /**
+             * @brief setImported stores a flag in pyRunner specifying that a particular module
+             *        has beel already imported in the currently running interpreter
+             * @param module the module name
+             */
+            void setImported(const std::string module);
+
+            /**
+             * @brief imported checks whether a module has been already imported
+             * @param module the module name
+             * @return true if the module has been previously loaded on the interpreter
+             */
+            bool imported(const std::string module);
         };
 
 //        /**
