@@ -69,56 +69,54 @@ namespace OpenSoT {
             bool imported(const std::string module);
         };
 
-//        /**
-//         * sends Previewer trajectory results to rviz via robot status message (aka moveit)
-//         */
-//        template <class T>
-//        void sendTrajectoryToRviz(OpenSoT::Previewer<T>::Results& results);
-
         /**
          *  plots q and dq from the Previewer trajectory results
          */
         template <class PreviewerResults>
         bool plotPreviewerTrajectory(PreviewerResults& results) {
-            typedef typename PreviewerResults::TrajectoryLogEntry TrajectoryLogEntry;
+            typedef typename PreviewerResults::LogEntry LogEntry;
 
-            std::ostringstream _src;
-            _src << "t_q = np.array((";
-            for(typename std::vector<TrajectoryLogEntry>::iterator it =
-                    results.trajectory.begin();
-                it != results.trajectory.end();
-                ++it)
+            if(results.log.size() > 0)
             {
-                std::string qString(it->q.toString());
-                std::replace(qString.begin(), qString.end(), '\t', ',');
-                _src << "(" << it->t << "," << qString << ")";
-                typename std::vector<TrajectoryLogEntry>::iterator it_next = it; ++it_next;
-                if(it_next != results.trajectory.end())
-                    _src << "," << std::endl;
-            }
-            _src << "))" << std::endl;
+                std::ostringstream _src;
 
-            _src << "t_dq = np.array((";
-            for(typename std::vector<TrajectoryLogEntry>::iterator it =
-                    results.trajectory.begin();
-                it != results.trajectory.end();
-                ++it)
-            {
-                typename std::vector<TrajectoryLogEntry>::iterator it_next = it; ++it_next;
-                if(it_next != results.trajectory.end())
+                _src << "t_q = np.array((";
+                for(typename std::map<double, LogEntry>::iterator it =
+                        results.log.begin();
+                    it != results.log.end();
+                    ++it)
                 {
-                    std::string dqString((it_next->q - it->q).toString());
-                    std::replace(dqString.begin(), dqString.end(), '\t', ',');
-                    _src << "(" << it_next->t << "," << dqString << "),";
+                    std::string qString(it->second.q.toString());
+                    std::replace(qString.begin(), qString.end(), '\t', ',');
+                    _src << "(" << it->first << "," << qString << ")";
+                    typename std::map<double, LogEntry>::iterator it_next = it; ++it_next;
+                    if(it_next != results.log.end())
+                        _src << "," << std::endl;
                 }
-            }
-            _src << "))" << std::endl;
+                _src << "))" << std::endl;
 
-            _src << "q_plot = figure(figsize=(8,6)); p_q = plot(t_q[:,0],t_q[:,1:]); title('Joint Positions')" << std::endl;
-            _src << "dq_plot = figure(figsize=(8,6)); p_dq = plot(t_dq[:,0],t_dq[:,1:]); title('Joint Velocities')" << std::endl;
-            _src << "show(block=True)" << std::endl;
+                _src << "t_dq = np.array((";
+                for(typename std::map<double, LogEntry>::iterator it =
+                        results.log.begin();
+                    it != results.log.end();
+                    ++it)
+                {
+                    typename std::map<double, LogEntry>::iterator it_next = it; ++it_next;
+                    if(it_next != results.log.end())
+                    {
+                        std::string dqString((it_next->second.q - it->second.q).toString());
+                        std::replace(dqString.begin(), dqString.end(), '\t', ',');
+                        _src << "(" << it_next->first << "," << dqString << "),";
+                    }
+                }
+                _src << "))" << std::endl;
 
-            return PyRunner::getInstance()->numpyRun(_src.str());
+                _src << "q_plot = figure(figsize=(8,6)); p_q = plot(t_q[:,0],t_q[:,1:]); title('Joint Positions')" << std::endl;
+                _src << "dq_plot = figure(figsize=(8,6)); p_dq = plot(t_dq[:,0],t_dq[:,1:]); title('Joint Velocities')" << std::endl;
+                _src << "show(block=True)" << std::endl;
+
+                return PyRunner::getInstance()->numpyRun(_src.str());
+            } return false;
         }
 
         /**
@@ -127,23 +125,19 @@ namespace OpenSoT {
         template <class PreviewerResults>
         bool plotPreviewerErrors(PreviewerResults& results)
         {
-            typedef typename PreviewerResults::ErrorsLogEntry ErrorsLogEntry;
-            typedef typename ErrorsLogEntry::CartesianError CartesianError;
+            typedef typename PreviewerResults::LogEntry LogEntry;
+            typedef typename LogEntry::CartesianError CartesianError;
             typedef OpenSoT::Task<yarp::sig::Matrix,yarp::sig::Vector> Task;
-            typedef map< double, ErrorsLogEntry > ErrorsLog;
             typedef map< Task*, CartesianError > ErrorsMap;
 
-            std::ostringstream _src;
-            for(typename ErrorsLog::iterator it_time =
-                    results.errorsMap.begin();
-                it_time != results.errorsMap.end();
-                ++it_time)
+            if(results.log.size() > 0)
             {
-                ErrorsLogEntry errorLogEntry = it_time->second;
+                std::ostringstream _src;
                 boost::hash<std::string> string_hash;
+
                 for(typename ErrorsMap::iterator it_task =
-                        errorLogEntry.errors.begin();
-                    it_task != errorLogEntry.errors.end();
+                        results.log.begin()->second.errors.begin();
+                    it_task != results.log.begin()->second.errors.end();
                     ++it_task)
                 {
                     Task* task = it_task->first;
@@ -152,19 +146,19 @@ namespace OpenSoT {
 
                     _src << "t_" << taskHash << "_err = np.array((";
 
-                    for(typename ErrorsLog::iterator it_time_inner =
-                            results.errorsMap.begin();
-                        it_time_inner != results.errorsMap.end();
-                        ++it_time_inner)
+                    for(typename std::map<double, LogEntry>::iterator it_time =
+                            results.log.begin();
+                        it_time != results.log.end();
+                        ++it_time)
                     {
-                        double time = it_time_inner->first;
-                        CartesianError error = it_time_inner->second.errors[task];
+                        double time = it_time->first;
+                        CartesianError error = it_time->second.errors[task];
 
                         std::string errString(yarp::math::cat(error.positionError, error.orientationError).toString());
                         std::replace(errString.begin(), errString.end(), '\t', ',');
                         _src << "(" << time << "," << errString << ")";
-                        typename ErrorsLog::iterator it_time_inner_next = it_time_inner; ++it_time_inner_next;
-                        if(it_time_inner_next != results.errorsMap.end())
+                        typename std::map<double, LogEntry>::iterator it_time_next = it_time; ++it_time_next;
+                        if(it_time_next != results.log.end())
                             _src << "," << std::endl;
                     }
                     _src << "))" << std::endl;
@@ -173,12 +167,12 @@ namespace OpenSoT {
                     if(dynamic_cast<OpenSoT::tasks::velocity::Cartesian*>(task))
                         _src << "figure(figsize=(8,6)); orient_err = plot(t_" << taskHash << "_err[:,0],t_" << taskHash << "_err[:,4:7]); title('Task " << taskName << " Orientation Errors'); legend(orient_err,('x', 'y', 'z'))" << std::endl;
                 }
-                break;  // just take first element, if it exists
+
+                _src << "show(block=True)" << std::endl;
+
+                return PyRunner::getInstance()->numpyRun(_src.str());
             }
-
-            _src << "show(block=True)" << std::endl;
-
-            return PyRunner::getInstance()->numpyRun(_src.str());
+            return false;
         }
 
 //        /**

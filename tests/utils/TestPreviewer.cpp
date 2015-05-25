@@ -346,7 +346,7 @@ TEST_F(testPreviewer, checkStaticConvergence)
     Previewer::Results results;
     bool preview_success = previewer->check(0.1,3,&results);
     EXPECT_FALSE(preview_success);
-    EXPECT_EQ(results.failures.size(),0);
+    EXPECT_EQ(results.num_failures,0);
 
     preview_success = previewer->check(1.0,3,&results);
     EXPECT_TRUE(preview_success);
@@ -355,21 +355,32 @@ TEST_F(testPreviewer, checkStaticConvergence)
     {
         std::cout << "Trajectory unfeasible!";
 
-        std::cout << "Logged " << results.failures.size() << " failures:" << std::endl;
-        for(unsigned int i = 0; i < results.failures.size(); ++i)
+        std::cout << "Logged " << results.num_failures << " failures:" << std::endl;
+        for(typename Previewer::Results::LogMap::iterator it =
+            results.log.begin();
+            it != results.log.end(); ++it)
         {
-            std::cout << "@t:" << results.failures[i].t
-                      << " - " << Previewer::Results::reasonToString(results.failures[i].reason)
-                      << std::endl;
+            if(it->second.failures.size() > 0)
+            {
+                std::cout << "@t:" << it->first;
+                for(typename std::list<Previewer::Results::Reason>::iterator
+                        it_f = it->second.failures.begin();
+                    it_f != it->second.failures.end();
+                    ++it_f)
+                    std::cout << " - " << Previewer::Results::reasonToString(*it_f);
+                std::cout << std::endl;
+            }
         }
     }
     else
     {
-        std::cout << "\nLogged " << results.trajectory.size() << " trajectory nodes:" << std::endl;
-        for(unsigned int i = 0; i < results.trajectory.size(); ++i)
+        std::cout << "\nLogged " << results.log.size() << " trajectory nodes:" << std::endl;
+        for(typename Previewer::Results::LogMap::iterator it =
+            results.log.begin();
+            it != results.log.end(); ++it)
         {
-            std::cout << "@t:" << results.trajectory[i].t
-                      << " - " << results.trajectory[i].q.toString()
+            std::cout << "@t:" << it->first
+                      << " - " << it->second.q.toString()
                       << std::endl;
         }
     }
@@ -441,7 +452,7 @@ TEST_F(testPreviewer, checkAutoConvergenceCheck)
     bool preview_success = previewer->check(std::numeric_limits<double>::infinity(),
                                             3,&results);
     ASSERT_TRUE(preview_success);
-    EXPECT_TRUE(results.trajectory.back().t < 2.0*duration);
+    EXPECT_TRUE(results.log.rbegin()->first < 2.0*duration);
 }
 
 TEST_F(testPreviewer, checkUnfeasibleConvergence)
@@ -486,8 +497,8 @@ TEST_F(testPreviewer, checkUnfeasibleConvergence)
     EXPECT_FALSE(eR < 1e-2);
 
     ASSERT_FALSE(preview_success);
-    EXPECT_EQ(results.failures.size(), 0);
-    EXPECT_DOUBLE_EQ(results.trajectory.back().t, duration);
+    EXPECT_EQ(results.num_failures, 0);
+    EXPECT_DOUBLE_EQ(results.log.rbegin()->first, duration);
 }
 
 TEST_F(testPreviewer, checkUnfeasibleBoundedness)
@@ -535,11 +546,21 @@ TEST_F(testPreviewer, checkUnfeasibleBoundedness)
     ASSERT_FALSE(preview_success);
 
     bool error_unbounded = false;
-    for(unsigned int i = 0; i < results.failures.size(); ++i)
+    for(typename Previewer::Results::LogMap::iterator it =
+        results.log.begin();
+        it != results.log.end(); ++it)
     {
-        if(results.failures[i].reason == Previewer::Results::ERROR_UNBOUNDED)
-            error_unbounded = true;
+        if(it->second.failures.size() > 0)
+        {
+            for(typename std::list<Previewer::Results::Reason>::iterator
+                    it_f = it->second.failures.begin();
+                it_f != it->second.failures.end();
+                ++it_f)
+                if(*it_f == Previewer::Results::ERROR_UNBOUNDED)
+                    error_unbounded = true;
+        }
     }
+
     EXPECT_TRUE(error_unbounded);
 }
 
@@ -567,11 +588,21 @@ TEST_F(testPreviewer, checkSelfCollision)
     EXPECT_FALSE(preview_success);
 
     bool self_collision = false;
-    for(unsigned int i = 0; i < results.failures.size(); ++i)
+    for(typename Previewer::Results::LogMap::iterator it =
+        results.log.begin();
+        it != results.log.end(); ++it)
     {
-        if(results.failures[i].reason == Previewer::Results::COLLISION_EVENT)
-            self_collision = true;
+        if(it->second.failures.size() > 0)
+        {
+            for(typename std::list<Previewer::Results::Reason>::iterator
+                    it_f = it->second.failures.begin();
+                it_f != it->second.failures.end();
+                ++it_f)
+                if(*it_f == Previewer::Results::COLLISION_EVENT)
+                    self_collision = true;
+        }
     }
+
     EXPECT_TRUE(self_collision);
 }
 
@@ -582,6 +613,46 @@ TEST_F(testPreviewer, testShouldCheckSelfCollision)
     ASSERT_TRUE(jointSpaceConfigurationChangedWorks());
 
     ASSERT_TRUE(shouldCheckSelfCollisionWorks());
+}
+
+TEST_F(testPreviewer, resultsSum)
+{
+    /* feasible trajectory: 10 cm in 10secs */
+    yarp::sig::Matrix lb = DHS.leftArm->getActualPose();
+    yarp::sig::Matrix lf = lb; lf(0,3) = lb(0,3)+.1;
+    yarp::sig::Matrix rb = DHS.rightArm->getActualPose();
+    yarp::sig::Matrix rf = rb; rf(0,3) = rb(0,3)+.1;
+    double duration = 10.0;
+
+    MyTrajGen::Ptr trajLeftArm(new MyTrajGen(lb, lf, duration));
+    MyTrajGen::Ptr trajRightArm(new MyTrajGen(rb, rf, duration));
+
+    MyTrajGen::Ptr trajLeftArmBack(new MyTrajGen(lf, lb, duration));
+    MyTrajGen::Ptr trajRightArmBack(new MyTrajGen(rf, rb, duration));
+
+    Previewer::TrajectoryBindings bindings, bindingsBack;
+    bindings.push_back(Previewer::TrajBinding(trajLeftArm, DHS.leftArm));
+    bindings.push_back(Previewer::TrajBinding(trajRightArm, DHS.rightArm));
+    bindingsBack.push_back(Previewer::TrajBinding(trajLeftArmBack, DHS.leftArm));
+    bindingsBack.push_back(Previewer::TrajBinding(trajRightArmBack, DHS.rightArm));
+
+    previewer.reset();
+    previewer.reset(new Previewer(dT, _robot, autostack, bindings));
+
+    Previewer::Results results_1;
+    bool preview_success = previewer->check(std::numeric_limits<double>::infinity(),
+                                            3,&results_1);
+
+    previewer.reset();
+    previewer.reset(new Previewer(dT, _robot, autostack, bindingsBack));
+
+    Previewer::Results results_2;
+    preview_success = previewer->check(std::numeric_limits<double>::infinity(),
+                                       3,&results_2);
+
+    std::cout << "Collating results.." << std::endl; std::cout.flush();
+    Previewer::Results results = results_1 + results_2;
+    ASSERT_TRUE(results.log.rbegin()->first >= 20.0);
 }
 
 }

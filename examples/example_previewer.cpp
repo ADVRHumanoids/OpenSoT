@@ -61,21 +61,32 @@ int main(int argc, char **argv) {
     {
         std::cout << "Trajectory unfeasible!" << std::endl;
 
-        std::cout << "Logged " << results.failures.size() << " failures:" << std::endl;
-        for(unsigned int i = 0; i < results.failures.size(); ++i)
+        std::cout << "Logged " << results.num_failures << " failures:" << std::endl;
+        for(typename Previewer::Results::LogMap::iterator it =
+            results.log.begin();
+            it != results.log.end(); ++it)
         {
-            std::cout << "@t:" << results.failures[i].t
-                      << " - " << Previewer::Results::reasonToString(results.failures[i].reason)
-                      << std::endl;
+            if(it->second.failures.size() > 0)
+            {
+                std::cout << "@t:" << it->first;
+                for(typename std::list<Previewer::Results::Reason>::iterator
+                        it_f = it->second.failures.begin();
+                    it_f != it->second.failures.end();
+                    ++it_f)
+                    std::cout << " - " << Previewer::Results::reasonToString(*it_f);
+                std::cout << std::endl;
+            }
         }
     }
     else
     {
-        std::cout << "Logged " << results.trajectory.size() << " trajectory nodes:" << std::endl;
-        for(unsigned int i = 0; i < results.trajectory.size(); ++i)
+        std::cout << "Logged " << results.log.size() << " trajectory nodes:" << std::endl;
+        for(typename Previewer::Results::LogMap::iterator it =
+            results.log.begin();
+            it != results.log.end(); ++it)
         {
-            std::cout << "@t:" << results.trajectory[i].t
-                      << " - " << results.trajectory[i].q.toString()
+            std::cout << "@t:" << it->first
+                      << " - " << it->second.q.toString()
                       << std::endl;
         }
     }

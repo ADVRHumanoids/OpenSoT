@@ -39,6 +39,17 @@
 
 namespace OpenSoT {
     /**
+     * @brief The PreviewerCallBack class implements an interface
+     * for callbacks used by Previewer's check()
+     */
+    class PreviewerCallBack
+    {
+    public:
+        PreviewerCallBack() {}
+        virtual void callback(const yarp::sig::Vector& q) = 0;
+    };
+
+    /**
      * @brief The Previewer class creates a kinematic simulator of a robot
      *        that uses the OpenSoT IK as a solver, and a trajectory generator
      *
@@ -190,20 +201,20 @@ namespace OpenSoT {
              */
             struct Results
             {
+            private:
                 /**
-                 * @brief The ErrorsLogEntry struct holds error information
-                 *        about every task for which we set a trajectory binding
+                 * @brief dT integration time of the Solver, used by operator+()
                  */
-                struct ErrorsLogEntry {
-                    typedef typename OpenSoT::Previewer<TrajectoryGenerator>::CartesianError CartesianError;
-                    std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
-                             CartesianError> errors;
-                    ErrorsLogEntry() {}
-                    ErrorsLogEntry(ErrorMap errorMap) {
-                        for(typename ErrorMap::iterator it = errorMap.begin();
-                            it != errorMap.end(); ++it) {
-                            errors[it->first] = it->second.lastCartesianError;
-                        } } };
+                double dT;
+
+            public:
+
+                /**
+                 * @brief num_failures number of failures along the whole preview
+                 */
+                int num_failures;
+
+                Results() : dT(0.0), num_failures(0) {}
 
                 enum Reason { COLLISION_EVENT, ERROR_UNBOUNDED };
                 static std::string reasonToString(Reason reason) {
@@ -218,70 +229,79 @@ namespace OpenSoT {
                     }
                 }
 
-                /**
-                 * @brief The FailuresLogEntry struct
-                 *        as used by the Results struct
-                 */
-                struct FailuresLogEntry     { double t; Reason reason; std::string details;
-                                              OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
-                                              FailuresLogEntry(double t, Reason reason) :
-                                                t(t), reason(reason) {}
-                                              FailuresLogEntry(double t, Reason reason,
-                                                               OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task) :
-                                                t(t), reason(reason), task(task) {} };
+                struct LogEntry
+                {
+                    // importing CartesianError type
+                    typedef OpenSoT::Previewer<TrajectoryGenerator>::CartesianError CartesianError;
+
+                    /**
+                     * @brief q joint posiitons
+                     */
+                    yarp::sig::Vector q;
+
+                    /**
+                     * @brief failures a vector of failures
+                     */
+                    std::list<Reason> failures;
+                    /**
+                     * @brief errors is a map holding Cartesian error information
+                     *        about every task for which we set a trajectory binding
+                     */
+                    std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
+                             CartesianError> errors;
+                };
 
                 /**
-                 * @brief The TrajectoryLogEntry struct is used to store time, joint configuration pairs,
-                 *        as used by the Results struct
+                 * @brief LogMap maps times to logs
                  */
-                struct TrajectoryLogEntry   { double t; yarp::sig::Vector q;
-                                              TrajectoryLogEntry(double t, const yarp::sig::Vector& q) :
-                                                t(t), q(q) {} };
+                typedef std::map<double, LogEntry> LogMap;
 
-                std::vector <TrajectoryLogEntry> trajectory;
-                // redundant data for easy lookup
-                std::map <double, yarp::sig::Vector> trajectoryMap;
-
-                std::vector <FailuresLogEntry> failures;
-                // redundant data for easy lookup
-                std::multimap <double, FailuresLogEntry> failuresMap;
-
-                std::map <double, ErrorsLogEntry> errorsMap;
+                /**
+                 * @brief log results log. Contains trajectory,
+                 * cartesian errors, and trajectory failures
+                 * (unbounded errors or self-collision)
+                 */
+                LogMap log;
 
                 void logFailure(double time, Reason reason)
                 {
-                    FailuresLogEntry failure(time,reason);
-
-                    failures.push_back(failure);
-
-                    failuresMap.insert(
-                        std::make_pair(
-                            time, failure));
-                }
-
-                void logFailure(double time, Reason reason,
-                                OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-                {
-                    FailuresLogEntry failure(time, reason, task);
-
-                    failures.push_back(failure);
-
-                    failuresMap.insert(
-                        std::make_pair(
-                            time, failure));
+                    if(log.count(time) == 0) log[time] = LogEntry();
+                    log[time].failures.push_back(reason);
+                    ++num_failures;
                 }
 
                 void logTrajectory(double time, const yarp::sig::Vector& q)
                 {
-                    trajectory.push_back(
-                        TrajectoryLogEntry(time, q));
-
-                    trajectoryMap[time] = q;
+                    if(log.count(time) == 0) log[time] = LogEntry();
+                    log[time].q = q;
                 }
 
                 void logErrors(double time, ErrorMap errors)
                 {
-                    errorsMap[time] = ErrorsLogEntry(errors);
+                    if(log.count(time) == 0) log[time] = LogEntry();
+                    for(typename ErrorMap::iterator it = errors.begin();
+                        it != errors.end(); ++it) {
+                        log[time].errors[it->first] = it->second.lastCartesianError;
+                    }
+                }
+
+                const Results operator+(const Results& res) const
+                {
+                    Results final;
+
+                    final.log = this->log;
+                    final.num_failures = this->num_failures+res.num_failures;
+                    final.dT = this->dT;
+
+                    double finalTime = 0.0;
+                    if(this->log.size() > 0)
+                        finalTime = this->log.rbegin()->first + this->dT;
+                    // copying all trajectory information
+                    for(typename LogMap::const_iterator it =
+                        res.log.begin(); it != res.log.end(); ++it)
+                        final.log[finalTime+it->first] = it->second;
+
+                    return final;
                 }
             };
 
@@ -538,7 +558,7 @@ namespace OpenSoT {
              * joint position changed too much; in which case, we force a collision check
              * @return true if we need to call a self-collision check
              */
-            bool shouldCheckSelfCollision(double threshold = 1e-2)
+            bool shouldCheckSelfCollision(double threshold = 2e-2)
             {
                 bool cartesianPosesChanged = false;
                 bool qChanged = false;
@@ -771,7 +791,8 @@ namespace OpenSoT {
              */
             bool check(const double time = std::numeric_limits<double>::infinity(),
                        const unsigned int max_retries = 3,
-                       Results* results = NULL)
+                       Results* results = NULL,
+                       PreviewerCallBack* call_back = NULL)
             {
                 this->resetPreviewer();
 
@@ -812,6 +833,9 @@ namespace OpenSoT {
                     autostack->update(q);
 
                     updateErrorsStatistics();
+
+                    if(call_back != NULL)
+                        call_back->callback(q);
 
                     updateReferences();
                     /**
