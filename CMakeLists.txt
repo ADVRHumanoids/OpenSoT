@@ -49,6 +49,10 @@ FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 
+# compilation flags
+option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
+option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" TRUE)
+
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
                             ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS} ${kdl_codyco_INCLUDE_DIRS}
@@ -174,7 +178,7 @@ catkin_package(
  INCLUDE_DIRS include
  LIBRARIES idyn_ros_interface
  CATKIN_DEPENDS roscpp rospy roslib srdfdom
- DEPENDS system_lib TinyXML
+ DEPENDS system_lib
 )
 
 install(TARGETS OpenSoT ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
@@ -202,10 +206,14 @@ include(AddUninstallTarget)
 
 add_subdirectory(app)
 add_subdirectory(doc)
-add_subdirectory(examples)
+if(OPENSOT_COMPILE_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 #######################
 # Add Testing target  #
 #######################
-enable_testing()
-add_subdirectory(tests)
+if(OPENSOT_COMPILE_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
