@@ -22,7 +22,7 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
     yarp::sig::Matrix W = outAggregated->getWeight();
     W.setSubmatrix(aggregated->getWeight(),0,0);
     outAggregated->setWeight(W);
-    outAggregated->setLambda(aggregated->getLambda());
+    //outAggregated->setLambda(aggregated->getLambda());
     outAggregated->getConstraints() = aggregated->getConstraints();
 
     return outAggregated;
@@ -42,7 +42,7 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ta
     W.setSubmatrix(W_aggregated,W.rows()-W_aggregated.rows(),
                                 W.cols()-W_aggregated.cols());
     outAggregated->setWeight(W);
-    outAggregated->setLambda(aggregated->getLambda());
+    //outAggregated->setLambda(aggregated->getLambda());
     outAggregated->getConstraints() = aggregated->getConstraints();
 
     return outAggregated;
@@ -65,7 +65,7 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
                     new OpenSoT::tasks::Aggregated( taskList,
                                                     aggregated1->getXSize()));
 
-        outAggregated->setLambda(aggregated1->getLambda());
+        //outAggregated->setLambda(aggregated1->getLambda());
     } else {
         outAggregated = OpenSoT::tasks::Aggregated::Ptr(
             new OpenSoT::tasks::Aggregated( aggregated1,
