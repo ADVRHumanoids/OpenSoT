@@ -38,16 +38,232 @@
  */
 
 namespace OpenSoT {
-    /**
-     * @brief The PreviewerCallBack class implements an interface
-     * for callbacks used by Previewer's check()
-     */
-    class PreviewerCallBack
-    {
-    public:
-        PreviewerCallBack() {}
-        virtual void callback(const yarp::sig::Vector& q) = 0;
-    };
+    namespace previewer {
+        /**
+         * @brief Accumulator computes the rolling mean over a window (moving average) of double values
+         */
+        typedef boost::accumulators::accumulator_set<double,
+                                                    boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
+                                                    > Accumulator;
+
+        /**
+         * @brief The CartesianError struct is an utility struct to store cartesian errors
+         */
+        struct CartesianError { yarp::sig::Vector positionError; yarp::sig::Vector orientationError; double Ko;
+                                CartesianError() :
+                                    positionError(3,0.0), orientationError(3,0.0), Ko(1.0) {}
+                                const double getPositionErrorNorm() const {
+                                    return yarp::math::norm(positionError); }
+                                const double getOrientationErrorNorm() const {
+                                    return yarp::math::norm(orientationError); }
+                                const double getNorm() const {
+                                    using namespace yarp::math;
+                                    return std::sqrt(std::pow(getPositionErrorNorm(),2) +
+                                                     std::pow(Ko*getOrientationErrorNorm(),2)); }
+                              };
+        /**
+         * @brief The ErrorLog struct is an utility struct that logs at every update step
+         *        the distance to the goal as a CartesianError (i.e., desired pose at the
+         *        final time of the trajectory) and the norm of the current error between
+         *        actual pose and desired pose at the current time for a single task for
+         *        which a trajectory binding exists
+         */
+        struct ErrorLog {
+            /**
+             * @brief accumulator an accumulator that stores error values at every instant and computes
+             *        the moving average of the error norms over a window set by window_size
+             */
+            Accumulator accumulator;
+            /**
+             * @brief previousMean moving average of the error norms for each task
+             */
+            double previousMean;
+
+            /**
+             * @brief lastError previous error in norm
+             */
+            double lastError;
+
+            /**
+             * @brief lastCartesianError previous cartesian error
+             */
+            CartesianError lastCartesianError;
+
+            /**
+             * @brief errorToGoal cartesian error to goal
+             */
+            CartesianError errorToGoal;
+
+            ErrorLog(int window_size = 100) :
+                accumulator(boost::accumulators::tag::rolling_mean::window_size = window_size),
+                previousMean(0.0), lastError(0.0) {}
+
+            void update(double error)
+            {
+                lastError = error;
+                previousMean = this->getRollingMean();
+                accumulator(lastError);
+            }
+
+            void update(CartesianError error, CartesianError toGoal)
+            {
+                this->update(error.getNorm());
+                errorToGoal = toGoal;
+                lastCartesianError = error;
+            }
+
+            double getRollingMean()
+            {
+                return boost::accumulators::extract::rolling_mean(accumulator);
+            }
+        };
+
+        typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
+                         ErrorLog> ErrorMap;
+
+        /**
+         * @brief The Results struct is used to store information about the preview.
+         *        We store the trajectory and all detected failures
+         */
+        struct Results
+        {
+        private:
+            /**
+             * @brief dT integration time of the Solver, used by operator+()
+             */
+            double dT;
+
+        public:
+
+            /**
+             * @brief num_failures number of failures along the whole preview
+             */
+            int num_failures;
+
+            Results() : dT(0.0), num_failures(0) {}
+
+            enum Reason { COLLISION_EVENT, ERROR_UNBOUNDED };
+            static std::string reasonToString(Reason reason) {
+                switch(reason)
+                {
+                    case COLLISION_EVENT:
+                        return "Collision Occured";
+                    case ERROR_UNBOUNDED:
+                        return "Unbounded Cartesian Error";
+                    default:
+                        return "Unknown error";
+                }
+            }
+
+            struct LogEntry
+            {
+                // importing CartesianError type
+                typedef OpenSoT::previewer::CartesianError CartesianError;
+
+                /**
+                 * @brief q joint posiitons
+                 */
+                yarp::sig::Vector q;
+
+                /**
+                 * @brief failures a vector of failures
+                 */
+                std::list<Reason> failures;
+                /**
+                 * @brief errors is a map holding Cartesian error information
+                 *        about every task for which we set a trajectory binding
+                 */
+                std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
+                         CartesianError> errors;
+            };
+
+            /**
+             * @brief LogMap maps times to logs
+             */
+            typedef std::map<double, LogEntry> LogMap;
+
+            /**
+             * @brief log results log. Contains trajectory,
+             * cartesian errors, and trajectory failures
+             * (unbounded errors or self-collision)
+             */
+            LogMap log;
+
+            void logFailure(double time, Reason reason)
+            {
+                if(log.count(time) == 0) log[time] = LogEntry();
+                log[time].failures.push_back(reason);
+                ++num_failures;
+            }
+
+            void logTrajectory(double time, const yarp::sig::Vector& q)
+            {
+                if(log.count(time) == 0) log[time] = LogEntry();
+                log[time].q = q;
+            }
+
+            void logErrors(double time, ErrorMap errors)
+            {
+                if(log.count(time) == 0) log[time] = LogEntry();
+                for(typename ErrorMap::iterator it = errors.begin();
+                    it != errors.end(); ++it) {
+                    log[time].errors[it->first] = it->second.lastCartesianError;
+                }
+            }
+
+            const Results operator+(const Results& res) const
+            {
+                Results final;
+
+                final.log = this->log;
+                final.num_failures = this->num_failures+res.num_failures;
+                final.dT = this->dT;
+
+                double finalTime = 0.0;
+                if(this->log.size() > 0)
+                    finalTime = this->log.rbegin()->first + this->dT;
+                // copying all trajectory information
+                for(typename LogMap::const_iterator it =
+                    res.log.begin(); it != res.log.end(); ++it)
+                    final.log[finalTime+it->first] = it->second;
+
+                return final;
+            }
+        };
+
+        /**
+         * @brief The CallBack class implements an interface
+         * for callbacks used by Previewer's check()
+         */
+        class CallBack
+        {
+        public:
+            typedef boost::shared_ptr<CallBack> Ptr;
+            CallBack() {}
+            virtual void callback(const OpenSoT::previewer::Results::LogEntry& log) = 0;
+        };
+
+        /**
+         * @brief The CallbackAggregator class implements a simple
+         *        aggregator so that you can call multiple callbacks at once
+         */
+        class CallbackAggregator : public OpenSoT::previewer::CallBack
+        {
+            std::list<OpenSoT::previewer::CallBack::Ptr> _callbacks_list;
+            public:
+            typedef boost::shared_ptr<CallbackAggregator> Ptr;
+            /**
+             * @brief PreviewerCallbackAggregator
+             * @param model the internal model from the Previewer
+             */
+            CallbackAggregator(std::list<OpenSoT::previewer::CallBack::Ptr> callbacks_list)
+                : _callbacks_list(callbacks_list) {}
+            void callback(const OpenSoT::previewer::Results::LogEntry& log)
+            { for(std::list<OpenSoT::previewer::CallBack::Ptr>::iterator it_c =
+                _callbacks_list.begin(); it_c != _callbacks_list.end(); ++it_c)
+                (*it_c)->callback(log); }
+        };
+    }
 
     /**
      * @brief The Previewer class creates a kinematic simulator of a robot
@@ -114,196 +330,14 @@ namespace OpenSoT {
 
             typedef std::list<TrajBinding> TrajectoryBindings;
             typedef boost::shared_ptr<OpenSoT::Previewer<TrajectoryGenerator>> Ptr;
-            typedef boost::accumulators::accumulator_set<double,
-                                                        boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
-                                                        > Accumulator;
-
-            /**
-             * @brief The CartesianError struct is an utility struct to store cartesian errors
-             */
-            struct CartesianError { yarp::sig::Vector positionError; yarp::sig::Vector orientationError; double Ko;
-                                    CartesianError() :
-                                        positionError(3,0.0), orientationError(3,0.0), Ko(1.0) {}
-                                    double getPositionErrorNorm() {
-                                        return yarp::math::norm(positionError); }
-                                    double getOrientationErrorNorm() {
-                                        return yarp::math::norm(orientationError); }
-                                    double getNorm() {
-                                        using namespace yarp::math;
-                                        return std::sqrt(std::pow(getPositionErrorNorm(),2) +
-                                                         std::pow(Ko*getOrientationErrorNorm(),2)); }
-                                  };
-            /**
-             * @brief The ErrorLog struct is an utility struct that logs at every update step
-             *        the distance to the goal as a CartesianError (i.e., desired pose at the
-             *        final time of the trajectory) and the norm of the current error between
-             *        actual pose and desired pose at the current time for a single task for
-             *        which a trajectory binding exists
-             */
-            struct ErrorLog {
-                /**
-                 * @brief accumulator an accumulator that stores error values at every instant and computes
-                 *        the moving average of the error norms over a window set by window_size
-                 */
-                Accumulator accumulator;
-                /**
-                 * @brief previousMean moving average of the error norms for each task
-                 */
-                double previousMean;
-
-                /**
-                 * @brief lastError previous error in norm
-                 */
-                double lastError;
-
-                /**
-                 * @brief lastCartesianError previous cartesian error
-                 */
-                CartesianError lastCartesianError;
-
-                /**
-                 * @brief errorToGoal cartesian error to goal
-                 */
-                CartesianError errorToGoal;
-
-                ErrorLog(int window_size = 100) :
-                    accumulator(boost::accumulators::tag::rolling_mean::window_size = window_size),
-                    previousMean(0.0), lastError(0.0) {}
-
-                void update(double error)
-                {
-                    lastError = error;
-                    previousMean = this->getRollingMean();
-                    accumulator(lastError);
-                }
-
-                void update(CartesianError error, CartesianError toGoal)
-                {
-                    this->update(error.getNorm());
-                    errorToGoal = toGoal;
-                    lastCartesianError = error;
-                }
-
-                double getRollingMean()
-                {
-                    return boost::accumulators::extract::rolling_mean(accumulator);
-                }
-            };
-
-            typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
-                             ErrorLog> ErrorMap;
             typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
                              KDL::Frame>  CartesianNodes;
 
-            /**
-             * @brief The Results struct is used to store information about the preview.
-             *        We store the trajectory and all detected failures
-             */
-            struct Results
-            {
-            private:
-                /**
-                 * @brief dT integration time of the Solver, used by operator+()
-                 */
-                double dT;
-
-            public:
-
-                /**
-                 * @brief num_failures number of failures along the whole preview
-                 */
-                int num_failures;
-
-                Results() : dT(0.0), num_failures(0) {}
-
-                enum Reason { COLLISION_EVENT, ERROR_UNBOUNDED };
-                static std::string reasonToString(Reason reason) {
-                    switch(reason)
-                    {
-                        case COLLISION_EVENT:
-                            return "Collision Occured";
-                        case ERROR_UNBOUNDED:
-                            return "Unbounded Cartesian Error";
-                        default:
-                            return "Unknown error";
-                    }
-                }
-
-                struct LogEntry
-                {
-                    // importing CartesianError type
-                    typedef OpenSoT::Previewer<TrajectoryGenerator>::CartesianError CartesianError;
-
-                    /**
-                     * @brief q joint posiitons
-                     */
-                    yarp::sig::Vector q;
-
-                    /**
-                     * @brief failures a vector of failures
-                     */
-                    std::list<Reason> failures;
-                    /**
-                     * @brief errors is a map holding Cartesian error information
-                     *        about every task for which we set a trajectory binding
-                     */
-                    std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
-                             CartesianError> errors;
-                };
-
-                /**
-                 * @brief LogMap maps times to logs
-                 */
-                typedef std::map<double, LogEntry> LogMap;
-
-                /**
-                 * @brief log results log. Contains trajectory,
-                 * cartesian errors, and trajectory failures
-                 * (unbounded errors or self-collision)
-                 */
-                LogMap log;
-
-                void logFailure(double time, Reason reason)
-                {
-                    if(log.count(time) == 0) log[time] = LogEntry();
-                    log[time].failures.push_back(reason);
-                    ++num_failures;
-                }
-
-                void logTrajectory(double time, const yarp::sig::Vector& q)
-                {
-                    if(log.count(time) == 0) log[time] = LogEntry();
-                    log[time].q = q;
-                }
-
-                void logErrors(double time, ErrorMap errors)
-                {
-                    if(log.count(time) == 0) log[time] = LogEntry();
-                    for(typename ErrorMap::iterator it = errors.begin();
-                        it != errors.end(); ++it) {
-                        log[time].errors[it->first] = it->second.lastCartesianError;
-                    }
-                }
-
-                const Results operator+(const Results& res) const
-                {
-                    Results final;
-
-                    final.log = this->log;
-                    final.num_failures = this->num_failures+res.num_failures;
-                    final.dT = this->dT;
-
-                    double finalTime = 0.0;
-                    if(this->log.size() > 0)
-                        finalTime = this->log.rbegin()->first + this->dT;
-                    // copying all trajectory information
-                    for(typename LogMap::const_iterator it =
-                        res.log.begin(); it != res.log.end(); ++it)
-                        final.log[finalTime+it->first] = it->second;
-
-                    return final;
-                }
-            };
+            typedef OpenSoT::previewer::CartesianError CartesianError;
+            typedef OpenSoT::previewer::ErrorLog ErrorLog;
+            typedef OpenSoT::previewer::ErrorMap ErrorMap;
+            typedef OpenSoT::previewer::Results Results;
+            typedef OpenSoT::previewer::CallBack PreviewerCallBack;
 
         private:
             ErrorMap cartesianErrors;
@@ -834,9 +868,6 @@ namespace OpenSoT {
 
                     updateErrorsStatistics();
 
-                    if(call_back != NULL)
-                        call_back->callback(q);
-
                     updateReferences();
                     /**
                       Update the tasks to refresh the reference
@@ -892,6 +923,9 @@ namespace OpenSoT {
                         std::cerr << "Error with solver: could not solve" << std::endl;
                         continue;
                     }
+
+                    if(call_back != NULL && results != NULL && results->log.size() > 0)
+                        call_back->callback(results->log.rbegin()->second);
                 }
 
                 std::cout << std::endl;

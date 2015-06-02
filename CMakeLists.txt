@@ -90,7 +90,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/ConvexHull.cpp
                     src/constraints/velocity/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
-		    src/constraints/velocity/SelfCollisionAvoidance.cpp
+                    src/constraints/velocity/SelfCollisionAvoidance.cpp
                     src/interfaces/yarp/tasks/YCartesian.cpp
                     src/interfaces/yarp/tasks/YCoM.cpp
                     src/interfaces/yarp/tasks/YPostural.cpp
