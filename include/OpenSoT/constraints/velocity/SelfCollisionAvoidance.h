@@ -44,7 +44,8 @@
             class SelfCollisionAvoidance: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
             public:
                 typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
-            protected: 
+            protected:
+                double _boundScaling;
                 /**
                  * @brief _LinkPair_threshold is the allowable minimum distance between every Link pair
                  */
@@ -102,11 +103,14 @@
                  * @param Detection_threshold all the link pairs whose minimum distance are smaller than this Detection_threshold
                  * would be dealt with further
                  * @param linkPair_threshold the minimum distance between each Link pair
+                 * @param boundScaling the bound scaling for the capsule distance (a lower number means we will approach
+                 *        the linkPair_threshold more slowly)
                  */
                 SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                        iDynUtils &robot,
                                        double detection_threshold = std::numeric_limits<double>::infinity(),
-                                       double linkPair_threshold = 0.0);
+                                       double linkPair_threshold = 0.0,
+                                       const double boundScaling = 1.0);
                 /**
                  * @brief getLinkPairThreshold
                  * @return _LinkPair_threshold
@@ -160,6 +164,14 @@
                  * @return true on success
                  */
                 bool setCollisionBlackList(std::list< LinkPairDistance::LinksPair > blackList);
+
+                /**
+                 * @brief setBoundScaling sets bound scaling for the capsule constraint
+                 * @param boundScaling is a number which should be lower than 1.0
+                 *        (e.g. 1./2. means we are looking two steps ahead and will avoid
+                 *         collision with the capsule by slowing down)
+                 */
+                void setBoundScaling(const double boundScaling);
             };
         }
     }

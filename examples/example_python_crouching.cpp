@@ -23,8 +23,8 @@ int main(int argc, char **argv) {
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
     yarp::os::Time::delay(1.0);
     yarp::sig::Vector q = robot.sensePosition();
-    robot.idynutils.setFloatingBaseLink(robot.idynutils.left_leg.end_effector_name);
     robot.idynutils.updateiDyn3Model(q,true);
+    robot.idynutils.setFloatingBaseLink(robot.idynutils.left_leg.end_effector_name);
     OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
 
 
@@ -37,10 +37,13 @@ int main(int argc, char **argv) {
     // task of priority two is leftArm and rightArm,
     // and the stack is subject to bounds jointLimits and velocityLimits
     OpenSoT::AutoStack::Ptr autoStack = 
-        ( DHS.rightLeg ) /
+        ( DHS.rightLeg << DHS.convexHull) /
+        ( (DHS.leftArm + DHS.waist_Orientation + DHS.com) << DHS.selfCollisionAvoidance << DHS.convexHull) /
+        ( (DHS.postural)  << DHS.selfCollisionAvoidance << DHS.convexHull);
+        /*( DHS.rightLeg ) /
         ( (DHS.waist_Position_Z + DHS.com_XY) ) /
-        ( (DHS.leftArm ) << DHS.selfCollisionAvoidance ) /
-        ( (DHS.postural) << DHS.selfCollisionAvoidance );
+        ( (DHS.leftArm ) ) /
+        ( (DHS.postural) );*/
     autoStack << DHS.jointLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
 
 
@@ -48,10 +51,14 @@ int main(int argc, char **argv) {
     /*      CONFIGURING STACK     */
     /*                            */
 
+    DHS.com->setLambda(0.0);        // com is a minimum velocity task
+    DHS.convexHull->setSafetyMargin(0.05); // 5cm bound
     DHS.rightLeg->setLambda(0.6);   DHS.rightLeg->setOrientationErrorGain(1.0);
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
-    DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.1);
-    DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.1);
+    DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.3);
+    DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.3);
+    DHS.jointLimits->setBoundScaling(0.3);
+    DHS.selfCollisionAvoidance->setBoundScaling(0.3);
     DHS.velocityLimits->setVelocityLimits(0.3);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();
@@ -69,6 +76,10 @@ int main(int argc, char **argv) {
            robot.idynutils.right_leg.joint_numbers[i_t]) *= amt;
     }
     DHS.postural->setWeight(pW);
+
+    pW = DHS.waist_Orientation->getWeight();
+    pW(1, 1) *= 1e-2;
+    DHS.waist_Orientation->setWeight(pW);
 
     std::list<std::pair<std::string,std::string>> whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
@@ -112,7 +123,7 @@ int main(int argc, char **argv) {
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
     typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = autoStack->getStack()[3];
+    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = autoStack->getStack()[2];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
@@ -120,9 +131,9 @@ int main(int argc, char **argv) {
                     *i_c))
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
-                                *i_c)->setVelocityLimits(.9);
+                                *i_c)->setVelocityLimits(.6);
     }
-                            
+/*
     OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr beforeLastTask = autoStack->getStack()[1];
         for(it_constraint i_c = beforeLastTask->getConstraints().begin() ;
             i_c != beforeLastTask->getConstraints().end() ; ++i_c) {
@@ -132,15 +143,17 @@ int main(int argc, char **argv) {
                 boost::dynamic_pointer_cast<
                                 OpenSoT::constraints::velocity::VelocityLimits>(
                                     *i_c)->setVelocityLimits(.7);
-    }
+    }*/
 
 
     /*                            */
     /*  CREATING TASK INTERFACES  */
     /*                            */
 
+
     OpenSoT::interfaces::yarp::tasks::YCartesian leftArm(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.leftArm);
+
 
     OpenSoT::interfaces::yarp::tasks::YCartesian waist(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.waist);
@@ -155,7 +168,7 @@ int main(int argc, char **argv) {
                                                MODULE_NAME, DHS.com);
 
     OpenSoT::solvers::QPOases_sot solver(autoStack->getStack(),
-                                         autoStack->getBounds(), 1e5);
+                                         autoStack->getBounds(), 1e10);
 
     robot.setPositionDirectMode();
     yarp::sig::Vector dq;
@@ -164,6 +177,12 @@ int main(int argc, char **argv) {
     while(true) {
         tic = yarp::os::Time::now();
         robot.idynutils.updateiDyn3Model(q, true);
+
+        yarp::sig::Matrix M(6+robot.idynutils.iDyn3_model.getNrOfDOFs(), 6+robot.idynutils.iDyn3_model.getNrOfDOFs());
+        robot.idynutils.iDyn3_model.getFloatingBaseMassMatrix(M);
+        M.removeCols(0,6); M.removeRows(0,6);
+        DHS.postural->setWeight(M);
+
         autoStack->update(q);
         if(solver.solve(dq))
             q+=dq;
@@ -181,6 +200,7 @@ int main(int argc, char **argv) {
 
             std::cout << "l_wrist reference:" << DHS.leftArm->getReference().toString() << std::endl;
             std::cout << "r_wrist reference:" << DHS.rightArm->getReference().toString() << std::endl;
+            std::cout << "waist reference:" << DHS.waist->getReference().toString() << std::endl;
             std::cout << "Active Capsules Pairs: " << DHS.selfCollisionAvoidance->getbUpperBound().size() << std::endl;
 
         }

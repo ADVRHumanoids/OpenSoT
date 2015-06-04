@@ -30,13 +30,15 @@ const double SMALL_NUM = pow(10.0, -5);
 SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                                iDynUtils &robot,
                                                double detection_threshold,
-                                               double linkPair_threshold):
+                                               double linkPair_threshold,
+                                               const double boundScaling):
     Constraint(x.size()),
     _detection_threshold(detection_threshold),
     _linkPair_threshold(linkPair_threshold),
     computeLinksDistance(robot),
     robot_col(robot),
-    _x_cache(x) {
+    _x_cache(x),
+    _boundScaling(boundScaling) {
 
     std::string base_name = "Waist";
     base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
@@ -203,7 +205,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
 
 
         Aineq_fc_Eigen.row(linkPairIndex) = closepoint_dir.transpose() * ( Link1_CP_Jaco - Link2_CP_Jaco );
-        bUpperB_fc_Eigen(linkPairIndex) = Dm_LinkPair - _linkPair_threshold;
+        bUpperB_fc_Eigen(linkPairIndex) = (Dm_LinkPair - _linkPair_threshold) / _boundScaling;
 
         ++linkPairIndex;
 
@@ -289,5 +291,10 @@ yarp::sig::Vector SelfCollisionAvoidance::from_Eigen_to_Yarp_vector(const Vector
       }
       return A_V;
 
+}
+
+void SelfCollisionAvoidance::setBoundScaling(const double boundScaling)
+{
+    _boundScaling = boundScaling;
 }
 

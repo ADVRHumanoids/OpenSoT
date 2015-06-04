@@ -52,11 +52,11 @@
                  * @brief ConvexHull constructor
                  * @param x the robot configuration vector
                  * @param robot the robot model, with floating base link set on the support foot
-                 * @param boundScaling the margin, in percentage, of the bounds margins
+                 * @param safetyMargin the margin, in [m], of the bounds margins
                  */
                 ConvexHull( const yarp::sig::Vector& x,
                             iDynUtils& robot,
-                            const double boundScaling = BOUND_SCALING);
+                            const double safetyMargin = BOUND_SCALING);
 
                 void update(const yarp::sig::Vector &x);
 
@@ -82,6 +82,12 @@
                                                 double &a, double& b, double &c);
 
                 bool getConvexHull(std::vector<KDL::Vector>& ch);
+
+                /**
+                 * @brief setSafetyMargin sets a safety margin in [m] for the convex hull
+                 * @param sagetyMargin
+                 */
+                void setSafetyMargin(const double safetyMargin);
             };
         }
     }
