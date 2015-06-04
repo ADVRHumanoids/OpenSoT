@@ -205,7 +205,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
 
 
         Aineq_fc_Eigen.row(linkPairIndex) = closepoint_dir.transpose() * ( Link1_CP_Jaco - Link2_CP_Jaco );
-        bUpperB_fc_Eigen(linkPairIndex) = (Dm_LinkPair - _linkPair_threshold) / _boundScaling;
+        bUpperB_fc_Eigen(linkPairIndex) = (Dm_LinkPair - _linkPair_threshold) * _boundScaling;
 
         ++linkPairIndex;
 
