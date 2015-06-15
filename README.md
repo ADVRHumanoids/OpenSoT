@@ -1,15 +1,13 @@
-OpenSoT v0.2
+OpenSoT DRC Edition
 =========
+This is the code of OpenSoT that the WALK-MAN Team have used in the DRC competition for all the manipulation tasks.
 
 New Features Includes:
 -----------------------
-- SubTasks: to consider only some rows of Tasks Jacobians/Errors
-- Active Joint Mask: to zero columns in the Task Jacobians
-- Rewritten QP Solver: this version does not explicitly pass Constraints of high priority Tasks to low priority Tasks
-- MinAcc task
-- Cartesian Interaction Task
-- Math of Tasks (aka write IK problem in a more easy way)
-- Autostack 
+- Cartesian Position Constraint
+- Manipulability Task
+- Interactive Markers
+- Self Collision Avoidance  
 - Many Bug Fixes
 - Improved documentation (we hope!)
 
