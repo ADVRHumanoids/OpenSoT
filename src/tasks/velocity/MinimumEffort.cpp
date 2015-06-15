@@ -47,7 +47,7 @@ void MinimumEffort::_update(const yarp::sig::Vector &x) {
     _x = x;
     /************************* COMPUTING TASK *****************************/
 
-    _b = -1.0 * cartesian_utils::computeGradient(x, _gTauGradientWorker);
+    _b = -1.0 * _lambda * cartesian_utils::computeGradient(x, _gTauGradientWorker, this->getActiveJointsMask());
 
     /**********************************************************************/
 }

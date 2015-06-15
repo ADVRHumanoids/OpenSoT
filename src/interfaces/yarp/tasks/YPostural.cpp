@@ -11,7 +11,8 @@ YPostural::YPostural(const std::string &robot_name, const std::string &module_pr
     _rpc(),
     _idynutils(idynutils)
 {
-    assert(computePortPrefix(robot_name, module_prefix, taskPostural->getTaskID()));
+    bool res = computePortPrefix(robot_name, module_prefix, taskPostural->getTaskID());
+    assert(res);
     open(_port_prefix+"set_ref:i");
 
     useCallback();
@@ -31,7 +32,8 @@ YPostural::YPostural(const std::string& robot_name,
     _rpc(),
     _idynutils(idynutils)
 {
-    assert(computePortPrefix(robot_name, module_prefix, postural_task->getTaskID()));
+    bool res = computePortPrefix(robot_name, module_prefix, postural_task->getTaskID());
+    assert(res);
     open(_port_prefix+"set_ref:i");
     useCallback();
 

@@ -25,6 +25,8 @@
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
+#define LAMBDA_THS 1E-12
+
 CoM::CoM(   const yarp::sig::Vector& x,
             iDynUtils &robot) :
     Task("CoM", x.size()), _robot(robot),
@@ -58,7 +60,8 @@ void CoM::_update(const yarp::sig::Vector &x)
 
     _actualPosition = _robot.iDyn3_model.getCOM();
 
-    assert(_robot.iDyn3_model.getCOMJacobian(_A));
+    bool res = _robot.iDyn3_model.getCOMJacobian(_A);
+    assert(res);
     _A = _A.removeRows(3,3);    // remove orientation
     _A = _A.removeCols(0,6);    // remove floating base
 
@@ -117,12 +120,18 @@ std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
 
 void CoM::update_b()
 {
-    positionError = _desiredPosition - _actualPosition;
-    _b = positionError + _desiredVelocity/_lambda;
+    _b = _desiredVelocity + _lambda*this->getError();
 }
 
 void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
 {
-    this->_lambda = lambda;
-    this->update_b();
+    if(lambda >= 0.0){
+        this->_lambda = lambda;
+        this->update_b();
+    }
+}
+
+yarp::sig::Vector OpenSoT::tasks::velocity::CoM::getError()
+{
+    return _desiredPosition - _actualPosition;
 }

@@ -42,7 +42,7 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
 Aggregated::Aggregated(TaskPtr task1,
                        TaskPtr task2,
                        const unsigned int x_size) :
-Task(task1->getTaskID()+task2->getTaskID(),x_size)
+Task(task1->getTaskID()+"+"+task2->getTaskID(),x_size)
 {
     _tasks.push_back(task1);
     _tasks.push_back(task2);
@@ -97,7 +97,7 @@ void Aggregated::generateAll() {
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
         _A = yarp::math::pile(_A,t->getWeight()*t->getA());
-        _b = yarp::math::cat(_b, t->getWeight()*t->getLambda()*t->getb());
+        _b = yarp::math::cat(_b, t->getWeight()*t->getb());
     }
     generateConstraints();
 }
@@ -202,4 +202,17 @@ const std::string Aggregated::concatenateTaskIds(const std::list<TaskPtr> tasks)
             concatenatedId += "+";
     }
     return concatenatedId;
+}
+
+void Aggregated::setLambda(double lambda)
+{
+    if(lambda >= 0.0)
+    {
+        _lambda = lambda;
+        for(std::list<TaskPtr>::const_iterator i = _tasks.begin(); i != _tasks.end(); ++i)
+        {
+            TaskPtr t = *i;
+            t->setLambda(_lambda);
+        }
+    }
 }

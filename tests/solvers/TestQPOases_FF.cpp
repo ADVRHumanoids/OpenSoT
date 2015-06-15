@@ -745,7 +745,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
             } else {
 
                 EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;
-                EXPECT_NEAR(current_norm, 0, 1e-3) << " @t= " << t;
+                EXPECT_NEAR(current_norm, 0, 1.3e-3) << " @t= " << t;
             }
         }
     }

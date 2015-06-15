@@ -10,7 +10,8 @@ YCartesian::YCartesian(const std::string &robot_name, const std::string &module_
     _rpc_cb(taskCartesian),
     _rpc()
 {
-    assert(computePortPrefix(robot_name, module_prefix, task_id));
+    bool res = computePortPrefix(robot_name, module_prefix, task_id);
+    assert(res);
     open(_port_prefix+"set_ref:i");
 
     useCallback();
@@ -29,7 +30,8 @@ YCartesian::YCartesian(const std::string& robot_name,
     _rpc_cb(taskCartesian),
     _rpc()
 {
-    assert(computePortPrefix(robot_name, module_prefix, cartesian_task->getTaskID()));
+    bool res = computePortPrefix(robot_name, module_prefix, cartesian_task->getTaskID());
+    assert(res);
     open(_port_prefix+"set_ref:i");
     useCallback();
 

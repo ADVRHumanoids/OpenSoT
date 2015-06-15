@@ -27,18 +27,30 @@ using namespace yarp::math;
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
+#define TEST_VA_FILE            "testQPOases_VelocityAllocation.py"
+#define TEST_VA_POSTURAL_FILE   "testQPOases_VelocityAllocation_Postural.py"
+#define TEST_VA_MINVEL_FILE     "testQPOases_VelocityAllocation_MinimumVelocity.py"
+#define TEST_VA_POSTURAL_TIME_FILE   "testQPOases_VelocityAllocation_Postural_computationTime.eps"
+#define TEST_VA_MINVEL_TIME_FILE     "testQPOases_VelocityAllocation_MinimumVelocity_computationTime.eps"
+#define TEST_VA_POSTURAL_ERRORS_FILE "testQPOases_VelocityAllocation_Postural_velocitiesAndErrors.eps"
+#define TEST_VA_MINVEL_ERRORS_FILE   "testQPOases_VelocityAllocation_MinimumVelocity_velocitiesAndErrors.eps"
 
 namespace {
 
 class testQPOases_VelocityAllocation:
-        public ::testing::Test
+        public ::testing::Test, 
+        public ::testing::WithParamInterface<bool>
 {
 protected:
     std::ofstream   _log;
 
     testQPOases_VelocityAllocation()
     {
-        _log.open("testQPOases_VelocityAllocation.m");
+        _log.open(TEST_VA_FILE);
+        _log << "#! /usr/bin/env python" << std::endl
+         << std::endl;
+        _log << "execfile('" << TEST_VA_POSTURAL_FILE << "')" << std::endl;
+        _log << "execfile('" << TEST_VA_MINVEL_FILE << "')" << std::endl;
     }
 
     virtual ~testQPOases_VelocityAllocation() {
@@ -73,23 +85,13 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
     return q;
 }
 
-void minimumVelocity(iDynUtils& model,
-                     OpenSoT::DefaultHumanoidStack& DHS,
-                     kinematic_chain& chain,
-                     const yarp::sig::Vector& q) {
-    // setting postural reference to have minimum velocity
-    // on left arm, postural on the rest of the body
-    yarp::sig::Vector q_postural = DHS.postural->getReference();
-    for(unsigned int i = 0; i < chain.joint_numbers.size(); ++i)
-        q_postural[chain.joint_numbers[i]] = q[chain.joint_numbers[i]];
-    DHS.postural->setReference(q_postural);
-}
-
 //#define TRY_ON_SIMULATOR
 // will try script on the simulator, without velocity allocation
 //#define TRY_NVA
 
-TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
+TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
+
+    bool useMinimumVelocity = GetParam();
 
 #ifdef TRY_ON_SIMULATOR
     yarp::os::Network init;
@@ -125,6 +127,11 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
                                            OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
                                            OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
 
+    OpenSoT::SubTask::Ptr minimumVelocity(
+        new OpenSoT::SubTask(DHS.minimumVelocity, OpenSoT::SubTask::SubTaskMap(model.torso.joint_numbers)+
+                                                  OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
+                                                  OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
+
     ASSERT_EQ(postural->getTaskSize(), 11);
     ASSERT_EQ(postural->getXSize(), 29);
     ASSERT_EQ(postural->getA().cols(), postural->getXSize());
@@ -138,29 +145,50 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
                                               OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
                                               OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
 
-    ASSERT_EQ(posturalnva->getTaskSize(), 11);
-    ASSERT_EQ(posturalnva->getXSize(), 29);
-    ASSERT_EQ(posturalnva->getA().cols(), posturalnva->getXSize());
-    ASSERT_EQ(posturalnva->getA().rows(), posturalnva->getTaskSize());
-    ASSERT_EQ(posturalnva->getWeight().rows(), posturalnva->getTaskSize());
-    ASSERT_EQ(posturalnva->getWeight().rows(), posturalnva->getWeight().cols());
-    ASSERT_EQ(posturalnva->getb().size(), posturalnva->getTaskSize());
+    OpenSoT::SubTask::Ptr minimumVelocitynva(
+        new OpenSoT::SubTask(DHSnva.minimumVelocity, OpenSoT::SubTask::SubTaskMap(model.torso.joint_numbers)+
+                                                     OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
+                                                     OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
 
-    stack =  (DHS.leftLeg + DHS.rightLeg) /
-             (DHS.leftArm + DHS.rightArm) /
-              postural;
+
+    ASSERT_EQ(minimumVelocitynva->getTaskSize(), 11);
+    ASSERT_EQ(minimumVelocitynva->getXSize(), 29);
+    ASSERT_EQ(minimumVelocitynva->getA().cols(), minimumVelocitynva->getXSize());
+    ASSERT_EQ(minimumVelocitynva->getA().rows(), minimumVelocitynva->getTaskSize());
+    ASSERT_EQ(minimumVelocitynva->getWeight().rows(), minimumVelocitynva->getTaskSize());
+    ASSERT_EQ(minimumVelocitynva->getWeight().rows(), minimumVelocitynva->getWeight().cols());
+    ASSERT_EQ(minimumVelocitynva->getb().size(), minimumVelocitynva->getTaskSize());
+
+    if(useMinimumVelocity)
+        stack =  (DHS.leftLeg + DHS.rightLeg) /
+         (DHS.leftArm + DHS.rightArm) /
+          minimumVelocity;
+    else
+        stack =  (DHS.leftLeg + DHS.rightLeg) /
+                 (DHS.leftArm + DHS.rightArm) /
+                  postural;
     stack <<  DHS.jointLimits;
 
-    stacknva = (DHSnva.leftLeg + DHSnva.rightLeg) /
-               (DHSnva.leftArm + DHSnva.rightArm) /
-                posturalnva;
+    if(useMinimumVelocity)
+        stacknva = (DHSnva.leftLeg + DHSnva.rightLeg) /
+                   (DHSnva.leftArm + DHSnva.rightArm) /
+                    minimumVelocitynva;
+    else
+        stacknva = (DHSnva.leftLeg + DHSnva.rightLeg) /
+                   (DHSnva.leftArm + DHSnva.rightArm) /
+                    posturalnva;
     stacknva << DHSnva.jointLimits << DHSnva.velocityLimits;
 
 
     OpenSoT::VelocityAllocation(stack, 3e-3, 0.15, 0.3);
-    ASSERT_DOUBLE_EQ((boost::dynamic_pointer_cast<
-                        OpenSoT::constraints::velocity::VelocityLimits>(
-                            postural->getConstraints().front()))->getVelocityLimits(), 0.3);
+    if(useMinimumVelocity)
+        ASSERT_DOUBLE_EQ((boost::dynamic_pointer_cast<
+                            OpenSoT::constraints::velocity::VelocityLimits>(
+                                minimumVelocity->getConstraints().front()))->getVelocityLimits(), 0.3);
+    else
+        ASSERT_DOUBLE_EQ((boost::dynamic_pointer_cast<
+                            OpenSoT::constraints::velocity::VelocityLimits>(
+                                postural->getConstraints().front()))->getVelocityLimits(), 0.3);
     DHSnva.velocityLimits->setVelocityLimits(0.3);
 
     OpenSoT::solvers::QPOases_sot::Ptr sot(
@@ -182,17 +210,26 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
     double e, enva, epost, epostnva, epost_max, epostnva_max;
 
     unsigned int i = 0;
-    _log << "%t, xdot, ydot, zdot, xdotnva, ydotnva, zdotnva,"  // 1-7
+
+    if(useMinimumVelocity) { _log.close(); _log.open(TEST_VA_MINVEL_FILE); }
+    else { _log.close(); _log.open(TEST_VA_POSTURAL_FILE); }
+
+    _log << "#! /usr/bin/env python" << std::endl
+         << std::endl
+         << "import numpy as np" << std::endl
+         << "import matplotlib" << std::endl
+         << "from matplotlib.pyplot import *" << std::endl;
+    _log << "#t, xdot, ydot, zdot, xdotnva, ydotnva, zdotnva,"  // 1-7
          << " q0dot_torso, q1dot_torso, q2dot_torso,"           // 8-10
          << " q0dotnva_torso, q1dotnva_torso, q2dotnva_torso,"  // 11-13
          << " e, e_nva, epost, epost_nva,"                      // 14-17
          << " t_loop, t_loop_nva" << std::endl;                 // 18-19
-    _log << "test_data = [";
+    _log << "test_data = np.array((";
 
     double t_loop = 0.0;
     double t_loopnva = 0.0;
     bool settled = false;
-    double settling_counter = 15.0;
+    double settling_counter = 1.0;
     bool converged_event = false;
 
     DHS.leftArm->setReference(desired_pose_y);
@@ -217,7 +254,12 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
         //minimumVelocity(model, DHS, model.left_arm, q);
 
         e = norm(DHS.leftArm->getb());
-        epost = norm(postural->getb());
+        if(useMinimumVelocity) {
+            ASSERT_EQ(dq.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
+            ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
+            epost = norm((q-DHS.postural->getReference()).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
+        } else
+            epost = norm(postural->getb());
         if(epost > epost_max)
             epost_max = epost;
 
@@ -248,10 +290,14 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
         //minimumVelocity(model, DHSnva, model.left_arm, qnva);
 
         enva = norm(DHSnva.leftArm->getb());
-        epostnva = norm(posturalnva->getb());
+        if(useMinimumVelocity) {
+            ASSERT_EQ(qnva.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
+            ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
+            epostnva = norm((qnva-DHSnva.postural->getReference()).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
+        } else
+            epostnva = norm(posturalnva->getb());
         if(epostnva > epostnva_max)
             epostnva_max = epostnva;
-
 
         EXPECT_TRUE(sotnva->solve(dqnva));
         qnva+=dqnva;
@@ -269,9 +315,9 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 
 
 #ifdef TRY_ON_SIMULATOR
-        _log << yarp::os::Time::now() - t_test << ","
+        _log << "(" << yarp::os::Time::now() - t_test << ","
 #else
-        _log << yarp::os::SystemClock::nowSystem() - t_test << ","
+        _log << "(" << yarp::os::SystemClock::nowSystem() - t_test << ","
 #endif
             << (DHS.leftArm->getA()*dq)[0] << ","
             << (DHS.leftArm->getA()*dq)[1] << ","
@@ -286,7 +332,7 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
             << dqnva[model.torso.joint_numbers[1]]  << ","
             << dqnva[model.torso.joint_numbers[2]]  << ","
             << e << "," << enva << "," << epost << "," << epostnva << ","
-            << t_loop << "," << t_loopnva << ";" << std::endl;
+            << t_loop << "," << t_loopnva << ")," << std::endl;
 
         if(e < 1.5e-3 && enva < 1.5e-3 && !converged_event)
         {
@@ -324,20 +370,30 @@ TEST_F(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
         << "error for the postural to be higher without VA.";
 
 
-    _log << "];" << std::endl;
+    _log << "));" << std::endl;
 
-    _log << "ct = figure('Position',[0 0 800 600]); plot(test_data(:,1),test_data(:,[18, 19])); title('Computation time with and without Velocity Allocation'); legend('Solve time (VA)', 'Solve time (no VA)');" << std::endl;
-    _log << "vae = figure('Position',[0 0 1027 768]); subplot(3,1,1); plot(test_data(:,1),test_data(:,[3,4,6,7])); title('Hand Velocity');" << std::endl;
-    _log << "legend('y dot (VA)', 'z dot (VA)', 'y dot (no VA)', 'z dot (no VA)');" << std::endl;
+    _log << "ct = figure(figsize=(8,6)); p = plot(test_data[:,0],test_data[:,(17, 18)]); title('Computation time with and without Velocity Allocation'); legend(p,('Solve time (VA)', 'Solve time (no VA)'));" << std::endl;
+    _log << "vae = figure(figsize=(10.27,7.68)); subplot(3,1,1); p = plot(test_data[:,0],test_data[:,(2,3,5,6)]); title('Hand Velocity');" << std::endl;
+    _log << "legend(p,('y dot (VA)', 'z dot (VA)', 'y dot (no VA)', 'z dot (no VA)'));" << std::endl;
     _log << "ylabel('Hand Velocity [m/s]'); xlabel('t [s]');" << std::endl;
-    _log << "subplot(3,1,2); plot(test_data(:,1), [sum(test_data(:,[8,9,10]).*test_data(:,[8,9,10]),2), sum(test_data(:,[11,12,13]).*test_data(:,[11,12,13]),2)]); title('Torso Joints Velocity');" << std::endl;
+    _log << "subplot(3,1,2); p = plot(test_data[:,0], np.transpose(np.vstack(((test_data[:,(7,8,9)]**2).sum(1),(test_data[:,(10,11,12)]**2).sum(1))))); title('Torso Joints Velocity');" << std::endl;
     _log << "ylabel('Torso Joint Velocity [rad/s]'); xlabel('t [s]');" << std::endl;
-    _log << "legend('Norm of Joint Velocity (VA)', 'Norm of Joint Velocity (no VA)');" << std::endl;
-    _log << "subplot(3,1,3); plot(test_data(:,1),test_data(:,[14,15,16,17])); title('Tracking Error');" << std::endl;
-    _log << "legend('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)');" << std::endl;
-    _log << "print(ct,'-depsc','testQPOases_VelocityAllocation_computationTime');" << std::endl;
-    _log << "print(vae,'-depsc','testQPOases_VelocityAllocation_velocitiesAndErrors');" << std::endl;
+    _log << "legend(p,('Norm of Joint Velocity (VA)', 'Norm of Joint Velocity (no VA)'));" << std::endl;
+    _log << "subplot(3,1,3); p = plot(test_data[:,0],test_data[:,(13,14,15,16)]); title('Tracking Error');" << std::endl;
+    _log << "legend(p,('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)'));" << std::endl;
+    if(useMinimumVelocity) {
+        _log << "ct.savefig('" << TEST_VA_MINVEL_TIME_FILE << "', format='eps', transparent=True);" << std::endl;
+        _log << "vae.savefig('" << TEST_VA_MINVEL_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
+    } else {
+        _log << "ct.savefig('" << TEST_VA_POSTURAL_TIME_FILE << "', format='eps', transparent=True);" << std::endl;
+        _log << "vae.savefig('" << TEST_VA_POSTURAL_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
+    }
+    _log << "show(block=True)" << std::endl;
 }
+
+INSTANTIATE_TEST_CASE_P(tryMovingWhileKeepinTorsoStillWithPosturalOrMinVel,
+                        testQPOases_VelocityAllocation,
+                        ::testing::Values(false, true));
 
 }
 

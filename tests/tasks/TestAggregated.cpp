@@ -110,7 +110,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
         aggregated_task->update(q);
         EXPECT_TRUE(aggregated_task->getA() == postural_task->getA());
         EXPECT_TRUE(aggregated_task->getb() == postural_task->getb());
-        dq = pinv(postural_task->getA(),1E-7)*postural_task->getLambda()*postural_task->getb();
+        dq = pinv(postural_task->getA(),1E-7)*postural_task->getb();
         q += dq;
     }
 
@@ -126,7 +126,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
         EXPECT_TRUE(aggregated_task->getA() == postural_task->getA());
         EXPECT_TRUE(aggregated_task->getb() == postural_task->getb()) << "aggregated_task b is " << aggregated_task->getb().toString() << std::endl
                                                                       << " while postural_task b is " << postural_task->getb().toString();
-        dq = pinv(aggregated_task->getA(),1E-7)*aggregated_task->getLambda()*aggregated_task->getb();
+        dq = pinv(aggregated_task->getA(),1E-7)*aggregated_task->getb();
         q += dq;
     }
 

@@ -48,6 +48,8 @@ void VelocityAllocation::processStack(OpenSoT::Solver<yarp::sig::Matrix, yarp::s
         OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task = stack[i];
         OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits;
 
+        // TODO notice this does not work if every stack has already a VelocityLimits
+        // but they are instances of the same object - we should check duplication
         for(auto constraint : task->getConstraints())
             if(boost::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(

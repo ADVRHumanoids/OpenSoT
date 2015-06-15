@@ -4,6 +4,9 @@
 #include <ctime>
 #include <qpOASES/Utils.hpp>
 #include <fstream>
+#include <boost/make_shared.hpp>
+#include <qpOASES/Matrices.hpp>
+
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -24,7 +27,8 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _constraints(new qpOASES::Constraints()),
     _nWSR(132),
     _epsRegularisation(eps_regularisation),
-    _solution(number_of_variables), _dual_solution(number_of_variables)
+    _solution(number_of_variables), _dual_solution(number_of_variables),
+    _opt(new qpOASES::Options())
 { setDefaultOptions();}
 
 QPOasesProblem::~QPOasesProblem()
@@ -37,6 +41,9 @@ void QPOasesProblem::setDefaultOptions()
     opt.printLevel = qpOASES::PL_NONE;
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= _epsRegularisation;
+    opt.numRegularisationSteps = 2;
+    opt.numRefinementSteps = 1;
+    opt.enableFlippingBounds = qpOASES::BT_TRUE;
 
     opt.ensureConsistency();
 
@@ -44,9 +51,12 @@ void QPOasesProblem::setDefaultOptions()
 
     std::cout<<GREEN<<"Solver Default Options:"<<DEFAULT<<std::endl;
     opt.print();
+
+    _opt.reset(new qpOASES::Options(opt));
 }
 
 void QPOasesProblem::setOptions(const qpOASES::Options &options){
+    _opt.reset(new qpOASES::Options(options));
     _problem->setOptions(options);}
 
 qpOASES::Options QPOasesProblem::getOptions(){
@@ -75,8 +85,15 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         assert(_lA.size() == _uA.size());}
 
     int nWSR = _nWSR;
-        qpOASES::returnValue val =_problem->init( _H.data(),_g.data(),
-                       _A.data(),
+    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    H_sparse->createDiagInfo();
+    A_dense = NULL;
+    if(!(_A.data() == NULL))
+        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
+                qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+
+        qpOASES::returnValue val =_problem->init(H_sparse.get(),_g.data(),
+                       A_dense.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -91,6 +108,8 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         std::cout<<RED<<"ERROR INITIALIZING QP PROBLEM "<<DEFAULT<<std::endl;
         std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
 
+
+#ifndef NDEBUG //Log is generated only in DEBUG Mode!
         time_t rawtime;
         struct tm * timeinfo;
         char buffer [80];
@@ -104,6 +123,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
             std::cout<<"Wrote QP problem into mat file "<<file_name<<std::endl;
         else
             std::cout<<RED<<"ERROR while writing QP problem into mat file!"<<DEFAULT<<std::endl;
+#endif
 
         return false;
     }
@@ -159,7 +179,7 @@ bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
 }
@@ -203,7 +223,7 @@ bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const 
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
 }
@@ -260,7 +280,7 @@ bool QPOasesProblem::addTask(const Matrix &H, const Vector &g)
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
 
@@ -294,7 +314,7 @@ bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vec
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        setDefaultOptions();
+        _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
     std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
@@ -307,8 +327,16 @@ bool QPOasesProblem::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
-                       _A.data(),
+    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
+    H_sparse->createDiagInfo();
+    A_dense = NULL;
+    if(!(_A.data() == NULL))
+        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
+                    qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+
+
+    qpOASES::returnValue val =_problem->hotstart(H_sparse.get(),_g.data(),
+                       A_dense.get(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -326,8 +354,9 @@ bool QPOasesProblem::solve()
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
-        val =_problem->init(_H.data(),_g.data(),
-                           _A.data(),
+        _problem->setOptions(*_opt.get());
+        val =_problem->init(H_sparse.get(),_g.data(),
+                           A_dense.get(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,
@@ -343,6 +372,7 @@ bool QPOasesProblem::solve()
                                                                   number_of_variables,
                                                                   number_of_constraints,
                                                                   hessian_type));
+            _problem->setOptions(*_opt.get());
             return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);}
     }
 
