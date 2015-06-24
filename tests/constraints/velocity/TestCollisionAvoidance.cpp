@@ -16,12 +16,15 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <idynutils/cartesian_utils.h>
 #include <eigen_conversions/eigen_kdl.h>
+#include <iostream>
+#include <fstream>
 
 #define  s                1.0
 #define  dT               0.001* s
 #define  m_s              1.0
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
+#define Thread_period 0.005
 
 KDL::Frame fcl2KDL(const fcl::Transform3f &in)
 {
@@ -45,7 +48,7 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
     yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
     arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
+    arm[1] = 36.0 * M_PI/180.0;
     arm[2] = -15.0 * M_PI/180.0;
     arm[3] = -80.0 * M_PI/180.0;
     idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
@@ -308,14 +311,13 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
-    int t = 100;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
         new OpenSoT::constraints::velocity::JointLimits(this->q,
                                                         this->robot.iDyn3_model.getJointBoundMax(),
                                                         this->robot.iDyn3_model.getJointBoundMin()));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
-                new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
+                new OpenSoT::constraints::velocity::VelocityLimits(0.6, Thread_period, this->q.size()));
 
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
                 new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
@@ -323,9 +325,16 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
         new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
 
+    std::ofstream output;
+    output.open("original.data", std::ofstream::trunc);
+
+    int t = 1000;
+    double tic, toc;
     yarp::sig::Vector dq(this->q.size(), 0.0);
-    for(unsigned int i = 0; i < 50*t; ++i)
+    for(unsigned int i = 0; i < t; ++i)
     {
+        tic = yarp::os::SystemClock::nowSystem();
+
         this->robot.updateiDyn3Model(this->q, true);
 
         taskCartesianAggregated->update(this->q);
@@ -337,7 +346,24 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
             dq = 0.0;}
         this->q += dq;
 
+        for(unsigned int ii = 0; ii < robot.left_arm.joint_numbers.size(); ii++)
+        {
+            output << q[robot.left_arm.joint_numbers[ii]] << " ";
+        }
+        for(unsigned int jj = 0; jj < robot.right_arm.joint_numbers.size(); jj++)
+        {
+            output << q[robot.right_arm.joint_numbers[jj]] << " ";
+        }
+        output <<"\n";
+
+        toc = yarp::os::SystemClock::nowSystem();
+
+        if (toc - tic < Thread_period)
+            sleep( Thread_period - ( toc - tic ) );
+
     }
+
+    output.close();
 
     std::cout << "Q_final: " << q.toString() << std::endl;
 
