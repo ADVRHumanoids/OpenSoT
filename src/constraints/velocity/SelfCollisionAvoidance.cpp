@@ -46,8 +46,222 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     if(base_index == -1)
         std::cout << "Failed to get base_index" << std::endl;
 
+    // used for online prediction of link pair selection
+
+    x_larm_rarm = (struct svm_node *) malloc(40*sizeof(struct svm_node));
+    x_larm_torso = (struct svm_node *) malloc(40*sizeof(struct svm_node));
+
+    model_larm_rarm = svm_load_model("fc.train.scale.model.1519");
+    model_larm_torso = svm_load_model("???");
+
+    scale_larm_rarm.open("range1519");
+    scale_larm_torso.open("???");
+
+    number_larm = robot_col.left_arm.joint_numbers.size();
+    number_rarm = robot_col.right_arm.joint_numbers.size();
+    number_torso = robot_col.torso.joint_numbers.size();
+    number_head = robot_col.head.joint_numbers.size();
+    number_lleg = robot_col.left_leg.joint_numbers.size();
+    number_rleg = robot_col.right_leg.joint_numbers.size();
+
+    number_larm_rarm = number_larm + number_rarm;
+    number_larm_torso = number_larm + number_torso;
+
+
+    double temp_min, temp_max;
+    for (unsigned int i = 0; i<number_larm_rarm; i++)
+    {
+        scale_larm_rarm>>temp_min;
+        min_larm_rarm.push_back(temp_min);
+
+        scale_larm_rarm>>temp_max;
+        max_larm_rarm.push_back(temp_max);
+
+        temp_larm_rarm.push_back( 2 / (temp_max-temp_min) );
+    }
+
+
+    for (unsigned int i = 0; i<number_larm_torso; i++)
+    {
+        scale_larm_torso>>temp_min;
+        min_larm_torso.push_back(temp_min);
+
+        scale_larm_torso>>temp_max;
+        max_larm_torso.push_back(temp_max);
+
+        temp_larm_torso.push_back( 2 / (temp_max-temp_min) );
+    }
+
+    /*//////////////////whiteList_L_R_Arms////////////////////*/
+
+    std::string linkA1 = "LSoftHandLink";
+    std::string linkA2 = "LWrMot3";
+    std::string linkA3 = "LWrMot2";
+    std::string linkA4 = "LForearm";
+    std::string linkA5 = "LElb";
+    std::string linkA6 = "LShy";
+    std::string linkA7 = "LShr";
+    std::string linkA8 = "LShp";
+
+    std::string linkB1 = "RSoftHandLink";
+    std::string linkB2 = "RWrMot3";
+    std::string linkB3 = "RWrMot2";
+    std::string linkB4 = "RForearm";
+    std::string linkB5 = "RElb";
+    std::string linkB6 = "RShy";
+    std::string linkB7 = "RShr";
+    std::string linkB8 = "RShp";
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA1,linkB8));
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA2,linkB8));
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA3,linkB8));
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA4,linkB8));
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA5,linkB8));
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA6,linkB8));
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA7,linkB8));
+
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB6));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB7));
+    whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB8));
+
+    /*//////////////////whiteList_L_Arms_Torso////////////////////*/
+
+    linkA1 = "LSoftHandLink";
+    linkA2 = "LWrMot3";
+    linkA3 = "LWrMot2";
+    linkA4 = "LForearm";
+    linkA5 = "LElb";
+    linkA6 = "LShy";
+    linkA7 = "LShr";
+    linkA8 = "LShp";
+
+    linkB1 = "Waist";
+    linkB2 = "DWL";
+    linkB3 = "DWS";
+    linkB4 = "DWYTorso";
+    linkB5 = "TorsoProtections";
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    //whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+
+    // used for online prediction of link pair selection
+
     update(x);
 
+}
+
+SelfCollisionAvoidance::~SelfCollisionAvoidance()
+{
+    free(x_larm_rarm);
+    free(x_larm_torso);
+
+    scale_larm_rarm.close();
+    scale_larm_torso.close();
 }
 
 double SelfCollisionAvoidance::getLinkPairThreshold()
@@ -79,10 +293,19 @@ void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
     // we update _Aineq and _bupperBound only if x has changed
     if(!(x == _x_cache)) {
         _x_cache = x;
-        calculate_Aineq_bUpperB (_Aineq, _bUpperBound );
+
+        predict_SCAFoIs( x );
+
+        bool flag;
+        flag = this->setCollisionWhiteList(whitelist_all);
+        if (!flag)
+        {
+            std::cout << "fail to set whitelist!" << std::endl;
+        }
+
     }
 //    std::cout << "_Aineq" << _Aineq.toString() << std::endl << std::endl;
-    //    std::cout << "_bUpperBound" << _bUpperBound.toString() << std::endl << std::endl;
+//    std::cout << "_bUpperBound" << _bUpperBound.toString() << std::endl << std::endl;
 }
 
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
@@ -111,6 +334,65 @@ Eigen::MatrixXd SelfCollisionAvoidance::skewSymmetricOperator (const Eigen::Vect
     J_transform.block(0,3,3,3) = right_part;
 
     return J_transform;
+}
+
+void predict_SCAFoIs( const yarp::sig::Vector & q )
+{
+
+    whitelist_all.clear();
+
+    double predict_label_1;
+    int predict_label_int_1;
+
+    /*//////////////////SCAFoI:whiteList_L_R_Arms////////////////////*/
+
+    for(unsigned int i = 0; i < number_larm; i++)
+    {
+        x_larm_rarm[i].index = i+1;
+        x_larm_rarm[i].value = ( q[robot.left_arm.joint_numbers[i]] - min_larm_rarm[i] ) * temp_larm_rarm[i] - 1;
+    }
+    for(unsigned int j = 0; j < number_rarm; j++)
+    {
+        x_larm_rarm[number_larm + j].index = number_larm + j + 1;
+        x_larm_rarm[number_larm + j].value = ( q[robot.right_arm.joint_numbers[j]] - min_larm_rarm[number_larm + j] ) * temp_larm_rarm[number_larm + j] - 1;
+    }
+    x_larm_rarm[number_larm_rarm].index = -1;
+
+    predict_label_1 = svm_predict(model_larm_rarm,x_larm_rarm);
+    predict_label_int_1 = (int)predict_label;
+
+    if ( predict_label_int_1 == 1 )
+    {
+        whitelist_all.insert( whitelist_all.end(), whiteList_L_R_Arms.begin(), whiteList_L_R_Arms.end() );
+    }
+
+
+    /*//////////////////whiteList_L_Arms_Torso////////////////////*/
+
+    double predict_label_2;
+    int predict_label_int_2;
+
+    for(unsigned int i = 0; i < number_larm; i++)
+    {
+        x_larm_torso[i].index = i+1;
+        x_larm_torso[i].value = ( q[robot.left_arm.joint_numbers[i]] - min_larm_torso[i] ) * temp_larm_torso[i] - 1;
+    }
+    for(unsigned int j = 0; j < number_torso; j++)
+    {
+        x_larm_rarm[number_larm + j].index = number_larm + j + 1;
+        x_larm_rarm[number_larm + j].value = ( q[robot.torso.joint_numbers[j]] - min_larm_torso[number_larm + j] ) * temp_larm_torso[number_larm + j] - 1;
+    }
+    x_larm_torso[number_larm_torso].index = -1;
+
+    predict_label_2 = svm_predict(model_larm_torso,x_larm_torso);
+    predict_label_int_2 = (int)predict_label;
+
+    if ( predict_label_int_2 == 1 )
+    {
+        whitelist_all.insert( whitelist_all.end(), whitelist_L_Arm_Torso.begin(), whitelist_L_Arm_Torso.end() );
+    }
+
+
 }
 
 

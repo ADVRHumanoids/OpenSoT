@@ -28,6 +28,10 @@
 
 #include <Eigen/Dense>
 
+#include <iostream>
+#include <fstream>
+#include "svm.h"
+
 
  namespace OpenSoT {
     namespace constraints {
@@ -70,6 +74,27 @@
                  * a base link frame which is "waist" link frame
                  */
                 int base_index;
+
+                // used for online prediction of link pair selection
+
+                struct svm_node * x_larm_rarm, * x_larm_torso;
+
+                struct svm_model * model_larm_rarm, * model_larm_torso;
+
+                std::ifstream scale_larm_rarm, scale_larm_torso;
+
+                int number_larm, number_rarm, number_torso, number_head, number_lleg, number_rleg;
+                int number_larm_rarm, number_larm_torso;
+
+                //double min_larm_rarm[number_larm_rarm], max_larm_rarm[number_larm_rarm], temp_larm_rarm[number_larm_rarm];
+                //double min_larm_torso[number_larm_torso], max_larm_torso[number_larm_torso], temp_larm_torso[number_larm_torso];
+                vector<double> min_larm_rarm, max_larm_rarm, temp_larm_rarm, min_larm_torso, max_larm_torso, temp_larm_torso;
+
+                std::list<std::pair<std::string,std::string>> whiteList_L_R_Arms, whitelist_L_Arm_Torso;
+                std::list<std::pair<std::string,std::string>> whitelist_all;
+
+                // used for online prediction of link pair selection
+
             public:
                 ///TODO: Move in cartesian utils
                 // the following four functions are responsible for the transformation between the yarp data type and Eigen data type
@@ -111,6 +136,10 @@
                                        double detection_threshold = std::numeric_limits<double>::infinity(),
                                        double linkPair_threshold = 0.0,
                                        const double boundScaling = 1.0);
+
+
+                ~SelfCollisionAvoidance();
+
                 /**
                  * @brief getLinkPairThreshold
                  * @return _LinkPair_threshold
