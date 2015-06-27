@@ -30,7 +30,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "svm.h"
+#include <OpenSoT/constraints/velocity/svm.h>
 
 
  namespace OpenSoT {
