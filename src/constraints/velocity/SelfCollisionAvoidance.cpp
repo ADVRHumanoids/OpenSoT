@@ -29,11 +29,9 @@ const double SMALL_NUM = pow(10.0, -5);
 
 SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                                iDynUtils &robot,
-                                               double detection_threshold,
                                                double linkPair_threshold,
                                                const double boundScaling):
     Constraint(x.size()),
-    _detection_threshold(detection_threshold),
     _linkPair_threshold(linkPair_threshold),
     computeLinksDistance(robot),
     robot_col(robot),
@@ -50,12 +48,15 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
 
     x_larm_rarm = (struct svm_node *) malloc(40*sizeof(struct svm_node));
     x_larm_torso = (struct svm_node *) malloc(40*sizeof(struct svm_node));
+    x_rarm_torso = (struct svm_node *) malloc(40*sizeof(struct svm_node));
 
-    model_larm_rarm = svm_load_model("fc.train.scale.model.1519");
-    model_larm_torso = svm_load_model("???");
+    model_larm_rarm = svm_load_model("SCAFoI.model.larm.rarm");
+    model_larm_torso = svm_load_model("SCAFoI.model.larm.torso");
+    model_rarm_torso = svm_load_model("SCAFoI.model.rarm.torso");
 
-    scale_larm_rarm.open("range1519");
-    scale_larm_torso.open("???");
+    scale_larm_rarm.open("scale.larm.rarm");
+    scale_larm_torso.open("scale.larm.torso");
+    scale_rarm_torso.open("scale.rarm.torso");
 
     number_larm = robot_col.left_arm.joint_numbers.size();
     number_rarm = robot_col.right_arm.joint_numbers.size();
@@ -66,7 +67,7 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
 
     number_larm_rarm = number_larm + number_rarm;
     number_larm_torso = number_larm + number_torso;
-
+    number_rarm_torso = number_rarm + number_torso;
 
     double temp_min, temp_max;
     for (unsigned int i = 0; i<number_larm_rarm; i++)
@@ -80,7 +81,6 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
         temp_larm_rarm.push_back( 2 / (temp_max-temp_min) );
     }
 
-
     for (unsigned int i = 0; i<number_larm_torso; i++)
     {
         scale_larm_torso>>temp_min;
@@ -91,6 +91,32 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
 
         temp_larm_torso.push_back( 2 / (temp_max-temp_min) );
     }
+
+    for (unsigned int i = 0; i<number_rarm_torso; i++)
+    {
+        scale_rarm_torso>>temp_min;
+        min_rarm_torso.push_back(temp_min);
+
+        scale_rarm_torso>>temp_max;
+        max_rarm_torso.push_back(temp_max);
+
+        temp_rarm_torso.push_back( 2 / (temp_max-temp_min) );
+    }
+
+    d_recent_L_R_Arms[0] = 0.0;
+    d_recent_L_R_Arms[1] = 0.0;
+    d_recent_L_R_Arms[2] = 0.0;
+
+    d_recent_L_Arm_Torso[0] = 0.0;
+    d_recent_L_Arm_Torso[1] = 0.0;
+    d_recent_L_Arm_Torso[2] = 0.0;
+
+    d_recent_R_Arm_Torso[0] = 0.0;
+    d_recent_R_Arm_Torso[1] = 0.0;
+    d_recent_R_Arm_Torso[2] = 0.0;
+
+    d_threshold_upper = 0.2;
+    d_threshold_lower = 0.15;
 
     /*//////////////////whiteList_L_R_Arms////////////////////*/
 
@@ -184,7 +210,7 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB7));
     whiteList_L_R_Arms.push_back(std::pair<std::string,std::string>(linkA8,linkB8));
 
-    /*//////////////////whiteList_L_Arms_Torso////////////////////*/
+    /*//////////////////whiteList_L_Arm_Torso////////////////////*/
 
     linkA1 = "LSoftHandLink";
     linkA2 = "LWrMot3";
@@ -249,6 +275,71 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
     whitelist_L_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
 
+    /*//////////////////whiteList_R_Arm_Torso////////////////////*/
+
+    linkA1 = "RSoftHandLink";
+    linkA2 = "RWrMot3";
+    linkA3 = "RWrMot2";
+    linkA4 = "RForearm";
+    linkA5 = "RElb";
+    linkA6 = "RShy";
+    linkA7 = "RShr";
+    linkA8 = "RShp";
+
+    linkB1 = "Waist";
+    linkB2 = "DWL";
+    linkB3 = "DWS";
+    linkB4 = "DWYTorso";
+    linkB5 = "TorsoProtections";
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    //whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+
     // used for online prediction of link pair selection
 
     update(x);
@@ -269,10 +360,6 @@ double SelfCollisionAvoidance::getLinkPairThreshold()
     return _linkPair_threshold;
 }
 
-double SelfCollisionAvoidance::getDetectionThreshold()
-{
-    return _detection_threshold;
-}
 
 
 void SelfCollisionAvoidance::setLinkPairThreshold(const double linkPair_threshold)
@@ -281,11 +368,6 @@ void SelfCollisionAvoidance::setLinkPairThreshold(const double linkPair_threshol
     //this->update();
 }
 
-void SelfCollisionAvoidance::setDetectionThreshold(const double detection_threshold)
-{
-    _detection_threshold = std::fabs(detection_threshold);
-    //this->update();
-}
 
 
 void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
@@ -294,14 +376,8 @@ void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
     if(!(x == _x_cache)) {
         _x_cache = x;
 
-        predict_SCAFoIs( x );
-
-        bool flag;
-        flag = this->setCollisionWhiteList(whitelist_all);
-        if (!flag)
-        {
-            std::cout << "fail to set whitelist!" << std::endl;
-        }
+        this->predict_SCAFoIs( x, Linkpair_updated_list_all, Linkpair_constrained_list_all );
+        this->calculate_Aineq_bUpperB( _Aineq, _bUpperBound, Linkpair_constrained_list_all );
 
     }
 //    std::cout << "_Aineq" << _Aineq.toString() << std::endl << std::endl;
@@ -311,14 +387,14 @@ void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
     bool ok = computeLinksDistance.setCollisionWhiteList(whiteList);
-    this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
+    //this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
     return ok;
 }
 
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
     bool ok = computeLinksDistance.setCollisionBlackList(blackList);
-    this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
+    //this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
     return ok;
 }
 
@@ -336,61 +412,390 @@ Eigen::MatrixXd SelfCollisionAvoidance::skewSymmetricOperator (const Eigen::Vect
     return J_transform;
 }
 
-void predict_SCAFoIs( const yarp::sig::Vector & q )
+void SelfCollisionAvoidance::store_l_r_arms(const double & d_current)
+{
+    d_recent_L_R_Arms[2] = d_recent_L_R_Arms[1];
+    d_recent_L_R_Arms[1] = d_recent_L_R_Arms[0];
+    d_recent_L_R_Arms[0] = d_current;
+}
+
+void SelfCollisionAvoidance::store_larm_torso(const double & d_current)
+{
+    d_recent_L_Arm_Torso[2] = d_recent_L_Arm_Torso[1];
+    d_recent_L_Arm_Torso[1] = d_recent_L_Arm_Torso[0];
+    d_recent_L_Arm_Torso[0] = d_current;
+}
+
+void SelfCollisionAvoidance::store_rarm_torso(const double & d_current)
+{
+    d_recent_R_Arm_Torso[2] = d_recent_R_Arm_Torso[1];
+    d_recent_R_Arm_Torso[1] = d_recent_R_Arm_Torso[0];
+    d_recent_R_Arm_Torso[0] = d_current;
+}
+
+void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
+                                              std::list<std::pair<std::string,std::string>> & linkpair_updated_list,
+                                              std::list<LinkPairDistance> & linkpair_constrained_list)
 {
 
-    whitelist_all.clear();
+    linkpair_updated_list.clear();
+    linkpair_constrained_list.clear();
 
-    double predict_label_1;
-    int predict_label_int_1;
+    double d_p_lrarms, d_r_lrarms;
 
     /*//////////////////SCAFoI:whiteList_L_R_Arms////////////////////*/
+    /*//////////////////SCAFoI:whiteList_L_R_Arms////////////////////*/
 
-    for(unsigned int i = 0; i < number_larm; i++)
+    if ( (d_recent_L_R_Arms[0] != 0.0) && ((d_recent_L_R_Arms[1] != 0.0)) && (d_recent_L_R_Arms[2] != 0.0)  )
     {
-        x_larm_rarm[i].index = i+1;
-        x_larm_rarm[i].value = ( q[robot.left_arm.joint_numbers[i]] - min_larm_rarm[i] ) * temp_larm_rarm[i] - 1;
+        d_p_lrarms = d_recent_L_R_Arms[2] - 3*d_recent_L_R_Arms[1] + 3*d_recent_L_R_Arms[0];
+
+        if ( d_p_lrarms < d_threshold_upper )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whiteList_L_R_Arms);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and rightarm!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_lrarms = result.getDistance();
+
+                if ( d_r_lrarms < d_threshold_upper )
+                {
+                    store_l_r_arms(d_r_lrarms);
+                }
+                else
+                {
+                    store_l_r_arms(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_l_r_arms(0.0);
+        }
     }
-    for(unsigned int j = 0; j < number_rarm; j++)
+    else
     {
-        x_larm_rarm[number_larm + j].index = number_larm + j + 1;
-        x_larm_rarm[number_larm + j].value = ( q[robot.right_arm.joint_numbers[j]] - min_larm_rarm[number_larm + j] ) * temp_larm_rarm[number_larm + j] - 1;
+        for(unsigned int i = 0; i < number_larm; i++)
+        {
+            x_larm_rarm[i].index = i+1;
+            x_larm_rarm[i].value = ( q[robot_col.left_arm.joint_numbers[i]] - min_larm_rarm[i] ) * temp_larm_rarm[i] - 1;
+        }
+        for(unsigned int j = 0; j < number_rarm; j++)
+        {
+            x_larm_rarm[number_larm + j].index = number_larm + j + 1;
+            x_larm_rarm[number_larm + j].value = ( q[robot_col.right_arm.joint_numbers[j]] - min_larm_rarm[number_larm + j] ) * temp_larm_rarm[number_larm + j] - 1;
+        }
+        x_larm_rarm[number_larm_rarm].index = -1;
+
+        double predict_label = svm_predict(model_larm_rarm,x_larm_rarm);
+        int predict_label_int = (int)predict_label;
+
+        if ( predict_label_int == 1 )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whiteList_L_R_Arms);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and rightarm!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_lrarms = result.getDistance();
+
+                if ( d_r_lrarms < d_threshold_upper )
+                {
+                    store_l_r_arms(d_r_lrarms);
+                }
+                else
+                {
+                    store_l_r_arms(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_l_r_arms(0.0);
+        }
+
     }
-    x_larm_rarm[number_larm_rarm].index = -1;
 
-    predict_label_1 = svm_predict(model_larm_rarm,x_larm_rarm);
-    predict_label_int_1 = (int)predict_label;
 
-    if ( predict_label_int_1 == 1 )
+    /*//////////////////whiteList_L_Arm_Torso////////////////////*/
+    /*//////////////////whiteList_L_Arm_Torso////////////////////*/
+
+
+    double d_p_larmtorso, d_r_larmtorso;
+
+    if ( (d_recent_L_Arm_Torso[0] != 0.0) && ((d_recent_L_Arm_Torso[1] != 0.0)) && (d_recent_L_Arm_Torso[2] != 0.0)  )
     {
-        whitelist_all.insert( whitelist_all.end(), whiteList_L_R_Arms.begin(), whiteList_L_R_Arms.end() );
+        d_p_larmtorso = d_recent_L_Arm_Torso[2] - 3*d_recent_L_Arm_Torso[1] + 3*d_recent_L_Arm_Torso[0];
+
+        if ( d_p_larmtorso < d_threshold_upper )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_Torso);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and torso!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_larmtorso = result.getDistance();
+
+                if ( d_r_larmtorso < d_threshold_upper )
+                {
+                    store_larm_torso(d_r_larmtorso);
+                }
+                else
+                {
+                    store_larm_torso(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_larm_torso(0.0);
+        }
     }
-
-
-    /*//////////////////whiteList_L_Arms_Torso////////////////////*/
-
-    double predict_label_2;
-    int predict_label_int_2;
-
-    for(unsigned int i = 0; i < number_larm; i++)
+    else
     {
-        x_larm_torso[i].index = i+1;
-        x_larm_torso[i].value = ( q[robot.left_arm.joint_numbers[i]] - min_larm_torso[i] ) * temp_larm_torso[i] - 1;
-    }
-    for(unsigned int j = 0; j < number_torso; j++)
-    {
-        x_larm_rarm[number_larm + j].index = number_larm + j + 1;
-        x_larm_rarm[number_larm + j].value = ( q[robot.torso.joint_numbers[j]] - min_larm_torso[number_larm + j] ) * temp_larm_torso[number_larm + j] - 1;
-    }
-    x_larm_torso[number_larm_torso].index = -1;
+        for(unsigned int i = 0; i < number_larm; i++)
+        {
+            x_larm_torso[i].index = i+1;
+            x_larm_torso[i].value = ( q[robot_col.left_arm.joint_numbers[i]] - min_larm_torso[i] ) * temp_larm_torso[i] - 1;
+        }
+        for(unsigned int j = 0; j < number_torso; j++)
+        {
+            x_larm_torso[number_larm + j].index = number_larm + j + 1;
+            x_larm_torso[number_larm + j].value = ( q[robot_col.torso.joint_numbers[j]] - min_larm_torso[number_larm + j] ) * temp_larm_torso[number_larm + j] - 1;
+        }
+        x_larm_torso[number_larm_torso].index = -1;
 
-    predict_label_2 = svm_predict(model_larm_torso,x_larm_torso);
-    predict_label_int_2 = (int)predict_label;
+        double predict_label = svm_predict(model_larm_torso,x_larm_torso);
+        int predict_label_int = (int)predict_label;
 
-    if ( predict_label_int_2 == 1 )
-    {
-        whitelist_all.insert( whitelist_all.end(), whitelist_L_Arm_Torso.begin(), whitelist_L_Arm_Torso.end() );
+        if ( predict_label_int == 1 )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_Torso);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and torso!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_larmtorso = result.getDistance();
+
+                if ( d_r_larmtorso < d_threshold_upper )
+                {
+                    store_larm_torso(d_r_larmtorso);
+                }
+                else
+                {
+                    store_larm_torso(0.0);
+                }
+            }
+
+        }
+        else
+        {
+            store_larm_torso(0.0);
+        }
+
     }
+
+    /*//////////////////whiteList_R_Arm_Torso////////////////////*/
+    /*//////////////////whiteList_R_Arm_Torso////////////////////*/
+
+
+    double d_p_rarmtorso, d_r_rarmtorso;
+
+    if ( (d_recent_R_Arm_Torso[0] != 0.0) && ((d_recent_R_Arm_Torso[1] != 0.0)) && (d_recent_R_Arm_Torso[2] != 0.0)  )
+    {
+        d_p_rarmtorso = d_recent_R_Arm_Torso[2] - 3*d_recent_R_Arm_Torso[1] + 3*d_recent_R_Arm_Torso[0];
+
+        if ( d_p_rarmtorso < d_threshold_upper )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_Torso);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of rightarm and torso!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_rarmtorso = result.getDistance();
+
+                if ( d_r_rarmtorso < d_threshold_upper )
+                {
+                    store_rarm_torso(d_r_rarmtorso);
+                }
+                else
+                {
+                    store_rarm_torso(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_rarm_torso(0.0);
+        }
+    }
+    else
+    {
+        for(unsigned int i = 0; i < number_rarm; i++)
+        {
+            x_rarm_torso[i].index = i+1;
+            x_rarm_torso[i].value = ( q[robot_col.right_arm.joint_numbers[i]] - min_rarm_torso[i] ) * temp_rarm_torso[i] - 1;
+        }
+        for(unsigned int j = 0; j < number_torso; j++)
+        {
+            x_rarm_torso[number_rarm + j].index = number_rarm + j + 1;
+            x_rarm_torso[number_rarm + j].value = ( q[robot_col.torso.joint_numbers[j]] - min_rarm_torso[number_rarm + j] ) * temp_rarm_torso[number_rarm + j] - 1;
+        }
+        x_rarm_torso[number_rarm_torso].index = -1;
+
+        double predict_label = svm_predict(model_rarm_torso,x_rarm_torso);
+        int predict_label_int = (int)predict_label;
+
+        if ( predict_label_int == 1 )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_Torso);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of rightarm and torso!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_rarmtorso = result.getDistance();
+
+                if ( d_r_rarmtorso < d_threshold_upper )
+                {
+                    store_rarm_torso(d_r_rarmtorso);
+                }
+                else
+                {
+                    store_rarm_torso(0.0);
+                }
+            }
+
+        }
+        else
+        {
+            store_rarm_torso(0.0);
+        }
+
+    }
+
 
 
 }
@@ -398,16 +803,11 @@ void predict_SCAFoIs( const yarp::sig::Vector & q )
 
 
 void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_fc,
-                                                      yarp::sig::Vector & bUpperB_fc )
+                                                      yarp::sig::Vector & bUpperB_fc,
+                                                      std::list<LinkPairDistance> & interested_LinkPairs)
 {
 
 //    robot_col.updateiDyn3Model(x, false);
-
-    std::list<LinkPairDistance> interested_LinkPairs;
-    std::list<LinkPairDistance>::iterator j;
-    interested_LinkPairs = computeLinksDistance.getLinkDistances(_detection_threshold);
-
-    /*//////////////////////////////////////////////////////////*/
 
     MatrixXd Aineq_fc_Eigen(interested_LinkPairs.size(), robot_col.iDyn3_model.getNrOfDOFs());
     VectorXd bUpperB_fc_Eigen(interested_LinkPairs.size());
@@ -437,6 +837,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
     temp_trans_matrix.block(3,0,3,3) = MatrixXd::Zero(3,3);
 
     int linkPairIndex = 0;
+    std::list<LinkPairDistance>::iterator j;
     for (j = interested_LinkPairs.begin(); j != interested_LinkPairs.end(); ++j)
     {
 

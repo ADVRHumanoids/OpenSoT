@@ -54,10 +54,7 @@
                  * @brief _LinkPair_threshold is the allowable minimum distance between every Link pair
                  */
                 double _linkPair_threshold;
-                /**
-                 * @brief all the link pairs whose minimum distance are smaller than this "_Detection_threshold" would be dealt with further
-                 */
-                double _detection_threshold;
+
                 iDynUtils& robot_col;
                 ComputeLinksDistance computeLinksDistance;
 
@@ -76,23 +73,35 @@
                 int base_index;
 
                 // used for online prediction of link pair selection
+                // used for online prediction of link pair selection
 
-                struct svm_node * x_larm_rarm, * x_larm_torso;
+                struct svm_node * x_larm_rarm, * x_larm_torso, * x_rarm_torso;
 
-                struct svm_model * model_larm_rarm, * model_larm_torso;
+                struct svm_model * model_larm_rarm, * model_larm_torso, * model_rarm_torso;
 
-                std::ifstream scale_larm_rarm, scale_larm_torso;
+                std::ifstream scale_larm_rarm, scale_larm_torso, scale_rarm_torso;
 
                 int number_larm, number_rarm, number_torso, number_head, number_lleg, number_rleg;
-                int number_larm_rarm, number_larm_torso;
+                int number_larm_rarm, number_larm_torso, number_rarm_torso;
 
-                //double min_larm_rarm[number_larm_rarm], max_larm_rarm[number_larm_rarm], temp_larm_rarm[number_larm_rarm];
-                //double min_larm_torso[number_larm_torso], max_larm_torso[number_larm_torso], temp_larm_torso[number_larm_torso];
-                vector<double> min_larm_rarm, max_larm_rarm, temp_larm_rarm, min_larm_torso, max_larm_torso, temp_larm_torso;
+                std::vector<double> min_larm_rarm, max_larm_rarm, temp_larm_rarm;
+                std::vector<double> min_larm_torso, max_larm_torso, temp_larm_torso;
+                std::vector<double> min_rarm_torso, max_rarm_torso, temp_rarm_torso;
 
-                std::list<std::pair<std::string,std::string>> whiteList_L_R_Arms, whitelist_L_Arm_Torso;
-                std::list<std::pair<std::string,std::string>> whitelist_all;
+                double d_recent_L_R_Arms[3], d_recent_L_Arm_Torso[3], d_recent_R_Arm_Torso[3];
 
+                double d_threshold_upper, d_threshold_lower;
+
+                std::list<std::pair<std::string,std::string>> whiteList_L_R_Arms, whitelist_L_Arm_Torso, whitelist_R_Arm_Torso;
+                std::list<std::pair<std::string,std::string>> Linkpair_updated_list_all;
+                std::list<LinkPairDistance> Linkpair_constrained_list_all;
+
+                void predict_SCAFoIs( const yarp::sig::Vector & q, std::list<std::pair<std::string,std::string>> & linkpair_updated_list, std::list<LinkPairDistance> & linkpair_constrained_list );
+                void store_l_r_arms(const double & d_current);
+                void store_larm_torso(const double & d_current);
+                void store_rarm_torso(const double & d_current);
+
+                // used for online prediction of link pair selection
                 // used for online prediction of link pair selection
 
             public:
@@ -118,22 +127,19 @@
                  * @param Aineq_fc Aineq matrix of this constraint
                  * @param bUpperB_fc bUpperBound of this constraint
                  */
-                void calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc );
+                void calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc, std::list<LinkPairDistance> & interested_LinkPairs );
 
             public:
                 /**
                  * @brief SelfCollisionAvoidanceConstraint
                  * @param x the robot current configuration vector
                  * @param robot the robot model reference
-                 * @param Detection_threshold all the link pairs whose minimum distance are smaller than this Detection_threshold
-                 * would be dealt with further
                  * @param linkPair_threshold the minimum distance between each Link pair
                  * @param boundScaling the bound scaling for the capsule distance (a lower number means we will approach
                  *        the linkPair_threshold more slowly)
                  */
                 SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                        iDynUtils &robot,
-                                       double detection_threshold = std::numeric_limits<double>::infinity(),
                                        double linkPair_threshold = 0.0,
                                        const double boundScaling = 1.0);
 
@@ -147,22 +153,11 @@
                 double getLinkPairThreshold();
 
                 /**
-                 * @brief getDetectionThreshold
-                 * @return _Detection_threshold
-                 */
-                double getDetectionThreshold();
-
-                /**
                  * @brief setLinkPairThreshold set _LinkPair_threshold
                  * @param linkPair_threshold (always positive)
                  */
                 void setLinkPairThreshold(const double linkPair_threshold);
 
-                /**
-                 * @brief setDetectionThreshold set _Detection_threshold
-                 * @param detection_threshold (always positive)
-                 */
-                void setDetectionThreshold(const double detection_threshold);
 
                 /**
                  * @brief update recomputes Aineq and bUpperBound if x is different than the previously stored value
