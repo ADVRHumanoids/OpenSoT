@@ -90,13 +90,9 @@
 
                 double d_recent_L_R_Arms[3], d_recent_L_Arm_Torso[3], d_recent_R_Arm_Torso[3];
 
-                double d_threshold_upper, d_threshold_lower;
+                void predict_SCAFoIs( const yarp::sig::Vector & q, std::list<std::pair<std::string,std::string>> & linkpair_updated_list,
+                                      std::list<LinkPairDistance> & linkpair_constrained_list );
 
-                std::list<std::pair<std::string,std::string>> whiteList_L_R_Arms, whitelist_L_Arm_Torso, whitelist_R_Arm_Torso;
-                std::list<std::pair<std::string,std::string>> Linkpair_updated_list_all;
-                std::list<LinkPairDistance> Linkpair_constrained_list_all;
-
-                void predict_SCAFoIs( const yarp::sig::Vector & q, std::list<std::pair<std::string,std::string>> & linkpair_updated_list, std::list<LinkPairDistance> & linkpair_constrained_list );
                 void store_l_r_arms(const double & d_current);
                 void store_larm_torso(const double & d_current);
                 void store_rarm_torso(const double & d_current);
@@ -196,6 +192,17 @@
                  *         collision with the capsule by slowing down)
                  */
                 void setBoundScaling(const double boundScaling);
+
+                std::list<std::pair<std::string,std::string>> whiteList_L_R_Arms,
+                                                              whitelist_L_Arm_Torso,
+                                                              whitelist_R_Arm_Torso;
+
+                /* upper and lower threshold for SCAFoIs activation */
+                double d_threshold_upper, d_threshold_lower;
+
+                /* these get updated each time you call udpate() */
+                std::list<std::pair<std::string,std::string>> Linkpair_updated_list_all;
+                std::list<LinkPairDistance> Linkpair_constrained_list_all;
             };
         }
     }

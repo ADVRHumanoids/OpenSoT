@@ -3,6 +3,7 @@
  @author Alessio Rocchi
  */
 
+#include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 #include <geometry_msgs/Transform.h>
 #include <idynutils/collision_utils.h>
 #include <ros/ros.h>
@@ -14,7 +15,7 @@
 static const std::string JOINT_STATE_TOPIC = "/joint_states";
 static const std::string RESULT_MARKER_TOPIC = "distance_query/result_marker";
 
-int id_counter = 1;
+int id_counter = 0;
 int id_lines = 0;
 std::string base_frame = "base_link";
 
@@ -44,8 +45,14 @@ const int kelly_colors_hex[] = {
     0x232C16  // Dark Olive Green
 };
 
+const unsigned int GREY =   0x817066;
+const unsigned int RED =    0xC10020;
+const unsigned int PURPLE = 0x803E75;
+const unsigned int GREEN =  0x007D34;
+const unsigned int YELLOW = 0xFFB300;
+
 bool draw_point(const double x, const double y, const double z,
-                const std::string frame, visualization_msgs::Marker& marker, float color=1.0) {
+                const std::string frame, visualization_msgs::Marker& marker, unsigned int color=0xff0000) {
     //DRAW REFERENCE
     marker.header.frame_id = frame;
     marker.header.stamp = ros::Time().now();
@@ -65,21 +72,19 @@ bool draw_point(const double x, const double y, const double z,
     marker.scale.y = 0.02;
     marker.scale.z = 0.02;
 
-    marker.color.r = color;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
-    marker.color.a = 1.0;
     /* // use the map of kelly_colors
-    marker.color.r = (kelly_colors_hex[id_lines] & 0xff0000) >> 16;
-    marker.color.g = (kelly_colors_hex[id_lines] & 0x00ff00) >> 8;
-    marker.color.b =  kelly_colors_hex[id_lines] & 0x0000ff;
-    */
+    color = kelly_colors_hex[id_lines];*/
+    marker.color.r = (float)(((color & 0xff0000) >> 16)/255.0);
+    marker.color.g = (float)(((color & 0x00ff00) >> 8 )/255.0);
+    marker.color.b = (float)(((color & 0x0000ff)      )/255.0);
+
+    marker.color.a = 1.0;
     return true;
 }
 
 bool draw_line(const double x1, const double y1, const double z1,
                const double x2, const double y2, const double z2,
-               visualization_msgs::Marker& marker, float color=1.0) {
+               visualization_msgs::Marker& marker, unsigned int color=0xff0000) {
     //DRAW REFERENCE
     marker.header.frame_id = "Waist";
     marker.header.stamp = ros::Time().now();
@@ -97,24 +102,24 @@ bool draw_line(const double x1, const double y1, const double z1,
     marker.scale.y = 0.005;
     marker.scale.z = 0.005;
 
-    marker.color.r = color;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
-    marker.color.a = 1.0;
     /* // use the map of kelly_colors
-    marker.color.r = (kelly_colors_hex[id_lines] & 0xff0000) >> 16;
-    marker.color.g = (kelly_colors_hex[id_lines] & 0x00ff00) >> 8;
-    marker.color.b =  kelly_colors_hex[id_lines] & 0x0000ff;
-    */
+    color = kelly_colors_hex[id_lines];*/
+    marker.color.r = (float)(((color & 0xff0000) >> 16)/255.0);
+    marker.color.g = (float)(((color & 0x00ff00) >> 8 )/255.0);
+    marker.color.b = (float)(((color & 0x0000ff)      )/255.0);
+
+    marker.color.a = 1.0;
+
     id_lines = (id_lines+1)% kelly_colors_hex_size; // can be used in the future to index the kelly_colors array
     return true;
 }
 
 void createMarkerArray(std::list<LinkPairDistance>& results,
                        const boost::shared_ptr<visualization_msgs::MarkerArray>& markers,
-                       iDynUtils& model) {
+                       iDynUtils& model,
+                       unsigned int markerColor=0xff0000,
+                       unsigned int lineColor=0xff0000) {
     typedef std::list<LinkPairDistance>::iterator iter_pairs;
-    unsigned int indicator = 0;
     for(iter_pairs it = results.begin(); it != results.end(); ++it)
     {
         visualization_msgs::Marker m1;
@@ -123,14 +128,14 @@ void createMarkerArray(std::list<LinkPairDistance>& results,
         draw_point( transforms.first.p.x(),
                     transforms.first.p.y(),
                     transforms.first.p.z(),
-                    linkNames.first, m1, indicator++);
+                    linkNames.first, m1, markerColor);
 
 
         visualization_msgs::Marker m2;
         draw_point( transforms.second.p.x(),
                     transforms.second.p.y(),
                     transforms.second.p.z(),
-                    linkNames.second, m2, indicator++);
+                    linkNames.second, m2, markerColor);
 
         visualization_msgs::Marker l12;
         KDL::Frame p1 = model.iDyn3_model.getPositionKDL(
@@ -141,7 +146,7 @@ void createMarkerArray(std::list<LinkPairDistance>& results,
                             model.iDyn3_model.getLinkIndex(linkNames.second))*transforms.second;
         draw_line(  p1.p.x(), p1.p.y(), p1.p.z(),
                     p2.p.x(), p2.p.y(), p2.p.z(),
-                    l12, indicator++);
+                    l12, lineColor);
 
         markers->markers.push_back(m1);
         markers->markers.push_back(m2);
@@ -166,8 +171,23 @@ int main(int argc, char** argv) {
     boost::shared_ptr<ComputeLinksDistance> distance_comp(
             new ComputeLinksDistance(bigman));
 
-    
+    OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sca(
+        new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
+            yarp::sig::Vector(bigman.iDyn3_model.getNrOfDOFs(),0.0),
+            bigman, 0.005, 0.3));
+
     std::list<std::pair<std::string,std::string>> whiteList;
+    whiteList.insert(whiteList.end(),
+                     sca->whiteList_L_R_Arms.begin(),
+                     sca->whiteList_L_R_Arms.end());
+    whiteList.insert(whiteList.end(),
+                     sca->whitelist_L_Arm_Torso.begin(),
+                     sca->whitelist_L_Arm_Torso.end());
+    whiteList.insert(whiteList.end(),
+                     sca->whitelist_R_Arm_Torso.begin(),
+                     sca->whitelist_R_Arm_Torso.end());
+
+    /*
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
     whiteList.push_back(std::pair<std::string,std::string>("LLowLeg","LSoftHandLink"));
     whiteList.push_back(std::pair<std::string,std::string>("LHipMot","LSoftHandLink"));
@@ -198,6 +218,7 @@ int main(int argc, char** argv) {
     whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RShr"));
     whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RSoftHandLink"));
     whiteList.push_back(std::pair<std::string,std::string>("LWrMot2","RWrMot2"));
+    */
 
     distance_comp->setCollisionWhiteList(whiteList);
 
@@ -213,17 +234,50 @@ int main(int argc, char** argv) {
 
     while (ros::ok()) {
         std::list<LinkPairDistance> results = distance_comp->getLinkDistances();
+        std::list<LinkPairDistance> results_in_scafois, // all link pairs which are in an activated SCAFoI
+                                    results_green_zone, // all link pairs not in an active SCAFoI, with distance > d_threshold_upper
+                                    results_yellow_zone,// all link pairs not in an active SCAFoI, with distance > d_threshold_lower && distance < d_threshold_upper
+                                    results_red_zone;   // all link pairs not in an active SCAFoI, with distance < d_threshold_lower
+        //sca->update(bigman.iDyn3_model.getAng());
+        sca->Linkpair_constrained_list_all;
+        sca->Linkpair_updated_list_all;
 
-        while(results.size() > 15) results.pop_back();
-
-        std::list<LinkPairDistance>::iterator it = results.begin();
+        //while(results.size() > 15) results.pop_back();
 
         if (results.size() > 0) {
             markers->markers.clear();
             id_counter = 0;
             id_lines = 0;
 
+            /*
+            for(std::list<LinkPairDistance>::iterator it =
+                    results.begin(); it != results.end(); ++it)
+            {
+                //if(in activeScafois)
+                //  continue;
+                if(it->getDistance() > sca->d_threshold_upper)
+                    results_green_zone.push_back(it->getLinkNames());
+                else if(it->getDistance() > sca->d_threshold_lower)
+                    results_yellow_zone.push_back(it->getLinkNames());
+                else
+                    results_red_zone.push_back(it->getLinkNames());
+            }*/
+
             createMarkerArray(results, markers, bigman);
+
+
+            if(results_in_scafois.size() > 0)
+                createMarkerArray(results_in_scafois, markers, bigman,  RED,    RED);
+
+            if(results_green_zone.size() > 0)
+                createMarkerArray(results_green_zone, markers, bigman,   GREY,   GREEN);
+
+            if(results_yellow_zone.size() > 0)
+                createMarkerArray(results_yellow_zone, markers, bigman,  GREY,   YELLOW);
+
+            if(results_red_zone.size() > 0)
+                createMarkerArray(results_red_zone, markers, bigman,     PURPLE, RED);
+
             resultMarkerPub.publish(markers);
         }
 

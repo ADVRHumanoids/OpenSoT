@@ -80,7 +80,7 @@ TARGET_LINK_LIBRARIES(example_minimum_effort PUBLIC  OpenSoT ${idynutils_LIBRARI
 TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_python PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_python_crouching PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_python_distance_query ${iDynTree_LIBRARIES} ${idynutils_LIBRARIES} 
-                                                    ${Boost_LIBRARIES} ${tf_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_python_distance_query PUBLIC OpenSoT ${iDynTree_LIBRARIES} ${idynutils_LIBRARIES}
+                                                           ${Boost_LIBRARIES} ${tf_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_previewer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_velocity_allocation PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
