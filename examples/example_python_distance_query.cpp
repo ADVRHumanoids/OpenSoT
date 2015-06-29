@@ -50,6 +50,7 @@ const unsigned int RED =    0xC10020;
 const unsigned int PURPLE = 0x803E75;
 const unsigned int GREEN =  0x007D34;
 const unsigned int YELLOW = 0xFFB300;
+const unsigned int BLUE =   0x00538A;
 
 bool draw_point(const double x, const double y, const double z,
                 const std::string frame, visualization_msgs::Marker& marker, unsigned int color=0xff0000) {
@@ -173,7 +174,7 @@ int main(int argc, char** argv) {
 
     OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sca(
         new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
-            yarp::sig::Vector(bigman.iDyn3_model.getNrOfDOFs(),0.0),
+            bigman.iDyn3_model.getAng(),
             bigman, 0.005, 0.3));
 
     std::list<std::pair<std::string,std::string>> whiteList;
@@ -234,13 +235,13 @@ int main(int argc, char** argv) {
 
     while (ros::ok()) {
         std::list<LinkPairDistance> results = distance_comp->getLinkDistances();
-        std::list<LinkPairDistance> results_in_scafois, // all link pairs which are in an activated SCAFoI
-                                    results_green_zone, // all link pairs not in an active SCAFoI, with distance > d_threshold_upper
-                                    results_yellow_zone,// all link pairs not in an active SCAFoI, with distance > d_threshold_lower && distance < d_threshold_upper
-                                    results_red_zone;   // all link pairs not in an active SCAFoI, with distance < d_threshold_lower
-        //sca->update(bigman.iDyn3_model.getAng());
-        sca->Linkpair_constrained_list_all;
-        sca->Linkpair_updated_list_all;
+        std::list<LinkPairDistance>
+            results_in_scafois, // all link pairs which are in an activated SCAFoI
+            results_constrained,// all link pairs which are in an activated SCAFoI and are active constraints
+            results_green_zone, // all link pairs not in an active SCAFoI, with distance > d_threshold_upper
+            results_yellow_zone,// all link pairs not in an active SCAFoI, with distance > d_threshold_lower && distance < d_threshold_upper
+            results_red_zone;   // all link pairs not in an active SCAFoI, with distance < d_threshold_lower
+        sca->update(bigman.iDyn3_model.getAng());
 
         //while(results.size() > 15) results.pop_back();
 
@@ -249,25 +250,37 @@ int main(int argc, char** argv) {
             id_counter = 0;
             id_lines = 0;
 
-            /*
             for(std::list<LinkPairDistance>::iterator it =
                     results.begin(); it != results.end(); ++it)
             {
-                //if(in activeScafois)
-                //  continue;
-                if(it->getDistance() > sca->d_threshold_upper)
-                    results_green_zone.push_back(it->getLinkNames());
-                else if(it->getDistance() > sca->d_threshold_lower)
-                    results_yellow_zone.push_back(it->getLinkNames());
-                else
-                    results_red_zone.push_back(it->getLinkNames());
-            }*/
+                if(std::find(sca->Linkpair_updated_list_all.begin(),
+                                  sca->Linkpair_updated_list_all.end(),
+                                  it->getLinkNames()) != sca->Linkpair_updated_list_all.end()) // in a SCAFoI
+                {
+                    if(it->getDistance() < sca->d_threshold_lower)
+                        results_constrained.push_back(*it);
+                    else
+                        results_in_scafois.push_back(*it);
+                }
+                else    // NOT in any SCAFoI :(
+                {
+                    if(it->getDistance() > sca->d_threshold_upper)
+                        results_green_zone.push_back(*it);
+                    else if(it->getDistance() > sca->d_threshold_lower)
+                        results_yellow_zone.push_back(*it);
+                    else
+                        results_red_zone.push_back(*it);
+                }
+            }
 
-            createMarkerArray(results, markers, bigman);
+            //createMarkerArray(results, markers, bigman);
 
 
             if(results_in_scafois.size() > 0)
-                createMarkerArray(results_in_scafois, markers, bigman,  RED,    RED);
+                createMarkerArray(results_in_scafois, markers, bigman,  RED,    BLUE);
+
+            if(results_constrained.size() > 0)
+                createMarkerArray(results_constrained, markers, bigman,  RED,    RED);
 
             if(results_green_zone.size() > 0)
                 createMarkerArray(results_green_zone, markers, bigman,   GREY,   GREEN);
