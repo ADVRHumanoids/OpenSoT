@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
 
 
             if(results_in_scafois.size() > 0)
-                createMarkerArray(results_in_scafois, markers, bigman,  RED,    BLUE);
+                createMarkerArray(results_in_scafois, markers, bigman,  RED,     YELLOW);
 
             if(results_constrained.size() > 0)
                 createMarkerArray(results_constrained, markers, bigman,  RED,    RED);
@@ -286,7 +286,7 @@ int main(int argc, char** argv) {
                 createMarkerArray(results_green_zone, markers, bigman,   GREY,   GREEN);
 
             if(results_yellow_zone.size() > 0)
-                createMarkerArray(results_yellow_zone, markers, bigman,  GREY,   YELLOW);
+                createMarkerArray(results_yellow_zone, markers, bigman,  GREY,   BLUE);
 
             if(results_red_zone.size() > 0)
                 createMarkerArray(results_red_zone, markers, bigman,     PURPLE, RED);
