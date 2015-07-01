@@ -206,7 +206,7 @@
                  */
                 void setBoundScaling(const double boundScaling);
 
-                std::list<std::pair<std::string,std::string>> whiteList_L_R_Arms,
+                std::list<std::pair<std::string,std::string>> whitelist_L_R_Arms,
                                                               whitelist_L_Arm_Torso,
                                                               whitelist_R_Arm_Torso,
                                                               whitelist_L_Arm_L_Leg,
