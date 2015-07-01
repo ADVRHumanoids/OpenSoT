@@ -75,20 +75,29 @@
                 // used for online prediction of link pair selection
                 // used for online prediction of link pair selection
 
-                struct svm_node * x_larm_rarm, * x_larm_torso, * x_rarm_torso;
+                struct svm_node * x_larm_rarm, * x_larm_torso, * x_rarm_torso,
+                                * x_larm_lleg, * x_rarm_rleg, * x_larm_rleg, * x_rarm_lleg;
 
-                struct svm_model * model_larm_rarm, * model_larm_torso, * model_rarm_torso;
+                struct svm_model * model_larm_rarm, * model_larm_torso, * model_rarm_torso,
+                                 * model_larm_lleg, * model_rarm_rleg, * model_larm_rleg, * model_rarm_lleg;
 
-                std::ifstream scale_larm_rarm, scale_larm_torso, scale_rarm_torso;
+                std::ifstream scale_larm_rarm, scale_larm_torso, scale_rarm_torso,
+                              scale_larm_lleg, scale_rarm_rleg, scale_larm_rleg, scale_rarm_lleg;
 
                 int number_larm, number_rarm, number_torso, number_head, number_lleg, number_rleg;
-                int number_larm_rarm, number_larm_torso, number_rarm_torso;
+                int number_larm_rarm, number_larm_torso, number_rarm_torso,
+                    number_larm_lleg, number_rarm_rleg, number_larm_rleg, number_rarm_lleg;
 
                 std::vector<double> min_larm_rarm, max_larm_rarm, temp_larm_rarm;
                 std::vector<double> min_larm_torso, max_larm_torso, temp_larm_torso;
                 std::vector<double> min_rarm_torso, max_rarm_torso, temp_rarm_torso;
+                std::vector<double> min_larm_lleg, max_larm_lleg, temp_larm_lleg;
+                std::vector<double> min_rarm_rleg, max_rarm_rleg, temp_rarm_rleg;
+                std::vector<double> min_larm_rleg, max_larm_rleg, temp_larm_rleg;
+                std::vector<double> min_rarm_lleg, max_rarm_lleg, temp_rarm_lleg;
 
-                double d_recent_L_R_Arms[3], d_recent_L_Arm_Torso[3], d_recent_R_Arm_Torso[3];
+                double d_recent_L_R_Arms[3], d_recent_L_Arm_Torso[3], d_recent_R_Arm_Torso[3],
+                       d_recent_L_Arm_L_Leg[3], d_recent_R_Arm_R_Leg[3], d_recent_L_Arm_R_Leg[3], d_recent_R_Arm_L_Leg[3];
 
                 void predict_SCAFoIs( const yarp::sig::Vector & q, std::list<std::pair<std::string,std::string>> & linkpair_updated_list,
                                       std::list<LinkPairDistance> & linkpair_constrained_list );
@@ -96,6 +105,10 @@
                 void store_l_r_arms(const double & d_current);
                 void store_larm_torso(const double & d_current);
                 void store_rarm_torso(const double & d_current);
+                void store_larm_lleg(const double & d_current);
+                void store_rarm_rleg(const double & d_current);
+                void store_larm_rleg(const double & d_current);
+                void store_rarm_lleg(const double & d_current);
 
                 // used for online prediction of link pair selection
                 // used for online prediction of link pair selection
@@ -195,7 +208,11 @@
 
                 std::list<std::pair<std::string,std::string>> whiteList_L_R_Arms,
                                                               whitelist_L_Arm_Torso,
-                                                              whitelist_R_Arm_Torso;
+                                                              whitelist_R_Arm_Torso,
+                                                              whitelist_L_Arm_L_Leg,
+                                                              whitelist_R_Arm_R_Leg,
+                                                              whitelist_L_Arm_R_Leg,
+                                                              whitelist_R_Arm_L_Leg;
 
                 /* upper and lower threshold for SCAFoIs activation */
                 double d_threshold_upper, d_threshold_lower;

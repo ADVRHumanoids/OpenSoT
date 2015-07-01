@@ -49,14 +49,26 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     x_larm_rarm = (struct svm_node *) malloc(40*sizeof(struct svm_node));
     x_larm_torso = (struct svm_node *) malloc(40*sizeof(struct svm_node));
     x_rarm_torso = (struct svm_node *) malloc(40*sizeof(struct svm_node));
+    x_larm_lleg = (struct svm_node *) malloc(40*sizeof(struct svm_node));
+    x_rarm_rleg = (struct svm_node *) malloc(40*sizeof(struct svm_node));
+    x_larm_rleg = (struct svm_node *) malloc(40*sizeof(struct svm_node));
+    x_rarm_lleg = (struct svm_node *) malloc(40*sizeof(struct svm_node));
 
     model_larm_rarm = svm_load_model("SCAFoI.model.larm.rarm");
     model_larm_torso = svm_load_model("SCAFoI.model.larm.torso");
     model_rarm_torso = svm_load_model("SCAFoI.model.rarm.torso");
+    model_larm_lleg = svm_load_model("SCAFoI.model.larm.lleg");
+    model_rarm_rleg = svm_load_model("SCAFoI.model.rarm.rleg");
+    model_larm_rleg = svm_load_model("SCAFoI.model.larm.rleg");
+    model_rarm_lleg = svm_load_model("SCAFoI.model.rarm.lleg");
 
     scale_larm_rarm.open("scale.larm.rarm");
     scale_larm_torso.open("scale.larm.torso");
     scale_rarm_torso.open("scale.rarm.torso");
+    scale_larm_lleg.open("scale.larm.lleg");
+    scale_rarm_rleg.open("scale.rarm.rleg");
+    scale_larm_rleg.open("scale.larm.rleg");
+    scale_rarm_lleg.open("scale.rarm.lleg");
 
     number_larm = robot_col.left_arm.joint_numbers.size();
     number_rarm = robot_col.right_arm.joint_numbers.size();
@@ -68,6 +80,10 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     number_larm_rarm = number_larm + number_rarm;
     number_larm_torso = number_larm + number_torso;
     number_rarm_torso = number_rarm + number_torso;
+    number_larm_lleg = number_larm + number_torso + number_lleg - 1;
+    number_rarm_rleg = number_rarm + number_torso + number_rleg - 1;
+    number_larm_rleg = number_larm + number_torso + number_rleg - 1;
+    number_rarm_lleg = number_rarm + number_torso + number_lleg - 1;
 
     double temp_min, temp_max;
     for (unsigned int i = 0; i<number_larm_rarm; i++)
@@ -103,6 +119,51 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
         temp_rarm_torso.push_back( 2 / (temp_max-temp_min) );
     }
 
+    for (unsigned int i = 0; i<number_larm_lleg; i++)
+    {
+        scale_larm_lleg>>temp_min;
+        min_larm_lleg.push_back(temp_min);
+
+        scale_larm_lleg>>temp_max;
+        max_larm_lleg.push_back(temp_max);
+
+        temp_larm_lleg.push_back( 2 / (temp_max-temp_min) );
+    }
+
+    for (unsigned int i = 0; i<number_rarm_rleg; i++)
+    {
+        scale_rarm_rleg>>temp_min;
+        min_rarm_rleg.push_back(temp_min);
+
+        scale_rarm_rleg>>temp_max;
+        max_rarm_rleg.push_back(temp_max);
+
+        temp_rarm_rleg.push_back( 2 / (temp_max-temp_min) );
+    }
+
+    for (unsigned int i = 0; i<number_larm_rleg; i++)
+    {
+        scale_larm_rleg>>temp_min;
+        min_larm_rleg.push_back(temp_min);
+
+        scale_larm_rleg>>temp_max;
+        max_larm_rleg.push_back(temp_max);
+
+        temp_larm_rleg.push_back( 2 / (temp_max-temp_min) );
+    }
+
+    for (unsigned int i = 0; i<number_rarm_lleg; i++)
+    {
+        scale_rarm_lleg>>temp_min;
+        min_rarm_lleg.push_back(temp_min);
+
+        scale_rarm_lleg>>temp_max;
+        max_rarm_lleg.push_back(temp_max);
+
+        temp_rarm_lleg.push_back( 2 / (temp_max-temp_min) );
+    }
+
+
     d_recent_L_R_Arms[0] = 0.0;
     d_recent_L_R_Arms[1] = 0.0;
     d_recent_L_R_Arms[2] = 0.0;
@@ -114,6 +175,22 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     d_recent_R_Arm_Torso[0] = 0.0;
     d_recent_R_Arm_Torso[1] = 0.0;
     d_recent_R_Arm_Torso[2] = 0.0;
+
+    d_recent_L_Arm_L_Leg[0] = 0.0;
+    d_recent_L_Arm_L_Leg[1] = 0.0;
+    d_recent_L_Arm_L_Leg[2] = 0.0;
+
+    d_recent_R_Arm_R_Leg[0] = 0.0;
+    d_recent_R_Arm_R_Leg[1] = 0.0;
+    d_recent_R_Arm_R_Leg[2] = 0.0;
+
+    d_recent_L_Arm_R_Leg[0] = 0.0;
+    d_recent_L_Arm_R_Leg[1] = 0.0;
+    d_recent_L_Arm_R_Leg[2] = 0.0;
+
+    d_recent_R_Arm_L_Leg[0] = 0.0;
+    d_recent_R_Arm_L_Leg[1] = 0.0;
+    d_recent_R_Arm_L_Leg[2] = 0.0;
 
     d_threshold_upper = 0.2;
     d_threshold_lower = 0.15;
@@ -340,6 +417,266 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
     whitelist_R_Arm_Torso.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
 
+    /*//////////////////whiteList_L_Arm_L_Leg////////////////////*/
+
+    linkA1 = "LSoftHandLink";
+    linkA2 = "LWrMot3";
+    linkA3 = "LWrMot2";
+    linkA4 = "LForearm";
+    linkA5 = "LElb";
+    linkA6 = "LShy";
+    linkA7 = "LShr";
+    linkA8 = "LShp";
+
+    linkB1 = "LHipMot";
+    linkB2 = "LThighUpLeg";
+    linkB3 = "LThighLowLeg";
+    linkB4 = "LLowLeg";
+    linkB5 = "LFootmot";
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+
+    /*//////////////////whiteList_R_Arm_R_Leg////////////////////*/
+
+    linkA1 = "RSoftHandLink";
+    linkA2 = "RWrMot3";
+    linkA3 = "RWrMot2";
+    linkA4 = "RForearm";
+    linkA5 = "RElb";
+    linkA6 = "RShy";
+    linkA7 = "RShr";
+    linkA8 = "RShp";
+
+    linkB1 = "RHipMot";
+    linkB2 = "RThighUpLeg";
+    linkB3 = "RThighLowLeg";
+    linkB4 = "RLowLeg";
+    linkB5 = "RFootmot";
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+
+    /*//////////////////whiteList_L_Arm_R_Leg////////////////////*/
+
+    linkA1 = "LSoftHandLink";
+    linkA2 = "LWrMot3";
+    linkA3 = "LWrMot2";
+    linkA4 = "LForearm";
+    linkA5 = "LElb";
+    linkA6 = "LShy";
+    linkA7 = "LShr";
+    linkA8 = "LShp";
+
+    linkB1 = "RHipMot";
+    linkB2 = "RThighUpLeg";
+    linkB3 = "RThighLowLeg";
+    linkB4 = "RLowLeg";
+    linkB5 = "RFootmot";
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+
+    /*//////////////////whiteList_R_Arm_L_Leg////////////////////*/
+
+    linkA1 = "RSoftHandLink";
+    linkA2 = "RWrMot3";
+    linkA3 = "RWrMot2";
+    linkA4 = "RForearm";
+    linkA5 = "RElb";
+    linkA6 = "RShy";
+    linkA7 = "RShr";
+    linkA8 = "RShp";
+
+    linkB1 = "LHipMot";
+    linkB2 = "LThighUpLeg";
+    linkB3 = "LThighLowLeg";
+    linkB4 = "LLowLeg";
+    linkB5 = "LFootmot";
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+
     // used for online prediction of link pair selection
 
     update(x);
@@ -350,9 +687,20 @@ SelfCollisionAvoidance::~SelfCollisionAvoidance()
 {
     free(x_larm_rarm);
     free(x_larm_torso);
+    free(x_rarm_torso);
+    free(x_larm_lleg);
+    free(x_rarm_rleg);
+    free(x_larm_rleg);
+    free(x_rarm_lleg);
 
     scale_larm_rarm.close();
     scale_larm_torso.close();
+    scale_rarm_torso.close();
+    scale_larm_lleg.close();
+    scale_rarm_rleg.close();
+    scale_larm_rleg.close();
+    scale_rarm_lleg.close();
+
 }
 
 double SelfCollisionAvoidance::getLinkPairThreshold()
@@ -433,6 +781,34 @@ void SelfCollisionAvoidance::store_rarm_torso(const double & d_current)
     d_recent_R_Arm_Torso[0] = d_current;
 }
 
+void SelfCollisionAvoidance::store_larm_lleg(const double & d_current)
+{
+    d_recent_L_Arm_L_Leg[2] = d_recent_L_Arm_L_Leg[1];
+    d_recent_L_Arm_L_Leg[1] = d_recent_L_Arm_L_Leg[0];
+    d_recent_L_Arm_L_Leg[0] = d_current;
+}
+
+void SelfCollisionAvoidance::store_rarm_rleg(const double & d_current)
+{
+    d_recent_R_Arm_R_Leg[2] = d_recent_R_Arm_R_Leg[1];
+    d_recent_R_Arm_R_Leg[1] = d_recent_R_Arm_R_Leg[0];
+    d_recent_R_Arm_R_Leg[0] = d_current;
+}
+
+void SelfCollisionAvoidance::store_larm_rleg(const double & d_current)
+{
+    d_recent_L_Arm_R_Leg[2] = d_recent_L_Arm_R_Leg[1];
+    d_recent_L_Arm_R_Leg[1] = d_recent_L_Arm_R_Leg[0];
+    d_recent_L_Arm_R_Leg[0] = d_current;
+}
+
+void SelfCollisionAvoidance::store_rarm_lleg(const double & d_current)
+{
+    d_recent_R_Arm_L_Leg[2] = d_recent_R_Arm_L_Leg[1];
+    d_recent_R_Arm_L_Leg[1] = d_recent_R_Arm_L_Leg[0];
+    d_recent_R_Arm_L_Leg[0] = d_current;
+}
+
 void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
                                               std::list<std::pair<std::string,std::string>> & linkpair_updated_list,
                                               std::list<LinkPairDistance> & linkpair_constrained_list)
@@ -441,10 +817,11 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
     linkpair_updated_list.clear();
     linkpair_constrained_list.clear();
 
-    double d_p_lrarms, d_r_lrarms;
 
     /*//////////////////SCAFoI:whiteList_L_R_Arms////////////////////*/
     /*//////////////////SCAFoI:whiteList_L_R_Arms////////////////////*/
+
+    double d_p_lrarms, d_r_lrarms;
 
     if ( (d_recent_L_R_Arms[0] != 0.0) && ((d_recent_L_R_Arms[1] != 0.0)) && (d_recent_L_R_Arms[2] != 0.0)  )
     {
@@ -796,6 +1173,494 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
     }
 
+    /*//////////////////whiteList_L_Arm_L_Leg////////////////////*/
+    /*//////////////////whiteList_L_Arm_L_Leg////////////////////*/
+
+    double d_p_larmlleg, d_r_larmlleg;
+
+    if ( (d_recent_L_Arm_L_Leg[0] != 0.0) && ((d_recent_L_Arm_L_Leg[1] != 0.0)) && (d_recent_L_Arm_L_Leg[2] != 0.0)  )
+    {
+        d_p_larmlleg = d_recent_L_Arm_L_Leg[2] - 3*d_recent_L_Arm_L_Leg[1] + 3*d_recent_L_Arm_L_Leg[0];
+
+        if ( d_p_larmlleg < d_threshold_upper )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_L_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and leftleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_larmlleg = result.getDistance();
+
+                if ( d_r_larmlleg < d_threshold_upper )
+                {
+                    store_larm_lleg(d_r_larmlleg);
+                }
+                else
+                {
+                    store_larm_lleg(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_larm_lleg(0.0);
+        }
+    }
+    else
+    {
+        for(unsigned int i = 0; i < number_larm; i++)
+        {
+            x_larm_lleg[i].index = i+1;
+            x_larm_lleg[i].value = ( q[robot_col.left_arm.joint_numbers[i]] - min_larm_lleg[i] ) * temp_larm_lleg[i] - 1;
+        }
+        for(unsigned int j = 0; j < number_torso; j++)
+        {
+            x_larm_lleg[number_larm + j].index = number_larm + j + 1;
+            x_larm_lleg[number_larm + j].value = ( q[robot_col.torso.joint_numbers[j]] - min_larm_lleg[number_larm + j] ) * temp_larm_lleg[number_larm + j] - 1;
+        }
+        for(unsigned int k = 0; k < (number_lleg-1); k++)
+        {
+            x_larm_lleg[number_larm + number_torso + k].index = number_larm + number_torso + k + 1;
+            x_larm_lleg[number_larm + number_torso + k].value = ( q[robot_col.left_leg.joint_numbers[k]] - min_larm_lleg[number_larm + number_torso + k] ) * temp_larm_lleg[number_larm + number_torso + k] - 1;
+        }
+        x_larm_lleg[number_larm_lleg].index = -1;
+
+        double predict_label = svm_predict(model_larm_lleg,x_larm_lleg);
+        int predict_label_int = (int)predict_label;
+
+        if ( predict_label_int == 1 )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_L_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and leftleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_larmlleg = result.getDistance();
+
+                if ( d_r_larmlleg < d_threshold_upper )
+                {
+                    store_larm_lleg(d_r_larmlleg);
+                }
+                else
+                {
+                    store_larm_lleg(0.0);
+                }
+            }
+
+        }
+        else
+        {
+            store_larm_lleg(0.0);
+        }
+
+    }
+
+
+    /*//////////////////whiteList_R_Arm_R_Leg////////////////////*/
+    /*//////////////////whiteList_R_Arm_R_Leg////////////////////*/
+
+    double d_p_rarmrleg, d_r_rarmrleg;
+
+    if ( (d_recent_R_Arm_R_Leg[0] != 0.0) && ((d_recent_R_Arm_R_Leg[1] != 0.0)) && (d_recent_R_Arm_R_Leg[2] != 0.0)  )
+    {
+        d_p_rarmrleg = d_recent_R_Arm_R_Leg[2] - 3*d_recent_R_Arm_R_Leg[1] + 3*d_recent_R_Arm_R_Leg[0];
+
+        if ( d_p_rarmrleg < d_threshold_upper )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_R_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of rightarm and rightleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_rarmrleg = result.getDistance();
+
+                if ( d_r_rarmrleg < d_threshold_upper )
+                {
+                    store_rarm_rleg(d_r_rarmrleg);
+                }
+                else
+                {
+                    store_rarm_rleg(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_rarm_rleg(0.0);
+        }
+    }
+    else
+    {
+        for(unsigned int i = 0; i < number_rarm; i++)
+        {
+            x_rarm_rleg[i].index = i+1;
+            x_rarm_rleg[i].value = ( q[robot_col.right_arm.joint_numbers[i]] - min_rarm_rleg[i] ) * temp_rarm_rleg[i] - 1;
+        }
+        for(unsigned int j = 0; j < number_torso; j++)
+        {
+            x_rarm_rleg[number_rarm + j].index = number_rarm + j + 1;
+            x_rarm_rleg[number_rarm + j].value = ( q[robot_col.torso.joint_numbers[j]] - min_rarm_rleg[number_rarm + j] ) * temp_rarm_rleg[number_rarm + j] - 1;
+        }
+        for(unsigned int k = 0; k < (number_rleg-1); k++)
+        {
+            x_rarm_rleg[number_rarm + number_torso + k].index = number_rarm + number_torso + k + 1;
+            x_rarm_rleg[number_rarm + number_torso + k].value = ( q[robot_col.right_leg.joint_numbers[k]] - min_rarm_rleg[number_rarm + number_torso + k] ) * temp_rarm_rleg[number_rarm + number_torso + k] - 1;
+        }
+        x_rarm_rleg[number_rarm_rleg].index = -1;
+
+        double predict_label = svm_predict(model_rarm_rleg,x_rarm_rleg);
+        int predict_label_int = (int)predict_label;
+
+        if ( predict_label_int == 1 )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_R_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of rightarm and rightleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_rarmrleg = result.getDistance();
+
+                if ( d_r_rarmrleg < d_threshold_upper )
+                {
+                    store_rarm_rleg(d_r_rarmrleg);
+                }
+                else
+                {
+                    store_rarm_rleg(0.0);
+                }
+            }
+
+        }
+        else
+        {
+            store_rarm_rleg(0.0);
+        }
+
+    }
+
+    /*//////////////////whiteList_L_Arm_R_Leg////////////////////*/
+    /*//////////////////whiteList_L_Arm_R_Leg////////////////////*/
+
+    double d_p_larmrleg, d_r_larmrleg;
+
+    if ( (d_recent_L_Arm_R_Leg[0] != 0.0) && ((d_recent_L_Arm_R_Leg[1] != 0.0)) && (d_recent_L_Arm_R_Leg[2] != 0.0)  )
+    {
+        d_p_larmrleg = d_recent_L_Arm_R_Leg[2] - 3*d_recent_L_Arm_R_Leg[1] + 3*d_recent_L_Arm_R_Leg[0];
+
+        if ( d_p_larmrleg < d_threshold_upper )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_R_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and rightleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_larmrleg = result.getDistance();
+
+                if ( d_r_larmrleg < d_threshold_upper )
+                {
+                    store_larm_rleg(d_r_larmrleg);
+                }
+                else
+                {
+                    store_larm_rleg(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_larm_rleg(0.0);
+        }
+    }
+    else
+    {
+        for(unsigned int i = 0; i < number_larm; i++)
+        {
+            x_larm_rleg[i].index = i+1;
+            x_larm_rleg[i].value = ( q[robot_col.left_arm.joint_numbers[i]] - min_larm_rleg[i] ) * temp_larm_rleg[i] - 1;
+        }
+        for(unsigned int j = 0; j < number_torso; j++)
+        {
+            x_larm_rleg[number_larm + j].index = number_larm + j + 1;
+            x_larm_rleg[number_larm + j].value = ( q[robot_col.torso.joint_numbers[j]] - min_larm_rleg[number_larm + j] ) * temp_larm_rleg[number_larm + j] - 1;
+        }
+        for(unsigned int k = 0; k < (number_rleg-1); k++)
+        {
+            x_larm_rleg[number_larm + number_torso + k].index = number_larm + number_torso + k + 1;
+            x_larm_rleg[number_larm + number_torso + k].value = ( q[robot_col.right_leg.joint_numbers[k]] - min_larm_rleg[number_larm + number_torso + k] ) * temp_larm_rleg[number_larm + number_torso + k] - 1;
+        }
+        x_larm_rleg[number_larm_rleg].index = -1;
+
+        double predict_label = svm_predict(model_larm_rleg,x_larm_rleg);
+        int predict_label_int = (int)predict_label;
+
+        if ( predict_label_int == 1 )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_R_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of leftarm and rightleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_larmrleg = result.getDistance();
+
+                if ( d_r_larmrleg < d_threshold_upper )
+                {
+                    store_larm_rleg(d_r_larmrleg);
+                }
+                else
+                {
+                    store_larm_rleg(0.0);
+                }
+            }
+
+        }
+        else
+        {
+            store_larm_rleg(0.0);
+        }
+
+    }
+
+    /*//////////////////whiteList_R_Arm_L_Leg////////////////////*/
+    /*//////////////////whiteList_R_Arm_L_Leg////////////////////*/
+
+    double d_p_rarmlleg, d_r_rarmlleg;
+
+    if ( (d_recent_R_Arm_L_Leg[0] != 0.0) && ((d_recent_R_Arm_L_Leg[1] != 0.0)) && (d_recent_R_Arm_L_Leg[2] != 0.0)  )
+    {
+        d_p_rarmlleg = d_recent_R_Arm_L_Leg[2] - 3*d_recent_R_Arm_L_Leg[1] + 3*d_recent_R_Arm_L_Leg[0];
+
+        if ( d_p_rarmlleg < d_threshold_upper )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_L_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of rightarm and leftleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_rarmlleg = result.getDistance();
+
+                if ( d_r_rarmlleg < d_threshold_upper )
+                {
+                    store_rarm_lleg(d_r_rarmlleg);
+                }
+                else
+                {
+                    store_rarm_lleg(0.0);
+                }
+
+            }
+
+        }
+        else
+        {
+            store_rarm_lleg(0.0);
+        }
+    }
+    else
+    {
+        for(unsigned int i = 0; i < number_rarm; i++)
+        {
+            x_rarm_lleg[i].index = i+1;
+            x_rarm_lleg[i].value = ( q[robot_col.right_arm.joint_numbers[i]] - min_rarm_lleg[i] ) * temp_rarm_lleg[i] - 1;
+        }
+        for(unsigned int j = 0; j < number_torso; j++)
+        {
+            x_rarm_lleg[number_rarm + j].index = number_rarm + j + 1;
+            x_rarm_lleg[number_rarm + j].value = ( q[robot_col.torso.joint_numbers[j]] - min_rarm_lleg[number_rarm + j] ) * temp_rarm_lleg[number_rarm + j] - 1;
+        }
+        for(unsigned int k = 0; k < (number_lleg-1); k++)
+        {
+            x_rarm_lleg[number_rarm + number_torso + k].index = number_rarm + number_torso + k + 1;
+            x_rarm_lleg[number_rarm + number_torso + k].value = ( q[robot_col.left_leg.joint_numbers[k]] - min_rarm_lleg[number_rarm + number_torso + k] ) * temp_rarm_lleg[number_rarm + number_torso + k] - 1;
+        }
+        x_rarm_lleg[number_rarm_lleg].index = -1;
+
+        double predict_label = svm_predict(model_rarm_lleg,x_rarm_lleg);
+        int predict_label_int = (int)predict_label;
+
+        if ( predict_label_int == 1 )
+        {
+            bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_L_Leg);
+            if(!ok)
+            {
+                std::cout<<"fail to set whitelist for the SCAFoI of the pair of rightarm and leftleg!" <<std::endl;
+            }
+            else
+            {
+                std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+
+                std::list<LinkPairDistance>::iterator i;
+                for (i = results.begin(); i != results.end(); ++i)
+                {
+                    if ( (*i).getDistance() < d_threshold_lower )
+                    {
+                        linkpair_constrained_list.push_back(*i);
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                    else
+                    {
+                        linkpair_updated_list.push_back( (*i).getLinkNames() );
+                    }
+                }
+
+                LinkPairDistance result = results.front();
+                d_r_rarmlleg = result.getDistance();
+
+                if ( d_r_rarmlleg < d_threshold_upper )
+                {
+                    store_rarm_lleg(d_r_rarmlleg);
+                }
+                else
+                {
+                    store_rarm_lleg(0.0);
+                }
+            }
+
+        }
+        else
+        {
+            store_rarm_lleg(0.0);
+        }
+
+    }
 
 
 }
