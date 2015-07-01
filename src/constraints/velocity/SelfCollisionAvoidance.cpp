@@ -434,53 +434,53 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     linkB4 = "LLowLeg";
     linkB5 = "LFootmot";
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
 
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
-    whiteList_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whitelist_L_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
 
     /*//////////////////whiteList_R_Arm_R_Leg////////////////////*/
 
@@ -499,53 +499,53 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     linkB4 = "RLowLeg";
     linkB5 = "RFootmot";
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
 
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
-    whiteList_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whitelist_R_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
 
     /*//////////////////whiteList_L_Arm_R_Leg////////////////////*/
 
@@ -564,53 +564,53 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     linkB4 = "RLowLeg";
     linkB5 = "RFootmot";
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
 
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
-    whiteList_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whitelist_L_Arm_R_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
 
     /*//////////////////whiteList_R_Arm_L_Leg////////////////////*/
 
@@ -629,53 +629,53 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     linkB4 = "LLowLeg";
     linkB5 = "LFootmot";
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA1,linkB5));
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA2,linkB5));
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA3,linkB5));
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA4,linkB5));
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA5,linkB5));
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA6,linkB5));
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA7,linkB5));
 
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
-    whiteList_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB1));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB2));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB3));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB4));
+    whitelist_R_Arm_L_Leg.push_back(std::pair<std::string,std::string>(linkA8,linkB5));
 
     // used for online prediction of link pair selection
 
