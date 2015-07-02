@@ -179,8 +179,8 @@ int main(int argc, char** argv) {
 
     std::list<std::pair<std::string,std::string>> whiteList;
     whiteList.insert(whiteList.end(),
-                     sca->whiteList_L_R_Arms.begin(),
-                     sca->whiteList_L_R_Arms.end());
+                     sca->whitelist_L_R_Arms.begin(),
+                     sca->whitelist_L_R_Arms.end());
     whiteList.insert(whiteList.end(),
                      sca->whitelist_L_Arm_Torso.begin(),
                      sca->whitelist_L_Arm_Torso.end());
