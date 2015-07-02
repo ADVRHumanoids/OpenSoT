@@ -218,3 +218,10 @@ if(OPENSOT_COMPILE_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
+
+
+file(GLOB SCAFoI_FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/tests/SCAFoI/*"
+)
+
+file(COPY ${SCAFoI_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
