@@ -16,6 +16,41 @@
   Velocity and effort limits are fake!
 -->
   <!-- ************ MODEL CONFIGURATION ************ -->
+  <!--
+####################################################
+##
+##  FEET SELECTION
+##
+##
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  FOREARMS & HANDS SELECTION
+##
+##
+##
+####################################################
+-->
+  <!--
+####################################################
+##
+##  Xtion SELECTION
+##
+##
+## options:
+## 1) COMAN classic without the staff to carry the sensor. 
+##      Torso frame is connected to gaze link through a gaze_joint "fixed"
+## 2) COMAN with staff and xtion sensor. Torso frame is connected to a xtion_staff_link through
+##      a xtion_staff_joint "fixed". Xtion_staff_link is then connected to gaze_link through gaze_joint "fixed". 
+##
+####################################################
+#
+# 1/2 (true/false) 
+#
+-->
   <!-- ***********  MODEL COLORS *********** -->
   <material name="grey">
     <color rgba="0.5 0.5 0.5 1"/>
@@ -31,66 +66,28 @@
 and to define the end effectors of the robot.
 The coordinate frame called gaze defines the head position and orientation. The orientation indicates in which direction the head appears to be looking regardless of any sensors (camera for instance). -->
   <link name="gaze"/>
-  <link name="Xtion_body">
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.047 0.0 0.40"/>
-      <mass value="0.39"/>
-      <inertia ixx="0.01" ixy="3.34E-7" ixz="-2.66E-4" iyy="0.009" iyz="1.97E-6" izz="5.1E-4"/>
-    </inertial>
-    <visual>
-      <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0.0 -0.68662053"/>
-      <geometry name="Xtion_body_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/Xtion/xtion_base.stl" scale="0.03937 0.03937 0.03937"/>
-      </geometry>
-    </visual>
-    <collision>
-      <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0.0 -0.68662053"/>
-      <geometry name="Xtion_body_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/Xtion/xtion_base.stl" scale="0.03937 0.03937 0.03937"/>
-      </geometry>
-    </collision>
-  </link>
-  <link name="Xtion_cam_body">
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0225"/>
-      <mass value="0.2"/>
-      <inertia ixx="0.00053" ixy="0.0" ixz="0.0" iyy="0.00008" iyz="0.0" izz="0.00053"/>
-    </inertial>
-    <visual>
-      <origin rpy="0 0 3.14159265359" xyz="-0.0915 0.0 -1.2778"/>
-      <geometry name="Xtion_cam_body_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/Xtion/xtion_cam_body.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-    </visual>
-    <collision>
-      <origin rpy="0 0 3.14159265359" xyz="-0.0915 0.0 -1.2778"/>
-      <geometry name="Xtion_cam_body_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/Xtion/xtion_cam_body.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="Xtion_body_joint" type="fixed">
-    <parent link="DWYTorso"/>
-    <child link="Xtion_body"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-  </joint>
-  <joint name="Xtion_cam_body_joint" type="fixed">
-    <parent link="Xtion_body"/>
-    <child link="Xtion_cam_body"/>
-    <!-- origin xyz="0.071 0 0.591" rpy="0 1.396 0" / -->
-    <origin rpy="0 0 0" xyz="0.071 0 0.591"/>
-    <!--axis xyz="0 1 0" />
-	<limit velocity="4.0" effort="5" lower="-0.4145" upper="1.57075" />
-	<dynamics friction="0" damping="3.0"/-->
-  </joint>
   <joint name="gaze_joint" type="fixed">
-    <parent link="Xtion_cam_body"/>
+    <parent link="torso"/>
     <child link="gaze"/>
-    <origin rpy="0 0 0" xyz="0.015 0 0.022"/>
+    <origin rpy="0 0 0" xyz="0 0 0.1"/>
   </joint>
   <!-- ************ COMAN BASE ************** -->
+  <!-- 
+  ROS urdf definition of the COMAN humanoid robot by Istituto Italiano di Tecnologia
+  
+  DO NOT INCLUDE THIS FILE DIRECTLY! USE coman_robot.urdf.xacro INSTEAD!
+
+  Author: Enrico Mingo & Alessio Rocchi
+
+  Inertial matrix has to be in CoM frame (URDF specs)
+
+  Velocity and effort limits are fake!
+-->
+  <!-- This links are defined in order to be compliant with http://www.ros.org/reps/rep-0120.html#coordinate-frames
+and to define the end effectors of the robot
+
+The coordinate frame called base_link is rigidly attached to the robot root body. It is recommended to choose the robot waist as its root body. The base_link can be attached to the root in any arbitrary position or orientation; for every hardware platform there will be a different place on the base that provides an obvious point of reference. Note that REP 103 [1] specifies a preferred orientation for frames. -->
   <link name="base_link"/>
-  <link name="torso"/>
   <link name="Waist">
     <inertial>
       <origin rpy="0.0 0.0 0.0" xyz="-0.026391145 -5.8216364E-4 0.052632312"/>
@@ -101,16 +98,27 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0 0 -0.52"/>
       <material name="dark_grey"/>
       <geometry name="Waist_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/torso0.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Waist.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0 0 -0.52"/>
       <geometry name="Waist_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_07_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Waist.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="Waist"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <!-- ********************TORSO******************** -->
+  <!-- first real link of the robot, inertial reference frame -->
+  <!-- Scale factor for meshes -->
+  <!-- LINKS -->
+  <!-- The coordinate frame called torso is attached to the lowest body of the model which is a parent of l_gripper, r_gripper and gaze. -->
+  <link name="torso"/>
   <link name="DWL">
     <inertial>
       <origin rpy="0 0 0" xyz="4.2999707E-4 -0.0097650317 0.033011157"/>
@@ -121,13 +129,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0 -0.63912053"/>
       <material name="dark_grey"/>
       <geometry name="DWL_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/torso1.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Torso1.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0 -0.63912053"/>
       <geometry name="DWL_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_09_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Torso1.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -141,13 +149,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0 -0.63912053"/>
       <material name="dark_grey"/>
       <geometry name="DWS_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/torso2.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Torso2.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0 -0.63912053"/>
       <geometry name="DWS_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_08_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Torso2.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -161,21 +169,17 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0.0 -0.68662053"/>
       <material name="red"/>
       <geometry name="DWYTorso_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/torso3.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Torso3.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.020281504 0.0 -0.68662053"/>
       <geometry name="DWYTorso_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_10_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Torso3.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
-  <joint name="base_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="Waist"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-  </joint>
+  <!-- JOINTS -->
   <joint name="torso_joint" type="fixed">
     <parent link="DWYTorso"/>
     <child link="torso"/>
@@ -206,12 +210,21 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <limit effort="50" lower="-1.3963" upper="1.3962" velocity="4.0"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
+  <!-- ********************LEGS******************** -->
+  <!-- This links are defined in order to be compliant with http://www.ros.org/reps/rep-0120.html#coordinate-frames
+and to define the end effectors of the robot -->
+  <!--  position and orientation of the leg regardless of the support body geometry -->
   <link name="l_ankle"/>
   <link name="r_ankle"/>
+  <!-- position and orientation of the left leg support body. The (X,Y) plane of this frame must be coplanar with the support body contact surface. It is recommended to choose the origin as the projection of the support body origin on the contact surface. The Z coordinate of this frame should be on the ground level when standing. -->
   <link name="l_sole"/>
   <link name="r_sole"/>
+  <!--  position and orientation of the leg toe body. The (X,Y) plan of this frame must be coplanar with the toe body contact surface. It is recommended to choose the origin as the projection of the body center on the contact surface. -->
   <link name="l_toe"/>
   <link name="r_toe"/>
+  <!-- Scale factor for meshes -->
+  <!-- LINKS -->
+  <!-- ********************RIGHT LEG******************** -->
   <link name="RHipMot">
     <inertial>
       <origin rpy="0 0 0" xyz="-3.269678E-4 -0.023587321 -2.6496509E-4"/>
@@ -222,13 +235,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.023 -0.52"/>
       <material name="dark_grey"/>
       <geometry name="RHipMot_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rleg0.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg0.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.023 -0.52"/>
       <geometry name="RHipMot_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_20_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg0.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -242,13 +255,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.52"/>
       <material name="dark_grey"/>
       <geometry name="RThighUpLeg_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rleg1.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg1.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.52"/>
       <geometry name="RThighUpLeg_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_19_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg1.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -262,13 +275,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.4176"/>
       <material name="dark_grey"/>
       <geometry name="RThighLowLeg_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rleg2.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg2.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.4176"/>
       <geometry name="RThighLowLeg_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_18_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg2.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -282,13 +295,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.2942"/>
       <material name="dark_grey"/>
       <geometry name="RLowLeg_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rleg3.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg3.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.2942"/>
       <geometry name="RLowLeg_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_17_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg3.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -302,13 +315,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.0932"/>
       <material name="dark_grey"/>
       <geometry name="RFootmot_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rleg4.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg4.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 0.0726 -0.0932"/>
       <geometry name="RFootmot_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_16_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg4.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -332,6 +345,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
       </geometry>
     </collision>
   </link>
+  <!-- ********************LEFT LEG******************** -->
   <link name="LHipMot">
     <inertial>
       <origin rpy="0 0 0" xyz="-3.269678E-4 0.023587321 -2.6496509E-4"/>
@@ -342,13 +356,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.023 -0.52"/>
       <material name="dark_grey"/>
       <geometry name="RHipMot_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/lleg0.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg0.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.023 -0.52"/>
       <geometry name="RHipMot_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_06_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg0.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -362,13 +376,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.52"/>
       <material name="dark_grey"/>
       <geometry name="LThighUpLeg_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/lleg1.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg1.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.52"/>
       <geometry name="LThighUpLeg_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_05_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg1.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -382,13 +396,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.4176"/>
       <material name="dark_grey"/>
       <geometry name="LThighLowLeg_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/lleg2.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg2.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.4176"/>
       <geometry name="LThighLowLeg_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_04_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg2.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -402,13 +416,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.2942"/>
       <material name="dark_grey"/>
       <geometry name="LLowLeg_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/lleg3.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg3.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.2942"/>
       <geometry name="LLowLeg_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_03_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg3.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -422,13 +436,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.0932"/>
       <material name="dark_grey"/>
       <geometry name="LFootmot_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/lleg4.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Leg4.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0.0 -0.0726 -0.0932"/>
       <geometry name="LFootmot_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_02_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Leg4.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -452,6 +466,8 @@ The coordinate frame called gaze defines the head position and orientation. The 
       </geometry>
     </collision>
   </link>
+  <!-- JOINTS -->
+  <!-- ********************RIGHT LEG******************** -->
   <joint name="RHipSag" type="revolute">
     <parent link="Waist"/>
     <child link="RHipMot"/>
@@ -500,6 +516,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <limit effort="50" lower="-1.2217" upper="1.2217" velocity="4.0"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
+  <!-- ********************LEFT LEG******************** -->
   <joint name="LHipSag" type="revolute">
     <parent link="Waist"/>
     <child link="LHipMot"/>
@@ -578,54 +595,69 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <child link="r_toe"/>
     <origin rpy="0 0 0" xyz="0.13 0 0"/>
   </joint>
+  <!-- Reference frames in feet -->
+  <!-- macro for reference frames in foot -->
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_upper_right_link"/>
   <joint name="l_foot_upper_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.13 -0.05 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_upper_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_upper_left_link"/>
   <joint name="l_foot_upper_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.13 0.05 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_upper_left_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_lower_right_link"/>
   <joint name="l_foot_lower_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.07 -0.05 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_lower_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="l_foot_lower_left_link"/>
   <joint name="l_foot_lower_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.07 0.05 0"/>
     <parent link="l_sole"/>
     <child link="l_foot_lower_left_link"/>
   </joint>
+  <!-- macro for reference frames in foot -->
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_upper_right_link"/>
   <joint name="r_foot_upper_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.13 -0.05 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_upper_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_upper_left_link"/>
   <joint name="r_foot_upper_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.13 0.05 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_upper_left_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_lower_right_link"/>
   <joint name="r_foot_lower_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.07 -0.05 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_lower_right_link"/>
   </joint>
+  <!-- macro for one reference frame in foot -->
   <link name="r_foot_lower_left_link"/>
   <joint name="r_foot_lower_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.07 0.05 0"/>
     <parent link="r_sole"/>
     <child link="r_foot_lower_left_link"/>
   </joint>
+  <!-- ********************ARMS******************** -->
+  <!-- Scale factor for meshes -->
+  <!-- LINKS -->
+  <!-- RIGHT ARM -->
   <link name="RShp">
     <inertial>
       <origin rpy="0 0 0" xyz="0.0099500565 -0.038682024 1.6446924E-4"/>
@@ -636,13 +668,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 0.0825 -0.844329"/>
       <material name="dark_grey"/>
       <geometry name="RShp_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rarm0.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Arm0.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 0.0825 -0.844329"/>
       <geometry name="RShp_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_24_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Arm0.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -656,13 +688,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 0.1558 -0.844329"/>
       <material name="dark_grey"/>
       <geometry name="RShr_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rarm1.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Arm1.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 0.1558 -0.844329"/>
       <geometry name="RShr_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_23_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Arm1.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -676,13 +708,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 0.1558 -0.79952053"/>
       <material name="dark_grey"/>
       <geometry name="RShy_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/rarm2.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Arm2.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 0.1558 -0.79952053"/>
       <geometry name="RShy_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_22_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Arm2.STL" scale="0.03937 0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -696,16 +728,17 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="-1.570796326795 1.570796326795 0" xyz="0 0 0"/>
       <material name="dark_grey"/>
       <geometry name="RElb_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/elbow.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://coman_urdf/meshes/Elbow.STL" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="-1.570796326795 1.570796326795 0" xyz="0 0 0"/>
       <geometry name="RElb_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/elbow.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Elbow.STL" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
   </link>
+  <!-- LEFT ARM -->
   <link name="LShp">
     <inertial>
       <origin rpy="0 0 0" xyz="0.0099500565 0.038682024 1.6446924E-4"/>
@@ -716,13 +749,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 -0.0825 -0.844329"/>
       <material name="dark_grey"/>
       <geometry name="LShp_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/larm0.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Arm0.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 -0.0825 -0.844329"/>
       <geometry name="LShp_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_14_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Arm0.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -736,13 +769,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 -0.1558 -0.844329"/>
       <material name="dark_grey"/>
       <geometry name="LShr_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/larm1.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Arm1.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 -0.1558 -0.844329"/>
       <geometry name="LShr_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_13_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Arm1.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -756,13 +789,13 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 -0.1558 -0.79952053"/>
       <material name="dark_grey"/>
       <geometry name="LShy_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/larm2.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/Arm2.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="-0.005305 -0.1558 -0.79952053"/>
       <geometry name="LShy_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/simple_asm0001_collada_12_prt.stl" scale="0.03937 0.03937 0.03937"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Arm2.STL" scale="0.03937 -0.03937 0.03937"/>
       </geometry>
     </collision>
   </link>
@@ -776,16 +809,18 @@ The coordinate frame called gaze defines the head position and orientation. The 
       <origin rpy="-1.570796326795 1.570796326795 0" xyz="0 0 0"/>
       <material name="dark_grey"/>
       <geometry name="LElb_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/elbow.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://coman_urdf/meshes/Elbow.STL" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="-1.570796326795 1.570796326795 0" xyz="0 0 0"/>
       <geometry name="LElb_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/elbow.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Elbow.STL" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
   </link>
+  <!-- JOINTS -->
+  <!-- RIGHT ARM -->
   <joint name="RShSag" type="revolute">
     <parent link="DWYTorso"/>
     <child link="RShp"/>
@@ -818,6 +853,7 @@ The coordinate frame called gaze defines the head position and orientation. The 
     <limit effort="50" lower="-2.3562" upper="0.0" velocity="4.0"/>
     <dynamics damping="3.0" friction="0"/>
   </joint>
+  <!-- LEFT ARM -->
   <joint name="LShSag" type="revolute">
     <parent link="DWYTorso"/>
     <child link="LShp"/>
@@ -856,6 +892,15 @@ and to define the end effectors of the robot -->
   <!-- position and orientation of the arm regardless of the tool (grasping device for instance) attached to it -->
   <link name="l_wrist"/>
   <link name="r_wrist"/>
+  <!-- distance from last motor to FT sensor 
+		The value needs to be subtracted to the *FOrearmPlate joint z origin,
+		and in order to be compensated in the following joint and link,
+		it neeeds to be added in return to the following joint (*Wrj1) z origin
+		and to the z displacement of mass, visual and collision of *Forearm -->
+  <!-- ****************LINKS**************** -->
+  <!-- ****************LEFT FOREARM**************** -->
+  <!-- ## WRONG NUMBERS FOR INERTIAL!!! FIX THEM!! ## -->
+  <!-- In ROBOTRAN this link is named LFARM -->
   <link name="LForearm">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 -0.0282"/>
@@ -866,16 +911,18 @@ and to define the end effectors of the robot -->
       <origin rpy="3.14159265359 0 1.570796326795" xyz="0 0 0.0718"/>
       <material name="dark_grey"/>
       <geometry name="LForearm_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/forearm0.stl" scale="0.1 0.1 0.1"/>
+        <mesh filename="package://coman_urdf/meshes/Forearm0.STL" scale="0.1 0.1 0.1"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 3.14159265359 1.570796326795" xyz="0 0 0.0718"/>
       <geometry name="LForearm_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/forearm.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Forearm0.STL" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
   </link>
+  <!-- ## WRONG NUMBERS FOR INERTIAL!!! FIX THEM!! ## -->
+  <!-- Here I have used the inertia of a full cylinder with r = 0.02 [m] and h = 0.07 [m] -->
   <link name="LWrMot2">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -886,16 +933,18 @@ and to define the end effectors of the robot -->
       <origin rpy="0 1.570796326795 3.14159265359" xyz="0.025 0 0"/>
       <material name="grey"/>
       <geometry name="LWrMot2_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/forearm1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/Forearm1.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 1.570796326795 3.14159265359" xyz="0.025 0 0"/>
       <geometry name="LWrMot2_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/simple_fa_asm_3_right_sw0001.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Forearm1.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
+  <!-- ## WRONG NUMBERS FOR INERTIAL!!! FIX THEM!! ## -->
+  <!-- Here I have used the inertia of a concave cylinder with r = 0.02 [m] -->
   <link name="LWrMot3">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -906,16 +955,19 @@ and to define the end effectors of the robot -->
       <origin rpy="0 3.14159265359 1.570796326795" xyz="0.025 -0.012 -0.02"/>
       <material name="grey"/>
       <geometry name="LWrMot3_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/forearm2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/Forearm2.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 3.14159265359 1.570796326795" xyz="0.025 -0.012 -0.02"/>
       <geometry name="LWrMot3_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/simple_fa_hand_interface_rig_sw0001.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Forearm2.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
+  <!-- ****************RIGHT FOREARM**************** -->
+  <!-- ## WRONG NUMBERS FOR INERTIAL!!! FIX THEM!! ## -->
+  <!-- In ROBOTRAN this link is named RFArm -->
   <link name="RForearm">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 -0.0282"/>
@@ -926,16 +978,18 @@ and to define the end effectors of the robot -->
       <origin rpy="3.14159265359 0 1.570796326795" xyz="0 0 0.0718"/>
       <material name="dark_grey"/>
       <geometry name="RForearm_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/forearm0.stl" scale="0.1 0.1 0.1"/>
+        <mesh filename="package://coman_urdf/meshes/Forearm0.STL" scale="0.1 0.1 0.1"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 3.14159265359 1.570796326795" xyz="0 0 0.0718"/>
       <geometry name="RForearm_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/forearm.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Forearm0.STL" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
   </link>
+  <!-- ## WRONG NUMBERS FOR INERTIAL!!! FIX THEM!! ## -->
+  <!-- Here I have used the inertia of a full cylinder with r = 0.02 [m] and h = 0.07 [m] -->
   <link name="RWrMot2">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -946,16 +1000,18 @@ and to define the end effectors of the robot -->
       <origin rpy="0 1.570796326795 3.14159265359" xyz="0.025 0 0"/>
       <material name="grey"/>
       <geometry name="RWrMot2_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/forearm1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/Forearm1.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 1.570796326795 3.14159265359" xyz="0.025 0 0"/>
       <geometry name="RWrMot2_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/simple_fa_asm_3_right_sw0001.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Forearm1.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
+  <!-- ## WRONG NUMBERS FOR INERTIAL!!! FIX THEM!! ## -->
+  <!-- Here I have used the inertia of a concave cylinder with r = 0.02 [m] -->
   <link name="RWrMot3">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -966,16 +1022,18 @@ and to define the end effectors of the robot -->
       <origin rpy="0 3.14159265359 1.570796326795" xyz="0.025 -0.012 -0.02"/>
       <material name="grey"/>
       <geometry name="RWrMot3_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/forearm2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/Forearm2.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 3.14159265359 1.570796326795" xyz="0.025 -0.012 -0.02"/>
       <geometry name="RWrMot3_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/simple_fa_hand_interface_rig_sw0001.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://coman_urdf/meshes/simple/Forearm2.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
+  <!-- ****************JOINTS**************** -->
+  <!-- ****************LEFT FOREARM**************** -->
   <joint name="LForearmPlate" type="revolute">
     <parent link="LElb"/>
     <child link="LForearm"/>
@@ -1005,6 +1063,7 @@ and to define the end effectors of the robot -->
     <child link="l_wrist"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
+  <!-- ****************RIGHT FOREARM**************** -->
   <joint name="RForearmPlate" type="revolute">
     <parent link="RElb"/>
     <child link="RForearm"/>
@@ -1034,7 +1093,20 @@ and to define the end effectors of the robot -->
     <child link="r_wrist"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
+  <link name="l_arm_ft"/>
+  <link name="r_arm_ft"/>
+  <joint name="l_arm_ft_joint" type="fixed">
+    <parent link="LForearm"/>
+    <child link="l_arm_ft"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <joint name="r_arm_ft_joint" type="fixed">
+    <parent link="RForearm"/>
+    <child link="r_arm_ft"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
   <!-- ************ HANDS ************ -->
+  <!-- LINKS -->
   <link name="RSoftHand">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -1045,13 +1117,13 @@ and to define the end effectors of the robot -->
       <origin rpy="-1.5707963268 0 3.14159265359" xyz="0.007 0.01 -0.04"/>
       <material name="dark_grey"/>
       <geometry name="RSoftHand_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/Rsofthand_fix.stl" scale="0.1 0.1 0.1"/>
+        <mesh filename="package://coman_urdf/meshes/SoftHandOpen.STL" scale="0.1 0.1 0.1"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0 0.01 -0.04"/>
       <geometry name="RSoftHand_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/R_soft_hand_open.stl" scale="1E-3 1E-3 1E-3"/>
+        <mesh filename="package://coman_urdf/meshes/simple/SoftHandOpen.STL" scale="1E-3 1E-3 1E-3"/>
       </geometry>
     </collision>
   </link>
@@ -1062,19 +1134,20 @@ and to define the end effectors of the robot -->
       <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
     </inertial>
     <visual>
-      <origin rpy="-1.5707963268 0 1.5707963268" xyz="0.007 -0.012 -0.04"/>
+      <origin rpy="-1.5707963268 0 0" xyz="0.007 -0.01 -0.04"/>
       <material name="dark_grey"/>
       <geometry name="LSoftHand_visual">
-        <mesh filename="package://coman_urdf/meshes/collada/forearms/Lsofthand_fix.stl" scale="0.1 0.1 0.1"/>
+        <mesh filename="package://coman_urdf/meshes/SoftHandOpen.STL" scale="-0.1 0.1 0.1"/>
       </geometry>
     </visual>
     <collision>
-      <origin rpy="0 0 1.5707963268" xyz="0.007 -0.012 -0.04"/>
+      <origin rpy="0 0 0" xyz="0.007 -0.01 -0.04"/>
       <geometry name="LSoftHand_collision">
-        <mesh filename="package://coman_urdf/meshes/collada/simple/forearms/L_soft_hand_open.stl" scale="1E-3 1E-3 1E-3"/>
+        <mesh filename="package://coman_urdf/meshes/simple/SoftHandOpen.STL" scale="-1E-3 1E-3 1E-3"/>
       </geometry>
     </collision>
   </link>
+  <!-- JOINTS -->
   <joint name="r_handj" type="fixed">
     <parent link="RWrMot3"/>
     <child link="RSoftHand"/>
@@ -1085,48 +1158,59 @@ and to define the end effectors of the robot -->
     <child link="LSoftHand"/>
     <origin rpy="0 0 0" xyz="0 0 -0.07"/>
   </joint>
+  <!-- Reference frames in hands -->
+  <!-- macro for reference frames in hand -->
+  <!-- macro for one reference frame in hand -->
   <link name="l_hand_upper_right_link"/>
   <joint name="l_hand_upper_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.04 0 -0.03"/>
     <parent link="LSoftHand"/>
     <child link="l_hand_upper_right_link"/>
   </joint>
+  <!-- macro for one reference frame in hand -->
   <link name="l_hand_upper_left_link"/>
   <joint name="l_hand_upper_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.04 0 0.03"/>
     <parent link="LSoftHand"/>
     <child link="l_hand_upper_left_link"/>
   </joint>
+  <!-- macro for one reference frame in hand -->
   <link name="l_hand_lower_right_link"/>
   <joint name="l_hand_lower_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.04 0 -0.03"/>
     <parent link="LSoftHand"/>
     <child link="l_hand_lower_right_link"/>
   </joint>
+  <!-- macro for one reference frame in hand -->
   <link name="l_hand_lower_left_link"/>
   <joint name="l_hand_lower_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.04 0 0.03"/>
     <parent link="LSoftHand"/>
     <child link="l_hand_lower_left_link"/>
   </joint>
+  <!-- macro for reference frames in hand -->
+  <!-- macro for one reference frame in hand -->
   <link name="r_hand_upper_right_link"/>
   <joint name="r_hand_upper_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.04 0 -0.03"/>
     <parent link="RSoftHand"/>
     <child link="r_hand_upper_right_link"/>
   </joint>
+  <!-- macro for one reference frame in hand -->
   <link name="r_hand_upper_left_link"/>
   <joint name="r_hand_upper_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.04 0 0.03"/>
     <parent link="RSoftHand"/>
     <child link="r_hand_upper_left_link"/>
   </joint>
+  <!-- macro for one reference frame in hand -->
   <link name="r_hand_lower_right_link"/>
   <joint name="r_hand_lower_right_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.04 0 -0.03"/>
     <parent link="RSoftHand"/>
     <child link="r_hand_lower_right_link"/>
   </joint>
+  <!-- macro for one reference frame in hand -->
   <link name="r_hand_lower_left_link"/>
   <joint name="r_hand_lower_left_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.04 0 0.03"/>
