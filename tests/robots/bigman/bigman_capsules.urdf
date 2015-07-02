@@ -156,7 +156,7 @@
     <axis xyz="0.89879991307 0.0 0.43835911792"/>
     <parent link="Waist"/>
     <child link="DWL"/>
-    <limit effort="120.0" lower="-0.261799387798" upper="0.261799387798" velocity="6.283"/>
+    <limit effort="120.0" lower="-0.610865238196" upper="0.610865238196" velocity="6.283"/>
     <dynamics damping="3.0" friction="0.0"/>
   </joint>
   <joint name="WaistSag" type="revolute">
@@ -164,7 +164,7 @@
     <axis xyz="0.0 1.0 0.0"/>
     <parent link="DWL"/>
     <child link="DWS"/>
-    <limit effort="220.0" lower="-0.174532925199" upper="0.698131700796" velocity="6.283"/>
+    <limit effort="220.0" lower="-0.349065850398" upper="1.39626340159" velocity="6.283"/>
     <dynamics damping="3.0" friction="0.0"/>
   </joint>
   <joint name="WaistYaw" type="revolute">
@@ -172,7 +172,7 @@
     <axis xyz="0.0 0.0 1.0"/>
     <parent link="DWS"/>
     <child link="DWYTorso"/>
-    <limit effort="120.0" lower="-1.74532925199" upper="1.74532925199" velocity="6.283"/>
+    <limit effort="120.0" lower="-2.84488668074" upper="2.84488668074" velocity="6.283"/>
     <dynamics damping="3.0" friction="0.0"/>
   </joint>
   <link name="NeckYaw">
@@ -339,21 +339,21 @@
   </link>
   <link name="RFoot">
     <inertial>
-      <origin xyz="0.01282904 -0.00463694 -0.10109499" rpy="0.0 0.0 0.0"/>
-      <mass value="3.33109981"/>
-      <inertia ixx="0.01006627" ixy="-0.00051955" ixz="-0.00374069" iyy="0.02882577" iyz="0.00044505" izz="0.02819025"/>
+      <origin xyz="-0.00653584 -0.00479384 -0.10180375" rpy="0.0 0.0 0.0"/>
+      <mass value="3.4263811"/>
+      <inertia ixx="0.01032886" ixy="-0.00016407" ixz="-0.00201294" iyy="0.02854025" iyz="0.00046315" izz="0.02799499"/>
     </inertial>
     <visual>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="package://bigman_urdf/meshes/Foot.STL" scale="0.001 -0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/NewFoot.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="dark_grey"/>
     </visual>
     <collision>
-      <origin xyz="0.047 -0.01 -0.1359" rpy="0.0 0.0 0.0"/>
+      <origin xyz="0.005 -0.01 -0.1359" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="0.306 0.16 0.015"/>
+        <box size="0.32 0.16 0.015"/>
       </geometry>
     </collision>
   </link>
@@ -459,21 +459,21 @@
   </link>
   <link name="LFoot">
     <inertial>
-      <origin xyz="0.01282904 0.00463694 -0.10109499" rpy="0.0 0.0 0.0"/>
-      <mass value="3.33109981"/>
-      <inertia ixx="0.01006627" ixy="0.00051955" ixz="-0.00374069" iyy="0.02882577" iyz="-0.00044505" izz="0.02819025"/>
+      <origin xyz="-0.00653584 0.00479384 -0.10180375" rpy="0.0 0.0 0.0"/>
+      <mass value="3.4263811"/>
+      <inertia ixx="0.01032886" ixy="-0.00016407" ixz="-0.00201294" iyy="0.02854025" iyz="0.00046315" izz="0.02799499"/>
     </inertial>
     <visual>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="package://bigman_urdf/meshes/Foot.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://bigman_urdf/meshes/NewFoot.STL" scale="0.001 -0.001 0.001"/>
       </geometry>
       <material name="dark_grey"/>
     </visual>
     <collision>
-      <origin xyz="0.047 0.01 -0.1359" rpy="0.0 0.0 0.0"/>
+      <origin xyz="0.005 0.01 -0.1359" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="0.306 0.16 0.015"/>
+        <box size="0.32 0.16 0.015"/>
       </geometry>
     </collision>
   </link>
@@ -594,60 +594,60 @@
     <child link="r_sole"/>
   </joint>
   <joint name="l_toe_joint" type="fixed">
-    <origin xyz="0.195 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.16 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="l_sole"/>
     <child link="l_toe"/>
   </joint>
   <joint name="r_toe_joint" type="fixed">
-    <origin xyz="0.195 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.16 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="r_sole"/>
     <child link="r_toe"/>
   </joint>
   <link name="l_foot_upper_right_link"/>
   <joint name="l_foot_upper_right_joint" type="fixed">
-    <origin xyz="0.195 -0.07 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.16 -0.07 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="l_sole"/>
     <child link="l_foot_upper_right_link"/>
   </joint>
   <link name="l_foot_upper_left_link"/>
   <joint name="l_foot_upper_left_joint" type="fixed">
-    <origin xyz="0.195 0.09 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.16 0.09 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="l_sole"/>
     <child link="l_foot_upper_left_link"/>
   </joint>
   <link name="l_foot_lower_right_link"/>
   <joint name="l_foot_lower_right_joint" type="fixed">
-    <origin xyz="-0.111 -0.07 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="-0.16 -0.07 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="l_sole"/>
     <child link="l_foot_lower_right_link"/>
   </joint>
   <link name="l_foot_lower_left_link"/>
   <joint name="l_foot_lower_left_joint" type="fixed">
-    <origin xyz="-0.111 0.09 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="-0.16 0.09 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="l_sole"/>
     <child link="l_foot_lower_left_link"/>
   </joint>
   <link name="r_foot_upper_right_link"/>
   <joint name="r_foot_upper_right_joint" type="fixed">
-    <origin xyz="0.195 0.07 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.16 0.07 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="r_sole"/>
     <child link="r_foot_upper_right_link"/>
   </joint>
   <link name="r_foot_upper_left_link"/>
   <joint name="r_foot_upper_left_joint" type="fixed">
-    <origin xyz="0.195 -0.09 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.16 -0.09 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="r_sole"/>
     <child link="r_foot_upper_left_link"/>
   </joint>
   <link name="r_foot_lower_right_link"/>
   <joint name="r_foot_lower_right_joint" type="fixed">
-    <origin xyz="-0.111 0.07 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="-0.16 0.07 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="r_sole"/>
     <child link="r_foot_lower_right_link"/>
   </joint>
   <link name="r_foot_lower_left_link"/>
   <joint name="r_foot_lower_left_joint" type="fixed">
-    <origin xyz="-0.111 -0.09 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="-0.16 -0.09 0.0" rpy="0.0 0.0 0.0"/>
     <parent link="r_sole"/>
     <child link="r_foot_lower_left_link"/>
   </joint>
@@ -816,7 +816,7 @@
     <axis xyz="0.0 0.743144825 -0.669130606"/>
     <parent link="DWYTorso"/>
     <child link="RShp"/>
-    <limit effort="120.0" lower="-0.959931088595" upper="1.48352986419" velocity="6.283"/>
+    <limit effort="120.0" lower="-2.84488668074" upper="2.8099800957" velocity="6.283"/>
     <dynamics damping="3.0" friction="0.0"/>
   </joint>
   <joint name="RShLat" type="revolute">
@@ -824,7 +824,7 @@
     <axis xyz="1.0 0.0 0.0"/>
     <parent link="RShp"/>
     <child link="RShr"/>
-    <limit effort="120.0" lower="-2.09439510239" upper="-0.122173047639" velocity="6.283"/>
+    <limit effort="120.0" lower="-3.8571776469" upper="-0.122173047639" velocity="6.283"/>
     <dynamics damping="3.0" friction="0.0"/>
   </joint>
   <joint name="RShYaw" type="revolute">
@@ -848,7 +848,7 @@
     <axis xyz="0.0 0.743144825 0.669130606"/>
     <parent link="DWYTorso"/>
     <child link="LShp"/>
-    <limit effort="120.0" lower="-0.959931088595" upper="1.48352986419" velocity="6.283"/>
+    <limit effort="120.0" lower="-2.87979326578" upper="2.79252680318" velocity="6.283"/>
     <dynamics damping="3.0" friction="0.0"/>
   </joint>
   <joint name="LShLat" type="revolute">
@@ -856,7 +856,7 @@
     <axis xyz="1.0 0.0 0.0"/>
     <parent link="LShp"/>
     <child link="LShr"/>
-    <limit effort="120.0" lower="0.0872664625995" upper="2.09439510239" velocity="6.283"/>
+    <limit effort="120.0" lower="0.0872664625995" upper="3.8571776469" velocity="6.283"/>
     <dynamics damping="3.0" friction="0.0"/>
   </joint>
   <joint name="LShYaw" type="revolute">
