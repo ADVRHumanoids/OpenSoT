@@ -187,6 +187,18 @@ int main(int argc, char** argv) {
     whiteList.insert(whiteList.end(),
                      sca->whitelist_R_Arm_Torso.begin(),
                      sca->whitelist_R_Arm_Torso.end());
+    whiteList.insert(whiteList.end(),
+                     sca->whitelist_L_Arm_L_Leg.begin(),
+                     sca->whitelist_L_Arm_L_Leg.end());
+    whiteList.insert(whiteList.end(),
+                     sca->whitelist_R_Arm_R_Leg.begin(),
+                     sca->whitelist_R_Arm_R_Leg.end());
+    whiteList.insert(whiteList.end(),
+                     sca->whitelist_L_Arm_R_Leg.begin(),
+                     sca->whitelist_L_Arm_R_Leg.end());
+    whiteList.insert(whiteList.end(),
+                     sca->whitelist_R_Arm_L_Leg.begin(),
+                     sca->whitelist_R_Arm_L_Leg.end());
 
     /*
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
