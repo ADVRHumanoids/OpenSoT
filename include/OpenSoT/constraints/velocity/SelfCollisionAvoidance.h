@@ -59,6 +59,14 @@
                 ComputeLinksDistance computeLinksDistance;
 
                 /**
+                 * @brief _use_SCAFoI defines whether we are going to use SCAFoIs to compute collision whitelists
+                 * Will be true if SCAFoI files are available.
+                 *  If false, the SCAFoIs will not be used to compute the collision whitelists,
+                 *  rather all the link pairs set in the WhiteList will be checked for distance computation.
+                 */
+                bool _use_SCAFoI;
+
+                /**
                  * @brief _x_cache is a copy of last q vector used to update the constraints.
                  * It is used in order to avoid multiple updated when the constraint is present
                  * in multiple tasks in the same stack. It is a simple speedup waiting for the stack system to support
@@ -222,7 +230,6 @@
 
                 void predict_SCAFoIs( const yarp::sig::Vector & q, std::list<std::pair<std::string,std::string>> & linkpair_updated_list,
                                       std::list<LinkPairDistance> & linkpair_constrained_list );
-
 
                 /* upper and lower threshold for SCAFoIs activation */
                 double d_threshold_upper, d_threshold_lower;

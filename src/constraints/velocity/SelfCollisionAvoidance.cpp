@@ -36,7 +36,8 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     computeLinksDistance(robot),
     robot_col(robot),
     _x_cache(x),
-    _boundScaling(boundScaling) {
+    _boundScaling(boundScaling),
+    _use_SCAFoI(true) {
 
     std::string base_name = "Waist";
     base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
@@ -724,7 +725,21 @@ void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
     if(!(x == _x_cache)) {
         _x_cache = x;
 
-        this->predict_SCAFoIs( x, Linkpair_updated_list_all, Linkpair_constrained_list_all );
+        if(_use_SCAFoI)
+            this->predict_SCAFoIs( x, Linkpair_updated_list_all, Linkpair_constrained_list_all );
+        else
+        {
+            Linkpair_constrained_list_all.clear();
+            std::list<LinkPairDistance> results = computeLinksDistance.getLinkDistances();
+            std::list<LinkPairDistance>::iterator i;
+            for (i = results.begin(); i != results.end(); ++i)
+            {
+                if ( (*i).getDistance() < d_threshold_lower )
+                {
+                    Linkpair_constrained_list_all.push_back(*i);
+                }
+            }
+        }
         this->calculate_Aineq_bUpperB( _Aineq, _bUpperBound, Linkpair_constrained_list_all );
 
     }
