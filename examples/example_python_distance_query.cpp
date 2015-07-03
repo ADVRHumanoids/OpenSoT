@@ -246,14 +246,20 @@ int main(int argc, char** argv) {
             new visualization_msgs::MarkerArray);
 
     while (ros::ok()) {
+        double distance_comp_tic = yarp::os::SystemClock::nowSystem();
         std::list<LinkPairDistance> results = distance_comp->getLinkDistances();
+        double distance_comp = yarp::os::SystemClock::nowSystem() - distance_comp_tic;
+
         std::list<LinkPairDistance>
             results_in_scafois, // all link pairs which are in an activated SCAFoI
             results_constrained,// all link pairs which are in an activated SCAFoI and are active constraints
             results_green_zone, // all link pairs not in an active SCAFoI, with distance > d_threshold_upper
             results_yellow_zone,// all link pairs not in an active SCAFoI, with distance > d_threshold_lower && distance < d_threshold_upper
             results_red_zone;   // all link pairs not in an active SCAFoI, with distance < d_threshold_lower
-        sca->update(bigman.iDyn3_model.getAng());
+
+        sca->predict_SCAFoIs(bigman.iDyn3_model.getAng(),
+                             sca->Linkpair_updated_list_all,
+                             sca->Linkpair_constrained_list_all);
 
         //while(results.size() > 15) results.pop_back();
 
