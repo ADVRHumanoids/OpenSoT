@@ -49,12 +49,6 @@
             public:
                 typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
             protected:
-                double _boundScaling;
-                /**
-                 * @brief _LinkPair_threshold is the allowable minimum distance between every Link pair
-                 */
-                double _linkPair_threshold;
-
                 iDynUtils& robot_col;
                 ComputeLinksDistance computeLinksDistance;
 
@@ -237,6 +231,13 @@
                 /* these get updated each time you call udpate() */
                 std::list<std::pair<std::string,std::string>> Linkpair_updated_list_all;
                 std::list<LinkPairDistance> Linkpair_constrained_list_all;
+
+                /**
+                 * @brief _LinkPair_threshold is the allowable minimum distance between every Link pair
+                 */
+                double _linkPair_threshold;
+
+                double _boundScaling;
             };
         }
     }

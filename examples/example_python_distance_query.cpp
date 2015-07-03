@@ -11,6 +11,7 @@
 #include <tf/transform_broadcaster.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <fstream>
 
 static const std::string JOINT_STATE_TOPIC = "/joint_states";
 static const std::string RESULT_MARKER_TOPIC = "distance_query/result_marker";
@@ -169,13 +170,41 @@ int main(int argc, char** argv) {
             ros::topic::waitForMessage<sensor_msgs::JointState>(
                     JOINT_STATE_TOPIC, nh);
 
-    boost::shared_ptr<ComputeLinksDistance> distance_comp(
-            new ComputeLinksDistance(bigman));
-
     OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sca(
         new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
             bigman.iDyn3_model.getAng(),
             bigman, 0.005, 0.3));
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp_L_R_Arms(
+            new ComputeLinksDistance(bigman));
+    distance_comp_L_R_Arms->setCollisionWhiteList(sca->whitelist_L_R_Arms);
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp_L_Arm_Torso(
+            new ComputeLinksDistance(bigman));
+    distance_comp_L_Arm_Torso->setCollisionWhiteList(sca->whitelist_L_Arm_Torso);
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp_R_Arm_Torso(
+            new ComputeLinksDistance(bigman));
+    distance_comp_R_Arm_Torso->setCollisionWhiteList(sca->whitelist_R_Arm_Torso);
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp_L_Arm_L_Leg(
+            new ComputeLinksDistance(bigman));
+    distance_comp_L_Arm_L_Leg->setCollisionWhiteList(sca->whitelist_L_Arm_L_Leg);
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp_R_Arm_R_Leg(
+            new ComputeLinksDistance(bigman));
+    distance_comp_R_Arm_R_Leg->setCollisionWhiteList(sca->whitelist_R_Arm_R_Leg);
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp_L_Arm_R_Leg(
+            new ComputeLinksDistance(bigman));
+    distance_comp_L_Arm_R_Leg->setCollisionWhiteList(sca->whitelist_L_Arm_R_Leg);
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp_R_Arm_L_Leg(
+            new ComputeLinksDistance(bigman));
+    distance_comp_R_Arm_L_Leg->setCollisionWhiteList(sca->whitelist_R_Arm_L_Leg);
+
+    boost::shared_ptr<ComputeLinksDistance> distance_comp(
+            new ComputeLinksDistance(bigman));
 
     std::list<std::pair<std::string,std::string>> whiteList;
     whiteList.insert(whiteList.end(),
@@ -245,10 +274,96 @@ int main(int argc, char** argv) {
     boost::shared_ptr<visualization_msgs::MarkerArray> markers(
             new visualization_msgs::MarkerArray);
 
+    std::ofstream _logger_accuracy("SCAFoI_log_q.csv");
+    std::ofstream _logger("SCAFoI_log_t.csv");
+    _logger << "# log, for each t, the following data:"
+            << "# uid, t, t_SCAFoI, t_whole, "
+            << "... L_R_Arms_Distance, L_R_Arms_SCAFoI_Activation, ..."
+            << "... L_Arm_Torso_Distance, L_Arm_Torso_Activation, ..."
+            << "... R_Arm_Torso_Distance, R_Arm_Torso_Activation, ..."
+            << "... L_Arm_L_Leg_Distance, L_Arm_L_Leg_Activation, ..."
+            << "... R_Arm_R_Leg_Distance, R_Arm_R_Leg_Activation, ..."
+            << "... L_Arm_R_Leg_Distance, L_Arm_R_Leg_Activation, ..."
+            << "... R_Arm_L_Leg_Distance, R_Arm_L_Leg_Activation" << std::endl;
+
+    _logger_accuracy << "# log, for each q, the following data:"
+            << "# uid, L_R_Arms_correct_prediction"
+            << "... L_Arm_Torso_correct_prediction, L_Arm_Torso_critical, ..."
+            << "... R_Arm_Torso_correct_prediction, R_Arm_Torso_critical, ..."
+            << "... L_Arm_L_Leg_correct_prediction, L_Arm_L_Leg_critical, ..."
+            << "... R_Arm_R_Leg_correct_prediction, R_Arm_R_Leg_critical, ..."
+            << "... L_Arm_R_Leg_correct_prediction, L_Arm_R_Leg_Critical, ..."
+            << "... R_Arm_L_Leg_correct_prediction, R_Arm_L_Leg_Critical, q" << std::endl;
+
+
+    double time_start = yarp::os::SystemClock::nowSystem();
+    unsigned int uid = 0;
+    double t = time_start;
+    yarp::sig::Vector q_prev, q_curr;
+    q_prev = bigman.iDyn3_model.getAng(); q_curr = q_prev;
     while (ros::ok()) {
         double distance_comp_tic = yarp::os::SystemClock::nowSystem();
         std::list<LinkPairDistance> results = distance_comp->getLinkDistances();
         double distance_comp = yarp::os::SystemClock::nowSystem() - distance_comp_tic;
+
+        std::list<LinkPairDistance> results_L_R_Arms =
+            distance_comp_L_R_Arms->getLinkDistances();
+        std::list<LinkPairDistance> results_L_Arm_Torso =
+            distance_comp_L_Arm_Torso->getLinkDistances();
+        std::list<LinkPairDistance> results_R_Arm_Torso =
+            distance_comp_R_Arm_Torso->getLinkDistances();
+        std::list<LinkPairDistance> results_L_Arm_L_Leg =
+            distance_comp_L_Arm_L_Leg->getLinkDistances();
+        std::list<LinkPairDistance> results_R_Arm_R_Leg =
+            distance_comp_R_Arm_R_Leg->getLinkDistances();
+        std::list<LinkPairDistance> results_L_Arm_R_Leg =
+            distance_comp_L_Arm_R_Leg->getLinkDistances();
+        std::list<LinkPairDistance> results_R_Arm_L_Leg =
+            distance_comp_R_Arm_L_Leg->getLinkDistances();
+
+        double SCAFoI_comp_tic = yarp::os::SystemClock::nowSystem();
+
+        q_curr = bigman.iDyn3_model.getAng();
+
+        sca->predict_SCAFoIs(q_curr,
+                             sca->Linkpair_updated_list_all,
+                             sca->Linkpair_constrained_list_all);
+        double SCAFoI_comp = yarp::os::SystemClock::nowSystem() - SCAFoI_comp_tic;
+
+        uid++;
+        t = yarp::os::SystemClock::nowSystem() - time_start;
+
+        _logger << uid << ", " << t << ", "
+                << SCAFoI_comp << ", " << distance_comp << ", "
+                << results_L_R_Arms.front().getDistance()    << ", " << (int)sca->is_active_SCAFoI_L_R_Arms << ", "
+                << results_L_Arm_Torso.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_L_Arm_Torso << ", "
+                << results_R_Arm_Torso.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_R_Arm_Torso << ", "
+                << results_L_Arm_L_Leg.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_L_Arm_L_Leg << ", "
+                << results_R_Arm_R_Leg.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_R_Arm_R_Leg << ", "
+                << results_L_Arm_R_Leg.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_L_Arm_R_Leg << ", "
+                << results_R_Arm_L_Leg.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_R_Arm_L_Leg << std::endl;
+
+        using namespace yarp::math;
+        if(norm(q_curr - q_prev) > 1e-9)
+        {
+            q_prev = q_curr;
+            _logger_accuracy << uid << ", "
+                    << (int)(sca->is_active_SCAFoI_L_R_Arms     ? results_L_R_Arms.front().getDistance() < sca->d_threshold_upper : results_L_R_Arms.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_R_Arms    ? results_L_R_Arms.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_L_Arm_Torso  ? results_L_Arm_Torso.front().getDistance() < sca->d_threshold_upper : results_L_Arm_Torso.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_Torso ? results_L_Arm_Torso.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_R_Arm_Torso  ? results_R_Arm_Torso.front().getDistance() < sca->d_threshold_upper : results_R_Arm_Torso.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_Torso ? results_R_Arm_Torso.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_L_Arm_L_Leg   ? results_L_Arm_L_Leg.front().getDistance() < sca->d_threshold_upper : results_L_Arm_L_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_L_Leg  ? results_L_Arm_L_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_R_Arm_R_Leg   ? results_R_Arm_R_Leg.front().getDistance() < sca->d_threshold_upper : results_R_Arm_R_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_R_Leg  ? results_R_Arm_R_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_L_Arm_R_Leg   ? results_L_Arm_R_Leg.front().getDistance() < sca->d_threshold_upper : results_L_Arm_R_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_R_Leg  ? results_L_Arm_R_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_R_Arm_L_Leg   ? results_R_Arm_L_Leg.front().getDistance() < sca->d_threshold_upper : results_R_Arm_L_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_L_Leg  ? results_R_Arm_L_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << q_curr.toString() << std::endl;
+        }
 
         std::list<LinkPairDistance>
             results_in_scafois, // all link pairs which are in an activated SCAFoI
@@ -256,10 +371,6 @@ int main(int argc, char** argv) {
             results_green_zone, // all link pairs not in an active SCAFoI, with distance > d_threshold_upper
             results_yellow_zone,// all link pairs not in an active SCAFoI, with distance > d_threshold_lower && distance < d_threshold_upper
             results_red_zone;   // all link pairs not in an active SCAFoI, with distance < d_threshold_lower
-
-        sca->predict_SCAFoIs(bigman.iDyn3_model.getAng(),
-                             sca->Linkpair_updated_list_all,
-                             sca->Linkpair_constrained_list_all);
 
         //while(results.size() > 15) results.pop_back();
 
