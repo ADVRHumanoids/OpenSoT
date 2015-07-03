@@ -99,9 +99,6 @@
                 double d_recent_L_R_Arms[3], d_recent_L_Arm_Torso[3], d_recent_R_Arm_Torso[3],
                        d_recent_L_Arm_L_Leg[3], d_recent_R_Arm_R_Leg[3], d_recent_L_Arm_R_Leg[3], d_recent_R_Arm_L_Leg[3];
 
-                void predict_SCAFoIs( const yarp::sig::Vector & q, std::list<std::pair<std::string,std::string>> & linkpair_updated_list,
-                                      std::list<LinkPairDistance> & linkpair_constrained_list );
-
                 void store_l_r_arms(const double & d_current);
                 void store_larm_torso(const double & d_current);
                 void store_rarm_torso(const double & d_current);
@@ -221,6 +218,10 @@
                         is_active_SCAFoI_R_Arm_R_Leg,
                         is_active_SCAFoI_L_Arm_R_Leg,
                         is_active_SCAFoI_R_Arm_L_Leg;
+
+
+                void predict_SCAFoIs( const yarp::sig::Vector & q, std::list<std::pair<std::string,std::string>> & linkpair_updated_list,
+                                      std::list<LinkPairDistance> & linkpair_constrained_list );
 
 
                 /* upper and lower threshold for SCAFoIs activation */
