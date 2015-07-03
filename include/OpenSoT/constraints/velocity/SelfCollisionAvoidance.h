@@ -214,6 +214,15 @@
                                                               whitelist_L_Arm_R_Leg,
                                                               whitelist_R_Arm_L_Leg;
 
+                bool    is_active_SCAFoI_L_R_Arms,
+                        is_active_SCAFoI_L_Arm_Torso,
+                        is_active_SCAFoI_R_Arm_Torso,
+                        is_active_SCAFoI_L_Arm_L_Leg,
+                        is_active_SCAFoI_R_Arm_R_Leg,
+                        is_active_SCAFoI_L_Arm_R_Leg,
+                        is_active_SCAFoI_R_Arm_L_Leg;
+
+
                 /* upper and lower threshold for SCAFoIs activation */
                 double d_threshold_upper, d_threshold_lower;
 

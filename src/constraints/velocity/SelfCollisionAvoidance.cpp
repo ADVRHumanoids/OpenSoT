@@ -817,6 +817,14 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
     linkpair_updated_list.clear();
     linkpair_constrained_list.clear();
 
+    is_active_SCAFoI_L_R_Arms    = false;
+    is_active_SCAFoI_L_Arm_Torso = false;
+    is_active_SCAFoI_R_Arm_Torso = false;
+    is_active_SCAFoI_L_Arm_L_Leg = false;
+    is_active_SCAFoI_R_Arm_R_Leg = false;
+    is_active_SCAFoI_L_Arm_R_Leg = false;
+    is_active_SCAFoI_R_Arm_L_Leg = false;
+
 
     /*//////////////////SCAFoI:whitelist_L_R_Arms////////////////////*/
     /*//////////////////SCAFoI:whitelist_L_R_Arms////////////////////*/
@@ -829,6 +837,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( d_p_lrarms < d_threshold_upper )
         {
+            is_active_SCAFoI_L_R_Arms    = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_R_Arms);
             if(!ok)
             {
@@ -891,6 +900,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( predict_label_int == 1 )
         {
+            is_active_SCAFoI_L_R_Arms    = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_R_Arms);
             if(!ok)
             {
@@ -949,6 +959,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( d_p_larmtorso < d_threshold_upper )
         {
+            is_active_SCAFoI_L_Arm_Torso = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_Torso);
             if(!ok)
             {
@@ -1011,6 +1022,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( predict_label_int == 1 )
         {
+            is_active_SCAFoI_L_Arm_Torso = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_Torso);
             if(!ok)
             {
@@ -1067,6 +1079,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( d_p_rarmtorso < d_threshold_upper )
         {
+            is_active_SCAFoI_R_Arm_Torso = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_Torso);
             if(!ok)
             {
@@ -1129,6 +1142,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( predict_label_int == 1 )
         {
+            is_active_SCAFoI_R_Arm_Torso = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_Torso);
             if(!ok)
             {
@@ -1184,6 +1198,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( d_p_larmlleg < d_threshold_upper )
         {
+            is_active_SCAFoI_L_Arm_L_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_L_Leg);
             if(!ok)
             {
@@ -1251,6 +1266,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( predict_label_int == 1 )
         {
+            is_active_SCAFoI_L_Arm_L_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_L_Leg);
             if(!ok)
             {
@@ -1307,6 +1323,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( d_p_rarmrleg < d_threshold_upper )
         {
+            is_active_SCAFoI_R_Arm_R_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_R_Leg);
             if(!ok)
             {
@@ -1374,6 +1391,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( predict_label_int == 1 )
         {
+            is_active_SCAFoI_R_Arm_R_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_R_Leg);
             if(!ok)
             {
@@ -1429,6 +1447,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( d_p_larmrleg < d_threshold_upper )
         {
+            is_active_SCAFoI_L_Arm_R_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_R_Leg);
             if(!ok)
             {
@@ -1496,6 +1515,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( predict_label_int == 1 )
         {
+            is_active_SCAFoI_L_Arm_R_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_L_Arm_R_Leg);
             if(!ok)
             {
@@ -1551,6 +1571,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( d_p_rarmlleg < d_threshold_upper )
         {
+            is_active_SCAFoI_R_Arm_L_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_L_Leg);
             if(!ok)
             {
@@ -1618,6 +1639,7 @@ void SelfCollisionAvoidance::predict_SCAFoIs( const yarp::sig::Vector & q,
 
         if ( predict_label_int == 1 )
         {
+            is_active_SCAFoI_R_Arm_L_Leg = true;
             bool ok = computeLinksDistance.setCollisionWhiteList(whitelist_R_Arm_L_Leg);
             if(!ok)
             {
