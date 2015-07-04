@@ -321,10 +321,9 @@ int main(int argc, char** argv) {
         std::list<LinkPairDistance> results_R_Arm_L_Leg =
             distance_comp_R_Arm_L_Leg->getLinkDistances();
 
-        double SCAFoI_comp_tic = yarp::os::SystemClock::nowSystem();
-
         q_curr = bigman.iDyn3_model.getAng();
 
+        double SCAFoI_comp_tic = yarp::os::SystemClock::nowSystem();
         sca->predict_SCAFoIs(q_curr,
                              sca->Linkpair_updated_list_all,
                              sca->Linkpair_constrained_list_all);
@@ -347,6 +346,9 @@ int main(int argc, char** argv) {
         if(norm(q_curr - q_prev) > 1e-9)
         {
             q_prev = q_curr;
+            std::string q_curr_str = q_curr.toString();
+            std::replace( q_curr_str.begin(), q_curr_str.end(), '\t', ',');
+
             _logger_accuracy << uid << ", "
                     << (int)(sca->is_active_SCAFoI_L_R_Arms     ? results_L_R_Arms.front().getDistance() < sca->d_threshold_upper : results_L_R_Arms.front().getDistance() > sca->d_threshold_lower) << ", "
                     << (int)(!sca->is_active_SCAFoI_L_R_Arms    ? results_L_R_Arms.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
@@ -362,7 +364,7 @@ int main(int argc, char** argv) {
                     << (int)(!sca->is_active_SCAFoI_L_Arm_R_Leg  ? results_L_Arm_R_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
                     << (int)(sca->is_active_SCAFoI_R_Arm_L_Leg   ? results_R_Arm_L_Leg.front().getDistance() < sca->d_threshold_upper : results_R_Arm_L_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
                     << (int)(!sca->is_active_SCAFoI_R_Arm_L_Leg  ? results_R_Arm_L_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
-                    << q_curr.toString() << std::endl;
+                    << q_curr_str << std::endl;
         }
 
         std::list<LinkPairDistance>
