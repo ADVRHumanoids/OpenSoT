@@ -61,6 +61,7 @@ bool draw_point(const double x, const double y, const double z,
     marker.id = ++id_counter;
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.action = visualization_msgs::Marker::ADD;
+    marker.lifetime = ros::Duration(0.05);
 
     marker.pose.position.x = x;
     marker.pose.position.y = y;
@@ -93,6 +94,7 @@ bool draw_line(const double x1, const double y1, const double z1,
     marker.id = ++id_counter;
     marker.type = visualization_msgs::Marker::LINE_STRIP;
     marker.action = visualization_msgs::Marker::ADD;
+    marker.lifetime = ros::Duration(0.05);
 
     geometry_msgs::Point p1; p1.x = x1; p1.y = y1; p1.z = z1;
     geometry_msgs::Point p2; p2.x = x2; p2.y = y2; p2.z = z2;
@@ -202,11 +204,11 @@ int main(int argc, char** argv) {
         distance_comp->setCollisionWhiteList(sca->Linkpair_updated_list_all);
         std::list<LinkPairDistance> results = distance_comp->getLinkDistances();
 
-        if (results.size() > 0) {
-            markers->markers.clear();
-            id_counter = 0;
-            id_lines = 0;
+        markers->markers.clear();
+        id_counter = 0;
+        id_lines = 0;
 
+        if (results.size() > 0) {
             for(std::list<LinkPairDistance>::iterator it =
                     results.begin();
                 it != results.end(); ++it)
@@ -223,8 +225,10 @@ int main(int argc, char** argv) {
             if(results_constrained.size() > 0)
                 createMarkerArray(results_constrained, markers, bigman,  RED,    RED);
 
-            resultMarkerPub.publish(markers);
+
         }
+
+        resultMarkerPub.publish(markers);
 
         ros::spinOnce();
         loopRate.sleep();
