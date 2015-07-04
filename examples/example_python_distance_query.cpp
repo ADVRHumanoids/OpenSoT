@@ -287,13 +287,15 @@ int main(int argc, char** argv) {
             << "... R_Arm_L_Leg_Distance, R_Arm_L_Leg_Activation" << std::endl;
 
     _logger_accuracy << "# log, for each q, the following data:"
-            << "# uid, L_R_Arms_correct_prediction"
-            << "... L_Arm_Torso_correct_prediction, L_Arm_Torso_critical, ..."
-            << "... R_Arm_Torso_correct_prediction, R_Arm_Torso_critical, ..."
-            << "... L_Arm_L_Leg_correct_prediction, L_Arm_L_Leg_critical, ..."
-            << "... R_Arm_R_Leg_correct_prediction, R_Arm_R_Leg_critical, ..."
-            << "... L_Arm_R_Leg_correct_prediction, L_Arm_R_Leg_Critical, ..."
-            << "... R_Arm_L_Leg_correct_prediction, R_Arm_L_Leg_Critical, q" << std::endl;
+            << "# uid, ..."
+            << "... L_R_Arms_correct_prediction,    L_R_Arms_critical,    L_R_Arms_collision, ..."
+            << "... L_Arm_Torso_correct_prediction, L_Arm_Torso_critical, L_Arm_Torso_collision, ..."
+            << "... R_Arm_Torso_correct_prediction, R_Arm_Torso_critical, R_Arm_Torso_collision, ..."
+            << "... L_Arm_L_Leg_correct_prediction, L_Arm_L_Leg_critical, L_Arm_L_Leg_collision, ..."
+            << "... R_Arm_R_Leg_correct_prediction, R_Arm_R_Leg_critical, R_Arm_R_Leg_collision, ..."
+            << "... L_Arm_R_Leg_correct_prediction, L_Arm_R_Leg_critical, L_Arm_R_Leg_collision, ..."
+            << "... R_Arm_L_Leg_correct_prediction, R_Arm_L_Leg_critical, R_Arm_L_Leg_critical,  ..."
+            << "q" << std::endl;
 
 
     double time_start = yarp::os::SystemClock::nowSystem();
@@ -350,20 +352,27 @@ int main(int argc, char** argv) {
             std::replace( q_curr_str.begin(), q_curr_str.end(), '\t', ',');
 
             _logger_accuracy << uid << ", "
-                    << (int)(sca->is_active_SCAFoI_L_R_Arms     ? results_L_R_Arms.front().getDistance() < sca->d_threshold_upper : results_L_R_Arms.front().getDistance() > sca->d_threshold_lower) << ", "
-                    << (int)(!sca->is_active_SCAFoI_L_R_Arms    ? results_L_R_Arms.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
-                    << (int)(sca->is_active_SCAFoI_L_Arm_Torso  ? results_L_Arm_Torso.front().getDistance() < sca->d_threshold_upper : results_L_Arm_Torso.front().getDistance() > sca->d_threshold_lower) << ", "
-                    << (int)(!sca->is_active_SCAFoI_L_Arm_Torso ? results_L_Arm_Torso.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
-                    << (int)(sca->is_active_SCAFoI_R_Arm_Torso  ? results_R_Arm_Torso.front().getDistance() < sca->d_threshold_upper : results_R_Arm_Torso.front().getDistance() > sca->d_threshold_lower) << ", "
-                    << (int)(!sca->is_active_SCAFoI_R_Arm_Torso ? results_R_Arm_Torso.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_L_R_Arms     ? results_L_R_Arms.front().getDistance()     < sca->d_threshold_upper : results_L_R_Arms.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_R_Arms    ? results_L_R_Arms.front().getDistance()     < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_R_Arms    ? results_L_R_Arms.front().getDistance()     < 0 : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_L_Arm_Torso  ? results_L_Arm_Torso.front().getDistance()  < sca->d_threshold_upper : results_L_Arm_Torso.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_Torso ? results_L_Arm_Torso.front().getDistance()  < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_Torso ? results_L_Arm_Torso.front().getDistance()  < 0 : false) << ", "
+                    << (int)(sca->is_active_SCAFoI_R_Arm_Torso  ? results_R_Arm_Torso.front().getDistance()  < sca->d_threshold_upper : results_R_Arm_Torso.front().getDistance() > sca->d_threshold_lower) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_Torso ? results_R_Arm_Torso.front().getDistance()  < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_Torso ? results_R_Arm_Torso.front().getDistance()  < 0 : false) << ", "
                     << (int)(sca->is_active_SCAFoI_L_Arm_L_Leg   ? results_L_Arm_L_Leg.front().getDistance() < sca->d_threshold_upper : results_L_Arm_L_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
-                    << (int)(!sca->is_active_SCAFoI_L_Arm_L_Leg  ? results_L_Arm_L_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_L_Leg  ? results_L_Arm_L_Leg.front().getDistance() < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_L_Leg  ? results_L_Arm_L_Leg.front().getDistance() < 0 : false) << ", "
                     << (int)(sca->is_active_SCAFoI_R_Arm_R_Leg   ? results_R_Arm_R_Leg.front().getDistance() < sca->d_threshold_upper : results_R_Arm_R_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
-                    << (int)(!sca->is_active_SCAFoI_R_Arm_R_Leg  ? results_R_Arm_R_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_R_Leg  ? results_R_Arm_R_Leg.front().getDistance() < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_R_Leg  ? results_R_Arm_R_Leg.front().getDistance() < 0 : false) << ", "
                     << (int)(sca->is_active_SCAFoI_L_Arm_R_Leg   ? results_L_Arm_R_Leg.front().getDistance() < sca->d_threshold_upper : results_L_Arm_R_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
-                    << (int)(!sca->is_active_SCAFoI_L_Arm_R_Leg  ? results_L_Arm_R_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_R_Leg  ? results_L_Arm_R_Leg.front().getDistance() < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_L_Arm_R_Leg  ? results_L_Arm_R_Leg.front().getDistance() < 0 : false) << ", "
                     << (int)(sca->is_active_SCAFoI_R_Arm_L_Leg   ? results_R_Arm_L_Leg.front().getDistance() < sca->d_threshold_upper : results_R_Arm_L_Leg.front().getDistance() > sca->d_threshold_lower) << ", "
-                    << (int)(!sca->is_active_SCAFoI_R_Arm_L_Leg  ? results_R_Arm_L_Leg.front().getDistance() > sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_L_Leg  ? results_R_Arm_L_Leg.front().getDistance() < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
+                    << (int)(!sca->is_active_SCAFoI_R_Arm_L_Leg  ? results_R_Arm_L_Leg.front().getDistance() < 0 : false) << ", "
                     << q_curr_str << std::endl;
         }
 
