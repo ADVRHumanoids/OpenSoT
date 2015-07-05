@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     unsigned int counter = 0;
 
-    std::ofstream j_lims("task_joint_limits.csv");
+    std::ofstream j_lims("task_joint_limits.txt");
 
     while(true)
     {
