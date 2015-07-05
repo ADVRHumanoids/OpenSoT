@@ -203,6 +203,112 @@ int main(int argc, char** argv) {
             new ComputeLinksDistance(bigman));
     distance_comp_R_Arm_L_Leg->setCollisionWhiteList(sca->whitelist_R_Arm_L_Leg);
 
+
+    std::vector<std::string> names_SCAFoI;
+    std::map<std::string, boost::shared_ptr<ComputeLinksDistance> > distance_SCAFoI;
+    std::map<std::string, std::ofstream> logger_SCAFoI;
+    std::map<std::string, std::list<std::pair<std::string, std::string> >* > whitelists_SCAFoI;
+    std::map<std::string, std::vector<unsigned int> > indices_q_SCAFoI;
+    std::map<std::string, std::list<LinkPairDistance> > results_distance_SCAFoI;
+
+    names_SCAFoI.push_back("L_R_Arms");
+    names_SCAFoI.push_back("L_Arm_Torso");
+    names_SCAFoI.push_back("R_Arm_Torso");
+    names_SCAFoI.push_back("L_Arm_L_Leg");
+    names_SCAFoI.push_back("R_Arm_R_Leg");
+    names_SCAFoI.push_back("L_Arm_R_Leg");
+    names_SCAFoI.push_back("R_Arm_L_Leg");
+
+    distance_SCAFoI[names_SCAFoI[0]] = distance_comp_L_R_Arms;
+    distance_SCAFoI[names_SCAFoI[1]] = distance_comp_L_Arm_Torso;
+    distance_SCAFoI[names_SCAFoI[2]] = distance_comp_R_Arm_Torso;
+    distance_SCAFoI[names_SCAFoI[3]] = distance_comp_L_Arm_L_Leg;
+    distance_SCAFoI[names_SCAFoI[4]] = distance_comp_R_Arm_R_Leg;
+    distance_SCAFoI[names_SCAFoI[5]] = distance_comp_L_Arm_R_Leg;
+    distance_SCAFoI[names_SCAFoI[6]] = distance_comp_R_Arm_L_Leg;
+
+    for(unsigned int i = 0; i < names_SCAFoI.size(); ++i)
+        logger_SCAFoI[names_SCAFoI[i]].open(names_SCAFoI[i]+"_log.csv");
+
+    indices_q_SCAFoI[names_SCAFoI[0]].insert(
+        indices_q_SCAFoI[names_SCAFoI[0]].end(),
+        bigman.left_arm.joint_numbers.begin(),
+        bigman.left_arm.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[0]].insert(
+        indices_q_SCAFoI[names_SCAFoI[0]].end(),
+        bigman.right_arm.joint_numbers.begin(),
+        bigman.right_arm.joint_numbers.end());
+
+    indices_q_SCAFoI[names_SCAFoI[1]].insert(
+        indices_q_SCAFoI[names_SCAFoI[1]].end(),
+        bigman.left_arm.joint_numbers.begin(),
+        bigman.left_arm.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[1]].insert(
+        indices_q_SCAFoI[names_SCAFoI[1]].end(),
+        bigman.torso.joint_numbers.begin(),
+        bigman.torso.joint_numbers.end());
+
+    indices_q_SCAFoI[names_SCAFoI[2]].insert(
+        indices_q_SCAFoI[names_SCAFoI[2]].end(),
+        bigman.right_arm.joint_numbers.begin(),
+        bigman.right_arm.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[2]].insert(
+        indices_q_SCAFoI[names_SCAFoI[2]].end(),
+        bigman.torso.joint_numbers.begin(),
+        bigman.torso.joint_numbers.end());
+
+    indices_q_SCAFoI[names_SCAFoI[3]].insert(
+        indices_q_SCAFoI[names_SCAFoI[3]].end(),
+        bigman.left_arm.joint_numbers.begin(),
+        bigman.left_arm.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[3]].insert(
+        indices_q_SCAFoI[names_SCAFoI[3]].end(),
+        bigman.torso.joint_numbers.begin(),
+        bigman.torso.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[3]].insert(
+        indices_q_SCAFoI[names_SCAFoI[3]].end(),
+        bigman.left_leg.joint_numbers.begin(),
+        bigman.left_leg.joint_numbers.end());
+
+    indices_q_SCAFoI[names_SCAFoI[4]].insert(
+        indices_q_SCAFoI[names_SCAFoI[4]].end(),
+        bigman.right_arm.joint_numbers.begin(),
+        bigman.right_arm.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[4]].insert(
+        indices_q_SCAFoI[names_SCAFoI[4]].end(),
+        bigman.torso.joint_numbers.begin(),
+        bigman.torso.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[4]].insert(
+        indices_q_SCAFoI[names_SCAFoI[4]].end(),
+        bigman.right_leg.joint_numbers.begin(),
+        bigman.right_leg.joint_numbers.end());
+
+    indices_q_SCAFoI[names_SCAFoI[5]].insert(
+        indices_q_SCAFoI[names_SCAFoI[5]].end(),
+        bigman.left_arm.joint_numbers.begin(),
+        bigman.left_arm.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[5]].insert(
+        indices_q_SCAFoI[names_SCAFoI[5]].end(),
+        bigman.torso.joint_numbers.begin(),
+        bigman.torso.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[5]].insert(
+        indices_q_SCAFoI[names_SCAFoI[5]].end(),
+        bigman.right_leg.joint_numbers.begin(),
+        bigman.right_leg.joint_numbers.end());
+
+    indices_q_SCAFoI[names_SCAFoI[6]].insert(
+        indices_q_SCAFoI[names_SCAFoI[6]].end(),
+        bigman.right_arm.joint_numbers.begin(),
+        bigman.right_arm.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[6]].insert(
+        indices_q_SCAFoI[names_SCAFoI[6]].end(),
+        bigman.torso.joint_numbers.begin(),
+        bigman.torso.joint_numbers.end());
+    indices_q_SCAFoI[names_SCAFoI[6]].insert(
+        indices_q_SCAFoI[names_SCAFoI[6]].end(),
+        bigman.left_leg.joint_numbers.begin(),
+        bigman.left_leg.joint_numbers.end());
+
     boost::shared_ptr<ComputeLinksDistance> distance_comp(
             new ComputeLinksDistance(bigman));
 
@@ -310,18 +416,25 @@ int main(int argc, char** argv) {
 
         std::list<LinkPairDistance> results_L_R_Arms =
             distance_comp_L_R_Arms->getLinkDistances();
+        results_distance_SCAFoI[names_SCAFoI[0]] = results_L_R_Arms;
         std::list<LinkPairDistance> results_L_Arm_Torso =
             distance_comp_L_Arm_Torso->getLinkDistances();
+        results_distance_SCAFoI[names_SCAFoI[1]] = results_L_Arm_Torso;
         std::list<LinkPairDistance> results_R_Arm_Torso =
             distance_comp_R_Arm_Torso->getLinkDistances();
+        results_distance_SCAFoI[names_SCAFoI[2]] = results_R_Arm_Torso;
         std::list<LinkPairDistance> results_L_Arm_L_Leg =
             distance_comp_L_Arm_L_Leg->getLinkDistances();
+        results_distance_SCAFoI[names_SCAFoI[3]] = results_L_Arm_L_Leg;
         std::list<LinkPairDistance> results_R_Arm_R_Leg =
             distance_comp_R_Arm_R_Leg->getLinkDistances();
+        results_distance_SCAFoI[names_SCAFoI[4]] = results_R_Arm_R_Leg;
         std::list<LinkPairDistance> results_L_Arm_R_Leg =
             distance_comp_L_Arm_R_Leg->getLinkDistances();
+        results_distance_SCAFoI[names_SCAFoI[5]] = results_L_Arm_R_Leg;
         std::list<LinkPairDistance> results_R_Arm_L_Leg =
             distance_comp_R_Arm_L_Leg->getLinkDistances();
+        results_distance_SCAFoI[names_SCAFoI[6]] = results_R_Arm_L_Leg;
 
         q_curr = bigman.iDyn3_model.getAng();
 
@@ -374,6 +487,21 @@ int main(int argc, char** argv) {
                     << (int)(!sca->is_active_SCAFoI_R_Arm_L_Leg  ? results_R_Arm_L_Leg.front().getDistance() < sca->_linkPair_threshold/sca->_boundScaling : false) << ", "
                     << (int)(!sca->is_active_SCAFoI_R_Arm_L_Leg  ? results_R_Arm_L_Leg.front().getDistance() < 0 : false) << ", "
                     << q_curr_str << std::endl;
+
+            for(unsigned int i = 0; i < names_SCAFoI.size(); ++i)
+                if(results_distance_SCAFoI[names_SCAFoI[i]].front().getDistance() < sca->d_threshold_lower ||
+                   results_distance_SCAFoI[names_SCAFoI[i]].front().getDistance() > sca->d_threshold_upper)
+                {
+                    yarp::sig::Vector q_SCAFoI;
+                    for(unsigned int j = 0; j < indices_q_SCAFoI[names_SCAFoI[i]].size(); ++j)
+                        q_SCAFoI.push_back(q_curr[indices_q_SCAFoI[names_SCAFoI[i]][j]]);
+                    std::string q_SCAFoI_string = q_SCAFoI.toString();
+                    std::replace(q_SCAFoI_string.begin(), q_SCAFoI_string.end(),'\t',',');
+
+                    logger_SCAFoI[names_SCAFoI[i]]
+                        << (int)(results_distance_SCAFoI[names_SCAFoI[i]].front().getDistance() < sca->d_threshold_lower ? 1 : 0) << ", "
+                        << q_SCAFoI_string << std::endl;
+                }
         }
 
         std::list<LinkPairDistance>
