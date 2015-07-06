@@ -29,6 +29,17 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
         throw "Can Not initizalize SoT with bounds!";
 }
 
+QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
+                         ConstraintPtr bounds,
+                         ConstraintPtr globalConstraints,
+                         const double eps_regularisation):
+    Solver(stack_of_tasks, bounds, globalConstraints),
+    _epsRegularisation(eps_regularisation)
+{
+    if(!prepareSoT())
+        throw "Can Not initizalize SoT with bounds!";
+}
+
 void QPOases_sot::computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g)
 {
     H = task->getA().transposed() * task->getWeight() * task->getA();
@@ -71,6 +82,13 @@ bool QPOases_sot::prepareSoT()
                 lA = cat(lA, tmp_lA);
                 uA = cat(uA, tmp_uA);
             }
+        }
+
+        if(_globalConstraints)
+        {
+            A = pile(A, _globalConstraints->getAineq());
+            lA = cat(lA, _globalConstraints->getbLowerBound());
+            uA = cat(uA, _globalConstraints->getbUpperBound());
         }
 
         if(_bounds)
@@ -117,6 +135,14 @@ bool QPOases_sot::solve(Vector &solution)
                 uA = yarp::math::cat(uA, tmp_uA);
             }
         }
+
+        if(_globalConstraints)
+        {
+            A = pile(A, _globalConstraints->getAineq());
+            lA = cat(lA, _globalConstraints->getbLowerBound());
+            uA = cat(uA, _globalConstraints->getbUpperBound());
+        }
+
         if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
             return false;
 
