@@ -416,13 +416,14 @@ void QPOasesProblem::checkInfeasibility()
     std::cout<<RED<<"Constraints:"<<DEFAULT<<std::endl;
     infeasibleConstraints.print();
 
-    yarp::sig::Vector wrong_solution(_A.cols(), 0.0);
-    _problem->getPrimalSolution(wrong_solution.data());
     std::cout<<"--------------------------------------------"<<std::endl;
     for(unsigned int i = 0; i < _lA.size(); ++i)
-        std::cout<<i<<": "<<_lA[i]<<" <= "<<
-                   yarp::math::dot(_A.getRow(i),wrong_solution)
-                <<" <= "<<_uA[i]<<std::endl;
+        std::cout<<i<<": "<<_lA[i]<<" <= "<<"Adq"<<" <= "<<_uA[i]<<std::endl;
+
+    std::cout<<std::endl;
+    std::cout<<"A = ["<<std::endl;
+    std::cout<<_A.toString()<<" ]"<<std::endl;
+    std::cout<<"--------------------------------------------"<<std::endl;
 }
 
 void QPOasesProblem::printProblemInformation(const int problem_number, const std::string problem_id)
