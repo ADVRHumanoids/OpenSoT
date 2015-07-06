@@ -410,9 +410,9 @@ int main(int argc, char** argv) {
     yarp::sig::Vector q_prev, q_curr;
     q_prev = bigman.iDyn3_model.getAng(); q_curr = q_prev;
     while (ros::ok()) {
-        double distance_comp_tic = yarp::os::SystemClock::nowSystem();
+        double t_distance_comp_tic = yarp::os::SystemClock::nowSystem();
         std::list<LinkPairDistance> results = distance_comp->getLinkDistances();
-        double distance_comp = yarp::os::SystemClock::nowSystem() - distance_comp_tic;
+        double t_distance_comp = yarp::os::SystemClock::nowSystem() - t_distance_comp_tic;
 
         std::list<LinkPairDistance> results_L_R_Arms =
             distance_comp_L_R_Arms->getLinkDistances();
@@ -448,7 +448,7 @@ int main(int argc, char** argv) {
         t = yarp::os::SystemClock::nowSystem() - time_start;
 
         _logger << uid << ", " << t << ", "
-                << SCAFoI_comp << ", " << distance_comp << ", "
+                << SCAFoI_comp << ", " << t_distance_comp << ", "
                 << results_L_R_Arms.front().getDistance()    << ", " << (int)sca->is_active_SCAFoI_L_R_Arms << ", "
                 << results_L_Arm_Torso.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_L_Arm_Torso << ", "
                 << results_R_Arm_Torso.front().getDistance() << ", " << (int)sca->is_active_SCAFoI_R_Arm_Torso << ", "
