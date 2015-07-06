@@ -16,7 +16,7 @@ When constructed, the QPOasesProblem class instantiates a SQProblem (from qpOase
 
 Afterwards, the problem is initialized with the following state machine:
 
-![QPOasesProblem::initProblem()](https://github.com/robotology-playground/OpenSoT/blob/qp_solver/doc/QPOasesProblem.init.png)
+![QPOasesProblem::initProblem()](https://github.com/robotology-playground/OpenSoT/blob/devel/doc/QPOasesProblem.init.png)
 
 that return true if the problem is correctly initialized.
 
@@ -27,7 +27,7 @@ When adding a task, it has to be the same number of cols of the contained task; 
 
 When the problem is solved, the following state machine is used:
 
-![QPOasesProblem::solve()](https://github.com/robotology-playground/OpenSoT/blob/qp_solver/doc/QPOasesProblem.solve.png)
+![QPOasesProblem::solve()](https://github.com/robotology-playground/OpenSoT/blob/devel/doc/QPOasesProblem.solve.png)
 
 In the solve, the first solution is attempted using the <em>hotstart</em> functionality of qpOASES. If it fails, a second soluton is attempted with the initialization with initial guess given from the previous bounds (aka <em>warmstart</em>), constraints and solution. If also this fails the init is called as last attempt.
 
@@ -39,6 +39,6 @@ The stack is created and initialized in the constructor and if something goes wr
 
 When solved, the following state machine is used:
 
-![QPOases_sot::solve()](https://github.com/robotology-playground/OpenSoT/blob/qp_solver/doc/QPOases_sot.solve.png)
+![QPOases_sot::solve()](https://github.com/robotology-playground/OpenSoT/blob/devel/doc/QPOases_sot.solve.png)
 
 <em>Optimality</em> and <em>Cost Function</em> depends on the type of control. 
