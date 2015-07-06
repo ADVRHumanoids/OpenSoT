@@ -343,7 +343,7 @@ bool QPOasesProblem::solve()
 
     if(val != qpOASES::SUCCESSFUL_RETURN){
         std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN HOTSTART! ERROR "<<val<<DEFAULT<<std::endl;
-        std::cout<<YELLOW<<"RETRYING INITING WITH INITIAL GUESS"<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"RETRYING INITING WITH WARMSTART"<<DEFAULT<<std::endl;
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
         int number_of_variables = _problem->getNV();
@@ -364,8 +364,8 @@ bool QPOasesProblem::solve()
                            _bounds.get(), _constraints.get());
 
         if(val != qpOASES::SUCCESSFUL_RETURN){
-            std::cout<<RED<<"ERROR OPTIMIZING TASK WITH INITIAL GUESS! ERROR "<<val<<DEFAULT<<std::endl;
-            std::cout<<RED<<"RETRYING INITING"<<DEFAULT<<std::endl;
+            std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN WARMSTART! ERROR "<<val<<DEFAULT<<std::endl;
+            std::cout<<GREEN<<"RETRYING INITING"<<DEFAULT<<std::endl;
 
             _problem.reset();
             _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
@@ -413,24 +413,16 @@ void QPOasesProblem::checkInfeasibility()
 {
     qpOASES::Constraints infeasibleConstraints;
     _problem->getConstraints(infeasibleConstraints);
-    yarp::sig::Vector indices_infeasible_lower;
-    yarp::sig::Vector indices_infeasible_upper;
-    for(unsigned int i = 0; i < infeasibleConstraints.getNC(); ++i){
-        if(infeasibleConstraints.getStatus(i) == qpOASES::ST_INFEASIBLE_LOWER)
-            indices_infeasible_lower.push_back(i);
-        if(infeasibleConstraints.getStatus(i) == qpOASES::ST_INFEASIBLE_UPPER)
-            indices_infeasible_upper.push_back(i);
-    }
-    std::cout<<RED<<"Indices of LOWER INFEASIBLE CONSTRAINTS"<<DEFAULT<<std::endl;
-    std::cout<<indices_infeasible_lower.toString()<<std::endl<<std::endl;
-    std::cout<<RED<<"Indices of UPPER INFEASIBLE CONSTRAINTS"<<DEFAULT<<std::endl;
-    std::cout<<indices_infeasible_upper.toString()<<std::endl<<std::endl;
     std::cout<<RED<<"Constraints:"<<DEFAULT<<std::endl;
     infeasibleConstraints.print();
 
+    yarp::sig::Vector wrong_solution(_A.cols(), 0.0);
+    _problem->getPrimalSolution(wrong_solution.data());
     std::cout<<"--------------------------------------------"<<std::endl;
     for(unsigned int i = 0; i < _lA.size(); ++i)
-        std::cout<<i<<": "<<_lA[i]<<" <= "<<_A.getRow(i).toString()<<" <= "<<_uA[i]<<std::endl;
+        std::cout<<i<<": "<<_lA[i]<<" <= "<<
+                   yarp::math::dot(_A.getRow(i),wrong_solution)
+                <<" <= "<<_uA[i]<<std::endl;
 }
 
 void QPOasesProblem::printProblemInformation(const int problem_number, const std::string problem_id)
