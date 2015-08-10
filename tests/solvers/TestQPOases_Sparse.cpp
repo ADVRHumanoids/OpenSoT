@@ -899,8 +899,8 @@ namespace
                                              new Cartesian("cartesian::torso",state,robot_model,"torso","world")));
                     /** 3.1) We want to control torso in /world frame using only the three joints in the torso **/
                     std::vector<bool> active_joint_mask = taskTorso->getActiveJointsMask();
-                    for(unsigned int i = 0; i < robot_model.left_leg.getNrOfDOFs(); ++i)
-                        active_joint_mask[robot_model.left_leg.joint_numbers[i]] = false;
+                    for(unsigned int j = 0; j < robot_model.left_leg.getNrOfDOFs(); ++j)
+                        active_joint_mask[robot_model.left_leg.joint_numbers[j]] = false;
                     taskTorso->setActiveJointsMask(active_joint_mask);
 
                     /** 3.2) We are interested only in the orientation of the torso **/
