@@ -421,7 +421,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     task_right_arm->setReference(T_reference_r_arm);
 
     std::cout << "xxx Setting whitelist" << std::endl;
-    std::list<std::pair<std::string,std::string>> whiteList;
+    std::list<std::pair<std::string,std::string> > whiteList;
     whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
     this->sc_constraint->setCollisionWhiteList(whiteList);
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
@@ -623,7 +623,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     // set whitelist
 
     std::cout << "xxx Setting whitelist" << std::endl;
-    std::list<std::pair<std::string,std::string>> whiteList;
+    std::list<std::pair<std::string,std::string> > whiteList;
     whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
     whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
     this->sc_constraint->setCollisionWhiteList(whiteList);
@@ -871,7 +871,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     // set whitelist
 
     std::cout << "xxx Setting whitelist" << std::endl;
-    std::list<std::pair<std::string,std::string>> whiteList;
+    std::list<std::pair<std::string,std::string> > whiteList;
     whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
     whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
     this->sc_constraint->setCollisionWhiteList(whiteList);

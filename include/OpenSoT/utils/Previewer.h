@@ -329,7 +329,7 @@ namespace OpenSoT {
             };
 
             typedef std::list<TrajBinding> TrajectoryBindings;
-            typedef boost::shared_ptr<OpenSoT::Previewer<TrajectoryGenerator>> Ptr;
+            typedef boost::shared_ptr<OpenSoT::Previewer<TrajectoryGenerator> > Ptr;
             typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
                              KDL::Frame>  CartesianNodes;
 

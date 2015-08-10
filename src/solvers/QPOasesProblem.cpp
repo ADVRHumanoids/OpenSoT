@@ -87,7 +87,7 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
     int nWSR = _nWSR;
     H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
     H_sparse->createDiagInfo();
-    A_dense = NULL;
+    A_dense.reset();
     if(!(_A.data() == NULL))
         A_dense = boost::make_shared<qpOASES::DenseMatrix>(
                 qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
@@ -329,7 +329,7 @@ bool QPOasesProblem::solve()
 
     H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
     H_sparse->createDiagInfo();
-    A_dense = NULL;
+    A_dense.reset();
     if(!(_A.data() == NULL))
         A_dense = boost::make_shared<qpOASES::DenseMatrix>(
                     qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
@@ -449,8 +449,7 @@ void QPOasesProblem::printProblemInformation(const int problem_number, const std
 
 bool QPOasesProblem::writeQPIntoMFile(const std::string& file_name)
 {
-    std::ofstream file;
-    file.open(file_name);
+    std::ofstream file(file_name.c_str());
     if(file.is_open())
     {
         file<<"H = [\n"<<_H.toString()<<"\n]\n\n";

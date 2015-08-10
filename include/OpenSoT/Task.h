@@ -20,6 +20,7 @@
 
  #include <list>
  #include <string>
+ #include <vector>
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
  #include <boost/shared_ptr.hpp>
@@ -189,8 +190,16 @@
                 i != this->getConstraints().end(); ++i) (*i)->update(x);
             this->_update(x);
 
-            if(!(std::all_of(_active_joints_mask.begin(), _active_joints_mask.end(), istrue())))
-                applyActiveJointsMask(_A);
+            typedef std::vector<bool>::const_iterator it_m;
+            bool all_true = true;
+            for( it_m active_joint = _active_joints_mask.begin();
+                 active_joint != _active_joints_mask.end();
+                 ++active_joint)
+            {
+                if(*active_joint == false) all_true = false;
+            }
+
+            if(!all_true) applyActiveJointsMask(_A);
         }
 
         /**

@@ -98,7 +98,7 @@ public:
             opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
-        _log.open(file_name);
+        _log.open(file_name.c_str());
         _variable_name = "data_test_" + type;
         _log<<_variable_name<<" = ["<<std::endl;
     }
@@ -269,7 +269,7 @@ public:
             opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
-        _log.open(file_name);
+        _log.open(file_name.c_str());
         _variable_name = "data_test_" + type;
         _log<<_variable_name<<" = ["<<std::endl;
     }
@@ -467,7 +467,7 @@ public:
             opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
-        _log.open(file_name);
+        _log.open(file_name.c_str());
         _variable_name = "data_test_" + type;
         _log<<_variable_name<<" = ["<<std::endl;
     }

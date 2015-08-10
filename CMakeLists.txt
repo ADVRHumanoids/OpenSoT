@@ -11,17 +11,6 @@ endif(COMMAND cmake_policy)
 include(ExternalProject)
 PROJECT(open_sot)
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type -Werror=address -Werror=parentheses " )
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -48,8 +37,8 @@ FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 
 # compilation flags
-option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
-option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" TRUE)
+option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
+option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
