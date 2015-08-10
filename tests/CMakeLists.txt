@@ -68,7 +68,7 @@ endif()
 # gTests for Velocity constraints
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ICUB_LIBRARIES})
+               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES})
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
