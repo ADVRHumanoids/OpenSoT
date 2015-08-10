@@ -4,7 +4,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <boost/smart_ptr/scoped_ptr.hpp>
 #include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_trj_msg.h>
-#include <mutex>
+#include <boost/thread/mutex.hpp>
 
 
 namespace OpenSoT {
@@ -66,7 +66,7 @@ private:
     double _lambda;
     double _orientation_gain;
     ::yarp::sig::Matrix _task_pose;
-    std::mutex _mtx;
+    boost::mutex _mtx;
 
     std::string _help_string;
     std::string _W_string;
@@ -103,7 +103,7 @@ private:
 
     bool setW()
     {
-        std::unique_lock<std::mutex>lck(_mtx);
+        boost::unique_lock<boost::mutex>lck(_mtx);
 
         ::yarp::sig::Vector v;
 
@@ -114,7 +114,7 @@ private:
                 v.push_back(w_ii);
             else
             {
-                _out.addInt(output_type::ERROR_NEGATIVE_W_GAIN);
+                _out.addInt(ERROR_NEGATIVE_W_GAIN);
                 return false;
             }
         }
@@ -125,11 +125,11 @@ private:
                 _W(i,i) = v(i);
 
             _task->setWeight(_W);
-            _out.addInt(output_type::SUCCEED);
+            _out.addInt(SUCCEED);
         }
         else
         {
-            _out.addInt(output_type::ERROR_WRONG_VECTOR_SIZE);
+            _out.addInt(ERROR_WRONG_VECTOR_SIZE);
             return false;
         }
 
@@ -138,43 +138,43 @@ private:
 
     bool setOrientationGain()
     {
-        std::unique_lock<std::mutex>lck(_mtx);
+        boost::unique_lock<boost::mutex>lck(_mtx);
 
         double orientation_gain = _in.get(1).asDouble();
 
         if(orientation_gain < 0.0)
         {
-            _out.addInt(output_type::ERROR_NEGATIVE_ORIENTATION_GAIN);
+            _out.addInt(ERROR_NEGATIVE_ORIENTATION_GAIN);
             return false;
         }
 
         _orientation_gain = orientation_gain;
         _task->setOrientationErrorGain(_orientation_gain);
-        _out.addInt(output_type::SUCCEED);
+        _out.addInt(SUCCEED);
         return true;
     }
 
     bool setLambda()
     {
-        std::unique_lock<std::mutex>lck(_mtx);
+        boost::unique_lock<boost::mutex>lck(_mtx);
 
         double lambda = _in.get(1).asDouble();
 
         if(lambda <= 0.0)
         {
-            _out.addInt(output_type::ERROR_NEGATIVE_LAMBDA_GAIN);
+            _out.addInt(ERROR_NEGATIVE_LAMBDA_GAIN);
             return false;
         }
 
         if (lambda > 1.0)
         {
-            _out.addInt(output_type::ERROR_LAMBA_GAIN_MORE_THAN_1);
+            _out.addInt(ERROR_LAMBA_GAIN_MORE_THAN_1);
             return false;
         }
 
         _lambda = lambda;
         _task->setLambda(_lambda);
-        _out.addInt(output_type::SUCCEED);
+        _out.addInt(SUCCEED);
         return true;
     }
 

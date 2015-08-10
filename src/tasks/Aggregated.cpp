@@ -19,6 +19,7 @@
 #include <yarp/math/Math.h>
 #include <algorithm>
 #include <exception>
+#include <stdexcept>
 #include <assert.h>
 
 using namespace OpenSoT::tasks;

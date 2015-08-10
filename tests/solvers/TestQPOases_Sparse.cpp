@@ -477,7 +477,7 @@ namespace
                  bool writeQPIntoMFile(const std::string& file_name)
                  {
                      std::ofstream file;
-                     file.open(file_name);
+                     file.open(file_name.c_str());
                      if(file.is_open())
                      {
                          file<<"H = [\n"<<_H.toString()<<"\n]\n\n";

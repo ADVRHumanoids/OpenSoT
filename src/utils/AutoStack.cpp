@@ -79,11 +79,15 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
     W.setSubmatrix(W1,0,0);
     W.setSubmatrix(W1,W1.rows(), W1.cols());
     outAggregated->getConstraints() = aggregated1->getConstraints();
-    for(auto constraint : aggregated2->getConstraints()) {
+    typedef std::list< OpenSoT::tasks::Aggregated::ConstraintPtr >::const_iterator it_c;
+    for(it_c constraint = aggregated2->getConstraints().begin();
+        constraint != aggregated2->getConstraints().end();
+        ++constraint)
+    {
         if(find(outAggregated->getConstraints().begin(),
-                outAggregated->getConstraints().end(), constraint)
+                outAggregated->getConstraints().end(), *constraint)
            == outAggregated->getConstraints().end())
-            outAggregated->getConstraints().push_back(constraint);
+            outAggregated->getConstraints().push_back(*constraint);
     }
 
     return outAggregated;
@@ -151,9 +155,12 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
         outBounds.insert(outBounds.end(),
                          stack1->getBoundsList().begin(),
                          stack1->getBoundsList().end());
-        for(auto bound : stack2->getBoundsList())
-            if(std::find(outBounds.begin(), outBounds.end(), bound) == outBounds.end())
-                outBounds.push_back(bound);
+        typedef std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>::const_iterator it_b;
+        for(it_b bound = stack2->getBoundsList().begin();
+            bound != stack2->getBoundsList().end();
+            ++bound)
+            if(std::find(outBounds.begin(), outBounds.end(), *bound) == outBounds.end())
+                outBounds.push_back(*bound);
     }
 
     if(outBounds.size() > 0)
@@ -228,8 +235,11 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
 void OpenSoT::AutoStack::update(const Vector &state)
 {
     _boundsAggregated->update(state);
-    for(auto task: _stack)
-        task->update(state);
+    typedef std::vector<OpenSoT::tasks::Aggregated::TaskPtr>::iterator it_t;
+    for(it_t task = _stack.begin();
+        task != _stack.end();
+        ++task)
+        (*task)->update(state);
 }
 
 std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& OpenSoT::AutoStack::getBoundsList()
