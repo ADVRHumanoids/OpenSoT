@@ -39,6 +39,8 @@ using namespace std;
     protected:
         vector <TaskPtr> _tasks;
         ConstraintPtr _bounds;
+        ConstraintPtr _globalConstraints;
+
 
     public:
 
@@ -55,6 +57,15 @@ using namespace std;
          */
         Solver(vector <TaskPtr>& stack,
                ConstraintPtr bounds) : _tasks(stack), _bounds(bounds) {}
+
+        /**
+         * @brief Solver an interface for a generic solver
+         * @param stack a vector of pointers to tasks
+         * @param bounds a global bound for the problem
+         * @param globalConstraints a global constrains for the problem
+         */
+        Solver(vector<TaskPtr> &stack, ConstraintPtr bounds, ConstraintPtr globalConstraints):
+            _tasks(stack), _bounds(bounds), _globalConstraints(globalConstraints) {}
 
         virtual ~Solver(){}
 

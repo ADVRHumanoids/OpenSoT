@@ -68,6 +68,19 @@ namespace OpenSoT{
                     ConstraintPtr bounds,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
 
+        /**
+         * @brief QPOases_sot constructor of the problem
+         * @param stack_of_tasks a vector of tasks
+         * @param bounds a vector of bounds passed to all the stacks
+         * @param globalConstraints a vector of constraints passed to all the stacks
+         * @param eps_regularisation regularisation factor
+         * @throw exception if the stack can not be initialized
+         */
+        QPOases_sot(Stack& stack_of_tasks,
+                    ConstraintPtr bounds,
+                    ConstraintPtr globalConstraints,
+                    const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+
 
         ~QPOases_sot(){}
 

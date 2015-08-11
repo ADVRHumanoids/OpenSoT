@@ -32,7 +32,6 @@ FIND_PACKAGE(YARP REQUIRED)
 FIND_PACKAGE(ICUB REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
-FIND_PACKAGE(kdl_codyco REQUIRED)
 FIND_PACKAGE(orocos_kdl REQUIRED)
 FIND_PACKAGE(idynutils REQUIRED)
 FIND_PACKAGE(roslib REQUIRED)
@@ -55,7 +54,7 @@ option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" TRUE)
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
-                            ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS} ${kdl_codyco_INCLUDE_DIRS}
+                            ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
                             ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS} ${tf_INCLUDE_DIRS}
                             ${interactive_markers_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 
