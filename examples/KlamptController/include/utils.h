@@ -22,9 +22,9 @@
 #include <KlamptController.h>
 
 yarp::sig::Vector fromJntToiDyn(iDynUtils& model,
-                                const KlamptController::JntPose &pose);
+                                const KlamptController::JntPosition &posture);
 
-KlamptController::JntPose fromiDynToJnt(iDynUtils& model,
+KlamptController::JntPosition fromiDynToJnt(iDynUtils& model,
                                         const yarp::sig::Vector &q);
 
 #endif

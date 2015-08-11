@@ -23,16 +23,11 @@ FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(idynutils REQUIRED)
 FIND_PACKAGE(Klampt QUIET)
-FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(YARP REQUIRED)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
-
-ADD_DEFINITIONS(${PCL_DEFINITIONS})
-
-add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/../tests/robots/")
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS})
 
 include_directories("${qpOASES_INCLUDE_DIRS}")
 
@@ -45,6 +40,7 @@ ADD_LIBRARY(klampt_controller   src/KlamptController.cpp
 ADD_DEPENDENCIES(klampt_controller OpenSoT)
 ADD_DEPENDENCIES(example_klampt_controller klampt_controller)
 
-TARGET_LINK_LIBRARIES(example_klampt_controller PUBLIC  OpenSoT klampt_controller ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_klampt_controller PUBLIC  OpenSoT klampt_controller
+                                                ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 
 # TODO add SWIG bindings

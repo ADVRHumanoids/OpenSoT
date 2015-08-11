@@ -1,10 +1,11 @@
 #include <KlamptController.h>
+#include <utils.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/interfaces/yarp/tasks/YCartesian.h>
 #include <OpenSoT/interfaces/yarp/tasks/YCoM.h>
 #include <OpenSoT/interfaces/yarp/tasks/YPostural.h>
 
-#define MODULE_NAME huboplus_klampt_controller
+#define MODULE_NAME "huboplus_klampt_controller"
 #define dT  1e-2    // [s]
 
 typedef boost::accumulators::accumulator_set<double,
@@ -14,13 +15,13 @@ typedef boost::accumulators::accumulator_set<double,
 class example_class_controller : public KlamptController
 {
     /* LIST OF TASKS ACCESSIBLE VIA PYTHON YARP INTERFACES */
-    OpenSoT::interfaces::yarp::tasks::YCartesian leftArm;
-    OpenSoT::interfaces::yarp::tasks::YCartesian rightArm;
-    OpenSoT::interfaces::yarp::tasks::YCartesian waist;
-    OpenSoT::interfaces::yarp::tasks::YCartesian leftLeg;
-    OpenSoT::interfaces::yarp::tasks::YCartesian rightLeg;
-    OpenSoT::interfaces::yarp::tasks::YCoM com;
-    OpenSoT::interfaces::yarp::tasks::YPostural postural;
+    OpenSoT::interfaces::yarp::tasks::YCartesian::Ptr leftArm;
+    OpenSoT::interfaces::yarp::tasks::YCartesian::Ptr rightArm;
+    OpenSoT::interfaces::yarp::tasks::YCartesian::Ptr waist;
+    OpenSoT::interfaces::yarp::tasks::YCartesian::Ptr leftLeg;
+    OpenSoT::interfaces::yarp::tasks::YCartesian::Ptr rightLeg;
+    OpenSoT::interfaces::yarp::tasks::YCoM::Ptr com;
+    OpenSoT::interfaces::yarp::tasks::YPostural::Ptr postural;
 
     /* keeping a pointer to the DHS */
     boost::shared_ptr<OpenSoT::DefaultHumanoidStack> DHS;
@@ -57,11 +58,11 @@ public:
         // where the task of first priority is an aggregated of leftLeg and rightLeg,
         // task of priority two is leftArm and rightArm,
         // and the stack is subject to bounds jointLimits and velocityLimits
-        autoStack =
+        stack =
             ( DHS->leftLeg + DHS->rightLeg ) /
             ( DHS->leftArm + DHS->rightArm + DHS->waist_Orientation + DHS->com_XY ) /
             ( DHS->postural );
-        autoStack << DHS->jointLimits; // << DHS->velocityLimits; commented since we are using VelocityAllocation
+        stack << DHS->jointLimits; // << DHS->velocityLimits; commented since we are using VelocityAllocation
 
 
         /*                            */
@@ -96,7 +97,7 @@ public:
         pW(1, 1) *= 1e-2;
         DHS->waist_Orientation->setWeight(pW);
 
-        OpenSoT::VelocityAllocation(autoStack,
+        OpenSoT::VelocityAllocation(stack,
                                     dT,
                                     0.3,
                                     0.3);
@@ -104,7 +105,7 @@ public:
         // setting higher velocity limit to last stack --
         // TODO next feature of VelocityAllocation is a last_stack_speed ;)
         typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-        OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = autoStack->getStack()[2];
+        OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = stack->getStack()[2];
         for(it_constraint i_c = lastTask->getConstraints().begin() ;
             i_c != lastTask->getConstraints().end() ; ++i_c) {
             if( boost::dynamic_pointer_cast<
@@ -137,12 +138,12 @@ public:
                                MODULE_NAME, DHS->com));
 
             postural.reset(new YPostural(model.getRobotName(),
-                                         MODULE_NAME, DHS->postural));
+                                         MODULE_NAME, model, DHS->postural));
         }
 
         solver.reset(new OpenSoT::solvers::QPOases_sot(
-                         autoStack->getStack(),
-                         autoStack->getBounds(), 1e10));
+                         stack->getStack(),
+                         stack->getBounds(), 1e10));
     }
 
     ~example_class_controller()
@@ -150,7 +151,7 @@ public:
 
     }
 
-    KlamptController::JntCommand computeControl(KlamptController::JntPose pose)
+    KlamptController::JntCommand computeControl(KlamptController::JntPosition posture)
     {
         yarp::sig::Vector dq;
         JntCommand command;
@@ -158,7 +159,7 @@ public:
         int print_mean = 0;
 
         tic = yarp::os::Time::now();
-        yarp::sig::Vector q = fromJntToiDyn(pose);
+        yarp::sig::Vector q = fromJntToiDyn(model, posture);
         model.updateiDyn3Model(q, true);
 
         yarp::sig::Matrix M(6+model.iDyn3_model.getNrOfDOFs(), 6+model.iDyn3_model.getNrOfDOFs());
@@ -166,9 +167,9 @@ public:
         M.removeCols(0,6); M.removeRows(0,6);
         DHS->postural->setWeight(M);
 
-        autoStack->update(q);
-        if(solver.solve(dq))
-                command = fromiDynToJnt(dq);
+        stack->update(q);
+        if(solver->solve(dq))
+                command = fromiDynToJnt(model, dq);
             else
                 std::cout << "Error computing solve()" << std::endl;
             toc = yarp::os::Time::now();
@@ -188,3 +189,8 @@ public:
             return command;
     }
 };
+
+int main(int argc, char** argv)
+{
+    return 0;
+}
