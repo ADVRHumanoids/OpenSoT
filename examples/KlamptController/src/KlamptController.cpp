@@ -15,12 +15,12 @@ std::string getSRDFPath(std::string urdf_path)
 }
 
 yarp::sig::Vector fromJntToiDyn(iDynUtils& model,
-                                const KlamptController::JntPose &pose)
+                                const KlamptController::JntPosition &posture)
 {
     yarp::sig::Vector q(model.iDyn3_model.getNrOfDOFs());
 
-    for(KlamptController::JntPose::iterator i = pose.begin();
-        i != pose.end(); ++i)
+    for(KlamptController::JntPosition::const_iterator i = posture.begin();
+        i != posture.end(); ++i)
     {
         q[model.iDyn3_model.getDOFIndex(i->first)] = i->second;
     }
@@ -28,23 +28,23 @@ yarp::sig::Vector fromJntToiDyn(iDynUtils& model,
     return q;
 }
 
-KlamptController::JntPose fromiDynToJnt(iDynUtils& model,
+KlamptController::JntPosition fromiDynToJnt(iDynUtils& model,
                                         const yarp::sig::Vector &q)
 {
-    KlamptController::JntPose pose;
-    for(std::vector<std::string>::const_iterator it =
-        model.joint_names.begin();
-        it != model.joint_names.end();
-        ++it)
+    KlamptController::JntPosition posture;
+    for(std::vector<std::string>::const_iterator joint =
+        model.getJointNames().begin();
+        joint != model.getJointNames().end();
+        ++joint)
     {
-        pose[*it]=q[model.iDyn3_model.getDOFIndex(it->first)];
+        posture[*joint]=q[model.iDyn3_model.getDOFIndex(*joint)];
     }
 
-    return pose;
+    return posture;
 }
 
 KlamptController::KlamptController(std::string urdf_path)
-: robot(getRobotName(urdf_path), urdf_path, getSRDFPath(srdf_path))
+: model(getRobotName(urdf_path), urdf_path, getSRDFPath(urdf_path))
 {
 }
 
@@ -53,13 +53,13 @@ KlamptController::~KlamptController()
     ;
 }
 
-KlamptController::JntPose KlamptController::getPose()
+KlamptController::JntPosition KlamptController::getPosture()
 {
-    return fromiDynToJntPose(model, model.iDyn3_model.getAng());
+    return fromiDynToJnt(model, model.iDyn3_model.getAng());
 }
 
 
-void KlamptController::setPose(const KlamptController::JntPose& pose)
+void KlamptController::setPosture(const KlamptController::JntPosition& posture)
 {
-    model.updateiDyn3Model(fromJntPoseToiDyn(model, pose), true);
+    model.updateiDyn3Model(fromJntToiDyn(model, posture), true);
 }

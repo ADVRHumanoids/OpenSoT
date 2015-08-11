@@ -27,13 +27,14 @@
 
 class KlamptController
 {
+protected:
     iDynUtils model;
-    OpenSoT::AutoStack stack;
+    OpenSoT::AutoStack::Ptr stack;
     OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr solver;
 
 public:
-    typedef std::map<std::string, double> JntPose;
-    typedef JntPose JntCommand;
+    typedef std::map<std::string, double> JntPosition;
+    typedef JntPosition JntCommand;
 
     /**
      * @brief KlamptController loads the idynutils model
@@ -52,25 +53,25 @@ public:
     ~KlamptController();
 
     /**
-     * @brief getPose returns the robot pose
-     * @return robot pose
+     * @brief getPosture returns the robot posture
+     * @return robot posture
      */
-    JntPose getPose();
+    JntPosition getPosture();
 
     /**
-     * @brief setPose updates the internal model with the
+     * @brief setPosture updates the internal model with the
      * specified configuration vector and updates the kinematic
      * information of the robot
-     * @param pose the desired joint pose
+     * @param posture the desired joint posture
      */
-    void setPose(const JntPose& pose);
+    void setPosture(const JntPosition& posture);
 
     /**
      * @brief computeControl
      * @param q
      * @return joint commands for the robot
      */
-    virtual JntCommand computeControl(JntPose q) = 0;
+    virtual JntCommand computeControl(JntPosition q) = 0;
 };
 
 #endif
