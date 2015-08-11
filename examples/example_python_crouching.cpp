@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
     pW(1, 1) *= 1e-2;
     DHS.waist_Orientation->setWeight(pW);
 
-    std::list<std::pair<std::string,std::string>> whiteList;
+    std::list<std::pair<std::string,std::string> > whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
     whiteList.push_back(std::pair<std::string,std::string>("LLowLeg","LSoftHandLink"));
     whiteList.push_back(std::pair<std::string,std::string>("LHipMot","LSoftHandLink"));
