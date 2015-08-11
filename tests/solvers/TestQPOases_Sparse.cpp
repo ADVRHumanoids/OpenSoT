@@ -858,6 +858,8 @@ namespace
 
     TEST_F(testqpOASESSparseMatrices, testSparseVSDenseSolver)
     {
+
+        yarp::sig::Vector solve_time;
         std::vector<double> mean_time_solver;
         std::vector<double> init_time_solver;
         for(unsigned int i = 0; i < 2; ++i){
@@ -992,6 +994,7 @@ namespace
                                                                              problem->damped_least_square_eps));
                     double toc = qpOASES::getCPUtime();
                     init_time_solver.push_back(toc-tic);
+                    solve_time.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
                     double acc = 0.0;
@@ -1007,6 +1010,7 @@ namespace
                         ASSERT_TRUE(qp_solver_sparse->solve(dq));
                         double toc = qpOASES::getCPUtime();
                         acc += toc - tic;
+                        solve_time.push_back(toc-tic);
                         state += dq;
                     }
                     double t = acc/(double)(step);
@@ -1022,6 +1026,12 @@ namespace
                     for(unsigned int ii = 0; ii < 3; ++ii)
                         for(unsigned int jj = 0; jj < 3; ++jj)
                             EXPECT_NEAR(waistActual(ii,jj), waistRef(ii,jj), 1E-2);
+
+                    ofstream file;
+                    file.open("TestSparseSolverSolveTime.m");
+                    file<<"time = [ "<<solve_time.toString()<<" ];"<<std::endl;
+                    file.close();
+                    solve_time.clear();
                 }
                 else if(i == 1){
                     std::cout<<GREEN<<"DENSE SOLVER"<<DEFAULT<<std::endl;
@@ -1031,6 +1041,7 @@ namespace
                                                                          problem->damped_least_square_eps));
                     double toc = qpOASES::getCPUtime();
                     init_time_solver.push_back(toc-tic);
+                    solve_time.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
                     double acc = 0.0;
@@ -1046,6 +1057,7 @@ namespace
                         ASSERT_TRUE(qp_solver_dense->solve(dq));
                         double toc = qpOASES::getCPUtime();
                         acc += toc - tic;
+                        solve_time.push_back(toc-tic);
                         state += dq;
                     }
                     double t = acc/(double)(step);
@@ -1061,6 +1073,11 @@ namespace
                     for(unsigned int ii = 0; ii < 3; ++ii)
                         for(unsigned int jj = 0; jj < 3; ++jj)
                             EXPECT_NEAR(waistActual(ii,jj), waistRef(ii,jj), 1E-2);
+
+                    ofstream file;
+                    file.open("TestDenseSolverSolveTime.m");
+                    file<<"time = [ "<<solve_time.toString()<<" ];"<<std::endl;
+                    file.close();
                 }
         }
         std::cout<<GREEN<<"SPARSE SOLVER init needs: "<<DEFAULT<<init_time_solver[0]<<" [s]"<<std::endl;
