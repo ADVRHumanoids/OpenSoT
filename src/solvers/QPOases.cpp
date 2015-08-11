@@ -29,10 +29,21 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
         throw "Can Not initizalize SoT with bounds!";
 }
 
+QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
+                         ConstraintPtr bounds,
+                         ConstraintPtr globalConstraints,
+                         const double eps_regularisation):
+    Solver(stack_of_tasks, bounds, globalConstraints),
+    _epsRegularisation(eps_regularisation)
+{
+    if(!prepareSoT())
+        throw "Can Not initizalize SoT with bounds!";
+}
+
 void QPOases_sot::computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g)
 {
     H = task->getA().transposed() * task->getWeight() * task->getA();
-    g = -1.0 * task->getLambda() * task->getA().transposed() * task->getWeight() * task->getb();
+    g = -1.0 * task->getA().transposed() * task->getWeight() * task->getb();
 }
 
 void QPOases_sot::computeVelCtrlOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
@@ -73,6 +84,13 @@ bool QPOases_sot::prepareSoT()
             }
         }
 
+        if(_globalConstraints)
+        {
+            A = pile(A, _globalConstraints->getAineq());
+            lA = cat(lA, _globalConstraints->getbLowerBound());
+            uA = cat(uA, _globalConstraints->getbUpperBound());
+        }
+
         if(_bounds)
             constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
         yarp::sig::Vector l = constraints_task_i->getLowerBound();
@@ -85,7 +103,7 @@ bool QPOases_sot::prepareSoT()
             _qp_stack_of_tasks.push_back(problem_i);
             _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID());}
         else{
-            std::cout<<RED<<"ERROR: INITIALIZING STAK "<<i<<DEFAULT<<std::endl;
+            std::cout<<RED<<"ERROR: INITIALIZING STACK "<<i<<DEFAULT<<std::endl;
             return false;}
     }
     return true;
@@ -117,6 +135,14 @@ bool QPOases_sot::solve(Vector &solution)
                 uA = yarp::math::cat(uA, tmp_uA);
             }
         }
+
+        if(_globalConstraints)
+        {
+            A = pile(A, _globalConstraints->getAineq());
+            lA = cat(lA, _globalConstraints->getbLowerBound());
+            uA = cat(uA, _globalConstraints->getbUpperBound());
+        }
+
         if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
             return false;
 

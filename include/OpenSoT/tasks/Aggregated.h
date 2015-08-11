@@ -172,6 +172,14 @@
             const std::list< ConstraintPtr >& getAggregatedConstraints() { return _aggregatedConstraints; }
 
             const std::list< TaskPtr >& getTaskList() { return _tasks; }
+
+            /**
+             * @brief setLambda set the lambda to ALL the aggregated tasks to the same value lambda.
+             * The lambda associated to the Aggregate and the lambda associated to the tasks are different if a
+             * Aggregated.setLambda(lambda) is not called.
+             * @param lambda a value for all the tasks in the aggregate
+             */
+            void setLambda(double lambda);
         };
 
     }

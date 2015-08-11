@@ -52,12 +52,12 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     postural.setReference(q_ref);
     postural.update(q);
-    EXPECT_TRUE(postural.getb() == (q_ref-q));
+    EXPECT_TRUE(postural.getb() == postural.getLambda()*(q_ref-q));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
         postural.update(q);
-        q += postural.getLambda()*postural.getb();
+        q += postural.getb();
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)

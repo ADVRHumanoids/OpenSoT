@@ -67,12 +67,20 @@ void Cartesian::_update(const yarp::sig::Vector &x) {
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world) {
-        assert(_robot.iDyn3_model.getJacobian(_distal_link_index,_A));
+        bool res = _robot.iDyn3_model.getJacobian(_distal_link_index,_A);
+        assert(res);
         _A = _A.removeCols(0,6);    // removing unactuated joints (floating base)
-    } else
-        assert(_robot.iDyn3_model.getRelativeJacobian(_distal_link_index,
-                                                      _base_link_index,
-                                                      _A, true));
+    } else{
+        bool res = _robot.iDyn3_model.getRelativeJacobian(_distal_link_index,
+                                                          _base_link_index,
+                                                          _A, true);
+        assert(res);
+        yarp::sig::Matrix base_R_world = _robot.iDyn3_model.getPosition(_base_link_index).submatrix(0,2,0,2).transposed();
+        yarp::sig::Matrix Adj(6,6); Adj = Adj.eye();
+        Adj.setSubmatrix(base_R_world, 0,0);
+        Adj.setSubmatrix(base_R_world, 3,3);
+        _A = Adj*_A;
+    }
 
     if(_base_link_is_world)
         _actualPose = _robot.iDyn3_model.getPosition(_distal_link_index);
@@ -149,6 +157,11 @@ const std::string OpenSoT::tasks::velocity::Cartesian::getBaseLink() const
     return _base_link;
 }
 
+const bool OpenSoT::tasks::velocity::Cartesian::baseLinkIsWorld() const
+{
+    return _base_link_is_world;
+}
+
 void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
 {
     if(lambda >= 0.0){
@@ -157,12 +170,14 @@ void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
     }
 }
 
+yarp::sig::Vector OpenSoT::tasks::velocity::Cartesian::getError()
+{
+    return yarp::math::cat(positionError, -_orientationErrorGain*orientationError);
+}
+
 void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
-    if(_lambda >= LAMBDA_THS)
-        _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError) + _desiredTwist/_lambda;
-    else
-        _b = yarp::math::cat(positionError, -_orientationErrorGain*orientationError);
+    _b = _desiredTwist + _lambda*this->getError();
 }

@@ -86,14 +86,14 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == cat(positionError, -orientationErrorGain*orientationError));
+    EXPECT_TRUE(cartesian.getb() == cartesian.getLambda()*cat(positionError, -orientationErrorGain*orientationError));
 
     yarp::sig::Matrix x_now;
     for(unsigned int i = 0; i < 60; ++i)
     {
         _robot.updateiDyn3Model(q_whole,true);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getb();
         _robot.updateiDyn3Model(q_whole,true);
         x_now = _robot.iDyn3_model.getPosition(
                       _robot.right_leg.end_effector_index);
@@ -175,14 +175,14 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == cat(positionError, -orientationErrorGain*orientationError));
+    EXPECT_TRUE(cartesian.getb() == cartesian.getLambda()*cat(positionError, -orientationErrorGain*orientationError));
 
     yarp::sig::Matrix x_now;
     for(unsigned int i = 0; i < 60; ++i)
     {
         _robot.updateiDyn3Model(q_whole);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getb();
         _robot.updateiDyn3Model(q_whole);
         x_now = _robot.iDyn3_model.getPosition(
                       _robot.left_leg.end_effector_index);
@@ -273,14 +273,14 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == cat(positionError, -orientationErrorGain*orientationError));
+    EXPECT_TRUE(cartesian.getb() == cartesian.getLambda()*cat(positionError, -orientationErrorGain*orientationError));
 
     yarp::sig::Matrix x_now;
     for(unsigned int i = 0; i < 120; ++i)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.iDyn3_model.getPosition(
                     _robot.left_leg.end_effector_index,
@@ -361,14 +361,14 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == cat(positionError, -orientationErrorGain*orientationError));
+    EXPECT_TRUE(cartesian.getb() == cartesian.getLambda()*cat(positionError, -orientationErrorGain*orientationError));
 
     yarp::sig::Matrix x_now;
     for(unsigned int i = 0; i < 120; ++i)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.iDyn3_model.getPosition(
                       0,
@@ -459,14 +459,14 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == cat(positionError, -orientationErrorGain*orientationError));
+    EXPECT_TRUE(cartesian.getb() == cartesian.getLambda()*cat(positionError, -orientationErrorGain*orientationError));
 
     yarp::sig::Matrix x_now;
     for(unsigned int i = 0; i < 120; ++i)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.iDyn3_model.getPosition(
                       _robot.left_leg.end_effector_index,
@@ -547,14 +547,14 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == cat(positionError, -orientationErrorGain*orientationError));
+    EXPECT_TRUE(cartesian.getb() == cartesian.getLambda()*cat(positionError, -orientationErrorGain*orientationError));
 
     yarp::sig::Matrix x_now;
     for(unsigned int i = 0; i < 120; ++i)
     {
         _robot.updateiDyn3Model(q_whole, update_world);
         cartesian._update(q_whole);
-        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getLambda()*cartesian.getb();
+        q_whole += pinv(cartesian.getA(),1E-7)*cartesian.getb();
         _robot.updateiDyn3Model(q_whole, update_world);
         x_now = _robot.iDyn3_model.getPosition(
                       0,

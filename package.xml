@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<package>
+  <name>open_sot</name>
+  <version>0.2.0</version>
+  <description>OpenSoT is a library dedicated to hierarchical whole-body control of robots subject to constraints such as joint limits,
+  joint velocities, cartesian constraints... The main idea behind OpenSoT is to decouple Task and Constraints description from the
+  Solver used to compute the robot commands and the Type of Control available on the robot to perform them.
+  OpenSoT is developed under the European Project WALK-MAN.</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="opensot@gmail.com">OpenSoT</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>LGPLv2</license>
+
+
+  <!-- Url tags are optional, but mutiple are allowed, one per tag -->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <!-- Example: -->
+  <url type="website">https://github.com/robotology-playground/OpenSoT</url>
+  <url type="website">http://opensot.github.io/</url>
+  <url type="website">http://www.walk-man.eu/</url>
+
+  <!-- Author tags are optional, mutiple are allowed, one per tag -->
+  <!-- Authors do not have to be maintianers, but could be -->
+  <!-- Example: -->
+  <author email="alessio.rocchi@iit.it">Alessio Rocchi</author>
+  <author email="enrico.mingo@iit.it">Enrico Mingo Hoffman</author>
+
+
+  <!-- The *_depend tags are used to specify dependencies -->
+  <!-- Dependencies can be catkin packages or system dependencies -->
+  <!-- Examples: -->
+  <!-- Use build_depend for packages you need at compile time: -->
+  <!--   <build_depend>message_generation</build_depend> -->
+  <!-- Use buildtool_depend for build tool packages: -->
+  <!--   <buildtool_depend>catkin</buildtool_depend> -->
+  <!-- Use run_depend for packages you need at runtime: -->
+  <!--   <run_depend>message_runtime</run_depend> -->
+  <!-- Use test_depend for packages you need only for testing: -->
+  <!--   <test_depend>gtest</test_depend> -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>rospack</build_depend>
+  <build_depend>rosconsole</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>moveit_core</build_depend>
+  <build_depend>srdfdom</build_depend>
+  <build_depend>kdl_parser</build_depend>
+  <build_depend>orocos_kdl</build_depend>
+  <build_depend>interactive_markers</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>rospack</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>moveit_core</run_depend>
+  <run_depend>srdfdom</run_depend>
+  <run_depend>kdl_parser</run_depend>
+  <run_depend>rosconsole</run_depend>
+  <run_depend>orocos_kdl</run_depend>
+  <run_depend>interactive_markers</run_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- You can specify that this package is a metapackage here: -->
+    <!-- <metapackage/> -->
+
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

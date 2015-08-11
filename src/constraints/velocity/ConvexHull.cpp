@@ -26,9 +26,9 @@ using namespace yarp::math;
 
 ConvexHull::ConvexHull(const yarp::sig::Vector& x,
                        iDynUtils& robot,
-                       const double boundScaling) :
+                       const double safetyMargin) :
     Constraint(x.size()), _robot(robot),
-    _boundScaling(boundScaling),
+    _boundScaling(safetyMargin),
     _convex_hull(new idynutils::convex_hull())
 {
 
@@ -129,3 +129,7 @@ void ConvexHull::getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p
 }
 
 
+void ConvexHull::setSafetyMargin(const double safetyMargin)
+{
+    _boundScaling = safetyMargin;
+}

@@ -15,6 +15,8 @@ namespace qpOASES {
     class Options;
     class Bounds;
     class Constraints;
+    class SymSparseMat;
+    class DenseMatrix;
 }
 
 namespace OpenSoT{
@@ -48,12 +50,14 @@ namespace OpenSoT{
         /**
          * @brief setDefaultOptions to internal qpOases problem.
          * Default are set to:
-         *      opt.setToMPC();
-         *      opt.printLevel = qpOASES::PL_LOW;
-         *      opt.enableRegularisation = qpOASES::BT_TRUE;
-         *      opt.epsRegularisation *= _epsRegularisation;
+         *  opt.setToMPC();
+         *  opt.printLevel = qpOASES::PL_NONE;
+         *  opt.enableRegularisation = qpOASES::BT_TRUE;
+         *  opt.epsRegularisation *= _epsRegularisation;
+         *  opt.numRegularisationSteps = 2;
+         *  opt.numRefinementSteps = 1;
+         *  opt.enableFlippingBounds = qpOASES::BT_TRUE;
          *
-         *       opt.ensureConsistency();
          */
         void setDefaultOptions();
 
@@ -281,12 +285,14 @@ namespace OpenSoT{
          * Define a cost function: ||Hx - g||
          */
         yarp::sig::Matrix _H;
+        boost::shared_ptr<qpOASES::SymSparseMat> H_sparse;
         Vector _g;
 
         /**
          * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
         yarp::sig::Matrix _A;
+        boost::shared_ptr<qpOASES::DenseMatrix> A_dense;
         Vector _lA;
         Vector _uA;
 
@@ -301,6 +307,11 @@ namespace OpenSoT{
          */
         Vector _solution;
         Vector _dual_solution;
+
+        /**
+         * @brief _opt solver options
+         */
+        boost::shared_ptr<qpOASES::Options> _opt;
     };
     }
 }

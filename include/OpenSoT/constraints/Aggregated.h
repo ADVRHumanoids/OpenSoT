@@ -24,7 +24,6 @@
 #include <boost/shared_ptr.hpp>
 #include <list>
 
-
  namespace OpenSoT {
     namespace constraints {
 
@@ -61,7 +60,6 @@
             std::list< ConstraintPtr > _bounds;
             unsigned int _aggregationPolicy;
 
-            void generateAll();
             void checkSizes();
 
         public:
@@ -106,7 +104,9 @@
 
             void update(const yarp::sig::Vector &x);
 
-            const std::list< ConstraintPtr >& getConstraintsList() { return _bounds; }
+            std::list< ConstraintPtr >& getConstraintsList() { return _bounds; }
+
+            void generateAll();
         };
     }
  }
