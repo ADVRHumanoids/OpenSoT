@@ -1,0 +1,50 @@
+cmake_minimum_required(VERSION 2.8.11)
+include(ExternalProject)
+
+set(PROJECTNAME examples)
+project(${PROJECTNAME})
+
+# Copyright: (C) 2014 Walkman Consortium
+# Authors: Enrico Mingo, Alessio Rocchi
+# CopyPolicy: Released under the terms of the GNU GPL v2.0.
+
+cmake_minimum_required(VERSION 2.8.12)
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 OLD)
+    cmake_policy(SET CMP0005 NEW)
+    cmake_policy(SET CMP0017 NEW)
+endif(COMMAND cmake_policy)
+include(ExternalProject)
+PROJECT(OpenSoT)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+
+FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(iDynTree REQUIRED)
+FIND_PACKAGE(idynutils REQUIRED)
+FIND_PACKAGE(Klampt QUIET)
+FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
+FIND_PACKAGE(tf REQUIRED)
+FIND_PACKAGE(YARP REQUIRED)
+
+# add include directories
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+
+ADD_DEFINITIONS(${PCL_DEFINITIONS})
+
+add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/../tests/robots/")
+
+include_directories("${qpOASES_INCLUDE_DIRS}")
+
+ADD_EXECUTABLE(example_klampt_controller example_klampt_controller.cpp)
+
+ADD_LIBRARY(klampt_controller   src/KlamptController.cpp
+                                 include/KlamptController.h
+                                 include/utils.h)
+
+ADD_DEPENDENCIES(klampt_controller OpenSoT)
+ADD_DEPENDENCIES(example_klampt_controller klampt_controller)
+
+TARGET_LINK_LIBRARIES(example_klampt_controller PUBLIC  OpenSoT klampt_controller ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+
+# TODO add SWIG bindings
