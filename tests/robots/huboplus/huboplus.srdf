@@ -32,12 +32,12 @@
     </group>
     <group name="left_leg">
         <chain base_link="Body_Hip" tip_link="Body_LAR"/>
-        <joint name="LHY" />
+        <!--<joint name="LHY" />
         <joint name="LHR" />
         <joint name="LHP" />
         <joint name="LKP" />
         <joint name="LAP" />
-        <joint name="LAR" />
+        <joint name="LAR" />-->
     </group>
     <group name="right_leg">
         <chain base_link="Body_Hip" tip_link="Body_RAR"/>
