@@ -33,7 +33,8 @@ include_directories("${qpOASES_INCLUDE_DIRS}")
 
 ADD_EXECUTABLE(klampt_controller main.cpp)
 
-ADD_LIBRARY(example_klampt_controller example_klampt_controller.cpp
+ADD_LIBRARY(example_klampt_controller SHARED
+                                      example_klampt_controller.cpp
                                       example_klampt_controller.h
                                       src/KlamptController.cpp
                                       include/KlamptController.h
@@ -46,19 +47,18 @@ TARGET_LINK_LIBRARIES(example_klampt_controller PUBLIC OpenSoT ${idynutils_LIBRA
 
 TARGET_LINK_LIBRARIES(klampt_controller         PUBLIC example_klampt_controller)
 
+install(TARGETS example_klampt_controller DESTINATION lib)
+
 find_package(SWIG)
 if(SWIG_FOUND)
     include(UseSWIG)
 
     set_source_files_properties(KlamptController.i PROPERTIES CPLUSPLUS ON)
 
-    get_property(OPENSOT_INCLUDE_DIRS GLOBAL PROPERTY IDYNTREE_TREE_INCLUDE_DIRS)
-    get_property(OPENSOT_LIBRARIES GLOBAL PROPERTY ${VARS_PREFIX}_TARGETS)
+    include_directories(. include)
+    link_libraries(example_klampt_controller)
 
-    include_directories(${OPENSOT_INCLUDE_DIRS})
-    link_libraries(${OPENSOT_LIBRARIES})
-
-    set(CMAKE_SWIG_FLAGS "-Wall;-module;_ExampleKlamptController;-threads")
+    set(CMAKE_SWIG_FLAGS "-Wall;-module;ExampleKlamptController;-threads")
 
         set(OPENSOT_USES_PYTHON_VERSION "" CACHE STRING "Specify python version to use" )
 
@@ -72,7 +72,7 @@ if(SWIG_FOUND)
         include_directories(${PYTHON_INCLUDE_PATH})
         link_libraries(${PYTHON_LIBRARY})
 
-        set(target_name OpenSoT_python)
+        set(target_name ExampleKlamptController)
 
         swig_add_module(${target_name} python KlamptController.i)
         set_target_properties(_${target_name} PROPERTIES OUTPUT_NAME "_ExampleKlamptController")
@@ -82,7 +82,7 @@ if(SWIG_FOUND)
         execute_process(COMMAND ${PYTHON_EXECUTABLE}
             -c "from distutils import sysconfig; print(sysconfig.get_python_lib(1,0,prefix=''))"
         OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE )
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_ExampleKlamptController.py DESTINATION ${PYTHON_INSTDIR} )
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ExampleKlamptController.py DESTINATION ${PYTHON_INSTDIR} )
         install(TARGETS _${target_name} DESTINATION ${PYTHON_INSTDIR} )
 
 endif(SWIG_FOUND)
