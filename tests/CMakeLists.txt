@@ -4,6 +4,8 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
+option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
+
 # compite GTest
 find_package(GTest)
 if (NOT GTEST_FOUND)
@@ -244,14 +246,17 @@ add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 
 find_package(MATLAB QUIET)
-if(MATLAB_FOUND)
+find_package(PythonInterp)
+if(MATLAB_FOUND AND PYTHONINTERP_FOUND AND SHOW_TEST_RESULTS)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_CURRENT_BINARY_DIR}/../CTestCustom.cmake)
-else()
 endif()
 
 
 add_custom_target(copy_robot_model_files ALL
                   ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")
 
-add_custom_target(copy_test_plotter ALL
+add_custom_target(copy_test_plotter_m ALL
                   ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.m" "${CMAKE_CURRENT_BINARY_DIR}/")
+
+add_custom_target(copy_test_plotter_py ALL
+                  ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.py" "${CMAKE_CURRENT_BINARY_DIR}/")
