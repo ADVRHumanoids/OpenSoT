@@ -48,7 +48,7 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
         this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
     else
     {
-        _Aineq.resize(0,_Aineq.cols());
+        _Aineq.resize(0, 2);
         _bUpperBound.resize(0);
     }
 
@@ -59,16 +59,21 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
 }
 
 bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
-{   
+{
     std::list<KDL::Vector> points;
     // get support polygon points w.r.t. COM
     if(_robot.getSupportPolygonPoints(points,"COM")){
-        std::vector<KDL::Vector> tmp_ch;
-        if(_convex_hull->getConvexHull(points, tmp_ch)){
-            ch = tmp_ch;
-            return true;}
+        if(points.size() > 2)
+        {
+            std::vector<KDL::Vector> tmp_ch;
+            if(_convex_hull->getConvexHull(points, tmp_ch)){
+                ch = tmp_ch;
+                return true;}
+            else
+                std::cout<<"Problems computing Convex Hull, old Convex Hull will be used"<<std::endl;
+        }
         else
-            std::cout<<"Problems computing Convex Hull, old Convex Hull will be used"<<std::endl;
+            std::cout<<"Too few points for Convex Hull computation!, old Convex Hull will be used"<<std::endl;
     }
     else
         std::cout<<"Problems getting Points for Convex Hull computation!, old Convex Hull will be used"<<std::endl;
