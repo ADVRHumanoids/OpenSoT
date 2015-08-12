@@ -60,7 +60,6 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testVelocityAllocation
                       testYCartesian
                       testYPostural
-                      testMinimizeAccelerationTask
                       testInteractionVelocityTask
                       TestManipulabilityTask)
 endif()
@@ -183,10 +182,6 @@ add_dependencies(testMinimumVelocityTask GTest-ext OpenSoT)
 ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
 add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
-
-ADD_EXECUTABLE(testMinimizeAccelerationTask tasks/velocity/TestMinimizeAcceleration.cpp)
-TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
-add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
 TARGET_LINK_LIBRARIES(testAutoStack ${TestLibs})
