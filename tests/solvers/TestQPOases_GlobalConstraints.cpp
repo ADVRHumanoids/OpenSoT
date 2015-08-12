@@ -541,7 +541,7 @@ namespace
         // set whitelist
 
         std::cout << "xxx Setting whitelist" << std::endl;
-        std::list<std::pair<std::string,std::string>> whiteList;
+        std::list<std::pair<std::string,std::string> > whiteList;
         whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
         whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
         whiteList.push_back(std::pair<std::string,std::string>(linkE,linkG));
