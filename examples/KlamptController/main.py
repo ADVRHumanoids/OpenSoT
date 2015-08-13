@@ -8,5 +8,7 @@ if __name__ == "__main__":
 
     # Main loop
     dq = controller.computeControl(q)
-    q = ExampleKlamptController.JntMap(Counter(q) + Counter(dq))
+    accumulator = Counter(q.asdict)
+    accumulator.update(Counter(dq.asdict()))
+    q = ExampleKlamptController.JntMap(accumulator)
     controller.setPosture(q)
