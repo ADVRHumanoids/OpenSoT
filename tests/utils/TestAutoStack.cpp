@@ -156,11 +156,11 @@ TEST_F(testAutoStack, testOperatorRedirection)
         / (DHS.rightLeg + DHS.leftLeg) << DHS.jointLimits << DHS.velocityLimits;
     EXPECT_TRUE(auto2->getBoundsList().size() == 2);
     EXPECT_TRUE(auto2->getStack().size() == 2);
-    EXPECT_TRUE(boost::reinterpret_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().size() == 2);
-    EXPECT_EQ(boost::reinterpret_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().front()->getConstraints().size(), 2);
-    EXPECT_EQ(boost::reinterpret_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().back()->getConstraints().size(), 1);
-    EXPECT_EQ(boost::reinterpret_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().size(), 2);
-    EXPECT_EQ(boost::reinterpret_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().front()->getConstraints().size(), 0);
+    EXPECT_TRUE(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().size() == 2);
+    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().front()->getConstraints().size(), 2);
+    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().back()->getConstraints().size(), 1);
+    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().size(), 2);
+    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().front()->getConstraints().size(), 0);
 }
 
 }

@@ -72,13 +72,13 @@ bool YCoM::computePortPrefix(const std::string& robot_name, const std::string& m
 
 void YCoM::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
 {
-    if(!(ref_trj_msg.base_frame == taskCoM->getBaseLink()))
-        std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.base_frame<<
+    if(!(ref_trj_msg.yarp_pose_msg::base_frame == taskCoM->getBaseLink()))
+        std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.yarp_pose_msg::base_frame<<
                    " instead of "<<taskCoM->getBaseLink()<<" as base_frame"<<std::endl;
     else
     {
-        if(!(ref_trj_msg.distal_frame == taskCoM->getDistalLink()))
-            std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.distal_frame<<
+        if(!(ref_trj_msg.yarp_pose_msg::distal_frame == taskCoM->getDistalLink()))
+            std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.yarp_pose_msg::distal_frame<<
                        " instead of "<<taskCoM->getDistalLink()<<" as distal_frame"<<std::endl;
         else
         {
