@@ -72,13 +72,13 @@ bool YCartesian::computePortPrefix(const std::string& robot_name, const std::str
 
 void YCartesian::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
 {
-    if(!(ref_trj_msg.base_frame == taskCartesian->getBaseLink()))
-        std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.base_frame<<
+    if(!(ref_trj_msg.yarp_pose_msg::base_frame == taskCartesian->getBaseLink()))
+        std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.yarp_pose_msg::base_frame<<
                    " instead of "<<taskCartesian->getBaseLink()<<" as base_frame"<<std::endl;
     else
     {
-        if(!(ref_trj_msg.distal_frame == taskCartesian->getDistalLink()))
-            std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.distal_frame<<
+        if(!(ref_trj_msg.yarp_pose_msg::distal_frame == taskCartesian->getDistalLink()))
+            std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.yarp_pose_msg::distal_frame<<
                        " instead of "<<taskCartesian->getDistalLink()<<" as distal_frame"<<std::endl;
         else
         {
