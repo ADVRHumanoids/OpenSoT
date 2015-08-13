@@ -1,3 +1,5 @@
+#include <yarp/os/Network.h>    // to change settings and send references to tasks via YARP
+
 #include <example_klampt_controller.h>
 #include <utils.h>
 
@@ -94,6 +96,7 @@ ExampleKlamptController::ExampleKlamptController()
 
 
     {
+        yarp::os::Network::init();
         using namespace OpenSoT::interfaces::yarp::tasks;
 
         leftArm.reset(new YCartesian(model.getRobotName(),
