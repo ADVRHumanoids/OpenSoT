@@ -30,6 +30,7 @@ public:
         _help_string("help"),
         _W_string("W"),
         _lambda_string("lambda"),
+        _actual_position_string("actual_position"),
         _set_string("set "),
         _get_string("get "),
         _task(task)
@@ -60,11 +61,13 @@ private:
     ::yarp::os::Bottle _out;
     ::yarp::sig::Matrix _W;
     double _lambda;
+    ::yarp::sig::Vector _task_position;
     boost::mutex _mtx;
 
     std::string _help_string;
     std::string _W_string;
     std::string _lambda_string;
+    std::string _actual_position_string;
     std::string _set_string;
     std::string _get_string;
 
@@ -83,6 +86,8 @@ private:
             getW();
         else if(command == (_get_string + _lambda_string))
             getLambda();
+        else if(command == (_get_string + _actual_position_string))
+            getActualPosition();
         else
             std::cout<<"Unknown command! Run help instead!"<<std::endl;
     }
@@ -159,6 +164,14 @@ private:
         _out.addDouble(_lambda);
     }
 
+    void getActualPosition()
+    {
+        _task_position = _task->getActualPosition();
+        for(unsigned int i = 0; i < 3; ++i){
+            _out.addDouble(_task_position(i));
+        }
+    }
+
     void help()
     {
         std::cout<<"help: "<<std::endl;
@@ -176,6 +189,9 @@ private:
         std::cout<<"    get lambda:"<<std::endl;
         std::cout<<"        in: "<<std::endl;
         std::cout<<"        out: lambda as double"<<std::endl;
+        std::cout<<"    get actual_position:"<<std::endl;
+        std::cout<<"        in: "<<std::endl;
+        std::cout<<"        out: position as double"<<std::endl;
         std::cout<<std::endl;
     }
 };
