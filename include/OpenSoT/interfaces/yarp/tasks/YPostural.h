@@ -24,7 +24,7 @@ public:
         ERROR_LAMBA_GAIN_MORE_THAN_1
     };
 
-    RPCCallBackPostural(Postural::Ptr task):
+    RPCCallBackPostural(Postural::Ptr task, iDynUtils &idynutils):
         _W(task->getWeight()),
         _lambda(task->getLambda()),
         _help_string("help"),
@@ -33,7 +33,9 @@ public:
         _set_string("set "),
         _get_string("get "),
         _actual_position("actual_position"),
-        _task(task)
+        _actual_posture("actual_posture"),
+        _task(task),
+        _idynutils(idynutils)
     {
 
     }
@@ -69,8 +71,10 @@ private:
     std::string _set_string;
     std::string _get_string;
     std::string _actual_position;
+    std::string _actual_posture;
 
     Postural::Ptr _task;
+    iDynUtils& _idynutils;
 
     void prepareInputAndOutput()
     {
@@ -87,6 +91,8 @@ private:
             getLambda();
         else if(command == (_get_string + _actual_position))
             getActualPositions();
+        else if(command == (_get_string + _actual_posture))
+            getActualPosture();
         else
             std::cout<<"Unknown command! Run help instead!"<<std::endl;
     }
@@ -168,6 +174,17 @@ private:
         ::yarp::sig::Vector q = _task->getActualPositions();
         for(unsigned int i = 0; i < q.size(); ++i)
             _out.addDouble(q[i]);
+    }
+
+    void getActualPosture()
+    {
+        ::yarp::sig::Vector q = _task->getActualPositions();
+        std::map<std::string, double> joint_map;
+        std::vector<std::string> joint_names = _idynutils.getJointNames();
+        for(unsigned int i = 0; i < q.size(); ++i)
+            joint_map[joint_names[i]] = q[i];
+        msgs::yarp_position_joint_msg joint_msg(joint_map);
+        joint_msg.serializeMsg(_out);
     }
 
     void help()

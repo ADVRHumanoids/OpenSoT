@@ -81,26 +81,42 @@ class YTask(object):
         return reply
 
     def setW(self, W):
-        return
+        pass
 
     def getW(self):
-        return
+        pass
 
     def setLambda(self, l):
-        return
+        pass
 
     def getLambda(self):
-        return
+        pass
 
 
 class CartesianTask(YTask):
-    def __init__(self, module_name, robot_name, task_name):
+    def __init__(self, module_name, robot_name, task_name, base_link, distal_link):
         super(CartesianTask, self).__init__(module_name, robot_name, task_name)
+        self.base = base_link
+        self.distal = distal_link
 
     def setReference(self, ref_pose):
-        pass
+        """
+        Sets a reference pose for the robot ee of this cartesian task
+        :param ref_pose: a kdl.Frame with the desired pose of the EE
+        :return: True on success
+        """
+
+        cmd = yarp.Bottle()
+
+        pose_msg(ref_pose, self.base, self.distal, cmd)
+
+        return self.set_ref.write(cmd)
 
     def getActualPose(self):
+        """
+        Returns the actual pose of the EE
+        :return: a kdl.Frame with the actual pose of the EE
+        """
         reply = yarp.Bottle()
         reply.clear()
 
@@ -109,7 +125,19 @@ class CartesianTask(YTask):
 
         request.addString('get actual_pose')
         self.rpc.write(request, reply)
-        return reply
+        if reply.size() != 16:
+            raise Exception('Unexpected reply size')
+
+        frame = kdl.Frame()
+
+        for i in xrange(3):
+            frame.p[i] = reply.get(i*4 + 3).asDouble()
+
+        for c in xrange(3):
+            for r in xrange(3):
+                frame.M[r, c] = reply.get(r + c*4).asDouble()
+
+        return frame
 
     def setOrientationGain(self, orientation_gain):
         pass
@@ -120,9 +148,17 @@ class CartesianTask(YTask):
 class CoMTask(YTask):
     def __init__(self, module_name, robot_name, task_name):
         super(CoMTask, self).__init__(module_name, robot_name, task_name)
+        self.base = 'world'
+        self.distal = 'CoM'
 
     def setReference(self, ref_position):
-        pass
+        cmd = yarp.Bottle()
+
+        ref_pose = kdl.Frame()
+        ref_pose.p = ref_position
+        pose_msg(ref_pose, self.base, self.distal, cmd)
+
+        return self.set_ref.write(cmd)
 
     def getActualPosition(self):
         reply = yarp.Bottle()
@@ -134,16 +170,36 @@ class CoMTask(YTask):
         request.addString('get')
         request.addString('actual_position')
         self.rpc.write(request, reply)
-        return reply
+
+        position = kdl.Vector()
+
+        for i in xrange(3):
+            position[i] = reply.get(i).asDouble()
+
+        return position
 
 class PosturalTask(YTask):
     def __init__(self, module_name, robot_name, task_name):
         super(PosturalTask, self).__init__(module_name, robot_name, task_name)
 
     def setReference(self, ref_posture):
-        pass
+        """
+
+        :param ref_posture: a dict {'jnt_name0':q_cmd0,'jnt_name1':q_cmd1}
+        :return:
+        """
+
+        cmd = yarp.Bottle()
+        position_joint_msg(ref_posture.keys(), ref_posture.values(), cmd)
+
+        return self.set_ref.write(cmd)
+
 
     def getActualPosture(self):
+        """
+        Returns the posture of the robot as a numpy array
+        :return: a dict {'jnt_name0':q0,'jnt_name1':q_1,...,'jnt_namen_1':q_n_1}
+        """
         reply = yarp.Bottle()
         reply.clear()
 
@@ -151,9 +207,13 @@ class PosturalTask(YTask):
         request.clear()
 
         request.addString('get')
-        request.addString('actual_position')
+        request.addString('actual_posture')
         self.rpc.write(request, reply)
-        return reply
+
+        posture = dict()
+        for i in xrange(reply.size()/2):
+            posture[reply.get(2*i).asString*()] = reply.get(2*i+1).asDouble()
+        return posture
 
 __author__ = ('Alessio Rocchi', 'Enrico Mingo')
 
