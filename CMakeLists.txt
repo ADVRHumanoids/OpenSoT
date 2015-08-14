@@ -204,6 +204,10 @@ include(AddUninstallTarget)
 
 add_subdirectory(app)
 add_subdirectory(doc)
+
+########################
+# Add Examples target  #
+########################
 if(OPENSOT_COMPILE_EXAMPLES)
   add_subdirectory(examples)
 endif()
@@ -214,4 +218,9 @@ endif()
 if(OPENSOT_COMPILE_TESTS)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
+    add_custom_target(copy_robot_model_files ALL
+                      ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()
