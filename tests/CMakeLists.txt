@@ -261,6 +261,3 @@ add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
-
-add_custom_target(copy_robot_model_files ALL
-                  ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")
