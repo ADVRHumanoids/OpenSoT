@@ -60,8 +60,9 @@ class YTask(object):
         port_prefix = '/'+robot_name+'/'+module_name+'/'+task_name+'/'
         self.set_ref = yarp.BufferedPortBottle()
         self.set_ref.open(port_prefix+'set_ref:o')
-        yarp.Network.connect(port_prefix+'set_ref:o',
-                             port_prefix+'set_ref:i')
+        self.set_ref.addOutput(port_prefix+'set_ref:i')
+        #yarp.Network.connect(port_prefix+'set_ref:o',
+        #                     port_prefix+'set_ref:i')
         self.rpc = yarp.RpcClient()
         self.rpc.open(port_prefix+'rpc_client')
         self.rpc.addOutput(port_prefix+'rpc')
@@ -106,11 +107,10 @@ class CartesianTask(YTask):
         :return: True on success
         """
 
-        cmd = yarp.Bottle()
-
+        cmd = self.set_ref.prepare()
         pose_msg(ref_pose, self.base, self.distal, cmd)
 
-        return self.set_ref.write(cmd)
+        return self.set_ref.write()
 
     def getActualPose(self):
         """
@@ -152,13 +152,13 @@ class CoMTask(YTask):
         self.distal = 'CoM'
 
     def setReference(self, ref_position):
-        cmd = yarp.Bottle()
+        cmd = self.set_ref.prepare()
 
         ref_pose = kdl.Frame()
         ref_pose.p = ref_position
         pose_msg(ref_pose, self.base, self.distal, cmd)
 
-        return self.set_ref.write(cmd)
+        return self.set_ref.write()
 
     def getActualPosition(self):
         reply = yarp.Bottle()
@@ -167,11 +167,13 @@ class CoMTask(YTask):
         request = yarp.Bottle()
         request.clear()
 
-        request.addString('get')
-        request.addString('actual_position')
+        request.addString('get actual_position')
         self.rpc.write(request, reply)
 
         position = kdl.Vector()
+
+        if reply.size() != 3:
+            raise Exception('Unexpected reply size')
 
         for i in xrange(3):
             position[i] = reply.get(i).asDouble()
@@ -189,7 +191,7 @@ class PosturalTask(YTask):
         :return:
         """
 
-        cmd = yarp.Bottle()
+        cmd = self.set_ref.prepare()
         position_joint_msg(ref_posture.keys(), ref_posture.values(), cmd)
 
         return self.set_ref.write(cmd)
@@ -206,13 +208,12 @@ class PosturalTask(YTask):
         request = yarp.Bottle()
         request.clear()
 
-        request.addString('get')
-        request.addString('actual_posture')
+        request.addString('get actual_posture')
         self.rpc.write(request, reply)
 
         posture = dict()
         for i in xrange(reply.size()/2):
-            posture[reply.get(2*i).asString*()] = reply.get(2*i+1).asDouble()
+            posture[reply.get(2*i).asString()] = reply.get(2*i+1).asDouble()
         return posture
 
 __author__ = ('Alessio Rocchi', 'Enrico Mingo')

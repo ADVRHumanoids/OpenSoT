@@ -8,6 +8,8 @@ ExampleKlamptController::ExampleKlamptController()
     : KlamptController(std::string(OPENSOT_TESTS_ROBOTS_DIR)+"huboplus/huboplus.urdf"),
       time_accumulator(boost::accumulators::tag::rolling_mean::window_size = int(1.0/dT))
 {
+    print_mean = 0;
+
     yarp::sig::Vector q = model.iDyn3_model.getAng();   // [rad]
     model.updateiDyn3Model(q,true);
 
@@ -101,16 +103,39 @@ ExampleKlamptController::ExampleKlamptController()
 
         leftArm.reset(new YCartesian(model.getRobotName(),
                                      MODULE_NAME, DHS->leftArm));
+        std::cout << "left arm base - distal link:\n"
+                  <<  DHS->leftArm->getBaseLink() << "-"
+                  <<  DHS->leftArm->getDistalLink() << std::endl;
+
         rightArm.reset(new YCartesian(model.getRobotName(),
                                      MODULE_NAME, DHS->rightArm));
+        std::cout << "right arm base - distal link:\n"
+                  <<  DHS->rightArm->getBaseLink() << "-"
+                  <<  DHS->rightArm->getDistalLink() << std::endl;
+
         waist.reset(new YCartesian(model.getRobotName(),
                                    MODULE_NAME, DHS->waist));
+        std::cout << "waist base - distal link:\n"
+                  <<  DHS->waist->getBaseLink() << "-"
+                  <<  DHS->waist->getDistalLink() << std::endl;
+
         leftLeg.reset(new YCartesian(model.getRobotName(),
                                      MODULE_NAME, DHS->leftLeg));
+        std::cout << "left leg base - distal link:\n"
+                  <<  DHS->leftLeg->getBaseLink() << "-"
+                  <<  DHS->leftLeg->getDistalLink() << std::endl;
+
         rightLeg.reset(new YCartesian(model.getRobotName(),
                                       MODULE_NAME, DHS->rightLeg));
+        std::cout << "right leg base - distal link:\n"
+                  <<  DHS->leftLeg->getBaseLink() << "-"
+                  <<  DHS->leftLeg->getDistalLink() << std::endl;
+
         com.reset(new YCoM(model.getRobotName(),
                            MODULE_NAME, DHS->com));
+        std::cout << "CoM base - distal link:\n"
+                  <<  DHS->com->getBaseLink() << "-"
+                  <<  DHS->com->getDistalLink() << std::endl;
 
         postural.reset(new YPostural(model.getRobotName(),
                                      MODULE_NAME, model, DHS->postural));
@@ -131,7 +156,6 @@ KlamptController::JntCommand ExampleKlamptController::computeControl(KlamptContr
     yarp::sig::Vector dq;
     JntCommand command;
     double tic, toc;
-    int print_mean = 0;
 
     tic = yarp::os::Time::now();
     yarp::sig::Vector q = fromJntToiDyn(model, posture);
@@ -156,9 +180,10 @@ KlamptController::JntCommand ExampleKlamptController::computeControl(KlamptContr
             std::cout << "dt = "
                       << boost::accumulators::extract::rolling_mean(time_accumulator) << std::endl;
 
-            std::cout << "l_wrist reference:" << DHS->leftArm->getReference().toString() << std::endl;
-            std::cout << "r_wrist reference:" << DHS->rightArm->getReference().toString() << std::endl;
-            std::cout << "waist reference:"   << DHS->waist->getReference().toString() << std::endl;
+            std::cout << "l_wrist reference:\n" << DHS->leftArm->getReference().toString() << std::endl;
+            std::cout << "r_wrist reference:\n" << DHS->rightArm->getReference().toString() << std::endl;
+            std::cout << "waist reference:\n"   << DHS->waist->getReference().toString() << std::endl;
+            std::cout << "com reference:\n"     << DHS->com->getReference().toString() << std::endl;
 
         }
         return command;
