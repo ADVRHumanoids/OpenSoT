@@ -48,6 +48,9 @@ class ExampleKlamptController : public KlamptController
     /* to compute mean computing time over 1sec */
     Accumulator time_accumulator;
 
+    /* counter for periodic print statements */
+    int print_mean;
+
 public:
     ExampleKlamptController();
 
