@@ -5,7 +5,8 @@ import PyKDL as kdl
 yarp.Network.init()
 l_wrist = pYTask.CartesianTask('huboplus_klampt_controller',
                                'huboplus',
-                               'cartesian::l_wrist')
+                               'cartesian::l_wrist',
+                               'world', 'l_wrist')
 
 com = pYTask.CoMTask('huboplus_klampt_controller',
                      'huboplus',
@@ -16,10 +17,19 @@ postural = pYTask.PosturalTask('huboplus_klampt_controller',
                                'Postural')
 
 #l_wrist.help()
-print l_wrist.getActualPose()
+p = l_wrist.getActualPose()
+print p
+p.p[0] += 0.01
+l_wrist.setReference(p)
 
 #com.help()
-print com.getActualPosition()
+p = com.getActualPosition()
+print p
+p.p[0] += 0.01
+com.setReference(p)
 
 #postural.help()
-print postural.getActualPosture()
+p = postural.getActualPosture()
+print p
+p['HPY']+=0.2
+postural.setReference(p)
