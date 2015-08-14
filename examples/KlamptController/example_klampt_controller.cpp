@@ -45,11 +45,11 @@ ExampleKlamptController::ExampleKlamptController()
     /*      CONFIGURING STACK     */
     /*                            */
 
-    DHS->com->setLambda(0.0);        // com is a minimum velocity task
+    DHS->com->setLambda(0.5);        // com is a minimum velocity task
     DHS->rightLeg->setLambda(0.6);   DHS->rightLeg->setOrientationErrorGain(1.0);
     DHS->leftLeg->setLambda(0.6);    DHS->leftLeg->setOrientationErrorGain(1.0);
-    DHS->rightArm->setLambda(0.1);   DHS->rightArm->setOrientationErrorGain(0.3);
-    DHS->leftArm->setLambda(0.1);    DHS->leftArm->setOrientationErrorGain(0.3);
+    DHS->rightArm->setLambda(0.3);   DHS->rightArm->setOrientationErrorGain(0.3);
+    DHS->leftArm->setLambda(0.3);    DHS->leftArm->setOrientationErrorGain(0.3);
     DHS->jointLimits->setBoundScaling(0.3);
     DHS->velocityLimits->setVelocityLimits(0.3);
 
@@ -174,8 +174,8 @@ KlamptController::JntCommand ExampleKlamptController::computeControl(KlamptContr
         toc = yarp::os::Time::now();
         time_accumulator(toc-tic);
 
-        // print mean every 5s
-        if(((++print_mean)%int(5.0/dT))==0) {
+        // print mean every s
+        if(((++print_mean)%int(1.0/dT))==0) {
             print_mean = 0;
             std::cout << "dt = "
                       << boost::accumulators::extract::rolling_mean(time_accumulator) << std::endl;

@@ -8,6 +8,11 @@ l_wrist = pYTask.CartesianTask('huboplus_klampt_controller',
                                'cartesian::l_wrist',
                                'world', 'Body_LWP')
 
+r_wrist = pYTask.CartesianTask('huboplus_klampt_controller',
+                               'huboplus',
+                               'cartesian::r_wrist',
+                               'world', 'Body_RWP')
+
 com = pYTask.CoMTask('huboplus_klampt_controller',
                      'huboplus',
                      'CoM')
