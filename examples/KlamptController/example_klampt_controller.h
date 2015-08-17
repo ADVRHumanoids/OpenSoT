@@ -51,7 +51,11 @@ class ExampleKlamptController : public KlamptController
     /* counter for periodic print statements */
     int print_mean;
 
+    void init();
+
 public:
+    ExampleKlamptController(const KlamptController::JntPosition& posture);
+
     ExampleKlamptController();
 
     ~ExampleKlamptController();
