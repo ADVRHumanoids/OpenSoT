@@ -4,14 +4,9 @@
 #include <utils.h>
 
 
-ExampleKlamptController::ExampleKlamptController()
-    : KlamptController(std::string(OPENSOT_TESTS_ROBOTS_DIR)+"huboplus/huboplus.urdf"),
-      time_accumulator(boost::accumulators::tag::rolling_mean::window_size = int(1.0/dT))
+void ExampleKlamptController::init()
 {
-    print_mean = 0;
-
     yarp::sig::Vector q = model.iDyn3_model.getAng();   // [rad]
-    model.updateiDyn3Model(q,true);
 
     // we assume the floating base is on the left leg end effector
     model.setFloatingBaseLink(model.left_leg.end_effector_name);
@@ -144,6 +139,30 @@ ExampleKlamptController::ExampleKlamptController()
     solver.reset(new OpenSoT::solvers::QPOases_sot(
                      stack->getStack(),
                      stack->getBounds(), 1e10));
+}
+
+ExampleKlamptController::ExampleKlamptController(const KlamptController::JntPosition& posture)
+    : KlamptController(std::string(OPENSOT_TESTS_ROBOTS_DIR)+"huboplus/huboplus.urdf"),
+      time_accumulator(boost::accumulators::tag::rolling_mean::window_size = int(1.0/dT))
+{
+    print_mean = 0;
+
+    yarp::sig::Vector q = fromJntToiDyn(model, posture);   // [rad]
+    model.updateiDyn3Model(q,true);
+
+    this->init();
+}
+
+ExampleKlamptController::ExampleKlamptController()
+    : KlamptController(std::string(OPENSOT_TESTS_ROBOTS_DIR)+"huboplus/huboplus.urdf"),
+      time_accumulator(boost::accumulators::tag::rolling_mean::window_size = int(1.0/dT))
+{
+    print_mean = 0;
+
+    yarp::sig::Vector q = model.iDyn3_model.getAng();   // [rad]
+    model.updateiDyn3Model(q,true);
+
+    this->init();
 }
 
 ExampleKlamptController::~ExampleKlamptController()
