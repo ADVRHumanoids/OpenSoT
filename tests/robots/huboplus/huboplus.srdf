@@ -32,12 +32,12 @@
     </group>
     <group name="left_leg">
         <chain base_link="Body_Hip" tip_link="Body_LAR"/>
-        <!--<joint name="LHY" />
+        <joint name="LHY" />
         <joint name="LHR" />
         <joint name="LHP" />
         <joint name="LKP" />
         <joint name="LAP" />
-        <joint name="LAR" />-->
+        <joint name="LAR" />
     </group>
     <group name="right_leg">
         <chain base_link="Body_Hip" tip_link="Body_RAR"/>
@@ -56,40 +56,6 @@
         <chain base_link="Body_Torso" tip_link="Body_HNP"/>
         <joint name="HNP" />
         <joint name="HNR" />
-    </group>
-    <group name="right_hand">
-        <joint name="rightIndexKnuckle1" />
-        <joint name="rightIndexKnuckle2" />
-        <joint name="rightIndexKnuckle3" />
-        <joint name="rightMiddleKnuckle1" />
-        <joint name="rightMiddleKnuckle2" />
-        <joint name="rightMiddleKnuckle3" />
-        <joint name="rightPinkyKnuckle1" />
-        <joint name="rightPinkyKnuckle2" />
-        <joint name="rightPinkyKnuckle3" />
-        <joint name="rightRingKnuckle1" />
-        <joint name="rightRingKnuckle2" />
-        <joint name="rightRingKnuckle3" />
-        <joint name="rightThumbKnuckle1" />
-        <joint name="rightThumbKnuckle2" />
-        <joint name="rightThumbKnuckle3" />
-    </group>
-    <group name="left_hand">
-        <joint name="rightIndexKnuckle1" />
-        <joint name="rightIndexKnuckle2" />
-        <joint name="rightIndexKnuckle3" />
-        <joint name="rightMiddleKnuckle1" />
-        <joint name="rightMiddleKnuckle2" />
-        <joint name="rightMiddleKnuckle3" />
-        <joint name="rightPinkyKnuckle1" />
-        <joint name="rightPinkyKnuckle2" />
-        <joint name="rightPinkyKnuckle3" />
-        <joint name="rightRingKnuckle1" />
-        <joint name="rightRingKnuckle2" />
-        <joint name="rightRingKnuckle3" />
-        <joint name="rightThumbKnuckle1" />
-        <joint name="rightThumbKnuckle2" />
-        <joint name="rightThumbKnuckle3" />
     </group>
     <group name="left_foot">
         <joint name="LAR" />
@@ -156,35 +122,11 @@
         <joint name="RWY" value="1.5531" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="right_hand_eef" parent_link="Body_RWP" group="right_hand" parent_group="right_arm" />
-    <end_effector name="left_hand_eef" parent_link="Body_LWP" group="left_hand" parent_group="left_arm" />
     <end_effector name="left_foot_eef" parent_link="Body_LAP" group="left_foot" />
     <end_effector name="right_foot_eef" parent_link="Body_RAP" group="right_foot" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="floating" parent_frame="/hubo_location" child_link="Body_Torso" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
-    <disable_collisions link1="Body_Head" link2="Body_Hip" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LAP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LAR" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LEP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LHP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LHR" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LHY" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LKP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LSP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LSR" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_LSY" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RAP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RAR" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_REP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RHP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RHR" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RHY" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RKP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RSP" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RSR" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_RSY" reason="Never" />
-    <disable_collisions link1="Body_Head" link2="Body_Torso" reason="Adjacent" />
     <disable_collisions link1="Body_Hip" link2="Body_LHR" reason="Default" />
     <disable_collisions link1="Body_Hip" link2="Body_LHY" reason="Adjacent" />
     <disable_collisions link1="Body_Hip" link2="Body_LSP" reason="Never" />
@@ -1066,28 +1008,4 @@
     <disable_collisions link1="rightThumbDistal" link2="rightThumbMedial" reason="Adjacent" />
     <disable_collisions link1="rightThumbDistal" link2="rightThumbProximal" reason="Never" />
     <disable_collisions link1="rightThumbMedial" link2="rightThumbProximal" reason="Adjacent" />
-
-    <disable_collisions link1="hand_mount_link" link2="hand_mount_kinect_ir_link"/>
-    <disable_collisions link1="hand_mount_link" link2="Body_RWP"/>
-
-    <disable_collisions link1="hand_mount_link" link2="rightThumbProximal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightThumbMedial"/>
-    <disable_collisions link1="hand_mount_link" link2="rightThumbDistal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightIndexProximal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightIndexMedial"/>
-    <disable_collisions link1="hand_mount_link" link2="rightIndexDistal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightMiddleProximal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightMiddleMedial"/>
-    <disable_collisions link1="hand_mount_link" link2="rightMiddleDistal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightRingProximal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightRingMedial"/>
-    <disable_collisions link1="hand_mount_link" link2="rightRingDistal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightPinkyProximal"/>
-    <disable_collisions link1="hand_mount_link" link2="rightPinkyMedial"/>
-    <disable_collisions link1="hand_mount_link" link2="rightPinkyDistal"/>
-
-    <disable_collisions link1="Body_RHP" link2="hand_mount_link" />
-    <disable_collisions link1="Body_RHR" link2="hand_mount_link" />
-
-    <disable_collisions link1="hand_mount_kinect_ir_link" link2="hand_mount_prosilica_link"/>
 </robot>
