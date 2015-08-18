@@ -48,7 +48,7 @@ while t <= duration:
     l_wrist.setReference(des_l)
     des_r = traj_r.Pos(t)
     r_wrist.setReference(des_r)
-    if float(int(t)) == t:
+    if np.abs(int(t) - t) < dT:
         print "l/r wrist traj @t", t
     time.sleep(1.1*dT)
     t += dT
@@ -71,7 +71,7 @@ des_com = com_pose_fake
 while t <= duration:
     des_com = traj_com.Pos(t)
     com.setReference(des_com.p)
-    if float(int(t)) == t:
+    if np.abs(int(t) - t) < dT:
         print "CoM traj @t", t
     time.sleep(1.2*dT)
     t+=dT
