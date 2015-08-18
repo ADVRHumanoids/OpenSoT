@@ -49,7 +49,7 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     _x_cache(x),
     _boundScaling(boundScaling) {
 
-    std::string base_name = "Waist";
+    std::string base_name = robot.getBaseLink();
     base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
 
     if(base_index == -1)
