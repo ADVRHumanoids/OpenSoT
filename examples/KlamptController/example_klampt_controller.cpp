@@ -30,8 +30,9 @@ void ExampleKlamptController::init()
     // task of priority two is leftArm and rightArm,
     // and the stack is subject to bounds jointLimits and velocityLimits
     stack =
-        ( DHS->leftLeg + DHS->rightLeg ) /
-        ( DHS->leftArm + DHS->rightArm + DHS->waist_Orientation + DHS->com_XY ) /
+        ( DHS->rightLeg + DHS->leftLeg) /
+        ( DHS->com_XY + DHS->waist_Orientation + DHS->leftArm + DHS->rightArm ) /
+        //( DHS->waist_Orientation + DHS->waist_Position_Z) /
         ( DHS->postural );
     stack << DHS->jointLimits; // << DHS->velocityLimits; commented since we are using VelocityAllocation
 
@@ -40,13 +41,39 @@ void ExampleKlamptController::init()
     /*      CONFIGURING STACK     */
     /*                            */
 
-    DHS->com->setLambda(0.5);        // com is a minimum velocity task
+    DHS->com->setLambda(0.6);        // com is a minimum velocity task
     DHS->rightLeg->setLambda(0.6);   DHS->rightLeg->setOrientationErrorGain(1.0);
     DHS->leftLeg->setLambda(0.6);    DHS->leftLeg->setOrientationErrorGain(1.0);
     DHS->rightArm->setLambda(0.3);   DHS->rightArm->setOrientationErrorGain(0.3);
     DHS->leftArm->setLambda(0.3);    DHS->leftArm->setOrientationErrorGain(0.3);
+    DHS->waist->setLambda(0.6);
     DHS->jointLimits->setBoundScaling(0.3);
     DHS->velocityLimits->setVelocityLimits(0.3);
+
+    // configuring joint mask for CoM task
+    std::vector<bool> jointMask(model.getJointNames().size(),false);
+    std::list<int> activeJoints;
+    activeJoints.insert(activeJoints.end(),
+                        model.left_arm.joint_numbers.begin(),
+                        model.left_arm.joint_numbers.end());
+    activeJoints.insert(activeJoints.end(),
+                        model.right_arm.joint_numbers.begin(),
+                        model.right_arm.joint_numbers.end());
+    activeJoints.insert(activeJoints.end(),
+                        model.left_leg.joint_numbers.begin(),
+                        model.left_leg.joint_numbers.end());
+    activeJoints.insert(activeJoints.end(),
+                        model.right_leg.joint_numbers.begin(),
+                        model.right_leg.joint_numbers.end());
+    activeJoints.insert(activeJoints.end(),
+                        model.torso.joint_numbers.begin(),
+                        model.torso.joint_numbers.end());
+    for(    std::list<int>::iterator j_it = activeJoints.begin();
+            j_it != activeJoints.end();
+            ++j_it)
+        jointMask[*j_it]=true;
+
+    DHS->com->setActiveJointsMask(jointMask);
 
     yarp::sig::Matrix pW = DHS->postural->getWeight();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
