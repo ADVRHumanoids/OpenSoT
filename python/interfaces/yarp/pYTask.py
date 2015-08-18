@@ -88,10 +88,26 @@ class YTask(object):
         pass
 
     def setLambda(self, l):
-        pass
+        reply = yarp.Bottle()
+        reply.clear()
+
+        request = yarp.Bottle()
+        request.clear()
+
+        request.addString('set lambda')
+        request.addDouble(l)
+        self.rpc.write(request, reply)
 
     def getLambda(self):
-        pass
+        reply = yarp.Bottle()
+        reply.clear()
+
+        request = yarp.Bottle()
+        request.clear()
+
+        request.addString('get lambda')
+        self.rpc.write(request, reply)
+        return reply.get(0).asDouble()
 
 
 class CartesianTask(YTask):
@@ -133,9 +149,9 @@ class CartesianTask(YTask):
         for i in xrange(3):
             frame.p[i] = reply.get(i*4 + 3).asDouble()
 
-        for c in xrange(3):
-            for r in xrange(3):
-                frame.M[r, c] = reply.get(r + c*4).asDouble()
+        for r in xrange(3):
+            for c in xrange(3):
+                frame.M[r, c] = reply.get(r*4 + c).asDouble()
 
         return frame
 
