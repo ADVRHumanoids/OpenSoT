@@ -225,6 +225,16 @@ ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
 TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
 add_dependencies(testYPostural GTest-ext OpenSoT)
 
+if(OPENSOT_COMPILE_EXAMPLES)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
+    ADD_EXECUTABLE(testKlamptController ../examples/KlamptController/tests/testKlamptController.cpp
+                                        ../examples/KlamptController/src/KlamptController.cpp)
+    TARGET_LINK_LIBRARIES(testKlamptController ${TestLibs})
+    add_dependencies(testKlamptController GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_KlamptController COMMAND testKlamptController)
+endif()
+
+
 add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
