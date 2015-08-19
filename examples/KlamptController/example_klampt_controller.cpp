@@ -31,8 +31,7 @@ void ExampleKlamptController::init()
     // and the stack is subject to bounds jointLimits and velocityLimits
     stack =
         ( DHS->rightLeg + DHS->leftLeg) /
-        ( DHS->com_XY + DHS->waist_Orientation + DHS->leftArm + DHS->rightArm ) /
-        //( DHS->waist_Orientation + DHS->waist_Position_Z) /
+        ( DHS->com_XY + DHS->waist_Position_Z + DHS->leftArm + DHS->rightArm ) /
         ( DHS->postural );
     stack << DHS->jointLimits; // << DHS->velocityLimits; commented since we are using VelocityAllocation
 
@@ -52,26 +51,28 @@ void ExampleKlamptController::init()
 
     // configuring joint mask for CoM task
     std::vector<bool> jointMask(model.getJointNames().size(),false);
-    std::list<int> activeJoints;
-    activeJoints.insert(activeJoints.end(),
+    bodyJoints.insert(bodyJoints.end(),
                         model.left_arm.joint_numbers.begin(),
                         model.left_arm.joint_numbers.end());
-    activeJoints.insert(activeJoints.end(),
+    bodyJoints.insert(bodyJoints.end(),
                         model.right_arm.joint_numbers.begin(),
                         model.right_arm.joint_numbers.end());
-    activeJoints.insert(activeJoints.end(),
+    bodyJoints.insert(bodyJoints.end(),
                         model.left_leg.joint_numbers.begin(),
                         model.left_leg.joint_numbers.end());
-    activeJoints.insert(activeJoints.end(),
+    bodyJoints.insert(bodyJoints.end(),
                         model.right_leg.joint_numbers.begin(),
                         model.right_leg.joint_numbers.end());
-    activeJoints.insert(activeJoints.end(),
+    bodyJoints.insert(bodyJoints.end(),
                         model.torso.joint_numbers.begin(),
                         model.torso.joint_numbers.end());
-    for(    std::list<int>::iterator j_it = activeJoints.begin();
-            j_it != activeJoints.end();
+    for(    std::list<int>::iterator j_it = bodyJoints.begin();
+            j_it != bodyJoints.end();
             ++j_it)
+    {
         jointMask[*j_it]=true;
+        std::cout << "Enabling joint " << model.getJointNames()[*j_it]<< " in CoM activeJointMask" << std::endl;
+    }
 
     DHS->com->setActiveJointsMask(jointMask);
 
@@ -165,7 +166,58 @@ void ExampleKlamptController::init()
 
     solver.reset(new OpenSoT::solvers::QPOases_sot(
                      stack->getStack(),
-                     stack->getBounds(), 1e10));
+                     stack->getBounds()));
+    //stack->getBounds(), 1e10));
+}
+
+bool ExampleKlamptController::debug_checkSolutionDoesntMoveFingers(const yarp::sig::Vector &dq)
+{
+    bool movesFingers = false;
+    // checking solution for finger movement
+    for(int j_n = 0; j_n < model.iDyn3_model.getNrOfDOFs(); ++j_n)
+        if(std::find(bodyJoints.begin(),
+                     bodyJoints.end(), j_n) == bodyJoints.end())
+        {
+            if(dq[j_n] > 0.0)
+            {
+                std::cout << "WARNING dq has element "
+                          << model.getJointNames()[j_n]
+                          << " = " << dq[j_n] << std::endl;
+                movesFingers = true;
+            }
+        }
+    return movesFingers;
+}
+
+bool ExampleKlamptController::debug_checkJacobiansDontContainFingerCols()
+{
+    bool jacobianContainFingers = true;
+
+    // checking Jacobians for fingers
+    std::vector<yarp::sig::Matrix> jacobians;
+    jacobians.push_back(DHS->rightLeg->getA());
+    jacobians.push_back(DHS->leftLeg->getA());
+    jacobians.push_back(DHS->com_XY->getA());
+    jacobians.push_back(DHS->waist_Position_Z->getA());
+    jacobians.push_back(DHS->leftArm->getA());
+    jacobians.push_back(DHS->rightArm->getA());
+
+    for(std::vector<yarp::sig::Matrix>::iterator j_it = jacobians.begin();
+        j_it != jacobians.end(); ++j_it)
+        for(int j_n = 0; j_n < model.iDyn3_model.getNrOfDOFs(); ++j_n)
+            if(std::find(bodyJoints.begin(),
+                         bodyJoints.end(), j_n) == bodyJoints.end())
+            {
+                yarp::sig::Vector c = j_it->getCol(j_n);
+                if(yarp::math::norm(c) > 0.0)
+                {
+                    std::cout << "WARNING J has column "
+                              << c.toString()
+                              << " != 0" << std::endl;
+                    jacobianContainFingers = true;
+                }
+            }
+    return jacobianContainFingers;
 }
 
 ExampleKlamptController::ExampleKlamptController(const KlamptController::JntPosition& posture)
@@ -207,30 +259,39 @@ KlamptController::JntCommand ExampleKlamptController::computeControl(KlamptContr
     yarp::sig::Vector q = fromJntToiDyn(model, posture);
     model.updateiDyn3Model(q, true);
 
-    yarp::sig::Matrix M(6+model.iDyn3_model.getNrOfDOFs(), 6+model.iDyn3_model.getNrOfDOFs());
+    /*yarp::sig::Matrix M(6+model.iDyn3_model.getNrOfDOFs(), 6+model.iDyn3_model.getNrOfDOFs());
     model.iDyn3_model.getFloatingBaseMassMatrix(M);
     M.removeCols(0,6); M.removeRows(0,6);
-    DHS->postural->setWeight(M);
+    DHS->postural->setWeight(M);*/ // this causes CROSS-COUPLING
 
     stack->update(q);
+
+    debug_checkJacobiansDontContainFingerCols();
+
     if(solver->solve(dq))
-            command = fromiDynToJnt(model, dq);
-        else
-            std::cout << "Error computing solve()" << std::endl;
-        toc = yarp::os::Time::now();
-        time_accumulator(toc-tic);
+    {
+        command = fromiDynToJnt(model, dq);
+        debug_checkSolutionDoesntMoveFingers(dq);
+    }
+    else
+    {
+        dq.zero();
+        std::cout << "Error computing solve()" << std::endl;
+    }
+    toc = yarp::os::Time::now();
+    time_accumulator(toc-tic);
 
-        // print mean every s
-        if(((++print_mean)%int(1.0/dT))==0) {
-            print_mean = 0;
-            std::cout << "dt = "
-                      << boost::accumulators::extract::rolling_mean(time_accumulator) << std::endl;
+    // print mean every s
+    if(((++print_mean)%int(1.0/dT))==0) {
+        print_mean = 0;
+        std::cout << "dt = "
+                  << boost::accumulators::extract::rolling_mean(time_accumulator) << std::endl;
 
-            std::cout << "l_wrist reference:\n" << DHS->leftArm->getReference().toString() << std::endl;
-            std::cout << "r_wrist reference:\n" << DHS->rightArm->getReference().toString() << std::endl;
-            std::cout << "waist reference:\n"   << DHS->waist->getReference().toString() << std::endl;
-            std::cout << "com reference:\n"     << DHS->com->getReference().toString() << std::endl;
+        std::cout << "l_wrist reference:\n" << DHS->leftArm->getReference().toString() << std::endl;
+        std::cout << "r_wrist reference:\n" << DHS->rightArm->getReference().toString() << std::endl;
+        std::cout << "waist reference:\n"   << DHS->waist->getReference().toString() << std::endl;
+        std::cout << "com reference:\n"     << DHS->com->getReference().toString() << std::endl;
 
-        }
-        return command;
+    }
+    return command;
 }
