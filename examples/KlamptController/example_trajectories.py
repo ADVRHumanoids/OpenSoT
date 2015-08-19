@@ -47,7 +47,7 @@ class LinearTrajectory(object):
         self.desired_pose = desired_pose
         self.loop = loop
 
-        print "Creating trajectory generator from ", current_pose, " to ", desired_pose
+        print "Creating trajectory generator for line segment going from \n", current_pose, " to \n", desired_pose
         print "Trajectory will take ", duration, "s"
 
     def Duration(self):
@@ -59,7 +59,7 @@ class LinearTrajectory(object):
             while _lambda > 2.0:
                 _lambda /= 2.0
             if _lambda > 1.0:
-                _lambda = 1.0 - _lambda
+                _lambda = 2.0 - _lambda
         else:
             _lambda = np.min((t / self.duration, 1.0))
         d = kdl.Frame()
