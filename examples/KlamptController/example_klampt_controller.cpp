@@ -30,8 +30,10 @@ void ExampleKlamptController::init()
     // task of priority two is leftArm and rightArm,
     // and the stack is subject to bounds jointLimits and velocityLimits
     stack =
-        ( DHS->rightLeg + DHS->leftLeg) /
-        ( DHS->com_XY + DHS->waist_Position_Z + DHS->leftArm + DHS->rightArm ) /
+        ( DHS->rightLeg + DHS->leftLeg ) /
+        ( DHS->com_XY ) /
+        ( DHS->waist_Position_Z ) /
+        ( DHS->leftArm + DHS->rightArm ) /
         ( DHS->postural );
     stack << DHS->jointLimits; // << DHS->velocityLimits; commented since we are using VelocityAllocation
 
@@ -92,19 +94,15 @@ void ExampleKlamptController::init()
     }
     DHS->postural->setWeight(pW);
 
-    pW = DHS->waist_Orientation->getWeight();
-    pW(1, 1) *= 1e-2;
-    DHS->waist_Orientation->setWeight(pW);
-
     OpenSoT::VelocityAllocation(stack,
                                 dT,
                                 0.3,
-                                0.3);
+                                0.6);
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
     typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = stack->getStack()[2];
+    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = *(stack->getStack().rbegin());
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
@@ -112,7 +110,7 @@ void ExampleKlamptController::init()
                     *i_c))
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
-                                *i_c)->setVelocityLimits(.6);
+                                *i_c)->setVelocityLimits(1.0);
     }
 
     /*                            */
@@ -166,8 +164,7 @@ void ExampleKlamptController::init()
 
     solver.reset(new OpenSoT::solvers::QPOases_sot(
                      stack->getStack(),
-                     stack->getBounds()));
-    //stack->getBounds(), 1e10));
+                     stack->getBounds(), 1e10));
 }
 
 bool ExampleKlamptController::debug_checkSolutionDoesntMoveFingers(const yarp::sig::Vector &dq)
