@@ -51,7 +51,12 @@ class ExampleKlamptController : public KlamptController
     /* counter for periodic print statements */
     int print_mean;
 
+    std::list<int> bodyJoints;
+
     void init();
+
+    bool debug_checkSolutionDoesntMoveFingers(const yarp::sig::Vector &dq);
+    bool debug_checkJacobiansDontContainFingerCols();
 
 public:
     ExampleKlamptController(const KlamptController::JntPosition& posture);
