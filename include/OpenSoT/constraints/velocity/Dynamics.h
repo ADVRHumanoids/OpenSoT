@@ -14,6 +14,17 @@
              * @brief The Dynamics class implements constraints on joint velocities due to
              * dynamics feasability.
              *
+             * The constraint is written as:
+             *
+             * u_min <= (M/dT)dq <= u_max
+             *
+             * u_min = dT*tau_min - dT*b + M*q_dot
+             * u_max = dT*tau_max - dT*b + M*q_dot
+             *
+             * b = C(q,q_dot)q_dot + g(q)
+             *
+             * where q_dot is the velocity in the previous step.
+             *
              * For now we do not consider external forces: so the constraint can be used just
              * on the upper body of a humanoid robot if not interacting with anything
              */
@@ -36,6 +47,14 @@
                 yarp::sig::Matrix _M;
             public:
 
+                /**
+                 * @brief Dynamics constraint constructor
+                 * @param q actual position
+                 * @param q_dot previous velocity
+                 * @param jointTorquesMax maximum allowed torque
+                 * @param robot_model model of the robot
+                 * @param dT time step
+                 */
                 Dynamics(const yarp::sig::Vector &q,
                          const yarp::sig::Vector &q_dot,
                             const yarp::sig::Vector &jointTorquesMax,
@@ -44,7 +63,8 @@
 
                 /**
                  * @brief update
-                 * @param x constains the concatenation of q and q_dot!
+                 * @param x constains the concatenation of q and q_dot:
+                 *  x = [q, q_dot]
                  */
                 void update(const yarp::sig::Vector &x);
             };

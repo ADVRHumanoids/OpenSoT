@@ -4,6 +4,12 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
+#Gazebo
+find_package(Gazebo   REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+link_directories(${GAZEBO_LIBRARY_DIRS})
+include_directories(${GAZEBO_INCLUDE_DIRS})
+
 # compite GTest
 find_package(GTest)
 if (NOT GTEST_FOUND)
@@ -69,7 +75,7 @@ endif()
 # gTests for Velocity constraints
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ICUB_LIBRARIES})
+               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ICUB_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 

@@ -37,7 +37,7 @@ void Dynamics::update(const yarp::sig::Vector &x)
      * Here I suppose that q and dq have been set in the iDynTree Model,
      * this basically save time since I do not have to compute anything more than ID:
      *
-     *      ID(q, dq, zero) = C(q,dq)dq + g(q) = -b1
+     *      ID(q, q_dot, zero) = C(q,q_dot)q_dot + g(q) = -b1
     **/
     _b = _robot_model.iDyn3_model.getTorques();
 
@@ -50,7 +50,7 @@ void Dynamics::update(const yarp::sig::Vector &x)
     /**
      * Here we need the Mass matrix to compute the term:
      *
-     *      Mdq = b2
+     *      Mq_dot = b2
      *
      * and summed to the previous one
     **/
