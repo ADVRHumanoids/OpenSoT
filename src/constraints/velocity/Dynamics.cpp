@@ -172,5 +172,5 @@ void Dynamics::update(const yarp::sig::Vector &x)
     **/
     _bLowerBound = _jointTorquesMin + _b;
     _bUpperBound = _jointTorquesMax + _b;
-    _Aineq = _M/_dT;
+    _Aineq = (1.0/_dT)*_M;
 }

@@ -215,21 +215,23 @@ for(unsigned int j = 0; j < 2; ++j){
     double dT = 0.001;
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
-                new constraints::velocity::VelocityLimits(0.3, dT,q.size()));
+                new constraints::velocity::VelocityLimits(0.6, dT,q.size()));
 
 
     constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
                 new constraints::Aggregated(boundsJointLimits, boundsJointVelocity,
                                             q.size()));
     // TASKS
-    tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist(
+    tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist=
+            tasks::velocity::Cartesian::Ptr(
                 new tasks::velocity::Cartesian("cartesian::l_wrist", q,
                     coman_robot.idynutils,"l_wrist", "Waist"));
     Matrix goal = cartesian_task_l_wrist->getActualPose();
-    goal(0,3) += 1.0;
+    goal(0,3) += 0.5;
     cartesian_task_l_wrist->setReference(goal);
 
-    tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist(
+    tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
+            tasks::velocity::Cartesian::Ptr(
                 new tasks::velocity::Cartesian("cartesian::r_wrist", q,
                     coman_robot.idynutils,"r_wrist", "world"));
 
@@ -240,7 +242,8 @@ for(unsigned int j = 0; j < 2; ++j){
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(cartesianTasks,q.size()));
 
-    tasks::velocity::Postural::Ptr postural_task(new tasks::velocity::Postural(q));
+    tasks::velocity::Postural::Ptr postural_task=
+            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
 
     solvers::QPOases_sot::Stack stack_of_tasks;
     stack_of_tasks.push_back(taskCartesianAggregated);
@@ -252,7 +255,7 @@ for(unsigned int j = 0; j < 2; ++j){
         yarp::sig::Vector zero(q.size(), 0.0);
         Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
-                    coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
+                    0.9*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
                     coman_robot.idynutils, dT));
     }
 
@@ -343,17 +346,24 @@ for(unsigned int j = 0; j < 2; ++j){
     file3<<"];"<<std::endl;
     file3.close();
 
-    //Despite the files, we check that in the second case the torques are under the
-    //desired limits.
-    if(j == 1)
-    {
+    if(j == 1){
         for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
             yarp::sig::Vector t = sensed_torque_exp[i];
-            for(unsigned int jj = 0; jj < t.size(); ++jj)
-                EXPECT_TRUE(fabs(t[jj]) <=
-                            coman_robot.idynutils.iDyn3_model.getJointTorqueMax()[jj]);
+            yarp::sig::Vector x = yarp::math::cat(
+                               t.subVector(coman_robot.idynutils.torso.joint_numbers[0],
+                                             coman_robot.idynutils.torso.joint_numbers[2]),
+                               t.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
+                                          coman_robot.idynutils.left_arm.joint_numbers[6]));
+            yarp::sig::Vector xx = yarp::math::cat(
+                               coman_robot.idynutils.iDyn3_model.getJointTorqueMax().subVector(coman_robot.idynutils.torso.joint_numbers[0],
+                                             coman_robot.idynutils.torso.joint_numbers[2]),
+                               coman_robot.idynutils.iDyn3_model.getJointTorqueMax().subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
+                                          coman_robot.idynutils.left_arm.joint_numbers[6]));
+            for(unsigned int jj = 0; jj < x.size(); ++jj)
+                EXPECT_LE(fabs(x[jj]), 0.9*xx[jj])<<"@joint "<<jj;
         }
     }
+
 }
 
 
