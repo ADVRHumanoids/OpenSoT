@@ -342,6 +342,18 @@ for(unsigned int j = 0; j < 2; ++j){
     file2.close();
     file3<<"];"<<std::endl;
     file3.close();
+
+    //Despite the files, we check that in the second case the torques are under the
+    //desired limits.
+    if(j == 1)
+    {
+        for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
+            yarp::sig::Vector t = sensed_torque_exp[i];
+            for(unsigned int jj = 0; jj < t.size(); ++jj)
+                EXPECT_TRUE(fabs(t[jj]) <=
+                            coman_robot.idynutils.iDyn3_model.getJointTorqueMax()[jj]);
+        }
+    }
 }
 
 
