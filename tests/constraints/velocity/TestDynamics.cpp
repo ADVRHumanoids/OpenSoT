@@ -82,6 +82,72 @@ TEST_F(testDynamicsConstr, ID_from_iDynThree) {
             EXPECT_DOUBLE_EQ(M(i,j), M2(i,j));
 }
 
+TEST_F(testDynamicsConstr, testLinkCrawling) {
+    std::list<std::string> links_in_contact = coman.getLinksInContact();
+    std::cout<<"links in contact: "<<std::endl;
+    std::list<std::string>::iterator link;
+    for(link = links_in_contact.begin(); link != links_in_contact.end(); link++)
+        std::cout<<"    "<<*link<<std::endl;
+
+    std::cout<<std::endl; std::cout<<std::endl;
+
+    std::vector<std::string> ft_links;
+    ft_links.push_back("l_ankle");
+    ft_links.push_back("r_ankle");
+    ft_links.push_back("l_arm_ft");
+    ft_links.push_back("r_arm_ft");
+
+    //fake numbers, here we test just a static function
+    OpenSoT::constraints::velocity::Dynamics constr(q,q,q,coman,3);
+    std::vector<std::string> ft_in_contact;
+    constr.crawlLinks(ft_links,
+                      std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
+                      coman, ft_in_contact);
+    std::cout<<"FT IN CONTACT: "<<std::endl;
+    for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
+        std::cout<<"    "<<ft_in_contact[i]<<std::endl;
+
+    EXPECT_EQ(ft_in_contact.size(),2);
+    EXPECT_TRUE(ft_in_contact[0] == ft_links[0]);
+    EXPECT_TRUE(ft_in_contact[1] == ft_links[1]);
+
+    for(unsigned int i = 0; i < 4; ++i)
+        links_in_contact.pop_front();
+
+    std::cout<<std::endl;
+    std::cout<<"links in contact: "<<std::endl;
+    for(link = links_in_contact.begin(); link != links_in_contact.end(); link++)
+        std::cout<<"    "<<*link<<std::endl;
+
+    constr.crawlLinks(ft_links,
+                      std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
+                      coman, ft_in_contact);
+    std::cout<<"FT IN CONTACT: "<<std::endl;
+    for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
+        std::cout<<"    "<<ft_in_contact[i]<<std::endl;
+
+    EXPECT_EQ(ft_in_contact.size(),1);
+    EXPECT_TRUE(ft_in_contact[0] == ft_links[1]);
+
+    links_in_contact.push_back("r_wrist");
+
+    std::cout<<std::endl;
+    std::cout<<"links in contact: "<<std::endl;
+    for(link = links_in_contact.begin(); link != links_in_contact.end(); link++)
+        std::cout<<"    "<<*link<<std::endl;
+
+    constr.crawlLinks(ft_links,
+                      std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
+                      coman, ft_in_contact);
+    std::cout<<"FT IN CONTACT: "<<std::endl;
+    for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
+        std::cout<<"    "<<ft_in_contact[i]<<std::endl;
+
+    EXPECT_EQ(ft_in_contact.size(),2);
+    EXPECT_TRUE(ft_in_contact[0] == ft_links[1]);
+    EXPECT_TRUE(ft_in_contact[1] == ft_links[3]);
+}
+
 yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
