@@ -5,6 +5,9 @@
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
+#define YELLOW "\033[0;33m"
+#define DEFAULT "\033[0m"
+
 Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
                    const yarp::sig::Vector &jointTorquesMax, iDynUtils &robot_model,
                    const double dT):
@@ -15,7 +18,7 @@ Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
     _dT(dT),
     _b(q.size()),
     _M(6+q.size(), 6+q.size()),
-    _base_link("base_link"),
+    _base_link("Waist"), //Here we have to use /Waist since /base_link is not recognized by iDynTree
     _Jc(0,0),
     _Fc(0),
     _tmp_wrench_in_sensor_frame(6,0.0)
@@ -98,6 +101,8 @@ void Dynamics::updateActualWrench()
                                         _robot_model.getLinksInContact().end()},
                                         _robot_model,
                                         ft_in_contact);
+    _Fc.clear();
+    _Jc.resize(0,0);
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
     {
         /**
@@ -110,30 +115,49 @@ void Dynamics::updateActualWrench()
         unsigned int ft_index = _robot_model.iDyn3_model.getFTSensorIndex(ft_link->getParentJointModel()->getName());
         _robot_model.iDyn3_model.getSensorMeasurement(ft_index, _tmp_wrench_in_sensor_frame);
 
-        KDL::Wrench wrench_in_sensor_frame_KDL;
-        cartesian_utils::fromYarpVectortoKDLWrench(_tmp_wrench_in_sensor_frame, wrench_in_sensor_frame_KDL);
+        if(_tmp_wrench_in_base_link_frame.size() > 0)
+        {
+            KDL::Wrench wrench_in_sensor_frame_KDL;
+            cartesian_utils::fromYarpVectortoKDLWrench(_tmp_wrench_in_sensor_frame, wrench_in_sensor_frame_KDL);
 
-        // Wrench has to be transformed from ft_frame to base_link **/
-        yarp::sig::Matrix ft_frame_in_base_link;
-        ft_frame_in_base_link = _robot_model.iDyn3_model.getPosition(
-                _robot_model.iDyn3_model.getLinkIndex(_base_link),
-                _robot_model.iDyn3_model.getLinkIndex(ft_in_contact[i]));
+            // Wrench has to be transformed from ft_frame to base_link **/
+            yarp::sig::Matrix ft_frame_in_base_link;
+            ft_frame_in_base_link = _robot_model.iDyn3_model.getPosition(
+                    _robot_model.iDyn3_model.getLinkIndex(_base_link),
+                    _robot_model.iDyn3_model.getLinkIndex(ft_in_contact[i]));
 
-        KDL::Frame ft_frame_in_base_link_KDL;
-        cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
+            KDL::Frame ft_frame_in_base_link_KDL;
+            cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
 
-        KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL * wrench_in_sensor_frame_KDL; //Adjoint matrix is automatically computed by KDL!
-        cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _tmp_wrench_in_base_link_frame);
+            KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL * wrench_in_sensor_frame_KDL; //Adjoint matrix is automatically computed by KDL!
+            cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _tmp_wrench_in_base_link_frame);
 
-        /**
-          * Here we concatenate the wrenches
-         **/
-        _Fc = yarp::math::cat(_Fc, _tmp_wrench_in_base_link_frame);
+            /**
+              * Here we concatenate the wrenches
+             **/
+            _Fc = yarp::math::cat(_Fc, _tmp_wrench_in_base_link_frame);
 
-        /**
-          * Then we need to compute the Jacobian of the contact: from base_link to
-          * ft_frame.
-         **/
+            /**
+              * Then we need to compute the Jacobian of the contact: from base_link to
+              * ft_frame.
+             **/
+            unsigned int base_link_index = _robot_model.iDyn3_model.getLinkIndex(_base_link);
+            unsigned int ft_link_index = _robot_model.iDyn3_model.getLinkIndex(ft_in_contact[i]);
+            yarp::sig::Matrix A(0,0);
+            _robot_model.iDyn3_model.getRelativeJacobian(ft_link_index, base_link_index, A, true);
+            yarp::sig::Matrix base_R_world = _robot_model.iDyn3_model.getPosition(base_link_index).submatrix(0,2,0,2).transposed();
+            yarp::sig::Matrix Adj(6,6); Adj = Adj.eye();
+            Adj.setSubmatrix(base_R_world, 0,0);
+            Adj.setSubmatrix(base_R_world, 3,3);
+            A = Adj*A;
+
+            /**
+              * Here we concatenate the Jacobians of the contacts
+             **/
+            _Jc = yarp::math::pile(_Jc, A);
+        }
+        else
+            std::cout<<YELLOW<<"WARNING: can not read wrench @ "<<ft_in_contact[i]<<" sensor, skip."<<DEFAULT<<std::endl;
     }
 }
 
@@ -166,6 +190,15 @@ void Dynamics::update(const yarp::sig::Vector &x)
     _robot_model.iDyn3_model.getFloatingBaseMassMatrix(_M);
     _M = _M.removeCols(0,6); _M = _M.removeRows(0,6);
     _b = _b + _M*x.subVector(_x_size, (2*_x_size)-1);
+
+    /**
+      * Here we compute the torque due to contacts (if present):
+      *
+      *     -dT*Jc'Fc = b3
+     **/
+    updateActualWrench();
+    if(_Fc.size() > 0)
+        _b = _b - _dT*_Jc.transposed()*_Fc;
 
     /**
      * The final constraint is given by:

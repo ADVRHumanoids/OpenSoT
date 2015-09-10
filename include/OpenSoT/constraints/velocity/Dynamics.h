@@ -18,8 +18,8 @@
              *
              * u_min <= (M/dT)dq <= u_max
              *
-             * u_min = dT*tau_min - dT*b + M*q_dot - Jc'Fc
-             * u_max = dT*tau_max - dT*b + M*q_dot - Jc'Fc
+             * u_min = dT*tau_min - dT*b + M*q_dot - dT*Jc'Fc
+             * u_max = dT*tau_max - dT*b + M*q_dot - dT*Jc'Fc
              *
              * b = C(q,q_dot)q_dot + g(q)
              * Jc = [Jc1 Jc2 ... Jcn]'
