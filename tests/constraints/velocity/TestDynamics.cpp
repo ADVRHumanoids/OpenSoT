@@ -12,6 +12,7 @@
 #include <fstream>
 #include <OpenSoT/tasks/Aggregated.h>
 
+
 #define VISUALIZE_SIMULATION true
 
 using namespace OpenSoT::constraints::velocity;
@@ -394,10 +395,6 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     sleep(4);
 
 
-
-for(unsigned int j = 0; j < 2; ++j){
-    sleep(5);
-
     //To control the robot we need RobotUtils
     RobotUtils coman_robot("testConstraint",
                      "coman",
@@ -408,137 +405,199 @@ for(unsigned int j = 0; j < 2; ++j){
     yarp::sig::Vector q = getGoodInitialPosition(coman_robot.idynutils);
 
     //Homing
-    coman_robot.idynutils.updateiDyn3Model(q,true);
+    std::vector<iDynUtils::ft_measure> _ft_measurements;
+    RobotUtils::ftPtrMap ft_sensors = coman_robot.getftSensors();
+    for(RobotUtils::ftPtrMap::iterator it = ft_sensors.begin();
+        it != ft_sensors.end(); it++)
+    {
+        iDynUtils::ft_measure ft_measurement;
+        ft_measurement.first = it->second->getReferenceFrame();
+        yarp::sig::Vector dummy_measure(6 ,0.0);
+        ft_measurement.second = dummy_measure;
+
+        _ft_measurements.push_back(ft_measurement);
+    }
+
+    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+    coman_robot.idynutils.setFloatingBaseLink(coman_robot.idynutils.left_leg.end_effector_name);
     coman_robot.setPositionMode();
-    yarp::sig::Vector legs_speed(6,0.3);
+    double speed = 0.8;
+    yarp::sig::Vector legs_speed(6,speed);
     legs_speed[3] = 2.0*legs_speed[3];
     coman_robot.left_leg.setReferenceSpeeds(legs_speed);
     coman_robot.right_leg.setReferenceSpeeds(legs_speed);
-    coman_robot.left_arm.setReferenceSpeed(0.3);
-    coman_robot.right_arm.setReferenceSpeed(0.3);
-    coman_robot.torso.setReferenceSpeed(0.3);
+    coman_robot.left_arm.setReferenceSpeed(speed);
+    coman_robot.right_arm.setReferenceSpeed(speed);
+    coman_robot.torso.setReferenceSpeed(speed);
     coman_robot.move(q);
 
-//    //Set Up SoT
-//    sleep(5);
-//    // BOUNDS
-//    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
-//            constraints::velocity::JointLimits::ConstraintPtr(
-//                new constraints::velocity::JointLimits(
-//                    q,
-//                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
-//                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
+    //Set Up SoT
+    sleep(10);
+    coman_robot.setPositionDirectMode();
+    sleep(2);
+    // BOUNDS
+    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
+            constraints::velocity::JointLimits::ConstraintPtr(
+                new constraints::velocity::JointLimits(
+                    q,
+                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
+                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
 
-//    double dT = 0.001;
-//    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
-//            constraints::velocity::VelocityLimits::ConstraintPtr(
-//                new constraints::velocity::VelocityLimits(0.6, dT,q.size()));
-
-
-//    constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
-//                new constraints::Aggregated(boundsJointLimits, boundsJointVelocity,
-//                                            q.size()));
-//    // TASKS
-//    tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist=
-//            tasks::velocity::Cartesian::Ptr(
-//                new tasks::velocity::Cartesian("cartesian::l_wrist", q,
-//                    coman_robot.idynutils,"l_wrist", "Waist"));
-//    Matrix goal = cartesian_task_l_wrist->getActualPose();
-//    goal(0,3) += 0.5;
-//    cartesian_task_l_wrist->setReference(goal);
-
-//    tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
-//            tasks::velocity::Cartesian::Ptr(
-//                new tasks::velocity::Cartesian("cartesian::r_wrist", q,
-//                    coman_robot.idynutils,"r_wrist", "world"));
-
-//    std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
-//    cartesianTasks.push_back(cartesian_task_l_wrist);
-//    cartesianTasks.push_back(cartesian_task_r_wrist);
-//    Task<Matrix, Vector>::TaskPtr taskCartesianAggregated =
-//            tasks::Aggregated::TaskPtr(
-//       new tasks::Aggregated(cartesianTasks,q.size()));
-
-//    tasks::velocity::Postural::Ptr postural_task=
-//            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
-
-//    solvers::QPOases_sot::Stack stack_of_tasks;
-//    stack_of_tasks.push_back(taskCartesianAggregated);
-//    stack_of_tasks.push_back(postural_task);
-
-//    constraints::velocity::Dynamics::Ptr Dyn;
-//    if(j == 1)
-//    {
-//        yarp::sig::Vector zero(q.size(), 0.0);
-//        Dyn = constraints::velocity::Dynamics::Ptr(
-//                new constraints::velocity::Dynamics(q,zero,
-//                    0.9*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
-//                    coman_robot.idynutils, dT));
-//    }
-
-//    double eps = 1e10;
-
-//    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
-//    if(j == 0)
-//        sot = solvers::QPOases_sot::Ptr(
-//                new solvers::QPOases_sot(stack_of_tasks, bounds, eps));
-//    else
-//        sot = solvers::QPOases_sot::Ptr(
-//                   new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
+    double dT = 0.001;
+    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
+            constraints::velocity::VelocityLimits::ConstraintPtr(
+                new constraints::velocity::VelocityLimits(0.4, dT,q.size()));
 
 
-//    yarp::sig::Vector dq(q.size(), 0.0);
-//    std::vector<yarp::sig::Vector> sensed_torque_exp;
-//    std::vector<yarp::sig::Vector> cartesian_error_exp;
-//    std::vector<yarp::sig::Vector> computed_velocity_exp;
-//    int steps = 10000;
-//    sensed_torque_exp.reserve(steps);
-//    cartesian_error_exp.reserve(steps);
-//    computed_velocity_exp.reserve(steps);
-//    for(unsigned int i = 0; i < steps; ++i)
-//    {
-//        double tic = yarp::os::Time::now();
-//        coman_robot.idynutils.updateiDyn3Model(q, dq/dT, true);
+    constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
+                new constraints::Aggregated(boundsJointLimits, boundsJointVelocity,
+                                            q.size()));
+    // TASKS
+    std::vector<bool> active_joints;
 
-//        bounds->update(q);
-//        taskCartesianAggregated->update(q);
-//        postural_task->update(q);
+    tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist=
+            tasks::velocity::Cartesian::Ptr(
+                new tasks::velocity::Cartesian("cartesian::l_wrist", q,
+                    coman_robot.idynutils,"l_wrist", "world"));
+    Matrix goal = cartesian_task_l_wrist->getActualPose();
+    goal(2,3) -= 0.2;
+    cartesian_task_l_wrist->setReference(goal);
 
-//        cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+    tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
+            tasks::velocity::Cartesian::Ptr(
+                new tasks::velocity::Cartesian("cartesian::r_wrist", q,
+                    coman_robot.idynutils,"r_wrist", "world"));
+    goal = cartesian_task_r_wrist->getActualPose();
+    goal(2,3) -= 0.2;
+    cartesian_task_r_wrist->setReference(goal);
 
-//        if(j == 1)
-//            Dyn->update(cat(q,dq/dT));
+    active_joints = cartesian_task_l_wrist->getActiveJointsMask();
+    for(unsigned int i = 0; i < coman_robot.idynutils.torso.getNrOfDOFs(); ++i)
+        active_joints[coman_robot.idynutils.torso.joint_numbers[i]] = false;
+    cartesian_task_l_wrist->setActiveJointsMask(active_joints);
+    cartesian_task_r_wrist->setActiveJointsMask(active_joints);
 
-//        if(sot->solve(dq)){
-//            computed_velocity_exp.push_back(dq);
-//            q += dq;}
-//        coman_robot.move(q);
-//        double toc = yarp::os::Time::now();
+    tasks::velocity::CoM::Ptr com_task(new tasks::velocity::CoM(q, coman_robot.idynutils));
+    yarp::sig::Matrix WW(3,3); WW.eye();
+    WW(2,2) = 0.0;
+    com_task->setWeight(WW);
 
-//        yarp::sig::Vector q_sensed(q.size(), 0.0);
-//        yarp::sig::Vector dq_sensed(q.size(), 0.0);
-//        yarp::sig::Vector tau_sensed(q.size(), 0.0);
-//        coman_robot.sense(q_sensed, dq_sensed, tau_sensed);
-//        sensed_torque_exp.push_back(tau_sensed);
 
-//        if((toc-tic) < dT)
-//            usleep(dT*1000.0 - (toc-tic)*1E-6);
-//    }
+    tasks::velocity::Postural::Ptr postural_task=
+            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
+
+
+    tasks::velocity::Cartesian::Ptr right_foot(new tasks::velocity::Cartesian("cartesian::r_foot",q,
+        coman_robot.idynutils, coman_robot.idynutils.right_leg.end_effector_name, "world"));
+    tasks::velocity::Cartesian::Ptr torso(new tasks::velocity::Cartesian("cartesian::torso",q,
+        coman_robot.idynutils, "torso", "world"));
+    yarp::sig::Matrix W(6,6); W.eye();
+    W(0,0) = 0.0; W(1,1) = 0.0; W(2,2) = 0.0;
+    torso->setWeight(W);
+    active_joints = torso->getActiveJointsMask();
+    for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
+        active_joints[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
+    torso->setActiveJointsMask(active_joints);
+
+    std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasksHighest;
+    cartesianTasksHighest.push_back(right_foot);
+    Task<Matrix, Vector>::TaskPtr taskCartesianAggregatedHighest =
+            tasks::Aggregated::TaskPtr(
+       new tasks::Aggregated(cartesianTasksHighest,q.size()));
+
+    std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
+    cartesianTasks.push_back(cartesian_task_l_wrist);
+    cartesianTasks.push_back(cartesian_task_r_wrist);
+    cartesianTasks.push_back(torso);
+    cartesianTasks.push_back(com_task);
+    Task<Matrix, Vector>::TaskPtr taskCartesianAggregated =
+            tasks::Aggregated::TaskPtr(
+       new tasks::Aggregated(cartesianTasks,q.size()));
+
+
+    solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(taskCartesianAggregatedHighest);
+    stack_of_tasks.push_back(taskCartesianAggregated);
+    stack_of_tasks.push_back(postural_task);
+
+
+    yarp::sig::Vector zero(q.size(), 0.0);
+    constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
+                new constraints::velocity::Dynamics(q,zero,
+                    coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
+                    coman_robot.idynutils, dT));
+
+
+    double eps = 1e5;
+
+    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot = solvers::QPOases_sot::Ptr(
+                  new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
+    //new solvers::QPOases_sot(stack_of_tasks, bounds, eps));
+
+
+    yarp::sig::Vector dq(q.size(), 0.0);
+    std::vector<yarp::sig::Vector> sensed_torque_exp;
+    std::vector<yarp::sig::Vector> cartesian_error_exp;
+    std::vector<yarp::sig::Vector> computed_velocity_exp;
+    int steps = 10000;
+    sensed_torque_exp.reserve(steps);
+    cartesian_error_exp.reserve(steps);
+    computed_velocity_exp.reserve(steps);
+    for(unsigned int i = 0; i < steps; ++i)
+    {
+        double tic = yarp::os::Time::now();
+        RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
+        for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
+            _ft_measurements[i].second = ft_readings[_ft_measurements[i].first];
+
+        coman_robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
+
+        yarp::sig::Matrix M(6+coman_robot.getNumberOfJoints(), 6+coman_robot.getNumberOfJoints());
+        coman_robot.idynutils.iDyn3_model.getFloatingBaseMassMatrix(M);
+        M.removeCols(0,6); M.removeRows(0,6);
+        postural_task->setWeight(M);
+
+        bounds->update(q);
+        taskCartesianAggregated->update(q);
+        taskCartesianAggregatedHighest->update(q);
+        com_task->update(q);
+        postural_task->update(q);
+        Dyn->update(cat(q,dq/dT));
+
+        cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+
+
+
+        if(sot->solve(dq)){
+            computed_velocity_exp.push_back(dq);
+            q += dq;}
+        coman_robot.move(q);
+        double toc = yarp::os::Time::now();
+
+        yarp::sig::Vector q_sensed(q.size(), 0.0);
+        yarp::sig::Vector dq_sensed(q.size(), 0.0);
+        yarp::sig::Vector tau_sensed(q.size(), 0.0);
+        coman_robot.sense(q_sensed, dq_sensed, tau_sensed);
+        sensed_torque_exp.push_back(tau_sensed);
+
+        if((toc-tic) < dT)
+            usleep(dT*1000.0 - (toc-tic)*1E-6);
+    }
 
 //    std::ofstream file1;
-//    std::string file_name = "testDynamics_torque_exp_"+std::to_string(j)+"_left_arm.m";
+//    std::string file_name = "testDynamics_torque_legsINcontacts_left_arm.m";
 //    file1.open(file_name);
-//    file1<<"tau_"<<j<<" = ["<<std::endl;
+//    file1<<"tau = ["<<std::endl;
 
 //    std::ofstream file2;
-//    file_name = "testDynamics_cartesian_error_exp_"+std::to_string(j)+"_left_arm.m";
+//    file_name = "testDynamics_cartesian_error_legsINcontacts_left_arm.m";
 //    file2.open(file_name);
-//    file2<<"cartesian_error_"<<j<<" = ["<<std::endl;
+//    file2<<"cartesian_error = ["<<std::endl;
 
 //    std::ofstream file3;
-//    file_name = "testDynamics_computed_vel_exp_"+std::to_string(j)+"_left_arm.m";
+//    file_name = "testDynamics_computed_vel_legsINcontacts_left_arm.m";
 //    file3.open(file_name);
-//    file3<<"computed_vel_"<<j<<" = ["<<std::endl;
+//    file3<<"computed_vel = ["<<std::endl;
 
 //    for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
 //        yarp::sig::Vector tau = sensed_torque_exp[i];
@@ -578,8 +637,15 @@ for(unsigned int j = 0; j < 2; ++j){
 //                                          coman_robot.idynutils.left_arm.joint_numbers[6]));
 //            for(unsigned int jj = 0; jj < x.size(); ++jj)
 //                EXPECT_LE(fabs(x[jj]), 0.9*xx[jj])<<"@joint "<<jj;
-        }
-    }
+
+
+
+
+    tests_utils::stopGazebo();
+    sleep(5);
+    tests_utils::stopYarpServer();
+}
+
 
 
 

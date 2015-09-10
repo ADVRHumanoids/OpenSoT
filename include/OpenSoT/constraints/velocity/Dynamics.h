@@ -63,6 +63,11 @@
                 yarp::sig::Vector _tmp_wrench_in_sensor_frame;
                 yarp::sig::Vector _tmp_wrench_in_base_link_frame;
 
+                /**
+                 * @brief updateActualWrench this method updates the actual wrench at the base_link
+                 * considering all the mearusments from the ft sensors.
+                 * NOTE: here we use the REACTION forces!
+                 */
                 void updateActualWrench();
 
         public:

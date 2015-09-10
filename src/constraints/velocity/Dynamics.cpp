@@ -21,7 +21,8 @@ Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
     _base_link("Waist"), //Here we have to use /Waist since /base_link is not recognized by iDynTree
     _Jc(0,0),
     _Fc(0),
-    _tmp_wrench_in_sensor_frame(6,0.0)
+    _tmp_wrench_in_sensor_frame(6,0.0),
+    _tmp_wrench_in_base_link_frame(6, 0.0)
 {
 
     _Aineq.resize(_x_size, _x_size);
@@ -115,7 +116,7 @@ void Dynamics::updateActualWrench()
         unsigned int ft_index = _robot_model.iDyn3_model.getFTSensorIndex(ft_link->getParentJointModel()->getName());
         _robot_model.iDyn3_model.getSensorMeasurement(ft_index, _tmp_wrench_in_sensor_frame);
 
-        if(_tmp_wrench_in_base_link_frame.size() > 0)
+        if(_tmp_wrench_in_sensor_frame.size() > 0)
         {
             KDL::Wrench wrench_in_sensor_frame_KDL;
             cartesian_utils::fromYarpVectortoKDLWrench(_tmp_wrench_in_sensor_frame, wrench_in_sensor_frame_KDL);
@@ -135,7 +136,11 @@ void Dynamics::updateActualWrench()
             /**
               * Here we concatenate the wrenches
              **/
-            _Fc = yarp::math::cat(_Fc, _tmp_wrench_in_base_link_frame);
+            if(_Fc.size() == 0){
+                _Fc.resize(_tmp_wrench_in_base_link_frame.size(), 0.0);
+                _Fc = _tmp_wrench_in_base_link_frame;}
+            else
+                _Fc = yarp::math::cat(_Fc, _tmp_wrench_in_base_link_frame);
 
             /**
               * Then we need to compute the Jacobian of the contact: from base_link to
@@ -154,7 +159,10 @@ void Dynamics::updateActualWrench()
             /**
               * Here we concatenate the Jacobians of the contacts
              **/
-            _Jc = yarp::math::pile(_Jc, A);
+            if(_Jc.rows() == 0){
+                _Jc.resize(A.rows(), A.cols()); _Jc = A;}
+            else
+                _Jc = yarp::math::pile(_Jc, A);
         }
         else
             std::cout<<YELLOW<<"WARNING: can not read wrench @ "<<ft_in_contact[i]<<" sensor, skip."<<DEFAULT<<std::endl;
