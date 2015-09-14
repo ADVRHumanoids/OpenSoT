@@ -63,6 +63,8 @@
                 yarp::sig::Vector _tmp_wrench_in_sensor_frame;
                 yarp::sig::Vector _tmp_wrench_in_base_link_frame;
 
+                double _boundScaling;
+
                 /**
                  * @brief updateActualWrench this method updates the actual wrench at the base_link
                  * considering all the mearusments from the ft sensors.
@@ -122,6 +124,11 @@
                  *  x = [q, q_dot]
                  */
                 void update(const yarp::sig::Vector &x);
+
+                void setBoundScaling(const double boundScaling)
+                {
+                    _boundScaling = boundScaling;
+                }
             };
         }
     }

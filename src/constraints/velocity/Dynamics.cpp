@@ -102,6 +102,8 @@ void Dynamics::updateActualWrench()
                                         _robot_model.getLinksInContact().end()},
                                         _robot_model,
                                         ft_in_contact);
+
+
     _Fc.clear();
     _Jc.resize(0,0);
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
@@ -208,10 +210,11 @@ void Dynamics::update(const yarp::sig::Vector &x)
     if(_Fc.size() > 0)
         _b = _b - _dT*_Jc.transposed()*_Fc;
 
+
     /**
      * The final constraint is given by:
     **/
-    _bLowerBound = _jointTorquesMin + _b;
-    _bUpperBound = _jointTorquesMax + _b;
+    _bLowerBound = _boundScaling*(_jointTorquesMin + _b);
+    _bUpperBound = _boundScaling*(_jointTorquesMax + _b);
     _Aineq = (1.0/_dT)*_M;
 }

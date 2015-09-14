@@ -11,6 +11,7 @@
 #include <idynutils/RobotUtils.h>
 #include <fstream>
 #include <OpenSoT/tasks/Aggregated.h>
+#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 
 
 #define VISUALIZE_SIMULATION true
@@ -299,7 +300,7 @@ for(unsigned int j = 0; j < 2; ++j){
             computed_velocity_exp.push_back(dq);
             q += dq;}
         coman_robot.move(q);
-        double toc = yarp::os::Time::now();
+
 
         yarp::sig::Vector q_sensed(q.size(), 0.0);
         yarp::sig::Vector dq_sensed(q.size(), 0.0);
@@ -307,8 +308,9 @@ for(unsigned int j = 0; j < 2; ++j){
         coman_robot.sense(q_sensed, dq_sensed, tau_sensed);
         sensed_torque_exp.push_back(tau_sensed);
 
+        double toc = yarp::os::Time::now();
         if((toc-tic) < dT)
-            usleep(dT*1000.0 - (toc-tic)*1E-6);
+            yarp::os::Time::delay(dT - (toc-tic));
     }
 
     std::ofstream file1;
@@ -385,6 +387,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     // Start YARP Server
     tests_utils::startYarpServer();
 
+    for(unsigned int j = 1; j < 2; ++j){
     // Load a world
     std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.world";
     if(VISUALIZE_SIMULATION)
@@ -400,7 +403,6 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
                      "coman",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-
 
     yarp::sig::Vector q = getGoodInitialPosition(coman_robot.idynutils);
 
@@ -446,7 +448,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     double dT = 0.001;
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
-                new constraints::velocity::VelocityLimits(0.4, dT,q.size()));
+                new constraints::velocity::VelocityLimits(0.9, dT,q.size()));
 
 
     constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
@@ -459,17 +461,21 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
             tasks::velocity::Cartesian::Ptr(
                 new tasks::velocity::Cartesian("cartesian::l_wrist", q,
                     coman_robot.idynutils,"l_wrist", "world"));
-    Matrix goal = cartesian_task_l_wrist->getActualPose();
-    goal(2,3) -= 0.2;
-    cartesian_task_l_wrist->setReference(goal);
+    Matrix intial_pose_l_wrist = cartesian_task_l_wrist->getActualPose();
 
     tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
             tasks::velocity::Cartesian::Ptr(
                 new tasks::velocity::Cartesian("cartesian::r_wrist", q,
                     coman_robot.idynutils,"r_wrist", "world"));
-    goal = cartesian_task_r_wrist->getActualPose();
-    goal(2,3) -= 0.2;
-    cartesian_task_r_wrist->setReference(goal);
+    Matrix intial_pose_r_wrist = cartesian_task_r_wrist->getActualPose();
+
+    tasks::velocity::Cartesian::Ptr cartesian_task_waist=
+            tasks::velocity::Cartesian::Ptr(
+                new tasks::velocity::Cartesian("cartesian::waist", q,
+                    coman_robot.idynutils,"Waist", "world"));
+    yarp::sig::Matrix WWW(6,6); WWW.eye();
+    WWW(0,0) = 0.0; WWW(1,1) = 0.0; WWW(2,2) = 0.0;
+    cartesian_task_waist->setWeight(WWW);
 
     active_joints = cartesian_task_l_wrist->getActiveJointsMask();
     for(unsigned int i = 0; i < coman_robot.idynutils.torso.getNrOfDOFs(); ++i)
@@ -485,7 +491,14 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
     tasks::velocity::Postural::Ptr postural_task=
             tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
-
+    tasks::velocity::MinimizeAcceleration::Ptr min_acc_task=
+            tasks::velocity::MinimizeAcceleration::Ptr(new tasks::velocity::MinimizeAcceleration(q));
+    std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> jointTasks;
+    jointTasks.push_back(postural_task);
+    //jointTasks.push_back(min_acc_task);
+     OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr taskJointAggregated =
+             OpenSoT::tasks::Aggregated::TaskPtr(
+        new OpenSoT::tasks::Aggregated(jointTasks,q.size()));
 
     tasks::velocity::Cartesian::Ptr right_foot(new tasks::velocity::Cartesian("cartesian::r_foot",q,
         coman_robot.idynutils, coman_robot.idynutils.right_leg.end_effector_name, "world"));
@@ -508,6 +521,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
     cartesianTasks.push_back(cartesian_task_l_wrist);
     cartesianTasks.push_back(cartesian_task_r_wrist);
+    cartesianTasks.push_back(cartesian_task_waist);
     cartesianTasks.push_back(torso);
     cartesianTasks.push_back(com_task);
     Task<Matrix, Vector>::TaskPtr taskCartesianAggregated =
@@ -518,28 +532,35 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     solvers::QPOases_sot::Stack stack_of_tasks;
     stack_of_tasks.push_back(taskCartesianAggregatedHighest);
     stack_of_tasks.push_back(taskCartesianAggregated);
-    stack_of_tasks.push_back(postural_task);
+    stack_of_tasks.push_back(taskJointAggregated);
 
 
+    yarp::sig::Vector tau_max = coman_robot.idynutils.iDyn3_model.getJointTorqueMax();
+    for(unsigned int i = 0; i < coman_robot.left_leg.getNumberOfJoints(); ++i){
+        tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= 0.4;
+        tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= 0.4;}
     yarp::sig::Vector zero(q.size(), 0.0);
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
-                    coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
+                    tau_max,
                     coman_robot.idynutils, dT));
+    Dyn->setBoundScaling(0.7); //<-- Whithout this does not work!
 
 
-    double eps = 1e5;
+    double eps = 1e10;
 
-    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot = solvers::QPOases_sot::Ptr(
-                  new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
-    //new solvers::QPOases_sot(stack_of_tasks, bounds, eps));
+    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
+    if(j == 1)
+        sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
+    else
+        sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, eps));
 
 
     yarp::sig::Vector dq(q.size(), 0.0);
     std::vector<yarp::sig::Vector> sensed_torque_exp;
     std::vector<yarp::sig::Vector> cartesian_error_exp;
     std::vector<yarp::sig::Vector> computed_velocity_exp;
-    int steps = 10000;
+    int steps = int(1.5*M_PI*1000);
     sensed_torque_exp.reserve(steps);
     cartesian_error_exp.reserve(steps);
     computed_velocity_exp.reserve(steps);
@@ -550,6 +571,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second = ft_readings[_ft_measurements[i].first];
 
+
         coman_robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
 
         yarp::sig::Matrix M(6+coman_robot.getNumberOfJoints(), 6+coman_robot.getNumberOfJoints());
@@ -557,14 +579,24 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         M.removeCols(0,6); M.removeRows(0,6);
         postural_task->setWeight(M);
 
+        if(i <= M_PI*1000){
+            Matrix goal_r_wrist = intial_pose_r_wrist;
+            goal_r_wrist(2,3) += (-0.18)*std::sin((i+M_PI)/1000.0);
+            cartesian_task_r_wrist->setReference(goal_r_wrist);
+
+            Matrix goal_l_wrist = intial_pose_l_wrist;
+            goal_l_wrist(2,3) += (-0.18)*std::sin((i+M_PI)/1000.0);
+            cartesian_task_l_wrist->setReference(goal_l_wrist);}
+
         bounds->update(q);
         taskCartesianAggregated->update(q);
         taskCartesianAggregatedHighest->update(q);
-        com_task->update(q);
-        postural_task->update(q);
+        taskJointAggregated->update(q);
         Dyn->update(cat(q,dq/dT));
 
-        cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+        cartesian_error_exp.push_back(yarp::math::cat(
+                                          cartesian_task_l_wrist->getError(),
+                                          cartesian_task_r_wrist->getError()));
 
 
 
@@ -572,7 +604,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
             computed_velocity_exp.push_back(dq);
             q += dq;}
         coman_robot.move(q);
-        double toc = yarp::os::Time::now();
+
 
         yarp::sig::Vector q_sensed(q.size(), 0.0);
         yarp::sig::Vector dq_sensed(q.size(), 0.0);
@@ -580,47 +612,45 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         coman_robot.sense(q_sensed, dq_sensed, tau_sensed);
         sensed_torque_exp.push_back(tau_sensed);
 
+        double toc = yarp::os::Time::now();
+
         if((toc-tic) < dT)
-            usleep(dT*1000.0 - (toc-tic)*1E-6);
+            yarp::os::Time::delay(dT - (toc-tic));
     }
 
-//    std::ofstream file1;
-//    std::string file_name = "testDynamics_torque_legsINcontacts_left_arm.m";
-//    file1.open(file_name);
-//    file1<<"tau = ["<<std::endl;
+    std::ofstream file1;
+    std::string file_name = "testDynamics_torque_all"+std::to_string(j)+".m";
+    file1.open(file_name);
+    file1<<"tau"+std::to_string(j)+" = ["<<std::endl;
 
-//    std::ofstream file2;
-//    file_name = "testDynamics_cartesian_error_legsINcontacts_left_arm.m";
-//    file2.open(file_name);
-//    file2<<"cartesian_error = ["<<std::endl;
+    std::ofstream file2;
+    file_name = "testDynamics_cartesian_error_legsINcontacts_left_right_arm"+std::to_string(j)+".m";
+    file2.open(file_name);
+    file2<<"cartesian_error"+std::to_string(j)+" = ["<<std::endl;
 
-//    std::ofstream file3;
-//    file_name = "testDynamics_computed_vel_legsINcontacts_left_arm.m";
-//    file3.open(file_name);
-//    file3<<"computed_vel = ["<<std::endl;
+    std::ofstream file3;
+    file_name = "testDynamics_computed_vel_legsINcontacts_all"+std::to_string(j)+".m";
+    file3.open(file_name);
+    file3<<"computed_vel"+std::to_string(j)+" = ["<<std::endl;
 
-//    for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
-//        yarp::sig::Vector tau = sensed_torque_exp[i];
+    for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
+        yarp::sig::Vector tau = sensed_torque_exp[i];
 //        file1<<yarp::math::cat(
-//                   tau.subVector(coman_robot.idynutils.torso.joint_numbers[0],
-//                                 coman_robot.idynutils.torso.joint_numbers[2]),
-//                tau.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
-//                              coman_robot.idynutils.left_arm.joint_numbers[6])
+//                   tau.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+//                                 coman_robot.idynutils.left_leg.joint_numbers[5]),
+//                tau.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
+//                              coman_robot.idynutils.right_leg.joint_numbers[5])
 //                ).toString()<<std::endl;
-//        file2<<cartesian_error_exp[i].toString()<<std::endl;
-//        file3<<yarp::math::cat(
-//                computed_velocity_exp[i].subVector(coman_robot.idynutils.torso.joint_numbers[0],
-//                                 coman_robot.idynutils.torso.joint_numbers[2]),
-//                computed_velocity_exp[i].subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
-//                              coman_robot.idynutils.left_arm.joint_numbers[6])
-//                ).toString()<<std::endl;
-//    }
-//    file1<<"];"<<std::endl;
-//    file1.close();
-//    file2<<"];"<<std::endl;
-//    file2.close();
-//    file3<<"];"<<std::endl;
-//    file3.close();
+        file1<<tau.toString()<<std::endl;
+        file2<<cartesian_error_exp[i].toString()<<std::endl;
+        file3<<computed_velocity_exp[i].toString()<<std::endl;
+    }
+    file1<<"];"<<std::endl;
+    file1.close();
+    file2<<"];"<<std::endl;
+    file2.close();
+    file3<<"];"<<std::endl;
+    file3.close();
 
 //    if(j == 1){
 //        for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
@@ -642,8 +672,9 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
 
     tests_utils::stopGazebo();
-    sleep(5);
+    sleep(10);
     tests_utils::stopYarpServer();
+    }
 }
 
 

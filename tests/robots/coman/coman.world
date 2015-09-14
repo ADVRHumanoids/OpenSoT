@@ -621,7 +621,7 @@
         <always_on>1</always_on>
         <visualize>1</visualize>
         <update_rate>1000</update_rate>
-        <pose>0 0 -0.065 0 -0 0</pose>
+        <!--pose>0 0 -0.065 0 -0 0</pose-->
         <plugin name='LAnkSag_FT_plugin' filename='libgazebo_yarp_forcetorque.so'>
           <yarpConfigurationFile>model://coman_urdf/conf/coman/coman_gazebo_left_leg_ft.ini</yarpConfigurationFile>
         </plugin>
@@ -1148,7 +1148,7 @@
         <always_on>1</always_on>
         <visualize>1</visualize>
         <update_rate>1000</update_rate>
-        <pose>0 0 -0.065 0 -0 0</pose>
+        <!--pose>0 0 -0.065 0 -0 0</pose-->
         <plugin name='RAnkSag_FT_plugin' filename='libgazebo_yarp_forcetorque.so'>
           <yarpConfigurationFile>model://coman_urdf/conf/coman/coman_gazebo_right_leg_ft.ini</yarpConfigurationFile>
         </plugin>
