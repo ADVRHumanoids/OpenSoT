@@ -10,7 +10,8 @@ using namespace yarp::math;
 
 Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
                    const yarp::sig::Vector &jointTorquesMax, iDynUtils &robot_model,
-                   const double dT):
+                   const double dT,
+                   const double boundScaling):
     Constraint(q.size()),
     _jointTorquesMin(-1.0*jointTorquesMax),
     _jointTorquesMax(jointTorquesMax),
@@ -22,7 +23,8 @@ Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
     _Jc(0,0),
     _Fc(0),
     _tmp_wrench_in_sensor_frame(6,0.0),
-    _tmp_wrench_in_base_link_frame(6, 0.0)
+    _tmp_wrench_in_base_link_frame(6, 0.0),
+    _boundScaling(boundScaling)
 {
 
     _Aineq.resize(_x_size, _x_size);

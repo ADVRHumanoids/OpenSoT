@@ -111,12 +111,14 @@
                  * @param jointTorquesMax maximum allowed torque
                  * @param robot_model model of the robot
                  * @param dT time step
+                 * @param boundScaling bound scaling between maximum/minimum allowed torques
+                 * and torques computed by ID
                  */
                 Dynamics(const yarp::sig::Vector &q,
                          const yarp::sig::Vector &q_dot,
                             const yarp::sig::Vector &jointTorquesMax,
                          iDynUtils& robot_model,
-                         const double dT);
+                         const double dT, const double boundScaling);
 
                 /**
                  * @brief update
@@ -125,6 +127,12 @@
                  */
                 void update(const yarp::sig::Vector &x);
 
+                /**
+                 * @brief setBoundScaling sets bound scaling for the capsule constraint
+                 * @param boundScaling is a number which should be lower than 1.0
+                 *        (e.g. 1./2. means we are looking two steps ahead and will avoid
+                 *         collision with the capsule by slowing down)
+                 */
                 void setBoundScaling(const double boundScaling)
                 {
                     _boundScaling = boundScaling;

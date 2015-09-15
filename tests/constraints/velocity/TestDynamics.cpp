@@ -100,7 +100,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     ft_links.push_back("r_arm_ft");
 
     //fake numbers, here we test just a static function
-    OpenSoT::constraints::velocity::Dynamics constr(q,q,q,coman,3);
+    OpenSoT::constraints::velocity::Dynamics constr(q,q,q,coman,3,1);
     std::vector<std::string> ft_in_contact;
     constr.crawlLinks(ft_links,
                       std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
@@ -260,7 +260,7 @@ for(unsigned int j = 0; j < 2; ++j){
         Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
                     0.9*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
-                    coman_robot.idynutils, dT));
+                    coman_robot.idynutils, dT,1.0));
     }
 
     double eps = 1e10;
@@ -540,11 +540,11 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= 0.4;
         tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= 0.4;}
     yarp::sig::Vector zero(q.size(), 0.0);
+    double bound_scaling = 0.7; //<-- Whithout this does not work!
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
                     tau_max,
-                    coman_robot.idynutils, dT));
-    Dyn->setBoundScaling(0.7); //<-- Whithout this does not work!
+                    coman_robot.idynutils, dT,bound_scaling));
 
 
     double eps = 1e10;
