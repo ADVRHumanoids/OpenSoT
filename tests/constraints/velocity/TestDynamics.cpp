@@ -100,9 +100,9 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     ft_links.push_back("r_arm_ft");
 
     //fake numbers, here we test just a static function
-    OpenSoT::constraints::velocity::Dynamics constr(q,q,q,coman,3,1);
+    //OpenSoT::constraints::velocity::Dynamics constr(q,q,q,coman,3,1);
     std::vector<std::string> ft_in_contact;
-    constr.crawlLinks(ft_links,
+    OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
                       std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
                       coman, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
@@ -113,6 +113,24 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     EXPECT_TRUE(ft_in_contact[0] == ft_links[0]);
     EXPECT_TRUE(ft_in_contact[1] == ft_links[1]);
 
+
+    std::list<std::string> links_in_contact2 = coman.getLinksInContact();
+    links_in_contact2.push_back("l_wrist");
+    std::cout<<"links in contact2: "<<std::endl;
+    for(link = links_in_contact2.begin(); link != links_in_contact2.end(); link++)
+        std::cout<<"    "<<*link<<std::endl;
+    OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
+                      std::vector<std::string> { std::begin(links_in_contact2), std::end(links_in_contact2) },
+                      coman, ft_in_contact);
+    std::cout<<"FT IN CONTACT: "<<std::endl;
+    for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
+        std::cout<<"    "<<ft_in_contact[i]<<std::endl;
+    EXPECT_EQ(ft_in_contact.size(),3);
+    EXPECT_TRUE(ft_in_contact[0] == ft_links[0]);
+    EXPECT_TRUE(ft_in_contact[1] == ft_links[1]);
+    EXPECT_TRUE(ft_in_contact[2] == ft_links[2]);
+
+
     for(unsigned int i = 0; i < 4; ++i)
         links_in_contact.pop_front();
 
@@ -121,7 +139,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     for(link = links_in_contact.begin(); link != links_in_contact.end(); link++)
         std::cout<<"    "<<*link<<std::endl;
 
-    constr.crawlLinks(ft_links,
+    OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
                       std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
                       coman, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
@@ -138,7 +156,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     for(link = links_in_contact.begin(); link != links_in_contact.end(); link++)
         std::cout<<"    "<<*link<<std::endl;
 
-    constr.crawlLinks(ft_links,
+    OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
                       std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
                       coman, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
@@ -148,6 +166,37 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     EXPECT_EQ(ft_in_contact.size(),2);
     EXPECT_TRUE(ft_in_contact[0] == ft_links[1]);
     EXPECT_TRUE(ft_in_contact[1] == ft_links[3]);
+
+
+
+    std::vector<std::string> ft_links2;
+    ft_links2.push_back("l_ankle");
+    ft_links2.push_back("r_ankle");
+    ft_links2.push_back("l_wrist");
+    ft_links2.push_back("r_wrist");
+    iDynUtils coman2("coman",
+          std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+          std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    std::list<std::string> links_in_contact3 = coman2.getLinksInContact();
+    links_in_contact3.push_back("l_hand_upper_right_link");
+    coman2.setLinksInContact(links_in_contact3);
+    links_in_contact3 = coman2.getLinksInContact();
+    std::cout<<"links in contact: "<<std::endl;
+    for(link = links_in_contact3.begin(); link != links_in_contact3.end(); link++)
+        std::cout<<"    "<<*link<<std::endl;
+    OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links2,
+                      std::vector<std::string> { std::begin(links_in_contact3), std::end(links_in_contact3) },
+                      coman2, ft_in_contact);
+    std::cout<<"FT IN CONTACT: "<<std::endl;
+    for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
+        std::cout<<"    "<<ft_in_contact[i]<<std::endl;
+
+    EXPECT_EQ(ft_in_contact.size(),3);
+    EXPECT_TRUE(ft_in_contact[0] == ft_links2[0]);
+    EXPECT_TRUE(ft_in_contact[1] == ft_links2[1]);
+    EXPECT_TRUE(ft_in_contact[2] == ft_links2[2]);
+
+
 }
 
 yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {

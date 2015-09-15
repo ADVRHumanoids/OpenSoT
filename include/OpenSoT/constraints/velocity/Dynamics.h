@@ -93,6 +93,8 @@
                  *                  |
                  *                o_o_o
                  *
+                 * NOTE: It works ONLY if the list of links in contact contains links that
+                 * does not have any child!
                  *
                  * @param ft_links_list is the list of all the ft_links of the robot
                  * @param contact_link_list is the list of the updated links in contact
