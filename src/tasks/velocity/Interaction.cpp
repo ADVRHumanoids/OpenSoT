@@ -65,11 +65,16 @@ void Interaction::updateActualWrench()
     cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _actualWrench);
 }
 
+yarp::sig::Vector Interaction::getWrenchError()
+{
+    return _desiredWrench - _actualWrench;
+}
+
 void Interaction::_update(const yarp::sig::Vector &x)
 {
     updateActualWrench();
 
-    yarp::sig::Vector wrench_error = _desiredWrench - _actualWrench;
+    yarp::sig::Vector wrench_error = getWrenchError();
     forceError = wrench_error.subVector(0, 2);
     torqueError = wrench_error.subVector(3, 5);
     yarp::sig::Vector delta_x = _C * wrench_error;

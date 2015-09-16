@@ -92,6 +92,7 @@ void CoM::setReference(const yarp::sig::Vector& desiredPosition)
 
 	_desiredPosition = desiredPosition;
     _desiredVelocity.zero();
+    _desiredAcceleration.zero();
     this->update_b();
 }
 
@@ -103,6 +104,7 @@ void OpenSoT::tasks::force::CoM::setReference(const yarp::sig::Vector &desiredPo
 
     _desiredPosition = desiredPosition;
     _desiredVelocity = desiredVelocity;
+    _desiredAcceleration.zero();
     this->update_b();
 }
 
@@ -131,7 +133,7 @@ yarp::sig::Matrix OpenSoT::tasks::force::CoM::computeW(const std::vector<std::st
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i){
         world_T_ft = _robot.iDyn3_model.getPosition(
                     _robot.iDyn3_model.getLinkIndex(ft_in_contact[i]));
-        W.setSubmatrix(I*world_T_ft.submatrix(0,2,0,2).transposed(), 0, i*3);
+        W.setSubmatrix(I*world_T_ft.submatrix(0,2,0,2), 0, i*3);
 
 
 //        pi = -1.0*_actualPosition + world_T_ft.getCol(3).subVector(0,2);
