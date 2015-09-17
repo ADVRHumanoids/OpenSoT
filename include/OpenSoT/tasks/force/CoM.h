@@ -30,6 +30,10 @@
     namespace tasks {
         namespace force {
 
+            /**
+             * @brief The CoM class computes the wrench distribution all over the contacts to exert a certain
+             * force on the COM. The resultants are the (reaction) wrench in sensor frame expressed in world
+             */
             class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
             public:
                 typedef boost::shared_ptr<CoM> Ptr;

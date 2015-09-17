@@ -118,7 +118,7 @@ void OpenSoT::tasks::force::CoM::setReference(const yarp::sig::Vector &desiredPo
 
     _desiredPosition = desiredPosition;
     _desiredVelocity = desiredVelocity;
-    _desiredVelocity = desiredAcceleration;
+    _desiredAcceleration = desiredAcceleration;
     this->update_b();
 }
 
