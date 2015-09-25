@@ -14,6 +14,7 @@
 #include <idynutils/cartesian_utils.h>
 #include <OpenSoT/constraints/force/FrictionCone.h>
 #include <OpenSoT/constraints/velocity/Dynamics.h>
+#include <ros/ros.h>
 
 #define VISUALIZE_SIMULATION true
 
@@ -128,6 +129,15 @@ using namespace yarp::sig;
 using namespace OpenSoT;
 
 TEST_F(testForceCoM, testForceCoM2) {
+//    int argc = 0;
+//    char *argv[] = {""};
+//    ros::init(argc, argv, "testForceCoM2");
+//    //ROS Related stuffs
+//    ros::NodeHandle n;
+//    ros::Publisher new_world_pub;
+//    new_world_pub = n.advertise<geometry_msgs::TransformStamped>("/anchor_to_world_pose", 1000);
+
+
     // Start YARP Server
     tests_utils::startYarpServer();
     // Load a world
@@ -138,6 +148,9 @@ TEST_F(testForceCoM, testForceCoM2) {
     else
         tests_utils::startGZServer(world_path);
     sleep(4);
+
+//    //WAIT
+//    cin.get();
 
     //To control the robot we need RobotUtils
     RobotUtils coman_robot("testConstraint",
@@ -184,12 +197,36 @@ TEST_F(testForceCoM, testForceCoM2) {
     q[coman_robot.idynutils.left_leg.joint_numbers[5]] += -10.0*M_PI/180.0;
     q[coman_robot.idynutils.right_leg.joint_numbers[5]] += -10.0*M_PI/180.0;
     coman_robot.move(q);
+    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
 
     //Set Up SoT
     sleep(10);
     coman_robot.setPositionDirectMode();
     sleep(2);
 
+    std::string anchor; KDL::Frame anchor_T_World;
+    coman_robot.idynutils.getWorldPose(anchor_T_World, anchor);
+    anchor_T_World.M.DoRotY(20.0*M_PI/180.0);
+    coman_robot.idynutils.setAnchor_T_World(anchor_T_World);
+    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+
+//    //Publish world in ros
+//    geometry_msgs::TransformStamped T;
+//    T.header.frame_id = "l_sole";
+//    T.child_frame_id = "world";
+//    KDL::Frame anchorKDL = coman_robot.idynutils.getAnchor_T_World();
+//    double qx,qy,qz,qw;
+//    anchorKDL.M.GetQuaternion(qx,qy,qz,qw);
+//    T.transform.rotation.x = qx;
+//    T.transform.rotation.y = qy;
+//    T.transform.rotation.z = qz;
+//    T.transform.rotation.w = qw;
+//    T.transform.translation.x = anchorKDL.p[0];
+//    T.transform.translation.y = anchorKDL.p[1];
+//    T.transform.translation.z = anchorKDL.p[2];
+//    new_world_pub.publish(T);
+//    cin.get();
+//    ///////////////////////////////////////
 
     std::vector<std::string> ft_in_contact;
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(coman_robot.idynutils.getForceTorqueFrameNames(),
@@ -203,7 +240,11 @@ TEST_F(testForceCoM, testForceCoM2) {
     yarp::sig::Vector wrench_d(12,0.0);
     OpenSoT::tasks::force::CoM::Ptr force_com_task(
                 new OpenSoT::tasks::force::CoM(wrench_d, coman_robot.idynutils));
-    force_com_task->setLambda(200.0,20.0);
+    force_com_task->setLambda(400.0,40.0);
+
+    std::cout<<"INITIAL REF = ["<<force_com_task->getReference().toString()<<std::endl;
+    std::cout<<"INITIAL COM POSE = ["<<coman_robot.idynutils.iDyn3_model.getCOM().toString()<<std::endl;
+
 
     std::map<std::string, double> mu;
     KDL::Rotation R_KDL; R_KDL.DoRotY(-20.0*M_PI/180.0);
@@ -211,6 +252,7 @@ TEST_F(testForceCoM, testForceCoM2) {
     for(unsigned int i = 0; i < 3; ++i)
         for(unsigned int j = 0; j < 3; ++j)
             R(i,j) = R_KDL(i,j);
+
 
     std::map<std::string, yarp::sig::Matrix> world_R_surfaces;
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
@@ -227,10 +269,18 @@ TEST_F(testForceCoM, testForceCoM2) {
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks_force;
     stack_of_tasks_force.push_back(force_com_task);
     OpenSoT::solvers::QPOases_sot::Ptr sot_force(
-                new OpenSoT::solvers::QPOases_sot(stack_of_tasks_force,2E10));
+                new OpenSoT::solvers::QPOases_sot(stack_of_tasks_force,2E5));
     sot_force->solve(wrench_d);
 
     //This is the wrench in sensor frame expressed in world, we have to tranform it!
+    yarp::sig::Matrix world_T_ft_l = coman_robot.idynutils.iDyn3_model.getPosition(
+        coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[0]));
+    yarp::sig::Matrix world_T_ft_r = coman_robot.idynutils.iDyn3_model.getPosition(
+        coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[1]));
+    KDL::Frame world_T_ft_lKDL, world_T_ft_rKDL;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(world_T_ft_l, world_T_ft_lKDL);
+    cartesian_utils::fromYARPMatrixtoKDLFrame(world_T_ft_r, world_T_ft_rKDL);
+
     yarp::sig::Vector wrench_d_lankle = -1.0*yarp::math::cat(
                 wrench_d.subVector(0,2),wrench_d.subVector(6,8));
     yarp::sig::Vector wrench_d_rankle = -1.0*yarp::math::cat(
@@ -242,15 +292,21 @@ TEST_F(testForceCoM, testForceCoM2) {
     cartesian_utils::fromYarpVectortoKDLWrench(wrench_d_lankle, wrench_d_lankle_KDL);
     KDL::Wrench wrench_d_rankle_KDL;
     cartesian_utils::fromYarpVectortoKDLWrench(wrench_d_rankle, wrench_d_rankle_KDL);
-    KDL::Frame base_link_T_world = coman_robot.idynutils.iDyn3_model.getPositionKDL(
-        coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"), true);
-    wrench_d_lankle_KDL = base_link_T_world*wrench_d_lankle_KDL;
-    wrench_d_rankle_KDL = base_link_T_world*wrench_d_rankle_KDL;
+    KDL::Frame base_link_T_ft_l = coman_robot.idynutils.iDyn3_model.getPositionKDL(
+        coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"),
+        coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[0]));
+    KDL::Frame base_link_T_ft_r = coman_robot.idynutils.iDyn3_model.getPositionKDL(
+        coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"),
+        coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[1]));
+    wrench_d_lankle_KDL = base_link_T_ft_l*world_T_ft_lKDL.Inverse()*wrench_d_lankle_KDL;
+    wrench_d_rankle_KDL = base_link_T_ft_r*world_T_ft_rKDL.Inverse()*wrench_d_rankle_KDL;
     cartesian_utils::fromKDLWrenchtoYarpVector(wrench_d_lankle_KDL, wrench_d_lankle);
     cartesian_utils::fromKDLWrenchtoYarpVector(wrench_d_rankle_KDL, wrench_d_rankle);
 
     std::cout<<"wrench_d_lankle = ["<<wrench_d_lankle.toString()<<"] expressed in Waist"<<std::endl;
     std::cout<<"wrench_d_rankle = ["<<wrench_d_rankle.toString()<<"] expressed in Waist"<<std::endl;
+
+    //cin.get();
 
     // BOUNDS
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
@@ -269,12 +325,19 @@ TEST_F(testForceCoM, testForceCoM2) {
                 new constraints::Aggregated(boundsJointLimits, boundsJointVelocity,
                                             q.size()));
 
+//    std::cout<<"INITIAL REF = ["<<force_com_task->getReference().toString()<<std::endl;
+//    std::cout<<"INITIAL COM POSE = ["<<coman_robot.idynutils.iDyn3_model.getCOM().toString()<<std::endl;
+
+
     RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
     std::vector<yarp::sig::Vector> filter_ft;
     for(unsigned int i = 0; i < _ft_measurements.size(); ++i){
         _ft_measurements[i].second = -1.0*ft_readings[_ft_measurements[i].first];
         filter_ft.push_back(-1.0*ft_readings[_ft_measurements[i].first]);}
-    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, false);
+
+//    std::cout<<"INITIAL REF = ["<<force_com_task->getReference().toString()<<std::endl;
+//    std::cout<<"INITIAL COM POSE = ["<<coman_robot.idynutils.iDyn3_model.getCOM().toString()<<std::endl;
 
     yarp::sig::Matrix C(6,6); C = C.eye();
     for(unsigned int i = 0; i < 3; ++i)
@@ -289,8 +352,8 @@ TEST_F(testForceCoM, testForceCoM2) {
     interaction_lankle_task->setCompliance(C);
     interaction_lankle_task->setReferenceWrench(wrench_d_lankle);
     interaction_lankle_task->update(q);
-    std::cout<<"actual_wrench_lankle = ["<<interaction_lankle_task->getActualWrench().toString()<<"] expressed in Waist"<<std::endl;
-    std::cout<<"error_wrench_lankle = ["<<interaction_lankle_task->getWrenchError().toString()<<"]"<<std::endl;
+//    std::cout<<"actual_wrench_lankle = ["<<interaction_lankle_task->getActualWrench().toString()<<"] expressed in Waist"<<std::endl;
+//    std::cout<<"error_wrench_lankle = ["<<interaction_lankle_task->getWrenchError().toString()<<"]"<<std::endl;
 
     tasks::velocity::Interaction::Ptr interaction_rankle_task(
                 new tasks::velocity::Interaction("interaction::r_ankle",
@@ -298,8 +361,8 @@ TEST_F(testForceCoM, testForceCoM2) {
     interaction_rankle_task->setCompliance(C);
     interaction_rankle_task->setReferenceWrench(wrench_d_rankle);
     interaction_rankle_task->update(q);
-    std::cout<<"actual_wrench_lankle = ["<<interaction_rankle_task->getActualWrench().toString()<<"] expressed in Waist"<<std::endl;
-    std::cout<<"error_wrench_rankle = ["<<interaction_rankle_task->getWrenchError().toString()<<"]"<<std::endl;
+//    std::cout<<"actual_wrench_lankle = ["<<interaction_rankle_task->getActualWrench().toString()<<"] expressed in Waist"<<std::endl;
+//    std::cout<<"error_wrench_rankle = ["<<interaction_rankle_task->getWrenchError().toString()<<"]"<<std::endl;
 
 
 
@@ -338,6 +401,23 @@ TEST_F(testForceCoM, testForceCoM2) {
     {
         double tic = yarp::os::Time::now();
 
+//        //Publish world in ros
+//        anchorKDL = coman_robot.idynutils.getAnchor_T_World();
+//        anchorKDL.M.GetQuaternion(qx,qy,qz,qw);
+//        T.transform.rotation.x = qx;
+//        T.transform.rotation.y = qy;
+//        T.transform.rotation.z = qz;
+//        T.transform.rotation.w = qw;
+//        T.transform.translation.x = anchorKDL.p[0];
+//        T.transform.translation.y = anchorKDL.p[1];
+//        T.transform.translation.z = anchorKDL.p[2];
+//        new_world_pub.publish(T);
+//        ///////////////////////////////////////
+
+
+
+
+
         if(i <= M_PI*1000){
             yarp::sig::Vector goal = ref;
             goal(2) += (-0.15)*std::sin((i+M_PI)/1000.);
@@ -351,6 +431,7 @@ TEST_F(testForceCoM, testForceCoM2) {
             force_com_task->setReference(goal,v);
             }
 
+
         ft_readings = coman_robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i){
             filter_ft[i] += (-1.0*ft_readings[_ft_measurements[i].first]-filter_ft[i])*0.1;
@@ -362,24 +443,52 @@ TEST_F(testForceCoM, testForceCoM2) {
         force_com_task->update(wrench_d);
         friction_cones_constraint->update(wrench_d);
 
+//        std::cout<<std::endl;
+//        std::cout<<"force_com_task actual position"<<force_com_task->getActualPosition().toString()<<std::endl;
+//        std::cout<<"force_com_task reference"<<force_com_task->getReference().toString()<<std::endl;
+//        std::cout<<"force_com_task position error: ["<<force_com_task->getError().toString()<<"]"<<std::endl;
+//        std::cout<<"force_com_task b: ["<<force_com_task->getb().toString()<<"]"<<std::endl;
+//        std::cout<<"force_com_task A: ["<<force_com_task->getA().toString()<<"]"<<std::endl;
+
 
 
         if(sot_force->solve(wrench))
-           wrench_d = wrench;
+            wrench_d = wrench;
+        else
+            std::cout<<"ERROR FORCE Optimization"<<std::endl;
+
+        world_T_ft_l = coman_robot.idynutils.iDyn3_model.getPosition(
+            coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[0]));
+        world_T_ft_r = coman_robot.idynutils.iDyn3_model.getPosition(
+            coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[1]));
+        cartesian_utils::fromYARPMatrixtoKDLFrame(world_T_ft_l, world_T_ft_lKDL);
+        cartesian_utils::fromYARPMatrixtoKDLFrame(world_T_ft_r, world_T_ft_rKDL);
 
         wrench_d_lankle = -1.0*yarp::math::cat(
                     wrench_d.subVector(0,2),wrench_d.subVector(6,8));
         wrench_d_rankle = -1.0*yarp::math::cat(
                     wrench_d.subVector(3,5),wrench_d.subVector(9,11));
+//        std::cout<<"wrench_d_lankle = ["<<wrench_d_lankle.toString()<<"] expressed in world"<<std::endl;
+//        std::cout<<"wrench_d_rankle = ["<<wrench_d_rankle.toString()<<"] expressed in world"<<std::endl;
+
         cartesian_utils::fromYarpVectortoKDLWrench(wrench_d_lankle, wrench_d_lankle_KDL);
         cartesian_utils::fromYarpVectortoKDLWrench(wrench_d_rankle, wrench_d_rankle_KDL);
-        base_link_T_world = coman_robot.idynutils.iDyn3_model.getPositionKDL(
-            coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"), true);
-        wrench_d_lankle_KDL = base_link_T_world*wrench_d_lankle_KDL;
-        wrench_d_rankle_KDL = base_link_T_world*wrench_d_rankle_KDL;
+        base_link_T_ft_l = coman_robot.idynutils.iDyn3_model.getPositionKDL(
+            coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"),
+            coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[0]));
+        base_link_T_ft_r = coman_robot.idynutils.iDyn3_model.getPositionKDL(
+            coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"),
+            coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[1]));
+        wrench_d_lankle_KDL = base_link_T_ft_l*world_T_ft_lKDL.Inverse()*wrench_d_lankle_KDL;
+        wrench_d_rankle_KDL = base_link_T_ft_r*world_T_ft_rKDL.Inverse()*wrench_d_rankle_KDL;
         cartesian_utils::fromKDLWrenchtoYarpVector(wrench_d_lankle_KDL, wrench_d_lankle);
         cartesian_utils::fromKDLWrenchtoYarpVector(wrench_d_rankle_KDL, wrench_d_rankle);
 
+//        std::cout<<"wrench_d_lankle = ["<<wrench_d_lankle.toString()<<"] expressed in Waist"<<std::endl;
+//        std::cout<<"wrench_d_rankle = ["<<wrench_d_rankle.toString()<<"] expressed in Waist"<<std::endl;
+
+
+        //cin.get();
         interaction_lankle_task->setReferenceWrench(wrench_d_lankle);
         interaction_rankle_task->setReferenceWrench(wrench_d_rankle);
 

@@ -37,14 +37,15 @@ namespace OpenSoT {
 
        void FrictionCone::computeAineq()
        {
-            _Aineq.resize(4*_ft_in_contact.size(), 3*2*_ft_in_contact.size());
+            _Aineq.resize(5*_ft_in_contact.size(), 3*2*_ft_in_contact.size());
             _Aineq.zero();
 
-            yarp::sig::Matrix Ci(4,3); Ci.zero();
+            yarp::sig::Matrix Ci(5,3); Ci.zero();
             Ci(0,0) = 1.0;
             Ci(1,1) = 1.0;
             Ci(2,0) = -1.0;
             Ci(3,1) = -1.0;
+            Ci(4,2) = -1.0;
 
             for(unsigned int i = 0; i < _ft_in_contact.size(); ++i)
             {
@@ -55,13 +56,14 @@ namespace OpenSoT {
                  Ci(2,2) = -mu;
                  Ci(3,2) = -mu;
 
-                _Aineq.setSubmatrix(Ci*(_world_R_surfaces[_ft_in_contact[i]]).transposed(),i*3, i*4);
+                _Aineq.setSubmatrix(Ci*(_world_R_surfaces[_ft_in_contact[i]]).transposed(),
+                        i*Ci.rows(), i*Ci.cols());
             }
        }
 
        void FrictionCone::computeUpperBound()
        {
-           _bUpperBound.resize(4*_ft_in_contact.size(),0.0);
+           _bUpperBound.resize(5*_ft_in_contact.size(),0.0);
        }
 
 
