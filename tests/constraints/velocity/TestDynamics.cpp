@@ -589,7 +589,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= 0.4;
         tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= 0.4;}
     yarp::sig::Vector zero(q.size(), 0.0);
-    double bound_scaling = 0.7; //<-- Whithout this does not work!
+    double bound_scaling = 0.68; //<-- Whithout this does not work!
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
                     tau_max,
