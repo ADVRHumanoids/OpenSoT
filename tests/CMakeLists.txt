@@ -68,7 +68,7 @@ endif()
 # gTests for Velocity constraints
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ICUB_LIBRARIES})
+               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES})
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
@@ -208,6 +208,16 @@ ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
 TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
 add_dependencies(testYPostural GTest-ext OpenSoT)
 
+if(OPENSOT_COMPILE_EXAMPLES)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
+    ADD_EXECUTABLE(testKlamptController ../examples/KlamptController/tests/testKlamptController.cpp
+                                        ../examples/KlamptController/src/KlamptController.cpp)
+    TARGET_LINK_LIBRARIES(testKlamptController ${TestLibs})
+    add_dependencies(testKlamptController GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_KlamptController COMMAND testKlamptController)
+endif()
+
+
 add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
@@ -242,6 +252,3 @@ add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
-
-add_custom_target(copy_robot_model_files ALL
-                  ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")

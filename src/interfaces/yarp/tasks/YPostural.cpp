@@ -7,7 +7,7 @@ YPostural::YPostural(const std::string &robot_name, const std::string &module_pr
     ::yarp::os::BufferedPort<msgs::yarp_position_joint_msg_portable>(),
     taskPostural(new Postural(x)),
     _port_prefix(),
-    _rpc_cb(taskPostural),
+    _rpc_cb(taskPostural, idynutils),
     _rpc(),
     _idynutils(idynutils)
 {
@@ -23,12 +23,12 @@ YPostural::YPostural(const std::string &robot_name, const std::string &module_pr
 }
 
 YPostural::YPostural(const std::string& robot_name,
-                       const std::string& module_prefix, iDynUtils &idynutils,
-                       Postural::Ptr postural_task):
+                     const std::string& module_prefix, iDynUtils &idynutils,
+                     Postural::Ptr postural_task):
     ::yarp::os::BufferedPort<msgs::yarp_position_joint_msg_portable>(),
     taskPostural(postural_task),
     _port_prefix(),
-    _rpc_cb(taskPostural),
+    _rpc_cb(taskPostural, idynutils),
     _rpc(),
     _idynutils(idynutils)
 {

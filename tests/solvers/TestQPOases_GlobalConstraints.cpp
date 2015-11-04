@@ -27,7 +27,16 @@
 #include <qpOASES/Utils.hpp>
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 #include <tf/tf.h>
-#include <eigen_conversions/eigen_kdl.h>
+
+// local version of vectorKDLToEigen since oldest versions are bogous.
+// To use instead of:
+// #include <eigen_conversions/eigen_kdl.h>
+// tf::vectorKDLToEigen
+void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
+{
+  for(int i = 0; i < 3; ++i)
+    e[i] = k[i];
+}
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -541,7 +550,7 @@ namespace
         // set whitelist
 
         std::cout << "xxx Setting whitelist" << std::endl;
-        std::list<std::pair<std::string,std::string>> whiteList;
+        std::list<std::pair<std::string,std::string> > whiteList;
         whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
         whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
         whiteList.push_back(std::pair<std::string,std::string>(linkE,linkG));
@@ -692,10 +701,10 @@ namespace
             Eigen::Vector3d lefthand_CP, righthand_CP;
             double reference_distance;
 
-            tf::vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-            tf::vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-            tf::vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-            tf::vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
+            vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
+            vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
+            vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
+            vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
 
             reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
                                                             lefthand_capsule_ep2_eigen,

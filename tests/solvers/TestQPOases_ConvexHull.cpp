@@ -531,17 +531,21 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     points.push_back(points.front());
     points_inner.push_back(points_inner.front());
-    for(KDL::Vector point : points) {
+    typedef std::vector<KDL::Vector>::iterator it_p;
+    for(it_p point = points.begin();
+        point != points.end();
+        ++point)
+    {
         std::cout << std::endl
                   << "=================" << std::endl
                   << "Moving from ("
                   << point_old.x() << "," << point_old.y()
                   << ") to ("
-                  << point.x() << "," << point.y()
+                  << point->x() << "," << point->y()
                   <<")" << std::endl;
 
-        T_com_p_ref[0] = point.x();
-        T_com_p_ref[1] = point.y();
+        T_com_p_ref[0] = point->x();
+        T_com_p_ref[1] = point->y();
 
         com_task->setReference(T_com_p_ref);
 
@@ -622,7 +626,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         boundsConvexHull->getConstraints(points_check, A_ch_check, b_ch_check, 0.01);
 
         EXPECT_NEAR(d, expected_d, (expected_d-0.01)*1.01) << "Failed to reach point "
-                                                           << point
+                                                           << *point
                                                            << " in the allocated threshold (0.01m)." << std::endl;
         //EXPECT_TRUE(A_ch == A_ch_check) << "Convex Hull changed!" << std::endl;
         if(! (A_ch == A_ch_check) )
@@ -632,20 +636,25 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             std::cout << "Had originally " << points.size() -1 << " points in the Convex Hull, "
                       << " now we have " << points_check.size() << std::endl;
         }
-        point_old = point;
+        point_old = *point;
     }
 
     _log << "];" << std::endl;
 
     if(footStrategy == USE_TASK)
     {
+        typedef std::vector<KDL::Vector>::iterator it_p;
         _log << "points=[";
-        for(KDL::Vector point : points)
-            _log << point.x() << "," << point.y() << ";";
+        for(it_p point = points.begin();
+            point != points.end();
+            ++point)
+            _log << point->x() << "," << point->y() << ";";
         _log << "];" << std::endl;
         _log << "points_inner=[";
-        for(KDL::Vector point : points_inner)
-            _log << point.x() << "," << point.y() << ";";
+        for(it_p point = points_inner.begin();
+            point != points_inner.end();
+            ++point)
+            _log << point->x() << "," << point->y() << ";";
         _log << "];" << std::endl;
 
         _log << "figure; hold on; plot2(points,'r'); plot2(points_inner,'g'); axis equal;" << std::endl;

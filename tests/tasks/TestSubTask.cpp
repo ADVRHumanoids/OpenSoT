@@ -299,7 +299,8 @@ TEST_F(TestSubTask, testgetWeight)
     ASSERT_EQ(subTask->getWeight().rows(), 5);
     ASSERT_EQ(subTask->getWeight().cols(), 5);
     W.resize(5, 5);
-    std::vector<unsigned int> indices = {0, 1, 2, 5, 6};
+    unsigned int c_indices[] = {0, 1, 2, 5, 6};
+    std::vector<unsigned int> indices(c_indices,c_indices+sizeof(c_indices)/sizeof(indices[0]));
     for(unsigned int r = 0; r < indices.size(); ++r)
         for(unsigned int c = 0; c < indices.size(); ++c)
             W(r,c) = _postural->getWeight()(indices[r], indices[c]);

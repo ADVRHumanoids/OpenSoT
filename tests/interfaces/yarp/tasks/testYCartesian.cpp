@@ -102,8 +102,11 @@ TEST_F(testYTask, testPoseTwistMsgs)
             yarp_network.connect("/test_port2:o", y_cartesian_l_arm.getPortPrefix()+"set_ref:i");
             sleep(1);
             OpenSoT::interfaces::yarp::msgs::yarp_trj_msg_portable& trj_msg = trj_msg_port.prepare();
-            trj_msg.base_frame = base_link;
-            trj_msg.distal_frame = distal_link;
+            {
+                using namespace OpenSoT::interfaces::yarp::msgs;
+                trj_msg.yarp_pose_msg::base_frame = base_link;
+                trj_msg.yarp_pose_msg::distal_frame = distal_link;
+            }
             trj_msg.pose.p[0] = 7.0;
             trj_msg.pose.p[1] = 8.0;
             trj_msg.pose.p[2] = 9.0;
@@ -120,8 +123,11 @@ TEST_F(testYTask, testPoseTwistMsgs)
             std::cout<<"SENT TRJ: "<<std::endl;
             cartesian_utils::printKDLFrame(trj_msg.pose);
             cartesian_utils::printKDLTwist(trj_msg.twist);
-            std::cout<<"base_frame: "<<trj_msg.base_frame<<std::endl;
-            std::cout<<"distal_frame: "<<trj_msg.distal_frame<<std::endl;std::cout<<std::endl;
+            {
+                using namespace OpenSoT::interfaces::yarp::msgs;
+                std::cout<<"base_frame: "<<trj_msg.yarp_pose_msg::base_frame<<std::endl;
+                std::cout<<"distal_frame: "<<trj_msg.yarp_pose_msg::distal_frame<<std::endl;std::cout<<std::endl;
+            }
 
             std::cout<<"RECEIVED TRJ: "<<std::endl;
             y_cartesian_l_arm.taskCartesian->getReference(T, v);
@@ -136,8 +142,11 @@ TEST_F(testYTask, testPoseTwistMsgs)
             cartesian_utils::fromYARPVectortoKDLTwist(v, tmp3);
             EXPECT_TRUE(tmp2 == trj_msg.pose);
             EXPECT_TRUE(tmp3 == trj_msg.twist);
-            EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getBaseLink() == trj_msg.base_frame);
-            EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getDistalLink() == trj_msg.distal_frame);
+            {
+                using namespace OpenSoT::interfaces::yarp::msgs;
+                EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getBaseLink() == trj_msg.yarp_pose_msg::base_frame);
+                EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getDistalLink() == trj_msg.yarp_pose_msg::distal_frame);
+            }
 
             pose_msg = pose_msg_port.prepare();
             pose_msg.base_frame = base_link;
@@ -165,9 +174,11 @@ TEST_F(testYTask, testPoseTwistMsgs)
             cartesian_utils::fromYARPVectortoKDLTwist(v, tmp3);
             EXPECT_TRUE(tmp2 == pose_msg.pose);
             EXPECT_TRUE(tmp3 == KDL::Twist::Zero());
-            EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getBaseLink() == trj_msg.base_frame);
-            EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getDistalLink() == trj_msg.distal_frame);
-
+            {
+                using namespace OpenSoT::interfaces::yarp::msgs;
+                EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getBaseLink() == trj_msg.yarp_pose_msg::base_frame);
+                EXPECT_TRUE(y_cartesian_l_arm.taskCartesian->getDistalLink() == trj_msg.yarp_pose_msg::distal_frame);
+            }
         }
         tests_utils::stopYarpServer();
     }
@@ -343,8 +354,11 @@ TEST_F(testYTask, testYTASK)
             yarp_network.connect("/test_port:o", y_cartesian_l_arm4.getPortPrefix()+"set_ref:i");
             sleep(1);
             OpenSoT::interfaces::yarp::msgs::yarp_trj_msg_portable& trj_msg = trj_msg_port.prepare();
-            trj_msg.base_frame = base_link;
-            trj_msg.distal_frame = distal_link;
+            {
+                using namespace OpenSoT::interfaces::yarp::msgs;
+                trj_msg.yarp_pose_msg::base_frame = base_link;
+                trj_msg.yarp_pose_msg::distal_frame = distal_link;
+            }
             trj_msg.pose.p[0] = 1.0;
             trj_msg.pose.p[1] = 2.0;
             trj_msg.pose.p[2] = 3.0;
@@ -353,8 +367,11 @@ TEST_F(testYTask, testYTASK)
             sleep(1);
 
             std::cout<<"SENT FRAME: "<<std::endl;cartesian_utils::printKDLFrame(trj_msg.pose);
-            std::cout<<"base_frame: "<<trj_msg.base_frame<<std::endl;
-            std::cout<<"distal_frame: "<<trj_msg.distal_frame<<std::endl;std::cout<<std::endl;
+            {
+                using namespace OpenSoT::interfaces::yarp::msgs;
+                std::cout<<"base_frame: "<<trj_msg.yarp_pose_msg::base_frame<<std::endl;
+                std::cout<<"distal_frame: "<<trj_msg.yarp_pose_msg::distal_frame<<std::endl;std::cout<<std::endl;
+            }
 
             std::cout<<"RECEIVED FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(y_cartesian_l_arm4.taskCartesian->getReference());
             std::cout<<"base_frame: "<<y_cartesian_l_arm4.taskCartesian->getBaseLink()<<std::endl;
@@ -363,10 +380,11 @@ TEST_F(testYTask, testYTASK)
             KDL::Frame tmp;
             cartesian_utils::fromYARPMatrixtoKDLFrame(y_cartesian_l_arm4.taskCartesian->getReference(), tmp);
             EXPECT_TRUE(tmp == trj_msg.pose);
-            EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getBaseLink() == trj_msg.base_frame);
-            EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getDistalLink() == trj_msg.distal_frame);
-
-
+            {
+                using namespace OpenSoT::interfaces::yarp::msgs;
+                EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getBaseLink() == trj_msg.yarp_pose_msg::base_frame);
+                EXPECT_TRUE(y_cartesian_l_arm4.taskCartesian->getDistalLink() == trj_msg.yarp_pose_msg::distal_frame);
+            }
         }
         tests_utils::stopYarpServer();
 

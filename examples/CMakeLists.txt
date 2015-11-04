@@ -17,39 +17,24 @@ endif(COMMAND cmake_policy)
 include(ExternalProject)
 PROJECT(OpenSoT)
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(idynutils REQUIRED)
-FIND_PACKAGE(ICUB REQUIRED)
+FIND_PACKAGE(Klampt QUIET)
 FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(YARP REQUIRED)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${ICUB_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/../tests/robots/")
 
-# add required linker flags
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")
-
 include_directories("${qpOASES_INCLUDE_DIRS}")
-
 
 ADD_EXECUTABLE(example_autostack example_autostack.cpp)
 ADD_EXECUTABLE(example_cartesian example_cartesian.cpp)
@@ -84,3 +69,7 @@ TARGET_LINK_LIBRARIES(example_python_distance_query ${iDynTree_LIBRARIES} ${idyn
                                                     ${Boost_LIBRARIES} ${tf_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_previewer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_velocity_allocation PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+
+if(KLAMPT_FOUND)
+  add_subdirectory(KlamptController)
+endif()
