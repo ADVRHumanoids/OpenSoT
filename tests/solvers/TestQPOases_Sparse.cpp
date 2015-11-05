@@ -477,7 +477,7 @@ namespace
                  bool writeQPIntoMFile(const std::string& file_name)
                  {
                      std::ofstream file;
-                     file.open(file_name);
+                     file.open(file_name.c_str());
                      if(file.is_open())
                      {
                          file<<"H = [\n"<<_H.toString()<<"\n]\n\n";
@@ -858,6 +858,8 @@ namespace
 
     TEST_F(testqpOASESSparseMatrices, testSparseVSDenseSolver)
     {
+
+        yarp::sig::Vector solve_time;
         std::vector<double> mean_time_solver;
         std::vector<double> init_time_solver;
         for(unsigned int i = 0; i < 2; ++i){
@@ -899,8 +901,8 @@ namespace
                                              new Cartesian("cartesian::torso",state,robot_model,"torso","world")));
                     /** 3.1) We want to control torso in /world frame using only the three joints in the torso **/
                     std::vector<bool> active_joint_mask = taskTorso->getActiveJointsMask();
-                    for(unsigned int i = 0; i < robot_model.left_leg.getNrOfDOFs(); ++i)
-                        active_joint_mask[robot_model.left_leg.joint_numbers[i]] = false;
+                    for(unsigned int j = 0; j < robot_model.left_leg.getNrOfDOFs(); ++j)
+                        active_joint_mask[robot_model.left_leg.joint_numbers[j]] = false;
                     taskTorso->setActiveJointsMask(active_joint_mask);
 
                     /** 3.2) We are interested only in the orientation of the torso **/
@@ -992,6 +994,7 @@ namespace
                                                                              problem->damped_least_square_eps));
                     double toc = qpOASES::getCPUtime();
                     init_time_solver.push_back(toc-tic);
+                    solve_time.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
                     double acc = 0.0;
@@ -1007,6 +1010,7 @@ namespace
                         ASSERT_TRUE(qp_solver_sparse->solve(dq));
                         double toc = qpOASES::getCPUtime();
                         acc += toc - tic;
+                        solve_time.push_back(toc-tic);
                         state += dq;
                     }
                     double t = acc/(double)(step);
@@ -1022,6 +1026,12 @@ namespace
                     for(unsigned int ii = 0; ii < 3; ++ii)
                         for(unsigned int jj = 0; jj < 3; ++jj)
                             EXPECT_NEAR(waistActual(ii,jj), waistRef(ii,jj), 1E-2);
+
+                    ofstream file;
+                    file.open("TestSparseSolverSolveTime.m");
+                    file<<"time = [ "<<solve_time.toString()<<" ];"<<std::endl;
+                    file.close();
+                    solve_time.clear();
                 }
                 else if(i == 1){
                     std::cout<<GREEN<<"DENSE SOLVER"<<DEFAULT<<std::endl;
@@ -1031,6 +1041,7 @@ namespace
                                                                          problem->damped_least_square_eps));
                     double toc = qpOASES::getCPUtime();
                     init_time_solver.push_back(toc-tic);
+                    solve_time.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
                     double acc = 0.0;
@@ -1046,6 +1057,7 @@ namespace
                         ASSERT_TRUE(qp_solver_dense->solve(dq));
                         double toc = qpOASES::getCPUtime();
                         acc += toc - tic;
+                        solve_time.push_back(toc-tic);
                         state += dq;
                     }
                     double t = acc/(double)(step);
@@ -1061,6 +1073,11 @@ namespace
                     for(unsigned int ii = 0; ii < 3; ++ii)
                         for(unsigned int jj = 0; jj < 3; ++jj)
                             EXPECT_NEAR(waistActual(ii,jj), waistRef(ii,jj), 1E-2);
+
+                    ofstream file;
+                    file.open("TestDenseSolverSolveTime.m");
+                    file<<"time = [ "<<solve_time.toString()<<" ];"<<std::endl;
+                    file.close();
                 }
         }
         std::cout<<GREEN<<"SPARSE SOLVER init needs: "<<DEFAULT<<init_time_solver[0]<<" [s]"<<std::endl;

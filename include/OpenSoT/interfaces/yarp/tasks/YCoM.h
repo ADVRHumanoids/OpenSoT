@@ -4,7 +4,7 @@
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <boost/smart_ptr/scoped_ptr.hpp>
 #include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_trj_msg.h>
-#include <mutex>
+#include <boost/thread/mutex.hpp>
 
 
 namespace OpenSoT {
@@ -30,6 +30,7 @@ public:
         _help_string("help"),
         _W_string("W"),
         _lambda_string("lambda"),
+        _actual_position_string("actual_position"),
         _set_string("set "),
         _get_string("get "),
         _task(task)
@@ -60,11 +61,13 @@ private:
     ::yarp::os::Bottle _out;
     ::yarp::sig::Matrix _W;
     double _lambda;
-    std::mutex _mtx;
+    ::yarp::sig::Vector _task_position;
+    boost::mutex _mtx;
 
     std::string _help_string;
     std::string _W_string;
     std::string _lambda_string;
+    std::string _actual_position_string;
     std::string _set_string;
     std::string _get_string;
 
@@ -83,13 +86,15 @@ private:
             getW();
         else if(command == (_get_string + _lambda_string))
             getLambda();
+        else if(command == (_get_string + _actual_position_string))
+            getActualPosition();
         else
             std::cout<<"Unknown command! Run help instead!"<<std::endl;
     }
 
     bool setW()
     {
-        std::unique_lock<std::mutex>lck(_mtx);
+        boost::unique_lock<boost::mutex>lck(_mtx);
 
         ::yarp::sig::Vector v;
 
@@ -100,7 +105,7 @@ private:
                 v.push_back(w_ii);
             else
             {
-                _out.addInt(output_type::ERROR_NEGATIVE_W_GAIN);
+                _out.addInt(ERROR_NEGATIVE_W_GAIN);
                 return false;
             }
         }
@@ -111,11 +116,11 @@ private:
                 _W(i,i) = v(i);
 
             _task->setWeight(_W);
-            _out.addInt(output_type::SUCCEED);
+            _out.addInt(SUCCEED);
         }
         else
         {
-            _out.addInt(output_type::ERROR_WRONG_VECTOR_SIZE);
+            _out.addInt(ERROR_WRONG_VECTOR_SIZE);
             return false;
         }
 
@@ -124,25 +129,25 @@ private:
 
     bool setLambda()
     {
-        std::unique_lock<std::mutex>lck(_mtx);
+        boost::unique_lock<boost::mutex>lck(_mtx);
 
         double lambda = _in.get(1).asDouble();
 
         if(lambda <= 0.0)
         {
-            _out.addInt(output_type::ERROR_NEGATIVE_LAMBDA_GAIN);
+            _out.addInt(ERROR_NEGATIVE_LAMBDA_GAIN);
             return false;
         }
 
         if (lambda > 1.0)
         {
-            _out.addInt(output_type::ERROR_LAMBA_GAIN_MORE_THAN_1);
+            _out.addInt(ERROR_LAMBA_GAIN_MORE_THAN_1);
             return false;
         }
 
         _lambda = lambda;
         _task->setLambda(_lambda);
-        _out.addInt(output_type::SUCCEED);
+        _out.addInt(SUCCEED);
         return true;
     }
 
@@ -157,6 +162,14 @@ private:
     {
         _lambda = _task->getLambda();
         _out.addDouble(_lambda);
+    }
+
+    void getActualPosition()
+    {
+        _task_position = _task->getActualPosition();
+        for(unsigned int i = 0; i < 3; ++i){
+            _out.addDouble(_task_position(i));
+        }
     }
 
     void help()
@@ -176,6 +189,9 @@ private:
         std::cout<<"    get lambda:"<<std::endl;
         std::cout<<"        in: "<<std::endl;
         std::cout<<"        out: lambda as double"<<std::endl;
+        std::cout<<"    get actual_position:"<<std::endl;
+        std::cout<<"        in: "<<std::endl;
+        std::cout<<"        out: position as double"<<std::endl;
         std::cout<<std::endl;
     }
 };

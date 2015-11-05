@@ -12,17 +12,20 @@ VelocityAllocation::VelocityAllocation(OpenSoT::AutoStack::Ptr autoStack,
     _max_velocity(max_velocity)
 {
     this->processStack(autoStack->getStack());
-     
-    for(auto constraint : autoStack->getBoundsList())
+
+    typedef std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>::const_iterator it_c;
+    for(it_c constraint = autoStack->getBoundsList().begin();
+        constraint != autoStack->getBoundsList().end();
+        ++constraint)
     {
         if(boost::dynamic_pointer_cast<
             OpenSoT::constraints::velocity::VelocityLimits>(
-                constraint))
+                *constraint))
         {
             OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits =
                 boost::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
-                        constraint);
+                        *constraint);
             assert(_dT == velocityLimits->getDT());
             velocityLimits->setVelocityLimits(_max_velocity);
         }
@@ -50,14 +53,17 @@ void VelocityAllocation::processStack(OpenSoT::Solver<yarp::sig::Matrix, yarp::s
 
         // TODO notice this does not work if every stack has already a VelocityLimits
         // but they are instances of the same object - we should check duplication
-        for(auto constraint : task->getConstraints())
+        typedef std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>::const_iterator it_c;
+        for(it_c constraint = task->getConstraints().begin();
+            constraint != task->getConstraints().end();
+            ++constraint)
             if(boost::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
-                        constraint))
+                        *constraint))
             {
                 velocityLimits = boost::dynamic_pointer_cast<
                         OpenSoT::constraints::velocity::VelocityLimits>(
-                            constraint);
+                            *constraint);
                 assert(_dT == velocityLimits->getDT());
                 velocityLimits->setVelocityLimits(velocityLimit);
             }
