@@ -65,6 +65,13 @@ public:
 
     ~ExampleKlamptController();
 
+    /**
+     * @brief computeControl updates the internal model with the
+     * specified configuration vector, updates the stack accordingly, and solves
+     * the IK problem to obtain a new joint command to be used.
+     * @param posture the actual joint posture
+     * @return the joint velocity command (dq) output by solving the IK problem
+     */
     KlamptController::JntCommand computeControl(KlamptController::JntPosition posture);
 };
 
