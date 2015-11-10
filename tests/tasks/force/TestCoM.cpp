@@ -727,9 +727,11 @@ TEST_F(testForceCoM, testForceCoM3) {
     yarp::sig::Vector wrench(wrench_d.size(), 0.0);
     int steps = 3*int(1.5*M_PI*200);
     std::vector<yarp::sig::Vector> wrench_measured;
+    std::vector<yarp::sig::Vector> wrench_desired;
     std::vector<yarp::sig::Vector> com;
     std::vector<yarp::sig::Vector> com_d;
     wrench_measured.reserve(steps);
+    wrench_desired.reserve(steps);
     com.reserve(steps);
     yarp::sig::Vector ref = force_com_task->getReference();
     std::cout<<"INITIAL REF = ["<<ref.toString()<<std::endl;
@@ -809,8 +811,8 @@ TEST_F(testForceCoM, testForceCoM3) {
         base_link_T_ft_r = coman_robot.idynutils.iDyn3_model.getPositionKDL(
             coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"),
             coman_robot.idynutils.iDyn3_model.getLinkIndex(ft_in_contact[1]));
-        wrench_d_lankle_KDL = base_link_T_ft_l*world_T_ft_lKDL.Inverse()*wrench_d_lankle_KDL;
-        wrench_d_rankle_KDL = base_link_T_ft_r*world_T_ft_rKDL.Inverse()*wrench_d_rankle_KDL;
+        wrench_d_lankle_KDL = base_link_T_ft_l.M*world_T_ft_lKDL.Inverse().M*wrench_d_lankle_KDL;
+        wrench_d_rankle_KDL = base_link_T_ft_r.M*world_T_ft_rKDL.Inverse().M*wrench_d_rankle_KDL;
         cartesian_utils::fromKDLWrenchtoYarpVector(wrench_d_lankle_KDL, wrench_d_lankle);
         cartesian_utils::fromKDLWrenchtoYarpVector(wrench_d_rankle_KDL, wrench_d_rankle);
 
@@ -822,7 +824,8 @@ TEST_F(testForceCoM, testForceCoM3) {
         postural_task->update(q);
 
 
-
+        wrench_desired.push_back(yarp::math::cat(interaction_lankle_task->getReferenceWrench(),
+                                                 interaction_rankle_task->getReferenceWrench()));
         wrench_measured.push_back(yarp::math::cat(
             interaction_lankle_task->getActualWrench(), interaction_rankle_task->getActualWrench()));
 
@@ -849,6 +852,15 @@ TEST_F(testForceCoM, testForceCoM3) {
     file2<<"];"<<std::endl;
     file2.close();
 
+    std::ofstream file5;
+    std::string file_name5 = "testCoMForce_wrenchDesired3.m";
+    file5.open(file_name5);
+    file5<<"wrench_desired_lankle_rankle = ["<<std::endl;
+    for(unsigned int i = 0; i < wrench_desired.size(); ++i)
+        file5<<wrench_desired[i].toString()<<std::endl;
+    file5<<"];"<<std::endl;
+    file5.close();
+
     std::ofstream file3;
     std::string file_name3 = "testCoMForce_com3.m";
     file3.open(file_name3);
@@ -871,6 +883,8 @@ TEST_F(testForceCoM, testForceCoM3) {
     sleep(10);
     tests_utils::stopYarpServer();
 }
+
+
 
 //TEST_F(testForceCoM, testForceCoP) {
 //    // Start YARP Server
