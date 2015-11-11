@@ -1,26 +1,5 @@
 <sdf version='1.5'>
   <world name='default'>
-    <physics name='default_physics' default='0' type='ode'>
-      <gravity>0 0 -9.81</gravity>
-      <ode>
-        <solver>
-          <type>quick</type>
-          <iters>50</iters>
-          <sor>1.4</sor>
-          <use_dynamic_moi_rescaling>0</use_dynamic_moi_rescaling>
-        </solver>
-        <constraints>
-          <cfm>0</cfm>
-          <erp>0.2</erp>
-          <contact_max_correcting_vel>100</contact_max_correcting_vel>
-          <contact_surface_layer>0</contact_surface_layer>
-        </constraints>
-      </ode>
-      <real_time_update_rate>1000</real_time_update_rate>
-      <max_step_size>0.001</max_step_size>
-      <real_time_factor>1</real_time_factor>
-      <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
-    </physics>
     <light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
       <pose>0 0 10 0 -0 0</pose>
@@ -78,13 +57,25 @@
         <gravity>1</gravity>
       </link>
     </model>
-    <gui fullscreen='0'>
-      <camera name='user_camera'>
-        <pose>-0.089658 -2.72863 0.985085 0 0.151643 1.64019</pose>
-        <view_controller>orbit</view_controller>
-        <projection_type>perspective</projection_type>
-      </camera>
-    </gui>
+    <physics name='default_physics' default='0' type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+      <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    </physics>
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+    </scene>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
     <model name='coman'>
       <link name='base_link'>
         <pose>0 0 0 0 -0 0</pose>
@@ -224,7 +215,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -309,7 +299,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -396,7 +385,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -481,7 +469,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -573,7 +560,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -676,7 +662,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -698,6 +683,7 @@
           <always_on>1</always_on>
           <visualize>1</visualize>
           <update_rate>1000</update_rate>
+          <pose>0 0 -0.065 0 -0 0</pose>
           <plugin name='LAnkSag_FT_plugin' filename='libgazebo_yarp_forcetorque.so'>
             <yarpConfigurationFile>model://coman_urdf/conf/coman/coman_gazebo_left_leg_ft.ini</yarpConfigurationFile>
           </plugin>
@@ -773,7 +759,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -860,7 +845,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -946,7 +930,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -1031,7 +1014,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -1123,7 +1105,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -1226,7 +1207,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -1248,6 +1228,7 @@
           <always_on>1</always_on>
           <visualize>1</visualize>
           <update_rate>1000</update_rate>
+          <pose>0 0 -0.065 0 -0 0</pose>
           <plugin name='RAnkSag_FT_plugin' filename='libgazebo_yarp_forcetorque.so'>
             <yarpConfigurationFile>model://coman_urdf/conf/coman/coman_gazebo_right_leg_ft.ini</yarpConfigurationFile>
           </plugin>
@@ -1323,7 +1304,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -1410,7 +1390,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -1495,7 +1474,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -1582,7 +1560,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -1667,7 +1644,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -1754,7 +1730,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -1840,7 +1815,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -1925,7 +1899,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -2024,7 +1997,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -2146,7 +2118,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -2231,7 +2202,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -2318,7 +2288,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -2403,7 +2372,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -2490,7 +2458,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -2575,7 +2542,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -2674,7 +2640,6 @@
             <spring_reference>0</spring_reference>
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
-          <use_parent_model_frame>1</use_parent_model_frame>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
@@ -2796,7 +2761,6 @@
             <spring_stiffness>0</spring_stiffness>
           </dynamics>
           <use_parent_model_frame>1</use_parent_model_frame>
-          <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
         <physics>
           <provide_feedback>1</provide_feedback>
@@ -2863,21 +2827,9 @@
         <yarpConfigurationFile>model://coman_urdf/conf/coman/coman_gazebo_right_arm_torque.ini</yarpConfigurationFile>
       </plugin>
       <plugin name='coman_yarp_gazebo_plugin_external_wrench' filename='libgazebo_yarp_externalwrench.so'/>
-      <pose>0 0 0.521 0 -0 0</pose>
+      <pose>1 -3 0.521 0 -0 0</pose>
     </model>
-    <scene>
-      <ambient>0.4 0.4 0.4 1</ambient>
-      <background>0.7 0.7 0.7 1</background>
-      <shadows>1</shadows>
-    </scene>
-    <spherical_coordinates>
-      <surface_model>EARTH_WGS84</surface_model>
-      <latitude_deg>0</latitude_deg>
-      <longitude_deg>0</longitude_deg>
-      <elevation>0</elevation>
-      <heading_deg>0</heading_deg>
-    </spherical_coordinates>
-    <model name='brick_box_3x1x3_0'>
+    <model name='brick_box_3x1x3'>
       <static>1</static>
       <link name='chassis'>
         <pose>0 0 1.5 0 -0 0</pose>
@@ -2917,203 +2869,203 @@
         <kinematic>0</kinematic>
         <gravity>1</gravity>
       </link>
-      <pose>1.81687 -0.411156 0 0 -0 0</pose>
+      <pose>2.92002 -3.35175 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>80 697000000</sim_time>
-      <real_time>114 739938911</real_time>
-      <wall_time>1447169021 555188270</wall_time>
-      <iterations>80697</iterations>
-      <model name='brick_box_3x1x3_0'>
-        <pose>1.81687 -0.08048 0 0 -0 0</pose>
+      <sim_time>28 577000000</sim_time>
+      <real_time>63 600397865</real_time>
+      <wall_time>1447236773 419461244</wall_time>
+      <iterations>28577</iterations>
+      <model name='brick_box_3x1x3'>
+        <pose>2.92002 -3.01572 0 0 -0 0</pose>
         <link name='chassis'>
-          <pose>1.81687 -0.08048 1.5 0 -0 0</pose>
+          <pose>2.92002 -3.01572 1.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='coman'>
-        <pose>0.000383 3.1e-05 0.516749 1.4e-05 -0.000324 -0.000209</pose>
+        <pose>1.00027 -2.99997 0.516745 1.8e-05 -0.000304 -0.000182</pose>
         <link name='DWL'>
-          <pose>0.020625 2.7e-05 0.635876 1.2e-05 -0.000281 -0.000202</pose>
-          <velocity>-0.000297 6.5e-05 0.000171 9e-05 -0.008733 0.006497</velocity>
-          <acceleration>-1.08413 0.074211 0.16815 -3.12837 0.052481 -0.825616</acceleration>
-          <wrench>-0.591815 0.040511 0.091791 0 -0 0</wrench>
+          <pose>1.02051 -2.99997 0.635871 1.7e-05 -0.000257 -0.000179</pose>
+          <velocity>-0.000371 8.1e-05 0.000191 3.5e-05 -0.010117 0.007661</velocity>
+          <acceleration>-1.37138 0.103131 0.221098 -0.242425 -0.60614 -2.49979</acceleration>
+          <wrench>-0.748618 0.056298 0.120695 0 -0 0</wrench>
         </link>
         <link name='DWS'>
-          <pose>0.020625 2.7e-05 0.635871 -4e-05 -0.003647 -0.000201</pose>
-          <velocity>-0.0003 6.4e-05 0.000139 -0.000309 0.001421 0.006483</velocity>
-          <acceleration>-0.683188 0.061119 0.147762 -3.09259 0.119931 -1.43438</acceleration>
-          <wrench>-0.515113 0.046083 0.11141 0 -0 0</wrench>
+          <pose>1.02051 -2.99997 0.635863 -4.3e-05 -0.003621 -0.00018</pose>
+          <velocity>-0.000375 7.6e-05 0.000145 -0.00046 0.002222 0.007635</velocity>
+          <acceleration>-0.870639 0.06922 0.171103 2.58976 -0.695453 0.014878</acceleration>
+          <wrench>-0.656448 0.052191 0.129009 0 -0 0</wrench>
         </link>
         <link name='DWYTorso'>
-          <pose>0.020453 3e-05 0.683365 1.8e-05 -0.003631 -0.000206</pose>
-          <velocity>-0.000225 7.3e-05 0.000108 0.00031 0.001522 -0.000412</velocity>
-          <acceleration>-0.151077 0.07077 0.231788 -2.79291 0.116512 2.96403</acceleration>
-          <wrench>-0.961108 0.45022 1.47457 0 -0 0</wrench>
+          <pose>1.02034 -2.99997 0.683356 2.4e-05 -0.003608 -0.000186</pose>
+          <velocity>-0.00026 8.1e-05 0.000103 0.000388 0.002319 -0.000625</velocity>
+          <acceleration>-0.188869 0.073653 0.264462 -2.74202 -0.743967 2.95705</acceleration>
+          <wrench>-1.20153 0.46856 1.68243 0 -0 0</wrench>
         </link>
         <link name='LElb'>
-          <pose>0.020563 0.186038 0.663619 0.168654 -0.003699 -0.000283</pose>
-          <velocity>-1.4e-05 -2.8e-05 0.000112 4.8e-05 -4e-06 -0.000834</velocity>
-          <acceleration>-0.052387 -0.023272 0.183076 -2.27978 1.07352 0.486412</acceleration>
-          <wrench>-0.033164 -0.014733 0.1159 0 -0 0</wrench>
+          <pose>1.02045 -2.81396 0.663608 0.168625 -0.003682 -0.000262</pose>
+          <velocity>7.3e-05 -4e-05 9.8e-05 4.1e-05 0.00011 -0.000866</velocity>
+          <acceleration>-0.035881 -0.036946 0.148941 -2.05125 0.996536 1.04091</acceleration>
+          <wrench>-0.022715 -0.02339 0.09429 0 -0 0</wrench>
         </link>
         <link name='LFoot'>
-          <pose>0.000477 0.072815 0.089959 0.00015 -0.000116 0.00048</pose>
-          <velocity>1.5e-05 5.8e-05 7.5e-05 -0.000615 0.000165 1e-05</velocity>
-          <acceleration>-0.010255 0.01126 -0.079644 -0.231605 -0.231784 -0.011195</acceleration>
-          <wrench>-0.006835 0.007504 -0.05308 0 -0 0</wrench>
+          <pose>1.00036 -2.92727 0.089959 6.4e-05 -0.000116 7.2e-05</pose>
+          <velocity>2.2e-05 3.2e-05 0.000109 -0.000319 0.000245 1.3e-05</velocity>
+          <acceleration>-0.006232 0.006013 -0.049034 -0.127616 -0.136045 -0.003007</acceleration>
+          <wrench>-0.004153 0.004008 -0.03268 0 -0 0</wrench>
         </link>
         <link name='LFootmot'>
-          <pose>0.000478 0.072815 0.089958 0.000171 -0.00015 0.000483</pose>
-          <velocity>1.5e-05 5.9e-05 7e-05 -0.000528 -8.5e-05 0</velocity>
-          <acceleration>-0.018958 0.021684 -0.082925 -0.154546 -0.391175 -0.092589</acceleration>
-          <wrench>-0.013838 0.015828 -0.060529 0 -0 0</wrench>
+          <pose>1.00036 -2.92727 0.089957 8.7e-05 -0.000147 7.1e-05</pose>
+          <velocity>2.2e-05 3.4e-05 0.000101 -0.000224 -7.1e-05 3e-06</velocity>
+          <acceleration>-0.011234 0.012264 -0.055121 -0.059727 -0.347753 -0.043906</acceleration>
+          <wrench>-0.0082 0.008952 -0.040234 0 -0 0</wrench>
         </link>
         <link name='LForearm'>
-          <pose>0.005959 0.20414 0.557295 0.168654 -0.003702 -0.000283</pose>
-          <velocity>-1e-05 -1.4e-05 0.000113 -3e-06 -0.000202 0.000225</velocity>
-          <acceleration>-0.000928 -0.036408 0.175185 -0.167555 -0.505046 0.339517</acceleration>
-          <wrench>-0.000866 -0.033987 0.163538 0 -0 0</wrench>
+          <pose>1.00584 -2.79586 0.557283 0.168627 -0.003685 -0.000261</pose>
+          <velocity>6.1e-05 -1.9e-05 0.0001 2e-06 -9.1e-05 0.000225</velocity>
+          <acceleration>-0.005333 -0.027963 0.144089 0.028258 -0.385448 0.066247</acceleration>
+          <wrench>-0.004979 -0.026104 0.13451 0 -0 0</wrench>
         </link>
         <link name='LHipMot'>
-          <pose>0.000387 0.023029 0.516753 7.3e-05 -0.000234 -0.000191</pose>
-          <velocity>0.000622 -2.1e-05 1.9e-05 0.000841 0.001266 0.006729</velocity>
-          <acceleration>0.845512 -0.047543 -0.109403 -2.2696 0.08029 -0.804455</acceleration>
-          <wrench>0.754689 -0.042436 -0.097651 0 -0 0</wrench>
+          <pose>1.00027 -2.97697 0.516749 0.000106 -0.000233 -0.000173</pose>
+          <velocity>0.000688 -1.1e-05 2.6e-05 0.001174 0.001275 0.008034</velocity>
+          <acceleration>1.03348 -0.032366 -0.103575 -1.7903 -0.608693 1.11437</acceleration>
+          <wrench>0.922464 -0.028889 -0.092449 0 -0 0</wrench>
         </link>
         <link name='LLowLeg'>
-          <pose>0.000448 0.072729 0.290957 0.000427 -0.000149 0.000449</pose>
-          <velocity>-6e-06 3e-05 6.3e-05 0.000137 -0.000104 1.2e-05</velocity>
-          <acceleration>-0.040775 0.005252 -0.085782 0.129812 -0.234752 -0.207275</acceleration>
-          <wrench>-0.057485 0.007405 -0.120938 0 -0 0</wrench>
+          <pose>1.00033 -2.92732 0.290956 0.000218 -0.000147 4.7e-05</pose>
+          <velocity>-1e-06 2.4e-05 9.3e-05 4.1e-05 -0.000115 0.000101</velocity>
+          <acceleration>-0.052761 0.005862 -0.061277 0.03838 -0.376833 0.00665</acceleration>
+          <wrench>-0.074383 0.008265 -0.086389 0 -0 0</wrench>
         </link>
         <link name='LShp'>
-          <pose>0.004921 0.082531 0.841014 -2.2e-05 -0.003507 -0.000211</pose>
-          <velocity>5.2e-05 2.9e-05 0.000124 6.7e-05 0.000562 -0.000445</velocity>
-          <acceleration>-0.005339 0.050141 0.188566 0.451222 0.348921 1.80268</acceleration>
-          <wrench>-0.003032 0.028471 0.107072 0 -0 0</wrench>
+          <pose>1.00481 -2.91747 0.841005 -3.3e-05 -0.003493 -0.000191</pose>
+          <velocity>0.000162 2.7e-05 0.000127 -1.1e-05 0.000814 -0.000675</velocity>
+          <acceleration>-0.003064 0.048306 0.169653 0.168186 0.229909 1.74132</acceleration>
+          <wrench>-0.00174 0.027429 0.096333 0 -0 0</wrench>
         </link>
         <link name='LShr'>
-          <pose>0.004936 0.155831 0.841013 0.168629 -0.003486 -0.00021</pose>
-          <velocity>8.3e-05 2.9e-05 0.000134 -0.000295 0.000675 -0.000463</velocity>
-          <acceleration>-0.001089 0.051105 0.20385 2.08428 -0.321683 -0.110312</acceleration>
-          <wrench>-0.000846 0.0397 0.158359 0 -0 0</wrench>
+          <pose>1.00482 -2.84417 0.841003 0.168618 -0.003469 -0.000189</pose>
+          <velocity>0.00021 2.8e-05 0.000129 -0.000379 0.000947 -0.000699</velocity>
+          <acceleration>0.002499 0.049743 0.175819 1.93974 -0.278551 -0.198807</acceleration>
+          <wrench>0.001941 0.038642 0.136583 0 -0 0</wrench>
         </link>
         <link name='LShy'>
-          <pose>0.005093 0.163352 0.796841 0.168634 -0.003482 -0.000244</pose>
-          <velocity>6.3e-05 1.9e-05 0.000132 -0.000265 0.000714 -0.000708</velocity>
-          <acceleration>-0.022834 0.015256 0.192865 0.419075 1.35907 -0.765838</acceleration>
-          <wrench>-0.023889 0.015961 0.201781 0 -0 0</wrench>
+          <pose>1.00498 -2.83665 0.79683 0.168623 -0.003464 -0.000223</pose>
+          <velocity>0.000181 1.6e-05 0.000125 -0.000339 0.000954 -0.000713</velocity>
+          <acceleration>-0.01393 0.005652 0.160581 0.325881 1.32289 -0.534323</acceleration>
+          <wrench>-0.014574 0.005913 0.168005 0 -0 0</wrench>
         </link>
         <link name='LThighLowLeg'>
-          <pose>0.00042 0.072676 0.414356 0.000431 -0.000223 0.000441</pose>
-          <velocity>0.000156 1e-05 6.1e-05 0.000155 0.00131 1.2e-05</velocity>
-          <acceleration>0.086308 -0.012928 -0.091745 2.91187 0.834987 -3.04923</acceleration>
-          <wrench>0.146733 -0.021979 -0.155976 0 -0 0</wrench>
+          <pose>1.0003 -2.92734 0.414355 0.000222 -0.000224 4e-05</pose>
+          <velocity>0.000158 1.5e-05 8.9e-05 6.5e-05 0.001292 0.000121</velocity>
+          <acceleration>0.095298 -0.00095 -0.069486 3.07938 -0.473528 -2.98951</acceleration>
+          <wrench>0.162018 -0.001616 -0.118134 0 -0 0</wrench>
         </link>
         <link name='LThighUpLeg'>
-          <pose>0.000397 0.072629 0.516757 0.000432 -0.000224 -0.000184</pose>
-          <velocity>0.000289 -1.9e-05 6.2e-05 0.000152 0.001295 0.006726</velocity>
-          <acceleration>0.298084 -0.026141 -0.089943 -2.87582 -0.193426 -0.961824</acceleration>
-          <wrench>0.30542 -0.026784 -0.092156 0 -0 0</wrench>
+          <pose>1.00028 -2.92737 0.516755 0.000224 -0.000226 -0.000166</pose>
+          <velocity>0.000289 -8e-06 8.9e-05 6.7e-05 0.001276 0.008004</velocity>
+          <acceleration>0.362561 -0.009774 -0.068982 -3.03918 -0.629327 1.04452</acceleration>
+          <wrench>0.371484 -0.010015 -0.070679 0 -0 0</wrench>
         </link>
         <link name='LWrMot2'>
-          <pose>0.00628 0.218724 0.471648 0.168654 -0.003695 -0.000281</pose>
-          <velocity>4e-06 -1.4e-05 0.000112 -3e-06 -4.4e-05 0.000252</velocity>
-          <acceleration>0.025021 -0.045928 0.172963 -0.164077 0.419677 -2.16246</acceleration>
-          <wrench>0.006523 -0.011974 0.045092 0 -0 0</wrench>
+          <pose>1.00616 -2.78128 0.471636 0.168627 -0.003678 -0.00026</pose>
+          <velocity>6.5e-05 -1.7e-05 9.8e-05 2e-06 0.000474 0.000321</velocity>
+          <acceleration>0.016412 -0.025336 0.142191 0.033815 0.422843 -2.43335</acceleration>
+          <wrench>0.004279 -0.006605 0.03707 0 -0 0</wrench>
         </link>
         <link name='LWrMot3'>
-          <pose>0.00628 0.218724 0.471648 0.165267 -0.003695 -0.000281</pose>
-          <velocity>4e-06 -1.4e-05 0.000113 -0.000136 -4.5e-05 0.000251</velocity>
-          <acceleration>0.009178 -0.038106 0.175191 0.136801 0.182527 0.472324</acceleration>
-          <wrench>0.003249 -0.01349 0.062019 0 -0 0</wrench>
+          <pose>1.00616 -2.78128 0.471636 0.165243 -0.003679 -0.00026</pose>
+          <velocity>6.5e-05 -1.8e-05 9.9e-05 -0.000137 0.000473 0.00032</velocity>
+          <acceleration>0.004981 -0.02499 0.144154 0.010825 0.166706 0.175543</acceleration>
+          <wrench>0.001763 -0.008847 0.051032 0 -0 0</wrench>
         </link>
         <link name='RElb'>
-          <pose>0.020492 -0.185981 0.663611 -0.168617 -0.003729 -0.000133</pose>
-          <velocity>9e-06 4.4e-05 2.8e-05 -1.3e-05 0.000113 0.0012</velocity>
-          <acceleration>-0.056057 0.077712 0.052766 -0.745307 1.41725 -0.547884</acceleration>
-          <wrench>-0.035488 0.049197 0.033404 0 -0 0</wrench>
+          <pose>1.02038 -3.18598 0.663598 -0.168602 -0.003702 -0.000117</pose>
+          <velocity>7e-05 2.1e-05 9e-06 -4.6e-05 -1.4e-05 0.000278</velocity>
+          <acceleration>-0.054343 0.050907 0.029083 2.36671 1.39908 1.14092</acceleration>
+          <wrench>-0.034403 0.032228 0.018412 0 -0 0</wrench>
         </link>
         <link name='RFoot'>
-          <pose>0.00048 -0.072764 0.089958 -0.000155 -0.000123 -0.000883</pose>
-          <velocity>2.1e-05 -4.7e-05 2.2e-05 0.000489 0.000237 -1e-05</velocity>
-          <acceleration>-0.035535 0.006097 -0.15147 -0.166066 -0.804828 0.042097</acceleration>
-          <wrench>-0.023683 0.004063 -0.10095 0 -0 0</wrench>
+          <pose>1.00036 -3.07267 0.089958 -6.9e-05 -0.000123 -0.000417</pose>
+          <velocity>4.4e-05 -2.9e-05 5.1e-05 0.000279 0.000495 -1.4e-05</velocity>
+          <acceleration>-0.009981 0.000323 -0.131891 -0.021686 -0.234233 0.020324</acceleration>
+          <wrench>-0.006652 0.000215 -0.087901 0 -0 0</wrench>
         </link>
         <link name='RFootmot'>
-          <pose>0.00048 -0.072764 0.089957 -0.000176 -0.00022 -0.000886</pose>
-          <velocity>2.3e-05 -4.8e-05 1.4e-05 0.000352 -0.004836 -1.2e-05</velocity>
-          <acceleration>-0.068858 0.01059 -0.157276 -0.247308 -1.3444 0.111519</acceleration>
-          <wrench>-0.050261 0.00773 -0.114799 0 -0 0</wrench>
+          <pose>1.00036 -3.07267 0.089957 -9.2e-05 -0.000218 -0.000416</pose>
+          <velocity>4.7e-05 -3e-05 3.9e-05 0.000109 -0.005354 2e-05</velocity>
+          <acceleration>-0.01849 5.5e-05 -0.136208 2.9951 -0.317507 -3.05144</acceleration>
+          <wrench>-0.013496 4e-05 -0.099421 0 -0 0</wrench>
         </link>
         <link name='RForearm'>
-          <pose>0.005884 -0.204078 0.557284 -0.16864 -0.003741 -0.000133</pose>
-          <velocity>9e-06 -5e-06 2.5e-05 2.9e-05 -0.000429 -0.001661</velocity>
-          <acceleration>-0.004518 -0.010413 0.051165 -0.107853 -1.13088 2.76342</acceleration>
-          <wrench>-0.004218 -0.00972 0.047763 0 -0 0</wrench>
+          <pose>1.00577 -3.20407 0.55727 -0.168609 -0.003713 -0.000115</pose>
+          <velocity>6.6e-05 -1.4e-05 2e-06 8.7e-05 -0.00028 -0.00091</velocity>
+          <acceleration>-0.007794 -0.013373 0.018433 0.053444 -0.830259 -1.83067</acceleration>
+          <wrench>-0.007275 -0.012484 0.017207 0 -0 0</wrench>
         </link>
         <link name='RHipMot'>
-          <pose>0.000377 -0.02297 0.516751 -0.0001 -0.000306 -0.000188</pose>
-          <velocity>0.00093 -1.1e-05 -4e-06 -0.000128 0.00979 0.006879</velocity>
-          <acceleration>1.65541 -0.039838 -0.161082 -2.9631 0.742359 -0.564638</acceleration>
-          <wrench>1.47759 -0.035559 -0.143778 0 -0 0</wrench>
+          <pose>1.00026 -3.02297 0.516747 -0.000134 -0.000298 -0.000146</pose>
+          <velocity>0.001058 2e-06 -1e-06 -0.000286 0.01097 0.008147</velocity>
+          <acceleration>2.01637 -0.019037 -0.164358 -0.07704 -0.699179 -1.88888</acceleration>
+          <wrench>1.79978 -0.016992 -0.146703 0 -0 0</wrench>
         </link>
         <link name='RLowLeg'>
-          <pose>0.000436 -0.072674 0.290956 -0.000445 -0.000219 -0.000854</pose>
-          <velocity>-0.000952 -3.7e-05 6e-06 -4.5e-05 -0.004844 0.000127</velocity>
-          <acceleration>-0.897222 -0.004192 -0.151468 0.152964 -0.997887 0.461771</acceleration>
-          <wrench>-1.26492 -0.00591 -0.213542 0 -0 0</wrench>
+          <pose>1.00032 -3.07262 0.290955 -0.000236 -0.000219 -0.000394</pose>
+          <velocity>-0.001028 -2.2e-05 2.7e-05 -2.8e-05 -0.005339 0.000368</velocity>
+          <acceleration>-1.04558 -0.006118 -0.13387 -3.05619 -0.438163 -2.59879</acceleration>
+          <wrench>-1.47408 -0.008625 -0.188732 0 -0 0</wrench>
         </link>
         <link name='RShp'>
-          <pose>0.004887 -0.082469 0.84101 -3.8e-05 -0.003475 -0.000209</pose>
-          <velocity>-1.6e-05 3.2e-05 7.1e-05 2.7e-05 -0.000109 -0.000425</velocity>
-          <acceleration>-0.048566 0.052551 0.099221 0.364248 0.206788 -2.34796</acceleration>
-          <wrench>-0.027577 0.029839 0.05634 0 -0 0</wrench>
+          <pose>1.00478 -3.08247 0.841 -1.9e-05 -0.00345 -0.000187</pose>
+          <velocity>5.8e-05 3.1e-05 6.7e-05 0.000163 -0.000172 -0.000634</velocity>
+          <acceleration>-0.051591 0.053036 0.093463 0.410764 0.189991 -2.32169</acceleration>
+          <wrench>-0.029294 0.030115 0.05307 0 -0 0</wrench>
         </link>
         <link name='RShr'>
-          <pose>0.004872 -0.155769 0.841007 -0.168625 -0.003541 -0.0002</pose>
-          <velocity>-4.6e-05 3e-05 4.1e-05 4e-06 -0.000445 -0.000375</velocity>
-          <acceleration>-0.053891 0.054469 0.071929 -2.5057 0.579395 -0.463232</acceleration>
-          <wrench>-0.041864 0.042314 0.055877 0 -0 0</wrench>
+          <pose>1.00477 -3.15577 0.840995 -0.168605 -0.003517 -0.000178</pose>
+          <velocity>1.2e-05 2.8e-05 2.1e-05 -1.2e-05 -0.00052 -0.000582</velocity>
+          <acceleration>-0.056498 0.052654 0.050795 -2.49717 0.658706 -0.431278</acceleration>
+          <wrench>-0.04389 0.040904 0.03946 0 -0 0</wrench>
         </link>
         <link name='RShy'>
-          <pose>0.005027 -0.16329 0.796833 -0.168617 -0.00352 -0.000174</pose>
-          <velocity>-2.8e-05 2.3e-05 3.3e-05 3e-05 -6.6e-05 0.001207</velocity>
-          <acceleration>-0.035108 0.049328 0.063724 -0.521178 0.421378 0.859157</acceleration>
-          <wrench>-0.036731 0.051608 0.066669 0 -0 0</wrench>
+          <pose>1.00492 -3.16329 0.796821 -0.168598 -0.003493 -0.000157</pose>
+          <velocity>3.2e-05 1.8e-05 1.1e-05 1e-05 -0.000226 0.000291</velocity>
+          <acceleration>-0.043285 0.040717 0.039562 -0.508591 -0.068679 -0.446405</acceleration>
+          <wrench>-0.045287 0.042599 0.041391 0 -0 0</wrench>
         </link>
         <link name='RThighLowLeg'>
-          <pose>0.000399 -0.072619 0.414356 -0.000448 -0.000297 -0.000846</pose>
-          <velocity>0.000265 -3.1e-05 3e-06 -5.5e-05 0.009867 0.000156</velocity>
-          <acceleration>-0.798781 -0.023309 -0.185158 -2.46842 1.35464 -3.05867</acceleration>
-          <wrench>-1.35801 -0.039629 -0.31479 0 -0 0</wrench>
+          <pose>1.00029 -3.0726 0.414355 -0.00024 -0.000288 -0.000387</pose>
+          <velocity>0.000337 -1.7e-05 2.1e-05 -4.6e-05 0.011067 0.000452</velocity>
+          <acceleration>-0.947764 -0.016848 -0.178792 0.245278 -0.716552 0.459234</acceleration>
+          <wrench>-1.6113 -0.028643 -0.303965 0 -0 0</wrench>
         </link>
         <link name='RThighUpLeg'>
-          <pose>0.000369 -0.07257 0.516756 -0.000449 -0.000297 -0.000195</pose>
-          <velocity>0.001275 -1.1e-05 4e-06 -6e-05 0.009867 0.006838</velocity>
-          <acceleration>1.15073 -0.018803 -0.189628 3.08165 0.164139 -0.37291</acceleration>
-          <wrench>1.17905 -0.019266 -0.194294 0 -0 0</wrench>
+          <pose>1.00025 -3.07257 0.516755 -0.000242 -0.000289 -0.000152</pose>
+          <velocity>0.001471 3e-06 1.9e-05 -5.1e-05 0.011066 0.008046</velocity>
+          <acceleration>1.41034 0.003426 -0.186284 -0.008903 -0.490593 -1.92605</acceleration>
+          <wrench>1.44505 0.00351 -0.190869 0 -0 0</wrench>
         </link>
         <link name='RWrMot2'>
-          <pose>0.006203 -0.21866 0.471637 -0.168639 -0.003733 -0.000134</pose>
-          <velocity>2.1e-05 -4e-06 2.3e-05 4.8e-05 0.000674 -0.001849</velocity>
-          <acceleration>0.025476 -0.017933 0.049958 -0.084977 -0.500785 -0.780574</acceleration>
-          <wrench>0.006642 -0.004675 0.013024 0 -0 0</wrench>
+          <pose>1.00609 -3.21865 0.471622 -0.168607 -0.003705 -0.000117</pose>
+          <velocity>7.6e-05 -8e-06 -3e-06 0.000106 -0.000172 -0.000929</velocity>
+          <acceleration>0.021238 -0.011139 0.014227 0.077327 -0.078043 1.08525</acceleration>
+          <wrench>0.005537 -0.002904 0.003709 0 -0 0</wrench>
         </link>
         <link name='RWrMot3'>
-          <pose>0.006203 -0.21866 0.471636 -0.165247 -0.003733 -0.000134</pose>
-          <velocity>2e-05 -4e-06 1.7e-05 -2.9e-05 0.000674 -0.001849</velocity>
-          <acceleration>0.013665 -0.006481 0.042364 0.225097 -0.523455 2.62326</acceleration>
-          <wrench>0.004837 -0.002294 0.014997 0 -0 0</wrench>
+          <pose>1.00609 -3.21865 0.471621 -0.16522 -0.003705 -0.000117</pose>
+          <velocity>7.5e-05 -8e-06 -8e-06 -6.1e-05 -0.000172 -0.000929</velocity>
+          <acceleration>0.012522 -0.005786 0.005935 0.115437 -0.243212 -1.95886</acceleration>
+          <wrench>0.004433 -0.002048 0.002101 0 -0 0</wrench>
         </link>
         <link name='base_link'>
-          <pose>0.000383 3.1e-05 0.516749 1.4e-05 -0.000324 -0.000209</pose>
-          <velocity>0.000784 -1.2e-05 -9e-06 0.000534 -0.008995 0.006725</velocity>
-          <acceleration>0.424949 -0.300331 -0.582795 -2.54139 0.226572 -0.745451</acceleration>
-          <wrench>0.769527 -0.54386 -1.05537 0 -0 0</wrench>
+          <pose>1.00027 -2.99997 0.516745 1.8e-05 -0.000304 -0.000182</pose>
+          <velocity>0.000883 -1e-06 -1.1e-05 0.0007 -0.010422 0.008049</velocity>
+          <acceleration>0.505041 -0.346581 -0.704955 0.872523 -0.891897 -1.99223</acceleration>
+          <wrench>0.914564 -0.627613 -1.27658 0 -0 0</wrench>
         </link>
       </model>
       <model name='ground_plane'>
@@ -3126,5 +3078,12 @@
         </link>
       </model>
     </state>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>1.21092 -6.75232 1.14301 0 0.115643 1.4362</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
   </world>
 </sdf>

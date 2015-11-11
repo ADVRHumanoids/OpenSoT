@@ -70,7 +70,8 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testMinimizeAccelerationTask
                       testInteractionVelocityTask
                       TestManipulabilityTask
-                      testCoMForceTask)
+                      testCoMForceTask
+)
 endif()
 
 # gTests for Velocity constraints
@@ -232,7 +233,7 @@ add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesi
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
-add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
+#add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
 add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
 add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
@@ -248,9 +249,9 @@ add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_Glob
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
-add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
+#add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
-add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
+#add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)

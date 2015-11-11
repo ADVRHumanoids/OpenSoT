@@ -58,11 +58,16 @@ void Interaction::updateActualWrench()
                 _robot.iDyn3_model.getLinkIndex(_base_link),
                 _robot.iDyn3_model.getLinkIndex(_ft_frame));
 
+//    std::cout<<"base_link is "<<_base_link<<std::endl;
+//    std::cout<<"ft_frame_in_base_link:"<<std::endl;
+//    cartesian_utils::printHomogeneousTransform(ft_frame_in_base_link);std::cout<<std::endl;
+
     KDL::Frame ft_frame_in_base_link_KDL;
     cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
 
     KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL.M * wrench_in_sensor_frame_KDL;
     if(_distal_link != _ft_frame){
+        std::cout<<"I AM CHANGING POLE!!!!"<<std::endl;
         yarp::sig::Matrix ft_frame_to_distal_link = _robot.iDyn3_model.getPosition(
                     _robot.iDyn3_model.getLinkIndex(_ft_frame),
                     _robot.iDyn3_model.getLinkIndex(_distal_link));

@@ -62,6 +62,26 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     return q;
 }
 
+yarp::sig::Vector getGoodInitialPosition2(iDynUtils& idynutils) {
+    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 0.0 * M_PI/180.0;
+    arm[1] = 0.0 * M_PI/180.0;
+    arm[3] = -90.0 * M_PI/180.0;
+    arm[6] = 1.3;
+    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+    arm[1] = -arm[1];
+    arm[6] = -arm[6];
+    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    return q;
+}
+
 /**
  * @brief computeWallForce computes the reaction wrench performed by a spring attached to the wall and the robot ee
  * @param xEE the current position of the end effector of the robot
@@ -295,14 +315,14 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 using namespace OpenSoT;
 
 TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
-    // Start YARP Server
-    tests_utils::startYarpServer();
-    // Load a world
-    std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman_brick_wall.world";
-    if(VISUALIZE_SIMULATION)
-        tests_utils::startGazebo(world_path);
-    else
-        tests_utils::startGZServer(world_path);
+//    // Start YARP Server
+//    tests_utils::startYarpServer();
+//    // Load a world
+//    std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman_brick_wall.world";
+//    if(VISUALIZE_SIMULATION)
+//        tests_utils::startGazebo(world_path);
+//    else
+//        tests_utils::startGZServer(world_path);
     sleep(4);
 
     //To control the robot we need RobotUtils
@@ -311,24 +331,9 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
-    yarp::sig::Vector q = getGoodInitialPosition(coman_robot.idynutils);
+    yarp::sig::Vector q = getGoodInitialPosition2(coman_robot.idynutils);
 
     //Homing
-    std::vector<iDynUtils::ft_measure> _ft_measurements;
-    RobotUtils::ftPtrMap ft_sensors = coman_robot.getftSensors();
-    for(RobotUtils::ftPtrMap::iterator it = ft_sensors.begin();
-        it != ft_sensors.end(); it++)
-    {
-        iDynUtils::ft_measure ft_measurement;
-        ft_measurement.first = it->second->getReferenceFrame();
-        yarp::sig::Vector dummy_measure(6 ,0.0);
-        ft_measurement.second = dummy_measure;
-
-        _ft_measurements.push_back(ft_measurement);
-    }
-
-    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
-    coman_robot.idynutils.setFloatingBaseLink(coman_robot.idynutils.left_leg.end_effector_name);
     coman_robot.setPositionMode();
     double speed = 0.8;
     yarp::sig::Vector legs_speed(6,speed);
@@ -345,13 +350,26 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
     coman_robot.setPositionDirectMode();
     sleep(2);
 
+    std::vector<iDynUtils::ft_measure> _ft_measurements;
+    RobotUtils::ftPtrMap ft_sensors = coman_robot.getftSensors();
+    for(RobotUtils::ftPtrMap::iterator it = ft_sensors.begin();
+        it != ft_sensors.end(); it++)
+    {
+        iDynUtils::ft_measure ft_measurement;
+        ft_measurement.first = it->second->getReferenceFrame();
+        yarp::sig::Vector dummy_measure(6 ,0.0);
+        ft_measurement.second = dummy_measure;
+
+        _ft_measurements.push_back(ft_measurement);
+    }
+    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+    coman_robot.idynutils.setFloatingBaseLink(coman_robot.idynutils.left_leg.end_effector_name);
+
+
 
 //    yarp::sig::Vector wrench_d_l_wrist(6,0.0);
 //    wrench_d_l_wrist[0] = 20.0; wrench_d_l_wrist[1] = -2.0; wrench_d_l_wrist[2] = 10.0;
 //    wrench_d_l_wrist[3] = 2.0; wrench_d_l_wrist[4] = -2.0; wrench_d_l_wrist[5] = -2.0;
-    yarp::sig::Vector wrench_d_r_wrist(6,0.0);
-    wrench_d_r_wrist[0] = 20.0; wrench_d_r_wrist[1] = 10.0; wrench_d_r_wrist[2] = 10.0;
-    wrench_d_r_wrist[3] = 2.0; wrench_d_r_wrist[4] = -2.0; wrench_d_r_wrist[5] = 2.0;
 
     // BOUNDS
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
@@ -361,7 +379,7 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
                     coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
                     coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
 
-    double dT = 0.01;
+    double dT = 0.005;
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
                 new constraints::velocity::VelocityLimits(0.3, dT,q.size()));
@@ -374,7 +392,8 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
     std::vector<yarp::sig::Vector> filter_ft;
     for(unsigned int i = 0; i < _ft_measurements.size(); ++i){
         _ft_measurements[i].second = -1.0*ft_readings[_ft_measurements[i].first];
-        filter_ft.push_back(-1.0*ft_readings[_ft_measurements[i].first]);}
+        filter_ft.push_back(-1.0*ft_readings[_ft_measurements[i].first]);
+    }
     coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
 
     yarp::sig::Matrix C(6,6); C = C.eye();
@@ -386,8 +405,18 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
 
     tasks::velocity::Interaction::Ptr interaction_rwrist_task(
                 new tasks::velocity::Interaction("interaction::r_wrist",
-                                q, coman_robot.idynutils, "r_wrist", "Waist", "r_wrist"));
+                                q, coman_robot.idynutils, "r_wrist", "world", "r_wrist"));
+    std::vector<bool> active_joint_mask = interaction_rwrist_task->getActiveJointsMask();
+    for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
+        active_joint_mask[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
+    interaction_rwrist_task->setActiveJointsMask(active_joint_mask);
+    yarp::sig::Matrix W = interaction_rwrist_task->getWeight();
+    W(3,3) = 0.1; W(4,4) = 0.1; W(5,5) = 0.1;
+    interaction_rwrist_task->setWeight(W);
     interaction_rwrist_task->setCompliance(C);
+    yarp::sig::Vector wrench_d_r_wrist(6,0.0);
+    wrench_d_r_wrist[0] = 25.0; wrench_d_r_wrist[1] = 5.0; wrench_d_r_wrist[2] = 5.0;
+    wrench_d_r_wrist[3] = 0.0; wrench_d_r_wrist[4] = 5.0; wrench_d_r_wrist[5] = 5.0;
     interaction_rwrist_task->setReferenceWrench(wrench_d_r_wrist);
     interaction_rwrist_task->update(q);
 
@@ -431,6 +460,7 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
 
         ft_readings = coman_robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i){
+            //filter_ft[i] = -1.0*ft_readings[_ft_measurements[i].first];
             filter_ft[i] += (-1.0*ft_readings[_ft_measurements[i].first]-filter_ft[i])*0.25;
             _ft_measurements[i].second = filter_ft[i];}
         coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
