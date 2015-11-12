@@ -315,14 +315,14 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 using namespace OpenSoT;
 
 TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
-//    // Start YARP Server
-//    tests_utils::startYarpServer();
-//    // Load a world
-//    std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman_brick_wall.world";
-//    if(VISUALIZE_SIMULATION)
-//        tests_utils::startGazebo(world_path);
-//    else
-//        tests_utils::startGZServer(world_path);
+    // Start YARP Server
+    tests_utils::startYarpServer();
+    // Load a world
+    std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman_brick_wall.world";
+    if(VISUALIZE_SIMULATION)
+        tests_utils::startGazebo(world_path);
+    else
+        tests_utils::startGZServer(world_path);
     sleep(4);
 
     //To control the robot we need RobotUtils
@@ -405,18 +405,18 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
 
     tasks::velocity::Interaction::Ptr interaction_rwrist_task(
                 new tasks::velocity::Interaction("interaction::r_wrist",
-                                q, coman_robot.idynutils, "r_wrist", "world", "r_wrist"));
-    std::vector<bool> active_joint_mask = interaction_rwrist_task->getActiveJointsMask();
-    for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
-        active_joint_mask[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
-    interaction_rwrist_task->setActiveJointsMask(active_joint_mask);
-    yarp::sig::Matrix W = interaction_rwrist_task->getWeight();
-    W(3,3) = 0.1; W(4,4) = 0.1; W(5,5) = 0.1;
-    interaction_rwrist_task->setWeight(W);
+                                q, coman_robot.idynutils, "r_wrist", "Waist", "r_arm_ft"));
+//    std::vector<bool> active_joint_mask = interaction_rwrist_task->getActiveJointsMask();
+//    for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
+//        active_joint_mask[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
+//    interaction_rwrist_task->setActiveJointsMask(active_joint_mask);
+//    yarp::sig::Matrix W = interaction_rwrist_task->getWeight();
+//    W(3,3) = 0.1; W(4,4) = 0.1; W(5,5) = 0.1;
+//    interaction_rwrist_task->setWeight(W);
     interaction_rwrist_task->setCompliance(C);
     yarp::sig::Vector wrench_d_r_wrist(6,0.0);
-    wrench_d_r_wrist[0] = 25.0; wrench_d_r_wrist[1] = 5.0; wrench_d_r_wrist[2] = 5.0;
-    wrench_d_r_wrist[3] = 0.0; wrench_d_r_wrist[4] = 5.0; wrench_d_r_wrist[5] = 5.0;
+    wrench_d_r_wrist[0] = 25.0; wrench_d_r_wrist[1] = 0.0; wrench_d_r_wrist[2] = 10.0;
+    wrench_d_r_wrist[3] = 0.0; wrench_d_r_wrist[4] = 0.0; wrench_d_r_wrist[5] = 0.0;
     interaction_rwrist_task->setReferenceWrench(wrench_d_r_wrist);
     interaction_rwrist_task->update(q);
 
