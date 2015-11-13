@@ -56,10 +56,10 @@
     <chain base_link="DWYTorso" tip_link="r_wrist"/>
   </group>
   <group name="force_torque_sensors">
-    	<joint name="l_ankle_joint"/>
-    	<joint name="r_ankle_joint"/>
-    	<joint name="l_arm_ft_joint"/>
-    	<joint name="r_arm_ft_joint"/>
+    <joint name="l_leg_ft_joint"/>
+    <joint name="r_leg_ft_joint"/>
+    <joint name="l_arm_ft_joint"/>
+    <joint name="r_arm_ft_joint"/>
   </group>
   <group name="left_leg">
     <chain base_link="Waist" tip_link="l_sole"/>

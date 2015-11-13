@@ -1105,6 +1105,18 @@ and to define the end effectors of the robot -->
     <child link="r_arm_ft"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
+  <link name="l_leg_ft"/>
+  <link name="r_leg_ft"/>
+  <joint name="l_leg_ft_joint" type="fixed">
+    <parent link="LFoot"/>
+    <child link="l_leg_ft"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.065"/>
+  </joint>
+  <joint name="r_leg_ft_joint" type="fixed">
+    <parent link="RFoot"/>
+    <child link="r_leg_ft"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.065"/>
+  </joint>
   <!-- ************ HANDS ************ -->
   <!-- LINKS -->
   <link name="RSoftHand">
