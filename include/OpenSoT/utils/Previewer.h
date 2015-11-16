@@ -31,6 +31,22 @@
 #include <map>
 #include <utility>
 
+
+/* when previewing for an infinite time, stop if t >= longest_task_duration*safety_margin */
+#define TRAJECTORIES_EXPIRED_SAFETY_MARGIN 1.5
+
+/* set the time window of the moving average filter for the error statistics*/
+#define UPDATE_ERRORS_STATISTICS_WINDOW_SIZE_IN_SECS .1
+
+/* if solve() fails, retry for a maximum of MAX_RETRIES */
+#define PREVIEWER_CHECK_MAX_RETRIES 3
+
+/* maximum allowed Cartesian error, in norm, during task execution */
+#define TRAJ_BINDING_MAXIMUM_ALLOWED_ERROR  5e-2
+
+/* threshold value for Cartesian error convergence */
+#define TRAJ_BINDING_CONVERGENCE_TOLERANCE  5e-4
+
 /**
  * @example example_previewer.cpp
  * The Previwer class allows to check the SoT is able to perform a trajectory
@@ -295,7 +311,7 @@ namespace OpenSoT {
                     CONVERGE_ON_CARTESIAN_ERROR_SMALL,
                     // converges when cartesian error wrt goal goes below a certain threshold AND error is not decreasing
                     CONVERGE_ON_CARTESIAN_ERROR_SMALL_AND_NOT_DECREASING,
-                    // converges when cartesian error wrt goal goes below a certain threshold
+                    // converges when cartesian error wrt goal goes below a certain threshold AND error is not decreasing AND joint configuration is not changing
                     CONVERGE_ON_CARTESIAN_ERROR_AND_NULL_STABLE };
 
                 ConvergencePolicy convergencePolicy;
@@ -317,8 +333,8 @@ namespace OpenSoT {
                  */
                 TrajBinding(TrajGenPtr trajectoryGenerator,
                             OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
-                            double maximumAllowedError = 5e-2,
-                            double convergenceTolerance = 5e-4,
+                            double maximumAllowedError = TRAJ_BINDING_MAXIMUM_ALLOWED_ERROR,
+                            double convergenceTolerance = TRAJ_BINDING_CONVERGENCE_TOLERANCE,
                             ConvergencePolicy convergencePolicy = CONVERGE_ON_CARTESIAN_ERROR_SMALL) :
                     convergenceTolerance(convergenceTolerance),
                     maximumAllowedError(maximumAllowedError),
@@ -629,11 +645,11 @@ namespace OpenSoT {
 
             /**
              * @brief trajectoriesExpired checks whether we simulated forward in time enough
-             *        to ecompass the duratino of all trajectories.
+             *        to ecompass the duration of all trajectories.
              * @param safetyMargin a percentage of the longest trajectory duration we wish to wait for.
              * @return true if t has surpassed the longest trajectory duration by safetyMargin (in percentage)
              */
-            bool trajectoriesExpired(double safetyMargin = 1.5)
+            bool trajectoriesExpired(double safetyMargin = TRAJECTORIES_EXPIRED_SAFETY_MARGIN)
             {
                 bool trajCompleted = true;
 
@@ -649,7 +665,7 @@ namespace OpenSoT {
                 return trajCompleted;
             }
 
-            void updateErrorsStatistics(double windowSizeInSecs = .1)
+            void updateErrorsStatistics(double windowSizeInSecs = UPDATE_ERRORS_STATISTICS_WINDOW_SIZE_IN_SECS)
             {
                 for(typename TrajectoryBindings::iterator b = bindings.begin();
                     b != bindings.end();
@@ -817,14 +833,14 @@ namespace OpenSoT {
              * @param time the time to simulate, in seconds. Notice that if the time is smaller than the trajectory time,
              *        the previewer will return false, since we didn't complete the trajectory.
              *        You can still check the results to see if any fault occured
-             * @param max_retries maximum number of times to retries solve() if errors occur
+             * @param max_retries maximum number of times to retry solve() if errors occur
              * @return true if during the whole trajectory the tracking was always lower than the specified threshold,
              *              and no self-collisions were detected.
              *              If the previewer is asked to simulate for a time lower than the longest trajectory duration,
              *              false will be returned. To get finer informations you should check the results structure
              */
             bool check(const double time = std::numeric_limits<double>::infinity(),
-                       const unsigned int max_retries = 3,
+                       const unsigned int max_retries = PREVIEWER_CHECK_MAX_RETRIES,
                        Results* results = NULL,
                        PreviewerCallBack* call_back = NULL)
             {
