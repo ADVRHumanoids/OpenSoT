@@ -62,6 +62,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testVelocityAllocation
                       testYCartesian
                       testYPostural
+                      testMinimizeAccelerationTask
                       testInteractionVelocityTask
                       TestManipulabilityTask)
 endif()
@@ -209,6 +210,16 @@ ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
 TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
 add_dependencies(testYPostural GTest-ext OpenSoT)
 
+if(OPENSOT_COMPILE_EXAMPLES)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
+    ADD_EXECUTABLE(testKlamptController ../examples/KlamptController/tests/testKlamptController.cpp
+                                        ../examples/KlamptController/src/KlamptController.cpp)
+    TARGET_LINK_LIBRARIES(testKlamptController ${TestLibs})
+    add_dependencies(testKlamptController GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_KlamptController COMMAND testKlamptController)
+endif()
+
+
 add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
@@ -250,10 +261,6 @@ find_package(PythonInterp)
 if(MATLAB_FOUND AND PYTHONINTERP_FOUND AND SHOW_TEST_RESULTS)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_CURRENT_BINARY_DIR}/../CTestCustom.cmake)
 endif()
-
-
-add_custom_target(copy_robot_model_files ALL
-                  ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/robots" "${CMAKE_CURRENT_BINARY_DIR}/robots")
 
 add_custom_target(copy_test_plotter_m ALL
                   ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.m" "${CMAKE_CURRENT_BINARY_DIR}/")

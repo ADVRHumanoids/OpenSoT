@@ -17,6 +17,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+FIND_PACKAGE(Boost QUIET)
 FIND_PACKAGE(YARP REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
@@ -100,10 +101,6 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/utils/VelocityAllocation.cpp
                     ${sot_INCLUDES})
 
-ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
-ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
-ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
-
 # we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
     add_dependencies(OpenSoT qpOASES-ext)
@@ -113,17 +110,24 @@ endif()
 # we now add the YARP libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
-TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
 
-TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
+if(Boost_VERSION VERSION_GREATER 104701)
+    ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
+    ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
+    ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
 
-TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
+    TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
+
+    TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
+
+    TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
+endif()
 
 
 
@@ -165,12 +169,22 @@ catkin_package(
  DEPENDS system_lib
 )
 
-install(TARGETS OpenSoT ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
-ros_yarp_postural_interactive_marker
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+if(Boost_VERSION VERSION_GREATER 104701)
+    message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
+
+    install(TARGETS OpenSoT ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
+    ros_yarp_postural_interactive_marker
+       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+else()
+    install(TARGETS OpenSoT
+       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+endif()
 
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
@@ -190,6 +204,10 @@ include(AddUninstallTarget)
 
 add_subdirectory(app)
 add_subdirectory(doc)
+
+########################
+# Add Examples target  #
+########################
 if(OPENSOT_COMPILE_EXAMPLES)
   add_subdirectory(examples)
 endif()
@@ -200,4 +218,9 @@ endif()
 if(OPENSOT_COMPILE_TESTS)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
+    add_custom_target(copy_robot_model_files ALL
+                      ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()

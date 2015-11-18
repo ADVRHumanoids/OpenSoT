@@ -48,7 +48,19 @@ class ExampleKlamptController : public KlamptController
     /* to compute mean computing time over 1sec */
     Accumulator time_accumulator;
 
+    /* counter for periodic print statements */
+    int print_mean;
+
+    std::list<int> bodyJoints;
+
+    void init();
+
+    bool debug_checkSolutionDoesntMoveFingers(const yarp::sig::Vector &dq);
+    bool debug_checkJacobiansDontContainFingerCols();
+
 public:
+    ExampleKlamptController(const KlamptController::JntPosition& posture);
+
     ExampleKlamptController();
 
     ~ExampleKlamptController();

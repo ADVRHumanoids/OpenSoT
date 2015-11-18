@@ -17,7 +17,16 @@
 
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 #include <yarp/math/Math.h>
-#include <eigen_conversions/eigen_kdl.h>
+
+// local version of vectorKDLToEigen since oldest versions are bogous.
+// To use instead of:
+// #include <eigen_conversions/eigen_kdl.h>
+// tf::vectorKDLToEigen
+void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
+{
+  for(int i = 0; i < 3; ++i)
+    e[i] = k[i];
+}
 
 using namespace yarp::math;
 
@@ -40,7 +49,7 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
     _x_cache(x),
     _boundScaling(boundScaling) {
 
-    std::string base_name = "Waist";
+    std::string base_name = robot.getBaseLink();
     base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
 
     if(base_index == -1)
@@ -182,10 +191,10 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
         Link1_CP_kdl = Waist_T_Link1_CP.p;
         Link2_CP_kdl = Waist_T_Link2_CP.p;
 
-        tf::vectorKDLToEigen(Link1_origin_kdl, Link1_origin);
-        tf::vectorKDLToEigen(Link2_origin_kdl, Link2_origin);
-        tf::vectorKDLToEigen(Link1_CP_kdl, Link1_CP);
-        tf::vectorKDLToEigen(Link2_CP_kdl, Link2_CP);
+        vectorKDLToEigen(Link1_origin_kdl, Link1_origin);
+        vectorKDLToEigen(Link2_origin_kdl, Link2_origin);
+        vectorKDLToEigen(Link1_CP_kdl, Link1_CP);
+        vectorKDLToEigen(Link2_CP_kdl, Link2_CP);
 
 
         closepoint_dir = Link2_CP - Link1_CP;
