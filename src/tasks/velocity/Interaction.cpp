@@ -61,15 +61,18 @@ void Interaction::updateActualWrench()
     KDL::Frame ft_frame_in_base_link_KDL;
     cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
 
-    KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL.M * wrench_in_sensor_frame_KDL;
     if(_distal_link != _ft_frame){
         yarp::sig::Matrix ft_frame_to_distal_link = _robot.iDyn3_model.getPosition(
                     _robot.iDyn3_model.getLinkIndex(_ft_frame),
                     _robot.iDyn3_model.getLinkIndex(_distal_link));
-        yarp::sig::Vector distance_in_base_link = ft_frame_in_base_link.submatrix(0,3,0,3) * ft_frame_to_distal_link.subcol(0, 3, 3);
-        KDL::Vector distance_in_base_link_KDL(distance_in_base_link[0], distance_in_base_link[1], distance_in_base_link[2]);
-        wrench_in_base_link.RefPoint(distance_in_base_link_KDL);
+        KDL::Vector distance_in_distal_link_KDL(ft_frame_to_distal_link.subcol(0,3,3)[0],
+                                                ft_frame_to_distal_link.subcol(0,3,3)[1],
+                                                ft_frame_to_distal_link.subcol(0,3,3)[2]);
+        wrench_in_sensor_frame_KDL.RefPoint(distance_in_distal_link_KDL);
     }
+
+    KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL.M * wrench_in_sensor_frame_KDL;
+
     cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _actualWrench);
 }
 

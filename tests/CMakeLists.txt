@@ -4,6 +4,8 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
+option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
+
 # compite GTest
 find_package(GTest)
 if (NOT GTEST_FOUND)
@@ -89,7 +91,7 @@ TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
 add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
-TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
 add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
@@ -97,7 +99,7 @@ TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
 add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
-TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
 add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
@@ -145,23 +147,23 @@ TARGET_LINK_LIBRARIES(testQPOases_GlobalConstraints ${TestLibs} ${PCL_LIBRARIES}
 add_dependencies(testQPOases_GlobalConstraints GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
-TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
 add_dependencies(testAggregatedTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
-TARGET_LINK_LIBRARIES(testSubTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
 add_dependencies(testSubTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
-TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
-TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
 add_dependencies(testInteractionVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
-TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
 add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
@@ -173,7 +175,7 @@ TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
-TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
 add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testMinimumVelocityTask tasks/velocity/TestMinimumVelocity.cpp)
@@ -181,7 +183,7 @@ TARGET_LINK_LIBRARIES(testMinimumVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 add_dependencies(testMinimumVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
-TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
 add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
@@ -252,3 +254,16 @@ add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
+
+
+find_package(MATLAB QUIET)
+find_package(PythonInterp)
+if(MATLAB_FOUND AND PYTHONINTERP_FOUND AND SHOW_TEST_RESULTS)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_CURRENT_BINARY_DIR}/../CTestCustom.cmake)
+endif()
+
+add_custom_target(copy_test_plotter_m ALL
+                  ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.m" "${CMAKE_CURRENT_BINARY_DIR}/")
+
+add_custom_target(copy_test_plotter_py ALL
+                  ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.py" "${CMAKE_CURRENT_BINARY_DIR}/")

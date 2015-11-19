@@ -1,2 +1,6 @@
-testQPOases_VelocityAllocation
+testMinimizeAcceleration
+testQPOases_CartesianFF
+testQPOases_CartesianPositionContraint
+testQPOases_CoMAndPosturalFF
 testQPOases_ConvexHull
+testQPOases_VelocityAllocation
