@@ -42,7 +42,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
                       testCollisionAvoidanceVelocityConstraint
-                      testDynamicsConstraint
+                      #testDynamicsConstraint
                       testQPOasesSolver
                       testQPOases_AutoStack
                       testQPOases_CartesianPositionConstraint
@@ -68,9 +68,9 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testYCartesian
                       testYPostural
                       testMinimizeAccelerationTask
-                      testInteractionVelocityTask
+                      #testInteractionVelocityTask
                       TestManipulabilityTask
-                      testCoMForceTask
+                      #testCoMForceTask
 )
 endif()
 
