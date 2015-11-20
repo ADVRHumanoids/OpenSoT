@@ -15,7 +15,7 @@
 #include <OpenSoT/constraints/force/FrictionCone.h>
 #include <OpenSoT/constraints/velocity/Dynamics.h>
 #include <ros/ros.h>
-#include <OpenSoT/tasks/force/CoP.h>
+
 
 #define VISUALIZE_SIMULATION true
 
