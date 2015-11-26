@@ -233,8 +233,3 @@ if(OPENSOT_COMPILE_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
-
-if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
-    add_custom_target(copy_robot_model_test_files ALL
-                      ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
-endif()
