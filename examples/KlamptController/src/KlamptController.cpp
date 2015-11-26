@@ -11,7 +11,7 @@ std::string getRobotName(std::string urdf_path)
 
 std::string getSRDFPath(std::string urdf_path)
 {
-    return boost::filesystem::change_extension(urdf_path,"srdf").string();
+    return boost::filesystem::change_extension(urdf_path,"").string() + ".srdf";
 }
 
 yarp::sig::Vector fromJntToiDyn(iDynUtils& model,
