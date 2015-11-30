@@ -4,11 +4,26 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
-#Gazebo
-find_package(Gazebo   REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
-link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(${GAZEBO_INCLUDE_DIRS})
+#TESTS THAT USES GAZEBO
+set(OPENSOT_COMPILE_SIMULATION_TESTS OFF CACHE BOOL "Flag to compile tests that uses Gazebo")
+
+if (OPENSOT_COMPILE_SIMULATION_TESTS)
+    add_definitions( -DOPENSOT_COMPILE_SIMULATION_TESTS=true )
+    #Gazebo
+    find_package(Gazebo   REQUIRED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+    link_directories(${GAZEBO_LIBRARY_DIRS})
+    include_directories(${GAZEBO_INCLUDE_DIRS})
+
+    set(OPENSOT_SIMULATION_TESTS_VISUALIZATION OFF CACHE BOOL "Flag to show simulation tests")
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
+        add_definitions( -DOPENSOT_SIMULATION_TESTS_VISUALIZATION=true )
+    else()
+        add_definitions( -DOPENSOT_SIMULATION_TESTS_VISUALIZATION=false )
+    endif()
+else()
+    add_definitions( -DOPENSOT_COMPILE_SIMULATION_TESTS=false )
+endif()
 
 option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
 
@@ -44,7 +59,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
                       testCollisionAvoidanceVelocityConstraint
-                      #testDynamicsConstraint
+                      testDynamicsConstraint
                       testQPOasesSolver
                       testQPOases_AutoStack
                       testQPOases_CartesianPositionConstraint
@@ -245,7 +260,7 @@ add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesi
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
-#add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
+add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
 add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
 add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)

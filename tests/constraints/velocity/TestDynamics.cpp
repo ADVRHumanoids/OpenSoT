@@ -13,9 +13,6 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 
-
-#define VISUALIZE_SIMULATION true
-
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
@@ -196,8 +193,9 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     EXPECT_TRUE(ft_in_contact[1] == ft_links2[1]);
     EXPECT_TRUE(ft_in_contact[2] == ft_links2[2]);
 
-
 }
+
+#if OPENSOT_COMPILE_SIMULATION_TESTS
 
 yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
@@ -227,7 +225,7 @@ TEST_F(testDynamicsConstr, testConstraint) {
 
     // Load a world
     std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman_fixed.world";
-    if(VISUALIZE_SIMULATION)
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
         tests_utils::startGazebo(world_path);
     else
         tests_utils::startGZServer(world_path);
@@ -424,7 +422,7 @@ for(unsigned int j = 0; j < 2; ++j){
 
 
     tests_utils::stopGazebo();
-    sleep(5);
+    sleep(10);
     tests_utils::stopYarpServer();
 }
 
@@ -433,13 +431,25 @@ for(unsigned int j = 0; j < 2; ++j){
 
 TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
+    for(unsigned int j = 1; j < 2; ++j){
+//    if(j == 1){
+//        sleep(5);
+//        bool success = tests_utils::stopGazebo();
+//        if(success)
+//            std::cout<<"GAZEBO KILLED"<<std::endl;
+//        sleep(5);
+//        success = tests_utils::stopYarpServer();
+//        if(success)
+//            std::cout<<"yarpserver KILLED"<<std::endl;
+//        sleep(5);
+//    }
+
     // Start YARP Server
     tests_utils::startYarpServer();
 
-    for(unsigned int j = 1; j < 2; ++j){
     // Load a world
     std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.world";
-    if(VISUALIZE_SIMULATION)
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
         tests_utils::startGazebo(world_path);
     else
         tests_utils::startGZServer(world_path);
@@ -485,7 +495,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     //Set Up SoT
     sleep(10);
     coman_robot.setPositionDirectMode();
-    sleep(2);
+    sleep(10);
     // BOUNDS
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
             constraints::velocity::JointLimits::ConstraintPtr(
@@ -497,7 +507,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     double dT = 0.001;
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
-                new constraints::velocity::VelocityLimits(0.9, dT,q.size()));
+                new constraints::velocity::VelocityLimits(0.6, dT,q.size()));
 
 
     constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
@@ -589,7 +599,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= 0.4;
         tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= 0.4;}
     yarp::sig::Vector zero(q.size(), 0.0);
-    double bound_scaling = 0.68; //<-- Whithout this does not work!
+    double bound_scaling = 0.68; //0.68<-- Whithout this does not work!
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
                     tau_max,
@@ -618,7 +628,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         double tic = yarp::os::Time::now();
         RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
-            _ft_measurements[i].second = ft_readings[_ft_measurements[i].first];
+            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.7;
 
 
         coman_robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
@@ -635,7 +645,8 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
             Matrix goal_l_wrist = intial_pose_l_wrist;
             goal_l_wrist(2,3) += (-0.18)*std::sin((i+M_PI)/1000.0);
-            cartesian_task_l_wrist->setReference(goal_l_wrist);}
+            cartesian_task_l_wrist->setReference(goal_l_wrist);
+        }
 
         bounds->update(q);
         taskCartesianAggregated->update(q);
@@ -701,33 +712,30 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     file3<<"];"<<std::endl;
     file3.close();
 
-//    if(j == 1){
-//        for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
-//            yarp::sig::Vector t = sensed_torque_exp[i];
-//            yarp::sig::Vector x = yarp::math::cat(
-//                               t.subVector(coman_robot.idynutils.torso.joint_numbers[0],
-//                                             coman_robot.idynutils.torso.joint_numbers[2]),
-//                               t.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
-//                                          coman_robot.idynutils.left_arm.joint_numbers[6]));
-//            yarp::sig::Vector xx = yarp::math::cat(
-//                               coman_robot.idynutils.iDyn3_model.getJointTorqueMax().subVector(coman_robot.idynutils.torso.joint_numbers[0],
-//                                             coman_robot.idynutils.torso.joint_numbers[2]),
-//                               coman_robot.idynutils.iDyn3_model.getJointTorqueMax().subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
-//                                          coman_robot.idynutils.left_arm.joint_numbers[6]));
-//            for(unsigned int jj = 0; jj < x.size(); ++jj)
-//                EXPECT_LE(fabs(x[jj]), 0.9*xx[jj])<<"@joint "<<jj;
-
-
-
-
-    tests_utils::stopGazebo();
-    sleep(10);
-    tests_utils::stopYarpServer();
+    if(j == 1){
+        for(unsigned int i = 10; i < sensed_torque_exp.size(); ++i){
+            yarp::sig::Vector tau = sensed_torque_exp[i];
+            for(unsigned int jj = 0; jj < coman_robot.idynutils.left_leg.joint_numbers.size(); ++jj){
+                EXPECT_LE(fabs(tau[coman_robot.idynutils.left_leg.joint_numbers[jj]]),
+                        tau_max[coman_robot.idynutils.left_leg.joint_numbers[jj]]*1.02)<<"@joint "<<coman_robot.idynutils.left_leg.joint_numbers[jj];
+                EXPECT_LE(fabs(tau[coman_robot.idynutils.right_leg.joint_numbers[jj]]),
+                        tau_max[coman_robot.idynutils.right_leg.joint_numbers[jj]]*1.02)<<"@joint "<<coman_robot.idynutils.right_leg.joint_numbers[jj];
+            }
+        }
     }
+
+    }
+    sleep(5);
+    bool success = tests_utils::stopGazebo();
+    if(success)
+        std::cout<<"GAZEBO KILLED"<<std::endl;
+    sleep(5);
+    success = tests_utils::stopYarpServer();
+    if(success)
+        std::cout<<"yarpserver KILLED"<<std::endl;
+    sleep(5);
 }
-
-
-
+#endif
 
 
 }
