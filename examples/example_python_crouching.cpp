@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.3);
     DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.3);
     DHS.jointLimits->setBoundScaling(0.3);
-    DHS.selfCollisionAvoidance->setBoundScaling(0.3);
+    DHS.selfCollisionAvoidance->setBoundScaling(0.01);
     DHS.velocityLimits->setVelocityLimits(0.3);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
                                 0.3,
-                                0.3);
+                                0.6);
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
@@ -131,19 +131,8 @@ int main(int argc, char **argv) {
                     *i_c))
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
-                                *i_c)->setVelocityLimits(.6);
+                                *i_c)->setVelocityLimits(.9);
     }
-/*
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr beforeLastTask = autoStack->getStack()[1];
-        for(it_constraint i_c = beforeLastTask->getConstraints().begin() ;
-            i_c != beforeLastTask->getConstraints().end() ; ++i_c) {
-            if( boost::dynamic_pointer_cast<
-                    OpenSoT::constraints::velocity::VelocityLimits>(
-                        *i_c))
-                boost::dynamic_pointer_cast<
-                                OpenSoT::constraints::velocity::VelocityLimits>(
-                                    *i_c)->setVelocityLimits(.7);
-    }*/
 
 
     /*                            */
@@ -153,6 +142,9 @@ int main(int argc, char **argv) {
 
     OpenSoT::interfaces::yarp::tasks::YCartesian leftArm(robot.idynutils.getRobotName(),
                                                          MODULE_NAME, DHS.leftArm);
+
+    OpenSoT::interfaces::yarp::tasks::YCartesian rightArm(robot.idynutils.getRobotName(),
+                                                         MODULE_NAME, DHS.rightArm);
 
 
     OpenSoT::interfaces::yarp::tasks::YCartesian waist(robot.idynutils.getRobotName(),
@@ -168,7 +160,7 @@ int main(int argc, char **argv) {
                                                MODULE_NAME, DHS.com);
 
     OpenSoT::solvers::QPOases_sot solver(autoStack->getStack(),
-                                         autoStack->getBounds(), 1e10);
+                                         autoStack->getBounds(), 5e10);
 
     robot.setPositionDirectMode();
     yarp::sig::Vector dq;
@@ -178,10 +170,12 @@ int main(int argc, char **argv) {
         tic = yarp::os::Time::now();
         robot.idynutils.updateiDyn3Model(q, true);
 
+        /*
         yarp::sig::Matrix M(6+robot.idynutils.iDyn3_model.getNrOfDOFs(), 6+robot.idynutils.iDyn3_model.getNrOfDOFs());
         robot.idynutils.iDyn3_model.getFloatingBaseMassMatrix(M);
         M.removeCols(0,6); M.removeRows(0,6);
         DHS.postural->setWeight(M);
+        */
 
         autoStack->update(q);
         if(solver.solve(dq))
