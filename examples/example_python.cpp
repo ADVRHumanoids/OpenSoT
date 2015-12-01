@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     // and the stack is subject to bounds jointLimits and velocityLimits
     OpenSoT::AutoStack::Ptr autoStack = 
         ( DHS.rightLeg ) /
-        ( (DHS.com_XY) << DHS.selfCollisionAvoidance ) /
+        ( (DHS.com_XY) << DHS.selfCollisionAvoidance << DHS.convexHull ) /
         ( (DHS.leftArm + DHS.rightArm ) << DHS.selfCollisionAvoidance ) /
         ( (DHS.postural) << DHS.selfCollisionAvoidance );
     autoStack << DHS.jointLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
