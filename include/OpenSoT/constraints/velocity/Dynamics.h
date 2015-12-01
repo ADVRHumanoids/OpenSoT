@@ -122,6 +122,19 @@
                          iDynUtils& robot_model,
                          const double dT, const double boundScaling);
 
+
+                /**
+                 * @brief getVelocityLimits returns the current velocity limits.
+                 * @return the joint torque limits. It is always a positive double [Nm]
+                 */
+                yarp::sig::Vector getTorqueLimits();
+
+                /**
+                 * @brief setVelocityLimits
+                 * @param tauLimits the joint torque limits. It needs be a positive number [Nm]
+                 */
+                void setTorqueLimits(const yarp::sig::Vector tauLimits);
+
                 /**
                  * @brief update
                  * @param x constains the concatenation of q and q_dot:
