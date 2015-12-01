@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     // and the stack is subject to bounds jointLimits and velocityLimits
     OpenSoT::AutoStack::Ptr autoStack = 
         ( DHS.rightLeg ) /
-        ( (DHS.com_XY) << DHS.selfCollisionAvoidance ) /
+        ( (DHS.com_XY) << DHS.selfCollisionAvoidance << DHS.convexHull ) /
         ( (DHS.leftArm + DHS.rightArm ) << DHS.selfCollisionAvoidance ) /
         ( (DHS.postural) << DHS.selfCollisionAvoidance );
     autoStack << DHS.jointLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
@@ -50,9 +50,10 @@ int main(int argc, char **argv) {
 
     DHS.rightLeg->setLambda(0.6);   DHS.rightLeg->setOrientationErrorGain(1.0);
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
-    DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.1);
-    DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.1);
+    DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.6);
+    DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.6);
     DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
+    DHS.selfCollisionAvoidance->setBoundScaling(0.1);
     DHS.velocityLimits->setVelocityLimits(0.3);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();
@@ -108,7 +109,7 @@ int main(int argc, char **argv) {
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
                                 0.3,
-                                0.3);
+                                0.6);
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
@@ -122,17 +123,6 @@ int main(int argc, char **argv) {
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 *i_c)->setVelocityLimits(.9);
-    }
-                            
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr beforeLastTask = autoStack->getStack()[1];
-        for(it_constraint i_c = beforeLastTask->getConstraints().begin() ;
-            i_c != beforeLastTask->getConstraints().end() ; ++i_c) {
-            if( boost::dynamic_pointer_cast<
-                    OpenSoT::constraints::velocity::VelocityLimits>(
-                        *i_c))
-                boost::dynamic_pointer_cast<
-                                OpenSoT::constraints::velocity::VelocityLimits>(
-                                    *i_c)->setVelocityLimits(.7);
     }
 
 
@@ -155,7 +145,7 @@ int main(int argc, char **argv) {
                                                MODULE_NAME, DHS.com);
 
     OpenSoT::solvers::QPOases_sot solver(autoStack->getStack(),
-                                         autoStack->getBounds(), 1e5);
+                                         autoStack->getBounds(), 5e10);
 
     robot.setPositionDirectMode();
     yarp::sig::Vector dq;
