@@ -41,12 +41,12 @@ using namespace yarp::math;
    we won't save (though we will compute) the variance of the Cartesian error - it will be a measure of vibration
    and it will be used as an indicator of the success for the constraint
    */
-#define TEST_SCA_CT1_ERRORS_FILE   "testQPOases_SCA_CT1_Errors.eps"
-#define TEST_SCA_CT1_DISTANCES_FILE   "testQPOases_SCA_CT1_Distances.eps"
-#define TEST_SCA_BST_ERRORS_FILE     "testQPOases_SCA_BST_Errors.eps"
-#define TEST_SCA_BST_DISTANCES_FILE     "testQPOases_SCA_BST_Distances.eps"
-#define TEST_SCA_DS_ERRORS_FILE "testQPOases_SCA_DS_Errors.eps"
-#define TEST_SCA_DS_DISTANCES_FILE "testQPOases_SCA_DS_Distances.eps"
+#define TEST_SCA_CT1_ERRORS_FILE    "testQPOases_SCA_CT1_Errors.eps"
+#define TEST_SCA_CT1_DISTANCES_FILE "testQPOases_SCA_CT1_Distances.eps"
+#define TEST_SCA_BST_ERRORS_FILE    "testQPOases_SCA_BST_Errors.eps"
+#define TEST_SCA_BST_DISTANCES_FILE "testQPOases_SCA_BST_Distances.eps"
+#define TEST_SCA_DS_ERRORS_FILE     "testQPOases_SCA_DS_Errors.eps"
+#define TEST_SCA_DS_DISTANCES_FILE  "testQPOases_SCA_DS_Distances.eps"
 #define dT 25e-3
 
 namespace {
@@ -232,9 +232,9 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
     WalkmanUtils robot("testSCA");
 #endif
 
-    iDynUtils model("walkman",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"walkman/walkman.urdf",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"walkman/walkman.srdf");
+    iDynUtils model("bigman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
 
     yarp::sig::Vector q = getGoodInitialPosition(model);
     yarp::sig::Vector qns = q;
@@ -394,20 +394,24 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 #else
         _log << "(" << yarp::os::SystemClock::nowSystem() - t_test << ","
 #endif
-            << (DHS.leftArm->getA()*dq)[0] << ","
+            << (DHS.leftArm->getA()*dq)[0] << ","               // 0
             << (DHS.leftArm->getA()*dq)[1] << ","
             << (DHS.leftArm->getA()*dq)[2] << ","
-            << (DHSns.leftArm->getA()*dqnva)[0] << ","
+            << (DHSns.leftArm->getA()*dqnva)[0] << ","          // 3
             << (DHSns.leftArm->getA()*dqnva)[1] << ","
             << (DHSns.leftArm->getA()*dqnva)[2] << ","
-            << dq[model.torso.joint_numbers[0]]  << ","
+            << dq[model.torso.joint_numbers[0]]  << ","         // 6
             << dq[model.torso.joint_numbers[1]]  << ","
             << dq[model.torso.joint_numbers[2]]  << ","
-            << dqnva[model.torso.joint_numbers[0]]  << ","
+            << dqnva[model.torso.joint_numbers[0]]  << ","      // 9
             << dqnva[model.torso.joint_numbers[1]]  << ","
             << dqnva[model.torso.joint_numbers[2]]  << ","
-            << e << "," << enva << "," << epost << "," << epostnva << ","
-            << t_loop << "," << t_loopnva << ")," << std::endl;
+            << e << ","                                         // 12
+            << enva << ","
+            << epost << ","
+            << epostnva << ","                                  // 15
+            << t_loop << ","
+            << t_loopnva << ")," << std::endl;                  // 17
 
         if(e < 1.5e-3 && enva < 1.5e-3 && !converged_event)
         {
