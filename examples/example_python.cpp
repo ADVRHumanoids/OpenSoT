@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
     yarp::os::Time::delay(1.0);
     yarp::sig::Vector q = robot.sensePosition();
+    yarp::sig::Vector dq = q*0.0;
 
     RobotUtils::ftPtrMap ft_sensors = robot.getftSensors();
     std::vector<iDynUtils::ft_measure> _ft_measurements;
@@ -71,7 +72,7 @@ int main(int argc, char **argv) {
 
     yarp::sig::Vector tauLims = DHS.torqueLimits->getTorqueLimits();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
-        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.3;
+        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.1;
     DHS.torqueLimits->setTorqueLimits(tauLims);
 
     std::list<std::pair<std::string,std::string> > whiteList;
@@ -166,7 +167,6 @@ int main(int argc, char **argv) {
                                          autoStack->getBounds(), 5e10);
 
     robot.setPositionDirectMode();
-    yarp::sig::Vector dq;
     double tic, toc;
     int print_mean = 0;
     while(true) {
