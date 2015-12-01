@@ -282,7 +282,7 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
     desired_pose_y(1,3) = actual_pose_y(1,3) + 0.1;
     desired_pose_y(2,3) = actual_pose_y(2,3) + 0.1;
     yarp::sig::Vector dq(q.size(), 0.0);
-    yarp::sig::Vector dqnva(q.size(), 0.0);
+    yarp::sig::Vector dqns(q.size(), 0.0);
     double e, enva, epost, epostnva, epost_max, epostnva_max;
 
     _log << "#! /usr/bin/env python" << std::endl
@@ -322,8 +322,6 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         model.updateiDyn3Model(q, true);
         stack->update(q);
 
-        //minimumVelocity(model, DHS, model.left_arm, q);
-
         e = norm(DHS.leftArm->getb());
         /*
         if(useMinimumVelocity) {
@@ -360,8 +358,6 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         model.updateiDyn3Model(qns, true);
         stackns->update(qns);
 
-        //minimumVelocity(model, DHSnva, model.left_arm, qnva);
-
         enva = norm(DHSns.leftArm->getb());
         /*
         if(useMinimumVelocity) {
@@ -374,8 +370,8 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
             epostnva_max = epostnva;
         */
 
-        EXPECT_TRUE(sotns->solve(dqnva));
-        qns+=dqnva;
+        EXPECT_TRUE(sotns->solve(dqns));
+        qns+=dqns;
 
 #ifdef TRY_ON_SIMULATOR
 #ifdef TRY_NVS
@@ -397,15 +393,15 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
             << (DHS.leftArm->getA()*dq)[0] << ","
             << (DHS.leftArm->getA()*dq)[1] << ","
             << (DHS.leftArm->getA()*dq)[2] << ","
-            << (DHSns.leftArm->getA()*dqnva)[0] << ","
-            << (DHSns.leftArm->getA()*dqnva)[1] << ","
-            << (DHSns.leftArm->getA()*dqnva)[2] << ","
+            << (DHSns.leftArm->getA()*dqns)[0] << ","
+            << (DHSns.leftArm->getA()*dqns)[1] << ","
+            << (DHSns.leftArm->getA()*dqns)[2] << ","
             << dq[model.torso.joint_numbers[0]]  << ","
             << dq[model.torso.joint_numbers[1]]  << ","
             << dq[model.torso.joint_numbers[2]]  << ","
-            << dqnva[model.torso.joint_numbers[0]]  << ","
-            << dqnva[model.torso.joint_numbers[1]]  << ","
-            << dqnva[model.torso.joint_numbers[2]]  << ","
+            << dqns[model.torso.joint_numbers[0]]  << ","
+            << dqns[model.torso.joint_numbers[1]]  << ","
+            << dqns[model.torso.joint_numbers[2]]  << ","
             << e << "," << enva << "," << epost << "," << epostnva << ","
             << t_loop << "," << t_loopnva << ")," << std::endl;
 
@@ -447,8 +443,7 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 
     _log << "));" << std::endl;
 
-    _log << "ct = figure(figsize=(8,6)); p = plot(test_data[:,0],test_data[:,(17, 18)]); title('Computation time with and without Velocity Allocation'); legend(p,('Solve time (VA)', 'Solve time (no VA)'));" << std::endl;
-    _log << "vae = figure(figsize=(10.27,7.68)); subplot(3,1,1); p = plot(test_data[:,0],test_data[:,(2,3,5,6)]); title('Hand Velocity');" << std::endl;
+    _log << "se = figure(figsize=(10.27,7.68)); subplot(3,2,1); p = plot(test_data[:,0],test_data[:,(2,3,5,6)]); title('Hand Velocity');" << std::endl;
     _log << "legend(p,('y dot (VA)', 'z dot (VA)', 'y dot (no VA)', 'z dot (no VA)'));" << std::endl;
     _log << "ylabel('Hand Velocity [m/s]'); xlabel('t [s]');" << std::endl;
     _log << "subplot(3,1,2); p = plot(test_data[:,0], np.transpose(np.vstack(((test_data[:,(7,8,9)]**2).sum(1),(test_data[:,(10,11,12)]**2).sum(1))))); title('Torso Joints Velocity');" << std::endl;
@@ -457,15 +452,38 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
     _log << "subplot(3,1,3); p = plot(test_data[:,0],test_data[:,(13,14,15,16)]); title('Tracking Error');" << std::endl;
     _log << "legend(p,('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)'));" << std::endl;
     _log << "ylabel('2-norm of task error'); xlabel('t [s]');" << std::endl;
+
+    _log << "et = figure(figsize=(8,6));" << std::endl;
+
+    _log << "subplot(2,2,1); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "title('Computation Time');" << std::endl;
+    _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
+    _log << "ylabel('Solve Time [s]'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(2,2,2); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "title('CoM_XY Task Error');" << std::endl;
+    _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
+    _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(2,2,3); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "title('l_arm + r_arm Task Error');" << std::endl;
+    _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
+    _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(2,2,4); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "title('Postural Task Error');" << std::endl;
+    _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
+    _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl;
+
     if(strategy == STRATEGY_CARTESIAN_TUNING_1) {
-        _log << "ct.savefig('" << TEST_SCA_CT1_DISTANCES_FILE << "', format='eps', transparent=True);" << std::endl;
-        _log << "vae.savefig('" << TEST_SCA_CT1_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
+        _log << "se.savefig('" << TEST_SCA_CT1_DISTANCES_FILE << "', format='eps', transparent=True);" << std::endl;
+        _log << "et.savefig('" << TEST_SCA_CT1_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
     } else if(strategy == STRATEGY_BOUNDSCALING_TUNING) {
-        _log << "ct.savefig('" << TEST_SCA_BST_DISTANCES_FILE << "', format='eps', transparent=True);" << std::endl;
-        _log << "vae.savefig('" << TEST_SCA_BST_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
+        _log << "se.savefig('" << TEST_SCA_BST_DISTANCES_FILE << "', format='eps', transparent=True);" << std::endl;
+        _log << "et.savefig('" << TEST_SCA_BST_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
     } else if(strategy == STRATEGY_DISTANCE_SMOOTHING) {
-        _log << "ct.savefig('" << TEST_SCA_BST_DISTANCES_FILE << "', format='eps', transparent=True);" << std::endl;
-        _log << "vae.savefig('" << TEST_SCA_BST_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
+        _log << "se.savefig('" << TEST_SCA_BST_DISTANCES_FILE << "', format='eps', transparent=True);" << std::endl;
+        _log << "et.savefig('" << TEST_SCA_BST_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
     } else {
         std::cerr << "Unhandlex exception at line " << __LINE__ << std::endl;
         exit(1);
