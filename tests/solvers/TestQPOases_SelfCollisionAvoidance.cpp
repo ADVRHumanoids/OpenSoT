@@ -27,11 +27,11 @@ using namespace yarp::math;
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
-#define TEST_SCA_FILE            "testQPOases_SCA.py"
+#define TEST_SCA_FILE               "testQPOases_SCA.py"
 /* WE WILL TRY SCA PERFORMANCE WHILE TUNING CARTESIAN TASK PARAMETERS, BOUND SCALING, SMOOTHING */
-#define TEST_SCA_CT1_FILE   "testQPOases_SCA_CartesianTuning1.py"
-#define TEST_SCA_BST_FILE     "testQPOases_SCA_BoundScalingTuning.py"
-#define TEST_SCA_DS_FILE     "testQPOases_SCA_DistanceSmoothingTuning.py"
+#define TEST_SCA_CT1_FILE           "testQPOases_SCA_CartesianTuning1.py"
+#define TEST_SCA_BST_FILE           "testQPOases_SCA_BoundScalingTuning.py"
+#define TEST_SCA_DS_FILE            "testQPOases_SCA_DistanceSmoothingTuning.py"
 /* for each teas, we want to save:
    Cartesian error (x,y,z,theta,phy,psi)
    2-norm of task error ofr each task in the stack
@@ -283,22 +283,24 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
     desired_pose_y(2,3) = actual_pose_y(2,3) + 0.1;
     yarp::sig::Vector dq(q.size(), 0.0);
     yarp::sig::Vector dqns(q.size(), 0.0);
-    double e, enva, epost, epostnva, epost_max, epostnva_max;
+    double e_com, e_com_ns, e_arms, e_arms_ns, e_post, e_post_ns;
 
     _log << "#! /usr/bin/env python" << std::endl
          << std::endl
          << "import numpy as np" << std::endl
          << "import matplotlib" << std::endl
          << "from matplotlib.pyplot import *" << std::endl;
-    _log << "#t, xdot, ydot, zdot, xdotnva, ydotnva, zdotnva,"  // 1-7
-         << " q0dot_torso, q1dot_torso, q2dot_torso,"           // 8-10
-         << " q0dotnva_torso, q1dotnva_torso, q2dotnva_torso,"  // 11-13
-         << " e, e_nva, epost, epost_nva,"                      // 14-17
-         << " t_loop, t_loop_nva" << std::endl;                 // 18-19
+    _log << "#t, x, y, z, r, p, y,"                 // 0-6
+         << " xns, yns, zns, rns, pns, yns,"        // 7-12
+         << " xref, yref, zref, rref, pref, yref,"  // 13-18
+         << " e_com, e_com_ns,"                     // 19-20
+         << " e_arms, e_arms_ns,"                   // 21-22
+         << " e_post, e_post_ns,"                   // 23-24
+         << " t_loop, t_loop_nva" << std::endl;     // 25-26
     _log << "test_data = np.array((";
 
     double t_loop = 0.0;
-    double t_loopnva = 0.0;
+    double t_loopns = 0.0;
     bool settled = false;
     double settling_counter = 1.0;
     bool converged_event = false;
@@ -322,7 +324,9 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         model.updateiDyn3Model(q, true);
         stack->update(q);
 
-        e = norm(DHS.leftArm->getb());
+        e_com = yarp::math::norm(stack->getStack()[1]->getb());
+        e_arms = yarp::math::norm(stack->getStack()[2]->getb());
+        e_post = yarp::math::norm(stack->getStack()[3]->getb());
         /*
         if(useMinimumVelocity) {
             ASSERT_EQ(dq.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
@@ -358,7 +362,9 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         model.updateiDyn3Model(qns, true);
         stackns->update(qns);
 
-        enva = norm(DHSns.leftArm->getb());
+        e_com_ns = yarp::math::norm(stackns->getStack()[1]->getb());
+        e_arms_ns = yarp::math::norm(stackns->getStack()[2]->getb());
+        e_post_ns = yarp::math::norm(stackns->getStack()[3]->getb());
         /*
         if(useMinimumVelocity) {
             ASSERT_EQ(qns.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
@@ -375,41 +381,57 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 
 #ifdef TRY_ON_SIMULATOR
 #ifdef TRY_NVS
-        robot.move(qnva);
+        robot.move(qns);
         yarp::os::Time::delay(0.005);
 #endif
 
         t_loopnva = yarp::os::Time::now() - t_begin;
 #else
-        t_loopnva = yarp::os::SystemClock::nowSystem() - t_begin;
+        t_loopns = yarp::os::SystemClock::nowSystem() - t_begin;
 #endif
 
+
+        double r, p, y,         r_ns, p_ns, y_ns,                      r_ref, p_ref, y_ref;
+        yarp::sig::Matrix F =     DHS.leftArm->getActualPose();
+        yarp::sig::Matrix F_ns =  DHSns.leftArm->getActualPose();
+        yarp::sig::Matrix F_ref = DHS.leftArm->getReference();
+        KDL::Frame F_kdl,        F_ns_kdl,                             F_ref_kdl;
+        YarptoKDL(F, F_kdl);     YarptoKDL(F_ns, F_ns_kdl);            YarptoKDL(F_ref, F_ref_kdl);
+        F_kdl.M.GetRPY(r, p, y); F_ns_kdl.M.GetRPY(r_ns, p_ns, y_ns);  F_ref_kdl.M.GetRPY(r_ref, p_ref, y_ref);
 
 #ifdef TRY_ON_SIMULATOR
         _log << "(" << yarp::os::Time::now() - t_test << ","
 #else
         _log << "(" << yarp::os::SystemClock::nowSystem() - t_test << ","
 #endif
-            << (DHS.leftArm->getA()*dq)[0] << ","               // 0
-            << (DHS.leftArm->getA()*dq)[1] << ","
-            << (DHS.leftArm->getA()*dq)[2] << ","
-            << (DHSns.leftArm->getA()*dqnva)[0] << ","          // 3
-            << (DHSns.leftArm->getA()*dqnva)[1] << ","
-            << (DHSns.leftArm->getA()*dqnva)[2] << ","
-            << dq[model.torso.joint_numbers[0]]  << ","         // 6
-            << dq[model.torso.joint_numbers[1]]  << ","
-            << dq[model.torso.joint_numbers[2]]  << ","
-            << dqnva[model.torso.joint_numbers[0]]  << ","      // 9
-            << dqnva[model.torso.joint_numbers[1]]  << ","
-            << dqnva[model.torso.joint_numbers[2]]  << ","
-            << e << ","                                         // 12
-            << enva << ","
-            << epost << ","
-            << epostnva << ","                                  // 15
-            << t_loop << ","
-            << t_loopnva << ")," << std::endl;                  // 17
+            << (DHS.leftArm->getActualPose())(0,3) << ","       // 1
+            << (DHS.leftArm->getActualPose())(1,3) << ","
+            << (DHS.leftArm->getActualPose())(2,3) << ","
+            << (DHSns.leftArm->getActualPose())(0,3) << ","     // 4
+            << (DHSns.leftArm->getActualPose())(1,3) << ","
+            << (DHSns.leftArm->getActualPose())(2,3) << ","
+            << (DHS.leftArm->getReference())(0,3) << ","        // 7
+            << (DHS.leftArm->getReference())(1,3) << ","
+            << (DHS.leftArm->getReference())(2,3) << ","
+            << r  << ","                                        // 10
+            << p  << ","
+            << y  << ","
+            << r_ns  << ","                                     // 13
+            << p_ns  << ","
+            << y_ns  << ","
+            << r_ref  << ","                                    // 16
+            << p_ref  << ","
+            << y_ref  << ","
+            << e_com << ","                                     // 19
+            << e_com_ns << ","
+            << e_arms << ","                                    // 21
+            << e_arms_ns << ","
+            << e_post << ","                                    // 23
+            << e_post_ns << ","
+            << t_loop << ","                                    // 25
+            << t_loopns << ")," << std::endl;                   // 26
 
-        if(e < 1.5e-3 && enva < 1.5e-3 && !converged_event)
+        if(e_com < 1.5e-3 && e_com_ns < 1.5e-3 && !converged_event)
         {
             converged_event = true;
             std::cout << "settling";
@@ -430,51 +452,54 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
             std::cout.flush();
         }
 
-    } while(e > 1.5e-3 || enva > 1.5e-3 || !settled);
-
-    EXPECT_GT(epostnva_max, epost_max)
-        << "With velocity allocation, we expect that "
-        << "the maximum postural error for a certain task "
-        << "will be lower than without velocity allocation.\n"
-        << "In fact, having a scaled velocity for the primary "
-        << "task means we are willing to invest some resources "
-        << "to consistently reduce the error in the lower priority "
-        << "tasks, not just when the error of the primary task is "
-        << "low. Since the postural task is at a lower priority than "
-        << "the cartesian tasks in this test, we want to see the peak "
-        << "error for the postural to be higher without VA.";
-
+    } while(e_com > 1.5e-3 || e_com_ns > 1.5e-3 || !settled);
 
     _log << "));" << std::endl;
 
-    _log << "se = figure(figsize=(10.27,7.68)); subplot(3,2,1); p = plot(test_data[:,0],test_data[:,(2,3,5,6)]); title('Hand Velocity');" << std::endl;
-    _log << "legend(p,('y dot (VA)', 'z dot (VA)', 'y dot (no VA)', 'z dot (no VA)'));" << std::endl;
-    _log << "ylabel('Hand Velocity [m/s]'); xlabel('t [s]');" << std::endl;
-    _log << "subplot(3,1,2); p = plot(test_data[:,0], np.transpose(np.vstack(((test_data[:,(7,8,9)]**2).sum(1),(test_data[:,(10,11,12)]**2).sum(1))))); title('Torso Joints Velocity');" << std::endl;
-    _log << "ylabel('Torso Joint Velocity [rad/s]'); xlabel('t [s]');" << std::endl;
-    _log << "legend(p,('Norm of Joint Velocity (VA)', 'Norm of Joint Velocity (no VA)'));" << std::endl;
-    _log << "subplot(3,1,3); p = plot(test_data[:,0],test_data[:,(13,14,15,16)]); title('Tracking Error');" << std::endl;
-    _log << "legend(p,('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)'));" << std::endl;
-    _log << "ylabel('2-norm of task error'); xlabel('t [s]');" << std::endl;
+    _log << "se = figure(figsize=(10.27,7.68));" << std::endl;
+
+    _log << "subplot(3,2,1); p = plot(test_data[:,0], test_data[:,(1,4,7)]); title('l_arm x');" << std::endl;
+    _log << "legend(p,('smoothing', 'no smoothing)', 'reference'));" << std::endl;
+    _log << "ylabel('hand position [m]'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(3,2,2); p = plot(test_data[:,0], test_data[:,(2,5,8)]); title('l_arm y');" << std::endl;
+    _log << "legend(p,('smoothing', 'no smoothing)', 'reference'));" << std::endl;
+    _log << "ylabel('hand position [m]'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(3,2,3); p = plot(test_data[:,0], test_data[:,(3,6,9)]); title('l_arm z');" << std::endl;
+    _log << "legend(p,('smoothing', 'no smoothing)', 'reference'));" << std::endl;
+    _log << "ylabel('hand position [m]'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(3,2,4); p = plot(test_data[:,0], test_data[:,(10,13,16)]); title('l_arm r');" << std::endl;
+    _log << "legend(p,('smoothing', 'no smoothing)', 'reference'));" << std::endl;
+    _log << "ylabel('hand orientation [rad]'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(3,2,5); p = plot(test_data[:,0], test_data[:,(11,14,17)]); title('l_arm p');" << std::endl;
+    _log << "legend(p,('smoothing', 'no smoothing)', 'reference'));" << std::endl;
+    _log << "ylabel('hand orientation [rad]'); xlabel('t [s]');" << std::endl;
+
+    _log << "subplot(3,2,6); p = plot(test_data[:,0], test_data[:,(12,15,18)]); title('l_arm y');" << std::endl;
+    _log << "legend(p,('smoothing', 'no smoothing)', 'reference'));" << std::endl;
+    _log << "ylabel('hand orientation [rad]'); xlabel('t [s]');" << std::endl;
 
     _log << "et = figure(figsize=(8,6));" << std::endl;
 
-    _log << "subplot(2,2,1); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "subplot(2,2,1); p = plot(test_data[:,0],test_data[:,(25, 26)]);" << std::endl;
     _log << "title('Computation Time');" << std::endl;
     _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
     _log << "ylabel('Solve Time [s]'); xlabel('t [s]');" << std::endl;
 
-    _log << "subplot(2,2,2); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "subplot(2,2,2); p = plot(test_data[:,0],test_data[:,(19, 20)]);" << std::endl;
     _log << "title('CoM_XY Task Error');" << std::endl;
     _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
     _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl;
 
-    _log << "subplot(2,2,3); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "subplot(2,2,3); p = plot(test_data[:,0],test_data[:,(21, 22)]);" << std::endl;
     _log << "title('l_arm + r_arm Task Error');" << std::endl;
     _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
     _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl;
 
-    _log << "subplot(2,2,4); p = plot(test_data[:,0],test_data[:,(17, 18)]);" << std::endl;
+    _log << "subplot(2,2,4); p = plot(test_data[:,0],test_data[:,(23, 24)]);" << std::endl;
     _log << "title('Postural Task Error');" << std::endl;
     _log << "legend(p,('Smoothing', 'no Smoothing'));" << std::endl;
     _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl;
@@ -489,7 +514,7 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         _log << "se.savefig('" << TEST_SCA_BST_DISTANCES_FILE << "', format='eps', transparent=True);" << std::endl;
         _log << "et.savefig('" << TEST_SCA_BST_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;
     } else {
-        std::cerr << "Unhandlex exception at line " << __LINE__ << std::endl;
+        std::cerr << "Unhandled exception at line " << __LINE__ << std::endl;
         exit(1);
     }
     _log << "show(block=True)" << std::endl;
