@@ -11,6 +11,17 @@ endif(COMMAND cmake_policy)
 include(ExternalProject)
 PROJECT(open_sot)
 
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
+check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type -Werror=address -Werror=parentheses " )
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -80,6 +91,8 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
                     src/constraints/velocity/SelfCollisionAvoidance.cpp
+                    src/constraints/velocity/Dynamics.cpp
+                    src/constraints/force/FrictionCone.cpp
                     src/interfaces/yarp/tasks/YCartesian.cpp
                     src/interfaces/yarp/tasks/YCoM.cpp
                     src/interfaces/yarp/tasks/YPostural.cpp
@@ -91,10 +104,11 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/CoM.cpp
                     src/tasks/velocity/Interaction.cpp
                     src/tasks/velocity/Manipulability.cpp
+                    src/tasks/velocity/MinimizeAcceleration.cpp
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
-                    src/tasks/velocity/MinimizeAcceleration.cpp
+                    src/tasks/force/CoM.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/PreviewerUtils.cpp

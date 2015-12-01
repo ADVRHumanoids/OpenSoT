@@ -11,11 +11,14 @@
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/tasks/velocity/all.h>
 #include <fstream>
+#include <idynutils/RobotUtils.h>
 
 using namespace yarp::math;
 using namespace OpenSoT::tasks::velocity;
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::sig;
+
+#define VISUALIZE_SIMULATION true
 
 namespace {
 
@@ -55,6 +58,26 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     arm[3] = -80.0 * M_PI/180.0;
     idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
     arm[1] = -arm[1];
+    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    return q;
+}
+
+yarp::sig::Vector getGoodInitialPosition2(iDynUtils& idynutils) {
+    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
+    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = 0.0 * M_PI/180.0;
+    arm[1] = 0.0 * M_PI/180.0;
+    arm[3] = -90.0 * M_PI/180.0;
+    arm[6] = 1.3;
+    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
+    arm[1] = -arm[1];
+    arm[6] = -arm[6];
     idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
     return q;
 }
@@ -287,6 +310,208 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
     EXPECT_NEAR(interactionTask->getActualWrench()[4], base_WallWrenchDesired[4], 2E-1);
     EXPECT_NEAR(interactionTask->getActualWrench()[5], base_WallWrenchDesired[5], 2E-1);
 
+}
+
+using namespace OpenSoT;
+
+TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
+    // Start YARP Server
+    tests_utils::startYarpServer();
+    // Load a world
+    std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman_brick_wall.world";
+    if(VISUALIZE_SIMULATION)
+        tests_utils::startGazebo(world_path);
+    else
+        tests_utils::startGZServer(world_path);
+    sleep(4);
+
+    //To control the robot we need RobotUtils
+    RobotUtils coman_robot("testConstraint",
+                     "coman",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+
+    yarp::sig::Vector q = getGoodInitialPosition2(coman_robot.idynutils);
+
+    //Homing
+    coman_robot.setPositionMode();
+    double speed = 0.8;
+    yarp::sig::Vector legs_speed(6,speed);
+    legs_speed[3] = 2.0*legs_speed[3];
+    coman_robot.left_leg.setReferenceSpeeds(legs_speed);
+    coman_robot.right_leg.setReferenceSpeeds(legs_speed);
+    coman_robot.left_arm.setReferenceSpeed(speed);
+    coman_robot.right_arm.setReferenceSpeed(speed);
+    coman_robot.torso.setReferenceSpeed(speed);
+    coman_robot.move(q);
+
+    //Set Up SoT
+    sleep(10);
+    coman_robot.setPositionDirectMode();
+    sleep(2);
+
+    std::vector<iDynUtils::ft_measure> _ft_measurements;
+    RobotUtils::ftPtrMap ft_sensors = coman_robot.getftSensors();
+    for(RobotUtils::ftPtrMap::iterator it = ft_sensors.begin();
+        it != ft_sensors.end(); it++)
+    {
+        iDynUtils::ft_measure ft_measurement;
+        ft_measurement.first = it->second->getReferenceFrame();
+        yarp::sig::Vector dummy_measure(6 ,0.0);
+        ft_measurement.second = dummy_measure;
+
+        _ft_measurements.push_back(ft_measurement);
+    }
+    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+    coman_robot.idynutils.setFloatingBaseLink(coman_robot.idynutils.left_leg.end_effector_name);
+
+
+
+//    yarp::sig::Vector wrench_d_l_wrist(6,0.0);
+//    wrench_d_l_wrist[0] = 20.0; wrench_d_l_wrist[1] = -2.0; wrench_d_l_wrist[2] = 10.0;
+//    wrench_d_l_wrist[3] = 2.0; wrench_d_l_wrist[4] = -2.0; wrench_d_l_wrist[5] = -2.0;
+
+    // BOUNDS
+    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
+            constraints::velocity::JointLimits::ConstraintPtr(
+                new constraints::velocity::JointLimits(
+                    q,
+                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
+                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
+
+    double dT = 0.005;
+    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
+            constraints::velocity::VelocityLimits::ConstraintPtr(
+                new constraints::velocity::VelocityLimits(0.3, dT,q.size()));
+
+    constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
+                new constraints::Aggregated(boundsJointLimits, boundsJointVelocity,
+                                            q.size()));
+
+    RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
+    std::vector<yarp::sig::Vector> filter_ft;
+    for(unsigned int i = 0; i < _ft_measurements.size(); ++i){
+        _ft_measurements[i].second = -1.0*ft_readings[_ft_measurements[i].first];
+        filter_ft.push_back(-1.0*ft_readings[_ft_measurements[i].first]);
+    }
+    coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+
+    yarp::sig::Matrix C(6,6); C = C.eye();
+    for(unsigned int i = 0; i < 3; ++i){
+        C(i,i) = 1E-5;
+        C(i+3,i+3) = 1E-4;
+    }
+
+
+    tasks::velocity::Interaction::Ptr interaction_rwrist_task(
+                new tasks::velocity::Interaction("interaction::r_wrist",
+                                q, coman_robot.idynutils, "r_wrist", "Waist", "r_arm_ft"));
+//    std::vector<bool> active_joint_mask = interaction_rwrist_task->getActiveJointsMask();
+//    for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
+//        active_joint_mask[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
+//    interaction_rwrist_task->setActiveJointsMask(active_joint_mask);
+//    yarp::sig::Matrix W = interaction_rwrist_task->getWeight();
+//    W(3,3) = 0.1; W(4,4) = 0.1; W(5,5) = 0.1;
+//    interaction_rwrist_task->setWeight(W);
+    interaction_rwrist_task->setCompliance(C);
+    yarp::sig::Vector wrench_d_r_wrist(6,0.0);
+    wrench_d_r_wrist[0] = 25.0; wrench_d_r_wrist[1] = 0.0; wrench_d_r_wrist[2] = 10.0;
+    wrench_d_r_wrist[3] = 0.0; wrench_d_r_wrist[4] = 0.0; wrench_d_r_wrist[5] = 0.0;
+    interaction_rwrist_task->setReferenceWrench(wrench_d_r_wrist);
+    interaction_rwrist_task->update(q);
+
+//    tasks::velocity::Interaction::Ptr interaction_lwrist_task(
+//                new tasks::velocity::Interaction("interaction::l_wrist",
+//                                q, coman_robot.idynutils, "l_wrist", "Waist", "l_wrist"));
+//    interaction_lwrist_task->setCompliance(C);
+//    interaction_lwrist_task->setReferenceWrench(wrench_d_l_wrist);
+//    interaction_lwrist_task->update(q);
+
+
+    std::list<tasks::velocity::Cartesian::TaskPtr> aggregated_list;
+    aggregated_list.push_back(interaction_rwrist_task);
+    //aggregated_list.push_back(interaction_lwrist_task);
+    Task<Matrix, Vector>::TaskPtr taskAggregatedHighest =
+            tasks::Aggregated::TaskPtr(
+       new tasks::Aggregated(aggregated_list,q.size()));
+
+    tasks::velocity::Postural::Ptr postural_task=
+            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
+
+    solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(taskAggregatedHighest);
+    stack_of_tasks.push_back(postural_task);
+
+    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
+    sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, 1E10));
+
+    yarp::sig::Vector dq(q.size(), 0.0);
+    int steps = 3000;
+    std::vector<yarp::sig::Vector> wrench_measured;
+    std::vector<yarp::sig::Vector> wrench_desired;
+    wrench_measured.reserve(steps);
+    wrench_desired.reserve(steps);
+
+    for(unsigned int i = 0; i < steps; ++i)
+    {
+        double tic = yarp::os::Time::now();
+
+
+
+        ft_readings = coman_robot.senseftSensors();
+        for(unsigned int i = 0; i < _ft_measurements.size(); ++i){
+            //filter_ft[i] = -1.0*ft_readings[_ft_measurements[i].first];
+            filter_ft[i] += (-1.0*ft_readings[_ft_measurements[i].first]-filter_ft[i])*0.25;
+            _ft_measurements[i].second = filter_ft[i];}
+        coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+
+        bounds->update(q);
+        taskAggregatedHighest->update(q);
+        postural_task->update(q);
+
+
+//        wrench_desired.push_back(yarp::math::cat(interaction_lwrist_task->getReferenceWrench(),
+//                                                 interaction_rwrist_task->getReferenceWrench()));
+//        wrench_measured.push_back(yarp::math::cat(
+//            interaction_lwrist_task->getActualWrench(), interaction_rwrist_task->getActualWrench()));
+        wrench_desired.push_back(interaction_rwrist_task->getReferenceWrench());
+        wrench_measured.push_back(interaction_rwrist_task->getActualWrench());
+
+
+        if(sot->solve(dq)){
+            q += dq;}
+        coman_robot.move(q);
+
+
+
+        double toc = yarp::os::Time::now();
+
+        if((toc-tic) < dT)
+            yarp::os::Time::delay(dT - (toc-tic));
+        else
+            std::cout<<"we are too slow!"<<std::endl;
+    }
+    std::ofstream file2;
+    std::string file_name2 = "testCoMForce_wrenchMeasured4.m";
+    file2.open(file_name2);
+    file2<<"wrench_measured_lankle_rankle = ["<<std::endl;
+    for(unsigned int i = 0; i < wrench_measured.size(); ++i)
+        file2<<wrench_measured[i].toString()<<std::endl;
+    file2<<"];"<<std::endl;
+    file2.close();
+
+    std::ofstream file5;
+    std::string file_name5 = "testCoMForce_wrenchDesired4.m";
+    file5.open(file_name5);
+    file5<<"wrench_desired_lankle_rankle = ["<<std::endl;
+    for(unsigned int i = 0; i < wrench_desired.size(); ++i)
+        file5<<wrench_desired[i].toString()<<std::endl;
+    file5<<"];"<<std::endl;
+    file5.close();
+
+    tests_utils::stopGazebo();
+    sleep(10);
+    tests_utils::stopYarpServer();
 }
 
 }

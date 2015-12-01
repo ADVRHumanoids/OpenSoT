@@ -114,6 +114,8 @@
                  */
                 void setCompliance(const yarp::sig::Matrix& C);
 
+                yarp::sig::Vector getWrenchError();
+
                 };
         }
     }

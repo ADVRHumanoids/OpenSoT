@@ -4,6 +4,27 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
+#TESTS THAT USES GAZEBO
+set(OPENSOT_COMPILE_SIMULATION_TESTS OFF CACHE BOOL "Flag to compile tests that uses Gazebo")
+
+if (OPENSOT_COMPILE_SIMULATION_TESTS)
+    add_definitions( -DOPENSOT_COMPILE_SIMULATION_TESTS=true )
+    #Gazebo
+    find_package(Gazebo   REQUIRED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+    link_directories(${GAZEBO_LIBRARY_DIRS})
+    include_directories(${GAZEBO_INCLUDE_DIRS})
+
+    set(OPENSOT_SIMULATION_TESTS_VISUALIZATION OFF CACHE BOOL "Flag to show simulation tests")
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
+        add_definitions( -DOPENSOT_SIMULATION_TESTS_VISUALIZATION=true )
+    else()
+        add_definitions( -DOPENSOT_SIMULATION_TESTS_VISUALIZATION=false )
+    endif()
+else()
+    add_definitions( -DOPENSOT_COMPILE_SIMULATION_TESTS=false )
+endif()
+
 option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
 
 # compite GTest
@@ -36,6 +57,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCollisionAvoidanceVelocityConstraint
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
+                      testDynamicsConstraint
                       testJointLimitsVelocityBounds
                       testVelocityLimitsVelocityBounds
                       testQPOasesSolver
@@ -51,8 +73,9 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_VelocityAllocation
                       testAggregatedTask
                       testCartesianVelocityTask
+                      #testCoMForceTask
                       testCoMVelocityTask
-                      testInteractionVelocityTask
+                      #testInteractionVelocityTask
                       TestManipulabilityTask
                       testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
@@ -97,6 +120,10 @@ add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
 ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
 TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
 add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
+TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
+add_dependencies(testDynamicsConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLimits.cpp)
 TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
@@ -157,6 +184,10 @@ add_dependencies(testAggregatedTask GTest-ext OpenSoT)
 ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
 TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
+TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
+add_dependencies(testCoMForceTask GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
 TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
@@ -230,6 +261,7 @@ add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesi
 add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
+add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
 add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
@@ -246,8 +278,9 @@ add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_Glob
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
+#add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
-add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
+#add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)

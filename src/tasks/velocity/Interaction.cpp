@@ -58,6 +58,10 @@ void Interaction::updateActualWrench()
                 _robot.iDyn3_model.getLinkIndex(_base_link),
                 _robot.iDyn3_model.getLinkIndex(_ft_frame));
 
+//    std::cout<<"base_link is "<<_base_link<<std::endl;
+//    std::cout<<"ft_frame_in_base_link:"<<std::endl;
+//    cartesian_utils::printHomogeneousTransform(ft_frame_in_base_link);std::cout<<std::endl;
+
     KDL::Frame ft_frame_in_base_link_KDL;
     cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
 
@@ -76,11 +80,16 @@ void Interaction::updateActualWrench()
     cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _actualWrench);
 }
 
+yarp::sig::Vector Interaction::getWrenchError()
+{
+    return _desiredWrench - _actualWrench;
+}
+
 void Interaction::_update(const yarp::sig::Vector &x)
 {
     updateActualWrench();
 
-    yarp::sig::Vector wrench_error = _desiredWrench - _actualWrench;
+    yarp::sig::Vector wrench_error = getWrenchError();
     forceError = wrench_error.subVector(0, 2);
     torqueError = wrench_error.subVector(3, 5);
     yarp::sig::Vector delta_x = _C * wrench_error;
