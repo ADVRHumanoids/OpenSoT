@@ -85,7 +85,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testYCartesian
                       testYPostural
                       testMinimizeAccelerationTask
-                      #testInteractionVelocityTask
+                      testInteractionVelocityTask
                       TestManipulabilityTask
                       #testCoMForceTask
 )
@@ -276,7 +276,7 @@ add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_Glob
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
-#add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
+add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 #add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
