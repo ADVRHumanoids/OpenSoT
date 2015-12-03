@@ -230,6 +230,12 @@ void OpenSoT::SubTask::generateb()
             this->_b = cat(this->_b, _taskPtr->getb().subVector(i->front(),
                                                                 i->back()));
     }
+
+    if(this->_b.size() > 0)
+    {
+        using namespace yarp::math;
+        this->_b = this->_b * this->_lambda;
+    }
 }
 
 void OpenSoT::SubTask::generateWeight()

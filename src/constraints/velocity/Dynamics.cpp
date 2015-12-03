@@ -41,6 +41,24 @@ Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
     update(yarp::math::cat(q, q_dot));
 }
 
+yarp::sig::Vector Dynamics::Dynamics::getTorqueLimits()
+{
+    return _jointTorquesMax / _dT;
+}
+
+void Dynamics::Dynamics::setTorqueLimits(const yarp::sig::Vector torqueLimits)
+{
+    _jointTorquesMax = torqueLimits;
+    _jointTorquesMin = -1.0*torqueLimits;
+
+    /**
+     * Since the constraint is specified in velocity we approximate the acceleration
+     * to the first order, for these reason the jointTorquesMin/Max has to be multiplied by dT
+    **/
+    _jointTorquesMax = _dT*_jointTorquesMax;
+    _jointTorquesMin = _dT*_jointTorquesMin;
+}
+
 void Dynamics::crawlLinks(const std::vector<std::string>& ft_links_list,
                 const std::vector<std::string>& contact_link_list, iDynUtils &robot,
                 std::vector<std::string>& ft_in_contact_list)
@@ -175,7 +193,7 @@ void Dynamics::updateActualWrench()
 
 void Dynamics::update(const yarp::sig::Vector &x)
 {
-    assert(x.size() == 2*_x_size);
+    assert(x.size() == 2*_x_size || x.size() == _x_size);
 
     /**
      * Here I suppose that q and dq have been set in the iDynTree Model,
@@ -201,7 +219,10 @@ void Dynamics::update(const yarp::sig::Vector &x)
     _M.resize(6+_x_size, 6+_x_size);
     _robot_model.iDyn3_model.getFloatingBaseMassMatrix(_M);
     _M = _M.removeCols(0,6); _M = _M.removeRows(0,6);
-    _b = _b + _M*x.subVector(_x_size, (2*_x_size)-1);
+    if(x.size() == 2*_x_size)
+        _b = _b + _M*x.subVector(_x_size, (2*_x_size)-1);
+    else
+        _b = _b + _M*_robot_model.iDyn3_model.getDAng();
 
     /**
       * Here we compute the torque due to contacts (if present):

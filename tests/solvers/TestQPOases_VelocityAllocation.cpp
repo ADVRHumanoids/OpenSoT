@@ -381,6 +381,7 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
     _log << "legend(p,('Norm of Joint Velocity (VA)', 'Norm of Joint Velocity (no VA)'));" << std::endl;
     _log << "subplot(3,1,3); p = plot(test_data[:,0],test_data[:,(13,14,15,16)]); title('Tracking Error');" << std::endl;
     _log << "legend(p,('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)'));" << std::endl;
+    _log << "ylabel('2-norm of task error'); xlabel('t [s]');" << std::endl;
     if(useMinimumVelocity) {
         _log << "ct.savefig('" << TEST_VA_MINVEL_TIME_FILE << "', format='eps', transparent=True);" << std::endl;
         _log << "vae.savefig('" << TEST_VA_MINVEL_ERRORS_FILE << "',format='eps',transparent=True);" << std::endl;

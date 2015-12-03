@@ -264,7 +264,7 @@ TEST_F(TestSubTask, testgetb)
 
     SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
     ASSERT_EQ(subTask->getb().size(), 3);
-    yarp::sig::Vector b(3);
+    yarp::sig::Vector b(3), bLambda(3);
     b = _postural->getb().subVector(0,2);
     EXPECT_TRUE(tests_utils::vectorAreEqual(subTask->getb(),b));
 
@@ -275,6 +275,13 @@ TEST_F(TestSubTask, testgetb)
     b = _postural->getb().subVector(0,2);
     b = yarp::math::cat(b, _postural->getb().subVector(5,6));
     EXPECT_TRUE(tests_utils::vectorAreEqual(subTask->getb(),b));
+
+    b = subTask->getb();
+    subTask->setLambda(0.1);
+    subTask->update(_postural->getActualPositions());
+    bLambda = subTask->getb();
+
+    EXPECT_TRUE(tests_utils::vectorAreEqual(bLambda, b*0.1));
 }
 
 TEST_F(TestSubTask, testgetWeight)
