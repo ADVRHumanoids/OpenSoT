@@ -134,7 +134,7 @@ void Dynamics::updateActualWrench()
             KDL::Frame ft_frame_in_base_link_KDL;
             cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
 
-            KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL * wrench_in_sensor_frame_KDL; //Adjoint matrix is automatically computed by KDL!
+            KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL.M * wrench_in_sensor_frame_KDL;
             cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _tmp_wrench_in_base_link_frame);
 
             /**
