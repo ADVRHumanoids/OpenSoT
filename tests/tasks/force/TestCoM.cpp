@@ -17,8 +17,6 @@
 #include <ros/ros.h>
 
 
-#define VISUALIZE_SIMULATION true
-
 using namespace yarp::math;
 
 namespace{
@@ -126,6 +124,8 @@ TEST_F(testForceCoM, testForceCoM1) {
 
 }
 
+#if OPENSOT_COMPILE_SIMULATION_TESTS
+
 using namespace yarp::sig;
 using namespace OpenSoT;
 
@@ -144,7 +144,7 @@ TEST_F(testForceCoM, testForceCoM2) {
     // Load a world
     //std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.world";
     std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/block.world";
-    if(VISUALIZE_SIMULATION)
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
         tests_utils::startGazebo(world_path);
     else
         tests_utils::startGZServer(world_path);
@@ -553,7 +553,7 @@ TEST_F(testForceCoM, testForceCoM3) {
     tests_utils::startYarpServer();
     // Load a world
     std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.world";
-    if(VISUALIZE_SIMULATION)
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
         tests_utils::startGazebo(world_path);
     else
         tests_utils::startGZServer(world_path);
@@ -884,6 +884,7 @@ TEST_F(testForceCoM, testForceCoM3) {
     tests_utils::stopYarpServer();
 }
 
+#endif
 
 }
 

@@ -87,7 +87,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testMinimizeAccelerationTask
                       testInteractionVelocityTask
                       TestManipulabilityTask
-                      #testCoMForceTask
+                      testCoMForceTask
 )
 endif()
 
@@ -278,7 +278,7 @@ add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
-#add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
+add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
