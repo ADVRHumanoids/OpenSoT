@@ -77,8 +77,7 @@ void CoM::_update(const yarp::sig::Vector &x)
     // First I have to know which are the contacts
     std::vector<std::string> ft_in_contact;
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(_robot.getForceTorqueFrameNames(),
-               std::vector<std::string>{std::begin(_robot.getLinksInContact()),
-                                        std::end(_robot.getLinksInContact())},
+                                        _robot.getLinksInContact(),
                                         _robot,
                                         ft_in_contact);
     yarp::sig::Matrix O(3, 3*ft_in_contact.size()); O.zero();
