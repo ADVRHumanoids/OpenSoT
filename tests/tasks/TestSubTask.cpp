@@ -281,7 +281,7 @@ TEST_F(TestSubTask, testgetb)
     subTask->update(_postural->getActualPositions());
     bLambda = subTask->getb();
 
-    EXPECT_TRUE(tests_utils::vectorAreEqual(bLambda, b*0.1));"
+    EXPECT_TRUE(tests_utils::vectorAreEqual(bLambda, b*0.1));
 }
 
 TEST_F(TestSubTask, testgetWeight)
