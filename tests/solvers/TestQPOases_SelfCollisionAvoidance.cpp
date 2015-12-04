@@ -201,23 +201,34 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
 
 }
 
-yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
-    yarp::sig::Vector q(model.iDyn3_model.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(model.left_leg.getNrOfDOFs(), 0.0);
-    leg[0] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[5] = -25.0 * M_PI/180.0;
-    model.fromRobotToIDyn(leg, q, model.left_leg);
-    model.fromRobotToIDyn(leg, q, model.right_leg);
-    yarp::sig::Vector arm(model.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = -10.0 * M_PI/180.0;
-    arm[1] = 30.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    model.fromRobotToIDyn(arm, q, model.left_arm);
-    arm[1] = -arm[1];
-    model.fromRobotToIDyn(arm, q, model.right_arm);
+yarp::sig::Vector getStablePosition(iDynUtils& model) {
+    double q_vec[31] =                              {-0.052231, -0.001525, -0.507339,  0.994823, -0.500385,
+                                                      0.054478,  0.047959,  0.001114, -0.504303,  0.989594,
+                                                     -0.498290, -0.045896,  0.000282, -0.030130, -0.000038,
+                                                      0.304843,  0.323796, -0.335870, -1.594352,  0.290507,
+                                                     -0.138132, -0.544013, -0.000115,  0.001027,  0.284300,
+                                                     -0.248960, -0.007307, -1.156816, -0.006277, -0.024351,
+                                                      0.003562};
+    yarp::sig::Vector q(31, q_vec);
     return q;
 }
+
+yarp::sig::Vector getShakingPosition(iDynUtils& model, yarp::sig::Matrix& l_arm_ref) {
+    double q_vec[31] =                              {-0.015077,  0.007937, -0.518198,  1.413155, -0.791772,
+                                                      0.049212,  0.096468, -0.002291, -0.514733,  1.402080,
+                                                     -0.783909, -0.062951, -0.006270, -0.029317,  0.000176,
+                                                      0.212405,  0.228882, -0.321196, -0.730445,  0.160591,
+                                                     -0.580431, -1.130814,  0.007054, -0.014495,  0.451303,
+                                                     -0.282880,  0.132477, -1.586318, -0.086197,  0.351271,
+                                                     -0.010837};
+    yarp::sig::Vector q(31, q_vec);
+    yarp::sig::Vector old_q = model.iDyn3_model.getAng();
+    model.updateiDyn3Model(q, true);
+    l_arm_ref = model.iDyn3_model.getPosition(model.left_arm.end_effector_index);
+    model.updateiDyn3Model(q_old, true);
+    return q;
+}
+
 
 //#define TRY_ON_SIMULATOR
 // will try script on the simulator, without the prescribed smoothing technique
@@ -236,10 +247,15 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"walkman/walkman.urdf",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"walkman/walkman.srdf");
 
-    yarp::sig::Vector q = getGoodInitialPosition(model);
+    yarp::sig::Vector q = getStablePosition(model);
     yarp::sig::Vector qns = q;
+
     model.setFloatingBaseLink(model.left_leg.end_effector_name);
     model.updateiDyn3Model(q, true);
+
+    yarp::sig::Matrix l_arm_ref;
+    getShakingPosition(model, l_arm_ref);
+
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -277,13 +293,10 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 
 
     //SET SOME REFERENCES
-    yarp::sig::Matrix actual_pose_y = DHS.leftArm->getActualPose();
-    yarp::sig::Matrix desired_pose_y = actual_pose_y;
-    desired_pose_y(1,3) = actual_pose_y(1,3) + 0.1;
-    desired_pose_y(2,3) = actual_pose_y(2,3) + 0.1;
+    yarp::sig::Matrix desired_pose = l_arm_ref;
     yarp::sig::Vector dq(q.size(), 0.0);
     yarp::sig::Vector dqns(q.size(), 0.0);
-    double e, enva, epost, epostnva, epost_max, epostnva_max;
+    double e, enva, epost, epostnva, epost_max, epostns_max;
 
     _log << "#! /usr/bin/env python" << std::endl
          << std::endl
@@ -303,8 +316,8 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
     double settling_counter = 1.0;
     bool converged_event = false;
 
-    DHS.leftArm->setReference(desired_pose_y);
-    DHSns.leftArm->setReference(desired_pose_y);
+    DHS.leftArm->setReference(desired_pose);
+    DHSns.leftArm->setReference(desired_pose);
 
 #ifdef TRY_ON_SIMULATOR
     double t_test = yarp::os::Time::now();
@@ -359,16 +372,6 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         stackns->update(qns);
 
         enva = norm(DHSns.leftArm->getb());
-        /*
-        if(useMinimumVelocity) {
-            ASSERT_EQ(qns.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
-            ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
-            epostnva = norm((qns-DHSns.postural->getReference()).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
-        } else
-            epostnva = norm(posturalnva->getb());
-        if(epostnva > epostnva_max)
-            epostnva_max = epostnva;
-        */
 
         EXPECT_TRUE(sotns->solve(dqns));
         qns+=dqns;
@@ -428,27 +431,19 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 
     } while(e > 1.5e-3 || enva > 1.5e-3 || !settled);
 
-    EXPECT_GT(epostnva_max, epost_max)
-        << "With velocity allocation, we expect that "
-        << "the maximum postural error for a certain task "
-        << "will be lower than without velocity allocation.\n"
-        << "In fact, having a scaled velocity for the primary "
-        << "task means we are willing to invest some resources "
-        << "to consistently reduce the error in the lower priority "
-        << "tasks, not just when the error of the primary task is "
-        << "low. Since the postural task is at a lower priority than "
-        << "the cartesian tasks in this test, we want to see the peak "
-        << "error for the postural to be higher without VA.";
-
 
     _log << "));" << std::endl;
 
-    _log << "se = figure(figsize=(10.27,7.68)); subplot(3,2,1); p = plot(test_data[:,0],test_data[:,(2,3,5,6)]); title('Hand Velocity');" << std::endl;
+    _log << "se = figure(figsize=(10.27,7.68));" << std::endl;
+    
+    _log << "subplot(3,3,1); p = plot(test_data[:,0],test_data[:,(2,3,5,6)]); title('Hand Velocity');" << std::endl;
     _log << "legend(p,('y dot (VA)', 'z dot (VA)', 'y dot (no VA)', 'z dot (no VA)'));" << std::endl;
     _log << "ylabel('Hand Velocity [m/s]'); xlabel('t [s]');" << std::endl;
+    
     _log << "subplot(3,1,2); p = plot(test_data[:,0], np.transpose(np.vstack(((test_data[:,(7,8,9)]**2).sum(1),(test_data[:,(10,11,12)]**2).sum(1))))); title('Torso Joints Velocity');" << std::endl;
     _log << "ylabel('Torso Joint Velocity [rad/s]'); xlabel('t [s]');" << std::endl;
     _log << "legend(p,('Norm of Joint Velocity (VA)', 'Norm of Joint Velocity (no VA)'));" << std::endl;
+    
     _log << "subplot(3,1,3); p = plot(test_data[:,0],test_data[:,(13,14,15,16)]); title('Tracking Error');" << std::endl;
     _log << "legend(p,('Left Hand tracking error (VA)','Left Hand tracking error (no VA)','Postural tracking error (VA)','Postural tracking error (no VA)'));" << std::endl;
     _log << "ylabel('2-norm of task error'); xlabel('t [s]');" << std::endl;
