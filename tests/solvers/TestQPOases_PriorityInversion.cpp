@@ -202,34 +202,23 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
 
 }
 
-yarp::sig::Vector getStablePosition(iDynUtils& model) {
-    double q_vec[31] =                              {-0.052231, -0.001525, -0.507339,  0.994823, -0.500385,
-                                                      0.054478,  0.047959,  0.001114, -0.504303,  0.989594,
-                                                     -0.498290, -0.045896,  0.000282, -0.030130, -0.000038,
-                                                      0.304843,  0.323796, -0.335870, -1.594352,  0.290507,
-                                                     -0.138132, -0.544013, -0.000115,  0.001027,  0.284300,
-                                                     -0.248960, -0.007307, -1.156816, -0.006277, -0.024351,
-                                                      0.003562};
-    yarp::sig::Vector q(31, q_vec);
+yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
+    yarp::sig::Vector q(model.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(model.left_leg.getNrOfDOFs(), 0.0);
+    leg[0] = -25.0 * M_PI/180.0;
+    leg[3] =  50.0 * M_PI/180.0;
+    leg[5] = -25.0 * M_PI/180.0;
+    model.fromRobotToIDyn(leg, q, model.left_leg);
+    model.fromRobotToIDyn(leg, q, model.right_leg);
+    yarp::sig::Vector arm(model.left_arm.getNrOfDOFs(), 0.0);
+    arm[0] = -10.0 * M_PI/180.0;
+    arm[1] = 30.0 * M_PI/180.0;
+    arm[3] = -80.0 * M_PI/180.0;
+    model.fromRobotToIDyn(arm, q, model.left_arm);
+    arm[1] = -arm[1];
+    model.fromRobotToIDyn(arm, q, model.right_arm);
     return q;
 }
-
-yarp::sig::Vector getShakingPosition(iDynUtils& model, yarp::sig::Matrix& l_arm_ref) {
-    double q_vec[31] =                              {-0.015077,  0.007937, -0.518198,  1.413155, -0.791772,
-                                                      0.049212,  0.096468, -0.002291, -0.514733,  1.402080,
-                                                     -0.783909, -0.062951, -0.006270, -0.029317,  0.000176,
-                                                      0.212405,  0.228882, -0.321196, -0.730445,  0.160591,
-                                                     -0.580431, -1.130814,  0.007054, -0.014495,  0.451303,
-                                                     -0.282880,  0.132477, -1.586318, -0.086197,  0.351271,
-                                                     -0.010837};
-    yarp::sig::Vector q(31, q_vec);
-    yarp::sig::Vector q_old = model.iDyn3_model.getAng();
-    model.updateiDyn3Model(q, true);
-    l_arm_ref = model.iDyn3_model.getPosition(model.left_arm.end_effector_index);
-    model.updateiDyn3Model(q_old, true);
-    return q;
-}
-
 
 //#define TRY_ON_SIMULATOR
 // will try script on the simulator, without the prescribed smoothing technique
@@ -248,15 +237,10 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
 
-    yarp::sig::Vector q = getStablePosition(model);
+    yarp::sig::Vector q = getGoodInitialPosition(model);
     yarp::sig::Vector qns = q;
-
     model.setFloatingBaseLink(model.left_leg.end_effector_name);
     model.updateiDyn3Model(q, true);
-
-    yarp::sig::Matrix l_arm_ref;
-    getShakingPosition(model, l_arm_ref);
-
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -294,7 +278,10 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 
 
     //SET SOME REFERENCES
-    yarp::sig::Matrix desired_pose = l_arm_ref;
+    yarp::sig::Matrix actual_pose_y = DHS.leftArm->getActualPose();
+    yarp::sig::Matrix desired_pose_y = actual_pose_y;
+    desired_pose_y(1,3) = actual_pose_y(1,3) + 0.1;
+    desired_pose_y(2,3) = actual_pose_y(2,3) + 0.1;
     yarp::sig::Vector dq(q.size(), 0.0);
     yarp::sig::Vector dqns(q.size(), 0.0);
     double e_com, e_com_ns, e_arms, e_arms_ns, e_post, e_post_ns;
@@ -319,8 +306,8 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
     double settling_counter = 1.0;
     bool converged_event = false;
 
-    DHS.leftArm->setReference(desired_pose);
-    DHSns.leftArm->setReference(desired_pose);
+    DHS.leftArm->setReference(desired_pose_y);
+    DHSns.leftArm->setReference(desired_pose_y);
 
 #ifdef TRY_ON_SIMULATOR
     double t_test = yarp::os::Time::now();
@@ -379,6 +366,16 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         e_com_ns = yarp::math::norm(stackns->getStack()[1]->getb());
         e_arms_ns = yarp::math::norm(stackns->getStack()[2]->getb());
         e_post_ns = yarp::math::norm(stackns->getStack()[3]->getb());
+        /*
+        if(useMinimumVelocity) {
+            ASSERT_EQ(qns.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
+            ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
+            epostnva = norm((qns-DHSns.postural->getReference()).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
+        } else
+            epostnva = norm(posturalnva->getb());
+        if(epostnva > epostnva_max)
+            epostnva_max = epostnva;
+        */
 
         EXPECT_TRUE(sotns->solve(dqns));
         qns+=dqns;
@@ -389,7 +386,7 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
         yarp::os::Time::delay(0.005);
 #endif
 
-        t_loopns = yarp::os::Time::now() - t_begin;
+        t_loopnva = yarp::os::Time::now() - t_begin;
 #else
         t_loopns = yarp::os::SystemClock::nowSystem() - t_begin;
 #endif

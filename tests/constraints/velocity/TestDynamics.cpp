@@ -83,10 +83,6 @@ TEST_F(testDynamicsConstr, ID_from_iDynThree) {
 
 TEST_F(testDynamicsConstr, testLinkCrawling) {
     std::list<std::string> links_in_contact = coman.getLinksInContact();
-    std::vector<std::string> links_in_contact_vec;
-    links_in_contact_vec.insert(links_in_contact_vec.end(),
-                                links_in_contact.begin(),
-                                links_in_contact.end());
     std::cout<<"links in contact: "<<std::endl;
     std::list<std::string>::iterator link;
     for(link = links_in_contact.begin(); link != links_in_contact.end(); link++)
@@ -104,7 +100,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     //OpenSoT::constraints::velocity::Dynamics constr(q,q,q,coman,3,1);
     std::vector<std::string> ft_in_contact;
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
-                      links_in_contact_vec,
+                      links_in_contact,
                       coman, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
@@ -121,7 +117,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     for(link = links_in_contact2.begin(); link != links_in_contact2.end(); link++)
         std::cout<<"    "<<*link<<std::endl;
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
-                      std::vector<std::string> { std::begin(links_in_contact2), std::end(links_in_contact2) },
+                      links_in_contact2,
                       coman, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
@@ -141,7 +137,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
         std::cout<<"    "<<*link<<std::endl;
 
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
-                      std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
+                      links_in_contact,
                       coman, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
@@ -158,7 +154,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
         std::cout<<"    "<<*link<<std::endl;
 
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links,
-                      std::vector<std::string> { std::begin(links_in_contact), std::end(links_in_contact) },
+                      links_in_contact,
                       coman, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)
@@ -186,7 +182,7 @@ TEST_F(testDynamicsConstr, testLinkCrawling) {
     for(link = links_in_contact3.begin(); link != links_in_contact3.end(); link++)
         std::cout<<"    "<<*link<<std::endl;
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(ft_links2,
-                      std::vector<std::string> { std::begin(links_in_contact3), std::end(links_in_contact3) },
+                      links_in_contact3,
                       coman2, ft_in_contact);
     std::cout<<"FT IN CONTACT: "<<std::endl;
     for(unsigned int i = 0; i < ft_in_contact.size(); ++i)

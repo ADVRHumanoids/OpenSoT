@@ -18,7 +18,6 @@ using namespace OpenSoT::tasks::velocity;
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::sig;
 
-#define VISUALIZE_SIMULATION true
 
 namespace {
 
@@ -312,6 +311,8 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 
 }
 
+#if OPENSOT_COMPILE_SIMULATION_TESTS
+
 using namespace OpenSoT;
 
 TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
@@ -319,7 +320,7 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
     tests_utils::startYarpServer();
     // Load a world
     std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman_brick_wall.world";
-    if(VISUALIZE_SIMULATION)
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
         tests_utils::startGazebo(world_path);
     else
         tests_utils::startGZServer(world_path);
@@ -513,6 +514,7 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
     sleep(10);
     tests_utils::stopYarpServer();
 }
+#endif
 
 }
 

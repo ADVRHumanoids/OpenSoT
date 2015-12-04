@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
             std::cout << "l_wrist reference:" << DHS.leftArm->getReference().toString() << std::endl;
             std::cout << "r_wrist reference:" << DHS.rightArm->getReference().toString() << std::endl;
             std::cout << "Active Capsules Pairs: " << DHS.selfCollisionAvoidance->getbUpperBound().size() << std::endl;
-
+            std::cout << "Configuration: " << q.toString() << std::endl;
         }
         yarp::os::Time::delay(dT-(toc-tic));
     }

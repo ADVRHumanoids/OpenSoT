@@ -101,7 +101,7 @@
                  * @param ft_in_contact_list updated list of ft in contact
                  */
                 static void crawlLinks(const std::vector<std::string>& ft_links_list,
-                                const std::vector<std::string>& contact_link_list,
+                                const std::list<std::string>& contact_link_list,
                                 iDynUtils& robot,
                                 std::vector<std::string>& ft_in_contact_list);
 

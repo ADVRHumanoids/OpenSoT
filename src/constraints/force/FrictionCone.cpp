@@ -16,8 +16,7 @@ namespace OpenSoT {
            _world_R_surfaces(world_R_surfaces)
        {
            OpenSoT::constraints::velocity::Dynamics::crawlLinks(_robot.getForceTorqueFrameNames(),
-                      std::vector<std::string>{std::begin(_robot.getLinksInContact()),
-                                               std::end(_robot.getLinksInContact())},
+                                                _robot.getLinksInContact(),
                                                _robot,
                                                _ft_in_contact);
            assert(_world_R_surfaces.size() == _ft_in_contact.size());
@@ -31,8 +30,6 @@ namespace OpenSoT {
 
 
            update(x);
-
-
        }
 
        void FrictionCone::computeAineq()
@@ -74,8 +71,7 @@ namespace OpenSoT {
            //   does not change.
            std::vector<std::string> ft_in_contact;
            OpenSoT::constraints::velocity::Dynamics::crawlLinks(_robot.getForceTorqueFrameNames(),
-                      std::vector<std::string>{std::begin(_robot.getLinksInContact()),
-                                               std::end(_robot.getLinksInContact())},
+                                                _robot.getLinksInContact(),
                                                _robot,
                                                ft_in_contact);
            if(!(_ft_in_contact == ft_in_contact))

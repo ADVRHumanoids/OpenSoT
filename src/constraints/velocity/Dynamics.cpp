@@ -60,7 +60,7 @@ void Dynamics::Dynamics::setTorqueLimits(const yarp::sig::Vector torqueLimits)
 }
 
 void Dynamics::crawlLinks(const std::vector<std::string>& ft_links_list,
-                const std::vector<std::string>& contact_link_list, iDynUtils &robot,
+                const std::list<std::string>& contact_link_list, iDynUtils &robot,
                 std::vector<std::string>& ft_in_contact_list)
 {
     ft_in_contact_list.clear();
@@ -118,10 +118,9 @@ void Dynamics::updateActualWrench()
 {
     std::vector<std::string> ft_in_contact;
     crawlLinks(_robot_model.getForceTorqueFrameNames(),
-               std::vector<std::string>{_robot_model.getLinksInContact().begin(),
-                                        _robot_model.getLinksInContact().end()},
-                                        _robot_model,
-                                        ft_in_contact);
+               _robot_model.getLinksInContact(),
+               _robot_model,
+               ft_in_contact);
 
 
     _Fc.clear();
@@ -152,7 +151,7 @@ void Dynamics::updateActualWrench()
             KDL::Frame ft_frame_in_base_link_KDL;
             cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
 
-            KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL * wrench_in_sensor_frame_KDL; //Adjoint matrix is automatically computed by KDL!
+            KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL.M * wrench_in_sensor_frame_KDL;
             cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _tmp_wrench_in_base_link_frame);
 
             /**

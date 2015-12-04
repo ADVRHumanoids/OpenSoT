@@ -67,15 +67,16 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_FF
                       testQPOases_GlobalConstraints.cpp
                       testQPOases_Options
+                      testQPOases_PriorityInversion
                       testQPOases_SelfCollisionAvoidance
                       testQPOases_Sparse
                       testQPOases_SubTask
                       testQPOases_VelocityAllocation
                       testAggregatedTask
                       testCartesianVelocityTask
-                      #testCoMForceTask
+                      testCoMForceTask
                       testCoMVelocityTask
-                      #testInteractionVelocityTask
+                      testInteractionVelocityTask
                       TestManipulabilityTask
                       testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
@@ -160,6 +161,10 @@ add_dependencies(testQPOases_GlobalConstraints GTest-ext OpenSoT)
 ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
 add_dependencies(testQPOases_Options GTest-ext OpenSoT)
+
+ADD_EXECUTABLE(testQPOases_PriorityInversion solvers/TestQPOases_PriorityInversion.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_PriorityInversion ${TestLibs})
+add_dependencies(testQPOases_PriorityInversion GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testQPOases_SelfCollisionAvoidance solvers/TestQPOases_SelfCollisionAvoidance.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_SelfCollisionAvoidance ${TestLibs})
@@ -269,18 +274,19 @@ add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
 add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
+add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
+add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
+add_test(NAME OpenSoT_solvers_qpOases_PriorityInversion COMMAND testQPOases_PriorityInversion)
+add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
+add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
 add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
-add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
-add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
-add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
-add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
-#add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
+add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
-#add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
+add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
