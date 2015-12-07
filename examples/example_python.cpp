@@ -50,8 +50,9 @@ int main(int argc, char **argv) {
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
     DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.6);
     DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.6);
+    DHS.com_XY->setLambda(0.1);     DHS.postural->setLambda(0.3);
     DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
-    DHS.selfCollisionAvoidance->setBoundScaling(0.1);
+    DHS.selfCollisionAvoidance->setBoundScaling(0.6);
     DHS.velocityLimits->setVelocityLimits(0.3);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();
@@ -164,7 +165,7 @@ int main(int argc, char **argv) {
                                                MODULE_NAME, DHS.com);
 
     OpenSoT::solvers::QPOases_sot solver(autoStack->getStack(),
-                                         autoStack->getBounds(), 5e10);
+                                         autoStack->getBounds(), 1e10);
 
     robot.setPositionDirectMode();
     double tic, toc;
