@@ -84,11 +84,18 @@ bool QPOases_sot::prepareSoT()
             }
         }
 
+        /* @TODO fix this by moving line 89 & line 101 in line 70
+         * - this way it will also take into account about equality constraints (thanks to automatic conversion in Aggregated)*/
         if(_globalConstraints)
         {
             A = pile(A, _globalConstraints->getAineq());
             lA = cat(lA, _globalConstraints->getbLowerBound());
             uA = cat(uA, _globalConstraints->getbUpperBound());
+        } else if(_bounds && _bounds->isInequalityConstraint())
+        {
+            A = pile(A, _bounds->getAineq());
+            lA = cat(lA, _bounds->getbLowerBound());
+            uA = cat(uA, _bounds->getbUpperBound());
         }
 
         if(_bounds)
@@ -136,11 +143,18 @@ bool QPOases_sot::solve(Vector &solution)
             }
         }
 
+        /* @TODO fix this by moving line 148 & line 163 in line 129
+         * - this way it will also take into account about equality constraints (thanks to automatic conversion in Aggregated)*/
         if(_globalConstraints)
         {
             A = pile(A, _globalConstraints->getAineq());
             lA = cat(lA, _globalConstraints->getbLowerBound());
             uA = cat(uA, _globalConstraints->getbUpperBound());
+        } else if(_bounds && _bounds->isInequalityConstraint())
+        {
+            A = pile(A, _bounds->getAineq());
+            lA = cat(lA, _bounds->getbLowerBound());
+            uA = cat(uA, _bounds->getbUpperBound());
         }
 
         if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))

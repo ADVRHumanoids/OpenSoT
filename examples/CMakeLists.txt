@@ -19,7 +19,7 @@ PROJECT(OpenSoT)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
-FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS system program_options REQUIRED)
 FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(idynutils REQUIRED)
 FIND_PACKAGE(Klampt QUIET)
@@ -28,9 +28,7 @@ FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(YARP REQUIRED)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
-
-ADD_DEFINITIONS(${PCL_DEFINITIONS})
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/../tests/robots/")
 
@@ -60,10 +58,10 @@ ADD_DEPENDENCIES(example_velocity_allocation OpenSoT)
 
 TARGET_LINK_LIBRARIES(example_autostack PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_cartesian PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES} ${PCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_com PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_minimum_effort PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_postural PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_python PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_python PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES} boost_program_options)
 TARGET_LINK_LIBRARIES(example_python_crouching PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_python_distance_query ${iDynTree_LIBRARIES} ${idynutils_LIBRARIES} 
                                                     ${Boost_LIBRARIES} ${tf_LIBRARIES})

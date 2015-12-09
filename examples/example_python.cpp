@@ -8,6 +8,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/VelocityAllocation.h>
+#include <boost/program_options.hpp>
 
 #define MODULE_NAME "example_python"
 #define dT          25e-3
@@ -16,6 +17,42 @@ typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                             > Accumulator;
 int main(int argc, char **argv) {
+    bool no_torque_limits;
+
+    namespace po = boost::program_options;
+        po::options_description desc("Options");
+        desc.add_options()
+          ("help", "this help message")
+          ("no_torque_limits",
+           po::bool_switch(&no_torque_limits));
+
+    po::variables_map vm;
+    try
+    {
+      po::store(po::parse_command_line(argc, argv, desc),
+                vm); // can throw
+
+      /** --help option
+       */
+      if ( vm.count("help")  )
+      {
+        std::cout << "example_python, a simple executable creating a stack that executes non-CLIK IK, with pYTask interfaces for tasks" << std::endl
+                  << "USAGE: example_python [options] "
+                  << std::endl << std::endl;
+        std::cout << desc << std::endl;
+        return 0;
+      }
+
+      po::notify(vm); // throws on error, so do after help in case
+                      // there are any problems
+    }
+    catch(po::error& e)
+    {
+      std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+      std::cerr << desc << std::endl;
+      return 1;
+    }
+
     yarp::os::Network::init();
     Accumulator time_accumulator(boost::accumulators::tag::rolling_mean::window_size = 1000);
     RobotUtils robot( MODULE_NAME, "bigman",
@@ -73,7 +110,7 @@ int main(int argc, char **argv) {
 
     yarp::sig::Vector tauLims = DHS.torqueLimits->getTorqueLimits();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
-        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.1;
+        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.5;
     DHS.torqueLimits->setTorqueLimits(tauLims);
 
     std::list<std::pair<std::string,std::string> > whiteList;
@@ -124,7 +161,12 @@ int main(int argc, char **argv) {
         ( (DHS.com_XY) << DHS.selfCollisionAvoidance << DHS.convexHull ) /
         ( (DHS.leftArm + DHS.rightArm ) << DHS.selfCollisionAvoidance ) /
         ( (DHS.postural) << DHS.selfCollisionAvoidance );
-    autoStack << DHS.jointLimits << DHS.torqueLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
+    autoStack << DHS.jointLimits;
+    if(!no_torque_limits)
+    {
+        std::cout << "Adding torque limits.." << std::endl;
+        autoStack << DHS.torqueLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
+    }
 
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
