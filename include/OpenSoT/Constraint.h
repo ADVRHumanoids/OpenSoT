@@ -119,20 +119,20 @@
          * @brief isBound
          * @return true if Constraint is a bound
          */
-        virtual bool isBound() { return _upperBound.size() > 0; }
+        virtual bool isBound() { return _upperBound.size() > 0 || _lowerBound.size() > 0; }
 
         /**
          * @brief isUnilateralConstraint
          * @return true if the Constraint is an unilateral inequality
          */
         virtual bool isUnilateralConstraint() { return isInequalityConstraint() &&
-                                                       _bLowerBound.size() == 0; }
+                                                       (_bLowerBound.size() == 0 || _bUpperBound.size() == 0); }
 
         /**
          * @brief isBilateralConstraint
          * @return true if the Constraint is a bilateral inequality
          */
-        virtual bool isBilateralConstraint() { return !isUnilateralConstraint(); }
+        virtual bool isBilateralConstraint() { return isInequalityConstraint() && !isUnilateralConstraint(); }
 
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
