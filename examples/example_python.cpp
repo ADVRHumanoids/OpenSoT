@@ -11,7 +11,7 @@
 #include <boost/program_options.hpp>
 
 #define MODULE_NAME "example_python"
-#define dT          25e-3
+#define dT          35e-3
 
 typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     RobotUtils robot( MODULE_NAME, "bigman",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
-    yarp::os::Time::delay(1.0);
+    yarp::os::Time::delay(0.5);
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq = q*0.0;
 
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         _ft_measurements[i].second = ft_readings[_ft_measurements[i].first];
 
     robot.idynutils.setFloatingBaseLink(robot.idynutils.left_leg.end_effector_name);
-    robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+    robot.idynutils.updateiDyn3Model(q, dq, _ft_measurements, true);
     OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
 
     /*                            */
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     DHS.com_XY->setLambda(0.1);     DHS.postural->setLambda(0.3);
     DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
     DHS.selfCollisionAvoidance->setBoundScaling(0.6);
-    DHS.velocityLimits->setVelocityLimits(0.3);
+    DHS.velocityLimits->setVelocityLimits(0.6);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
@@ -170,8 +170,8 @@ int main(int argc, char **argv) {
 
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
-                                0.3,
-                                0.6);
+                                0.6,
+                                0.9);
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
@@ -184,7 +184,7 @@ int main(int argc, char **argv) {
                     *i_c))
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
-                                *i_c)->setVelocityLimits(.9);
+                                *i_c)->setVelocityLimits(1.1);
     }
 
 
@@ -210,6 +210,8 @@ int main(int argc, char **argv) {
                                          autoStack->getBounds(), 1e10);
 
     robot.setPositionDirectMode();
+    yarp::os::Time::delay(2.5);
+
     double tic, toc;
     int print_mean = 0;
     while(true) {
