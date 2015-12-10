@@ -162,11 +162,11 @@ int main(int argc, char **argv) {
         ( (DHS.leftArm + DHS.rightArm ) << DHS.selfCollisionAvoidance ) /
         ( (DHS.postural) << DHS.selfCollisionAvoidance );
     autoStack << DHS.jointLimits;
-    if(!no_torque_limits)
+    /*if(no_torque_limits)
     {
         std::cout << "Adding torque limits.." << std::endl;
         autoStack << DHS.torqueLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
-    }
+    }*/
 
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
@@ -206,8 +206,16 @@ int main(int argc, char **argv) {
     OpenSoT::interfaces::yarp::tasks::YCoM com(robot.idynutils.getRobotName(),
                                                MODULE_NAME, DHS.com);
 
-    OpenSoT::solvers::QPOases_sot solver(autoStack->getStack(),
-                                         autoStack->getBounds(), 1e10);
+    OpenSoT::solvers::QPOases_sot::Ptr solver;
+    if(!no_torque_limits)
+    {
+        std::cout << "Adding torque limits.." << std::endl;
+        solver.reset(new OpenSoT::solvers::QPOases_sot(autoStack->getStack(),
+                                             autoStack->getBounds(),
+                                             DHS.torqueLimits, 1e10));
+    } else
+        solver.reset(new OpenSoT::solvers::QPOases_sot(autoStack->getStack(),
+                                             autoStack->getBounds(), 1e10));
 
     robot.setPositionDirectMode();
     yarp::os::Time::delay(2.5);
@@ -224,7 +232,12 @@ int main(int argc, char **argv) {
         robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
 
         autoStack->update(q);
-        if(solver.solve(dq))
+        if(!no_torque_limits)
+        {
+            using namespace yarp::math;
+            DHS.torqueLimits->update(cat(q,dq/dT));
+        }
+        if(solver->solve(dq))
             q+=dq;
         else
             std::cout << "Error computing solve()" << std::endl;
