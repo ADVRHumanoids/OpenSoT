@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
     DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.6);
     DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.6);
-    DHS.com_XY->setLambda(0.1);     DHS.postural->setLambda(0.3);
+    DHS.com_XY->setLambda(0.05);     DHS.postural->setLambda(0.05);
     DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
     DHS.selfCollisionAvoidance->setBoundScaling(0.6);
     DHS.velocityLimits->setVelocityLimits(0.6);
@@ -110,8 +110,9 @@ int main(int argc, char **argv) {
 
     yarp::sig::Vector tauLims = DHS.torqueLimits->getTorqueLimits();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
-        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.5;
+        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.6;
     DHS.torqueLimits->setTorqueLimits(tauLims);
+    DHS.torqueLimits->setBoundScaling(0.60);
 
     std::list<std::pair<std::string,std::string> > whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
