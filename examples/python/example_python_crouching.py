@@ -60,7 +60,7 @@ if __name__ == '__main__':
     l_wrist_act = l_wrist.getActualPose()
     l_wrist_des = kdl.Frame(l_wrist_act)
     l_wrist_des.p[0] += 0.15
-    l_wrist_des.p[1] += 0.05
+    l_wrist_des.p[1] += 0.08
     l_wrist_des.p[2] -= 0.50
     l_wrist_des.M.DoRotZ(-np.pi/3)
 

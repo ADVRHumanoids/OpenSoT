@@ -1,6 +1,7 @@
 #include <OpenSoT/constraints/velocity/Dynamics.h>
 #include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
+#include <algorithm>
 
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
@@ -238,5 +239,11 @@ void Dynamics::update(const yarp::sig::Vector &x)
     **/
     _bLowerBound = _boundScaling*(_jointTorquesMin + _b);
     _bUpperBound = _boundScaling*(_jointTorquesMax + _b);
+
+    for(unsigned int i =0; i < _b.size(); ++i)
+    {
+        _bLowerBound[i] = std::min(_bLowerBound[i],0.0);
+        _bUpperBound[i] = std::max(_bUpperBound[i],0.0);
+    }
     _Aineq = (1.0/_dT)*_M;
 }
