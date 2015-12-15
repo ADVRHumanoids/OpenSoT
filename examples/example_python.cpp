@@ -9,6 +9,10 @@
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/VelocityAllocation.h>
 #include <boost/program_options.hpp>
+#include <signal.h>
+#include <fstream>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define MODULE_NAME "example_python"
 #define dT          35e-3
@@ -16,7 +20,48 @@
 typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                             > Accumulator;
+class logger{
+public:
+logger(const std::string& name, const int size = 0)
+    {
+        if(size > 0)
+            data.reserve(size);
+
+        std::string file_name = "example_python_" + name + ".m";
+        file.open(file_name.c_str());
+        file<<name<<" = ["<<std::endl;
+    }
+
+    void log(const yarp::sig::Vector& data_)
+    {
+        data.push_back(data_);
+    }
+
+    void write()
+    {
+        for(unsigned int i = 0; i < data.size(); ++i)
+            file<<data[i].toString()<<std::endl;
+        file<<"];"<<std::endl;
+        file.close();
+    }
+
+    std::vector<yarp::sig::Vector> data;
+    std::ofstream file;
+
+};
+
+logger torques_measured("torques_measured");
+
+void my_handler(int s){
+           std::cout<<"Writing log files..."<<std::endl;
+           torques_measured.write();
+           std::cout<<"...log files written!"<<std::endl;
+           exit(1);
+
+}
+
 int main(int argc, char **argv) {
+    signal (SIGINT,my_handler);
     bool no_torque_limits;
 
     namespace po = boost::program_options;
@@ -109,10 +154,12 @@ int main(int argc, char **argv) {
     DHS.postural->setWeight(pW);
 
     yarp::sig::Vector tauLims = DHS.torqueLimits->getTorqueLimits();
-    for(unsigned int i_t = 0; i_t < 3; ++i_t)
-        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.6;
+    tauLims[robot.idynutils.torso.joint_numbers[0]] *= 0.6;
+    tauLims[robot.idynutils.torso.joint_numbers[1]] *= 0.6;
+    tauLims[robot.idynutils.torso.joint_numbers[2]] *= 0.6;
+
     DHS.torqueLimits->setTorqueLimits(tauLims);
-    DHS.torqueLimits->setBoundScaling(0.60);
+    DHS.torqueLimits->setBoundScaling(0.2);
 
     std::list<std::pair<std::string,std::string> > whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
@@ -223,12 +270,19 @@ int main(int argc, char **argv) {
 
     double tic, toc;
     int print_mean = 0;
+
+
+    yarp::sig::Vector q_m(q.size(), 0.0), dq_m(q.size(), 0.0), tau_m(q.size(), 0.0);
     while(true) {
         tic = yarp::os::Time::now();
 
+
+        robot.sense(q_m, dq_m, tau_m);
+        torques_measured.log(tau_m);
+
         RobotUtils::ftReadings ft_readings = robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
-            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.7;
+            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.6;
 
         robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
 
