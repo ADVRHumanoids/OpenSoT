@@ -16,8 +16,7 @@
 */
 
 #include <boost/shared_ptr.hpp>
-#include <OpenSoT/utils/logger/flushers/tasks/Cartesian.h>
-#include <OpenSoT/utils/logger/flushers/tasks/CoM.h>
+#include <OpenSoT/utils/Indices.h>
 
 namespace OpenSoT 
 {
@@ -27,6 +26,29 @@ namespace OpenSoT
         {
         public:
             typedef boost::shared_ptr<TaskFlusher> Ptr;
-        }
+
+
+            virtual std::string toString() const = 0;
+            virtual ~TaskFlusher() = 0;
+
+            /**
+             * @brief getSize returns the number of elements logged by this flusher
+             * @return the number of elements to be logged
+             */
+            virtual int getSize() { return 0; }
+
+            virtual Indices getIndices(int label) = 0;
+        };
     }
+}
+
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::TaskFlusher& flusher)
+{
+    out << flusher.toString();
+}
+
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::TaskFlusher::Ptr& flusher)
+{
+    if(flusher)
+        out << flusher->toString();
 }

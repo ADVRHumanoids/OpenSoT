@@ -19,6 +19,7 @@
 #define __SUBTASK_H__
 
  #include <OpenSoT/Task.h>
+ #include <OpenSoT/utils/Indices.h>
 
  #include <list>
  #include <vector>
@@ -28,7 +29,6 @@
  #include <yarp/sig/all.h>
  #include <yarp/math/Math.h>
  #include <yarp/math/SVD.h>
- #include <sstream>
  #include <iterator>
 
  namespace OpenSoT {
@@ -50,89 +50,9 @@
 
         typedef boost::shared_ptr<OpenSoT::SubTask> Ptr;
 
-        class SubTaskMap {
-        public:
-            /**
-             * @brief RowsChunk a vector<unsigned int> of rows which are contiguous
-             */
-            typedef std::vector<unsigned int> RowsChunk;
-            /**
-             * @brief ChunkList a list<vector<int>>, a list of contiguous chunks of rows
-             * e.g., {{1,2},{4},{10,11,12}}, is a list of 3 chunks of contiguous row indices,
-             * where the first chunk has size 2, the second chunk has size 1, the third chunk has size 3
-             */
-            typedef std::list< RowsChunk > ChunkList;
-        private:
-
-            ChunkList _contiguousChunks;
-            std::list<unsigned int> _rowsList;
-            std::vector<unsigned int> _rowsVector;
-
-            /**
-             * @brief getNextAdjacentChunk returns an iterator pointing to the last element of a chunk
-             * @param searchBegin iterator pointing to the first element where we start looking for chunks
-             * @return the iterator pointing to the last element of a chunk
-             */
-            std::list<unsigned int>::iterator getNextAdjacentChunk(std::list<unsigned int>::iterator searchBegin);
-
-            void generateChunks();
-
-        public:
-            /**
-             * @brief SubTaskMap creates a SubTaskMap of size 1, with just one index
-             * @param i
-             */
-            SubTaskMap(unsigned int i);
-
-            SubTaskMap(const std::list<unsigned int>& rowsList);
-
-            SubTaskMap(const std::vector<unsigned int> &rowsVector);
-
-            template<class Iterator>
-            SubTaskMap(Iterator it, const Iterator end) {
-                while( it != end)
-                {
-                    _rowsList.push_back(*it);
-                    ++it;
-                }
-            }
-
-            SubTaskMap(const SubTaskMap& subTaskMap);
-
-            const ChunkList &getChunks() const;
-
-            /**
-             * @brief getRowsList returns the list of all rows as a list (first row has index 0)
-             * @return a list of row indices (starting from 0)
-             */
-            const std::list<unsigned int> &getRowsList() const;
-
-            /**
-             * @brief getRowsVector returns the list of all rows as a vector (first row has index 0)
-             * @return  a vector of row indices (starting from 0)
-             */
-            const std::vector<unsigned int> &getRowsVector() const;
-
-            bool isContiguous() const;
-
-            int size() const;
-
-            static SubTaskMap range(unsigned int from, unsigned int to);
-
-            SubTaskMap operator+(const SubTaskMap& b) const;
-
-            SubTaskMap operator+(const unsigned int r) const;
-
-            bool operator==(const SubTaskMap& b) const;
-
-            operator std::string() const;
-
-            operator std::list<unsigned int>() const;
-        };
-
     private:
         TaskPtr _taskPtr;
-        SubTaskMap _subTaskMap;
+        Indices _subTaskMap;
 
     protected:
 

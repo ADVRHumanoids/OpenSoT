@@ -100,8 +100,10 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/force/CoM.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
+                    src/utils/Indices.cpp
                     src/utils/PreviewerUtils.cpp
                     src/utils/VelocityAllocation.cpp
+                    src/utils/logger/L.cpp
                     ${sot_INCLUDES})
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT

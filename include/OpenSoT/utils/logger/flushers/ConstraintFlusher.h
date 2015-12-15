@@ -15,7 +15,12 @@
  * Public License for more details
 */
 
+
+#ifndef __CONSTRAINT_FLUSHER_H__
+#define __CONSTRAINT_FLUSHER_H__
+
 #include <boost/shared_ptr.hpp>
+#include <ostream>
 
 namespace OpenSoT 
 {
@@ -25,6 +30,31 @@ namespace OpenSoT
         {
         public:
             typedef boost::shared_ptr<ConstraintFlusher> Ptr;
-        }
+
+
+            virtual std::string toString() const = 0;
+            virtual ~ConstraintFlusher() = 0;
+
+            /**
+             * @brief getSize returns the number of elements logged by this flusher
+             * @return the number of elements to be logged
+             */
+            virtual int getSize() { return 0; }
+
+            virtual Indices getIndices(int label) = 0;
+        };
     }
 }
+
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::ConstraintFlusher& flusher)
+{
+    out << flusher.toString();
+}
+
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::ConstraintFlusher::Ptr& flusher)
+{
+    if(flusher)
+        out << flusher->toString();
+}
+
+#endif __CONSTRAINT_FLUSHER_H__

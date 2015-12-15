@@ -123,14 +123,14 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 
 
     OpenSoT::SubTask::Ptr postural(
-        new OpenSoT::SubTask(DHS.postural, OpenSoT::SubTask::SubTaskMap(model.torso.joint_numbers)+
-                                           OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
-                                           OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
+        new OpenSoT::SubTask(DHS.postural, OpenSoT::Indices(model.torso.joint_numbers)+
+                                           OpenSoT::Indices(model.right_arm.joint_numbers)+
+                                           OpenSoT::Indices(model.left_arm.joint_numbers[2])));
 
     OpenSoT::SubTask::Ptr minimumVelocity(
-        new OpenSoT::SubTask(DHS.minimumVelocity, OpenSoT::SubTask::SubTaskMap(model.torso.joint_numbers)+
-                                                  OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
-                                                  OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
+        new OpenSoT::SubTask(DHS.minimumVelocity, OpenSoT::Indices(model.torso.joint_numbers)+
+                                                  OpenSoT::Indices(model.right_arm.joint_numbers)+
+                                                  OpenSoT::Indices(model.left_arm.joint_numbers[2])));
 
     ASSERT_EQ(postural->getTaskSize(), 11);
     ASSERT_EQ(postural->getXSize(), 29);
@@ -141,14 +141,14 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
     ASSERT_EQ(postural->getb().size(), postural->getTaskSize());
 
     OpenSoT::SubTask::Ptr posturalnva(
-        new OpenSoT::SubTask(DHSnva.postural, OpenSoT::SubTask::SubTaskMap(model.torso.joint_numbers)+
-                                              OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
-                                              OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
+        new OpenSoT::SubTask(DHSnva.postural, OpenSoT::Indices(model.torso.joint_numbers)+
+                                              OpenSoT::Indices(model.right_arm.joint_numbers)+
+                                              OpenSoT::Indices(model.left_arm.joint_numbers[2])));
 
     OpenSoT::SubTask::Ptr minimumVelocitynva(
-        new OpenSoT::SubTask(DHSnva.minimumVelocity, OpenSoT::SubTask::SubTaskMap(model.torso.joint_numbers)+
-                                                     OpenSoT::SubTask::SubTaskMap(model.right_arm.joint_numbers)+
-                                                     OpenSoT::SubTask::SubTaskMap(model.left_arm.joint_numbers[2])));
+        new OpenSoT::SubTask(DHSnva.minimumVelocity, OpenSoT::Indices(model.torso.joint_numbers)+
+                                                     OpenSoT::Indices(model.right_arm.joint_numbers)+
+                                                     OpenSoT::Indices(model.left_arm.joint_numbers[2])));
 
 
     ASSERT_EQ(minimumVelocitynva->getTaskSize(), 11);
