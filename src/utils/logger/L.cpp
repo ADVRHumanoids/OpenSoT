@@ -15,7 +15,9 @@
  * Public License for more details
 */
 
+#include <OpenSoT/OpenSoT.h>
 #include <OpenSoT/utils/logger/L.h>
+#include <OpenSoT/utils/logger/plotters/Plotter.h>
 
 void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
 {
@@ -53,13 +55,13 @@ void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
         typedef std::map<TaskPtr, flushers::TaskFlusher::Ptr>::const_iterator it_t;
         typedef std::map<ConstraintPtr, flushers::ConstraintFlusher::Ptr>::const_iterator it_c;
 
-        for(it_t it = taskFlushers.begin(); it != taskFlushers.end(); ++it)
+        for(it_t it = _taskFlushers.begin(); it != _taskFlushers.end(); ++it)
         {
             it->second->updateSolution(q_dot);
             _current_log << it->second;
         }
 
-        for(it_c it = constraintFlushers.begin(); it != constraintFlushers.end(); ++it)
+        for(it_c it = _constraintFlushers.begin(); it != _constraintFlushers.end(); ++it)
         {
             it->second->updateSolution(q_dot);
             _current_log << it->second;
@@ -70,34 +72,41 @@ void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
 
 bool OpenSoT::L::open(std::string logName)
 {
-    if(must_append.count(logName) > 0)
+    if(_format == FORMAT_PYTHON)
     {
-        _current_log.open(logName.c_str(), std::fstream::app);
-        must_append[logName]++;
+        _current_log_filename = logName + ".py";
+    }
+    if(_must_append.count(_current_log_filename) > 0)
+    {
+        _current_log.open(_current_log_filename.c_str(), std::fstream::app);
+        _must_append[_current_log_filename]++;
     }
     else
     {
-        _current_log.open(logName.c_str());
-        must_append[logName] = 1;
+        _current_log.open(_current_log_filename.c_str());
+        _must_append[_current_log_filename] = 1;
     }
 
-    _current_log << "#! /usr/bin/env python" << std::endl
-         << std::endl
-         << "import numpy as np" << std::endl
-         << "import matplotlib" << std::endl
-         << "from matplotlib.pyplot import *" << std::endl;
-    /* @TODO this should be done by the flusher
-    _log << "#t, x, y, z, r, p, y,"                 // 0-6
-         << " xns, yns, zns, rns, pns, yns,"        // 7-12
-         << " xref, yref, zref, rref, pref, yref,"  // 13-18
-         << " e_com, e_com_ns,"                     // 19-20
-         << " e_arms, e_arms_ns,"                   // 21-22
-         << " e_post, e_post_ns,"                   // 23-24
-         << " t_loop, t_loop_nva" << std::endl;     // 25-26
-     */
+    if(_format == FORMAT_PYTHON)
+    {
+        _current_log << "#! /usr/bin/env python" << std::endl
+             << std::endl
+             << "import numpy as np" << std::endl
+             << "import matplotlib" << std::endl
+             << "from matplotlib.pyplot import *" << std::endl;
+        /* @TODO this should be done by the flusher
+        _log << "#t, x, y, z, r, p, y,"                 // 0-6
+             << " xns, yns, zns, rns, pns, yns,"        // 7-12
+             << " xref, yref, zref, rref, pref, yref,"  // 13-18
+             << " e_com, e_com_ns,"                     // 19-20
+             << " e_arms, e_arms_ns,"                   // 21-22
+             << " e_post, e_post_ns,"                   // 23-24
+             << " t_loop, t_loop_nva" << std::endl;     // 25-26
+         */
 
-    // @TODO here we should append a number to test_data
-    _current_log << "data = np.array((";
+        // @TODO here we should append a number to test_data
+        _current_log << "data = np.array((";
+    }
 
     return true;
 }
@@ -105,9 +114,15 @@ bool OpenSoT::L::open(std::string logName)
 bool OpenSoT::L::close()
 {
 
-    /*
+    if(_format == FORMAT_PYTHON)
+    {
+        _current_log << "));" << std::endl;
+        _current_log << std::endl;
+        _current_log << plotter->getCommands() << std::endl;
+        _collator << "execfile('" << _current_log_filename << "')" << std::endl;
+    }
 
-    _log << "));" << std::endl;
+    /*
 
     _log << "se = figure('"<< smoothing_strategy_stream.str() << "- Cartesian Errors',figsize=(10.27,7.68));" << std::endl;
     std::string smoothing = smoothing_params_stream.str();
@@ -188,10 +203,114 @@ bool OpenSoT::L::close()
 
      */
     _current_log.close();
+    _flushers.clear();
+    _constraintFlushers.clear();
+    _dataFlushers.clear();
+    _taskFlushers.clear();
+
+    return true;
+}
+
+OpenSoT::L::L(std::string loggerName, iDynUtils& model, OpenSoT::L::logger_format format)
+    : _name(loggerName), _model(model), _format(format),
+      _n_dofs(model.iDyn3_model.getNrOfDOFs()),
+      fakeFlusher(_n_dofs+1)
+{
+    if(_format == FORMAT_PYTHON)
+    {
+        _collator.open((loggerName + ".py").c_str());
+        _collator << "#! /usr/bin/env python" << std::endl;
+        _collator << std::endl;
+    }
+
+    std::list<std::string> descriptions;
+    descriptions.push_back("time");
+    std::vector<std::string> joint_names = model.getJointNames();
+    for(unsigned int i = 0; i < joint_names.size(); ++i)
+        descriptions.push_back(joint_names[i] + "dq");
+    fakeFlusher.setDescription(descriptions);
 }
 
 OpenSoT::L::~L()
 {
     if(_current_log.is_open())
         this->close();
+}
+
+OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::add(             OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+{
+OpenSoT::flushers::TaskFlusher::Ptr taskFlusher;
+// no task flushers are implemented at the moment
+return taskFlusher;
+}
+
+OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::add(       OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
+{
+    OpenSoT::flushers::ConstraintFlusher::Ptr constraintFlusher;
+    if(boost::dynamic_pointer_cast<OpenSoT::constraints::velocity::Dynamics>(constraint))
+    {
+        // the Dynamics flusher need a model to obtain the proper description
+        constraintFlusher.reset(
+            new OpenSoT::flushers::constraints::velocity::Dynamics(
+                boost::dynamic_pointer_cast<OpenSoT::constraints::velocity::Dynamics>(constraint),
+                _model));
+        _constraintFlushers[constraint] = constraintFlusher;
+        _flushers.push_back(constraintFlusher);
+    }
+    return constraintFlusher;
+}
+
+OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::getFlusher(      OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+{
+    return _taskFlushers[task];
+}
+
+OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::getFlusher(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
+{
+    return _constraintFlushers[constraint];
+}
+
+OpenSoT::flushers::Flusher::Ptr OpenSoT::L::getFlusher(void* data)
+{
+    return _dataFlushers[data];
+}
+
+OpenSoT::L::logger_format OpenSoT::L::getFormat() const
+{
+    return _format;
+}
+
+std::string OpenSoT::L::getName() const
+{
+    return _name;
+}
+
+OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flusher::Ptr, Indices> plottable)
+{
+    if(boost::dynamic_pointer_cast<OpenSoT::flushers::FakeFlusher>(plottable.first))
+        return plottable.second;
+
+    unsigned int minIndex = 0;
+    minIndex += fakeFlusher.getSize()-1;
+    for(unsigned int i = 0; i < _flushers.size(); ++i)
+    {
+        if(_flushers[i] == plottable.first)
+        {
+            Indices indices = plottable.second;
+            std::vector<unsigned int> indices_v = indices.getRowsVector();
+            for(unsigned int j = 0; j < indices_v.size(); ++j)
+                indices_v[j] += minIndex;
+            return Indices(indices_v);
+        }
+        else minIndex += _flushers[i]->getSize();
+    }
+}
+
+unsigned int OpenSoT::L::getMaximumIndex()
+{
+    unsigned int maxIndex = 0;
+    maxIndex += fakeFlusher.getSize()-1;
+    for(unsigned int i = 0; i < _flushers.size(); ++i)
+        maxIndex += _flushers[i]->getSize();
+    return maxIndex;
 }

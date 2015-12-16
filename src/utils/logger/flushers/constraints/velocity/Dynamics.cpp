@@ -2,7 +2,26 @@
 
 using namespace OpenSoT::flushers::constraints::velocity;
 
-std::string Dynamics::toString()
+Dynamics::Dynamics(OpenSoT::constraints::velocity::Dynamics::Ptr dynamics, iDynUtils &model)
+    : ConstraintFlusher(dynamics)
+{
+    const std::vector<std::string> jointNames = model.getJointNames();
+    std::list<std::string> description;
+
+    for(unsigned int i = 0; i < jointNames.size(); ++i)
+        description.push_back(jointNames[i] + " \tau_{lim}");
+    for(unsigned int i = 0; i < jointNames.size(); ++i)
+        description.push_back(jointNames[i] + " \tau_{est}");
+    for(unsigned int i = 0; i < jointNames.size(); ++i)
+        description.push_back(jointNames[i] + " \bUpperBound");
+    for(unsigned int i = 0; i < jointNames.size(); ++i)
+        description.push_back(jointNames[i] + " \bLowerBound");
+    description.push_back("bound scaling");
+
+    this->setDescription(description);
+}
+
+std::string Dynamics::toString() const
 {
     std::stringstream ss;
     OpenSoT::constraints::velocity::Dynamics::Ptr _dynamics =
@@ -38,7 +57,7 @@ OpenSoT::Indices Dynamics::getIndices(int label) const
     }
 }
 
-int Dynamics::getSize()
+int Dynamics::getSize() const
 {
     // torque limits, estimated torque, sigma, bUpperBound, bLowerBound
     return _constraint->getXSize()*4 + 1;

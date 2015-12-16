@@ -23,93 +23,86 @@
 #include <OpenSoT/utils/logger/flushers/all.h>
 #include <OpenSoT/utils/logger/flushers/ConstraintFlusher.h>
 #include <OpenSoT/utils/logger/flushers/DataFlusher.h>
+#include <OpenSoT/utils/logger/flushers/FakeFlusher.h>
 #include <OpenSoT/utils/logger/flushers/TaskFlusher.h>
+
+#include <idynutils/idynutils.h>
+
 #include <map>
 #include <fstream>
 #include <string>
 
 namespace OpenSoT {
+    namespace plotters {
+        // forward declaration of Plotter
+        class Plotter;
+    }
+
     class L
     {
-        class Plottable
-        {
-            OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr _task;
-            OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr _constraint;
-            OpenSoT::Indices _indices;
-        public:
-            /**
-             * @brief Plottable plots all the elements of a task as specified by its flusher
-             * @param task the task to plot
-             */
-            Plottable(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-                : _task(task), _indices(-1) {}
-
-            /**
-             * @brief Plottable plots all the elements of a constraint as specified by its flusher
-             * @param constraint the constraint to plot
-             */
-            Plottable(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
-                : _constraint(constraint), _indices(-1) {}
-
-            /**
-             * @brief Plottable plots the specified elements of a task
-             * @param task task to plot
-             * @param indices indices to plot
-             */
-            Plottable(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
-                      OpenSoT::Indices& indices)
-                : _task(task), _indices(indices) {}
-
-            /**
-             * @brief Plottable plots the specified elements of a constraint
-             * @param constraint constraint to plot
-             * @param indices indices to plot
-             */
-            Plottable(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint,
-                      OpenSoT::Indices& indices)
-                : _constraint(constraint), _indices(indices) {}
-        };
-
-        class Plotter
-        {
-        protected:
-            std::map<unsigned int, Plottable> toPlot;
-        public:
-            Plotter(){};
-
-            bool setupSubPlots(unsigned int nRows, unsigned int nCols);
-
-            Plotter& subPlot(unsigned int nSubPlot);
-
-            bool plot(std::list<Plottable> data);
-
-            bool plot(std::list<Plottable> data, std::list<std::string> labels);
-        };
 
     public:
         /**
-         * @brief L creates a named logger
-         * @param loggerName
+         * @brief The logger_format enum defines in which format we are saving data
          */
-        L(std::string loggerName);
+        enum logger_format {FORMAT_PYTHON};
+
+        /**
+         * @brief L creates a named logger. Logged data will be included each in a separate file.
+         * All files will then be included in a file named as the logger name, with an extension
+         * that depends on the logger format (e.g., loggerName.py or loggerName.m)
+         * @param loggerName the name of the current logger
+         * @param model the robot model used.
+         * @TODO we could inherite a LSolution that automatically saves the solution of the problem
+         */
+        L(std::string loggerName, iDynUtils& model, logger_format format = FORMAT_PYTHON);
 
         ~L();
 
-        void udpate(double t, const yarp::sig::Vector& q_dot);
+        /**
+         * @brief udpate the logger. It will automatically flush to file all flushers, save the current time and the optimal solution.
+         * Should be called after solving a stack, and before the next stack update. For it to work, at least a flusher needs to be created
+         * via the add() function.
+         * @param t the current time
+         * @param dq_opt the optimal solution as given by solve()
+         */
+        void udpate(double t, const yarp::sig::Vector& dq_opt);
 
+        /**
+         * @brief open opens a file for logging.
+         * @param logName the name of the file without extension.
+         * The extension that the logger will add depends on its format
+         * (e.g. logName.py or logName.m)
+         * @return
+         */
         bool open(std::string logName);
 
         bool close();
 
+        /**
+         * @brief add adds a new task flusher. It will be deleted after the current log file is closed.
+         * @param task a pointer to a task
+         * @return the corresponding flusher
+         */
         flushers::TaskFlusher::Ptr add(      Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
 
+        /**
+         * @brief add adds a new constraint flusher. It will be deleted after the current log file is closed
+         * @param constraint
+         * @return
+         */
         flushers::ConstraintFlusher::Ptr add(Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint);
 
+        /**
+         * @brief add adds a new data flusher. It will be deleted after the current log file is closed
+         * @param data a pointer to the beginning of the the data to flush
+         * @return
+         */
         template <class T>
-        flushers::Flusher::Ptr add(const T* data)
+        flushers::Flusher::Ptr add(const T* data, const unsigned int size)
         {
-            dataFlushers[(void*)data].reset(new flushers::DataFlusher<T>(data));
-            return dataFlushers[(void*)data];
+            _dataFlushers[(void*)data].reset(new flushers::DataFlusher<T>(data, size));
+            return _dataFlushers[(void*)data];
         }
 
         flushers::TaskFlusher::Ptr getFlusher(      Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
@@ -118,31 +111,55 @@ namespace OpenSoT {
 
         flushers::Flusher::Ptr getFlusher(void* data);
 
-        Plotter plotter;
+        logger_format getFormat() const;
 
-    private:
+        std::string getName() const;
+
+        Indices getGlobalIndices(std::pair<flushers::Flusher::Ptr, Indices> plottable);
+
+        unsigned int getMaximumIndex();
+
+        OpenSoT::plotters::Plotter* plotter;
+
+    protected:
         typedef Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr TaskPtr;
         typedef Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr ConstraintPtr;
 
+        iDynUtils& _model;
+
+        /**
+         * @brief _name the name of the current logger
+         */
+        std::string _name;
+
+        logger_format _format;
+
+        /**
+         * @brief _collator_log contains a list of all log files which this logger has written to
+         */
+        std::ofstream _collator;
+
+        /**
+         * @brief _current_log the file on which we are currently logging
+         */
         std::ofstream _current_log;
         std::string   _current_log_filename;
 
-        std::map<std::string, int> must_append;
-        std::map<TaskPtr, flushers::TaskFlusher::Ptr> taskFlushers;
-        std::map<ConstraintPtr, flushers::ConstraintFlusher::Ptr> constraintFlushers;
-        std::map<void*, flushers::Flusher::Ptr> dataFlushers;
+
+        /**
+         * @brief _n_dofs the size of the solution.
+         */
+        int _n_dofs;
+
+        OpenSoT::flushers::FakeFlusher fakeFlusher;
+
+        std::map<std::string, int> _must_append;
+
+        std::vector<flushers::Flusher::Ptr> _flushers;
+        std::map<TaskPtr, flushers::TaskFlusher::Ptr> _taskFlushers;
+        std::map<ConstraintPtr, flushers::ConstraintFlusher::Ptr> _constraintFlushers;
+        std::map<void*, flushers::Flusher::Ptr> _dataFlushers;
     };
-}
-
-std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::Flusher& flusher)
-{
-    out << flusher.toString();
-}
-
-std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::Flusher::Ptr& flusher)
-{
-    if(flusher)
-        out << flusher->toString();
 }
 
 #endif

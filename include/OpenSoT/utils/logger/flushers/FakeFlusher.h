@@ -16,55 +16,35 @@
 */
 
 
-#ifndef __DATA_FLUSHER_H__
-#define __DATA_FLUSHER_H__
+#ifndef __FAKE_FLUSHER_H__
+#define __FAKE_FLUSHER_H__
 
 #include <OpenSoT/utils/logger/flushers/Flusher.h>
 #include <boost/shared_ptr.hpp>
-#include <ostream>
-#include <sstream>
 
 namespace OpenSoT
 {
     namespace flushers
     {
-        template <class T>
-        class DataFlusher : public Flusher
+        class FakeFlusher : public Flusher
         {
             unsigned int _size;
-            const T* _data;
         public:
-            enum { DATA = 0 };
+            typedef boost::shared_ptr<FakeFlusher> Ptr;
 
-            typedef boost::shared_ptr< DataFlusher<T> > Ptr;
+            FakeFlusher(unsigned int size);
 
-            DataFlusher(const T* data, unsigned int size)
-                : _data(data), _size(size) {}
+            ~FakeFlusher();
 
-            ~DataFlusher() {}
-
-
-            std::string toString() const
-            {
-                std::stringstream ss;
-                for(unsigned int i = 0; i < _size; ++i)
-                    ss << ", " << _data[i];
-                return ss.str();
-            }
+            std::string toString() const;
 
             /**
              * @brief getSize returns the number of elements logged by this flusher
              * @return the number of elements to be logged
              */
-            virtual int getSize() const
-            {
-                return _size;
-            }
+            int getSize() const;
 
-            Indices getIndices(int label) const
-            {
-                return Indices::range(0, _size - 1);
-            }
+            Indices getIndices(int label) const;
         };
     }
 }

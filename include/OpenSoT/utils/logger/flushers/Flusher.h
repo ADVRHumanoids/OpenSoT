@@ -18,18 +18,26 @@
 #ifndef __FLUSHER_H__
 #define __FLUSHER_H__
 
+#include <yarp/sig/Vector.h>
+#include <OpenSoT/utils/Indices.h>
 
 #include <boost/shared_ptr.hpp>
-#include <OpenSoT/utils/Indices.h>
+#include <algorithm>
+#include <ostream>
+#include <utility>
 
 namespace OpenSoT 
 {
     namespace flushers
     {
+        /**
+         * @brief The Flusher interface defines what can write to file.
+         */
         class Flusher
         {
         protected:
             yarp::sig::Vector _q_dot;
+            std::vector<std::string> _descriptions;
         public:
             typedef boost::shared_ptr<Flusher> Ptr;
 
@@ -41,16 +49,31 @@ namespace OpenSoT
              * @brief getSize returns the number of elements logged by this flusher
              * @return the number of elements to be logged
              */
-            virtual int getSize() const { return 0; }
+            virtual int getSize() const = 0;
 
             virtual Indices getIndices(int label) const = 0;
+
+            std::list<std::string> getDescription();
+
+            std::list<std::string> getDescription(Indices indices);
+
+            bool setDescription(const std::list<std::string> descriptions);
+
+            bool setDescription(const std::list<std::string> descriptions, Indices indices);
+
 
             void updateSolution(const yarp::sig::Vector& q_dot)
             {
                 _q_dot = q_dot;
             }
+
+            std::pair<Flusher*, Indices> operator()(Indices indices);
         };
     }
 }
+
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::Flusher& flusher);
+
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::Flusher::Ptr& flusher);
 
 #endif

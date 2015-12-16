@@ -21,6 +21,7 @@
 
 #include <OpenSoT/constraints/velocity/Dynamics.h>
 #include <OpenSoT/utils/logger/flushers/ConstraintFlusher.h>
+#include <idynutils/idynutils.h>
 
 namespace OpenSoT
 {
@@ -42,11 +43,13 @@ namespace OpenSoT
                         SIGMA
                     };
 
-                    std::string toString();
+                    Dynamics(OpenSoT::constraints::velocity::Dynamics::Ptr dynamics, iDynUtils& model);
+
+                    std::string toString() const;
 
                     OpenSoT::Indices getIndices(int label) const;
 
-                    int getSize();
+                    int getSize() const;
 
                     typedef boost::shared_ptr<Dynamics> Ptr;
                 };

@@ -102,8 +102,18 @@ public:
      */
     static Indices range(unsigned int from, unsigned int to);
 
+    /**
+     * @brief operator + adds a set of indices to the current indices set
+     * @param b the indices set to concatenate
+     * @return a bigger indices set (sorted, without duplicates)
+     */
     Indices operator+(const Indices& b) const;
 
+    /**
+     * @brief operator + adds a new index to the current indices set
+     * @param r the index to add to the set
+     * @return a bigger indices set (sorted, without duplicates)
+     */
     Indices operator+(const unsigned int r) const;
 
     bool operator==(const Indices& b) const;
