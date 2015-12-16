@@ -19,6 +19,9 @@
 #ifndef __CONSTRAINT_FLUSHER_H__
 #define __CONSTRAINT_FLUSHER_H__
 
+#include <OpenSoT/Constraint.h>
+#include <OpenSoT/utils/logger/flushers/Flusher.h>
+
 #include <boost/shared_ptr.hpp>
 #include <ostream>
 
@@ -26,35 +29,18 @@ namespace OpenSoT
 {
     namespace flushers 
     {
-        class ConstraintFlusher 
+        class ConstraintFlusher : public Flusher
         {
+        protected:
+            OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr _constraint;
         public:
             typedef boost::shared_ptr<ConstraintFlusher> Ptr;
 
-
-            virtual std::string toString() const = 0;
-            virtual ~ConstraintFlusher() = 0;
-
-            /**
-             * @brief getSize returns the number of elements logged by this flusher
-             * @return the number of elements to be logged
-             */
-            virtual int getSize() { return 0; }
-
-            virtual Indices getIndices(int label) = 0;
+            ConstraintFlusher(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
+                : _constraint(constraint) {}
+            virtual ~ConstraintFlusher() {}
         };
     }
 }
 
-std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::ConstraintFlusher& flusher)
-{
-    out << flusher.toString();
-}
-
-std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::ConstraintFlusher::Ptr& flusher)
-{
-    if(flusher)
-        out << flusher->toString();
-}
-
-#endif __CONSTRAINT_FLUSHER_H__
+#endif

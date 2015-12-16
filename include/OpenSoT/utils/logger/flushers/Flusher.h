@@ -15,30 +15,40 @@
  * Public License for more details
 */
 
-#ifndef __TASK_FLUSHER_H__
-#define __TASK_FLUSHER_H__
+#ifndef __FLUSHER_H__
+#define __FLUSHER_H__
 
-#include <OpenSoT/Task.h>
-#include <OpenSoT/utils/logger/flushers/Flusher.h>
 
 #include <boost/shared_ptr.hpp>
+#include <OpenSoT/utils/Indices.h>
 
-namespace OpenSoT
+namespace OpenSoT 
 {
     namespace flushers
     {
-        class TaskFlusher : public Flusher
-        {   
+        class Flusher
+        {
         protected:
-            Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr _task;
+            yarp::sig::Vector _q_dot;
         public:
-            typedef boost::shared_ptr<TaskFlusher> Ptr;
+            typedef boost::shared_ptr<Flusher> Ptr;
 
 
-            TaskFlusher(Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-                : _task(task) {}
             virtual std::string toString() const = 0;
-            virtual ~TaskFlusher() {};
+            virtual ~Flusher() {}
+
+            /**
+             * @brief getSize returns the number of elements logged by this flusher
+             * @return the number of elements to be logged
+             */
+            virtual int getSize() const { return 0; }
+
+            virtual Indices getIndices(int label) const = 0;
+
+            void updateSolution(const yarp::sig::Vector& q_dot)
+            {
+                _q_dot = q_dot;
+            }
         };
     }
 }

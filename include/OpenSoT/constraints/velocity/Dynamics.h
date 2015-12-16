@@ -130,6 +130,15 @@
                 yarp::sig::Vector getTorqueLimits();
 
                 /**
+                 * @brief getEstimatedTorque returns an estimate of the joint torques given a certain
+                 *        solution vector
+                 * @param q_dot the commanded joint velocities
+                 * @return the vector of estimated torques on the joints,
+                 *         based on the model state (position and velocity)
+                 */
+                yarp::sig::Vector getEstimatedTorques(const yarp::sig::Vector& q_dot);
+
+                /**
                  * @brief setVelocityLimits
                  * @param tauLimits the joint torque limits. It needs be a positive number [Nm]
                  */
@@ -137,20 +146,29 @@
 
                 /**
                  * @brief update
-                 * @param x constains the concatenation of q and q_dot:
-                 *  x = [q, q_dot]
+                 * @param x constains either the concatenation of q and q_dot:
+                 *  x = [q, q_dot], or x = q
                  */
                 void update(const yarp::sig::Vector &x);
 
                 /**
-                 * @brief setBoundScaling sets bound scaling for the capsule constraint
+                 * @brief setBoundScaling sets bound scaling for the dynamics constraint
                  * @param boundScaling is a number which should be lower than 1.0
                  *        (e.g. 1./2. means we are looking two steps ahead and will avoid
-                 *         collision with the capsule by slowing down)
+                 *         collision with the dynamic limits by slowing down)
                  */
                 void setBoundScaling(const double boundScaling)
                 {
                     _boundScaling = boundScaling;
+                }
+
+                /**
+                 * @brief getBoundScaling returns the bound scaling of the dynamics constraint
+                 * @return the bound scaling
+                 */
+                double getBoundScaling() const
+                {
+                    return _boundScaling;
                 }
             };
         }

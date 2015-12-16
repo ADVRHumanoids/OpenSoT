@@ -240,3 +240,8 @@ void Dynamics::update(const yarp::sig::Vector &x)
     _bUpperBound = _boundScaling*(_jointTorquesMax + _b);
     _Aineq = (1.0/_dT)*_M;
 }
+
+yarp::sig::Vector Dynamics::getEstimatedTorques(const yarp::sig::Vector &q_dot)
+{
+    return _Aineq*q_dot - _b;
+}

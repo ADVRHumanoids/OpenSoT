@@ -104,6 +104,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/utils/PreviewerUtils.cpp
                     src/utils/VelocityAllocation.cpp
                     src/utils/logger/L.cpp
+                    src/utils/logger/flushers/constraints/velocity/Dynamics.cpp
                     ${sot_INCLUDES})
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT

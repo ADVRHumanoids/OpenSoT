@@ -15,25 +15,75 @@
  * Public License for more details
 */
 
+#ifndef __LOGGER_H__
+#define __LOGGER_H__
+
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/logger/flushers/all.h>
 #include <OpenSoT/utils/logger/flushers/ConstraintFlusher.h>
+#include <OpenSoT/utils/logger/flushers/DataFlusher.h>
 #include <OpenSoT/utils/logger/flushers/TaskFlusher.h>
 #include <map>
 #include <fstream>
 #include <string>
 
-#ifndef __LOGGER_H__
-#define __LOGGER_H__
-
 namespace OpenSoT {
     class L
     {
+        class Plottable
+        {
+            OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr _task;
+            OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr _constraint;
+            OpenSoT::Indices _indices;
+        public:
+            /**
+             * @brief Plottable plots all the elements of a task as specified by its flusher
+             * @param task the task to plot
+             */
+            Plottable(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+                : _task(task), _indices(-1) {}
+
+            /**
+             * @brief Plottable plots all the elements of a constraint as specified by its flusher
+             * @param constraint the constraint to plot
+             */
+            Plottable(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
+                : _constraint(constraint), _indices(-1) {}
+
+            /**
+             * @brief Plottable plots the specified elements of a task
+             * @param task task to plot
+             * @param indices indices to plot
+             */
+            Plottable(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
+                      OpenSoT::Indices& indices)
+                : _task(task), _indices(indices) {}
+
+            /**
+             * @brief Plottable plots the specified elements of a constraint
+             * @param constraint constraint to plot
+             * @param indices indices to plot
+             */
+            Plottable(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint,
+                      OpenSoT::Indices& indices)
+                : _constraint(constraint), _indices(indices) {}
+        };
+
         class Plotter
         {
+        protected:
+            std::map<unsigned int, Plottable> toPlot;
         public:
             Plotter(){};
+
+            bool setupSubPlots(unsigned int nRows, unsigned int nCols);
+
+            Plotter& subPlot(unsigned int nSubPlot);
+
+            bool plot(std::list<Plottable> data);
+
+            bool plot(std::list<Plottable> data, std::list<std::string> labels);
         };
 
     public:
@@ -45,7 +95,7 @@ namespace OpenSoT {
 
         ~L();
 
-        void udpate(double t);
+        void udpate(double t, const yarp::sig::Vector& q_dot);
 
         bool open(std::string logName);
 
@@ -55,9 +105,18 @@ namespace OpenSoT {
 
         flushers::ConstraintFlusher::Ptr add(Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint);
 
+        template <class T>
+        flushers::Flusher::Ptr add(const T* data)
+        {
+            dataFlushers[(void*)data].reset(new flushers::DataFlusher<T>(data));
+            return dataFlushers[(void*)data];
+        }
+
         flushers::TaskFlusher::Ptr getFlusher(      Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
 
         flushers::ConstraintFlusher::Ptr getFlusher(Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint);
+
+        flushers::Flusher::Ptr getFlusher(void* data);
 
         Plotter plotter;
 
@@ -71,7 +130,19 @@ namespace OpenSoT {
         std::map<std::string, int> must_append;
         std::map<TaskPtr, flushers::TaskFlusher::Ptr> taskFlushers;
         std::map<ConstraintPtr, flushers::ConstraintFlusher::Ptr> constraintFlushers;
+        std::map<void*, flushers::Flusher::Ptr> dataFlushers;
     };
 }
 
-#endif __LOGGER_H__
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::Flusher& flusher)
+{
+    out << flusher.toString();
+}
+
+std::ostream& operator<<(std::ostream& out, const OpenSoT::flushers::Flusher::Ptr& flusher)
+{
+    if(flusher)
+        out << flusher->toString();
+}
+
+#endif
