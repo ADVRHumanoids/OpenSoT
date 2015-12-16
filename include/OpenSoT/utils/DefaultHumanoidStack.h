@@ -70,6 +70,7 @@
          const tasks::velocity::MinimumEffort::Ptr minimumEffort;
          const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
          const tasks::velocity::Postural::Ptr postural;
+         const tasks::velocity::MinimizeAcceleration::Ptr minimumAcceleration;
 
 
          // constraints

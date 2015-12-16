@@ -9,14 +9,59 @@
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/VelocityAllocation.h>
 #include <boost/program_options.hpp>
+#include <signal.h>
+#include <fstream>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define MODULE_NAME "example_python"
-#define dT          25e-3
+#define dT          35e-3
 
 typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                             > Accumulator;
+class logger{
+public:
+logger(const std::string& name, const int size = 0)
+    {
+        if(size > 0)
+            data.reserve(size);
+
+        std::string file_name = "example_python_" + name + ".m";
+        file.open(file_name.c_str());
+        file<<name<<" = ["<<std::endl;
+    }
+
+    void log(const yarp::sig::Vector& data_)
+    {
+        data.push_back(data_);
+    }
+
+    void write()
+    {
+        for(unsigned int i = 0; i < data.size(); ++i)
+            file<<data[i].toString()<<std::endl;
+        file<<"];"<<std::endl;
+        file.close();
+    }
+
+    std::vector<yarp::sig::Vector> data;
+    std::ofstream file;
+
+};
+
+logger torques_measured("torques_measured");
+
+void my_handler(int s){
+           std::cout<<"Writing log files..."<<std::endl;
+           torques_measured.write();
+           std::cout<<"...log files written!"<<std::endl;
+           exit(1);
+
+}
+
 int main(int argc, char **argv) {
+    signal (SIGINT,my_handler);
     bool no_torque_limits;
 
     namespace po = boost::program_options;
@@ -58,7 +103,7 @@ int main(int argc, char **argv) {
     RobotUtils robot( MODULE_NAME, "bigman",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf");
-    yarp::os::Time::delay(1.0);
+    yarp::os::Time::delay(0.5);
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq = q*0.0;
 
@@ -76,7 +121,7 @@ int main(int argc, char **argv) {
         _ft_measurements[i].second = ft_readings[_ft_measurements[i].first];
 
     robot.idynutils.setFloatingBaseLink(robot.idynutils.left_leg.end_effector_name);
-    robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
+    robot.idynutils.updateiDyn3Model(q, dq, _ft_measurements, true);
     OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
 
     /*                            */
@@ -87,10 +132,10 @@ int main(int argc, char **argv) {
     DHS.leftLeg->setLambda(0.6);    DHS.leftLeg->setOrientationErrorGain(1.0);
     DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.6);
     DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.6);
-    DHS.com_XY->setLambda(0.1);     DHS.postural->setLambda(0.3);
+    DHS.com_XY->setLambda(0.05);     DHS.postural->setLambda(0.05);
     DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
     DHS.selfCollisionAvoidance->setBoundScaling(0.6);
-    DHS.velocityLimits->setVelocityLimits(0.3);
+    DHS.velocityLimits->setVelocityLimits(0.6);
 
     yarp::sig::Matrix pW = DHS.postural->getWeight();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
@@ -109,9 +154,12 @@ int main(int argc, char **argv) {
     DHS.postural->setWeight(pW);
 
     yarp::sig::Vector tauLims = DHS.torqueLimits->getTorqueLimits();
-    for(unsigned int i_t = 0; i_t < 3; ++i_t)
-        tauLims[robot.idynutils.torso.joint_numbers[i_t]] *= 0.5;
+    tauLims[robot.idynutils.torso.joint_numbers[0]] *= 0.6;
+    tauLims[robot.idynutils.torso.joint_numbers[1]] *= 0.6;
+    tauLims[robot.idynutils.torso.joint_numbers[2]] *= 0.6;
+
     DHS.torqueLimits->setTorqueLimits(tauLims);
+    DHS.torqueLimits->setBoundScaling(0.2);
 
     std::list<std::pair<std::string,std::string> > whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
@@ -162,16 +210,16 @@ int main(int argc, char **argv) {
         ( (DHS.leftArm + DHS.rightArm ) << DHS.selfCollisionAvoidance ) /
         ( (DHS.postural) << DHS.selfCollisionAvoidance );
     autoStack << DHS.jointLimits;
-    if(!no_torque_limits)
+    /*if(no_torque_limits)
     {
         std::cout << "Adding torque limits.." << std::endl;
         autoStack << DHS.torqueLimits; // << DHS.velocityLimits; commented since we are using VelocityALlocation
-    }
+    }*/
 
     OpenSoT::VelocityAllocation(autoStack,
                                 dT,
-                                0.3,
-                                0.6);
+                                0.6,
+                                0.9);
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
@@ -184,7 +232,7 @@ int main(int argc, char **argv) {
                     *i_c))
             boost::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
-                                *i_c)->setVelocityLimits(.9);
+                                *i_c)->setVelocityLimits(1.1);
     }
 
 
@@ -206,23 +254,45 @@ int main(int argc, char **argv) {
     OpenSoT::interfaces::yarp::tasks::YCoM com(robot.idynutils.getRobotName(),
                                                MODULE_NAME, DHS.com);
 
-    OpenSoT::solvers::QPOases_sot solver(autoStack->getStack(),
-                                         autoStack->getBounds(), 1e10);
+    OpenSoT::solvers::QPOases_sot::Ptr solver;
+    if(!no_torque_limits)
+    {
+        std::cout << "Adding torque limits.." << std::endl;
+        solver.reset(new OpenSoT::solvers::QPOases_sot(autoStack->getStack(),
+                                             autoStack->getBounds(),
+                                             DHS.torqueLimits, 1e10));
+    } else
+        solver.reset(new OpenSoT::solvers::QPOases_sot(autoStack->getStack(),
+                                             autoStack->getBounds(), 1e10));
 
     robot.setPositionDirectMode();
+    yarp::os::Time::delay(2.5);
+
     double tic, toc;
     int print_mean = 0;
+
+
+    yarp::sig::Vector q_m(q.size(), 0.0), dq_m(q.size(), 0.0), tau_m(q.size(), 0.0);
     while(true) {
         tic = yarp::os::Time::now();
 
+
+        robot.sense(q_m, dq_m, tau_m);
+        torques_measured.log(tau_m);
+
         RobotUtils::ftReadings ft_readings = robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
-            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.7;
+            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.6;
 
         robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
 
         autoStack->update(q);
-        if(solver.solve(dq))
+        if(!no_torque_limits)
+        {
+            using namespace yarp::math;
+            DHS.torqueLimits->update(cat(q,dq/dT));
+        }
+        if(solver->solve(dq))
             q+=dq;
         else
             std::cout << "Error computing solve()" << std::endl;
