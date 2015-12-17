@@ -24,6 +24,10 @@ bool OpenSoT::flushers::Flusher::setDescription(const std::list<std::string> des
     return true;
 }
 
+void OpenSoT::flushers::Flusher::updateSolution(const yarp::sig::Vector &q_dot)
+{
+    _q_dot = q_dot;
+}
 
 std::pair<OpenSoT::flushers::Flusher *, OpenSoT::Indices> OpenSoT::flushers::Flusher::i(OpenSoT::Indices indices)
 {

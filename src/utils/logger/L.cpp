@@ -18,6 +18,7 @@
 #include <OpenSoT/OpenSoT.h>
 #include <OpenSoT/utils/logger/L.h>
 #include <OpenSoT/utils/logger/plotters/Plotter.h>
+#include <exception>
 
 void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
 {
@@ -25,19 +26,12 @@ void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
     for(unsigned int i = 0; i < q_dot.size(); ++i)
         _current_log << q_dot[i] << ",";
     {
-        typedef std::map<TaskPtr, flushers::TaskFlusher::Ptr>::const_iterator it_t;
-        typedef std::map<ConstraintPtr, flushers::ConstraintFlusher::Ptr>::const_iterator it_c;
+        typedef std::vector<flushers::Flusher::Ptr>::const_iterator it_f;
 
-        for(it_t it = _taskFlushers.begin(); it != _taskFlushers.end(); ++it)
+        for(it_f it = _flushers.begin(); it != _flushers.end(); ++it)
         {
-            it->second->updateSolution(q_dot);
-            _current_log << it->second;
-        }
-
-        for(it_c it = _constraintFlushers.begin(); it != _constraintFlushers.end(); ++it)
-        {
-            it->second->updateSolution(q_dot);
-            _current_log << it->second;
+            (*it)->updateSolution(q_dot);
+            _current_log << *it;
         }
     }
     _current_log << ")," << std::endl;
@@ -108,7 +102,8 @@ OpenSoT::L::L(std::string loggerName, iDynUtils& model_, OpenSoT::L::logger_form
     : _name(loggerName), model(model_), _format(format),
       _n_dofs(model_.iDyn3_model.getNrOfDOFs()),
       _fakeFlusher_t(1),
-      _fakeFlusher_dq(_n_dofs)
+      _fakeFlusher_dq(_n_dofs),
+      plotter(new OpenSoT::plotters::Plotter(this))
 {
     if(_format == FORMAT_PYTHON)
     {
@@ -182,7 +177,8 @@ std::string OpenSoT::L::getName() const
     return _name;
 }
 
-OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flusher::Ptr, Indices> plottable)
+OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flusher::Ptr,
+                                              Indices> plottable)
 {
     if(boost::dynamic_pointer_cast<OpenSoT::flushers::FakeFlusher>(plottable.first))
         return plottable.second;
@@ -201,6 +197,8 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flush
         }
         else minIndex += _flushers[i]->getSize();
     }
+
+    throw new std::runtime_error("Error: could not find specified flusher");
 }
 
 unsigned int OpenSoT::L::getMaximumIndex()

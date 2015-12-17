@@ -62,10 +62,7 @@ namespace OpenSoT
             bool setDescription(const std::list<std::string> descriptions, Indices indices);
 
 
-            void updateSolution(const yarp::sig::Vector& q_dot)
-            {
-                _q_dot = q_dot;
-            }
+            void updateSolution(const yarp::sig::Vector& q_dot);
 
             /**
              * @brief i generates a Plottable element given a label

@@ -68,7 +68,7 @@ TEST_F(testLogger, testDataFlusherWorks)
     dq[5] = 2.0;
 
     logger.udpate(t, dq);
-    logger.close();  // the final file should have 4 rows of data, 35 columns
+    logger.close();  // the final file should have 4 rows of data, 33 columns
 }
 
 TEST_F(testLogger, testLoggerCollationWorks)
@@ -89,7 +89,7 @@ TEST_F(testLogger, testLoggerCollationWorks)
 
     logger.udpate(t, dq);
 
-    logger.close(); // the first file should have 2 rows of data, 35 columns
+    logger.close(); // the first file should have 2 rows of data, 33 columns
     logger.open("test_cw_data2");
     dataFlusher = logger.add(v.data(),3);
 
@@ -108,7 +108,7 @@ TEST_F(testLogger, testLoggerCollationWorks)
     dq[5] = 2.0;
 
     logger.udpate(t, dq);
-    logger.close();  // the second file should have 2 rows of data, 35 columns
+    logger.close();  // the second file should have 2 rows of data, 33 columns
 }
 
 TEST_F(testLogger, testAppendingWorks)
@@ -148,7 +148,7 @@ TEST_F(testLogger, testAppendingWorks)
     dq[5] = 2.0;
 
     logger.udpate(t, dq);
-    logger.close();  // the second file should have 2 rows of data, 35 columns
+    logger.close();  // the second file should have 2 rows of data, 33 columns
 
     logger.open("test_aw_data1");
     dataFlusher = logger.add(v.data(),3);
@@ -168,7 +168,7 @@ TEST_F(testLogger, testAppendingWorks)
     dq[5] = 2.0;
 
     logger.udpate(t, dq);
-    logger.close();  // the first file should have now 2 rows of data, 35 columns
+    logger.close();  // the first file should have now 2 rows of data, 33 columns
 }
 
 TEST_F(testLogger, testPlotterWorks)
@@ -240,7 +240,7 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->ylabel("solution [rad/s]");
     logger.plotter->savefig();
 
-    logger.close();  // the final file should have 4 rows of data, 35 columns
+    logger.close();  // the final file should have 4 rows of data, 33 columns
 }
 
 TEST_F(testLogger, testDynamicsFlusherWork)

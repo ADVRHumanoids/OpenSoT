@@ -97,8 +97,10 @@ namespace OpenSoT {
         template <class T>
         flushers::Flusher::Ptr add(const T* data, const unsigned int size)
         {
-            _dataFlushers[(void*)data].reset(new flushers::DataFlusher<T>(data, size));
-            return _dataFlushers[(void*)data];
+            typename flushers::DataFlusher<T>::Ptr dataFlusher(new flushers::DataFlusher<T>(data, size));
+            _dataFlushers[(void*)data] = dataFlusher;
+            _flushers.push_back(dataFlusher);
+            return dataFlusher;
         }
 
         flushers::TaskFlusher::Ptr getFlusher(      Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
@@ -128,7 +130,7 @@ namespace OpenSoT {
         /**
          * @brief plotter a utility class to generate plots
          */
-        OpenSoT::plotters::Plotter* plotter;
+        OpenSoT::plotters::Plotter::Ptr plotter;
 
         const iDynUtils& model;
 

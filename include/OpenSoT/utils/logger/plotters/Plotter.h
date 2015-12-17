@@ -76,6 +76,8 @@ namespace OpenSoT
             std::string getIndicesString(std::list<unsigned int> indices);
 
         public:
+            typedef boost::shared_ptr<Plotter> Ptr;
+
             Plotter(L* logger);
 
             void subplot(const unsigned int nRows,
@@ -129,6 +131,11 @@ namespace OpenSoT
              * @brief savefig saves the last defined figure
              */
             void savefig();
+
+            /**
+             * @brief show displays plots on screen
+             */
+            void show();
 
             void title(const std::string& title);
 

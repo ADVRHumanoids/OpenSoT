@@ -138,6 +138,12 @@ void OpenSoT::plotters::Plotter::savefig()
                   << "_" << _n_fig << "', format='eps', transparent=True);" << std::endl;
 }
 
+void OpenSoT::plotters::Plotter::show()
+{
+    _commands << std::endl;
+    _commands << "show(block=True);" << std::endl;
+}
+
 void OpenSoT::plotters::Plotter::title(const std::string &title)
 {
     _commands << "title('" << title << "');" << std::endl;
@@ -145,10 +151,10 @@ void OpenSoT::plotters::Plotter::title(const std::string &title)
 
 std::string OpenSoT::plotters::Plotter::getCommands()
 {
-    _commands << std::endl;
-    _commands << "show(block=True);" << std::endl;
+    _n_fig = 0;
     std::string commands = _commands.str();
-    _commands.str("");
+    _commands.str(std::string());
+    _commands.clear();
     _fakeFlushers.clear();
     return commands;
 }
