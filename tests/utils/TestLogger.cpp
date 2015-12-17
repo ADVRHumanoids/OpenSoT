@@ -1,6 +1,7 @@
 #include <idynutils/idynutils.h>
 #include <idynutils/tests_utils.h>
 #include <OpenSoT/utils/logger/L.h>
+#include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <gtest/gtest.h>
 
 #define dT 1.0e-2
@@ -68,6 +69,35 @@ TEST_F(testLogger, testDataFlusherWorks)
     dq[5] = 2.0;
 
     logger.udpate(t, dq);
+    logger.close();  // the final file should have 4 rows of data, 33 columns
+}
+
+TEST_F(testLogger, testDynamicsFlusherWork)
+{
+    yarp::sig::Vector q(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector dq = q*0.0;
+    _robot.switchAnchorAndFloatingBase(_robot.left_leg.end_effector_name);
+    _robot.updateiDyn3Model(q, true);
+    OpenSoT::DefaultHumanoidStack DHS(_robot, dT, q);
+
+    double t = 0.0;
+    OpenSoT::flushers::Flusher::Ptr dynamicsFlusher;
+
+    L logger("test_dyfw", _robot);
+    logger.open("test_dyfw_data1");
+    dynamicsFlusher = logger.add(DHS.torqueLimits);
+
+    for(unsigned int j = 0; j < 100; ++j)
+    {
+        for(unsigned int i = 0; i < logger.model.right_arm.joint_numbers.size(); ++i)
+            dq[logger.model.right_arm.joint_numbers[i]] += 0.0001;
+
+        _robot.updateiDyn3Model(q, dq/dT, true);
+        DHS.torqueLimits->update(q);
+        t+=dT;
+        logger.udpate(t, dq);
+    }
+
     logger.close();  // the final file should have 4 rows of data, 33 columns
 }
 
@@ -242,11 +272,6 @@ TEST_F(testLogger, testPlotterWorks)
 
     logger.close();  // the final file should have 4 rows of data, 33 columns
 }
-
-TEST_F(testLogger, testDynamicsFlusherWork)
-{
-}
-
 
 }
 
