@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi, Enrico Mingo
+ * Author: Alessio Rocchi, Enrico Mingo Hoffman
  * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any

@@ -21,6 +21,7 @@ typedef boost::accumulators::accumulator_set<double,
 OpenSoT::L::Ptr logger;
 OpenSoT::flushers::Flusher::Ptr tauFlusher;
 OpenSoT::flushers::Flusher::Ptr dynamicsFlusher;
+OpenSoT::flushers::Flusher::Ptr LeftHandCartesianFlusher;
 
 void my_handler(int s){
     using namespace OpenSoT::flushers;
@@ -309,6 +310,7 @@ int main(int argc, char **argv) {
     logger->open("dynamics_log");
     dynamicsFlusher = logger->add(DHS.torqueLimits);
     tauFlusher = logger->add(tau_m.data(), q.size());
+    LeftHandCartesianFlusher = logger->add(DHS.leftArm);
 
     begin = yarp::os::Time::now();
 
