@@ -132,11 +132,11 @@
                 /**
                  * @brief getEstimatedTorque returns an estimate of the joint torques given a certain
                  *        solution vector
-                 * @param q_dot the commanded joint velocities
+                 * @param dq the commanded joint velocities
                  * @return the vector of estimated torques on the joints,
                  *         based on the model state (position and velocity)
                  */
-                yarp::sig::Vector getEstimatedTorques(const yarp::sig::Vector& q_dot);
+                yarp::sig::Vector getEstimatedTorques(const yarp::sig::Vector& dq);
 
                 /**
                  * @brief setVelocityLimits
