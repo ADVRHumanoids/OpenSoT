@@ -51,10 +51,12 @@ logger(const std::string& name, const int size = 0)
 };
 
 logger torques_measured("torques_measured");
+logger cartesian_error("cartesian_error");
 
 void my_handler(int s){
            std::cout<<"Writing log files..."<<std::endl;
            torques_measured.write();
+           cartesian_error.write();
            std::cout<<"...log files written!"<<std::endl;
            exit(1);
 
@@ -292,6 +294,9 @@ int main(int argc, char **argv) {
             using namespace yarp::math;
             DHS.torqueLimits->update(cat(q,dq/dT));
         }
+
+        cartesian_error.log(yarp::math::cat(DHS.leftArm->positionError, DHS.leftArm->orientationError));
+
         if(solver->solve(dq))
             q+=dq;
         else
