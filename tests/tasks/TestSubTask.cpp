@@ -110,8 +110,8 @@ TEST_F(TestSubTaskMap, testSubMapConstructor)
     ASSERT_TRUE(i != subTaskMap.getChunks().end());
     EXPECT_EQ(i->size(), 3);
 
-    ASSERT_EQ(subTaskMap.getRowsList().size(), 11);
-    ASSERT_EQ(subTaskMap.getRowsVector().size(), 11);
+    ASSERT_EQ(subTaskMap.asList().size(), 11);
+    ASSERT_EQ(subTaskMap.asVector().size(), 11);
     ASSERT_EQ(subTaskMap.size(), 11);
 }
 

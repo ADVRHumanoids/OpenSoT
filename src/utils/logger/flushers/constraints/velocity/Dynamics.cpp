@@ -47,11 +47,14 @@ OpenSoT::Indices Dynamics::getIndices(int label) const
     if(label & TORQUE_LIMITS)
         indices = indices + OpenSoT::Indices::range(0,_constraint->getXSize()-1);
     if(label & ESTIMATED_TORQUE)
-        indices = indices + OpenSoT::Indices::range(_constraint->getXSize(),                                                2*_constraint->getXSize()-1);
+        indices = indices + OpenSoT::Indices::range(_constraint->getXSize(),
+                                                    2*_constraint->getXSize()-1);
     if(label & BUPPERBOUND)
-        indices = indices + OpenSoT::Indices::range(2*_constraint->getXSize(),                                                    3*_constraint->getXSize()-1);
+        indices = indices + OpenSoT::Indices::range(2*_constraint->getXSize(),
+                                                    3*_constraint->getXSize()-1);
     if(label & BLOWERBOUND)
-        indices = indices + OpenSoT::Indices::range(3*_constraint->getXSize(),                                                    4*_constraint->getXSize()-1);
+        indices = indices + OpenSoT::Indices::range(3*_constraint->getXSize(),
+                                                    4*_constraint->getXSize()-1);
     if(label & SIGMA)
         indices = indices + 4*_constraint->getXSize();
 

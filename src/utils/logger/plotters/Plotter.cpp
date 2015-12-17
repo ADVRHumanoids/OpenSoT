@@ -9,7 +9,7 @@ std::list<unsigned int> OpenSoT::plotters::Plotter::getGlobalIndicesList(std::li
         ++it)
     {
         Indices globalIndices = _logger->getGlobalIndices(*it);
-        std::list<unsigned int> globalIndices_l = globalIndices.getRowsList();
+        std::list<unsigned int> globalIndices_l = globalIndices.asList();
         indices.insert(indices.end(),
                        globalIndices_l.begin(),
                        globalIndices_l.end());

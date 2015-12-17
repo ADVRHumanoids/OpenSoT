@@ -76,7 +76,7 @@ OpenSoT::Indices::Indices(const std::vector<unsigned int> &rowsVector)
 }
 
 OpenSoT::Indices::Indices(const OpenSoT::Indices &subTaskMap)
-    : _rowsList(subTaskMap.getRowsList())
+    : _rowsList(subTaskMap.asList())
 {
     this->generateChunks();
 }
@@ -86,12 +86,12 @@ const OpenSoT::Indices::ChunkList& OpenSoT::Indices::getChunks() const
     return _contiguousChunks;
 }
 
-const std::list<unsigned int>& OpenSoT::Indices::getRowsList() const
+const std::list<unsigned int>& OpenSoT::Indices::asList() const
 {
     return _rowsList;
 }
 
-const std::vector<unsigned int> &OpenSoT::Indices::getRowsVector() const
+const std::vector<unsigned int> &OpenSoT::Indices::asVector() const
 {
     return _rowsVector;
 }
@@ -112,7 +112,7 @@ OpenSoT::Indices OpenSoT::Indices::range(unsigned int from, unsigned int to)
 
 OpenSoT::Indices::operator std::list<unsigned int>() const
 {
-    return this->getRowsList();
+    return this->asList();
 }
 
 OpenSoT::Indices::operator std::string() const
@@ -147,7 +147,7 @@ OpenSoT::Indices::operator std::string() const
 OpenSoT::Indices OpenSoT::Indices::operator+(const OpenSoT::Indices &b) const
 {
     std::list<unsigned int> rows = this->_rowsList;
-    rows.insert(rows.end(), b.getRowsList().begin(), b.getRowsList().end());
+    rows.insert(rows.end(), b.asList().begin(), b.asList().end());
     return Indices(rows);
 }
 
@@ -160,7 +160,7 @@ OpenSoT::Indices OpenSoT::Indices::operator+(const unsigned int r) const
 
 bool OpenSoT::Indices::operator==(const OpenSoT::Indices &b) const
 {
-    return this->_rowsList == b.getRowsList();
+    return this->_rowsList == b.asList();
 }
 
 int OpenSoT::Indices::size() const

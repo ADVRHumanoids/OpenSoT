@@ -257,7 +257,7 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->savefig();
 
     OpenSoT::Indices allDqIndices = solutionPlottable.second;
-    std::vector<unsigned int> allDqIndicesV = allDqIndices.getRowsVector();
+    std::vector<unsigned int> allDqIndicesV = allDqIndices.asVector();
     std::vector<unsigned int> j3_5Indicesv;
     for(unsigned int i = 3; i <= 5; ++i)
         j3_5Indicesv.push_back(allDqIndicesV[i]);

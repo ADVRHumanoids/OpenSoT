@@ -63,8 +63,8 @@ void OpenSoT::SubTask::generateWeight()
 
         for(unsigned int r = 0; r < this->getTaskSize(); ++r)
             for(unsigned int c = 0; c < this->getTaskSize(); ++c)
-                this->_W(r,c) = _taskPtr->getWeight()(this->_subTaskMap.getRowsVector()[r],
-                                                      this->_subTaskMap.getRowsVector()[c]);
+                this->_W(r,c) = _taskPtr->getWeight()(this->_subTaskMap.asVector()[r],
+                                                      this->_subTaskMap.asVector()[c]);
 }
 
 void OpenSoT::SubTask::setWeight(const yarp::sig::Matrix &W)
@@ -76,8 +76,8 @@ void OpenSoT::SubTask::setWeight(const yarp::sig::Matrix &W)
     yarp::sig::Matrix fullW = _taskPtr->getWeight();
     for(unsigned int r = 0; r < this->getTaskSize(); ++r)
         for(unsigned int c = 0; c < this->getTaskSize(); ++c)
-            fullW(this->_subTaskMap.getRowsVector()[r],
-                  this->_subTaskMap.getRowsVector()[c]) = this->_W(r,c);
+            fullW(this->_subTaskMap.asVector()[r],
+                  this->_subTaskMap.asVector()[c]) = this->_W(r,c);
 
     _taskPtr->setWeight(fullW);
 }

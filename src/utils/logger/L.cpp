@@ -190,7 +190,7 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flush
         if(_flushers[i] == plottable.first)
         {
             Indices indices = plottable.second;
-            std::vector<unsigned int> indices_v = indices.getRowsVector();
+            std::vector<unsigned int> indices_v = indices.asVector();
             for(unsigned int j = 0; j < indices_v.size(); ++j)
                 indices_v[j] += minIndex;
             return Indices(indices_v);

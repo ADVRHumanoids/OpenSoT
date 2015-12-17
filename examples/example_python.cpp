@@ -41,9 +41,9 @@ void my_handler(int s){
             std::vector<std::list<unsigned int> > finalIndicesL(3);
             std::vector<std::vector<unsigned int> > indicesV(3);
             unsigned int n_dofs = logger->model.getJointNames().size();
-            indicesV[0] = tauIndices.getRowsVector();
-            indicesV[1] = dynConstr1Indices.getRowsVector();
-            indicesV[2] = dynConstr2Indices.getRowsVector();
+            indicesV[0] = tauIndices.asVector();
+            indicesV[1] = dynConstr1Indices.asVector();
+            indicesV[2] = dynConstr2Indices.asVector();
             for(unsigned int i = 0; i < logger->model.torso.joint_numbers.size(); ++i)
             {
                 unsigned int jIndex = logger->model.torso.joint_numbers[i];

@@ -3,7 +3,7 @@
 std::list<std::string> OpenSoT::flushers::Flusher::getDescription(OpenSoT::Indices indices)
 {
     std::list<std::string> descriptions_l;
-    std::vector<unsigned int> indices_v = indices.getRowsVector();
+    std::vector<unsigned int> indices_v = indices.asVector();
     for(unsigned int i = 0; i < indices_v.size(); ++i)
         descriptions_l.push_back(_descriptions[indices_v[i]]);
     return descriptions_l;
@@ -16,7 +16,7 @@ bool OpenSoT::flushers::Flusher::setDescription(const std::list<std::string> des
     descriptions_v.insert(descriptions_v.end(),
                           descriptions.begin(),
                           descriptions.end());
-    std::vector<unsigned int> indices_v = indices.getRowsVector();
+    std::vector<unsigned int> indices_v = indices.asVector();
     if(*std::max_element(indices_v.begin(), indices_v.end()) > this->getSize())
         return false;
     for(unsigned int i = 0; i < indices_v.size(); ++i)

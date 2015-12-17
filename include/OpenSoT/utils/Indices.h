@@ -79,16 +79,16 @@ public:
     const ChunkList &getChunks() const;
 
     /**
-     * @brief getRowsList returns the list of all rows as a list (first row has index 0)
+     * @brief asList returns the list of all rows as a list (first row has index 0)
      * @return a list of row indices (starting from 0)
      */
-    const std::list<unsigned int> &getRowsList() const;
+    const std::list<unsigned int> &asList() const;
 
     /**
-     * @brief getRowsVector returns the list of all rows as a vector (first row has index 0)
+     * @brief asVector returns the list of all rows as a vector (first row has index 0)
      * @return  a vector of row indices (starting from 0)
      */
-    const std::vector<unsigned int> &getRowsVector() const;
+    const std::vector<unsigned int> &asVector() const;
 
     bool isContiguous() const;
 
