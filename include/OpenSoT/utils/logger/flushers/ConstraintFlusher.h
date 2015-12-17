@@ -38,7 +38,6 @@ namespace OpenSoT
 
             ConstraintFlusher(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
                 : _constraint(constraint) {}
-            virtual ~ConstraintFlusher() {}
         };
     }
 }

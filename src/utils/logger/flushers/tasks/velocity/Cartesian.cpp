@@ -2,11 +2,11 @@
 
 using namespace OpenSoT::flushers::tasks::velocity;
 
-Cartesian::Cartesian(OpenSoT::tasks::velocity::Cartesian::Ptr cartesian, const iDynUtils &model):
+Cartesian::Cartesian(OpenSoT::tasks::velocity::Cartesian::Ptr cartesian):
     TaskFlusher(cartesian)
 {
 
-    std::list<std::string> description;
+    std::vector<std::string> description;
 
     description.push_back("error/position/x");
     description.push_back("error/position/y");

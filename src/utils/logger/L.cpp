@@ -131,9 +131,17 @@ OpenSoT::L::~L()
 
 OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::add(             OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
 {
-OpenSoT::flushers::TaskFlusher::Ptr taskFlusher;
-// no task flushers are implemented at the moment
-return taskFlusher;
+    OpenSoT::flushers::TaskFlusher::Ptr taskFlusher;
+    if(boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task))
+    {
+        // the Dynamics flusher need a model to obtain the proper description
+        taskFlusher.reset(
+            new OpenSoT::flushers::tasks::velocity::Cartesian(
+                boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task)));
+        _taskFlushers[task] = taskFlusher;
+        _flushers.push_back(taskFlusher);
+    }
+    return taskFlusher;
 }
 
 OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::add(       OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)

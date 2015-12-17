@@ -39,7 +39,7 @@ namespace OpenSoT
                         ORIENTATION_ERROR    = 2
                     };
 
-                    Cartesian(OpenSoT::tasks::velocity::Cartesian::Ptr cartesian, const iDynUtils& model);
+                    Cartesian(OpenSoT::tasks::velocity::Cartesian::Ptr cartesian);
 
                     std::string toString() const;
 

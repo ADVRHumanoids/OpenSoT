@@ -37,8 +37,6 @@ namespace OpenSoT
 
             TaskFlusher(Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
                 : _task(task) {}
-            virtual std::string toString() const = 0;
-            virtual ~TaskFlusher() {};
         };
     }
 }
