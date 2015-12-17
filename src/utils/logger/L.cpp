@@ -107,7 +107,8 @@ bool OpenSoT::L::close()
 OpenSoT::L::L(std::string loggerName, iDynUtils& model_, OpenSoT::L::logger_format format)
     : _name(loggerName), model(model_), _format(format),
       _n_dofs(model_.iDyn3_model.getNrOfDOFs()),
-      _fakeFlusher(_n_dofs+1)
+      _fakeFlusher_t(1),
+      _fakeFlusher_dq(_n_dofs)
 {
     if(_format == FORMAT_PYTHON)
     {
@@ -118,10 +119,13 @@ OpenSoT::L::L(std::string loggerName, iDynUtils& model_, OpenSoT::L::logger_form
 
     std::list<std::string> descriptions;
     descriptions.push_back("time");
+    _fakeFlusher_t.setDescription(descriptions);
+
+    descriptions.clear();
     std::vector<std::string> joint_names = model.getJointNames();
     for(unsigned int i = 0; i < joint_names.size(); ++i)
-        descriptions.push_back(joint_names[i] + "dq");
-    _fakeFlusher.setDescription(descriptions);
+        descriptions.push_back(joint_names[i] + " dq_opt");
+    _fakeFlusher_dq.setDescription(descriptions);
 }
 
 OpenSoT::L::~L()
@@ -184,7 +188,7 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flush
         return plottable.second;
 
     unsigned int minIndex = 0;
-    minIndex += _fakeFlusher.getSize()-1;
+    minIndex += _fakeFlusher_t.getSize()+_fakeFlusher_dq.getSize()-1;
     for(unsigned int i = 0; i < _flushers.size(); ++i)
     {
         if(_flushers[i] == plottable.first)
@@ -202,7 +206,7 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flush
 unsigned int OpenSoT::L::getMaximumIndex()
 {
     unsigned int maxIndex = 0;
-    maxIndex += _fakeFlusher.getSize()-1;
+    maxIndex += _fakeFlusher_t.getSize()+_fakeFlusher_dq.getSize()-1;
     for(unsigned int i = 0; i < _flushers.size(); ++i)
         maxIndex += _flushers[i]->getSize();
     return maxIndex;
@@ -211,4 +215,16 @@ unsigned int OpenSoT::L::getMaximumIndex()
 unsigned int OpenSoT::L::isAppending()
 {
     return _must_append[_current_log_filename];
+}
+
+OpenSoT::plotters::Plottable OpenSoT::L::t()
+{
+    Indices plottableIndices(0);
+    return std::make_pair(&_fakeFlusher_t, plottableIndices);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::L::dq_opt()
+{
+    Indices plottableIndices = OpenSoT::Indices::range(1, _n_dofs);
+    return std::make_pair(&_fakeFlusher_dq, plottableIndices);
 }

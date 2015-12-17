@@ -34,7 +34,7 @@ namespace OpenSoT
             unsigned int _size;
             const T* _data;
         public:
-            enum { DATA = 0 };
+            enum { ALL = 0 };
 
             typedef boost::shared_ptr< DataFlusher<T> > Ptr;
 

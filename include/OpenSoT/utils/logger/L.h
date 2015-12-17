@@ -111,15 +111,45 @@ namespace OpenSoT {
 
         std::string getName() const;
 
+        /**
+         * @brief getGlobalIndices transform a plottable with local indices
+         * to a plottable with global indices
+         * @param plottable
+         * @return
+         */
         Indices getGlobalIndices(std::pair<flushers::Flusher::Ptr, Indices> plottable);
 
+        /**
+         * @brief getMaximumIndex gets the total number of data we are flushing
+         * @return the first free global index
+         */
         unsigned int getMaximumIndex();
 
+        /**
+         * @brief plotter a utility class to generate plots
+         */
         OpenSoT::plotters::Plotter* plotter;
 
         const iDynUtils& model;
 
+        /**
+         * @brief isAppending returns a number greater than zero if the logger
+         * is currently writing to a log file in append mode
+         * @return the number of "open/close" operations already executed on this file
+         */
         unsigned int isAppending();
+
+        /**
+         * @brief t returns a time plottable
+         * @return a plottable with global index that refers to time
+         */
+        OpenSoT::plotters::Plottable t();
+
+        /**
+         * @brief dq_opt returns a solution vector plottable
+         * @return a plottable with global index that refers to the stored solution
+         */
+        OpenSoT::plotters::Plottable dq_opt();
 
     protected:
         typedef Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr TaskPtr;
@@ -149,7 +179,8 @@ namespace OpenSoT {
          */
         int _n_dofs;
 
-        OpenSoT::flushers::FakeFlusher _fakeFlusher;
+        OpenSoT::flushers::FakeFlusher _fakeFlusher_t;
+        OpenSoT::flushers::FakeFlusher _fakeFlusher_dq;
 
         std::map<std::string, unsigned int> _must_append;
 
