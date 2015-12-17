@@ -53,13 +53,13 @@ namespace OpenSoT
 
             virtual Indices getIndices(int label) const = 0;
 
-            std::list<std::string> getDescription();
+            std::vector<std::string> getDescription();
 
-            std::list<std::string> getDescription(Indices indices);
+            std::vector<std::string> getDescription(Indices indices);
 
-            bool setDescription(const std::list<std::string> descriptions);
+            bool setDescription(const std::vector<std::string> descriptions);
 
-            bool setDescription(const std::list<std::string> descriptions, Indices indices);
+            bool setDescription(const std::vector<std::string> descriptions, Indices indices);
 
 
             void updateSolution(const yarp::sig::Vector& q_dot);

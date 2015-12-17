@@ -238,7 +238,7 @@ TEST_F(testLogger, testPlotterWorks)
     OpenSoT::plotters::Plottable dataPlottable =
         dataFlusher->i(OpenSoT::flushers::DataFlusher<double>::ALL);
     logger.plotter->figure(10.24,7.68,"estimated torques for torso vs real torques");
-    logger.plotter->subplot(1,3,1);
+    logger.plotter->subplot(2,2,1);
     logger.plotter->plot_t(dataPlottable);
     logger.plotter->title("Data Flusher");
     logger.plotter->autoLegend(dataPlottable);
@@ -246,9 +246,22 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->ylabel("data");
     logger.plotter->savefig();
 
+    logger.plotter->subplot(2,2,2);
+    logger.plotter->plot_t(dataPlottable);
+    logger.plotter->title("Data Flusher (with labels)");
+    std::vector<std::string> tau_description;
+    tau_description.push_back("tau 0");
+    tau_description.push_back("tau 1");
+    tau_description.push_back("tau 2");
+    dataPlottable.first->setDescription(tau_description);
+    logger.plotter->autoLegend(dataPlottable);
+    logger.plotter->xlabel("t [s]");
+    logger.plotter->ylabel("data");
+    logger.plotter->savefig();
+
     OpenSoT::plotters::Plottable solutionPlottable =
         logger.dq_opt();
-    logger.plotter->subplot(1,3,2);
+    logger.plotter->subplot(2,2,3);
     logger.plotter->plot_t(solutionPlottable);
     logger.plotter->title("Solution");
     logger.plotter->autoLegend(solutionPlottable);
@@ -262,7 +275,7 @@ TEST_F(testLogger, testPlotterWorks)
     for(unsigned int i = 3; i <= 5; ++i)
         j3_5Indicesv.push_back(allDqIndicesV[i]);
     solutionPlottable.second = OpenSoT::Indices(j3_5Indicesv);
-    logger.plotter->subplot(1,3,3);
+    logger.plotter->subplot(2,2,4);
     logger.plotter->plot_t(solutionPlottable);
     logger.plotter->title("Solution (joints 3-5");
     logger.plotter->autoLegend(solutionPlottable);

@@ -39,7 +39,10 @@ namespace OpenSoT
             typedef boost::shared_ptr< DataFlusher<T> > Ptr;
 
             DataFlusher(const T* data, unsigned int size)
-                : _data(data), _size(size) {}
+                : _data(data), _size(size)
+            {
+                _descriptions.resize(_size, std::string());
+            }
 
             ~DataFlusher() {}
 
@@ -56,7 +59,7 @@ namespace OpenSoT
              * @brief getSize returns the number of elements logged by this flusher
              * @return the number of elements to be logged
              */
-            virtual int getSize() const
+            int getSize() const
             {
                 return _size;
             }

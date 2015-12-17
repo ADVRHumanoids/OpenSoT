@@ -64,14 +64,20 @@ void OpenSoT::plotters::Plotter::ylabel(const std::string& label)
 OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(std::list<OpenSoT::plotters::Plottable> data)
 {
     std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
-    OpenSoT::flushers::Flusher::Ptr flusher(new OpenSoT::flushers::FakeFlusher(globalIndices.size()));
+    unsigned int maximumIndex = _logger->getMaximumIndex();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        maximumIndex += (*it)->getSize();
+
+    OpenSoT::flushers::Flusher::Ptr flusher(
+        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), maximumIndex));
     _fakeFlushers.push_back(flusher);
 
-    Indices plottableIndices = OpenSoT::Indices::range(_logger->getMaximumIndex(),
-                                                       _logger->getMaximumIndex()+globalIndices.size()-1);
-    _commands << "data = np.hstack((data.transpose(), data[:,(" << getIndicesString(globalIndices) << ")]**2).sum(1))).transpose()";
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+        _commands << "data = np.hstack((data.transpose(), data[:,("
+                  << getIndicesString(globalIndices) << ")]**2).sum(1))).transpose()";
 
-    return std::make_pair(flusher.get(),plottableIndices);
+    return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
 
 void OpenSoT::plotters::Plotter::legend(const std::list<std::string> labels)
@@ -106,7 +112,7 @@ std::list<std::string> OpenSoT::plotters::Plotter::autoGenerateLegend(std::list<
         it_p != plottables.end();
         ++it_p)
     {
-        std::list<std::string> plottableLabels = it_p->first->getDescription(it_p->second);
+        std::vector<std::string> plottableLabels = it_p->first->getDescription(it_p->second);
         labels.insert(labels.end(),
                       plottableLabels.begin(),
                       plottableLabels.end());

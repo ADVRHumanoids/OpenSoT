@@ -7,16 +7,16 @@ Dynamics::Dynamics(OpenSoT::constraints::velocity::Dynamics::Ptr dynamics,
     : ConstraintFlusher(dynamics)
 {
     const std::vector<std::string> jointNames = model.getJointNames();
-    std::list<std::string> description;
+    std::vector<std::string> description;
 
     for(unsigned int i = 0; i < jointNames.size(); ++i)
-        description.push_back(jointNames[i] + " \tau_{lim}");
+        description.push_back(jointNames[i] + " \\tau_{lim}");
     for(unsigned int i = 0; i < jointNames.size(); ++i)
-        description.push_back(jointNames[i] + " \tau_{est}");
+        description.push_back(jointNames[i] + " \\tau_{est}");
     for(unsigned int i = 0; i < jointNames.size(); ++i)
-        description.push_back(jointNames[i] + " \bUpperBound");
+        description.push_back(jointNames[i] + " bUpperBound");
     for(unsigned int i = 0; i < jointNames.size(); ++i)
-        description.push_back(jointNames[i] + " \bLowerBound");
+        description.push_back(jointNames[i] + " bLowerBound");
     description.push_back("bound scaling");
 
     this->setDescription(description);

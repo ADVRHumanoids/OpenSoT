@@ -90,6 +90,12 @@ public:
      */
     const std::vector<unsigned int> &asVector() const;
 
+    /**
+     * @brief shift shifts all indices by the amount specified
+     * @param amount by which all indices will be shift
+     */
+    Indices& shift(unsigned int amount);
+
     bool isContiguous() const;
 
     int size() const;

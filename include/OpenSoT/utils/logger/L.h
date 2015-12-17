@@ -119,7 +119,7 @@ namespace OpenSoT {
          * @param plottable
          * @return
          */
-        Indices getGlobalIndices(std::pair<flushers::Flusher::Ptr, Indices> plottable);
+        Indices getGlobalIndices(plotters::Plottable plottable);
 
         /**
          * @brief getMaximumIndex gets the total number of data we are flushing

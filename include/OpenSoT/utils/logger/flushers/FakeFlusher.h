@@ -29,10 +29,13 @@ namespace OpenSoT
         class FakeFlusher : public Flusher
         {
             unsigned int _size;
+            unsigned int _indicesOffset;
         public:
+            enum { ALL = 0 };
+
             typedef boost::shared_ptr<FakeFlusher> Ptr;
 
-            FakeFlusher(unsigned int size);
+            FakeFlusher(unsigned int size, unsigned int indicesOffset = 0);
 
             ~FakeFlusher();
 
@@ -45,6 +48,10 @@ namespace OpenSoT
             int getSize() const;
 
             Indices getIndices(int label) const;
+
+            unsigned int getIndicesOffset() const;
+
+            void setIndicesOffset(unsigned int offset);
         };
     }
 }

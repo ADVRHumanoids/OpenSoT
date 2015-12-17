@@ -18,7 +18,7 @@
 #include <OpenSoT/OpenSoT.h>
 #include <OpenSoT/utils/logger/L.h>
 #include <OpenSoT/utils/logger/plotters/Plotter.h>
-#include <exception>
+#include <stdexcept>
 
 void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
 {
@@ -102,7 +102,7 @@ OpenSoT::L::L(std::string loggerName, iDynUtils& model_, OpenSoT::L::logger_form
     : _name(loggerName), model(model_), _format(format),
       _n_dofs(model_.iDyn3_model.getNrOfDOFs()),
       _fakeFlusher_t(1),
-      _fakeFlusher_dq(_n_dofs),
+      _fakeFlusher_dq(_n_dofs,1),
       plotter(new OpenSoT::plotters::Plotter(this))
 {
     if(_format == FORMAT_PYTHON)
@@ -112,7 +112,7 @@ OpenSoT::L::L(std::string loggerName, iDynUtils& model_, OpenSoT::L::logger_form
         _collator << std::endl;
     }
 
-    std::list<std::string> descriptions;
+    std::vector<std::string> descriptions;
     descriptions.push_back("time");
     _fakeFlusher_t.setDescription(descriptions);
 
@@ -177,28 +177,25 @@ std::string OpenSoT::L::getName() const
     return _name;
 }
 
-OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flusher::Ptr,
-                                              Indices> plottable)
+OpenSoT::Indices OpenSoT::L::getGlobalIndices(OpenSoT::plotters::Plottable plottable)
 {
-    if(boost::dynamic_pointer_cast<OpenSoT::flushers::FakeFlusher>(plottable.first))
-        return plottable.second;
+    if(dynamic_cast<OpenSoT::flushers::FakeFlusher*>(plottable.first))
+    {
+        unsigned int offset =
+            (dynamic_cast<OpenSoT::flushers::FakeFlusher*>(plottable.first))->getIndicesOffset();
+        return (plottable.second).shift(offset);
+    }
 
     unsigned int minIndex = 0;
     minIndex += _fakeFlusher_t.getSize()+_fakeFlusher_dq.getSize()-1;
     for(unsigned int i = 0; i < _flushers.size(); ++i)
     {
-        if(_flushers[i] == plottable.first)
-        {
-            Indices indices = plottable.second;
-            std::vector<unsigned int> indices_v = indices.asVector();
-            for(unsigned int j = 0; j < indices_v.size(); ++j)
-                indices_v[j] += minIndex;
-            return Indices(indices_v);
-        }
+        if(_flushers[i].get() == plottable.first)
+            plottable.second.shift(minIndex);
         else minIndex += _flushers[i]->getSize();
     }
 
-    throw new std::runtime_error("Error: could not find specified flusher");
+    throw new std::invalid_argument("Error: could not find specified flusher");
 }
 
 unsigned int OpenSoT::L::getMaximumIndex()
@@ -217,12 +214,10 @@ unsigned int OpenSoT::L::isAppending()
 
 OpenSoT::plotters::Plottable OpenSoT::L::t()
 {
-    Indices plottableIndices(0);
-    return std::make_pair(&_fakeFlusher_t, plottableIndices);
+    return _fakeFlusher_t.i(OpenSoT::flushers::FakeFlusher::ALL);
 }
 
 OpenSoT::plotters::Plottable OpenSoT::L::dq_opt()
 {
-    Indices plottableIndices = OpenSoT::Indices::range(1, _n_dofs);
-    return std::make_pair(&_fakeFlusher_dq, plottableIndices);
+    return _fakeFlusher_dq.i(OpenSoT::flushers::FakeFlusher::ALL);
 }
