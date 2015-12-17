@@ -24,9 +24,25 @@ bool OpenSoT::flushers::Flusher::setDescription(const std::list<std::string> des
     return true;
 }
 
-std::pair<OpenSoT::flushers::Flusher*, OpenSoT::Indices> OpenSoT::flushers::Flusher::operator()(OpenSoT::Indices indices)
+
+std::pair<OpenSoT::flushers::Flusher *, OpenSoT::Indices> OpenSoT::flushers::Flusher::i(OpenSoT::Indices indices)
 {
     return std::make_pair(this, indices);
+}
+
+std::pair<OpenSoT::flushers::Flusher *, OpenSoT::Indices> OpenSoT::flushers::Flusher::i(int label)
+{
+    return this->i(this->getIndices(label));
+}
+
+std::pair<OpenSoT::flushers::Flusher*, OpenSoT::Indices> OpenSoT::flushers::Flusher::operator()(OpenSoT::Indices indices)
+{
+    return this->i(indices);
+}
+
+std::pair<OpenSoT::flushers::Flusher *, OpenSoT::Indices> OpenSoT::flushers::Flusher::operator()(int label)
+{
+    return this->i(this->getIndices(label));
 }
 
 bool OpenSoT::flushers::Flusher::setDescription(const std::list<std::string> descriptions)

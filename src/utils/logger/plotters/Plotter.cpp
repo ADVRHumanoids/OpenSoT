@@ -1,6 +1,5 @@
 #include <OpenSoT/utils/logger/plotters/Plotter.h>
-
-
+#include <OpenSoT/utils/logger/L.h>
 
 std::list<unsigned int> OpenSoT::plotters::Plotter::getGlobalIndicesList(std::list<OpenSoT::plotters::Plottable> data)
 {
@@ -88,7 +87,19 @@ void OpenSoT::plotters::Plotter::legend(const std::list<std::string> labels)
     }
 }
 
-std::list<std::string> OpenSoT::plotters::Plotter::autoLegend(std::list<OpenSoT::plotters::Plottable> plottables)
+void OpenSoT::plotters::Plotter::autoLegend(std::list<OpenSoT::plotters::Plottable> plottables)
+{
+    legend(autoGenerateLegend(plottables));
+}
+
+void OpenSoT::plotters::Plotter::autoLegend(OpenSoT::plotters::Plottable data)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    autoLegend(data_l);
+}
+
+std::list<std::string> OpenSoT::plotters::Plotter::autoGenerateLegend(std::list<OpenSoT::plotters::Plottable> plottables)
 {
     std::list<std::string> labels;
     for(std::list<OpenSoT::plotters::Plottable>::const_iterator it_p = plottables.begin();
@@ -110,10 +121,21 @@ void OpenSoT::plotters::Plotter::plot_t(std::list<OpenSoT::plotters::Plottable> 
         _commands << "p = plot(data[:,0], data[:,"<< getIndicesString(globalIndices) << "]);" << std::endl;
 }
 
+void OpenSoT::plotters::Plotter::plot_t(OpenSoT::plotters::Plottable data)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    plot_t(data_l);
+}
+
 void OpenSoT::plotters::Plotter::savefig()
 {
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
-        _commands << "fig.savefig('" << "_fig_" << _n_fig << "', format='eps', transparent=True);" << std::endl;
+        _commands << "fig.savefig('"
+                  << _logger->getName()
+                  << "_fig_"
+                  << _logger->isAppending()
+                  << "_" << _n_fig << "', format='eps', transparent=True);" << std::endl;
 }
 
 void OpenSoT::plotters::Plotter::title(const std::string &title)
@@ -123,6 +145,8 @@ void OpenSoT::plotters::Plotter::title(const std::string &title)
 
 std::string OpenSoT::plotters::Plotter::getCommands()
 {
+    _commands << std::endl;
+    _commands << "show(block=True);" << std::endl;
     std::string commands = _commands.str();
     _commands.str("");
     _fakeFlushers.clear();

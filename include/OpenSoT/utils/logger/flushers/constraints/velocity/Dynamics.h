@@ -36,14 +36,14 @@ namespace OpenSoT
                 public:
                     enum labels
                     {
-                        TORQUE_LIMITS,
-                        ESTIMATED_TORQUE,
-                        BUPPERBOUND,
-                        BLOWERBOUND,
-                        SIGMA
+                        TORQUE_LIMITS   = 1,
+                        ESTIMATED_TORQUE= 2,
+                        BUPPERBOUND     = 4,
+                        BLOWERBOUND     = 8,
+                        SIGMA           = 16
                     };
 
-                    Dynamics(OpenSoT::constraints::velocity::Dynamics::Ptr dynamics, iDynUtils& model);
+                    Dynamics(OpenSoT::constraints::velocity::Dynamics::Ptr dynamics, const iDynUtils& model);
 
                     std::string toString() const;
 

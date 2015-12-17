@@ -20,7 +20,6 @@
 
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/Task.h>
-#include <OpenSoT/utils/logger/L.h>
 #include <OpenSoT/utils/logger/flushers/all.h>
 #include <OpenSoT/utils/logger/flushers/ConstraintFlusher.h>
 #include <OpenSoT/utils/logger/flushers/DataFlusher.h>
@@ -35,6 +34,9 @@
 
 namespace OpenSoT
 {
+    // forward declaration of L
+    class L;
+
     namespace plotters
     {
         /**
@@ -99,13 +101,29 @@ namespace OpenSoT
             /**
              * @brief autoLegend build a legend from the flusher data description
              */
-            std::list<std::string> autoLegend(std::list<Plottable> data);
+            void autoLegend(std::list<Plottable> data);
+
+            /**
+             * @brief autoLegend build a legend from the flusher data description
+             */
+            void autoLegend(Plottable data);
+
+            /**
+             * @brief autoLegend builds a list of labels from the flusher data description
+             */
+            std::list<std::string> autoGenerateLegend(std::list<Plottable> data);
 
             /**
              * @brief plot_t plots data against time
              * @param data a list of plottables
              */
             void plot_t(std::list<Plottable> data);
+
+            /**
+             * @brief plot_t plots data against time
+             * @param data a list of plottables
+             */
+            void plot_t(Plottable data);
 
             /**
              * @brief savefig saves the last defined figure

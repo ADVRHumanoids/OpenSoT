@@ -24,33 +24,6 @@ void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
     _current_log << "(" << t << ",";
     for(unsigned int i = 0; i < q_dot.size(); ++i)
         _current_log << q_dot[i] << ",";
-                    /*
-        << (DHS.leftArm->getActualPose())(0,3) << ","       // 1
-        << (DHS.leftArm->getActualPose())(1,3) << ","
-        << (DHS.leftArm->getActualPose())(2,3) << ","
-        << (DHSns.leftArm->getActualPose())(0,3) << ","     // 4
-        << (DHSns.leftArm->getActualPose())(1,3) << ","
-        << (DHSns.leftArm->getActualPose())(2,3) << ","
-        << (DHS.leftArm->getReference())(0,3) << ","        // 7
-        << (DHS.leftArm->getReference())(1,3) << ","
-        << (DHS.leftArm->getReference())(2,3) << ","
-        << r  << ","                                        // 10
-        << p  << ","
-        << y  << ","
-        << r_ns  << ","                                     // 13
-        << p_ns  << ","
-        << y_ns  << ","
-        << r_ref  << ","                                    // 16
-        << p_ref  << ","
-        << y_ref  << ","
-        << e_com << ","                                     // 19
-        << e_com_ns << ","
-        << e_arms << ","                                    // 21
-        << e_arms_ns << ","
-        << e_post << ","                                    // 23
-        << e_post_ns << ","
-        << t_loop << ","                                    // 25
-        << t_loopns */
     {
         typedef std::map<TaskPtr, flushers::TaskFlusher::Ptr>::const_iterator it_t;
         typedef std::map<ConstraintPtr, flushers::ConstraintFlusher::Ptr>::const_iterator it_c;
@@ -122,86 +95,6 @@ bool OpenSoT::L::close()
         _collator << "execfile('" << _current_log_filename << "')" << std::endl;
     }
 
-    /*
-
-    _log << "se = figure('"<< smoothing_strategy_stream.str() << "- Cartesian Errors',figsize=(10.27,7.68));" << std::endl;
-    std::string smoothing = smoothing_params_stream.str();
-    std::string no_smoothing = regular_params_stream.str();
-
-    _log << "subplot(3,2,1); p = plot(test_data[:,0], test_data[:,(1,4,7)]); title('l_arm x');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "', 'reference'));" << std::endl;
-    _log << "ylabel('hand position [m]'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(3,2,2); p = plot(test_data[:,0], test_data[:,(2,5,8)]); title('l_arm y');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "', 'reference'));" << std::endl;
-    _log << "ylabel('hand position [m]'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(3,2,3); p = plot(test_data[:,0], test_data[:,(3,6,9)]); title('l_arm z');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "', 'reference'));" << std::endl;
-    _log << "ylabel('hand position [m]'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(3,2,4); p = plot(test_data[:,0], test_data[:,(10,13,16)]); title('l_arm r');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "', 'reference'));" << std::endl;
-    _log << "ylabel('hand orientation [rad]'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(3,2,5); p = plot(test_data[:,0], test_data[:,(11,14,17)]); title('l_arm p');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "', 'reference'));" << std::endl;
-    _log << "ylabel('hand orientation [rad]'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(3,2,6); p = plot(test_data[:,0], test_data[:,(12,15,18)]); title('l_arm y');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "', 'reference'));" << std::endl;
-    _log << "ylabel('hand orientation [rad]'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "et = figure('"<< smoothing_strategy_stream.str() << "- Task Errors',figsize=(8,6));" << std::endl << std::endl;
-
-    _log << "subplot(2,2,1); p = plot(test_data[:,0],test_data[:,(25, 26)]);" << std::endl;
-    _log << "title('Computation Time');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "'));" << std::endl;
-    _log << "ylabel('Solve Time [s]'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(2,2,2); p = plot(test_data[:,0],test_data[:,(19, 20)]);" << std::endl;
-    _log << "title('CoM_XY Task Error');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "'));" << std::endl;
-    _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(2,2,3); p = plot(test_data[:,0],test_data[:,(21, 22)]);" << std::endl;
-    _log << "title('l_arm + r_arm Task Error');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "'));" << std::endl;
-    _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl << std::endl;
-
-    _log << "subplot(2,2,4); p = plot(test_data[:,0],test_data[:,(23, 24)]);" << std::endl;
-    _log << "title('Postural Task Error');" << std::endl;
-    _log << "legend(p,('" << smoothing << "', '" << no_smoothing << "'));" << std::endl;
-    _log << "ylabel('norm2 of task error'); xlabel('t [s]');" << std::endl << std::endl;
-
-    if(params.strategy == STRATEGY_CARTESIAN_TUNING_1) {
-        _log << "se.savefig('" << getPlotFilename(STRATEGY_CARTESIAN_TUNING_1, TEST_SCA_CT1_DISTANCES_FILE) << "', format='eps', transparent=True);" << std::endl;
-        _log << "et.savefig('" << getPlotFilename(STRATEGY_CARTESIAN_TUNING_1, TEST_SCA_CT1_ERRORS_FILE)    << "',format='eps',transparent=True);" << std::endl;
-    } else if(params.strategy == STRATEGY_COM_TUNING) {
-        _log << "se.savefig('" << getPlotFilename(STRATEGY_COM_TUNING, TEST_SCA_COM_DISTANCES_FILE) << "', format='eps', transparent=True);" << std::endl;
-        _log << "et.savefig('" << getPlotFilename(STRATEGY_COM_TUNING, TEST_SCA_COM_ERRORS_FILE)    << "',format='eps',transparent=True);" << std::endl;
-    } else if(params.strategy == STRATEGY_BOUNDSCALING_TUNING) {
-        _log << "se.savefig('" << getPlotFilename(STRATEGY_BOUNDSCALING_TUNING, TEST_SCA_BST_DISTANCES_FILE) << "', format='eps', transparent=True);" << std::endl;
-        _log << "et.savefig('" << getPlotFilename(STRATEGY_BOUNDSCALING_TUNING, TEST_SCA_BST_ERRORS_FILE)    << "',format='eps',transparent=True);" << std::endl;
-    } else if(params.strategy == STRATEGY_EPS_TUNING) {
-        _log << "se.savefig('" << getPlotFilename(STRATEGY_EPS_TUNING, TEST_SCA_EPS_DISTANCES_FILE) << "', format='eps', transparent=True);" << std::endl;
-        _log << "et.savefig('" << getPlotFilename(STRATEGY_EPS_TUNING, TEST_SCA_EPS_ERRORS_FILE)    << "',format='eps',transparent=True);" << std::endl;
-    } else if(params.strategy == STRATEGY_SMALLER_STACK) {
-        _log << "se.savefig('" << getPlotFilename(STRATEGY_SMALLER_STACK, TEST_SCA_SS_DISTANCES_FILE) << "', format='eps', transparent=True);" << std::endl;
-        _log << "et.savefig('" << getPlotFilename(STRATEGY_SMALLER_STACK, TEST_SCA_SS_ERRORS_FILE)    << "',format='eps',transparent=True);" << std::endl;
-    } else if(params.strategy == STRATEGY_POSTURAL_TUNING) {
-        _log << "se.savefig('" << getPlotFilename(STRATEGY_POSTURAL_TUNING, TEST_SCA_PT_DISTANCES_FILE) << "', format='eps', transparent=True);" << std::endl;
-        _log << "et.savefig('" << getPlotFilename(STRATEGY_POSTURAL_TUNING, TEST_SCA_PT_ERRORS_FILE)    << "',format='eps',transparent=True);" << std::endl;
-    } else if(params.strategy == STRATEGY_DISTANCE_SMOOTHING) {
-        _log << "se.savefig('" << TEST_SCA_BST_DISTANCES_FILE << ".eps', format='eps', transparent=True);" << std::endl;
-        _log << "et.savefig('" << TEST_SCA_BST_ERRORS_FILE << ".eps',format='eps',transparent=True);" << std::endl;
-    } else {
-        std::cerr << "Unhandled exception at line " << __LINE__ << std::endl;
-        exit(1);
-    }
-    _log << "show(block=True)" << std::endl;
-
-     */
     _current_log.close();
     _flushers.clear();
     _constraintFlushers.clear();
@@ -211,10 +104,10 @@ bool OpenSoT::L::close()
     return true;
 }
 
-OpenSoT::L::L(std::string loggerName, iDynUtils& model, OpenSoT::L::logger_format format)
-    : _name(loggerName), _model(model), _format(format),
-      _n_dofs(model.iDyn3_model.getNrOfDOFs()),
-      fakeFlusher(_n_dofs+1)
+OpenSoT::L::L(std::string loggerName, iDynUtils& model_, OpenSoT::L::logger_format format)
+    : _name(loggerName), model(model_), _format(format),
+      _n_dofs(model_.iDyn3_model.getNrOfDOFs()),
+      _fakeFlusher(_n_dofs+1)
 {
     if(_format == FORMAT_PYTHON)
     {
@@ -228,7 +121,7 @@ OpenSoT::L::L(std::string loggerName, iDynUtils& model, OpenSoT::L::logger_forma
     std::vector<std::string> joint_names = model.getJointNames();
     for(unsigned int i = 0; i < joint_names.size(); ++i)
         descriptions.push_back(joint_names[i] + "dq");
-    fakeFlusher.setDescription(descriptions);
+    _fakeFlusher.setDescription(descriptions);
 }
 
 OpenSoT::L::~L()
@@ -253,7 +146,7 @@ OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::add(       OpenSoT::Constr
         constraintFlusher.reset(
             new OpenSoT::flushers::constraints::velocity::Dynamics(
                 boost::dynamic_pointer_cast<OpenSoT::constraints::velocity::Dynamics>(constraint),
-                _model));
+                model));
         _constraintFlushers[constraint] = constraintFlusher;
         _flushers.push_back(constraintFlusher);
     }
@@ -291,7 +184,7 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flush
         return plottable.second;
 
     unsigned int minIndex = 0;
-    minIndex += fakeFlusher.getSize()-1;
+    minIndex += _fakeFlusher.getSize()-1;
     for(unsigned int i = 0; i < _flushers.size(); ++i)
     {
         if(_flushers[i] == plottable.first)
@@ -309,8 +202,13 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(std::pair<OpenSoT::flushers::Flush
 unsigned int OpenSoT::L::getMaximumIndex()
 {
     unsigned int maxIndex = 0;
-    maxIndex += fakeFlusher.getSize()-1;
+    maxIndex += _fakeFlusher.getSize()-1;
     for(unsigned int i = 0; i < _flushers.size(); ++i)
         maxIndex += _flushers[i]->getSize();
     return maxIndex;
+}
+
+unsigned int OpenSoT::L::isAppending()
+{
+    return _must_append[_current_log_filename];
 }

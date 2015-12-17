@@ -9,10 +9,8 @@
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/VelocityAllocation.h>
 #include <boost/program_options.hpp>
+#include <OpenSoT/utils/logger/L.h>
 #include <signal.h>
-#include <fstream>
-#include <stdlib.h>
-#include <stdio.h>
 
 #define MODULE_NAME "example_python"
 #define dT          35e-3
@@ -20,44 +18,69 @@
 typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                             > Accumulator;
-class logger{
-public:
-logger(const std::string& name, const int size = 0)
-    {
-        if(size > 0)
-            data.reserve(size);
-
-        std::string file_name = "example_python_" + name + ".m";
-        file.open(file_name.c_str());
-        file<<name<<" = ["<<std::endl;
-    }
-
-    void log(const yarp::sig::Vector& data_)
-    {
-        data.push_back(data_);
-    }
-
-    void write()
-    {
-        for(unsigned int i = 0; i < data.size(); ++i)
-            file<<data[i].toString()<<std::endl;
-        file<<"];"<<std::endl;
-        file.close();
-    }
-
-    std::vector<yarp::sig::Vector> data;
-    std::ofstream file;
-
-};
-
-logger torques_measured("torques_measured");
+OpenSoT::L::Ptr logger;
+OpenSoT::flushers::Flusher::Ptr tauFlusher;
+OpenSoT::flushers::Flusher::Ptr dynamicsFlusher;
 
 void my_handler(int s){
-           std::cout<<"Writing log files..."<<std::endl;
-           torques_measured.write();
-           std::cout<<"...log files written!"<<std::endl;
-           exit(1);
+    using namespace OpenSoT::flushers;
 
+    /*                  */
+    /*  CREATING PLOTS  */
+    /*                  */
+
+    // selecting torso joints for all plots
+    OpenSoT::Indices dynConstr2Indices = dynamicsFlusher->getIndices(constraints::velocity::Dynamics::ESTIMATED_TORQUE |
+                                                                     constraints::velocity::Dynamics::BLOWERBOUND |
+                                                                     constraints::velocity::Dynamics::BUPPERBOUND);
+    OpenSoT::Indices dynConstr1Indices = dynamicsFlusher->getIndices(constraints::velocity::Dynamics::ESTIMATED_TORQUE);
+    OpenSoT::Indices tauIndices        = tauFlusher->getIndices(     DataFlusher<double>::DATA);
+    {
+        std::vector<std::list<unsigned int> > finalIndicesL(3);
+        std::vector<std::vector<unsigned int> > indicesV(3);
+        unsigned int n_dofs = logger->model.getJointNames().size();
+        indicesV[0] = tauIndices.getRowsVector();
+        indicesV[1] = dynConstr1Indices.getRowsVector();
+        indicesV[2] = dynConstr2Indices.getRowsVector();
+        for(unsigned int i = 0; i < logger->model.torso.joint_numbers.size(); ++i)
+        {
+            unsigned int jIndex = logger->model.torso.joint_numbers[i];
+            for(unsigned int j = 0; j < 3; ++j)
+                finalIndicesL[j].push_back(indicesV[j][jIndex]);
+
+            finalIndicesL[2].push_back(indicesV[2][jIndex+n_dofs]);
+            finalIndicesL[2].push_back(indicesV[2][jIndex+2*n_dofs]);
+        }
+        tauIndices = OpenSoT::Indices(finalIndicesL[0]);
+        dynConstr1Indices = OpenSoT::Indices(finalIndicesL[1]);
+        dynConstr2Indices = OpenSoT::Indices(finalIndicesL[2]);
+
+    }
+
+    logger->plotter->figure(10.24,7.68,"estimated torques for torso vs real torques");
+    std::list<OpenSoT::plotters::Plottable> plottables;
+    plottables.push_back(dynamicsFlusher->i(dynConstr1Indices));
+    plottables.push_back(tauFlusher->i(tauIndices));
+    logger->plotter->subplot(1,2,1);
+    logger->plotter->plot_t(plottables);
+    logger->plotter->title("Torque vs Estimated Torque");
+    logger->plotter->autoLegend(plottables);
+    logger->plotter->xlabel("t[s]");
+    logger->plotter->ylabel("tau [Nm]");
+    logger->plotter->savefig();
+
+    logger->plotter->subplot(1,2,2);
+    logger->plotter->plot_t(dynamicsFlusher->i(dynConstr2Indices));
+    logger->plotter->title("Dynamics Constraint");
+    logger->plotter->autoLegend(dynamicsFlusher->i(dynConstr2Indices));
+    logger->plotter->xlabel("t[s]");
+    logger->plotter->ylabel("Error");
+    logger->plotter->savefig();
+
+    std::cout<<"Writing log files..."<<std::endl;
+    logger.reset();
+    std::cout<<"...log files written!"<<std::endl;
+    exit(1);
 }
 
 int main(int argc, char **argv) {
@@ -268,17 +291,29 @@ int main(int argc, char **argv) {
     robot.setPositionDirectMode();
     yarp::os::Time::delay(2.5);
 
-    double tic, toc;
+    double tic, toc, begin;
     int print_mean = 0;
 
 
     yarp::sig::Vector q_m(q.size(), 0.0), dq_m(q.size(), 0.0), tau_m(q.size(), 0.0);
+    robot.sense(q_m, dq_m, tau_m);
+
+    /*                    */
+    /*  CREATING LOGGER   */
+    /*                    */
+
+    logger.reset(new OpenSoT::L(MODULE_NAME,robot.idynutils));
+    logger->open("dynamics_log");
+    dynamicsFlusher = logger->add(DHS.torqueLimits);
+    tauFlusher = logger->add(tau_m.data(), q.size());
+
+    begin = yarp::os::Time::now();
+
     while(true) {
-        tic = yarp::os::Time::now();
+        tic = yarp::os::Time::now() - begin;
 
 
         robot.sense(q_m, dq_m, tau_m);
-        torques_measured.log(tau_m);
 
         RobotUtils::ftReadings ft_readings = robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
@@ -296,8 +331,11 @@ int main(int argc, char **argv) {
             q+=dq;
         else
             std::cout << "Error computing solve()" << std::endl;
+
+        logger->udpate(tic, dq);
+
         robot.move(q);
-        toc = yarp::os::Time::now();
+        toc = yarp::os::Time::now() - begin;
         time_accumulator(toc-tic);
 
         // print mean every 5s

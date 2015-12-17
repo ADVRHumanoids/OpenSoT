@@ -25,7 +25,7 @@
 #include <OpenSoT/utils/logger/flushers/DataFlusher.h>
 #include <OpenSoT/utils/logger/flushers/FakeFlusher.h>
 #include <OpenSoT/utils/logger/flushers/TaskFlusher.h>
-
+#include <OpenSoT/utils/logger/plotters/Plotter.h>
 #include <idynutils/idynutils.h>
 
 #include <map>
@@ -33,15 +33,11 @@
 #include <string>
 
 namespace OpenSoT {
-    namespace plotters {
-        // forward declaration of Plotter
-        class Plotter;
-    }
-
     class L
     {
-
     public:
+        typedef boost::shared_ptr<L> Ptr;
+
         /**
          * @brief The logger_format enum defines in which format we are saving data
          */
@@ -121,11 +117,13 @@ namespace OpenSoT {
 
         OpenSoT::plotters::Plotter* plotter;
 
+        const iDynUtils& model;
+
+        unsigned int isAppending();
+
     protected:
         typedef Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr TaskPtr;
         typedef Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr ConstraintPtr;
-
-        iDynUtils& _model;
 
         /**
          * @brief _name the name of the current logger
@@ -151,9 +149,9 @@ namespace OpenSoT {
          */
         int _n_dofs;
 
-        OpenSoT::flushers::FakeFlusher fakeFlusher;
+        OpenSoT::flushers::FakeFlusher _fakeFlusher;
 
-        std::map<std::string, int> _must_append;
+        std::map<std::string, unsigned int> _must_append;
 
         std::vector<flushers::Flusher::Ptr> _flushers;
         std::map<TaskPtr, flushers::TaskFlusher::Ptr> _taskFlushers;

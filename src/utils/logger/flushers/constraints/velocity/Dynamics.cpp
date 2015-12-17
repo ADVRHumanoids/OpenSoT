@@ -2,7 +2,8 @@
 
 using namespace OpenSoT::flushers::constraints::velocity;
 
-Dynamics::Dynamics(OpenSoT::constraints::velocity::Dynamics::Ptr dynamics, iDynUtils &model)
+Dynamics::Dynamics(OpenSoT::constraints::velocity::Dynamics::Ptr dynamics,
+                   const iDynUtils &model)
     : ConstraintFlusher(dynamics)
 {
     const std::vector<std::string> jointNames = model.getJointNames();
@@ -41,20 +42,24 @@ std::string Dynamics::toString() const
 
 OpenSoT::Indices Dynamics::getIndices(int label) const
 {
-    switch(label){
-    case TORQUE_LIMITS:
-        return 0;
-    case ESTIMATED_TORQUE:
-        return _constraint->getXSize();
-    case BUPPERBOUND:
-        return _constraint->getXSize()*2;
-    case BLOWERBOUND:
-        return _constraint->getXSize()*3;
-    case SIGMA:
-        return _constraint->getXSize()*4;
-    default:
-        return -1;  /* @TODO should throw assert here */
-    }
+    std::list<unsigned int> emptyList;
+    OpenSoT::Indices indices(emptyList);
+    if(label & TORQUE_LIMITS)
+        indices = indices + OpenSoT::Indices::range(0,_constraint->getXSize()-1);
+    if(label & ESTIMATED_TORQUE)
+        indices = indices + OpenSoT::Indices::range(_constraint->getXSize(),                                                2*_constraint->getXSize()-1);
+    if(label & BUPPERBOUND)
+        indices = indices + OpenSoT::Indices::range(2*_constraint->getXSize(),                                                    3*_constraint->getXSize()-1);
+    if(label & BLOWERBOUND)
+        indices = indices + OpenSoT::Indices::range(3*_constraint->getXSize(),                                                    4*_constraint->getXSize()-1);
+    if(label & SIGMA)
+        indices = indices + 4*_constraint->getXSize();
+
+    if(indices.size() == 0)
+        /// @TODO throw assertion
+        ;
+
+    return indices;
 }
 
 int Dynamics::getSize() const

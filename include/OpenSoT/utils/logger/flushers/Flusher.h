@@ -67,6 +67,32 @@ namespace OpenSoT
                 _q_dot = q_dot;
             }
 
+            /**
+             * @brief i generates a Plottable element given a label
+             * @param label
+             * @return
+             */
+            std::pair<Flusher*, Indices> i(int label);
+
+            /**
+             * @brief i generates a Plottable element given a set of indices
+             * @param indices
+             * @return
+             */
+            std::pair<Flusher*, Indices> i(Indices indices);
+
+            /**
+             * @brief operator () generates a Plottable element given a label
+             * @param label
+             * @return
+             */
+            std::pair<Flusher*, Indices> operator()(int label);
+
+            /**
+             * @brief operator () generates a Plottable element given a set of indices
+             * @param indices
+             * @return
+             */
             std::pair<Flusher*, Indices> operator()(Indices indices);
         };
     }
