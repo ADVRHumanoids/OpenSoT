@@ -22,9 +22,9 @@
 
 void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
 {
-    _current_log << "(" << t << ",";
+    _current_log << "(" << t ;
     for(unsigned int i = 0; i < q_dot.size(); ++i)
-        _current_log << q_dot[i] << ",";
+        _current_log << "," << q_dot[i];
     {
         typedef std::vector<flushers::Flusher::Ptr>::const_iterator it_f;
 
@@ -199,7 +199,7 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(OpenSoT::plotters::Plottable plott
     for(unsigned int i = 0; i < _flushers.size(); ++i)
     {
         if(_flushers[i].get() == plottable.first)
-            plottable.second.shift(minIndex);
+            return plottable.second.shift(minIndex);
         else minIndex += _flushers[i]->getSize();
     }
 
