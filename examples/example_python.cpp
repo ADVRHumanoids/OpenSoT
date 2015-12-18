@@ -26,11 +26,19 @@ OpenSoT::flushers::Flusher::Ptr leftHandCartesianFlusher;
 void my_handler(int s){
     using namespace OpenSoT::flushers;
 
-    if(tauFlusher && dynamicsFlusher)
+    if(tauFlusher && dynamicsFlusher && leftHandCartesianFlusher)
     {
         /*                  */
         /*  CREATING PLOTS  */
         /*                  */
+
+        std::vector<std::string> tauLabels = logger->model.getJointNames();
+        for(unsigned int i = 0; i < tauLabels.size(); ++i)
+            tauLabels[i] += " tau";
+        tauFlusher->setDescription(tauLabels);
+        /*                                      */
+        /*  PLOT 1 - estimated vs real torques  */
+        /*                                      */
 
         // selecting torso joints for all plots
         OpenSoT::Indices tauIndices        = tauFlusher->getIndices(     DataFlusher<double>::ALL);
@@ -60,9 +68,6 @@ void my_handler(int s){
 
         }
 
-        /*                                      */
-        /*  PLOT 1 - estimated vs real torques  */
-        /*                                      */
         std::list<OpenSoT::plotters::Plottable> plottables;
         logger->plotter->figure(10.24,7.68,"estimated torques for torso vs real torques");
         plottables.push_back(dynamicsFlusher->i(dynConstr1Indices));
@@ -101,7 +106,7 @@ void my_handler(int s){
         plottables.push_back(dynamicsFlusher->i(torqueLimsIRoll));
         logger->plotter->plot_t(plottables);
         logger->plotter->subplot(3,1,1);
-        logger->plotter->title("\\tau torso Roll");
+        logger->plotter->title("tau torso Roll");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("tau [Nm]");
 
@@ -114,7 +119,7 @@ void my_handler(int s){
         plottables.push_back(tauFlusher->i(torquesIPitch));
         plottables.push_back(dynamicsFlusher->i(torqueLimsIPitch));
         logger->plotter->plot_t(plottables);
-        logger->plotter->title("\\tau torso Pitch");
+        logger->plotter->title("tau torso Pitch");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("tau [Nm]");
 
@@ -127,7 +132,7 @@ void my_handler(int s){
         plottables.push_back(tauFlusher->i(torquesIYaw));
         plottables.push_back(dynamicsFlusher->i(torqueLimsIYaw));
         logger->plotter->plot_t(plottables);
-        logger->plotter->title("\\tau torso Yaw");
+        logger->plotter->title("tau torso Yaw");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("tau [Nm]");
 
@@ -167,7 +172,7 @@ void my_handler(int s){
         logger->plotter->subplot(3,2,4);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[1])));
-        logger->plotter->title("x Orientation Error Left Hand");
+        logger->plotter->title("y Orientation Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[rad]");
 
@@ -181,11 +186,13 @@ void my_handler(int s){
         logger->plotter->subplot(3,2,6);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[2])));
-        logger->plotter->title("x Orientation Error Left Hand");
+        logger->plotter->title("z Orientation Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[rad]");
 
         logger->plotter->savefig();
+
+        logger->plotter->show();
 
     }
 
@@ -415,7 +422,7 @@ int main(int argc, char **argv) {
     /*                    */
 
     logger.reset(new OpenSoT::L(MODULE_NAME,robot.idynutils));
-    logger->open("dynamics_log");
+    logger->open("example_python_dynamics_log");
     dynamicsFlusher = logger->add(DHS.torqueLimits);
     tauFlusher = logger->add(tau_m.data(), q.size());
     leftHandCartesianFlusher = logger->add(DHS.leftArm);
