@@ -64,13 +64,13 @@ void OpenSoT::plotters::Plotter::ylabel(const std::string& label)
 OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(std::list<OpenSoT::plotters::Plottable> data)
 {
     std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
-    unsigned int maximumIndex = _logger->getMaximumIndex();
+    unsigned int minFreeIndex = _logger->getDataSize();
     for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
         it != _fakeFlushers.end(); ++it)
-        maximumIndex += (*it)->getSize();
+        minFreeIndex += (*it)->getSize();
 
     OpenSoT::flushers::Flusher::Ptr flusher(
-        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), maximumIndex));
+        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), minFreeIndex));
     _fakeFlushers.push_back(flusher);
 
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
@@ -124,7 +124,7 @@ void OpenSoT::plotters::Plotter::plot_t(std::list<OpenSoT::plotters::Plottable> 
 {
     std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
-        _commands << "p = plot(data[:,0], data[:,"<< getIndicesString(globalIndices) << "]);" << std::endl;
+        _commands << "p = plot(data[:,0], data[:,("<< getIndicesString(globalIndices) << ")]);" << std::endl;
 }
 
 void OpenSoT::plotters::Plotter::plot_t(OpenSoT::plotters::Plottable data)
@@ -141,7 +141,7 @@ void OpenSoT::plotters::Plotter::savefig()
                   << _logger->getName()
                   << "_fig_"
                   << _logger->isAppending()
-                  << "_" << _n_fig << "', format='eps', transparent=True);" << std::endl;
+                  << "_" << _n_fig << ".eps', format='eps', transparent=True);" << std::endl;
 }
 
 void OpenSoT::plotters::Plotter::show()

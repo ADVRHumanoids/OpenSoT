@@ -56,12 +56,18 @@ bool OpenSoT::L::open(std::string logName)
 
     if(_format == FORMAT_PYTHON)
     {
-        _current_log << "#! /usr/bin/env python" << std::endl
-             << std::endl
-             << "import numpy as np" << std::endl
-             << "import matplotlib" << std::endl
-             << "from matplotlib.pyplot import *" << std::endl;
-        /* @TODO this should be done by the flusher
+        // we already incremented just above - the variable has now the semantic meaning of:
+        // how many times did we open the file?
+        if(_must_append[_current_log_filename] == 1)
+        {
+            _current_log << "#! /usr/bin/env python" << std::endl
+                 << std::endl
+                 << "import numpy as np" << std::endl
+                 << "import matplotlib" << std::endl
+                 << "from matplotlib.pyplot import *" << std::endl;
+        }
+
+        /* @TODO this should be done by the flushers
         _log << "#t, x, y, z, r, p, y,"                 // 0-6
              << " xns, yns, zns, rns, pns, yns,"        // 7-12
              << " xref, yref, zref, rref, pref, yref,"  // 13-18
@@ -86,7 +92,8 @@ bool OpenSoT::L::close()
         _current_log << "));" << std::endl;
         _current_log << std::endl;
         _current_log << plotter->getCommands() << std::endl;
-        _collator << "execfile('" << _current_log_filename << "')" << std::endl;
+        if(_must_append[_current_log_filename] == 1) // we opened the file just once...
+            _collator << "execfile('" << _current_log_filename << "')" << std::endl;
     }
 
     _current_log.close();
@@ -195,7 +202,7 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(OpenSoT::plotters::Plottable plott
     }
 
     unsigned int minIndex = 0;
-    minIndex += _fakeFlusher_t.getSize()+_fakeFlusher_dq.getSize()-1;
+    minIndex += _fakeFlusher_t.getSize()+_fakeFlusher_dq.getSize();
     for(unsigned int i = 0; i < _flushers.size(); ++i)
     {
         if(_flushers[i].get() == plottable.first)
@@ -206,10 +213,10 @@ OpenSoT::Indices OpenSoT::L::getGlobalIndices(OpenSoT::plotters::Plottable plott
     throw new std::invalid_argument("Error: could not find specified flusher");
 }
 
-unsigned int OpenSoT::L::getMaximumIndex()
+unsigned int OpenSoT::L::getDataSize()
 {
     unsigned int maxIndex = 0;
-    maxIndex += _fakeFlusher_t.getSize()+_fakeFlusher_dq.getSize()-1;
+    maxIndex += _fakeFlusher_t.getSize()+_fakeFlusher_dq.getSize();
     for(unsigned int i = 0; i < _flushers.size(); ++i)
         maxIndex += _flushers[i]->getSize();
     return maxIndex;

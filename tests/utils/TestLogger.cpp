@@ -51,6 +51,7 @@ TEST_F(testLogger, testDataFlusherWorks)
 
     v[0] = 1.0;
     dq[3] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -59,6 +60,7 @@ TEST_F(testLogger, testDataFlusherWorks)
 
     v[1] = 1.0;
     dq[4] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -67,6 +69,7 @@ TEST_F(testLogger, testDataFlusherWorks)
 
     v[2] = 1.0;
     dq[5] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
     logger.close();  // the final file should have 4 rows of data, 33 columns
@@ -116,6 +119,7 @@ TEST_F(testLogger, testLoggerCollationWorks)
 
     v[0] = 1.0;
     dq[3] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -128,6 +132,7 @@ TEST_F(testLogger, testLoggerCollationWorks)
 
     v[1] = 1.0;
     dq[4] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -136,6 +141,7 @@ TEST_F(testLogger, testLoggerCollationWorks)
 
     v[2] = 1.0;
     dq[5] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
     logger.close();  // the second file should have 2 rows of data, 33 columns
@@ -156,6 +162,7 @@ TEST_F(testLogger, testAppendingWorks)
 
     v[0] = 1.0;
     dq[3] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -168,6 +175,7 @@ TEST_F(testLogger, testAppendingWorks)
 
     v[1] = 1.0;
     dq[4] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -176,6 +184,7 @@ TEST_F(testLogger, testAppendingWorks)
 
     v[2] = 1.0;
     dq[5] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
     logger.close();  // the second file should have 2 rows of data, 33 columns
@@ -188,6 +197,7 @@ TEST_F(testLogger, testAppendingWorks)
 
     v[1] = 1.0;
     dq[4] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -196,6 +206,7 @@ TEST_F(testLogger, testAppendingWorks)
 
     v[2] = 1.0;
     dq[5] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
     logger.close();  // the first file should have now 2 rows of data, 33 columns
@@ -216,6 +227,7 @@ TEST_F(testLogger, testPlotterWorks)
 
     v[0] = 1.0;
     dq[3] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -224,6 +236,7 @@ TEST_F(testLogger, testPlotterWorks)
 
     v[1] = 1.0;
     dq[4] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -232,6 +245,7 @@ TEST_F(testLogger, testPlotterWorks)
 
     v[2] = 1.0;
     dq[5] = 2.0;
+    t+=dT;
 
     logger.udpate(t, dq);
 
@@ -244,7 +258,6 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->autoLegend(dataPlottable);
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
-    logger.plotter->savefig();
 
     logger.plotter->subplot(2,2,2);
     logger.plotter->plot_t(dataPlottable);
@@ -257,7 +270,6 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->autoLegend(dataPlottable);
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
-    logger.plotter->savefig();
 
     OpenSoT::plotters::Plottable solutionPlottable =
         logger.dq_opt();
@@ -267,7 +279,6 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->autoLegend(solutionPlottable);
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("solution [rad/s]");
-    logger.plotter->savefig();
 
     OpenSoT::Indices allDqIndices = solutionPlottable.second;
     std::vector<unsigned int> allDqIndicesV = allDqIndices.asVector();
@@ -277,11 +288,12 @@ TEST_F(testLogger, testPlotterWorks)
     solutionPlottable.second = OpenSoT::Indices(j3_5Indicesv);
     logger.plotter->subplot(2,2,4);
     logger.plotter->plot_t(solutionPlottable);
-    logger.plotter->title("Solution (joints 3-5");
+    logger.plotter->title("Solution (joints 3-5)");
     logger.plotter->autoLegend(solutionPlottable);
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("solution [rad/s]");
     logger.plotter->savefig();
+    logger.plotter->show();
 
     logger.close();  // the final file should have 4 rows of data, 33 columns
 }

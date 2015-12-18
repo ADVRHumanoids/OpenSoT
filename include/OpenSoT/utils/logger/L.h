@@ -122,10 +122,10 @@ namespace OpenSoT {
         Indices getGlobalIndices(plotters::Plottable plottable);
 
         /**
-         * @brief getMaximumIndex gets the total number of data we are flushing
+         * @brief getLastIndex gets the size of the data we are flushing
          * @return the first free global index
          */
-        unsigned int getMaximumIndex();
+        unsigned int getDataSize();
 
         /**
          * @brief plotter a utility class to generate plots
