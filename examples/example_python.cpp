@@ -34,7 +34,7 @@ void my_handler(int s){
 
         std::vector<std::string> tauLabels = logger->model.getJointNames();
         for(unsigned int i = 0; i < tauLabels.size(); ++i)
-            tauLabels[i] += " tau";
+            tauLabels[i] += " $\tau$";
         tauFlusher->setDescription(tauLabels);
         /*                                      */
         /*  PLOT 1 - estimated vs real torques  */
@@ -85,6 +85,8 @@ void my_handler(int s){
         logger->plotter->autoLegend(dynamicsFlusher->i(dynConstr2Indices));
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("Error");
+
+        logger->plotter->tight_layout();
         logger->plotter->savefig();
 
         /*                                */
@@ -101,12 +103,14 @@ void my_handler(int s){
             torquesI.asVector()[logger->model.torso.joint_numbers[0]]);
         OpenSoT::Indices torqueLimsIRoll = OpenSoT::Indices(
             torqueLimsTorsoI.asVector()[logger->model.torso.joint_numbers[0]]);
+        logger->plotter->subplot(3,1,1);
         plottables.clear();
         plottables.push_back(tauFlusher->i(torquesIRoll));
         plottables.push_back(dynamicsFlusher->i(torqueLimsIRoll));
+        plottables.push_back(
+            logger->plotter->minus(dynamicsFlusher->i(torqueLimsIRoll)));
         logger->plotter->plot_t(plottables);
-        logger->plotter->subplot(3,1,1);
-        logger->plotter->title("tau torso Roll");
+        logger->plotter->title("$\tau$ torso Roll");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("tau [Nm]");
 
@@ -118,8 +122,10 @@ void my_handler(int s){
         plottables.clear();
         plottables.push_back(tauFlusher->i(torquesIPitch));
         plottables.push_back(dynamicsFlusher->i(torqueLimsIPitch));
+        plottables.push_back(
+            logger->plotter->minus(dynamicsFlusher->i(torqueLimsIPitch)));
         logger->plotter->plot_t(plottables);
-        logger->plotter->title("tau torso Pitch");
+        logger->plotter->title("$\tau$ torso Pitch");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("tau [Nm]");
 
@@ -131,11 +137,14 @@ void my_handler(int s){
         plottables.clear();
         plottables.push_back(tauFlusher->i(torquesIYaw));
         plottables.push_back(dynamicsFlusher->i(torqueLimsIYaw));
+        plottables.push_back(
+            logger->plotter->minus(dynamicsFlusher->i(torqueLimsIYaw)));
         logger->plotter->plot_t(plottables);
-        logger->plotter->title("tau torso Yaw");
+        logger->plotter->title("$\tau$ torso Yaw");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("tau [Nm]");
 
+        logger->plotter->tight_layout();
         logger->plotter->savefig();
 
         /*                           */
@@ -151,45 +160,46 @@ void my_handler(int s){
         logger->plotter->subplot(3,2,1);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(posErrorI.asVector()[0])));
-        logger->plotter->title("x Position Error Left Hand");
+        logger->plotter->title("$x$ Position Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[m]");
 
         logger->plotter->subplot(3,2,2);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[0])));
-        logger->plotter->title("x Orientation Error Left Hand");
+        logger->plotter->title("$x$ Orientation Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[rad]");
 
         logger->plotter->subplot(3,2,3);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(posErrorI.asVector()[1])));
-        logger->plotter->title("y Position Error Left Hand");
+        logger->plotter->title("$y$ Position Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[m]");
 
         logger->plotter->subplot(3,2,4);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[1])));
-        logger->plotter->title("y Orientation Error Left Hand");
+        logger->plotter->title("$y$ Orientation Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[rad]");
 
         logger->plotter->subplot(3,2,5);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(posErrorI.asVector()[2])));
-        logger->plotter->title("z Position Error Left Hand");
+        logger->plotter->title("$z$ Position Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[m]");
 
         logger->plotter->subplot(3,2,6);
         logger->plotter->plot_t(
             leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[2])));
-        logger->plotter->title("z Orientation Error Left Hand");
+        logger->plotter->title("$z$ Orientation Error Left Hand");
         logger->plotter->xlabel("t [s]");
         logger->plotter->ylabel("[rad]");
 
+        logger->plotter->tight_layout();
         logger->plotter->savefig();
 
         logger->plotter->show();

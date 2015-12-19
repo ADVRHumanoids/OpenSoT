@@ -53,12 +53,19 @@ void OpenSoT::plotters::Plotter::figure(const unsigned int width_in,
 
 void OpenSoT::plotters::Plotter::xlabel(const std::string& label)
 {
-    _commands << "xlabel('" << label << "');" << std::endl;
+    _commands << "xlabel(r'" << label << "');" << std::endl;
 }
 
 void OpenSoT::plotters::Plotter::ylabel(const std::string& label)
 {
-    _commands << "ylabel('" << label << "');" << std::endl;
+    _commands << "ylabel(r'" << label << "');" << std::endl;
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(OpenSoT::plotters::Plottable data)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    return norm(data_l);
 }
 
 OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(std::list<OpenSoT::plotters::Plottable> data)
@@ -74,8 +81,34 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(std::list<OpenSoT:
     _fakeFlushers.push_back(flusher);
 
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
-        _commands << "data = np.hstack((data.transpose(), data[:,("
-                  << getIndicesString(globalIndices) << ")]**2).sum(1))).transpose()";
+        _commands << "data = np.vstack((data.transpose(), (data[:,("
+                  << getIndicesString(globalIndices) << ")]**2).sum(1))).transpose();" << std::endl;
+
+    return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::minus(OpenSoT::plotters::Plottable data)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    return minus(data_l);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::minus(std::list<OpenSoT::plotters::Plottable> data)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    unsigned int minFreeIndex = _logger->getDataSize();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        minFreeIndex += (*it)->getSize();
+
+    OpenSoT::flushers::Flusher::Ptr flusher(
+        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), minFreeIndex));
+    _fakeFlushers.push_back(flusher);
+
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+        _commands << "data = np.hstack((data, -1.0*data[:,("
+                  << getIndicesString(globalIndices) << ")]));" << std::endl;
 
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
@@ -88,7 +121,7 @@ void OpenSoT::plotters::Plotter::legend(const std::list<std::string> labels)
         for(std::list<std::string>::const_iterator it = labels.begin();
             it != labels.end();
             ++it)
-            _commands << "'" << *it << "', ";
+            _commands << "r'" << *it << "', ";
         _commands << "));" << std::endl;
     }
 }
@@ -150,9 +183,15 @@ void OpenSoT::plotters::Plotter::show()
     _commands << "show(block=True);" << std::endl;
 }
 
+void OpenSoT::plotters::Plotter::tight_layout()
+{
+    _commands << std::endl;
+    _commands << "tight_layout();" << std::endl;
+}
+
 void OpenSoT::plotters::Plotter::title(const std::string &title)
 {
-    _commands << "title('" << title << "');" << std::endl;
+    _commands << "title(r'" << title << "');" << std::endl;
 }
 
 std::string OpenSoT::plotters::Plotter::getCommands()

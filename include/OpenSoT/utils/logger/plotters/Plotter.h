@@ -92,7 +92,23 @@ namespace OpenSoT
 
             void ylabel(const std::string& label);
 
+            Plottable norm(Plottable data);
+
+            /**
+             * @brief norm creates a new plottable which is the norm2 of a given plottable
+             * @param data a list of plottables
+             * @return
+             */
             Plottable norm(std::list<Plottable> data);
+
+            Plottable minus(Plottable data);
+
+            /**
+             * @brief minus creates a new plottable obtained by negating the data of a given plottable
+             * @param data a list of plottables
+             * @return
+             */
+            Plottable minus(std::list<Plottable> data);
 
             /**
              * @brief legend builds a legend from a list of labels
@@ -136,6 +152,11 @@ namespace OpenSoT
              * @brief show displays plots on screen
              */
             void show();
+
+            /**
+             * @brief tight_layout adjusts labels of plots to have a nice fitting plot
+             */
+            void tight_layout();
 
             void title(const std::string& title);
 
