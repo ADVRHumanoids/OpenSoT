@@ -9,10 +9,8 @@
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/VelocityAllocation.h>
 #include <boost/program_options.hpp>
+#include <OpenSoT/utils/logger/L.h>
 #include <signal.h>
-#include <fstream>
-#include <stdlib.h>
-#include <stdio.h>
 
 #define MODULE_NAME "example_python"
 #define dT          35e-3
@@ -20,46 +18,198 @@
 typedef boost::accumulators::accumulator_set<double,
                                             boost::accumulators::stats<boost::accumulators::tag::rolling_mean>
                                             > Accumulator;
-class logger{
-public:
-logger(const std::string& name, const int size = 0)
-    {
-        if(size > 0)
-            data.reserve(size);
-
-        std::string file_name = "example_python_" + name + ".m";
-        file.open(file_name.c_str());
-        file<<name<<" = ["<<std::endl;
-    }
-
-    void log(const yarp::sig::Vector& data_)
-    {
-        data.push_back(data_);
-    }
-
-    void write()
-    {
-        for(unsigned int i = 0; i < data.size(); ++i)
-            file<<data[i].toString()<<std::endl;
-        file<<"];"<<std::endl;
-        file.close();
-    }
-
-    std::vector<yarp::sig::Vector> data;
-    std::ofstream file;
-
-};
-
-logger torques_measured("torques_measured");
-logger cartesian_error("cartesian_error");
+OpenSoT::L::Ptr logger;
+OpenSoT::flushers::Flusher::Ptr tauFlusher;
+OpenSoT::flushers::Flusher::Ptr dynamicsFlusher;
+OpenSoT::flushers::Flusher::Ptr leftHandCartesianFlusher;
 
 void my_handler(int s){
-           std::cout<<"Writing log files..."<<std::endl;
-           torques_measured.write();
-           cartesian_error.write();
-           std::cout<<"...log files written!"<<std::endl;
-           exit(1);
+    using namespace OpenSoT::flushers;
 
+    if(tauFlusher && dynamicsFlusher && leftHandCartesianFlusher)
+    {
+        /*                  */
+        /*  CREATING PLOTS  */
+        /*                  */
+
+        std::vector<std::string> tauLabels = logger->model.getJointNames();
+        for(unsigned int i = 0; i < tauLabels.size(); ++i)
+            tauLabels[i] += " $\tau$";
+        tauFlusher->setDescription(tauLabels);
+        /*                                      */
+        /*  PLOT 1 - estimated vs real torques  */
+        /*                                      */
+
+        // selecting torso joints for all plots
+        OpenSoT::Indices tauIndices        = tauFlusher->getIndices(     DataFlusher<double>::ALL);
+        OpenSoT::Indices dynConstr1Indices = dynamicsFlusher->getIndices(constraints::velocity::Dynamics::ESTIMATED_TORQUE);
+        OpenSoT::Indices dynConstr2Indices = dynamicsFlusher->getIndices(constraints::velocity::Dynamics::ESTIMATED_TORQUE |
+                                                                         constraints::velocity::Dynamics::BLOWERBOUND |
+                                                                         constraints::velocity::Dynamics::BUPPERBOUND);
+        {
+            std::vector<std::list<unsigned int> > finalIndicesL(3);
+            std::vector<std::vector<unsigned int> > indicesV(3);
+            unsigned int n_dofs = logger->model.getJointNames().size();
+            indicesV[0] = tauIndices.asVector();
+            indicesV[1] = dynConstr1Indices.asVector();
+            indicesV[2] = dynConstr2Indices.asVector();
+            for(unsigned int i = 0; i < logger->model.torso.joint_numbers.size(); ++i)
+            {
+                unsigned int jIndex = logger->model.torso.joint_numbers[i];
+                for(unsigned int j = 0; j < 3; ++j)
+                    finalIndicesL[j].push_back(indicesV[j][jIndex]);
+
+                finalIndicesL[2].push_back(indicesV[2][jIndex+n_dofs]);
+                finalIndicesL[2].push_back(indicesV[2][jIndex+2*n_dofs]);
+            }
+            tauIndices = OpenSoT::Indices(finalIndicesL[0]);
+            dynConstr1Indices = OpenSoT::Indices(finalIndicesL[1]);
+            dynConstr2Indices = OpenSoT::Indices(finalIndicesL[2]);
+
+        }
+
+        std::list<OpenSoT::plotters::Plottable> plottables;
+        logger->plotter->figure(10.24,7.68,"estimated torques for torso vs real torques");
+        plottables.push_back(dynamicsFlusher->i(dynConstr1Indices));
+        plottables.push_back(tauFlusher->i(tauIndices));
+        logger->plotter->subplot(1,2,1);
+        logger->plotter->plot_t(plottables);
+        logger->plotter->title("Torque vs Estimated Torque");
+        logger->plotter->autoLegend(plottables);
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("tau [Nm]");
+
+        logger->plotter->subplot(1,2,2);
+        logger->plotter->plot_t(dynamicsFlusher->i(dynConstr2Indices));
+        logger->plotter->title("Dynamics Constraint");
+        logger->plotter->autoLegend(dynamicsFlusher->i(dynConstr2Indices));
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("Error");
+
+        logger->plotter->tight_layout();
+        logger->plotter->savefig();
+
+        /*                                */
+        /*  PLOT 2 - torso joint torques  */
+        /*                                */
+        OpenSoT::Indices torquesI = tauFlusher->getIndices(DataFlusher<double>::ALL);
+        OpenSoT::Indices torqueLimsTorsoI = dynamicsFlusher->getIndices(
+            constraints::velocity::Dynamics::TORQUE_LIMITS);
+
+        logger->plotter->figure(10.24,7.68,"torso joint torques vs constraints");
+
+
+        OpenSoT::Indices torquesIRoll = OpenSoT::Indices(
+            torquesI.asVector()[logger->model.torso.joint_numbers[0]]);
+        OpenSoT::Indices torqueLimsIRoll = OpenSoT::Indices(
+            torqueLimsTorsoI.asVector()[logger->model.torso.joint_numbers[0]]);
+        logger->plotter->subplot(3,1,1);
+        plottables.clear();
+        plottables.push_back(tauFlusher->i(torquesIRoll));
+        plottables.push_back(dynamicsFlusher->i(torqueLimsIRoll));
+        plottables.push_back(
+            logger->plotter->minus(dynamicsFlusher->i(torqueLimsIRoll)));
+        logger->plotter->plot_t(plottables);
+        logger->plotter->title("$\tau$ torso Roll");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("tau [Nm]");
+
+        OpenSoT::Indices torquesIPitch = OpenSoT::Indices(
+            torquesI.asVector()[logger->model.torso.joint_numbers[1]]);
+        OpenSoT::Indices torqueLimsIPitch = OpenSoT::Indices(
+            torqueLimsTorsoI.asVector()[logger->model.torso.joint_numbers[1]]);
+        logger->plotter->subplot(3,1,2);
+        plottables.clear();
+        plottables.push_back(tauFlusher->i(torquesIPitch));
+        plottables.push_back(dynamicsFlusher->i(torqueLimsIPitch));
+        plottables.push_back(
+            logger->plotter->minus(dynamicsFlusher->i(torqueLimsIPitch)));
+        logger->plotter->plot_t(plottables);
+        logger->plotter->title("$\tau$ torso Pitch");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("tau [Nm]");
+
+        OpenSoT::Indices torquesIYaw = OpenSoT::Indices(
+            torquesI.asVector()[logger->model.torso.joint_numbers[2]]);
+        OpenSoT::Indices torqueLimsIYaw = OpenSoT::Indices(
+            torqueLimsTorsoI.asVector()[logger->model.torso.joint_numbers[2]]);
+        logger->plotter->subplot(3,1,3);
+        plottables.clear();
+        plottables.push_back(tauFlusher->i(torquesIYaw));
+        plottables.push_back(dynamicsFlusher->i(torqueLimsIYaw));
+        plottables.push_back(
+            logger->plotter->minus(dynamicsFlusher->i(torqueLimsIYaw)));
+        logger->plotter->plot_t(plottables);
+        logger->plotter->title("$\tau$ torso Yaw");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("tau [Nm]");
+
+        logger->plotter->tight_layout();
+        logger->plotter->savefig();
+
+        /*                           */
+        /*  PLOT 3 - Cartesian Error */
+        /*                           */
+
+        OpenSoT::Indices posErrorI = leftHandCartesianFlusher->getIndices(
+            OpenSoT::flushers::tasks::velocity::Cartesian::POSITION_ERROR);
+        OpenSoT::Indices oriErrorI = leftHandCartesianFlusher->getIndices(
+            OpenSoT::flushers::tasks::velocity::Cartesian::ORIENTATION_ERROR);
+        logger->plotter->figure(10.24,7.68,"Cartesian Error");
+
+        logger->plotter->subplot(3,2,1);
+        logger->plotter->plot_t(
+            leftHandCartesianFlusher->i(OpenSoT::Indices(posErrorI.asVector()[0])));
+        logger->plotter->title("$x$ Position Error Left Hand");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("[m]");
+
+        logger->plotter->subplot(3,2,2);
+        logger->plotter->plot_t(
+            leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[0])));
+        logger->plotter->title("$x$ Orientation Error Left Hand");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("[rad]");
+
+        logger->plotter->subplot(3,2,3);
+        logger->plotter->plot_t(
+            leftHandCartesianFlusher->i(OpenSoT::Indices(posErrorI.asVector()[1])));
+        logger->plotter->title("$y$ Position Error Left Hand");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("[m]");
+
+        logger->plotter->subplot(3,2,4);
+        logger->plotter->plot_t(
+            leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[1])));
+        logger->plotter->title("$y$ Orientation Error Left Hand");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("[rad]");
+
+        logger->plotter->subplot(3,2,5);
+        logger->plotter->plot_t(
+            leftHandCartesianFlusher->i(OpenSoT::Indices(posErrorI.asVector()[2])));
+        logger->plotter->title("$z$ Position Error Left Hand");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("[m]");
+
+        logger->plotter->subplot(3,2,6);
+        logger->plotter->plot_t(
+            leftHandCartesianFlusher->i(OpenSoT::Indices(oriErrorI.asVector()[2])));
+        logger->plotter->title("$z$ Orientation Error Left Hand");
+        logger->plotter->xlabel("t [s]");
+        logger->plotter->ylabel("[rad]");
+
+        logger->plotter->tight_layout();
+        logger->plotter->savefig();
+
+        logger->plotter->show();
+
+    }
+
+    std::cout<<"Writing log files..."<<std::endl;
+    logger.reset();
+    std::cout<<"...log files written!"<<std::endl;
+    exit(1);
 }
 
 int main(int argc, char **argv) {
@@ -270,17 +420,30 @@ int main(int argc, char **argv) {
     robot.setPositionDirectMode();
     yarp::os::Time::delay(2.5);
 
-    double tic, toc;
+    double tic, toc, begin;
     int print_mean = 0;
 
 
     yarp::sig::Vector q_m(q.size(), 0.0), dq_m(q.size(), 0.0), tau_m(q.size(), 0.0);
+    robot.sense(q_m, dq_m, tau_m);
+
+    /*                    */
+    /*  CREATING LOGGER   */
+    /*                    */
+
+    logger.reset(new OpenSoT::L(MODULE_NAME,robot.idynutils));
+    logger->open("example_python_dynamics_log");
+    dynamicsFlusher = logger->add(DHS.torqueLimits);
+    tauFlusher = logger->add(tau_m.data(), q.size());
+    leftHandCartesianFlusher = logger->add(DHS.leftArm);
+
+    begin = yarp::os::Time::now();
+
     while(true) {
-        tic = yarp::os::Time::now();
+        tic = yarp::os::Time::now() - begin;
 
 
         robot.sense(q_m, dq_m, tau_m);
-        torques_measured.log(tau_m);
 
         RobotUtils::ftReadings ft_readings = robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
@@ -294,15 +457,15 @@ int main(int argc, char **argv) {
             using namespace yarp::math;
             DHS.torqueLimits->update(cat(q,dq/dT));
         }
-
-        cartesian_error.log(yarp::math::cat(DHS.leftArm->positionError, DHS.leftArm->orientationError));
-
         if(solver->solve(dq))
             q+=dq;
         else
             std::cout << "Error computing solve()" << std::endl;
+
+        logger->udpate(tic, dq);
+
         robot.move(q);
-        toc = yarp::os::Time::now();
+        toc = yarp::os::Time::now() - begin;
         time_accumulator(toc-tic);
 
         // print mean every 5s

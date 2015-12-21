@@ -247,3 +247,8 @@ void Dynamics::update(const yarp::sig::Vector &x)
     }
     _Aineq = (1.0/_dT)*_M;
 }
+
+yarp::sig::Vector Dynamics::getEstimatedTorques(const yarp::sig::Vector &dq)
+{
+    return _Aineq*dq - _b;
+}

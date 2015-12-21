@@ -88,10 +88,10 @@ TEST_F(TestSubTaskMap, testSubMapConstructor)
     // goes into third chunk and increases it to size 2
     indices.push_back(11);
 
-    OpenSoT::SubTask::SubTaskMap subTaskMap(indices);
+    OpenSoT::Indices subTaskMap(indices);
     ASSERT_EQ(subTaskMap.getChunks().size(), 5);
 
-    OpenSoT::SubTask::SubTaskMap::ChunkList::const_iterator i = subTaskMap.getChunks().begin();
+    OpenSoT::Indices::ChunkList::const_iterator i = subTaskMap.getChunks().begin();
     EXPECT_EQ(i->size(), 3);
     i++;
 
@@ -110,8 +110,8 @@ TEST_F(TestSubTaskMap, testSubMapConstructor)
     ASSERT_TRUE(i != subTaskMap.getChunks().end());
     EXPECT_EQ(i->size(), 3);
 
-    ASSERT_EQ(subTaskMap.getRowsList().size(), 11);
-    ASSERT_EQ(subTaskMap.getRowsVector().size(), 11);
+    ASSERT_EQ(subTaskMap.asList().size(), 11);
+    ASSERT_EQ(subTaskMap.asVector().size(), 11);
     ASSERT_EQ(subTaskMap.size(), 11);
 }
 
@@ -141,7 +141,7 @@ TEST_F(TestSubTaskMap, testSubMapToString)
     // goes into third chunk and increases it to size 2
     indices.push_back(11);
 
-    OpenSoT::SubTask::SubTaskMap subTaskMap(indices);
+    OpenSoT::Indices subTaskMap(indices);
     EXPECT_EQ(std::string(subTaskMap), "1-3+7-8+10-11+13+17-19");
 }
 
@@ -169,9 +169,9 @@ TEST_F(TestSubTaskMap, testSubMapOperatorPlus)
     indices1_plus_3.insert(indices1_plus_3.end(), indices3.begin(), indices3.end());
     indices1_plus_3.sort(); indices1_plus_3.unique();
 
-    OpenSoT::SubTask::SubTaskMap subTaskMap(indices.begin(),indices.end());
-    OpenSoT::SubTask::SubTaskMap subTaskMap2(indices2);
-    OpenSoT::SubTask::SubTaskMap subTaskMap3(indices3);
+    OpenSoT::Indices subTaskMap(indices.begin(),indices.end());
+    OpenSoT::Indices subTaskMap2(indices2);
+    OpenSoT::Indices subTaskMap3(indices3);
 
     EXPECT_EQ(std::string(subTaskMap+subTaskMap2),"1-3+7-8");
     EXPECT_EQ(std::list<unsigned int>(subTaskMap+subTaskMap3),indices1_plus_3);
@@ -209,7 +209,7 @@ TEST_F(TestSubTaskMap, testSubTaskOperatorToList)
     // goes into third chunk and increases it to size 2
     indices.push_back(11);
 
-    OpenSoT::SubTask::SubTaskMap subTaskMap(indices);
+    OpenSoT::Indices subTaskMap(indices);
     indices.sort(); indices.unique();
     EXPECT_EQ(std::list<unsigned int>(subTaskMap), indices);
 }
@@ -222,9 +222,9 @@ TEST_F(TestSubTaskMap, testRange)
     indices.push_back(2);
     indices.push_back(3);
 
-    OpenSoT::SubTask::SubTaskMap subTaskMap(indices);
-    EXPECT_EQ("1-3", std::string(OpenSoT::SubTask::SubTaskMap::range(1,3)));
-    EXPECT_EQ(subTaskMap, OpenSoT::SubTask::SubTaskMap::range(1,3));
+    OpenSoT::Indices subTaskMap(indices);
+    EXPECT_EQ("1-3", std::string(OpenSoT::Indices::range(1,3)));
+    EXPECT_EQ(subTaskMap, OpenSoT::Indices::range(1,3));
 }
 
 
@@ -233,15 +233,15 @@ TEST_F(TestSubTask, testgetA)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     ASSERT_EQ(subTask->getA().rows(), 3);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     yarp::sig::Matrix A(3, _postural->getXSize());
     A = _postural->getA().submatrix(0,2,0,_postural->getXSize()-1);
     EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getA(),A));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
-                                                 SubTask::SubTaskMap::range(5,6)));
+    subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
+                                                 Indices::range(5,6)));
     ASSERT_EQ(subTask->getA().rows(), 5);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     A.resize(5, _postural->getXSize());
@@ -254,7 +254,7 @@ TEST_F(TestSubTask, testGetHessianAType)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
     ASSERT_EQ(subTask->getHessianAtype(), HST_POSDEF);
 }
 
@@ -262,14 +262,14 @@ TEST_F(TestSubTask, testgetb)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     ASSERT_EQ(subTask->getb().size(), 3);
     yarp::sig::Vector b(3), bLambda(3);
     b = _postural->getb().subVector(0,2);
     EXPECT_TRUE(tests_utils::vectorAreEqual(subTask->getb(),b));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
-                                                 SubTask::SubTaskMap::range(5,6)));
+    subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
+                                                 Indices::range(5,6)));
     ASSERT_EQ(subTask->getb().size(), 5);
     b.resize(5);
     b = _postural->getb().subVector(0,2);
@@ -294,15 +294,15 @@ TEST_F(TestSubTask, testgetWeight)
     _postural->setWeight(W);
 
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
 
     W = _postural->getWeight().submatrix(0,2,0,2);
     EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getWeight(),W));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
-                                                 SubTask::SubTaskMap::range(5,6)));
+    subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
+                                                 Indices::range(5,6)));
     ASSERT_EQ(subTask->getWeight().rows(), 5);
     ASSERT_EQ(subTask->getWeight().cols(), 5);
     W.resize(5, 5);
@@ -323,7 +323,7 @@ TEST_F(TestSubTask, testsetWeight)
     for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
     yarp::sig::Matrix W(3,3); W.diagonal(W_diag);
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(0,2)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     subTask->setWeight(W);
 
     ASSERT_EQ(subTask->getWeight().rows(), 3);
@@ -339,8 +339,8 @@ TEST_F(TestSubTask, testsetWeight)
     for(unsigned int i = 3; i < 5 ; ++i) { W_diag(i) = i+1; fullW(i+2,i+2) = i+1; }
     W.diagonal(W_diag);
 
-    subTask = SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(0,2) +
-                                                  SubTask::SubTaskMap::range(5,6)));
+    subTask = SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
+                                                  Indices::range(5,6)));
     subTask->setWeight(W);
     ASSERT_EQ(subTask->getWeight().rows(), 5);
     ASSERT_EQ(subTask->getWeight().cols(), 5);
@@ -357,7 +357,7 @@ TEST_F(TestSubTask, testGetConstraints)
 
     _postural->getConstraints().push_back(_joint_limits);
 
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
 
     yarp::sig::Vector lowerBounds = subTask->getConstraints().front()->getLowerBound();
     yarp::sig::Vector b = subTask->getb();
@@ -381,7 +381,7 @@ TEST_F(TestSubTask, testUpdate)
     using namespace OpenSoT;
 
     _postural->getConstraints().push_back(_joint_limits);
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
 
 
     ASSERT_EQ(_postural->getConstraints(), subTask->getConstraints());
@@ -392,11 +392,11 @@ TEST_F(TestSubTask, testGetTaskSize)
     using namespace OpenSoT;
 
     _postural->getConstraints().push_back(_joint_limits);
-    SubTask::Ptr subTask(new SubTask(_postural, SubTask::SubTaskMap::range(1,3)));
+    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
     ASSERT_EQ(subTask->getTaskSize(), 3);
 
-    subTask = SubTask::Ptr(new SubTask(_postural, SubTask::SubTaskMap::range(1,3) +
-                                                  SubTask::SubTaskMap::range(6,7)));
+    subTask = SubTask::Ptr(new SubTask(_postural, Indices::range(1,3) +
+                                                  Indices::range(6,7)));
     ASSERT_EQ(subTask->getTaskSize(), 5);
 }
 
