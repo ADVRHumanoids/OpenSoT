@@ -1,3 +1,4 @@
+#include <OpenSoT/utils/logger/L.h>
 #include <OpenSoT/utils/logger/flushers/RobotFlusher.h>
 
 using namespace OpenSoT::flushers;
@@ -58,4 +59,42 @@ int RobotFlusher::getSize() const
 {
     // q, dq, tau
     return 3*_nDoFs;
+}
+
+void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l)
+{
+    l.plotter->figure(10.24,7.68,"estimated torques for torso vs real torques");
+
+    OpenSoT::plotters::Plottable qPlottable =
+        l.getFlusher(_robot)->i(Q);
+    l.plotter->subplot(2,2,1);
+    l.plotter->plot_t(qPlottable);
+    l.plotter->title("Robot Configuration");
+    l.plotter->autoLegend(qPlottable);
+    l.plotter->xlabel("t [s]");
+    l.plotter->ylabel("q [rad]");
+
+
+    OpenSoT::plotters::Plottable dqPlottable =
+        l.getFlusher(_robot)->i(DQ);
+    l.plotter->subplot(2,2,2);
+    l.plotter->plot_t(dqPlottable);
+    l.plotter->title("Robot Velocities");
+    l.plotter->autoLegend(dqPlottable);
+    l.plotter->xlabel("t [s]");
+    l.plotter->ylabel("\dq [rad/s]");
+
+
+    OpenSoT::plotters::Plottable tauPlottable =
+        l.getFlusher(_robot)->i(TAU);
+    l.plotter->subplot(2,2,3);
+    l.plotter->plot_t(tauPlottable);
+    l.plotter->title("Robot Torques");
+    l.plotter->autoLegend(tauPlottable);
+    l.plotter->xlabel("t [s]");
+    l.plotter->ylabel("tau [Nm]");
+
+    l.plotter->tight_layout();
+    l.plotter->savefig();
+    l.plotter->show();
 }

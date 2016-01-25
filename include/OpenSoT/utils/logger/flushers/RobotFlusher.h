@@ -24,6 +24,8 @@
 
 namespace OpenSoT
 {
+    class L;
+
     namespace flushers
     {
         class RobotFlusher: public Flusher
@@ -43,6 +45,8 @@ namespace OpenSoT
             OpenSoT::Indices getIndices(int label) const;
 
             int getSize() const;
+
+            void defaultPlot(L&);
 
             typedef boost::shared_ptr<RobotFlusher> Ptr;
         private:
