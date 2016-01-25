@@ -24,6 +24,7 @@
 #include <OpenSoT/utils/logger/flushers/ConstraintFlusher.h>
 #include <OpenSoT/utils/logger/flushers/DataFlusher.h>
 #include <OpenSoT/utils/logger/flushers/FakeFlusher.h>
+#include <OpenSoT/utils/logger/flushers/RobotFlusher.h>
 #include <OpenSoT/utils/logger/flushers/TaskFlusher.h>
 #include <OpenSoT/utils/logger/plotters/Plotter.h>
 #include <idynutils/idynutils.h>
@@ -56,13 +57,20 @@ namespace OpenSoT {
         ~L();
 
         /**
-         * @brief udpate the logger. It will automatically flush to file all flushers, save the current time and the optimal solution.
+         * @brief update the logger. It will automatically flush to file all flushers, save the current time and the optimal solution.
          * Should be called after solving a stack, and before the next stack update. For it to work, at least a flusher needs to be created
          * via the add() function.
          * @param t the current time
          * @param dq_opt the optimal solution as given by solve()
          */
-        void udpate(double t, const yarp::sig::Vector& dq_opt);
+        void update(double t, const yarp::sig::Vector& dq_opt);
+
+        /**
+         * @brief update the logger. It will automatically flush to file all flushers, and save the current time.
+         * For it to work, at least a flusher needs to be created via the add() function.
+         * @param t the current time
+         */
+        void update(double t);
 
         /**
          * @brief open opens a file for logging.
@@ -103,11 +111,20 @@ namespace OpenSoT {
             return dataFlusher;
         }
 
+        /**
+         * @brief add adds a new robot flusher. It will be deleted after the current log file is closed
+         * @param robot the RobotUtils object referring to the robot whose state we want to log
+         * @return
+         */
+        flushers::RobotFlusher::Ptr add(RobotUtils& robot);
+
         flushers::TaskFlusher::Ptr getFlusher(      Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
 
         flushers::ConstraintFlusher::Ptr getFlusher(Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint);
 
         flushers::Flusher::Ptr getFlusher(void* data);
+
+        flushers::RobotFlusher::Ptr getFlusher(RobotUtils& robot);
 
         logger_format getFormat() const;
 
@@ -190,6 +207,7 @@ namespace OpenSoT {
         std::map<TaskPtr, flushers::TaskFlusher::Ptr> _taskFlushers;
         std::map<ConstraintPtr, flushers::ConstraintFlusher::Ptr> _constraintFlushers;
         std::map<void*, flushers::Flusher::Ptr> _dataFlushers;
+        std::map<RobotUtils*, flushers::RobotFlusher::Ptr> _robotFlushers;
     };
 }
 

@@ -47,13 +47,13 @@ TEST_F(testLogger, testDataFlusherWorks)
     logger.open("test_dfw_data1");
     dataFlusher = logger.add(v.data(),3);
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[0] = 1.0;
     dq[3] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[0] = 0.0;
     dq[3] = 0.0;
@@ -62,7 +62,7 @@ TEST_F(testLogger, testDataFlusherWorks)
     dq[4] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[1] = 0.0;
     dq[4] = 0.0;
@@ -71,7 +71,7 @@ TEST_F(testLogger, testDataFlusherWorks)
     dq[5] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
     logger.close();  // the final file should have 4 rows of data, 33 columns
 }
 
@@ -98,7 +98,7 @@ TEST_F(testLogger, testDynamicsFlusherWork)
         _robot.updateiDyn3Model(q, dq/dT, true);
         DHS.torqueLimits->update(q);
         t+=dT;
-        logger.udpate(t, dq);
+        logger.update(t, dq);
     }
 
     logger.close();  // the final file should have 4 rows of data, 33 columns
@@ -115,13 +115,13 @@ TEST_F(testLogger, testLoggerCollationWorks)
     logger.open("test_cw_data1");
     dataFlusher = logger.add(v.data(),3);
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[0] = 1.0;
     dq[3] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     logger.close(); // the first file should have 2 rows of data, 33 columns
     logger.open("test_cw_data2");
@@ -134,7 +134,7 @@ TEST_F(testLogger, testLoggerCollationWorks)
     dq[4] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[1] = 0.0;
     dq[4] = 0.0;
@@ -143,7 +143,7 @@ TEST_F(testLogger, testLoggerCollationWorks)
     dq[5] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
     logger.close();  // the second file should have 2 rows of data, 33 columns
 }
 
@@ -158,13 +158,13 @@ TEST_F(testLogger, testAppendingWorks)
     logger.open("test_aw_data1");
     dataFlusher = logger.add(v.data(),3);
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[0] = 1.0;
     dq[3] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     logger.close();
     logger.open("test_aw_data2");
@@ -177,7 +177,7 @@ TEST_F(testLogger, testAppendingWorks)
     dq[4] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[1] = 0.0;
     dq[4] = 0.0;
@@ -186,7 +186,7 @@ TEST_F(testLogger, testAppendingWorks)
     dq[5] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
     logger.close();  // the second file should have 2 rows of data, 33 columns
 
     logger.open("test_aw_data1");
@@ -199,7 +199,7 @@ TEST_F(testLogger, testAppendingWorks)
     dq[4] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[1] = 0.0;
     dq[4] = 0.0;
@@ -208,7 +208,7 @@ TEST_F(testLogger, testAppendingWorks)
     dq[5] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
     logger.close();  // the first file should have now 2 rows of data, 33 columns
 }
 
@@ -223,13 +223,13 @@ TEST_F(testLogger, testPlotterWorks)
     logger.open("test_pw_data1");
     dataFlusher = logger.add(v.data(),3);
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[0] = 1.0;
     dq[3] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[0] = 0.0;
     dq[3] = 0.0;
@@ -238,7 +238,7 @@ TEST_F(testLogger, testPlotterWorks)
     dq[4] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     v[1] = 0.0;
     dq[4] = 0.0;
@@ -247,7 +247,7 @@ TEST_F(testLogger, testPlotterWorks)
     dq[5] = 2.0;
     t+=dT;
 
-    logger.udpate(t, dq);
+    logger.update(t, dq);
 
     OpenSoT::plotters::Plottable dataPlottable =
         dataFlusher->i(OpenSoT::flushers::DataFlusher<double>::ALL);

@@ -462,7 +462,7 @@ int main(int argc, char **argv) {
         else
             std::cout << "Error computing solve()" << std::endl;
 
-        logger->udpate(tic, dq);
+        logger->update(tic, dq);
 
         robot.move(q);
         toc = yarp::os::Time::now() - begin;

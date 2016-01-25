@@ -20,7 +20,7 @@
 #include <OpenSoT/utils/logger/plotters/Plotter.h>
 #include <stdexcept>
 
-void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
+void OpenSoT::L::update(double t, const yarp::sig::Vector &q_dot)
 {
     _current_log << "(" << t ;
     for(unsigned int i = 0; i < q_dot.size(); ++i)
@@ -35,6 +35,12 @@ void OpenSoT::L::udpate(double t, const yarp::sig::Vector &q_dot)
         }
     }
     _current_log << ")," << std::endl;
+}
+
+void OpenSoT::L::update(double t)
+{
+    yarp::sig::Vector dq(0.0, model.iDyn3_model.getNrOfDOFs());
+    this->update(t, dq);
 }
 
 bool OpenSoT::L::open(std::string logName)
@@ -101,6 +107,7 @@ bool OpenSoT::L::close()
     _constraintFlushers.clear();
     _dataFlushers.clear();
     _taskFlushers.clear();
+    _robotFlushers.clear();
 
     return true;
 }
@@ -167,6 +174,18 @@ OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::add(       OpenSoT::Constr
     return constraintFlusher;
 }
 
+OpenSoT::flushers::RobotFlusher::Ptr OpenSoT::L::add(RobotUtils& robot)
+{
+    OpenSoT::flushers::RobotFlusher::Ptr robotFlusher;
+        // the Dynamics flusher need a model to obtain the proper description
+    robotFlusher.reset(
+        new OpenSoT::flushers::RobotFlusher(robot));
+    _robotFlushers[&robot] = robotFlusher;
+    _flushers.push_back(robotFlusher);
+    return robotFlusher;
+}
+
+
 OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::getFlusher(      OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
 {
     return _taskFlushers[task];
@@ -180,6 +199,11 @@ OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::getFlusher(OpenSoT::Constr
 OpenSoT::flushers::Flusher::Ptr OpenSoT::L::getFlusher(void* data)
 {
     return _dataFlushers[data];
+}
+
+OpenSoT::flushers::RobotFlusher::Ptr OpenSoT::L::getFlusher(RobotUtils& robot)
+{
+    return _robotFlushers[&robot];
 }
 
 OpenSoT::L::logger_format OpenSoT::L::getFormat() const
