@@ -39,7 +39,7 @@ void OpenSoT::L::update(double t, const yarp::sig::Vector &q_dot)
 
 void OpenSoT::L::update(double t)
 {
-    yarp::sig::Vector dq(0.0, model.iDyn3_model.getNrOfDOFs());
+    yarp::sig::Vector dq(model.iDyn3_model.getNrOfDOFs(), 0.0);
     this->update(t, dq);
 }
 
