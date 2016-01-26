@@ -72,7 +72,6 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indice
     l.plotter->subplot(2,2,1);
     l.plotter->plot_t(qPlottable);
     l.plotter->title("Robot Configuration");
-    l.plotter->autoLegend(qPlottable);
     l.plotter->xlabel("t [s]");
     l.plotter->ylabel("q [rad]");
 
@@ -84,7 +83,6 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indice
     l.plotter->subplot(2,2,2);
     l.plotter->plot_t(dqPlottable);
     l.plotter->title("Robot Velocities");
-    l.plotter->autoLegend(dqPlottable);
     l.plotter->xlabel("t [s]");
     l.plotter->ylabel("\dq [rad/s]");
 
@@ -96,10 +94,19 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indice
     l.plotter->subplot(2,2,3);
     l.plotter->plot_t(tauPlottable);
     l.plotter->title("Robot Torques");
-    l.plotter->autoLegend(tauPlottable);
     l.plotter->xlabel("t [s]");
     l.plotter->ylabel("tau [Nm]");
 
+    std::list<std::string> jointNames;
+    if(i.size() > 0)
+        for(unsigned int j = 0; j < i.size(); ++j)
+            jointNames.push_back(
+                l.model.getJointNames()[i.asVector()[j]]);
+    else
+        jointNames.insert(jointNames.end(),
+                          l.model.getJointNames().begin(),
+                          l.model.getJointNames().end());
+    l.plotter->figlegend(jointNames,"loc=(0.5, 0.328), labelspacing=0, ncol=2");
     l.plotter->tight_layout();
     l.plotter->savefig();
     l.plotter->show();

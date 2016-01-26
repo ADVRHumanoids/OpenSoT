@@ -128,23 +128,34 @@ namespace OpenSoT
             Plottable minus(std::list<Plottable> data);
 
             /**
-             * @brief legend builds a legend from a list of labels
+             * @brief legend builds a legend from a list of labels, and applies it to a plot or subplot
              * @param labels a list of string, one for each plot line
+             * @param options additional options to add to the legend command
              */
-            void legend(const std::list<std::string> labels);
+            void legend(const std::list<std::string> labels, std::string options = "loc='best'");
+
+            /**
+             * @brief figlegend builds a legend from a list of labels, and applies it to the main figure
+             * @param labels a list of string, one for each plot line
+             * @param options additional options to add to the legend command
+             */
+            void figlegend(const std::list<std::string> labels, const std::string options = "loc='best'");
 
             /**
              * @brief autoLegend build a legend from the flusher data description
+             * @param options additional options to add to the legend command
              */
-            void autoLegend(std::list<Plottable> data);
+            void autoLegend(std::list<Plottable> data, const std::string options = "loc='best'", const bool fig = false);
 
             /**
              * @brief autoLegend build a legend from the flusher data description
+             * @param options additional options to add to the legend command
+             * @param fig if true, uses figlegend instead of legend
              */
-            void autoLegend(Plottable data);
+            void autoLegend(Plottable data, const std::string options = "loc='best'", const bool fig = false);
 
             /**
-             * @brief autoLegend builds a list of labels from the flusher data description
+             * @brief autoGenerateLegend builds a list of labels from the flusher data description
              */
             std::list<std::string> autoGenerateLegend(std::list<Plottable> data);
 

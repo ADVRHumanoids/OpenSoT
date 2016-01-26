@@ -163,7 +163,7 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::minus(std::list<OpenSoT
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
 
-void OpenSoT::plotters::Plotter::legend(const std::list<std::string> labels)
+void OpenSoT::plotters::Plotter::legend(const std::list<std::string> labels, std::string options)
 {
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
     {
@@ -172,20 +172,40 @@ void OpenSoT::plotters::Plotter::legend(const std::list<std::string> labels)
             it != labels.end();
             ++it)
             _commands << "r'" << *it << "', ";
-        _commands << "));" << std::endl;
+        _commands << "), "<< options << ");" << std::endl;
     }
 }
 
-void OpenSoT::plotters::Plotter::autoLegend(std::list<OpenSoT::plotters::Plottable> plottables)
+void OpenSoT::plotters::Plotter::figlegend(const std::list<std::string> labels, std::string options)
 {
-    legend(autoGenerateLegend(plottables));
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+    {
+        _commands << "figlegend(p,(";
+        for(std::list<std::string>::const_iterator it = labels.begin();
+            it != labels.end();
+            ++it)
+            _commands << "r'" << *it << "', ";
+        _commands << "), "<< options << ");" << std::endl;
+    }
 }
 
-void OpenSoT::plotters::Plotter::autoLegend(OpenSoT::plotters::Plottable data)
+void OpenSoT::plotters::Plotter::autoLegend(std::list<OpenSoT::plotters::Plottable> plottables,
+                                            const std::string options,
+                                            const bool fig)
+{
+    if(fig)
+        figlegend(autoGenerateLegend(plottables), options);
+    else
+        legend(autoGenerateLegend(plottables), options);
+}
+
+void OpenSoT::plotters::Plotter::autoLegend(OpenSoT::plotters::Plottable data,
+                                            const std::string options,
+                                            const bool fig)
 {
     std::list<OpenSoT::plotters::Plottable> data_l;
     data_l.push_back(data);
-    autoLegend(data_l);
+    autoLegend(data_l, options, fig);
 }
 
 std::list<std::string> OpenSoT::plotters::Plotter::autoGenerateLegend(std::list<OpenSoT::plotters::Plottable> plottables)
