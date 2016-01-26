@@ -295,7 +295,33 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->savefig();
     logger.plotter->show();
 
-    logger.close();  // the final file should have 4 rows of data, 33 columns
+
+    logger.plotter->figure(10.24,7.68,"data analysis");
+    logger.plotter->subplot(1,2,1);
+    std::list<OpenSoT::plotters::Plottable> dataPlusNorm;
+    dataPlusNorm.push_back(dataPlottable);
+    dataPlusNorm.push_back(logger.plotter->norm(dataPlottable));
+    logger.plotter->plot_t(dataPlusNorm);
+    logger.plotter->title("Data Flusher + Norm");
+    logger.plotter->autoLegend(dataPlusNorm);
+    logger.plotter->xlabel("t [s]");
+    logger.plotter->ylabel("data");
+
+    logger.plotter->subplot(1,2,2);
+    std::list<OpenSoT::plotters::Plottable> dataPlusProduct;
+    dataPlusProduct.push_back(dataPlottable);
+    dataPlusProduct.push_back(logger.plotter->times(dataPlottable, dataPlottable));
+    logger.plotter->plot_t(dataPlusProduct);
+    logger.plotter->title("Data Flusher + Element-Wise Product");
+    logger.plotter->autoLegend(dataPlusProduct);
+    logger.plotter->xlabel("t [s]");
+    logger.plotter->ylabel("data");
+
+    logger.plotter->tight_layout();
+    logger.plotter->savefig();
+    logger.plotter->show();
+
+    logger.close();  // the final file should have 4 rows of data
 }
 
 }

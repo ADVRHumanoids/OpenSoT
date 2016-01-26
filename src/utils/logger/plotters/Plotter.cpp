@@ -77,12 +77,35 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(std::list<OpenSoT:
         minFreeIndex += (*it)->getSize();
 
     OpenSoT::flushers::Flusher::Ptr flusher(
-        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), minFreeIndex));
+        new OpenSoT::flushers::FakeFlusher(1, minFreeIndex));
     _fakeFlushers.push_back(flusher);
 
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
         _commands << "data = np.vstack((data.transpose(), (data[:,("
                   << getIndicesString(globalIndices) << ")]**2).sum(1))).transpose();" << std::endl;
+    /// @TODO add description
+    return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::times(OpenSoT::plotters::Plottable data1, OpenSoT::plotters::Plottable data2)
+{
+    std::list<OpenSoT::plotters::Plottable> data1_l, data2_l;
+    data1_l.push_back(data1); data2_l.push_back(data2);
+    std::list<unsigned int> globalIndices1 = getGlobalIndicesList(data1_l);
+    std::list<unsigned int> globalIndices2 = getGlobalIndicesList(data2_l);
+    unsigned int minFreeIndex = _logger->getDataSize();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        minFreeIndex += (*it)->getSize();
+
+    OpenSoT::flushers::Flusher::Ptr flusher(
+        new OpenSoT::flushers::FakeFlusher(globalIndices1.size(), minFreeIndex));
+    _fakeFlushers.push_back(flusher);
+
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+        _commands << "data = np.hstack((data, data[:,("
+                  << getIndicesString(globalIndices1) << ")]* data[:,("
+                  << getIndicesString(globalIndices2) << ")]));" << std::endl;
 
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
@@ -109,7 +132,7 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::minus(std::list<OpenSoT
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
         _commands << "data = np.hstack((data, -1.0*data[:,("
                   << getIndicesString(globalIndices) << ")]));" << std::endl;
-
+    /// @TODO add description
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
 

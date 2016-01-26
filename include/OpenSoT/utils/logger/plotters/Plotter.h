@@ -101,6 +101,14 @@ namespace OpenSoT
              */
             Plottable norm(std::list<Plottable> data);
 
+            /**
+             * @brief times creates a new plottable which is the element wise product between two plottables
+             * @param data1 the first plottable
+             * @param data2 the second plottable
+             * @return
+             */
+            Plottable times(Plottable data1, Plottable data2);
+
             Plottable minus(Plottable data);
 
             /**
