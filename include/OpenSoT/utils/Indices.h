@@ -101,6 +101,15 @@ public:
     int size() const;
 
     /**
+     * @brief filter modifies the current set of indices by picking only the entries specified in f (the entries are counted starting from 0)
+     * For example, if the current object contains a set of 13 indices, [2,14], and the filter f contains 3 indices, [0,3,5]
+     * the final object will contain just 3 indices, [2, 5, 7]
+     * @param f the indices filter. Numbers here will specify the entries to keep in the filtered Indices set
+     * @return the current object, with just the filtered index set.
+     */
+    Indices& filter(const OpenSoT::Indices& f);
+
+    /**
      * @brief range creates a range of integers, [from,to]
      * @param from the first index
      * @param to the last index

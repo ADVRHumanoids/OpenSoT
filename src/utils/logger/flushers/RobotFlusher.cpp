@@ -61,12 +61,14 @@ int RobotFlusher::getSize() const
     return 3*_nDoFs;
 }
 
-void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l)
+void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indices &i)
 {
     l.plotter->figure(10.24,7.68,"estimated torques for torso vs real torques");
 
     OpenSoT::plotters::Plottable qPlottable =
         l.getFlusher(_robot)->i(Q);
+    if(i.size() > 0)
+        qPlottable.second.filter(i);
     l.plotter->subplot(2,2,1);
     l.plotter->plot_t(qPlottable);
     l.plotter->title("Robot Configuration");
@@ -77,6 +79,8 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l)
 
     OpenSoT::plotters::Plottable dqPlottable =
         l.getFlusher(_robot)->i(DQ);
+    if(i.size() > 0)
+        dqPlottable.second.filter(i);
     l.plotter->subplot(2,2,2);
     l.plotter->plot_t(dqPlottable);
     l.plotter->title("Robot Velocities");
@@ -87,6 +91,8 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l)
 
     OpenSoT::plotters::Plottable tauPlottable =
         l.getFlusher(_robot)->i(TAU);
+    if(i.size() > 0)
+        tauPlottable.second.filter(i);
     l.plotter->subplot(2,2,3);
     l.plotter->plot_t(tauPlottable);
     l.plotter->title("Robot Torques");
@@ -97,4 +103,11 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l)
     l.plotter->tight_layout();
     l.plotter->savefig();
     l.plotter->show();
+}
+
+void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l)
+{
+    std::list<unsigned int> empty_list;
+    OpenSoT::Indices i(empty_list);
+    this->defaultPlot(l, i);
 }

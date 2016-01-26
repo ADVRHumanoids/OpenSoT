@@ -46,7 +46,9 @@ namespace OpenSoT
 
             int getSize() const;
 
-            void defaultPlot(L&);
+            void defaultPlot(L& l);
+
+            void defaultPlot(L& l, OpenSoT::Indices& i);
 
             typedef boost::shared_ptr<RobotFlusher> Ptr;
         private:

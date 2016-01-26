@@ -106,6 +106,18 @@ OpenSoT::Indices &OpenSoT::Indices::shift(unsigned int amount)
     return *this;
 }
 
+
+OpenSoT::Indices &OpenSoT::Indices::filter(const OpenSoT::Indices &f)
+{
+    _rowsList.clear();
+    std::vector<unsigned int> indices = f.asVector();
+    for(unsigned int i = 0; i < indices.size(); ++i)
+        _rowsList.push_back(_rowsVector[indices[i]]);
+    this->generateChunks();
+    return *this;
+}
+
+
 bool OpenSoT::Indices::isContiguous() const
 {
     return _contiguousChunks.size() == 1;
