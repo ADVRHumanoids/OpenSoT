@@ -70,6 +70,7 @@ bool OpenSoT::L::open(std::string logName)
                  << std::endl
                  << "import numpy as np" << std::endl
                  << "import matplotlib" << std::endl
+                 << "import scipy.signal" << std::endl
                  << "from matplotlib.pyplot import *" << std::endl;
         }
 

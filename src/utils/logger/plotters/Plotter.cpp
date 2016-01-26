@@ -110,6 +110,33 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::times(OpenSoT::plotters
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
 
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::medfilt(OpenSoT::plotters::Plottable data, int kernel_size)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    return medfilt(data_l, kernel_size);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::medfilt(std::list<OpenSoT::plotters::Plottable> data, int kernel_size)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    unsigned int minFreeIndex = _logger->getDataSize();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        minFreeIndex += (*it)->getSize();
+
+    OpenSoT::flushers::Flusher::Ptr flusher(
+        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), minFreeIndex));
+    _fakeFlushers.push_back(flusher);
+
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+        _commands << "data = np.hstack((data, scipy.signal.medfilt(data[:,("
+                  << getIndicesString(globalIndices) << ")],"
+                  << kernel_size << ")));" << std::endl;
+    /// @TODO add description
+    return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+}
+
 OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::minus(OpenSoT::plotters::Plottable data)
 {
     std::list<OpenSoT::plotters::Plottable> data_l;

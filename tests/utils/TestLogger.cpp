@@ -297,7 +297,7 @@ TEST_F(testLogger, testPlotterWorks)
 
 
     logger.plotter->figure(10.24,7.68,"data analysis");
-    logger.plotter->subplot(1,2,1);
+    logger.plotter->subplot(2,2,1);
     std::list<OpenSoT::plotters::Plottable> dataPlusNorm;
     dataPlusNorm.push_back(dataPlottable);
     dataPlusNorm.push_back(logger.plotter->norm(dataPlottable));
@@ -307,13 +307,23 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
 
-    logger.plotter->subplot(1,2,2);
+    logger.plotter->subplot(2,2,2);
     std::list<OpenSoT::plotters::Plottable> dataPlusProduct;
     dataPlusProduct.push_back(dataPlottable);
     dataPlusProduct.push_back(logger.plotter->times(dataPlottable, dataPlottable));
     logger.plotter->plot_t(dataPlusProduct);
     logger.plotter->title("Data Flusher + Element-Wise Product");
     logger.plotter->autoLegend(dataPlusProduct);
+    logger.plotter->xlabel("t [s]");
+    logger.plotter->ylabel("data");
+
+    logger.plotter->subplot(2,2,3);
+    std::list<OpenSoT::plotters::Plottable> dataPlusFiltered;
+    dataPlusFiltered.push_back(dataPlottable);
+    dataPlusFiltered.push_back(logger.plotter->medfilt(dataPlottable, 3));
+    logger.plotter->plot_t(dataPlusFiltered);
+    logger.plotter->title("Data Flusher + Filter");
+    logger.plotter->autoLegend(dataPlusFiltered);
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
 

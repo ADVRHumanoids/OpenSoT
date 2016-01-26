@@ -109,6 +109,15 @@ namespace OpenSoT
              */
             Plottable times(Plottable data1, Plottable data2);
 
+            Plottable medfilt(Plottable data, int kernel_size);
+
+            /**
+             * @brief medfilt applies a median filter
+             * @param data
+             * @return
+             */
+            Plottable medfilt(std::list<Plottable> data, int kernel_size);
+
             Plottable minus(Plottable data);
 
             /**
