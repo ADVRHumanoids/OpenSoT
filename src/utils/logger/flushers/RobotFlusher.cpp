@@ -113,7 +113,7 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indice
         jointNames.insert(jointNames.end(),
                           l.model.getJointNames().begin(),
                           l.model.getJointNames().end());
-    l.plotter->figlegend(jointNames,"loc=(0.5, 0.328), labelspacing=0, ncol=2");
+    l.plotter->figlegend(jointNames,"loc=(0.12, 0.5), labelspacing=0, ncol=10");
     l.plotter->tight_layout();
     l.plotter->savefig();
     l.plotter->show();
