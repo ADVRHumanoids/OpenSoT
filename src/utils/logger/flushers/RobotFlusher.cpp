@@ -63,7 +63,7 @@ int RobotFlusher::getSize() const
 
 void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indices &i)
 {
-    l.plotter->figure(10.24,7.68,"estimated torques for torso vs real torques");
+    l.plotter->figure(10.24,7.68,"Robot joints position, velocity, torque and power");
 
     OpenSoT::plotters::Plottable qPlottable =
         l.getFlusher(_robot)->i(Q);
@@ -96,6 +96,13 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indice
     l.plotter->title("Robot Torques");
     l.plotter->xlabel("t [s]");
     l.plotter->ylabel("tau [Nm]");
+
+	OpenSoT::plotters::Plottable wPlottable = l.plotter->times(qPlottable, tauPlottable);
+    l.plotter->subplot(2,2,4);
+    l.plotter->plot_t(wPlottable);
+    l.plotter->title("Robot Power");
+    l.plotter->xlabel("t [s]");
+    l.plotter->ylabel("Power [Watt]");
 
     std::list<std::string> jointNames;
     if(i.size() > 0)
