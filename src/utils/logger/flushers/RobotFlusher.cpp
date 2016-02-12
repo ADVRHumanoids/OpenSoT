@@ -84,7 +84,7 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indice
     l.plotter->plot_t(dqPlottable);
     l.plotter->title("Robot Velocities");
     l.plotter->xlabel("t [s]");
-    l.plotter->ylabel("\dq [rad/s]");
+    l.plotter->ylabel("$\\dotq$ [rad/s]");
 
 
     OpenSoT::plotters::Plottable tauPlottable =
@@ -95,7 +95,7 @@ void OpenSoT::flushers::RobotFlusher::defaultPlot(OpenSoT::L &l, OpenSoT::Indice
     l.plotter->plot_t(tauPlottable);
     l.plotter->title("Robot Torques");
     l.plotter->xlabel("t [s]");
-    l.plotter->ylabel("tau [Nm]");
+    l.plotter->ylabel("$\\tau$ [Nm]");
 
 	OpenSoT::plotters::Plottable wPlottable = l.plotter->times(qPlottable, tauPlottable);
     l.plotter->subplot(2,2,4);
