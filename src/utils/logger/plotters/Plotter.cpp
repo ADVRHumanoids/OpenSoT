@@ -131,8 +131,8 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::medfilt(std::list<OpenS
 
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
         _commands << "data = np.hstack((data, scipy.signal.medfilt(data[:,("
-                  << getIndicesString(globalIndices) << ")],"
-                  << kernel_size << ")));" << std::endl;
+                  << getIndicesString(globalIndices) << ")],("
+                  << kernel_size << ",1))));" << std::endl;
     /// @TODO add description
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
