@@ -68,6 +68,11 @@ bool QPOases_sot::prepareSoT()
         computeVelCtrlCostFunction(_tasks[i], H, g);
 
         OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
+        if(_globalConstraints)
+            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(
+                        new OpenSoT::constraints::Aggregated(constraints_task_i, _globalConstraints, _tasks[i]->getXSize()));
+        else if(_bounds && _bounds->isInequalityConstraint())
+            constraints_task_i->getConstraintsList().push_back(_bounds);
         yarp::sig::Matrix A = constraints_task_i->getAineq();
         yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
         yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
@@ -82,20 +87,6 @@ bool QPOases_sot::prepareSoT()
                 lA = cat(lA, tmp_lA);
                 uA = cat(uA, tmp_uA);
             }
-        }
-
-        /* @TODO fix this by moving line 89 & line 101 in line 70
-         * - this way it will also take into account about equality constraints (thanks to automatic conversion in Aggregated)*/
-        if(_globalConstraints)
-        {
-            A = pile(A, _globalConstraints->getAineq());
-            lA = cat(lA, _globalConstraints->getbLowerBound());
-            uA = cat(uA, _globalConstraints->getbUpperBound());
-        } else if(_bounds && _bounds->isInequalityConstraint())
-        {
-            A = pile(A, _bounds->getAineq());
-            lA = cat(lA, _bounds->getbLowerBound());
-            uA = cat(uA, _bounds->getbUpperBound());
         }
 
         if(_bounds)
@@ -127,6 +118,11 @@ bool QPOases_sot::solve(Vector &solution)
             return false;
 
         OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
+        if(_globalConstraints)
+            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(
+                        new OpenSoT::constraints::Aggregated(constraints_task_i, _globalConstraints, _tasks[i]->getXSize()));
+        else if(_bounds && _bounds->isInequalityConstraint())
+            constraints_task_i->getConstraintsList().push_back(_bounds);
         yarp::sig::Matrix A = constraints_task_i->getAineq();
         yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
         yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
@@ -141,20 +137,6 @@ bool QPOases_sot::solve(Vector &solution)
                 lA = yarp::math::cat(lA, tmp_lA);
                 uA = yarp::math::cat(uA, tmp_uA);
             }
-        }
-
-        /* @TODO fix this by moving line 148 & line 163 in line 129
-         * - this way it will also take into account about equality constraints (thanks to automatic conversion in Aggregated)*/
-        if(_globalConstraints)
-        {
-            A = pile(A, _globalConstraints->getAineq());
-            lA = cat(lA, _globalConstraints->getbLowerBound());
-            uA = cat(uA, _globalConstraints->getbUpperBound());
-        } else if(_bounds && _bounds->isInequalityConstraint())
-        {
-            A = pile(A, _bounds->getAineq());
-            lA = cat(lA, _bounds->getbLowerBound());
-            uA = cat(uA, _bounds->getbUpperBound());
         }
 
         if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
