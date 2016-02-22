@@ -71,8 +71,11 @@ bool QPOases_sot::prepareSoT()
         if(_globalConstraints)
             constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(
                         new OpenSoT::constraints::Aggregated(constraints_task_i, _globalConstraints, _tasks[i]->getXSize()));
-        else if(_bounds && _bounds->isInequalityConstraint())
+        else if(_bounds && _bounds->isConstraint())
+        {
             constraints_task_i->getConstraintsList().push_back(_bounds);
+            constraints_task_i->generateAll();
+        }
         yarp::sig::Matrix A = constraints_task_i->getAineq();
         yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
         yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
@@ -89,7 +92,7 @@ bool QPOases_sot::prepareSoT()
             }
         }
 
-        if(_bounds)
+        if(_bounds && _bounds->isBound())   // if it is a constraint, it has already been added in #74
             constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
         yarp::sig::Vector l = constraints_task_i->getLowerBound();
         yarp::sig::Vector u = constraints_task_i->getUpperBound();
@@ -121,8 +124,11 @@ bool QPOases_sot::solve(Vector &solution)
         if(_globalConstraints)
             constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(
                         new OpenSoT::constraints::Aggregated(constraints_task_i, _globalConstraints, _tasks[i]->getXSize()));
-        else if(_bounds && _bounds->isInequalityConstraint())
+        else if(_bounds && _bounds->isConstraint())
+        {
             constraints_task_i->getConstraintsList().push_back(_bounds);
+            constraints_task_i->generateAll();
+        }
         yarp::sig::Matrix A = constraints_task_i->getAineq();
         yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
         yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
@@ -142,10 +148,16 @@ bool QPOases_sot::solve(Vector &solution)
         if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
             return false;
 
-        if(_bounds){
+        if(_bounds && _bounds->isBound()) // if it is a constraint, it has already been added in #127
+        {
             constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
+        }
+
+        if(constraints_task_i->hasBounds()) // bounds specified everywhere will work
+        {
             if(!_qp_stack_of_tasks[i].updateBounds(constraints_task_i->getLowerBound(), constraints_task_i->getUpperBound()))
-                return false;}
+                return false;
+        }
 
         if(!_qp_stack_of_tasks[i].solve())
             return false;

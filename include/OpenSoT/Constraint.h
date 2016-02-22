@@ -116,24 +116,36 @@
         virtual bool isInequalityConstraint() { return _Aineq.rows() > 0; }
 
         /**
-         * @brief isBound
-         * @return true if Constraint is a bound
-         */
-        virtual bool isBound() { return _upperBound.size() > 0 || _lowerBound.size() > 0; }
-
-        /**
          * @brief isUnilateralConstraint
          * @return true if the Constraint is an unilateral inequality
          */
         virtual bool isUnilateralConstraint() { return isInequalityConstraint() &&
                                                        (_bLowerBound.size() == 0 || _bUpperBound.size() == 0); }
-
         /**
          * @brief isBilateralConstraint
          * @return true if the Constraint is a bilateral inequality
          */
         virtual bool isBilateralConstraint() { return isInequalityConstraint() && !isUnilateralConstraint(); }
 
+        /**
+         * @brief hasBounds checks whether this Constraint contains a bound
+         * @return true if Constraint if this constraint contains a bound
+         */
+        virtual bool hasBounds() { return (_upperBound.size() > 0 || _lowerBound.size() > 0); }
+
+        /**
+         * @brief isBound checks whether this Constraint is a bound in the form lowerBound <= x <= upperBound
+         * @return true if Constraint is a bound
+         */
+        virtual bool isBound() { return this->hasBounds() &&
+                                        !this->isConstraint(); }
+
+        /**
+         * @brief isConstraint checks whether this Constraint is a constraint (i.e., it is not a bound)
+         * @return true if the Constraint is not a bound
+         */
+        virtual bool isConstraint() { return this->isEqualityConstraint() ||
+                                             this->isInequalityConstraint(); }
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
