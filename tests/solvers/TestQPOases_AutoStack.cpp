@@ -131,7 +131,7 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
     yarp::sig::Vector joint_bound_max = model.iDyn3_model.getJointBoundMax();
     yarp::sig::Vector joint_bound_min = model.iDyn3_model.getJointBoundMin();
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_bounds(
-        new OpenSoT::constraints::velocity::JointLimits(q,joint_bound_max,joint_bound_min));
+        new OpenSoT::constraints::velocity::JointLimits(q, joint_bound_max, joint_bound_min));
 
     double sot_speed_limit = 0.5;
     double dT = 0.001;
@@ -149,7 +149,10 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
                                          ((postural)<<convex_hull_constraint));
     AutoStack->getBoundsList().push_back(joint_bounds);
     AutoStack->getBoundsList().push_back(velocity_bounds);
-    AutoStack->getBounds()->update(q);
+    /* the following is not needed, as getBounds() from line #156 will compute generateAll()
+       and correctly recompute the bounds. Notice that, if the q from line #155 was instead
+       different from that of line #134, the update(q_new) would have been necessary */
+    // AutoStack->getBounds()->update(q);
 
     OpenSoT::solvers::QPOases_sot::Ptr solver(
         new OpenSoT::solvers::QPOases_sot(AutoStack->getStack(), AutoStack->getBounds()));
