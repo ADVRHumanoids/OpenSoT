@@ -128,13 +128,15 @@
         virtual bool isBilateralConstraint() { return isInequalityConstraint() && !isUnilateralConstraint(); }
 
         /**
-         * @brief hasBounds checks whether this Constraint contains a bound
+         * @brief hasBounds checks whether this Constraint contains a bound (or box constraint),
+         *                  meaning the constraint matrix $A^T=\left(I \quad \tilde{A}^T\right)$
          * @return true if Constraint if this constraint contains a bound
          */
         virtual bool hasBounds() { return (_upperBound.size() > 0 || _lowerBound.size() > 0); }
 
         /**
-         * @brief isBound checks whether this Constraint is a bound in the form lowerBound <= x <= upperBound
+         * @brief isBound checks whether this Constraint is a bound in the form lowerBound <= x <= upperBound,
+         *                meaning the constraint matrix $A = I$ is a box constraint
          * @return true if Constraint is a bound
          */
         virtual bool isBound() { return this->hasBounds() &&
