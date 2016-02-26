@@ -1246,7 +1246,7 @@ and to define the end effectors of the robot -->
   <joint name="imu_joint" type="fixed">
     <parent link="Waist"/>
     <child link="imu_link"/>
-    <origin rpy="0 3.14159265359 0" xyz="-0.072 -0.0068 0.044"/>
+    <origin rpy="0 0 0" xyz="-0.072 -0.0068 0.044"/>
   </joint>
 </robot>
 

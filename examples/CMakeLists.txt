@@ -42,6 +42,7 @@ ADD_EXECUTABLE(example_postural example_postural.cpp)
 ADD_EXECUTABLE(example_python example_python.cpp)
 ADD_EXECUTABLE(example_python_crouching example_python_crouching.cpp)
 ADD_EXECUTABLE(example_python_distance_query example_python_distance_query.cpp)
+ADD_EXECUTABLE(example_python_simple_stabilizer example_python_simple_stabilizer.cpp)
 ADD_EXECUTABLE(example_previewer example_previewer.cpp)
 ADD_EXECUTABLE(example_velocity_allocation example_velocity_allocation.cpp)
 
@@ -53,6 +54,7 @@ ADD_DEPENDENCIES(example_postural OpenSoT)
 ADD_DEPENDENCIES(example_python OpenSoT)
 ADD_DEPENDENCIES(example_python_crouching OpenSoT)
 ADD_DEPENDENCIES(example_python_distance_query OpenSoT)
+ADD_DEPENDENCIES(example_python_simple_stabilizer OpenSoT)
 ADD_DEPENDENCIES(example_previewer OpenSoT)
 ADD_DEPENDENCIES(example_velocity_allocation OpenSoT)
 
@@ -65,6 +67,7 @@ TARGET_LINK_LIBRARIES(example_python PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Bo
 TARGET_LINK_LIBRARIES(example_python_crouching PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_python_distance_query ${iDynTree_LIBRARIES} ${idynutils_LIBRARIES} 
                                                     ${Boost_LIBRARIES} ${tf_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_python_simple_stabilizer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_previewer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_velocity_allocation PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 
