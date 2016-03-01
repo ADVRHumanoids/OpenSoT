@@ -57,6 +57,8 @@
          const SubTask::Ptr   rightLeg_Position;
          const SubTask::Ptr   rightLeg_Orientation;
 
+         const tasks::velocity::Cartesian::Ptr right2LeftLeg;
+
          const tasks::velocity::Cartesian::Ptr waist;
          const SubTask::Ptr waist_Position;
          const SubTask::Ptr waist_Position_XY;
