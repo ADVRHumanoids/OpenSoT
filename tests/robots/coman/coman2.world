@@ -77,7 +77,7 @@
         </geometry>
       </visual>
       <visual name='base_link_visual_base_link_1'>
-        <pose>-0.072 -0.0068 0.044 3.14159 -0 3.14159</pose>
+        <pose>-0.072 -0.0068 0.044 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.01</size>
@@ -97,7 +97,7 @@
         <plugin name='coman_yarp_gazebo_plugin_IMU' filename='libgazebo_yarp_imu.so'>
           <yarpConfigurationFile>model://coman_urdf/conf/coman/coman_gazebo_inertial.ini</yarpConfigurationFile>
         </plugin>
-        <pose>-0.072 -0.0068 0.044 3.14159 -0 3.14159</pose>
+        <pose>-0.072 -0.0068 0.044 0 -0 0</pose>
       </sensor>
     </link>
     <link name='LHipMot'>

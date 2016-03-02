@@ -26,6 +26,7 @@ FIND_PACKAGE(Klampt QUIET)
 FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(YARP REQUIRED)
+FIND_PACKAGE(roscpp REQUIRED)
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
@@ -67,7 +68,7 @@ TARGET_LINK_LIBRARIES(example_python PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Bo
 TARGET_LINK_LIBRARIES(example_python_crouching PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_python_distance_query ${iDynTree_LIBRARIES} ${idynutils_LIBRARIES} 
                                                     ${Boost_LIBRARIES} ${tf_LIBRARIES})
-TARGET_LINK_LIBRARIES(example_python_simple_stabilizer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(example_python_simple_stabilizer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES} ${roscpp_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_previewer PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(example_velocity_allocation PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${Boost_LIBRARIES})
 
