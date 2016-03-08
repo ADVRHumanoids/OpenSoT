@@ -17,6 +17,10 @@
 #define dT          10e-3
 #define PUBLISH_WORLD false
 
+/**
+ * NOTE: This example should run with the coman2.world for GAZEBO
+ */
+
 void publish_world(ros::Publisher& world_pulisher, const KDL::Frame& anchor_T_world, const std::string& anchor)
 {
     geometry_msgs::TransformStamped T;
@@ -69,14 +73,13 @@ int main(int argc, char **argv) {
     robot.idynutils.setIMUOrientation(imu_orientation, robot.getIMU()->getReferenceFrame());
     robot.idynutils.updateiDyn3Model(q, true);
 
-
     OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
 
     double K = 0.1;
-    DHS.velocityLimits->setVelocityLimits(0.3);
+    DHS.velocityLimits->setVelocityLimits(0.9);
     DHS.waist->setLambda(K);
     DHS.waist->setOrientationErrorGain(0.1);
-    DHS.com->setLambda(K);
+    DHS.com_XY->setLambda(K);
     DHS.right2LeftLeg->setLambda(K);
     DHS.right2LeftLeg->setOrientationErrorGain(0.1);
     DHS.postural->setLambda(K);
@@ -85,7 +88,7 @@ int main(int argc, char **argv) {
     OpenSoT::AutoStack::Ptr autoStack =
         ( DHS.right2LeftLeg) /
         ( DHS.waist) /
-        ( DHS.com) /
+        ( DHS.com_XY) /
         ( DHS.postural);
     autoStack << DHS.jointLimits << DHS.velocityLimits;
     autoStack->update(q);
@@ -96,9 +99,11 @@ int main(int argc, char **argv) {
     std::cout<<"["<<DHS.waist->getError().toString()<<"]"<<std::endl;
     std::cout<<"CoM Initial Error:"<<std::endl;
     std::cout<<"["<<DHS.com->getError().toString()<<"]"<<std::endl;
-    getchar();
 
 
+    yarp::sig::Matrix waist_up = DHS.waist->getReference();
+    yarp::sig::Matrix waist_down = waist_up;
+    waist_down(2,3) -= 0.1;
 
 
     qpOASES::Options opt;
@@ -118,6 +123,7 @@ int main(int argc, char **argv) {
             return 0;}
     }
 
+    DHS.waist->setReference(waist_down);
     yarp::sig::Vector dq(q.size(), 0.0);
     double tic, toc;
     while(true) {
@@ -146,11 +152,12 @@ int main(int argc, char **argv) {
         publish_world(world_pub, robot.idynutils.getAnchor_T_World(), robot.idynutils.getAnchor());
 #endif
 
+
         autoStack->update(q);
 
 //        if(getchar()){
 //            std::cout<<"right2LeftLeg Error: ["<<DHS.right2LeftLeg->getError().toString()<<""<<std::endl;
-//            std::cout<<"waist Error: ["<<DHS.waist->getError().toString()<<""<<std::endl;
+            std::cout<<"waist Error_Z: "<<DHS.waist->getError()(2)<<" [m]"<<std::endl;
 //            std::cout<<"CoM Error: ["<<DHS.com->getError().toString()<<""<<std::endl;
 //            KDL::Frame anchor_T_world; std::string anchor; robot.idynutils.getWorldPose(anchor_T_world, anchor);
 //            std::cout<<"anchor_T_world:"<<std::endl; cartesian_utils::printKDLFrame(anchor_T_world);
