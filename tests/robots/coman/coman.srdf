@@ -47,7 +47,7 @@
   </group>
   <group name="imu_sensors">
     <!-- NEAREST JOINT TO IMU -->
-    <joint name="WaistSag"/>
+    <link name="imu_link"/>
   </group>
   <group name="left_arm">
     <chain base_link="DWYTorso" tip_link="l_wrist"/>
