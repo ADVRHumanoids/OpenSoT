@@ -414,3 +414,8 @@ std::list<OpenSoT::plotters::Plottable> OpenSoT::plotters::operator+(std::list<O
                           pl2.end());
     return plottablesList;
 }
+
+unsigned int OpenSoT::plotters::Plotter::getDataCount()
+{
+    return _logger->getDataCount();
+}

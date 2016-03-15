@@ -139,10 +139,16 @@ namespace OpenSoT {
         Indices getGlobalIndices(plotters::Plottable plottable);
 
         /**
-         * @brief getLastIndex gets the size of the data we are flushing
+         * @brief getLastIndex gets the size of the data we are flushing (aka number of columns)
          * @return the first free global index
          */
         unsigned int getDataSize();
+
+        /**
+         * @brief getDataCount
+         * @return number of rows
+         */
+        unsigned int getDataCount();
 
         /**
          * @brief plotter a utility class to generate plots
@@ -197,6 +203,8 @@ namespace OpenSoT {
          * @brief _n_dofs the size of the solution.
          */
         int _n_dofs;
+
+        unsigned int _number_of_updates;
 
         OpenSoT::flushers::FakeFlusher _fakeFlusher_t;
         OpenSoT::flushers::FakeFlusher _fakeFlusher_dq;

@@ -206,6 +206,8 @@ namespace OpenSoT
             /*bool plot(const Plottable& index, std::list<Plottable> data);*/
 
             std::string getCommands();
+
+            unsigned int getDataCount();
         };
 
         std::list<Plottable> operator+(const Plottable& p1, const Plottable& p2);

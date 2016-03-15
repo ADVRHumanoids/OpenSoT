@@ -35,6 +35,8 @@ void OpenSoT::L::update(double t, const yarp::sig::Vector &q_dot)
         }
     }
     _current_log << ")," << std::endl;
+    _number_of_updates++;
+
 }
 
 void OpenSoT::L::update(double t)
@@ -87,6 +89,8 @@ bool OpenSoT::L::open(std::string logName)
         // @TODO here we should append a number to test_data
         _current_log << "data = np.array((";
     }
+
+    _number_of_updates = 0;
 
     return true;
 }
@@ -260,4 +264,9 @@ OpenSoT::plotters::Plottable OpenSoT::L::t()
 OpenSoT::plotters::Plottable OpenSoT::L::dq_opt()
 {
     return _fakeFlusher_dq.i(OpenSoT::flushers::FakeFlusher::ALL);
+}
+
+unsigned int OpenSoT::L::getDataCount()
+{
+    return _number_of_updates;
 }
