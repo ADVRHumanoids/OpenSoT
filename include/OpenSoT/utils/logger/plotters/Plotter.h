@@ -92,14 +92,14 @@ namespace OpenSoT
 
             void ylabel(const std::string& label);
 
-            Plottable norm(Plottable data);
+            Plottable norm2(Plottable data);
 
             /**
              * @brief norm creates a new plottable which is the norm2 of a given plottable
              * @param data a list of plottables
              * @return
              */
-            Plottable norm(std::list<Plottable> data);
+            Plottable norm2(std::list<Plottable> data);
 
             /**
              * @brief times creates a new plottable which is the element wise product between two plottables
@@ -109,7 +109,22 @@ namespace OpenSoT
              */
             Plottable times(Plottable data1, Plottable data2);
 
+            Plottable times(std::list<OpenSoT::plotters::Plottable> data, double scalar);
+            Plottable times(Plottable data, double scalar);
+
             Plottable medfilt(Plottable data, int kernel_size);
+
+            Plottable pow(std::list<OpenSoT::plotters::Plottable> data, double exponent);
+            Plottable pow(OpenSoT::plotters::Plottable data, double exponent);
+
+            /**
+             * @brief sum
+             * @param data
+             * @param direction "0" for rows, "1" for columns
+             * @return
+             */
+            Plottable sum(std::list<OpenSoT::plotters::Plottable> data, int direction);
+            Plottable sum(OpenSoT::plotters::Plottable data, int direction);
 
             /**
              * @brief medfilt applies a median filter

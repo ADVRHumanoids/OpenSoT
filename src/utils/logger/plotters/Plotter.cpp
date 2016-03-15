@@ -61,14 +61,85 @@ void OpenSoT::plotters::Plotter::ylabel(const std::string& label)
     _commands << "ylabel(r'" << label << "');" << std::endl;
 }
 
-OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(OpenSoT::plotters::Plottable data)
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::pow(std::list<OpenSoT::plotters::Plottable> data, double exponent)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    unsigned int minFreeIndex = _logger->getDataSize();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        minFreeIndex += (*it)->getSize();
+
+    OpenSoT::flushers::Flusher::Ptr flusher(
+        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), minFreeIndex));
+    _fakeFlushers.push_back(flusher);
+
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+        _commands << "data = np.hstack((data, (data[:,("
+                  << getIndicesString(globalIndices) << ")]**"<<exponent<<")));" << std::endl;
+    /// @TODO add description
+    return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::pow(OpenSoT::plotters::Plottable data, double exponent)
 {
     std::list<OpenSoT::plotters::Plottable> data_l;
     data_l.push_back(data);
-    return norm(data_l);
+    return pow(data_l, exponent);
 }
 
-OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm(std::list<OpenSoT::plotters::Plottable> data)
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::sum(std::list<OpenSoT::plotters::Plottable> data, int direction)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    unsigned int minFreeIndex = _logger->getDataSize();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        minFreeIndex += (*it)->getSize();
+
+    if(direction == 1)
+    {
+        OpenSoT::flushers::Flusher::Ptr flusher(
+            new OpenSoT::flushers::FakeFlusher(1, minFreeIndex));
+        _fakeFlushers.push_back(flusher);
+
+        if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+            _commands << "data = np.vstack((data.transpose(), (data[:,("
+                      << getIndicesString(globalIndices) << ")]).sum(1))).transpose();" << std::endl;
+        /// @TODO add description
+        return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+    }
+    else if(direction == 0)
+    {
+        OpenSoT::flushers::Flusher::Ptr flusher(
+            new OpenSoT::flushers::FakeFlusher(globalIndices.size(), minFreeIndex));
+        _fakeFlushers.push_back(flusher);
+
+        if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+            _commands << "data = np.hstack((data, (data[:,("
+                      << getIndicesString(globalIndices) << ")]).sum(0) * np.ones("<<
+                         "data[:,("<< getIndicesString(globalIndices) << ")].shape)));" << std::endl;
+        /// @TODO add description
+        return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+    }
+    else
+        throw new std::runtime_error("direction is \"0\" for rows or \"1\" for columns");
+
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::sum(OpenSoT::plotters::Plottable data, int direction)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    return sum(data_l, direction);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm2(OpenSoT::plotters::Plottable data)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    return norm2(data_l);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::norm2(std::list<OpenSoT::plotters::Plottable> data)
 {
     std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
     unsigned int minFreeIndex = _logger->getDataSize();
@@ -107,6 +178,33 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::times(OpenSoT::plotters
                   << getIndicesString(globalIndices1) << ")]* data[:,("
                   << getIndicesString(globalIndices2) << ")]));" << std::endl;
 
+    return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::times(OpenSoT::plotters::Plottable data, double scalar)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    return times(data_l, scalar);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::times(std::list<OpenSoT::plotters::Plottable> data,
+                                                               double scalar)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    unsigned int minFreeIndex = _logger->getDataSize();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        minFreeIndex += (*it)->getSize();
+
+    OpenSoT::flushers::Flusher::Ptr flusher(
+        new OpenSoT::flushers::FakeFlusher(globalIndices.size(), minFreeIndex));
+    _fakeFlushers.push_back(flusher);
+
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+        _commands << "data = np.hstack((data, "<<scalar<<"*data[:,("
+                  << getIndicesString(globalIndices) << ")]));" << std::endl;
+    /// @TODO add description
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
 
