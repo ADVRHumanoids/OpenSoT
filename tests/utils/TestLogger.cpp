@@ -226,24 +226,33 @@ TEST_F(testLogger, testPlotterWorks)
     logger.update(t, dq);
 
     v[0] = 1.0;
+    v[1] = 4.0;
+    v[2] = 7.0;
     dq[3] = 2.0;
     t+=dT;
 
     logger.update(t, dq);
 
-    v[0] = 0.0;
+    v[0] = 2.0;
+    v[1] = 5.0;
+    v[2] = 8.0;
     dq[3] = 0.0;
 
-    v[1] = 1.0;
+    logger.update(t, dq);
+
+    v[0] = 3.0;
+    v[1] = 6.0;
+    v[2] = 9.0;
     dq[4] = 2.0;
     t+=dT;
 
     logger.update(t, dq);
 
+    v[0] = 0.0;
     v[1] = 0.0;
+    v[2] = 0.0;
     dq[4] = 0.0;
 
-    v[2] = 1.0;
     dq[5] = 2.0;
     t+=dT;
 
@@ -300,7 +309,7 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->subplot(2,2,1);
     std::list<OpenSoT::plotters::Plottable> dataPlusNorm;
     dataPlusNorm.push_back(dataPlottable);
-    dataPlusNorm.push_back(logger.plotter->norm(dataPlottable));
+    dataPlusNorm.push_back(logger.plotter->norm2(dataPlottable));
     logger.plotter->plot_t(dataPlusNorm);
     logger.plotter->title("Data Flusher + Norm");
     logger.plotter->autoLegend(dataPlusNorm);
@@ -324,6 +333,17 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->plot_t(dataPlusFiltered);
     logger.plotter->title("Data Flusher + Filter");
     logger.plotter->autoLegend(dataPlusFiltered);
+    logger.plotter->xlabel("t [s]");
+    logger.plotter->ylabel("data");
+
+    logger.plotter->subplot(2,2,4);
+    std::list<OpenSoT::plotters::Plottable> dataPlusSSoS;
+    dataPlusSSoS.push_back(logger.plotter->times(
+                logger.plotter->pow(logger.plotter->sum(
+                logger.plotter->pow(dataPlottable,2.),0), 0.5), 1/5.));
+    logger.plotter->plot_t(dataPlusSSoS);
+    logger.plotter->title("Data Squared Sum of Squares");
+    logger.plotter->autoLegend(dataPlusSSoS);
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
 
