@@ -179,12 +179,14 @@ namespace OpenSoT
              * @param data a list of plottables
              */
             void plot_t(std::list<Plottable> data);
+            void boxPlot(std::list<Plottable> data);
 
             /**
              * @brief plot_t plots data against time
              * @param data a list of plottables
              */
             void plot_t(Plottable data);
+            void boxPlot(Plottable data);
 
             /**
              * @brief savefig saves the last defined figure

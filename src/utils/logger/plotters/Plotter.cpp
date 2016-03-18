@@ -328,11 +328,25 @@ void OpenSoT::plotters::Plotter::plot_t(std::list<OpenSoT::plotters::Plottable> 
         _commands << "p = plot(data[:,0], data[:,("<< getIndicesString(globalIndices) << ")]);" << std::endl;
 }
 
+void OpenSoT::plotters::Plotter::boxPlot(std::list<OpenSoT::plotters::Plottable> data)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+        _commands << "p = boxplot(data[:,("<< getIndicesString(globalIndices) << ")]);" << std::endl;
+}
+
 void OpenSoT::plotters::Plotter::plot_t(OpenSoT::plotters::Plottable data)
 {
     std::list<OpenSoT::plotters::Plottable> data_l;
     data_l.push_back(data);
     plot_t(data_l);
+}
+
+void OpenSoT::plotters::Plotter::boxPlot(OpenSoT::plotters::Plottable data)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    boxPlot(data_l);
 }
 
 void OpenSoT::plotters::Plotter::savefig()

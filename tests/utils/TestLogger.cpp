@@ -306,7 +306,7 @@ TEST_F(testLogger, testPlotterWorks)
 
 
     logger.plotter->figure(10.24,7.68,"data analysis");
-    logger.plotter->subplot(2,2,1);
+    logger.plotter->subplot(3,2,1);
     std::list<OpenSoT::plotters::Plottable> dataPlusNorm;
     dataPlusNorm.push_back(dataPlottable);
     dataPlusNorm.push_back(logger.plotter->norm2(dataPlottable));
@@ -316,7 +316,7 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
 
-    logger.plotter->subplot(2,2,2);
+    logger.plotter->subplot(3,2,2);
     std::list<OpenSoT::plotters::Plottable> dataPlusProduct;
     dataPlusProduct.push_back(dataPlottable);
     dataPlusProduct.push_back(logger.plotter->times(dataPlottable, dataPlottable));
@@ -326,7 +326,7 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
 
-    logger.plotter->subplot(2,2,3);
+    logger.plotter->subplot(3,2,3);
     std::list<OpenSoT::plotters::Plottable> dataPlusFiltered;
     dataPlusFiltered.push_back(dataPlottable);
     dataPlusFiltered.push_back(logger.plotter->medfilt(dataPlottable, 3));
@@ -336,7 +336,7 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
 
-    logger.plotter->subplot(2,2,4);
+    logger.plotter->subplot(3,2,4);
     std::list<OpenSoT::plotters::Plottable> dataPlusSSoS;
     dataPlusSSoS.push_back(logger.plotter->times(
                 logger.plotter->pow(logger.plotter->sum(
@@ -344,6 +344,12 @@ TEST_F(testLogger, testPlotterWorks)
     logger.plotter->plot_t(dataPlusSSoS);
     logger.plotter->title("Data Squared Sum of Squares");
     logger.plotter->autoLegend(dataPlusSSoS);
+    logger.plotter->xlabel("t [s]");
+    logger.plotter->ylabel("data");
+
+    logger.plotter->subplot(3,2,5);
+    logger.plotter->boxPlot(dataPlottable);
+    logger.plotter->title("Box Plot data");
     logger.plotter->xlabel("t [s]");
     logger.plotter->ylabel("data");
 
