@@ -16,43 +16,40 @@
 */
 
 
-#ifndef __FAKE_FLUSHER_H__
-#define __FAKE_FLUSHER_H__
+#ifndef __SCRIPT_FLUSHER_H__
+#define __SCRIPT_FLUSHER_H__
 
-#include <OpenSoT/utils/logger/flushers/Flusher.h>
+#include <OpenSoT/utils/logger/flushers/FakeFlusher.h>
 #include <boost/shared_ptr.hpp>
+#include <limits>
 
 namespace OpenSoT
 {
     namespace flushers
     {
-        class FakeFlusher : public Flusher
+        class ScriptFlusher : public FakeFlusher
         {
-        protected:
-            unsigned int _size;
-            unsigned int _indicesOffset;
+            std::string _script_name;
+            std::list<unsigned int> _cols;
+            unsigned int _rows;
+
         public:
-            enum { ALL = 0 };
+            typedef boost::shared_ptr<ScriptFlusher> Ptr;
 
-            typedef boost::shared_ptr<FakeFlusher> Ptr;
+            ScriptFlusher(std::string script_name,
+                          std::list<unsigned int> cols,
+                          unsigned int size,
+                          unsigned int indicesOffset = 0,
+                          unsigned int rows = std::numeric_limits<unsigned int>::infinity());
 
-            FakeFlusher(unsigned int size, unsigned int indicesOffset = 0);
+            ~ScriptFlusher();
 
-            virtual ~FakeFlusher();
+            std::string toString() const;
 
-            virtual std::string toString() const;
-
-            /**
-             * @brief getSize returns the number of elements logged by this flusher
-             * @return the number of elements to be logged
-             */
+            /*
             int getSize() const;
 
-            Indices getIndices(int label) const;
-
-            unsigned int getIndicesOffset() const;
-
-            void setIndicesOffset(unsigned int offset);
+            Indices getIndices(int label) const;*/
         };
     }
 }

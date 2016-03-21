@@ -73,9 +73,9 @@ namespace OpenSoT
 
             std::list<unsigned int> getGlobalIndicesList(std::list<OpenSoT::plotters::Plottable> data);
 
-            std::string getIndicesString(std::list<unsigned int> indices);
-
         public:
+            static std::string getIndicesString(std::list<unsigned int> indices);
+
             typedef boost::shared_ptr<Plotter> Ptr;
 
             Plotter(L* logger);

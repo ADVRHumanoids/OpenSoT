@@ -107,6 +107,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/utils/logger/flushers/FakeFlusher.cpp
                     src/utils/logger/flushers/Flusher.cpp
                     src/utils/logger/flushers/RobotFlusher.cpp
+                    src/utils/logger/flushers/ScriptFlusher.cpp
                     src/utils/logger/flushers/constraints/velocity/Dynamics.cpp
                     src/utils/logger/flushers/tasks/velocity/Cartesian.cpp
                     src/utils/logger/plotters/Plotter.cpp
