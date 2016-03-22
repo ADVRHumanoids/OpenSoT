@@ -208,9 +208,13 @@ namespace OpenSoT
              * @param rows_number the number of rows to plot
              */
             void boxPlot(std::list<Plottable> data,
-                         unsigned int rows_number = std::numeric_limits<unsigned int>::infinity());
+                         int rows_number = -1);
             void boxPlot(Plottable data,
-                         unsigned int rows_number = std::numeric_limits<unsigned int>::infinity());
+                         int rows_number = -1);
+            void boxPlot(std::list<Plottable> data,
+                         std::list<Plottable> median, int rows_number = -1);
+            void boxPlot(Plottable data,
+                         Plottable median, int rows_number = -1);
 
             /**
              * @brief savefig saves the last defined figure
@@ -234,6 +238,8 @@ namespace OpenSoT
             std::string getCommands();
 
             unsigned int getDataCount();
+
+            void customCommand(const std::string& command);
         };
 
         std::list<Plottable> operator+(const Plottable& p1, const Plottable& p2);

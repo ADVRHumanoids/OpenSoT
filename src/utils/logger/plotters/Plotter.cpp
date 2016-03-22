@@ -370,13 +370,13 @@ void OpenSoT::plotters::Plotter::plot_t(OpenSoT::plotters::Plottable data)
 }
 
 void OpenSoT::plotters::Plotter::boxPlot(std::list<OpenSoT::plotters::Plottable> data,
-                                         unsigned int rows_number)
+                                         int rows_number)
 {
     std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
     {
-        if(rows_number < std::numeric_limits<unsigned int>::infinity())
-            _commands << "p = boxplot(data[:" << rows_number << ",("
+        if(rows_number > 0)
+            _commands << "p = boxplot(data[0:" << rows_number << ",("
                       << getIndicesString(globalIndices)
                       << ")]);" << std::endl;
         else
@@ -385,12 +385,43 @@ void OpenSoT::plotters::Plotter::boxPlot(std::list<OpenSoT::plotters::Plottable>
     }
 }
 
+void OpenSoT::plotters::Plotter::boxPlot(std::list<Plottable> data,
+             std::list<Plottable> median, int rows_number)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    std::list<unsigned int> medianlIndices = getGlobalIndicesList(median);
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+    {
+        if(rows_number > 0)
+            _commands << "p = boxplot(data[0:" << rows_number << ",("
+                      << getIndicesString(globalIndices)
+                      << ")],usermedians=data[0,("
+                      << getIndicesString(medianlIndices)
+                      << ")]);" << std::endl;
+        else
+            _commands << "p = boxplot(data[:,("<< getIndicesString(globalIndices)
+                      << ")],usermedians=data[0,("
+                      << getIndicesString(medianlIndices)
+                      << ")]);" << std::endl;
+    }
+}
+
 void OpenSoT::plotters::Plotter::boxPlot(OpenSoT::plotters::Plottable data,
-                                         unsigned int rows_number)
+                                         int rows_number)
 {
     std::list<OpenSoT::plotters::Plottable> data_l;
     data_l.push_back(data);
     boxPlot(data_l, rows_number);
+}
+
+void OpenSoT::plotters::Plotter::boxPlot(Plottable data,
+             Plottable median, int rows_number)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    std::list<OpenSoT::plotters::Plottable> median_l;
+    data_l.push_back(data);
+    median_l.push_back(median);
+    boxPlot(data_l, median_l, rows_number);
 }
 
 void OpenSoT::plotters::Plotter::savefig()
@@ -476,4 +507,9 @@ std::list<OpenSoT::plotters::Plottable> OpenSoT::plotters::operator+(std::list<O
 unsigned int OpenSoT::plotters::Plotter::getDataCount()
 {
     return _logger->getDataCount();
+}
+
+void OpenSoT::plotters::Plotter::customCommand(const std::string& command)
+{
+    _commands << command;
 }
