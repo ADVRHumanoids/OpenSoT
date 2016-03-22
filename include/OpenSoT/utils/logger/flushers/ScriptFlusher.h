@@ -21,6 +21,7 @@
 
 #include <OpenSoT/utils/logger/flushers/FakeFlusher.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/any.hpp>
 #include <limits>
 
 namespace OpenSoT
@@ -31,7 +32,7 @@ namespace OpenSoT
         {
             std::string _script_name;
             std::list<unsigned int> _cols;
-            unsigned int _rows;
+            std::list<boost::any> _args;
 
         public:
             typedef boost::shared_ptr<ScriptFlusher> Ptr;
@@ -40,16 +41,11 @@ namespace OpenSoT
                           std::list<unsigned int> cols,
                           unsigned int size,
                           unsigned int indicesOffset = 0,
-                          unsigned int rows = std::numeric_limits<unsigned int>::infinity());
+                          std::list<boost::any> args = std::list<boost::any>());
 
             ~ScriptFlusher();
 
             std::string toString() const;
-
-            /*
-            int getSize() const;
-
-            Indices getIndices(int label) const;*/
         };
     }
 }

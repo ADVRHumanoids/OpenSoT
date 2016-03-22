@@ -24,7 +24,9 @@
 #include <OpenSoT/utils/logger/flushers/ConstraintFlusher.h>
 #include <OpenSoT/utils/logger/flushers/DataFlusher.h>
 #include <OpenSoT/utils/logger/flushers/FakeFlusher.h>
+#include <OpenSoT/utils/logger/flushers/ScriptFlusher.h>
 #include <OpenSoT/utils/logger/flushers/TaskFlusher.h>
+#include <boost/any.hpp>
 #include <map>
 #include <fstream>
 #include <list>
@@ -143,6 +145,25 @@ namespace OpenSoT
             Plottable minus(std::list<Plottable> data);
 
             /**
+             * @brief run runs a script that creates a new Plottable.
+             *            the number of columns to be created is
+             * @param data a plottable (or list of plottables) of data to analyze
+             * @param script_name the name of the script to run
+             * @param size the size (number of columns) that the script will provide
+             * @param args
+             * @return
+             */
+            Plottable run(Plottable data,
+                          std::string script_name,
+                          unsigned int size,
+                          std::list<boost::any> args = std::list<boost::any>());
+            Plottable run(std::list<Plottable> data,
+                          std::string script_name,
+                          unsigned int size,
+                          std::list<boost::any> args = std::list<boost::any>());
+
+
+            /**
              * @brief legend builds a legend from a list of labels, and applies it to a plot or subplot
              * @param labels a list of string, one for each plot line
              * @param options additional options to add to the legend command
@@ -179,14 +200,17 @@ namespace OpenSoT
              * @param data a list of plottables
              */
             void plot_t(std::list<Plottable> data);
-            void boxPlot(std::list<Plottable> data);
+            void plot_t(Plottable data);
 
             /**
-             * @brief plot_t plots data against time
+             * @brief boxPlot generates a box plot of data
              * @param data a list of plottables
+             * @param rows_number the number of rows to plot
              */
-            void plot_t(Plottable data);
-            void boxPlot(Plottable data);
+            void boxPlot(std::list<Plottable> data,
+                         unsigned int rows_number = std::numeric_limits<unsigned int>::infinity());
+            void boxPlot(Plottable data,
+                         unsigned int rows_number = std::numeric_limits<unsigned int>::infinity());
 
             /**
              * @brief savefig saves the last defined figure

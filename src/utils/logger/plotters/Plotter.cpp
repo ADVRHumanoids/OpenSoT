@@ -261,6 +261,40 @@ OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::minus(std::list<OpenSoT
     return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
 }
 
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::run(OpenSoT::plotters::Plottable data,
+                                                             std::string script_name,
+                                                             unsigned int size,
+                                                             std::list<boost::any> args)
+{
+    std::list<OpenSoT::plotters::Plottable> data_l;
+    data_l.push_back(data);
+    return run(data_l, script_name, size, args);
+}
+
+OpenSoT::plotters::Plottable OpenSoT::plotters::Plotter::run(std::list<OpenSoT::plotters::Plottable> data,
+                                                             std::string script_name,
+                                                             unsigned int size,
+                                                             std::list<boost::any> args)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    unsigned int minFreeIndex = _logger->getDataSize();
+    for(std::list<flushers::Flusher::Ptr>::iterator it = _fakeFlushers.begin();
+        it != _fakeFlushers.end(); ++it)
+        minFreeIndex += (*it)->getSize();
+
+    OpenSoT::flushers::Flusher::Ptr flusher(
+        new OpenSoT::flushers::ScriptFlusher(script_name,
+                                             globalIndices,
+                                             size,
+                                             minFreeIndex,
+                                             args));
+    _fakeFlushers.push_back(flusher);
+
+    _commands << flusher << std::endl;
+    /// @TODO add description
+    return flusher->i(OpenSoT::flushers::FakeFlusher::ALL);
+}
+
 void OpenSoT::plotters::Plotter::legend(const std::list<std::string> labels, std::string options)
 {
     if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
@@ -328,13 +362,6 @@ void OpenSoT::plotters::Plotter::plot_t(std::list<OpenSoT::plotters::Plottable> 
         _commands << "p = plot(data[:,0], data[:,("<< getIndicesString(globalIndices) << ")]);" << std::endl;
 }
 
-void OpenSoT::plotters::Plotter::boxPlot(std::list<OpenSoT::plotters::Plottable> data)
-{
-    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
-    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
-        _commands << "p = boxplot(data[:,("<< getIndicesString(globalIndices) << ")]);" << std::endl;
-}
-
 void OpenSoT::plotters::Plotter::plot_t(OpenSoT::plotters::Plottable data)
 {
     std::list<OpenSoT::plotters::Plottable> data_l;
@@ -342,11 +369,28 @@ void OpenSoT::plotters::Plotter::plot_t(OpenSoT::plotters::Plottable data)
     plot_t(data_l);
 }
 
-void OpenSoT::plotters::Plotter::boxPlot(OpenSoT::plotters::Plottable data)
+void OpenSoT::plotters::Plotter::boxPlot(std::list<OpenSoT::plotters::Plottable> data,
+                                         unsigned int rows_number)
+{
+    std::list<unsigned int> globalIndices = getGlobalIndicesList(data);
+    if(_logger->getFormat() == OpenSoT::L::FORMAT_PYTHON)
+    {
+        if(rows_number < std::numeric_limits<unsigned int>::infinity())
+            _commands << "p = boxplot(data[:" << rows_number << ",("
+                      << getIndicesString(globalIndices)
+                      << ")]);" << std::endl;
+        else
+            _commands << "p = boxplot(data[:,("<< getIndicesString(globalIndices)
+                      << ")]);" << std::endl;
+    }
+}
+
+void OpenSoT::plotters::Plotter::boxPlot(OpenSoT::plotters::Plottable data,
+                                         unsigned int rows_number)
 {
     std::list<OpenSoT::plotters::Plottable> data_l;
     data_l.push_back(data);
-    boxPlot(data_l);
+    boxPlot(data_l, rows_number);
 }
 
 void OpenSoT::plotters::Plotter::savefig()
