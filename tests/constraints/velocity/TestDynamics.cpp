@@ -218,6 +218,71 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
 using namespace yarp::sig;
 using namespace OpenSoT;
 
+TEST_F(testDynamicsConstr, testFTSensors) {
+    tests_utils::startYarpServer();
+
+    // Load a world
+    std::string world_path = std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.world";
+    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
+        tests_utils::startGazebo(world_path);
+    else
+        tests_utils::startGZServer(world_path);
+
+    sleep(4);
+
+    RobotUtils coman_robot("testConstraint",
+                     "coman",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+
+    yarp::sig::Vector q = getGoodInitialPosition(coman_robot.idynutils);
+
+    coman_robot.setPositionMode();
+    double speed = 0.8;
+    yarp::sig::Vector legs_speed(6,speed);
+    legs_speed[3] = 2.0*legs_speed[3];
+    coman_robot.left_leg.setReferenceSpeeds(legs_speed);
+    coman_robot.right_leg.setReferenceSpeeds(legs_speed);
+    coman_robot.left_arm.setReferenceSpeed(speed);
+    coman_robot.right_arm.setReferenceSpeed(speed);
+    coman_robot.torso.setReferenceSpeed(speed);
+    coman_robot.move(q);
+
+    sleep(10);
+
+    yarp::sig::Vector dq(coman_robot.idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector tau(coman_robot.idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+    coman_robot.sense(q, dq, tau);
+    RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
+    std::map<std::string, yarp::sig::Vector>::iterator it;
+    for(it = ft_readings.begin(); it !=  ft_readings.end(); it++)
+        std::cout<<"FT Read @ "<<it->first<<" is ["<<it->second.toString()<<"]"<<std::endl;
+
+    std::cout<<"left leg sensed torque = ["<<tau.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+            coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<"]"<<std::endl;
+
+    coman_robot.idynutils.updateiDyn3Model(q, true);
+    yarp::sig::Vector tau_g = coman_robot.idynutils.iDyn3_model.getTorques();
+
+    yarp::sig::Matrix waist_J_l_ft_sensor;
+    coman_robot.idynutils.iDyn3_model.getRelativeJacobian(
+                coman_robot.idynutils.iDyn3_model.getLinkIndex("l_leg_ft"),
+                coman_robot.idynutils.iDyn3_model.getLinkIndex("Waist"), waist_J_l_ft_sensor);
+
+    std::cout<<"Leg Jacobian expressed in base: ["<<std::endl;
+    for(unsigned int ii = 0; ii < waist_J_l_ft_sensor.rows(); ++ii)
+        std::cout<<waist_J_l_ft_sensor.subrow(ii, coman_robot.idynutils.left_leg.joint_numbers[0], 6).toString()<<std::endl;
+    std::cout<<"]"<<std::endl;
+
+    yarp::sig::Vector tau_computed = waist_J_l_ft_sensor.transposed()*-1.0*ft_readings["l_leg_ft"]+tau_g;
+    std::cout<<"left leg computed torque = ["<<tau_computed.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+            coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<"]"<<std::endl;
+
+    tests_utils::stopGazebo();
+    sleep(10);
+    tests_utils::stopYarpServer();
+}
+
 TEST_F(testDynamicsConstr, testConstraint) {
 
     // Start YARP Server
@@ -426,9 +491,6 @@ for(unsigned int j = 0; j < 2; ++j){
     tests_utils::stopYarpServer();
 }
 
-
-
-
 TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
     for(unsigned int j = 1; j < 2; ++j){
@@ -599,14 +661,14 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= 0.4;
         tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= 0.4;}
     yarp::sig::Vector zero(q.size(), 0.0);
-    double bound_scaling = 0.68; //0.68<-- Whithout this does not work!
+    double bound_scaling = 1.0;
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
                     tau_max,
                     coman_robot.idynutils, dT,bound_scaling));
 
 
-    double eps = 1e10;
+    double eps = 2e10;
 
     Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
     if(j == 1)
@@ -625,18 +687,24 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     computed_velocity_exp.reserve(steps);
     for(unsigned int i = 0; i < steps; ++i)
     {
+
+        yarp::sig::Vector dq_m = coman_robot.senseVelocity();
+
         double tic = yarp::os::Time::now();
         RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
-            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.7;
+            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.5;
 
+        for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
+            _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
+        coman_robot.idynutils.updateiDyn3Model(q, dq_m, _ft_measurements, true);
+        for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
+            _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
 
-        coman_robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
-
-        yarp::sig::Matrix M(6+coman_robot.getNumberOfJoints(), 6+coman_robot.getNumberOfJoints());
-        coman_robot.idynutils.iDyn3_model.getFloatingBaseMassMatrix(M);
-        M.removeCols(0,6); M.removeRows(0,6);
-        postural_task->setWeight(M);
+//        yarp::sig::Matrix M(6+coman_robot.getNumberOfJoints(), 6+coman_robot.getNumberOfJoints());
+//        coman_robot.idynutils.iDyn3_model.getFloatingBaseMassMatrix(M);
+//        M.removeCols(0,6); M.removeRows(0,6);
+//        postural_task->setWeight(M);
 
         if(i <= M_PI*1000){
             Matrix goal_r_wrist = intial_pose_r_wrist;
@@ -652,7 +720,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         taskCartesianAggregated->update(q);
         taskCartesianAggregatedHighest->update(q);
         taskJointAggregated->update(q);
-        Dyn->update(cat(q,dq/dT));
+        Dyn->update(cat(q,dq_m));
 
         cartesian_error_exp.push_back(yarp::math::cat(
                                           cartesian_task_l_wrist->getError(),
@@ -693,17 +761,25 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     file3.open(file_name);
     file3<<"computed_vel"+std::to_string(j)+" = ["<<std::endl;
 
+    std::ofstream file4;
+    file_name = "testDynamics_torque_l_leg"+std::to_string(j)+".m";
+    file4.open(file_name);
+    file4<<"tau_l_leg"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file5;
+    file_name = "testDynamics_torque_r_leg"+std::to_string(j)+".m";
+    file5.open(file_name);
+    file5<<"tau_r_leg"+std::to_string(j)+" = ["<<std::endl;
+
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
         yarp::sig::Vector tau = sensed_torque_exp[i];
-//        file1<<yarp::math::cat(
-//                   tau.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
-//                                 coman_robot.idynutils.left_leg.joint_numbers[5]),
-//                tau.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
-//                              coman_robot.idynutils.right_leg.joint_numbers[5])
-//                ).toString()<<std::endl;
         file1<<tau.toString()<<std::endl;
         file2<<cartesian_error_exp[i].toString()<<std::endl;
         file3<<computed_velocity_exp[i].toString()<<std::endl;
+        file4<<tau.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+                coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
+        file5<<tau.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
+                coman_robot.idynutils.right_leg.joint_numbers[5]).toString()<<std::endl;
     }
     file1<<"];"<<std::endl;
     file1.close();
@@ -711,15 +787,20 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     file2.close();
     file3<<"];"<<std::endl;
     file3.close();
+    file4<<"];"<<std::endl;
+    file4.close();
+    file5<<"];"<<std::endl;
+    file5.close();
+
 
     if(j == 1){
         for(unsigned int i = 10; i < sensed_torque_exp.size(); ++i){
             yarp::sig::Vector tau = sensed_torque_exp[i];
             for(unsigned int jj = 0; jj < coman_robot.idynutils.left_leg.joint_numbers.size(); ++jj){
                 EXPECT_LE(fabs(tau[coman_robot.idynutils.left_leg.joint_numbers[jj]]),
-                        tau_max[coman_robot.idynutils.left_leg.joint_numbers[jj]]*1.02)<<"@joint "<<coman_robot.idynutils.left_leg.joint_numbers[jj];
+                        tau_max[coman_robot.idynutils.left_leg.joint_numbers[jj]]*1.05)<<"@joint "<<coman_robot.idynutils.left_leg.joint_numbers[jj];
                 EXPECT_LE(fabs(tau[coman_robot.idynutils.right_leg.joint_numbers[jj]]),
-                        tau_max[coman_robot.idynutils.right_leg.joint_numbers[jj]]*1.02)<<"@joint "<<coman_robot.idynutils.right_leg.joint_numbers[jj];
+                        tau_max[coman_robot.idynutils.right_leg.joint_numbers[jj]]*1.05)<<"@joint "<<coman_robot.idynutils.right_leg.joint_numbers[jj];
             }
         }
     }

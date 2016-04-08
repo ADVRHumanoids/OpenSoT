@@ -140,29 +140,14 @@ void Dynamics::updateActualWrench()
 
         if(_tmp_wrench_in_sensor_frame.size() > 0)
         {
-            KDL::Wrench wrench_in_sensor_frame_KDL;
-            cartesian_utils::fromYarpVectortoKDLWrench(_tmp_wrench_in_sensor_frame, wrench_in_sensor_frame_KDL);
-
-            // Wrench has to be transformed from ft_frame to base_link **/
-            yarp::sig::Matrix ft_frame_in_base_link;
-            ft_frame_in_base_link = _robot_model.iDyn3_model.getPosition(
-                    _robot_model.iDyn3_model.getLinkIndex(_base_link),
-                    _robot_model.iDyn3_model.getLinkIndex(ft_in_contact[i]));
-
-            KDL::Frame ft_frame_in_base_link_KDL;
-            cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
-
-            KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL.M * wrench_in_sensor_frame_KDL;
-            cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _tmp_wrench_in_base_link_frame);
-
             /**
               * Here we concatenate the wrenches
              **/
             if(_Fc.size() == 0){
-                _Fc.resize(_tmp_wrench_in_base_link_frame.size(), 0.0);
-                _Fc = _tmp_wrench_in_base_link_frame;}
+                _Fc.resize(_tmp_wrench_in_sensor_frame.size(), 0.0);
+                _Fc = _tmp_wrench_in_sensor_frame;}
             else
-                _Fc = yarp::math::cat(_Fc, _tmp_wrench_in_base_link_frame);
+                _Fc = yarp::math::cat(_Fc, _tmp_wrench_in_sensor_frame);
 
             /**
               * Then we need to compute the Jacobian of the contact: from base_link to
@@ -171,12 +156,8 @@ void Dynamics::updateActualWrench()
             unsigned int base_link_index = _robot_model.iDyn3_model.getLinkIndex(_base_link);
             unsigned int ft_link_index = _robot_model.iDyn3_model.getLinkIndex(ft_in_contact[i]);
             yarp::sig::Matrix A(0,0);
-            _robot_model.iDyn3_model.getRelativeJacobian(ft_link_index, base_link_index, A, true);
-            yarp::sig::Matrix base_R_world = _robot_model.iDyn3_model.getPosition(base_link_index).submatrix(0,2,0,2).transposed();
-            yarp::sig::Matrix Adj(6,6); Adj = Adj.eye();
-            Adj.setSubmatrix(base_R_world, 0,0);
-            Adj.setSubmatrix(base_R_world, 3,3);
-            A = Adj*A;
+            _robot_model.iDyn3_model.getRelativeJacobian(ft_link_index, base_link_index, A);
+
 
             /**
               * Here we concatenate the Jacobians of the contacts

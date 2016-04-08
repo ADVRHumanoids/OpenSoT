@@ -231,7 +231,7 @@ TEST_F(testForceCoM, testForceCoM2) {
 
     std::vector<std::string> ft_in_contact;
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(coman_robot.idynutils.getForceTorqueFrameNames(),
-               std::vector<std::string>{std::begin(coman_robot.idynutils.getLinksInContact()),
+               std::list<std::string>{std::begin(coman_robot.idynutils.getLinksInContact()),
                                         std::end(coman_robot.idynutils.getLinksInContact())},
                                         coman_robot.idynutils,
                                         ft_in_contact);
@@ -602,7 +602,7 @@ TEST_F(testForceCoM, testForceCoM3) {
 
     std::vector<std::string> ft_in_contact;
     OpenSoT::constraints::velocity::Dynamics::crawlLinks(coman_robot.idynutils.getForceTorqueFrameNames(),
-               std::vector<std::string>{std::begin(coman_robot.idynutils.getLinksInContact()),
+               std::list<std::string>{std::begin(coman_robot.idynutils.getLinksInContact()),
                                         std::end(coman_robot.idynutils.getLinksInContact())},
                                         coman_robot.idynutils,
                                         ft_in_contact);
