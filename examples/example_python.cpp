@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
     tauLims[robot.idynutils.torso.joint_numbers[2]] *= 0.6;
 
     DHS.torqueLimits->setTorqueLimits(tauLims);
-    DHS.torqueLimits->setBoundScaling(0.2);
+    DHS.torqueLimits->setBoundScaling(0.5);
 
     std::list<std::pair<std::string,std::string> > whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
@@ -449,13 +449,17 @@ int main(int argc, char **argv) {
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.6;
 
-        robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
+        for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
+            _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
+        robot.idynutils.updateiDyn3Model(q, dq_m, _ft_measurements, true);
+        for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
+            _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
 
         autoStack->update(q);
         if(!no_torque_limits)
         {
             using namespace yarp::math;
-            DHS.torqueLimits->update(cat(q,dq/dT));
+            DHS.torqueLimits->update(cat(q,dq_m));
         }
         if(solver->solve(dq))
             q+=dq;
