@@ -12,6 +12,13 @@
 #include <fstream>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
+#include <numeric>
+#include <qpOASES.hpp>
+
+#define GREEN "\033[0;32m"
+#define YELLOW "\033[0;33m"
+#define RED "\033[0;31m"
+#define DEFAULT "\033[0m"
 
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
@@ -322,8 +329,15 @@ TEST_F(testDynamicsConstr, testConstraint) {
     sleep(4);
 
 
+    double loop_time_average_1 = 0.0;
+    double loop_time_average_2 = 0.0;
 
 for(unsigned int j = 0; j < 2; ++j){
+    if(j == 0)
+        std::cout<<RED<<"TEST w/o Dynamic Constr! j = 0"<<DEFAULT<<std::endl;
+    else
+        std::cout<<GREEN<<"TEST w/ Dynamic Constr! j = 1"<<DEFAULT<<std::endl;
+
     sleep(5);
 
     //To control the robot we need RobotUtils
@@ -355,7 +369,7 @@ for(unsigned int j = 0; j < 2; ++j){
     double dT = 0.001;
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
-                new constraints::velocity::VelocityLimits(0.6, dT,q.size()));
+                new constraints::velocity::VelocityLimits(M_PI_2, dT,q.size()));
 
 
     constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
@@ -385,9 +399,15 @@ for(unsigned int j = 0; j < 2; ++j){
     tasks::velocity::Postural::Ptr postural_task=
             tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
 
+    std::list<tasks::velocity::Cartesian::TaskPtr> jointTasks;
+    jointTasks.push_back(postural_task);
+    Task<Matrix, Vector>::TaskPtr taskJointAggregated =
+            tasks::Aggregated::TaskPtr(
+       new tasks::Aggregated(jointTasks,q.size()));
+
     solvers::QPOases_sot::Stack stack_of_tasks;
     stack_of_tasks.push_back(taskCartesianAggregated);
-    stack_of_tasks.push_back(postural_task);
+    stack_of_tasks.push_back(taskJointAggregated);
 
     constraints::velocity::Dynamics::Ptr Dyn;
     if(j == 1)
@@ -396,18 +416,26 @@ for(unsigned int j = 0; j < 2; ++j){
         Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
                     0.9*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
-                    coman_robot.idynutils, dT,1.0));
+                    coman_robot.idynutils, dT,0.9));
     }
 
-    double eps = 1e10;
+    double eps = 2e11;
 
-    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
+    solvers::QPOases_sot::Ptr sot;
     if(j == 0)
         sot = solvers::QPOases_sot::Ptr(
                 new solvers::QPOases_sot(stack_of_tasks, bounds, eps));
     else
         sot = solvers::QPOases_sot::Ptr(
                    new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
+
+    for(unsigned int ii = 0; ii < stack_of_tasks.size(); ++ii){
+        qpOASES::Options opt;
+        sot->getOptions(ii, opt);
+        opt.setToReliable();
+        opt.printLevel = qpOASES::PL_NONE;
+        sot->setOptions(ii, opt);
+    }
 
 
     yarp::sig::Vector dq(q.size(), 0.0);
@@ -418,16 +446,21 @@ for(unsigned int j = 0; j < 2; ++j){
     sensed_torque_exp.reserve(steps);
     cartesian_error_exp.reserve(steps);
     computed_velocity_exp.reserve(steps);
+    std::vector<double> time; time.reserve(steps);
     for(unsigned int i = 0; i < steps; ++i)
     {
         double tic = yarp::os::Time::now();
+
+        yarp::sig::Vector q_sensed(q.size(), 0.0);
+        yarp::sig::Vector dq_sensed(q.size(), 0.0);
+        yarp::sig::Vector tau_sensed(q.size(), 0.0);
+        coman_robot.sense(q_sensed, dq_sensed, tau_sensed);
+
         coman_robot.idynutils.updateiDyn3Model(q, dq/dT, true);
 
         bounds->update(q);
         taskCartesianAggregated->update(q);
-        postural_task->update(q);
-
-        cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+        taskJointAggregated->update(q);
 
         if(j == 1)
             Dyn->update(cat(q,dq/dT));
@@ -437,14 +470,14 @@ for(unsigned int j = 0; j < 2; ++j){
             q += dq;}
         coman_robot.move(q);
 
-
-        yarp::sig::Vector q_sensed(q.size(), 0.0);
-        yarp::sig::Vector dq_sensed(q.size(), 0.0);
-        yarp::sig::Vector tau_sensed(q.size(), 0.0);
-        coman_robot.sense(q_sensed, dq_sensed, tau_sensed);
-        sensed_torque_exp.push_back(tau_sensed);
-
         double toc = yarp::os::Time::now();
+        time.push_back((toc-tic));
+
+        sensed_torque_exp.push_back(tau_sensed);
+        cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+
+        toc = yarp::os::Time::now();
+
         if((toc-tic) < dT)
             yarp::os::Time::delay(dT - (toc-tic));
     }
@@ -505,10 +538,16 @@ for(unsigned int j = 0; j < 2; ++j){
         }
     }
 
+    if(j == 0)
+        loop_time_average_1 = std::accumulate(time.begin(), time.end(), 0);
+    else
+        loop_time_average_2 = std::accumulate(time.begin(), time.end(), 0);
+
 }
 
 
-
+    std::cout<<"LOOP TIME AVERAGE w/o Dynamic Constr: "<<loop_time_average_1<<" [s]"<<std::endl;
+    std::cout<<"LOOP TIME AVERAGE w Dynamic Constr: "<<loop_time_average_2<<" [s]"<<std::endl;
 
     tests_utils::stopGazebo();
     sleep(10);
