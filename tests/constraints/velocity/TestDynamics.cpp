@@ -332,6 +332,14 @@ TEST_F(testDynamicsConstr, testConstraint) {
     double loop_time_average_1 = 0.0;
     double loop_time_average_2 = 0.0;
 
+    double dT = 0.001;
+    double joint_velocity_limits = M_PI_2;
+    double joint_torque_limit_factor = 0.9;
+    double sigma_dynamic_constraint = 0.9;
+    double eps = 2e11;
+
+    std::vector<double> time;
+
 for(unsigned int j = 0; j < 2; ++j){
     if(j == 0)
         std::cout<<RED<<"TEST w/o Dynamic Constr! j = 0"<<DEFAULT<<std::endl;
@@ -366,10 +374,10 @@ for(unsigned int j = 0; j < 2; ++j){
                     coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
                     coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
 
-    double dT = 0.001;
+
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
-                new constraints::velocity::VelocityLimits(M_PI_2, dT,q.size()));
+                new constraints::velocity::VelocityLimits(joint_velocity_limits, dT,q.size()));
 
 
     constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
@@ -415,11 +423,9 @@ for(unsigned int j = 0; j < 2; ++j){
         yarp::sig::Vector zero(q.size(), 0.0);
         Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
-                    0.9*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
-                    coman_robot.idynutils, dT,0.9));
+                    joint_torque_limit_factor*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
+                    coman_robot.idynutils, dT,sigma_dynamic_constraint));
     }
-
-    double eps = 2e11;
 
     solvers::QPOases_sot::Ptr sot;
     if(j == 0)
@@ -432,7 +438,7 @@ for(unsigned int j = 0; j < 2; ++j){
     for(unsigned int ii = 0; ii < stack_of_tasks.size(); ++ii){
         qpOASES::Options opt;
         sot->getOptions(ii, opt);
-        opt.setToReliable();
+        opt.setToDefault();
         opt.printLevel = qpOASES::PL_NONE;
         sot->setOptions(ii, opt);
     }
@@ -442,11 +448,12 @@ for(unsigned int j = 0; j < 2; ++j){
     std::vector<yarp::sig::Vector> sensed_torque_exp;
     std::vector<yarp::sig::Vector> cartesian_error_exp;
     std::vector<yarp::sig::Vector> computed_velocity_exp;
-    int steps = 10000;
+    int steps = 5000;
     sensed_torque_exp.reserve(steps);
     cartesian_error_exp.reserve(steps);
     computed_velocity_exp.reserve(steps);
-    std::vector<double> time; time.reserve(steps);
+    time.reserve(steps);
+
     for(unsigned int i = 0; i < steps; ++i)
     {
         double tic = yarp::os::Time::now();
@@ -466,7 +473,6 @@ for(unsigned int j = 0; j < 2; ++j){
             Dyn->update(cat(q,dq/dT));
 
         if(sot->solve(dq)){
-            computed_velocity_exp.push_back(dq);
             q += dq;}
         coman_robot.move(q);
 
@@ -475,6 +481,7 @@ for(unsigned int j = 0; j < 2; ++j){
 
         sensed_torque_exp.push_back(tau_sensed);
         cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+        computed_velocity_exp.push_back(dq);
 
         toc = yarp::os::Time::now();
 
@@ -520,6 +527,25 @@ for(unsigned int j = 0; j < 2; ++j){
     file3<<"];"<<std::endl;
     file3.close();
 
+    if(j == 1)
+    {
+        std::ofstream file4;
+        file_name = "testDynamics_joint_torque_limits_"+std::to_string(j)+"_left_arm.m";
+        file4.open(file_name);
+        file4<<"torque_limits"<<j<<" = ["<<std::endl;
+
+        yarp::sig::Vector torque_limits_upper = Dyn->getTorqueLimits();
+        for(unsigned int i = 0; i < steps; ++i)
+        {
+            file4<<yarp::math::cat(torque_limits_upper.subVector(coman_robot.idynutils.torso.joint_numbers[0],
+                                   coman_robot.idynutils.torso.joint_numbers[2]),
+                    torque_limits_upper.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
+                    coman_robot.idynutils.left_arm.joint_numbers[6])
+                    ).toString()<<std::endl;
+        }
+        file4<<"];"<<std::endl;
+    }
+
     if(j == 1){
         for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
             yarp::sig::Vector t = sensed_torque_exp[i];
@@ -538,16 +564,43 @@ for(unsigned int j = 0; j < 2; ++j){
         }
     }
 
-    if(j == 0)
-        loop_time_average_1 = std::accumulate(time.begin(), time.end(), 0);
+    if(j == 0){
+        for(unsigned int i = 0; i < time.size(); ++i)
+            loop_time_average_1 += time[i];
+        loop_time_average_1 = loop_time_average_1/double(time.size());
+    }
     else
-        loop_time_average_2 = std::accumulate(time.begin(), time.end(), 0);
+        for(unsigned int i = 0; i < time.size(); ++i)
+            loop_time_average_2 += time[i];
+        loop_time_average_2 = loop_time_average_2/double(time.size());
+
+    time.clear();
 
 }
+
+    std::ofstream file6;
+    std::string file_name = "testDynamicsConstr.testConstraint.m";
+    file6.open(file_name);
+    file6<<"LOOP_TIME_AVERAGE_NO_Dynamic_Constr= "<<loop_time_average_1<<std::endl;
+    file6<<"LOOP_TIME_AVERAGE_Dynamic_Constr= "<<loop_time_average_2<<std::endl;
+    file6<<"dT= "<<dT<<std::endl;
+    file6<<"joint_velocity_limit= "<<joint_velocity_limits<<std::endl;
+    file6<<"joint_torque_limit_factor= "<<joint_torque_limit_factor<<std::endl;
+    file6<<"sigma_dynamic_constraint= "<<sigma_dynamic_constraint<<std::endl;
+    file6<<"eps_regularization= "<<eps<<std::endl;
+    file6.close();
 
 
     std::cout<<"LOOP TIME AVERAGE w/o Dynamic Constr: "<<loop_time_average_1<<" [s]"<<std::endl;
     std::cout<<"LOOP TIME AVERAGE w Dynamic Constr: "<<loop_time_average_2<<" [s]"<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"TEST PARAMETERS:"<<std::endl;
+    std::cout<<"dT: "<<dT<<" [s]"<<std::endl;
+    std::cout<<"joint_velocity_limit: "<<joint_velocity_limits<<" [rad/sec]"<<std::endl;
+    std::cout<<"joint_torque_limit_factor: "<<joint_torque_limit_factor<<std::endl;
+    std::cout<<"sigma_dynamic_constraint: "<<sigma_dynamic_constraint<<std::endl;
+    std::cout<<"eps regularization: "<<eps<<std::endl;
+
 
     tests_utils::stopGazebo();
     sleep(10);
