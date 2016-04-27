@@ -61,6 +61,7 @@ bool OpenSoT::flushers::Flusher::setDescription(const std::vector<std::string> d
     _descriptions.insert(_descriptions.end(),
                          descriptions.begin(),
                          descriptions.end());
+    return true;
 }
 
 std::vector<std::string> OpenSoT::flushers::Flusher::getDescription()
@@ -72,10 +73,12 @@ std::ostream &operator<<(std::ostream &out, const OpenSoT::flushers::Flusher::Pt
 {
     if(flusher)
         out << flusher->toString();
+    return out;
 }
 
 
 std::ostream &operator<<(std::ostream &out, const OpenSoT::flushers::Flusher &flusher)
 {
     out << flusher.toString();
+    return out;
 }
