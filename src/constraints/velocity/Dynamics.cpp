@@ -25,7 +25,8 @@ Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
     _Fc(0),
     _tmp_wrench_in_sensor_frame(6,0.0),
     _tmp_wrench_in_base_link_frame(6, 0.0),
-    _boundScaling(boundScaling)
+    _boundScaling(boundScaling),
+    _constraint_clipper(true)
 {
 
     _Aineq.resize(_x_size, _x_size);
@@ -221,11 +222,13 @@ void Dynamics::update(const yarp::sig::Vector &x)
     _bLowerBound = _boundScaling*(_jointTorquesMin + _b);
     _bUpperBound = _boundScaling*(_jointTorquesMax + _b);
 
-    for(unsigned int i =0; i < _b.size(); ++i)
-    {
-        _bLowerBound[i] = std::min(_bLowerBound[i],0.0);
-        _bUpperBound[i] = std::max(_bUpperBound[i],0.0);
+    if(_constraint_clipper){
+        for(unsigned int i =0; i < _b.size(); ++i){
+            _bLowerBound[i] = std::min(_bLowerBound[i],0.0);
+            _bUpperBound[i] = std::max(_bUpperBound[i],0.0);
+        }
     }
+
     _Aineq = (1.0/_dT)*_M;
 }
 

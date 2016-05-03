@@ -1353,7 +1353,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     double dT = 0.001;
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
-                new constraints::velocity::VelocityLimits(2.*M_PI, dT,q.size()));
+                new constraints::velocity::VelocityLimits(M_PI, dT,q.size()));
 
 
     constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
@@ -1366,13 +1366,11 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
             tasks::velocity::Cartesian::Ptr(
                 new tasks::velocity::Cartesian("cartesian::l_wrist", q,
                     coman_robot.idynutils,"l_wrist", "world"));
-   cartesian_task_l_wrist->setLambda(300.0);
 
     tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
             tasks::velocity::Cartesian::Ptr(
                 new tasks::velocity::Cartesian("cartesian::r_wrist", q,
                     coman_robot.idynutils,"r_wrist", "world"));
-    cartesian_task_r_wrist->setLambda(300.0);
 
     tasks::velocity::Cartesian::Ptr cartesian_task_waist=
             tasks::velocity::Cartesian::Ptr(
@@ -1381,7 +1379,6 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     yarp::sig::Matrix WWW(6,6); WWW.eye();
     WWW(0,0) = 0.0; WWW(1,1) = 0.0; WWW(2,2) = 0.0;
     cartesian_task_waist->setWeight(WWW);
-    cartesian_task_waist->setLambda(300.0);
 
 
     active_joints = cartesian_task_l_wrist->getActiveJointsMask();
@@ -1394,12 +1391,11 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     yarp::sig::Matrix WW(3,3); WW.eye();
     WW(2,2) = 0.0;
     com_task->setWeight(WW);
-    com_task->setLambda(300.0);
 
 
     tasks::velocity::Postural::Ptr postural_task=
             tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
-    postural_task->setLambda(300.0);
+
     tasks::velocity::MinimizeAcceleration::Ptr min_acc_task=
             tasks::velocity::MinimizeAcceleration::Ptr(new tasks::velocity::MinimizeAcceleration(q));
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> jointTasks;
@@ -1420,8 +1416,6 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
         active_joints[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
     torso->setActiveJointsMask(active_joints);
-    right_foot->setLambda(300.0);
-    torso->setLambda(300.0);
 
     std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasksHighest;
     cartesianTasksHighest.push_back(right_foot);
@@ -1456,6 +1450,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
                 new constraints::velocity::Dynamics(q,zero,
                     tau_max,
                     coman_robot.idynutils, dT,bound_scaling));
+    Dyn->setConstraintClipperValue(false);
 
 
     double eps = 1e12;
@@ -1469,23 +1464,23 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     std::vector<yarp::sig::Vector> sensed_torque_exp;
     std::vector<yarp::sig::Vector> cartesian_error_exp;
     std::vector<yarp::sig::Vector> computed_velocity_exp;
+    std::vector<yarp::sig::Vector> filtered_ft_left_right;
     double t = 0.0;
     while(1)
     {
         double tic = yarp::os::Time::now();
         RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
-            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*1.0;
+            _ft_measurements[i].second += (ft_readings[_ft_measurements[i].first]-_ft_measurements[i].second)*0.75;
 
         yarp::sig::Vector q_sensed(q.size(), 0.0);
         yarp::sig::Vector dq_sensed(q.size(), 0.0);
         yarp::sig::Vector tau_sensed(q.size(), 0.0);
         coman_robot.sense(q_sensed, dq_sensed, tau_sensed);
-        q = q_sensed;
 
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
-        coman_robot.idynutils.updateiDyn3Model(q, dq_sensed, _ft_measurements, true);
+        coman_robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
 
@@ -1493,7 +1488,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
         taskCartesianAggregated->update(q);
         taskCartesianAggregatedHighest->update(q);
         taskJointAggregated->update(q);
-        Dyn->update(cat(q,dq_sensed));
+        Dyn->update(cat(q,dq/dT));
 
 
         if(sot->solve(dq))
@@ -1510,6 +1505,8 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
                                           cartesian_task_l_wrist->getError(),
                                           cartesian_task_r_wrist->getError()));
         computed_velocity_exp.push_back(dq);
+        filtered_ft_left_right.push_back(yarp::math::cat(
+            _ft_measurements[0].second, _ft_measurements[1].second));
 
         toc = yarp::os::Time::now();
 
@@ -1553,6 +1550,11 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     file5.open(file_name);
     file5<<"tau_r_leg = ["<<std::endl;
 
+    std::ofstream file6;
+    file_name = "testDynamics_filtered_ft_left_right.m";
+    file6.open(file_name);
+    file6<<"filtered_ft_left_right = ["<<std::endl;
+
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
         yarp::sig::Vector tau = sensed_torque_exp[i];
         file1<<tau.toString()<<std::endl;
@@ -1562,6 +1564,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
                 coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
         file5<<tau.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
                 coman_robot.idynutils.right_leg.joint_numbers[5]).toString()<<std::endl;
+        file6<<filtered_ft_left_right[i].toString()<<std::endl;
     }
     file1<<"];"<<std::endl;
     file1.close();
@@ -1573,6 +1576,10 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     file4.close();
     file5<<"];"<<std::endl;
     file5.close();
+    file6<<"];"<<std::endl;
+    file6.close();
+
+
 
 
     sleep(5);

@@ -72,6 +72,11 @@
                  */
                 void updateActualWrench();
 
+                /**
+                 * @brief _constraint_clipper, if true the bound is clipped at 0 (it cannot change sign)
+                 */
+                bool _constraint_clipper;
+
         public:
 
                 /**
@@ -169,6 +174,16 @@
                 double getBoundScaling() const
                 {
                     return _boundScaling;
+                }
+
+                bool getConstraintClipperValue() const
+                {
+                    return _constraint_clipper;
+                }
+
+                void setConstraintClipperValue(const bool constraint_clipper)
+                {
+                    _constraint_clipper = constraint_clipper;
                 }
             };
         }
