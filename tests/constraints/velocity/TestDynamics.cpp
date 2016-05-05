@@ -1535,32 +1535,32 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
 
     std::ofstream file1;
     std::string file_name = "testDynamics_torque_all.m";
-    file1.open(file_name);
+    file1.open(file_name.c_str());
     file1<<"tau = ["<<std::endl;
 
     std::ofstream file2;
     file_name = "testDynamics_cartesian_error_legsINcontacts_left_right_arm.m";
-    file2.open(file_name);
+    file2.open(file_name.c_str());
     file2<<"cartesian_error = ["<<std::endl;
 
     std::ofstream file3;
     file_name = "testDynamics_computed_vel_legsINcontacts_all.m";
-    file3.open(file_name);
+    file3.open(file_name.c_str());
     file3<<"computed_vel = ["<<std::endl;
 
     std::ofstream file4;
     file_name = "testDynamics_torque_l_leg.m";
-    file4.open(file_name);
+    file4.open(file_name.c_str());
     file4<<"tau_l_leg = ["<<std::endl;
 
     std::ofstream file5;
     file_name = "testDynamics_torque_r_leg.m";
-    file5.open(file_name);
+    file5.open(file_name.c_str());
     file5<<"tau_r_leg = ["<<std::endl;
 
     std::ofstream file6;
     file_name = "testDynamics_filtered_ft_left_right.m";
-    file6.open(file_name);
+    file6.open(file_name.c_str());
     file6<<"filtered_ft_left_right = ["<<std::endl;
 
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
@@ -1600,7 +1600,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
 
     std::ofstream file7;
     file_name = "testConstraintWithContacts_externalForces.m";
-    file7.open(file_name);
+    file7.open(file_name.c_str());
     file7<<"dT = "<<dT<<std::endl;
     file7<<"joint_vel_limits = "<<joint_vel_limits<<std::endl;
     file7<<"dyn_constr_bound_scaling = "<<dyn_constr_bound_scaling<<std::endl;
@@ -1612,7 +1612,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
 
     std::ofstream file8;
     file_name = "max_torques_legs.m";
-    file8.open(file_name);
+    file8.open(file_name.c_str());
     file8<<"tau_legs_max = ["<<std::endl;
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i)
         file8<<(Dyn->getTorqueLimits()).subVector(
