@@ -27,7 +27,7 @@ CoMVelocity::CoMVelocity(const yarp::sig::Vector velocityLimits,
                          const double dT,
                          const yarp::sig::Vector& x,
                          iDynUtils &robot) :
-Constraint(x.size()), _dT(dT), _velocityLimits(velocityLimits),
+Constraint("CoMVelocity", x.size()), _dT(dT), _velocityLimits(velocityLimits),
 _robot(robot) {
 
     if(_velocityLimits.size() < 3 )

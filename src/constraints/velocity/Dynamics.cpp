@@ -13,7 +13,7 @@ Dynamics::Dynamics(const yarp::sig::Vector &q, const yarp::sig::Vector &q_dot,
                    const yarp::sig::Vector &jointTorquesMax, iDynUtils &robot_model,
                    const double dT,
                    const double boundScaling):
-    Constraint(q.size()),
+    Constraint("torque_limits", q.size()),
     _jointTorquesMin(-1.0*jointTorquesMax),
     _jointTorquesMax(jointTorquesMax),
     _robot_model(robot_model),

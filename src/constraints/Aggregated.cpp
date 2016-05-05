@@ -20,6 +20,7 @@
 #include <yarp/math/Math.h>
 #include <assert.h>
 #include <limits>
+#include <sstream>
 
 using namespace OpenSoT::constraints;
 using namespace yarp::math;
@@ -27,7 +28,8 @@ using namespace yarp::math;
 Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const yarp::sig::Vector &q,
                        const unsigned int aggregationPolicy) :
-    Constraint(q.size()), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
+    Constraint(concatenateConstraintsIds(bounds), q.size()),
+               _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     assert(bounds.size()>0);
 
@@ -39,7 +41,8 @@ Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
 Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const unsigned int x_size,
                        const unsigned int aggregationPolicy) :
-    Constraint(x_size), _bounds(bounds), _aggregationPolicy(aggregationPolicy)
+    Constraint(concatenateConstraintsIds(bounds), x_size),
+               _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     this->checkSizes();
     /* calling update to generate bounds */
@@ -50,7 +53,8 @@ Aggregated::Aggregated(ConstraintPtr bound1,
                        ConstraintPtr bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
-    Constraint(x_size), _aggregationPolicy(aggregationPolicy)
+    Constraint(bound1->getConstraintID() + "+" + bound2->getConstraintID(),
+               x_size), _aggregationPolicy(aggregationPolicy)
 {
     _bounds.push_back(bound1);
     _bounds.push_back(bound2);
@@ -232,3 +236,13 @@ void Aggregated::checkSizes()
     }
 }
 
+const std::string Aggregated::concatenateConstraintsIds(const std::list<ConstraintPtr> constraints) {
+    std::string concatenatedId;
+    int constraintSize = constraints.size();
+    for(std::list<ConstraintPtr>::const_iterator i = constraints.begin(); i != constraints.end(); ++i) {
+        concatenatedId += (*i)->getConstraintID();
+        if(--constraintSize > 0)
+            concatenatedId += "+";
+    }
+    return concatenatedId;
+}

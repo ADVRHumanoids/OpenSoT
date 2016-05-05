@@ -62,6 +62,8 @@
 
             void checkSizes();
 
+            static const std::string concatenateConstraintsIds(const std::list<ConstraintPtr> constraints);
+
         public:
             /**
              * @brief Aggregated

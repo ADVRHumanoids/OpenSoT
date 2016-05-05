@@ -10,7 +10,7 @@ namespace OpenSoT {
        FrictionCone::FrictionCone(const yarp::sig::Vector &x, iDynUtils &robot,
                                   const std::map<std::string, double>& mu,
                                   const std::map<std::string, yarp::sig::Matrix>& world_R_surfaces):
-           Constraint(x.size()),
+           Constraint("friction_cone", x.size()),
            _robot(robot),
            _mu(mu),
            _world_R_surfaces(world_R_surfaces)

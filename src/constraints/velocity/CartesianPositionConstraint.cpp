@@ -28,7 +28,7 @@ CartesianPositionConstraint::CartesianPositionConstraint(const yarp::sig::Vector
                                                          const yarp::sig::Matrix &A_Cartesian,
                                                          const yarp::sig::Vector &b_Cartesian,
                                                          const double boundScaling) :
-    Constraint(x.size()),
+    Constraint("position_constraint", x.size()),
     _cartesianTask(cartesianTask),
     _A_Cartesian(A_Cartesian),
     _b_Cartesian(b_Cartesian),

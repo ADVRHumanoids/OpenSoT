@@ -25,7 +25,7 @@ using namespace yarp::math;
 VelocityLimits::VelocityLimits(const double qDotLimit,
                                const double dT,
                                const unsigned int x_size) :
-    Constraint(x_size), _dT(dT) {
+    Constraint("velocity_limits", x_size), _dT(dT) {
 
     _lowerBound.resize(_x_size, 0.0);
     _upperBound.resize(_x_size, 0.0);

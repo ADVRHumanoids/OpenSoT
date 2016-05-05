@@ -34,6 +34,12 @@
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
         typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
+
+        /**
+         * @brief _constraint_id unique name of the constraint
+         */
+        std::string _constraint_id;
+
         /**
          * @brief _x_size size of the controlled variables
          */
@@ -89,7 +95,9 @@
         Vector_type _bUpperBound;
 
     public:
-        Constraint(const unsigned int x_size) : _x_size(x_size) {}
+        Constraint(const std::string constraint_id,
+                   const unsigned int x_size) :
+            _constraint_id(constraint_id), _x_size(x_size) {}
         virtual ~Constraint() {}
 
         const unsigned int getXSize() { return _x_size; }
@@ -148,6 +156,12 @@
          */
         virtual bool isConstraint() { return this->isEqualityConstraint() ||
                                              this->isInequalityConstraint(); }
+
+        /**
+         * @brief getTaskID return the task id
+         * @return a string with the task id
+         */
+        std::string getConstraintID(){ return _constraint_id; }
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */

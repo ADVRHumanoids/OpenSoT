@@ -25,7 +25,7 @@ JointLimits::JointLimits(   const yarp::sig::Vector& q,
                             const yarp::sig::Vector& jointBoundMax,
                             const yarp::sig::Vector& jointBoundMin,
                             const double boundScaling) :
-    Constraint(q.size()),
+    Constraint("joint_limits", q.size()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
     _boundScaling(boundScaling) {

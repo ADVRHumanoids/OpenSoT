@@ -20,15 +20,21 @@
 #include <yarp/math/Math.h>
 #include <assert.h>
 #include <limits>
+#include <sstream>
 
 using namespace OpenSoT::constraints;
 using namespace yarp::math;
 
+int BilateralConstraint::_constr_count = 0;
+
 BilateralConstraint::BilateralConstraint(const yarp::sig::Matrix &Aineq,
                                          const yarp::sig::Vector &bLowerBound,
                                          const yarp::sig::Vector &bUpperBound) :
-    Constraint(Aineq.cols())
+    Constraint("bilateral_constr_", Aineq.cols())
 {
+    std::stringstream tmp; tmp << BilateralConstraint::_constr_count++;
+    this->_constraint_id += tmp.str();
+
     _Aineq = Aineq;
     _bLowerBound = bLowerBound;
     _bUpperBound = bUpperBound;
@@ -37,4 +43,18 @@ BilateralConstraint::BilateralConstraint(const yarp::sig::Matrix &Aineq,
             (_Aineq.rows() == _bUpperBound.size()));
 }
 
+
+BilateralConstraint::BilateralConstraint(const std::string constraintName,
+                                         const yarp::sig::Matrix &Aineq,
+                                         const yarp::sig::Vector &bLowerBound,
+                                         const yarp::sig::Vector &bUpperBound) :
+    Constraint(constraintName, Aineq.cols())
+{
+    _Aineq = Aineq;
+    _bLowerBound = bLowerBound;
+    _bUpperBound = bUpperBound;
+
+    assert( (_Aineq.rows() == _bLowerBound.size()) &&
+            (_Aineq.rows() == _bUpperBound.size()));
+}
 

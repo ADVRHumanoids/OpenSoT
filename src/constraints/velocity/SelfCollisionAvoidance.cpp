@@ -41,7 +41,7 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
                                                double detection_threshold,
                                                double linkPair_threshold,
                                                const double boundScaling):
-    Constraint(x.size()),
+    Constraint("self_collision_avoidance", x.size()),
     _detection_threshold(detection_threshold),
     _linkPair_threshold(linkPair_threshold),
     computeLinksDistance(robot),

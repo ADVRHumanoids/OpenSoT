@@ -27,7 +27,7 @@ using namespace yarp::math;
 ConvexHull::ConvexHull(const yarp::sig::Vector& x,
                        iDynUtils& robot,
                        const double safetyMargin) :
-    Constraint(x.size()), _robot(robot),
+    Constraint("convex_hull", x.size()), _robot(robot),
     _boundScaling(safetyMargin),
     _convex_hull(new idynutils::convex_hull())
 {
