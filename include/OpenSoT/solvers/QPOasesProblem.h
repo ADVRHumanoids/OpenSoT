@@ -238,8 +238,11 @@ namespace OpenSoT{
          * @brief printProblemInformation print some extra information about the problem
          * @param problem_number a number to identify the problem
          * @param problem_id a string to identify the problem
+         * @param constraints_id a string to identify the constraints associated to the problem
+         * @param bounds_id a string to identify the bounds associated to the problem
          */
-        void printProblemInformation(const int problem_number, const std::string problem_id);
+        void printProblemInformation(const int problem_number, const std::string& problem_id,
+                                     const std::string& constraints_id, const std::string& bounds_id);
 
         bool writeQPIntoMFile(const std::string& file_name);
 

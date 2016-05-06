@@ -76,6 +76,9 @@ bool QPOases_sot::prepareSoT()
             constraints_task_i->getConstraintsList().push_back(_bounds);
             constraints_task_i->generateAll();
         }
+
+        std::string constraints_str = constraints_task_i->getConstraintID();
+
         yarp::sig::Matrix A = constraints_task_i->getAineq();
         yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
         yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
@@ -86,6 +89,11 @@ bool QPOases_sot::prepareSoT()
                 yarp::sig::Matrix tmp_A;
                 yarp::sig::Vector tmp_lA, tmp_uA;
                 computeVelCtrlOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
+
+                if(!constraints_str.compare("") == 0)
+                    constraints_str = constraints_str + "+";
+                constraints_str = constraints_str + _tasks[j]->getTaskID() + "_optimality";
+
                 A = pile(A, tmp_A);
                 lA = cat(lA, tmp_lA);
                 uA = cat(uA, tmp_uA);
@@ -102,7 +110,9 @@ bool QPOases_sot::prepareSoT()
 
         if(problem_i.initProblem(H, g, A, lA, uA, l, u)){
             _qp_stack_of_tasks.push_back(problem_i);
-            _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID());}
+            _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID(),
+                                                          constraints_str,
+                                                          _bounds->getConstraintID());}
         else{
             std::cout<<RED<<"ERROR: INITIALIZING STACK "<<i<<DEFAULT<<std::endl;
             return false;}

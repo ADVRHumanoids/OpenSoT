@@ -426,7 +426,8 @@ void QPOasesProblem::checkInfeasibility()
     std::cout<<"--------------------------------------------"<<std::endl;
 }
 
-void QPOasesProblem::printProblemInformation(const int problem_number, const std::string problem_id)
+void QPOasesProblem::printProblemInformation(const int problem_number, const std::string& problem_id,
+                                             const std::string& constraints_id, const std::string& bounds_id)
 {
     std::cout<<std::endl;
     if(problem_number == -1)
@@ -434,8 +435,10 @@ void QPOasesProblem::printProblemInformation(const int problem_number, const std
     else
         std::cout<<GREEN<<"PROBLEM "<<problem_number<<" ID: "<<DEFAULT<<problem_id<<std::endl;
     std::cout<<GREEN<<"eps Regularisation factor: "<<DEFAULT<<_problem->getOptions().epsRegularisation<<std::endl;
-    std::cout<<GREEN<<"# OF CONSTRAINTS: "<<DEFAULT<<_problem->getNC()<<std::endl;
-    std::cout<<GREEN<<"# OF BOUNDS: "<<DEFAULT<<_l.size()<<std::endl;
+    std::cout<<GREEN<<"CONSTRAINTS ID: "<<DEFAULT<<constraints_id<<std::endl;
+    std::cout<<GREEN<<"     # OF CONSTRAINTS: "<<DEFAULT<<_problem->getNC()<<std::endl;
+    std::cout<<GREEN<<"BOUNDS ID: "<<DEFAULT<<bounds_id<<std::endl;
+    std::cout<<GREEN<<"     # OF BOUNDS: "<<DEFAULT<<_l.size()<<std::endl;
     std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_problem->getNV()<<std::endl;
 //    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
 //    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
