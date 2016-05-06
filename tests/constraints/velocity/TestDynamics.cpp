@@ -336,14 +336,20 @@ TEST_F(testDynamicsConstr, testConstraint) {
     double joint_torque_limit_factor = 0.9;
     double sigma_dynamic_constraint = 0.9;
     double eps = 2e11;
+    bool enable_clipping = false;
 
     std::vector<double> time;
 
 for(unsigned int j = 0; j < 2; ++j){
     if(j == 0)
         std::cout<<RED<<"TEST w/o Dynamic Constr! j = 0"<<DEFAULT<<std::endl;
-    else
+    else{
         std::cout<<GREEN<<"TEST w/ Dynamic Constr! j = 1"<<DEFAULT<<std::endl;
+        if(enable_clipping)
+            std::cout<<GREEN<<"Clipping is active"<<std::endl;
+        else
+            std::cout<<RED<<"Clipping is NOT active"<<std::endl;
+    }
 
     sleep(5);
 
@@ -424,6 +430,7 @@ for(unsigned int j = 0; j < 2; ++j){
                 new constraints::velocity::Dynamics(q,zero,
                     joint_torque_limit_factor*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
                     coman_robot.idynutils, dT,sigma_dynamic_constraint));
+        Dyn->setConstraintClipperValue(enable_clipping);
     }
 
     solvers::QPOases_sot::Ptr sot;
@@ -645,6 +652,7 @@ TEST_F(testDynamicsConstr, testConstraintWithTrj) {
     double joint_torque_limit_factor = 0.9;
     double sigma_dynamic_constraint = 0.9;
     double eps = 2e11;
+    bool enable_clipping = false;
 
     std::vector<double> time;
 
@@ -655,8 +663,13 @@ for(unsigned int j = 0; j < 2; ++j){
     t_trj = 0.0;
     if(j == 0)
         std::cout<<RED<<"TEST w/o Dynamic Constr! j = 0"<<DEFAULT<<std::endl;
-    else
+    else{
         std::cout<<GREEN<<"TEST w/ Dynamic Constr! j = 1"<<DEFAULT<<std::endl;
+        if(enable_clipping)
+            std::cout<<GREEN<<"Clipping is enabled"<<DEFAULT<<std::endl;
+        else
+            std::cout<<RED<<"Clipping is NOT enabled"<<DEFAULT<<std::endl;
+    }
 
     sleep(5);
 
@@ -739,6 +752,7 @@ for(unsigned int j = 0; j < 2; ++j){
                 new constraints::velocity::Dynamics(q,zero,
                     joint_torque_limit_factor*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
                     coman_robot.idynutils, dT,sigma_dynamic_constraint));
+        Dyn->setConstraintClipperValue(enable_clipping);
     }
 
     solvers::QPOases_sot::Ptr sot;
@@ -1349,12 +1363,22 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     double dT = 0.001;
     double joint_vel_limits = M_PI;
     double dyn_constr_bound_scaling = 1.0;
-    bool   dyn_constr_clip = false;
+    bool   dyn_constr_clip = true;
     double torque_scaling_factor = 0.9;
     double eps = 1e12;
     double ft_filter = 0.75;
 
+    bool enable_dyn_constraint = false;
 
+
+    if(enable_dyn_constraint){
+        std::cout<<GREEN<<"Dyn Constraint is active!!"<<DEFAULT<<std::endl;
+        if(dyn_constr_bound_scaling)
+            std::cout<<RED<<"Clipping is active!"<<DEFAULT<<std::endl;
+        else
+            std::cout<<GREEN<<"Clipping is NOT active!"<<DEFAULT<<std::endl;
+    }else
+        std::cout<<RED<<"Dyn Constraint is NOT active"<<DEFAULT<<std::endl;
 
     // BOUNDS
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
@@ -1462,14 +1486,17 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     Dyn->setConstraintClipperValue(dyn_constr_clip);
 
 
-    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot =
-            solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
+    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
+    if(enable_dyn_constraint)
+        sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
+    else
+        sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, eps));
 
 
 
     yarp::sig::Vector dq(q.size(), 0.0);
     std::vector<yarp::sig::Vector> sensed_torque_exp;
-    std::vector<yarp::sig::Vector> cartesian_error_exp;
+    std::vector<yarp::sig::Vector> com_cartesian_error_exp;
     std::vector<yarp::sig::Vector> computed_velocity_exp;
     std::vector<yarp::sig::Vector> filtered_ft_left_right;
 
@@ -1509,9 +1536,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
 
 
         sensed_torque_exp.push_back(tau_sensed);
-        cartesian_error_exp.push_back(yarp::math::cat(
-                                          cartesian_task_l_wrist->getError(),
-                                          cartesian_task_r_wrist->getError()));
+        com_cartesian_error_exp.push_back((com_task->getError()).subVector(0,1));
         computed_velocity_exp.push_back(dq);
         filtered_ft_left_right.push_back(yarp::math::cat(
             _ft_measurements[1].second, _ft_measurements[3].second));
@@ -1539,7 +1564,7 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     file1<<"tau = ["<<std::endl;
 
     std::ofstream file2;
-    file_name = "testDynamics_cartesian_error_legsINcontacts_left_right_arm.m";
+    file_name = "testDynamics_cartesian_error_legsINcontacts_com.m";
     file2.open(file_name.c_str());
     file2<<"cartesian_error = ["<<std::endl;
 
@@ -1547,6 +1572,16 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     file_name = "testDynamics_computed_vel_legsINcontacts_all.m";
     file3.open(file_name.c_str());
     file3<<"computed_vel = ["<<std::endl;
+
+    std::ofstream file8;
+    file_name = "testDynamics_computed_vel_l_leg.m";
+    file8.open(file_name.c_str());
+    file8<<"computed_dq_l_leg = ["<<std::endl;
+
+    std::ofstream file9;
+    file_name = "testDynamics_computed_vel_r_leg.m";
+    file9.open(file_name.c_str());
+    file9<<"computed_dq_r_leg = ["<<std::endl;
 
     std::ofstream file4;
     file_name = "testDynamics_torque_l_leg.m";
@@ -1565,14 +1600,19 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
 
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
         yarp::sig::Vector tau = sensed_torque_exp[i];
+        yarp::sig::Vector dq = computed_velocity_exp[i];
         file1<<tau.toString()<<std::endl;
-        file2<<cartesian_error_exp[i].toString()<<std::endl;
+        file2<<com_cartesian_error_exp[i].toString()<<std::endl;
         file3<<computed_velocity_exp[i].toString()<<std::endl;
         file4<<tau.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
                 coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
         file5<<tau.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
                 coman_robot.idynutils.right_leg.joint_numbers[5]).toString()<<std::endl;
         file6<<filtered_ft_left_right[i].toString()<<std::endl;
+        file8<<dq.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+                coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
+        file9<<dq.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
+                coman_robot.idynutils.right_leg.joint_numbers[5]).toString()<<std::endl;
     }
     file1<<"];"<<std::endl;
     file1.close();
@@ -1586,6 +1626,10 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     file5.close();
     file6<<"];"<<std::endl;
     file6.close();
+    file8<<"];"<<std::endl;
+    file8.close();
+    file9<<"];"<<std::endl;
+    file9.close();
 
 
     std::cout<<"PARAMETERS:"<<std::endl;
@@ -1610,16 +1654,16 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     file7<<"ft_filter = "<<ft_filter<<std::endl;
     file7.close();
 
-    std::ofstream file8;
+    std::ofstream file10;
     file_name = "max_torques_legs.m";
-    file8.open(file_name.c_str());
-    file8<<"tau_legs_max = ["<<std::endl;
+    file10.open(file_name.c_str());
+    file10<<"tau_legs_max = ["<<std::endl;
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i)
-        file8<<(Dyn->getTorqueLimits()).subVector(
+        file10<<(Dyn->getTorqueLimits()).subVector(
             coman_robot.idynutils.left_leg.joint_numbers[0],
             coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
-    file8<<"];"<<std::endl;
-    file8.close();
+    file10<<"];"<<std::endl;
+    file10.close();
 
 
 
