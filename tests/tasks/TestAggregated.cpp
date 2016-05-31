@@ -55,7 +55,7 @@ TEST_F(testAggregatedTask, testConcatenateTaskIds)
     task_list.push_back(postural_in_aggregated);
     task_list.push_back(postural_in_aggregated);
 
-    EXPECT_TRUE(Aggregated(task_list,q.size()).getTaskID() == postural_in_aggregated->getTaskID()+"+"+postural_in_aggregated->getTaskID());
+    EXPECT_TRUE(Aggregated(task_list,q.size()).getTaskID() == "("+postural_in_aggregated->getTaskID()+"+"+postural_in_aggregated->getTaskID()+")");
 }
 
 TEST_F(testAggregatedTask, testAggregatedTask_)
