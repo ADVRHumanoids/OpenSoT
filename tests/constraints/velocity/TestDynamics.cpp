@@ -336,7 +336,7 @@ TEST_F(testDynamicsConstr, testConstraint) {
     double joint_torque_limit_factor = 0.9;
     double sigma_dynamic_constraint = 0.9;
     double eps = 2e11;
-    bool enable_clipping = false;
+    bool enable_clipping = true;
 
     std::vector<double> time;
 
@@ -652,7 +652,7 @@ TEST_F(testDynamicsConstr, testConstraintWithTrj) {
     double joint_torque_limit_factor = 0.9;
     double sigma_dynamic_constraint = 0.9;
     double eps = 2e11;
-    bool enable_clipping = false;
+    bool enable_clipping = true;
 
     std::vector<double> time;
 
@@ -1045,6 +1045,16 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     sleep(10);
     coman_robot.setPositionDirectMode();
     sleep(10);
+
+
+    double dT = 0.001;
+    double joint_velocity_limits = 0.6;
+    double joint_torque_limit_factor = 0.4;
+    double sigma_dynamic_constraint = 0.5;
+    double eps = 2e11;
+    bool enable_clipping = false;
+
+
     // BOUNDS
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
             constraints::velocity::JointLimits::ConstraintPtr(
@@ -1053,10 +1063,10 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
                     coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
                     coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
 
-    double dT = 0.001;
+
     Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
-                new constraints::velocity::VelocityLimits(0.6, dT,q.size()));
+                new constraints::velocity::VelocityLimits(joint_velocity_limits, dT,q.size()));
 
 
     constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
@@ -1145,17 +1155,15 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
     yarp::sig::Vector tau_max = coman_robot.idynutils.iDyn3_model.getJointTorqueMax();
     for(unsigned int i = 0; i < coman_robot.left_leg.getNumberOfJoints(); ++i){
-        tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= 0.4;
-        tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= 0.4;}
+        tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= joint_torque_limit_factor;
+        tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= joint_torque_limit_factor;}
     yarp::sig::Vector zero(q.size(), 0.0);
-    double bound_scaling = 0.85;
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
                 new constraints::velocity::Dynamics(q,zero,
                     tau_max,
-                    coman_robot.idynutils, dT,bound_scaling));
+                    coman_robot.idynutils, dT,sigma_dynamic_constraint));
+    Dyn->setConstraintClipperValue(enable_clipping);
 
-
-    double eps = 1e10;
 
     Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
     if(j == 1)
@@ -1168,14 +1176,14 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     std::vector<yarp::sig::Vector> sensed_torque_exp;
     std::vector<yarp::sig::Vector> cartesian_error_exp;
     std::vector<yarp::sig::Vector> computed_velocity_exp;
-    int steps = int(2.*M_PI*1000);//1.5
+    int steps = int(2.*M_PI*1000);//2.
     sensed_torque_exp.reserve(steps);
     cartesian_error_exp.reserve(steps);
     computed_velocity_exp.reserve(steps);
     for(unsigned int i = 0; i < steps; ++i)
     {
 
-        yarp::sig::Vector dq_m = coman_robot.senseVelocity();
+        //yarp::sig::Vector dq_m = coman_robot.senseVelocity();
 
         double tic = yarp::os::Time::now();
         RobotUtils::ftReadings ft_readings = coman_robot.senseftSensors();
@@ -1184,7 +1192,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
-        coman_robot.idynutils.updateiDyn3Model(q, dq_m, _ft_measurements, true);
+        coman_robot.idynutils.updateiDyn3Model(q, dq/dT, _ft_measurements, true);
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
 
@@ -1207,7 +1215,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
         taskCartesianAggregated->update(q);
         taskCartesianAggregatedHighest->update(q);
         taskJointAggregated->update(q);
-        Dyn->update(cat(q,dq_m));
+        Dyn->update(cat(q,dq/dT));
 
         cartesian_error_exp.push_back(yarp::math::cat(
                                           cartesian_task_l_wrist->getError(),
@@ -1234,50 +1242,184 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     }
 
     std::ofstream file1;
-    std::string file_name = "testDynamics_torque_all"+std::to_string(j)+".m";
+    std::string file_name = "testDynamics_max_torques_torso"+std::to_string(j)+".m";
     file1.open(file_name);
-    file1<<"tau"+std::to_string(j)+" = ["<<std::endl;
+    file1<<"tau_max_torso"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file11;
+    file_name = "testDynamics_max_torques_left_arm"+std::to_string(j)+".m";
+    file11.open(file_name);
+    file11<<"tau_max_left_arm"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file12;
+    file_name = "testDynamics_max_torques_right_arm"+std::to_string(j)+".m";
+    file12.open(file_name);
+    file12<<"tau_max_right_arm"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file13;
+    file_name = "testDynamics_max_torques_left_leg"+std::to_string(j)+".m";
+    file13.open(file_name);
+    file13<<"tau_max_left_leg"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file14;
+    file_name = "testDynamics_max_torques_right_leg"+std::to_string(j)+".m";
+    file14.open(file_name);
+    file14<<"tau_max_right_leg"+std::to_string(j)+" = ["<<std::endl;
+
+    yarp::sig::Vector trq_limits = Dyn->getTorqueLimits();
+        file1<<trq_limits.subVector(coman_robot.idynutils.torso.joint_numbers[0],
+                coman_robot.idynutils.torso.joint_numbers[2]).toString()<<std::endl;
+        file11<<trq_limits.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
+                coman_robot.idynutils.left_arm.joint_numbers[6]).toString()<<std::endl;
+        file12<<trq_limits.subVector(coman_robot.idynutils.right_arm.joint_numbers[0],
+                coman_robot.idynutils.right_arm.joint_numbers[6]).toString()<<std::endl;
+        file13<<trq_limits.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+                coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
+        file14<<trq_limits.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
+                coman_robot.idynutils.right_leg.joint_numbers[5]).toString()<<std::endl;
+
+
+    file1<<"];"<<std::endl;
+    file1.close();
+    file11<<"];"<<std::endl;
+    file11.close();
+    file12<<"];"<<std::endl;
+    file12.close();
+    file13<<"];"<<std::endl;
+    file13.close();
+    file14<<"];"<<std::endl;
+    file14.close();
 
     std::ofstream file2;
     file_name = "testDynamics_cartesian_error_legsINcontacts_left_right_arm"+std::to_string(j)+".m";
     file2.open(file_name);
     file2<<"cartesian_error"+std::to_string(j)+" = ["<<std::endl;
 
-    std::ofstream file3;
-    file_name = "testDynamics_computed_vel_legsINcontacts_all"+std::to_string(j)+".m";
-    file3.open(file_name);
-    file3<<"computed_vel"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file31;
+    file_name = "testDynamics_computed_vel_torso"+std::to_string(j)+".m";
+    file31.open(file_name);
+    file31<<"computed_vel_torso"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file32;
+    file_name = "testDynamics_computed_vel_left_arm"+std::to_string(j)+".m";
+    file32.open(file_name);
+    file32<<"computed_vel_left_arm"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file33;
+    file_name = "testDynamics_computed_vel_right_arm"+std::to_string(j)+".m";
+    file33.open(file_name);
+    file33<<"computed_vel_right_arm"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file34;
+    file_name = "testDynamics_computed_vel_left_leg"+std::to_string(j)+".m";
+    file34.open(file_name);
+    file34<<"computed_vel_left_leg"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file35;
+    file_name = "testDynamics_computed_vel_right_leg"+std::to_string(j)+".m";
+    file35.open(file_name);
+    file35<<"computed_vel_right_leg"+std::to_string(j)+" = ["<<std::endl;
+
 
     std::ofstream file4;
-    file_name = "testDynamics_torque_l_leg"+std::to_string(j)+".m";
+    file_name = "testDynamics_torque_torso"+std::to_string(j)+".m";
     file4.open(file_name);
-    file4<<"tau_l_leg"+std::to_string(j)+" = ["<<std::endl;
+    file4<<"tau_torso"+std::to_string(j)+" = ["<<std::endl;
 
-    std::ofstream file5;
-    file_name = "testDynamics_torque_r_leg"+std::to_string(j)+".m";
-    file5.open(file_name);
-    file5<<"tau_r_leg"+std::to_string(j)+" = ["<<std::endl;
+    std::ofstream file41;
+    file_name = "testDynamics_torque_left_arm"+std::to_string(j)+".m";
+    file41.open(file_name);
+    file41<<"tau_left_arm"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file42;
+    file_name = "testDynamics_torque_right_arm"+std::to_string(j)+".m";
+    file42.open(file_name);
+    file42<<"tau_right_arm"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file43;
+    file_name = "testDynamics_torque_left_leg"+std::to_string(j)+".m";
+    file43.open(file_name);
+    file43<<"tau_left_leg"+std::to_string(j)+" = ["<<std::endl;
+
+    std::ofstream file44;
+    file_name = "testDynamics_torque_right_leg"+std::to_string(j)+".m";
+    file44.open(file_name);
+    file44<<"tau_right_leg"+std::to_string(j)+" = ["<<std::endl;
 
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i){
-        yarp::sig::Vector tau = sensed_torque_exp[i];
-        file1<<tau.toString()<<std::endl;
         file2<<cartesian_error_exp[i].toString()<<std::endl;
-        file3<<computed_velocity_exp[i].toString()<<std::endl;
-        file4<<tau.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+
+        yarp::sig::Vector tau = sensed_torque_exp[i];
+        file4<<tau.subVector(coman_robot.idynutils.torso.joint_numbers[0],
+                coman_robot.idynutils.torso.joint_numbers[2]).toString()<<std::endl;
+        file41<<tau.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
+                coman_robot.idynutils.left_arm.joint_numbers[6]).toString()<<std::endl;
+        file42<<tau.subVector(coman_robot.idynutils.right_arm.joint_numbers[0],
+                coman_robot.idynutils.right_arm.joint_numbers[6]).toString()<<std::endl;
+        file43<<tau.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
                 coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
-        file5<<tau.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
+        file44<<tau.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
                 coman_robot.idynutils.right_leg.joint_numbers[5]).toString()<<std::endl;
+
+        yarp::sig::Vector vel = computed_velocity_exp[i];
+        file31<<vel.subVector(coman_robot.idynutils.torso.joint_numbers[0],
+                coman_robot.idynutils.torso.joint_numbers[2]).toString()<<std::endl;
+        file32<<vel.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
+                coman_robot.idynutils.left_arm.joint_numbers[6]).toString()<<std::endl;
+        file33<<vel.subVector(coman_robot.idynutils.right_arm.joint_numbers[0],
+                coman_robot.idynutils.right_arm.joint_numbers[6]).toString()<<std::endl;
+        file34<<vel.subVector(coman_robot.idynutils.left_leg.joint_numbers[0],
+                coman_robot.idynutils.left_arm.joint_numbers[5]).toString()<<std::endl;
+        file35<<vel.subVector(coman_robot.idynutils.right_leg.joint_numbers[0],
+                coman_robot.idynutils.right_arm.joint_numbers[5]).toString()<<std::endl;
+
     }
-    file1<<"];"<<std::endl;
-    file1.close();
-    file2<<"];"<<std::endl;
-    file2.close();
-    file3<<"];"<<std::endl;
-    file3.close();
+
+
+    file31<<"];"<<std::endl;
+    file31.close();
+    file32<<"];"<<std::endl;
+    file32.close();
+    file33<<"];"<<std::endl;
+    file33.close();
+    file34<<"];"<<std::endl;
+    file34.close();
+    file35<<"];"<<std::endl;
+    file35.close();
+
     file4<<"];"<<std::endl;
     file4.close();
-    file5<<"];"<<std::endl;
-    file5.close();
+    file41<<"];"<<std::endl;
+    file41.close();
+    file42<<"];"<<std::endl;
+    file42.close();
+    file43<<"];"<<std::endl;
+    file43.close();
+    file44<<"];"<<std::endl;
+    file44.close();
+
+    file2<<"];"<<std::endl;
+    file2.close();
+
+    std::ofstream file6;
+    file_name = "testDynamicsConstr_testConstraintWithContacts.m";
+    file6.open(file_name);
+    file6<<"dT= "<<dT<<std::endl;
+    file6<<"joint_velocity_limit= "<<joint_velocity_limits<<std::endl;
+    file6<<"joint_torque_limit_factor= "<<joint_torque_limit_factor<<std::endl;
+    file6<<"sigma_dynamic_constraint= "<<sigma_dynamic_constraint<<std::endl;
+    file6<<"eps_regularization= "<<eps<<std::endl;
+    file6.close();
+
+
+    std::cout<<std::endl;
+    std::cout<<"TEST PARAMETERS:"<<std::endl;
+    std::cout<<"dT: "<<dT<<" [s]"<<std::endl;
+    std::cout<<"joint_velocity_limit: "<<joint_velocity_limits<<" [rad/sec]"<<std::endl;
+    std::cout<<"joint_torque_limit_factor: "<<joint_torque_limit_factor<<std::endl;
+    std::cout<<"sigma_dynamic_constraint: "<<sigma_dynamic_constraint<<std::endl;
+    std::cout<<"eps regularization: "<<eps<<std::endl;
 
 
     if(j == 1){
@@ -1285,9 +1427,9 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
             yarp::sig::Vector tau = sensed_torque_exp[i];
             for(unsigned int jj = 0; jj < coman_robot.idynutils.left_leg.joint_numbers.size(); ++jj){
                 EXPECT_LE(fabs(tau[coman_robot.idynutils.left_leg.joint_numbers[jj]]),
-                        tau_max[coman_robot.idynutils.left_leg.joint_numbers[jj]]*1.05)<<"@joint "<<coman_robot.idynutils.left_leg.joint_numbers[jj];
+                        tau_max[coman_robot.idynutils.left_leg.joint_numbers[jj]]*1.0)<<"@joint "<<coman_robot.idynutils.left_leg.joint_numbers[jj];
                 EXPECT_LE(fabs(tau[coman_robot.idynutils.right_leg.joint_numbers[jj]]),
-                        tau_max[coman_robot.idynutils.right_leg.joint_numbers[jj]]*1.05)<<"@joint "<<coman_robot.idynutils.right_leg.joint_numbers[jj];
+                        tau_max[coman_robot.idynutils.right_leg.joint_numbers[jj]]*1.0)<<"@joint "<<coman_robot.idynutils.right_leg.joint_numbers[jj];
             }
         }
     }
@@ -1305,7 +1447,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 }
 #endif
 
-TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForces) {
+TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
 
     // Applied external force is: base_link 0 0 -200 0 0 0 1
 
@@ -1363,12 +1505,12 @@ TEST_F(testDynamicsConstr, /*DISABLED_*/testConstraintWithContacts_externalForce
     double dT = 0.001;
     double joint_vel_limits = M_PI;
     double dyn_constr_bound_scaling = 1.0;
-    bool   dyn_constr_clip = true;
+    bool   dyn_constr_clip = false;
     double torque_scaling_factor = 0.9;
     double eps = 1e12;
     double ft_filter = 0.75;
 
-    bool enable_dyn_constraint = false;
+    bool enable_dyn_constraint = true;
 
 
     if(enable_dyn_constraint){
