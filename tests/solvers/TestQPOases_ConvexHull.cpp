@@ -416,11 +416,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     right_foot_task->setLambda(.2);
     right_foot_task->setOrientationErrorGain(.1);
 
-    OpenSoT::tasks::Aggregated::Ptr first_task(
-                new OpenSoT::tasks::Aggregated( com_task,
-                                                right_foot_task,
-                                                q.size()));
-
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(q));;
@@ -557,7 +552,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         {
             idynutils_com.updateiDyn3Model(q, true);
 
-            first_task->update(q);
             right_foot_task->update(q);
             com_task->update(q);
             postural_task->update(q);
