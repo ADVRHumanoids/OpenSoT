@@ -71,6 +71,30 @@ DefaultHumanoidStack::DefaultHumanoidStack(iDynUtils& model,
      minimumVelocity( new tasks::velocity::MinimumVelocity(state.size()) ),
      minimumAcceleration( new tasks::velocity::MinimizeAcceleration(state) ),
      postural( new tasks::velocity::Postural(state) ),
+     posturalForTorso( new tasks::velocity::Postural(state) ),
+     postural_Torso( new SubTask(posturalForTorso,
+                                 Indices(model.torso.joint_numbers)) ),
+     posturalForArms( new tasks::velocity::Postural(state) ),
+     postural_Arms( new SubTask(posturalForTorso,
+                                (Indices(model.left_arm.joint_numbers) +
+                                 Indices(model.right_arm.joint_numbers)) ) ),
+     posturalForLegs( new tasks::velocity::Postural(state) ),
+     postural_Legs( new SubTask(posturalForTorso,
+                                (Indices(model.left_leg.joint_numbers) +
+                                 Indices(model.right_leg.joint_numbers)) ) ),
+     posturalForLimbs( new tasks::velocity::Postural(state) ),
+     postural_Limbs( new SubTask(posturalForTorso,
+                                 (Indices(model.left_leg.joint_numbers) +
+                                  Indices(model.right_leg.joint_numbers) +
+                                  Indices(model.left_leg.joint_numbers) +
+                                  Indices(model.right_leg.joint_numbers)) ) ),
+     posturalForLimbsAndHead( new tasks::velocity::Postural(state) ),
+     postural_LimbsAndHead( new SubTask(posturalForTorso,
+                                 (Indices(model.left_leg.joint_numbers) +
+                                  Indices(model.right_leg.joint_numbers) +
+                                  Indices(model.left_leg.joint_numbers) +
+                                  Indices(model.right_leg.joint_numbers) +
+                                  Indices(model.head.joint_numbers)) ) ),
      comVelocity( new constraints::velocity::CoMVelocity(yarp::sig::Vector(3,.3),
                                                          dT,
                                                          state,

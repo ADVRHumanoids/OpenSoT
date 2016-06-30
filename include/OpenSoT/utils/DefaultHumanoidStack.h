@@ -26,6 +26,13 @@
      {
         public:
 
+         /**
+          * @brief DefaultHumanoidStack creates a default set of stacks for a humanoid robot
+          * @param model the robot model. It should be updated before creating the DHS (Default Humanoid Stack)
+          *              in order to impose good initial references for the tasks
+          * @param dT the control time in [s].
+          * @param state
+          */
          DefaultHumanoidStack(iDynUtils &model,
                               const double dT,
                               const yarp::sig::Vector& state);
@@ -72,6 +79,16 @@
          const tasks::velocity::MinimumEffort::Ptr minimumEffort;
          const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
          const tasks::velocity::Postural::Ptr postural;
+         const tasks::velocity::Postural::Ptr posturalForTorso;
+         const tasks::velocity::Postural::Ptr posturalForArms;
+         const tasks::velocity::Postural::Ptr posturalForLegs;
+         const tasks::velocity::Postural::Ptr posturalForLimbs;
+         const tasks::velocity::Postural::Ptr posturalForLimbsAndHead;
+         const SubTask::Ptr postural_Torso;
+         const SubTask::Ptr postural_Arms;
+         const SubTask::Ptr postural_Legs;
+         const SubTask::Ptr postural_Limbs;
+         const SubTask::Ptr postural_LimbsAndHead;
          const tasks::velocity::MinimizeAcceleration::Ptr minimumAcceleration;
 
 
