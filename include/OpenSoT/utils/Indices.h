@@ -131,6 +131,20 @@ public:
      */
     Indices operator+(const unsigned int r) const;
 
+    /**
+     * @brief operator - removes a set of indices (if existing) from the current indices set
+     * @param b the indices set to remove
+     * @return a smaller indices set (sorted, without duplicates)
+     */
+    Indices operator-(const Indices& b) const;
+
+    /**
+     * @brief operator - removes an index (if existing) from the current indices set
+     * @param r the index to remove frin the set
+     * @return a smaller indices set (sorted, without duplicates)
+     */
+    Indices operator-(const unsigned int r) const;
+
     bool operator==(const Indices& b) const;
 
     operator std::string() const;

@@ -180,6 +180,23 @@ OpenSoT::Indices OpenSoT::Indices::operator+(const unsigned int r) const
     return Indices(rows);
 }
 
+OpenSoT::Indices OpenSoT::Indices::operator-(const OpenSoT::Indices &b) const
+{
+    std::list<unsigned int> rows = this->_rowsList;
+    for(std::list<unsigned int>::const_iterator i = b.asList().begin();
+        i != b.asList().end();
+        ++i)
+        rows.remove(*i);
+    return Indices(rows);
+}
+
+OpenSoT::Indices OpenSoT::Indices::operator-(const unsigned int r) const
+{
+    std::list<unsigned int> rows = this->_rowsList;
+    rows.remove(r);
+    return Indices(rows);
+}
+
 bool OpenSoT::Indices::operator==(const OpenSoT::Indices &b) const
 {
     return this->_rowsList == b.asList();

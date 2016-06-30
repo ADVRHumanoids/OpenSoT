@@ -183,6 +183,32 @@ TEST_F(TestSubTaskMap, testSubMapOperatorPlus)
     EXPECT_EQ(std::string(subTaskMap2+10+11+12+subTaskMap3),"3-5+7-8+10-12");
 }
 
+TEST_F(TestSubTaskMap, testSubMapOperatorMinus)
+{
+    std::list<unsigned int> indices;
+    std::list<unsigned int> indices2;
+    std::list<unsigned int> indices3;
+
+    std::list<unsigned int> indices1_minus_3;
+
+
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(3);
+
+    indices3.push_back(3);
+
+    indices1_minus_3.push_back(1);
+    indices1_minus_3.push_back(2);
+
+    OpenSoT::Indices subTaskMap(indices.begin(),indices.end());
+    OpenSoT::Indices subTaskMap3(indices3);
+
+    EXPECT_EQ(std::string(subTaskMap-subTaskMap3),"1-2");
+    EXPECT_EQ(std::list<unsigned int>(subTaskMap-subTaskMap3),indices1_minus_3);
+    EXPECT_EQ(std::string(subTaskMap-1-2),"3");
+}
+
 TEST_F(TestSubTaskMap, testSubTaskOperatorToList)
 {
     std::list<unsigned int> indices;
