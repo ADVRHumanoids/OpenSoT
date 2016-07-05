@@ -146,6 +146,49 @@ namespace OpenSoT {
                     return false;
                 }
             };
+            
+            /**
+             * @brief The yarp_action_pose_msg_portable class implement a portable from yarp_pose_msg with an action
+             */
+            class yarp_action_pose_msg_portable: public yarp_pose_msg, public ::yarp::os::Portable
+            {
+            public:
+                std::string action;
+            public:
+                yarp_action_pose_msg_portable():
+                yarp_pose_msg()
+                {
+
+                }
+
+                yarp_action_pose_msg_portable(std::string action, const KDL::Frame& p, const std::string& base, const std::string& distal):
+                yarp_pose_msg(p, base, distal)
+                {
+                    this->action = action;
+                }
+
+                bool read(::yarp::os::ConnectionReader& connection)
+                {
+                    ::yarp::os::Bottle tmp_bot;
+                    if(!tmp_bot.read(connection))
+                        return false;
+
+                    deserializeMsg(tmp_bot);
+                    action = tmp_bot.get(9).asString().c_str();
+                    return true;
+                }
+
+                bool write(::yarp::os::ConnectionWriter& connection)
+                {
+                    ::yarp::os::Bottle tmp_bot;
+                    serializeMsg(tmp_bot);
+                    tmp_bot.addString(action);
+
+                    if(tmp_bot.write(connection))
+                        return true;
+                    return false;
+                }
+            };
 
             }
         }
