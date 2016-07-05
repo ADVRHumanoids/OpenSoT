@@ -133,7 +133,7 @@ void Dynamics::updateActualWrench()
          * For each ft in contact we first take the measured wrench and we
          * transform the wrench from the sensor frame to the base_link frame.
          */
-        moveit::core::LinkModel* ft_link =
+        const moveit::core::LinkModel* ft_link =
                 _robot_model.moveit_robot_model->getLinkModel(ft_in_contact[i]);
 
         unsigned int ft_index = _robot_model.iDyn3_model.getFTSensorIndex(ft_link->getParentJointModel()->getName());

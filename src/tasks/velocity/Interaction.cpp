@@ -20,7 +20,7 @@ Interaction::Interaction(std::string task_id,
     _ft_index(-1),
     _C(6,6)
 {
-    moveit::core::LinkModel* ft_link = robot.moveit_robot_model->getLinkModel(ft_frame);
+    const moveit::core::LinkModel* ft_link = robot.moveit_robot_model->getLinkModel(ft_frame);
 
     _ft_index = robot.iDyn3_model.getFTSensorIndex(ft_link->getParentJointModel()->getName());
     if(_ft_index == -1)
