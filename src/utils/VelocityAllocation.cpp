@@ -191,7 +191,7 @@ double VelocityAllocation::computeVelocityLimit(const unsigned int taskIndex,
         if(stackSize > 2)
         {
             if(taskIndex < stackSize - 1)
-                _min_velocity+taskIndex*(_max_velocity-_min_velocity)/(stackSize-2);
+                return _min_velocity+taskIndex*(_max_velocity-_min_velocity)/(stackSize-2);
             else
                 return _last_velocity;
         }
