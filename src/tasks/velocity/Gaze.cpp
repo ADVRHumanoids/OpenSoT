@@ -10,8 +10,7 @@ Gaze::Gaze(std::string task_id,
            iDynUtils &robot,
            std::string base_link) :
     _distal_link("gaze"),
-    _base_link(base_link),
-    _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, _base_link)),
+    _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, base_link)),
     SubTask(_cartesian_task, Indices::range(4,5)),
     _robot(robot)
 {

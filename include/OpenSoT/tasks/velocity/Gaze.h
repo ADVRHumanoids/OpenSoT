@@ -46,16 +46,8 @@ public:
 
 
 private:
-    struct null_deleter
-    {
-        void operator()(void const *) const
-        {
-        }
-    };
-
-    Cartesian::Ptr _cartesian_task;
     std::string _distal_link;
-    std::string _base_link;
+    Cartesian::Ptr _cartesian_task;
     yarp::sig::Matrix _reference_gaze;
 
     iDynUtils& _robot;
