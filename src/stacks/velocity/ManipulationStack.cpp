@@ -7,7 +7,8 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
                                      const double dT,
                                      const yarp::sig::Vector& state) :
   OpenSoT::AutoStack(state.size()),
-  DefaultHumanoidStack(model, dT, state)
+  DefaultHumanoidStack(model, dT, state),
+  eps(2e12)
  {
     const yarp::sig::Vector &q = state;
     const yarp::sig::Vector dq = q*0.0;
@@ -29,7 +30,7 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     this->posturalForTorso->setLambda(0.05);     
     this->posturalForLimbdsAndHead->setLambda(0.05);*/
     // velocity limits
-    this->velocityLimits->setVelocityLimits(0.1);
+    this->velocityLimits->setVelocityLimits(M_PI_2);
     
     /*                            */
     /*       CREATING STACK       */
