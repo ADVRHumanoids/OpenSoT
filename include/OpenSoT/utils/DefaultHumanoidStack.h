@@ -50,6 +50,9 @@
          const SubTask::Ptr rightArm_Position;
          const SubTask::Ptr rightArm_Orientation;
 
+         const tasks::velocity::Cartesian::Ptr TCP_L;
+         const tasks::velocity::Cartesian::Ptr TCP_R;
+
          const tasks::velocity::Cartesian::Ptr waist2LeftArm;
          const SubTask::Ptr  waist2LeftArm_Position;
          const SubTask::Ptr  waist2LeftArm_Orientation;

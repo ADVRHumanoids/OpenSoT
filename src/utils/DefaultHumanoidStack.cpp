@@ -20,6 +20,20 @@ DefaultHumanoidStack::DefaultHumanoidStack(iDynUtils& model,
                                              "world") ),
      rightArm_Position( new SubTask(rightArm, Indices::range(0,2)) ),
      rightArm_Orientation( new SubTask(rightArm, Indices::range(3,5)) ),
+     TCP_L( new tasks::velocity::Cartesian("cartesian::TCP_L",
+                                           state,
+                                           model,
+                                           (model.iDyn3_model.getLinkIndex("TCP_L") > 0 ?
+                                                "TCP_L" :
+                                                model.left_arm.end_effector_name),
+                                           "world") ),
+     TCP_R( new tasks::velocity::Cartesian("cartesian::TCP_R",
+                                           state,
+                                           model,
+                                           (model.iDyn3_model.getLinkIndex("TCP_R") > 0 ?
+                                                "TCP_R" :
+                                                model.right_arm.end_effector_name),
+                                          "world") ),
      waist2LeftArm( new tasks::velocity::Cartesian("cartesian::l_wrist",
                                                    state,
                                                    model,
