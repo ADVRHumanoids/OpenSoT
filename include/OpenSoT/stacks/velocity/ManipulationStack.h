@@ -21,28 +21,32 @@
  #include <OpenSoT/utils/DefaultHumanoidStack.h>
  #include <OpenSoT/utils/AutoStack.h>
 
- class ManipulationStack : public OpenSoT::AutoStack, public OpenSoT::DefaultHumanoidStack
- {
- public:
-	typedef boost::shared_ptr<ManipulationStack> Ptr;
+namespace OpenSoT {
 
-     /**
-      * @brief MainpulationStack creates and tunes a stack for manipulation
-      * @param model the robot model. It should be updated before creating the stack
-      *              in order to impose good initial references for the tasks. The stack
-      				 will modify the model by setting the world on the left foot (with a identify transform),
-      				 and both the anchor and the floating base link on the left foot
-      * @param dT the control time in [s].
-      * @param state
-      */
-    ManipulationStack(iDynUtils &model,
-                      const double dT,
-                      const yarp::sig::Vector& state);
+     class ManipulationStack : public OpenSoT::AutoStack, public OpenSoT::DefaultHumanoidStack
+     {
+     public:
+        typedef boost::shared_ptr<ManipulationStack> Ptr;
 
-    ~ManipulationStack() {};
+         /**
+          * @brief MainpulationStack creates and tunes a stack for manipulation
+          * @param model the robot model. It should be updated before creating the stack
+          *              in order to impose good initial references for the tasks. The stack
+                         will modify the model by setting the world on the left foot (with a identify transform),
+                         and both the anchor and the floating base link on the left foot
+          * @param dT the control time in [s].
+          * @param state
+          */
+        ManipulationStack(iDynUtils &model,
+                          const double dT,
+                          const yarp::sig::Vector& state);
 
- 	/** \brief eps the suggested value to use as damping when inverting the task jacobians */
- 	double eps;
- };
+        ~ManipulationStack() {};
+
+        /** \brief eps the suggested value to use as damping when inverting the task jacobians */
+        double eps;
+     };
+}
+
 
  #endif
