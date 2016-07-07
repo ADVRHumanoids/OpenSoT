@@ -44,8 +44,6 @@ public:
      */
     void setGaze(const yarp::sig::Matrix& desiredGaze);
 
-    yarp::sig::Matrix getGaze();
-
     void setOrientationErrorGain(const double& orientationErrorGain);
 
     const double getOrientationErrorGain() const;

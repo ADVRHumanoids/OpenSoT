@@ -24,11 +24,6 @@ Gaze::~Gaze()
 
 }
 
-yarp::sig::Matrix Gaze::getGaze()
-{
-    return _reference_gaze;
-}
-
 void Gaze::setGaze(const yarp::sig::Matrix &desiredGaze)
 {
     _reference_gaze = desiredGaze;
