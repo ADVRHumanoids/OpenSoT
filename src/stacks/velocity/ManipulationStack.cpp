@@ -27,11 +27,12 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     /*DHS->leftLeg->setLambda(0.6);*/    DHS->leftLeg->setOrientationErrorGain(1.0);
     DHS->rightArm->setLambda(0.6);       DHS->rightArm->setOrientationErrorGain(1.0);
     DHS->leftArm->setLambda(0.6);        DHS->leftArm->setOrientationErrorGain(1.0);
-    DHS->com_XY->setLambda(0.05);      /*DHS->postural->setLambda(0.05);
-    DHS->posturalForTorso->setLambda(0.05);
-    DHS->posturalForLimbdsAndHead->setLambda(0.05);*/
+    DHS->com_XY->setLambda(0.05);        DHS->postural->setLambda(0.05);
+    DHS->posturalForTorso->setLambda(0.1);
+    DHS->posturalForLimbsAndHead->setLambda(0.05);
     // velocity limits
     DHS->velocityLimits->setVelocityLimits(M_PI_2);
+    DHS->waist->setLambda(0.01);
 
 
     std::vector<bool> gaze_active_joint_mask = DHS->gaze->getActiveJointsMask();
@@ -47,8 +48,8 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     DHS->com->setActiveJointsMask(com_active_joint_mask);
     DHS->gaze->setActiveJointsMask(gaze_active_joint_mask);
     DHS->waist2gaze->setActiveJointsMask(gaze_active_joint_mask);
-    DHS->gaze->setOrientationErrorGain(0.1);
-    DHS->waist2gaze->setOrientationErrorGain(0.1);
+    DHS->gaze->setOrientationErrorGain(0.05);
+    DHS->waist2gaze->setOrientationErrorGain(0.05);
 
     
     /*                            */
@@ -58,8 +59,8 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     // defining the stack 
     this->getStack() = 
         (( DHS->rightLeg ) /
-         ( (DHS->com_XY +  DHS->waist) <<  DHS->convexHull ) /
-         ( (DHS->leftArm + DHS->rightArm + DHS->postural_Torso + DHS->gaze) ) /
+         ( (DHS->com_XY + DHS->gaze) <<  DHS->convexHull ) /
+         ( (DHS->leftArm + DHS->rightArm + DHS->postural_Torso + DHS->waist) ) /
          ( (DHS->postural_LimbsAndHead) ))->getStack();
     // imposing joint and velocity limits TBD if you want to lock a joint modify the joint limits setting the actual posion and putting the velocity limits to 0
     this->getBoundsList().push_back(DHS->jointLimits);
