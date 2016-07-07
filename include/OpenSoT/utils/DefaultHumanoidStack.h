@@ -88,6 +88,7 @@
          const tasks::velocity::MinimumEffort::Ptr minimumEffort;
          const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
          const tasks::velocity::Postural::Ptr postural;
+         // TODO do we need 5 duplicates of the Postural?
          const tasks::velocity::Postural::Ptr posturalForTorso;
          const tasks::velocity::Postural::Ptr posturalForArms;
          const tasks::velocity::Postural::Ptr posturalForLegs;

@@ -34,13 +34,19 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     DHS->velocityLimits->setVelocityLimits(M_PI_2);
 
 
-    std::vector<bool> active_joint_mask = DHS->gaze->getActiveJointsMask();
-    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
-        active_joint_mask[i] = false;
+    std::vector<bool> gaze_active_joint_mask = DHS->gaze->getActiveJointsMask();
+    std::vector<bool> com_active_joint_mask = DHS->com->getActiveJointsMask();
+
+    for(unsigned int i = 0; i < gaze_active_joint_mask.size(); ++i)
+        gaze_active_joint_mask[i] = false;
     for(unsigned int i = 0; i < model.head.joint_numbers.size(); ++i)
-        active_joint_mask[model.head.joint_numbers[i]] = true;
-    DHS->gaze->setActiveJointsMask(active_joint_mask);
-    DHS->waist2gaze->setActiveJointsMask(active_joint_mask);
+    {
+        gaze_active_joint_mask[model.head.joint_numbers[i]] = true;
+        com_active_joint_mask[model.head.joint_numbers[i]] = false;
+    }
+    DHS->com->setActiveJointsMask(com_active_joint_mask);
+    DHS->gaze->setActiveJointsMask(gaze_active_joint_mask);
+    DHS->waist2gaze->setActiveJointsMask(gaze_active_joint_mask);
     DHS->gaze->setOrientationErrorGain(0.1);
     DHS->waist2gaze->setOrientationErrorGain(0.1);
 
@@ -52,8 +58,8 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     // defining the stack 
     this->getStack() = 
         (( DHS->rightLeg ) /
-         ( (DHS->com_XY +  DHS->waist) <<  DHS->convexHull ) /
-         ( (DHS->leftArm + DHS->rightArm + DHS->postural_Torso + DHS->gaze) ) /
+         ( (DHS->com_XY +  DHS->waist + DHS->gaze) <<  DHS->convexHull ) /
+         ( (DHS->leftArm + DHS->rightArm + DHS->postural_Torso) ) /
          ( (DHS->postural_LimbsAndHead) ))->getStack();
     // imposing joint and velocity limits TBD if you want to lock a joint modify the joint limits setting the actual posion and putting the velocity limits to 0
     this->getBoundsList().push_back(DHS->jointLimits);
