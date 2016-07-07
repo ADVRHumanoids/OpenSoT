@@ -84,14 +84,14 @@ DefaultHumanoidStack::DefaultHumanoidStack(iDynUtils& model,
                                  Indices(model.right_leg.joint_numbers)) ) ),
      posturalForLimbs( new tasks::velocity::Postural(state) ),
      postural_Limbs( new SubTask(posturalForTorso,
-                                 (Indices(model.left_leg.joint_numbers) +
-                                  Indices(model.right_leg.joint_numbers) +
+                                 (Indices(model.left_arm.joint_numbers) +
+                                  Indices(model.right_arm.joint_numbers) +
                                   Indices(model.left_leg.joint_numbers) +
                                   Indices(model.right_leg.joint_numbers)) ) ),
      posturalForLimbsAndHead( new tasks::velocity::Postural(state) ),
      postural_LimbsAndHead( new SubTask(posturalForTorso,
-                                 (Indices(model.left_leg.joint_numbers) +
-                                  Indices(model.right_leg.joint_numbers) +
+                                 (Indices(model.left_arm.joint_numbers) +
+                                  Indices(model.right_arm.joint_numbers) +
                                   Indices(model.left_leg.joint_numbers) +
                                   Indices(model.right_leg.joint_numbers) +
                                   Indices(model.head.joint_numbers)) ) ),
