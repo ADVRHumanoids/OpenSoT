@@ -23,7 +23,7 @@
 
 namespace OpenSoT {
 
-     class ManipulationStack : public OpenSoT::AutoStack, public OpenSoT::DefaultHumanoidStack
+     class ManipulationStack : public OpenSoT::AutoStack
      {
      public:
         typedef boost::shared_ptr<ManipulationStack> Ptr;
@@ -42,6 +42,8 @@ namespace OpenSoT {
                           const yarp::sig::Vector& state);
 
         ~ManipulationStack() {};
+
+        OpenSoT::DefaultHumanoidStack::Ptr DHS;
 
         /** \brief eps the suggested value to use as damping when inverting the task jacobians */
         double eps;

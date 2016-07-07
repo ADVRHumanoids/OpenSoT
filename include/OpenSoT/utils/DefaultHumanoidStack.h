@@ -26,6 +26,8 @@
      {
         public:
 
+         typedef boost::shared_ptr<DefaultHumanoidStack> Ptr;
+
          /**
           * @brief DefaultHumanoidStack creates a default set of stacks for a humanoid robot
           * @param model the robot model. It should be updated before creating the DHS (Default Humanoid Stack)

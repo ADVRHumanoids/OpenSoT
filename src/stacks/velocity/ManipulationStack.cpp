@@ -7,7 +7,6 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
                                      const double dT,
                                      const yarp::sig::Vector& state) :
   OpenSoT::AutoStack(state.size()),
-  DefaultHumanoidStack(model, dT, state),
   eps(2e12)
  {
     const yarp::sig::Vector &q = state;
@@ -18,19 +17,21 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     model.setAnchor_T_World(from_anchor_to_world);
     
     model.updateiDyn3Model(q, true);
+
+    DHS.reset( new DefaultHumanoidStack(model, dT, state) );
     
     /*                            */
     /*      CONFIGURING DHS       */
     /*                            */
-    /*this->rightLeg->setLambda(0.6);*/   this->rightLeg->setOrientationErrorGain(1.0);
-    /*this->leftLeg->setLambda(0.6);*/    this->leftLeg->setOrientationErrorGain(1.0);
-    this->rightArm->setLambda(0.6);       this->rightArm->setOrientationErrorGain(1.0);
-    this->leftArm->setLambda(0.6);        this->leftArm->setOrientationErrorGain(1.0);
-    this->com_XY->setLambda(0.05);      /*this->postural->setLambda(0.05);
-    this->posturalForTorso->setLambda(0.05);     
-    this->posturalForLimbdsAndHead->setLambda(0.05);*/
+    /*DHS->rightLeg->setLambda(0.6);*/   DHS->rightLeg->setOrientationErrorGain(1.0);
+    /*DHS->leftLeg->setLambda(0.6);*/    DHS->leftLeg->setOrientationErrorGain(1.0);
+    DHS->rightArm->setLambda(0.6);       DHS->rightArm->setOrientationErrorGain(1.0);
+    DHS->leftArm->setLambda(0.6);        DHS->leftArm->setOrientationErrorGain(1.0);
+    DHS->com_XY->setLambda(0.05);      /*DHS->postural->setLambda(0.05);
+    DHS->posturalForTorso->setLambda(0.05);
+    DHS->posturalForLimbdsAndHead->setLambda(0.05);*/
     // velocity limits
-    this->velocityLimits->setVelocityLimits(M_PI_2);
+    DHS->velocityLimits->setVelocityLimits(M_PI_2);
     
     /*                            */
     /*       CREATING STACK       */
@@ -38,13 +39,13 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
 
     // defining the stack 
     this->getStack() = 
-        (( this->rightLeg ) /
-         ( (this->com_XY + this->waist) << this->convexHull ) /
-         ( (this->leftArm + this->rightArm + this->postural_Torso) ) /
-         ( (this->postural_LimbsAndHead) ))->getStack();
+        (( DHS->rightLeg ) /
+         ( (DHS->com_XY +  DHS->waist) <<  DHS->convexHull ) /
+         ( (DHS->leftArm + DHS->rightArm + DHS->postural_Torso) ) /
+         ( (DHS->postural_LimbsAndHead) ))->getStack();
     // imposing joint and velocity limits TBD if you want to lock a joint modify the joint limits setting the actual posion and putting the velocity limits to 0
-    this->getBoundsList().push_back(this->jointLimits);
-    this->getBoundsList().push_back(this->velocityLimits);
+    this->getBoundsList().push_back(DHS->jointLimits);
+    this->getBoundsList().push_back(DHS->velocityLimits);
     // creating the aggregated bounds given the bounds list
     this->getBounds()->update(q);
     // updating the stack based on the actual state
