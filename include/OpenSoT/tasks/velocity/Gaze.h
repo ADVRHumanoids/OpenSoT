@@ -96,7 +96,6 @@ private:
     std::string _distal_link;
     Cartesian::Ptr _cartesian_task;
     SubTask::Ptr   _subtask;
-    yarp::sig::Matrix _reference_gaze;
 
     iDynUtils& _robot;
 };

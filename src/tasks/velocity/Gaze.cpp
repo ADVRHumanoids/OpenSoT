@@ -1,5 +1,6 @@
 #include <OpenSoT/tasks/velocity/Gaze.h>
 #include <yarp/math/Math.h>
+#include <idynutils/cartesian_utils.h>
 
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
@@ -15,7 +16,6 @@ Gaze::Gaze(std::string task_id,
     _subtask(new SubTask(_cartesian_task, Indices::range(4,5))),
     _robot(robot)
 {
-    _reference_gaze = _cartesian_task->getReference();
     this->_update(x);
 }
 
@@ -25,11 +25,27 @@ Gaze::~Gaze()
 }
 
 void Gaze::setGaze(const yarp::sig::Matrix &desiredGaze)
-{
-    _reference_gaze = desiredGaze;
+{    
+    KDL::Frame bl_T_gaze_kdl;
+
+    if(_cartesian_task->baseLinkIsWorld())
+        bl_T_gaze_kdl = _robot.iDyn3_model.getPositionKDL(
+                        _robot.iDyn3_model.getLinkIndex(_distal_link));
+    else
+        bl_T_gaze_kdl = _robot.iDyn3_model.getPositionKDL(
+                        _robot.iDyn3_model.getLinkIndex(_cartesian_task->getBaseLink()),
+                        _robot.iDyn3_model.getLinkIndex(_distal_link));
+
+    yarp::sig::Matrix bl_T_gaze;
+    cartesian_utils::fromKDLFrameToYARPMatrix(bl_T_gaze_kdl, bl_T_gaze);
+    yarp::sig::Matrix gaze_T_bl;
+    cartesian_utils::fromKDLFrameToYARPMatrix(bl_T_gaze_kdl.Inverse(), gaze_T_bl);
+    yarp::sig::Matrix gaze_T_obj = gaze_T_bl*desiredGaze;
 
     yarp::sig::Matrix gaze_goal(4,4);
-    cartesian_utils::computePanTiltMatrix(desiredGaze.subcol(0, 3, 3), gaze_goal);
+    cartesian_utils::computePanTiltMatrix(gaze_T_obj.subcol(0, 3, 3), gaze_goal);
+
+    gaze_goal = bl_T_gaze*gaze_goal;
 
     _cartesian_task->setReference(gaze_goal);
 }
