@@ -36,3 +36,8 @@ void Gaze::setGaze(const yarp::sig::Matrix &desiredGaze)
 
     _cartesian_task->setReference(gaze_goal);
 }
+
+void Gaze::setOrientationErrorGain(const double& orientationErrorGain)
+{
+    _cartesian_task->setOrientationErrorGain(orientationErrorGain);
+}

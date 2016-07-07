@@ -19,6 +19,7 @@
 #define __DEFAULTHUMANOIDSTACK_H__
 
 #include <OpenSoT/OpenSoT.h>
+#include <OpenSoT/tasks/velocity/Gaze.h>
 
  namespace OpenSoT {
 
@@ -80,6 +81,9 @@
          const tasks::velocity::CoM::Ptr com;
          const SubTask::Ptr com_XY;
          const SubTask::Ptr com_Z;
+
+         const tasks::velocity::Gaze::Ptr gaze;
+         const tasks::velocity::Gaze::Ptr waist2gaze;
 
          const tasks::velocity::MinimumEffort::Ptr minimumEffort;
          const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;

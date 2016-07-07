@@ -43,6 +43,7 @@ public:
 
     yarp::sig::Matrix getGaze();
 
+    void setOrientationErrorGain(const double& orientationErrorGain);
 
 
 private:
