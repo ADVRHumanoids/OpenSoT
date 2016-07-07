@@ -50,11 +50,9 @@
 
         typedef boost::shared_ptr<OpenSoT::SubTask> Ptr;
 
-    private:
+    protected:
         TaskPtr _taskPtr;
         Indices _subTaskMap;
-
-    protected:
 
     public:
         /**
