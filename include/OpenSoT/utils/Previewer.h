@@ -604,11 +604,11 @@ namespace OpenSoT {
             }
 
             /**
-             * @brief shouldCheckSelfCollision checks whether cartesian poses changed or
+             * @brief shouldCheckCollision checks whether cartesian poses changed or
              * joint position changed too much; in which case, we force a collision check
-             * @return true if we need to call a self-collision check
+             * @return true if we need to call a (self-)collision check
              */
-            bool shouldCheckSelfCollision(double threshold = 2e-2)
+            bool shouldCheckCollision(double threshold = 2e-2)
             {
                 bool cartesianPosesChanged = false;
                 bool qChanged = false;
@@ -835,7 +835,7 @@ namespace OpenSoT {
              *        You can still check the results to see if any fault occured
              * @param max_retries maximum number of times to retry solve() if errors occur
              * @return true if during the whole trajectory the tracking was always lower than the specified threshold,
-             *              and no self-collisions were detected.
+             *              and no (self-)collisions were detected.
              *              If the previewer is asked to simulate for a time lower than the longest trajectory duration,
              *              false will be returned. To get finer informations you should check the results structure
              */
@@ -895,9 +895,9 @@ namespace OpenSoT {
                         b->task->update(q);
                     }
 
-                    if(shouldCheckSelfCollision()) {
+                    if(shouldCheckCollision()) {
                         std::cout << " collision check ";
-                        if(model.checkSelfCollision())
+                        if(model.checkCollision())
                         {
                             check_ok = false;
                             if(results != NULL)

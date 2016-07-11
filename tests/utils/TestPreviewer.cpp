@@ -232,7 +232,7 @@ protected:
         return true;
     }
 
-    bool shouldCheckSelfCollisionWorks()
+    bool shouldCheckCollisionWorks()
     {
 
         double threshold = 1e-2;
@@ -242,18 +242,18 @@ protected:
         previewer->resetPreviewer();
 
         // first time we call it, it always returns true
-        if(!previewer->shouldCheckSelfCollision(threshold))
+        if(!previewer->shouldCheckCollision(threshold))
         {
-            std::cout << "--- shouldCheckSelfCollision() should return true "
+            std::cout << "--- shouldCheckCollision() should return true "
                       << "when called first time after a reset" << std::endl;
             return false;
-        } else std::cout << "+++ First call to shouldCheckSelfCollision "
+        } else std::cout << "+++ First call to shouldCheckCollision "
                          << "succesfully returns true" << std::endl;
 
         // but if we didn't move, it will then return false
-        if(previewer->shouldCheckSelfCollision(threshold))
+        if(previewer->shouldCheckCollision(threshold))
         {
-            std::cout << "--- shouldCheckSelfCollision is returning true while "
+            std::cout << "--- shouldCheckCollision is returning true while "
                       << "the cartesian pose did not change" << std::endl;
             return false;
         }
@@ -283,17 +283,17 @@ protected:
                 if( dXL >= threshold || dXR >= threshold)
                 {
                     x = DHS.leftArm->getActualPose();
-                    if(!previewer->shouldCheckSelfCollision(threshold))
+                    if(!previewer->shouldCheckCollision(threshold))
                     {
                         std::cout << "--- Error! cartesian reference changed, but "
-                                  << "shouldCheckSelfCollision did not return true" << std::endl;
+                                  << "shouldCheckCollision did not return true" << std::endl;
                         return false;
                     }
                 } else {
-                    if(previewer->shouldCheckSelfCollision(threshold))
+                    if(previewer->shouldCheckCollision(threshold))
                     {
                         std::cout << "--- Error! cartesian reference did not change much, but "
-                                  << "shouldCheckSelfCollision did return true" << std::endl;
+                                  << "shouldCheckCollision did return true" << std::endl;
                         return false;
                     }
                 }
@@ -302,10 +302,10 @@ protected:
                 std::cout << "--- Error: unable to solve stack" << std::endl;
         }
 
-        // we didn't move, shouldCheckSelfCollision should return false
-        if(previewer->shouldCheckSelfCollision(threshold))
+        // we didn't move, shouldCheckCollision should return false
+        if(previewer->shouldCheckCollision(threshold))
         {
-            std::cout << "--- shouldCheckSelfCollision is returning true while "
+            std::cout << "--- shouldCheckCollision is returning true while "
                       << "the cartesian pose did not change" << std::endl;
             return false;
         }
@@ -321,10 +321,10 @@ protected:
         _robot.updateiDyn3Model(q,true);
         autostack->update(q);
 
-        if(!previewer->shouldCheckSelfCollision())
+        if(!previewer->shouldCheckCollision())
         {
             std::cout << "Joint space configuration changed, but "
-                      << "shouldCheckSelfCollision returns false" << std::endl;
+                      << "shouldCheckCollision returns false" << std::endl;
             return false;
         }
 
@@ -341,7 +341,7 @@ TEST_F(testPreviewer, testDynamicCast)
 
 TEST_F(testPreviewer, checkStaticConvergence)
 {
-    ASSERT_FALSE(_robot.checkSelfCollision());
+    ASSERT_FALSE(_robot.checkCollision());
 
     Previewer::Results results;
     bool preview_success = previewer->check(0.1,3,&results);
@@ -564,7 +564,7 @@ TEST_F(testPreviewer, checkUnfeasibleBoundedness)
     EXPECT_TRUE(error_unbounded);
 }
 
-TEST_F(testPreviewer, checkSelfCollision)
+TEST_F(testPreviewer, checkCollision)
 {
     /* feasible trajectory with collision on l_arm: 10 cm in .1sec */
     yarp::sig::Matrix lb = DHS.leftArm->getActualPose();
@@ -606,13 +606,13 @@ TEST_F(testPreviewer, checkSelfCollision)
     EXPECT_TRUE(self_collision);
 }
 
-TEST_F(testPreviewer, testShouldCheckSelfCollision)
+TEST_F(testPreviewer, testShouldCheckCollision)
 {
     ASSERT_TRUE(cartesianPoseChangedWorks());
 
     ASSERT_TRUE(jointSpaceConfigurationChangedWorks());
 
-    ASSERT_TRUE(shouldCheckSelfCollisionWorks());
+    ASSERT_TRUE(shouldCheckCollisionWorks());
 }
 
 TEST_F(testPreviewer, resultsSum)

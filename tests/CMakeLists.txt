@@ -76,6 +76,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCartesianVelocityTask
                       testCoMForceTask
                       testCoMVelocityTask
+                      testGazeVelocityTask
                       testInteractionVelocityTask
                       TestManipulabilityTask
                       testMinimizeAccelerationTask
@@ -199,6 +200,10 @@ ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
 TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
 add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
+TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
+add_dependencies(testGazeVelocityTask GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
 TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
 add_dependencies(testInteractionVelocityTask GTest-ext OpenSoT)
@@ -283,7 +288,7 @@ add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_Glob
 add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
 #the following tests compile but don't get executed automatically. They are not proper tests ATM, rather case-studies and references for stack tuning.
 #add_test(NAME OpenSoT_solvers_qpOases_PriorityInversion COMMAND testQPOases_PriorityInversion)
-#add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
+add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
 add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
 add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
@@ -292,6 +297,7 @@ add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
+add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
