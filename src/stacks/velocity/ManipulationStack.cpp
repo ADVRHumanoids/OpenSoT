@@ -15,6 +15,7 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     model.setFloatingBaseLink(model.left_leg.end_effector_name);
     KDL::Frame from_anchor_to_world = from_anchor_to_world.Identity(); // zero because we want l_sole both as anchor and world
     model.setAnchor_T_World(from_anchor_to_world);
+    model.disableDynamicsUpdate();
     
     model.updateiDyn3Model(q, true);
 
@@ -25,8 +26,8 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     /*                            */
     /*DHS->rightLeg->setLambda(0.6);*/   DHS->rightLeg->setOrientationErrorGain(1.0);
     /*DHS->leftLeg->setLambda(0.6);*/    DHS->leftLeg->setOrientationErrorGain(1.0);
-    DHS->rightArm->setLambda(0.6);       DHS->rightArm->setOrientationErrorGain(1.0);
-    DHS->leftArm->setLambda(0.6);        DHS->leftArm->setOrientationErrorGain(1.0);
+    DHS->rightArm->setLambda(1.2);       DHS->rightArm->setOrientationErrorGain(1.0);
+    DHS->leftArm->setLambda(1.2);        DHS->leftArm->setOrientationErrorGain(1.0);
     DHS->com_XY->setLambda(0.05);        DHS->postural->setLambda(0.05);
     DHS->posturalForTorso->setLambda(0.1);
     DHS->posturalForLimbsAndHead->setLambda(0.05);
