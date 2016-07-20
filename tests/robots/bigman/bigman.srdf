@@ -112,6 +112,8 @@
 ##
 ####################################################
 -->
+  <virtual_joint child_link="base_link" name="virtual_joint" parent_frame="world" type="floating"/>
+
   <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
   <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
   <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
