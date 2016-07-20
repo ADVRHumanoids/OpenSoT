@@ -32,8 +32,9 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     DHS->posturalForTorso->setLambda(0.1);
     DHS->posturalForLimbsAndHead->setLambda(0.05);
     // velocity limits
-    DHS->velocityLimits->setVelocityLimits(M_PI_2);
+    DHS->velocityLimits->setVelocityLimits(M_PI_4);
     DHS->waist->setLambda(0.01);
+    DHS->waist->setOrientationErrorGain(10.0);
 
 
     std::vector<bool> gaze_active_joint_mask = DHS->gaze->getActiveJointsMask();
