@@ -145,6 +145,13 @@
                  * for the distal_link in the base_link frame of reference.
                  */
                 const yarp::sig::Matrix getActualPose() const;
+                
+                /**
+                 * @brief getActualPoseKDL returns the distal_link actual pose as a KDL frame. You need to call _update(x) for the actual pose to change
+                 * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
+                 * for the distal_link in the base_link frame of reference as a KDL Pose.
+                 */
+                const KDL::Frame getActualPoseKDL() const;
 
                 void setOrientationErrorGain(const double& orientationErrorGain);
                 const double getOrientationErrorGain() const;

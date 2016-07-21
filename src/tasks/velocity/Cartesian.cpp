@@ -137,6 +137,14 @@ const yarp::sig::Matrix Cartesian::getActualPose() const
     return _actualPose;
 }
 
+const KDL::Frame Cartesian::getActualPoseKDL() const
+{
+    KDL::Frame actualPoseKDL;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(_actualPose, actualPoseKDL);
+    return actualPoseKDL;
+}
+
+
 void Cartesian::setOrientationErrorGain(const double &orientationErrorGain)
 {
     this->_orientationErrorGain = orientationErrorGain;
