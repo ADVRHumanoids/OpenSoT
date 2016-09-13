@@ -21,6 +21,8 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
 
 /**
  * @example example_autostack.cpp
@@ -48,6 +50,9 @@ namespace OpenSoT {
         OpenSoT::solvers::QPOases_sot::Stack _stack;
 
         OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
+
+        std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> flattenTask(
+                OpenSoT::solvers::QPOases_sot::TaskPtr task);
 
         protected:
             AutoStack(const double x_size);
@@ -81,6 +86,9 @@ namespace OpenSoT {
                 OpenSoT::constraints::Aggregated::UNILATERAL_TO_BILATERAL);
 
             OpenSoT::constraints::Aggregated::ConstraintPtr getBounds();
+
+            OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
+            OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& task_id);
     };    
 }
 

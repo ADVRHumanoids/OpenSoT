@@ -267,3 +267,85 @@ OpenSoT::solvers::QPOases_sot::Stack& OpenSoT::AutoStack::getStack()
 {
     return _stack;
 }
+
+
+std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> OpenSoT::AutoStack::flattenTask(
+        OpenSoT::solvers::QPOases_sot::TaskPtr task)
+{
+    std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector;
+    if(task->getTaskID().find("+") == std::string::npos)
+        task_vector.push_back(task);
+    else
+    {
+        boost::shared_ptr<OpenSoT::tasks::Aggregated> aggregated =
+                boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
+        std::list<OpenSoT::solvers::QPOases_sot::TaskPtr> tasks_list = aggregated->getTaskList();
+
+        std::list<OpenSoT::solvers::QPOases_sot::TaskPtr>::iterator it;
+        for(it = tasks_list.begin(); it != tasks_list.end(); it++)
+        {
+            if(it->get()->getTaskID().find("+") == std::string::npos)
+                task_vector.push_back(*it);
+            else
+            {
+                std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector_tmp = flattenTask(*it);
+                task_vector.insert(task_vector.begin(), task_vector_tmp.begin(), task_vector_tmp.end());
+            }
+        }
+    }
+    return task_vector;
+}
+
+OpenSoT::solvers::QPOases_sot::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
+        const std::string& base_link, const std::string& distal_link)
+{
+    std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector;
+    for(unsigned int i = 0; i < _stack.size(); ++i)
+    {
+        std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector_tmp = flattenTask(_stack[i]);
+        task_vector.insert(task_vector.begin(), task_vector_tmp.begin(), task_vector_tmp.end());
+    }
+
+    for(unsigned int i = 0; i < task_vector.size(); ++i)
+    {
+        boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> task_Cartesian =
+                boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task_vector[i]);
+        if(task_Cartesian)
+        {
+            std::string _base_link = task_Cartesian->getBaseLink();
+            std::string _distal_link = task_Cartesian->getDistalLink();
+            if(_base_link.compare(base_link) == 0 && _distal_link.compare(distal_link) == 0)
+                return task_vector[i];
+        }
+
+        boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+                boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task_vector[i]);
+        if(task_CoM)
+        {
+            std::string _base_link = task_CoM->getBaseLink();
+            std::string _distal_link = task_CoM->getDistalLink();
+            if(_base_link.compare(base_link) == 0 && _distal_link.compare(distal_link) == 0)
+                return task_vector[i];
+        }
+    }
+    return OpenSoT::solvers::QPOases_sot::TaskPtr();
+}
+
+OpenSoT::solvers::QPOases_sot::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
+        const std::string& task_id)
+{
+    std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector;
+    for(unsigned int i = 0; i < _stack.size(); ++i)
+    {
+        std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector_tmp = flattenTask(_stack[i]);
+        task_vector.insert(task_vector.begin(), task_vector_tmp.begin(), task_vector_tmp.end());
+    }
+
+    for(unsigned int i = 0; i < task_vector.size(); ++i)
+    {
+        std::string _task_id = task_vector[i]->getTaskID();
+        if(_task_id.compare(task_id) == 0)
+            return task_vector[i];
+    }
+    return OpenSoT::solvers::QPOases_sot::TaskPtr();
+}

@@ -39,6 +39,88 @@ protected:
 
 };
 
+TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
+{
+    using namespace OpenSoT;
+    std::string task_id = "CoM";
+
+    AutoStack::Ptr auto_stack = (DHS.right2LeftLeg)/
+            (DHS.com + DHS.leftArm)/
+            DHS.postural;
+    auto_stack->update(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.));
+
+    OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
+    EXPECT_TRUE(com_task != NULL);
+    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
+    EXPECT_TRUE(task_CoM != NULL);
+    EXPECT_TRUE(task_CoM->getTaskID().compare(task_id) == 0);
+
+    task_id = "mammeta";
+    OpenSoT::solvers::QPOases_sot::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(task_id);
+    EXPECT_TRUE(mammeta_task == NULL);
+
+    task_id = "cartesian::l_wrist";
+    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(task_id);
+    EXPECT_TRUE(Cartesian_task != NULL);
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
+            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
+    EXPECT_TRUE(left_arm != NULL);
+    EXPECT_TRUE(left_arm->getTaskID().compare(task_id) == 0);
+
+    task_id = "cartesian:r2l_sole";
+    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(task_id);
+    EXPECT_TRUE(Cartesian_task2 != NULL);
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
+            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
+    EXPECT_TRUE(right_left_leg != NULL);
+    EXPECT_TRUE(right_left_leg->getTaskID().compare(task_id) == 0);
+}
+
+TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
+{
+    using namespace OpenSoT;
+    std::string base_link = "world";
+    std::string distal_link = "CoM";
+
+    AutoStack::Ptr auto_stack = (DHS.right2LeftLeg)/
+            (DHS.com + DHS.leftArm)/
+            DHS.postural;
+    auto_stack->update(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.));
+
+    OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    EXPECT_TRUE(com_task != NULL);
+    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
+    EXPECT_TRUE(task_CoM != NULL);
+    EXPECT_TRUE(task_CoM->getBaseLink().compare(base_link) == 0);
+    EXPECT_TRUE(task_CoM->getDistalLink().compare(distal_link) == 0);
+
+    base_link = "mammeta";
+    OpenSoT::solvers::QPOases_sot::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    EXPECT_TRUE(mammeta_task == NULL);
+
+    base_link = "world";
+    distal_link = _robot.left_arm.end_effector_name;
+    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    EXPECT_TRUE(Cartesian_task != NULL);
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
+            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
+    EXPECT_TRUE(left_arm != NULL);
+    EXPECT_TRUE(left_arm->getBaseLink().compare(base_link) == 0);
+    EXPECT_TRUE(left_arm->getDistalLink().compare(distal_link) == 0);
+
+    base_link = _robot.left_leg.end_effector_name;
+    distal_link = _robot.right_leg.end_effector_name;
+    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    EXPECT_TRUE(Cartesian_task2 != NULL);
+    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
+            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
+    EXPECT_TRUE(right_left_leg != NULL);
+    EXPECT_TRUE(right_left_leg->getBaseLink().compare(base_link) == 0);
+    EXPECT_TRUE(right_left_leg->getDistalLink().compare(distal_link) == 0);
+}
+
 TEST_F(testAutoStack, testOperatorPlus )
 {
     using namespace OpenSoT;
