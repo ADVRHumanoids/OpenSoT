@@ -90,7 +90,7 @@ namespace OpenSoT {
                     }                    
                 }
                 
-                void deserializeMsg(::yarp::os::Bottle& tmp_b, unsigned int cont = 0)
+                void deserializeMsg(const ::yarp::os::Bottle& tmp_b, unsigned int cont = 0)
                 {
 
                     // traj_type

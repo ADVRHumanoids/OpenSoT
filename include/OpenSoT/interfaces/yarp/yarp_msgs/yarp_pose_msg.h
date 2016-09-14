@@ -85,7 +85,7 @@ namespace OpenSoT {
                  * @param tmp_b bottle
                  * @param i index from which data are started to read
                  */
-                void deserializeMsg(::yarp::os::Bottle& tmp_b, unsigned int i = 0)
+                void deserializeMsg(const ::yarp::os::Bottle& tmp_b, unsigned int i = 0)
                 {
                     double qx,qy,qz,qw;
 

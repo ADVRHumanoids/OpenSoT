@@ -80,16 +80,18 @@ namespace OpenSoT {
                     return bottle_msg_size;
                 }
                 
-                void serializeMsg(::yarp::os::Bottle& tmp_b)
+                // NOTE in python is easier
+                ::yarp::os::Bottle& serializeMsg(::yarp::os::Bottle& tmp_b)
                 {
                     tmp_b.addString(task_id);
                     tmp_b.addInt(traj_num);
                     for(int i = 0; i < traj_num; i++) {
                         trajs[i].serializeMsg(tmp_b);
                     }
+                    return tmp_b;
                 }
                 
-                void deserializeMsg(::yarp::os::Bottle& tmp_b, unsigned int cont = 0)
+                void deserializeMsg(const ::yarp::os::Bottle& tmp_b, unsigned int cont = 0)
                 {
                     task_id = tmp_b.get(cont++).asString();
                     traj_num = tmp_b.get(cont++).asInt();
