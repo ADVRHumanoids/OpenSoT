@@ -73,14 +73,14 @@ namespace OpenSoT {
                 void serializeMsg(::yarp::os::Bottle& tmp_b)
                 {
                     tmp_b.addString(traj_type);
-                    if(traj_type == "LineTraj" || traj_type == "MinJerkTrj") {
+                    if(traj_type == "LineTrj" || traj_type == "MinJerkTrj") {
                         tmp_b.addInt(way_points_num);
                         for(int i = 0; i < way_points_num; i++) {
                             way_points[i].serializeMsg(tmp_b);
                             tmp_b.addDouble(sub_traj_time[i]);
                         }
                     }
-                    else if(traj_type == "ArcTraj") {
+                    else if(traj_type == "ArcTrj") {
                         start_pose.serializeMsg(tmp_b);
                         final_rotation.serializeMsg(tmp_b);
                         tmp_b.addDouble(angle_of_rotation);
@@ -97,11 +97,7 @@ namespace OpenSoT {
                     traj_type = tmp_b.get(cont++).asString();
                     
                     // LINEAR or MIN JERK TRAJECTORY
-                    if(traj_type == "LineTraj" || traj_type == "MinJerkTrj") {
-                        bottle_msg_size =   1 + 
-                                            1 + 
-                                            way_points.size() * yarp_pose_msg::bottle_msg_size + 
-                                            sub_traj_time.size();
+                    if(traj_type == "LineTrj" || traj_type == "MinJerkTrj") {
                         way_points_num = tmp_b.get(cont++).asInt();
                         // resize proper arrays
                         way_points.resize(way_points_num);
@@ -112,11 +108,13 @@ namespace OpenSoT {
                             cont += way_points[i].bottle_msg_size;
                             sub_traj_time[i] = tmp_b.get(cont++).asDouble();
                         }
+                        // updated bottle msg size
+                        bottle_msg_size =   1 + 
+                                            1 + 
+                                            way_points.size() * yarp_pose_msg::bottle_msg_size + 
+                                            sub_traj_time.size();                        
                     }
-                    else if(traj_type == "ArcTraj") {
-                        bottle_msg_size =   1 +
-                                            4 * yarp_pose_msg::bottle_msg_size + 
-                                            2;
+                    else if(traj_type == "ArcTrj") {
                                       
                         start_pose.deserializeMsg(tmp_b, cont);
                         cont += start_pose.bottle_msg_size;
@@ -133,6 +131,11 @@ namespace OpenSoT {
                         cont += plane_normal.bottle_msg_size;
                         
                         arc_traj_time = tmp_b.get(cont++).asDouble();
+                        
+                        // updated bottle msg size
+                        bottle_msg_size =   1 +
+                                            4 * yarp_pose_msg::bottle_msg_size + 
+                                            2;                        
                     }
 
                     
