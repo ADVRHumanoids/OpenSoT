@@ -135,3 +135,14 @@ yarp::sig::Vector OpenSoT::tasks::velocity::CoM::getError()
 {
     return _desiredPosition - _actualPosition;
 }
+
+OpenSoT::tasks::velocity::CoM::Ptr OpenSoT::tasks::velocity::CoM::asCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+{
+    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
+}
+
+
+bool OpenSoT::tasks::velocity::CoM::isCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+{
+    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
+}

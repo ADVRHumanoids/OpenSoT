@@ -143,15 +143,9 @@
                  */
                 yarp::sig::Vector getError();
 
-                static bool isCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-                {
-                    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
-                }
+                static bool isCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
 
-                static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-                {
-                    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
-                }
+                static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
             };
         }
     }
