@@ -125,20 +125,22 @@ protected:
     {
         OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr comTask(DHS.com);
         OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lArmTask(DHS.leftArm);
+        
+        using namespace OpenSoT::tasks::velocity;
 
         return
-                previewer->isCoM(DHS.com) &&
-                previewer->isCoM(comTask) &&
-                previewer->isCoM(previewer->asCoM(comTask)) &&
-                !previewer->isCartesian(DHS.com) &&
-                !previewer->isCartesian(comTask) &&
-                !previewer->isCartesian(previewer->asCoM(comTask)) &&
-                previewer->isCartesian(DHS.leftArm) &&
-                previewer->isCartesian(lArmTask) &&
-                previewer->isCartesian(previewer->asCartesian(lArmTask)) &&
-                !previewer->isCoM(DHS.leftArm) &&
-                !previewer->isCoM(lArmTask) &&
-                !previewer->isCoM(previewer->asCartesian(lArmTask));
+                CoM::isCoM(DHS.com) &&
+                CoM::isCoM(comTask) &&
+                CoM::isCoM(CoM::asCoM(comTask)) &&
+                !Cartesian::isCartesian(DHS.com) &&
+                !Cartesian::isCartesian(comTask) &&
+                !Cartesian::isCartesian(CoM::asCoM(comTask)) &&
+                Cartesian::isCartesian(DHS.leftArm) &&
+                Cartesian::isCartesian(lArmTask) &&
+                Cartesian::isCartesian(Cartesian::asCartesian(lArmTask)) &&
+                !CoM::isCoM(DHS.leftArm) &&
+                !CoM::isCoM(lArmTask) &&
+                !CoM::isCoM(Cartesian::asCartesian(lArmTask));
     }
 
     bool cartesianPoseChangedWorks()

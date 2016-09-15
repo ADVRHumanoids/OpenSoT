@@ -180,6 +180,11 @@
              * @param lambda a value for all the tasks in the aggregate
              */
             void setLambda(double lambda);
+              
+            static bool isAggregated(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+            {
+                return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
+            }
         };
 
     }

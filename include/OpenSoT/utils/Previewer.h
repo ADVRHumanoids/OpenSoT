@@ -374,28 +374,6 @@ namespace OpenSoT {
             OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr solver;
             double t;
 
-
-
-            bool isCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-            {
-                return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
-            }
-
-            OpenSoT::tasks::velocity::Cartesian::Ptr asCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-            {
-                return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
-            }
-
-            bool isCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-            {
-                return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
-            }
-
-            OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
-            {
-                return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
-            }
-
             /**
              * @brief cartesianErrorIsBounded checks whether cartesian errors for all tasks are lower than a threshold
              * @return true if cartesian error for all tasks is bounded
@@ -453,6 +431,7 @@ namespace OpenSoT {
             bool cartesianPoseChanged(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
                                       double threshold=1e-3)
             {
+                using namespace OpenSoT::tasks::velocity;
                 double error(std::numeric_limits<double>::infinity());
 
                 KDL::Frame f;
@@ -461,16 +440,16 @@ namespace OpenSoT {
 
                 yarp::sig::Vector positionError(3, 0.0);
                 yarp::sig::Vector orientationError(3, 0.0);
-
-                if(isCartesian(task))
+                
+                if(Cartesian::isCartesian(task))
                 {
-                    yf = asCartesian(task)->getActualPose();
+                    yf = Cartesian::asCartesian(task)->getActualPose();
                     bool res = YarptoKDL(yf,f);
                     assert(res && "error converting from yarp frame to kdl::Frame");
                 }
-                else if(isCoM(task))
+                else if(CoM::isCoM(task))
                 {
-                    yv = asCoM(task)->getActualPosition();
+                    yv = CoM::asCoM(task)->getActualPosition();
                     f.p.x(yv(0));
                     f.p.y(yv(1));
                     f.p.z(yv(2));
@@ -488,17 +467,17 @@ namespace OpenSoT {
                     res = KDLtoYarp(cartesianNodes[task.get()].p, yvOld);
                     assert(res && "Error transforming a kdl::Vector into a yarp vector");
 
-                    if(isCartesian(task))
+                    if(Cartesian::isCartesian(task))
                     {
                         using namespace yarp::math;
                         cartesian_utils::computeCartesianError(yf, yfOld,
                                                                positionError, orientationError);
-                        double Ko = asCartesian(task)->getOrientationErrorGain();
+                        double Ko = Cartesian::asCartesian(task)->getOrientationErrorGain();
                         error = yarp::math::norm(
                                     yarp::math::cat(
                                         positionError,
                                         -Ko*orientationError));
-                    } else if(isCoM(task))
+                    } else if(CoM::isCoM(task))
                     {
                         using namespace yarp::math;
                         error = norm(yv - yvOld);
@@ -520,10 +499,11 @@ namespace OpenSoT {
              */
             bool checkConsistency()
             {
+                using namespace OpenSoT::tasks::velocity;
                 for(typename TrajectoryBindings::iterator b = bindings.begin();
                     b != bindings.end();
                     ++b)
-                    if(!isCartesian(b->task) && !isCoM(b->task)) return false;
+                    if(!Cartesian::isCartesian(b->task) && !CoM::isCoM(b->task)) return false;
                 return true;
             }
 
@@ -667,6 +647,7 @@ namespace OpenSoT {
 
             void updateErrorsStatistics(double windowSizeInSecs = UPDATE_ERRORS_STATISTICS_WINDOW_SIZE_IN_SECS)
             {
+                using namespace OpenSoT::tasks::velocity;
                 for(typename TrajectoryBindings::iterator b = bindings.begin();
                     b != bindings.end();
                     ++b)
@@ -685,52 +666,52 @@ namespace OpenSoT {
 
                     KDL::Frame desired = b->trajectoryGenerator->Pos(previousTime);
 
-                    if(isCartesian(b->task))
+                    if(Cartesian::isCartesian(b->task))
                     {
                         CartesianError toGoal;
                         CartesianError toDesired;
                         yarp::sig::Vector positionError(3,0.0), orientationError(3,0.0);
 
                         /* updating CartesianError to goal */
-                        cartesian_utils::computeCartesianError(asCartesian(b->task)->getActualPose(), KDLtoYarp_position(goal),
+                        cartesian_utils::computeCartesianError(Cartesian::asCartesian(b->task)->getActualPose(), KDLtoYarp_position(goal),
                                                                positionError,
                                                                orientationError);
 
                         toGoal.positionError = positionError;
                         toGoal.orientationError = orientationError;
-                        toGoal.Ko = asCartesian(b->task)->getOrientationErrorGain();
+                        toGoal.Ko = Cartesian::asCartesian(b->task)->getOrientationErrorGain();
 
                         /* updating CartesianError to desired pose at previous time step */
-                        cartesian_utils::computeCartesianError(asCartesian(b->task)->getActualPose(), KDLtoYarp_position(desired),
+                        cartesian_utils::computeCartesianError(Cartesian::asCartesian(b->task)->getActualPose(), KDLtoYarp_position(desired),
                                                                positionError,
                                                                orientationError);
 
                         toDesired.positionError = positionError;
                         toDesired.orientationError = orientationError;
-                        toDesired.Ko = asCartesian(b->task)->getOrientationErrorGain();
+                        toDesired.Ko = Cartesian::asCartesian(b->task)->getOrientationErrorGain();
 
-                        if(std::fabs(toDesired.getNorm() - yarp::math::norm(asCartesian(b->task)->getError())) > 1e-12) {
-                            std::cout << std::endl << toDesired.getNorm() << " vs " << yarp::math::norm(asCartesian(b->task)->getError()) << std::endl;
+                        if(std::fabs(toDesired.getNorm() - yarp::math::norm(Cartesian::asCartesian(b->task)->getError())) > 1e-12) {
+                            std::cout << std::endl << toDesired.getNorm() << " vs " << yarp::math::norm(Cartesian::asCartesian(b->task)->getError()) << std::endl;
                             std::cout << std::endl << KDLtoYarp_position(desired).toString()
                                       << std::endl << " vs "
-                                      << std::endl << asCartesian(b->task)->getReference().toString()
+                                      << std::endl << Cartesian::asCartesian(b->task)->getReference().toString()
                                       << "@t" << previousTime << std::endl;
                         }
-                        assert(std::fabs(toDesired.getNorm() - yarp::math::norm(asCartesian(b->task)->getError())) < 1e-12 &&
+                        assert(std::fabs(toDesired.getNorm() - yarp::math::norm(Cartesian::asCartesian(b->task)->getError())) < 1e-12 &&
                                "Error: discrepancy between CartesianError and error computed by Cartesian->getError()");
 
                         cartesianErrors[b->task.get()].update(toDesired, toGoal);
                     }
 
-                    else if(isCoM(b->task))
+                    else if(CoM::isCoM(b->task))
                     {
                         CartesianError toGoal;
                         CartesianError toDesired;
 
-                        toGoal.positionError = asCoM(b->task)->getActualPosition() - KDLtoYarp(goal.p);
-                        toDesired.positionError = (asCoM(b->task)->getActualPosition() - KDLtoYarp(desired.p));
+                        toGoal.positionError = CoM::asCoM(b->task)->getActualPosition() - KDLtoYarp(goal.p);
+                        toDesired.positionError = (CoM::asCoM(b->task)->getActualPosition() - KDLtoYarp(desired.p));
 
-                        assert(std::fabs(toDesired.getNorm() - yarp::math::norm(asCoM(b->task)->getError())) < 1e-12 &&
+                        assert(std::fabs(toDesired.getNorm() - yarp::math::norm(CoM::asCoM(b->task)->getError())) < 1e-12 &&
                                "Error: discrepancy between CartesianError and error computed by CoM->getError()");
 
                         cartesianErrors[b->task.get()].update(toDesired, toGoal);
@@ -754,10 +735,11 @@ namespace OpenSoT {
 
                     {
                     using namespace yarp::math;
-                        if(isCartesian(b->task))
-                            asCartesian(b->task)->setReference(yf,yt*dT);
-                        else if(isCoM(b->task))
-                            asCoM(b->task)->setReference(yv, yt*dT);
+                    using namespace OpenSoT::tasks::velocity;
+                        if(Cartesian::isCartesian(b->task))
+                            Cartesian::asCartesian(b->task)->setReference(yf,yt*dT);
+                        else if(CoM::isCoM(b->task))
+                            CoM::asCoM(b->task)->setReference(yv, yt*dT);
                     }
                 }
                 return true;

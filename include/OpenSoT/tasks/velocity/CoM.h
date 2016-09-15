@@ -142,6 +142,16 @@
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
                 yarp::sig::Vector getError();
+
+                static bool isCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+                {
+                    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
+                }
+
+                static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+                {
+                    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
+                }
             };
         }
     }

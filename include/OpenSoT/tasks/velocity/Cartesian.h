@@ -167,6 +167,17 @@
                  * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
                  */
                 yarp::sig::Vector getError();
+                
+                static bool isCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+                {
+                    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
+                }
+
+                static OpenSoT::tasks::velocity::Cartesian::Ptr asCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+                {
+                    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
+                }
+
             };
         }
     }
