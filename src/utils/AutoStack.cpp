@@ -273,7 +273,7 @@ std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> OpenSoT::AutoStack::flattenT
         OpenSoT::solvers::QPOases_sot::TaskPtr task)
 {
     std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector;
-    if(task->getTaskID().find("+") == std::string::npos)
+    if(!OpenSoT::tasks::Aggregated::isAggregated(task))
         task_vector.push_back(task);
     else
     {
@@ -284,7 +284,7 @@ std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> OpenSoT::AutoStack::flattenT
         std::list<OpenSoT::solvers::QPOases_sot::TaskPtr>::iterator it;
         for(it = tasks_list.begin(); it != tasks_list.end(); it++)
         {
-            if(it->get()->getTaskID().find("+") == std::string::npos)
+            if(!OpenSoT::tasks::Aggregated::isAggregated(task))
                 task_vector.push_back(*it);
             else
             {
