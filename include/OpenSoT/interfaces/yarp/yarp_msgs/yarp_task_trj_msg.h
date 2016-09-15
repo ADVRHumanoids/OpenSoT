@@ -59,7 +59,13 @@ namespace OpenSoT {
                 
             public:
                 
-                yarp_task_trj_msg() {}
+                yarp_task_trj_msg() 
+                {
+                    // empty trajs
+                    trajs.clear();
+                    traj_num = 0;
+                    bottle_msg_size = 2;
+                }
 
                 // Line and Min Jerk trajectory
                 yarp_task_trj_msg(const std::string& task_id, 
@@ -210,6 +216,31 @@ namespace OpenSoT {
                     return task_id;
                 }
                 
+                void set_task_id(std::string task_id)
+                {
+                    this->task_id = task_id;
+                }
+                
+                std::string get_base_link()
+                {
+                    return base_link;
+                }
+                
+                void set_base_link(std::string base_link)
+                {
+                    this-> base_link = base_link;
+                }
+                
+                std::string get_distal_link()
+                {
+                    return distal_link;
+                }
+                
+                void set_distal_link(std::string distal_link)
+                {
+                    this->distal_link = distal_link;
+                }
+                
 
             };
 
@@ -229,6 +260,13 @@ namespace OpenSoT {
                     yarp_task_trj_msg(task_id, trajs)
                 {
 
+                }
+                
+                yarp_task_trj_msg_portable( const std::string& task_id,
+                                            const std::string& base_link,
+                                            const std::string& distal_link ) :
+                    yarp_task_trj_msg(task_id, base_link, distal_link)
+                {
                 }
 
 
