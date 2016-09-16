@@ -62,7 +62,7 @@ ManipulationStack::ManipulationStack(iDynUtils& model,
     this->getStack() = 
          (( DHS->postural_Torso + DHS->rightLeg) /
          ( (DHS->com_XY + DHS->gaze) <<  DHS->convexHull ) /
-         ( (DHS->waist) ) /
+         ( (DHS->waist_Orientation) ) /
          ( (DHS->leftArm + DHS->rightArm) ) /
          ( (DHS->postural_LimbsAndHead) ))->getStack();
     // imposing joint and velocity limits TBD if you want to lock a joint modify the joint limits setting the actual posion and putting the velocity limits to 0
