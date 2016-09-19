@@ -41,8 +41,38 @@ FIND_PACKAGE(eigen_conversions REQUIRED)
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 
+# Detect Linux Distribution
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+     if(EXISTS "/etc/lsb-release")
+         execute_process(COMMAND cat /etc/lsb-release
+                         COMMAND grep DISTRIB_CODENAME
+                         COMMAND awk -F= "{ print $2 }"
+                         COMMAND tr "\n" " "
+                         COMMAND sed "s/ //"
+                         OUTPUT_VARIABLE UBUNTU_VERSION
+                         RESULT_VARIABLE UBUNTU_VERSION_RESULT
+         )
+     endif(EXISTS "/etc/lsb-release")
+
+     message(STATUS "Configuring idynutils to be built on Ubuntu ${UBUNTU_VERSION}")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+if(${UBUNTU_VERSION} MATCHES "xenial")
+     message(STATUS "Adding CXX support")
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    if(COMPILER_SUPPORTS_CXX11)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    elseif(COMPILER_SUPPORTS_CXX0X)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    else()
+        message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    endif()
+endif(${UBUNTU_VERSION} MATCHES "xenial")
+
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${moveit_core_INCLUDE_DIRS}
                             ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
                             ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS} ${tf_INCLUDE_DIRS}
                             ${interactive_markers_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
@@ -132,15 +162,15 @@ if(Boost_VERSION VERSION_GREATER 104701)
     ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
 
     TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${moveit_core_LIBRARIES})
     add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
 
     TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${moveit_core_LIBRARIES})
     add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
 
     TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${moveit_core_LIBRARIES})
     add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
 endif()
 
