@@ -83,6 +83,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/SelfCollisionAvoidance.cpp
                     src/constraints/velocity/Dynamics.cpp
                     src/constraints/force/FrictionCone.cpp
+                    src/constraints/virtual_model/TorqueLimits.cpp
                     src/interfaces/yarp/tasks/YCartesian.cpp
                     src/interfaces/yarp/tasks/YCoM.cpp
                     src/interfaces/yarp/tasks/YPostural.cpp
@@ -101,6 +102,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
                     src/tasks/force/CoM.cpp
+                    src/tasks/virtual_model/CartesianSpringDamper.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp

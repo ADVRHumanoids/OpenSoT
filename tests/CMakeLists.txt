@@ -74,6 +74,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_VelocityAllocation
                       testAggregatedTask
                       testCartesianVelocityTask
+                      testCartesianSpringDamperVirtualModelTask
                       testCoMForceTask
                       testCoMVelocityTask
                       testGazeVelocityTask
@@ -192,6 +193,10 @@ ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
 TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
 
+ADD_EXECUTABLE(testCartesianSpringDamperVirtualModelTask tasks/virtual_model/TestCartesianSpringDamper.cpp)
+TARGET_LINK_LIBRARIES(testCartesianSpringDamperVirtualModelTask ${TestLibs})
+add_dependencies(testCartesianSpringDamperVirtualModelTask GTest-ext OpenSoT)
+
 ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
 TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
 add_dependencies(testCoMForceTask GTest-ext OpenSoT)
@@ -295,6 +300,7 @@ add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_Vel
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
+add_test(NAME OpenSoT_task_virtual_model_CartesianSpringDamper COMMAND testCartesianSpringDamperVirtualModelTask)
 add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
