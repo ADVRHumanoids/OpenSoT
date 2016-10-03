@@ -116,6 +116,7 @@ TEST_F(testCartesianSpringDamper, static_test) {
     Kj = 100.*Kj.eye();
     Dj = 1.*Dj.eye();
     joint_spring_damper->setStiffnessDamping(Kj, Dj);
+    //joint_spring_damper->update(q);
 
 
     OpenSoT::tasks::virtual_model::CartesianSpringDamper::Ptr spring_damper_task_r_wrist =
@@ -125,13 +126,14 @@ TEST_F(testCartesianSpringDamper, static_test) {
     yarp::sig::Matrix K(6,6), D(6,6);
     spring_damper_task_r_wrist->getStiffnessDamping(K,D);
     K.eye(); D.eye();
-    K(0,0) = 200.; D(0,0) = 1.5;
-    K(1,1) = 200.; D(1,1) = 1.5;
-    K(2,2) = 200.; D(2,2) = 1.5;
+    K(0,0) = 200.; D(0,0) = 1.0;
+    K(1,1) = 200.; D(1,1) = 1.0;
+    K(2,2) = 200.; D(2,2) = 1.0;
     K(3,3) = 200.; D(3,3) = 3.;
     K(4,4) = 200.; D(4,4) = 3.;
     K(5,5) = 200.; D(5,5) = 3.;
     spring_damper_task_r_wrist->setStiffnessDamping(K, D);
+    //spring_damper_task_r_wrist->update(q);
 
     yarp::sig::Matrix ref; yarp::sig::Vector ref_twist;
     spring_damper_task_r_wrist->getReference(ref, ref_twist);
@@ -158,18 +160,24 @@ TEST_F(testCartesianSpringDamper, static_test) {
     bool start_torque_ctrl = false;
     yarp::sig::Vector tau(q.size());
     double t = 0.;
+    double alpha = 0.;
     bool set_new_ref = false;
+    yarp::sig::Matrix T0 = spring_damper_task_r_wrist->getReference();
+    yarp::sig::Matrix T1 = spring_damper_task_r_wrist->getReference();
+    T1(2,3) = 0.1;
+    std::vector<double> log_t;
     while(1)
     {
         double tic = yarp::os::Time::now();
 
         if (t >= 3. && !set_new_ref)
         {
-            yarp::sig::Matrix T = spring_damper_task_r_wrist->getReference();
-            T(2,3) = 0.1;
+            yarp::sig::Matrix T = T1 + (1.-alpha)*(T0 - T1);
             spring_damper_task_r_wrist->setReference(T);
-            std::cout<<GREEN<<"Setting new reference"<<DEFAULT<<std::endl;
-            set_new_ref = true;
+            std::cout<<GREEN<<"Setting new reference "<<t<<DEFAULT<<std::endl;
+            alpha += 0.001;
+            if(alpha >= 1. )
+                set_new_ref = true;
         }
 
         bigman.sense(q, q_dot, tau_m);
@@ -219,7 +227,20 @@ TEST_F(testCartesianSpringDamper, static_test) {
         double toc = yarp::os::Time::now();
 
         t += toc-tic;
+        log_t.push_back(toc-tic);
     }
+
+
+    std::cout<<GREEN<<"Reference: "<<DEFAULT<<std::endl;
+    cartesian_utils::printHomogeneousTransform(T1); std::cout<<std::endl;
+    std::cout<<GREEN<<"Actual: "<<DEFAULT<<std::endl;
+    T1 = spring_damper_task_r_wrist->getReference();
+    cartesian_utils::printHomogeneousTransform(T1); std::cout<<std::endl;
+
+    double acc = 0.;
+    for(unsigned int i = 0; i < log_t.size(); ++i)
+        acc += log_t[i];
+    std::cout<<GREEN<<"Media dt: "<<DEFAULT<<acc/(double)log_t.size()<<std::endl;
 
 
     tests_utils::stopGazebo();
