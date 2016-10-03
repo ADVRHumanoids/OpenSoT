@@ -15,8 +15,8 @@
  * Public License for more details
 */
 
-#ifndef __TASKS_VIRTUAL_MODDEL_CARTESIAN_SPRING_DAMPER_H__
-#define __TASKS_VIRTUAL_MODDEL_CARTESIAN_SPRING_DAMPER_H__
+#ifndef __TASKS_VIRTUAL_MODEL_CARTESIAN_SPRING_DAMPER_H__
+#define __TASKS_VIRTUAL_MODEL_CARTESIAN_SPRING_DAMPER_H__
 
  #include <OpenSoT/Task.h>
  #include <idynutils/idynutils.h>

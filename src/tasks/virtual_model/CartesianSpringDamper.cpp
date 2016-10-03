@@ -49,9 +49,9 @@ CartesianSpringDamper::CartesianSpringDamper(std::string task_id,
         assert(this->_distal_link_index != _base_link_index);
 
     _K.resize(6, 6);
-    _K.eye(); _K = 1000.0*_K;
+    _K.eye(); _K = 100.0*_K;
     _D.resize(6, 6);
-    _D.eye(); _D = 100.0*_D;
+    _D.eye(); _D = 1.0*_D;
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);

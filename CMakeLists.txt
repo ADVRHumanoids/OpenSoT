@@ -103,6 +103,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/Postural.cpp
                     src/tasks/force/CoM.cpp
                     src/tasks/virtual_model/CartesianSpringDamper.cpp
+                    src/tasks/virtual_model/JointSpringDamper.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp
