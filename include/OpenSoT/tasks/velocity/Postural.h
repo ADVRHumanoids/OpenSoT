@@ -21,8 +21,7 @@
  #include <OpenSoT/Task.h>
  #include <idynutils/idynutils.h>
  #include <kdl/frames.hpp>
- #include <yarp/sig/all.h>
- #include <yarp/os/all.h>
+#include <Eigen/Dense>
 
 /**
  * @example example_postural.cpp
@@ -36,23 +35,23 @@
              * @brief The Postural class implements a task that tries to bring the robust posture to a reference posture.
              * You can see an example of it in @ref example_postural.cpp
              */
-            class Postural : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            class Postural : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
                 typedef boost::shared_ptr<Postural> Ptr;
             protected:
-                yarp::sig::Vector _x_desired;
-                yarp::sig::Vector _xdot_desired;
-                yarp::sig::Vector _x;
+                Eigen::VectorXd _x_desired;
+                Eigen::VectorXd _xdot_desired;
+                Eigen::VectorXd _x;
 
                 void update_b();
 
             public:
 
-                Postural(const yarp::sig::Vector& x);
+                Postural(const Eigen::VectorXd& x);
 
                 ~Postural();
 
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the Postural task.
@@ -60,7 +59,7 @@
                  * It also assumes a null desired velocity at the desired position, meaning we are trying to achieve a regulation task.
                  * @param x_desired the \f$R^{n_x}\f$ vector describing the desired joint position
                  */
-                void setReference(const yarp::sig::Vector& x_desired);
+                void setReference(const Eigen::VectorXd& x_desired);
 
                 /**
                  * @brief setReference sets a new reference for the Postural task.
@@ -73,14 +72,14 @@
                  * instead of rad/s. This means that if you have a velocity expressed in SI units, you have to call the function as
                  * setReference(x_desired, xdot_desired*dt)
                  */
-                void setReference(const yarp::sig::Vector& x_desired,
-                                  const yarp::sig::Vector& xdot_desired);
+                void setReference(const Eigen::VectorXd& x_desired,
+                                  const Eigen::VectorXd& xdot_desired);
 
                 /**
                  * @brief getReference returns the Postural task reference
                  * @return the \f$R^{n_x}\f$ Postural task reference
                  */
-                yarp::sig::Vector getReference() const;
+                Eigen::VectorXd getReference() const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the Postural task.
@@ -89,8 +88,8 @@
                  * @param xdot_desired is a \f$R^{n_x}\f$ twist describing the desired trajectory velocity,
                  * and it represents a feed-forward term in the task computation
                  */
-                void getReference(yarp::sig::Vector& x_desired,
-                                  yarp::sig::Vector& xdot_desired) const;
+                void getReference(Eigen::VectorXd& x_desired,
+                                  Eigen::VectorXd& xdot_desired) const;
 
                 void setLambda(double lambda);
 
@@ -98,13 +97,13 @@
                  * @brief getActualPositions return the actual state position of the task
                  * @return vector of joints positions
                  */
-                yarp::sig::Vector getActualPositions();
+                Eigen::VectorXd getActualPositions();
 
                 /**
                  * @brief getError return the error between the desired and actual joint position values
                  * @return vector of errors
                  */
-                yarp::sig::Vector getError();
+                Eigen::VectorXd getError();
 
             };
         }

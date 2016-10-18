@@ -71,50 +71,50 @@ file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
 ADD_LIBRARY(OpenSoT SHARED
-                    src/constraints/Aggregated.cpp
-                    src/constraints/BilateralConstraint.cpp
-                    src/constraints/TaskToConstraint.cpp
-                    src/constraints/velocity/CartesianPositionConstraint.cpp
-                    src/constraints/velocity/CartesianVelocity.cpp
-                    src/constraints/velocity/CoMVelocity.cpp
-                    src/constraints/velocity/ConvexHull.cpp
-                    src/constraints/velocity/JointLimits.cpp
-                    src/constraints/velocity/VelocityLimits.cpp
-                    src/constraints/velocity/SelfCollisionAvoidance.cpp
-                    src/constraints/velocity/Dynamics.cpp
-                    src/constraints/force/FrictionCone.cpp
-                    src/interfaces/yarp/tasks/YCartesian.cpp
-                    src/interfaces/yarp/tasks/YCoM.cpp
-                    src/interfaces/yarp/tasks/YPostural.cpp
-                    src/solvers/QPOases.cpp
-                    src/solvers/QPOasesProblem.cpp
-                    src/stacks/velocity/ManipulationStack.cpp
-                    src/stacks/velocity/WalkingStack.cpp
-                    src/tasks/Aggregated.cpp
-                    src/tasks/SubTask.cpp
-                    src/tasks/velocity/Cartesian.cpp
-                    src/tasks/velocity/Gaze.cpp
-                    src/tasks/velocity/CoM.cpp
-                    src/tasks/velocity/Interaction.cpp
-                    src/tasks/velocity/Manipulability.cpp
-                    src/tasks/velocity/MinimizeAcceleration.cpp
-                    src/tasks/velocity/MinimumEffort.cpp
-                    src/tasks/velocity/MinimumVelocity.cpp
+                    #src/constraints/Aggregated.cpp
+                    #src/constraints/BilateralConstraint.cpp
+                    #src/constraints/TaskToConstraint.cpp
+                    #src/constraints/velocity/CartesianPositionConstraint.cpp
+                    #src/constraints/velocity/CartesianVelocity.cpp
+                    #src/constraints/velocity/CoMVelocity.cpp
+                    #src/constraints/velocity/ConvexHull.cpp
+                    #src/constraints/velocity/JointLimits.cpp
+                    #src/constraints/velocity/VelocityLimits.cpp
+                    #src/constraints/velocity/SelfCollisionAvoidance.cpp
+                    #src/constraints/velocity/Dynamics.cpp
+                    #src/constraints/force/FrictionCone.cpp
+                    #src/interfaces/yarp/tasks/YCartesian.cpp
+                    #src/interfaces/yarp/tasks/YCoM.cpp
+                    #src/interfaces/yarp/tasks/YPostural.cpp
+                    #src/solvers/QPOases.cpp
+                    #src/solvers/QPOasesProblem.cpp
+                    #src/stacks/velocity/ManipulationStack.cpp
+                    #src/stacks/velocity/WalkingStack.cpp
+                    #src/tasks/Aggregated.cpp
+                    #src/tasks/SubTask.cpp
+                    #src/tasks/velocity/Cartesian.cpp
+                    #src/tasks/velocity/Gaze.cpp
+                    #src/tasks/velocity/CoM.cpp
+                    #src/tasks/velocity/Interaction.cpp
+                    #src/tasks/velocity/Manipulability.cpp
+                    #src/tasks/velocity/MinimizeAcceleration.cpp
+                    #src/tasks/velocity/MinimumEffort.cpp
+                    #src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
-                    src/tasks/force/CoM.cpp
-                    src/utils/AutoStack.cpp
-                    src/utils/DefaultHumanoidStack.cpp
-                    src/utils/Indices.cpp
-                    src/utils/PreviewerUtils.cpp
-                    src/utils/VelocityAllocation.cpp
-                    src/utils/logger/L.cpp
-                    src/utils/logger/flushers/FakeFlusher.cpp
-                    src/utils/logger/flushers/Flusher.cpp
-                    src/utils/logger/flushers/RobotFlusher.cpp
-                    src/utils/logger/flushers/ScriptFlusher.cpp
-                    src/utils/logger/flushers/constraints/velocity/Dynamics.cpp
-                    src/utils/logger/flushers/tasks/velocity/Cartesian.cpp
-                    src/utils/logger/plotters/Plotter.cpp
+                    #src/tasks/force/CoM.cpp
+                    #src/utils/AutoStack.cpp
+                    #src/utils/DefaultHumanoidStack.cpp
+                    #src/utils/Indices.cpp
+                    #src/utils/PreviewerUtils.cpp
+                    #src/utils/VelocityAllocation.cpp
+                    #src/utils/logger/L.cpp
+                    #src/utils/logger/flushers/FakeFlusher.cpp
+                    #src/utils/logger/flushers/Flusher.cpp
+                    #src/utils/logger/flushers/RobotFlusher.cpp
+                    #src/utils/logger/flushers/ScriptFlusher.cpp
+                    #src/utils/logger/flushers/constraints/velocity/Dynamics.cpp
+                    #src/utils/logger/flushers/tasks/velocity/Cartesian.cpp
+                    #src/utils/logger/plotters/Plotter.cpp
                     ${sot_INCLUDES})
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT
@@ -128,21 +128,21 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIE
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
 
 if(Boost_VERSION VERSION_GREATER 104701)
-    ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
-    ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
-    ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
+    #ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
+    #ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
+    #ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
 
-    TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
+    #TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+    #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    #add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
 
-    TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
+    #TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+    #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    #add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
 
-    TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
+    #TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+    #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    #add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
 endif()
 
 
@@ -185,25 +185,25 @@ catkin_package(
  DEPENDS system_lib
 )
 
-if(Boost_VERSION VERSION_GREATER 104701)
-    message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
+#if(Boost_VERSION VERSION_GREATER 104701)
+#    message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
 
-    install(TARGETS OpenSoT ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
-    ros_yarp_postural_interactive_marker
-       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    )
-else()
-    install(TARGETS OpenSoT
-       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    )
-endif()
+#    install(TARGETS OpenSoT ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
+#    ros_yarp_postural_interactive_marker
+#       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#    )
+#else()
+#    install(TARGETS OpenSoT
+#       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#    )
+#endif()
 
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+#install(DIRECTORY launch/
+#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
         
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
 set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
@@ -224,9 +224,9 @@ add_subdirectory(doc)
 ########################
 # Add Examples target  #
 ########################
-if(OPENSOT_COMPILE_EXAMPLES)
-  add_subdirectory(examples)
-endif()
+#if(OPENSOT_COMPILE_EXAMPLES)
+#  add_subdirectory(examples)
+#endif()
 
 #######################
 # Add Testing target  #
