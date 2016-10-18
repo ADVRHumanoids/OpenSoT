@@ -117,10 +117,11 @@ TEST_F(testForceCoM, testForceCoM1) {
 
     OpenSoT::solvers::QPOases_sot::Ptr sot(
                 new OpenSoT::solvers::QPOases_sot(stack_of_tasks,2E10));
+    std::cout<<"Solver stardted"<<std::endl;
     sot->solve(wrench_d);
     std::cout<<"wrench_d = [ "<<wrench_d.toString()<<" ]"<<std::endl;
 
-    EXPECT_NEAR(wrench_d[2] + wrench_d[5] + wrench_d[6], m*9.81, 1E-3);
+    EXPECT_NEAR(wrench_d[2] + wrench_d[5] + wrench_d[8], m*9.81, 1E-3);
 
 }
 
