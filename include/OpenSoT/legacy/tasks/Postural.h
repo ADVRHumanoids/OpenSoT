@@ -6,6 +6,8 @@
 
 namespace OpenSoT{
 namespace legacy{
+namespace tasks{
+namespace velocity{
 
 class Postural : public OpenSoT::tasks::velocity::Postural {
             public:
@@ -61,7 +63,8 @@ class Postural : public OpenSoT::tasks::velocity::Postural {
                 }
 
             };
-
+}
+}
 }
 }
 
