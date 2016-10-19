@@ -16,25 +16,25 @@
 */
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::tasks::velocity;
-using namespace yarp::math;
 
 #define LAMBDA_THS 1E-12
 
 Cartesian::Cartesian(std::string task_id,
-                     const yarp::sig::Vector& x,
+                     const Eigen::VectorXd& x,
                      iDynUtils &robot,
                      std::string distal_link,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _orientationErrorGain(1.0), _desiredTwist(6, 0.0)
+    _orientationErrorGain(1.0)
 {
+    _desiredTwist.setZero(6);
+
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
     if(!this->_base_link_is_world) {
@@ -51,9 +51,7 @@ Cartesian::Cartesian(std::string task_id,
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
 
-    _W.resize(_A.rows(), _A.rows());
-    _W.eye();
-
+    _W.setIdentity(_A.rows(), _A.rows());
 
     _hessianType = HST_SEMIDEF;
 }
@@ -62,57 +60,68 @@ Cartesian::~Cartesian()
 {
 }
 
-void Cartesian::_update(const yarp::sig::Vector &x) {
+void Cartesian::_update(const Eigen::VectorXd &x) {
 
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world) {
-        bool res = _robot.iDyn3_model.getJacobian(_distal_link_index,_A);
+        bool res = _robot.getJacobian(_distal_link_index,_A);
         assert(res);
-        _A = _A.removeCols(0,6);    // removing unactuated joints (floating base)
+        _A = _A.block(0,6,_A.rows(),_x_size);
     } else{
-        bool res = _robot.iDyn3_model.getRelativeJacobian(_distal_link_index,
+        bool res = _robot.getRelativeJacobian(_distal_link_index,
                                                           _base_link_index,
                                                           _A, true);
         assert(res);
-        yarp::sig::Matrix base_R_world = _robot.iDyn3_model.getPosition(_base_link_index).submatrix(0,2,0,2).transposed();
-        yarp::sig::Matrix Adj(6,6); Adj = Adj.eye();
-        Adj.setSubmatrix(base_R_world, 0,0);
-        Adj.setSubmatrix(base_R_world, 3,3);
+        Eigen::MatrixXd base_R_world = _robot.getPosition(_base_link_index).block(0,0,3,3).transpose();
+        Eigen::MatrixXd Adj(6,6);
+        Adj.setIdentity(6,6);
+        Adj.block(0,0,3,3)<<base_R_world;
+        Adj.block(3,3,3,3)<<base_R_world;
         _A = Adj*_A;
     }
 
     if(_base_link_is_world)
-        _actualPose = _robot.iDyn3_model.getPosition(_distal_link_index);
+        _actualPose = _robot.getPosition(_distal_link_index);
     else
-        _actualPose = _robot.iDyn3_model.getPosition(_base_link_index, _distal_link_index);
+        _actualPose = _robot.getPosition(_base_link_index, _distal_link_index);
 
     if(_desiredPose.rows() == 0) {
         /* initializing to zero error */
         _desiredPose = _actualPose;
-        _b.resize(_A.rows(), 0.0);
+        _b.setZero(_A.rows());
     }
 
     this->update_b();
 
-    this->_desiredTwist.zero();
+    this->_desiredTwist.setZero(6);
 
     /**********************************************************************/
 }
 
-void Cartesian::setReference(const yarp::sig::Matrix& desiredPose) {
+void Cartesian::setReference(const Eigen::MatrixXd& desiredPose) {
     assert(desiredPose.rows() == 4);
     assert(desiredPose.cols() == 4);
 
     _desiredPose = desiredPose;
-    _desiredTwist.zero();
+    _desiredTwist.setZero(6);
     this->update_b();
 }
 
-void OpenSoT::tasks::velocity::Cartesian::setReference(const yarp::sig::Matrix &desiredPose,
-                                                       const yarp::sig::Vector &desiredTwist)
+void Cartesian::setReference(const KDL::Frame& desiredPose)
 {
-    assert(desiredTwist.size() == 6);
+    _desiredPose(0,0) = desiredPose.M(0,0); _desiredPose(0,1) = desiredPose.M(0,1); _desiredPose(0,2) = desiredPose.M(0,2);
+    _desiredPose(0,0) = desiredPose.M(1,0); _desiredPose(1,1) = desiredPose.M(1,1); _desiredPose(1,2) = desiredPose.M(1,2);
+    _desiredPose(0,0) = desiredPose.M(2,0); _desiredPose(2,1) = desiredPose.M(2,1); _desiredPose(2,2) = desiredPose.M(2,2);
+
+    _desiredTwist.setZero(6);
+    this->update_b();
+}
+
+void Cartesian::setReference(const Eigen::MatrixXd &desiredPose,
+                             const Eigen::VectorXd &desiredTwist)
+{
+    assert(desiredTwist.rows() == 6);
     assert(desiredPose.rows() == 4);
     assert(desiredPose.cols() == 4);
 
@@ -121,26 +130,64 @@ void OpenSoT::tasks::velocity::Cartesian::setReference(const yarp::sig::Matrix &
     this->update_b();
 }
 
-const yarp::sig::Matrix Cartesian::getReference() const {
+void Cartesian::setReference(const KDL::Frame& desiredPose,
+                  const KDL::Twist& desiredTwist)
+{
+    _desiredPose(0,0) = desiredPose.M(0,0); _desiredPose(0,1) = desiredPose.M(0,1); _desiredPose(0,2) = desiredPose.M(0,2);
+    _desiredPose(0,0) = desiredPose.M(1,0); _desiredPose(1,1) = desiredPose.M(1,1); _desiredPose(1,2) = desiredPose.M(1,2);
+    _desiredPose(0,0) = desiredPose.M(2,0); _desiredPose(2,1) = desiredPose.M(2,1); _desiredPose(2,2) = desiredPose.M(2,2);
+
+    _desiredTwist(0) = desiredTwist[0]; _desiredTwist(1) = desiredTwist[1]; _desiredTwist(2) = desiredTwist[2];
+    _desiredTwist(3) = desiredTwist[3]; _desiredTwist(4) = desiredTwist[4]; _desiredTwist(5) = desiredTwist[5];
+
+    this->update_b();
+}
+
+const Eigen::MatrixXd Cartesian::getReference() const {
     return _desiredPose;
 }
 
-void OpenSoT::tasks::velocity::Cartesian::getReference(yarp::sig::Matrix &desiredPose,
-                                                       yarp::sig::Vector &desiredTwist) const
+
+void OpenSoT::tasks::velocity::Cartesian::getReference(Eigen::MatrixXd &desiredPose,
+                                                       Eigen::VectorXd &desiredTwist) const
 {
     desiredPose = _desiredPose;
     desiredTwist = _desiredTwist;
 }
 
-const yarp::sig::Matrix Cartesian::getActualPose() const
+void Cartesian::getReference(KDL::Frame& desiredPose,
+                  KDL::Vector& desiredTwist) const
+{
+    desiredPose.p.x(_desiredPose(0,3));
+    desiredPose.p.y(_desiredPose(1,3));
+    desiredPose.p.z(_desiredPose(2,3));
+    desiredPose.M(0,0) = _desiredPose(0,0); desiredPose.M(0,1) = _desiredPose(0,1); desiredPose.M(0,2) = _desiredPose(0,2);
+    desiredPose.M(0,0) = _desiredPose(1,0); desiredPose.M(1,1) = _desiredPose(1,1); desiredPose.M(1,2) = _desiredPose(1,2);
+    desiredPose.M(0,0) = _desiredPose(2,0); desiredPose.M(2,1) = _desiredPose(2,1); desiredPose.M(2,2) = _desiredPose(2,2);
+
+    desiredTwist[0] = _desiredTwist(0); desiredTwist[1] = _desiredTwist(1); desiredTwist[2] = _desiredTwist(2);
+    desiredTwist[3] = _desiredTwist(3); desiredTwist[4] = _desiredTwist(4); desiredTwist[5] = _desiredTwist(5);
+}
+
+const Eigen::MatrixXd Cartesian::getActualPose() const
 {
     return _actualPose;
+}
+
+const void Cartesian::getActualPose(KDL::Frame& actual_pose) const
+{
+    actual_pose.p.x(_actualPose(0,3));
+    actual_pose.p.y(_actualPose(1,3));
+    actual_pose.p.z(_actualPose(2,3));
+    actual_pose.M(0,0) = _actualPose(0,0); actual_pose.M(0,1) = _actualPose(0,1); actual_pose.M(0,2) = _actualPose(0,2);
+    actual_pose.M(0,0) = _actualPose(1,0); actual_pose.M(1,1) = _actualPose(1,1); actual_pose.M(1,2) = _actualPose(1,2);
+    actual_pose.M(0,0) = _actualPose(2,0); actual_pose.M(2,1) = _actualPose(2,1); actual_pose.M(2,2) = _actualPose(2,2);
 }
 
 const KDL::Frame Cartesian::getActualPoseKDL() const
 {
     KDL::Frame actualPoseKDL;
-    cartesian_utils::fromYARPMatrixtoKDLFrame(_actualPose, actualPoseKDL);
+    getActualPose(actualPoseKDL);
     return actualPoseKDL;
 }
 
@@ -178,9 +225,11 @@ void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
     }
 }
 
-yarp::sig::Vector OpenSoT::tasks::velocity::Cartesian::getError()
+Eigen::VectorXd OpenSoT::tasks::velocity::Cartesian::getError()
 {
-    return yarp::math::cat(positionError, -_orientationErrorGain*orientationError);
+    Eigen::VectorXd tmp(6);
+    tmp<<positionError,-_orientationErrorGain*orientationError;
+    return tmp;
 }
 
 void Cartesian::update_b() {
@@ -190,12 +239,12 @@ void Cartesian::update_b() {
     _b = _desiredTwist + _lambda*this->getError();
 }
 
-bool OpenSoT::tasks::velocity::Cartesian::isCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+bool OpenSoT::tasks::velocity::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
 }
 
-OpenSoT::tasks::velocity::Cartesian::Ptr OpenSoT::tasks::velocity::Cartesian::asCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+OpenSoT::tasks::velocity::Cartesian::Ptr OpenSoT::tasks::velocity::Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
 }
