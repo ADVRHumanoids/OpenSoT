@@ -3,83 +3,9 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
+#include <OpenSoT/legacy/tasks/Postural.h>
 
 using namespace yarp::math;
-
-
-#ifndef _TEST_LEGACY_POSTURAL_
-#define _TEST_LEGACY_POSTURAL_
-
-#include <OpenSoT/tasks/velocity/Postural.h>
-
-namespace OpenSoT{
-namespace test{
-namespace legacy{
-
-class yarp_Postural : public OpenSoT::tasks::velocity::Postural {
-            public:
-
-
-            public:
-
-                yarp_Postural(const yarp::sig::Vector& x):
-                    Postural(cartesian_utils::toEigen(x)) {
-                }
-
-
-                void setReference(const yarp::sig::Vector& x_desired)
-                {
-                    Postural::setReference(cartesian_utils::toEigen(x_desired));
-                }
-
-                void setReference(const yarp::sig::Vector& x_desired,
-                                  const yarp::sig::Vector& xdot_desired)
-                {
-                    Postural::setReference(cartesian_utils::toEigen(x_desired),
-                                           cartesian_utils::toEigen(xdot_desired));
-                }
-
-                yarp::sig::Vector getReference(){
-                    Eigen::VectorXd tmp = Postural::getReference();
-                    return cartesian_utils::fromEigentoYarp(tmp);
-                }
-
-
-                void getReference(yarp::sig::Vector& x_desired,
-                                  yarp::sig::Vector& xdot_desired)
-                {
-                    Eigen::VectorXd tmp1;
-                    Eigen::VectorXd tmp2;
-                    Postural::getReference(tmp1, tmp2);
-                    x_desired = cartesian_utils::fromEigentoYarp(tmp1);
-                    xdot_desired = cartesian_utils::fromEigentoYarp(tmp2);
-                }
-
-                void setLambda(double lambda)
-                {
-                    Postural::setLambda(lambda);
-                }
-
-                yarp::sig::Vector getActualPositions()
-                {
-                    Eigen::VectorXd tmp = Postural::getActualPositions();
-                    return cartesian_utils::fromEigentoYarp(tmp);
-                }
-
-                yarp::sig::Vector getError()
-                {
-                    Eigen::VectorXd tmp = Postural::getError();
-                    return cartesian_utils::fromEigentoYarp(tmp);
-                }
-
-            };
-
-}
-}
-}
-
-#endif
-
 
 namespace {
 
@@ -114,7 +40,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     yarp::sig::Vector q_ref(q.size(), 0.0);
 
-    OpenSoT::test::legacy::yarp_Postural postural(q);
+    OpenSoT::legacy::Postural postural(q);
     std::cout<<"Postural Task Inited"<<std::endl;
     EXPECT_TRUE(postural.getA() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
     EXPECT_TRUE(postural.getWeight() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
