@@ -274,10 +274,8 @@ bool QPOasesProblem::addTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
             std::cout<<RED<<"H rows: "<<H.rows()<<DEFAULT<<std::endl;
             return false;}
 
-        _H.resize(_H.rows()+H.rows(), _H.cols());
-        _H<<_H, H;
-        _g.resize(_g.rows()+g.rows());
-        _g <<_g, g;
+        pile(_H,H);
+        pile(_g,g);
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
         int number_of_variables = _H.cols();
@@ -309,12 +307,9 @@ bool QPOasesProblem::addConstraints(const Eigen::MatrixXd &A, const Eigen::Vecto
             std::cout<<RED<<"uA size: "<<uA.rows()<<DEFAULT<<std::endl;
             return false;}
 
-        _A.resize(_A.rows()+A.rows(), _A.cols());
-        _A<<_A, A;
-        _lA.resize(_lA.rows()+lA.rows());
-        _lA<<_lA, lA;
-        _uA.resize(_uA.rows()+uA.rows());
-        _uA<<_uA, uA;
+        pile(_A,A);
+        pile(_lA,lA);
+        pile(_uA,uA);
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
         int number_of_variables = _H.cols();

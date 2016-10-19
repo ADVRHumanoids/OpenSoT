@@ -51,7 +51,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       COMMAND ${CMAKE_CTEST_COMMAND}
                       MAIN_DEPENDENCY OpenSoT
                       DEPENDS
-                      #testAggregatedConstraint
+                      testAggregatedConstraint
                       #testBilateralConstraint
                       #testCartesianPositionVelocityConstraint
                       #testCollisionAvoidanceVelocityConstraint
@@ -101,9 +101,9 @@ SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
-#ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
-#TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
-#add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
+ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
+TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
+add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
 #TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
@@ -271,7 +271,7 @@ add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 #endif()
 
 
-#add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
+add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 #add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)

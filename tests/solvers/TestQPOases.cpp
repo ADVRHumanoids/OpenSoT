@@ -625,6 +625,40 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         }
 }
 
+TEST_F(testQPOasesTask, test_on_eigen)
+{
+    Eigen::MatrixXd A(2,2);
+    A<<1,2,3,4;
+
+    std::cout<<"A: "<<A<<std::endl;
+
+    Eigen::MatrixXd B(1,2);
+    B<<5,6;
+
+    std::cout<<"B: "<<B<<std::endl;
+
+    Eigen::MatrixXd C(A.rows()+B.rows(), A.cols());
+    C<<A,B;
+
+    std::cout<<"C: "<<C<<std::endl;
+
+    A.conservativeResize(A.rows()+B.rows(), A.cols());
+    A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+
+    std::cout<<"A: "<<A<<std::endl;
+
+    Eigen::VectorXd a(3);
+    a<<1,2,3;
+
+    Eigen::VectorXd b(2);
+    b<<4,5;
+
+    a.conservativeResize(a.rows()+b.rows());
+    a.segment(a.rows()-b.rows(),b.rows())<<b;
+
+    std::cout<<"a: "<<a<<std::endl;
+}
+
 //TEST_F(testQPOases_sot, testContructor1Problem)
 //{
 //    iDynUtils idynutils("coman",

@@ -17,19 +17,17 @@
 
 #include <OpenSoT/constraints/BilateralConstraint.h>
 
-#include <yarp/math/Math.h>
 #include <assert.h>
 #include <limits>
 #include <sstream>
 
 using namespace OpenSoT::constraints;
-using namespace yarp::math;
 
 int BilateralConstraint::_constr_count = 0;
 
-BilateralConstraint::BilateralConstraint(const yarp::sig::Matrix &Aineq,
-                                         const yarp::sig::Vector &bLowerBound,
-                                         const yarp::sig::Vector &bUpperBound) :
+BilateralConstraint::BilateralConstraint(const Eigen::MatrixXd &Aineq,
+                                         const Eigen::VectorXd &bLowerBound,
+                                         const Eigen::VectorXd &bUpperBound) :
     Constraint("bilateral_constr_", Aineq.cols())
 {
     std::stringstream tmp; tmp << BilateralConstraint::_constr_count++;
@@ -45,16 +43,16 @@ BilateralConstraint::BilateralConstraint(const yarp::sig::Matrix &Aineq,
 
 
 BilateralConstraint::BilateralConstraint(const std::string constraintName,
-                                         const yarp::sig::Matrix &Aineq,
-                                         const yarp::sig::Vector &bLowerBound,
-                                         const yarp::sig::Vector &bUpperBound) :
+                                         const Eigen::MatrixXd &Aineq,
+                                         const Eigen::VectorXd &bLowerBound,
+                                         const Eigen::VectorXd &bUpperBound) :
     Constraint(constraintName, Aineq.cols())
 {
     _Aineq = Aineq;
     _bLowerBound = bLowerBound;
     _bUpperBound = bUpperBound;
 
-    assert( (_Aineq.rows() == _bLowerBound.size()) &&
-            (_Aineq.rows() == _bUpperBound.size()));
+    assert( (_Aineq.rows() == _bLowerBound.rows()) &&
+            (_Aineq.rows() == _bUpperBound.rows()));
 }
 

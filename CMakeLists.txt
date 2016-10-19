@@ -71,8 +71,8 @@ file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
 ADD_LIBRARY(OpenSoT SHARED
-                    #src/constraints/Aggregated.cpp
-                    #src/constraints/BilateralConstraint.cpp
+                    src/constraints/Aggregated.cpp
+                    src/constraints/BilateralConstraint.cpp
                     #src/constraints/TaskToConstraint.cpp
                     #src/constraints/velocity/CartesianPositionConstraint.cpp
                     #src/constraints/velocity/CartesianVelocity.cpp

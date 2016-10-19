@@ -20,7 +20,6 @@
 
 #include <vector>
 #include <iostream>
-#include <yarp/sig/all.h>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
 #include <OpenSoT/Solver.h>

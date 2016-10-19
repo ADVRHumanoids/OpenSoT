@@ -20,7 +20,7 @@
 
 #include <OpenSoT/Constraint.h>
 
-#include <yarp/sig/all.h>
+#include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <list>
 
@@ -40,7 +40,7 @@
          *   lowerBound = max(bLowerBound1, bLowerBound2),
          *   upperBound = min(bUpperBound1,bUpperBound2)
          */
-        class Aggregated: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+        class Aggregated: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
 	    typedef boost::shared_ptr<Aggregated> Ptr;
 
@@ -64,6 +64,18 @@
 
             static const std::string concatenateConstraintsIds(const std::list<ConstraintPtr> constraints);
 
+            inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+            {
+                A.conservativeResize(A.rows()+B.rows(), A.cols());
+                A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+            }
+
+            inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+            {
+                a.conservativeResize(a.rows()+b.rows());
+                a.segment(a.rows()-b.rows(),b.rows())<<b;
+            }
+
         public:
             /**
              * @brief Aggregated
@@ -73,7 +85,7 @@
              *          update(q) on all tasks he is composed of
              */
             Aggregated(const std::list< ConstraintPtr > constraints,
-                       const yarp::sig::Vector &q,
+                       const Eigen::VectorXd &q,
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);
@@ -104,7 +116,7 @@
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);
 
-            void update(const yarp::sig::Vector &x);
+            void update(const Eigen::VectorXd &x);
 
             std::list< ConstraintPtr >& getConstraintsList() { return _bounds; }
 

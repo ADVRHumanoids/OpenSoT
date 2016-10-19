@@ -17,16 +17,14 @@
 
 #include <OpenSoT/constraints/Aggregated.h>
 
-#include <yarp/math/Math.h>
 #include <assert.h>
 #include <limits>
 #include <sstream>
 
 using namespace OpenSoT::constraints;
-using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
-                       const yarp::sig::Vector &q,
+                       const Eigen::VectorXd &q,
                        const unsigned int aggregationPolicy) :
     Constraint(concatenateConstraintsIds(bounds), q.size()),
                _bounds(bounds), _aggregationPolicy(aggregationPolicy)
@@ -64,7 +62,7 @@ Aggregated::Aggregated(ConstraintPtr bound1,
     this->generateAll();
 }
 
-void Aggregated::update(const yarp::sig::Vector& x) {
+void Aggregated::update(const Eigen::VectorXd& x) {
     /* iterating on all bounds.. */
     for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
@@ -95,15 +93,15 @@ void Aggregated::generateAll() {
 
         ConstraintPtr &b = *i;
 
-        yarp::sig::Vector boundUpperBound = b->getUpperBound();
-        yarp::sig::Vector boundLowerBound = b->getLowerBound();
+        Eigen::VectorXd boundUpperBound = b->getUpperBound();
+        Eigen::VectorXd boundLowerBound = b->getLowerBound();
 
-        yarp::sig::Matrix boundAeq = b->getAeq();
-        yarp::sig::Vector boundbeq = b->getbeq();
+        Eigen::MatrixXd boundAeq = b->getAeq();
+        Eigen::VectorXd boundbeq = b->getbeq();
 
-        yarp::sig::Matrix boundAineq = b->getAineq();
-        yarp::sig::Vector boundbUpperBound = b->getbUpperBound();
-        yarp::sig::Vector boundbLowerBound = b->getbLowerBound();
+        Eigen::MatrixXd boundAineq = b->getAineq();
+        Eigen::VectorXd boundbUpperBound = b->getbUpperBound();
+        Eigen::VectorXd boundbLowerBound = b->getbLowerBound();
 
         /* copying lowerBound, upperBound */
         if(boundUpperBound.size() != 0 ||
@@ -137,25 +135,22 @@ void Aggregated::generateAll() {
                 beq <= Aeq*x <= beq */
             if(_aggregationPolicy & EQUALITIES_TO_INEQUALITIES) {
                 assert(_Aineq.cols() == boundAeq.cols());
-                _Aineq = yarp::math::pile(_Aineq, boundAeq);
-                _bUpperBound = yarp::math::cat(_bUpperBound,
-                                               boundbeq);
+                pile(_Aineq,boundAeq);
+                pile(_bUpperBound,boundbeq);
                 if(_aggregationPolicy & UNILATERAL_TO_BILATERAL) {
-                    _bLowerBound = yarp::math::cat(_bLowerBound,
-                                                   boundbeq);
+                    pile(_bLowerBound,boundbeq);
                 /* we want to have only unilateral constraints, so
                    beq <= Aeq*x <= beq becomes
                    -Aeq*x <= -beq && Aeq*x <= beq */
                 } else {
                     assert(_Aineq.cols() == boundAeq.cols());
-                    _Aineq = yarp::math::pile(_Aineq, -1.0 * boundAeq);
-                    _bUpperBound = yarp::math::cat(_bUpperBound,
-                                                   -1.0 * boundbeq);
+                    pile(_Aineq,-1.0*boundAeq);
+                    pile(_bUpperBound, -1.0 * boundbeq);
                 }
             } else {
                 assert(_Aeq.cols() == boundAeq.cols());
-                _Aeq = yarp::math::pile(_Aeq, boundAeq);
-                _beq = yarp::math::cat(_beq, boundbeq);
+                pile(_Aeq,boundAeq);
+                pile(_beq,boundbeq);
             }
         }
 
@@ -173,12 +168,12 @@ void Aggregated::generateAll() {
             if(_aggregationPolicy & UNILATERAL_TO_BILATERAL) {
                 if(boundbUpperBound.size() == 0) {
                     assert(boundAineq.rows() == boundbLowerBound.size());
-                    boundbUpperBound.resize(boundAineq.rows(),
-                                            std::numeric_limits<double>::infinity());
+                    boundbUpperBound.resize(boundAineq.rows());
+                    boundbUpperBound<<boundbUpperBound.setOnes(boundAineq.rows())*std::numeric_limits<double>::infinity();
                 } else if(boundbLowerBound.size() == 0) {
                     assert(boundAineq.rows() == boundbUpperBound.size());
-                    boundbLowerBound.resize(boundAineq.rows(),
-                                            -std::numeric_limits<double>::max());
+                    boundbLowerBound.resize(boundAineq.rows());
+                                        boundbLowerBound<<boundbLowerBound.setOnes(boundAineq.rows())*std::numeric_limits<double>::infinity();
                 } else {
                     assert(boundAineq.rows() == boundbLowerBound.size());
                     assert(boundAineq.rows() == boundbUpperBound.size());
@@ -195,20 +190,18 @@ void Aggregated::generateAll() {
                 } else {
                     assert(boundAineq.rows() == boundbLowerBound.size());
                     assert(boundAineq.rows() == boundbUpperBound.size());
-                    boundAineq = yarp::math::pile(boundAineq,
-                                                  -1.0 * boundAineq);
-                    boundbUpperBound = yarp::math::cat(boundbUpperBound,
-                                                       -1.0 * boundbLowerBound);
+                    pile(boundAineq,-1.0 * boundAineq);
+                    pile(boundbUpperBound,-1.0 * boundbLowerBound);
                 }
             }
 
             assert(_Aineq.cols() == boundAineq.cols());
-            _Aineq = yarp::math::pile(_Aineq, boundAineq);
-            _bUpperBound = yarp::math::cat(_bUpperBound, boundbUpperBound);
+            pile(_Aineq,boundAineq);
+            pile(_bUpperBound,boundbUpperBound);
             /*  if using UNILATERAL_TO_BILATERAL we always have lower bounds,
                 otherwise, we never have them */
             if(_aggregationPolicy & UNILATERAL_TO_BILATERAL)
-                _bLowerBound = yarp::math::cat(_bLowerBound, boundbLowerBound);
+                pile(_bLowerBound, boundbLowerBound);
         }
     }
 
