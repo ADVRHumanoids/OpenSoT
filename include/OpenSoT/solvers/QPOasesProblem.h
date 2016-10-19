@@ -1,12 +1,9 @@
 #ifndef _WB_SOT_SOLVERS_QP_OASES_PROBLEM_H_
 #define _WB_SOT_SOLVERS_QP_OASES_PROBLEM_H_
 
-#include <yarp/sig/Vector.h>
-#include <yarp/sig/Matrix.h>
+#include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
-
-using namespace yarp::sig;
 
 #define DEFAULT_EPS_REGULARISATION 2E2
 
@@ -24,7 +21,8 @@ namespace OpenSoT{
 
     /**
      * @brief The QPOasesProblem class handle variables, options and execution of a
-     * single qpOases problem. Is implemented using yarp::sig Matrix and yarp::sig::Vector.
+     * single qpOases problem. Is implemented using Eigen.
+     * This represent the Back-End.
      */
     class QPOasesProblem {
     public:
@@ -90,16 +88,16 @@ namespace OpenSoT{
          * @param H Task Matrix
          * @param g Task references
          * @param A Constraint Matrix
-         * @param lA lower constraint yarp::sig::Vector
-         * @param uA upper constraint yarp::sig::Vector
+         * @param lA lower constraint Eigen::VectorXd
+         * @param uA upper constraint Eigen::VectorXd
          * @param l lower bounds
          * @param u upper bounds
          * @return true if the problem can be solved
          */
-        bool initProblem(const yarp::sig::Matrix& H, const yarp::sig::Vector& g,
-                        const yarp::sig::Matrix& A,
-                        const yarp::sig::Vector& lA, const yarp::sig::Vector& uA,
-                        const yarp::sig::Vector& l, const yarp::sig::Vector& u);
+        bool initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                        const Eigen::MatrixXd& A,
+                        const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
+                        const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
         /**
          * This set of function update current problem copying input data. Use these
@@ -112,10 +110,10 @@ namespace OpenSoT{
          * _g = g
          * for now is not possible to have different size of H and g wrt internal ones
          * @param H updated task matrix
-         * @param g updated reference yarp::sig::Vector
+         * @param g updated reference Eigen::VectorXd
          * @return true if task is correctly updated
          */
-        bool updateTask(const yarp::sig::Matrix& H, const yarp::sig::Vector& g);
+        bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
 
         /**
          * @brief updateConstraints update internal A, lA and uA
@@ -124,11 +122,11 @@ namespace OpenSoT{
          * _uA = uA
          * A, lA and uA can change rows size to allow variable constraints
          * @param A update constraint matrix
-         * @param lA update lower constraint yarp::sig::Vector
-         * @param uA update upper constraint yarp::sig::Vector
+         * @param lA update lower constraint Eigen::VectorXd
+         * @param uA update upper constraint Eigen::VectorXd
          * @return true if constraints are correctly updated
          */
-        bool updateConstraints(const yarp::sig::Matrix& A, const yarp::sig::Vector& lA, const yarp::sig::Vector& uA);
+        bool updateConstraints(const Eigen::MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA);
 
         /**
          * @brief updateBounds update internal l and u
@@ -138,42 +136,42 @@ namespace OpenSoT{
          * @param u update upper bounds
          * @return true if bounds are correctly updated
          */
-        bool updateBounds(const yarp::sig::Vector& l, const yarp::sig::Vector& u);
+        bool updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
         /**
          * @brief updateProblem update the whole problem see updateTask(), updateConstraints() and updateBounds()
          * @param H updated task matrix
-         * @param g updated reference yarp::sig::Vector
+         * @param g updated reference Eigen::VectorXd
          * @param A update constraint matrix
-         * @param lA update lower constraint yarp::sig::Vector
-         * @param uA update upper constraint yarp::sig::Vector
+         * @param lA update lower constraint Eigen::VectorXd
+         * @param uA update upper constraint Eigen::VectorXd
          * @param l update lower bounds
          * @param u update upper bounds
          * @return if the problem is correctly updated
          */
-        bool updateProblem(const yarp::sig::Matrix& H, const yarp::sig::Vector& g,
-                           const yarp::sig::Matrix& A,
-                           const yarp::sig::Vector& lA, const yarp::sig::Vector& uA,
-                           const yarp::sig::Vector& l, const yarp::sig::Vector& u);
+        bool updateProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                           const Eigen::MatrixXd& A,
+                           const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
+                           const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
         /**
          * @brief addTask pile a matrix H to internal _H and g to internal _g
          * so that _H = [_H; H] and _g = [_g; g]
          * @param H extra Task Matrix
-         * @param g extra reference yarp::sig::Vector
+         * @param g extra reference Eigen::VectorXd
          * @return true if the problem is initiazlized correctly
          */
-        bool addTask(const yarp::sig::Matrix& H, const yarp::sig::Vector& g);
+        bool addTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
 
         /**
          * @brief addConstraints pile a matrix A to internal _A and lA/uA to internal _lA/_uA
          * so that _A = [_A; A], _lA = [_lA; lA], _uA = [_uA; uA]
          * @param A extra constraint matrix
-         * @param lA extra lower constraint yarp::sig::Vector
-         * @param uA extra upper constraint yarp::sig::Vector
+         * @param lA extra lower constraint Eigen::VectorXd
+         * @param uA extra upper constraint Eigen::VectorXd
          * @return true if the problem is initiazlized correctly
          */
-        bool addConstraints(const yarp::sig::Matrix& A, const yarp::sig::Vector& lA, const yarp::sig::Vector& uA);
+        bool addConstraints(const Eigen::MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA);
 
         /**
          * @brief solve the QP problem
@@ -185,7 +183,7 @@ namespace OpenSoT{
          * @brief getSolution return the actual solution of the QP problem
          * @return solution
          */
-        const yarp::sig::Vector& getSolution(){return _solution;}
+        const Eigen::VectorXd& getSolution(){return _solution;}
 
         /**
          * @brief getHessianType return the hessian type f the problem
@@ -224,15 +222,15 @@ namespace OpenSoT{
         const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
 
         /**
-         * Getters for internal matrices and yarp::sig::Vectors
+         * Getters for internal matrices and Eigen::VectorXds
          */
-        const yarp::sig::Matrix& getH(){return _H;}
-        const yarp::sig::Vector& getg(){return _g;}
-        const yarp::sig::Matrix& getA(){return _A;}
-        const yarp::sig::Vector& getlA(){return _lA;}
-        const yarp::sig::Vector& getuA(){return _uA;}
-        const yarp::sig::Vector& getl(){return _l;}
-        const yarp::sig::Vector& getu(){return _u;}
+        const Eigen::MatrixXd& getH(){return _H;}
+        const Eigen::VectorXd& getg(){return _g;}
+        const Eigen::MatrixXd& getA(){return _A;}
+        const Eigen::VectorXd& getlA(){return _lA;}
+        const Eigen::VectorXd& getuA(){return _uA;}
+        const Eigen::VectorXd& getl(){return _l;}
+        const Eigen::VectorXd& getu(){return _u;}
 
         /**
          * @brief printProblemInformation print some extra information about the problem
@@ -287,29 +285,29 @@ namespace OpenSoT{
         /**
          * Define a cost function: ||Hx - g||
          */
-        yarp::sig::Matrix _H;
+        Eigen::MatrixXd _H;
         boost::shared_ptr<qpOASES::SymSparseMat> H_sparse;
-        yarp::sig::Vector _g;
+        Eigen::VectorXd _g;
 
         /**
          * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
-        yarp::sig::Matrix _A;
+        Eigen::MatrixXd _A;
         boost::shared_ptr<qpOASES::DenseMatrix> A_dense;
-        yarp::sig::Vector _lA;
-        yarp::sig::Vector _uA;
+        Eigen::VectorXd _lA;
+        Eigen::VectorXd _uA;
 
         /**
          * Define a set of bounds on solution: l <= x <= u
          */
-        yarp::sig::Vector _l;
-        yarp::sig::Vector _u;
+        Eigen::VectorXd _l;
+        Eigen::VectorXd _u;
 
         /**
          * Solution and dual solution of the QP problem
          */
-        yarp::sig::Vector _solution;
-        yarp::sig::Vector _dual_solution;
+        Eigen::VectorXd _solution;
+        Eigen::VectorXd _dual_solution;
 
         /**
          * @brief _opt solver options

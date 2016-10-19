@@ -1,5 +1,4 @@
 #include <OpenSoT/solvers/QPOasesProblem.h>
-#include <yarp/math/Math.h>
 #include <qpOASES.hpp>
 #include <ctime>
 #include <qpOASES/Utils.hpp>
@@ -14,7 +13,6 @@
 #define DEFAULT "\033[0m"
 
 using namespace OpenSoT::solvers;
-using namespace yarp::math;
 
 QPOasesProblem::QPOasesProblem(const int number_of_variables,
                                const int number_of_constraints,
@@ -22,14 +20,21 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _problem(new qpOASES::SQProblem(number_of_variables,
                                     number_of_constraints,
                                     (qpOASES::HessianType)(hessian_type))),
-    _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
     _bounds(new qpOASES::Bounds()),
     _constraints(new qpOASES::Constraints()),
     _nWSR(132),
     _epsRegularisation(eps_regularisation),
     _solution(number_of_variables), _dual_solution(number_of_variables),
     _opt(new qpOASES::Options())
-{ setDefaultOptions();}
+{
+    _H.setZero(0,0);
+    _g.setZero(0);
+    _A.setZero(0,0);
+    _lA.setZero(0);
+    _uA.setZero(0);
+    _l.setZero(0);
+    _u.setZero(0);
+    setDefaultOptions();}
 
 QPOasesProblem::~QPOasesProblem()
 {}
@@ -62,27 +67,27 @@ void QPOasesProblem::setOptions(const qpOASES::Options &options){
 qpOASES::Options QPOasesProblem::getOptions(){
     return _problem->getOptions();}
 
-bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
-                                 const Matrix &A,
-                                 const Vector &lA, const Vector &uA,
-                                 const Vector &l, const Vector &u)
+bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
+                                 const Eigen::MatrixXd &A,
+                                 const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                                 const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
     checkINFTY();
 
 
-    if(!(_l.size() == _u.size())){
-        std::cout<<RED<<"l size: "<<_l.size()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"u size: "<<_u.size()<<DEFAULT<<std::endl;
-        assert(_l.size() == _u.size());}
-    if(!(_lA.size() == _A.rows())){
-        std::cout<<RED<<"lA size: "<<_lA.size()<<DEFAULT<<std::endl;
+    if(!(_l.rows() == _u.rows())){
+        std::cout<<RED<<"l size: "<<_l.rows()<<DEFAULT<<std::endl;
+        std::cout<<RED<<"u size: "<<_u.rows()<<DEFAULT<<std::endl;
+        assert(_l.rows() == _u.rows());}
+    if(!(_lA.rows() == _A.rows())){
+        std::cout<<RED<<"lA size: "<<_lA.rows()<<DEFAULT<<std::endl;
         std::cout<<RED<<"A rows: "<<_A.rows()<<DEFAULT<<std::endl;
-        assert(_lA.size() == _A.rows());}
-    if(!(_lA.size() == _uA.size())){
-        std::cout<<RED<<"lA size: "<<_lA.size()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"uA size: "<<_uA.size()<<DEFAULT<<std::endl;
-        assert(_lA.size() == _uA.size());}
+        assert(_lA.rows() == _A.rows());}
+    if(!(_lA.rows() == _uA.rows())){
+        std::cout<<RED<<"lA size: "<<_lA.rows()<<DEFAULT<<std::endl;
+        std::cout<<RED<<"uA size: "<<_uA.rows()<<DEFAULT<<std::endl;
+        assert(_lA.rows() == _uA.rows());}
 
     int nWSR = _nWSR;
     H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
@@ -128,10 +133,10 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
         return false;
     }
 
-    if(_solution.size() != _problem->getNV())
+    if(_solution.rows() != _problem->getNV())
         _solution.resize(_problem->getNV());
 
-    if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
+    if(_dual_solution.rows() != _problem->getNV() + _problem->getNC())
         _dual_solution.resize(_problem->getNV() + _problem->getNC());
 
     //We get the solution
@@ -146,10 +151,10 @@ bool QPOasesProblem::initProblem(const Matrix &H, const Vector &g,
     return true;
 }
 
-bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
+bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
-    if(!(_g.size() == _H.rows())){
-        std::cout<<RED<<"g size: "<<_g.size()<<DEFAULT<<std::endl;
+    if(!(_g.rows() == _H.rows())){
+        std::cout<<RED<<"g size: "<<_g.rows()<<DEFAULT<<std::endl;
         std::cout<<RED<<"H rows: "<<_H.rows()<<DEFAULT<<std::endl;
         return false;}
     if(!(_H.cols() == H.cols())){
@@ -168,7 +173,7 @@ bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
     {
         _H.resize(H.rows(), H.cols());
         _H = H;
-        _g.resize(g.size());
+        _g.resize(g.rows());
         _g = g;
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
@@ -184,19 +189,19 @@ bool QPOasesProblem::updateTask(const Matrix &H, const Vector &g)
     }
 }
 
-bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const Vector &uA)
+bool QPOasesProblem::updateConstraints(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
 {
     if(!(_A.cols() == A.cols())){
         std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
         std::cout<<RED<<"should be: "<<_A.cols()<<DEFAULT<<std::endl;
         return false;}
-    if(!(lA.size() == A.rows())){
-        std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
+    if(!(lA.rows() == A.rows())){
+        std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
         std::cout<<RED<<"A rows: "<<A.rows()<<DEFAULT<<std::endl;
         return false;}
-    if(!(lA.size() == uA.size())){
-        std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"uA size: "<<uA.size()<<DEFAULT<<std::endl;
+    if(!(lA.rows() == uA.rows())){
+        std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
+        std::cout<<RED<<"uA size: "<<uA.rows()<<DEFAULT<<std::endl;
         return false;}
 
     if(A.rows() == _A.rows())
@@ -210,9 +215,9 @@ bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const 
     {
         _A.resize(A.rows(), A.cols());
         _A = A;
-        _lA.resize(lA.size());
+        _lA.resize(lA.rows());
         _lA = lA;
-        _uA.resize(uA.size());
+        _uA.resize(uA.rows());
         _uA = uA;
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
@@ -228,19 +233,19 @@ bool QPOasesProblem::updateConstraints(const Matrix &A, const Vector &lA, const 
     }
 }
 
-bool QPOasesProblem::updateBounds(const Vector &l, const Vector &u)
+bool QPOasesProblem::updateBounds(const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
-    if(!(l.size() == _l.size())){
-        std::cout<<RED<<"l size: "<<l.size()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"should be: "<<_l.size()<<DEFAULT<<std::endl;
+    if(!(l.rows() == _l.rows())){
+        std::cout<<RED<<"l size: "<<l.rows()<<DEFAULT<<std::endl;
+        std::cout<<RED<<"should be: "<<_l.rows()<<DEFAULT<<std::endl;
         return false;}
-    if(!(u.size() == _u.size())){
-        std::cout<<RED<<"u size: "<<u.size()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"should be: "<<_u.size()<<DEFAULT<<std::endl;
+    if(!(u.rows() == _u.rows())){
+        std::cout<<RED<<"u size: "<<u.rows()<<DEFAULT<<std::endl;
+        std::cout<<RED<<"should be: "<<_u.rows()<<DEFAULT<<std::endl;
         return false;}
-    if(!(l.size() == u.size())){
-        std::cout<<RED<<"l size: "<<l.size()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"u size: "<<u.size()<<DEFAULT<<std::endl;
+    if(!(l.rows() == u.rows())){
+        std::cout<<RED<<"l size: "<<l.rows()<<DEFAULT<<std::endl;
+        std::cout<<RED<<"u size: "<<u.rows()<<DEFAULT<<std::endl;
         return false;}
 
     _l = l;
@@ -249,9 +254,9 @@ bool QPOasesProblem::updateBounds(const Vector &l, const Vector &u)
     return true;
 }
 
-bool QPOasesProblem::updateProblem(const Matrix &H, const Vector &g,
-                                   const Matrix &A, const Vector &lA, const Vector &uA,
-                                   const Vector &l, const Vector &u)
+bool QPOasesProblem::updateProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
+                                   const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                                   const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
     bool success = true;
     success = success && updateBounds(l, u);
@@ -260,17 +265,19 @@ bool QPOasesProblem::updateProblem(const Matrix &H, const Vector &g,
     return success;
 }
 
-bool QPOasesProblem::addTask(const Matrix &H, const Vector &g)
+bool QPOasesProblem::addTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
     if(H.cols() == _H.cols())
     {
-        if(!(g.size() == H.rows())){
-            std::cout<<RED<<"g size: "<<g.size()<<DEFAULT<<std::endl;
+        if(!(g.rows() == H.rows())){
+            std::cout<<RED<<"g size: "<<g.rows()<<DEFAULT<<std::endl;
             std::cout<<RED<<"H rows: "<<H.rows()<<DEFAULT<<std::endl;
             return false;}
 
-        _H = pile(_H, H);
-        _g = cat(_g, g);
+        _H.resize(_H.rows()+H.rows(), _H.cols());
+        _H<<_H, H;
+        _g.resize(_g.rows()+g.rows());
+        _g <<_g, g;
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
         int number_of_variables = _H.cols();
@@ -289,22 +296,25 @@ bool QPOasesProblem::addTask(const Matrix &H, const Vector &g)
     return false;
 }
 
-bool QPOasesProblem::addConstraints(const Matrix &A, const Vector &lA, const Vector &uA)
+bool QPOasesProblem::addConstraints(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
 {
     if(A.cols() == _A.cols())
     {
-        if(!(lA.size() == A.rows())){
-            std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
+        if(!(lA.rows() == A.rows())){
+            std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
             std::cout<<RED<<"A rows: "<<A.rows()<<DEFAULT<<std::endl;
             return false;}
-        if(!(lA.size() == uA.size())){
-            std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
-            std::cout<<RED<<"uA size: "<<uA.size()<<DEFAULT<<std::endl;
+        if(!(lA.rows() == uA.rows())){
+            std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
+            std::cout<<RED<<"uA size: "<<uA.rows()<<DEFAULT<<std::endl;
             return false;}
 
-        _A = pile(_A, A);
-        _lA = cat(_lA, lA);
-        _uA = cat(_uA, uA);
+        _A.resize(_A.rows()+A.rows(), _A.cols());
+        _A<<_A, A;
+        _lA.resize(_lA.rows()+lA.rows());
+        _lA<<_lA, lA;
+        _uA.resize(_uA.rows()+uA.rows());
+        _uA<<_uA, uA;
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
         int number_of_variables = _H.cols();
@@ -377,10 +387,10 @@ bool QPOasesProblem::solve()
     }
 
     // If solution has changed of size we update the size
-    if(_solution.size() != _problem->getNV())
+    if(_solution.rows() != _problem->getNV())
         _solution.resize(_problem->getNV());
 
-    if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
+    if(_dual_solution.rows() != _problem->getNV() + _problem->getNC())
         _dual_solution.resize(_problem->getNV()+ _problem->getNC());
 
     //We get the solution
@@ -417,12 +427,12 @@ void QPOasesProblem::checkInfeasibility()
     infeasibleConstraints.print();
 
     std::cout<<"--------------------------------------------"<<std::endl;
-    for(unsigned int i = 0; i < _lA.size(); ++i)
+    for(unsigned int i = 0; i < _lA.rows(); ++i)
         std::cout<<i<<": "<<_lA[i]<<" <= "<<"Adq"<<" <= "<<_uA[i]<<std::endl;
 
     std::cout<<std::endl;
     std::cout<<"A = ["<<std::endl;
-    std::cout<<_A.toString()<<" ]"<<std::endl;
+    std::cout<<_A<<" ]"<<std::endl;
     std::cout<<"--------------------------------------------"<<std::endl;
 }
 
@@ -438,15 +448,15 @@ void QPOasesProblem::printProblemInformation(const int problem_number, const std
     std::cout<<GREEN<<"CONSTRAINTS ID: "<<DEFAULT<<constraints_id<<std::endl;
     std::cout<<GREEN<<"     # OF CONSTRAINTS: "<<DEFAULT<<_problem->getNC()<<std::endl;
     std::cout<<GREEN<<"BOUNDS ID: "<<DEFAULT<<bounds_id<<std::endl;
-    std::cout<<GREEN<<"     # OF BOUNDS: "<<DEFAULT<<_l.size()<<std::endl;
+    std::cout<<GREEN<<"     # OF BOUNDS: "<<DEFAULT<<_l.rows()<<std::endl;
     std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_problem->getNV()<<std::endl;
-//    std::cout<<GREEN<<"H: "<<DEFAULT<<_H.toString()<<std::endl;
-//    std::cout<<GREEN<<"g: "<<DEFAULT<<_g.toString()<<std::endl;
-//    std::cout<<GREEN<<"A: "<<DEFAULT<<_A.toString()<<std::endl;
-//    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA.toString()<<std::endl;
-//    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA.toString()<<std::endl;
-//    std::cout<<GREEN<<"u: "<<DEFAULT<<_u.toString()<<std::endl;
-//    std::cout<<GREEN<<"l: "<<DEFAULT<<_l.toString()<<std::endl;
+//    std::cout<<GREEN<<"H: "<<DEFAULT<<_H<<std::endl;
+//    std::cout<<GREEN<<"g: "<<DEFAULT<<_g<<std::endl;
+//    std::cout<<GREEN<<"A: "<<DEFAULT<<_A<<std::endl;
+//    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA<<std::endl;
+//    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA<<std::endl;
+//    std::cout<<GREEN<<"u: "<<DEFAULT<<_u<<std::endl;
+//    std::cout<<GREEN<<"l: "<<DEFAULT<<_l<<std::endl;
     std::cout<<std::endl;
 }
 
@@ -455,13 +465,13 @@ bool QPOasesProblem::writeQPIntoMFile(const std::string& file_name)
     std::ofstream file(file_name.c_str());
     if(file.is_open())
     {
-        file<<"H = [\n"<<_H.toString()<<"\n]\n\n";
-        file<<"g = [\n"<<_g.toString()<<"\n]\n\n";
-        file<<"A = [\n"<<_A.toString()<<"\n]\n\n";
-        file<<"lA = [\n"<<_lA.toString()<<"\n]\n\n";
-        file<<"uA = [\n"<<_uA.toString()<<"\n]\n\n";
-        file<<"l = [\n"<<_l.toString()<<"\n]\n\n";
-        file<<"u = [\n"<<_u.toString()<<"\n]";
+        file<<"H = [\n"<<_H<<"\n]\n\n";
+        file<<"g = [\n"<<_g<<"\n]\n\n";
+        file<<"A = [\n"<<_A<<"\n]\n\n";
+        file<<"lA = [\n"<<_lA<<"\n]\n\n";
+        file<<"uA = [\n"<<_uA<<"\n]\n\n";
+        file<<"l = [\n"<<_l<<"\n]\n\n";
+        file<<"u = [\n"<<_u<<"\n]";
 
         file.close();
         return true;
@@ -471,14 +481,14 @@ bool QPOasesProblem::writeQPIntoMFile(const std::string& file_name)
 
 void QPOasesProblem::checkINFTY()
 {
-    unsigned int constraints_size = _lA.size();
+    unsigned int constraints_size = _lA.rows();
     for(unsigned int i = 0; i < constraints_size; ++i){
         if(_lA[i] < -qpOASES::INFTY)
             _lA[i] = -qpOASES::INFTY;
         if(_uA[i] > qpOASES::INFTY)
             _uA[i] = qpOASES::INFTY;}
 
-    unsigned int bounds_size = _l.size();
+    unsigned int bounds_size = _l.rows();
     for(unsigned int i = 0; i < bounds_size; ++i){
         if(_l[i] < -qpOASES::INFTY)
             _l[i] = -qpOASES::INFTY;
