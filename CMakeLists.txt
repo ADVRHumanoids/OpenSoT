@@ -79,7 +79,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/constraints/velocity/CoMVelocity.cpp
                     #src/constraints/velocity/ConvexHull.cpp
                     src/constraints/velocity/JointLimits.cpp
-                    #src/constraints/velocity/VelocityLimits.cpp
+                    src/constraints/velocity/VelocityLimits.cpp
                     #src/constraints/velocity/SelfCollisionAvoidance.cpp
                     #src/constraints/velocity/Dynamics.cpp
                     #src/constraints/force/FrictionCone.cpp

@@ -2,8 +2,8 @@
 #include <gtest/gtest.h>
 #include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
-#include <OpenSoT/legacy/tasks/Postural.h>
-#include <OpenSoT/legacy/constraints/JointLimits.h>
+#include <OpenSoT/legacy/tasks/velocity/Postural.h>
+#include <OpenSoT/legacy/constraints/velocity/JointLimits.h>
 
 using namespace yarp::math;
 

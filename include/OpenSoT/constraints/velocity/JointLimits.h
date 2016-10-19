@@ -20,7 +20,7 @@
 
  #include <OpenSoT/Constraint.h>
  #include <Eigen/Dense>
- #include <iCub/iDynTree/DynTree.h>
+
 
  namespace OpenSoT {
     namespace constraints {

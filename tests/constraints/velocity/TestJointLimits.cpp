@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/constraints/JointLimits.h>
+#include <OpenSoT/legacy/constraints/velocity/JointLimits.h>
 #include <idynutils/idynutils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
