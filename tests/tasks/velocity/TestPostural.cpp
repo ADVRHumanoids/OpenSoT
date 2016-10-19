@@ -2,49 +2,10 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <yarp/math/Math.h>
+#include <idynutils/cartesian_utils.h>
 
 using namespace yarp::math;
 
-/*
- * Copied from Silvio Traversaro's iDynTree
- *
- * Copyright (C) 2013 RobotCub Consortium
- * Author: Silvio Traversaro
- * CopyPolicy: Released under the terms of the GNU LGPL v2.0 (or any later version)
- *
- */
-
-#ifndef IDYNTREE_YARP_EIGEN_CONVERSIONS_H
-#define IDYNTREE_YARP_EIGEN_CONVERSIONS_H
-
-#include <Eigen/Dense>
-
-namespace iDynTree
-{
-
-inline Eigen::Map<Eigen::VectorXd> toEigen(yarp::sig::Vector & yarpVector)
-{
-    return Eigen::Map<Eigen::VectorXd>(yarpVector.data(),yarpVector.size());
-}
-
-inline Eigen::Map< Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> > toEigen(yarp::sig::Matrix & yarpMatrix)
-{
-    return Eigen::Map< Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> >(yarpMatrix.data(),yarpMatrix.rows(),yarpMatrix.cols());
-}
-
-inline Eigen::Map<const Eigen::VectorXd> toEigen(const yarp::sig::Vector & yarpVector)
-{
-    return Eigen::Map<const Eigen::VectorXd>(yarpVector.data(),yarpVector.size());
-}
-
-inline Eigen::Map<const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> > toEigen(const yarp::sig::Matrix & yarpMatrix)
-{
-    return Eigen::Map<const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> >(yarpMatrix.data(),yarpMatrix.rows(),yarpMatrix.cols());
-}
-
-}
-
-#endif
 
 #ifndef _TEST_LEGACY_POSTURAL_
 #define _TEST_LEGACY_POSTURAL_
@@ -57,45 +18,30 @@ namespace legacy{
 
 class yarp_Postural : public OpenSoT::tasks::velocity::Postural {
             public:
-                static yarp::sig::Matrix toYarp(const Eigen::MatrixXd& M)
-                {
-                    yarp::sig::Matrix tmp(M.rows(), M.cols());
-                    for(unsigned int i = 0; i < M.rows(); ++i)
-                        for(unsigned int j = 0; j < M.cols(); ++j)
-                            tmp(i,j) = M(i,j);
-                    return tmp;
-                }
 
-                static yarp::sig::Vector toYarp(const Eigen::VectorXd& v)
-                {
-                    yarp::sig::Vector tmp(v.rows(), 0.0);
-                    for(unsigned int i = 0; i < v.rows(); ++i)
-                        tmp(i) = v(i);
-                    return tmp;
-                }
 
             public:
 
                 yarp_Postural(const yarp::sig::Vector& x):
-                    Postural(iDynTree::toEigen(x)) {
+                    Postural(cartesian_utils::toEigen(x)) {
                 }
 
 
                 void setReference(const yarp::sig::Vector& x_desired)
                 {
-                    Postural::setReference(iDynTree::toEigen(x_desired));
+                    Postural::setReference(cartesian_utils::toEigen(x_desired));
                 }
 
                 void setReference(const yarp::sig::Vector& x_desired,
                                   const yarp::sig::Vector& xdot_desired)
                 {
-                    Postural::setReference(iDynTree::toEigen(x_desired),
-                                           iDynTree::toEigen(xdot_desired));
+                    Postural::setReference(cartesian_utils::toEigen(x_desired),
+                                           cartesian_utils::toEigen(xdot_desired));
                 }
 
                 yarp::sig::Vector getReference(){
                     Eigen::VectorXd tmp = Postural::getReference();
-                    return toYarp(tmp);
+                    return cartesian_utils::fromEigentoYarp(tmp);
                 }
 
 
@@ -105,8 +51,8 @@ class yarp_Postural : public OpenSoT::tasks::velocity::Postural {
                     Eigen::VectorXd tmp1;
                     Eigen::VectorXd tmp2;
                     Postural::getReference(tmp1, tmp2);
-                    x_desired = toYarp(tmp1);
-                    xdot_desired = toYarp(tmp2);
+                    x_desired = cartesian_utils::fromEigentoYarp(tmp1);
+                    xdot_desired = cartesian_utils::fromEigentoYarp(tmp2);
                 }
 
                 void setLambda(double lambda)
@@ -117,13 +63,13 @@ class yarp_Postural : public OpenSoT::tasks::velocity::Postural {
                 yarp::sig::Vector getActualPositions()
                 {
                     Eigen::VectorXd tmp = Postural::getActualPositions();
-                    return toYarp(tmp);
+                    return cartesian_utils::fromEigentoYarp(tmp);
                 }
 
                 yarp::sig::Vector getError()
                 {
                     Eigen::VectorXd tmp = Postural::getError();
-                    return toYarp(tmp);
+                    return cartesian_utils::fromEigentoYarp(tmp);
                 }
 
             };
@@ -170,8 +116,8 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     OpenSoT::test::legacy::yarp_Postural postural(q);
     std::cout<<"Postural Task Inited"<<std::endl;
-    EXPECT_TRUE(postural.getA() == iDynTree::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
-    EXPECT_TRUE(postural.getWeight() == iDynTree::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
+    EXPECT_TRUE(postural.getA() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
+    EXPECT_TRUE(postural.getWeight() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
     EXPECT_TRUE(postural.getConstraints().size() == 0);
 
     double K = 0.1;
@@ -179,13 +125,13 @@ TEST_F(testPosturalTask, testPosturalTask_)
     EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
     postural.setReference(q_ref);
-    postural.update(iDynTree::toEigen(q));
-    EXPECT_TRUE(postural.getb() == iDynTree::toEigen(postural.getLambda()*(q_ref-q)));
+    postural.update(cartesian_utils::toEigen(q));
+    EXPECT_TRUE(postural.getb() == cartesian_utils::toEigen(postural.getLambda()*(q_ref-q)));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
-        postural.update(iDynTree::toEigen(q));
-        yarp::sig::Vector qq = OpenSoT::test::legacy::yarp_Postural::toYarp(postural.getb());
+        postural.update(cartesian_utils::toEigen(q));
+        yarp::sig::Vector qq = cartesian_utils::fromEigentoYarp(postural.getb());
         q += qq;
     }
 
