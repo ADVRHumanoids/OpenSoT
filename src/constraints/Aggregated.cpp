@@ -173,7 +173,7 @@ void Aggregated::generateAll() {
                 } else if(boundbLowerBound.size() == 0) {
                     assert(boundAineq.rows() == boundbUpperBound.size());
                     boundbLowerBound.resize(boundAineq.rows());
-                                        boundbLowerBound<<boundbLowerBound.setOnes(boundAineq.rows())*std::numeric_limits<double>::infinity();
+                    boundbLowerBound<<boundbLowerBound.setOnes(boundAineq.rows())*-std::numeric_limits<double>::max();
                 } else {
                     assert(boundAineq.rows() == boundbLowerBound.size());
                     assert(boundAineq.rows() == boundbUpperBound.size());
