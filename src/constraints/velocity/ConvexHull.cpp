@@ -17,14 +17,12 @@
 
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <idynutils/convex_hull.h>
-#include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
 
-ConvexHull::ConvexHull(const yarp::sig::Vector& x,
+ConvexHull::ConvexHull(const Eigen::VectorXd& x,
                        iDynUtils& robot,
                        const double safetyMargin) :
     Constraint("convex_hull", x.size()), _robot(robot),
@@ -35,14 +33,14 @@ ConvexHull::ConvexHull(const yarp::sig::Vector& x,
     this->update(x);
 }
 
-void ConvexHull::update(const yarp::sig::Vector &x) {
+void ConvexHull::update(const Eigen::VectorXd &x) {
 
     /************************ COMPUTING BOUNDS ****************************/
 
-    yarp::sig::Matrix JCoM;
-    _robot.iDyn3_model.getCOMJacobian(JCoM);
-    JCoM.removeCols(0,6);
-    JCoM.removeRows(2,4);
+    Eigen::MatrixXd JCoM;
+    _robot.getCOMJacobian(JCoM);
+    JCoM = JCoM.block(0,6,JCoM.rows(),_x_size);
+    JCoM = JCoM.block(0,0,2,_x_size); //We just consider X and Y
 
     if(getConvexHull(_ch))
         this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
@@ -82,7 +80,7 @@ bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 
 
 void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
-                                yarp::sig::Matrix &A, yarp::sig::Vector &b,
+                                Eigen::MatrixXd &A, Eigen::VectorXd &b,
                                 const double boundScaling)
 {
     double _a, _b, _c;

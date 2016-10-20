@@ -95,27 +95,28 @@ TEST_F(testAggregated, AggregatedWorks) {
     EXPECT_FALSE(oldUpperBound == newUpperBound);
 }
 
-//TEST_F(testAggregated, UnilateralToBilateralWorks) {
+TEST_F(testAggregated, UnilateralToBilateralWorks) {
 
-//    iDynUtils robot("coman",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    Vector q(robot.iDyn3_model.getNrOfDOFs(),0.0);
+    iDynUtils robot("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    Eigen::VectorXd q;
+    q.setZero(robot.iDyn3_model.getNrOfDOFs());
 
-//    OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr convexHull(
-//                new OpenSoT::constraints::velocity::ConvexHull(q,robot));
-//    std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> constraints;
-//    constraints.push_back(convexHull);
-//    OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr aggregated(
-//                new OpenSoT::constraints::Aggregated(constraints,
-//                                                     robot.iDyn3_model.getNrOfDOFs()));
+    OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr convexHull(
+                new OpenSoT::constraints::velocity::ConvexHull(q,robot));
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraints;
+    constraints.push_back(convexHull);
+    OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr aggregated(
+                new OpenSoT::constraints::Aggregated(constraints,
+                                                     robot.iDyn3_model.getNrOfDOFs()));
 
-//    EXPECT_TRUE(aggregated->getbLowerBound().size() == aggregated->getbUpperBound().size()) <<
-//                "bLowerBound:" << aggregated->getbLowerBound().toString() << std::endl <<
-//                "bUpperBound " << aggregated->getbUpperBound().toString();
-//    EXPECT_TRUE(aggregated->getAineq().rows() == aggregated->getbLowerBound().size());
+    EXPECT_TRUE(aggregated->getbLowerBound().rows() == aggregated->getbUpperBound().rows()) <<
+                "bLowerBound:" << aggregated->getbLowerBound() << std::endl <<
+                "bUpperBound " << aggregated->getbUpperBound();
+    EXPECT_TRUE(aggregated->getAineq().rows() == aggregated->getbLowerBound().rows());
 
-//}
+}
 
 /// TODO implement
 TEST_F(testAggregated, EqualityToInequalityWorks) {
