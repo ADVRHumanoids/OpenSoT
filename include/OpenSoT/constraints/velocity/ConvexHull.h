@@ -47,6 +47,7 @@
                 double _boundScaling;
                 boost::shared_ptr<idynutils::convex_hull> _convex_hull;
                 std::vector<KDL::Vector> _ch;
+
             public:
                 /**
                  * @brief ConvexHull constructor
@@ -57,8 +58,6 @@
                 ConvexHull( const Eigen::VectorXd& x,
                             iDynUtils& robot,
                             const double safetyMargin = BOUND_SCALING);
-
-                void update(const Eigen::VectorXd &x);
 
                 /**
                  * @brief getConstraints returns A and b such that \f$A*\delta q < b\f$ implies staying in the convex hull
@@ -88,6 +87,8 @@
                  * @param sagetyMargin
                  */
                 void setSafetyMargin(const double safetyMargin);
+
+                void update(const Eigen::VectorXd &x);
             };
         }
     }

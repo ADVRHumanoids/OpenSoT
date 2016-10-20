@@ -56,7 +56,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       #testCartesianPositionVelocityConstraint
                       #testCollisionAvoidanceVelocityConstraint
                       #testCoMVelocityVelocityConstraint
-                      #testConvexHullVelocityConstraint
+                      testConvexHullVelocityConstraint
                       #testDynamicsConstraint
                       testJointLimitsVelocityBounds
                       testVelocityLimitsVelocityBounds
@@ -121,9 +121,9 @@ add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
 #TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
 #add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
-#TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
-#add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
+ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
+add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
 #TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
@@ -276,7 +276,7 @@ add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
-#add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
+add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
 add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
