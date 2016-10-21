@@ -660,60 +660,64 @@ TEST_F(testQPOasesTask, test_on_eigen)
     std::cout<<"a: "<<a<<std::endl;
 }
 
-//TEST_F(testQPOases_sot, testContructor1Problem)
-//{
-//    iDynUtils idynutils("coman",
-//              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-//    yarp::sig::Vector q_ref(q.size(), M_PI);
-//    idynutils.updateiDyn3Model(q, true);
+TEST_F(testQPOases_sot, testContructor1Problem)
+{
+    iDynUtils idynutils("coman",
+              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q_ref(q.size(), M_PI);
+    idynutils.updateiDyn3Model(q, true);
 
-//    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-//            new OpenSoT::tasks::velocity::Postural(q));
-//    postural_task->setReference(q_ref);
-//    JointLimits::Ptr joint_limits(
-//        new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(), idynutils.iDyn3_model.getJointBoundMin()));
-//    postural_task->setLambda(0.1);
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+            new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
+    postural_task->setReference(cartesian_utils::toEigen(q_ref));
+    JointLimits::Ptr joint_limits(
+        new JointLimits(cartesian_utils::toEigen(q),
+                        idynutils.getJointBoundMax(),
+                        idynutils.getJointBoundMin()));
+    postural_task->setLambda(0.1);
 
-//    std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> bounds_list;
-//    bounds_list.push_back(joint_limits);
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
+    bounds_list.push_back(joint_limits);
 
-//    OpenSoT::constraints::Aggregated::Ptr bounds(
-//                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+    OpenSoT::constraints::Aggregated::Ptr bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
-//    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-//    stack_of_tasks.push_back(postural_task);
-//    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(postural_task);
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
 
-//    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
-//    yarp::sig::Vector dq(q.size(), 0.0);
-//    for(unsigned int i = 0; i < 100; ++i)
-//    {
-//        postural_task->update(q);
-//        bounds->update(q);
+    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(q.size());
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        postural_task->update(cartesian_utils::toEigen(q));
+        bounds->update(cartesian_utils::toEigen(q));
 
-//        EXPECT_TRUE(sot.solve(dq));
-//        q += dq;
-//    }
+        EXPECT_TRUE(sot.solve(dq));
+        yarp::sig::Vector _dq = cartesian_utils::fromEigentoYarp(dq);
+        q += _dq;
+    }
 
-//    for(unsigned int i = 0; i < q.size(); ++i)
-//    {
-//        if(q_ref[i] >= idynutils.iDyn3_model.getJointBoundMax()[i])
-//        {
-//            std::cout<<GREEN<<"On the Upper Bound!"<<DEFAULT<<std::endl;
-//            EXPECT_NEAR( q[i], idynutils.iDyn3_model.getJointBoundMax()[i], 1E-4);
-//        }
-//        else if(q_ref[i] <= idynutils.iDyn3_model.getJointBoundMin()[i])
-//        {
-//            std::cout<<GREEN<<"On the Lower Bound!"<<DEFAULT<<std::endl;
-//            EXPECT_NEAR( q[i], idynutils.iDyn3_model.getJointBoundMin()[i], 1E-4);
-//        }
-//        else
-//            EXPECT_NEAR( q[i], q_ref[i], 1E-4);
+    for(unsigned int i = 0; i < q.size(); ++i)
+    {
+        if(q_ref[i] >= idynutils.iDyn3_model.getJointBoundMax()[i])
+        {
+            std::cout<<GREEN<<"On the Upper Bound!"<<DEFAULT<<std::endl;
+            EXPECT_NEAR( q[i], idynutils.iDyn3_model.getJointBoundMax()[i], 1E-4);
+        }
+        else if(q_ref[i] <= idynutils.iDyn3_model.getJointBoundMin()[i])
+        {
+            std::cout<<GREEN<<"On the Lower Bound!"<<DEFAULT<<std::endl;
+            EXPECT_NEAR( q[i], idynutils.iDyn3_model.getJointBoundMin()[i], 1E-4);
+        }
+        else
+            EXPECT_NEAR( q[i], q_ref[i], 1E-4);
 
-//    }
-//}
+    }
+}
 
 //TEST_F(testQPOasesTask, testCoMTask)
 //{
