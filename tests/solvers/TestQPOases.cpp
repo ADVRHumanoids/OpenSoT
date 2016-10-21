@@ -13,6 +13,7 @@
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
 #include <fstream>
+#include <OpenSoT/solvers/QPOases.h>
 
 
 using namespace yarp::math;
@@ -770,158 +771,162 @@ TEST_F(testQPOasesTask, test_on_eigen)
 
 //}
 
-//TEST_F(testQPOasesTask, testCartesian)
-//{
-//    iDynUtils idynutils("coman",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
-//    idynutils.updateiDyn3Model(q, true);
+TEST_F(testQPOasesTask, testCartesian)
+{
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
+    idynutils.updateiDyn3Model(q, true);
 
-//    yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
-//                          idynutils.iDyn3_model.getLinkIndex("Waist"),
-//                          idynutils.iDyn3_model.getLinkIndex("l_wrist"));
+    yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
+                          idynutils.iDyn3_model.getLinkIndex("Waist"),
+                          idynutils.iDyn3_model.getLinkIndex("l_wrist"));
 
-//    //2 Tasks: Cartesian & Postural
-//    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
-//                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, idynutils,
-//                "l_wrist", "Waist"));
-
-
-//    yarp::sig::Matrix T_ref = T;
-//    T_ref(0,3) = T_ref(0,3) + 0.02;
-
-//    cartesian_task->setReference(T_ref);
-//    cartesian_task->update(q);
-
-//    OpenSoT::solvers::QPOasesProblem qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
-//    ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transposed()*cartesian_task->getA(), -1.0*cartesian_task->getA().transposed()*cartesian_task->getb(),
-//                                                yarp::sig::Matrix(), yarp::sig::Vector(), yarp::sig::Vector(),
-//                                                yarp::sig::Vector(), yarp::sig::Vector()));
-
-//    for(unsigned int i = 0; i < 100; ++i)
-//    {
-//        idynutils.updateiDyn3Model(q, true);
-
-//        cartesian_task->update(q);
-//        qp_cartesian_problem.updateTask(cartesian_task->getA().transposed()*cartesian_task->getA(), -1.0*cartesian_task->getA().transposed()*cartesian_task->getb());
-//        ASSERT_TRUE(qp_cartesian_problem.solve());
-//        q += qp_cartesian_problem.getSolution();
-//    }
-
-//    T = idynutils.iDyn3_model.getPosition(
-//                idynutils.iDyn3_model.getLinkIndex("Waist"),
-//                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-
-//    for(unsigned int i = 0; i < 3; ++i)
-//        EXPECT_NEAR(T(i,3), T_ref(i,3), 1E-4);
-//        for(unsigned int i = 0; i < 3; ++i)
-//            for(unsigned int j = 0; j < 3; ++j)
-//                EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
-//}
-
-//TEST_F(testQPOases_sot, testContructor2Problems)
-//{
-//    iDynUtils idynutils("coman",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
-//    yarp::sig::Vector torso(idynutils.torso.getNrOfDOFs(), 0.0);
-//    torso[0] = tests_utils::getRandomAngle(-20.0*M_PI/180.0, 20.0*M_PI/180.0);
-//    torso[1] = tests_utils::getRandomAngle(0.0, 45.0*M_PI/180.0);
-//    torso[2] = tests_utils::getRandomAngle(-30.0*M_PI/180.0, 30.0*M_PI/180.0);
-//    idynutils.fromRobotToIDyn(torso, q, idynutils.torso);
-//    idynutils.updateiDyn3Model(q, true);
-
-//    yarp::sig::Matrix T_init = idynutils.iDyn3_model.getPosition(
-//                idynutils.iDyn3_model.getLinkIndex("Waist"),
-//                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-//    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+    //2 Tasks: Cartesian & Postural
+    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", cartesian_utils::toEigen(q), idynutils,
+                "l_wrist", "Waist"));
 
 
-//    //2 Tasks: Cartesian & Postural
-//    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
-//                new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist", q, idynutils,
-//                                                       "l_wrist", "Waist"));
-//    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-//                new OpenSoT::tasks::velocity::Postural(q));
+    yarp::sig::Matrix T_ref = T;
+    T_ref(0,3) = T_ref(0,3) + 0.02;
 
-//    postural_task->setReference(q);
-//    cartesian_task->setReference(T_init);
+    cartesian_task->setReference(cartesian_utils::toEigen(T_ref));
+    cartesian_task->update(cartesian_utils::toEigen(q));
 
-//    int t = 50;
-//    //Constraints set to the Cartesian Task
-//    JointLimits::Ptr joint_limits(
-//        new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(),
-//                           idynutils.iDyn3_model.getJointBoundMin()));
-//    joint_limits->setBoundScaling((double)(1.0/t));
+    OpenSoT::solvers::QPOasesProblem qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
+    ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb(),
+                                                Eigen::MatrixXd(), Eigen::VectorXd(), Eigen::VectorXd(),
+                                                Eigen::VectorXd(), Eigen::VectorXd()));
 
-//    VelocityLimits::Ptr joint_velocity_limits(
-//                new VelocityLimits(0.3, (double)(1.0/t), q.size()));
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        idynutils.updateiDyn3Model(q, true);
 
-//    std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> joint_constraints_list;
-//    joint_constraints_list.push_back(joint_limits);
-//    joint_constraints_list.push_back(joint_velocity_limits);
+        cartesian_task->update(cartesian_utils::toEigen(q));
+        qp_cartesian_problem.updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
+        ASSERT_TRUE(qp_cartesian_problem.solve());
+        yarp::sig::Vector dq = cartesian_utils::fromEigentoYarp(
+                    qp_cartesian_problem.getSolution());
+        q += dq;
+    }
 
-//    OpenSoT::constraints::Aggregated::Ptr joint_constraints(
-//                new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
+    T = idynutils.iDyn3_model.getPosition(
+                idynutils.iDyn3_model.getLinkIndex("Waist"),
+                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
 
-//    //Create the SoT
-//    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-//    stack_of_tasks.push_back(cartesian_task);
-//    stack_of_tasks.push_back(postural_task);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T(i,3), T_ref(i,3), 1E-4);
+        for(unsigned int i = 0; i < 3; ++i)
+            for(unsigned int j = 0; j < 3; ++j)
+                EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
+}
 
-//    std::cout<<"Initial Position Error: "<<cartesian_task->positionError.toString()<<std::endl;
-//    std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError.toString()<<std::endl;
+TEST_F(testQPOases_sot, testContructor2Problems)
+{
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
+    yarp::sig::Vector torso(idynutils.torso.getNrOfDOFs(), 0.0);
+    torso[0] = tests_utils::getRandomAngle(-20.0*M_PI/180.0, 20.0*M_PI/180.0);
+    torso[1] = tests_utils::getRandomAngle(0.0, 45.0*M_PI/180.0);
+    torso[2] = tests_utils::getRandomAngle(-30.0*M_PI/180.0, 30.0*M_PI/180.0);
+    idynutils.fromRobotToIDyn(torso, q, idynutils.torso);
+    idynutils.updateiDyn3Model(q, true);
 
-//    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
-
-
-//    KDL::Frame T_ref_kdl;
-//    T_ref_kdl.p[0] = 0.283; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.499;
-//    T_ref_kdl.M = T_ref_kdl.M.Quaternion(0.0, 0.975, 0.0, -0.221);
-//    yarp::sig::Matrix T_ref;
-//    cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
-
-//    cartesian_task->setReference(T_ref);
-
-//    //Solve SoT
-//    idynutils.updateiDyn3Model(q, true);
-
-
-//    yarp::sig::Vector dq(q.size(), 0.0);
-//    for(unsigned int i = 0; i < 10*t; ++i)
-//    {
-//        idynutils.updateiDyn3Model(q, true);
-
-//        cartesian_task->update(q);
-//        postural_task->update(q);
-//        joint_constraints->update(q);
-
-//        ASSERT_TRUE(sot.solve(dq));
-//        //std::cout<<"Solution: ["<<dq.toString()<<"]"<<std::endl;
-//        q += dq;
-//    }
-
-//    idynutils.updateiDyn3Model(q);
-//    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
-//    yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
-//                idynutils.iDyn3_model.getLinkIndex("Waist"),
-//                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-//    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
-//    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+    yarp::sig::Matrix T_init = idynutils.iDyn3_model.getPosition(
+                idynutils.iDyn3_model.getLinkIndex("Waist"),
+                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
+    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
 
 
-//    KDL::Frame T_kdl;
-//    cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_kdl);
-//    for(unsigned int i = 0; i < 3; ++i)
-//        EXPECT_NEAR(T_kdl.p[i], T_ref_kdl.p[i], 1E-3);
-//    for(unsigned int i = 0; i < 3; ++i)
-//        for(unsigned int j = 0; j < 3; ++j)
-//            EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
+    //2 Tasks: Cartesian & Postural
+    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist", cartesian_utils::toEigen(q), idynutils,
+                                                       "l_wrist", "Waist"));
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+                new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
+
+    postural_task->setReference(cartesian_utils::toEigen(q));
+    cartesian_task->setReference(cartesian_utils::toEigen(T_init));
+
+    int t = 50;
+    //Constraints set to the Cartesian Task
+    JointLimits::Ptr joint_limits(
+        new JointLimits(cartesian_utils::toEigen(q), idynutils.getJointBoundMax(),
+                           idynutils.getJointBoundMin()));
+    joint_limits->setBoundScaling((double)(1.0/t));
+
+    VelocityLimits::Ptr joint_velocity_limits(
+                new VelocityLimits(0.3, (double)(1.0/t), q.size()));
+
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
+    joint_constraints_list.push_back(joint_limits);
+    joint_constraints_list.push_back(joint_velocity_limits);
+
+    OpenSoT::constraints::Aggregated::Ptr joint_constraints(
+                new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
+
+    //Create the SoT
+    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(cartesian_task);
+    stack_of_tasks.push_back(postural_task);
+
+    std::cout<<"Initial Position Error: "<<cartesian_task->positionError<<std::endl;
+    std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError<<std::endl;
+
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
 
-//}
+    KDL::Frame T_ref_kdl;
+    T_ref_kdl.p[0] = 0.283; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.499;
+    T_ref_kdl.M = T_ref_kdl.M.Quaternion(0.0, 0.975, 0.0, -0.221);
+    yarp::sig::Matrix T_ref;
+    cartesian_utils::fromKDLFrameToYARPMatrix(T_ref_kdl, T_ref);
+
+    cartesian_task->setReference(cartesian_utils::toEigen(T_ref));
+
+    //Solve SoT
+    idynutils.updateiDyn3Model(q, true);
+
+
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(q.size());
+    for(unsigned int i = 0; i < 10*t; ++i)
+    {
+        idynutils.updateiDyn3Model(q, true);
+
+        cartesian_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
+        joint_constraints->update(cartesian_utils::toEigen(q));
+
+        ASSERT_TRUE(sot.solve(dq));
+        yarp::sig::Vector _dq = cartesian_utils::fromEigentoYarp(dq);
+        //std::cout<<"Solution: ["<<dq<<"]"<<std::endl;
+        q += _dq;
+    }
+
+    idynutils.updateiDyn3Model(q);
+    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
+    yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
+                idynutils.iDyn3_model.getLinkIndex("Waist"),
+                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
+    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
+    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+
+
+    KDL::Frame T_kdl;
+    cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_kdl);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T_kdl.p[i], T_ref_kdl.p[i], 1E-3);
+    for(unsigned int i = 0; i < 3; ++i)
+        for(unsigned int j = 0; j < 3; ++j)
+            EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
+
+
+}
 
 
 //TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)

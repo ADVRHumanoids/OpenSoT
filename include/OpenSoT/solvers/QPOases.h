@@ -44,7 +44,7 @@ namespace OpenSoT{
     /**
      * @brief The QPOases_sot class implement a solver that accept a Stack of Tasks with Bounds and Constraints
      */
-    class QPOases_sot: public Solver<yarp::sig::Matrix, Vector>
+    class QPOases_sot: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
 	typedef boost::shared_ptr<QPOases_sot> Ptr;
@@ -88,7 +88,7 @@ namespace OpenSoT{
          * @param solution vector
          * @return true if all the stack is solved
          */
-        bool solve(Vector& solution);
+        bool solve(Eigen::VectorXd& solution);
 
         /**
          * @brief getNumberOfTasks
@@ -130,16 +130,16 @@ namespace OpenSoT{
         bool prepareSoT();
 
         /**
-         * @brief computeVelCtrlCostFunction compute a cost function for velocity control:
+         * @brief computeCostFunction compute a cost function for velocity control:
          *          F = ||Jdq - v||
          * @param task to get Jacobian and reference
          * @param H Hessian matrix computed as J'J
          * @param g reference vector computed as J'v
          */
-        void computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g);
+        void computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g);
 
         /**
-         * @brief computeVelCtrlOptimalityConstraint compute optimality constraint for velocity control:
+         * @brief computeOptimalityConstraint compute optimality constraint for velocity control:
          *      Jj*dqj = Jj*dqi
          * @param task to get Jacobian of the previous task
          * @param problem to get solution of the previous task
@@ -147,8 +147,20 @@ namespace OpenSoT{
          * @param lA lower bounds
          * @param uA upper bounds
          */
-        void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
-                                                yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA);
+        void computeOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
+                                                Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA);
+
+        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+        {
+            A.conservativeResize(A.rows()+B.rows(), A.cols());
+            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+        }
+
+        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+        {
+            a.conservativeResize(a.rows()+b.rows());
+            a.segment(a.rows()-b.rows(),b.rows())<<b;
+        }
 
     };
 

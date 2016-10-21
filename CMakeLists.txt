@@ -86,7 +86,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/interfaces/yarp/tasks/YCartesian.cpp
                     #src/interfaces/yarp/tasks/YCoM.cpp
                     #src/interfaces/yarp/tasks/YPostural.cpp
-                    #src/solvers/QPOases.cpp
+                    src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     #src/stacks/velocity/ManipulationStack.cpp
                     #src/stacks/velocity/WalkingStack.cpp
