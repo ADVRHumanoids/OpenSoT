@@ -16,14 +16,12 @@
 */
 
 #include <OpenSoT/tasks/Aggregated.h>
-#include <yarp/math/Math.h>
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
 #include <assert.h>
 
 using namespace OpenSoT::tasks;
-using namespace yarp::math;
 
 Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const unsigned int x_size) :
@@ -35,7 +33,8 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
     /* calling update to generate bounds */
     this->generateAll();
 
-    _W.resize(_A.rows(),_A.rows()); _W.eye();
+    _W.resize(_A.rows(),_A.rows());
+    _W.setIdentity(_A.rows(),_A.rows());
 
     _hessianType = this->computeHessianType();
 }
@@ -53,18 +52,20 @@ Task("(" + task1->getTaskID()+"+"+task2->getTaskID() + ")",x_size)
     /* calling update to generate bounds */
     this->generateAll();
 
-    _W.resize(_A.rows(),_A.rows()); _W.eye();
+    _W.resize(_A.rows(),_A.rows());
+    _W.setIdentity(_A.rows(),_A.rows());
     _hessianType = this->computeHessianType();
 }
 
 Aggregated::Aggregated(const std::list<TaskPtr> tasks,
-                       const yarp::sig::Vector& q) :
+                       const Eigen::VectorXd& q) :
     Task(concatenateTaskIds(tasks),q.size()), _tasks(tasks)
 {
     this->checkSizes();
     this->_update(q);
 
-    _W.resize(_A.rows(),_A.rows()); _W.eye();
+    _W.resize(_A.rows(),_A.rows());
+    _W.setIdentity(_A.rows(),_A.rows());
     _hessianType = this->computeHessianType();
 }
 
@@ -72,7 +73,7 @@ Aggregated::~Aggregated()
 {
 }
 
-void Aggregated::_update(const yarp::sig::Vector& x) {
+void Aggregated::_update(const Eigen::VectorXd& x) {
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
@@ -97,8 +98,8 @@ void Aggregated::generateAll() {
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
-        _A = yarp::math::pile(_A,t->getWeight()*t->getA());
-        _b = yarp::math::cat(_b, t->getWeight()*t->getb());
+        pile(_A,t->getWeight()*t->getA());
+        pile(_b, t->getWeight()*t->getb());
     }
     generateConstraints();
 }
@@ -222,7 +223,7 @@ void Aggregated::setLambda(double lambda)
     }
 }
 
-bool OpenSoT::tasks::Aggregated::isAggregated(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+bool OpenSoT::tasks::Aggregated::isAggregated(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
 }

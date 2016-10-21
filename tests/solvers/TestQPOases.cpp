@@ -1230,13 +1230,13 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 
 
 //    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-//            new OpenSoT::tasks::velocity::Postural(q));
-//    postural_task->setReference(q_ref);
+//            new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
+//    postural_task->setReference(cartesian_utils::toEigen(q_ref));
 
 //    OpenSoT::tasks::velocity::Postural::Ptr postural_task2(
-//            new OpenSoT::tasks::velocity::Postural(q2));
-//    postural_task2->setReference(q_ref2);
-//    std::list<OpenSoT::Task<Matrix, Vector>::TaskPtr> task_list;
+//            new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q2)));
+//    postural_task2->setReference(cartesian_utils::toEigen(q_ref2));
+//    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> task_list;
 //    task_list.push_back(postural_task2);
 //    OpenSoT::tasks::Aggregated::Ptr joint_space_task(
 //                new OpenSoT::tasks::Aggregated(task_list, q2.size()));
@@ -1247,9 +1247,9 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 //    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_vel_limits2(
 //        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q2.size()));
 
-//    std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> bounds_list;
+//    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
 //    bounds_list.push_back(joint_vel_limits);
-//    std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> bounds_list2;
+//    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list2;
 //    bounds_list2.push_back(joint_vel_limits2);
 
 
@@ -1259,19 +1259,21 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 //                new OpenSoT::constraints::Aggregated(bounds_list2, q2.size()));
 
 ////1. Here we use postural_task
-//    std::vector<OpenSoT::Task<Matrix, Vector>::TaskPtr> stack_of_tasks;
+//    std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks;
 //    stack_of_tasks.push_back(postural_task);
 //    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
 
 //    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
-//    yarp::sig::Vector dq(q.size(), 0.0);
+//    Eigen::VectorXd dq(q.size());
+//    dq.setZero(q.size());
 //    for(unsigned int i = 0; i < 1000; ++i)
 //    {
-//        postural_task->update(q);
-//        bounds->update(q);
+//        postural_task->update(cartesian_utils::toEigen(q));
+//        bounds->update(cartesian_utils::toEigen(q));
 
 //        EXPECT_TRUE(sot.solve(dq));
-//        q += dq;
+//        yarp::sig::Vector _dq = cartesian_utils::fromEigentoYarp(dq);
+//        q += _dq;
 //    }
 
 //    for(unsigned int i = 0; i < q.size(); ++i)
@@ -1279,18 +1281,20 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
 
 
 //////2. Here we use joint_space_task
-//    std::vector<OpenSoT::Task<Matrix, Vector>::TaskPtr> stack_of_tasks2;
+//    std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks2;
 //    stack_of_tasks2.push_back(joint_space_task);
 //    OpenSoT::solvers::QPOases_sot sot2(stack_of_tasks2, bounds2);
 
 //    EXPECT_TRUE(sot2.getNumberOfTasks() == 1);
-//    yarp::sig::Vector dq2(q2.size(), 0.0);
+//    Eigen::VectorXd dq2(q2.size());
+//    dq2.setZero(q2.size());
 //    for(unsigned int i = 0; i < 1000; ++i)
 //    {
-//        joint_space_task->update(q2);
-//        bounds2->update(q2);
+//        joint_space_task->update(cartesian_utils::toEigen(q2));
+//        bounds2->update(cartesian_utils::toEigen(q2));
 //        EXPECT_TRUE(sot2.solve(dq2));
-//        q2 += dq2;
+//        yarp::sig::Vector _dq2 = cartesian_utils::fromEigentoYarp(dq2);
+//        q2 += _dq2;
 //    }
 
 //    for(unsigned int i = 0; i < q.size(); ++i)
