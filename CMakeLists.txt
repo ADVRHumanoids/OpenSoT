@@ -98,7 +98,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/tasks/velocity/Interaction.cpp
                     #src/tasks/velocity/Manipulability.cpp
                     #src/tasks/velocity/MinimizeAcceleration.cpp
-                    #src/tasks/velocity/MinimumEffort.cpp
+                    src/tasks/velocity/MinimumEffort.cpp
                     #src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
                     #src/tasks/force/CoM.cpp

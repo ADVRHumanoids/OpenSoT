@@ -2,7 +2,7 @@
 #include <idynutils/cartesian_utils.h>
 #include <idynutils/idynutils.h>
 #include <gtest/gtest.h>
-#include <OpenSoT/tasks/velocity/MinimumEffort.h>
+#include <OpenSoT/legacy/tasks/velocity/MinimumEffort.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 
@@ -51,7 +51,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
     _robot.updateiDyn3Model(q_whole);
 
-    OpenSoT::tasks::velocity::MinimumEffort minimumEffort(q_whole, _robot);
+    OpenSoT::legacy::tasks::velocity::MinimumEffort minimumEffort(q_whole, _robot);
 
     EXPECT_EQ(minimumEffort.getA().rows(), nJ);
     EXPECT_EQ(minimumEffort.getb().size(), nJ);
@@ -66,22 +66,23 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
     EXPECT_DOUBLE_EQ(minimumEffort.getLambda(), K);
     _robot.updateiDyn3Model(q_whole, true);
     double initial_effort = yarp::math::dot(_robot.iDyn3_model.getTorques(),
-                                    minimumEffort.getWeight()*_robot.iDyn3_model.getTorques());
+                                    cartesian_utils::fromEigentoYarp(minimumEffort.getWeight())*_robot.iDyn3_model.getTorques());
     for(unsigned int i = 0; i < 25; ++i)
     {
-        minimumEffort.update(q_whole);
+        minimumEffort.update(cartesian_utils::toEigen(q_whole));
         double old_effort = minimumEffort.computeEffort();
 
-        q_whole += pinv(minimumEffort.getA(),1E-6)*minimumEffort.getLambda()*minimumEffort.getb();
+        q_whole += pinv(cartesian_utils::fromEigentoYarp(minimumEffort.getA()),1E-6)
+                *minimumEffort.getLambda()*cartesian_utils::fromEigentoYarp(minimumEffort.getb());
 
-        minimumEffort.update(q_whole);
+        minimumEffort.update(cartesian_utils::toEigen(q_whole));
         EXPECT_LE(minimumEffort.computeEffort(), old_effort);
         std::cout << "Effort at step" << i << ": " << minimumEffort.computeEffort() << std::endl;
 
     }
     _robot.updateiDyn3Model(q_whole, true);
     double final_effort = yarp::math::dot(_robot.iDyn3_model.getTorques(),
-                                    minimumEffort.getWeight()*_robot.iDyn3_model.getTorques());
+                                    cartesian_utils::fromEigentoYarp(minimumEffort.getWeight())*_robot.iDyn3_model.getTorques());
     EXPECT_LT(final_effort, initial_effort);
 }
 

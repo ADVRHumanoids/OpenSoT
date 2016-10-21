@@ -80,7 +80,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       #testInteractionVelocityTask
                       #TestManipulabilityTask
                       #testMinimizeAccelerationTask
-                      #testMinimumEffortVelocityTask
+                      testMinimumEffortVelocityTask
                       #testMinimumVelocityTask
                       testPosturalVelocityTask
                       #testSubTask
@@ -217,9 +217,9 @@ add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
 #TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
 #add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
-#TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
-#add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
+ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
+TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
+add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testMinimumVelocityTask tasks/velocity/TestMinimumVelocity.cpp)
 #TARGET_LINK_LIBRARIES(testMinimumVelocityTask ${TestLibs} ${PCL_LIBRARIES})
@@ -302,7 +302,7 @@ add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 #add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
-#add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
+add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_MinimumVelocity COMMAND testMinimumVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 #add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)

@@ -22,10 +22,7 @@
  #include <OpenSoT/Task.h>
  #include <idynutils/idynutils.h>
  #include <idynutils/cartesian_utils.h>
- #include <yarp/sig/all.h>
- #include <yarp/math/Math.h>
 
- using namespace yarp::math;
 
 /**
   * @example example_minimum_effort.cpp
@@ -45,11 +42,11 @@
              * through the OpenSoT::tasks::velocity::Cartesian class.
              * You can take a look at an implementation example in @ref example_minimum_effort.cpp
              */
-            class MinimumEffort : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            class MinimumEffort : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
                 typedef boost::shared_ptr<MinimumEffort> Ptr;
             protected:
-                yarp::sig::Vector _x;
+                Eigen::VectorXd _x;
 
                 /**
                  * @brief The ComputeGTauGradient class implements a worker class to computes the effort for a certain configuration.
@@ -62,23 +59,24 @@
                     public:
                     iDynUtils _robot;
                     const iDynUtils& _model;
-                    yarp::sig::Matrix _W;
-                    yarp::sig::Vector _zeros;
+                    Eigen::MatrixXd _W;
+                    Eigen::VectorXd _zeros;
 
-                    ComputeGTauGradient(const yarp::sig::Vector& q, const iDynUtils& robot_model) :
+                    ComputeGTauGradient(const Eigen::VectorXd& q, const iDynUtils& robot_model) :
                         _robot(robot_model.getRobotName(),
                                robot_model.getRobotURDFPath(),
                                robot_model.getRobotSRDFPath()),
                         _model(robot_model),
-                        _W(q.size(),q.size()),
-                        _zeros(q.size(), 0.0)
+                        _W(q.rows(),q.rows()),
+                        _zeros(q.rows())
                     {
-                        _W.eye();
+                        _zeros.setZero(q.rows());
+                        _W.setIdentity(q.rows(),q.rows());
 
                         for(unsigned int i = 0; i < q.size(); ++i)
-                            _W(i,i) = 1.0 / (_robot.iDyn3_model.getJointTorqueMax()[i]
+                            _W(i,i) = 1.0 / (_robot.getJointTorqueMax()[i]
                                                             *
-                                             _robot.iDyn3_model.getJointTorqueMax()[i]);
+                                             _robot.getJointTorqueMax()[i]);
 
                         _robot.updateiDyn3Model(_model.iDyn3_model.getAng(),
                                                 _model.iDyn3_model.getDAng(),
@@ -87,12 +85,12 @@
                         _robot.setAnchor_T_World(_model.getAnchor_T_World());
                     }
 
-                    double compute(const yarp::sig::Vector &q)
+                    double compute(const Eigen::VectorXd &q)
                     {
                         if(_robot.getAnchor() != _model.getAnchor())
                             _robot.switchAnchor(_model.getAnchor());
 
-                        _robot.updateiDyn3Model(q, true);
+                        _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
 
                         if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
                         {
@@ -101,20 +99,20 @@
                             _robot.setAnchor_T_World(_model.getAnchor_T_World());
                         }
 
-                        yarp::sig::Vector tau = _robot.iDyn3_model.getTorques();
-                        return yarp::math::dot(tau, _W * tau);
+                        Eigen::VectorXd tau = _robot.getTorques();
+                        return tau.transpose()* _W * tau;
                     }
 
-                    void setW(const yarp::sig::Matrix& W) { _W = W; }
+                    void setW(const Eigen::MatrixXd& W) { _W = W; }
 
-                    yarp::sig::Matrix& getW() {return _W;}
+                    Eigen::MatrixXd& getW() {return _W;}
                 };
 
                 ComputeGTauGradient _gTauGradientWorker;
 
             public:
 
-                MinimumEffort(const yarp::sig::Vector& x, const iDynUtils& robot_model);
+                MinimumEffort(const Eigen::VectorXd& x, const iDynUtils& robot_model);
 
                 ~MinimumEffort();
 
@@ -124,7 +122,7 @@
                  * computeEffort() function will take into account the updated posture of the robot.
                  * @param x the actual posture of the robot
                  */
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief computeEffort
@@ -136,14 +134,14 @@
                  * @brief setW set a CONSTANT Weight matrix for the manipulability index
                  * @param W weight matrix
                  */
-                void setW(const yarp::sig::Matrix& W){
+                void setW(const Eigen::MatrixXd& W){
                     _gTauGradientWorker.setW(W);
                 }
 
                 /**
                  * @brief getW get a Weight matrix for the manipulability index
                  */
-                yarp::sig::Matrix getW(){
+                Eigen::MatrixXd getW(){
                     return _gTauGradientWorker.getW();
                 }
 
