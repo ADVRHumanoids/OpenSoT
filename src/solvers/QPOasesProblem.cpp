@@ -67,8 +67,8 @@ void QPOasesProblem::setOptions(const qpOASES::Options &options){
 qpOASES::Options QPOasesProblem::getOptions(){
     return _problem->getOptions();}
 
-bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
-                                 const Eigen::MatrixXd &A,
+bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
+                                 const MatrixXd &A,
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
@@ -151,7 +151,7 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
     return true;
 }
 
-bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
+bool QPOasesProblem::updateTask(const MatrixXd &H, const Eigen::VectorXd &g)
 {
     if(!(_g.rows() == _H.rows())){
         std::cout<<RED<<"g size: "<<_g.rows()<<DEFAULT<<std::endl;
@@ -171,9 +171,7 @@ bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
     }
     else
     {
-        _H.resize(H.rows(), H.cols());
         _H = H;
-        _g.resize(g.rows());
         _g = g;
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
@@ -189,7 +187,7 @@ bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
     }
 }
 
-bool QPOasesProblem::updateConstraints(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
+bool QPOasesProblem::updateConstraints(const MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
 {
     if(!(_A.cols() == A.cols())){
         std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
@@ -213,11 +211,8 @@ bool QPOasesProblem::updateConstraints(const Eigen::MatrixXd &A, const Eigen::Ve
     }
     else
     {
-        _A.resize(A.rows(), A.cols());
         _A = A;
-        _lA.resize(lA.rows());
         _lA = lA;
-        _uA.resize(uA.rows());
         _uA = uA;
 
         qpOASES::HessianType hessian_type = _problem->getHessianType();
@@ -254,8 +249,8 @@ bool QPOasesProblem::updateBounds(const Eigen::VectorXd &l, const Eigen::VectorX
     return true;
 }
 
-bool QPOasesProblem::updateProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
-                                   const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+bool QPOasesProblem::updateProblem(const MatrixXd &H, const Eigen::VectorXd &g,
+                                   const MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                    const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
     bool success = true;
@@ -265,7 +260,7 @@ bool QPOasesProblem::updateProblem(const Eigen::MatrixXd &H, const Eigen::Vector
     return success;
 }
 
-bool QPOasesProblem::addTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
+bool QPOasesProblem::addTask(const MatrixXd &H, const Eigen::VectorXd &g)
 {
     if(H.cols() == _H.cols())
     {
@@ -294,7 +289,7 @@ bool QPOasesProblem::addTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
     return false;
 }
 
-bool QPOasesProblem::addConstraints(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
+bool QPOasesProblem::addConstraints(const MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
 {
     if(A.cols() == _A.cols())
     {
