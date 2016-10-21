@@ -729,30 +729,32 @@ TEST_F(testQPOases_sot, testContructor1Problem)
 //    idynutils.updateiDyn3Model(q, true);
 
 //    OpenSoT::tasks::velocity::CoM::Ptr com_task(
-//                new OpenSoT::tasks::velocity::CoM(q, idynutils));
+//                new OpenSoT::tasks::velocity::CoM(cartesian_utils::toEigen(q), idynutils));
 
+//    Eigen::VectorXd tmp(3);
+//    tmp<<0.06,0.06,0.06;
 //    OpenSoT::constraints::velocity::CoMVelocity::Ptr com_vel_constr(
 //                new OpenSoT::constraints::velocity::CoMVelocity(
-//                    yarp::sig::Vector(3,0.06),1.0,q,idynutils));
+//                    tmp,1.0,cartesian_utils::toEigen(q),idynutils));
 //    com_task->getConstraints().push_back(com_vel_constr);
 
-//    std::list< OpenSoT::Constraint< yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr> constraint_list =
+//    std::list< OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraint_list =
 //            com_task->getConstraints();
-//    OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint = constraint_list.front();
+//    OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint = constraint_list.front();
 
-//    OpenSoT::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
+//    OpenSoT::legacy::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
 //                                                    com_task->getHessianAtype());
 //    ASSERT_TRUE(qp_CoM_problem.initProblem(com_task->getA().transposed()*com_task->getA(), -1.0*com_task->getA().transposed()*com_task->getb(),
 //                                                constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
-//                                                yarp::sig::Vector(), yarp::sig::Vector()));
+//                                                Eigen::VectorXd(), Eigen::VectorXd()));
 
 
-//    yarp::sig::Vector com_i = com_task->getActualPosition();
+//    yarp::sig::Vector com_i = cartesian_utils::fromEigentoYarp(com_task->getActualPosition());
 //    yarp::sig::Vector com_f = com_i;
 //    com_f[0] += 0.05;
 //    com_f[1] += 0.05;
 //    com_f[2] -= 0.05;
-//    com_task->setReference(com_f);
+//    com_task->setReference(cartesian_utils::fromEigentoYarp(com_f));
 
 
 //    for(unsigned int i = 0; i < 100; ++i)
@@ -1027,197 +1029,200 @@ TEST_F(testQPOases_sot, test2ProblemsWithQPSolve)
             EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
 }
 
-//TEST_F(testQPOases_sot, testUpTo4Problems)
-//{
-//    for(unsigned int jj = 0; jj < 4; ++jj)
-//    {
-//        //srand(time(NULL));
-//        int number_of_tasks = jj;//rand() % 4;  //number between 1 and 3
+TEST_F(testQPOases_sot, testUpTo4Problems)
+{
+    for(unsigned int jj = 0; jj < 4; ++jj)
+    {
+        //srand(time(NULL));
+        int number_of_tasks = jj;//rand() % 4;  //number between 1 and 3
 
-//        iDynUtils idynutils("coman",
-//                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//        iDynUtils idynutils_com("coman",
-//                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//        idynutils_com.iDyn3_model.setFloatingBaseLink(idynutils_com.left_leg.index);
-//        yarp::sig::Vector q = getGoodInitialPosition(idynutils);
-//        idynutils.updateiDyn3Model(q, true);
-//        idynutils_com.updateiDyn3Model(q, true);
+        iDynUtils idynutils("coman",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+        iDynUtils idynutils_com("coman",
+                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                                std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+        idynutils_com.iDyn3_model.setFloatingBaseLink(idynutils_com.left_leg.index);
+        yarp::sig::Vector q = getGoodInitialPosition(idynutils);
+        idynutils.updateiDyn3Model(q, true);
+        idynutils_com.updateiDyn3Model(q, true);
 
-//        yarp::sig::Vector q_ref(q.size(), 0.0);
-//        q_ref = q;
+        yarp::sig::Vector q_ref(q.size(), 0.0);
+        q_ref = q;
 
-//        //3 Tasks: CoM & Cartesian & Postural
-//        OpenSoT::tasks::velocity::CoM::Ptr com_task(
-//                    new OpenSoT::tasks::velocity::CoM(q, idynutils_com));
-//        com_task->setLambda(1.0);
+        //3 Tasks: CoM & Cartesian & Postural
+        OpenSoT::tasks::velocity::CoM::Ptr com_task(
+                    new OpenSoT::tasks::velocity::CoM(cartesian_utils::toEigen(q), idynutils_com));
+        com_task->setLambda(1.0);
 
-//        std::string ee1 = "r_wrist";
-//        std::string ee2 = "l_wrist";
-//        OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
-//                    new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee1, q, idynutils,
-//                                                           ee1, "world"));
-//        cartesian_task->setLambda(1.0);
+        std::string ee1 = "r_wrist";
+        std::string ee2 = "l_wrist";
+        OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee1,
+                                                            cartesian_utils::toEigen(q), idynutils,
+                                                           ee1, "world"));
+        cartesian_task->setLambda(1.0);
 
-//        OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task2(
-//                    new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee2, q, idynutils,
-//                                                           ee2, "world"));
-//        cartesian_task2->setLambda(1.0);
+        OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task2(
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::"+ee2,
+                                                            cartesian_utils::toEigen(q), idynutils,
+                                                           ee2, "world"));
+        cartesian_task2->setLambda(1.0);
 
-//        OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-//                    new OpenSoT::tasks::velocity::Postural(q));
-//        postural_task->setLambda(1.0);
+        OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+                    new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
+        postural_task->setLambda(1.0);
 
-//        //Bounds
-//        int t = 50;
-//        std::list< OpenSoT::constraints::Aggregated::ConstraintPtr> constraints_list;
+        //Bounds
+        int t = 50;
+        std::list< OpenSoT::constraints::Aggregated::ConstraintPtr> constraints_list;
 
-//        JointLimits::Ptr joint_limits(
-//            new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(),
-//                               idynutils.iDyn3_model.getJointBoundMin()));
-//        joint_limits->setBoundScaling((double)(1.0));
-//        constraints_list.push_back(joint_limits);
+        JointLimits::Ptr joint_limits(
+            new JointLimits(cartesian_utils::toEigen(q), idynutils.getJointBoundMax(),
+                               idynutils.getJointBoundMin()));
+        joint_limits->setBoundScaling((double)(1.0));
+        constraints_list.push_back(joint_limits);
 
-//        VelocityLimits::Ptr joint_velocity_limits(
-//                    new VelocityLimits(0.3, (double)(1.0/t), q.size()));
-//        constraints_list.push_back(joint_velocity_limits);
-
-
-//        OpenSoT::constraints::Aggregated::Ptr joint_constraints(
-//                    new OpenSoT::constraints::Aggregated(constraints_list, q.size()));
-
-//        yarp::sig::Matrix T_arm_init = idynutils.iDyn3_model.getPosition(
-//                    idynutils.iDyn3_model.getLinkIndex(ee1));
-//        yarp::sig::Matrix T_arm_ref = T_arm_init;
-//        T_arm_ref(2,3) += 0.05;
-//        KDL::Frame T_arm_ref_kdl;
-//        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm_ref, T_arm_ref_kdl);
-
-//        yarp::sig::Matrix T_arm2_init = idynutils.iDyn3_model.getPosition(
-//                    idynutils.iDyn3_model.getLinkIndex(ee2));
-//        yarp::sig::Matrix T_arm2_ref = T_arm2_init;
-//        T_arm2_ref(0,3) += 0.05;
-//        KDL::Frame T_arm2_ref_kdl;
-//        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2_ref, T_arm2_ref_kdl);
+        VelocityLimits::Ptr joint_velocity_limits(
+                    new VelocityLimits(0.3, (double)(1.0/t), q.size()));
+        constraints_list.push_back(joint_velocity_limits);
 
 
-//        yarp::sig::Vector T_com_p_init = idynutils.iDyn3_model.getCOM();
-//        yarp::sig::Vector T_com_p_ref = T_com_p_init;
-//        T_com_p_ref[1] += 0.1;
-//        yarp::sig::Matrix T_com_ref(4,4); T_com_ref.eye();
-//        T_com_ref(0,3) = T_com_p_ref[0];
-//        T_com_ref(1,3) = T_com_p_ref[1];
-//        T_com_ref(2,3) = T_com_p_ref[2];
-//        KDL::Frame T_com_ref_kdl;
-//        cartesian_utils::fromYARPMatrixtoKDLFrame(T_com_ref, T_com_ref_kdl);
+        OpenSoT::constraints::Aggregated::Ptr joint_constraints(
+                    new OpenSoT::constraints::Aggregated(constraints_list, q.size()));
 
-//        com_task->setReference(T_com_p_ref);
-//        cartesian_task->setReference(T_arm_ref);
-//        cartesian_task2->setReference(T_arm2_ref);
-//        postural_task->setReference(q_ref);
+        yarp::sig::Matrix T_arm_init = idynutils.iDyn3_model.getPosition(
+                    idynutils.iDyn3_model.getLinkIndex(ee1));
+        yarp::sig::Matrix T_arm_ref = T_arm_init;
+        T_arm_ref(2,3) += 0.05;
+        KDL::Frame T_arm_ref_kdl;
+        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm_ref, T_arm_ref_kdl);
 
-
-//        //Create the SoT
-//        std::vector<OpenSoT::Task<Matrix, Vector>::TaskPtr> stack_of_tasks;
-//        if(number_of_tasks >= 1)
-//            stack_of_tasks.push_back(com_task);
-//        if(number_of_tasks >= 2)
-//            stack_of_tasks.push_back(cartesian_task);
-//        if(number_of_tasks >= 3)
-//            stack_of_tasks.push_back(cartesian_task2);
-
-//        stack_of_tasks.push_back(postural_task);
-//        OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints, 2E2);
-
-//        yarp::sig::Vector dq(q.size(), 0.0);
-//        double acc = 0.0;
-//        int s = 10;
-//        for(unsigned int i = 0; i < s*t; ++i)
-//        {
-//            idynutils.updateiDyn3Model(q, true);
-//            idynutils_com.updateiDyn3Model(q,true);
-
-//            com_task->update(q);
-//            cartesian_task->update(q);
-//            cartesian_task2->update(q);
-//            postural_task->update(q);
-//            joint_constraints->update(q);
-
-//            double tic = yarp::os::Time::now();
-//            sot.solve(dq);
-//            double toc = yarp::os::Time::now();
-//            acc += toc - tic;
-
-//            //std::cout<<"dq: "<<dq.toString()<<std::endl;
-//            q += dq;
-//        }
-//        std::cout<<"Medium Time to Solve sot "<<acc/(double)(s*t)<<"[s]"<<std::endl;
+        yarp::sig::Matrix T_arm2_init = idynutils.iDyn3_model.getPosition(
+                    idynutils.iDyn3_model.getLinkIndex(ee2));
+        yarp::sig::Matrix T_arm2_ref = T_arm2_init;
+        T_arm2_ref(0,3) += 0.05;
+        KDL::Frame T_arm2_ref_kdl;
+        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2_ref, T_arm2_ref_kdl);
 
 
-//        yarp::sig::Matrix T_arm = idynutils.iDyn3_model.getPosition(
-//                    idynutils.iDyn3_model.getLinkIndex(ee1));
-//        KDL::Frame T_arm_kdl;
-//        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm, T_arm_kdl);
+        yarp::sig::Vector T_com_p_init = idynutils.iDyn3_model.getCOM();
+        yarp::sig::Vector T_com_p_ref = T_com_p_init;
+        T_com_p_ref[1] += 0.1;
+        yarp::sig::Matrix T_com_ref(4,4); T_com_ref.eye();
+        T_com_ref(0,3) = T_com_p_ref[0];
+        T_com_ref(1,3) = T_com_p_ref[1];
+        T_com_ref(2,3) = T_com_p_ref[2];
+        KDL::Frame T_com_ref_kdl;
+        cartesian_utils::fromYARPMatrixtoKDLFrame(T_com_ref, T_com_ref_kdl);
 
-//        yarp::sig::Matrix T_arm2 = idynutils.iDyn3_model.getPosition(
-//                    idynutils.iDyn3_model.getLinkIndex(ee2));
-//        KDL::Frame T_arm2_kdl;
-//        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2, T_arm2_kdl);
-
-//        yarp::sig::Vector T_com_p = idynutils_com.iDyn3_model.getCOM();
-//        yarp::sig::Matrix T_com(4,4); T_com.eye();
-//        T_com(0,3) = T_com_p[0];
-//        T_com(1,3) = T_com_p[1];
-//        T_com(2,3) = T_com_p[2];
-//        KDL::Frame T_com_kdl;
-//        cartesian_utils::fromYARPMatrixtoKDLFrame(T_com, T_com_kdl);
-
-//        if(number_of_tasks >= 1)
-//        {
-//            yarp::sig::Matrix T_com_init(4,4);
-//            T_com_init(0,3) = T_com_p_init[0];
-//            T_com_init(1,3) = T_com_p_init[1];
-//            T_com_init(2,3) = T_com_p_init[2];
-//            std::cout<<GREEN<<"CoM Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_com_init);
-//            std::cout<<GREEN<<"CoM Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_ref_kdl);
-//            std::cout<<GREEN<<"CoM Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_kdl);
-//            for(unsigned int i = 0; i < 3; ++i)
-//                EXPECT_NEAR(T_com_kdl.p[i], T_com_ref_kdl.p[i], 1E-3)<<"For i: "<<i<<std::endl;
-//        }
+        com_task->setReference(cartesian_utils::toEigen(T_com_p_ref));
+        cartesian_task->setReference(cartesian_utils::toEigen(T_arm_ref));
+        cartesian_task2->setReference(cartesian_utils::toEigen(T_arm2_ref));
+        postural_task->setReference(cartesian_utils::toEigen(q_ref));
 
 
-//        if(number_of_tasks >= 2)
-//        {
-//            std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_arm_init);
-//            std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_ref_kdl);
-//            std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_kdl);
-//            for(unsigned int i = 0; i < 3; ++i)
-//                EXPECT_NEAR(T_arm_kdl.p[i], T_arm_ref_kdl.p[i], 1E-3);
-//            for(unsigned int i = 0; i < 3; ++i)
-//                for(unsigned int j = 0; j < 3; ++j)
-//                    EXPECT_NEAR(T_arm_kdl.M(i,j), T_arm_ref_kdl.M(i,j), 1E-2);
-//        }
+        //Create the SoT
+        std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks;
+        if(number_of_tasks >= 1)
+            stack_of_tasks.push_back(com_task);
+        if(number_of_tasks >= 2)
+            stack_of_tasks.push_back(cartesian_task);
+        if(number_of_tasks >= 3)
+            stack_of_tasks.push_back(cartesian_task2);
 
-//        if(number_of_tasks >= 3)
-//        {
-//            std::cout<<GREEN<<"Arm2 Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_arm2_init);
-//            std::cout<<GREEN<<"Arm2 Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm2_ref_kdl);
-//            std::cout<<GREEN<<"Arm2 Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm2_kdl);
-//            for(unsigned int i = 0; i < 3; ++i)
-//                EXPECT_NEAR(T_arm2_kdl.p[i], T_arm2_ref_kdl.p[i], 1E-3);
-//            for(unsigned int i = 0; i < 3; ++i)
-//                for(unsigned int j = 0; j < 3; ++j)
-//                    EXPECT_NEAR(T_arm2_kdl.M(i,j), T_arm2_ref_kdl.M(i,j), 1E-2);
-//        }
+        stack_of_tasks.push_back(postural_task);
+        OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints, 2E2);
 
-//        if(number_of_tasks == 0)
-//        {
-//            for(unsigned int i = 0; i < q.size(); ++i)
-//                EXPECT_DOUBLE_EQ(q[i], q_ref[i]);
-//        }
-//    }
-//}
+        Eigen::VectorXd dq(q.size());
+        dq.setZero(q.size());
+        double acc = 0.0;
+        int s = 10;
+        for(unsigned int i = 0; i < s*t; ++i)
+        {
+            idynutils.updateiDyn3Model(q, true);
+            idynutils_com.updateiDyn3Model(q,true);
+
+            com_task->update(cartesian_utils::toEigen(q));
+            cartesian_task->update(cartesian_utils::toEigen(q));
+            cartesian_task2->update(cartesian_utils::toEigen(q));
+            postural_task->update(cartesian_utils::toEigen(q));
+            joint_constraints->update(cartesian_utils::toEigen(q));
+
+            double tic = yarp::os::Time::now();
+            sot.solve(dq);
+            double toc = yarp::os::Time::now();
+            acc += toc - tic;
+            yarp::sig::Vector _dq = cartesian_utils::fromEigentoYarp(dq);
+            //std::cout<<"dq: "<<dq<<std::endl;
+            q += _dq;
+        }
+        std::cout<<"Medium Time to Solve sot "<<acc/(double)(s*t)<<"[s]"<<std::endl;
+
+
+        yarp::sig::Matrix T_arm = idynutils.iDyn3_model.getPosition(
+                    idynutils.iDyn3_model.getLinkIndex(ee1));
+        KDL::Frame T_arm_kdl;
+        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm, T_arm_kdl);
+
+        yarp::sig::Matrix T_arm2 = idynutils.iDyn3_model.getPosition(
+                    idynutils.iDyn3_model.getLinkIndex(ee2));
+        KDL::Frame T_arm2_kdl;
+        cartesian_utils::fromYARPMatrixtoKDLFrame(T_arm2, T_arm2_kdl);
+
+        yarp::sig::Vector T_com_p = idynutils_com.iDyn3_model.getCOM();
+        yarp::sig::Matrix T_com(4,4); T_com.eye();
+        T_com(0,3) = T_com_p[0];
+        T_com(1,3) = T_com_p[1];
+        T_com(2,3) = T_com_p[2];
+        KDL::Frame T_com_kdl;
+        cartesian_utils::fromYARPMatrixtoKDLFrame(T_com, T_com_kdl);
+
+        if(number_of_tasks >= 1)
+        {
+            yarp::sig::Matrix T_com_init(4,4);
+            T_com_init(0,3) = T_com_p_init[0];
+            T_com_init(1,3) = T_com_p_init[1];
+            T_com_init(2,3) = T_com_p_init[2];
+            std::cout<<GREEN<<"CoM Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_com_init);
+            std::cout<<GREEN<<"CoM Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_ref_kdl);
+            std::cout<<GREEN<<"CoM Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_com_kdl);
+            for(unsigned int i = 0; i < 3; ++i)
+                EXPECT_NEAR(T_com_kdl.p[i], T_com_ref_kdl.p[i], 1E-3)<<"For i: "<<i<<std::endl;
+        }
+
+
+        if(number_of_tasks >= 2)
+        {
+            std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_arm_init);
+            std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_ref_kdl);
+            std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm_kdl);
+            for(unsigned int i = 0; i < 3; ++i)
+                EXPECT_NEAR(T_arm_kdl.p[i], T_arm_ref_kdl.p[i], 1E-3);
+            for(unsigned int i = 0; i < 3; ++i)
+                for(unsigned int j = 0; j < 3; ++j)
+                    EXPECT_NEAR(T_arm_kdl.M(i,j), T_arm_ref_kdl.M(i,j), 1E-2);
+        }
+
+        if(number_of_tasks >= 3)
+        {
+            std::cout<<GREEN<<"Arm2 Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_arm2_init);
+            std::cout<<GREEN<<"Arm2 Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm2_ref_kdl);
+            std::cout<<GREEN<<"Arm2 Pose: "<<DEFAULT<<std::endl; cartesian_utils::printKDLFrame(T_arm2_kdl);
+            for(unsigned int i = 0; i < 3; ++i)
+                EXPECT_NEAR(T_arm2_kdl.p[i], T_arm2_ref_kdl.p[i], 1E-3);
+            for(unsigned int i = 0; i < 3; ++i)
+                for(unsigned int j = 0; j < 3; ++j)
+                    EXPECT_NEAR(T_arm2_kdl.M(i,j), T_arm2_ref_kdl.M(i,j), 1E-2);
+        }
+
+        if(number_of_tasks == 0)
+        {
+            for(unsigned int i = 0; i < q.size(); ++i)
+                EXPECT_DOUBLE_EQ(q[i], q_ref[i]);
+        }
+    }
+}
 
 TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 {
