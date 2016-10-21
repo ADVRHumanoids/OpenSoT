@@ -94,7 +94,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
                     #src/tasks/velocity/Gaze.cpp
-                    #src/tasks/velocity/CoM.cpp
+                    src/tasks/velocity/CoM.cpp
                     #src/tasks/velocity/Interaction.cpp
                     #src/tasks/velocity/Manipulability.cpp
                     #src/tasks/velocity/MinimizeAcceleration.cpp

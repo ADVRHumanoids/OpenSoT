@@ -75,7 +75,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testAggregatedTask
                       testCartesianVelocityTask
                       #testCoMForceTask
-                      #testCoMVelocityTask
+                      testCoMVelocityTask
                       #testGazeVelocityTask
                       #testInteractionVelocityTask
                       #TestManipulabilityTask
@@ -197,9 +197,9 @@ add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
 #TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
 #add_dependencies(testCoMForceTask GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
-#TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
-#add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
+ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
+TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
+add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
 #TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
@@ -297,7 +297,7 @@ add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 #add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 #add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
-#add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
+add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
