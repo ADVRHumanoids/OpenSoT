@@ -20,18 +20,17 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/CoM.h>
- #include <yarp/sig/all.h>
  #include <idynutils/idynutils.h>
 
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
-            class CoMVelocity: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class CoMVelocity: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<CoMVelocity> Ptr;
             private:
                 iDynUtils& _robot;
-                yarp::sig::Vector _velocityLimits;
+                Eigen::VectorXd _velocityLimits;
                 double _dT;
 
                 void generatebBounds();
@@ -45,15 +44,15 @@
                  * @param x initial configuration of the robot when creating the constraint
                  * @param robot the robot model, with floating base link set on the support foot
                  */
-                CoMVelocity(const yarp::sig::Vector velocityLimits,
+                CoMVelocity(const Eigen::VectorXd velocityLimits,
                             const double dT,
-                            const yarp::sig::Vector& x,
+                            const Eigen::VectorXd& x,
                             iDynUtils& robot);
 
-                virtual void update(const yarp::sig::Vector &x);
+                virtual void update(const Eigen::VectorXd &x);
 
-                yarp::sig::Vector getVelocityLimits();
-                void setVelocityLimits(const yarp::sig::Vector velocityLimits);
+                Eigen::VectorXd getVelocityLimits();
+                void setVelocityLimits(const Eigen::VectorXd velocityLimits);
             };
         }
     }

@@ -16,16 +16,14 @@
 */
 
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
-#include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
 
-CoMVelocity::CoMVelocity(const yarp::sig::Vector velocityLimits,
+CoMVelocity::CoMVelocity(const Eigen::VectorXd velocityLimits,
                          const double dT,
-                         const yarp::sig::Vector& x,
+                         const Eigen::VectorXd& x,
                          iDynUtils &robot) :
 Constraint("CoMVelocity", x.size()), _dT(dT), _velocityLimits(velocityLimits),
 _robot(robot) {
@@ -42,13 +40,12 @@ _robot(robot) {
     this->update(x);
 }
 
-void CoMVelocity::update(const yarp::sig::Vector &x) {
+void CoMVelocity::update(const Eigen::VectorXd &x) {
 
-    yarp::sig::Matrix JCoM;
-    if(!_robot.iDyn3_model.getCOMJacobian(JCoM))
+    Eigen::MatrixXd JCoM;
+    if(!_robot.getCOMJacobian(JCoM))
         throw "Error computing CoM Jacobian";
-    JCoM.removeRows(3,3);       // remove orientation
-    JCoM.removeCols(0,6);       // remove floating base
+    JCoM = JCoM.block(0,6,3,_x_size);
 
     /************************ COMPUTING BOUNDS ****************************/
 
@@ -57,12 +54,12 @@ void CoMVelocity::update(const yarp::sig::Vector &x) {
     /**********************************************************************/
 }
 
-yarp::sig::Vector OpenSoT::constraints::velocity::CoMVelocity::getVelocityLimits()
+Eigen::VectorXd OpenSoT::constraints::velocity::CoMVelocity::getVelocityLimits()
 {
     return _velocityLimits;
 }
 
-void OpenSoT::constraints::velocity::CoMVelocity::setVelocityLimits(const yarp::sig::Vector velocityLimits)
+void OpenSoT::constraints::velocity::CoMVelocity::setVelocityLimits(const Eigen::VectorXd velocityLimits)
 {
     if(_velocityLimits.size() < 3 )
         throw "Error: velocityLimits for CoM should be a vector of 3 elements";
