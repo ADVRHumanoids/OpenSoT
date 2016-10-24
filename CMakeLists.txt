@@ -91,7 +91,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/stacks/velocity/ManipulationStack.cpp
                     #src/stacks/velocity/WalkingStack.cpp
                     src/tasks/Aggregated.cpp
-                    #src/tasks/SubTask.cpp
+                    src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
                     #src/tasks/velocity/Gaze.cpp
                     src/tasks/velocity/CoM.cpp
@@ -104,7 +104,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/tasks/force/CoM.cpp
                     #src/utils/AutoStack.cpp
                     #src/utils/DefaultHumanoidStack.cpp
-                    #src/utils/Indices.cpp
+                    src/utils/Indices.cpp
                     #src/utils/PreviewerUtils.cpp
                     #src/utils/VelocityAllocation.cpp
                     #src/utils/logger/L.cpp

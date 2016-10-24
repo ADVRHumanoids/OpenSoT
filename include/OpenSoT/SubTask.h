@@ -20,15 +20,12 @@
 
  #include <OpenSoT/Task.h>
  #include <OpenSoT/utils/Indices.h>
-
+ #include <Eigen/Dense>
  #include <list>
  #include <vector>
  #include <string>
  #include <cassert>
  #include <boost/shared_ptr.hpp>
- #include <yarp/sig/all.h>
- #include <yarp/math/Math.h>
- #include <yarp/math/SVD.h>
  #include <iterator>
 
  namespace OpenSoT {
@@ -44,7 +41,7 @@
      * as well as the weight matrix W (the \f$W_\text{subtask}\f$ is a submatrix of \f$W\f$)
      * On the other side, the \f$\lambda\f$ for the SubTask is unique to the SubTask.
     */
-    class SubTask : public Task<yarp::sig::Matrix, yarp::sig::Vector> {
+    class SubTask : public Task<Eigen::MatrixXd, Eigen::VectorXd> {
 
     public:
 
@@ -53,6 +50,18 @@
     protected:
         TaskPtr _taskPtr;
         Indices _subTaskMap;
+
+        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+        {
+            A.conservativeResize(A.rows()+B.rows(), A.cols());
+            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+        }
+
+        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+        {
+            a.conservativeResize(a.rows()+b.rows());
+            a.segment(a.rows()-b.rows(),b.rows())<<b;
+        }
 
     public:
         /**
@@ -81,7 +90,7 @@
          * please use the class SubTask
          * @param W matrix weight
          */
-        virtual void setWeight(const yarp::sig::Matrix& W);
+        virtual void setWeight(const Eigen::MatrixXd& W);
 
         /**
          * @brief getConstraints return a reference to the constraint list. Use the standard list methods
@@ -100,7 +109,7 @@
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
             @param x variable state at the current step (input) */
-        virtual void _update(const yarp::sig::Vector &x);
+        virtual void _update(const Eigen::VectorXd &x);
 
         /**
          * @brief getActiveJointsMask return a vector of length NumberOfDOFs.

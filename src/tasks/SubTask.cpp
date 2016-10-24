@@ -19,11 +19,12 @@ void OpenSoT::SubTask::generateA()
     for(Indices::ChunkList::const_iterator i = _subTaskMap.getChunks().begin();
         i != _subTaskMap.getChunks().end();
         ++i) {
-        using namespace yarp::math;
+
         if(_taskPtr->getA().rows() > i->back())
-            this->_A = pile(this->_A, _taskPtr->getA().submatrix(i->front(),
-                                                                 i->back(),
-                                                                 0, _x_size-1));
+            pile(this->_A,
+                //_taskPtr->getA().submatrix(i->front(),i->back(),0, _x_size-1));
+                _taskPtr->getA().block(i->front(),0,
+                                       i->back()-i->front()+1, _x_size));
     }
 }
 
@@ -43,23 +44,22 @@ void OpenSoT::SubTask::generateb()
     for(Indices::ChunkList::const_iterator i = _subTaskMap.getChunks().begin();
         i != _subTaskMap.getChunks().end();
         ++i) {
-        using namespace yarp::math;
+
         if(_taskPtr->getb().size() > i->back())
-            this->_b = cat(this->_b, _taskPtr->getb().subVector(i->front(),
-                                                                i->back()));
+            pile(this->_b,
+                 //_taskPtr->getb().subVector(i->front(),i->back()));
+                 _taskPtr->getb().segment(i->front(),i->back()-i->front()+1));
     }
 
     if(this->_b.size() > 0)
-    {
-        using namespace yarp::math;
         this->_b = this->_b * this->_lambda;
-    }
+
 }
 
 void OpenSoT::SubTask::generateWeight()
 {
         this->_W.resize(this->getTaskSize(), this->getTaskSize());
-        this->_W.zero();
+        this->_W.setZero(this->getTaskSize(), this->getTaskSize());
 
         for(unsigned int r = 0; r < this->getTaskSize(); ++r)
             for(unsigned int c = 0; c < this->getTaskSize(); ++c)
@@ -67,13 +67,13 @@ void OpenSoT::SubTask::generateWeight()
                                                       this->_subTaskMap.asVector()[c]);
 }
 
-void OpenSoT::SubTask::setWeight(const yarp::sig::Matrix &W)
+void OpenSoT::SubTask::setWeight(const Eigen::MatrixXd &W)
 {
     assert(W.rows() == this->getTaskSize());
     assert(W.cols() == W.rows());
 
     this->_W = W;
-    yarp::sig::Matrix fullW = _taskPtr->getWeight();
+    Eigen::MatrixXd fullW = _taskPtr->getWeight();
     for(unsigned int r = 0; r < this->getTaskSize(); ++r)
         for(unsigned int c = 0; c < this->getTaskSize(); ++c)
             fullW(this->_subTaskMap.asVector()[r],
@@ -94,7 +94,7 @@ const unsigned int OpenSoT::SubTask::getTaskSize() const
         i != _subTaskMap.getChunks().end();
         ++i)
     {
-        using namespace yarp::math;
+
         if(_taskPtr->getTaskSize() > i->back()) {
             size += i->size();
         }
@@ -102,7 +102,7 @@ const unsigned int OpenSoT::SubTask::getTaskSize() const
     return size;
 }
 
-void OpenSoT::SubTask::_update(const yarp::sig::Vector &x)
+void OpenSoT::SubTask::_update(const Eigen::VectorXd &x)
 {
     _taskPtr->update(x);
     this->generateA();
