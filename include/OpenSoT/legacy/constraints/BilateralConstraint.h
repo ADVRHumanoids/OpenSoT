@@ -17,20 +17,22 @@
         public:
             BilateralConstraint(const yarp::sig::Matrix &Aineq,
                                 const yarp::sig::Vector &bLowerBound,
-                                const yarp::sig::Vector &bUpperBound)
-            {
+                                const yarp::sig::Vector &bUpperBound):
                 OpenSoT::constraints::BilateralConstraint(cartesian_utils::toEigen(Aineq),
-                        cartesian_utils::toEigen(bLowerBound), cartesian_utils::toEigen(bUpperBound));
+                        cartesian_utils::toEigen(bLowerBound), cartesian_utils::toEigen(bUpperBound))
+            {
+
             }
 
             BilateralConstraint(const std::string constraintName,
                                 const yarp::sig::Matrix &Aineq,
                                 const yarp::sig::Vector &bLowerBound,
-                                const yarp::sig::Vector &bUpperBound)
-            {
+                                const yarp::sig::Vector &bUpperBound):
                 OpenSoT::constraints::BilateralConstraint(constraintName,
                     cartesian_utils::toEigen(Aineq),
-                    cartesian_utils::toEigen(bLowerBound), cartesian_utils::toEigen(bUpperBound));
+                    cartesian_utils::toEigen(bLowerBound), cartesian_utils::toEigen(bUpperBound))
+            {
+
             }
 
         };

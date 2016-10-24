@@ -52,7 +52,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       MAIN_DEPENDENCY OpenSoT
                       DEPENDS
                       testAggregatedConstraint
-                      #testBilateralConstraint
+                      testBilateralConstraint
                       #testCartesianPositionVelocityConstraint
                       #testCollisionAvoidanceVelocityConstraint
                       #testCoMVelocityVelocityConstraint
@@ -105,9 +105,9 @@ ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
 add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
-#TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
-#add_dependencies(testBilateralConstraint GTest-ext OpenSoT)
+ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
+TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
+add_dependencies(testBilateralConstraint GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
@@ -272,7 +272,7 @@ add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
 
 add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
-#add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
+add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)

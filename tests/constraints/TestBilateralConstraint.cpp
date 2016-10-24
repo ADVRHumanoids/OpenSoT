@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/constraints/BilateralConstraint.h>
-#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/legacy/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/legacy/constraints/BilateralConstraint.h>
+#include <OpenSoT/legacy/constraints/velocity/JointLimits.h>
 #include <string>
 
 namespace {
@@ -48,7 +48,9 @@ TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
     yarp::sig::Vector bUpperBound(nJ,M_PI);
     yarp::sig::Vector bLowerBound(nJ,0.0);
     BilateralConstraint::ConstraintPtr bilateral(BilateralConstraint::ConstraintPtr(
-        new BilateralConstraint(A, bUpperBound, bLowerBound)
+        new BilateralConstraint(cartesian_utils::toEigen(A),
+                                cartesian_utils::toEigen(bUpperBound),
+                                cartesian_utils::toEigen(bLowerBound))
                                                   )
                           );
 
@@ -63,13 +65,13 @@ TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
     EXPECT_TRUE(bilateral->getAeq().rows() == 0);
     EXPECT_TRUE(bilateral->getbeq().size() == 0);
 
-    yarp::sig::Vector oldbLowerBound = bilateral->getbLowerBound();
-    yarp::sig::Vector oldbUpperBound = bilateral->getbUpperBound();
-    yarp::sig::Matrix oldAineq = bilateral->getAineq();
-    bilateral->update(q_next);
-    yarp::sig::Vector newbLowerBound = bilateral->getbLowerBound();
-    yarp::sig::Vector newbUpperBound = bilateral->getbUpperBound();
-    yarp::sig::Matrix newAineq = bilateral->getAineq();
+    yarp::sig::Vector oldbLowerBound = cartesian_utils::fromEigentoYarp(bilateral->getbLowerBound());
+    yarp::sig::Vector oldbUpperBound = cartesian_utils::fromEigentoYarp(bilateral->getbUpperBound());
+    yarp::sig::Matrix oldAineq = cartesian_utils::fromEigentoYarp(bilateral->getAineq());
+    bilateral->update(cartesian_utils::toEigen(q_next));
+    yarp::sig::Vector newbLowerBound = cartesian_utils::fromEigentoYarp(bilateral->getbLowerBound());
+    yarp::sig::Vector newbUpperBound = cartesian_utils::fromEigentoYarp(bilateral->getbUpperBound());
+    yarp::sig::Matrix newAineq = cartesian_utils::fromEigentoYarp(bilateral->getAineq());
     EXPECT_TRUE(oldbLowerBound == newbLowerBound);
     EXPECT_TRUE(oldbUpperBound == newbUpperBound);
     EXPECT_TRUE(oldAineq == newAineq);
