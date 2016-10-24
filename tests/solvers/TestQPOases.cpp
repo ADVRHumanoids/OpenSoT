@@ -719,63 +719,63 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     }
 }
 
-//TEST_F(testQPOasesTask, testCoMTask)
-//{
-//    iDynUtils idynutils("coman",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    idynutils.iDyn3_model.setFloatingBaseLink(idynutils.left_leg.index);
-//    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
-//    idynutils.updateiDyn3Model(q, true);
+TEST_F(testQPOasesTask, testCoMTask)
+{
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    idynutils.iDyn3_model.setFloatingBaseLink(idynutils.left_leg.index);
+    yarp::sig::Vector q = getGoodInitialPosition(idynutils);
+    idynutils.updateiDyn3Model(q, true);
 
-//    OpenSoT::tasks::velocity::CoM::Ptr com_task(
-//                new OpenSoT::tasks::velocity::CoM(cartesian_utils::toEigen(q), idynutils));
+    OpenSoT::tasks::velocity::CoM::Ptr com_task(
+                new OpenSoT::tasks::velocity::CoM(cartesian_utils::toEigen(q), idynutils));
 
-//    Eigen::VectorXd tmp(3);
-//    tmp<<0.06,0.06,0.06;
-//    OpenSoT::constraints::velocity::CoMVelocity::Ptr com_vel_constr(
-//                new OpenSoT::constraints::velocity::CoMVelocity(
-//                    tmp,1.0,cartesian_utils::toEigen(q),idynutils));
-//    com_task->getConstraints().push_back(com_vel_constr);
+    Eigen::VectorXd tmp(3);
+    tmp<<0.06,0.06,0.06;
+    OpenSoT::constraints::velocity::CoMVelocity::Ptr com_vel_constr(
+                new OpenSoT::constraints::velocity::CoMVelocity(
+                    tmp,1.0,cartesian_utils::toEigen(q),idynutils));
+    com_task->getConstraints().push_back(com_vel_constr);
 
-//    std::list< OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraint_list =
-//            com_task->getConstraints();
-//    OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint = constraint_list.front();
+    std::list< OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraint_list =
+            com_task->getConstraints();
+    OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint = constraint_list.front();
 
-//    OpenSoT::legacy::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
-//                                                    com_task->getHessianAtype());
-//    ASSERT_TRUE(qp_CoM_problem.initProblem(com_task->getA().transposed()*com_task->getA(), -1.0*com_task->getA().transposed()*com_task->getb(),
-//                                                constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
-//                                                Eigen::VectorXd(), Eigen::VectorXd()));
-
-
-//    yarp::sig::Vector com_i = cartesian_utils::fromEigentoYarp(com_task->getActualPosition());
-//    yarp::sig::Vector com_f = com_i;
-//    com_f[0] += 0.05;
-//    com_f[1] += 0.05;
-//    com_f[2] -= 0.05;
-//    com_task->setReference(cartesian_utils::fromEigentoYarp(com_f));
+    OpenSoT::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
+                                                    com_task->getHessianAtype());
+    ASSERT_TRUE(qp_CoM_problem.initProblem(com_task->getA().transpose()*com_task->getA(), -1.0*com_task->getA().transpose()*com_task->getb(),
+                                                constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
+                                                Eigen::VectorXd(), Eigen::VectorXd()));
 
 
-//    for(unsigned int i = 0; i < 100; ++i)
-//    {
-//        idynutils.updateiDyn3Model(q,true);
-//        com_task->update(q);
-
-//        qp_CoM_problem.updateProblem(com_task->getA().transposed()*com_task->getA(), -1.0*com_task->getA().transposed()*com_task->getb(),
-//                                          constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
-//                                          yarp::sig::Vector(), yarp::sig::Vector());
-
-//        ASSERT_TRUE(qp_CoM_problem.solve());
-//        yarp::sig::Vector dq = qp_CoM_problem.getSolution();
-//        q += dq;
-//    }
+    yarp::sig::Vector com_i = cartesian_utils::fromEigentoYarp(com_task->getActualPosition());
+    yarp::sig::Vector com_f = com_i;
+    com_f[0] += 0.05;
+    com_f[1] += 0.05;
+    com_f[2] -= 0.05;
+    com_task->setReference(cartesian_utils::toEigen(com_f));
 
 
-//    for(unsigned int i = 0; i < 3; ++i)
-//        EXPECT_NEAR( com_task->getb()[i], 0.0, 1E-4);
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        idynutils.updateiDyn3Model(q,true);
+        com_task->update(cartesian_utils::toEigen(q));
 
-//}
+        qp_CoM_problem.updateProblem(com_task->getA().transpose()*com_task->getA(), -1.0*com_task->getA().transpose()*com_task->getb(),
+                                          constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
+                                          Eigen::VectorXd(), Eigen::VectorXd());
+
+        ASSERT_TRUE(qp_CoM_problem.solve());
+        yarp::sig::Vector dq = cartesian_utils::fromEigentoYarp(qp_CoM_problem.getSolution());
+        q += dq;
+    }
+
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR( com_task->getb()[i], 0.0, 1E-4);
+
+}
 
 TEST_F(testQPOasesTask, testCartesian)
 {
