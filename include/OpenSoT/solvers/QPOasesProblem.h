@@ -320,17 +320,17 @@ namespace OpenSoT{
          */
         boost::shared_ptr<qpOASES::Options> _opt;
 
-        inline void pile(MatrixXd& A, const MatrixXd& B)
-        {
-            A.conservativeResize(A.rows()+B.rows(), A.cols());
-            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-        }
+//        inline void pile(MatrixXd& A, const MatrixXd& B)
+//        {
+//            A.conservativeResize(A.rows()+B.rows(), A.cols());
+//            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+//        }
 
-        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
-        {
-            a.conservativeResize(a.rows()+b.rows());
-            a.segment(a.rows()-b.rows(),b.rows())<<b;
-        }
+//        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+//        {
+//            a.conservativeResize(a.rows()+b.rows());
+//            a.segment(a.rows()-b.rows(),b.rows())<<b;
+//        }
     };
     }
 }

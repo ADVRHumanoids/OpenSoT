@@ -20,8 +20,10 @@
 #include <assert.h>
 #include <limits>
 #include <sstream>
+#include <OpenSoT/utils/math/Math.h>
 
 using namespace OpenSoT::constraints;
+using namespace OpenSoT::utils::math;
 
 Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const Eigen::VectorXd &q,

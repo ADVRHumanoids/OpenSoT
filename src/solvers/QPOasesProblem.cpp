@@ -5,6 +5,7 @@
 #include <fstream>
 #include <boost/make_shared.hpp>
 #include <qpOASES/Matrices.hpp>
+#include <OpenSoT/utils/math/Math.h>
 
 
 #define GREEN "\033[0;32m"
@@ -13,6 +14,7 @@
 #define DEFAULT "\033[0m"
 
 using namespace OpenSoT::solvers;
+using namespace OpenSoT::utils::math;
 
 QPOasesProblem::QPOasesProblem(const int number_of_variables,
                                const int number_of_constraints,

@@ -27,9 +27,6 @@
 #include "QPOasesProblem.h"
 
 
-
-using namespace yarp::sig;
-
 namespace qpOASES {
     class SQProblem;
     class Options;
@@ -150,17 +147,17 @@ namespace OpenSoT{
         void computeOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
                                                 Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA);
 
-        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
-        {
-            A.conservativeResize(A.rows()+B.rows(), A.cols());
-            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-        }
+//        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+//        {
+//            A.conservativeResize(A.rows()+B.rows(), A.cols());
+//            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+//        }
 
-        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
-        {
-            a.conservativeResize(a.rows()+b.rows());
-            a.segment(a.rows()-b.rows(),b.rows())<<b;
-        }
+//        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+//        {
+//            a.conservativeResize(a.rows()+b.rows());
+//            a.segment(a.rows()-b.rows(),b.rows())<<b;
+//        }
 
     };
 
