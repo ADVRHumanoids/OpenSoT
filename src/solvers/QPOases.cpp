@@ -1,15 +1,15 @@
 #include <qpOASES.hpp>
+#include <yarp/math/Math.h>
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
-#include <OpenSoT/utils/math/Math.h>
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
 #define RED "\033[0;31m"
 #define DEFAULT "\033[0m"
 
+using namespace yarp::math;
 using namespace OpenSoT::solvers;
-using namespace OpenSoT::utils::math;
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation):
     Solver(stack_of_tasks),

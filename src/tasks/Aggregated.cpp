@@ -20,10 +20,8 @@
 #include <exception>
 #include <stdexcept>
 #include <assert.h>
-#include <OpenSoT/utils/math/Math.h>
 
 using namespace OpenSoT::tasks;
-using namespace OpenSoT::utils::math;
 
 Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const unsigned int x_size) :

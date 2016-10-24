@@ -64,17 +64,17 @@
 
             static const std::string concatenateConstraintsIds(const std::list<ConstraintPtr> constraints);
 
-//            inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
-//            {
-//                A.conservativeResize(A.rows()+B.rows(), A.cols());
-//                A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-//            }
+            inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+            {
+                A.conservativeResize(A.rows()+B.rows(), A.cols());
+                A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+            }
 
-//            inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
-//            {
-//                a.conservativeResize(a.rows()+b.rows());
-//                a.segment(a.rows()-b.rows(),b.rows())<<b;
-//            }
+            inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+            {
+                a.conservativeResize(a.rows()+b.rows());
+                a.segment(a.rows()-b.rows(),b.rows())<<b;
+            }
 
         public:
             /**
