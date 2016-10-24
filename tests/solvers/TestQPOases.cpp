@@ -14,6 +14,7 @@
 #include <yarp/sig/all.h>
 #include <fstream>
 #include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/tasks/velocity/MinimumEffort.h>
 
 
 using namespace yarp::math;
@@ -1307,60 +1308,63 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 
 }
 
-//TEST_F(testQPOases_sot, testMinEffort)
-//{
-//    iDynUtils idynutils("coman",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-//    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-//    leg[5] = 45.0 * M_PI/180.0;
-//    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-//    idynutils.updateiDyn3Model(q,true);
+TEST_F(testQPOases_sot, testMinEffort)
+{
+    iDynUtils idynutils("coman",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
+    leg[5] = 45.0 * M_PI/180.0;
+    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
+    idynutils.updateiDyn3Model(q,true);
 
-//    OpenSoT::tasks::velocity::MinimumEffort::Ptr min_effort_task(
-//            new OpenSoT::tasks::velocity::MinimumEffort(q, idynutils));
+    OpenSoT::tasks::velocity::MinimumEffort::Ptr min_effort_task(
+            new OpenSoT::tasks::velocity::MinimumEffort(
+                    cartesian_utils::toEigen(q), idynutils));
 
-//    std::list<OpenSoT::Task<Matrix, Vector>::TaskPtr> task_list;
-//    task_list.push_back(min_effort_task);
+    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> task_list;
+    task_list.push_back(min_effort_task);
 
-//    OpenSoT::tasks::Aggregated::Ptr joint_space_task(
-//                new OpenSoT::tasks::Aggregated(task_list, q.size()));
-
-
-//    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_vel_limits(
-//        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
-
-//    std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> bounds_list;
-//    bounds_list.push_back(joint_vel_limits);
-
-//    OpenSoT::constraints::Aggregated::Ptr bounds(
-//                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+    OpenSoT::tasks::Aggregated::Ptr joint_space_task(
+                new OpenSoT::tasks::Aggregated(task_list, q.size()));
 
 
-//    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-//    stack_of_tasks.push_back(joint_space_task);
-//    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_vel_limits(
+        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
 
-//    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
-//    yarp::sig::Vector dq(q.size(), 0.0);
-//    old_gravity_gradient oldGravityGradient;
-//    for(unsigned int i = 0; i < 100; ++i)
-//    {
-//        joint_space_task->update(q);
-//        bounds->update(q);
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
+    bounds_list.push_back(joint_vel_limits);
 
-//        yarp::sig::Vector old_gradient = oldGravityGradient.computeMinEffort(q);
-
-//        for(unsigned int i = 0; i < q.size(); ++i)
-//            EXPECT_NEAR(joint_space_task->getb()[i], old_gradient[i], 1E-3);
+    OpenSoT::constraints::Aggregated::Ptr bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
 
-//        EXPECT_TRUE(sot.solve(dq));
-//        q += dq;
-//    }
+    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(joint_space_task);
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
 
-//}
+    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(q.size());
+    old_gravity_gradient oldGravityGradient;
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        joint_space_task->update(cartesian_utils::toEigen(q));
+        bounds->update(cartesian_utils::toEigen(q));
+
+        yarp::sig::Vector old_gradient = oldGravityGradient.computeMinEffort(q);
+
+        for(unsigned int i = 0; i < q.size(); ++i)
+            EXPECT_NEAR(joint_space_task->getb()[i], old_gradient[i], 1E-3);
+
+
+        EXPECT_TRUE(sot.solve(dq));
+        yarp::sig::Vector dq_ = cartesian_utils::fromEigentoYarp(dq);
+        q += dq_;
+    }
+
+}
 
 //TEST_F(testQPOases_sot, testAggregated2Tasks)
 //{
