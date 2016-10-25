@@ -21,7 +21,6 @@
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <OpenSoT/Task.h>
 
-#include <yarp/sig/all.h>
 #include <list>
 
 
@@ -36,7 +35,7 @@
          */
         class TaskToConstraint: public BilateralConstraint {
         public:
-            typedef boost::shared_ptr< OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector> > TaskPtr;
+            typedef boost::shared_ptr< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> > TaskPtr;
             typedef boost::shared_ptr< OpenSoT::constraints::TaskToConstraint> Ptr;
 
         private:
@@ -55,7 +54,7 @@
              * @brief update updates the adapted task and the adapter constraint
              * @param q
              */
-            void update(const yarp::sig::Vector &q);
+            void update(const Eigen::VectorXd &q);
 
         protected:
 

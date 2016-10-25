@@ -252,17 +252,30 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
     static bool result0 = false;
     static bool isQProblemInitialized0 = false;
     if(!isQProblemInitialized0){
-        result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
+        result0 = qp0.initProblem(
+                    cartesian_utils::toEigen(H0),
+                    cartesian_utils::toEigen(g0),
+                    cartesian_utils::toEigen(A0),
+                    cartesian_utils::toEigen(lA0),
+                    cartesian_utils::toEigen(uA0),
+                    cartesian_utils::toEigen(l),
+                    cartesian_utils::toEigen(u));
         isQProblemInitialized0 = true;}
     else
     {
-        qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
+        qp0.updateProblem(cartesian_utils::toEigen(H0),
+                          cartesian_utils::toEigen(g0),
+                          cartesian_utils::toEigen(A0),
+                          cartesian_utils::toEigen(lA0),
+                          cartesian_utils::toEigen(uA0),
+                          cartesian_utils::toEigen(l),
+                          cartesian_utils::toEigen(u));
         result0 = qp0.solve();
     }
 
     if(result0)
     {
-        yarp::sig::Vector dq0 = qp0.getSolution();
+        yarp::sig::Vector dq0 = cartesian_utils::fromEigentoYarp(qp0.getSolution());
         yarp::sig::Matrix A1 = J0;
         yarp::sig::Vector b1 = J0*dq0;
         yarp::sig::Vector lA1 = b1;
@@ -273,16 +286,29 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
         static bool result1 = false;
         static bool isQProblemInitialized1 = false;
         if(!isQProblemInitialized1){
-            result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
+            result1 = qp1.initProblem(
+                        cartesian_utils::toEigen(H1),
+                        cartesian_utils::toEigen(g1),
+                        cartesian_utils::toEigen(A1),
+                        cartesian_utils::toEigen(lA1),
+                        cartesian_utils::toEigen(uA1),
+                        cartesian_utils::toEigen(l),
+                        cartesian_utils::toEigen(u));
             isQProblemInitialized1 = true;}
         else
         {
-            qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
+            qp1.updateProblem(cartesian_utils::toEigen(H1),
+                              cartesian_utils::toEigen(g1),
+                              cartesian_utils::toEigen(A1),
+                              cartesian_utils::toEigen(lA1),
+                              cartesian_utils::toEigen(uA1),
+                              cartesian_utils::toEigen(l),
+                              cartesian_utils::toEigen(u));
             result1 = qp1.solve();
         }
         if(result1)
         {
-            dq_ref = qp1.getSolution();
+            dq_ref = cartesian_utils::fromEigentoYarp(qp1.getSolution());
             return true;
         }
         else
@@ -374,9 +400,10 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits( q,
-                        idynutils_com.iDyn3_model.getJointBoundMax(),
-                        idynutils_com.iDyn3_model.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(
+                    cartesian_utils::toEigen(q),
+                        idynutils_com.getJointBoundMax(),
+                        idynutils_com.getJointBoundMin()));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr velocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits(0.3,
@@ -393,24 +420,27 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::CoM::Ptr com_task(
-                new OpenSoT::tasks::velocity::CoM(q, idynutils_com));
+                new OpenSoT::tasks::velocity::CoM(
+                    cartesian_utils::toEigen(q), idynutils_com));
     com_task->setLambda(.6);
 
     yarp::sig::Matrix W(3,3);
     W.eye(); W(2,2) = .1;
-    com_task->setWeight(W);
+    com_task->setWeight(cartesian_utils::toEigen(W));
 
     OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
                 new OpenSoT::constraints::velocity::CoMVelocity(
-                    yarp::sig::Vector(3, 0.05), 0.004 , q, idynutils_com));
+                    cartesian_utils::toEigen(yarp::sig::Vector(3, 0.05)), 0.004 ,
+                    cartesian_utils::toEigen(q), idynutils_com));
     com_task->getConstraints().push_back(boundsCoMVelocity);
     OpenSoT::constraints::velocity::ConvexHull::Ptr boundsConvexHull(
-                new OpenSoT::constraints::velocity::ConvexHull(q, idynutils_com, 0.01));
+                new OpenSoT::constraints::velocity::ConvexHull(
+                    cartesian_utils::toEigen(q), idynutils_com, 0.01));
     com_task->getConstraints().push_back(boundsConvexHull);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr right_foot_task(
                 new OpenSoT::tasks::velocity::Cartesian("world::right_foot",
-                                                        q, idynutils_com,
+                                                        cartesian_utils::toEigen(q), idynutils_com,
                                                         idynutils_com.right_leg.end_effector_name,
                                                         "world"));
     right_foot_task->setLambda(.2);
@@ -418,7 +448,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(q));;
+            new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
     if(footStrategy == USE_TASK)
@@ -454,10 +484,10 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     std::cout << "Initial CoM position is " << T_com_p_init.toString() << std::endl;
     std::cout << "Moving to (0,0)" << std::endl;
 
-    com_task->setReference(T_com_p_ref);
+    com_task->setReference(cartesian_utils::toEigen(T_com_p_ref));
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    double e = norm(T_com_p_ref - com_task->getActualPosition());
+    double e = norm(T_com_p_ref - cartesian_utils::fromEigentoYarp(com_task->getActualPosition()));
     double previous_e = 0.0;
 
     unsigned int i = 0;
@@ -467,62 +497,66 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     else if(footStrategy == USE_CONSTRAINT)
         _log << "com_traj_constraint = [";
 
-    yarp::sig::Matrix right_foot_pose = right_foot_task->getActualPose();
+    yarp::sig::Matrix right_foot_pose = cartesian_utils::fromEigentoYarp(right_foot_task->getActualPose());
 
     for(i = 0; i < n_iterations; ++i)
     {
         idynutils_com.updateiDyn3Model(q, true);
 
-        right_foot_task->update(q);
-        com_task->update(q);
-        postural_task->update(q);
-        bounds->update(q);
+        right_foot_task->update(cartesian_utils::toEigen(q));
+        com_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
+        bounds->update(cartesian_utils::toEigen(q));
 
         _log << com_task->getActualPosition()[0] << ","
             << com_task->getActualPosition()[1] <<";";
-        e = norm(T_com_p_ref - com_task->getActualPosition());
+        e = norm(T_com_p_ref - cartesian_utils::fromEigentoYarp(com_task->getActualPosition()));
 
         if(fabs(previous_e - e) < 1e-13) {
-            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - com_task->getActualPosition()) << " . Error not decreasing. CONVERGED." << std::endl;
+            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - cartesian_utils::fromEigentoYarp(com_task->getActualPosition())) << " . Error not decreasing. CONVERGED." << std::endl;
             break;
         }
         previous_e = e;
 
-        EXPECT_TRUE(sot->solve(dq));
+        Eigen::VectorXd _dq(dq.size());
+        _dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
-        yarp::sig::Matrix right_foot_pose_now = right_foot_task->getActualPose();
+        yarp::sig::Matrix right_foot_pose_now = cartesian_utils::fromEigentoYarp(right_foot_task->getActualPose());
         for(unsigned int r = 0; r < 4; ++r)
             for(unsigned int c = 0; c < 4; ++c)
                 ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-6);
-        ASSERT_LT(norm(right_foot_task->getb()),1e-8);
+        ASSERT_LT(norm(cartesian_utils::fromEigentoYarp(right_foot_task->getb())),1e-8);
 
 #ifdef TRY_ON_SIMULATOR
         robot.move(q);
 #endif
     }
 
-    ASSERT_NEAR(norm(T_com_p_ref - com_task->getActualPosition()),0,1E-9);
+    ASSERT_NEAR(norm(T_com_p_ref - cartesian_utils::fromEigentoYarp(com_task->getActualPosition())),0,1E-9);
 
     idynutils_com.updateiDyn3Model(q, true);
-    boundsConvexHull->update(q);
+    boundsConvexHull->update(cartesian_utils::toEigen(q));
     std::vector<KDL::Vector> points;
     std::vector<KDL::Vector> points_inner;
     boundsConvexHull->getConvexHull(points);
 
     KDL::Vector point_old;
-    yarp::sig::Matrix A_ch, A_ch_outer;
-    yarp::sig::Vector b_ch, b_ch_outer;
+    Eigen::MatrixXd A_ch, A_ch_outer;
+    Eigen::VectorXd b_ch, b_ch_outer;
     boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
     boundsConvexHull->getConstraints(points, A_ch_outer, b_ch_outer, 0.0);
-    std::cout << std::endl << "A_ch: " << std::endl << A_ch.toString() << std::endl;
-    std::cout << std::endl << "b_ch: " << std::endl << b_ch.toString() << std::endl;
-    std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer.toString() << std::endl;
-    std::cout << std::endl << "b_ch_outer: " << std::endl << b_ch_outer.toString() << std::endl;
+    std::cout << std::endl << "A_ch: " << std::endl << A_ch << std::endl;
+    std::cout << std::endl << "b_ch: " << std::endl << b_ch << std::endl;
+    std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer << std::endl;
+    std::cout << std::endl << "b_ch_outer: " << std::endl << b_ch_outer << std::endl;
     std::cout << std::endl << "@q: " << std::endl << q.toString() << std::endl << std::endl;
-    getPointsFromConstraints(A_ch,
-                             b_ch,
+    getPointsFromConstraints(cartesian_utils::fromEigentoYarp(A_ch),
+                             cartesian_utils::fromEigentoYarp(b_ch),
                              points_inner);
+
 
     points.push_back(points.front());
     points_inner.push_back(points_inner.front());
@@ -542,24 +576,24 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         T_com_p_ref[0] = point->x();
         T_com_p_ref[1] = point->y();
 
-        com_task->setReference(T_com_p_ref);
+        com_task->setReference(cartesian_utils::toEigen(T_com_p_ref));
 
         yarp::sig::Vector dq(q.size(), 0.0);
-        double e = norm(T_com_p_ref - com_task->getActualPosition());
+        double e = norm(T_com_p_ref - cartesian_utils::fromEigentoYarp(com_task->getActualPosition()));
         double previous_e = 0.0;
         double oscillation_check_e = 0.0;
         for(i = 0; i < n_iterations; ++i)
         {
             idynutils_com.updateiDyn3Model(q, true);
 
-            right_foot_task->update(q);
-            com_task->update(q);
-            postural_task->update(q);
-            bounds->update(q);
+            right_foot_task->update(cartesian_utils::toEigen(q));
+            com_task->update(cartesian_utils::toEigen(q));
+            postural_task->update(cartesian_utils::toEigen(q));
+            bounds->update(cartesian_utils::toEigen(q));
 
             _log << com_task->getActualPosition()[0] << ","
                 << com_task->getActualPosition()[1] <<";";
-            e = norm(T_com_p_ref - com_task->getActualPosition());
+            e = norm(T_com_p_ref - cartesian_utils::fromEigentoYarp(com_task->getActualPosition()));
 
             if(fabs(e - oscillation_check_e) < 1e-9)
             {
@@ -577,14 +611,20 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
             if(e < 1e-3) {  // what if we get too close?!?
                 boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
-                std::cout << "A_ch:" << A_ch.toString() << std::endl;
-                std::cout << "b_ch:" << b_ch.toString() << std::endl;
+                std::cout << "A_ch:" << A_ch << std::endl;
+                std::cout << "b_ch:" << b_ch << std::endl;
             }
 
-            EXPECT_TRUE(sot->solve(dq));
+
+
+            Eigen::VectorXd _dq(dq.size());
+            _dq.setZero(dq.size());
+            EXPECT_TRUE(sot->solve(_dq));
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             q += dq;
 
-            yarp::sig::Matrix right_foot_pose_now = right_foot_task->getActualPose();
+
+            yarp::sig::Matrix right_foot_pose_now = cartesian_utils::fromEigentoYarp(right_foot_task->getActualPose());
             for(unsigned int r = 0; r < 4; ++r)
                 for(unsigned int c = 0; c < 4; ++c)
                     EXPECT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-3) << "Error at iteration "
@@ -593,45 +633,57 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                                                                                     << "(" << r
                                                                                     << "," << c << ")"
                                                                                     << " with cartesian error equal to "
-                                                                                    << norm(right_foot_task->getb()) << std::endl;
-            EXPECT_LT(norm(right_foot_task->getb()),5e-5);
-            EXPECT_LT(norm(right_foot_task->getA()*dq),1E-6) << "Error at iteration "
+                                                                                    << norm(cartesian_utils::fromEigentoYarp(right_foot_task->getb())) << std::endl;
+            EXPECT_LT(norm(cartesian_utils::fromEigentoYarp(right_foot_task->getb())),5e-5);
+            EXPECT_LT(norm(cartesian_utils::fromEigentoYarp(right_foot_task->getA())*dq),1E-6) << "Error at iteration "
                                                              << i
                                                              << " J_foot*dq = "
-                                                             << (right_foot_task->getA()*dq).toString()
+                                                             << (right_foot_task->getA()*cartesian_utils::toEigen(dq))
                                                              << std::endl;
 
 #ifdef TRY_ON_SIMULATOR
             robot.move(q);
 #endif
         }
-        if(i == n_iterations)
-            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - com_task->getActualPosition()) << " -- Error not decreasing. STOPPING." << std::endl;
 
-        yarp::sig::Vector distance = T_com_p_ref - com_task->getActualPosition();
+
+
+        if(i == n_iterations)
+            std::cout << "i: " << i << " e: " << norm(T_com_p_ref -
+                                                      cartesian_utils::fromEigentoYarp(com_task->getActualPosition())) << " -- Error not decreasing. STOPPING." << std::endl;
+
+        yarp::sig::Vector distance = T_com_p_ref - cartesian_utils::fromEigentoYarp(com_task->getActualPosition());
         double d = norm(distance);
         yarp::sig::Vector exp_distance(2,0.01);
         double expected_d = norm(exp_distance);
 
         std::vector<KDL::Vector> points_check;
         boundsConvexHull->getConvexHull(points_check);
-        yarp::sig::Matrix A_ch_check;
-        yarp::sig::Vector b_ch_check;
+        Eigen::MatrixXd A_ch_check;
+        Eigen::VectorXd b_ch_check;
         boundsConvexHull->getConstraints(points_check, A_ch_check, b_ch_check, 0.01);
+
 
         EXPECT_NEAR(d, expected_d, (expected_d-0.01)*1.01) << "Failed to reach point "
                                                            << *point
                                                            << " in the allocated threshold (0.01m)." << std::endl;
         //EXPECT_TRUE(A_ch == A_ch_check) << "Convex Hull changed!" << std::endl;
-        if(! (A_ch == A_ch_check) )
+
+
+        std::cout<<"A_ch size is "<<A_ch.rows()<<"x"<<A_ch.cols()<<std::endl;
+        std::cout<<"A_ch_check size is "<<A_ch_check.rows()<<"x"<<A_ch_check.cols()<<std::endl;
+
+        if(! (A_ch.rows() == A_ch_check.rows()) )
         {
-            std::cout << "Old A:" << std::endl << A_ch.toString() << std::endl;
-            std::cout << "New A:" << std::endl << A_ch_check.toString() << std::endl;
+            std::cout << "Old A:" << std::endl << A_ch << std::endl;
+            std::cout << "New A:" << std::endl << A_ch_check << std::endl;
             std::cout << "Had originally " << points.size() -1 << " points in the Convex Hull, "
                       << " now we have " << points_check.size() << std::endl;
         }
         point_old = *point;
     }
+
+
 
     _log << "];" << std::endl;
 

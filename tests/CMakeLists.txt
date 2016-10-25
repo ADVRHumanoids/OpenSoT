@@ -63,7 +63,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOasesSolver
                       #testQPOases_AutoStack
                       #testQPOases_CartesianPositionConstraint
-                      #testQPOases_ConvexHull
+                      testQPOases_ConvexHull
                       #testQPOases_FF
                       #testQPOases_GlobalConstraints.cpp
                       #testQPOases_Options
@@ -149,9 +149,9 @@ add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 #TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
 #add_dependencies(testQPOases_CartesianPositionConstraint GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
-#TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
-#add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
+ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
+add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
 #TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
@@ -283,7 +283,7 @@ add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLim
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 #add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 #add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
-#add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
+add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 #add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 #add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
 #add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
