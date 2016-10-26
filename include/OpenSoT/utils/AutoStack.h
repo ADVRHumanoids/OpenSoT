@@ -66,7 +66,7 @@ namespace OpenSoT {
             /*AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
                       OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
 
-            void update(const yarp::sig::Vector & state);
+            void update(const Eigen::VectorXd & state);
 
             OpenSoT::solvers::QPOases_sot::Stack& getStack();
 

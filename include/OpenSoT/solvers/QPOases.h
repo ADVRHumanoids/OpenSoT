@@ -27,9 +27,6 @@
 #include "QPOasesProblem.h"
 
 
-
-using namespace yarp::sig;
-
 namespace qpOASES {
     class SQProblem;
     class Options;

@@ -65,15 +65,18 @@ namespace OpenSoT {
         /**
          * @brief The CartesianError struct is an utility struct to store cartesian errors
          */
-        struct CartesianError { yarp::sig::Vector positionError; yarp::sig::Vector orientationError; double Ko;
+        struct CartesianError { Eigen::VectorXd positionError; Eigen::VectorXd orientationError; double Ko;
                                 CartesianError() :
-                                    positionError(3,0.0), orientationError(3,0.0), Ko(1.0) {}
-                                const double getPositionErrorNorm() const {
-                                    return yarp::math::norm(positionError); }
+                                    positionError(3), orientationError(3), Ko(1.0)
+                                {
+                                    positionError.setZero(3);
+                                    orientationError.setZero(3);
+                                }
+                                const double getPositionErrorNorm() const{
+                                    return positionError.squaredNorm();}
                                 const double getOrientationErrorNorm() const {
-                                    return yarp::math::norm(orientationError); }
+                                    return orientationError.squaredNorm(); }
                                 const double getNorm() const {
-                                    using namespace yarp::math;
                                     return std::sqrt(std::pow(getPositionErrorNorm(),2) +
                                                      std::pow(Ko*getOrientationErrorNorm(),2)); }
                               };
@@ -134,7 +137,7 @@ namespace OpenSoT {
             }
         };
 
-        typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
+        typedef std::map<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>*,
                          ErrorLog> ErrorMap;
 
         /**
@@ -177,9 +180,9 @@ namespace OpenSoT {
                 typedef OpenSoT::previewer::CartesianError CartesianError;
 
                 /**
-                 * @brief q joint posiitons
+                 * @brief q joint positions
                  */
-                yarp::sig::Vector q;
+                Eigen::VectorXd q;
 
                 /**
                  * @brief failures a vector of failures
@@ -189,7 +192,7 @@ namespace OpenSoT {
                  * @brief errors is a map holding Cartesian error information
                  *        about every task for which we set a trajectory binding
                  */
-                std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
+                std::map<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>*,
                          CartesianError> errors;
             };
 
@@ -212,7 +215,7 @@ namespace OpenSoT {
                 ++num_failures;
             }
 
-            void logTrajectory(double time, const yarp::sig::Vector& q)
+            void logTrajectory(double time, const Eigen::VectorXd& q)
             {
                 if(log.count(time) == 0) log[time] = LogEntry();
                 log[time].q = q;
@@ -317,7 +320,7 @@ namespace OpenSoT {
                 ConvergencePolicy convergencePolicy;
                 double convergenceTolerance;
                 double maximumAllowedError;
-                OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task;
+                OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task;
                 TrajGenPtr trajectoryGenerator;
 
                 /**
@@ -332,7 +335,7 @@ namespace OpenSoT {
                  *          from positionErrorNorm and orientationErrorNorm (if orientationErrorNorm exists)
                  */
                 TrajBinding(TrajGenPtr trajectoryGenerator,
-                            OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
+                            OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task,
                             double maximumAllowedError = TRAJ_BINDING_MAXIMUM_ALLOWED_ERROR,
                             double convergenceTolerance = TRAJ_BINDING_CONVERGENCE_TOLERANCE,
                             ConvergencePolicy convergencePolicy = CONVERGE_ON_CARTESIAN_ERROR_SMALL) :
@@ -346,7 +349,7 @@ namespace OpenSoT {
 
             typedef std::list<TrajBinding> TrajectoryBindings;
             typedef boost::shared_ptr<OpenSoT::Previewer<TrajectoryGenerator> > Ptr;
-            typedef std::map<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>*,
+            typedef std::map<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>*,
                              KDL::Frame>  CartesianNodes;
 
             typedef OpenSoT::previewer::CartesianError CartesianError;
@@ -361,17 +364,17 @@ namespace OpenSoT {
             // nodes are last "far" configurations. i.e., whenever a position moves more than a threshold,
             // it gets saved in a node. For each task, and for the q vector, we then keep an history of one value.
             CartesianNodes cartesianNodes;
-            yarp::sig::Vector qNode;
+            Eigen::VectorXd qNode;
 
-            yarp::sig::Vector q;
-            yarp::sig::Vector dq;
+            Eigen::VectorXd q;
+            Eigen::VectorXd dq;
 
         protected:
             OpenSoT::AutoStack::Ptr autostack;
             TrajectoryBindings bindings;
             double dT;
             iDynUtils& model;
-            OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr solver;
+            OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr solver;
             double t;
 
             /**
@@ -428,24 +431,25 @@ namespace OpenSoT {
              * @return true if the cartesian pose or position changed more than threshold, in norm.
              * Notice it will also return true if it was never called, i.e. the first time it gets called.
              */
-            bool cartesianPoseChanged(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task,
+            bool cartesianPoseChanged(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task,
                                       double threshold=1e-3)
             {
                 using namespace OpenSoT::tasks::velocity;
                 double error(std::numeric_limits<double>::infinity());
 
                 KDL::Frame f;
-                yarp::sig::Matrix yf, yfOld;
-                yarp::sig::Vector yv, yvOld;
+                Eigen::MatrixXd yf, yfOld;
+                Eigen::VectorXd yv, yvOld;
 
-                yarp::sig::Vector positionError(3, 0.0);
-                yarp::sig::Vector orientationError(3, 0.0);
+                Eigen::VectorXd positionError(3);
+                positionError.setZero(3);
+                Eigen::VectorXd orientationError(3);
+                orientationError.setZero(3);
                 
                 if(Cartesian::isCartesian(task))
                 {
                     yf = Cartesian::asCartesian(task)->getActualPose();
-                    bool res = YarptoKDL(yf,f);
-                    assert(res && "error converting from yarp frame to kdl::Frame");
+                    Cartesian::asCartesian(task)->getActualPose(f);
                 }
                 else if(CoM::isCoM(task))
                 {
@@ -461,26 +465,21 @@ namespace OpenSoT {
                     return true;
                 } else {
 
-                    yfOld.resize(4,4);
-                    bool res = KDLtoYarp_position(cartesianNodes[task.get()], yfOld);
-                    assert(res && "Error transforming a kdl::Frame into  a yarp 4x4 matrix");
-                    res = KDLtoYarp(cartesianNodes[task.get()].p, yvOld);
-                    assert(res && "Error transforming a kdl::Vector into a yarp vector");
+                    yfOld = toEigen(cartesianNodes[task.get()]);
+                    yvOld = toEigen(cartesianNodes[task.get()].p);
 
                     if(Cartesian::isCartesian(task))
                     {
-                        using namespace yarp::math;
                         cartesian_utils::computeCartesianError(yf, yfOld,
                                                                positionError, orientationError);
                         double Ko = Cartesian::asCartesian(task)->getOrientationErrorGain();
-                        error = yarp::math::norm(
-                                    yarp::math::cat(
-                                        positionError,
-                                        -Ko*orientationError));
+
+                        Eigen::VectorXd errors(6);
+                        errors<<positionError,-Ko*orientationError;
+                        error = errors.squaredNorm();
                     } else if(CoM::isCoM(task))
                     {
-                        using namespace yarp::math;
-                        error = norm(yv - yvOld);
+                        error = (yv - yvOld).squaredNorm();
                     };
 
                     if(error > threshold)
@@ -545,8 +544,7 @@ namespace OpenSoT {
              */
             bool jointSpaceConfigurationChanged(double threshold = 1e-5)
             {
-                using namespace yarp::math;
-                double error = norm(q - qNode);
+                double error = (q - qNode).squaredNorm();
 
                 if(error > threshold)
                 {
@@ -564,7 +562,7 @@ namespace OpenSoT {
              */
             bool jointSpaceConfigurationConverged(double threshold = 1e-9)
             {
-                return yarp::math::norm(dq) < threshold;
+                return dq.squaredNorm() < threshold;
             }
 
             /**
@@ -578,9 +576,9 @@ namespace OpenSoT {
 
                 t = 0.0;
 
-                q = model.iDyn3_model.getAng();
-                dq.resize(q.size()); dq.zero();
-                qNode.resize(q.size()); qNode.zero();
+                q = model.getAng();
+                dq.resize(q.rows()); dq.setZero(q.rows());
+                qNode.resize(q.rows()); qNode.setZero(q.rows());
             }
 
             /**
@@ -670,7 +668,7 @@ namespace OpenSoT {
                     {
                         CartesianError toGoal;
                         CartesianError toDesired;
-                        yarp::sig::Vector positionError(3,0.0), orientationError(3,0.0);
+                        Eigen::VectorXd positionError(3,0.0), orientationError(3,0.0);
 
                         /* updating CartesianError to goal */
                         cartesian_utils::computeCartesianError(Cartesian::asCartesian(b->task)->getActualPose(), KDLtoYarp_position(goal),
@@ -727,14 +725,11 @@ namespace OpenSoT {
                 {
                     KDL::Frame f = b->trajectoryGenerator->Pos(t);
                     KDL::Twist tw = b->trajectoryGenerator->Vel(t);
-                    yarp::sig::Matrix yf = KDLtoYarp_position(f);
-                    yarp::sig::Vector yt(6, 0.0);  KDLtoYarp(tw, yt);
-                    yarp::sig::Vector yv(3,0.0);
-                    bool res = KDLtoYarp(f.p, yv);
-                    assert(res && "Error converting kdl::Vector in yarp::sig::Vector");
+                    Eigen::MatrixXd yf = toEigen(f);
+                    Eigen::VectorXd yt = toEigen(tw);
+                    Eigen::VectorXd yv = toEigen(f.p);
 
                     {
-                    using namespace yarp::math;
                     using namespace OpenSoT::tasks::velocity;
                         if(Cartesian::isCartesian(b->task))
                             Cartesian::asCartesian(b->task)->setReference(yf,yt*dT);
@@ -781,7 +776,7 @@ namespace OpenSoT {
                      iDynUtils& idyn,
                      OpenSoT::AutoStack::Ptr autostack,
                      TrajectoryBindings bindings,
-                     OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr solver) :
+                     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr solver) :
                 autostack(autostack),
                 bindings(bindings),
                 dT(dT),
@@ -859,7 +854,7 @@ namespace OpenSoT {
                     else
                         finished = (t >= time);
 
-                    model.updateiDyn3Model(q, true);
+                    model.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
 
                     // update the stack to get new error statistics
                     autostack->update(q);
@@ -932,6 +927,45 @@ namespace OpenSoT {
                 if(!converged()) check_ok = false;
 
                 return check_ok;
+            }
+
+            Eigen::MatrixXd toEigen(const KDL::Frame& F)
+            {
+                Eigen::MatrixXd K(4,4);
+                K.setIdentity(4,4);
+                K(0,0) = F.M(0,0); K(0,1) = F.M(0,1); K(0,2) = F.M(0,2); K(0,3) = F.p.x();
+                K(1,0) = F.M(1,0); K(1,1) = F.M(1,1); K(1,2) = F.M(1,2); K(1,3) = F.p.y();
+                K(2,0) = F.M(2,0); K(2,1) = F.M(2,1); K(2,2) = F.M(2,2); K(2,3) = F.p.z();
+                return K;
+            }
+
+            Eigen::VectorXd toEigen(const KDL::Vector& v)
+            {
+                Eigen::VectorXd p(3);
+                p(0) = v.x();
+                p(1) = v.y();
+                p(2) = v.z();
+                return p;
+            }
+
+
+            KDL::Frame toKDL(const Eigen::MatrixXd& F)
+            {
+                KDL::Frame K;
+                K = K.Identity();
+                K.M(0,0) = F(0,0); K.M(0,1) = F(0,1); K.M(0,2) = F(0,2); K.p.x(F(0,3));
+                K.M(1,0) = F(1,0); K.M(1,1) = F(1,1); K.M(1,2) = F(1,2); K.p.y(F(1,3));
+                K.M(2,0) = F(2,0); K.M(2,1) = F(2,1); K.M(2,2) = F(2,2); K.p.z(F(2,3));
+                return K;
+            }
+
+            KDL::Vector toKDL(const Eigen::VectorXd& v)
+            {
+                KDL::Vector p;
+                p.x(v(0));
+                p.y(v(1));
+                p.z(v(2));
+                return p;
             }
     };
 }

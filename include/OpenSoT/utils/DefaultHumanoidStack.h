@@ -38,7 +38,7 @@
           */
          DefaultHumanoidStack(iDynUtils &model,
                               const double dT,
-                              const yarp::sig::Vector& state);
+                              const Eigen::VectorXd& state);
 
          virtual ~DefaultHumanoidStack() {}
 
@@ -82,11 +82,11 @@
          const SubTask::Ptr com_XY;
          const SubTask::Ptr com_Z;
 
-         const tasks::velocity::Gaze::Ptr gaze;
-         const tasks::velocity::Gaze::Ptr waist2gaze;
+//         const tasks::velocity::Gaze::Ptr gaze;
+//         const tasks::velocity::Gaze::Ptr waist2gaze;
 
          const tasks::velocity::MinimumEffort::Ptr minimumEffort;
-         const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
+         //const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
          const tasks::velocity::Postural::Ptr postural;
          // TODO do we need 5 duplicates of the Postural?
          const tasks::velocity::Postural::Ptr posturalForTorso;
@@ -106,8 +106,8 @@
          const constraints::velocity::CoMVelocity::Ptr comVelocity;
          const constraints::velocity::ConvexHull::Ptr convexHull;
          const constraints::velocity::JointLimits::Ptr jointLimits;
-         const constraints::velocity::SelfCollisionAvoidance::Ptr selfCollisionAvoidance;
-         const constraints::velocity::Dynamics::Ptr torqueLimits;
+         //const constraints::velocity::SelfCollisionAvoidance::Ptr selfCollisionAvoidance;
+         //sconst constraints::velocity::Dynamics::Ptr torqueLimits;
          const constraints::velocity::VelocityLimits::Ptr velocityLimits;
      };
  };

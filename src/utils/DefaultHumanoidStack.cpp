@@ -5,7 +5,7 @@ using namespace OpenSoT;
 
 DefaultHumanoidStack::DefaultHumanoidStack(iDynUtils& model,
                                            const double dT,
-                                           const yarp::sig::Vector& state) :
+                                           const Eigen::VectorXd& state) :
      leftArm( new tasks::velocity::Cartesian("cartesian::l_wrist",
                                              state,
                                              model,
@@ -80,11 +80,11 @@ DefaultHumanoidStack::DefaultHumanoidStack(iDynUtils& model,
                                    model) ),
      com_XY( new SubTask(com, Indices::range(0,1)) ),
      com_Z( new SubTask(com,  Indices::range(2,2)) ),
-     gaze( new tasks::velocity::Gaze("cartesian::gaze", state, model, "world") ),
-     waist2gaze( new tasks::velocity::Gaze("cartesian::w2gaze", state, model, "Waist") ),
+     //gaze( new tasks::velocity::Gaze("cartesian::gaze", state, model, "world") ),
+     //waist2gaze( new tasks::velocity::Gaze("cartesian::w2gaze", state, model, "Waist") ),
      minimumEffort( new tasks::velocity::MinimumEffort(state,
                                                        model) ),
-     minimumVelocity( new tasks::velocity::MinimumVelocity(state.size()) ),
+     //minimumVelocity( new tasks::velocity::MinimumVelocity(state.size()) ),
      minimumAcceleration( new tasks::velocity::MinimizeAcceleration(state) ),
      postural( new tasks::velocity::Postural(state) ),
      posturalForTorso( new tasks::velocity::Postural(state) ),
@@ -111,25 +111,23 @@ DefaultHumanoidStack::DefaultHumanoidStack(iDynUtils& model,
                                   Indices(model.left_leg.joint_numbers) +
                                   Indices(model.right_leg.joint_numbers) +
                                   Indices(model.head.joint_numbers)) ) ),
-     comVelocity( new constraints::velocity::CoMVelocity(yarp::sig::Vector(3,.3),
-                                                         dT,
-                                                         state,
-                                                         model) ),
      convexHull( new constraints::velocity::ConvexHull(state,
                                                        model) ),
      jointLimits( new constraints::velocity::JointLimits(state,
-                                                         model.iDyn3_model.getJointBoundMax(),
-                                                         model.iDyn3_model.getJointBoundMin()) ),
-     selfCollisionAvoidance( new constraints::velocity::SelfCollisionAvoidance( state,
-                                                                                model,
-                                                                                std::numeric_limits<double>::infinity(),
-                                                                                0.01)),
-     torqueLimits( new constraints::velocity::Dynamics(state, state*0.0,
-                         model.iDyn3_model.getJointTorqueMax(),
-                         model, dT, 0.65) ),
+                                                         model.getJointBoundMax(),
+                                                         model.getJointBoundMin()) ),
+//     selfCollisionAvoidance( new constraints::velocity::SelfCollisionAvoidance( state,
+//                                                                                model,
+//                                                                                std::numeric_limits<double>::infinity(),
+//                                                                                0.01)),
+//     torqueLimits( new constraints::velocity::Dynamics(state, state*0.0,
+//                         model.iDyn3_model.getJointTorqueMax(),
+//                         model, dT, 0.65) ),
      velocityLimits( new constraints::velocity::VelocityLimits(0.3,
                                                                dT,
-                                                               state.size()) )
+                                                               state.size()) ),
+     comVelocity(new constraints::velocity::CoMVelocity(Eigen::VectorXd::Constant(3,0.3)
+                                                        ,dT,state,model))
 
 
  {
