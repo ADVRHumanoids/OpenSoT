@@ -61,7 +61,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testJointLimitsVelocityBounds
                       testVelocityLimitsVelocityBounds
                       testQPOasesSolver
-                      #testQPOases_AutoStack
+                      testQPOases_AutoStack
                       #testQPOases_CartesianPositionConstraint
                       testQPOases_ConvexHull
                       #testQPOases_FF
@@ -76,7 +76,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCartesianVelocityTask
                       #testCoMForceTask
                       testCoMVelocityTask
-                      #testGazeVelocityTask
+                      testGazeVelocityTask
                       #testInteractionVelocityTask
                       #TestManipulabilityTask
                       testMinimizeAccelerationTask
@@ -141,9 +141,9 @@ ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
-#TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
-#add_dependencies(testQPOases_AutoStack GTest-ext OpenSoT)
+ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
+add_dependencies(testQPOases_AutoStack GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testQPOases_CartesianPositionConstraint solvers/TestQPOases_CartesianPositionConstraint.cpp)
 #TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
@@ -201,9 +201,9 @@ ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
 TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
 add_dependencies(testCoMVelocityTask GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
-#TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
-#add_dependencies(testGazeVelocityTask GTest-ext OpenSoT)
+ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
+TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
+add_dependencies(testGazeVelocityTask GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
 #TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
@@ -281,7 +281,7 @@ add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelo
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
 add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
-#add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
+add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 #add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
 add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 #add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
@@ -298,7 +298,7 @@ add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 #add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
-#add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
+add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 #add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
 add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)

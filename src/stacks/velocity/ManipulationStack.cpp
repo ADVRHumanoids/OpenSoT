@@ -5,19 +5,19 @@ using namespace OpenSoT;
 
 ManipulationStack::ManipulationStack(iDynUtils& model,
                                      const double dT,
-                                     const yarp::sig::Vector& state) :
+                                     const Eigen::VectorXd& state) :
   OpenSoT::AutoStack(state.size()),
   eps(2e12)
  {
-    const yarp::sig::Vector &q = state;
-    const yarp::sig::Vector dq = q*0.0;
+    const Eigen::VectorXd &q = state;
+    const Eigen::VectorXd dq = q*0.0;
     
     model.setFloatingBaseLink(model.left_leg.end_effector_name);
     KDL::Frame from_anchor_to_world = from_anchor_to_world.Identity(); // zero because we want l_sole both as anchor and world
     model.setAnchor_T_World(from_anchor_to_world);
     model.disableDynamicsUpdate();
     
-    model.updateiDyn3Model(q, true);
+    model.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
 
     DHS.reset( new DefaultHumanoidStack(model, dT, state) );
     

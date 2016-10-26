@@ -39,9 +39,9 @@ namespace OpenSoT {
           */
         ManipulationStack(iDynUtils &model,
                           const double dT,
-                          const yarp::sig::Vector& state);
+                          const Eigen::VectorXd& state);
 
-        ~ManipulationStack() {};
+        ~ManipulationStack() {}
 
         OpenSoT::DefaultHumanoidStack::Ptr DHS;
 

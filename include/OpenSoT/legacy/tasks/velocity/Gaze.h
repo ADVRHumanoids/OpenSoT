@@ -1,38 +1,22 @@
-/*
- * Copyright (C) 2016 Walkman
- * Authors:Enrico Mingo Hoffman, Alessio Rocchi
- * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
- * Permission is granted to copy, distribute, and/or modify this program
- * under the terms of the GNU Lesser General Public License, version 2 or any
- * later version published by the Free Software Foundation.
- *
- * A copy of the license can be found at
- * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details
-*/
-
-#ifndef __TASKS_VELOCITY_GAZE_H__
-#define __TASKS_VELOCITY_GAZE_H__
+#ifndef _LEGACY_TASKS_VELOCITY_GAZE_H__
+#define _LEGACY_TASKS_VELOCITY_GAZE_H__
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/SubTask.h>
 #include <idynutils/cartesian_utils.h>
 
 namespace OpenSoT {
+namespace legacy {
 namespace tasks {
 namespace velocity {
 
-class Gaze: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>
+class Gaze: public OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>
 {
 public:
     typedef boost::shared_ptr<Gaze> Ptr;
 
     Gaze(std::string task_id,
-         const Eigen::VectorXd &x,
+         const yarp::sig::Vector &x,
          iDynUtils &robot,
          std::string base_link);
 
@@ -42,7 +26,7 @@ public:
      * @brief setGaze
      * @param desiredGaze pose of the object to observe in base_link
      */
-    void setGaze(const Eigen::MatrixXd& desiredGaze);
+    void setGaze(const yarp::sig::Matrix& desiredGaze);
 
     void setOrientationErrorGain(const double& orientationErrorGain);
 
@@ -56,7 +40,7 @@ public:
      * please use the class SubTask
      * @param W matrix weight
      */
-    virtual void setWeight(const Eigen::MatrixXd& W);
+    virtual void setWeight(const yarp::sig::Matrix& W);
 
     /**
      * @brief getConstraints return a reference to the constraint list. Use the standard list methods
@@ -75,7 +59,7 @@ public:
 
     /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
         @param x variable state at the current step (input) */
-    virtual void _update(const Eigen::VectorXd &x);
+    virtual void _update(const yarp::sig::Vector &x);
 
     /**
      * @brief getActiveJointsMask return a vector of length NumberOfDOFs.
@@ -97,24 +81,9 @@ private:
     Cartesian::Ptr _cartesian_task;
     SubTask::Ptr   _subtask;
 
-    Eigen::MatrixXd _gaze_T_obj;
-    Eigen::VectorXd _tmp_vector;
-
     iDynUtils& _robot;
-
-    Eigen::MatrixXd toEigen(const KDL::Frame& F)
-    {
-        Eigen::MatrixXd K(4,4);
-        K.setIdentity(4,4);
-        K(0,0) = F.M(0,0); K(0,1) = F.M(0,1); K(0,2) = F.M(0,2); K(0,3) = F.p.x();
-        K(1,0) = F.M(1,0); K(1,1) = F.M(1,1); K(1,2) = F.M(1,2); K(1,3) = F.p.y();
-        K(2,0) = F.M(2,0); K(2,1) = F.M(2,1); K(2,2) = F.M(2,2); K(2,3) = F.p.z();
-        return K;
-    }
-
-
-
 };
+}
 
 }
 
