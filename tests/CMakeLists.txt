@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(SET CMP0040 OLD)
 include(ExternalProject)
 
 set(PROJECTNAME tests)
