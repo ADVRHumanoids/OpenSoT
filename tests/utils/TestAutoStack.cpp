@@ -20,7 +20,7 @@ protected:
                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
         DHS(_robot,
               3e-3,
-              _robot.zeros)
+              cartesian_utils::toEigen(_robot.zeros))
     {
 
     }
@@ -47,7 +47,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     AutoStack::Ptr auto_stack = (DHS.right2LeftLeg)/
             (DHS.com + DHS.leftArm)/
             DHS.postural;
-    auto_stack->update(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.));
+    auto_stack->update(
+                cartesian_utils::toEigen(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.)));
 
     OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(com_task != NULL);
@@ -86,7 +87,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
     AutoStack::Ptr auto_stack = (DHS.right2LeftLeg)/
             (DHS.com + DHS.leftArm)/
             DHS.postural;
-    auto_stack->update(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.));
+    auto_stack->update(
+                cartesian_utils::toEigen(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.)));
 
     OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(com_task != NULL);
