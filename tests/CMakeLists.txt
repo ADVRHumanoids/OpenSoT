@@ -85,7 +85,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testPosturalVelocityTask
                       testSubTask
                       testAutoStack
-                      #testDefaultHumanoidStack
+                      testDefaultHumanoidStack
                       #testLogger
                       #testPreviewer
                       #testVelocityAllocation
@@ -237,9 +237,9 @@ ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
 TARGET_LINK_LIBRARIES(testAutoStack ${TestLibs})
 add_dependencies(testAutoStack GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testDefaultHumanoidStack utils/TestDefaultHumanoidStack.cpp)
-#TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
-#add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
+ADD_EXECUTABLE(testDefaultHumanoidStack utils/TestDefaultHumanoidStack.cpp)
+TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
+add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
 
 #ADD_EXECUTABLE(testLogger utils/TestLogger.cpp)
 #TARGET_LINK_LIBRARIES(testLogger ${TestLibs})
@@ -306,7 +306,7 @@ add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVeloc
 add_test(NAME OpenSoT_task_velocity_MinimumVelocity COMMAND testMinimumVelocityTask)
 add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
-#add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
+add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 #add_test(NAME OpenSoT_utils_Logger COMMAND testLogger)
 #add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 #add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
