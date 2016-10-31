@@ -127,12 +127,32 @@ TEST_F(testAutoStack, testOperatorPlus )
 {
     using namespace OpenSoT;
     tasks::Aggregated::Ptr aggr1 = DHS.leftArm + DHS.rightArm;
+    Eigen::MatrixXd W1 = aggr1->getWeight();
+    W1 = 3.*W1;
+    aggr1->setWeight(W1);
     EXPECT_EQ(aggr1->getTaskList().size(), 2);
 
     tasks::Aggregated::Ptr aggr2 = DHS.leftLeg + DHS.rightLeg;
+    Eigen::MatrixXd W2 = aggr2->getWeight();
+    W2 = 5.*W2;
+    aggr2->setWeight(W2);
     EXPECT_EQ(aggr2->getTaskList().size(), 2);
 
     tasks::Aggregated::Ptr aggr3 = aggr1 + aggr2;
+    yarp::sig::Matrix W3 = cartesian_utils::fromEigentoYarp(aggr3->getWeight());
+    EXPECT_TRUE(W3.submatrix(0,W1.rows()-1, 0, W1.cols()-1) == cartesian_utils::fromEigentoYarp(W1));
+    EXPECT_TRUE(W3.submatrix(W1.rows(),W1.rows() + W2.rows()-1,
+        W1.cols(),W1.cols() + W2.cols()-1) == cartesian_utils::fromEigentoYarp(W2));
+    yarp::sig::Matrix matBlock0_des(W1.rows(), W2.cols());
+    matBlock0_des.zero();
+    yarp::sig::Matrix matBlock0 = W3.submatrix(0, W1.rows()-1,
+                                                   W1.cols(), W1.cols() + W2.cols()-1);
+    EXPECT_TRUE(matBlock0_des == matBlock0);
+    yarp::sig::Matrix matBlock1_des(W2.rows(), W1.cols());
+    matBlock1_des.zero();
+    yarp::sig::Matrix matBlock1 = W3.submatrix(W1.rows(), W1.rows() + W2.rows() -1,
+        0, W1.cols()-1);
+    EXPECT_TRUE(matBlock1_des == matBlock1);
     EXPECT_EQ(aggr3->getTaskList().size(), 4);
 
     aggr1->setLambda(.1);
