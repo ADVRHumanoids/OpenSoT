@@ -97,7 +97,7 @@ VelocityAllocation::VelocityAllocation(OpenSoT::AutoStack::Ptr autoStack,
     }
 }
 
-VelocityAllocation::VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack,
+VelocityAllocation::VelocityAllocation(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack,
                                        const double dT,
                                        const double min_velocity,
                                        const double max_velocity) :
@@ -109,7 +109,7 @@ VelocityAllocation::VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::
     this->processStack(stack);
 }
 
-VelocityAllocation::VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack,
+VelocityAllocation::VelocityAllocation(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack,
                                        const double dT,
                                        const double min_velocity,
                                        const double max_velocity,
@@ -122,7 +122,7 @@ VelocityAllocation::VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::
     this->processStack(stack);
 }
 
-VelocityAllocation::VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack,
+VelocityAllocation::VelocityAllocation(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack,
                                        const double dT,
                                        const std::vector<double> velocity_vector) :
     _dT(dT),
@@ -138,12 +138,12 @@ VelocityAllocation::VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::
     this->processStack(stack);
 }
 
-void VelocityAllocation::processStack(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack)
+void VelocityAllocation::processStack(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack)
 {
     for(unsigned int i = 0; i < stack.size(); ++i)
     {
         const double velocityLimit = this->computeVelocityLimit(i, stack.size());
-        OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task = stack[i];
+        OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task = stack[i];
         OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits;
 
         // TODO notice this does not work if every stack has already a VelocityLimits

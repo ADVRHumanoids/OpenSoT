@@ -67,7 +67,7 @@ namespace OpenSoT
          * @param min_velocity the velocity bounds for the highest priority task
          * @param max_velocity the velocity bounds for the lowest priority task
          */
-        VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack,
+        VelocityAllocation(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack,
                            const double dT,
                            const double min_velocity,
                            const double max_velocity);
@@ -92,7 +92,7 @@ namespace OpenSoT
          * @param max_velocity the velocity bounds for the task with the penultimate lower priority
          * @param last_velocity the velocity bounds for the lowest priority task
          */
-        VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack,
+        VelocityAllocation(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack,
                            const double dT,
                            const double min_veloicity,
                            const double max_velocity,
@@ -116,7 +116,7 @@ namespace OpenSoT
          * @param dT sample time
          * @param velocity_vector a vector with velocity limits for each task in the stack
          */
-        VelocityAllocation(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack,
+        VelocityAllocation(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack,
                            const double dT,
                            const std::vector<double> velocity_vector);
 
@@ -199,7 +199,7 @@ namespace OpenSoT
         double _last_velocity;
         std::vector<double> _velocity_vector;
 
-        void processStack(OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::Stack& stack);
+        void processStack(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack& stack);
         double computeVelocityLimit(const unsigned int taskIndex,
                                     const unsigned int stackSize);
     };

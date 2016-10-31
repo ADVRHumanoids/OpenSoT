@@ -71,7 +71,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       #testQPOases_SelfCollisionAvoidance
                       #testQPOases_Sparse
                       testQPOases_SubTask
-                      #testQPOases_VelocityAllocation
+                      testQPOases_VelocityAllocation
                       testAggregatedTask
                       testCartesianVelocityTask
                       #testCoMForceTask
@@ -181,9 +181,9 @@ ADD_EXECUTABLE(testQPOases_SubTask solvers/TestQPOases_SubTask.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_SubTask ${TestLibs})
 add_dependencies(testQPOases_SubTask GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
-#TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
-#add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
+ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
+add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
 TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
@@ -292,7 +292,7 @@ add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
 #add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
 #add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
 add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
-#add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
+add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
 add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)

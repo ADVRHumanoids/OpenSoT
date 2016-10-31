@@ -106,7 +106,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp
                     #src/utils/PreviewerUtils.cpp
-                    #src/utils/VelocityAllocation.cpp
+                    src/utils/VelocityAllocation.cpp
                     #src/utils/logger/L.cpp
                     #src/utils/logger/flushers/FakeFlusher.cpp
                     #src/utils/logger/flushers/Flusher.cpp
