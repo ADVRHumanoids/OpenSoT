@@ -89,7 +89,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/stacks/velocity/ManipulationStack.cpp
-                    #src/stacks/velocity/WalkingStack.cpp
+                    src/stacks/velocity/WalkingStack.cpp
                     src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp

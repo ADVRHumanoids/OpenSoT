@@ -4,19 +4,19 @@ using namespace OpenSoT;
 
 WalkingStack::WalkingStack(iDynUtils& model,
                                      const double dT,
-                                     const yarp::sig::Vector& state) :
+                                     const Eigen::VectorXd& state) :
   OpenSoT::AutoStack(state.size()),
   eps(2e12),
   _model(model)
  {
-    const yarp::sig::Vector &q = state;
+    const Eigen::VectorXd &q = state;
 
-    model.updateiDyn3Model(q, true);
+    model.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
 
     model.setFloatingBaseLink(model.left_leg.end_effector_name);
     KDL::Frame from_anchor_to_world = from_anchor_to_world.Identity(); // zero because we want l_sole both as anchor and world
 
-    model.updateiDyn3Model(q, true);
+    model.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
 
     stance_foot = LEFT_FOOT;
 

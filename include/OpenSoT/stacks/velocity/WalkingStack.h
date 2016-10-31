@@ -43,7 +43,7 @@ namespace OpenSoT {
           */
         WalkingStack(iDynUtils &model,
                           const double dT,
-                          const yarp::sig::Vector& state);
+                          const Eigen::VectorXd& state);
 
         ~WalkingStack() {}
 
