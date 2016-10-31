@@ -55,7 +55,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testBilateralConstraint
                       #testCartesianPositionVelocityConstraint
                       #testCollisionAvoidanceVelocityConstraint
-                      #testCoMVelocityVelocityConstraint
+                      testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
                       #testDynamicsConstraint
                       testJointLimitsVelocityBounds
@@ -65,7 +65,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       #testQPOases_CartesianPositionConstraint
                       testQPOases_ConvexHull
                       #testQPOases_FF
-                      #testQPOases_GlobalConstraints.cpp
+                      #testQPOases_GlobalConstraints
                       testQPOases_Options
                       #testQPOases_PriorityInversion
                       #testQPOases_SelfCollisionAvoidance
