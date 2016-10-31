@@ -5,6 +5,7 @@
 #include <fstream>
 #include <boost/make_shared.hpp>
 #include <qpOASES/Matrices.hpp>
+#include <iostream>
 
 
 #define GREEN "\033[0;32m"
@@ -92,14 +93,13 @@ bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
     int nWSR = _nWSR;
     H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
     H_sparse->createDiagInfo();
-    A_dense.reset();
     if(!(_A.data() == NULL))
-        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
-                qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+        A_dense.reset(new qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+    else
+        A_dense.reset();
 
         qpOASES::returnValue val =_problem->init(H_sparse.get(),_g.data(),
-                       A_dense.get(),
-                       _l.data(), _u.data(),
+                       A_dense.get(), _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
 
@@ -329,15 +329,15 @@ bool QPOasesProblem::solve()
 
     H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
     H_sparse->createDiagInfo();
-    A_dense.reset();
     if(!(_A.data() == NULL))
-        A_dense = boost::make_shared<qpOASES::DenseMatrix>(
-                    qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+        A_dense.reset(new qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
+    else
+        A_dense.reset();
 
 
     qpOASES::returnValue val =_problem->hotstart(H_sparse.get(),_g.data(),
                        A_dense.get(),
-                       _l.data(), _u.data(),
+                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
 
