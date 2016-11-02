@@ -54,7 +54,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testAggregatedConstraint
                       testBilateralConstraint
                       #testCartesianPositionVelocityConstraint
-                      #testCollisionAvoidanceVelocityConstraint
+                      testCollisionAvoidanceVelocityConstraint
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
                       #testDynamicsConstraint
@@ -113,9 +113,9 @@ add_dependencies(testBilateralConstraint GTest-ext OpenSoT)
 #TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
 #add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
-#TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
-#add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
+ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
+TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
+add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
 TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
@@ -274,7 +274,7 @@ add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
-#add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
+add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 #add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
