@@ -255,7 +255,8 @@ namespace
                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf"),
           q(robot.iDyn3_model.getNrOfDOFs(), 0.0),
           compute_distance(robot),
-          sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(q, robot, std::numeric_limits<double>::infinity(), 0.005))
+          sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
+                            cartesian_utils::toEigen(q), robot, std::numeric_limits<double>::infinity(), 0.005))
       {}
 
       virtual ~testSelfCollisionAvoidanceGlobConstr() {
@@ -612,62 +613,76 @@ namespace
         OpenSoT::constraints::Aggregated::Ptr globalConstraints(
                     new OpenSoT::constraints::Aggregated(globalConstraintsList, cartesian_utils::toEigen(this->q)));
 
-        OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
+        OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
                     new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, globalConstraints));
 
         yarp::sig::Vector dq(this->q.size(), 0.0);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
         for(unsigned int i = 0; i < 50*t; ++i)
         {
             this->robot.updateiDyn3Model(this->q, true);
 
 
-            taskCartesianAggregated->update(this->q);
-            postural_task->update(this->q);
-            bounds->update(this->q);
-            globalConstraints->update(this->q);
+            taskCartesianAggregated->update(cartesian_utils::toEigen(this->q));
+            postural_task->update(cartesian_utils::toEigen(this->q));
+            bounds->update(cartesian_utils::toEigen(this->q));
+            globalConstraints->update(cartesian_utils::toEigen(this->q));
 
-            if(!sot->solve(dq)){
+            if(!sot->solve(_dq)){
                 std::cout<<"error"<<std::endl;
-                dq = 0.0;}
+                _dq.setZero(dq.size());}
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             this->q += dq;
 
         }
 
         std::cout << "Q_final: " << q.toString() << std::endl;
 
-        std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_l_arm);
+        std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    T_init_l_arm);
         std::cout<<std::endl;
-        std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_l_arm);
+        std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    T_reference_l_arm);
         std::cout<<std::endl;
-        std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_left_arm->getActualPose());
+        std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_left_arm->getActualPose()));
 
         std::cout<<std::endl;
         std::cout<<std::endl;
 
-        std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_r_arm);
+        std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    T_init_r_arm);
         std::cout<<std::endl;
-        std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_r_arm);
+        std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_reference_r_arm));
         std::cout<<std::endl;
-        std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_right_arm->getActualPose());
+        std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_right_arm->getActualPose()));
 
         // showing the data of the legs
 
         std::cout<<std::endl;
 
-        std::cout<<"Initial Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_l_leg);
+        std::cout<<"Initial Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_init_l_leg));
         std::cout<<std::endl;
-        std::cout<<"Reference Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_l_leg);
+        std::cout<<"Reference Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_reference_l_leg));
         std::cout<<std::endl;
-        std::cout<<"Actual Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_left_leg->getActualPose());
+        std::cout<<"Actual Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_left_leg->getActualPose()));
 
         std::cout<<std::endl;
         std::cout<<std::endl;
 
-        std::cout<<"Initial Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_r_leg);
+        std::cout<<"Initial Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_init_r_leg));
         std::cout<<std::endl;
-        std::cout<<"Reference Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_r_leg);
+        std::cout<<"Reference Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_reference_r_leg));
         std::cout<<std::endl;
-        std::cout<<"Actual Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_right_leg->getActualPose());
+        std::cout<<"Actual Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_right_leg->getActualPose()));
 
         std::cout<<std::endl;
 
