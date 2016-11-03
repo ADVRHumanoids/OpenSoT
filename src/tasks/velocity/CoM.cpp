@@ -73,6 +73,31 @@ void CoM::_update(const Eigen::VectorXd &x)
     /**********************************************************************/
 }
 
+void CoM::setReference(const KDL::Vector& desiredPosition,
+                  const KDL::Vector& desiredVelocity)
+{
+    Eigen::VectorXd tmp(3); tmp.setZero(3);
+    tmp(0) = desiredPosition.x();
+    tmp(1) = desiredPosition.y();
+    tmp(2) = desiredPosition.z();
+
+    Eigen::VectorXd tmp2(3); tmp2.setZero(3);
+    tmp2(0) = desiredVelocity.x();
+    tmp2(1) = desiredVelocity.y();
+    tmp2(2) = desiredVelocity.z();
+
+    setReference(tmp, tmp2);
+}
+
+void CoM::setReference(const KDL::Vector& desiredPosition)
+{
+    Eigen::VectorXd tmp(3); tmp.setZero(3);
+    tmp(0) = desiredPosition.x();
+    tmp(1) = desiredPosition.y();
+    tmp(2) = desiredPosition.z();
+    setReference(tmp);
+}
+
 void CoM::setReference(const Eigen::VectorXd& desiredPosition)
 {
     assert(desiredPosition.size() == 3);

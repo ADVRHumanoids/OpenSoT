@@ -233,9 +233,10 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits( q,
-                        model.iDyn3_model.getJointBoundMax(),
-                        model.iDyn3_model.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(
+                    cartesian_utils::toEigen(q),
+                        model.getJointBoundMax(),
+                        model.getJointBoundMin()));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits( 0.6,3e-3,q.size()));
@@ -248,13 +249,15 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm_task(
-                new OpenSoT::tasks::velocity::Cartesian("l_arm",q, model,
+                new OpenSoT::tasks::velocity::Cartesian("l_arm",
+                                                        cartesian_utils::toEigen(q), model,
                                                         model.left_arm.end_effector_name,
                                                         "world"));
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(
+                    cartesian_utils::toEigen(q)));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
 
@@ -279,11 +282,11 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     dq = yarp::sig::Vector(q.size(), 0.0);
     q = getGoodInitialPosition(model);
     model.updateiDyn3Model(q, true);
-    l_arm_task->update(q);
-    postural_task->update(q);
-    bounds->update(q);
+    l_arm_task->update(cartesian_utils::toEigen(q));
+    postural_task->update(cartesian_utils::toEigen(q));
+    bounds->update(cartesian_utils::toEigen(q));
 
-    current_pose_y = l_arm_task->getActualPose();
+    current_pose_y = cartesian_utils::fromEigentoYarp(l_arm_task->getActualPose());
     YarptoKDL(current_pose_y,current_pose);
 
     if(!hasInitialError) {
@@ -396,11 +399,11 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         desired_twist = trajectory->Vel(t);
         KDLtoYarp_position(desired_pose, desired_pose_y);
         KDLtoYarp(desired_twist, desired_twist_y);
-        l_arm_task->setReference(desired_pose_y, desired_twist_y*t_loop);
+        l_arm_task->setReference(desired_pose, desired_twist*t_loop);
 
         // initializing previous norm
         if(previous_norm < 0)
-            previous_norm = norm(l_arm_task->getb());
+            previous_norm = l_arm_task->getb().squaredNorm();
 
         // checking variation of gain during trajectory following
         if(t>=6)
@@ -408,14 +411,16 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
         model.updateiDyn3Model(q, true);
 
-        l_arm_task->update(q);
-        postural_task->update(q);
-        bounds->update(q);
+        l_arm_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
+        bounds->update(cartesian_utils::toEigen(q));
 
-        EXPECT_TRUE(sot->solve(dq));
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
-        current_pose_y = l_arm_task->getActualPose();
+        current_pose_y = cartesian_utils::fromEigentoYarp(l_arm_task->getActualPose());
         YarptoKDL(current_pose_y,current_pose);
 
 
@@ -439,7 +444,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
         twist_estimate[0] = twist_measure;
 
-        current_norm = norm(l_arm_task->getb());
+        current_norm = l_arm_task->getb().squaredNorm();
 
         if(trajType == KDL::Path::ID_LINE) {
             _log << t << ",\t"
@@ -469,10 +474,10 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         if(!hasInitialError) {
             if(trajType == KDL::Path::ID_LINE) {
                 EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;;
-                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 5e-4) << " @t= " << t;;
+                EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 5e-4) << " @t= " << t;;
             } else {
                 EXPECT_NEAR(R, Rdes,3e-3) << " @t= " << t;;
-                EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1.5e-2) << " @t= " << t;;
+                EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 1.5e-2) << " @t= " << t;;
             }
         } else {
             if(t<=1.3) {
@@ -502,10 +507,10 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
             } else {
                 if(trajType == KDL::Path::ID_LINE) {
                     EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1.5e-4) << " @t= " << t;
-                    EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1.5e-3) << " @t= " << t;
+                    EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 1.5e-3) << " @t= " << t;
                 } else {
                     EXPECT_NEAR(R, Rdes,2e-3);
-                    EXPECT_NEAR(norm(l_arm_task->getb()), 0, 1e-2);
+                    EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 1e-2);
                 }
             }
         }
@@ -565,9 +570,10 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits( q,
-                        model.iDyn3_model.getJointBoundMax(),
-                        model.iDyn3_model.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(
+                    cartesian_utils::toEigen(q),
+                        model.getJointBoundMax(),
+                        model.getJointBoundMin()));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits( 0.9,3e-3,q.size()));
@@ -580,11 +586,13 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::CoM::Ptr com(
-                new OpenSoT::tasks::velocity::CoM(q, model));
+                new OpenSoT::tasks::velocity::CoM(
+                    cartesian_utils::toEigen(q), model));
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(
+                    cartesian_utils::toEigen(q)));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
 
@@ -608,9 +616,9 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     dq = yarp::sig::Vector(q.size(), 0.0);
     q = getGoodInitialPosition(model);
     model.updateiDyn3Model(q, true);
-    com->update(q);
-    postural_task->update(q);
-    bounds->update(q);
+    com->update(cartesian_utils::toEigen(q));
+    postural_task->update(cartesian_utils::toEigen(q));
+    bounds->update(cartesian_utils::toEigen(q));
 
 
     if(!hasInitialError) {
@@ -622,7 +630,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         _log.close();
         _log.open("testQPOases_FF_CoM_5cmfw_noerr.m");
 
-        current_position_y = com->getActualPosition();
+        current_position_y = cartesian_utils::fromEigentoYarp(com->getActualPosition());
         YarptoKDL(current_position_y,current_pose.p);
         get5cmFwdLinearTraj(current_pose);
         desired_pose = trajectory->Pos(0.0);
@@ -638,7 +646,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         _log.close();
         _log.open("testQPOases_FF_CoM_5cmfw_1cmerr.m");
 
-        current_position_y = com->getActualPosition();
+        current_position_y = cartesian_utils::fromEigentoYarp(com->getActualPosition());
         YarptoKDL(current_position_y,current_pose.p);
         desired_pose = current_pose;
         desired_pose.p[0] = current_pose.p[0] + .01;
@@ -679,11 +687,11 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         desired_twist = trajectory->Vel(t);
         KDLtoYarp(desired_pose.p, desired_position_y);
         KDLtoYarp(desired_twist.vel, desired_twist_y);
-        com->setReference(desired_position_y, desired_twist_y*t_loop);
+        com->setReference(desired_pose.p, desired_twist.vel*t_loop);
 
         // initializing previous norm
         if(previous_norm < 0)
-            previous_norm = norm(com->getb());
+            previous_norm = com->getb().squaredNorm();
 
         // checking variation of gain during trajectory following
         if(t>=6)
@@ -691,14 +699,16 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 
         model.updateiDyn3Model(q, true);
 
-        com->update(q);
-        postural_task->update(q);
-        bounds->update(q);
+        com->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
+        bounds->update(cartesian_utils::toEigen(q));
 
-        EXPECT_TRUE(sot->solve(dq));
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
-        current_position_y = com->getActualPosition();
+        current_position_y = cartesian_utils::fromEigentoYarp(com->getActualPosition());
         YarptoKDL(current_position_y,current_pose.p);
 
 
@@ -714,7 +724,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
         twist_estimate[0] = twist_measure;
 
-        current_norm = norm(com->getb());
+        current_norm = com->getb().squaredNorm();
 
         _log << t << ",\t"
              << twist_estimate[0] << ",\t"
@@ -818,9 +828,10 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits( q,
-                        model.iDyn3_model.getJointBoundMax(),
-                        model.iDyn3_model.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(
+                    cartesian_utils::toEigen(q),
+                        model.getJointBoundMax(),
+                        model.getJointBoundMin()));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits( 1.5,3e-3,q.size()));
@@ -834,7 +845,8 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(
+                    cartesian_utils::toEigen(q)));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
 
@@ -855,8 +867,8 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     q = getGoodInitialPosition(model);
     q[j_index] = .0;
     model.updateiDyn3Model(q, true);
-    postural_task->update(q);
-    bounds->update(q);
+    postural_task->update(cartesian_utils::toEigen(q));
+    bounds->update(cartesian_utils::toEigen(q));
 
     if(!hasInitialError) {
         /**************************************************
@@ -924,11 +936,13 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         desired_q = q;
         desired_q[j_index] = desired_pose.p[0];
         desired_qdot[j_index] = desired_twist.vel[0];
-        postural_task->setReference(desired_q, desired_qdot*t_loop);
+        postural_task->setReference(
+                    cartesian_utils::toEigen(desired_q),
+                    cartesian_utils::toEigen(desired_qdot)*t_loop);
 
         // initializing previous norm
         if(previous_norm < 0)
-            previous_norm = norm(postural_task->getb());
+            previous_norm = postural_task->getb().squaredNorm();
 
         // checking variation of gain during trajectory following
         if(t>=6)
@@ -936,10 +950,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 
         model.updateiDyn3Model(q, true);
 
-        postural_task->update(q);
-        bounds->update(q);
+        postural_task->update(cartesian_utils::toEigen(q));
+        bounds->update(cartesian_utils::toEigen(q));
 
-        EXPECT_TRUE(sot->solve(dq));
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
 
         current_pose.p[0] = q[j_index];
 
@@ -957,7 +973,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
         twist_estimate[0] = twist_measure;
 
-        current_norm = norm(postural_task->getb());
+        current_norm = postural_task->getb().squaredNorm();
 
         _log << t << ",\t"
              << twist_estimate[0] << ",\t"

@@ -82,6 +82,7 @@
                  * in the world coordinate frame
                  */
                 void setReference(const Eigen::VectorXd& desiredPosition);
+                void setReference(const KDL::Vector& desiredPosition);
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.
@@ -96,6 +97,8 @@
                  */
                 void setReference(const Eigen::VectorXd& desiredPosition,
                                   const Eigen::VectorXd& desiredVelocity);
+                void setReference(const KDL::Vector& desiredPosition,
+                                  const KDL::Vector& desiredVelocity);
 
 
                 /**
