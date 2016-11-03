@@ -68,7 +68,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_GlobalConstraints
                       testQPOases_Options
                       #testQPOases_PriorityInversion
-                      #testQPOases_SelfCollisionAvoidance
+                      testQPOases_SelfCollisionAvoidance
                       testQPOases_Sparse
                       testQPOases_SubTask
                       testQPOases_VelocityAllocation
@@ -169,9 +169,9 @@ add_dependencies(testQPOases_Options GTest-ext OpenSoT)
 #TARGET_LINK_LIBRARIES(testQPOases_PriorityInversion ${TestLibs})
 #add_dependencies(testQPOases_PriorityInversion GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testQPOases_SelfCollisionAvoidance solvers/TestQPOases_SelfCollisionAvoidance.cpp)
-#TARGET_LINK_LIBRARIES(testQPOases_SelfCollisionAvoidance ${TestLibs})
-#add_dependencies(testQPOases_SelfCollisionAvoidance GTest-ext OpenSoT)
+ADD_EXECUTABLE(testQPOases_SelfCollisionAvoidance solvers/TestQPOases_SelfCollisionAvoidance.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_SelfCollisionAvoidance ${TestLibs})
+add_dependencies(testQPOases_SelfCollisionAvoidance GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testQPOases_Sparse solvers/TestQPOases_Sparse.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_Sparse ${TestLibs})
@@ -289,7 +289,7 @@ add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_Glob
 add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
 ##the following tests compile but don't get executed automatically. They are not proper tests ATM, rather case-studies and references for stack tuning.
 ##add_test(NAME OpenSoT_solvers_qpOases_PriorityInversion COMMAND testQPOases_PriorityInversion)
-#add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
+add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
 add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
 add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)

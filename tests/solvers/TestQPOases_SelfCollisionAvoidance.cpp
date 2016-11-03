@@ -209,10 +209,12 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
     DHS.leftArm->setLambda(0.2);    DHS.leftArm->setOrientationErrorGain(0.3);
 
     DHS.com_XY->setLambda(1.0);
-    DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
+    Eigen::VectorXd tmp(3);
+    tmp<<0.1,0.1,0.1;
+    DHS.comVelocity->setVelocityLimits(tmp);
     DHS.velocityLimits->setVelocityLimits(0.3);
 
-    yarp::sig::Matrix pW = DHS.postural->getWeight();
+    Eigen::MatrixXd pW = DHS.postural->getWeight();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
         pW(model.torso.joint_numbers[i_t],
             model.torso.joint_numbers[i_t]) *= 1e3;
@@ -239,8 +241,8 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
-    typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = stack->getStack()[stack->getStack().size()-1];
+    typedef std::list<OpenSoT::Constraint<Eigen::MatrixXd,Eigen::VectorXd>::ConstraintPtr>::iterator it_constraint;
+    OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>::TaskPtr lastTask = stack->getStack()[stack->getStack().size()-1];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
@@ -347,8 +349,8 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 
     OpenSoT::AutoStack::Ptr stack, stackns;
     OpenSoT::solvers::QPOases_sot::Ptr sot, sotns;
-    OpenSoT::DefaultHumanoidStack DHS(model, dT, q);
-    OpenSoT::DefaultHumanoidStack DHSns(model, dT, qns);
+    OpenSoT::DefaultHumanoidStack DHS(model, dT, cartesian_utils::toEigen(q));
+    OpenSoT::DefaultHumanoidStack DHSns(model, dT, cartesian_utils::toEigen(qns));
 
     // we need to change the eps before creating the solver
     if(params.strategy == STRATEGY_EPS_TUNING)
@@ -468,8 +470,8 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
     double settling_counter = 1.0;
     bool converged_event = false;
 
-    DHS.leftArm->setReference(desired_pose);
-    DHSns.leftArm->setReference(desired_pose);
+    DHS.leftArm->setReference(cartesian_utils::toEigen(desired_pose));
+    DHSns.leftArm->setReference(cartesian_utils::toEigen(desired_pose));
 
 #ifdef TRY_ON_SIMULATOR
     double t_test = yarp::os::Time::now();
@@ -485,13 +487,17 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 #endif
 
         model.updateiDyn3Model(q, true);
-        stack->update(q);
+        stack->update(cartesian_utils::toEigen(q));
 
-        e_com = yarp::math::norm(stack->getStack()[stack_off  + 0]->getb());
-        e_arms = yarp::math::norm(stack->getStack()[stack_off + 1]->getb());
-        e_post = yarp::math::norm(stack->getStack()[stack_off + 2]->getb());
-
-        EXPECT_TRUE(sot->solve(dq));
+        e_com = yarp::math::norm(
+                    cartesian_utils::fromEigentoYarp(stack->getStack()[stack_off  + 0]->getb()));
+        e_arms = yarp::math::norm(
+                    cartesian_utils::fromEigentoYarp(stack->getStack()[stack_off + 1]->getb()));
+        e_post = yarp::math::norm(
+                    cartesian_utils::fromEigentoYarp(stack->getStack()[stack_off + 2]->getb()));
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
 #ifdef TRY_ON_SIMULATOR
@@ -512,13 +518,17 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 #endif
 
         model.updateiDyn3Model(qns, true);
-        stackns->update(qns);
+        stackns->update(cartesian_utils::toEigen(qns));
 
-        e_com_ns = yarp::math::norm(stackns->getStack()[1]->getb());
-        e_arms_ns = yarp::math::norm(stackns->getStack()[2]->getb());
-        e_post_ns = yarp::math::norm(stackns->getStack()[3]->getb());
-
-        EXPECT_TRUE(sotns->solve(dqns));
+        e_com_ns = yarp::math::norm(
+                    cartesian_utils::fromEigentoYarp(stackns->getStack()[1]->getb()));
+        e_arms_ns = yarp::math::norm(
+                    cartesian_utils::fromEigentoYarp(stackns->getStack()[2]->getb()));
+        e_post_ns = yarp::math::norm(
+                    cartesian_utils::fromEigentoYarp(stackns->getStack()[3]->getb()));
+        Eigen::VectorXd _dqns(dqns.size()); _dqns.setZero(dqns.size());
+        EXPECT_TRUE(sotns->solve(_dqns));
+        dqns = cartesian_utils::fromEigentoYarp(_dqns);
         qns+=dqns;
 
 #ifdef TRY_ON_SIMULATOR
@@ -534,9 +544,9 @@ TEST_P(testQPOases_SCA, trySCASmoothing) {
 
 
         double r, p, y,         r_ns, p_ns, y_ns,                      r_ref, p_ref, y_ref;
-        yarp::sig::Matrix F =     DHS.leftArm->getActualPose();
-        yarp::sig::Matrix F_ns =  DHSns.leftArm->getActualPose();
-        yarp::sig::Matrix F_ref = DHS.leftArm->getReference();
+        yarp::sig::Matrix F =     cartesian_utils::fromEigentoYarp(DHS.leftArm->getActualPose());
+        yarp::sig::Matrix F_ns =  cartesian_utils::fromEigentoYarp(DHSns.leftArm->getActualPose());
+        yarp::sig::Matrix F_ref = cartesian_utils::fromEigentoYarp(DHS.leftArm->getReference());
         KDL::Frame F_kdl,        F_ns_kdl,                             F_ref_kdl;
         YarptoKDL(F, F_kdl);     YarptoKDL(F_ns, F_ns_kdl);            YarptoKDL(F_ref, F_ref_kdl);
         F_kdl.M.GetRPY(r, p, y); F_ns_kdl.M.GetRPY(r_ns, p_ns, y_ns);  F_ref_kdl.M.GetRPY(r_ref, p_ref, y_ref);
