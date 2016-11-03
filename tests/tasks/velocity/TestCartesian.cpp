@@ -205,14 +205,19 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
         }
     }
 
+    /**HERE WE ARE USING NEAR WITH A VERY SMALL NUMBER SINCE SOMETIMES
+    * THE TEST DOES NOT PASE IN CTEST BECAUSE IT COMPARES 0.0 WITH
+    * -1.34...1E-306 AND THE TEST FAILS...
+    **/
+
     for(unsigned int i = 0; i < 6; ++i)
-        EXPECT_DOUBLE_EQ(q_whole[_robot.right_leg.joint_numbers[i]],0.0);
+        EXPECT_NEAR(q_whole[_robot.right_leg.joint_numbers[i]],0.0,1E-100);
     for(unsigned int i = 0; i < 7; ++i) {
-        EXPECT_DOUBLE_EQ(q_whole[_robot.left_arm.joint_numbers[i]],0.0);
-        EXPECT_DOUBLE_EQ(q_whole[_robot.right_arm.joint_numbers[i]],0.0);
+        EXPECT_NEAR(q_whole[_robot.left_arm.joint_numbers[i]],0.0,1E-100);
+        EXPECT_NEAR(q_whole[_robot.right_arm.joint_numbers[i]],0.0,1E-100);
     }
     for(unsigned int i = 0; i < 3; ++i) {
-        EXPECT_DOUBLE_EQ(q_whole[_robot.torso.joint_numbers[i]],0.0);
+        EXPECT_NEAR(q_whole[_robot.torso.joint_numbers[i]],0.0,1E-100);
     }
 }
 
@@ -616,8 +621,8 @@ TEST_F(testCartesianTask, testActiveJointsMask)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    OpenSoT::legacy::tasks::velocity::Cartesian cartesian("cartesian::torso",
-                                                 q_whole,
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
+                                                 cartesian_utils::toEigen(q_whole),
                                                  _robot,
                                                  "torso",
                                                  "world");

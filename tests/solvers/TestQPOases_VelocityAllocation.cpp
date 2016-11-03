@@ -254,13 +254,13 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 
         //minimumVelocity(model, DHS, model.left_arm, q);
 
-        e = DHS.leftArm->getb().squaredNorm();
+        e = sqrt(DHS.leftArm->getb().squaredNorm());
         if(useMinimumVelocity) {
             ASSERT_EQ(dq.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
             ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
             epost = norm((q-cartesian_utils::fromEigentoYarp(DHS.postural->getReference())).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
         } else
-            epost = postural->getb().squaredNorm();
+            epost = sqrt(postural->getb().squaredNorm());
         if(epost > epost_max)
             epost_max = epost;
 
@@ -292,13 +292,13 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 
         //minimumVelocity(model, DHSnva, model.left_arm, qnva);
 
-        enva = DHSnva.leftArm->getb().squaredNorm();
+        enva = sqrt(DHSnva.leftArm->getb().squaredNorm());
         if(useMinimumVelocity) {
             ASSERT_EQ(qnva.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
             ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
             epostnva = norm((qnva-cartesian_utils::fromEigentoYarp(DHSnva.postural->getReference())).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
         } else
-            epostnva = posturalnva->getb().squaredNorm();
+            epostnva = sqrt(posturalnva->getb().squaredNorm());
         if(epostnva > epostnva_max)
             epostnva_max = epostnva;
 

@@ -403,7 +403,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
         // initializing previous norm
         if(previous_norm < 0)
-            previous_norm = l_arm_task->getb().squaredNorm();
+            previous_norm = sqrt(l_arm_task->getb().squaredNorm());
 
         // checking variation of gain during trajectory following
         if(t>=6)
@@ -444,7 +444,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
         twist_estimate[0] = twist_measure;
 
-        current_norm = l_arm_task->getb().squaredNorm();
+        current_norm = sqrt(l_arm_task->getb().squaredNorm());
 
         if(trajType == KDL::Path::ID_LINE) {
             _log << t << ",\t"
@@ -474,10 +474,10 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         if(!hasInitialError) {
             if(trajType == KDL::Path::ID_LINE) {
                 EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;;
-                EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 5e-4) << " @t= " << t;;
+                EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 5e-4) << " @t= " << t;;
             } else {
                 EXPECT_NEAR(R, Rdes,3e-3) << " @t= " << t;;
-                EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 1.5e-2) << " @t= " << t;;
+                EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1.5e-2) << " @t= " << t;;
             }
         } else {
             if(t<=1.3) {
@@ -507,10 +507,10 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
             } else {
                 if(trajType == KDL::Path::ID_LINE) {
                     EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1.5e-4) << " @t= " << t;
-                    EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 1.5e-3) << " @t= " << t;
+                    EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1.5e-3) << " @t= " << t;
                 } else {
                     EXPECT_NEAR(R, Rdes,2e-3);
-                    EXPECT_NEAR(l_arm_task->getb().squaredNorm(), 0, 1e-2);
+                    EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1e-2);
                 }
             }
         }
@@ -691,7 +691,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 
         // initializing previous norm
         if(previous_norm < 0)
-            previous_norm = com->getb().squaredNorm();
+            previous_norm = sqrt(com->getb().squaredNorm());
 
         // checking variation of gain during trajectory following
         if(t>=6)
@@ -724,7 +724,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
         twist_estimate[0] = twist_measure;
 
-        current_norm = com->getb().squaredNorm();
+        current_norm = sqrt(com->getb().squaredNorm());
 
         _log << t << ",\t"
              << twist_estimate[0] << ",\t"
@@ -942,7 +942,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 
         // initializing previous norm
         if(previous_norm < 0)
-            previous_norm = postural_task->getb().squaredNorm();
+            previous_norm = sqrt(postural_task->getb().squaredNorm());
 
         // checking variation of gain during trajectory following
         if(t>=6)
@@ -973,7 +973,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
         twist_estimate[0] = twist_measure;
 
-        current_norm = postural_task->getb().squaredNorm();
+        current_norm = sqrt(postural_task->getb().squaredNorm());
 
         _log << t << ",\t"
              << twist_estimate[0] << ",\t"

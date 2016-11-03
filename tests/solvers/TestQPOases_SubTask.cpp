@@ -161,7 +161,7 @@ TEST_F(testQPOases_SubTask, testSolveCartesianThroughSubTasksAndAggregated)
     desiredPose(0,3) = actualPose(0,3)+0.1;
 
     unsigned int iterations = 10000;
-    while(DHS.leftArm->getb().squaredNorm() > 1e-4 && iterations > 0)
+    while(sqrt(DHS.leftArm->getb().squaredNorm()) > 1e-4 && iterations > 0)
     {
         model.updateiDyn3Model(q, true);
         subTaskTest->update(cartesian_utils::toEigen(q));
@@ -171,7 +171,7 @@ TEST_F(testQPOases_SubTask, testSolveCartesianThroughSubTasksAndAggregated)
         q += dq;
     }
 
-    ASSERT_TRUE(DHS.leftArm->getb().squaredNorm() <= 1e-4);
+    ASSERT_TRUE(sqrt(DHS.leftArm->getb().squaredNorm()) <= 1e-4);
 }
 
 }

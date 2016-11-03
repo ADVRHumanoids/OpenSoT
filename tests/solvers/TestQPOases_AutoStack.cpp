@@ -84,14 +84,14 @@ TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
     yarp::sig::Matrix desiredPose = actualPose; desiredPose(0,3) = actualPose(0,3)+0.1;
 
     unsigned int iterations = 10000;
-    while(DHS.leftArm->getb().squaredNorm() > 1e-4 && iterations > 0)
+    while(sqrt(DHS.leftArm->getb().squaredNorm()) > 1e-4 && iterations > 0)
     {
-        double oldBoundsNorm = DHS.jointLimits->getbLowerBound().squaredNorm();
+        double oldBoundsNorm = sqrt(DHS.jointLimits->getbLowerBound().squaredNorm());
         model.updateiDyn3Model(q, true);
         subTaskTest->update(model.getAng());
 
         if(yarp::math::norm(dq) > 1e-3)
-            EXPECT_NE(oldBoundsNorm,DHS.jointLimits->getbLowerBound().squaredNorm());
+            EXPECT_NE(oldBoundsNorm,sqrt(DHS.jointLimits->getbLowerBound().squaredNorm()));
 
         Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
         ASSERT_TRUE(solver->solve(_dq));
@@ -99,7 +99,7 @@ TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
         q += dq;
     }
 
-    ASSERT_TRUE(DHS.leftArm->getb().squaredNorm() <= 1e-4);
+    ASSERT_TRUE(sqrt(DHS.leftArm->getb().squaredNorm()) <= 1e-4);
 }
 
 TEST_F(testQPOases_AutoStack, testComplexAutoStack)
@@ -183,11 +183,11 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
         q += dq;
     }
 
-    EXPECT_TRUE(l_arm->getb().squaredNorm() <= 1e-4);
-    std::cout<<"l_arm getb norm "<<l_arm->getb().squaredNorm()<<std::endl;
-    EXPECT_TRUE(r_arm->getb().squaredNorm() <= 1e-4);
-    std::cout<<"r_arm getb norm "<<r_arm->getb().squaredNorm()<<std::endl;
-    EXPECT_TRUE(r_leg->getb().squaredNorm() <= 1e-4);
+    EXPECT_TRUE(sqrt(l_arm->getb().squaredNorm()) <= 1e-4);
+    std::cout<<"l_arm getb norm "<<sqrt(l_arm->getb().squaredNorm())<<std::endl;
+    EXPECT_TRUE(sqrt(r_arm->getb().squaredNorm()) <= 1e-4);
+    std::cout<<"r_arm getb norm "<<sqrt(r_arm->getb().squaredNorm())<<std::endl;
+    EXPECT_TRUE(sqrt(r_leg->getb().squaredNorm()) <= 1e-4);
 
 }
 

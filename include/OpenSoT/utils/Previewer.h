@@ -73,9 +73,9 @@ namespace OpenSoT {
                                     orientationError.setZero(3);
                                 }
                                 const double getPositionErrorNorm() const{
-                                    return positionError.squaredNorm();}
+                                    return sqrt(positionError.squaredNorm());}
                                 const double getOrientationErrorNorm() const {
-                                    return orientationError.squaredNorm(); }
+                                    return sqrt(orientationError.squaredNorm()); }
                                 const double getNorm() const {
                                     return std::sqrt(std::pow(getPositionErrorNorm(),2) +
                                                      std::pow(Ko*getOrientationErrorNorm(),2)); }
@@ -476,10 +476,10 @@ namespace OpenSoT {
 
                         Eigen::VectorXd errors(6);
                         errors<<positionError,-Ko*orientationError;
-                        error = errors.squaredNorm();
+                        error = sqrt(errors.squaredNorm());
                     } else if(CoM::isCoM(task))
                     {
-                        error = (yv - yvOld).squaredNorm();
+                        error = sqrt((yv - yvOld).squaredNorm());
                     };
 
                     if(error > threshold)
@@ -544,7 +544,7 @@ namespace OpenSoT {
              */
             bool jointSpaceConfigurationChanged(double threshold = 1e-5)
             {
-                double error = (q - qNode).squaredNorm();
+                double error = sqrt((q - qNode).squaredNorm());
 
                 if(error > threshold)
                 {
@@ -562,7 +562,7 @@ namespace OpenSoT {
              */
             bool jointSpaceConfigurationConverged(double threshold = 1e-9)
             {
-                return dq.squaredNorm() < threshold;
+                return sqrt(dq.squaredNorm()) < threshold;
             }
 
             /**
