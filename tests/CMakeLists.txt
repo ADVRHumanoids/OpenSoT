@@ -62,7 +62,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testVelocityLimitsVelocityBounds
                       testQPOasesSolver
                       testQPOases_AutoStack
-                      #testQPOases_CartesianPositionConstraint
+                      testQPOases_CartesianPositionConstraint
                       testQPOases_ConvexHull
                       testQPOases_FF
                       testQPOases_GlobalConstraints
@@ -145,9 +145,9 @@ ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
 add_dependencies(testQPOases_AutoStack GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testQPOases_CartesianPositionConstraint solvers/TestQPOases_CartesianPositionConstraint.cpp)
-#TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
-#add_dependencies(testQPOases_CartesianPositionConstraint GTest-ext OpenSoT)
+ADD_EXECUTABLE(testQPOases_CartesianPositionConstraint solvers/TestQPOases_CartesianPositionConstraint.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
+add_dependencies(testQPOases_CartesianPositionConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
@@ -282,7 +282,7 @@ add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsV
 add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
-#add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
+add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
 add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)

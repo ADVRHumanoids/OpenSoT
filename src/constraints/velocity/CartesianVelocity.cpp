@@ -23,13 +23,13 @@
 using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
-CartesianVelocity::CartesianVelocity(const yarp::sig::Vector velocityLimits,
+CartesianVelocity::CartesianVelocity(const Eigen::VectorXd velocityLimits,
                          			 const double dT,
                                      OpenSoT::tasks::velocity::Cartesian::Ptr& task) :
 Constraint(task->getTaskID()+"_VelocityLimit", task->getXSize()), _dT(dT), _velocityLimits(velocityLimits),
 _task(task) {
 
-    if(_velocityLimits.size() < 6 )
+    if(_velocityLimits.rows() < 6 )
         throw "Error: velocityLimits for CoM should be a vector of 3 elements";
 
     _Aineq.resize(6,    task->getXSize());
@@ -41,20 +41,20 @@ _task(task) {
     this->generateAineq();
 }
 
-void CartesianVelocity::update(const yarp::sig::Vector &x) {
+void CartesianVelocity::update(const Eigen::VectorXd &x) {
 
     this->generateAineq();
 
 }
 
-yarp::sig::Vector OpenSoT::constraints::velocity::CartesianVelocity::getVelocityLimits()
+Eigen::VectorXd OpenSoT::constraints::velocity::CartesianVelocity::getVelocityLimits()
 {
     return _velocityLimits;
 }
 
-void OpenSoT::constraints::velocity::CartesianVelocity::setVelocityLimits(const yarp::sig::Vector velocityLimits)
+void OpenSoT::constraints::velocity::CartesianVelocity::setVelocityLimits(const Eigen::VectorXd velocityLimits)
 {
-    if(_velocityLimits.size() < 3 )
+    if(_velocityLimits.rows() < 3 )
         throw "Error: velocityLimits for CoM should be a vector of 3 elements";
     _velocityLimits = velocityLimits;
 }

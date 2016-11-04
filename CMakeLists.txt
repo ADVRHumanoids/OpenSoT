@@ -75,7 +75,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
                     src/constraints/velocity/CartesianPositionConstraint.cpp
-                    #src/constraints/velocity/CartesianVelocity.cpp
+                    src/constraints/velocity/CartesianVelocity.cpp
                     src/constraints/velocity/CoMVelocity.cpp
                     src/constraints/velocity/ConvexHull.cpp
                     src/constraints/velocity/JointLimits.cpp
