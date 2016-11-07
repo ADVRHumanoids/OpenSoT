@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Walkman
- * Authors:Alessio Rocchi, Enrico Mingo
- * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+ * Authors: Enrico Mingo Hoffman, Alessio Rocchi
+ * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -15,15 +15,12 @@
  * Public License for more details
 */
 
-#ifndef __TASKS_VELOCITY_COM_H__
-#define __TASKS_VELOCITY_COM_H__
+#ifndef __TASKS_FORCE_COM_H__
+#define __TASKS_FORCE_COM_H__
 
 #include <OpenSoT/Task.h>
 #include <idynutils/idynutils.h>
 #include <kdl/frames.hpp>
-#include <yarp/sig/all.h>
-#include <yarp/os/all.h>
-
 
 
  namespace OpenSoT {
@@ -31,10 +28,17 @@
         namespace force {
 
             /**
-             * @brief The CoM class computes the wrench distribution all over the contacts to exert a certain
-             * force on the COM. The resultants are the (reaction) wrench in sensor frame expressed in world
+             * @brief The CoM task computes the wrenches at the contact, in world frame, in
+             * order to realize a certain acceleration and variation of angular momentum
+             * at the CoM considering the Centroidal Dynamics:
+             *
+             *      m*ddr = sum(f) + mg
+             *      dL = sum(pxf + tau)
+             *
+             * Note: variables are wrenches: w = [f tau]'
+             *
              */
-            class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            class CoM : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
                 typedef boost::shared_ptr<CoM> Ptr;
             private:
@@ -46,67 +50,99 @@
                 /**
                  * @brief _g gravity vector in world frame
                  */
-                yarp::sig::Vector _g;
+                Eigen::Vector3d _g;
 
                 /**
-                 * @brief _desiredAccelerationCoM in world frame computed as:
+                 * @brief _desiredAcceleration (linear) of CoM in world frame computed as:
                  *
-                 *  ddx_x = ddx_ref + K1(dx_ref-dx) + K2(x_ref-x)
+                 *  ddr = ddr_ref + K1(dr_ref-dr) + K2(r_ref-r)
+                 *
                  */
-                yarp::sig::Vector _desiredAcceleration;
-                yarp::sig::Vector _desiredPosition;
-                yarp::sig::Vector _desiredVelocity;
+                Eigen::Vector3d _desiredAcceleration;
+                Eigen::Vector3d _desiredPosition;
+                Eigen::Vector3d _desiredVelocity;
 
-                yarp::sig::Vector _actualPosition;
-                yarp::sig::Vector _actualVelocity;
+                Eigen::Vector3d _desiredVariationAngularMomentum;
+                Eigen::Vector3d _desiredAngularMomentum;
+
+                Eigen::Vector3d _actualPosition;
+                Eigen::Vector3d _actualVelocity;
+                Eigen::Vector3d _actualAngularMomentum;
+
 
                 double _lambda2;
 
+                double _lambdaAngularMomentum;
+
                 void update_b();
+
+                std::vector<std::string> _links_in_contact;
+
+                Eigen::Matrix3d _I;
+                Eigen::Matrix3d _P;
+                Eigen::Matrix4d _T;
+                Eigen::Matrix3d _O;
 
             public:
 
-                yarp::sig::Vector positionError;
-                yarp::sig::Vector velocityError;
+                Eigen::Vector3d positionError;
+                Eigen::Vector3d velocityError;
+                Eigen::Vector3d angularMomentumError;
 
                 /**
                  * @brief CoM
                  * @param x the initial configuration of the robot
                  * @param robot the robot model, with floating base link set on the support foot
                  */
-                CoM(const yarp::sig::Vector& x,
+                CoM(const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact,
                     iDynUtils& robot);
 
                 ~CoM();
 
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
 
 
-                void setReference(const yarp::sig::Vector& desiredPosition);
+                void setLinearReference(const Eigen::Vector3d& desiredPosition);
 
 
-                void setReference(const yarp::sig::Vector& desiredPosition,
-                                  const yarp::sig::Vector& desiredVelocity);
+                void setLinearReference(const Eigen::Vector3d& desiredPosition,
+                                  const Eigen::Vector3d& desiredVelocity);
 
-                void setReference(const yarp::sig::Vector& desiredPosition,
-                                  const yarp::sig::Vector& desiredVelocity,
-                                  const yarp::sig::Vector& desiredAcceleration);
+                void setLinearReference(const Eigen::Vector3d& desiredPosition,
+                                  const Eigen::Vector3d& desiredVelocity,
+                                  const Eigen::Vector3d& desiredAcceleration);
 
+                void setAngularReference(const Eigen::Vector3d& desiredAngularMomentum);
 
-
-                yarp::sig::Vector getReference() const;
-
-                void getReference(yarp::sig::Vector& desiredPosition,
-                                  yarp::sig::Vector& desiredVelocity) const;
-
-                void getReference(yarp::sig::Vector& desiredPosition,
-                                  yarp::sig::Vector& desiredVelocity,
-                                  yarp::sig::Vector& desiredAcceleration) const;
+                void setAngularReference(const Eigen::Vector3d& desiredAngularMomentum,
+                                         const Eigen::Vector3d& desiredVariationAngularMomentum);
 
 
-                yarp::sig::Vector getActualPosition() const;
+                void setLinksInContact(const std::vector<std::string>& links_in_contact);
+                std::vector<std::string> getLinksInContact();
 
-                yarp::sig::Vector getActualVelocity() const;
+
+
+                Eigen::Vector3d getLinearReference() const;
+
+                void getLinearReference(Eigen::Vector3d& desiredPosition,
+                                  Eigen::Vector3d& desiredVelocity) const;
+
+                void getLinearReference(Eigen::Vector3d& desiredPosition,
+                                  Eigen::Vector3d& desiredVelocity,
+                                  Eigen::Vector3d& desiredAcceleration) const;
+
+                Eigen::Vector3d getAngularReference() const;
+
+                void getAngularReference(Eigen::Vector3d& desiredAngularMomentum,
+                                  Eigen::Vector3d& desiredVariationAngularMomentum) const;
+
+
+                Eigen::Vector3d getActualPosition() const;
+
+                Eigen::Vector3d getActualVelocity() const;
+
+                Eigen::Vector3d getActualAngularMomentum() const;
 
                 /**
                  * @brief getBaseLink an utility function that always returns "world"
@@ -120,22 +156,24 @@
                  */
                 std::string getDistalLink();
 
-                void setLambda(double lambda, double lambda2);
+                void setLambda(double lambda, double lambda2, double lambdaAngularMomentum);
 
 
                 /**
                  * @brief getError returns the position error between actual and reference positions
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
-                yarp::sig::Vector getError();
+                Eigen::Vector3d getError();
 
                 /**
                  * @brief getError returns the position error between actual and reference positions
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
-                yarp::sig::Vector getVelocityError();
+                Eigen::Vector3d getVelocityError();
 
-                yarp::sig::Matrix computeW(const std::vector<std::string>& ft_in_contact);
+                Eigen::Vector3d getAngularMomentumError();
+
+                Eigen::MatrixXd computeW(const std::vector<std::string>& links_in_contact);
 
             };
         }

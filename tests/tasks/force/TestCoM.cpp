@@ -77,51 +77,63 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     return q;
 }
 
-TEST_F(testForceCoM, testForceCoM1) {
+TEST_F(testForceCoM, testForceCoM_StaticCase) {
     iDynUtils coman("coman",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q = getGoodInitialPosition1(coman);
 
     coman.updateiDyn3Model(q, true);
-    std::list<std::string> links_in_contact = coman.getLinksInContact();
-    links_in_contact.push_back("l_hand_upper_right_link");
-    coman.setLinksInContact(links_in_contact);
-    links_in_contact.clear();
-    links_in_contact = coman.getLinksInContact();
-    std::list<std::string>::iterator it;
+
+    std::vector<std::string> links_in_contact;
+    links_in_contact.push_back("r_sole");
+    links_in_contact.push_back("l_sole");
+    links_in_contact.push_back("LSoftHand");
+
+    std::vector<std::string>::iterator it;
     for(it = links_in_contact.begin();
         it != links_in_contact.end(); it++)
         std::cout<<"link in contact "<<":"<<*it<<std::endl;
 
-    yarp::sig::Matrix M(6+coman.iDyn3_model.getNrOfDOFs(), 6+coman.iDyn3_model.getNrOfDOFs());
-    coman.iDyn3_model.getFloatingBaseMassMatrix(M);
-    double m = M(0,0);
 
-    yarp::sig::Vector wrench_d(18,0.0);
+    Eigen::VectorXd contact_wrenches_d(6*links_in_contact.size());
+    contact_wrenches_d.setZero(contact_wrenches_d.rows());
     OpenSoT::tasks::force::CoM::Ptr force_com_task(
-                new OpenSoT::tasks::force::CoM(wrench_d, coman));
-    force_com_task->update(wrench_d);
+        new OpenSoT::tasks::force::CoM(contact_wrenches_d, links_in_contact, coman));
+    force_com_task->update(contact_wrenches_d);
 
-    yarp::sig::Matrix A = force_com_task->getA();
-    EXPECT_EQ(A.rows(), 3);
-    EXPECT_EQ(A.cols(), 2*3*3);
-    std::cout<<"A = [ "<<A.toString()<<" ]"<<std::endl;
+    Eigen::MatrixXd A = force_com_task->getA();
+    EXPECT_EQ(A.rows(), 6);
+    EXPECT_EQ(A.cols(), 6*links_in_contact.size());
+    std::cout<<"A = [ "<<A<<" ]"<<std::endl;
 
-    yarp::sig::Vector b = force_com_task->getb();
-    EXPECT_DOUBLE_EQ(b(2), m*9.81);
-    std::cout<<"b = [ "<<b.toString()<<" ]"<<std::endl;
+    Eigen::VectorXd b = force_com_task->getb();
+    EXPECT_DOUBLE_EQ(b.rows(), 6);
+    std::cout<<"b = [ "<<b<<" ]"<<std::endl;
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
     stack_of_tasks.push_back(force_com_task);
 
     OpenSoT::solvers::QPOases_sot::Ptr sot(
-                new OpenSoT::solvers::QPOases_sot(stack_of_tasks,2E10));
-    std::cout<<"Solver stardted"<<std::endl;
-    sot->solve(wrench_d);
-    std::cout<<"wrench_d = [ "<<wrench_d.toString()<<" ]"<<std::endl;
+                new OpenSoT::solvers::QPOases_sot(stack_of_tasks,2E3));
+    std::cout<<"Solver started"<<std::endl;
+    sot->solve(contact_wrenches_d);
+    std::cout<<"contact_wrenches_d = [ "<<contact_wrenches_d<<" ]"<<std::endl;
 
-    EXPECT_NEAR(wrench_d[2] + wrench_d[5] + wrench_d[8], m*9.81, 1E-3);
+    yarp::sig::Matrix M(6+coman.iDyn3_model.getNrOfDOFs(),
+                        6+coman.iDyn3_model.getNrOfDOFs());
+    coman.iDyn3_model.getFloatingBaseMassMatrix(M);
+    double m = M(0,0);
+
+    EXPECT_NEAR(contact_wrenches_d[2] + contact_wrenches_d[8]
+            + contact_wrenches_d[14], m*9.81, 1E-6);
+
+    Eigen::VectorXd Ax = A*contact_wrenches_d;
+    std::cout<<"A*x = \n"<<Ax<<std::endl;
+    std::cout<<"b = \n"<<b<<std::endl;
+
+    for(unsigned int i = 0; i < b.rows(); ++i)
+        EXPECT_NEAR(Ax[i],b[i], 1E-6);
 
 }
 

@@ -101,7 +101,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
-                    #src/tasks/force/CoM.cpp
+                    src/tasks/force/CoM.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp
