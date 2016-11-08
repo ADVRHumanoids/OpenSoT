@@ -89,7 +89,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       #testLogger
                       #testPreviewer
                       testVelocityAllocation
-                      #testYCartesian
+                      testYCartesian
                       testYPostural
 )
 endif()
@@ -253,9 +253,9 @@ ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
 TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
-#TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
-#add_dependencies(testYCartesian GTest-ext OpenSoT)
+ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
+TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
+add_dependencies(testYCartesian GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
 TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
@@ -310,7 +310,7 @@ add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStac
 #add_test(NAME OpenSoT_utils_Logger COMMAND testLogger)
 #add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
-#add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
+add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
 add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
 
 

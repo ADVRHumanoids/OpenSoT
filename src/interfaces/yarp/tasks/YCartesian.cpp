@@ -3,7 +3,7 @@
 using namespace OpenSoT::interfaces::yarp::tasks;
 
 YCartesian::YCartesian(const std::string &robot_name, const std::string &module_prefix, std::string task_id,
-                       const ::yarp::sig::Vector &x, iDynUtils &robot, std::string distal_link, std::string base_link):
+                       const Eigen::VectorXd &x, iDynUtils &robot, std::string distal_link, std::string base_link):
     ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>(),
     taskCartesian(new Cartesian(task_id,x,robot, distal_link, base_link)),
     _port_prefix(),
@@ -81,26 +81,14 @@ void YCartesian::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
             std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.yarp_pose_msg::distal_frame<<
                        " instead of "<<taskCartesian->getDistalLink()<<" as distal_frame"<<std::endl;
         else
-        {
-            ::yarp::sig::Matrix tmp;
-            cartesian_utils::fromKDLFrameToYARPMatrix(ref_trj_msg.pose, tmp);
-
-            ::yarp::sig::Vector tmp2(6, 0.0);
-            tmp2[0] = ref_trj_msg.twist.vel.x();
-            tmp2[1] = ref_trj_msg.twist.vel.y();
-            tmp2[2] = ref_trj_msg.twist.vel.z();
-            tmp2[3] = ref_trj_msg.twist.rot.x();
-            tmp2[4] = ref_trj_msg.twist.rot.y();
-            tmp2[5] = ref_trj_msg.twist.rot.z();
-
-            taskCartesian->setReference(tmp, tmp2);
-        }
+            taskCartesian->setReference(ref_trj_msg.pose,
+                                        ref_trj_msg.twist);
     }
 }
 
 void YCartesian::printInitialError()
 {
     std::cout<<"Initial Reference for "<<taskCartesian->getTaskID()<<":"<<std::endl;
-    cartesian_utils::printHomogeneousTransform(taskCartesian->getReference());
+    std::cout<<taskCartesian->getReference()<<std::endl;
     std::cout<<std::endl;
 }

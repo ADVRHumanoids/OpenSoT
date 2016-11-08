@@ -5,6 +5,7 @@
 #include <boost/smart_ptr/scoped_ptr.hpp>
 #include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_trj_msg.h>
 #include <boost/thread/mutex.hpp>
+#include <Eigen/Dense>
 
 
 namespace OpenSoT {
@@ -62,10 +63,10 @@ public:
 private:
     ::yarp::os::Bottle _in;
     ::yarp::os::Bottle _out;
-    ::yarp::sig::Matrix _W;
+    Eigen::MatrixXd _W;
     double _lambda;
     double _orientation_gain;
-    ::yarp::sig::Matrix _task_pose;
+    Eigen::MatrixXd _task_pose;
     boost::mutex _mtx;
 
     std::string _help_string;
@@ -249,7 +250,7 @@ public:
     YCartesian(const std::string& robot_name,
                const std::string& module_prefix,
                std::string task_id,
-               const ::yarp::sig::Vector& x,
+               const Eigen::VectorXd& x,
                iDynUtils &robot,
                std::string distal_link,
                std::string base_link);

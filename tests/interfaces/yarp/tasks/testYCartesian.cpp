@@ -58,7 +58,8 @@ TEST_F(testYTask, testPoseTwistMsgs)
         if(check)
         {
             OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm(robot_name,
-                module_prefix, task_id, q, robot, distal_link, base_link);
+                module_prefix, task_id,
+                cartesian_utils::toEigen(q), robot, distal_link, base_link);
 
             yarp::os::BufferedPort<OpenSoT::interfaces::yarp::msgs::yarp_pose_msg_portable> pose_msg_port;
             pose_msg_port.open("/test_port:o");
@@ -81,7 +82,11 @@ TEST_F(testYTask, testPoseTwistMsgs)
 
             yarp::sig::Matrix T(4,4);
             yarp::sig::Vector v(6, 1.0);
-            y_cartesian_l_arm.taskCartesian->getReference(T, v);
+            Eigen::MatrixXd T_(4,4);
+            Eigen::VectorXd v_(6);
+            y_cartesian_l_arm.taskCartesian->getReference(T_, v_);
+            T = cartesian_utils::fromEigentoYarp(T_);
+            v = cartesian_utils::fromEigentoYarp(v_);
 
             std::cout<<"RECEIVED FRAME: "<<std::endl;
             cartesian_utils::printHomogeneousTransform(T);
@@ -130,7 +135,9 @@ TEST_F(testYTask, testPoseTwistMsgs)
             }
 
             std::cout<<"RECEIVED TRJ: "<<std::endl;
-            y_cartesian_l_arm.taskCartesian->getReference(T, v);
+            y_cartesian_l_arm.taskCartesian->getReference(T_, v_);
+            T = cartesian_utils::fromEigentoYarp(T_);
+            v = cartesian_utils::fromEigentoYarp(v_);
             cartesian_utils::printHomogeneousTransform(T);
             cartesian_utils::printVelocityVector(v);
             std::cout<<"base_frame: "<<y_cartesian_l_arm.taskCartesian->getBaseLink()<<std::endl;
@@ -164,7 +171,9 @@ TEST_F(testYTask, testPoseTwistMsgs)
             std::cout<<"distal_frame: "<<pose_msg.distal_frame<<std::endl;std::cout<<std::endl;
 
             std::cout<<"RECEIVED TRJ: "<<std::endl;
-            y_cartesian_l_arm.taskCartesian->getReference(T, v);
+            y_cartesian_l_arm.taskCartesian->getReference(T_, v_);
+            T = cartesian_utils::fromEigentoYarp(T_);
+            v = cartesian_utils::fromEigentoYarp(v_);
             cartesian_utils::printHomogeneousTransform(T);
             cartesian_utils::printVelocityVector(v);
             std::cout<<"base_frame: "<<y_cartesian_l_arm.taskCartesian->getBaseLink()<<std::endl;
@@ -208,7 +217,8 @@ TEST_F(testYTask, testYTASK)
         }
         if(check)
         {
-            OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm(robot_name, module_prefix, task_id, q, robot, distal_link, base_link);
+            OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm(robot_name, module_prefix, task_id,
+                                                                           cartesian_utils::toEigen(q), robot, distal_link, base_link);
 
             EXPECT_EQ(y_cartesian_l_arm.getBaseLink(), base_link);
             EXPECT_EQ(y_cartesian_l_arm.getDistalLink(), distal_link);
@@ -293,7 +303,7 @@ TEST_F(testYTask, testYTASK)
             W.zero();
             for(unsigned int i = 0; i < b_in3.size(); ++i)
                 W(i,i) = b_in3.get(i).asDouble();
-            EXPECT_TRUE(W == y_cartesian_l_arm.taskCartesian->getWeight());
+            EXPECT_TRUE(W == cartesian_utils::fromEigentoYarp(y_cartesian_l_arm.taskCartesian->getWeight()));
             b_out3.clear();b_in3.clear();
             b_out3.addString("set W");
             W = -1.0*W;
@@ -318,13 +328,14 @@ TEST_F(testYTask, testYTASK)
             W.zero();
             for(unsigned int i = 0; i < b_in3.size(); ++i)
                 W(i,i) = b_in3.get(i).asDouble();
-            EXPECT_TRUE(W == y_cartesian_l_arm.taskCartesian->getWeight());
+            EXPECT_TRUE(W == cartesian_utils::fromEigentoYarp(y_cartesian_l_arm.taskCartesian->getWeight()));
 
             y_cartesian_l_arm.cleanPorts();
 
             robot_name = "";
             OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_l_arm(
-                        new OpenSoT::tasks::velocity::Cartesian(task_id, q, robot, distal_link, base_link));
+                        new OpenSoT::tasks::velocity::Cartesian(task_id,
+                cartesian_utils::toEigen(q), robot, distal_link, base_link));
             OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm2(robot_name, module_prefix, cartesian_l_arm);
             EXPECT_EQ(y_cartesian_l_arm2.getBaseLink(), base_link);
             EXPECT_EQ(y_cartesian_l_arm2.getDistalLink(), distal_link);
@@ -336,7 +347,8 @@ TEST_F(testYTask, testYTASK)
             robot_name = "";
             module_prefix = "";
             task_id = "cartesian::left_arm";
-            OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm4(robot_name, module_prefix, task_id, q, robot, distal_link, base_link);
+            OpenSoT::interfaces::yarp::tasks::YCartesian y_cartesian_l_arm4(robot_name, module_prefix, task_id,
+                                    cartesian_utils::toEigen(q), robot, distal_link, base_link);
             EXPECT_EQ(y_cartesian_l_arm4.getBaseLink(), base_link);
             EXPECT_EQ(y_cartesian_l_arm4.getDistalLink(), distal_link);
             EXPECT_EQ(y_cartesian_l_arm4.getTaskID(), task_id);
@@ -344,7 +356,8 @@ TEST_F(testYTask, testYTASK)
             EXPECT_EQ(y_cartesian_l_arm4.getPortPrefix(), port_prefix);
             y_cartesian_l_arm4.cleanPorts();
 
-            std::cout<<"INIT FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(y_cartesian_l_arm4.taskCartesian->getReference());
+            std::cout<<"INIT FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(
+                        cartesian_utils::fromEigentoYarp(y_cartesian_l_arm4.taskCartesian->getReference()));
             std::cout<<"base_frame: "<<y_cartesian_l_arm4.taskCartesian->getBaseLink()<<std::endl;
             std::cout<<"distal_frame: "<<y_cartesian_l_arm4.taskCartesian->getDistalLink()<<std::endl;std::cout<<std::endl;
 
@@ -373,12 +386,14 @@ TEST_F(testYTask, testYTASK)
                 std::cout<<"distal_frame: "<<trj_msg.yarp_pose_msg::distal_frame<<std::endl;std::cout<<std::endl;
             }
 
-            std::cout<<"RECEIVED FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(y_cartesian_l_arm4.taskCartesian->getReference());
+            std::cout<<"RECEIVED FRAME: "<<std::endl;cartesian_utils::printHomogeneousTransform(
+                        cartesian_utils::fromEigentoYarp(y_cartesian_l_arm4.taskCartesian->getReference()));
             std::cout<<"base_frame: "<<y_cartesian_l_arm4.taskCartesian->getBaseLink()<<std::endl;
             std::cout<<"distal_frame: "<<y_cartesian_l_arm4.taskCartesian->getDistalLink()<<std::endl;std::cout<<std::endl;
 
             KDL::Frame tmp;
-            cartesian_utils::fromYARPMatrixtoKDLFrame(y_cartesian_l_arm4.taskCartesian->getReference(), tmp);
+            cartesian_utils::fromYARPMatrixtoKDLFrame(
+                        cartesian_utils::fromEigentoYarp(y_cartesian_l_arm4.taskCartesian->getReference()), tmp);
             EXPECT_TRUE(tmp == trj_msg.pose);
             {
                 using namespace OpenSoT::interfaces::yarp::msgs;

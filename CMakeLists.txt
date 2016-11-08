@@ -83,7 +83,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/SelfCollisionAvoidance.cpp
                     #src/constraints/velocity/Dynamics.cpp
                     #src/constraints/force/FrictionCone.cpp
-                    #src/interfaces/yarp/tasks/YCartesian.cpp
+                    src/interfaces/yarp/tasks/YCartesian.cpp
                     #src/interfaces/yarp/tasks/YCoM.cpp
                     src/interfaces/yarp/tasks/YPostural.cpp
                     src/solvers/QPOases.cpp
@@ -128,13 +128,13 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIE
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
 
 if(Boost_VERSION VERSION_GREATER 104701)
-    #ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
+    ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
     #ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
     ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
 
-    #TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-    #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    #add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
+    TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
 
     #TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
     #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
@@ -189,7 +189,7 @@ if(Boost_VERSION VERSION_GREATER 104701)
     message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
 
     install(TARGETS OpenSoT
-#           ros_yarp_Cartesian_interactive_marker
+            ros_yarp_Cartesian_interactive_marker
 #           ros_yarp_gaze_interactive_marker
             ros_yarp_postural_interactive_marker
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
