@@ -16,9 +16,10 @@ class testYTask : public ::testing::Test{
       robot("coman",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
-      q(robot.iDyn3_model.getNrOfDOFs(), 0.0)
+      q(robot.iDyn3_model.getNrOfDOFs())
   {
-      robot.updateiDyn3Model(q, true);
+      q.setZero(q.rows());
+      robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
   }
 
   virtual ~testYTask()
@@ -31,7 +32,7 @@ class testYTask : public ::testing::Test{
   {}
 
   iDynUtils robot;
-  yarp::sig::Vector q;
+  Eigen::VectorXd q;
 };
 
 TEST_F(testYTask, testYPostural)
@@ -74,7 +75,7 @@ TEST_F(testYTask, testYPostural)
             joint_position_msg_port.write();
             sleep(1);
 
-            std::cout<<"RECIVED POSTURE: ["<<y_postural_task.taskPostural->getReference().toString()<<" ]"<<std::endl;
+            std::cout<<"RECIVED POSTURE: ["<<y_postural_task.taskPostural->getReference()<<" ]"<<std::endl;
 
             unsigned int j = 0;
             for(unsigned int i = 0; i < robot.iDyn3_model.getNrOfDOFs(); ++i)
@@ -105,7 +106,7 @@ TEST_F(testYTask, testYPostural)
             joint_position_msg_port.write();
             sleep(1);
 
-            std::cout<<"RECIVED POSTURE: ["<<y_postural_task.taskPostural->getReference().toString()<<" ]"<<std::endl;
+            std::cout<<"RECIVED POSTURE: ["<<y_postural_task.taskPostural->getReference()<<" ]"<<std::endl;
 
             unsigned int left_arm_index = 0;
             unsigned int right_arm_index = 0;

@@ -5,6 +5,7 @@
 #include <boost/smart_ptr/scoped_ptr.hpp>
 #include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_position_joint_msg.h>
 #include <boost/thread/mutex.hpp>
+#include <Eigen/Dense>
 
 
 namespace OpenSoT {
@@ -61,7 +62,7 @@ public:
 private:
     ::yarp::os::Bottle _in;
     ::yarp::os::Bottle _out;
-    ::yarp::sig::Matrix _W;
+    Eigen::MatrixXd _W;
     double _lambda;
     boost::mutex _mtx;
 
@@ -171,17 +172,17 @@ private:
 
     void getActualPositions()
     {
-        ::yarp::sig::Vector q = _task->getActualPositions();
-        for(unsigned int i = 0; i < q.size(); ++i)
+        Eigen::VectorXd q = _task->getActualPositions();
+        for(unsigned int i = 0; i < q.rows(); ++i)
             _out.addDouble(q[i]);
     }
 
     void getActualPosture()
     {
-        ::yarp::sig::Vector q = _task->getActualPositions();
+        Eigen::VectorXd q = _task->getActualPositions();
         std::map<std::string, double> joint_map;
         std::vector<std::string> joint_names = _idynutils.getJointNames();
-        for(unsigned int i = 0; i < q.size(); ++i)
+        for(unsigned int i = 0; i < q.rows(); ++i)
             joint_map[joint_names[i]] = q[i];
         msgs::yarp_position_joint_msg joint_msg(joint_map);
         joint_msg.serializeMsg(_out);
@@ -224,7 +225,7 @@ public:
     YPostural(const std::string& robot_name,
                const std::string& module_prefix,
               iDynUtils& idynutils,
-               const ::yarp::sig::Vector& x);
+               const Eigen::VectorXd& x);
 
     void cleanPorts();
 

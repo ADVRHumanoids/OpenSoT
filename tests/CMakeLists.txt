@@ -90,7 +90,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       #testPreviewer
                       testVelocityAllocation
                       #testYCartesian
-                      #testYPostural
+                      testYPostural
 )
 endif()
 
@@ -257,9 +257,9 @@ add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 #TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
 #add_dependencies(testYCartesian GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
-#TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
-#add_dependencies(testYPostural GTest-ext OpenSoT)
+ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
+TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
+add_dependencies(testYPostural GTest-ext OpenSoT)
 
 #if(OPENSOT_COMPILE_EXAMPLES)
 #    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
@@ -311,7 +311,7 @@ add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStac
 #add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 #add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
-#add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
+add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
 
 
 find_package(MATLAB QUIET)

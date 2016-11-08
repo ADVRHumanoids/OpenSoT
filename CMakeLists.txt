@@ -85,7 +85,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/constraints/force/FrictionCone.cpp
                     #src/interfaces/yarp/tasks/YCartesian.cpp
                     #src/interfaces/yarp/tasks/YCoM.cpp
-                    #src/interfaces/yarp/tasks/YPostural.cpp
+                    src/interfaces/yarp/tasks/YPostural.cpp
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/stacks/velocity/ManipulationStack.cpp
@@ -130,7 +130,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIE
 if(Boost_VERSION VERSION_GREATER 104701)
     #ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
     #ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
-    #ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
+    ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
 
     #TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
     #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
@@ -140,9 +140,9 @@ if(Boost_VERSION VERSION_GREATER 104701)
     #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
     #add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
 
-    #TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-    #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    #add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
+    TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+    add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
 endif()
 
 
@@ -185,25 +185,27 @@ catkin_package(
  DEPENDS system_lib
 )
 
-#if(Boost_VERSION VERSION_GREATER 104701)
-#    message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
+if(Boost_VERSION VERSION_GREATER 104701)
+    message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
 
-#    install(TARGETS OpenSoT ros_yarp_Cartesian_interactive_marker ros_yarp_gaze_interactive_marker
-#    ros_yarp_postural_interactive_marker
-#       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#    )
-#else()
-#    install(TARGETS OpenSoT
-#       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#    )
-#endif()
+    install(TARGETS OpenSoT
+#           ros_yarp_Cartesian_interactive_marker
+#           ros_yarp_gaze_interactive_marker
+            ros_yarp_postural_interactive_marker
+       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+else()
+    install(TARGETS OpenSoT
+       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+endif()
 
-#install(DIRECTORY launch/
-#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
         
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
 set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
