@@ -57,7 +57,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCollisionAvoidanceVelocityConstraint
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
-                      #testDynamicsConstraint
+                      testDynamicsConstraint
                       testJointLimitsVelocityBounds
                       testVelocityLimitsVelocityBounds
                       testQPOasesSolver
@@ -125,9 +125,9 @@ ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexH
 TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
 add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
 
-#ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
-#TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
-#add_dependencies(testDynamicsConstraint GTest-ext OpenSoT)
+ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
+TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
+add_dependencies(testDynamicsConstraint GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLimits.cpp)
 TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
@@ -277,7 +277,7 @@ add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesi
 add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
-#add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
+add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
 add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)

@@ -2,9 +2,6 @@
 #define __BOUNDS_Dynamics_H__
 
  #include <OpenSoT/Constraint.h>
-
- #include <yarp/sig/all.h>
- #include <iCub/iDynTree/DynTree.h>
  #include <idynutils/idynutils.h>
 
  namespace OpenSoT {
@@ -31,37 +28,50 @@
              * frames transformed in the base_link).
              *
              */
-            class Dynamics: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class Dynamics: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<Dynamics> Ptr;
             private:
-                yarp::sig::Vector _jointTorquesMin;
-                yarp::sig::Vector _jointTorquesMax;
+                Eigen::VectorXd _jointTorquesMin;
+                Eigen::VectorXd _jointTorquesMax;
                 iDynUtils& _robot_model;
                 double _dT;
                 std::string _base_link;
+                Eigen::VectorXd _tmp_x;
+
+                inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+                {
+                    A.conservativeResize(A.rows()+B.rows(), A.cols());
+                    A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+                }
+
+                inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+                {
+                    a.conservativeResize(a.rows()+b.rows());
+                    a.segment(a.rows()-b.rows(),b.rows())<<b;
+                }
 
                 /**
                  * @brief _b is used to store the partial constraint
                  */
-                yarp::sig::Vector _b;
+                Eigen::VectorXd _b;
                 /**
                  * @brief _M is used to store the Inertia matrix
                  */
-                yarp::sig::Matrix _M;
+               Eigen::MatrixXd _M;
 
                 /**
                  * @brief _Jc is used to store Jacobians for contact points (ft_sensors)
                  */
-                yarp::sig::Matrix _Jc;
+               Eigen::MatrixXd _Jc;
 
                 /**
                  * @brief _Fc is used to store wrenches at contact points (ft_sensors)
                  */
-                yarp::sig::Vector _Fc;
+                Eigen::VectorXd _Fc;
 
-                yarp::sig::Vector _tmp_wrench_in_sensor_frame;
-                yarp::sig::Vector _tmp_wrench_in_base_link_frame;
+                Eigen::VectorXd _tmp_wrench_in_sensor_frame;
+                Eigen::VectorXd _tmp_wrench_in_base_link_frame;
 
                 double _boundScaling;
 
@@ -121,9 +131,9 @@
                  * @param boundScaling bound scaling between maximum/minimum allowed torques
                  * and torques computed by ID
                  */
-                Dynamics(const yarp::sig::Vector &q,
-                         const yarp::sig::Vector &q_dot,
-                            const yarp::sig::Vector &jointTorquesMax,
+                Dynamics(const Eigen::VectorXd &q,
+                         const Eigen::VectorXd &q_dot,
+                            const Eigen::VectorXd &jointTorquesMax,
                          iDynUtils& robot_model,
                          const double dT, const double boundScaling);
 
@@ -132,7 +142,7 @@
                  * @brief getVelocityLimits returns the current velocity limits.
                  * @return the joint torque limits. It is always a positive double [Nm]
                  */
-                yarp::sig::Vector getTorqueLimits();
+                Eigen::VectorXd getTorqueLimits();
 
                 /**
                  * @brief getEstimatedTorque returns an estimate of the joint torques given a certain
@@ -141,20 +151,20 @@
                  * @return the vector of estimated torques on the joints,
                  *         based on the model state (position and velocity)
                  */
-                yarp::sig::Vector getEstimatedTorques(const yarp::sig::Vector& dq);
+                Eigen::VectorXd getEstimatedTorques(const Eigen::VectorXd& dq);
 
                 /**
                  * @brief setVelocityLimits
                  * @param tauLimits the joint torque limits. It needs be a positive number [Nm]
                  */
-                void setTorqueLimits(const yarp::sig::Vector tauLimits);
+                void setTorqueLimits(const Eigen::VectorXd tauLimits);
 
                 /**
                  * @brief update
                  * @param x constains either the concatenation of q and q_dot:
                  *  x = [q, q_dot], or x = q
                  */
-                void update(const yarp::sig::Vector &x);
+                void update(const Eigen::VectorXd &x);
 
                 /**
                  * @brief setBoundScaling sets bound scaling for the dynamics constraint
