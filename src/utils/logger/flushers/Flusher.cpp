@@ -30,7 +30,7 @@ bool OpenSoT::flushers::Flusher::setDescription(const std::vector<std::string> d
     return true;
 }
 
-void OpenSoT::flushers::Flusher::updateSolution(const yarp::sig::Vector &q_dot)
+void OpenSoT::flushers::Flusher::updateSolution(const Eigen::VectorXd &q_dot)
 {
     _q_dot = q_dot;
 }
@@ -72,7 +72,7 @@ std::vector<std::string> OpenSoT::flushers::Flusher::getDescription()
 std::ostream &operator<<(std::ostream &out, const OpenSoT::flushers::Flusher::Ptr &flusher)
 {
     if(flusher)
-        out << flusher->toString();
+        out << flusher;
     return out;
 }
 

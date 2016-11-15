@@ -27,7 +27,7 @@ std::string Dynamics::toString() const
     std::stringstream ss;
     OpenSoT::constraints::velocity::Dynamics::Ptr _dynamics =
             boost::dynamic_pointer_cast<OpenSoT::constraints::velocity::Dynamics>(_constraint);
-    yarp::sig::Vector tau_estimated = _dynamics->getEstimatedTorques(_q_dot);
+    Eigen::VectorXd tau_estimated = _dynamics->getEstimatedTorques(_q_dot);
     for(unsigned int i = 0; i < _constraint->getXSize(); ++i)
         ss << ", " << _dynamics->getTorqueLimits()[i];
     for(unsigned int i = 0; i < _constraint->getXSize(); ++i)

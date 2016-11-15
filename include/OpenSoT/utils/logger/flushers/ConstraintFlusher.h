@@ -32,11 +32,11 @@ namespace OpenSoT
         class ConstraintFlusher : public Flusher
         {
         protected:
-            OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr _constraint;
+            OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr _constraint;
         public:
             typedef boost::shared_ptr<ConstraintFlusher> Ptr;
 
-            ConstraintFlusher(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
+            ConstraintFlusher(OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint)
                 : _constraint(constraint) {}
         };
     }

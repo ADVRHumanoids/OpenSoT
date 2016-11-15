@@ -63,7 +63,7 @@ namespace OpenSoT {
          * @param t the current time
          * @param dq_opt the optimal solution as given by solve()
          */
-        void update(double t, const yarp::sig::Vector& dq_opt);
+        void update(double t, const Eigen::VectorXd& dq_opt);
 
         /**
          * @brief update the logger. It will automatically flush to file all flushers, and save the current time.
@@ -88,14 +88,14 @@ namespace OpenSoT {
          * @param task a pointer to a task
          * @return the corresponding flusher
          */
-        flushers::TaskFlusher::Ptr add(      Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
+        flushers::TaskFlusher::Ptr add(      Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
         /**
          * @brief add adds a new constraint flusher. It will be deleted after the current log file is closed
          * @param constraint
          * @return
          */
-        flushers::ConstraintFlusher::Ptr add(Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint);
+        flushers::ConstraintFlusher::Ptr add(Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint);
 
         /**
          * @brief add adds a new data flusher. It will be deleted after the current log file is closed
@@ -118,9 +118,9 @@ namespace OpenSoT {
          */
         flushers::RobotFlusher::Ptr add(RobotUtils& robot);
 
-        flushers::TaskFlusher::Ptr getFlusher(      Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
+        flushers::TaskFlusher::Ptr getFlusher(      Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
-        flushers::ConstraintFlusher::Ptr getFlusher(Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint);
+        flushers::ConstraintFlusher::Ptr getFlusher(Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint);
 
         flushers::Flusher::Ptr getFlusher(void* data);
 
@@ -177,8 +177,8 @@ namespace OpenSoT {
         OpenSoT::plotters::Plottable dq_opt();
 
     protected:
-        typedef Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr TaskPtr;
-        typedef Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr ConstraintPtr;
+        typedef Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr TaskPtr;
+        typedef Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr ConstraintPtr;
 
         /**
          * @brief _name the name of the current logger

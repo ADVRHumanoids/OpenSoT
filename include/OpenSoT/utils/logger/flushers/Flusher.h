@@ -18,9 +18,8 @@
 #ifndef __FLUSHER_H__
 #define __FLUSHER_H__
 
-#include <yarp/sig/Vector.h>
 #include <OpenSoT/utils/Indices.h>
-
+#include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <ostream>
@@ -36,7 +35,7 @@ namespace OpenSoT
         class Flusher
         {
         protected:
-            yarp::sig::Vector _q_dot;
+            Eigen::VectorXd _q_dot;
             std::vector<std::string> _descriptions;
         public:
             typedef boost::shared_ptr<Flusher> Ptr;
@@ -62,7 +61,7 @@ namespace OpenSoT
             bool setDescription(const std::vector<std::string> descriptions, Indices indices);
 
 
-            void updateSolution(const yarp::sig::Vector& q_dot);
+            void updateSolution(const Eigen::VectorXd& q_dot);
 
             /**
              * @brief i generates a Plottable element given a label

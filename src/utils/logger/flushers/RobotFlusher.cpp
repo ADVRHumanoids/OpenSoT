@@ -21,9 +21,9 @@ RobotFlusher::RobotFlusher(RobotUtils& robot):
 std::string RobotFlusher::toString() const
 {
     std::stringstream ss;
-    yarp::sig::Vector q = _robot.sensePosition();
-    yarp::sig::Vector dq = _robot.senseVelocity();
-    yarp::sig::Vector tau = _robot.senseTorque();
+    Eigen::VectorXd q; _robot.sensePosition(q);
+    Eigen::VectorXd dq; _robot.senseVelocity(dq);
+    Eigen::VectorXd tau; _robot.senseTorque(tau);
     for(unsigned int i = 0; i < _nDoFs; ++i)
         ss << ", " << q[i];
     for(unsigned int i = 0; i < _nDoFs; ++i)
