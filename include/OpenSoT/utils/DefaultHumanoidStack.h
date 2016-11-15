@@ -107,7 +107,7 @@
          const constraints::velocity::ConvexHull::Ptr convexHull;
          const constraints::velocity::JointLimits::Ptr jointLimits;
          const constraints::velocity::SelfCollisionAvoidance::Ptr selfCollisionAvoidance;
-         //sconst constraints::velocity::Dynamics::Ptr torqueLimits;
+         const constraints::velocity::Dynamics::Ptr torqueLimits;
          const constraints::velocity::VelocityLimits::Ptr velocityLimits;
      };
  };

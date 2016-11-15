@@ -72,7 +72,7 @@ std::vector<std::string> OpenSoT::flushers::Flusher::getDescription()
 std::ostream &operator<<(std::ostream &out, const OpenSoT::flushers::Flusher::Ptr &flusher)
 {
     if(flusher)
-        out << flusher;
+        out << flusher->toString();
     return out;
 }
 
