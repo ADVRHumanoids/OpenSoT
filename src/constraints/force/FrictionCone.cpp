@@ -1,92 +1,68 @@
 #include <OpenSoT/constraints/force/FrictionCone.h>
-#include <OpenSoT/constraints/velocity/Dynamics.h>
-
-using namespace yarp::math;
 
 namespace OpenSoT {
    namespace constraints {
        namespace force {
 
-       FrictionCone::FrictionCone(const yarp::sig::Vector &x, iDynUtils &robot,
-                                  const std::map<std::string, double>& mu,
-                                  const std::map<std::string, yarp::sig::Matrix>& world_R_surfaces):
-           Constraint("friction_cone", x.size()),
+       FrictionCone::FrictionCone(const Eigen::VectorXd &x, iDynUtils &robot,
+                                  const friction_cones& mu):
+           Constraint("friction_cone", x.rows()),
            _robot(robot),
            _mu(mu),
-           _world_R_surfaces(world_R_surfaces)
+           _Ci(5,3)
        {
-           OpenSoT::constraints::velocity::Dynamics::crawlLinks(_robot.getForceTorqueFrameNames(),
-                                                _robot.getLinksInContact(),
-                                               _robot,
-                                               _ft_in_contact);
-           assert(_world_R_surfaces.size() == _ft_in_contact.size());
-           assert(_mu.size() == _ft_in_contact.size());
-           for(unsigned int i = 0; i < _world_R_surfaces.size(); ++i){
-               assert(_world_R_surfaces.find(_ft_in_contact[i]) != _world_R_surfaces.end());
-               assert(_mu.find(_ft_in_contact[i]) != _mu.end());}
+           _n_of_contacts = _mu.size();
 
            computeAineq();
            computeUpperBound();
 
-
-           update(x);
        }
 
        void FrictionCone::computeAineq()
        {
-            _Aineq.resize(5*_ft_in_contact.size(), 3*2*_ft_in_contact.size());
-            _Aineq.zero();
+           _Ci.setZero(5,3);
 
-            yarp::sig::Matrix Ci(5,3); Ci.zero();
-            Ci(0,0) = 1.0;
-            Ci(1,1) = 1.0;
-            Ci(2,0) = -1.0;
-            Ci(3,1) = -1.0;
-            Ci(4,2) = -1.0;
+           if(_Aineq.rows() != 5*_n_of_contacts)
+               _Aineq.resize(5*_n_of_contacts, 6*_n_of_contacts);
 
-            for(unsigned int i = 0; i < _ft_in_contact.size(); ++i)
-            {
-                double mu = _mu[_ft_in_contact[i]];
+           _Aineq.setZero(_Aineq.rows(), _Aineq.cols());
 
-                 Ci(0,2) = -mu;
-                 Ci(1,2) = -mu;
-                 Ci(2,2) = -mu;
-                 Ci(3,2) = -mu;
+           for(unsigned int i = 0; i < _n_of_contacts; ++i)
+           {
+                FrictionCone::R w_R_n = _mu[i].first;
+                double __mu = _mu[i].second;
 
-                _Aineq.setSubmatrix(Ci*(_world_R_surfaces[_ft_in_contact[i]]).transposed(),
-                        i*Ci.rows(), i*Ci.cols());
-            }
+                __mu = std::sqrt(2.*__mu)/2.;
+
+                _Ci(0,0) = 1.; _Ci(0,1) = 0.; _Ci(0,2) = -__mu;
+                _Ci(1,0) = -1.; _Ci(1,1) = 0.; _Ci(1,2) = -__mu;
+                _Ci(2,0) = 0.; _Ci(2,1) = 1.; _Ci(2,2) = -__mu;
+                _Ci(3,0) = 0.; _Ci(3,1) = -1.; _Ci(3,2) = -__mu;
+                _Ci(4,0) = 0.; _Ci(4,1) = 0.; _Ci(4,2) = -1.;
+
+                _Ci = _Ci*w_R_n.transpose();
+
+                _Aineq.block(5*i, 6*i,5,3)<<_Ci;
+           }
+
        }
 
        void FrictionCone::computeUpperBound()
        {
-           _bUpperBound.resize(5*_ft_in_contact.size(),0.0);
+           if(_bUpperBound.rows() != 5*_n_of_contacts){
+           _bUpperBound.resize(5*_n_of_contacts);
+           _bUpperBound.setZero(_bUpperBound.rows());}
        }
 
 
 
-       void FrictionCone::update(const yarp::sig::Vector &x)
+       void FrictionCone::update(const Eigen::VectorXd &x)
        {
-           //   NICE feature: this constraint is constant if the number of contact points
-           //   does not change.
-           std::vector<std::string> ft_in_contact;
-           OpenSoT::constraints::velocity::Dynamics::crawlLinks(_robot.getForceTorqueFrameNames(),
-                                                _robot.getLinksInContact(),
-                                               _robot,
-                                               ft_in_contact);
-           if(!(_ft_in_contact == ft_in_contact))
-           {
-               _ft_in_contact = ft_in_contact;
 
-               assert(_world_R_surfaces.size() == _ft_in_contact.size());
-               assert(_mu.size() == _ft_in_contact.size());
-               for(unsigned int i = 0; i < _world_R_surfaces.size(); ++i){
-                   assert(_world_R_surfaces.find(_ft_in_contact[i]) != _world_R_surfaces.end());
-                   assert(_mu.find(_ft_in_contact[i]) != _mu.end());}
+               _n_of_contacts = _mu.size();
 
                computeAineq();
                computeUpperBound();
-           }
        }
 
        }
