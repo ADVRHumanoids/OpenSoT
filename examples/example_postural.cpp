@@ -16,7 +16,8 @@ int main(int argc, char* argv[]) {
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq(q.size(),0.0);
 
-    vTasks::Postural::Ptr postural(new vTasks::Postural(q));
+    vTasks::Postural::Ptr postural(new vTasks::Postural(
+                                       cartesian_utils::toEigen(q)));
 
     solvers::QPOases_sot::Stack stack;
     stack.push_back(postural);
@@ -32,6 +33,7 @@ int main(int argc, char* argv[]) {
     robot.setPositionDirectMode();
     double t_start = yarp::os::Time::now();
     double t = t_start;
+    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     while(t - t_start < 10.0) {
         double delta = .3*cos(0.1*t);
 
@@ -39,10 +41,11 @@ int main(int argc, char* argv[]) {
         yarp::sig::Vector torsoPosturalReference = initialTorsoPosture + yarp::sig::Vector(3,delta);
         posturalReference.setSubvector(firstTorsoId, torsoPosturalReference);
 
-        postural->setReference(posturalReference);
-        postural->update(q);
-        solver.solve(dq);
+        postural->setReference(cartesian_utils::toEigen(posturalReference));
+        postural->update(cartesian_utils::toEigen(q));
+        solver.solve(_dq);
 
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
         robot.move(q);

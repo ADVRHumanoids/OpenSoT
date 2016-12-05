@@ -12,6 +12,8 @@
 #include <OpenSoT/utils/logger/L.h>
 #include <signal.h>
 
+using namespace yarp::math;
+
 #define MODULE_NAME "example_python"
 #define dT          35e-3
 
@@ -274,7 +276,8 @@ int main(int argc, char **argv) {
 
     robot.idynutils.setFloatingBaseLink(robot.idynutils.left_leg.end_effector_name);
     robot.idynutils.updateiDyn3Model(q, dq, _ft_measurements, true);
-    OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
+    OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT,
+                                      cartesian_utils::toEigen(q));
 
     /*                            */
     /*      CONFIGURING DHS       */
@@ -285,11 +288,11 @@ int main(int argc, char **argv) {
     DHS.rightArm->setLambda(0.1);   DHS.rightArm->setOrientationErrorGain(0.6);
     DHS.leftArm->setLambda(0.1);    DHS.leftArm->setOrientationErrorGain(0.6);
     DHS.com_XY->setLambda(0.05);     DHS.postural->setLambda(0.05);
-    DHS.comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
+    DHS.comVelocity->setVelocityLimits(cartesian_utils::toEigen(yarp::sig::Vector(0.1,3)));
     DHS.selfCollisionAvoidance->setBoundScaling(0.6);
     DHS.velocityLimits->setVelocityLimits(0.6);
 
-    yarp::sig::Matrix pW = DHS.postural->getWeight();
+    yarp::sig::Matrix pW = cartesian_utils::fromEigentoYarp(DHS.postural->getWeight());
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
         pW(robot.idynutils.torso.joint_numbers[i_t],
             robot.idynutils.torso.joint_numbers[i_t]) *= 1e3;
@@ -303,14 +306,14 @@ int main(int argc, char **argv) {
         pW(robot.idynutils.right_leg.joint_numbers[i_t],
            robot.idynutils.right_leg.joint_numbers[i_t]) *= amt;
     }
-    DHS.postural->setWeight(pW);
+    DHS.postural->setWeight(cartesian_utils::toEigen(pW));
 
-    yarp::sig::Vector tauLims = DHS.torqueLimits->getTorqueLimits();
+    yarp::sig::Vector tauLims = cartesian_utils::fromEigentoYarp(DHS.torqueLimits->getTorqueLimits());
     tauLims[robot.idynutils.torso.joint_numbers[0]] *= 0.6;
     tauLims[robot.idynutils.torso.joint_numbers[1]] *= 0.6;
     tauLims[robot.idynutils.torso.joint_numbers[2]] *= 0.6;
 
-    DHS.torqueLimits->setTorqueLimits(tauLims);
+    DHS.torqueLimits->setTorqueLimits(cartesian_utils::toEigen(tauLims));
     DHS.torqueLimits->setBoundScaling(0.5);
 
     std::list<std::pair<std::string,std::string> > whiteList;
@@ -375,8 +378,8 @@ int main(int argc, char **argv) {
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
-    typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = autoStack->getStack()[3];
+    typedef std::list<OpenSoT::Constraint<Eigen::MatrixXd,Eigen::VectorXd>::ConstraintPtr>::iterator it_constraint;
+    OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>::TaskPtr lastTask = autoStack->getStack()[3];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
@@ -438,7 +441,7 @@ int main(int argc, char **argv) {
     leftHandCartesianFlusher = logger->add(DHS.leftArm);
 
     begin = yarp::os::Time::now();
-
+    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     while(true) {
         tic = yarp::os::Time::now() - begin;
 
@@ -455,18 +458,19 @@ int main(int argc, char **argv) {
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
 
-        autoStack->update(q);
+        autoStack->update(cartesian_utils::toEigen(q));
         if(!no_torque_limits)
         {
             using namespace yarp::math;
-            DHS.torqueLimits->update(cat(q,dq_m));
+            DHS.torqueLimits->update(cartesian_utils::toEigen(cat(q,dq_m)));
         }
-        if(solver->solve(dq))
-            q+=dq;
+        if(solver->solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
+            q+=dq;}
         else
             std::cout << "Error computing solve()" << std::endl;
 
-        logger->update(tic, dq);
+        logger->update(tic, cartesian_utils::toEigen(dq));
 
         robot.move(q);
         toc = yarp::os::Time::now() - begin;
@@ -478,8 +482,8 @@ int main(int argc, char **argv) {
             std::cout << "dt = "
                       << boost::accumulators::extract::rolling_mean(time_accumulator) << std::endl;
 
-            std::cout << "l_wrist reference:" << DHS.leftArm->getReference().toString() << std::endl;
-            std::cout << "r_wrist reference:" << DHS.rightArm->getReference().toString() << std::endl;
+            std::cout << "l_wrist reference:" << DHS.leftArm->getReference() << std::endl;
+            std::cout << "r_wrist reference:" << DHS.rightArm->getReference() << std::endl;
             std::cout << "Active Capsules Pairs: " << DHS.selfCollisionAvoidance->getbUpperBound().size() << std::endl;
             std::cout << "Configuration: " << q.toString() << std::endl;
         }

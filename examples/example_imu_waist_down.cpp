@@ -13,6 +13,8 @@
 #include <ros/publisher.h>
 #include <geometry_msgs/TransformStamped.h>
 
+using namespace yarp::math;
+
 #define MODULE_NAME "example_python_simple_stabilizer"
 #define dT          10e-3
 #define PUBLISH_WORLD false
@@ -73,7 +75,7 @@ int main(int argc, char **argv) {
     robot.idynutils.setIMUOrientation(imu_orientation, robot.getIMU()->getReferenceFrame());
     robot.idynutils.updateiDyn3Model(q, true);
 
-    OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
+    OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, cartesian_utils::toEigen(q));
 
     double K = 0.1;
     DHS.velocityLimits->setVelocityLimits(0.9);
@@ -91,17 +93,17 @@ int main(int argc, char **argv) {
         ( DHS.com_XY) /
         ( DHS.postural);
     autoStack << DHS.jointLimits << DHS.velocityLimits;
-    autoStack->update(q);
+    autoStack->update(cartesian_utils::toEigen(q));
 
     std::cout<<"right2LeftLeg Initial Error:"<<std::endl;
-    std::cout<<"["<<DHS.right2LeftLeg->getError().toString()<<"]"<<std::endl;
+    std::cout<<"["<<DHS.right2LeftLeg->getError()<<"]"<<std::endl;
     std::cout<<"waist Initial Error:"<<std::endl;
-    std::cout<<"["<<DHS.waist->getError().toString()<<"]"<<std::endl;
+    std::cout<<"["<<DHS.waist->getError()<<"]"<<std::endl;
     std::cout<<"CoM Initial Error:"<<std::endl;
-    std::cout<<"["<<DHS.com->getError().toString()<<"]"<<std::endl;
+    std::cout<<"["<<DHS.com->getError()<<"]"<<std::endl;
 
 
-    yarp::sig::Matrix waist_up = DHS.waist->getReference();
+    yarp::sig::Matrix waist_up = cartesian_utils::fromEigentoYarp(DHS.waist->getReference());
     yarp::sig::Matrix waist_down = waist_up;
     waist_down(2,3) -= 0.1;
 
@@ -123,8 +125,9 @@ int main(int argc, char **argv) {
             return 0;}
     }
 
-    DHS.waist->setReference(waist_down);
+    DHS.waist->setReference(cartesian_utils::toEigen(waist_down));
     yarp::sig::Vector dq(q.size(), 0.0);
+    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     double tic, toc;
     while(true) {
 
@@ -153,7 +156,7 @@ int main(int argc, char **argv) {
 #endif
 
 
-        autoStack->update(q);
+        autoStack->update(cartesian_utils::toEigen(q));
 
 //        if(getchar()){
 //            std::cout<<"right2LeftLeg Error: ["<<DHS.right2LeftLeg->getError().toString()<<""<<std::endl;
@@ -163,8 +166,9 @@ int main(int argc, char **argv) {
 //            std::cout<<"anchor_T_world:"<<std::endl; cartesian_utils::printKDLFrame(anchor_T_world);
 //            std::cout<<std::endl;}
 
-        if(solver.solve(dq))
-            q+=dq;
+        if(solver.solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
+            q+=dq;}
         else
             std::cout << "Error computing solve()" << std::endl;
         robot.move(q);

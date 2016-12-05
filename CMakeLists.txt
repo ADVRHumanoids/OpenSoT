@@ -226,9 +226,9 @@ add_subdirectory(doc)
 ########################
 # Add Examples target  #
 ########################
-#if(OPENSOT_COMPILE_EXAMPLES)
-#  add_subdirectory(examples)
-#endif()
+if(OPENSOT_COMPILE_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 #######################
 # Add Testing target  #

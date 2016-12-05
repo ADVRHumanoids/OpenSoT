@@ -1,6 +1,9 @@
 #include <idynutils/idynutils.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
+#include <yarp/math/Math.h>
+
+using namespace yarp::math;
 
 int main(int argc, char **argv) {
 
@@ -9,7 +12,7 @@ int main(int argc, char **argv) {
                      std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q = _robot.iDyn3_model.getAng();
 
-    OpenSoT::DefaultHumanoidStack DHS(_robot, 3e-3, _robot.zeros);
+    OpenSoT::DefaultHumanoidStack DHS(_robot, 3e-3, cartesian_utils::toEigen(_robot.zeros));
 
     // defining a stack composed of size two,
     // where the task of first priority is an aggregated of leftArm and rightArm,
@@ -24,5 +27,5 @@ int main(int argc, char **argv) {
     _robot.updateiDyn3Model(q,true);
 
     // automatically update all tasks and constraints in the autostack
-    autoStack->update(q);
+    autoStack->update(cartesian_utils::toEigen(q));
 }
