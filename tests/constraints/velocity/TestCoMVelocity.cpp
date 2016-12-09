@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CoMVelocity.h>
 #include <idynutils/idynutils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
@@ -10,7 +10,7 @@
 #define  m_s              1.0
 #define  CoMVelocityLimit 0.03 * m_s
 
-using namespace OpenSoT::legacy::constraints::velocity;
+using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 namespace {
@@ -34,9 +34,9 @@ class testCoMVelocity : public ::testing::Test {
 
       coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
 
-      comVelocity = new CoMVelocity(velocityLimits,
+      comVelocity = new CoMVelocity(cartesian_utils::toEigen(velocityLimits),
                                     dT,
-                                    zeros,
+                                    cartesian_utils::toEigen(zeros),
                                     coman);
   }
 
@@ -54,7 +54,7 @@ class testCoMVelocity : public ::testing::Test {
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      comVelocity->update(zeros);
+      comVelocity->update(cartesian_utils::toEigen(zeros));
   }
 
   virtual void TearDown() {
@@ -129,7 +129,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     yarp::sig::Vector qDotOutNeg;
 
     yarp::sig::Vector q = zeros;
-    comVelocity->update(q);
+    comVelocity->update(cartesian_utils::toEigen(q));
 
     Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
     pAineq = pinv(Aineq);
@@ -164,7 +164,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
         qRight += pinv(JCoM) * dT * velocityLimits;
     }
 
-    comVelocity->update(qRight);
+    comVelocity->update(cartesian_utils::toEigen(qRight));
 
     Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
     pAineq = pinv(Aineq);
@@ -198,7 +198,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
         qLeft -= pinv(JCoM) * dT * velocityLimits;
     }
 
-    comVelocity->update(qLeft);
+    comVelocity->update(cartesian_utils::toEigen(qLeft));
 
     Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
     pAineq = pinv(Aineq);

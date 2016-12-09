@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>

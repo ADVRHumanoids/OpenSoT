@@ -1,6 +1,6 @@
 #include <idynutils/tests_utils.h>
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/tasks/Aggregated.h>
+#include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>

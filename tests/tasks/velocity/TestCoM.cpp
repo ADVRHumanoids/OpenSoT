@@ -2,7 +2,7 @@
 #include <idynutils/cartesian_utils.h>
 #include <idynutils/idynutils.h>
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/tasks/velocity/CoM.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 
@@ -82,7 +82,7 @@ TEST_F(testCoMTask, testCoMTask_)
     std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.iDyn3_model.getCOM(_normal_robot.left_leg.end_effector_index).toString() << std::endl;
 
 
-    OpenSoT::legacy::tasks::velocity::CoM CoM(q_whole, _robot);
+    OpenSoT::tasks::velocity::CoM CoM(cartesian_utils::toEigen(q_whole), _robot);
 
     EXPECT_TRUE(cartesian_utils::fromEigentoYarp(CoM.getb()) == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb();
 
@@ -110,11 +110,11 @@ TEST_F(testCoMTask, testCoMTask_)
     CoM.setLambda(K);
     EXPECT_DOUBLE_EQ(CoM.getLambda(), K);
 
-    CoM.setReference(x);
+    CoM.setReference(cartesian_utils::toEigen(x));
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
-    CoM.setReference(x_ref);
+    CoM.setReference(cartesian_utils::toEigen(x_ref));
     yarp::sig::Vector positionError = x_ref - x;
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];

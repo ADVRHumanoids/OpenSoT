@@ -2,7 +2,7 @@
 #include <idynutils/cartesian_utils.h>
 #include <idynutils/idynutils.h>
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/tasks/velocity/MinimumEffort.h>
+#include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 
@@ -51,7 +51,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
     _robot.updateiDyn3Model(q_whole);
 
-    OpenSoT::legacy::tasks::velocity::MinimumEffort minimumEffort(q_whole, _robot);
+    OpenSoT::tasks::velocity::MinimumEffort minimumEffort(cartesian_utils::toEigen(q_whole), _robot);
 
     EXPECT_EQ(minimumEffort.getA().rows(), nJ);
     EXPECT_EQ(minimumEffort.getb().size(), nJ);

@@ -86,7 +86,7 @@ TEST_F(testFrictionCones, testFrictionCones_) {
             w_R_LSoftHand(i,j) = w_T_LSoftHand.M(i,j);
     }
 
-    std::vector<std::pair<Eigen::Matrix3d, double>> friction__cones;
+    std::vector<std::pair<Eigen::Matrix3d, double> > friction__cones;
     friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_r_sole, 1.));
     friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_l_sole, 1.));
     friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_LSoftHand, 1.0));

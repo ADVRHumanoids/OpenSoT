@@ -2,8 +2,8 @@
 #include <gtest/gtest.h>
 #include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
-#include <OpenSoT/legacy/tasks/velocity/Postural.h>
-#include <OpenSoT/legacy/constraints/velocity/JointLimits.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
 
 using namespace yarp::math;
 
@@ -40,7 +40,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     yarp::sig::Vector q_ref(q.size(), 0.0);
 
-    OpenSoT::legacy::tasks::velocity::Postural postural(q);
+    OpenSoT::tasks::velocity::Postural postural(cartesian_utils::toEigen(q));
     std::cout<<"Postural Task Inited"<<std::endl;
     EXPECT_TRUE(postural.getA() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
     EXPECT_TRUE(postural.getWeight() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
@@ -50,7 +50,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
     postural.setLambda(K);
     EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
-    postural.setReference(q_ref);
+    postural.setReference(cartesian_utils::toEigen(q_ref));
     postural.update(cartesian_utils::toEigen(q));
     EXPECT_TRUE(postural.getb() == cartesian_utils::toEigen(postural.getLambda()*(q_ref-q)));
 
@@ -81,11 +81,11 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     }
     idynutils.updateiDyn3Model(q);
 
-    OpenSoT::legacy::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::legacy::tasks::velocity::Postural(q) );
-    OpenSoT::legacy::tasks::velocity::Postural::ConstraintPtr bound(
-        new OpenSoT::legacy::constraints::velocity::JointLimits(q,
-                        idynutils.iDyn3_model.getJointBoundMax(),
-                        idynutils.iDyn3_model.getJointBoundMin())
+    OpenSoT::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)) );
+    OpenSoT::tasks::velocity::Postural::ConstraintPtr bound(
+        new OpenSoT::constraints::velocity::JointLimits(cartesian_utils::toEigen(q),
+                        idynutils.getJointBoundMax(),
+                        idynutils.getJointBoundMin())
     );
 
     postural->getConstraints().push_back( bound );

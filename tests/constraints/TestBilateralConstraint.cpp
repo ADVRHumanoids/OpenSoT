@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/legacy/constraints/BilateralConstraint.h>
-#include <OpenSoT/legacy/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/constraints/BilateralConstraint.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <yarp/sig/all.h>
+#include <idynutils/cartesian_utils.h>
 #include <string>
 
 namespace {

@@ -1,8 +1,8 @@
 #include <idynutils/tests_utils.h>
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/SubTask.h>
-#include <OpenSoT/legacy/tasks/velocity/Postural.h>
-#include <OpenSoT/legacy/constraints/velocity/JointLimits.h>
+#include <OpenSoT/SubTask.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
 
 using namespace yarp::math;
 using namespace OpenSoT::tasks;

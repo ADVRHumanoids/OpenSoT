@@ -2,7 +2,7 @@
 #include <idynutils/cartesian_utils.h>
 #include <idynutils/idynutils.h>
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 
@@ -49,8 +49,8 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.right_leg);
     _robot.updateiDyn3Model(q_whole, true);
 
-    OpenSoT::legacy::tasks::velocity::Cartesian cartesian("cartesian::right_leg",
-                                                 q_whole,
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::right_leg",
+                                                 cartesian_utils::toEigen(q_whole),
                                                  _robot,
                                                  "r_sole",
                                                  "world");
@@ -77,7 +77,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     cartesian.setLambda(K);
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
-    cartesian.setReference(x_ref);
+    cartesian.setReference(cartesian_utils::toEigen(x_ref));
     cartesian.update(cartesian_utils::toEigen(q_whole));
     yarp::sig::Vector positionError, orientationError;
     cartesian_utils::computeCartesianError(x, x_ref,
@@ -139,8 +139,8 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.left_leg);
     _robot.updateiDyn3Model(q_whole);
 
-    OpenSoT::legacy::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
-                                                 q_whole,
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
+                                                 cartesian_utils::toEigen(q_whole),
                                                  _robot,
                                                  "l_sole",
                                                  "world");
@@ -167,7 +167,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     cartesian.setLambda(K);
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
-    cartesian.setReference(x_ref);
+    cartesian.setReference(cartesian_utils::toEigen(x_ref));
     cartesian.update(cartesian_utils::toEigen(q_whole));
     yarp::sig::Vector positionError, orientationError;
     cartesian_utils::computeCartesianError(x, x_ref,
@@ -242,8 +242,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    OpenSoT::legacy::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
-                                                 q_whole,
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
+                                                 cartesian_utils::toEigen(q_whole),
                                                  _robot,
                                                  "l_wrist",
                                                  "l_sole");
@@ -271,7 +271,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
     cartesian.setLambda(K);
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
-    cartesian.setReference(x_ref);
+    cartesian.setReference(cartesian_utils::toEigen(x_ref));
     cartesian.update(cartesian_utils::toEigen(q_whole));
     yarp::sig::Vector positionError, orientationError;
     cartesian_utils::computeCartesianError(x, x_ref,
@@ -331,8 +331,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    OpenSoT::legacy::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
-                                                 q_whole,
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
+                                                 cartesian_utils::toEigen(q_whole),
                                                  _robot,
                                                  "l_wrist",
                                                  "Waist");
@@ -360,7 +360,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
     cartesian.setLambda(K);
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
-    cartesian.setReference(x_ref);
+    cartesian.setReference(cartesian_utils::toEigen(x_ref));
     cartesian.update(cartesian_utils::toEigen(q_whole));
     yarp::sig::Vector positionError, orientationError;
     cartesian_utils::computeCartesianError(x, x_ref,
@@ -430,8 +430,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    OpenSoT::legacy::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
-                                                 q_whole,
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
+                                                 cartesian_utils::toEigen(q_whole),
                                                  _robot,
                                                  "l_wrist",
                                                  "l_sole");
@@ -459,7 +459,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     cartesian.setLambda(K);
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
-    cartesian.setReference(x_ref);
+    cartesian.setReference(cartesian_utils::toEigen(x_ref));
     cartesian.update(cartesian_utils::toEigen(q_whole));
     yarp::sig::Vector positionError, orientationError;
     cartesian_utils::computeCartesianError(x, x_ref,
@@ -519,8 +519,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
 
     _robot.updateiDyn3Model(q_whole, update_world);
 
-    OpenSoT::legacy::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
-                                                 q_whole,
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::l_wrist",
+                                                 cartesian_utils::toEigen(q_whole),
                                                  _robot,
                                                  "l_wrist",
                                                  "Waist");
@@ -548,7 +548,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     cartesian.setLambda(K);
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
-    cartesian.setReference(x_ref);
+    cartesian.setReference(cartesian_utils::toEigen(x_ref));
     cartesian.update(cartesian_utils::toEigen(q_whole));
     yarp::sig::Vector positionError, orientationError;
     cartesian_utils::computeCartesianError(x, x_ref,

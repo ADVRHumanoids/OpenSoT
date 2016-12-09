@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/legacy/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <idynutils/idynutils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
@@ -28,9 +28,9 @@ class testJointLimits : public ::testing::Test {
       qUpperBounds = coman.iDyn3_model.getJointBoundMax();
       zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
 
-      jointLimits = new OpenSoT::legacy::constraints::velocity::JointLimits(zeros,
-                                    qUpperBounds,
-                                    qLowerBounds);
+      jointLimits = new OpenSoT::constraints::velocity::JointLimits(cartesian_utils::toEigen(zeros),
+                                    cartesian_utils::toEigen(qUpperBounds),
+                                    cartesian_utils::toEigen(qLowerBounds));
   }
 
   virtual ~testJointLimits() {
@@ -48,7 +48,7 @@ class testJointLimits : public ::testing::Test {
     // Code here will be called immediately after the constructor (right
     // before each test).
       coman.updateiDyn3Model(zeros);
-      jointLimits->update(zeros);
+      jointLimits->update(cartesian_utils::toEigen(zeros));
   }
 
   virtual void TearDown() {
@@ -59,7 +59,7 @@ class testJointLimits : public ::testing::Test {
   // Objects declared here can be used by all tests in the test case for JointLimits.
 
   iDynUtils coman;
-  OpenSoT::legacy::constraints::velocity::JointLimits* jointLimits;
+  OpenSoT::constraints::velocity::JointLimits* jointLimits;
 
   yarp::sig::Vector qLowerBounds;
   yarp::sig::Vector qUpperBounds;
@@ -113,7 +113,7 @@ TEST_F(testJointLimits, BoundsAreCorrect) {
     q[24] = (qUpperBounds[22] + qLowerBounds[22])/2 + 1E-1;
 
     coman.updateiDyn3Model(q);
-    jointLimits->update(q);
+    jointLimits->update(cartesian_utils::toEigen(q));
     yarp::sig::Vector lowerBound = cartesian_utils::fromEigentoYarp(jointLimits->getLowerBound());
     yarp::sig::Vector upperBound = cartesian_utils::fromEigentoYarp(jointLimits->getUpperBound());
 
@@ -171,11 +171,11 @@ TEST_F(testJointLimits, boundsDoUpdate) {
     yarp::sig::Vector q(zeros);
     yarp::sig::Vector q_next(zeros.size(), 0.1);
 
-    jointLimits->update(q);
+    jointLimits->update(cartesian_utils::toEigen(q));
     yarp::sig::Vector oldLowerBound = cartesian_utils::fromEigentoYarp(jointLimits->getLowerBound());
     yarp::sig::Vector oldUpperBound = cartesian_utils::fromEigentoYarp(jointLimits->getUpperBound());
 
-    jointLimits->update(q_next);
+    jointLimits->update(cartesian_utils::toEigen(q_next));
 
     yarp::sig::Vector newLowerBound = cartesian_utils::fromEigentoYarp(jointLimits->getLowerBound());
     yarp::sig::Vector newUpperBound = cartesian_utils::fromEigentoYarp(jointLimits->getUpperBound());

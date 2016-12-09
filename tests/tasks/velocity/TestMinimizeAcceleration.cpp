@@ -4,19 +4,19 @@
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>
-#include <OpenSoT/legacy/constraints/Aggregated.h>
-#include <OpenSoT/legacy/tasks/Aggregated.h>
+#include <OpenSoT/constraints/Aggregated.h>
+#include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/all.h>
-#include <OpenSoT/legacy/solvers/QPOases.h>
+#include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/tasks/velocity/all.h>
-#include <OpenSoT/legacy/tasks/velocity/MinimizeAcceleration.h>
+#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <qpOASES.hpp>
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
 #include <fstream>
 
-using namespace OpenSoT::legacy::constraints;
-using namespace OpenSoT::legacy::tasks::velocity;
+using namespace OpenSoT::constraints;
+using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
 class testMinimizeAcceleration: public ::testing::Test

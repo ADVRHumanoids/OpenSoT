@@ -83,9 +83,6 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/SelfCollisionAvoidance.cpp
                     src/constraints/velocity/Dynamics.cpp
                     src/constraints/force/FrictionCone.cpp
-                    src/interfaces/yarp/tasks/YCartesian.cpp
-                    src/interfaces/yarp/tasks/YCoM.cpp
-                    src/interfaces/yarp/tasks/YPostural.cpp
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/stacks/velocity/ManipulationStack.cpp
@@ -117,6 +114,13 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/utils/logger/plotters/Plotter.cpp
                     ${sot_INCLUDES})
 
+if(YARP_FOUND)
+    ADD_LIBRARY(OpenSoT_YTasks SHARED
+                    src/interfaces/yarp/tasks/YCartesian.cpp
+                    src/interfaces/yarp/tasks/YCoM.cpp
+                    src/interfaces/yarp/tasks/YPostural.cpp)
+endif()
+
 # we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
     add_dependencies(OpenSoT qpOASES-ext)
@@ -126,23 +130,29 @@ endif()
 # we now add the YARP libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
+if(YARP_FOUND)
+    target_link_libraries(OpenSoT_YTasks PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
+                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
+endif()
 
 if(Boost_VERSION VERSION_GREATER 104701)
-    ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
-    ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
-    ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
+    if(YARP_FOUND)
+        ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
+        ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
+        ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
 
-    TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
+        TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                      PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+        add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
 
-    TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
+        TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                      PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+        add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
 
-    TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-                                  PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-    add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
+        TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
+                                      PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
+        add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
+    endif()
 endif()
 
 
@@ -168,6 +178,14 @@ target_include_directories(OpenSoT PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}
 set_target_properties(OpenSoT PROPERTIES VERSION ${${VARS_PREFIX}_VERSION}
                               SOVERSION ${${VARS_PREFIX}_VERSION})
 
+if(YARP_FOUND)
+    target_include_directories(OpenSoT_YTasks PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>"
+                                          "$<INSTALL_INTERFACE:${${VARS_PREFIX}_INSTALL_INCLUDEDIR}>")
+
+    set_target_properties(OpenSoT_YTasks PROPERTIES VERSION ${${VARS_PREFIX}_VERSION}
+                              SOVERSION ${${VARS_PREFIX}_VERSION})
+endif()
+
 install(DIRECTORY include/ 
         DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
         FILES_MATCHING PATTERN "*.h")
@@ -178,6 +196,14 @@ install(TARGETS OpenSoT
         RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
         LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
 
+if(YARP_FOUND)
+    install(TARGETS OpenSoT_YTasks
+        EXPORT OpenSoT_YTasks
+        ARCHIVE DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT lib
+        RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
+        LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
+endif()
+
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES idyn_ros_interface
@@ -186,22 +212,32 @@ catkin_package(
 )
 
 if(Boost_VERSION VERSION_GREATER 104701)
-    message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
+    if(YARP_FOUND)
+        message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
 
-    install(TARGETS OpenSoT
-            ros_yarp_Cartesian_interactive_marker
-           ros_yarp_gaze_interactive_marker
-            ros_yarp_postural_interactive_marker
+        install(TARGETS
+                ros_yarp_Cartesian_interactive_marker
+                ros_yarp_gaze_interactive_marker
+                ros_yarp_postural_interactive_marker
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
+    endif()
+endif()
+
+install(TARGETS OpenSoT
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    )
-else()
-    install(TARGETS OpenSoT
+       )
+
+if(YARP_FOUND)
+    install(TARGETS OpenSoT_YTasks
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    )
+       )
 endif()
 
 install(DIRECTORY launch/
@@ -218,6 +254,14 @@ install_basic_package_files(OpenSoT VARS_PREFIX ${VARS_PREFIX}
                                     TARGETS_PROPERTY ${VARS_PREFIX}_TARGETS
                                     NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
+if(YARP_FOUND)
+    install_basic_package_files(OpenSoT_YTasks VARS_PREFIX ${VARS_PREFIX}
+                                    VERSION ${${VARS_PREFIX}_VERSION}
+                                    COMPATIBILITY SameMajorVersion
+                                    TARGETS_PROPERTY ${VARS_PREFIX}_TARGETS
+                                    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+endif()
+
 include(AddUninstallTarget)
 
 add_subdirectory(app)
@@ -227,7 +271,7 @@ add_subdirectory(doc)
 # Add Examples target  #
 ########################
 if(OPENSOT_COMPILE_EXAMPLES)
-  add_subdirectory(examples)
+    add_subdirectory(examples)
 endif()
 
 #######################
@@ -235,7 +279,7 @@ endif()
 #######################
 if(OPENSOT_COMPILE_TESTS)
   enable_testing()
-  add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <idynutils/tests_utils.h>
 #include <idynutils/idynutils.h>
-#include <OpenSoT/legacy/constraints/Aggregated.h>
+#include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>

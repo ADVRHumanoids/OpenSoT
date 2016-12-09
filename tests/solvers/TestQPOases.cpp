@@ -7,8 +7,8 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/all.h>
-#include <OpenSoT/legacy/solvers/QPOasesProblem.h>
-#include <OpenSoT/legacy/tasks/velocity/Postural.h>
+#include <OpenSoT/solvers/QPOasesProblem.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
@@ -274,16 +274,28 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
 
     USING_NAMESPACE_QPOASES
 
-    static OpenSoT::legacy::solvers::QPOasesProblem qp0(nj, 0, OpenSoT::HST_SEMIDEF);
+    static OpenSoT::solvers::QPOasesProblem qp0(nj, 0, OpenSoT::HST_SEMIDEF);
     qp0.setnWSR(127);
     static bool result0 = false;
     static bool isQProblemInitialized0 = false;
     if(!isQProblemInitialized0){
-        result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
+        result0 = qp0.initProblem(cartesian_utils::toEigen(H0),
+                                  cartesian_utils::toEigen(g0),
+                                  cartesian_utils::toEigen(A0),
+                                  cartesian_utils::toEigen(lA0),
+                                  cartesian_utils::toEigen(uA0),
+                                  cartesian_utils::toEigen(l),
+                                  cartesian_utils::toEigen(u));
         isQProblemInitialized0 = true;}
     else
     {
-        qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
+        qp0.updateProblem(cartesian_utils::toEigen(H0),
+                          cartesian_utils::toEigen(g0),
+                          cartesian_utils::toEigen(A0),
+                          cartesian_utils::toEigen(lA0),
+                          cartesian_utils::toEigen(uA0),
+                          cartesian_utils::toEigen(l),
+                          cartesian_utils::toEigen(u));
         result0 = qp0.solve();
     }
 
@@ -295,16 +307,28 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
         yarp::sig::Vector lA1 = b1;
         yarp::sig::Vector uA1 = b1;
 
-        static OpenSoT::legacy::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
+        static OpenSoT::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
         qp1.setnWSR(127);
         static bool result1 = false;
         static bool isQProblemInitialized1 = false;
         if(!isQProblemInitialized1){
-            result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
+            result1 = qp1.initProblem(cartesian_utils::toEigen(H1),
+                                      cartesian_utils::toEigen(g1),
+                                      cartesian_utils::toEigen(A1),
+                                      cartesian_utils::toEigen(lA1),
+                                      cartesian_utils::toEigen(uA1),
+                                      cartesian_utils::toEigen(l),
+                                      cartesian_utils::toEigen(u));
             isQProblemInitialized1 = true;}
         else
         {
-            qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
+            qp1.updateProblem(cartesian_utils::toEigen(H1),
+                              cartesian_utils::toEigen(g1),
+                              cartesian_utils::toEigen(A1),
+                              cartesian_utils::toEigen(lA1),
+                              cartesian_utils::toEigen(uA1),
+                              cartesian_utils::toEigen(l),
+                              cartesian_utils::toEigen(u));
             result1 = qp1.solve();
         }
         if(result1)
@@ -451,9 +475,15 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
     yarp::sig::Vector x(2);
     simpleProblem sp;
 
-    OpenSoT::legacy::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
+    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
 
-    testProblem.initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
+    testProblem.initProblem(cartesian_utils::toEigen(sp.H),
+                            cartesian_utils::toEigen(sp.g),
+                            cartesian_utils::toEigen(sp.A),
+                            cartesian_utils::toEigen(sp.lA),
+                            cartesian_utils::toEigen(sp.uA),
+                            cartesian_utils::toEigen(sp.l),
+                            cartesian_utils::toEigen(sp.u));
 
     EXPECT_TRUE(testProblem.solve());
     yarp::sig::Vector s = cartesian_utils::fromEigentoYarp(testProblem.getSolution());
@@ -479,9 +509,15 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     yarp::sig::Vector x(2);
     simpleProblem sp;
 
-    OpenSoT::legacy::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
+    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
 
-    testProblem.initProblem(sp.H, sp.g, sp.A, sp.lA, sp.uA, sp.l, sp.u);
+    testProblem.initProblem(cartesian_utils::toEigen(sp.H),
+                            cartesian_utils::toEigen(sp.g),
+                            cartesian_utils::toEigen(sp.A),
+                            cartesian_utils::toEigen(sp.lA),
+                            cartesian_utils::toEigen(sp.uA),
+                            cartesian_utils::toEigen(sp.l),
+                            cartesian_utils::toEigen(sp.u));
 
     EXPECT_TRUE(testProblem.solve());
     yarp::sig::Vector s = cartesian_utils::fromEigentoYarp(testProblem.getSolution());
@@ -489,7 +525,8 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     EXPECT_EQ(-sp.g[1], s[1]);
 
     sp.g[0] = -1.0; sp.g[1] = 1.0;
-    testProblem.updateTask(sp.H, sp.g);
+    testProblem.updateTask(cartesian_utils::toEigen(sp.H),
+                           cartesian_utils::toEigen(sp.g));
     EXPECT_TRUE(testProblem.solve());
 
     s = cartesian_utils::fromEigentoYarp(testProblem.getSolution());
@@ -504,8 +541,8 @@ TEST_F(testQPOasesProblem, testTask)
     for(unsigned int i = 0; i < q.size(); ++i)
         q[i] = tests_utils::getRandomAngle();
 
-    OpenSoT::legacy::tasks::velocity::Postural postural_task(q);
-    postural_task.setReference(q_ref);
+    OpenSoT::tasks::velocity::Postural postural_task(cartesian_utils::toEigen(q));
+    postural_task.setReference(cartesian_utils::toEigen(q_ref));
     postural_task.update(cartesian_utils::toEigen(q));
 
     yarp::sig::Matrix H(q.size(),q.size()); H.eye();
