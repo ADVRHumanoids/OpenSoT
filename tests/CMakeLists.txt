@@ -79,7 +79,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testFrictionConeForceConstraint
                       testCoMVelocityTask
                       testGazeVelocityTask
-                      #testInteractionVelocityTask
+                      testInteractionVelocityTask
                       TestManipulabilityTask
                       testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
@@ -213,9 +213,9 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
     add_dependencies(testGazeVelocityTask GTest-ext OpenSoT)
 
-    #ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
-    #TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
-    #add_dependencies(testInteractionVelocityTask GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
+    TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
+    add_dependencies(testInteractionVelocityTask GTest-ext OpenSoT)
 
     ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
     TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${PCL_LIBRARIES})
@@ -308,7 +308,7 @@ if(YARP_FOUND)
     add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
     add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
     add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
-    #add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
+    add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
     add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
     add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
     add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
