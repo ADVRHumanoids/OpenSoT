@@ -82,6 +82,7 @@
                  * @param desiredWrench [6x1] forces and torques
                  */
                 void setReferenceWrench(const Eigen::VectorXd& desiredWrench);
+                void setReferenceWrench(const KDL::Wrench& desiredWrench);
 
                 /**
                  * @brief getReferenceWrench get specified reference wrench in base_link reference frame

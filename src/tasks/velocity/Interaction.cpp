@@ -117,6 +117,16 @@ void Interaction::setReferenceWrench(const Eigen::VectorXd &desiredWrench) {
     _desiredWrench = desiredWrench;
 }
 
+void Interaction::setReferenceWrench(const KDL::Wrench& desiredWrench)
+{
+    _desiredWrench[0] = desiredWrench.force.x();
+    _desiredWrench[1] = desiredWrench.force.y();
+    _desiredWrench[2] = desiredWrench.force.z();
+    _desiredWrench[3] = desiredWrench.torque.x();
+    _desiredWrench[4] = desiredWrench.torque.y();
+    _desiredWrench[5] = desiredWrench.torque.z();
+}
+
 const Eigen::VectorXd Interaction::getReferenceWrench() const {
     return _desiredWrench;
 }
