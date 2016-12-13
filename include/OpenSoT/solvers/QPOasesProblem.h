@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
+#include <qpOASES/Matrices.hpp>
 
 #define DEFAULT_EPS_REGULARISATION 2E2
 
@@ -12,8 +13,6 @@ namespace qpOASES {
     class Options;
     class Bounds;
     class Constraints;
-    class SymSparseMat;
-    class DenseMatrix;
 }
 
 namespace OpenSoT{
@@ -292,14 +291,12 @@ namespace OpenSoT{
          * Define a cost function: ||Hx - g||
          */
         MatrixXd _H;
-        boost::shared_ptr<qpOASES::SymSparseMat> H_sparse;
         Eigen::VectorXd _g;
 
         /**
          * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
         MatrixXd _A;
-        boost::shared_ptr<qpOASES::DenseMatrix> A_dense;
         Eigen::VectorXd _lA;
         Eigen::VectorXd _uA;
 

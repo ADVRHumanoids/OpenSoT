@@ -4,7 +4,6 @@
 #include <qpOASES/Utils.hpp>
 #include <fstream>
 #include <boost/make_shared.hpp>
-#include <qpOASES/Matrices.hpp>
 #include <iostream>
 
 
@@ -91,15 +90,12 @@ bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
         assert(_lA.rows() == _uA.rows());}
 
     int nWSR = _nWSR;
-    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
-    H_sparse->createDiagInfo();
-    if(!(_A.data() == NULL))
-        A_dense.reset(new qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
-    else
-        A_dense.reset();
+    qpOASES::SymSparseMat H_sparse(_H.rows(), _H.cols(), _H.rows(), _H.data());
+    H_sparse.createDiagInfo();
+    qpOASES::DenseMatrix A_dense(_A.rows(), _A.cols(), _A.cols(), _A.data());
 
-        qpOASES::returnValue val =_problem->init(H_sparse.get(),_g.data(),
-                       A_dense.get(), _l.data(), _u.data(),
+    qpOASES::returnValue val =_problem->init(H_sparse.duplicateSym(),_g.data(),
+                       A_dense.duplicate(), _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
 
@@ -327,16 +323,12 @@ bool QPOasesProblem::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    H_sparse.reset(new qpOASES::SymSparseMat(_H.rows(), _H.cols(), _H.rows(), _H.data()));
-    H_sparse->createDiagInfo();
-    if(!(_A.data() == NULL))
-        A_dense.reset(new qpOASES::DenseMatrix(_A.rows(), _A.cols(), _A.cols(), _A.data()));
-    else
-        A_dense.reset();
+    qpOASES::SymSparseMat H_sparse(_H.rows(), _H.cols(), _H.rows(), _H.data());
+    H_sparse.createDiagInfo();
+    qpOASES::DenseMatrix A_dense(_A.rows(), _A.cols(), _A.cols(), _A.data());
 
-
-    qpOASES::returnValue val =_problem->hotstart(H_sparse.get(),_g.data(),
-                       A_dense.get(),
+    qpOASES::returnValue val =_problem->hotstart(H_sparse.duplicateSym(),_g.data(),
+                       A_dense.duplicate(),
                         _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -355,8 +347,8 @@ bool QPOasesProblem::solve()
                                                               number_of_constraints,
                                                               hessian_type));
         _problem->setOptions(*_opt.get());
-        val =_problem->init(H_sparse.get(),_g.data(),
-                           A_dense.get(),
+        val =_problem->init(H_sparse.duplicateSym(),_g.data(),
+                           A_dense.duplicate(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,
