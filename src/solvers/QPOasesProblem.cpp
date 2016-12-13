@@ -187,9 +187,9 @@ bool QPOasesProblem::updateTask(const MatrixXd &H, const Eigen::VectorXd &g)
 
 bool QPOasesProblem::updateConstraints(const MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
 {
-    if(!(_A.cols() == A.cols())){
+    if(!(A.cols() == _H.cols())){
         std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"should be: "<<_A.cols()<<DEFAULT<<std::endl;
+        std::cout<<RED<<"should be: "<<_H.cols()<<DEFAULT<<std::endl;
         return false;}
     if(!(lA.rows() == A.rows())){
         std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
