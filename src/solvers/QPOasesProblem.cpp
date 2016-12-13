@@ -101,6 +101,7 @@ bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
 
     if(val != qpOASES::SUCCESSFUL_RETURN)
     {
+#ifndef NDEBUG
         _problem->printProperties();
 
         if(val == qpOASES::RET_INIT_FAILED_INFEASIBILITY)
@@ -110,7 +111,6 @@ bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
         std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
 
 
-#ifndef NDEBUG //Log is generated only in DEBUG Mode!
         time_t rawtime;
         struct tm * timeinfo;
         char buffer [80];
@@ -142,7 +142,9 @@ bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
     _problem->getConstraints(*_constraints);
 
     if(success != qpOASES::SUCCESSFUL_RETURN){
+#ifndef NDEBUG
         std::cout<<RED<<"ERROR GETTING PRIMAL SOLUTION IN INITIALIZATION! ERROR "<<success<<DEFAULT<<std::endl;
+#endif
         return false;}
     return true;
 }
@@ -334,19 +336,11 @@ bool QPOasesProblem::solve()
                        nWSR,0);
 
     if(val != qpOASES::SUCCESSFUL_RETURN){
+#ifndef NDEBUG
         std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN HOTSTART! ERROR "<<val<<DEFAULT<<std::endl;
         std::cout<<GREEN<<"RETRYING INITING WITH WARMSTART"<<DEFAULT<<std::endl;
+#endif
 
-        qpOASES::HessianType hessian_type = _problem->getHessianType();
-        int number_of_variables = _problem->getNV();
-        int number_of_constraints = _problem->getNC();
-
-        _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
-        _problem->setOptions(*_opt.get());
         val =_problem->init(H_sparse.duplicateSym(),_g.data(),
                            A_dense.duplicate(),
                            _l.data(), _u.data(),
@@ -356,15 +350,11 @@ bool QPOasesProblem::solve()
                            _bounds.get(), _constraints.get());
 
         if(val != qpOASES::SUCCESSFUL_RETURN){
+#ifndef NDEBUG
             std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN WARMSTART! ERROR "<<val<<DEFAULT<<std::endl;
             std::cout<<GREEN<<"RETRYING INITING"<<DEFAULT<<std::endl;
+#endif
 
-            _problem.reset();
-            _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                                  number_of_variables,
-                                                                  number_of_constraints,
-                                                                  hessian_type));
-            _problem->setOptions(*_opt.get());
             return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);}
     }
 
@@ -382,15 +372,9 @@ bool QPOasesProblem::solve()
     _problem->getConstraints(*_constraints);
 
     if(success != qpOASES::SUCCESSFUL_RETURN){
+#ifndef NDEBUG
         std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
-        qpOASES::HessianType hessian_type = _problem->getHessianType();
-        int number_of_variables = _problem->getNV();
-        int number_of_constraints = _problem->getNC();
-        _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
+#endif
         return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);
     }
     return true;
