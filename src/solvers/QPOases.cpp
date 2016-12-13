@@ -49,14 +49,13 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
 void QPOases_sot::computeOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
                                                      Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
-    OpenSoT::constraints::BilateralConstraint::Ptr optimality_bilateral_constraint(
-        new OpenSoT::constraints::BilateralConstraint(
+    OpenSoT::constraints::BilateralConstraint optimality_bilateral_constraint(
                 task->getA(),
                 task->getA()*problem.getSolution(),
-                task->getA()*problem.getSolution()));
-    A = optimality_bilateral_constraint->getAineq();
-    lA = optimality_bilateral_constraint->getbLowerBound();
-    uA = optimality_bilateral_constraint->getbUpperBound();
+                task->getA()*problem.getSolution());
+    A = optimality_bilateral_constraint.getAineq();
+    lA = optimality_bilateral_constraint.getbLowerBound();
+    uA = optimality_bilateral_constraint.getbUpperBound();
 }
 
 bool QPOases_sot::prepareSoT()
