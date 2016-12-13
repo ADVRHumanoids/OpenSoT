@@ -466,6 +466,71 @@ yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
     return q;
 }
 
+TEST_F(testQPOasesProblem, test_updates)
+{
+    OpenSoT::solvers::QPOasesProblem qp(3,3);
+    Eigen::MatrixXd H(2,3);
+    H<<1,1,1,
+       0,1,1;
+    Eigen::VectorXd b(2);
+    b<<6,
+       5;
+    Eigen::MatrixXd A(0,0);
+    Eigen::VectorXd lA;
+    Eigen::VectorXd uA;
+    Eigen::VectorXd l(3);
+    l<<-10,
+       -10,
+       -10;
+    Eigen::VectorXd u(3);
+    u<<10,
+       10,
+       10;
+    EXPECT_TRUE(qp.initProblem(H.transpose()*H,-1.*H.transpose()*b,A,lA,uA,l,u));
+
+    EXPECT_TRUE(qp.solve());
+    Eigen::VectorXd solution = qp.getSolution();
+    std::cout<<"solution is: ["<<solution<<"]"<<std::endl;
+
+    EXPECT_NEAR(solution[0], 1.,1E-6);
+    EXPECT_NEAR(solution[1], 2.5,1E-6);
+    EXPECT_NEAR(solution[2], 2.5,1E-6);
+
+    H.resize(3,3);
+    H<<1,1,1,
+       0,1,1,
+       1,1,0;
+    b.resize(3);
+    b<<6,
+       5,
+       3;
+    EXPECT_TRUE(qp.updateTask(H.transpose()*H, -1.*H.transpose()*b));
+    EXPECT_TRUE(qp.solve());
+    solution = qp.getSolution();
+    std::cout<<"solution is: ["<<solution<<"]"<<std::endl;
+    EXPECT_NEAR(solution[0], 1.,1E-6);
+    EXPECT_NEAR(solution[1], 2.,1E-6);
+    EXPECT_NEAR(solution[2], 3.,1E-6);
+
+    H.resize(4,3);
+    H<<1,1,1,
+       0,1,1,
+       1,1,0,
+       1,0,1;
+    b.resize(4);
+    b<<6,
+       5,
+       3,
+       3;
+    EXPECT_TRUE(qp.updateTask(H.transpose()*H, -1.*H.transpose()*b));
+    EXPECT_TRUE(qp.solve());
+    solution = qp.getSolution();
+    std::cout<<"solution is: ["<<solution<<"]"<<std::endl;
+    EXPECT_NEAR(solution[0], .5714,1E-4);
+    EXPECT_NEAR(solution[1], 2.5714,1E-4);
+    EXPECT_NEAR(solution[2], 2.5714,1E-4);
+}
+
 
 /**
  * @brief TEST_F testSimpleProblem test solution of a simple CONSTANT QP problem

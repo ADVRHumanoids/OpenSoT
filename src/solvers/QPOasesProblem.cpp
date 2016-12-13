@@ -258,68 +258,6 @@ bool QPOasesProblem::updateProblem(const MatrixXd &H, const Eigen::VectorXd &g,
     return success;
 }
 
-bool QPOasesProblem::addTask(const MatrixXd &H, const Eigen::VectorXd &g)
-{
-    if(H.cols() == _H.cols())
-    {
-        if(!(g.rows() == H.rows())){
-            std::cout<<RED<<"g size: "<<g.rows()<<DEFAULT<<std::endl;
-            std::cout<<RED<<"H rows: "<<H.rows()<<DEFAULT<<std::endl;
-            return false;}
-
-        pile(_H,H);
-        pile(_g,g);
-
-        qpOASES::HessianType hessian_type = _problem->getHessianType();
-        int number_of_variables = _H.cols();
-        int number_of_constraints = _A.rows();
-        _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
-        _problem->setOptions(*_opt.get());
-        return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
-    }
-
-    std::cout<<RED<<"H cols: "<<H.cols()<<DEFAULT<<std::endl;
-    std::cout<<RED<<"should be: "<<_H.cols()<<DEFAULT<<std::endl;
-    return false;
-}
-
-bool QPOasesProblem::addConstraints(const MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
-{
-    if(A.cols() == _A.cols())
-    {
-        if(!(lA.rows() == A.rows())){
-            std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
-            std::cout<<RED<<"A rows: "<<A.rows()<<DEFAULT<<std::endl;
-            return false;}
-        if(!(lA.rows() == uA.rows())){
-            std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
-            std::cout<<RED<<"uA size: "<<uA.rows()<<DEFAULT<<std::endl;
-            return false;}
-
-        pile(_A,A);
-        pile(_lA,lA);
-        pile(_uA,uA);
-
-        qpOASES::HessianType hessian_type = _problem->getHessianType();
-        int number_of_variables = _H.cols();
-        int number_of_constraints = _A.rows();
-        _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
-        _problem->setOptions(*_opt.get());
-        return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
-    }
-    std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
-    std::cout<<RED<<"should be: "<<_A.cols()<<DEFAULT<<std::endl;
-    return false;
-}
-
 bool QPOasesProblem::solve()
 {
     int nWSR = _nWSR;

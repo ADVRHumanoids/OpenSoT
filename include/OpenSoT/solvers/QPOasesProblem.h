@@ -160,25 +160,6 @@ namespace OpenSoT{
                            const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
         /**
-         * @brief addTask pile a matrix H to internal _H and g to internal _g
-         * so that _H = [_H; H] and _g = [_g; g]
-         * @param H extra Task Matrix
-         * @param g extra reference Eigen::VectorXd
-         * @return true if the problem is initiazlized correctly
-         */
-        bool addTask(const MatrixXd& H, const Eigen::VectorXd& g);
-
-        /**
-         * @brief addConstraints pile a matrix A to internal _A and lA/uA to internal _lA/_uA
-         * so that _A = [_A; A], _lA = [_lA; lA], _uA = [_uA; uA]
-         * @param A extra constraint matrix
-         * @param lA extra lower constraint Eigen::VectorXd
-         * @param uA extra upper constraint Eigen::VectorXd
-         * @return true if the problem is initiazlized correctly
-         */
-        bool addConstraints(const MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA);
-
-        /**
          * @brief solve the QP problem
          * @return true if the QP problem is solved
          */
