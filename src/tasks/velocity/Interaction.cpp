@@ -143,7 +143,7 @@ const Eigen::MatrixXd Interaction::getCompliance() const
 
 void Interaction::setCompliance(const Eigen::MatrixXd& C)
 {
-    assert(C.rows() == 6 && C.cols() == 6 && C.transposed() == C &&
+    assert(C.rows() == 6 && C.cols() == 6 && C.transpose() == C &&
            "Matrix C must be 6x6 positive definite matrix");
     // Check size  [6x6] and if Positive Definite
     //if(C.rows() == 6 && C.cols() == 6 && det(C) >= 0.0)

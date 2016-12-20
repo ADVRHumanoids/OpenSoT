@@ -60,11 +60,12 @@ bool WalkingStack::switchSupportFoot(const int trj_stance_foot)
 {
     if(trj_stance_foot != stance_foot){
         if(trj_stance_foot == LEFT_FOOT){
-            _model.switchAnchorAndFloatingBase("l_ankle");
-            stance_foot = LEFT_FOOT;}
-        if(trj_stance_foot == RIGHT_FOOT){
-            _model.switchAnchorAndFloatingBase("r_ankle");
-            stance_foot = RIGHT_FOOT;}
+            stance_foot = LEFT_FOOT;
+            return _model.switchAnchorAndFloatingBase("l_ankle");}
+        else if(trj_stance_foot == RIGHT_FOOT){
+            stance_foot = RIGHT_FOOT;
+            return _model.switchAnchorAndFloatingBase("r_ankle");}
     }
+    return false;
 }
 
