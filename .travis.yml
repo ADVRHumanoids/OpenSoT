@@ -1,0 +1,54 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+env:
+# set the CMAKE_PREFIX_PATH enviroment variable to get software installed by the superbuild
+  - TRAVIS_BUILD_TYPE=Debug, TRAVIS_CMAKE_GENERATOR="Unix Makefiles", CMAKE_PREFIX_PATH="/home/travis/build/robotology/robotology-superbuild/build/install"
+  - TRAVIS_BUILD_TYPE=Release, TRAVIS_CMAKE_GENERATOR="Unix Makefiles", CMAKE_PREFIX_PATH="/home/travis/build/robotology/robotology-superbuild/build/install"
+
+matrix:
+  allow_failures:
+    - compiler: clang
+
+install:
+  # workaround around opencv linking probelm in clang:
+  # http://stackoverflow.com/questions/12689304/ctypes-error-libdc1394-error-failed-to-initialize-libdc1394
+  - sudo ln /dev/null /dev/raw1394
+  - cmake --version
+  - cd ..
+  # use superbuild for getting iDynTree dependencies
+  - git clone https://github.com/robotology/robotology-superbuild
+  - cd robotology-superbuild
+  # install dependencies using the robotology-superbuild get_dependencies script
+  - chmod +x ./scripts/get_dependencies.sh
+  - sh ./scripts/get_dependencies.sh
+
+before_script:
+  - mkdir build
+  - cd build
+  # using the YCM_EP_MAINTAINER_MODE variable to enable the subproject-dependees target
+  - cmake -G"${TRAVIS_CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DYCM_EP_MAINTAINER_MODE:BOOL=ON- DNON_INTERACTIVE_BUILD:BOOL=TRUE ..
+  - make OpenSoT-dependees 
+  - make OpenSoT-update
+  - pwd
+  - cd ../..
+  - . robotology-setup.bash
+  # deal with TinyXML linking problems
+  - sudo ldconfig
+  - cd external/OpenSoT
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DOPENSOT_COMPILE_TESTS:BOOL=ON ..
+
+script:
+  - make
+  - sudo make install
+  - ctest 
+
+notifications:
+  email:
+    - rocchi.alessio@gmail.com
+    - enrico.mingo@gmail.com
