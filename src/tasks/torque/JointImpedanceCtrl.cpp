@@ -15,21 +15,22 @@
  * Public License for more details
 */
 
-#include <OpenSoT/tasks/virtual_model/JointSpringDamper.h>
-#include <yarp/math/Math.h>
+#include <OpenSoT/tasks/torque/JointImpedanceCtrl.h>
 #include <idynutils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
-using namespace OpenSoT::tasks::virtual_model;
-using namespace yarp::math;
+using namespace OpenSoT::tasks::torque;
 
-JointSpringDamper::JointSpringDamper(const yarp::sig::Vector& x, iDynUtils &robot) :
-    Task("JointSpringDamper", x.size()), _x(x), _x_dot(x), _robot(robot),
-    _x_desired(x.size(),0.0), _xdot_desired(x.size(),0.0), _use_inertia_matrix(true)
+JointImpedanceCtrl::JointImpedanceCtrl(const Eigen::VectorXd& x, XBot::ModelInterface &robot) :
+    Task("JointImpedanceCtrl", x.size()), _x(x), _x_dot(x), _robot(robot),
+    _x_desired(x.size()), _xdot_desired(x.size()), _use_inertia_matrix(true)
 {
+    _x_desired.setZero(x.size());
+    _xdot_desired.setZero(x.size());
+
     _W.resize(_x_size, _x_size);
-    _W.eye();
+    _W.setIdentity(_x_size, _x_size);
 
     _K = _W;
     _K = 100.*_K;
@@ -38,7 +39,7 @@ JointSpringDamper::JointSpringDamper(const yarp::sig::Vector& x, iDynUtils &robo
     _D = 1.*_D;
 
     _A.resize(_x_size, _x_size);
-    _A.eye();
+    _A.setIdentity(_x_size, _x_size);
 
     _lambda = 1.0;
 
@@ -49,47 +50,45 @@ JointSpringDamper::JointSpringDamper(const yarp::sig::Vector& x, iDynUtils &robo
     this->_update(x);
 }
 
-JointSpringDamper::~JointSpringDamper()
+JointImpedanceCtrl::~JointImpedanceCtrl()
 {
 }
 
-void JointSpringDamper::_update(const yarp::sig::Vector &x) {
+void JointImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     _x = x;
 
-    _x_dot = _robot.iDyn3_model.getDAng();
+    _robot.getJointVelocity(_x_dot);
 
-    _W.eye();
+    _W.setIdentity(_W.rows(), _W.cols());
     _hessianType = HST_IDENTITY;
     if(_use_inertia_matrix)
     {
         _hessianType = HST_POSDEF;
 
-        _M.resize(6+_x_size, 6+_x_size);
-        _robot.iDyn3_model.getFloatingBaseMassMatrix(_M);
-        _M = _M.removeCols(0,6); _M = _M.removeRows(0,6);
+        _robot.getInertiaMatrix(_M);
 
-        _W = _W*yarp::math::luinv(_M);
+        _W = _W*_M.inverse();
     }
 
     /************************* COMPUTING TASK *****************************/
 
     this->update_b();
 
-    _xdot_desired.zero();
+    _xdot_desired.setZero(_xdot_desired.size());
 
     /**********************************************************************/
 }
 
-void JointSpringDamper::setReference(const yarp::sig::Vector& x_desired) {
+void JointImpedanceCtrl::setReference(const Eigen::VectorXd& x_desired) {
     assert(x_desired.size() == _x_size);
 
     _x_desired = x_desired;
-    _xdot_desired.zero();
+    _xdot_desired.setZero(_xdot_desired.size());
     this->update_b();
 }
 
-void JointSpringDamper::setReference(const yarp::sig::Vector &x_desired,
-                                                      const yarp::sig::Vector &xdot_desired)
+void JointImpedanceCtrl::setReference(const Eigen::VectorXd &x_desired,
+                                      const Eigen::VectorXd &xdot_desired)
 {
     assert(x_desired.size() == _x_size);
     assert(xdot_desired.size() == _x_size);
@@ -99,72 +98,72 @@ void JointSpringDamper::setReference(const yarp::sig::Vector &x_desired,
     this->update_b();
 }
 
-yarp::sig::Vector JointSpringDamper::getReference() const
+Eigen::VectorXd JointImpedanceCtrl::getReference() const
 {
     return _x_desired;
 }
 
-void JointSpringDamper::getReference(yarp::sig::Vector &x_desired,
-                                                      yarp::sig::Vector &xdot_desired) const
+void JointImpedanceCtrl::getReference(Eigen::VectorXd &x_desired,
+                                      Eigen::VectorXd &xdot_desired) const
 {
     x_desired = _x_desired;
     xdot_desired = _xdot_desired;
 }
 
-void JointSpringDamper::update_b() {
+void JointImpedanceCtrl::update_b() {
     _b = getSpringForce() + getDampingForce();
 }
 
-yarp::sig::Vector JointSpringDamper::getSpringForce()
+Eigen::VectorXd JointImpedanceCtrl::getSpringForce()
 {
     return _K*(_x_desired - _x);
 }
 
-yarp::sig::Vector JointSpringDamper::getDampingForce()
+Eigen::VectorXd JointImpedanceCtrl::getDampingForce()
 {
     return _D*(_xdot_desired - _x_dot);
 }
 
-void JointSpringDamper::setStiffness(const yarp::sig::Matrix &K)
+void JointImpedanceCtrl::setStiffness(const Eigen::MatrixXd &K)
 {
     if(K.cols() == _K.cols() && K.rows() == _K.rows())
         _K = K;
 }
 
-void JointSpringDamper::setDamping(const yarp::sig::Matrix &D)
+void JointImpedanceCtrl::setDamping(const Eigen::MatrixXd &D)
 {
     if(D.cols() == _D.cols() && D.rows() == _D.rows())
         _D = D;
 }
 
-void JointSpringDamper::setStiffnessDamping(const yarp::sig::Matrix& K, const yarp::sig::Matrix &D)
+void JointImpedanceCtrl::setStiffnessDamping(const Eigen::MatrixXd& K, const Eigen::MatrixXd &D)
 {
     setStiffness(K);
     setDamping(D);
 }
 
-yarp::sig::Matrix JointSpringDamper::getStiffness()
+Eigen::MatrixXd JointImpedanceCtrl::getStiffness()
 {
     return _K;
 }
 
-yarp::sig::Matrix JointSpringDamper::getDamping()
+Eigen::MatrixXd JointImpedanceCtrl::getDamping()
 {
     return _D;
 }
 
-void JointSpringDamper::getStiffnessDamping(yarp::sig::Matrix &K, yarp::sig::Matrix &D)
+void JointImpedanceCtrl::getStiffnessDamping(Eigen::MatrixXd &K, Eigen::MatrixXd &D)
 {
     K = getStiffness();
     D = getDamping();
 }
 
-yarp::sig::Vector JointSpringDamper::getActualPositions()
+Eigen::VectorXd JointImpedanceCtrl::getActualPositions()
 {
     return _x;
 }
 
-yarp::sig::Vector JointSpringDamper::getActualVelocities()
+Eigen::VectorXd JointImpedanceCtrl::getActualVelocities()
 {
     return _x_dot;
 }
