@@ -50,7 +50,7 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DOPENSOT_COMPILE_TESTS:BOOL=ON ..
   - make
   - sudo make install
-  - ctest 
+  - env CTEST_OUTPUT_ON_FAILURE=1 ctest 
 
 notifications:
   email:
