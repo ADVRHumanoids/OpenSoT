@@ -39,25 +39,25 @@
                 /**
                  * @brief _deisredWrench desired Wrench in the base_link reference frame
                  */
-                yarp::sig::Vector _desiredWrench;
+                Eigen::VectorXd _desiredWrench;
 
                 /**
                  * @brief _actualWrench measured Wrench in the base_link reference frame
                  */
-                yarp::sig::Vector _actualWrench;
+                Eigen::VectorXd _actualWrench;
 
                 std::string _ft_frame;
                 int _ft_index;
 
-                yarp::sig::Matrix _C;
+                Eigen::MatrixXd _C;
 
                 void updateActualWrench();
 
 
             public:
 
-                yarp::sig::Vector forceError;
-                yarp::sig::Vector torqueError;
+                Eigen::VectorXd forceError;
+                Eigen::VectorXd torqueError;
 
                 /*********** TASK PARAMETERS ************/
 
@@ -67,7 +67,7 @@
 
 
                 Interaction(std::string task_id,
-                            const yarp::sig::Vector& x,
+                            const Eigen::VectorXd& x,
                             iDynUtils &robot,
                             std::string distal_link,
                             std::string base_link,
@@ -75,25 +75,26 @@
 
                 ~Interaction();
 
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReferenceWrench set desired Wrench in base_link reference frame
                  * @param desiredWrench [6x1] forces and torques
                  */
-                void setReferenceWrench(const yarp::sig::Vector& desiredWrench);
+                void setReferenceWrench(const Eigen::VectorXd& desiredWrench);
+                void setReferenceWrench(const KDL::Wrench& desiredWrench);
 
                 /**
                  * @brief getReferenceWrench get specified reference wrench in base_link reference frame
                  * @return [6x1] forces and torques
                  */
-                const yarp::sig::Vector getReferenceWrench() const;
+                const Eigen::VectorXd getReferenceWrench() const;
 
                 /**
                  * @brief getActualWrench return measured wrench in base_link reference frame
                  * @return [6x1] forces and torques
                  */
-                const yarp::sig::Vector getActualWrench() const;
+                const Eigen::VectorXd getActualWrench() const;
 
                 /**
                  * @brief getForceTorqueReferenceFrame return the reference frame of the ft sensor
@@ -105,16 +106,16 @@
                  * @brief getCompliance get Compliance matrix in base_link frame.
                  * @return [6x6] pd compliance Matrix
                  */
-                const yarp::sig::Matrix getCompliance() const;
+                const Eigen::MatrixXd getCompliance() const;
 
                 /**
                  * @brief setCompliance set a pd Compliance Matrix in base_link frame. If the compliance matrix is not pd the old one
                  * will be used.
                  * @param C [6x6] pd compliance Matrix
                  */
-                void setCompliance(const yarp::sig::Matrix& C);
+                void setCompliance(const Eigen::MatrixXd& C);
 
-                yarp::sig::Vector getWrenchError();
+                Eigen::VectorXd getWrenchError();
 
                 };
         }

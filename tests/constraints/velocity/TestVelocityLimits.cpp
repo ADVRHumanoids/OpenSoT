@@ -2,6 +2,7 @@
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
+#include <idynutils/cartesian_utils.h>
 #include <cmath>
 #define  s 1.0
 #define  x_size 10u
@@ -50,8 +51,8 @@ class testVelocityLimits : public ::testing::Test {
 };
 
 TEST_F(testVelocityLimits, sizesAreCorrect) {
-    yarp::sig::Vector lowerBound = velocityLimits->getLowerBound();
-    yarp::sig::Vector upperBound = velocityLimits->getUpperBound();
+    yarp::sig::Vector lowerBound = cartesian_utils::fromEigentoYarp(velocityLimits->getLowerBound());
+    yarp::sig::Vector upperBound = cartesian_utils::fromEigentoYarp(velocityLimits->getUpperBound());
 
     EXPECT_EQ(x_size, lowerBound.size()) << "lowerBound should have size"
                                          << x_size;
@@ -83,8 +84,8 @@ TEST_F(testVelocityLimits, sizesAreCorrect) {
 // Tests that the Foo::getLowerBounds() are zero at the bounds
 TEST_F(testVelocityLimits, BoundsAreCorrect) {
 
-    yarp::sig::Vector lowerBound = velocityLimits->getLowerBound();
-    yarp::sig::Vector upperBound = velocityLimits->getUpperBound();
+    yarp::sig::Vector lowerBound = cartesian_utils::fromEigentoYarp(velocityLimits->getLowerBound());
+    yarp::sig::Vector upperBound = cartesian_utils::fromEigentoYarp(velocityLimits->getUpperBound());
     /* checking a joint at upper bound */
     EXPECT_DOUBLE_EQ(-dT*vel_lim, lowerBound[0]) << "Lower Velocity Limits should be "
                                                   << -dT*vel_lim << ", "

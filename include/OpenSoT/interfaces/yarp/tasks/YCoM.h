@@ -5,6 +5,7 @@
 #include <boost/smart_ptr/scoped_ptr.hpp>
 #include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_trj_msg.h>
 #include <boost/thread/mutex.hpp>
+#include <Eigen/Dense>
 
 
 namespace OpenSoT {
@@ -59,9 +60,9 @@ public:
 private:
     ::yarp::os::Bottle _in;
     ::yarp::os::Bottle _out;
-    ::yarp::sig::Matrix _W;
+    Eigen::MatrixXd _W;
     double _lambda;
-    ::yarp::sig::Vector _task_position;
+    Eigen::VectorXd _task_position;
     boost::mutex _mtx;
 
     std::string _help_string;
@@ -207,7 +208,7 @@ public:
 
     YCoM(const std::string& robot_name,
                const std::string& module_prefix,
-               const ::yarp::sig::Vector& x,
+               const Eigen::VectorXd& x,
                iDynUtils &robot);
 
     void cleanPorts();

@@ -38,11 +38,11 @@ TEST_F(testDefaultHumanoidStack, testCreation )
 {
     EXPECT_NO_THROW(OpenSoT::DefaultHumanoidStack DHS(_robot,
                                         3e-3,
-                                        _robot.zeros));
+                                        cartesian_utils::toEigen(_robot.zeros)));
 
     OpenSoT::DefaultHumanoidStack DHS2(_robot,
                                         3e-3,
-                                        _robot.zeros);
+                                        cartesian_utils::toEigen(_robot.zeros));
     EXPECT_TRUE((bool)DHS2.com);
     EXPECT_TRUE((bool)DHS2.com_XY);
     EXPECT_TRUE((bool)DHS2.com_Z);

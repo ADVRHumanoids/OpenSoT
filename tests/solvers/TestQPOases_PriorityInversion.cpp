@@ -207,10 +207,11 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
     DHS->leftArm->setLambda(0.2);    DHS->leftArm->setOrientationErrorGain(0.3);
 
     DHS->com_XY->setLambda(1.0);
-    DHS->comVelocity->setVelocityLimits(yarp::sig::Vector(0.1,3));
+    Eigen::VectorXd tmp(3); tmp<<0.1,0.1,0.1;
+    DHS->comVelocity->setVelocityLimits(tmp);
     DHS->velocityLimits->setVelocityLimits(0.3);
 
-    yarp::sig::Matrix pW = DHS->postural->getWeight();
+    Eigen::MatrixXd pW = DHS->postural->getWeight();
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
         pW(model.torso.joint_numbers[i_t],
             model.torso.joint_numbers[i_t]) *= 1e3;
@@ -237,8 +238,8 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
-    typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = stack->getStack()[stack->getStack().size()-1];
+    typedef std::list<OpenSoT::Constraint<Eigen::MatrixXd,Eigen::VectorXd>::ConstraintPtr>::iterator it_constraint;
+    OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>::TaskPtr lastTask = stack->getStack()[stack->getStack().size()-1];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
@@ -336,8 +337,10 @@ TEST_P(testQPOases_PI, tryPISmoothing) {
     std::vector< boost::shared_ptr<OpenSoT::DefaultHumanoidStack> > DHSns_vec(N_COM_PARAMS);
     for(unsigned int i=0; i < N_COM_PARAMS; ++i)
     {
-        DHS_vec[i].reset(new OpenSoT::DefaultHumanoidStack(model, dT, q_vec[i]));
-        DHSns_vec[i].reset(new OpenSoT::DefaultHumanoidStack(model, dT, q_vec[i]));
+        DHS_vec[i].reset(new OpenSoT::DefaultHumanoidStack(model, dT,
+                            cartesian_utils::toEigen(q_vec[i])));
+        DHSns_vec[i].reset(new OpenSoT::DefaultHumanoidStack(model, dT,
+                            cartesian_utils::toEigen(q_vec[i])));
     }
 
     // we need to change the eps before creating the solver
@@ -474,8 +477,8 @@ TEST_P(testQPOases_PI, tryPISmoothing) {
 
     for(unsigned int i=0; i < N_COM_PARAMS; ++i)
     {
-        DHS_vec[i]->leftArm->setReference(desired_pose);
-        DHSns_vec[i]->leftArm->setReference(desired_pose);
+        DHS_vec[i]->leftArm->setReference(cartesian_utils::toEigen(desired_pose));
+        DHSns_vec[i]->leftArm->setReference(cartesian_utils::toEigen(desired_pose));
     }
 
     double t_test = yarp::os::SystemClock::nowSystem();
@@ -484,21 +487,25 @@ TEST_P(testQPOases_PI, tryPISmoothing) {
         for(unsigned int i = 0; i < N_COM_PARAMS; ++i)
         {
             model.updateiDyn3Model(q_vec[i], true);
-            stack_vec[i]->update(q_vec[i]);
+            stack_vec[i]->update(cartesian_utils::toEigen(q_vec[i]));
 
-            e_com_vec[i] = yarp::math::norm(stack_vec[i]->getStack()[stack_off  + 0]->getb());
-            e_post_vec[i] = yarp::math::norm(stack_vec[i]->getStack()[stack_off + 2]->getb());
+            e_com_vec[i] = stack_vec[i]->getStack()[stack_off  + 0]->getb().norm();
+            e_post_vec[i] = stack_vec[i]->getStack()[stack_off + 2]->getb().norm();
 
-            EXPECT_TRUE(sot_vec[i]->solve(dq));
+            Eigen::VectorXd _dq(dq.size());
+            EXPECT_TRUE(sot_vec[i]->solve(_dq));
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             q_vec[i] += dq;
 
             model.updateiDyn3Model(qns_vec[i], true);
-            stackns_vec[i]->update(qns_vec[i]);
+            stackns_vec[i]->update(cartesian_utils::toEigen(qns_vec[i]));
 
-            e_com_ns_vec[i] = yarp::math::norm(stackns_vec[i]->getStack()[1]->getb());
-            e_post_ns_vec[i] = yarp::math::norm(stackns_vec[i]->getStack()[3]->getb());
+            e_com_ns_vec[i] = stackns_vec[i]->getStack()[1]->getb().norm();
+            e_post_ns_vec[i] = stackns_vec[i]->getStack()[3]->getb().norm();
 
-            EXPECT_TRUE(sotns_vec[i]->solve(dqns));
+            Eigen::VectorXd _dqns(dqns.size());
+            EXPECT_TRUE(sotns_vec[i]->solve(_dqns));
+            dqns = cartesian_utils::fromEigentoYarp(_dqns);
             qns_vec[i]+=dqns;
         }
 

@@ -61,25 +61,30 @@ public:
                               _idynutils.iDyn3_model.getLinkIndex(_base_link_0),
                               _idynutils.iDyn3_model.getLinkIndex(_distal_link_0));
         _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, _idynutils,
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
+                        cartesian_utils::toEigen(q), _idynutils,
                     _distal_link_0, _base_link_0));
 
         T_ref_0 = _T_initial_0;
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
 
-        _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->setReference(cartesian_utils::toEigen(T_ref_0));
+        _cartesian_task_0->update(cartesian_utils::toEigen(q));
 
-        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(new OpenSoT::tasks::velocity::Postural(q));
+        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
+                    new OpenSoT::tasks::velocity::Postural(
+                        cartesian_utils::toEigen(q)));
 
         _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(q, _idynutils.iDyn3_model.getJointBoundMax(),
-                               _idynutils.iDyn3_model.getJointBoundMin()));
+                    new OpenSoT::constraints::velocity::JointLimits(
+                        cartesian_utils::toEigen(q),
+                               _idynutils.getJointBoundMax(),
+                               _idynutils.getJointBoundMin()));
 
         _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
                     new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
 
-        std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> joint_constraints_list;
+        std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
         joint_constraints_list.push_back(_joint_limits);
         joint_constraints_list.push_back(_joint_velocity_limits);
 
@@ -103,7 +108,7 @@ public:
         _log<<_variable_name<<" = ["<<std::endl;
     }
 
-    double solve(yarp::sig::Vector& dq, bool& solved)
+    double solve(Eigen::VectorXd& dq, bool& solved)
     {
         double tic = yarp::os::Time::now();
         solved = _sot->solve(dq);
@@ -114,13 +119,13 @@ public:
         return dt;
     }
 
-    void update(const yarp::sig::Vector& q)
+    void update(const Eigen::VectorXd& q)
     {
         _cartesian_task_0->update(q);
         _postural_task->update(q);
         _joint_constraints->update(q);
 
-        _log<<_cartesian_task_0->getb().toString()<<" ";
+        _log<<_cartesian_task_0->getb()<<" ";
     }
 
     ~testIKProblem()
@@ -222,10 +227,12 @@ public:
                               _idynutils.iDyn3_model.getLinkIndex(_base_link_1),
                               _idynutils.iDyn3_model.getLinkIndex(_distal_link_1));
         _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, _idynutils,
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
+                    cartesian_utils::toEigen(q), _idynutils,
                     _distal_link_0, _base_link_0));
         _cartesian_task_1 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", q, _idynutils,
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist",
+                    cartesian_utils::toEigen(q), _idynutils,
                     _distal_link_1, _base_link_1));
 
         T_ref_0 = _T_initial_0;
@@ -234,22 +241,26 @@ public:
         T_ref_1 = _T_initial_1;
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
-        _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->setReference(cartesian_utils::toEigen(T_ref_0));
+        _cartesian_task_0->update(cartesian_utils::toEigen(q));
 
-        _cartesian_task_1->setReference(T_ref_1);
-        _cartesian_task_1->update(q);
+        _cartesian_task_1->setReference(cartesian_utils::toEigen(T_ref_1));
+        _cartesian_task_1->update(cartesian_utils::toEigen(q));
 
-        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(new OpenSoT::tasks::velocity::Postural(q));
+        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
+                    new OpenSoT::tasks::velocity::Postural(
+                        cartesian_utils::toEigen(q)));
 
         _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(q, _idynutils.iDyn3_model.getJointBoundMax(),
-                               _idynutils.iDyn3_model.getJointBoundMin()));
+                    new OpenSoT::constraints::velocity::JointLimits(
+                        cartesian_utils::toEigen(q),
+                        _idynutils.getJointBoundMax(),
+                               _idynutils.getJointBoundMin()));
 
         _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
                     new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
 
-        std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> joint_constraints_list;
+        std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
         joint_constraints_list.push_back(_joint_limits);
         joint_constraints_list.push_back(_joint_velocity_limits);
 
@@ -274,7 +285,7 @@ public:
         _log<<_variable_name<<" = ["<<std::endl;
     }
 
-    double solve(yarp::sig::Vector& dq, bool& solved)
+    double solve(Eigen::VectorXd& dq, bool& solved)
     {
         double tic = yarp::os::Time::now();
         solved = _sot->solve(dq);
@@ -285,14 +296,14 @@ public:
         return dt;
     }
 
-    void update(const yarp::sig::Vector& q)
+    void update(const Eigen::VectorXd& q)
     {
         _cartesian_task_0->update(q);
         _cartesian_task_1->update(q);
         _postural_task->update(q);
         _joint_constraints->update(q);
 
-        _log<<_cartesian_task_0->getb().toString()<<" "<<_cartesian_task_1->getb().toString()<<" ";
+        _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";
     }
 
     ~testIKProblem2()
@@ -414,10 +425,12 @@ public:
                               _idynutils.iDyn3_model.getLinkIndex(_base_link_1),
                               _idynutils.iDyn3_model.getLinkIndex(_distal_link_1));
         _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, _idynutils,
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
+                cartesian_utils::toEigen(q), _idynutils,
                     _distal_link_0, _base_link_0));
         _cartesian_task_1 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", q, _idynutils,
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist",
+                    cartesian_utils::toEigen(q), _idynutils,
                     _distal_link_1, _base_link_1));
 
         T_ref_0 = _T_initial_0;
@@ -426,29 +439,33 @@ public:
         T_ref_1 = _T_initial_1;
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
-        _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->setReference(cartesian_utils::toEigen(T_ref_0));
+        _cartesian_task_0->update(cartesian_utils::toEigen(q));
 
-        _cartesian_task_1->setReference(T_ref_1);
-        _cartesian_task_1->update(q);
+        _cartesian_task_1->setReference(cartesian_utils::toEigen(T_ref_1));
+        _cartesian_task_1->update(cartesian_utils::toEigen(q));
 
-        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(new OpenSoT::tasks::velocity::Postural(q));
+        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
+                    new OpenSoT::tasks::velocity::Postural(
+                        cartesian_utils::toEigen(q)));
 
         _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(q, _idynutils.iDyn3_model.getJointBoundMax(),
-                               _idynutils.iDyn3_model.getJointBoundMin()));
+                    new OpenSoT::constraints::velocity::JointLimits(
+                        cartesian_utils::toEigen(q),
+                        _idynutils.getJointBoundMax(),
+                               _idynutils.getJointBoundMin()));
 
         _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
                     new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
 
-        std::list<OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr> joint_constraints_list;
+        std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
         joint_constraints_list.push_back(_joint_limits);
         joint_constraints_list.push_back(_joint_velocity_limits);
 
         _joint_constraints = OpenSoT::constraints::Aggregated::Ptr(
                     new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
 
-        std::list<OpenSoT::Task<Matrix, Vector>::TaskPtr> cartesian_task_list;
+        std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> cartesian_task_list;
         cartesian_task_list.push_back(_cartesian_task_0);
         cartesian_task_list.push_back(_cartesian_task_1);
 
@@ -472,7 +489,7 @@ public:
         _log<<_variable_name<<" = ["<<std::endl;
     }
 
-    double solve(yarp::sig::Vector& dq, bool& solved)
+    double solve(Eigen::VectorXd& dq, bool& solved)
     {
         double tic = yarp::os::Time::now();
         solved = _sot->solve(dq);
@@ -483,13 +500,13 @@ public:
         return dt;
     }
 
-    void update(const yarp::sig::Vector& q)
+    void update(const Eigen::VectorXd& q)
     {
         _cartesian_tasks->update(q);
         _postural_task->update(q);
         _joint_constraints->update(q);
 
-        _log<<_cartesian_task_0->getb().toString()<<" "<<_cartesian_task_1->getb().toString()<<" ";
+        _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";
     }
 
     ~testIKProblem3()
@@ -604,13 +621,14 @@ TEST_F(testQPOases_Options, testOptionMPC)
     {
         test0._idynutils.updateiDyn3Model(test0.q, true);
 
-        test0.update(test0.q);
+        test0.update(cartesian_utils::toEigen(test0.q));
 
         bool solved;
-        acc += test0.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test0.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test0.q = test0.q + dq;
     }
     acc = acc/double(T);
@@ -629,13 +647,14 @@ TEST_F(testQPOases_Options, testOptionMPC)
     {
         test1._idynutils.updateiDyn3Model(test1.q, true);
 
-        test1.update(test1.q);
+        test1.update(cartesian_utils::toEigen(test1.q));
 
         bool solved;
-        acc += test1.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test1.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test1.q = test1.q + dq;
     }
     acc = acc/double(T);
@@ -654,13 +673,14 @@ TEST_F(testQPOases_Options, testOptionMPC)
     {
         test2._idynutils.updateiDyn3Model(test2.q, true);
 
-        test2.update(test2.q);
+        test2.update(cartesian_utils::toEigen(test2.q));
 
         bool solved;
-        acc += test2.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test2.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test2.q = test2.q + dq;
     }
     acc = acc/double(T);
@@ -692,13 +712,14 @@ TEST_F(testQPOases_Options, testOptionReliable)
     {
         test0._idynutils.updateiDyn3Model(test0.q, true);
 
-        test0.update(test0.q);
+        test0.update(cartesian_utils::toEigen(test0.q));
 
         bool solved;
-        acc += test0.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test0.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test0.q = test0.q + dq;
     }
     acc = acc/double(T);
@@ -716,13 +737,14 @@ TEST_F(testQPOases_Options, testOptionReliable)
     {
         test1._idynutils.updateiDyn3Model(test1.q, true);
 
-        test1.update(test1.q);
+        test1.update(cartesian_utils::toEigen(test1.q));
 
         bool solved;
-        acc += test1.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test1.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test1.q = test1.q + dq;
     }
     acc = acc/double(T);
@@ -740,13 +762,14 @@ TEST_F(testQPOases_Options, testOptionReliable)
     {
         test2._idynutils.updateiDyn3Model(test2.q, true);
 
-        test2.update(test2.q);
+        test2.update(cartesian_utils::toEigen(test2.q));
 
         bool solved;
-        acc += test2.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test2.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test2.q = test2.q + dq;
     }
     acc = acc/double(T);
@@ -778,13 +801,14 @@ TEST_F(testQPOases_Options, testOptionDefault)
     {
         test0._idynutils.updateiDyn3Model(test0.q, true);
 
-        test0.update(test0.q);
+        test0.update(cartesian_utils::toEigen(test0.q));
 
         bool solved;
-        acc += test0.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test0.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test0.q = test0.q + dq;
     }
     acc = acc/double(T);
@@ -802,13 +826,14 @@ TEST_F(testQPOases_Options, testOptionDefault)
     {
         test1._idynutils.updateiDyn3Model(test1.q, true);
 
-        test1.update(test1.q);
+        test1.update(cartesian_utils::toEigen(test1.q));
 
         bool solved;
-        acc += test1.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test1.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test1.q = test1.q + dq;
     }
     acc = acc/double(T);
@@ -826,13 +851,14 @@ TEST_F(testQPOases_Options, testOptionDefault)
     {
         test2._idynutils.updateiDyn3Model(test2.q, true);
 
-        test2.update(test2.q);
+        test2.update(cartesian_utils::toEigen(test2.q));
 
         bool solved;
-        acc += test2.solve(dq, solved);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        acc += test2.solve(_dq, solved);
         if(!solved)
-            dq.zero();
-
+            _dq.setZero(dq.size());
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         test2.q = test2.q + dq;
     }
     acc = acc/double(T);

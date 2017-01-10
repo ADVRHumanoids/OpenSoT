@@ -16,19 +16,17 @@
 */
 
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <yarp/math/Math.h>
 #include <cmath>
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
 
 VelocityLimits::VelocityLimits(const double qDotLimit,
                                const double dT,
                                const unsigned int x_size) :
     Constraint("velocity_limits", x_size), _dT(dT) {
 
-    _lowerBound.resize(_x_size, 0.0);
-    _upperBound.resize(_x_size, 0.0);
+    _lowerBound.setZero(_x_size);
+    _upperBound.setZero(_x_size);
 
    this->setVelocityLimits(qDotLimit);
 
@@ -55,9 +53,8 @@ double OpenSoT::constraints::velocity::VelocityLimits::getDT()
 void VelocityLimits::generateBounds()
 {
     /************************ COMPUTING BOUNDS ****************************/
-
-        _lowerBound = -1.0*_qDotLimit*_dT;
-        _upperBound = +1.0*_qDotLimit*_dT;
+        _lowerBound<<_lowerBound.setOnes(_x_size)*-1.0*_qDotLimit*_dT;
+        _upperBound<<_upperBound.setOnes(_x_size)*1.0*_qDotLimit*_dT;
 
     /**********************************************************************/
 }

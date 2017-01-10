@@ -1,13 +1,13 @@
-OpenSoT DRC Edition
+OpenSoT Post-DRC Edition
 =========
 This is the code of OpenSoT that the WALK-MAN Team have used in the DRC competition for all the manipulation tasks.
 
 New Features Includes:
 -----------------------
-- Cartesian Position Constraint
-- Manipulability Task
-- Interactive Markers
-- Self Collision Avoidance  
+- Joint Torque Limits Constraint
+- Gaze Task
+- Default Humanoid Stack
+- Tons of Tools  
 - Many Bug Fixes
 - Improved documentation (we hope!)
 
@@ -34,9 +34,9 @@ alt="OpenSoT + PI" width="480" height="360" border="10" /><br>OpenSoT + PI</a>
 " target="_blank"><img src="http://img.youtube.com/vi/cBggRy7WPUE/0.jpg" 
 alt="Minimum Effort + Drawing Task" width="480" height="360" border="10" /><br>Minimum Effort + Drawing Task</a>
 
-<a href="https://www.youtube.com/watch?v=U1FcIq15jg4&feature=youtu.be
-" target="_blank"><img src="http://img.youtube.com/vi/U1FcIq15jg4/0.jpg" 
-alt="Static Walking with the SoT" width="480" height="360" border="10" /><br>Static Walking with the SoT</a>
+<a href="https://www.youtube.com/watch?v=aYwSLnBZtuA
+" target="_blank"><img src="http://img.youtube.com/vi/aYwSLnBZtuA/0.jpg" 
+alt="CoM Vs Waist Walking with the SoT" width="480" height="360" border="10" /><br>CoM Vs Waist Walking with the SoT</a>
 
 Installation
 ------------

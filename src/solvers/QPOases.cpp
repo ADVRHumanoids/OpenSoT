@@ -40,32 +40,31 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
         throw "Can Not initizalize SoT with bounds!";
 }
 
-void QPOases_sot::computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g)
+void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g)
 {
-    H = task->getA().transposed() * task->getWeight() * task->getA();
-    g = -1.0 * task->getA().transposed() * task->getWeight() * task->getb();
+    H = task->getA().transpose() * task->getWeight() * task->getA();
+    g = -1.0 * task->getA().transpose() * task->getWeight() * task->getb();
 }
 
-void QPOases_sot::computeVelCtrlOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
-                                                     yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA)
+void QPOases_sot::computeOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
+                                                     Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
-    OpenSoT::constraints::BilateralConstraint::Ptr optimality_bilateral_constraint(
-        new OpenSoT::constraints::BilateralConstraint(
+    OpenSoT::constraints::BilateralConstraint optimality_bilateral_constraint(
                 task->getA(),
                 task->getA()*problem.getSolution(),
-                task->getA()*problem.getSolution()));
-    A = optimality_bilateral_constraint->getAineq();
-    lA = optimality_bilateral_constraint->getbLowerBound();
-    uA = optimality_bilateral_constraint->getbUpperBound();
+                task->getA()*problem.getSolution());
+    A = optimality_bilateral_constraint.getAineq();
+    lA = optimality_bilateral_constraint.getbLowerBound();
+    uA = optimality_bilateral_constraint.getbUpperBound();
 }
 
 bool QPOases_sot::prepareSoT()
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        yarp::sig::Matrix H;
-        yarp::sig::Vector g;
-        computeVelCtrlCostFunction(_tasks[i], H, g);
+        Eigen::MatrixXd H;
+        Eigen::VectorXd g;
+        computeCostFunction(_tasks[i], H, g);
 
         OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
         if(_globalConstraints)
@@ -79,40 +78,43 @@ bool QPOases_sot::prepareSoT()
 
         std::string constraints_str = constraints_task_i->getConstraintID();
 
-        yarp::sig::Matrix A = constraints_task_i->getAineq();
-        yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
-        yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
+        Eigen::MatrixXd A = constraints_task_i->getAineq();
+        Eigen::VectorXd lA = constraints_task_i->getbLowerBound();
+        Eigen::VectorXd uA = constraints_task_i->getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
             {
-                yarp::sig::Matrix tmp_A;
-                yarp::sig::Vector tmp_lA, tmp_uA;
-                computeVelCtrlOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
+                Eigen::MatrixXd tmp_A;
+                Eigen::VectorXd tmp_lA, tmp_uA;
+                computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
 
                 if(!constraints_str.compare("") == 0)
                     constraints_str = constraints_str + "+";
                 constraints_str = constraints_str + _tasks[j]->getTaskID() + "_optimality";
 
-                A = pile(A, tmp_A);
-                lA = cat(lA, tmp_lA);
-                uA = cat(uA, tmp_uA);
+                pile(A, tmp_A);
+                pile(lA, tmp_lA);
+                pile(uA, tmp_uA);
             }
         }
 
         if(_bounds && _bounds->isBound())   // if it is a constraint, it has already been added in #74
             constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
-        yarp::sig::Vector l = constraints_task_i->getLowerBound();
-        yarp::sig::Vector u = constraints_task_i->getUpperBound();
+        Eigen::VectorXd l = constraints_task_i->getLowerBound();
+        Eigen::VectorXd u = constraints_task_i->getUpperBound();
 
         QPOasesProblem problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                  _epsRegularisation);
 
         if(problem_i.initProblem(H, g, A, lA, uA, l, u)){
             _qp_stack_of_tasks.push_back(problem_i);
+            std::string bounds_string = "";
+            if(_bounds)
+                bounds_string = _bounds->getConstraintID();
             _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID(),
                                                           constraints_str,
-                                                          _bounds->getConstraintID());}
+                                                          bounds_string);}
         else{
             std::cout<<RED<<"ERROR: INITIALIZING STACK "<<i<<DEFAULT<<std::endl;
             return false;}
@@ -120,13 +122,13 @@ bool QPOases_sot::prepareSoT()
     return true;
 }
 
-bool QPOases_sot::solve(Vector &solution)
+bool QPOases_sot::solve(Eigen::VectorXd &solution)
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        yarp::sig::Matrix H;
-        yarp::sig::Vector g;
-        computeVelCtrlCostFunction(_tasks[i], H, g);
+        Eigen::MatrixXd H;
+        Eigen::VectorXd g;
+        computeCostFunction(_tasks[i], H, g);
         if(!_qp_stack_of_tasks[i].updateTask(H, g))
             return false;
 
@@ -139,19 +141,19 @@ bool QPOases_sot::solve(Vector &solution)
             constraints_task_i->getConstraintsList().push_back(_bounds);
             constraints_task_i->generateAll();
         }
-        yarp::sig::Matrix A = constraints_task_i->getAineq();
-        yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
-        yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
+        Eigen::MatrixXd A = constraints_task_i->getAineq();
+        Eigen::VectorXd lA = constraints_task_i->getbLowerBound();
+        Eigen::VectorXd uA = constraints_task_i->getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
             {
-                yarp::sig::Matrix tmp_A;
-                yarp::sig::Vector tmp_lA, tmp_uA;
-                computeVelCtrlOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
-                A = yarp::math::pile(A, tmp_A);
-                lA = yarp::math::cat(lA, tmp_lA);
-                uA = yarp::math::cat(uA, tmp_uA);
+                Eigen::MatrixXd tmp_A;
+                Eigen::VectorXd tmp_lA, tmp_uA;
+                computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
+                pile(A, tmp_A);
+                pile(lA, tmp_lA);
+                pile(uA, tmp_uA);
             }
         }
 

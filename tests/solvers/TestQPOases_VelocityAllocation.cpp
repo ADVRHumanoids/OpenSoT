@@ -113,8 +113,8 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 #endif
 
     OpenSoT::AutoStack::Ptr stack, stacknva;
-    OpenSoT::DefaultHumanoidStack DHS(model, 3e-3, q);
-    OpenSoT::DefaultHumanoidStack DHSnva(model, 3e-3, qnva);
+    OpenSoT::DefaultHumanoidStack DHS(model, 3e-3, cartesian_utils::toEigen(q));
+    OpenSoT::DefaultHumanoidStack DHSnva(model, 3e-3, cartesian_utils::toEigen(qnva));
 
     DHS.leftArm->setLambda(0.3);
     DHS.leftArm->setOrientationErrorGain(0.1);
@@ -201,7 +201,7 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 
 
     //SET SOME REFERENCES
-    yarp::sig::Matrix actual_pose_y = DHS.leftArm->getActualPose();
+    yarp::sig::Matrix actual_pose_y = cartesian_utils::fromEigentoYarp(DHS.leftArm->getActualPose());
     yarp::sig::Matrix desired_pose_y = actual_pose_y;
     desired_pose_y(1,3) = actual_pose_y(1,3) + 0.1;
     desired_pose_y(2,3) = actual_pose_y(2,3) + 0.1;
@@ -232,8 +232,9 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
     double settling_counter = 1.0;
     bool converged_event = false;
 
-    DHS.leftArm->setReference(desired_pose_y);
-    DHSnva.leftArm->setReference(desired_pose_y);
+    DHS.leftArm->setReference(cartesian_utils::toEigen(desired_pose_y));
+    DHSnva.leftArm->setReference(cartesian_utils::toEigen(desired_pose_y));
+
 
 #ifdef TRY_ON_SIMULATOR
     double t_test = yarp::os::Time::now();
@@ -249,23 +250,25 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 #endif
 
         model.updateiDyn3Model(q, true);
-        stack->update(q);
+        stack->update(cartesian_utils::toEigen(q));
 
         //minimumVelocity(model, DHS, model.left_arm, q);
 
-        e = norm(DHS.leftArm->getb());
+        e = sqrt(DHS.leftArm->getb().squaredNorm());
         if(useMinimumVelocity) {
             ASSERT_EQ(dq.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
             ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
-            epost = norm((q-DHS.postural->getReference()).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
+            epost = norm((q-cartesian_utils::fromEigentoYarp(DHS.postural->getReference())).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
         } else
-            epost = norm(postural->getb());
+            epost = sqrt(postural->getb().squaredNorm());
         if(epost > epost_max)
             epost_max = epost;
 
-
-        EXPECT_TRUE(sot->solve(dq));
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
+
 
 #ifdef TRY_ON_SIMULATOR
 #ifndef TRY_NVA
@@ -285,22 +288,25 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 #endif
 
         model.updateiDyn3Model(qnva, true);
-        stacknva->update(qnva);
+        stacknva->update(cartesian_utils::toEigen(qnva));
 
         //minimumVelocity(model, DHSnva, model.left_arm, qnva);
 
-        enva = norm(DHSnva.leftArm->getb());
+        enva = sqrt(DHSnva.leftArm->getb().squaredNorm());
         if(useMinimumVelocity) {
             ASSERT_EQ(qnva.subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]).length(), 3);
             ASSERT_LT(model.torso.joint_numbers[0], model.torso.joint_numbers[2]);
-            epostnva = norm((qnva-DHSnva.postural->getReference()).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
+            epostnva = norm((qnva-cartesian_utils::fromEigentoYarp(DHSnva.postural->getReference())).subVector(model.torso.joint_numbers[0], model.torso.joint_numbers[2]));
         } else
-            epostnva = norm(posturalnva->getb());
+            epostnva = sqrt(posturalnva->getb().squaredNorm());
         if(epostnva > epostnva_max)
             epostnva_max = epostnva;
 
-        EXPECT_TRUE(sotnva->solve(dqnva));
+        Eigen::VectorXd _dqnva(dqnva.size()); _dqnva.setZero(dqnva.size());
+        EXPECT_TRUE(sotnva->solve(_dqnva));
+        dqnva = cartesian_utils::fromEigentoYarp(_dqnva);
         qnva+=dqnva;
+
 
 #ifdef TRY_ON_SIMULATOR
 #ifdef TRY_NVA
@@ -314,17 +320,20 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 #endif
 
 
+    Eigen::MatrixXd V = DHS.leftArm->getA()*_dq;
+    Eigen::MatrixXd Vnva = DHSnva.leftArm->getA()*_dqnva;
+    //std::cout<<"V: "<<V<<std::endl;
 #ifdef TRY_ON_SIMULATOR
         _log << "(" << yarp::os::Time::now() - t_test << ","
 #else
         _log << "(" << yarp::os::SystemClock::nowSystem() - t_test << ","
 #endif
-            << (DHS.leftArm->getA()*dq)[0] << ","
-            << (DHS.leftArm->getA()*dq)[1] << ","
-            << (DHS.leftArm->getA()*dq)[2] << ","
-            << (DHSnva.leftArm->getA()*dqnva)[0] << ","
-            << (DHSnva.leftArm->getA()*dqnva)[1] << ","
-            << (DHSnva.leftArm->getA()*dqnva)[2] << ","
+            << V(0) << ","
+            << V(1) << ","
+            << V(2) << ","
+            << Vnva(0) << ","
+            << Vnva(1) << ","
+            << Vnva(2) << ","
             << dq[model.torso.joint_numbers[0]]  << ","
             << dq[model.torso.joint_numbers[1]]  << ","
             << dq[model.torso.joint_numbers[2]]  << ","
@@ -333,6 +342,7 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
             << dqnva[model.torso.joint_numbers[2]]  << ","
             << e << "," << enva << "," << epost << "," << epostnva << ","
             << t_loop << "," << t_loopnva << ")," << std::endl;
+
 
         if(e < 1.5e-3 && enva < 1.5e-3 && !converged_event)
         {

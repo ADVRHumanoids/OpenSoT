@@ -20,18 +20,17 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
- #include <yarp/sig/all.h>
  #include <idynutils/idynutils.h>
 
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
-            class CartesianVelocity: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class CartesianVelocity: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<CartesianVelocity> Ptr;
             private:
                 OpenSoT::tasks::velocity::Cartesian::Ptr _task;
-                yarp::sig::Vector _velocityLimits;
+                Eigen::VectorXd _velocityLimits;
                 double _dT;
 
                 void generatebBounds();
@@ -46,14 +45,14 @@
                  * @param task a pointer to a Cartesian task. Notice how the task needs to be updated in order
                  *             for the constraint to work
                  */
-                CartesianVelocity(const yarp::sig::Vector velocityLimits,
+                CartesianVelocity(const Eigen::VectorXd velocityLimits,
                                   const double dT,
                                   OpenSoT::tasks::velocity::Cartesian::Ptr& task);
 
-                virtual void update(const yarp::sig::Vector &x);
+                virtual void update(const Eigen::VectorXd &x);
 
-                yarp::sig::Vector getVelocityLimits();
-                void setVelocityLimits(const yarp::sig::Vector velocityLimits);
+                Eigen::VectorXd getVelocityLimits();
+                void setVelocityLimits(const Eigen::VectorXd velocityLimits);
             };
         }
     }

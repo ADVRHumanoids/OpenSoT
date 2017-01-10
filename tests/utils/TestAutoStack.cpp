@@ -20,7 +20,7 @@ protected:
                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
         DHS(_robot,
               3e-3,
-              _robot.zeros)
+              cartesian_utils::toEigen(_robot.zeros))
     {
 
     }
@@ -47,7 +47,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     AutoStack::Ptr auto_stack = (DHS.right2LeftLeg)/
             (DHS.com + DHS.leftArm)/
             DHS.postural;
-    auto_stack->update(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.));
+    auto_stack->update(
+                cartesian_utils::toEigen(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.)));
 
     OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(com_task != NULL);
@@ -86,7 +87,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
     AutoStack::Ptr auto_stack = (DHS.right2LeftLeg)/
             (DHS.com + DHS.leftArm)/
             DHS.postural;
-    auto_stack->update(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.));
+    auto_stack->update(
+                cartesian_utils::toEigen(yarp::sig::Vector(_robot.iDyn3_model.getNrOfDOFs(),0.)));
 
     OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(com_task != NULL);
@@ -125,12 +127,32 @@ TEST_F(testAutoStack, testOperatorPlus )
 {
     using namespace OpenSoT;
     tasks::Aggregated::Ptr aggr1 = DHS.leftArm + DHS.rightArm;
+    Eigen::MatrixXd W1 = aggr1->getWeight();
+    W1 = 3.*W1;
+    aggr1->setWeight(W1);
     EXPECT_EQ(aggr1->getTaskList().size(), 2);
 
     tasks::Aggregated::Ptr aggr2 = DHS.leftLeg + DHS.rightLeg;
+    Eigen::MatrixXd W2 = aggr2->getWeight();
+    W2 = 5.*W2;
+    aggr2->setWeight(W2);
     EXPECT_EQ(aggr2->getTaskList().size(), 2);
 
     tasks::Aggregated::Ptr aggr3 = aggr1 + aggr2;
+    yarp::sig::Matrix W3 = cartesian_utils::fromEigentoYarp(aggr3->getWeight());
+    EXPECT_TRUE(W3.submatrix(0,W1.rows()-1, 0, W1.cols()-1) == cartesian_utils::fromEigentoYarp(W1));
+    EXPECT_TRUE(W3.submatrix(W1.rows(),W1.rows() + W2.rows()-1,
+        W1.cols(),W1.cols() + W2.cols()-1) == cartesian_utils::fromEigentoYarp(W2));
+    yarp::sig::Matrix matBlock0_des(W1.rows(), W2.cols());
+    matBlock0_des.zero();
+    yarp::sig::Matrix matBlock0 = W3.submatrix(0, W1.rows()-1,
+                                                   W1.cols(), W1.cols() + W2.cols()-1);
+    EXPECT_TRUE(matBlock0_des == matBlock0);
+    yarp::sig::Matrix matBlock1_des(W2.rows(), W1.cols());
+    matBlock1_des.zero();
+    yarp::sig::Matrix matBlock1 = W3.submatrix(W1.rows(), W1.rows() + W2.rows() -1,
+        0, W1.cols()-1);
+    EXPECT_TRUE(matBlock1_des == matBlock1);
     EXPECT_EQ(aggr3->getTaskList().size(), 4);
 
     aggr1->setLambda(.1);

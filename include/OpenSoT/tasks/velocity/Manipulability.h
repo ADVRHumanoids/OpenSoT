@@ -1,15 +1,28 @@
+/*
+ * Copyright (C) 2014 Walkman
+ * Authors: Enrico Mingo
+ * email: enrico.mingo@iit.it
+ * Permission is granted to copy, distribute, and/or modify this program
+ * under the terms of the GNU Lesser General Public License, version 2 or any
+ * later version published by the Free Software Foundation.
+ *
+ * A copy of the license can be found at
+ * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details
+*/
+
 #ifndef __TASKS_VELOCITY_MANIPULABILITY_H__
 #define __TASKS_VELOCITY_MANIPULABILITY_H__
 
 #include <OpenSoT/Task.h>
 #include <idynutils/idynutils.h>
 #include <idynutils/cartesian_utils.h>
-#include <yarp/sig/all.h>
-#include <yarp/math/Math.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
-
-using namespace yarp::math;
 
 
 namespace OpenSoT {
@@ -24,16 +37,16 @@ namespace OpenSoT {
              * The gradient of w is then computed and projected using the gardient projection method.
              * W is a CONSTANT weight matrix.
              */
-            class Manipulability : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            class Manipulability : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
                 typedef boost::shared_ptr<Manipulability> Ptr;
 
-                Manipulability(const yarp::sig::Vector& x, const iDynUtils& robot_model, const Cartesian::Ptr CartesianTask);
-                Manipulability(const yarp::sig::Vector& x, const iDynUtils& robot_model, const CoM::Ptr CartesianTask);
+                Manipulability(const Eigen::VectorXd& x, const iDynUtils& robot_model, const Cartesian::Ptr CartesianTask);
+                Manipulability(const Eigen::VectorXd& x, const iDynUtils& robot_model, const CoM::Ptr CartesianTask);
 
                 ~Manipulability();
 
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief ComputeManipulabilityIndex
@@ -45,14 +58,14 @@ namespace OpenSoT {
                  * @brief setW set a CONSTANT Weight matrix for the manipulability index
                  * @param W weight matrix
                  */
-                void setW(const yarp::sig::Matrix& W){
+                void setW(const Eigen::MatrixXd& W){
                     _manipulabilityIndexGradientWorker.setW(W);
                 }
 
                 /**
                  * @brief getW get a Weight matrix for the manipulability index
                  */
-                yarp::sig::Matrix getW(){
+                Eigen::MatrixXd getW(){
                     return _manipulabilityIndexGradientWorker.getW();
                 }
 
@@ -66,7 +79,7 @@ namespace OpenSoT {
 
             protected:
 
-                yarp::sig::Vector _x;
+                Eigen::VectorXd _x;
 
                 /**
                  * @brief The ComputeManipulabilityIndexGradient class implements a worker class to computes
@@ -76,20 +89,22 @@ namespace OpenSoT {
                 public:
                     iDynUtils _robot;
                     const iDynUtils& _model;
-                    yarp::sig::Matrix _W;
-                    yarp::sig::Vector _zeros;
-                    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr _CartesianTask;
+                    Eigen::MatrixXd _W;
+                    Eigen::VectorXd _zeros;
+                    OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _CartesianTask;
 
-                    ComputeManipulabilityIndexGradient(const yarp::sig::Vector& q, const iDynUtils& robot_model,
+                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const iDynUtils& robot_model,
                                                        const Cartesian::Ptr CartesianTask) :
                         _robot(robot_model.getRobotName(),
                                robot_model.getRobotURDFPath(),
                                robot_model.getRobotSRDFPath()),
                         _model(robot_model),
-                        _W(q.size(),q.size()),
-                        _zeros(q.size(), 0.0)
+                        _W(q.rows(),q.rows()),
+                        _zeros(q.rows())
                     {
-                        _W.eye();
+                        _W.setIdentity(_W.rows(), _W.cols());
+
+                        _zeros.setZero(_zeros.rows());
 
                         _robot.updateiDyn3Model(_model.iDyn3_model.getAng(),
                                                 _model.iDyn3_model.getDAng(),
@@ -101,16 +116,18 @@ namespace OpenSoT {
                                                 _robot, CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
                     }
 
-                    ComputeManipulabilityIndexGradient(const yarp::sig::Vector& q, const iDynUtils& robot_model,
+                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const iDynUtils& robot_model,
                                                        const CoM::Ptr CartesianTask) :
                         _robot(robot_model.getRobotName(),
                                robot_model.getRobotURDFPath(),
                                robot_model.getRobotSRDFPath()),
                         _model(robot_model),
-                        _W(q.size(),q.size()),
-                        _zeros(q.size(), 0.0)
+                        _W(q.rows(),q.rows()),
+                        _zeros(q.rows())
                     {
-                        _W.eye();
+                        _W.setIdentity(_W.rows(), _W.cols());
+
+                        _zeros.setZero(_zeros.rows());
 
                         _robot.updateiDyn3Model(_model.iDyn3_model.getAng(),
                                                 _model.iDyn3_model.getDAng(),
@@ -121,12 +138,12 @@ namespace OpenSoT {
                         _CartesianTask = CoM::Ptr(new OpenSoT::tasks::velocity::CoM(q, _robot));
                     }
 
-                    double compute(const yarp::sig::Vector &q)
+                    double compute(const Eigen::VectorXd &q)
                     {
                         if(_robot.getAnchor() != _model.getAnchor())
                             _robot.switchAnchor(_model.getAnchor());
 
-                        _robot.iDyn3_model.setAng(q);
+                        _robot.setAng(q);
                         _robot.iDyn3_model.kinematicRNEA();
 
                         if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
@@ -141,14 +158,14 @@ namespace OpenSoT {
                         return computeManipulabilityIndex();
                     }
 
-                    void setW(const yarp::sig::Matrix& W) { _W = W; }
+                    void setW(const Eigen::MatrixXd& W) { _W = W; }
 
-                    yarp::sig::Matrix& getW() {return _W;}
+                    Eigen::MatrixXd& getW() {return _W;}
 
                     double computeManipulabilityIndex()
                     {
-                        yarp::sig::Matrix J = _CartesianTask->getA();
-                        return sqrt(det(J*_W*J.transposed()));
+                        Eigen::MatrixXd J = _CartesianTask->getA();
+                        return sqrt((J*_W*J.transpose()).determinant());
                     }
                 };
 

@@ -312,7 +312,9 @@ TEST_F(testDynamicsConstr, testFTSensors) {
     sleep(10);
     tests_utils::stopYarpServer();
 }
+#endif
 
+#if OPENSOT_COMPILE_SIMULATION_TESTS
 TEST_F(testDynamicsConstr, testConstraint) {
 
     // Start YARP Server
@@ -372,15 +374,15 @@ for(unsigned int j = 0; j < 2; ++j){
     //Set Up SoT
     sleep(5);
     // BOUNDS
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointLimits =
             constraints::velocity::JointLimits::ConstraintPtr(
                 new constraints::velocity::JointLimits(
-                    q,
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
+                    cartesian_utils::toEigen(q),
+                    coman_robot.idynutils.getJointBoundMax(),
+                    coman_robot.idynutils.getJointBoundMin()));
 
 
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
                 new constraints::velocity::VelocityLimits(joint_velocity_limits, dT,q.size()));
 
@@ -391,30 +393,33 @@ for(unsigned int j = 0; j < 2; ++j){
     // TASKS
     tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::l_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::l_wrist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"l_wrist", "Waist"));
-    Matrix goal = cartesian_task_l_wrist->getActualPose();
+    Eigen::MatrixXd goal = cartesian_task_l_wrist->getActualPose();
     goal(0,3) += 0.5;
     cartesian_task_l_wrist->setReference(goal);
 
     tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::r_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::r_wrist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"r_wrist", "world"));
 
     std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
     cartesianTasks.push_back(cartesian_task_l_wrist);
     cartesianTasks.push_back(cartesian_task_r_wrist);
-    Task<Matrix, Vector>::TaskPtr taskCartesianAggregated =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(cartesianTasks,q.size()));
 
-    tasks::velocity::Postural::Ptr postural_task=
-            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
+    tasks::velocity::Postural::Ptr postural_task;
+    postural_task.reset(new tasks::velocity::Postural(
+                        cartesian_utils::toEigen(q)));
 
     std::list<tasks::velocity::Cartesian::TaskPtr> jointTasks;
     jointTasks.push_back(postural_task);
-    Task<Matrix, Vector>::TaskPtr taskJointAggregated =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskJointAggregated =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(jointTasks,q.size()));
 
@@ -425,10 +430,12 @@ for(unsigned int j = 0; j < 2; ++j){
     constraints::velocity::Dynamics::Ptr Dyn;
     if(j == 1)
     {
-        yarp::sig::Vector zero(q.size(), 0.0);
+        Eigen::VectorXd zero(q.size());
+        zero.setZero(q.size());
         Dyn = constraints::velocity::Dynamics::Ptr(
-                new constraints::velocity::Dynamics(q,zero,
-                    joint_torque_limit_factor*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
+                new constraints::velocity::Dynamics(
+                        cartesian_utils::toEigen(q),zero,
+                    joint_torque_limit_factor*coman_robot.idynutils.getJointTorqueMax(),
                     coman_robot.idynutils, dT,sigma_dynamic_constraint));
         Dyn->setConstraintClipperValue(enable_clipping);
     }
@@ -460,6 +467,8 @@ for(unsigned int j = 0; j < 2; ++j){
     computed_velocity_exp.reserve(steps);
     time.reserve(steps);
 
+    Eigen::VectorXd _dq(q.size());
+    _dq.setZero(_dq.rows());
     for(unsigned int i = 0; i < steps; ++i)
     {
         double tic = yarp::os::Time::now();
@@ -471,14 +480,15 @@ for(unsigned int j = 0; j < 2; ++j){
 
         coman_robot.idynutils.updateiDyn3Model(q, dq/dT, true);
 
-        bounds->update(q);
-        taskCartesianAggregated->update(q);
-        taskJointAggregated->update(q);
+        bounds->update(cartesian_utils::toEigen(q));
+        taskCartesianAggregated->update(cartesian_utils::toEigen(q));
+        taskJointAggregated->update(cartesian_utils::toEigen(q));
 
         if(j == 1)
-            Dyn->update(cat(q,dq/dT));
+            Dyn->update(cartesian_utils::toEigen(cat(q,dq/dT)));
 
-        if(sot->solve(dq)){
+        if(sot->solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             q += dq;}
         coman_robot.move(q);
 
@@ -486,7 +496,8 @@ for(unsigned int j = 0; j < 2; ++j){
         time.push_back((toc-tic));
 
         sensed_torque_exp.push_back(tau_sensed);
-        cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+        cartesian_error_exp.push_back(
+                    cartesian_utils::fromEigentoYarp(cartesian_task_l_wrist->getError()));
         computed_velocity_exp.push_back(dq);
 
         toc = yarp::os::Time::now();
@@ -540,7 +551,7 @@ for(unsigned int j = 0; j < 2; ++j){
         file4.open(file_name);
         file4<<"torque_limits"<<j<<" = ["<<std::endl;
 
-        yarp::sig::Vector torque_limits_upper = Dyn->getTorqueLimits();
+        yarp::sig::Vector torque_limits_upper = cartesian_utils::fromEigentoYarp(Dyn->getTorqueLimits());
         for(unsigned int i = 0; i < steps; ++i)
         {
             file4<<yarp::math::cat(torque_limits_upper.subVector(coman_robot.idynutils.torso.joint_numbers[0],
@@ -612,8 +623,9 @@ for(unsigned int j = 0; j < 2; ++j){
     sleep(10);
     tests_utils::stopYarpServer();
 }
+#endif
 
-
+#if OPENSOT_COMPILE_SIMULATION_TESTS
 void linear_trj(const yarp::sig::Matrix& A, const yarp::sig::Matrix& B,
                              const double t, const double p,
                              yarp::sig::Matrix& pose_trj, yarp::sig::Vector& vel_trj)
@@ -656,8 +668,8 @@ TEST_F(testDynamicsConstr, testConstraintWithTrj) {
 
     std::vector<double> time;
 
-    Matrix start(4,4);
-    Matrix goal(4,4);
+    Eigen::MatrixXd start(4,4);
+    Eigen::MatrixXd goal(4,4);
 
 for(unsigned int j = 0; j < 2; ++j){
     t_trj = 0.0;
@@ -692,15 +704,15 @@ for(unsigned int j = 0; j < 2; ++j){
     //Set Up SoT
     sleep(5);
     // BOUNDS
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointLimits =
             constraints::velocity::JointLimits::ConstraintPtr(
                 new constraints::velocity::JointLimits(
-                    q,
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
+                    cartesian_utils::toEigen(q),
+                    coman_robot.idynutils.getJointBoundMax(),
+                    coman_robot.idynutils.getJointBoundMin()));
 
 
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
                 new constraints::velocity::VelocityLimits(joint_velocity_limits, dT,q.size()));
 
@@ -711,7 +723,8 @@ for(unsigned int j = 0; j < 2; ++j){
     // TASKS
     tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::l_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::l_wrist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"l_wrist", "Waist"));
 
     start = cartesian_task_l_wrist->getActualPose();
@@ -721,22 +734,24 @@ for(unsigned int j = 0; j < 2; ++j){
 
     tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::r_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::r_wrist",
+                                               cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"r_wrist", "world"));
 
     std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
     cartesianTasks.push_back(cartesian_task_l_wrist);
     cartesianTasks.push_back(cartesian_task_r_wrist);
-    Task<Matrix, Vector>::TaskPtr taskCartesianAggregated =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(cartesianTasks,q.size()));
 
     tasks::velocity::Postural::Ptr postural_task=
-            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
+            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(
+                cartesian_utils::toEigen(q)));
 
     std::list<tasks::velocity::Cartesian::TaskPtr> jointTasks;
     jointTasks.push_back(postural_task);
-    Task<Matrix, Vector>::TaskPtr taskJointAggregated =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskJointAggregated =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(jointTasks,q.size()));
 
@@ -747,10 +762,12 @@ for(unsigned int j = 0; j < 2; ++j){
     constraints::velocity::Dynamics::Ptr Dyn;
     if(j == 1)
     {
-        yarp::sig::Vector zero(q.size(), 0.0);
+        Eigen::VectorXd zero(q.size());
+        zero.setZero(q.size());
         Dyn = constraints::velocity::Dynamics::Ptr(
-                new constraints::velocity::Dynamics(q,zero,
-                    joint_torque_limit_factor*coman_robot.idynutils.iDyn3_model.getJointTorqueMax(),
+                new constraints::velocity::Dynamics(
+                        cartesian_utils::toEigen(q),zero,
+                    joint_torque_limit_factor*coman_robot.idynutils.getJointTorqueMax(),
                     coman_robot.idynutils, dT,sigma_dynamic_constraint));
         Dyn->setConstraintClipperValue(enable_clipping);
     }
@@ -782,6 +799,8 @@ for(unsigned int j = 0; j < 2; ++j){
     computed_velocity_exp.reserve(steps);
     time.reserve(steps);
 
+    Eigen::VectorXd _dq(q.size());
+    _dq.setZero(q.size());
     for(unsigned int i = 0; i < steps; ++i)
     {
         double tic = yarp::os::Time::now();
@@ -796,18 +815,22 @@ for(unsigned int j = 0; j < 2; ++j){
         if(t_trj <= T_trj){
             yarp::sig::Matrix p(4,4);
             yarp::sig::Vector v(6, 0.0);
-            linear_trj(start, goal, t_trj, T_trj, p, v);
-            cartesian_task_l_wrist->setReference(p, v);
+            linear_trj(cartesian_utils::fromEigentoYarp(start),
+                       cartesian_utils::fromEigentoYarp(goal), t_trj, T_trj, p, v);
+            cartesian_task_l_wrist->setReference(
+                        cartesian_utils::toEigen(p),
+                        cartesian_utils::toEigen(v));
         }
 
-        bounds->update(q);
-        taskCartesianAggregated->update(q);
-        taskJointAggregated->update(q);
+        bounds->update(cartesian_utils::toEigen(q));
+        taskCartesianAggregated->update(cartesian_utils::toEigen(q));
+        taskJointAggregated->update(cartesian_utils::toEigen(q));
 
         if(j == 1)
-            Dyn->update(cat(q,dq/dT));
+            Dyn->update(cartesian_utils::toEigen(cat(q,dq/dT)));
 
-        if(sot->solve(dq)){
+        if(sot->solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             q += dq;}
         coman_robot.move(q);
 
@@ -815,7 +838,8 @@ for(unsigned int j = 0; j < 2; ++j){
         time.push_back((toc-tic));
 
         sensed_torque_exp.push_back(tau_sensed);
-        cartesian_error_exp.push_back(cartesian_task_l_wrist->getError());
+        cartesian_error_exp.push_back(
+                    cartesian_utils::fromEigentoYarp(cartesian_task_l_wrist->getError()));
         computed_velocity_exp.push_back(dq);
 
         toc = yarp::os::Time::now();
@@ -872,7 +896,8 @@ for(unsigned int j = 0; j < 2; ++j){
         file4.open(file_name);
         file4<<"torque_limits"<<j<<" = ["<<std::endl;
 
-        yarp::sig::Vector torque_limits_upper = Dyn->getTorqueLimits();
+        yarp::sig::Vector torque_limits_upper =
+                cartesian_utils::fromEigentoYarp(Dyn->getTorqueLimits());
         for(unsigned int i = 0; i < steps; ++i)
         {
             file4<<yarp::math::cat(torque_limits_upper.subVector(coman_robot.idynutils.torso.joint_numbers[0],
@@ -954,7 +979,8 @@ for(unsigned int j = 0; j < 2; ++j){
     {
         yarp::sig::Matrix T(4,4);
         yarp::sig::Vector v(6,0.0);
-        linear_trj(start, goal, t_trj, T_trj, T, v);
+        linear_trj(cartesian_utils::fromEigentoYarp(start),
+                   cartesian_utils::fromEigentoYarp(goal), t_trj, T_trj, T, v);
 
         KDL::Frame T_KDL;
         cartesian_utils::fromYARPMatrixtoKDLFrame(T, T_KDL);
@@ -977,21 +1003,13 @@ for(unsigned int j = 0; j < 2; ++j){
     sleep(10);
     tests_utils::stopYarpServer();
 }
+#endif
 
+#if OPENSOT_COMPILE_SIMULATION_TESTS
 TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
-    for(unsigned int j = 1; j < 2; ++j){
-//    if(j == 1){
-//        sleep(5);
-//        bool success = tests_utils::stopGazebo();
-//        if(success)
-//            std::cout<<"GAZEBO KILLED"<<std::endl;
-//        sleep(5);
-//        success = tests_utils::stopYarpServer();
-//        if(success)
-//            std::cout<<"yarpserver KILLED"<<std::endl;
-//        sleep(5);
-//    }
+for(unsigned int j = 0; j < 2; ++j){
+
 
     // Start YARP Server
     tests_utils::startYarpServer();
@@ -1056,15 +1074,15 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
 
     // BOUNDS
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointLimits =
             constraints::velocity::JointLimits::ConstraintPtr(
                 new constraints::velocity::JointLimits(
-                    q,
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
+                    cartesian_utils::toEigen(q),
+                    coman_robot.idynutils.getJointBoundMax(),
+                    coman_robot.idynutils.getJointBoundMin()));
 
 
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
                 new constraints::velocity::VelocityLimits(joint_velocity_limits, dT,q.size()));
 
@@ -1077,23 +1095,26 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
     tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::l_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::l_wrist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"l_wrist", "world"));
-    Matrix intial_pose_l_wrist = cartesian_task_l_wrist->getActualPose();
+    Eigen::MatrixXd intial_pose_l_wrist = cartesian_task_l_wrist->getActualPose();
 
     tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::r_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::r_wrist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"r_wrist", "world"));
-    Matrix intial_pose_r_wrist = cartesian_task_r_wrist->getActualPose();
+    Eigen::MatrixXd intial_pose_r_wrist = cartesian_task_r_wrist->getActualPose();
 
     tasks::velocity::Cartesian::Ptr cartesian_task_waist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::waist", q,
+                new tasks::velocity::Cartesian("cartesian::waist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"Waist", "world"));
     yarp::sig::Matrix WWW(6,6); WWW.eye();
     WWW(0,0) = 0.0; WWW(1,1) = 0.0; WWW(2,2) = 0.0;
-    cartesian_task_waist->setWeight(WWW);
+    cartesian_task_waist->setWeight(cartesian_utils::toEigen(WWW));
 
     active_joints = cartesian_task_l_wrist->getActiveJointsMask();
     for(unsigned int i = 0; i < coman_robot.idynutils.torso.getNrOfDOFs(); ++i)
@@ -1101,30 +1122,35 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     cartesian_task_l_wrist->setActiveJointsMask(active_joints);
     cartesian_task_r_wrist->setActiveJointsMask(active_joints);
 
-    tasks::velocity::CoM::Ptr com_task(new tasks::velocity::CoM(q, coman_robot.idynutils));
+    tasks::velocity::CoM::Ptr com_task(new tasks::velocity::CoM(
+        cartesian_utils::toEigen(q), coman_robot.idynutils));
     yarp::sig::Matrix WW(3,3); WW.eye();
     WW(2,2) = 0.0;
-    com_task->setWeight(WW);
+    com_task->setWeight(cartesian_utils::toEigen(WW));
 
 
     tasks::velocity::Postural::Ptr postural_task=
-            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
+            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(
+            cartesian_utils::toEigen(q)));
     tasks::velocity::MinimizeAcceleration::Ptr min_acc_task=
-            tasks::velocity::MinimizeAcceleration::Ptr(new tasks::velocity::MinimizeAcceleration(q));
+            tasks::velocity::MinimizeAcceleration::Ptr(new tasks::velocity::MinimizeAcceleration(
+            cartesian_utils::toEigen(q)));
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> jointTasks;
     jointTasks.push_back(postural_task);
     jointTasks.push_back(min_acc_task);
-     OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr taskJointAggregated =
+     OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskJointAggregated =
              OpenSoT::tasks::Aggregated::TaskPtr(
         new OpenSoT::tasks::Aggregated(jointTasks,q.size()));
 
-    tasks::velocity::Cartesian::Ptr right_foot(new tasks::velocity::Cartesian("cartesian::r_foot",q,
+    tasks::velocity::Cartesian::Ptr right_foot(new tasks::velocity::Cartesian("cartesian::r_foot",
+        cartesian_utils::toEigen(q),
         coman_robot.idynutils, coman_robot.idynutils.right_leg.end_effector_name, "world"));
-    tasks::velocity::Cartesian::Ptr torso(new tasks::velocity::Cartesian("cartesian::torso",q,
+    tasks::velocity::Cartesian::Ptr torso(new tasks::velocity::Cartesian("cartesian::torso",
+        cartesian_utils::toEigen(q),
         coman_robot.idynutils, "torso", "world"));
     yarp::sig::Matrix W(6,6); W.eye();
     W(0,0) = 0.0; W(1,1) = 0.0; W(2,2) = 0.0;
-    torso->setWeight(W);
+    torso->setWeight(cartesian_utils::toEigen(W));
     active_joints = torso->getActiveJointsMask();
     for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
         active_joints[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
@@ -1132,7 +1158,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 
     std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasksHighest;
     cartesianTasksHighest.push_back(right_foot);
-    Task<Matrix, Vector>::TaskPtr taskCartesianAggregatedHighest =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregatedHighest =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(cartesianTasksHighest,q.size()));
 
@@ -1142,7 +1168,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     cartesianTasks.push_back(cartesian_task_waist);
     cartesianTasks.push_back(torso);
     cartesianTasks.push_back(com_task);
-    Task<Matrix, Vector>::TaskPtr taskCartesianAggregated =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(cartesianTasks,q.size()));
 
@@ -1153,19 +1179,19 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     stack_of_tasks.push_back(taskJointAggregated);
 
 
-    yarp::sig::Vector tau_max = coman_robot.idynutils.iDyn3_model.getJointTorqueMax();
+    Eigen::VectorXd tau_max = coman_robot.idynutils.getJointTorqueMax();
     for(unsigned int i = 0; i < coman_robot.left_leg.getNumberOfJoints(); ++i){
         tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= joint_torque_limit_factor;
         tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= joint_torque_limit_factor;}
-    yarp::sig::Vector zero(q.size(), 0.0);
+    Eigen::VectorXd zero(q.size()); zero.setZero(q.size());
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
-                new constraints::velocity::Dynamics(q,zero,
+                new constraints::velocity::Dynamics(cartesian_utils::toEigen(q),zero,
                     tau_max,
                     coman_robot.idynutils, dT,sigma_dynamic_constraint));
     Dyn->setConstraintClipperValue(enable_clipping);
 
 
-    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
+    Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot;
     if(j == 1)
         sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
     else
@@ -1202,28 +1228,30 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 //        postural_task->setWeight(M);
 
         if(i <= M_PI*1000){
-            Matrix goal_r_wrist = intial_pose_r_wrist;
+            Eigen::MatrixXd goal_r_wrist = intial_pose_r_wrist;
             goal_r_wrist(2,3) += (-0.18)*std::sin((i+M_PI)/1000.0);
             cartesian_task_r_wrist->setReference(goal_r_wrist);
 
-            Matrix goal_l_wrist = intial_pose_l_wrist;
+            Eigen::MatrixXd goal_l_wrist = intial_pose_l_wrist;
             goal_l_wrist(2,3) += (-0.18)*std::sin((i+M_PI)/1000.0);
             cartesian_task_l_wrist->setReference(goal_l_wrist);
         }
 
-        bounds->update(q);
-        taskCartesianAggregated->update(q);
-        taskCartesianAggregatedHighest->update(q);
-        taskJointAggregated->update(q);
-        Dyn->update(cat(q,dq/dT));
+        bounds->update(cartesian_utils::toEigen(q));
+        taskCartesianAggregated->update(cartesian_utils::toEigen(q));
+        taskCartesianAggregatedHighest->update(cartesian_utils::toEigen(q));
+        taskJointAggregated->update(cartesian_utils::toEigen(q));
+        Dyn->update(cartesian_utils::toEigen(cat(q,dq/dT)));
 
-        cartesian_error_exp.push_back(yarp::math::cat(
-                                          cartesian_task_l_wrist->getError(),
-                                          cartesian_task_r_wrist->getError()));
+        cartesian_error_exp.push_back(
+                    yarp::math::cat(
+                    cartesian_utils::fromEigentoYarp(cartesian_task_l_wrist->getError()),
+                    cartesian_utils::fromEigentoYarp(cartesian_task_r_wrist->getError())));
 
 
-
-        if(sot->solve(dq)){
+        Eigen::VectorXd _dq(dq.size());
+        if(sot->solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             computed_velocity_exp.push_back(dq);
             q += dq;}
         coman_robot.move(q);
@@ -1266,7 +1294,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
     file14.open(file_name);
     file14<<"tau_max_right_leg"+std::to_string(j)+" = ["<<std::endl;
 
-    yarp::sig::Vector trq_limits = Dyn->getTorqueLimits();
+    yarp::sig::Vector trq_limits = cartesian_utils::fromEigentoYarp(Dyn->getTorqueLimits());
         file1<<trq_limits.subVector(coman_robot.idynutils.torso.joint_numbers[0],
                 coman_robot.idynutils.torso.joint_numbers[2]).toString()<<std::endl;
         file11<<trq_limits.subVector(coman_robot.idynutils.left_arm.joint_numbers[0],
@@ -1447,6 +1475,7 @@ TEST_F(testDynamicsConstr, testConstraintWithContacts) {
 }
 #endif
 
+#if OPENSOT_COMPILE_SIMULATION_TESTS
 TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
 
     // Applied external force is: base_link 0 0 -200 0 0 0 1
@@ -1523,14 +1552,14 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
         std::cout<<RED<<"Dyn Constraint is NOT active"<<DEFAULT<<std::endl;
 
     // BOUNDS
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointLimits =
             constraints::velocity::JointLimits::ConstraintPtr(
                 new constraints::velocity::JointLimits(
-                    q,
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
+                    cartesian_utils::toEigen(q),
+                    coman_robot.idynutils.getJointBoundMax(),
+                    coman_robot.idynutils.getJointBoundMin()));
 
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
                 new constraints::velocity::VelocityLimits(joint_vel_limits, dT,q.size()));
 
@@ -1543,17 +1572,20 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
 
     tasks::velocity::Cartesian::Ptr cartesian_task_l_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::l_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::l_wrist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"l_wrist", "world"));
 
     tasks::velocity::Cartesian::Ptr cartesian_task_r_wrist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::r_wrist", q,
+                new tasks::velocity::Cartesian("cartesian::r_wrist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"r_wrist", "world"));
 
     tasks::velocity::Cartesian::Ptr cartesian_task_waist=
             tasks::velocity::Cartesian::Ptr(
-                new tasks::velocity::Cartesian("cartesian::waist", q,
+                new tasks::velocity::Cartesian("cartesian::waist",
+                    cartesian_utils::toEigen(q),
                     coman_robot.idynutils,"Waist", "world"));
 
 
@@ -1563,31 +1595,36 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
     cartesian_task_l_wrist->setActiveJointsMask(active_joints);
     cartesian_task_r_wrist->setActiveJointsMask(active_joints);
 
-    tasks::velocity::CoM::Ptr com_task(new tasks::velocity::CoM(q, coman_robot.idynutils));
+    tasks::velocity::CoM::Ptr com_task(new tasks::velocity::CoM(
+        cartesian_utils::toEigen(q), coman_robot.idynutils));
     yarp::sig::Matrix WW(3,3); WW.eye();
     WW(2,2) = 0.0;
-    com_task->setWeight(WW);
+    com_task->setWeight(cartesian_utils::toEigen(WW));
 
 
     tasks::velocity::Postural::Ptr postural_task=
-            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
+            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(
+                            cartesian_utils::toEigen(q)));
 
     tasks::velocity::MinimizeAcceleration::Ptr min_acc_task=
-            tasks::velocity::MinimizeAcceleration::Ptr(new tasks::velocity::MinimizeAcceleration(q));
+            tasks::velocity::MinimizeAcceleration::Ptr(new tasks::velocity::MinimizeAcceleration(
+            cartesian_utils::toEigen(q)));
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> jointTasks;
     jointTasks.push_back(postural_task);
     jointTasks.push_back(min_acc_task);
-     OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr taskJointAggregated =
+     OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskJointAggregated =
              OpenSoT::tasks::Aggregated::TaskPtr(
         new OpenSoT::tasks::Aggregated(jointTasks,q.size()));
 
-    tasks::velocity::Cartesian::Ptr right_foot(new tasks::velocity::Cartesian("cartesian::r_foot",q,
+    tasks::velocity::Cartesian::Ptr right_foot(new tasks::velocity::Cartesian("cartesian::r_foot",
+        cartesian_utils::toEigen(q),
         coman_robot.idynutils, coman_robot.idynutils.right_leg.end_effector_name, "world"));
-    tasks::velocity::Cartesian::Ptr torso(new tasks::velocity::Cartesian("cartesian::torso",q,
+    tasks::velocity::Cartesian::Ptr torso(new tasks::velocity::Cartesian("cartesian::torso",
+        cartesian_utils::toEigen(q),
         coman_robot.idynutils, "torso", "world"));
     yarp::sig::Matrix W(6,6); W.eye();
     W(0,0) = 0.0; W(1,1) = 0.0; W(2,2) = 0.0;
-    torso->setWeight(W);
+    torso->setWeight(cartesian_utils::toEigen(W));
     active_joints = torso->getActiveJointsMask();
     for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
         active_joints[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
@@ -1595,7 +1632,7 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
 
     std::list<tasks::velocity::Cartesian::TaskPtr> cartesianTasksHighest;
     cartesianTasksHighest.push_back(right_foot);
-    Task<Matrix, Vector>::TaskPtr taskCartesianAggregatedHighest =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregatedHighest =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(cartesianTasksHighest,q.size()));
 
@@ -1605,7 +1642,7 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
     cartesianTasks.push_back(cartesian_task_waist);
     cartesianTasks.push_back(torso);
     cartesianTasks.push_back(com_task);
-    Task<Matrix, Vector>::TaskPtr taskCartesianAggregated =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(cartesianTasks,q.size()));
 
@@ -1616,19 +1653,20 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
     stack_of_tasks.push_back(taskJointAggregated);
 
 
-    yarp::sig::Vector tau_max = coman_robot.idynutils.iDyn3_model.getJointTorqueMax();
+    Eigen::VectorXd tau_max = coman_robot.idynutils.getJointTorqueMax();
     for(unsigned int i = 0; i < coman_robot.left_leg.getNumberOfJoints(); ++i){
         tau_max[coman_robot.idynutils.left_leg.joint_numbers[i]] *= torque_scaling_factor;
         tau_max[coman_robot.idynutils.right_leg.joint_numbers[i]] *= torque_scaling_factor;}
-    yarp::sig::Vector zero(q.size(), 0.0);
+    Eigen::VectorXd zero(q.size()); zero.setZero(q.size());
     constraints::velocity::Dynamics::Ptr Dyn = constraints::velocity::Dynamics::Ptr(
-                new constraints::velocity::Dynamics(q,zero,
+                new constraints::velocity::Dynamics(
+                    cartesian_utils::toEigen(q),zero,
                     tau_max,
                     coman_robot.idynutils, dT,dyn_constr_bound_scaling));
     Dyn->setConstraintClipperValue(dyn_constr_clip);
 
 
-    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
+    Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot;
     if(enable_dyn_constraint)
         sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, Dyn, eps));
     else
@@ -1661,15 +1699,16 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
         for(unsigned int i = 0; i < _ft_measurements.size(); ++i)
             _ft_measurements[i].second = -1.0*_ft_measurements[i].second;
 
-        bounds->update(q);
-        taskCartesianAggregated->update(q);
-        taskCartesianAggregatedHighest->update(q);
-        taskJointAggregated->update(q);
-        Dyn->update(cat(q,dq/dT));
+        bounds->update(cartesian_utils::toEigen(q));
+        taskCartesianAggregated->update(cartesian_utils::toEigen(q));
+        taskCartesianAggregatedHighest->update(cartesian_utils::toEigen(q));
+        taskJointAggregated->update(cartesian_utils::toEigen(q));
+        Dyn->update(cartesian_utils::toEigen(cat(q,dq/dT)));
 
-
-        if(sot->solve(dq))
-            q += dq;
+        Eigen::VectorXd _dq(dq.size());
+        if(sot->solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
+            q += dq;}
         else
             std::cout<<RED<<"SOLVER ERROR"<<DEFAULT<<std::endl;
         coman_robot.move(q);
@@ -1678,7 +1717,7 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
 
 
         sensed_torque_exp.push_back(tau_sensed);
-        com_cartesian_error_exp.push_back((com_task->getError()).subVector(0,1));
+        com_cartesian_error_exp.push_back(cartesian_utils::fromEigentoYarp(com_task->getError()).subVector(0,1));
         computed_velocity_exp.push_back(dq);
         filtered_ft_left_right.push_back(yarp::math::cat(
             _ft_measurements[1].second, _ft_measurements[3].second));
@@ -1801,7 +1840,7 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
     file10.open(file_name.c_str());
     file10<<"tau_legs_max = ["<<std::endl;
     for(unsigned int i = 0; i < sensed_torque_exp.size(); ++i)
-        file10<<(Dyn->getTorqueLimits()).subVector(
+        file10<<cartesian_utils::fromEigentoYarp(Dyn->getTorqueLimits()).subVector(
             coman_robot.idynutils.left_leg.joint_numbers[0],
             coman_robot.idynutils.left_leg.joint_numbers[5]).toString()<<std::endl;
     file10<<"];"<<std::endl;
@@ -1820,6 +1859,7 @@ TEST_F(testDynamicsConstr, DISABLED_testConstraintWithContacts_externalForces) {
         std::cout<<"yarpserver KILLED"<<std::endl;
     sleep(5);
 }
+#endif
 
 
 }

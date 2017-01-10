@@ -148,7 +148,8 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 #endif
 
     OpenSoT::AutoStack::Ptr stack;
-    OpenSoT::DefaultHumanoidStack DHS(model, 3e-3, q);
+    OpenSoT::DefaultHumanoidStack DHS(model, 3e-3,
+                                      cartesian_utils::toEigen(q));
 
     yarp::sig::Matrix A_Cartesian(2,3); yarp::sig::Vector b_Cartesian(2,0.0);
     // setting constraints so that the end-effector z-coordinate
@@ -162,15 +163,16 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 
     namespace vConstraints = OpenSoT::constraints::velocity;
     vConstraints::CartesianPositionConstraint::Ptr cartesianConstraint(
-        new vConstraints::CartesianPositionConstraint(q,
+        new vConstraints::CartesianPositionConstraint(
+                    cartesian_utils::toEigen(q),
                                                       DHS.leftArm,
-                                                      A_Cartesian,
-                                                      b_Cartesian, 0.09));
+                    cartesian_utils::toEigen(A_Cartesian),
+                    cartesian_utils::toEigen(b_Cartesian), 0.09));
     DHS.velocityLimits->setVelocityLimits(0.3);
     DHS.com->setLambda(0.6);
     yarp::sig::Matrix W(3,3);
     W.eye(); W(2,2) = .1;
-    DHS.com->setWeight(W);
+    DHS.com->setWeight(cartesian_utils::toEigen(W));
     W.resize(6,6);
     W.eye(); W(0,0) = .5;
     DHS.leftArm->setLambda(0.3);
@@ -190,7 +192,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
     //SET SOME REFERENCES
 
     KDL::Frame start, center;
-    yarp::sig::Matrix start_y = DHS.leftArm->getActualPose();
+    yarp::sig::Matrix start_y = cartesian_utils::fromEigentoYarp(DHS.leftArm->getActualPose());
     YarptoKDL(start_y,start);
     center = start;
 
@@ -227,27 +229,30 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 #endif
 
         model.updateiDyn3Model(q, true);
-        stack->update(q);
+        stack->update(cartesian_utils::toEigen(q));
 
         // setting left arm reference
         KDL::Frame traj_pose = traj1.Pos(t);
         yarp::sig::Matrix traj_pose_y;
         KDLtoYarp_position(traj_pose, traj_pose_y);
-        DHS.leftArm->setReference(traj_pose_y);
+        DHS.leftArm->setReference(cartesian_utils::toEigen(traj_pose_y));
 
         // setting postural reference to have minimum velocity
         // on left arm, postural on the rest of the body
-        yarp::sig::Vector q_postural = DHS.postural->getReference();
+        yarp::sig::Vector q_postural =
+                cartesian_utils::fromEigentoYarp(DHS.postural->getReference());
         for(unsigned int i = 0; i < model.left_arm.joint_numbers.size(); ++i)
             q_postural[model.left_arm.joint_numbers[i]] = q[model.left_arm.joint_numbers[i]];
-        DHS.postural->setReference(q_postural);
+        DHS.postural->setReference(
+                    cartesian_utils::toEigen(q_postural));
 
         // we get only the position, the orientation remains fixed
         KDL::Frame desired_pose = start;
         desired_pose.p = traj_pose.p;
         KDL::Frame expected_pose = desired_pose;
         KDL::Frame actual_pose;
-        yarp::sig::Matrix actual_pose_y = DHS.leftArm->getActualPose();
+        yarp::sig::Matrix actual_pose_y =
+                cartesian_utils::fromEigentoYarp(DHS.leftArm->getActualPose());
         YarptoKDL(actual_pose_y, actual_pose);
 
         if(desired_pose.p.z() > b_Cartesian(0))
@@ -255,7 +260,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
         if(desired_pose.p.z() < -b_Cartesian(1))
             expected_pose.p.z(-b_Cartesian(1));
 
-        e = norm(DHS.leftArm->getb());
+        e = DHS.leftArm->getb().norm();
 
         double distanceBetweenExpectedAndActualPosition =
             (KDL::Vector2(expected_pose.p.y(),expected_pose.p.z()) -
@@ -264,7 +269,9 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
             << "@t "<< t << " expected small distance between expected and actual position,"
             <<" getting "<< distanceBetweenExpectedAndActualPosition << " instead";
 
-        EXPECT_TRUE(sot->solve(dq));
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
 #ifdef TRY_ON_SIMULATOR
@@ -284,9 +291,9 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
              << expected_pose.p.y() << "," << expected_pose.p.z() << ","
              << e << "," << t_loop << ","  << cartesianConstraint->getbUpperBound()(0) << ","
                                            << cartesianConstraint->getbUpperBound()(1) << ","
-             << (DHS.leftArm->getA()*dq)[0] << ","
-             << (DHS.leftArm->getA()*dq)[1] << ","
-             << (DHS.leftArm->getA()*dq)[2] << ";" << std::endl;
+             << (cartesian_utils::fromEigentoYarp(DHS.leftArm->getA())*dq)[0] << ","
+             << (cartesian_utils::fromEigentoYarp(DHS.leftArm->getA())*dq)[1] << ","
+             << (cartesian_utils::fromEigentoYarp(DHS.leftArm->getA())*dq)[2] << ";" << std::endl;
     }
 
     _log << "];" << std::endl;

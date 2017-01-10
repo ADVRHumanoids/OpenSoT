@@ -3,7 +3,7 @@
 using namespace OpenSoT::interfaces::yarp::tasks;
 
 YPostural::YPostural(const std::string &robot_name, const std::string &module_prefix, iDynUtils &idynutils,
-                       const ::yarp::sig::Vector &x):
+                       const Eigen::VectorXd &x):
     ::yarp::os::BufferedPort<msgs::yarp_position_joint_msg_portable>(),
     taskPostural(new Postural(x)),
     _port_prefix(),
@@ -74,7 +74,7 @@ bool YPostural::computePortPrefix(const std::string& robot_name, const std::stri
 
 void YPostural::onRead(msgs::yarp_position_joint_msg_portable& ref_position_joint_msg)
 {
-    ::yarp::sig::Vector q_ref = taskPostural->getReference();
+    Eigen::VectorXd q_ref = taskPostural->getReference();
 
     for(std::map<std::string, double>::iterator i = ref_position_joint_msg.joints.begin(); i != ref_position_joint_msg.joints.end(); ++i)
        q_ref[_idynutils.iDyn3_model.getDOFIndex(i->first)] = i->second;
@@ -85,7 +85,7 @@ void YPostural::onRead(msgs::yarp_position_joint_msg_portable& ref_position_join
 void YPostural::printInitialError()
 {
     std::cout<<"Initial Reference for "<<taskPostural->getTaskID()<<":"<<std::endl;
-    ::yarp::sig::Vector tmp = taskPostural->getReference();
-    std::cout<<"[ "<<tmp.toString()<<" ]"<<std::endl;
+    Eigen::VectorXd tmp = taskPostural->getReference();
+    std::cout<<"[ "<<tmp<<" ]"<<std::endl;
     std::cout<<std::endl;
 }

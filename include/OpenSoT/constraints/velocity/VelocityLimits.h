@@ -19,8 +19,7 @@
 #define __BOUNDS_VELOCITY_VELOCITYLIMITS_H__
 
  #include <OpenSoT/Constraint.h>
-
- #include <yarp/sig/all.h>
+#include <Eigen/Dense>
 
  namespace OpenSoT {
     namespace constraints {
@@ -28,7 +27,7 @@
             /**
              * @brief The VelocityLimits class implements a bound on joint velocities
              */
-            class VelocityLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class VelocityLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<VelocityLimits> Ptr;
             private:

@@ -15,7 +15,7 @@
 #include <yarp/sig/all.h>
 #include <fstream>
 
-using namespace OpenSoT::constraints::velocity;
+using namespace OpenSoT::constraints;
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
 
@@ -78,49 +78,57 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     yarp::sig::Matrix T_init = idynutils.iDyn3_model.getPosition(
                           idynutils.iDyn3_model.getLinkIndex("Waist"),
                           idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-    Cartesian::Ptr cartesian_task(new Cartesian("cartesian::left_wrist", q, idynutils,"l_wrist", "Waist"));
+    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
+                              cartesian_utils::toEigen(q), idynutils,"l_wrist", "Waist"));
     yarp::sig::Matrix T_ref = T_init;
     T_ref(0,3) = T_ref(0,3) + 0.1;
     T_ref(1,3) = T_ref(1,3) + 0.1;
     T_ref(2,3) = T_ref(2,3) + 0.1;
-    cartesian_task->setReference(T_ref);
-    cartesian_task->update(q);
+    cartesian_task->setReference(cartesian_utils::toEigen(T_ref));
+    cartesian_task->update(cartesian_utils::toEigen(q));
 
-    Cartesian::Ptr cartesian_task2(new Cartesian("cartesian::left_wrist", q, idynutils2,"l_wrist", "Waist"));
+    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task2(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
+                                    cartesian_utils::toEigen(q), idynutils2,"l_wrist", "Waist"));
     yarp::sig::Matrix T_ref2 = T_init;
     T_ref2(0,3) = T_ref2(0,3) + 0.1;
     T_ref2(1,3) = T_ref2(1,3) + 0.1;
     T_ref2(2,3) = T_ref2(2,3) + 0.1;
-    cartesian_task2->setReference(T_ref2);
-    cartesian_task2->update(q);
+    cartesian_task2->setReference(cartesian_utils::toEigen(T_ref2));
+    cartesian_task2->update(cartesian_utils::toEigen(q));
 
     /// Postural Task
-    Postural::Ptr postural_task(new Postural(q));
-    postural_task->setReference(q);
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+                new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
+    postural_task->setReference(cartesian_utils::toEigen(q));
 
     /// MinAcc Task
-    MinimizeAcceleration::Ptr minacc_task(new MinimizeAcceleration(q));
+    OpenSoT::tasks::velocity::MinimizeAcceleration::Ptr minacc_task(
+                new OpenSoT::tasks::velocity::MinimizeAcceleration(cartesian_utils::toEigen(q)));
 
     int t = 100;
     /// Constraints set to the Cartesian Task
-    JointLimits::Ptr joint_limits(
-        new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(),
-                           idynutils.iDyn3_model.getJointBoundMin(), 0.2));
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
+        new OpenSoT::constraints::velocity::JointLimits(
+                    cartesian_utils::toEigen(q), idynutils.getJointBoundMax(),
+                           idynutils.getJointBoundMin(), 0.2));
 
-    JointLimits::Ptr joint_limits2(
-        new JointLimits(q, idynutils2.iDyn3_model.getJointBoundMax(),
-                           idynutils2.iDyn3_model.getJointBoundMin(), 0.2));
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits2(
+        new OpenSoT::constraints::velocity::JointLimits(
+                    cartesian_utils::toEigen(q), idynutils2.getJointBoundMax(),
+                           idynutils2.getJointBoundMin(), 0.2));
 
-    VelocityLimits::Ptr joint_velocity_limits(
-                new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
-    VelocityLimits::Ptr joint_velocity_limits2(
-                new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
+                new OpenSoT::constraints::velocity::VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits2(
+                new OpenSoT::constraints::velocity::VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
 
-    std::list< OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr > joint_constraints_list;
+    std::list< OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr > joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
     joint_constraints_list.push_back(joint_velocity_limits);
 
-    std::list< OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr > joint_constraints_list2;
+    std::list< OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr > joint_constraints_list2;
     joint_constraints_list2.push_back(joint_limits2);
     joint_constraints_list2.push_back(joint_velocity_limits2);
 
@@ -131,11 +139,11 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
                 new OpenSoT::constraints::Aggregated(joint_constraints_list2, q.size()));
 
     //Create the SoT
-    std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks;
+    std::vector< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(postural_task);
 
-    std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks2;
+    std::vector< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > stack_of_tasks2;
     stack_of_tasks2.push_back(cartesian_task2);
     stack_of_tasks2.push_back(minacc_task);
 
@@ -167,17 +175,20 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
         idynutils.updateiDyn3Model(q, true);
         idynutils2.updateiDyn3Model(q2, true);
 
-        cartesian_task->update(q);
-        postural_task->update(q);
-        joint_constraints->update(q);
+        cartesian_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
+        joint_constraints->update(cartesian_utils::toEigen(q));
 
-        cartesian_task2->update(q2);
-        minacc_task->update(q2);
+        cartesian_task2->update(cartesian_utils::toEigen(q2));
+        minacc_task->update(cartesian_utils::toEigen(q2));
         for(unsigned int i = 0; i < dq_old2.size(); ++i)
             ASSERT_NEAR(minacc_task->getb()[i], dq_old2[i], 1E-14);
-        joint_constraints2->update(q2);
+        joint_constraints2->update(cartesian_utils::toEigen(q2));
 
-        sot.solve(dq);
+        Eigen::VectorXd _dq(dq.size());
+        _dq.setZero(dq.size());
+        sot.solve(_dq);
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
         ddq = dq - dq_old;
         this->_log<<ddq.subVector(idynutils.torso.joint_numbers[0],
@@ -186,8 +197,10 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
                 ddq.subVector(idynutils.left_arm.joint_numbers[0],
                 idynutils.left_arm.joint_numbers[idynutils.left_arm.joint_numbers.size()-1]).toString()<<" ";
 
-
-        sot2.solve(dq2);
+        Eigen::VectorXd _dq2(dq2.size());
+        _dq2.setZero(dq2.size());
+        sot2.solve(_dq2);
+        dq2 = cartesian_utils::fromEigentoYarp(_dq2);
         q2 += dq2;
         ddq2 = dq2 - dq_old2;
         this->_log<<ddq2.subVector(idynutils2.torso.joint_numbers[0],
@@ -197,7 +210,7 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
                 idynutils2.left_arm.joint_numbers[idynutils.left_arm.joint_numbers.size()-1]).toString()<<" ";
 
 
-        this->_log<<cartesian_task->getb().toString()<<" "<<cartesian_task2->getb().toString()<<std::endl;
+        this->_log<<cartesian_task->getb()<<" "<<cartesian_task2->getb()<<std::endl;
 
         for(unsigned int j = 0; j < ddq.size(); ++j){
             integrator1 += yarp::math::norm(ddq);

@@ -41,8 +41,8 @@ TEST_F(testMinimumVelocityTask, testMinimumVelocityTask_)
 
     OpenSoT::tasks::velocity::MinimumVelocity minimumVelocity(q.size());
 
-    EXPECT_TRUE(minimumVelocity.getA() == yarp::sig::Matrix(q.size(), q.size()).eye());
-    EXPECT_TRUE(minimumVelocity.getWeight() == yarp::sig::Matrix(q.size(), q.size()).eye());
+    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(minimumVelocity.getA()) == yarp::sig::Matrix(q.size(), q.size()).eye());
+    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(minimumVelocity.getWeight()) == yarp::sig::Matrix(q.size(), q.size()).eye());
 
     EXPECT_TRUE(minimumVelocity.getConstraints().size() == 0);
 
@@ -50,13 +50,13 @@ TEST_F(testMinimumVelocityTask, testMinimumVelocityTask_)
     minimumVelocity.setLambda(K);
     EXPECT_DOUBLE_EQ(minimumVelocity.getLambda(), K);
 
-    minimumVelocity.update(q);
-    EXPECT_TRUE(minimumVelocity.getb() == dq_zeros);
+    minimumVelocity.update(cartesian_utils::toEigen(q));
+    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(minimumVelocity.getb()) == dq_zeros);
 
     for(unsigned int i = 0; i < 100; ++i)
     {
-        minimumVelocity.update(q);
-        q += minimumVelocity.getLambda()*minimumVelocity.getb();
+        minimumVelocity.update(cartesian_utils::toEigen(q));
+        q += minimumVelocity.getLambda()*cartesian_utils::fromEigentoYarp(minimumVelocity.getb());
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)

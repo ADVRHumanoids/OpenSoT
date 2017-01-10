@@ -51,14 +51,14 @@ TEST_F(testGazeTask, testGazeTaskWorldGlobal_)
     _robot.fromRobotToIDyn(q_leg, q_whole, _robot.right_leg);
     _robot.updateiDyn3Model(q_whole, true);
 
-    OpenSoT::DefaultHumanoidStack DHS(_robot, 0.001, q_whole);
+    OpenSoT::DefaultHumanoidStack DHS(_robot, 0.001, cartesian_utils::toEigen(q_whole));
 
     DHS.velocityLimits->setVelocityLimits(0.6);
 
     EXPECT_EQ(DHS.gaze->getA().rows(), 2);
     EXPECT_EQ(DHS.gaze->getb().size(), 2);
 
-    EXPECT_TRUE(DHS.gaze->getWeight() == yarp::sig::Matrix(2,2).eye());
+    EXPECT_TRUE(DHS.gaze->getWeight() == cartesian_utils::toEigen(yarp::sig::Matrix(2,2).eye()));
 
     EXPECT_TRUE(DHS.gaze->getConstraints().size() == 0);
 
@@ -87,30 +87,30 @@ TEST_F(testGazeTask, testGazeTaskWorldGlobal_)
                                     << DHS.jointLimits;
 
     //DHS.gaze->setGaze(x_ref);
-    stack->update(q_whole);
-    yarp::sig::Matrix J_1 = DHS.gaze->getA();
-    yarp::sig::Vector b_1 = DHS.gaze->getb();
+    stack->update(cartesian_utils::toEigen(q_whole));
+    yarp::sig::Matrix J_1 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_1 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
 
     q_whole[_robot.right_arm.joint_numbers[0]] += 0.1;
     _robot.updateiDyn3Model(q_whole, true);
-    stack->update(q_whole);
-    yarp::sig::Matrix J_2 = DHS.gaze->getA();
-    yarp::sig::Vector b_2 = DHS.gaze->getb();
+    stack->update(cartesian_utils::toEigen(q_whole));
+    yarp::sig::Matrix J_2 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_2 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
 
     q_whole[_robot.head.joint_numbers[0]] += 0.1;
     q_whole[_robot.head.joint_numbers[1]] += 0.1;
     _robot.updateiDyn3Model(q_whole, true);
-    stack->update(q_whole);
-    yarp::sig::Matrix J_3 = DHS.gaze->getA();
-    yarp::sig::Vector b_3 = DHS.gaze->getb();
+    stack->update(cartesian_utils::toEigen(q_whole));
+    yarp::sig::Matrix J_3 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_3 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
 
     q_whole[_robot.torso.joint_numbers[0]] += 0.1;
     q_whole[_robot.torso.joint_numbers[1]] += 0.1;
     q_whole[_robot.torso.joint_numbers[2]] += 0.1;
     _robot.updateiDyn3Model(q_whole, true);
-    stack->update(q_whole);
-    yarp::sig::Matrix J_4 = DHS.gaze->getA();
-    yarp::sig::Vector b_4 = DHS.gaze->getb();
+    stack->update(cartesian_utils::toEigen(q_whole));
+    yarp::sig::Matrix J_4 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_4 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
 
     EXPECT_TRUE(J_1 == J_2);
     EXPECT_TRUE(b_1 == b_2);

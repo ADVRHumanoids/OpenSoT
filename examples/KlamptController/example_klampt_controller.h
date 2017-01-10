@@ -23,6 +23,9 @@
 #include <OpenSoT/interfaces/yarp/tasks/YCartesian.h>
 #include <OpenSoT/interfaces/yarp/tasks/YCoM.h>
 #include <OpenSoT/interfaces/yarp/tasks/YPostural.h>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
+
 
 #define MODULE_NAME "huboplus_klampt_controller"
 #define dT  1e-2    // [s]

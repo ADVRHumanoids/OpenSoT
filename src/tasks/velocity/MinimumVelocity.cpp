@@ -28,13 +28,13 @@ MinimumVelocity::MinimumVelocity(const int& x_size) :
     Task("MinimumVelocity", x_size)
 {
     _W.resize(_x_size, _x_size);
-    _W.eye();
+    _W.setIdentity(_x_size, _x_size);
 
     _A.resize(_x_size, _x_size);
-    _A.eye();
+    _A.setIdentity(_x_size, _x_size);
 
     _b.resize(_x_size);
-    _b.zero();
+    _b.setZero(_x_size);
 
     _hessianType = HST_IDENTITY;
 }
@@ -43,7 +43,7 @@ MinimumVelocity::~MinimumVelocity()
 {
 }
 
-void MinimumVelocity::_update(const yarp::sig::Vector &x)
+void MinimumVelocity::_update(const Eigen::VectorXd &x)
 {
 }
 

@@ -21,8 +21,7 @@
 #include <OpenSoT/Task.h>
 #include <idynutils/idynutils.h>
 #include <kdl/frames.hpp>
-#include <yarp/sig/all.h>
-#include <yarp/os/all.h>
+#include <Eigen/Dense>
 
 
 
@@ -47,33 +46,33 @@
              * the floating base link set as the support foot.
              * You can see an example in @ref example_com.cpp
              */
-            class CoM : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            class CoM : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
                 typedef boost::shared_ptr<CoM> Ptr;
             private:
                 iDynUtils& _robot;
 
-                yarp::sig::Vector _actualPosition;
-                yarp::sig::Vector _desiredPosition;
-                yarp::sig::Vector _desiredVelocity;
+                Eigen::VectorXd _actualPosition;
+                Eigen::VectorXd _desiredPosition;
+                Eigen::VectorXd _desiredVelocity;
 
                 void update_b();
 
             public:
 
-                yarp::sig::Vector positionError;
+                Eigen::VectorXd positionError;
 
                 /**
                  * @brief CoM
                  * @param x the initial configuration of the robot
                  * @param robot the robot model, with floating base link set on the support foot
                  */
-                CoM(const yarp::sig::Vector& x,
+                CoM(const Eigen::VectorXd& x,
                     iDynUtils& robot);
 
                 ~CoM();
 
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.
@@ -82,7 +81,8 @@
                  * @param desiredPose the \f$R^{3}\f$ vector describing the desired position for the CoM
                  * in the world coordinate frame
                  */
-                void setReference(const yarp::sig::Vector& desiredPosition);
+                void setReference(const Eigen::VectorXd& desiredPosition);
+                void setReference(const KDL::Vector& desiredPosition);
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.
@@ -95,8 +95,10 @@
                  * instead of m/s. This means that if you have a linear velocity expressed in SI units, you have to call the function as
                  * setReference(desiredPosition, desiredVelocity*dt)
                  */
-                void setReference(const yarp::sig::Vector& desiredPosition,
-                                  const yarp::sig::Vector& desiredVelocity);
+                void setReference(const Eigen::VectorXd& desiredPosition,
+                                  const Eigen::VectorXd& desiredVelocity);
+                void setReference(const KDL::Vector& desiredPosition,
+                                  const KDL::Vector& desiredVelocity);
 
 
                 /**
@@ -104,7 +106,7 @@
                  * @return the CoM task reference \f$R^3\f$ vector describing the actual
                  * CoM position in the world coordinate frame
                  */
-                yarp::sig::Vector getReference() const;
+                Eigen::VectorXd getReference() const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the CoM task.
@@ -113,15 +115,15 @@
                  * @param desireVelocity is a \f$R^{3}\f$ twist describing the desired trajectory velocity,
                  * and it represents a feed-forward term in the task computation
                  */
-                void getReference(yarp::sig::Vector& desiredPosition,
-                                  yarp::sig::Vector& desiredVelocity) const;
+                void getReference(Eigen::VectorXd& desiredPosition,
+                                  Eigen::VectorXd& desiredVelocity) const;
 
 
                 /**
                  * @brief getActualPosition returns the CoM actual position. You need to call _update(x) for the position to change
                  * @return the \f$R^{3}\f$ vector describing the actual CoM position in the world coordinate frame
                  */
-                yarp::sig::Vector getActualPosition() const;
+                Eigen::VectorXd getActualPosition() const;
 
                 /**
                  * @brief getBaseLink an utility function that always returns "world"
@@ -141,11 +143,11 @@
                  * @brief getError returns the position error between actual and reference positions
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
-                yarp::sig::Vector getError();
+                Eigen::VectorXd getError();
 
-                static bool isCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
+                static bool isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
-                static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
+                static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
             };
         }
     }

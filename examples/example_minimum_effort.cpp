@@ -14,7 +14,8 @@ int main(int argc, char* argv[]) {
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq(q.size(),0.0);
 
-    vTasks::MinimumEffort::Ptr minimumEffort(new vTasks::MinimumEffort(q, robot.idynutils));
+    vTasks::MinimumEffort::Ptr minimumEffort(new vTasks::MinimumEffort(
+                                cartesian_utils::toEigen(q), robot.idynutils));
 
     solvers::QPOases_sot::Stack stack;
     stack.push_back(minimumEffort);
@@ -23,10 +24,12 @@ int main(int argc, char* argv[]) {
     robot.setPositionDirectMode();
     double t_start = yarp::os::Time::now();
     double t = t_start;
+    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     while(t - t_start < 10.0) {
 
-        minimumEffort->update(q);
-        solver.solve(dq);
+        minimumEffort->update(cartesian_utils::toEigen(q));
+        solver.solve(_dq);
+        dq = cartesian_utils::fromEigentoYarp(_dq);
 
         q += dq;
 

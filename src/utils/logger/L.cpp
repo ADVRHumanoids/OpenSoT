@@ -20,10 +20,10 @@
 #include <OpenSoT/utils/logger/plotters/Plotter.h>
 #include <stdexcept>
 
-void OpenSoT::L::update(double t, const yarp::sig::Vector &q_dot)
+void OpenSoT::L::update(double t, const Eigen::VectorXd &q_dot)
 {
     _current_log << "(" << t ;
-    for(unsigned int i = 0; i < q_dot.size(); ++i)
+    for(unsigned int i = 0; i < q_dot.rows(); ++i)
         _current_log << "," << q_dot[i];
     {
         typedef std::vector<flushers::Flusher::Ptr>::const_iterator it_f;
@@ -41,7 +41,8 @@ void OpenSoT::L::update(double t, const yarp::sig::Vector &q_dot)
 
 void OpenSoT::L::update(double t)
 {
-    yarp::sig::Vector dq(model.iDyn3_model.getNrOfDOFs(), 0.0);
+    Eigen::VectorXd dq(model.iDyn3_model.getNrOfDOFs());
+    dq.setZero(dq.rows());
     this->update(t, dq);
 }
 
@@ -148,7 +149,7 @@ OpenSoT::L::~L()
         this->close();
 }
 
-OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::add(             OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::add(             OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     OpenSoT::flushers::TaskFlusher::Ptr taskFlusher;
     if(boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task))
@@ -163,7 +164,7 @@ OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::add(             OpenSoT::Task<y
     return taskFlusher;
 }
 
-OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::add(       OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
+OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::add(       OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint)
 {
     OpenSoT::flushers::ConstraintFlusher::Ptr constraintFlusher;
     if(boost::dynamic_pointer_cast<OpenSoT::constraints::velocity::Dynamics>(constraint))
@@ -191,12 +192,12 @@ OpenSoT::flushers::RobotFlusher::Ptr OpenSoT::L::add(RobotUtils& robot)
 }
 
 
-OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::getFlusher(      OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+OpenSoT::flushers::TaskFlusher::Ptr OpenSoT::L::getFlusher(      OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return _taskFlushers[task];
 }
 
-OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::getFlusher(OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr constraint)
+OpenSoT::flushers::ConstraintFlusher::Ptr OpenSoT::L::getFlusher(OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint)
 {
     return _constraintFlushers[constraint];
 }

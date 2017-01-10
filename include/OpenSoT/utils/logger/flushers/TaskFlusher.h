@@ -30,12 +30,12 @@ namespace OpenSoT
         class TaskFlusher : public Flusher
         {   
         protected:
-            Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr _task;
+            Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _task;
         public:
             typedef boost::shared_ptr<TaskFlusher> Ptr;
 
 
-            TaskFlusher(Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task)
+            TaskFlusher(Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
                 : _task(task) {}
         };
     }

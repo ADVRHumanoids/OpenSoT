@@ -19,9 +19,8 @@
 #define __BOUNDS_VELOCITY_JOINTLIMITS_H__
 
  #include <OpenSoT/Constraint.h>
+ #include <Eigen/Dense>
 
- #include <yarp/sig/all.h>
- #include <iCub/iDynTree/DynTree.h>
 
  namespace OpenSoT {
     namespace constraints {
@@ -29,13 +28,13 @@
             /**
              * @brief The JointLimits class implements bounds on joints positions
              */
-            class JointLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class JointLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<JointLimits> Ptr;
             private:
                 double _boundScaling;
-                yarp::sig::Vector _jointLimitsMin;
-                yarp::sig::Vector _jointLimitsMax;
+                Eigen::VectorXd _jointLimitsMin;
+                Eigen::VectorXd _jointLimitsMax;
             public:
                 /**
                  * @brief JointLimits constructor
@@ -44,12 +43,12 @@
                  * @param jointBoundMax upper bounds for joint limits
                  * @param jointBounMin lower bounds for joint limits
                  */
-                JointLimits(const yarp::sig::Vector &q,
-                            const yarp::sig::Vector &jointBoundMax,
-                            const yarp::sig::Vector &jointBoundMin,
+                JointLimits(const Eigen::VectorXd &q,
+                            const Eigen::VectorXd &jointBoundMax,
+                            const Eigen::VectorXd &jointBoundMin,
                             const double boundScaling = 1.0);
 
-                void update(const yarp::sig::Vector &x);
+                void update(const Eigen::VectorXd &x);
                 void setBoundScaling(const double boundScaling);
             };
         }

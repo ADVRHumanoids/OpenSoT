@@ -16,27 +16,25 @@
 */
 
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <yarp/math/Math.h>
-using namespace yarp::math;
 
 using namespace OpenSoT::constraints::velocity;
 
-JointLimits::JointLimits(   const yarp::sig::Vector& q,
-                            const yarp::sig::Vector& jointBoundMax,
-                            const yarp::sig::Vector& jointBoundMin,
+JointLimits::JointLimits(   const Eigen::VectorXd& q,
+                            const Eigen::VectorXd& jointBoundMax,
+                            const Eigen::VectorXd& jointBoundMin,
                             const double boundScaling) :
     Constraint("joint_limits", q.size()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
     _boundScaling(boundScaling) {
 
-    assert(q.size() == _jointLimitsMax.size());
-    assert(q.size() == _jointLimitsMin.size());
+    assert(q.rows() == _jointLimitsMax.rows());
+    assert(q.rows() == _jointLimitsMin.rows());
     /* calling update to generate bounds */
     update(q);
 }
 
-void JointLimits::update(const yarp::sig::Vector& x)
+void JointLimits::update(const Eigen::VectorXd& x)
 {
 
 /************************ COMPUTING BOUNDS ****************************/

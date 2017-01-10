@@ -36,7 +36,7 @@ class testConvexHull : public ::testing::Test{
       velocityLimits.resize(3,CoMVelocityLimit);
       zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
       coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
-      _convexHull = new ConvexHull(  zeros, coman );
+      _convexHull = new ConvexHull(  cartesian_utils::toEigen(zeros), coman );
   }
 
   virtual ~testConvexHull() {
@@ -53,7 +53,7 @@ class testConvexHull : public ::testing::Test{
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      _convexHull->update(zeros);
+      _convexHull->update(cartesian_utils::toEigen(zeros));
       coman.updateiDyn3Model(zeros,true);
   }
 
@@ -124,28 +124,29 @@ TEST_F(testConvexHull, checkImplementation) {
     q[coman.right_leg.joint_numbers[4]] = toRad(2.0);
     q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
 
+    std::cout<<"---------------TEST-------------"<<std::endl;
+
     updateiDyn3Model(true, q, coman);
-    ConvexHull localConvexHull( q, coman, 0.00);
-    localConvexHull.update(q);
+    OpenSoT::constraints::velocity::ConvexHull localConvexHull( cartesian_utils::toEigen(q), coman, 0.00);
+    localConvexHull.update(cartesian_utils::toEigen(q));
 
     std::list<KDL::Vector> points;
     std::vector<KDL::Vector> ch;
     idynutils::convex_hull huller;
-    yarp::sig::Matrix A_JCoM;
-    yarp::sig::Matrix A;
-    yarp::sig::Vector b;
+    Eigen::MatrixXd A_JCoM;
+    Eigen::MatrixXd A;
+    Eigen::VectorXd b;
 
     coman.getSupportPolygonPoints(points,"COM");
     huller.getConvexHull(points, ch);
-    ConvexHull::getConstraints(ch, A, b, 0.00);
+    OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A, b, 0.00);
 
     EXPECT_EQ(ch.size(),A.rows());
     EXPECT_EQ(b.size(), A.rows());
     EXPECT_EQ(A.cols(), 2);
 
-
-    yarp::sig::Matrix Aineq = localConvexHull.getAineq();
-    yarp::sig::Vector bUpperBound = localConvexHull.getbUpperBound();
+    yarp::sig::Matrix Aineq = cartesian_utils::fromEigentoYarp(localConvexHull.getAineq());
+    yarp::sig::Vector bUpperBound = cartesian_utils::fromEigentoYarp(localConvexHull.getbUpperBound());
 
 
     // multiplying A by JCoM
@@ -154,24 +155,32 @@ TEST_F(testConvexHull, checkImplementation) {
     JCoM = JCoM.removeCols(0,6);    // remove floating base
     JCoM = JCoM.removeRows(2,4);    // remove orientation + z
     assert(A.cols() == JCoM.rows());
-    A_JCoM = A * JCoM;
+    std::cout<<"test JCoM: "<<JCoM.toString()<<std::endl;
+    A_JCoM = A * cartesian_utils::toEigen(JCoM);
 
     EXPECT_EQ(A_JCoM.rows(), Aineq.rows());
     EXPECT_EQ(A_JCoM.cols(), Aineq.cols());
     EXPECT_EQ(b.size(), bUpperBound.size());
 
+    std::cout<<"Aineq rows: "<<Aineq.rows()<<std::endl;
+    std::cout<<"Aineq cols: "<<Aineq.cols()<<std::endl;
+    std::cout<<"A_JCoM rows: "<<A_JCoM.rows()<<std::endl;
+    std::cout<<"A_JCoM cols: "<<A_JCoM.cols()<<std::endl;
+    std::cout<<"Aineq: "<<Aineq.toString()<<std::endl; std::cout<<std::endl;
+    std::cout<<"A_JCoM: "<<A_JCoM<<std::endl;
     for(unsigned int i = 0; i < A_JCoM.rows(); ++i)
     {
-        for(unsigned j = 0; j < A_JCoM.cols(); ++j)
-            EXPECT_DOUBLE_EQ(A_JCoM(i,j), Aineq(i,j));
+        for(unsigned j = 0; j < A_JCoM.cols(); ++j){
+            std::cout<<"i: "<<i<<", j: "<<j<<std::endl;
+            EXPECT_DOUBLE_EQ(A_JCoM(i,j), Aineq(i,j));}
     }
 
     for(unsigned int i = 0; i < b.size(); ++i)
         EXPECT_DOUBLE_EQ(b[i], bUpperBound[i]);
 
-    std::cout<<"A: "<<A.toString()<<std::endl;
+    std::cout<<"A: "<<A<<std::endl;
     std::cout<<"Aineq: "<<Aineq.toString()<<std::endl;
-    std::cout<<"b: "<<b.toString()<<std::endl;
+    std::cout<<"b: "<<b<<std::endl;
     std::cout<<"bUpperBound: "<<bUpperBound.toString()<<std::endl;
 }
 
@@ -185,12 +194,12 @@ TEST_F(testConvexHull, checkBoundsScaling) {
     std::vector<KDL::Vector> ch;
     idyn_convex_hull.getConvexHull(chPoints, ch);
 
-    yarp::sig::Matrix A_ch;
-    yarp::sig::Vector b_ch;
-    yarp::sig::Matrix A_ch_1cm_scaling;
-    yarp::sig::Vector b_ch_1cm_scaling;
-    ConvexHull::getConstraints(ch, A_ch, b_ch, 0.0);
-    ConvexHull::getConstraints(ch, A_ch_1cm_scaling, b_ch_1cm_scaling, 0.01);
+    Eigen::MatrixXd A_ch;
+    Eigen::VectorXd b_ch;
+    Eigen::MatrixXd A_ch_1cm_scaling;
+    Eigen::VectorXd b_ch_1cm_scaling;
+    OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch, 0.0);
+    OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A_ch_1cm_scaling, b_ch_1cm_scaling, 0.01);
 
     EXPECT_TRUE(A_ch == A_ch_1cm_scaling);
 
@@ -266,14 +275,14 @@ TEST_F(testConvexHull, NoZeroRowsPreset) {
                                              coman.iDyn3_model.getJointBoundMax(),
                                              coman.iDyn3_model.getNrOfDOFs());
         coman.updateiDyn3Model(q, true);
-        _convexHull->update(q);
+        _convexHull->update(cartesian_utils::toEigen(q));
         std::vector<KDL::Vector> ch;
         _convexHull->getConvexHull(ch);
-        yarp::sig::Matrix A_ch;
-        yarp::sig::Vector b_ch;
+        Eigen::MatrixXd A_ch;
+        Eigen::VectorXd b_ch;
         _convexHull->getConstraints(ch,A_ch,b_ch,0.01);
         for(unsigned int i = 0; i < A_ch.rows(); ++i)
-            EXPECT_GT(norm(A_ch.getRow(i)),1E-5);
+            EXPECT_GT(norm(cartesian_utils::fromEigentoYarp(A_ch).getRow(i)),1E-5);
     }
 }
 
@@ -297,7 +306,7 @@ TEST_F(testConvexHull, BoundsAreCorrect) {
     q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
 
     updateiDyn3Model(true, q, coman);
-    _convexHull->update(q);
+    _convexHull->update(cartesian_utils::toEigen(q));
 
     // Get Vector of CH's points from coman
     std::list<KDL::Vector> points;

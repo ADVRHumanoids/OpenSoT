@@ -24,7 +24,6 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/solvers/QPOases.h>
 #include <idynutils/cartesian_utils.h>
-#include <qpOASES/Utils.hpp>
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -34,7 +33,6 @@
 #define mSecToSec(X) (X*0.001)
 
 using namespace yarp::sig;
-using namespace yarp::math;
 
 namespace
 {
@@ -50,19 +48,31 @@ namespace
 
              class QPOasesProblemDense {
              public:
+                 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXd;
+
                  QPOasesProblemDense(const int number_of_variables, const int number_of_constraints,
                                 OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
                                 const double eps_regularisation = 2E2):
                     _problem(new qpOASES::SQProblem(number_of_variables, number_of_constraints,
                         (qpOASES::HessianType)(hessian_type))),
-                    _H(0,0), _g(0), _A(0,0), _lA(0), _uA(0), _l(0), _u(0),
                     _bounds(new qpOASES::Bounds()),
                     _constraints(new qpOASES::Constraints()),
                     _nWSR(132),
                     _epsRegularisation(eps_regularisation),
-                    _solution(number_of_variables), _dual_solution(number_of_variables),
                     _opt(new qpOASES::Options())
                 { setDefaultOptions();}
+
+                 inline void pile(MatrixXd& A, const MatrixXd& B)
+                 {
+                     A.conservativeResize(A.rows()+B.rows(), A.cols());
+                     A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+                 }
+
+                 inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+                 {
+                     a.conservativeResize(a.rows()+b.rows());
+                     a.segment(a.rows()-b.rows(),b.rows())<<b;
+                 }
 
                  ~QPOasesProblemDense(){}
 
@@ -99,27 +109,27 @@ namespace
                      _problem->setOptions(options);
                  }
 
-                 bool initProblem(const yarp::sig::Matrix& H, const Vector& g,
-                                  const yarp::sig::Matrix& A,
-                                  const Vector& lA, const Vector& uA,
-                                  const Vector& l, const Vector& u)
+                 bool initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                                  const Eigen::MatrixXd& A,
+                                  const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
+                                  const Eigen::VectorXd& l, const Eigen::VectorXd& u)
                  {
                      _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
                      checkINFTY();
 
 
-                     if(!(_l.size() == _u.size())){
-                         std::cout<<RED<<"l size: "<<_l.size()<<DEFAULT<<std::endl;
-                         std::cout<<RED<<"u size: "<<_u.size()<<DEFAULT<<std::endl;
-                         assert(_l.size() == _u.size());}
-                     if(!(_lA.size() == _A.rows())){
-                         std::cout<<RED<<"lA size: "<<_lA.size()<<DEFAULT<<std::endl;
+                     if(!(_l.rows() == _u.rows())){
+                         std::cout<<RED<<"l size: "<<_l.rows()<<DEFAULT<<std::endl;
+                         std::cout<<RED<<"u size: "<<_u.rows()<<DEFAULT<<std::endl;
+                         assert(_l.rows() == _u.rows());}
+                     if(!(_lA.rows() == _A.rows())){
+                         std::cout<<RED<<"lA size: "<<_lA.rows()<<DEFAULT<<std::endl;
                          std::cout<<RED<<"A rows: "<<_A.rows()<<DEFAULT<<std::endl;
-                         assert(_lA.size() == _A.rows());}
-                     if(!(_lA.size() == _uA.size())){
-                         std::cout<<RED<<"lA size: "<<_lA.size()<<DEFAULT<<std::endl;
-                         std::cout<<RED<<"uA size: "<<_uA.size()<<DEFAULT<<std::endl;
-                         assert(_lA.size() == _uA.size());}
+                         assert(_lA.rows() == _A.rows());}
+                     if(!(_lA.rows() == _uA.rows())){
+                         std::cout<<RED<<"lA size: "<<_lA.rows()<<DEFAULT<<std::endl;
+                         std::cout<<RED<<"uA size: "<<_uA.rows()<<DEFAULT<<std::endl;
+                         assert(_lA.rows() == _uA.rows());}
 
                      int nWSR = _nWSR;
                          qpOASES::returnValue val =_problem->init( _H.data(),_g.data(),
@@ -155,10 +165,10 @@ namespace
                          return false;
                      }
 
-                     if(_solution.size() != _problem->getNV())
+                     if(_solution.rows() != _problem->getNV())
                          _solution.resize(_problem->getNV());
 
-                     if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
+                     if(_dual_solution.rows() != _problem->getNV() + _problem->getNC())
                          _dual_solution.resize(_problem->getNV() + _problem->getNC());
 
                      //We get the solution
@@ -173,10 +183,10 @@ namespace
                      return true;
                  }
 
-                 bool updateTask(const yarp::sig::Matrix& H, const Vector& g)
+                 bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g)
                  {
-                     if(!(_g.size() == _H.rows())){
-                         std::cout<<RED<<"g size: "<<_g.size()<<DEFAULT<<std::endl;
+                     if(!(_g.rows() == _H.rows())){
+                         std::cout<<RED<<"g size: "<<_g.rows()<<DEFAULT<<std::endl;
                          std::cout<<RED<<"H rows: "<<_H.rows()<<DEFAULT<<std::endl;
                          return false;}
                      if(!(_H.cols() == H.cols())){
@@ -211,19 +221,19 @@ namespace
                      }
                  }
 
-                 bool updateConstraints(const yarp::sig::Matrix& A, const Vector& lA, const Vector& uA)
+                 bool updateConstraints(const Eigen::MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA)
                  {
                      if(!(_A.cols() == A.cols())){
                          std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
                          std::cout<<RED<<"should be: "<<_A.cols()<<DEFAULT<<std::endl;
                          return false;}
-                     if(!(lA.size() == A.rows())){
-                         std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
+                     if(!(lA.rows() == A.rows())){
+                         std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
                          std::cout<<RED<<"A rows: "<<A.rows()<<DEFAULT<<std::endl;
                          return false;}
-                     if(!(lA.size() == uA.size())){
-                         std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
-                         std::cout<<RED<<"uA size: "<<uA.size()<<DEFAULT<<std::endl;
+                     if(!(lA.rows() == uA.rows())){
+                         std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
+                         std::cout<<RED<<"uA size: "<<uA.rows()<<DEFAULT<<std::endl;
                          return false;}
 
                      if(A.rows() == _A.rows())
@@ -237,9 +247,9 @@ namespace
                      {
                          _A.resize(A.rows(), A.cols());
                          _A = A;
-                         _lA.resize(lA.size());
+                         _lA.resize(lA.rows());
                          _lA = lA;
-                         _uA.resize(uA.size());
+                         _uA.resize(uA.rows());
                          _uA = uA;
 
                          qpOASES::HessianType hessian_type = _problem->getHessianType();
@@ -255,19 +265,19 @@ namespace
                      }
                  }
 
-                 bool updateBounds(const Vector& l, const Vector& u)
+                 bool updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& u)
                  {
-                     if(!(l.size() == _l.size())){
-                         std::cout<<RED<<"l size: "<<l.size()<<DEFAULT<<std::endl;
-                         std::cout<<RED<<"should be: "<<_l.size()<<DEFAULT<<std::endl;
+                     if(!(l.rows() == _l.rows())){
+                         std::cout<<RED<<"l size: "<<l.rows()<<DEFAULT<<std::endl;
+                         std::cout<<RED<<"should be: "<<_l.rows()<<DEFAULT<<std::endl;
                          return false;}
-                     if(!(u.size() == _u.size())){
-                         std::cout<<RED<<"u size: "<<u.size()<<DEFAULT<<std::endl;
-                         std::cout<<RED<<"should be: "<<_u.size()<<DEFAULT<<std::endl;
+                     if(!(u.rows() == _u.rows())){
+                         std::cout<<RED<<"u size: "<<u.rows()<<DEFAULT<<std::endl;
+                         std::cout<<RED<<"should be: "<<_u.rows()<<DEFAULT<<std::endl;
                          return false;}
-                     if(!(l.size() == u.size())){
-                         std::cout<<RED<<"l size: "<<l.size()<<DEFAULT<<std::endl;
-                         std::cout<<RED<<"u size: "<<u.size()<<DEFAULT<<std::endl;
+                     if(!(l.rows() == u.rows())){
+                         std::cout<<RED<<"l size: "<<l.rows()<<DEFAULT<<std::endl;
+                         std::cout<<RED<<"u size: "<<u.rows()<<DEFAULT<<std::endl;
                          return false;}
 
                      _l = l;
@@ -276,10 +286,10 @@ namespace
                      return true;
                  }
 
-                 bool updateProblem(const yarp::sig::Matrix& H, const Vector& g,
-                                    const yarp::sig::Matrix& A,
-                                    const Vector& lA, const Vector& uA,
-                                    const Vector& l, const Vector& u)
+                 bool updateProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                                    const Eigen::MatrixXd& A,
+                                    const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
+                                    const Eigen::VectorXd& l, const Eigen::VectorXd& u)
                  {
                      bool success = true;
                      success = success && updateBounds(l, u);
@@ -288,17 +298,17 @@ namespace
                      return success;
                  }
 
-                 bool addTask(const yarp::sig::Matrix& H, const Vector& g)
+                 bool addTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g)
                  {
                      if(H.cols() == _H.cols())
                      {
-                         if(!(g.size() == H.rows())){
-                             std::cout<<RED<<"g size: "<<g.size()<<DEFAULT<<std::endl;
+                         if(!(g.rows() == H.rows())){
+                             std::cout<<RED<<"g size: "<<g.rows()<<DEFAULT<<std::endl;
                              std::cout<<RED<<"H rows: "<<H.rows()<<DEFAULT<<std::endl;
                              return false;}
 
-                         _H = pile(_H, H);
-                         _g = cat(_g, g);
+                         pile(_H, H);
+                         pile(_g, g);
 
                          qpOASES::HessianType hessian_type = _problem->getHessianType();
                          int number_of_variables = _H.cols();
@@ -317,22 +327,22 @@ namespace
                      return false;
                  }
 
-                 bool addConstraints(const yarp::sig::Matrix& A, const Vector& lA, const Vector& uA)
+                 bool addConstraints(const Eigen::MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA)
                  {
                      if(A.cols() == _A.cols())
                      {
-                         if(!(lA.size() == A.rows())){
-                             std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
+                         if(!(lA.rows() == A.rows())){
+                             std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
                              std::cout<<RED<<"A rows: "<<A.rows()<<DEFAULT<<std::endl;
                              return false;}
-                         if(!(lA.size() == uA.size())){
-                             std::cout<<RED<<"lA size: "<<lA.size()<<DEFAULT<<std::endl;
-                             std::cout<<RED<<"uA size: "<<uA.size()<<DEFAULT<<std::endl;
+                         if(!(lA.rows() == uA.rows())){
+                             std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
+                             std::cout<<RED<<"uA size: "<<uA.rows()<<DEFAULT<<std::endl;
                              return false;}
 
-                         _A = pile(_A, A);
-                         _lA = cat(_lA, lA);
-                         _uA = cat(_uA, uA);
+                         pile(_A, A);
+                         pile(_lA, lA);
+                         pile(_uA, uA);
 
                          qpOASES::HessianType hessian_type = _problem->getHessianType();
                          int number_of_variables = _H.cols();
@@ -397,10 +407,10 @@ namespace
                      }
 
                      // If solution has changed of size we update the size
-                     if(_solution.size() != _problem->getNV())
+                     if(_solution.rows() != _problem->getNV())
                          _solution.resize(_problem->getNV());
 
-                     if(_dual_solution.size() != _problem->getNV() + _problem->getNC())
+                     if(_dual_solution.rows() != _problem->getNV() + _problem->getNC())
                          _dual_solution.resize(_problem->getNV()+ _problem->getNC());
 
                      //We get the solution
@@ -424,7 +434,7 @@ namespace
                      return true;
                  }
 
-                 const Vector& getSolution(){return _solution;}
+                 const Eigen::VectorXd& getSolution(){return _solution;}
 
                  OpenSoT::HessianType getHessianType(){return (OpenSoT::HessianType)(_problem->getHessianType());}
 
@@ -439,19 +449,19 @@ namespace
 
                  const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
 
-                 const yarp::sig::Matrix& getH(){return _H;}
+                 const MatrixXd& getH(){return _H;}
 
-                 const yarp::sig::Vector& getg(){return _g;}
+                 const Eigen::VectorXd& getg(){return _g;}
 
-                 const yarp::sig::Matrix& getA(){return _A;}
+                 const MatrixXd& getA(){return _A;}
 
-                 const yarp::sig::Vector& getlA(){return _lA;}
+                 const Eigen::VectorXd& getlA(){return _lA;}
 
-                 const yarp::sig::Vector& getuA(){return _uA;}
+                 const Eigen::VectorXd& getuA(){return _uA;}
 
-                 const yarp::sig::Vector& getl(){return _l;}
+                 const Eigen::VectorXd& getl(){return _l;}
 
-                 const yarp::sig::Vector& getu(){return _u;}
+                 const Eigen::VectorXd& getu(){return _u;}
 
                  void printProblemInformation(const int problem_number, const std::string problem_id)
                  {
@@ -480,13 +490,13 @@ namespace
                      file.open(file_name.c_str());
                      if(file.is_open())
                      {
-                         file<<"H = [\n"<<_H.toString()<<"\n]\n\n";
-                         file<<"g = [\n"<<_g.toString()<<"\n]\n\n";
-                         file<<"A = [\n"<<_A.toString()<<"\n]\n\n";
-                         file<<"lA = [\n"<<_lA.toString()<<"\n]\n\n";
-                         file<<"uA = [\n"<<_uA.toString()<<"\n]\n\n";
-                         file<<"l = [\n"<<_l.toString()<<"\n]\n\n";
-                         file<<"u = [\n"<<_u.toString()<<"\n]";
+                         file<<"H = [\n"<<_H<<"\n]\n\n";
+                         file<<"g = [\n"<<_g<<"\n]\n\n";
+                         file<<"A = [\n"<<_A<<"\n]\n\n";
+                         file<<"lA = [\n"<<_lA<<"\n]\n\n";
+                         file<<"uA = [\n"<<_uA<<"\n]\n\n";
+                         file<<"l = [\n"<<_l<<"\n]\n\n";
+                         file<<"u = [\n"<<_u<<"\n]";
 
                          file.close();
                          return true;
@@ -516,7 +526,7 @@ namespace
 
                      std::cout<<"--------------------------------------------"<<std::endl;
                      for(unsigned int i = 0; i < _lA.size(); ++i)
-                         std::cout<<i<<": "<<_lA[i]<<" <= "<<_A.getRow(i).toString()<<" <= "<<_uA[i]<<std::endl;
+                         std::cout<<i<<": "<<_lA[i]<<" <= "<<_A.row(i)<<" <= "<<_uA[i]<<std::endl;
                  }
 
                  void checkINFTY()
@@ -541,19 +551,19 @@ namespace
                  boost::shared_ptr<qpOASES::Constraints> _constraints;
                  int _nWSR;
                  double _epsRegularisation;
-                 yarp::sig::Matrix _H;
-                 Vector _g;
-                 yarp::sig::Matrix _A;
-                 Vector _lA;
-                 Vector _uA;
-                 Vector _l;
-                 Vector _u;
-                 Vector _solution;
-                 Vector _dual_solution;
+                 MatrixXd _H;
+                 Eigen::VectorXd _g;
+                 MatrixXd _A;
+                 Eigen::VectorXd _lA;
+                 Eigen::VectorXd _uA;
+                 Eigen::VectorXd _l;
+                 Eigen::VectorXd _u;
+                 Eigen::VectorXd _solution;
+                 Eigen::VectorXd _dual_solution;
                  boost::shared_ptr<qpOASES::Options> _opt;
              };
 
-             class QPOases_sotDense: public OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>
+             class QPOases_sotDense: public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
              {
              public:
                  typedef boost::shared_ptr<QPOases_sotDense> Ptr;
@@ -578,30 +588,42 @@ namespace
 
                  ~QPOases_sotDense(){}
 
-                 bool solve(Vector& solution)
+                 inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+                 {
+                     A.conservativeResize(A.rows()+B.rows(), A.cols());
+                     A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+                 }
+
+                 inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+                 {
+                     a.conservativeResize(a.rows()+b.rows());
+                     a.segment(a.rows()-b.rows(),b.rows())<<b;
+                 }
+
+                 bool solve(Eigen::VectorXd& solution)
                  {
                      for(unsigned int i = 0; i < _tasks.size(); ++i)
                      {
-                         yarp::sig::Matrix H;
-                         yarp::sig::Vector g;
+                         Eigen::MatrixXd H;
+                         Eigen::VectorXd g;
                          computeVelCtrlCostFunction(_tasks[i], H, g);
                          if(!_qp_stack_of_tasks[i].updateTask(H, g))
                              return false;
 
                          OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
-                         yarp::sig::Matrix A = constraints_task_i->getAineq();
-                         yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
-                         yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
+                         Eigen::MatrixXd A = constraints_task_i->getAineq();
+                         Eigen::VectorXd lA = constraints_task_i->getbLowerBound();
+                         Eigen::VectorXd uA = constraints_task_i->getbUpperBound();
                          if(i > 0)
                          {
                              for(unsigned int j = 0; j < i; ++j)
                              {
-                                 yarp::sig::Matrix tmp_A;
-                                 yarp::sig::Vector tmp_lA, tmp_uA;
+                                 Eigen::MatrixXd tmp_A;
+                                 Eigen::VectorXd tmp_lA, tmp_uA;
                                  computeVelCtrlOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
-                                 A = yarp::math::pile(A, tmp_A);
-                                 lA = yarp::math::cat(lA, tmp_lA);
-                                 uA = yarp::math::cat(uA, tmp_uA);
+                                 pile(A, tmp_A);
+                                 pile(lA, tmp_lA);
+                                 pile(uA, tmp_uA);
                              }
                          }
                          if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
@@ -609,7 +631,9 @@ namespace
 
                          if(_bounds){
                              constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
-                             if(!_qp_stack_of_tasks[i].updateBounds(constraints_task_i->getLowerBound(), constraints_task_i->getUpperBound()))
+                             if(!_qp_stack_of_tasks[i].updateBounds(
+                                         constraints_task_i->getLowerBound(),
+                                         constraints_task_i->getUpperBound()))
                                  return false;}
 
                          if(!_qp_stack_of_tasks[i].solve())
@@ -652,31 +676,31 @@ namespace
                  {
                      for(unsigned int i = 0; i < _tasks.size(); ++i)
                      {
-                         yarp::sig::Matrix H;
-                         yarp::sig::Vector g;
+                         Eigen::MatrixXd H;
+                         Eigen::VectorXd g;
                          computeVelCtrlCostFunction(_tasks[i], H, g);
 
                          OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
-                         yarp::sig::Matrix A = constraints_task_i->getAineq();
-                         yarp::sig::Vector lA = constraints_task_i->getbLowerBound();
-                         yarp::sig::Vector uA = constraints_task_i->getbUpperBound();
+                         Eigen::MatrixXd A = constraints_task_i->getAineq();
+                         Eigen::VectorXd lA = constraints_task_i->getbLowerBound();
+                         Eigen::VectorXd uA = constraints_task_i->getbUpperBound();
                          if(i > 0)
                          {
                              for(unsigned int j = 0; j < i; ++j)
                              {
-                                 yarp::sig::Matrix tmp_A;
-                                 yarp::sig::Vector tmp_lA, tmp_uA;
+                                 Eigen::MatrixXd tmp_A;
+                                 Eigen::VectorXd tmp_lA, tmp_uA;
                                  computeVelCtrlOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
-                                 A = pile(A, tmp_A);
-                                 lA = cat(lA, tmp_lA);
-                                 uA = cat(uA, tmp_uA);
+                                 pile(A, tmp_A);
+                                 pile(lA, tmp_lA);
+                                 pile(uA, tmp_uA);
                              }
                          }
 
                          if(_bounds)
                              constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
-                         yarp::sig::Vector l = constraints_task_i->getLowerBound();
-                         yarp::sig::Vector u = constraints_task_i->getUpperBound();
+                         Eigen::VectorXd l = constraints_task_i->getLowerBound();
+                         Eigen::VectorXd u = constraints_task_i->getUpperBound();
 
                          QPOasesProblemDense problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                                   _epsRegularisation);
@@ -691,14 +715,17 @@ namespace
                      return true;
                  }
 
-                 void computeVelCtrlCostFunction(const TaskPtr& task, yarp::sig::Matrix& H, yarp::sig::Vector& g)
+                 void computeVelCtrlCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g)
                  {
-                     H = task->getA().transposed() * task->getWeight() * task->getA();
-                     g = -1.0 * task->getLambda() * task->getA().transposed() * task->getWeight() * task->getb();
+                     H = task->getA().transpose()*task->getWeight()*task->getA();
+                     g = -1.0 * task->getLambda() *
+                            task->getA().transpose() *
+                             task->getWeight() *
+                             task->getb();
                  }
 
                  void computeVelCtrlOptimalityConstraint(const TaskPtr& task, QPOasesProblemDense& problem,
-                                        yarp::sig::Matrix& A, yarp::sig::Vector& lA, yarp::sig::Vector& uA)
+                                        Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
                  {
                      OpenSoT::constraints::BilateralConstraint::Ptr optimality_bilateral_constraint(
                          new OpenSoT::constraints::BilateralConstraint(
@@ -851,7 +878,7 @@ namespace
 
     struct ik_problem
     {
-        std::vector<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr> stack_of_tasks;
+        std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks;
         OpenSoT::constraints::Aggregated::Ptr bounds;
         double damped_least_square_eps;
     };
@@ -876,29 +903,38 @@ namespace
             using namespace OpenSoT::tasks::velocity;
             /** Create Constraints **/
                 /** 1) Constraint Convex Hull **/
-                ConvexHull::Ptr constraintConvexHull(ConvexHull::Ptr(new ConvexHull(state, robot_model, 0.02)));
+                ConvexHull::Ptr constraintConvexHull(
+                            ConvexHull::Ptr(
+                                new ConvexHull(
+                                    cartesian_utils::toEigen(state), robot_model, 0.02)));
 
                 /** 2) CoM Velocity **/
+                Eigen::VectorXd com_vel(3);
+                com_vel<<0.9,0.9,0.9;
                 CoMVelocity::Ptr constraintCoMVel(CoMVelocity::Ptr(
-                                            new CoMVelocity(Vector(3,0.9), mSecToSec(dT), state, robot_model)));
+                                            new CoMVelocity(com_vel, mSecToSec(dT),
+                                                            cartesian_utils::toEigen(state), robot_model)));
 
             /** Create tasks **/
                 /** 1) Cartesian RSole **/
-                Cartesian::Ptr taskRSole(Cartesian::Ptr(new Cartesian("cartesian::r_sole",state,robot_model,
+                Cartesian::Ptr taskRSole(Cartesian::Ptr(new Cartesian("cartesian::r_sole",
+                                                                      cartesian_utils::toEigen(state),robot_model,
                                                                   robot_model.right_leg.end_effector_name,"world")));
 
                 /** 2) Cartesian Waist **/
                 Cartesian::Ptr taskWaist(Cartesian::Ptr(
-                                             new Cartesian("cartesian::Waist",state,robot_model,"Waist","world")));
-                yarp::sig::Matrix waistInit = taskWaist->getActualPose();
+                                             new Cartesian("cartesian::Waist",
+                                                           cartesian_utils::toEigen(state),robot_model,"Waist","world")));
+                yarp::sig::Matrix waistInit = cartesian_utils::fromEigentoYarp(taskWaist->getActualPose());
                 yarp::sig::Matrix waistRef = waistInit;
                 waistRef(0,3) += 0.07;
-                taskWaist->setReference(waistRef);
-                taskWaist->update(state);
+                taskWaist->setReference(cartesian_utils::toEigen(waistRef));
+                taskWaist->update(cartesian_utils::toEigen(state));
 
                 /** 3) Cartesian Torso **/
                 Cartesian::Ptr taskTorso(Cartesian::Ptr(
-                                             new Cartesian("cartesian::torso",state,robot_model,"torso","world")));
+                                             new Cartesian("cartesian::torso",
+                                                           cartesian_utils::toEigen(state),robot_model,"torso","world")));
                     /** 3.1) We want to control torso in /world frame using only the three joints in the torso **/
                     std::vector<bool> active_joint_mask = taskTorso->getActiveJointsMask();
                     for(unsigned int j = 0; j < robot_model.left_leg.getNrOfDOFs(); ++j)
@@ -908,27 +944,32 @@ namespace
                     /** 3.2) We are interested only in the orientation of the torso **/
                     yarp::sig::Matrix W_torso(6,6); W_torso = W_torso.eye();
                     W_torso(0,0) = 0.0; W_torso(1,1) = 0.0; W_torso(2,2) = 0.0;
-                    taskTorso->setWeight(W_torso);
+                    taskTorso->setWeight(cartesian_utils::toEigen(W_torso));
         //            OpenSoT::SubTask::Ptr taskTorsoPosition(OpenSoT::SubTask::Ptr(
         //                                            new OpenSoT::SubTask(taskTorso, OpenSoT::SubTask::SubTaskMap::range(3,5))));
-                    Cartesian::Ptr taskRArm(Cartesian::Ptr(new Cartesian("cartesian::r_arm",state,robot_model,
+                    Cartesian::Ptr taskRArm(Cartesian::Ptr(new Cartesian("cartesian::r_arm",
+                                                                         cartesian_utils::toEigen(state),robot_model,
                                                                       robot_model.right_arm.end_effector_name,"Waist")));
-                    Cartesian::Ptr taskLArm(Cartesian::Ptr(new Cartesian("cartesian::l_arm",state,robot_model,
+                    Cartesian::Ptr taskLArm(Cartesian::Ptr(new Cartesian("cartesian::l_arm",
+                                                                         cartesian_utils::toEigen(state),robot_model,
                                                                       robot_model.left_arm.end_effector_name,"Waist")));
 
                 /** 4) Postural **/
-                Postural::Ptr taskPostural(Postural::Ptr(new Postural(state)));
+                Postural::Ptr taskPostural(Postural::Ptr(new Postural(
+                                                             cartesian_utils::toEigen(state))));
                 //taskPostural->setLambda(0.0);
 
                 /** 5) Mininimize Acceleration **/
                 MinimizeAcceleration::Ptr taskMinimizeAcceleration(MinimizeAcceleration::Ptr(
-                                                                       new MinimizeAcceleration(state)));
+                                                                       new MinimizeAcceleration(
+                                                                           cartesian_utils::toEigen(state))));
 
                 /** Create bounds **/
                 /** 1) bounds joint limits **/
-                JointLimits::ConstraintPtr boundJointLimits(JointLimits::ConstraintPtr(new JointLimits(state,
-                                                                    robot_model.iDyn3_model.getJointBoundMax(),
-                                                                    robot_model.iDyn3_model.getJointBoundMin())));
+                JointLimits::ConstraintPtr boundJointLimits(JointLimits::ConstraintPtr(new JointLimits(
+                                                                                           cartesian_utils::toEigen(state),
+                                                                    robot_model.getJointBoundMax(),
+                                                                    robot_model.getJointBoundMin())));
                 /** 2) bounds joint velocities **/
                 VelocityLimits::ConstraintPtr boundsJointVelLimits(VelocityLimits::ConstraintPtr(
                                                             new VelocityLimits(0.1, mSecToSec(dT), state.size())));
@@ -997,27 +1038,32 @@ namespace
                     solve_time.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
+                    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
                     double acc = 0.0;
                     for(unsigned int i = 0; i < step; ++i)
                     {
                         robot_model.updateiDyn3Model(state, true);
 
                         for(unsigned int j = 0; j < problem->stack_of_tasks.size(); ++j)
-                            problem->stack_of_tasks[j]->update(state);
-                        problem->bounds->update(state);
+                            problem->stack_of_tasks[j]->update(
+                                        cartesian_utils::toEigen(state));
+                        problem->bounds->update(cartesian_utils::toEigen(state));
+
 
                         double tic = qpOASES::getCPUtime();
-                        ASSERT_TRUE(qp_solver_sparse->solve(dq));
+                        ASSERT_TRUE(qp_solver_sparse->solve(_dq));
                         double toc = qpOASES::getCPUtime();
                         acc += toc - tic;
                         solve_time.push_back(toc-tic);
+                        dq = cartesian_utils::fromEigentoYarp(_dq);
+                        using namespace yarp::math;
                         state += dq;
                     }
                     double t = acc/(double)(step);
                     std::cout<<"Medium Time to Solve sot "<<acc/(double)(step)<<"[s]"<<std::endl;
                     mean_time_solver.push_back(t);
 
-                    yarp::sig::Matrix waistActual = taskWaist->getActualPose();
+                    yarp::sig::Matrix waistActual = cartesian_utils::fromEigentoYarp(taskWaist->getActualPose());
                     std::cout<<GREEN<<"Waist Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistInit);
                     std::cout<<GREEN<<"Waist Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistRef);
                     std::cout<<GREEN<<"Waist Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistActual);
@@ -1044,27 +1090,30 @@ namespace
                     solve_time.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
+                    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
                     double acc = 0.0;
                     for(unsigned int i = 0; i < step; ++i)
                     {
                         robot_model.updateiDyn3Model(state, true);
 
                         for(unsigned int j = 0; j < problem->stack_of_tasks.size(); ++j)
-                            problem->stack_of_tasks[j]->update(state);
-                        problem->bounds->update(state);
+                            problem->stack_of_tasks[j]->update(cartesian_utils::toEigen(state));
+                        problem->bounds->update(cartesian_utils::toEigen(state));
 
                         double tic = qpOASES::getCPUtime();
-                        ASSERT_TRUE(qp_solver_dense->solve(dq));
+                        ASSERT_TRUE(qp_solver_dense->solve(_dq));
                         double toc = qpOASES::getCPUtime();
                         acc += toc - tic;
                         solve_time.push_back(toc-tic);
+                        dq = cartesian_utils::fromEigentoYarp(_dq);
+                        using namespace yarp::math;
                         state += dq;
                     }
                     double t = acc/(double)(step);
                     std::cout<<"Medium Time to Solve sot "<<acc/(double)(step)<<"[s]"<<std::endl;
                     mean_time_solver.push_back(t);
 
-                    yarp::sig::Matrix waistActual = taskWaist->getActualPose();
+                    yarp::sig::Matrix waistActual = cartesian_utils::fromEigentoYarp(taskWaist->getActualPose());
                     std::cout<<GREEN<<"Waist Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistInit);
                     std::cout<<GREEN<<"Waist Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistRef);
                     std::cout<<GREEN<<"Waist Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistActual);

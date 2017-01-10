@@ -62,9 +62,11 @@ TEST_F(testManipolability, testManipolabilityTask)
     yarp::sig::Matrix TR_init = idynutils.iDyn3_model.getPosition(
                           idynutils.iDyn3_model.getLinkIndex("Waist"),
                           idynutils.iDyn3_model.getLinkIndex("r_wrist"));
-    Cartesian::Ptr cartesian_task_L(new Cartesian("cartesian::left_wrist", q, idynutils,"l_wrist", "Waist"));
-    Cartesian::Ptr cartesian_task_R(new Cartesian("cartesian::right_wrist", q, idynutils,"r_wrist", "Waist"));
-    std::list< OpenSoT::Task<Matrix, Vector>::TaskPtr > task_list;
+    Cartesian::Ptr cartesian_task_L(new Cartesian("cartesian::left_wrist",
+        cartesian_utils::toEigen(q), idynutils,"l_wrist", "Waist"));
+    Cartesian::Ptr cartesian_task_R(new Cartesian("cartesian::right_wrist",
+        cartesian_utils::toEigen(q), idynutils,"r_wrist", "Waist"));
+    std::list< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > task_list;
     task_list.push_back(cartesian_task_L);
     task_list.push_back(cartesian_task_R);
     OpenSoT::tasks::Aggregated::Ptr cartesian_task(
@@ -72,12 +74,14 @@ TEST_F(testManipolability, testManipolabilityTask)
 
 
     /// Postural Task
-    Postural::Ptr postural_task(new Postural(q));
+    Postural::Ptr postural_task(new Postural(cartesian_utils::toEigen(q)));
 
     /// Manipulability task
-    Manipulability::Ptr manipulability_task_L(new Manipulability(q, idynutils, cartesian_task_L));
-    Manipulability::Ptr manipulability_task_R(new Manipulability(q, idynutils, cartesian_task_R));
-    std::list< OpenSoT::Task<Matrix, Vector>::TaskPtr > manip_list;
+    Manipulability::Ptr manipulability_task_L(new Manipulability(
+                                                  cartesian_utils::toEigen(q), idynutils, cartesian_task_L));
+    Manipulability::Ptr manipulability_task_R(new Manipulability(
+                                                  cartesian_utils::toEigen(q), idynutils, cartesian_task_R));
+    std::list< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > manip_list;
     manip_list.push_back(manipulability_task_L);
     manip_list.push_back(manipulability_task_R);
     OpenSoT::tasks::Aggregated::Ptr manipulability_task(
@@ -86,18 +90,18 @@ TEST_F(testManipolability, testManipolabilityTask)
     /// Constraints set to the Cartesian Task
     int t = 1000;
     JointLimits::Ptr joint_limits(
-        new JointLimits(q, idynutils.iDyn3_model.getJointBoundMax(),
-                           idynutils.iDyn3_model.getJointBoundMin(), 0.2));
+        new JointLimits(cartesian_utils::toEigen(q), idynutils.getJointBoundMax(),
+                           idynutils.getJointBoundMin(), 0.2));
     VelocityLimits::Ptr joint_velocity_limits(
                 new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
 
-    std::list< OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr > joint_constraints_list;
+    std::list< OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr > joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
     joint_constraints_list.push_back(joint_velocity_limits);
     OpenSoT::constraints::Aggregated::Ptr joint_constraints(
                 new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
 
-    std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks;
+    std::vector< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(postural_task);
 
@@ -109,22 +113,32 @@ TEST_F(testManipolability, testManipolabilityTask)
     {
         idynutils.updateiDyn3Model(q, true);
 
-        cartesian_task->update(q);
-        postural_task->update(q);
-        manipulability_task->update(q);
-        joint_constraints->update(q);
+        cartesian_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
+        manipulability_task->update(cartesian_utils::toEigen(q));
+        joint_constraints->update(cartesian_utils::toEigen(q));
 
-        sot.solve(dq);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        sot.solve(_dq);
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
-        double manip_index_L = sqrt(det(cartesian_task_L->getA()*cartesian_task_L->getA().transposed()));
-        double manip_index_R = sqrt(det(cartesian_task_R->getA()*cartesian_task_R->getA().transposed()));
+        double manip_index_L = sqrt(det(
+        cartesian_utils::fromEigentoYarp(cartesian_task_L->getA())*
+        cartesian_utils::fromEigentoYarp(cartesian_task_L->getA()).transposed()));
+        double manip_index_R = sqrt(det(
+        cartesian_utils::fromEigentoYarp(cartesian_task_R->getA())*
+        cartesian_utils::fromEigentoYarp(cartesian_task_R->getA()).transposed()));
 
-        ASSERT_DOUBLE_EQ(manipulability_task_L->ComputeManipulabilityIndex(), manip_index_L);
-        ASSERT_DOUBLE_EQ(manipulability_task_R->ComputeManipulabilityIndex(), manip_index_R);
+        ASSERT_NEAR(manipulability_task_L->ComputeManipulabilityIndex(), manip_index_L, 1e-10);
+        ASSERT_NEAR(manipulability_task_R->ComputeManipulabilityIndex(), manip_index_R, 1e-10);
     }
-    double manip_index_L = sqrt(det(cartesian_task_L->getA()*cartesian_task_L->getA().transposed()));
-    double manip_index_R = sqrt(det(cartesian_task_R->getA()*cartesian_task_R->getA().transposed()));
+    double manip_index_L = sqrt(det(
+    cartesian_utils::fromEigentoYarp(cartesian_task_L->getA())*
+    cartesian_utils::fromEigentoYarp(cartesian_task_L->getA()).transposed()));
+    double manip_index_R = sqrt(det(
+    cartesian_utils::fromEigentoYarp(cartesian_task_R->getA())*
+    cartesian_utils::fromEigentoYarp(cartesian_task_R->getA()).transposed()));
 
     yarp::sig::Vector q_init(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     q_init = q;
@@ -162,22 +176,32 @@ TEST_F(testManipolability, testManipolabilityTask)
     {
         idynutils.updateiDyn3Model(q, true);
 
-        cartesian_task->update(q);
-        postural_task->update(q);
-        manipulability_task->update(q);
-        joint_constraints->update(q);
+        cartesian_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
+        manipulability_task->update(cartesian_utils::toEigen(q));
+        joint_constraints->update(cartesian_utils::toEigen(q));
 
-        sot_manip.solve(dq);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        sot_manip.solve(_dq);
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
 
-        double manip_index_L = sqrt(det(cartesian_task_L->getA()*cartesian_task_L->getA().transposed()));
-        double manip_index_R = sqrt(det(cartesian_task_R->getA()*cartesian_task_R->getA().transposed()));
+        double manip_index_L = sqrt(det(
+                    cartesian_utils::fromEigentoYarp(cartesian_task_L->getA())*
+                    cartesian_utils::fromEigentoYarp(cartesian_task_L->getA()).transposed()));
+        double manip_index_R = sqrt(det(
+                    cartesian_utils::fromEigentoYarp(cartesian_task_R->getA())*
+                    cartesian_utils::fromEigentoYarp(cartesian_task_R->getA()).transposed()));
 
-        EXPECT_DOUBLE_EQ(manipulability_task_L->ComputeManipulabilityIndex(), manip_index_L);
-        EXPECT_DOUBLE_EQ(manipulability_task_R->ComputeManipulabilityIndex(), manip_index_R);
+        EXPECT_NEAR(manipulability_task_L->ComputeManipulabilityIndex(), manip_index_L, 1e-10);
+        EXPECT_NEAR(manipulability_task_R->ComputeManipulabilityIndex(), manip_index_R, 1e-10);
     }
-    double new_manip_index_L = sqrt(det(cartesian_task_L->getA()*cartesian_task_L->getA().transposed()));
-    double new_manip_index_R = sqrt(det(cartesian_task_R->getA()*cartesian_task_R->getA().transposed()));
+    double new_manip_index_L = sqrt(det(
+        cartesian_utils::fromEigentoYarp(cartesian_task_L->getA())*
+        cartesian_utils::fromEigentoYarp(cartesian_task_L->getA()).transposed()));
+    double new_manip_index_R = sqrt(det(
+        cartesian_utils::fromEigentoYarp(cartesian_task_R->getA())*
+        cartesian_utils::fromEigentoYarp(cartesian_task_R->getA()).transposed()));
 
     idynutils.updateiDyn3Model(q);
 

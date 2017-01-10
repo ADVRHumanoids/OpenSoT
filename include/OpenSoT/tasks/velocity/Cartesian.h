@@ -21,8 +21,7 @@
  #include <OpenSoT/Task.h>
  #include <idynutils/idynutils.h>
  #include <kdl/frames.hpp>
- #include <yarp/sig/all.h>
- #include <yarp/os/all.h>
+ #include <Eigen/Dense>
 
  #define WORLD_FRAME_NAME "world"
 
@@ -46,7 +45,7 @@
              *
              * You can see an example in @ref example_cartesian.cpp
              */
-            class Cartesian : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            class Cartesian : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
                 typedef boost::shared_ptr<Cartesian> Ptr;
             protected:
@@ -58,9 +57,9 @@
                 int _distal_link_index;
                 int _base_link_index;
 
-                yarp::sig::Matrix _actualPose;
-                yarp::sig::Matrix _desiredPose;
-                yarp::sig::Vector _desiredTwist;
+                Eigen::MatrixXd _actualPose;
+                Eigen::MatrixXd _desiredPose;
+                Eigen::VectorXd _desiredTwist;
 
                 bool _base_link_is_world;
 
@@ -70,8 +69,8 @@
 
             public:
 
-                yarp::sig::Vector positionError;
-                yarp::sig::Vector orientationError;
+                Eigen::VectorXd positionError;
+                Eigen::VectorXd orientationError;
 
                 /*********** TASK PARAMETERS ************/
 
@@ -88,14 +87,14 @@
                  * @param base_link the name of the base link as expressed in the robot urdf. Can be set to "world"
                  */
                 Cartesian(std::string task_id,
-                          const yarp::sig::Vector& x,
+                          const Eigen::VectorXd& x,
                           iDynUtils &robot,
                           std::string distal_link,
                           std::string base_link);
 
                 ~Cartesian();
 
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.
@@ -104,7 +103,8 @@
                  * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                void setReference(const yarp::sig::Matrix& desiredPose);
+                void setReference(const Eigen::MatrixXd& desiredPose);
+                void setReference(const KDL::Frame& desiredPose);
 
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.
@@ -118,15 +118,18 @@
                  * instead of units/s. This means that if you have a twist expressed in SI units, you have to call the function as
                  * setReference(desiredPose, desiredTwist*dt)
                  */
-                void setReference(const yarp::sig::Matrix& desiredPose,
-                                  const yarp::sig::Vector& desiredTwist);
+                void setReference(const Eigen::MatrixXd& desiredPose,
+                                  const Eigen::VectorXd& desiredTwist);
+                void setReference(const KDL::Frame& desiredPose,
+                                  const KDL::Twist& desiredTwist);
 
                 /**
                  * @brief getReference returns the Cartesian task reference
                  * @return the Cartesian task reference \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                const yarp::sig::Matrix getReference() const;
+                const Eigen::MatrixXd getReference() const;
+                const void getReference(KDL::Frame& desiredPose) const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the Cartesian task.
@@ -135,8 +138,10 @@
                  * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
                  * a feed-forward term in the cartesian task computation
                  */
-                void getReference(yarp::sig::Matrix& desiredPose,
-                                  yarp::sig::Vector& desiredTwist) const;
+                void getReference(Eigen::MatrixXd& desiredPose,
+                                  Eigen::VectorXd& desiredTwist) const;
+                void getReference(KDL::Frame& desiredPose,
+                                  KDL::Vector& desiredTwist) const;
 
 
                 /**
@@ -144,10 +149,11 @@
                  * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                const yarp::sig::Matrix getActualPose() const;
+                const Eigen::MatrixXd getActualPose() const;
+                const void getActualPose(KDL::Frame& actual_pose) const;
                 
                 /**
-                 * @brief getActualPoseKDL returns the distal_link actual pose as a KDL frame. You need to call _update(x) for the actual pose to change
+                 * @brief DEPRECATED getActualPoseKDL returns the distal_link actual pose as a KDL frame. You need to call _update(x) for the actual pose to change
                  * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
                  * for the distal_link in the base_link frame of reference as a KDL Pose.
                  */
@@ -166,11 +172,11 @@
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
                  * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
                  */
-                yarp::sig::Vector getError();
+                Eigen::VectorXd getError();
                 
-                static bool isCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
+                static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
-                static OpenSoT::tasks::velocity::Cartesian::Ptr asCartesian(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
+                static OpenSoT::tasks::velocity::Cartesian::Ptr asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
             };
         }

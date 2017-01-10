@@ -30,7 +30,7 @@ class testCartesianPositionConstraint : public ::testing::Test{
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
       zeros(coman.getJointNames().size(),0.0),
-      _DHS(coman, 3e-3, zeros),
+      _DHS(coman, 3e-3, cartesian_utils::toEigen(zeros)),
       _A(1,3),
       _b(1,-0.5)
   {
@@ -40,7 +40,10 @@ class testCartesianPositionConstraint : public ::testing::Test{
       // A,b represent a plane with normal along the z axis. We are imposing the z coordinate of the right_arm
       // should be greater than 0.5
       _A.zero(); _A(0,2) = -1.0;
-      _cartesianPositionConstraint = new CartesianPositionConstraint(zeros, _DHS.leftArm, _A, _b);
+      _cartesianPositionConstraint = new CartesianPositionConstraint(
+                  cartesian_utils::toEigen(zeros), _DHS.leftArm,
+                                            cartesian_utils::toEigen(_A),
+                                            cartesian_utils::toEigen(_b));
   }
 
   virtual ~testCartesianPositionConstraint() {
@@ -57,7 +60,7 @@ class testCartesianPositionConstraint : public ::testing::Test{
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      _cartesianPositionConstraint->update(zeros);
+      _cartesianPositionConstraint->update(cartesian_utils::toEigen(zeros));
       coman.updateiDyn3Model(zeros,true);
   }
 
@@ -105,7 +108,10 @@ TEST_F(testCartesianPositionConstraint, checkBoundsScaling) {
       delete _cartesianPositionConstraint;
       _cartesianPositionConstraint = NULL;
     }
-    _cartesianPositionConstraint = new CartesianPositionConstraint(zeros, _DHS.leftArm, _A, _b, 0.5);
+    _cartesianPositionConstraint = new CartesianPositionConstraint(
+                cartesian_utils::toEigen(zeros), _DHS.leftArm,
+                cartesian_utils::toEigen(_A),
+                cartesian_utils::toEigen(_b), 0.5);
 
     double boundSmall = _cartesianPositionConstraint->getbUpperBound()[0];
 
@@ -162,36 +168,44 @@ TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
     _DHS.leftArm->setLambda(0.3);
     q = getGoodInitialPosition(coman);
     coman.updateiDyn3Model(q, true);
-    _DHS.leftArm->update(q);
-    _cartesianPositionConstraint->update(q);
+    _DHS.leftArm->update(cartesian_utils::toEigen(q));
+    _cartesianPositionConstraint->update(cartesian_utils::toEigen(q));
 
-    yarp::sig::Matrix p = _DHS.leftArm->getActualPose();
+    Eigen::MatrixXd p = _DHS.leftArm->getActualPose();
     p(2,3) = 0.5;
     _DHS.leftArm->setReference(p);
 
     double e = 0.0;
     unsigned int i = 0;
 
-    EXPECT_TRUE(_cartesianPositionConstraint->getAineq() == -1.0*_DHS.leftArm->getA().submatrix(2,2,0,28))
-        << "Aineq is \n"            << _cartesianPositionConstraint->getAineq().toString()
-        << "\n while J(2,:) is \n"  << (-1.0 * _DHS.leftArm->getA().submatrix(2,2,0,28)).toString();
+    Eigen::MatrixXd tmp = -_DHS.leftArm->getA();
+    EXPECT_TRUE(
+                cartesian_utils::fromEigentoYarp(_cartesianPositionConstraint->getAineq()) ==
+                cartesian_utils::fromEigentoYarp(tmp).submatrix(2,2,0,28))
+        << "Aineq is \n"            <<
+           cartesian_utils::fromEigentoYarp(_cartesianPositionConstraint->getAineq()).toString()
+        << "\n while J(2,:) is \n"  << cartesian_utils::fromEigentoYarp(tmp).submatrix(2,2,0,28).toString();
 
                                                                                                               ;
     // when above the position bound, z_dot > z_dot_limit = -bUpperBound
     // and we expect z_dot_limit to be NEGATIVE (we can go up, but also down)
     EXPECT_LT(-_cartesianPositionConstraint->getbUpperBound()(0),0.0);
     do {
-        e = norm(_DHS.leftArm->getb());
+        std::cout<<"yarp::norm "<<norm(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb()))<<std::endl;
+        std::cout<<"squared norm "<<sqrt(_DHS.leftArm->getb().squaredNorm())<<std::endl;
+
+        e = norm(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb()));
         double previous_bUpperBound = -_cartesianPositionConstraint->getbUpperBound()(0);
-        q += pinv(_DHS.leftArm->getA(),1E-7)*_DHS.leftArm->getb();
+        q += pinv(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getA()),1E-7)*
+                cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb());
         coman.updateiDyn3Model(q, true);
-        _DHS.leftArm->update(q);
-        _cartesianPositionConstraint->update(q);
+        _DHS.leftArm->update(cartesian_utils::toEigen(q));
+        _cartesianPositionConstraint->update(cartesian_utils::toEigen(q));
         EXPECT_GE(-_cartesianPositionConstraint->getbUpperBound()(0), previous_bUpperBound) << "@i=" << i;
         ++i;
     } while ( e > 1e-6 && i < 1000);
     ASSERT_TRUE(e < 1.51e-6);
-    ASSERT_NEAR(_DHS.leftArm->getActualPose().getCol(3).subVector(0,2)(2),0.5,1.5e-6);
+    ASSERT_NEAR(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getActualPose()).getCol(3).subVector(0,2)(2),0.5,1.5e-6);
     // when at the bound, z_dot > z_dot_limit = -bUpperBound
     // and we expect z_dot_limit to be ZERO (we can go up, but not down)
     EXPECT_NEAR(-_cartesianPositionConstraint->getbUpperBound()(0),0.0,1.5e-6);
@@ -203,11 +217,12 @@ TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
     e = 0.0;
     i = 0;
     do {
-        e = norm(_DHS.leftArm->getb());
-        q += pinv(_DHS.leftArm->getA(),1E-7)*_DHS.leftArm->getLambda()*_DHS.leftArm->getb();
+        e = sqrt(_DHS.leftArm->getb().squaredNorm());
+        q += pinv(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getA()),1E-7)*_DHS.leftArm->getLambda()*
+                cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb());
         coman.updateiDyn3Model(q, true);
-        _DHS.leftArm->update(q);
-        _cartesianPositionConstraint->update(q);
+        _DHS.leftArm->update(cartesian_utils::toEigen(q));
+        _cartesianPositionConstraint->update(cartesian_utils::toEigen(q));
         ++i;
     } while ( e > 1e-6 && i < 1000);
     ASSERT_TRUE(e < 1.51e-6);

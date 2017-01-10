@@ -30,9 +30,9 @@ TaskToConstraint::TaskToConstraint(TaskPtr task) :
     this->generateAll();
 }
 
-void TaskToConstraint::update(const yarp::sig::Vector &q)
+void TaskToConstraint::update(const Eigen::VectorXd &q)
 {
-    assert(q.size() == _task->getXSize());
+    assert(q.rows() == _task->getXSize());
 
     _task->update(q);
     this->generateAll();
@@ -43,6 +43,6 @@ void TaskToConstraint::generateAll() {
     _bLowerBound = _task->getb();
     _bUpperBound = _bLowerBound;
 
-    assert( (_Aineq.rows() == _bLowerBound.size()) &&
-            (_Aineq.rows() == _bUpperBound.size()));
+    assert( (_Aineq.rows() == _bLowerBound.rows()) &&
+            (_Aineq.rows() == _bUpperBound.rows()));
 }

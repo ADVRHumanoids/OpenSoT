@@ -15,7 +15,8 @@ int main(int argc, char* argv[]) {
     yarp::sig::Vector q = robot.sensePosition();
     yarp::sig::Vector dq(q.size(),0.0);
 
-    vTasks::Cartesian::Ptr cartesian(new vTasks::Cartesian("cartesian::l_wrist::world", q,
+    vTasks::Cartesian::Ptr cartesian(new vTasks::Cartesian("cartesian::l_wrist::world",
+                                                           cartesian_utils::toEigen(q),
                                                            robot.idynutils,
                                                            robot.idynutils.left_arm.end_effector_name,
                                                            "world"));
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]) {
     stack.push_back(cartesian);
     solvers::QPOases_sot solver(stack);
 
-    yarp::sig::Matrix initialPose = cartesian->getActualPose();
+    yarp::sig::Matrix initialPose = cartesian_utils::fromEigentoYarp(cartesian->getActualPose());
     yarp::sig::Vector initialPosition = initialPose.getCol(3).subVector(0,2);
 
     // setting a lower lambda for convergence
@@ -36,6 +37,7 @@ int main(int argc, char* argv[]) {
     robot.setPositionDirectMode();
     double t_start = yarp::os::Time::now();
     double t = t_start;
+    Eigen::VectorXd _dq(q.size()); _dq.setZero(q.size());
     while(t - t_start < 10.0) {
         // delta goes from -.025m to +.025m
         double delta = .025*m*cos(0.1*t);
@@ -45,9 +47,10 @@ int main(int argc, char* argv[]) {
         yarp::sig::Vector positionReference = initialPosition + yarp::sig::Vector(3,delta);
         poseReference.setSubcol(positionReference,0,3);
 
-        cartesian->setReference(poseReference);
-        cartesian->update(q);
-        solver.solve(dq);
+        cartesian->setReference(cartesian_utils::toEigen(poseReference));
+        cartesian->update(cartesian_utils::toEigen(q));
+        solver.solve(_dq);
+        dq = cartesian_utils::fromEigentoYarp(_dq);
 
         q += dq;
 

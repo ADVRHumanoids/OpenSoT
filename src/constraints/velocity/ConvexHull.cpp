@@ -17,14 +17,12 @@
 
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <idynutils/convex_hull.h>
-#include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
 
-ConvexHull::ConvexHull(const yarp::sig::Vector& x,
+ConvexHull::ConvexHull(const Eigen::VectorXd& x,
                        iDynUtils& robot,
                        const double safetyMargin) :
     Constraint("convex_hull", x.size()), _robot(robot),
@@ -35,14 +33,13 @@ ConvexHull::ConvexHull(const yarp::sig::Vector& x,
     this->update(x);
 }
 
-void ConvexHull::update(const yarp::sig::Vector &x) {
+void ConvexHull::update(const Eigen::VectorXd &x) {
 
     /************************ COMPUTING BOUNDS ****************************/
 
-    yarp::sig::Matrix JCoM;
-    _robot.iDyn3_model.getCOMJacobian(JCoM);
-    JCoM.removeCols(0,6);
-    JCoM.removeRows(2,4);
+    Eigen::MatrixXd JCoM;
+    _robot.getCOMJacobian(JCoM);
+    JCoM = JCoM.block(0,6,2,_x_size);
 
     if(getConvexHull(_ch))
         this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
@@ -51,6 +48,9 @@ void ConvexHull::update(const yarp::sig::Vector &x) {
         _Aineq.resize(0, 2);
         _bUpperBound.resize(0);
     }
+
+
+
 
     assert(JCoM.rows() == _Aineq.cols());
 
@@ -82,7 +82,7 @@ bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 
 
 void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
-                                yarp::sig::Matrix &A, yarp::sig::Vector &b,
+                                Eigen::MatrixXd &A, Eigen::VectorXd &b,
                                 const double boundScaling)
 {
     double _a, _b, _c;
@@ -101,23 +101,23 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
         if(_c <= 0.0) { // c < 0 --> AJdq < -c w/ -c > 0
             A(z,0) = + _a;
             A(z,1) = + _b;
-            b[z] =   - _c;
+            b(z) =   - _c;
         } else { // c > 0 --> -AJdq < c
             A(z,0) = - _a;
             A(z,1) = - _b;
-            b[z] =   + _c;
+            b(z) =   + _c;
         }
 
 
         double normalizedBoundScaling = boundScaling * sqrt(_a*_a + _b*_b); //boundScaling Normalization
         if(fabs(_c) <= normalizedBoundScaling)
-            b[z] = 0.0;
+            b(z) = 0.0;
         else
-            b[z] -= normalizedBoundScaling;
+            b(z) -= normalizedBoundScaling;
         z++;
     }
-//    std::cout<<"A_ch: "<<A.toString()<<std::endl;
-//    std::cout<<"b_ch: "<<b.toString()<<std::endl;
+    //std::cout<<"A_ch: "<<A<<std::endl;
+    //std::cout<<"b_ch: "<<b<<std::endl;
 }
 
 void ConvexHull::getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,

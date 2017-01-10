@@ -1,16 +1,15 @@
 #include <OpenSoT/tasks/velocity/Interaction.h>
-#include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::tasks::velocity;
-using namespace yarp::math;
+
 
 #define COMPLIANCE_INITIAL_VALUE 1E-6 //[m/N] & [rad/Nm]
 
 Interaction::Interaction(std::string task_id,
-                     const yarp::sig::Vector& x,
+                     const Eigen::VectorXd& x,
                      iDynUtils &robot,
                      std::string distal_link,
                      std::string base_link,
@@ -26,7 +25,7 @@ Interaction::Interaction(std::string task_id,
     if(_ft_index == -1)
         throw "Passed ft_frame is not in model!";
 
-    _C = _C.eye();
+    _C = _C.setIdentity(6,6);
     _C = COMPLIANCE_INITIAL_VALUE*_C;
 
     updateActualWrench();
@@ -43,18 +42,18 @@ Interaction::~Interaction()
 void Interaction::updateActualWrench()
 {
     // Get ft measurement in sensor frame
-    yarp::sig::Vector wrench_in_sensor_frame(6, 0.0);
-    _robot.iDyn3_model.getSensorMeasurement(_ft_index, wrench_in_sensor_frame);
+    Eigen::VectorXd wrench_in_sensor_frame(6);
+    wrench_in_sensor_frame.setZero(6);
+    _robot.getSensorMeasurement(_ft_index, wrench_in_sensor_frame);
 
-    KDL::Wrench wrench_in_sensor_frame_KDL;
-    cartesian_utils::fromYarpVectortoKDLWrench(wrench_in_sensor_frame, wrench_in_sensor_frame_KDL);
+    KDL::Wrench wrench_in_sensor_frame_KDL = cartesian_utils::toKDLWrench(wrench_in_sensor_frame);
 
     // Wrench has to be transformed from ft_frame to base_link **/
-    yarp::sig::Matrix ft_frame_in_base_link;
+    Eigen::MatrixXd ft_frame_in_base_link(4,4);
     if(_base_link_is_world)
-        ft_frame_in_base_link = _robot.iDyn3_model.getPosition(_robot.iDyn3_model.getLinkIndex(_ft_frame));
+        ft_frame_in_base_link = _robot.getPosition(_robot.iDyn3_model.getLinkIndex(_ft_frame));
     else
-        ft_frame_in_base_link = _robot.iDyn3_model.getPosition(
+        ft_frame_in_base_link = _robot.getPosition(
                 _robot.iDyn3_model.getLinkIndex(_base_link),
                 _robot.iDyn3_model.getLinkIndex(_ft_frame));
 
@@ -62,47 +61,47 @@ void Interaction::updateActualWrench()
 //    std::cout<<"ft_frame_in_base_link:"<<std::endl;
 //    cartesian_utils::printHomogeneousTransform(ft_frame_in_base_link);std::cout<<std::endl;
 
-    KDL::Frame ft_frame_in_base_link_KDL;
-    cartesian_utils::fromYARPMatrixtoKDLFrame(ft_frame_in_base_link, ft_frame_in_base_link_KDL);
+    KDL::Frame ft_frame_in_base_link_KDL = cartesian_utils::toKDLFrame(ft_frame_in_base_link);
 
     if(_distal_link != _ft_frame){
-        yarp::sig::Matrix ft_frame_to_distal_link = _robot.iDyn3_model.getPosition(
+        Eigen::MatrixXd ft_frame_to_distal_link(4,4);
+        ft_frame_to_distal_link= _robot.getPosition(
                     _robot.iDyn3_model.getLinkIndex(_ft_frame),
                     _robot.iDyn3_model.getLinkIndex(_distal_link));
-        KDL::Vector distance_in_distal_link_KDL(ft_frame_to_distal_link.subcol(0,3,3)[0],
-                                                ft_frame_to_distal_link.subcol(0,3,3)[1],
-                                                ft_frame_to_distal_link.subcol(0,3,3)[2]);
+        KDL::Vector distance_in_distal_link_KDL(ft_frame_to_distal_link(0,3),
+                                                ft_frame_to_distal_link(1,3),
+                                                ft_frame_to_distal_link(2,3));
         wrench_in_sensor_frame_KDL.RefPoint(distance_in_distal_link_KDL);
     }
 
     KDL::Wrench wrench_in_base_link = ft_frame_in_base_link_KDL.M * wrench_in_sensor_frame_KDL;
 
-    cartesian_utils::fromKDLWrenchtoYarpVector(wrench_in_base_link, _actualWrench);
+    _actualWrench = cartesian_utils::toEigen(wrench_in_base_link);
 }
 
-yarp::sig::Vector Interaction::getWrenchError()
+Eigen::VectorXd Interaction::getWrenchError()
 {
     return _desiredWrench - _actualWrench;
 }
 
-void Interaction::_update(const yarp::sig::Vector &x)
+void Interaction::_update(const Eigen::VectorXd &x)
 {
     updateActualWrench();
 
-    yarp::sig::Vector wrench_error = getWrenchError();
-    forceError = wrench_error.subVector(0, 2);
-    torqueError = wrench_error.subVector(3, 5);
-    yarp::sig::Vector delta_x = _C * wrench_error;
+    Eigen::VectorXd wrench_error(6);
+    wrench_error= getWrenchError();
+    forceError = wrench_error.segment(0,3);
+    torqueError = wrench_error.segment(3,3);
+    Eigen::VectorXd delta_x(6);
+    delta_x= _C * wrench_error;
 
-    KDL::Twist delta_x_KDL;
-    cartesian_utils::fromYARPVectortoKDLTwist(delta_x, delta_x_KDL);
+    KDL::Twist delta_x_KDL = cartesian_utils::toKDLTwist(delta_x);
 
     //update desired position!
-    KDL::Frame actual_ref_KDL;
-    cartesian_utils::fromYARPMatrixtoKDLFrame(getActualPose(), actual_ref_KDL);
+    KDL::Frame actual_ref_KDL = cartesian_utils::toKDLFrame(getActualPose());
     actual_ref_KDL.Integrate(delta_x_KDL, 1.0);
-    yarp::sig::Matrix actual_ref(4,4);
-    cartesian_utils::fromKDLFrameToYARPMatrix(actual_ref_KDL, actual_ref);
+    Eigen::MatrixXd actual_ref(4,4);
+    actual_ref = cartesian_utils::toEigen(actual_ref_KDL);
 
 //    std::cout<<"xd: "<<std::endl;
 //    cartesian_utils::printHomogeneousTransform(actual_ref);
@@ -113,28 +112,38 @@ void Interaction::_update(const yarp::sig::Vector &x)
     Cartesian::_update(x);
 }
 
-void Interaction::setReferenceWrench(const yarp::sig::Vector &desiredWrench) {
+void Interaction::setReferenceWrench(const Eigen::VectorXd &desiredWrench) {
     assert(desiredWrench.size() == 6 && "Desired wrench musth be a 6-element vector");
     _desiredWrench = desiredWrench;
 }
 
-const yarp::sig::Vector Interaction::getReferenceWrench() const {
+void Interaction::setReferenceWrench(const KDL::Wrench& desiredWrench)
+{
+    _desiredWrench[0] = desiredWrench.force.x();
+    _desiredWrench[1] = desiredWrench.force.y();
+    _desiredWrench[2] = desiredWrench.force.z();
+    _desiredWrench[3] = desiredWrench.torque.x();
+    _desiredWrench[4] = desiredWrench.torque.y();
+    _desiredWrench[5] = desiredWrench.torque.z();
+}
+
+const Eigen::VectorXd Interaction::getReferenceWrench() const {
     return _desiredWrench;
 }
 
-const yarp::sig::Vector Interaction::getActualWrench() const
+const Eigen::VectorXd Interaction::getActualWrench() const
 {
     return _actualWrench;
 }
 
-const yarp::sig::Matrix Interaction::getCompliance() const
+const Eigen::MatrixXd Interaction::getCompliance() const
 {
     return _C;
 }
 
-void Interaction::setCompliance(const yarp::sig::Matrix& C)
+void Interaction::setCompliance(const Eigen::MatrixXd& C)
 {
-    assert(C.rows() == 6 && C.cols() == 6 && C.transposed() == C &&
+    assert(C.rows() == 6 && C.cols() == 6 && C.transpose() == C &&
            "Matrix C must be 6x6 positive definite matrix");
     // Check size  [6x6] and if Positive Definite
     //if(C.rows() == 6 && C.cols() == 6 && det(C) >= 0.0)

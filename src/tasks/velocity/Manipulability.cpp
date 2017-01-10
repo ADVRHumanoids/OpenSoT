@@ -3,40 +3,40 @@
 #include <cmath>
 
 using namespace OpenSoT::tasks::velocity;
-using namespace yarp::math;
 
-Manipulability::Manipulability(const yarp::sig::Vector& x, const iDynUtils& robot_model,
+Manipulability::Manipulability(const Eigen::VectorXd& x, const iDynUtils& robot_model,
                                const Cartesian::Ptr CartesianTask):
     Task("manipulability::"+CartesianTask->getTaskID(), x.size()),
     _manipulabilityIndexGradientWorker(x, robot_model, CartesianTask),
     _x(x)
 {
     _W.resize(_x_size, _x_size);
-    _W.eye();
+    _W.setIdentity(_x_size, _x_size);
 
     _hessianType = HST_POSDEF;
 
     _A.resize(_x_size, _x_size);
-    _A.eye();
+    _A.setIdentity(_x_size, _x_size);
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
 
 }
 
-Manipulability::Manipulability(const yarp::sig::Vector& x, const iDynUtils& robot_model,
+Manipulability::Manipulability(const Eigen::VectorXd& x, const iDynUtils& robot_model,
                                const CoM::Ptr CartesianTask):
     Task("manipulability::"+CartesianTask->getTaskID(), x.size()),
     _manipulabilityIndexGradientWorker(x, robot_model,CartesianTask),
     _x(x)
 {
     _W.resize(_x_size, _x_size);
-    _W.eye();
+    _W.setIdentity(_x_size, _x_size);
 
     _hessianType = HST_POSDEF;
 
     _A.resize(_x_size, _x_size);
-    _A.eye();
+    _A.setIdentity(_x_size, _x_size);
+
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
@@ -47,7 +47,7 @@ Manipulability::~Manipulability()
 
 }
 
-void Manipulability::_update(const yarp::sig::Vector &x) {
+void Manipulability::_update(const Eigen::VectorXd &x) {
 
     _x = x;
     /************************* COMPUTING TASK *****************************/

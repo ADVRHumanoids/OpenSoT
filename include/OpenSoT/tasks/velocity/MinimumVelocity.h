@@ -21,8 +21,6 @@
  #include <OpenSoT/Task.h>
  #include <idynutils/idynutils.h>
  #include <kdl/frames.hpp>
- #include <yarp/sig/all.h>
- #include <yarp/os/all.h>
 
 /**
  * @example example_MinimumVelocity.cpp
@@ -39,7 +37,7 @@
                 MinimumCartesianVelocity
              * You can see an example of it in @ref example_MinimumVelocity.cpp
              */
-            class MinimumVelocity : public Task < yarp::sig::Matrix, yarp::sig::Vector > {
+            class MinimumVelocity : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
                 typedef boost::shared_ptr<MinimumVelocity> Ptr;
             protected:
@@ -50,7 +48,7 @@
 
                 ~MinimumVelocity();
 
-                void _update(const yarp::sig::Vector& x);
+                void _update(const Eigen::VectorXd& x);
             };
         }
     }

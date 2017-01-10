@@ -20,7 +20,6 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
- #include <yarp/sig/all.h>
  #include <idynutils/idynutils.h>
  #include <idynutils/convex_hull.h>
  #include <kdl/frames.hpp>
@@ -44,13 +43,13 @@
              * NOTICE It is adviced to apply this constraint only to \emph{Cartesian} tasks that are
              * expressed in the \emph{world} frame of reference, to avoid unexpected behaviors.
              */
-            class CartesianPositionConstraint: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class CartesianPositionConstraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<CartesianPositionConstraint> Ptr;
             private:
                 OpenSoT::tasks::velocity::Cartesian::Ptr _cartesianTask;
-                yarp::sig::Matrix _A_Cartesian;
-                yarp::sig::Vector _b_Cartesian;
+                Eigen::MatrixXd _A_Cartesian;
+                Eigen::VectorXd _b_Cartesian;
                 double _boundScaling;
 
             public:
@@ -63,13 +62,13 @@
                  * @param boundScaling a parameter which is inversely proportional to the number of steps
                  * needed to reach the cartesian task limits.
                  */
-                CartesianPositionConstraint(const yarp::sig::Vector& x,
+                CartesianPositionConstraint(const Eigen::VectorXd& x,
                                              OpenSoT::tasks::velocity::Cartesian::Ptr cartesianTask,
-                                             const yarp::sig::Matrix& A_Cartesian,
-                                             const yarp::sig::Vector& b_Cartesian,
+                                             const Eigen::MatrixXd& A_Cartesian,
+                                             const Eigen::VectorXd& b_Cartesian,
                                             const double boundScaling = 1.0);
 
-                void update(const yarp::sig::Vector &x);
+                void update(const Eigen::VectorXd &x);
             };
         }
     }

@@ -19,6 +19,7 @@
 #define __CONSTRAINT_H__
 
 #include <boost/shared_ptr.hpp>
+#include <string>
 
  namespace OpenSoT {
 

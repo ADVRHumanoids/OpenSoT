@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi, Luca Muratore, Enrico Mingo Hoffman
- * email:  alessio.rocchi@iit.it, luca.muratore@iit.it, enrico.mingo@iit.it
+ * Copyright (C) 2016 Cogimon
+ * Author: Enrico Mingo Hoffman, Alessio Rocchi, Luca Muratore
+ * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it, luca.muratore@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -15,38 +15,52 @@
  * Public License for more details
 */
 
- #ifndef __MANIPULATION_STACK_H__
- #define __MANIPULATION_STACK_H__
+ #ifndef __WALKING_STACK_H__
+ #define __WALKING_STACK_H__
 
  #include <OpenSoT/utils/DefaultHumanoidStack.h>
  #include <OpenSoT/utils/AutoStack.h>
 
 namespace OpenSoT {
 
-     class ManipulationStack : public OpenSoT::AutoStack
+     class WalkingStack : public OpenSoT::AutoStack
      {
+
+         enum STANCE_FOOT
+         {
+             LEFT_FOOT = 1,
+             RIGHT_FOOT = -1
+         };
+
      public:
-        typedef boost::shared_ptr<ManipulationStack> Ptr;
+        typedef boost::shared_ptr<WalkingStack> Ptr;
 
          /**
-          * @brief MainpulationStack creates and tunes a stack for manipulation
-          * @param model the robot model. It should be updated before creating the stack
-          *              in order to impose good initial references for the tasks. The stack
-                         will modify the model by setting the world on the left foot (with a identify transform),
-                         and both the anchor and the floating base link on the left foot
+          * @brief WalkingStack creates and tunes a stack for walking
+          * @param model the robot model.
           * @param dT the control time in [s].
           * @param state
           */
-        ManipulationStack(iDynUtils &model,
+        WalkingStack(iDynUtils &model,
                           const double dT,
                           const Eigen::VectorXd& state);
 
-        ~ManipulationStack() {}
+        ~WalkingStack() {}
 
         OpenSoT::DefaultHumanoidStack::Ptr DHS;
 
         /** \brief eps the suggested value to use as damping when inverting the task jacobians */
         double eps;
+
+        int stance_foot;
+
+        bool switchSupportFoot(const int trj_stance_foot);
+
+     private:
+        iDynUtils& _model;
+
+            //robot_model.iDyn3_model.getSensorMeasurement(_ft_index, wrench_in_sensor_frame);
+
      };
 }
 

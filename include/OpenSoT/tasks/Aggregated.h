@@ -19,8 +19,7 @@
 #define __TASKS_AGGREGATED_H__
 
 #include <OpenSoT/Task.h>
-
-#include <yarp/sig/all.h>
+#include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <list>
 
@@ -38,7 +37,7 @@
          * it is comprised. Take a look at getConstraints(), getAggregatedConstraints(), getOwnConstraints() for more infos.
          *
          */
-        class Aggregated: public Task<yarp::sig::Matrix, yarp::sig::Vector> {
+        class Aggregated: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
             typedef boost::shared_ptr<Aggregated> Ptr;
         protected:
@@ -95,6 +94,18 @@
 
             static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
 
+            inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+            {
+                A.conservativeResize(A.rows()+B.rows(), A.cols());
+                A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+            }
+
+            inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+            {
+                a.conservativeResize(a.rows()+b.rows());
+                a.segment(a.rows()-b.rows(),b.rows())<<b;
+            }
+
         public:
             /**
              * @brief Aggregated
@@ -124,11 +135,11 @@
              *          update(q) on all tasks he is composed of
              */
             Aggregated(const std::list< TaskPtr > tasks,
-                       const yarp::sig::Vector &q);
+                       const Eigen::VectorXd &q);
 
             ~Aggregated();
 
-            void _update(const yarp::sig::Vector &x);
+            void _update(const Eigen::VectorXd &x);
 
 
             /**
@@ -181,7 +192,7 @@
              */
             void setLambda(double lambda);
               
-            static bool isAggregated(OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr task);
+            static bool isAggregated(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
         };
 
     }

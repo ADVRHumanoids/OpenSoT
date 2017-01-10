@@ -21,7 +21,6 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
- #include <yarp/sig/all.h>
  #include <idynutils/idynutils.h>
  #include <idynutils/collision_utils.h>
  #include <kdl/frames.hpp>
@@ -41,7 +40,7 @@
              *  the bUpperBound is the minimum distance vector of all the Link pairs, the dimension of which is n * 1.
              *  the element in bUpperBound is the minimum distance between the corresponding Link pair with taking the Link pair threshold into account.
              */
-            class SelfCollisionAvoidance: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class SelfCollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
             protected:
@@ -63,21 +62,14 @@
                  * in multiple tasks in the same stack. It is a simple speedup waiting for the stack system to support
                  * constraint caching - or for idynutils to support some form of cache system
                  */
-                yarp::sig::Vector _x_cache;
+                Eigen::VectorXd _x_cache;
 
                 /**
                  * @brief base_index all the calculation and expression is described in
                  * a base link frame which is "waist" link frame
                  */
                 int base_index;
-            public:
-                ///TODO: Move in cartesian utils
-                // the following four functions are responsible for the transformation between the yarp data type and Eigen data type
-                Eigen::MatrixXd from_yarp_to_Eigen_matrix(const yarp::sig::Matrix &Y_M);
-                yarp::sig::Matrix from_Eigen_to_Yarp_matrix(const Eigen::MatrixXd &E_M);
-                Eigen::VectorXd from_yarp_to_Eigen_vector(const yarp::sig::Vector &Y_V);
-                yarp::sig::Vector from_Eigen_to_Yarp_vector(const Eigen::VectorXd &E_V);
-                
+            public:               
                 /**
                  * @brief Skew_symmetric_operator is used to get the transformation matrix which is used to transform
                  * the base Jacobian to goal Jacobian
@@ -93,7 +85,7 @@
                  * @param Aineq_fc Aineq matrix of this constraint
                  * @param bUpperB_fc bUpperBound of this constraint
                  */
-                void calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_fc, yarp::sig::Vector & bUpperB_fc );
+                void calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc, Eigen::VectorXd & bUpperB_fc );
 
             public:
                 /**
@@ -106,7 +98,7 @@
                  * @param boundScaling the bound scaling for the capsule distance (a lower number means we will approach
                  *        the linkPair_threshold more slowly)
                  */
-                SelfCollisionAvoidance(const yarp::sig::Vector& x,
+                SelfCollisionAvoidance(const Eigen::VectorXd& x,
                                        iDynUtils &robot,
                                        double detection_threshold = std::numeric_limits<double>::infinity(),
                                        double linkPair_threshold = 0.0,
@@ -143,7 +135,7 @@
                  * at the stack level so that, if two tasks in the same stack are constrained by the same constraint, this constraint
                  * gets updated only once per stack update)
                  */
-                void update(const yarp::sig::Vector &x);
+                void update(const Eigen::VectorXd &x);
 
 
                 /**

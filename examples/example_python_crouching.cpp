@@ -9,6 +9,8 @@
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/utils/VelocityAllocation.h>
 
+using namespace yarp::math;
+
 #define MODULE_NAME "example_python"
 #define dT          25e-3
 
@@ -25,7 +27,8 @@ int main(int argc, char **argv) {
     yarp::sig::Vector q = robot.sensePosition();
     robot.idynutils.updateiDyn3Model(q,true);
     robot.idynutils.setFloatingBaseLink(robot.idynutils.left_leg.end_effector_name);
-    OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT, q);
+    OpenSoT::DefaultHumanoidStack DHS(robot.idynutils, dT,
+                                      cartesian_utils::toEigen(q));
 
 
     /*                            */
@@ -61,7 +64,7 @@ int main(int argc, char **argv) {
     DHS.selfCollisionAvoidance->setBoundScaling(0.01);
     DHS.velocityLimits->setVelocityLimits(0.3);
 
-    yarp::sig::Matrix pW = DHS.postural->getWeight();
+    yarp::sig::Matrix pW = cartesian_utils::fromEigentoYarp(DHS.postural->getWeight());
     for(unsigned int i_t = 0; i_t < 3; ++i_t)
         pW(robot.idynutils.torso.joint_numbers[i_t],
             robot.idynutils.torso.joint_numbers[i_t]) *= 1e3;
@@ -75,11 +78,11 @@ int main(int argc, char **argv) {
         pW(robot.idynutils.right_leg.joint_numbers[i_t],
            robot.idynutils.right_leg.joint_numbers[i_t]) *= amt;
     }
-    DHS.postural->setWeight(pW);
+    DHS.postural->setWeight(cartesian_utils::toEigen(pW));
 
-    pW = DHS.waist_Orientation->getWeight();
+    pW = cartesian_utils::fromEigentoYarp(DHS.waist_Orientation->getWeight());
     pW(1, 1) *= 1e-2;
-    DHS.waist_Orientation->setWeight(pW);
+    DHS.waist_Orientation->setWeight(cartesian_utils::toEigen(pW));
 
     std::list<std::pair<std::string,std::string> > whiteList;
     // lower body - arms collision whitelist for WalkMan (for upper-body manipulation tasks - i.e. not crouching)
@@ -122,8 +125,8 @@ int main(int argc, char **argv) {
 
     // setting higher velocity limit to last stack --
     // TODO next feature of VelocityAllocation is a last_stack_speed ;)
-    typedef std::list<OpenSoT::Constraint<yarp::sig::Matrix,yarp::sig::Vector>::ConstraintPtr>::iterator it_constraint;
-    OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr lastTask = autoStack->getStack()[2];
+    typedef std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr>::iterator it_constraint;
+    OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr lastTask = autoStack->getStack()[2];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
         if( boost::dynamic_pointer_cast<
@@ -166,6 +169,7 @@ int main(int argc, char **argv) {
     yarp::sig::Vector dq;
     double tic, toc;
     int print_mean = 0;
+    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     while(true) {
         tic = yarp::os::Time::now();
         robot.idynutils.updateiDyn3Model(q, true);
@@ -177,9 +181,10 @@ int main(int argc, char **argv) {
         DHS.postural->setWeight(M);
         */
 
-        autoStack->update(q);
-        if(solver.solve(dq))
-            q+=dq;
+        autoStack->update(cartesian_utils::toEigen(q));
+        if(solver.solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
+            q+=dq;}
         else
             std::cout << "Error computing solve()" << std::endl;
         robot.move(q);
@@ -192,9 +197,9 @@ int main(int argc, char **argv) {
             std::cout << "dt = "
                       << boost::accumulators::extract::rolling_mean(time_accumulator) << std::endl;
 
-            std::cout << "l_wrist reference:" << DHS.leftArm->getReference().toString() << std::endl;
-            std::cout << "r_wrist reference:" << DHS.rightArm->getReference().toString() << std::endl;
-            std::cout << "waist reference:" << DHS.waist->getReference().toString() << std::endl;
+            std::cout << "l_wrist reference:" << DHS.leftArm->getReference() << std::endl;
+            std::cout << "r_wrist reference:" << DHS.rightArm->getReference() << std::endl;
+            std::cout << "waist reference:" << DHS.waist->getReference() << std::endl;
             std::cout << "Active Capsules Pairs: " << DHS.selfCollisionAvoidance->getbUpperBound().size() << std::endl;
 
         }

@@ -212,30 +212,32 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 
     ASSERT_EQ(yarp::math::norm(sensor_WallWrench),0.0);
 
-    Interaction::Ptr interactionTask(new Interaction("interaction::l_wrist", q, _robot,
+    Interaction::Ptr interactionTask(new Interaction("interaction::l_wrist",
+                                                     cartesian_utils::toEigen(q), _robot,
                                                      distal_link,
                                                      base_link,
                                                      ft_sensor_link));
 
-    interactionTask->setCompliance(C);
+    interactionTask->setCompliance(cartesian_utils::toEigen(C));
 
-    EXPECT_TRUE(C == interactionTask->getCompliance());
+    EXPECT_TRUE(cartesian_utils::toEigen(C) == interactionTask->getCompliance());
 
-    Postural::Ptr posturalTask(new Postural(q));
+    Postural::Ptr posturalTask(new Postural(cartesian_utils::toEigen(q)));
 
     int T = 1000;
     VelocityLimits::Ptr joint_velocity_limits(new VelocityLimits(0.1, (double)(1.0/T), q.size()));
 
-    JointLimits::Ptr joint_limits(new JointLimits(q,
-                                                _robot.iDyn3_model.getJointBoundMax(),
-                                                _robot.iDyn3_model.getJointBoundMin()));
+    JointLimits::Ptr joint_limits(new JointLimits(
+                                      cartesian_utils::toEigen(q),
+                                                _robot.getJointBoundMax(),
+                                                _robot.getJointBoundMin()));
 
     //Create the SoT
-    std::vector< OpenSoT::Task<Matrix, Vector>::TaskPtr > stack_of_tasks;
+    std::vector< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > stack_of_tasks;
     stack_of_tasks.push_back(interactionTask);
     stack_of_tasks.push_back(posturalTask);
 
-    std::list< OpenSoT::Constraint<Matrix, Vector>::ConstraintPtr > joint_constraints_list;
+    std::list< OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr > joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
     joint_constraints_list.push_back(joint_velocity_limits);
 
@@ -246,18 +248,19 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 
 
     std::cout<<distal_link<<" actual position in "<<base_link<<" @t0: "<<std::endl;
-    cartesian_utils::printHomogeneousTransform(interactionTask->getActualPose());
-    std::cout <<"Applied wrench@t0: ["<<interactionTask->getActualWrench().toString()<<"]"<<std::endl;
-    ASSERT_EQ(yarp::math::norm(interactionTask->getActualWrench()),0.0);
+    cartesian_utils::printHomogeneousTransform(cartesian_utils::fromEigentoYarp(interactionTask->getActualPose()));
+    std::cout <<"Applied wrench@t0: ["<<interactionTask->getActualWrench()<<"]"<<std::endl;
+    ASSERT_EQ(yarp::math::norm(
+                  cartesian_utils::fromEigentoYarp(interactionTask->getActualWrench())),0.0);
 
-    yarp::sig::Vector base_WallWrenchDesired = interactionTask->getActualWrench();
+    yarp::sig::Vector base_WallWrenchDesired = cartesian_utils::fromEigentoYarp(interactionTask->getActualWrench());
     base_WallWrenchDesired[0] = 10.0;
     base_WallWrenchDesired[1] = 5.0;
     base_WallWrenchDesired[2] = -1.0;
     base_WallWrenchDesired[3] = 1.5;
     base_WallWrenchDesired[4] = -1.1;
     base_WallWrenchDesired[5] = 1.2;
-    interactionTask->setReferenceWrench(base_WallWrenchDesired);
+    interactionTask->setReferenceWrench(cartesian_utils::toEigen(base_WallWrenchDesired));
 
     yarp::sig::Vector dq(q.size(), 0.0);
     unsigned int max_iterations = 10000;
@@ -266,7 +269,7 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
     {
         _robot.updateiDyn3Model(q, true);
 
-        yarp::sig::Matrix base_link_T_EE = interactionTask->getActualPose();
+        yarp::sig::Matrix base_link_T_EE = cartesian_utils::fromEigentoYarp(interactionTask->getActualPose());
         std::cout<<"\n\n---@t"<<double(i)/T<<"------------\n";
         std::cout<<distal_link<<" actual position in "<<base_link<<std::endl;
         cartesian_utils::printHomogeneousTransform(base_link_T_EE);
@@ -287,16 +290,19 @@ TEST_F(testInteractionTask, testInteractionTask_wrench)
 
 
 
-         interactionTask->update(q);
-         joint_constraints->update(q);
+         interactionTask->update(cartesian_utils::toEigen(q));
+         joint_constraints->update(cartesian_utils::toEigen(q));
 
-         std::cout <<"Applied wrench in base_link: ["<<interactionTask->getActualWrench().toString()<<"]"<<std::endl;
-         std::cout<<"Force error: ["<<interactionTask->forceError.toString()<<"]"<<std::endl;
-         std::cout<<"Torque error: ["<<interactionTask->torqueError.toString()<<"]"<<std::endl;
+         std::cout <<"Applied wrench in base_link: ["<<interactionTask->getActualWrench()<<"]"<<std::endl;
+         std::cout<<"Force error: ["<<interactionTask->forceError<<"]"<<std::endl;
+         std::cout<<"Torque error: ["<<interactionTask->torqueError<<"]"<<std::endl;
 
-         file<<interactionTask->forceError.toString()<<" "<<interactionTask->torqueError.toString()<<std::endl;
+         file<<cartesian_utils::fromEigentoYarp(interactionTask->forceError).toString()<<" "<<
+               cartesian_utils::fromEigentoYarp(interactionTask->torqueError).toString()<<std::endl;
 
-         sot.solve(dq);
+         Eigen::VectorXd _dq(dq.size());
+         sot.solve(_dq);
+         dq = cartesian_utils::fromEigentoYarp(_dq);
          q += dq;
     }
     file<<"]"<<std::endl;
@@ -373,15 +379,15 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
 //    wrench_d_l_wrist[3] = 2.0; wrench_d_l_wrist[4] = -2.0; wrench_d_l_wrist[5] = -2.0;
 
     // BOUNDS
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointLimits =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointLimits =
             constraints::velocity::JointLimits::ConstraintPtr(
                 new constraints::velocity::JointLimits(
-                    q,
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMax(),
-                    coman_robot.idynutils.iDyn3_model.getJointBoundMin()));
+                    cartesian_utils::toEigen(q),
+                    coman_robot.idynutils.getJointBoundMax(),
+                    coman_robot.idynutils.getJointBoundMin()));
 
     double dT = 0.005;
-    Constraint<Matrix, Vector>::ConstraintPtr boundsJointVelocity =
+    Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr boundsJointVelocity =
             constraints::velocity::VelocityLimits::ConstraintPtr(
                 new constraints::velocity::VelocityLimits(0.3, dT,q.size()));
 
@@ -406,7 +412,7 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
 
     tasks::velocity::Interaction::Ptr interaction_rwrist_task(
                 new tasks::velocity::Interaction("interaction::r_wrist",
-                                q, coman_robot.idynutils, "r_wrist", "Waist", "r_arm_ft"));
+                                cartesian_utils::toEigen(q), coman_robot.idynutils, "r_wrist", "Waist", "r_arm_ft"));
 //    std::vector<bool> active_joint_mask = interaction_rwrist_task->getActiveJointsMask();
 //    for(unsigned int i = 0; i < coman_robot.idynutils.left_leg.getNrOfDOFs(); ++i)
 //        active_joint_mask[coman_robot.idynutils.left_leg.joint_numbers[i]] = false;
@@ -414,12 +420,12 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
 //    yarp::sig::Matrix W = interaction_rwrist_task->getWeight();
 //    W(3,3) = 0.1; W(4,4) = 0.1; W(5,5) = 0.1;
 //    interaction_rwrist_task->setWeight(W);
-    interaction_rwrist_task->setCompliance(C);
+    interaction_rwrist_task->setCompliance(cartesian_utils::toEigen(C));
     yarp::sig::Vector wrench_d_r_wrist(6,0.0);
     wrench_d_r_wrist[0] = 25.0; wrench_d_r_wrist[1] = 0.0; wrench_d_r_wrist[2] = 10.0;
     wrench_d_r_wrist[3] = 0.0; wrench_d_r_wrist[4] = 0.0; wrench_d_r_wrist[5] = 0.0;
-    interaction_rwrist_task->setReferenceWrench(wrench_d_r_wrist);
-    interaction_rwrist_task->update(q);
+    interaction_rwrist_task->setReferenceWrench(cartesian_utils::toEigen(wrench_d_r_wrist));
+    interaction_rwrist_task->update(cartesian_utils::toEigen(q));
 
 //    tasks::velocity::Interaction::Ptr interaction_lwrist_task(
 //                new tasks::velocity::Interaction("interaction::l_wrist",
@@ -432,18 +438,19 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
     std::list<tasks::velocity::Cartesian::TaskPtr> aggregated_list;
     aggregated_list.push_back(interaction_rwrist_task);
     //aggregated_list.push_back(interaction_lwrist_task);
-    Task<Matrix, Vector>::TaskPtr taskAggregatedHighest =
+    Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskAggregatedHighest =
             tasks::Aggregated::TaskPtr(
        new tasks::Aggregated(aggregated_list,q.size()));
 
     tasks::velocity::Postural::Ptr postural_task=
-            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(q));
+            tasks::velocity::Postural::Ptr(new tasks::velocity::Postural(
+                                               cartesian_utils::toEigen(q)));
 
     solvers::QPOases_sot::Stack stack_of_tasks;
     stack_of_tasks.push_back(taskAggregatedHighest);
     stack_of_tasks.push_back(postural_task);
 
-    Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot;
+    Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot;
     sot = solvers::QPOases_sot::Ptr(new solvers::QPOases_sot(stack_of_tasks, bounds, 1E10));
 
     yarp::sig::Vector dq(q.size(), 0.0);
@@ -466,20 +473,21 @@ TEST_F(testInteractionTask, testInteractionTask_wrenchSimulation) {
             _ft_measurements[i].second = filter_ft[i];}
         coman_robot.idynutils.updateiDyn3Model(q, _ft_measurements, true);
 
-        bounds->update(q);
-        taskAggregatedHighest->update(q);
-        postural_task->update(q);
+        bounds->update(cartesian_utils::toEigen(q));
+        taskAggregatedHighest->update(cartesian_utils::toEigen(q));
+        postural_task->update(cartesian_utils::toEigen(q));
 
 
 //        wrench_desired.push_back(yarp::math::cat(interaction_lwrist_task->getReferenceWrench(),
 //                                                 interaction_rwrist_task->getReferenceWrench()));
 //        wrench_measured.push_back(yarp::math::cat(
 //            interaction_lwrist_task->getActualWrench(), interaction_rwrist_task->getActualWrench()));
-        wrench_desired.push_back(interaction_rwrist_task->getReferenceWrench());
-        wrench_measured.push_back(interaction_rwrist_task->getActualWrench());
+        wrench_desired.push_back(cartesian_utils::fromEigentoYarp(interaction_rwrist_task->getReferenceWrench()));
+        wrench_measured.push_back(cartesian_utils::fromEigentoYarp(interaction_rwrist_task->getActualWrench()));
 
-
-        if(sot->solve(dq)){
+        Eigen::VectorXd _dq(dq.size());
+        if(sot->solve(_dq)){
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             q += dq;}
         coman_robot.move(q);
 

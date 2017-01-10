@@ -34,9 +34,9 @@ class testCoMVelocity : public ::testing::Test {
 
       coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
 
-      comVelocity = new CoMVelocity(velocityLimits,
+      comVelocity = new CoMVelocity(cartesian_utils::toEigen(velocityLimits),
                                     dT,
-                                    zeros,
+                                    cartesian_utils::toEigen(zeros),
                                     coman);
   }
 
@@ -54,7 +54,7 @@ class testCoMVelocity : public ::testing::Test {
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      comVelocity->update(zeros);
+      comVelocity->update(cartesian_utils::toEigen(zeros));
   }
 
   virtual void TearDown() {
@@ -75,8 +75,8 @@ class testCoMVelocity : public ::testing::Test {
 TEST_F(testCoMVelocity, sizesAreCorrect) {
     unsigned int x_size = coman.iDyn3_model.getNrOfDOFs();
 
-    yarp::sig::Vector bLowerBound = comVelocity->getbLowerBound();
-    yarp::sig::Vector bUpperBound = comVelocity->getbUpperBound();
+    yarp::sig::Vector bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
+    yarp::sig::Vector bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
 
     EXPECT_EQ(0, comVelocity->getLowerBound().size()) << "lowerBound should have size 0"
                                                         << "but has size"
@@ -129,12 +129,12 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     yarp::sig::Vector qDotOutNeg;
 
     yarp::sig::Vector q = zeros;
-    comVelocity->update(q);
+    comVelocity->update(cartesian_utils::toEigen(q));
 
-    Aineq = comVelocity->getAineq();
+    Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
     pAineq = pinv(Aineq);
-    bLowerBound = comVelocity->getbLowerBound();
-    bUpperBound = comVelocity->getbUpperBound();
+    bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
+    bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
     qDotInPos = pAineq * 0.5 * velocityLimits;
     qDotInNeg = pAineq * -0.5 * velocityLimits;
     qDotOutPos = pAineq * 1.5 * velocityLimits;
@@ -164,12 +164,12 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
         qRight += pinv(JCoM) * dT * velocityLimits;
     }
 
-    comVelocity->update(qRight);
+    comVelocity->update(cartesian_utils::toEigen(qRight));
 
-    Aineq = comVelocity->getAineq();
+    Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
     pAineq = pinv(Aineq);
-    bLowerBound = comVelocity->getbLowerBound();
-    bUpperBound = comVelocity->getbUpperBound();
+    bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
+    bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
     qDotInPos = pAineq * 0.5 * velocityLimits;
     qDotInNeg = pAineq * -0.5 * velocityLimits;
     qDotOutPos = pAineq * 1.5 * velocityLimits;
@@ -198,12 +198,12 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
         qLeft -= pinv(JCoM) * dT * velocityLimits;
     }
 
-    comVelocity->update(qLeft);
+    comVelocity->update(cartesian_utils::toEigen(qLeft));
 
-    Aineq = comVelocity->getAineq();
+    Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
     pAineq = pinv(Aineq);
-    bLowerBound = comVelocity->getbLowerBound();
-    bUpperBound = comVelocity->getbUpperBound();
+    bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
+    bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
     qDotInPos = pAineq * 0.5 * velocityLimits;
     qDotInNeg = pAineq * -0.5 * velocityLimits;
     qDotOutPos = pAineq * 1.5 * velocityLimits;

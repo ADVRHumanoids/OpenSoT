@@ -3,7 +3,7 @@
 using namespace OpenSoT::interfaces::yarp::tasks;
 
 YCoM::YCoM(const std::string &robot_name, const std::string &module_prefix,
-                       const ::yarp::sig::Vector &x, iDynUtils &robot):
+                       const Eigen::VectorXd &x, iDynUtils &robot):
     ::yarp::os::BufferedPort<msgs::yarp_trj_msg_portable>(),
     taskCoM(new CoM(x,robot)),
     _port_prefix(),
@@ -81,26 +81,14 @@ void YCoM::onRead(msgs::yarp_trj_msg_portable& ref_trj_msg)
             std::cout<<"WARNING: Reference Trajectory has "<<ref_trj_msg.yarp_pose_msg::distal_frame<<
                        " instead of "<<taskCoM->getDistalLink()<<" as distal_frame"<<std::endl;
         else
-        {
-            ::yarp::sig::Vector tmp(3, 0.0);
-            tmp[0] = ref_trj_msg.pose.p.x();
-            tmp[1] = ref_trj_msg.pose.p.y();
-            tmp[2] = ref_trj_msg.pose.p.z();
-
-//            ::yarp::sig::Vector tmp2(6, 0.0);
-//            tmp2[0] = ref_trj_msg.twist.vel.x();
-//            tmp2[1] = ref_trj_msg.twist.vel.y();
-//            tmp2[2] = ref_trj_msg.twist.vel.z();
-
-            taskCoM->setReference(tmp);
-        }
+            taskCoM->setReference(ref_trj_msg.pose.p);
     }
 }
 
 void YCoM::printInitialError()
 {
     std::cout<<"Initial Reference for "<<taskCoM->getTaskID()<<":"<<std::endl;
-    ::yarp::sig::Vector tmp = taskCoM->getReference();
+    Eigen::VectorXd tmp = taskCoM->getReference();
     KDL::Frame com_pose;
     com_pose.Identity();
     com_pose.p[0] = tmp [0];

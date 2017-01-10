@@ -82,9 +82,9 @@ TEST_F(testCoMTask, testCoMTask_)
     std::cout << "_normal_robot.getCoM(_normal_robot.left_leg.index) is: " << _normal_robot.iDyn3_model.getCOM(_normal_robot.left_leg.end_effector_index).toString() << std::endl;
 
 
-    OpenSoT::tasks::velocity::CoM CoM(q_whole, _robot);
+    OpenSoT::tasks::velocity::CoM CoM(cartesian_utils::toEigen(q_whole), _robot);
 
-    EXPECT_TRUE(CoM.getb() == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb().toString();
+    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(CoM.getb()) == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb();
 
     // setting x_ref with a delta offset along the z axis (+2cm)
     yarp::sig::Vector delta_x(3,0.0);
@@ -98,11 +98,11 @@ TEST_F(testCoMTask, testCoMTask_)
     _fixed_robot.iDyn3_model.getCOMJacobian(J);
     J.removeCols(0,6);
     J.removeRows(3,3);
-    EXPECT_TRUE(CoM.getA() == J);
+    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(CoM.getA()) == J);
     EXPECT_EQ(CoM.getA().rows(), 3);
     EXPECT_EQ(CoM.getb().size(), 3);
 
-    EXPECT_TRUE(CoM.getWeight() == yarp::sig::Matrix(3,3).eye());
+    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(CoM.getWeight()) == yarp::sig::Matrix(3,3).eye());
 
     EXPECT_TRUE(CoM.getConstraints().size() == 0);
 
@@ -110,11 +110,11 @@ TEST_F(testCoMTask, testCoMTask_)
     CoM.setLambda(K);
     EXPECT_DOUBLE_EQ(CoM.getLambda(), K);
 
-    CoM.setReference(x);
+    CoM.setReference(cartesian_utils::toEigen(x));
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
-    CoM.setReference(x_ref);
+    CoM.setReference(cartesian_utils::toEigen(x_ref));
     yarp::sig::Vector positionError = x_ref - x;
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
@@ -128,9 +128,10 @@ TEST_F(testCoMTask, testCoMTask_)
     {
         _robot.updateiDyn3Model(q_whole, true);
 
-        CoM.update(q_whole);
+        CoM.update(cartesian_utils::toEigen(q_whole));
 
-        q_whole += pinv(CoM.getA(),1E-6)*CoM.getb();
+        q_whole += pinv(cartesian_utils::fromEigentoYarp(CoM.getA()),1E-6)*
+                cartesian_utils::fromEigentoYarp(CoM.getb());
 
         _robot.updateiDyn3Model(q_whole, true);
         x_now = _robot.iDyn3_model.getCOM();

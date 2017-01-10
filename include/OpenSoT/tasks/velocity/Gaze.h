@@ -26,13 +26,13 @@ namespace OpenSoT {
 namespace tasks {
 namespace velocity {
 
-class Gaze: public OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>
+class Gaze: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>
 {
 public:
     typedef boost::shared_ptr<Gaze> Ptr;
 
     Gaze(std::string task_id,
-         const yarp::sig::Vector &x,
+         const Eigen::VectorXd &x,
          iDynUtils &robot,
          std::string base_link);
 
@@ -42,7 +42,7 @@ public:
      * @brief setGaze
      * @param desiredGaze pose of the object to observe in base_link
      */
-    void setGaze(const yarp::sig::Matrix& desiredGaze);
+    void setGaze(const Eigen::MatrixXd& desiredGaze);
 
     void setOrientationErrorGain(const double& orientationErrorGain);
 
@@ -56,7 +56,7 @@ public:
      * please use the class SubTask
      * @param W matrix weight
      */
-    virtual void setWeight(const yarp::sig::Matrix& W);
+    virtual void setWeight(const Eigen::MatrixXd& W);
 
     /**
      * @brief getConstraints return a reference to the constraint list. Use the standard list methods
@@ -75,7 +75,7 @@ public:
 
     /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
         @param x variable state at the current step (input) */
-    virtual void _update(const yarp::sig::Vector &x);
+    virtual void _update(const Eigen::VectorXd &x);
 
     /**
      * @brief getActiveJointsMask return a vector of length NumberOfDOFs.
@@ -97,7 +97,23 @@ private:
     Cartesian::Ptr _cartesian_task;
     SubTask::Ptr   _subtask;
 
+    Eigen::MatrixXd _gaze_T_obj;
+    Eigen::VectorXd _tmp_vector;
+
     iDynUtils& _robot;
+
+    Eigen::MatrixXd toEigen(const KDL::Frame& F)
+    {
+        Eigen::MatrixXd K(4,4);
+        K.setIdentity(4,4);
+        K(0,0) = F.M(0,0); K(0,1) = F.M(0,1); K(0,2) = F.M(0,2); K(0,3) = F.p.x();
+        K(1,0) = F.M(1,0); K(1,1) = F.M(1,1); K(1,2) = F.M(1,2); K(1,3) = F.p.y();
+        K(2,0) = F.M(2,0); K(2,1) = F.M(2,1); K(2,2) = F.M(2,2); K(2,3) = F.p.z();
+        return K;
+    }
+
+
+
 };
 
 }

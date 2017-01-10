@@ -1,8 +1,9 @@
 #include <idynutils/tests_utils.h>
 #include <gtest/gtest.h>
+#include <yarp/math/Math.h>
+#include <idynutils/cartesian_utils.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <yarp/math/Math.h>
 
 using namespace yarp::math;
 
@@ -39,25 +40,25 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     yarp::sig::Vector q_ref(q.size(), 0.0);
 
-    OpenSoT::tasks::velocity::Postural postural(q);
-
-    EXPECT_TRUE(postural.getA() == yarp::sig::Matrix(q.size(), q.size()).eye());
-    EXPECT_TRUE(postural.getWeight() == yarp::sig::Matrix(q.size(), q.size()).eye());
-
+    OpenSoT::tasks::velocity::Postural postural(cartesian_utils::toEigen(q));
+    std::cout<<"Postural Task Inited"<<std::endl;
+    EXPECT_TRUE(postural.getA() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
+    EXPECT_TRUE(postural.getWeight() == cartesian_utils::toEigen(yarp::sig::Matrix(q.size(), q.size()).eye()));
     EXPECT_TRUE(postural.getConstraints().size() == 0);
 
     double K = 0.1;
     postural.setLambda(K);
     EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
-    postural.setReference(q_ref);
-    postural.update(q);
-    EXPECT_TRUE(postural.getb() == postural.getLambda()*(q_ref-q));
+    postural.setReference(cartesian_utils::toEigen(q_ref));
+    postural.update(cartesian_utils::toEigen(q));
+    EXPECT_TRUE(postural.getb() == cartesian_utils::toEigen(postural.getLambda()*(q_ref-q)));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
-        postural.update(q);
-        q += postural.getb();
+        postural.update(cartesian_utils::toEigen(q));
+        yarp::sig::Vector qq = cartesian_utils::fromEigentoYarp(postural.getb());
+        q += qq;
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)
@@ -69,8 +70,6 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     iDynUtils idynutils("coman",
                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-    using namespace OpenSoT::tasks::velocity;
-    using namespace OpenSoT::constraints::velocity;
 
     yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
     yarp::sig::Vector q_next(q);
@@ -82,23 +81,23 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     }
     idynutils.updateiDyn3Model(q);
 
-    Postural::TaskPtr postural( new Postural(q) );
-    Postural::ConstraintPtr bound(
-        new JointLimits(q,
-                        idynutils.iDyn3_model.getJointBoundMax(),
-                        idynutils.iDyn3_model.getJointBoundMin())
+    OpenSoT::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)) );
+    OpenSoT::tasks::velocity::Postural::ConstraintPtr bound(
+        new OpenSoT::constraints::velocity::JointLimits(cartesian_utils::toEigen(q),
+                        idynutils.getJointBoundMax(),
+                        idynutils.getJointBoundMin())
     );
 
     postural->getConstraints().push_back( bound );
 
-    yarp::sig::Vector old_b = postural->getb();
-    yarp::sig::Vector old_LowerBound = bound->getLowerBound();
-    yarp::sig::Vector old_UpperBound = bound->getUpperBound();
+    yarp::sig::Vector old_b = cartesian_utils::fromEigentoYarp(postural->getb());
+    yarp::sig::Vector old_LowerBound = cartesian_utils::fromEigentoYarp(bound->getLowerBound());
+    yarp::sig::Vector old_UpperBound = cartesian_utils::fromEigentoYarp(bound->getUpperBound());
     idynutils.updateiDyn3Model(q_next);
-    postural->update(q_next);
-    yarp::sig::Vector new_b = postural->getb();
-    yarp::sig::Vector new_LowerBound = bound->getLowerBound();
-    yarp::sig::Vector new_UpperBound = bound->getUpperBound();
+    postural->update(cartesian_utils::toEigen(q_next));
+    yarp::sig::Vector new_b = cartesian_utils::fromEigentoYarp(postural->getb());
+    yarp::sig::Vector new_LowerBound = cartesian_utils::fromEigentoYarp(bound->getLowerBound());
+    yarp::sig::Vector new_UpperBound = cartesian_utils::fromEigentoYarp(bound->getUpperBound());
 
     EXPECT_FALSE(old_b == new_b);
     EXPECT_FALSE(old_LowerBound == new_LowerBound);

@@ -255,7 +255,8 @@ namespace
                 std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf"),
           q(robot.iDyn3_model.getNrOfDOFs(), 0.0),
           compute_distance(robot),
-          sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(q, robot, std::numeric_limits<double>::infinity(), 0.005))
+          sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
+                            cartesian_utils::toEigen(q), robot, std::numeric_limits<double>::infinity(), 0.005))
       {}
 
       virtual ~testSelfCollisionAvoidanceGlobConstr() {
@@ -294,7 +295,7 @@ namespace
 
     struct ik_problem
     {
-        std::vector<OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr> stack_of_tasks;
+        std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks;
         OpenSoT::constraints::Aggregated::Ptr bounds;
         double damped_least_square_eps;
     };
@@ -316,29 +317,36 @@ namespace
             using namespace OpenSoT::tasks::velocity;
             /** Create Constraints **/
                 /** 1) Constraint Convex Hull **/
-                ConvexHull::Ptr constraintConvexHull(ConvexHull::Ptr(new ConvexHull(state, robot_model, 0.02)));
+                ConvexHull::Ptr constraintConvexHull(ConvexHull::Ptr(new ConvexHull(
+                                                                         cartesian_utils::toEigen(state), robot_model, 0.02)));
 
                 /** 2) CoM Velocity **/
+                Eigen::VectorXd tmp(3);
+                tmp<<0.9,0.9,0.9;
                 CoMVelocity::Ptr constraintCoMVel(CoMVelocity::Ptr(
-                                            new CoMVelocity(Vector(3,0.9), mSecToSec(dT), state, robot_model)));
+                                            new CoMVelocity(tmp, mSecToSec(dT),
+                                                            cartesian_utils::toEigen(state), robot_model)));
 
             /** Create tasks **/
                 /** 1) Cartesian RSole **/
-                Cartesian::Ptr taskRSole(Cartesian::Ptr(new Cartesian("cartesian::r_sole",state,robot_model,
+                Cartesian::Ptr taskRSole(Cartesian::Ptr(new Cartesian("cartesian::r_sole",
+                                                                      cartesian_utils::toEigen(state),robot_model,
                                                                   robot_model.right_leg.end_effector_name,"world")));
 
                 /** 2) Cartesian Waist **/
                 Cartesian::Ptr taskWaist(Cartesian::Ptr(
-                                             new Cartesian("cartesian::Waist",state,robot_model,"Waist","world")));
-                yarp::sig::Matrix waistInit = taskWaist->getActualPose();
+                                             new Cartesian("cartesian::Waist",
+                                                           cartesian_utils::toEigen(state),robot_model,"Waist","world")));
+                yarp::sig::Matrix waistInit = cartesian_utils::fromEigentoYarp(taskWaist->getActualPose());
                 yarp::sig::Matrix waistRef = waistInit;
                 waistRef(0,3) += 0.07;
-                taskWaist->setReference(waistRef);
-                taskWaist->update(state);
+                taskWaist->setReference(cartesian_utils::toEigen(waistRef));
+                taskWaist->update(cartesian_utils::toEigen(state));
 
                 /** 3) Cartesian Torso **/
                 Cartesian::Ptr taskTorso(Cartesian::Ptr(
-                                             new Cartesian("cartesian::torso",state,robot_model,"torso","world")));
+                                             new Cartesian("cartesian::torso",
+                                                           cartesian_utils::toEigen(state),robot_model,"torso","world")));
                     /** 3.1) We want to control torso in /world frame using only the three joints in the torso **/
                     std::vector<bool> active_joint_mask = taskTorso->getActiveJointsMask();
                     for(unsigned int i = 0; i < robot_model.left_leg.getNrOfDOFs(); ++i)
@@ -348,27 +356,31 @@ namespace
                     /** 3.2) We are interested only in the orientation of the torso **/
                     yarp::sig::Matrix W_torso(6,6); W_torso = W_torso.eye();
                     W_torso(0,0) = 0.0; W_torso(1,1) = 0.0; W_torso(2,2) = 0.0;
-                    taskTorso->setWeight(W_torso);
+                    taskTorso->setWeight(cartesian_utils::toEigen(W_torso));
         //            OpenSoT::SubTask::Ptr taskTorsoPosition(OpenSoT::SubTask::Ptr(
         //                                            new OpenSoT::SubTask(taskTorso, OpenSoT::SubTask::SubTaskMap::range(3,5))));
-                    Cartesian::Ptr taskRArm(Cartesian::Ptr(new Cartesian("cartesian::r_arm",state,robot_model,
+                    Cartesian::Ptr taskRArm(Cartesian::Ptr(new Cartesian("cartesian::r_arm",
+                                                                         cartesian_utils::toEigen(state),robot_model,
                                                                       robot_model.right_arm.end_effector_name,"Waist")));
-                    Cartesian::Ptr taskLArm(Cartesian::Ptr(new Cartesian("cartesian::l_arm",state,robot_model,
+                    Cartesian::Ptr taskLArm(Cartesian::Ptr(new Cartesian("cartesian::l_arm",
+                                                                         cartesian_utils::toEigen(state),robot_model,
                                                                       robot_model.left_arm.end_effector_name,"Waist")));
 
                 /** 4) Postural **/
-                Postural::Ptr taskPostural(Postural::Ptr(new Postural(state)));
+                Postural::Ptr taskPostural(Postural::Ptr(new Postural(cartesian_utils::toEigen(state))));
                 //taskPostural->setLambda(0.0);
 
                 /** 5) Mininimize Acceleration **/
                 MinimizeAcceleration::Ptr taskMinimizeAcceleration(MinimizeAcceleration::Ptr(
-                                                                       new MinimizeAcceleration(state)));
+                                                                       new MinimizeAcceleration(
+                                                                           cartesian_utils::toEigen(state))));
 
                 /** Create bounds **/
                 /** 1) bounds joint limits **/
-                JointLimits::ConstraintPtr boundJointLimits(JointLimits::ConstraintPtr(new JointLimits(state,
-                                                                    robot_model.iDyn3_model.getJointBoundMax(),
-                                                                    robot_model.iDyn3_model.getJointBoundMin())));
+                JointLimits::ConstraintPtr boundJointLimits(JointLimits::ConstraintPtr(new JointLimits(
+                                                                                           cartesian_utils::toEigen(state),
+                                                                    robot_model.getJointBoundMax(),
+                                                                    robot_model.getJointBoundMin())));
                 /** 2) bounds joint velocities **/
                 VelocityLimits::ConstraintPtr boundsJointVelLimits(VelocityLimits::ConstraintPtr(
                                                             new VelocityLimits(0.1, mSecToSec(dT), state.size())));
@@ -415,7 +427,8 @@ namespace
                 globalConstraintsList.push_back(constraintConvexHull);
                 globalConstraintsList.push_back(constraintCoMVel);
                 OpenSoT::constraints::Aggregated::Ptr globalConstraints(
-                            new OpenSoT::constraints::Aggregated(globalConstraintsList, state));
+                            new OpenSoT::constraints::Aggregated(globalConstraintsList,
+                                                                 cartesian_utils::toEigen(state)));
 
                 /** Add bounds to problem **/
                 std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds;
@@ -440,28 +453,30 @@ namespace
                     init_time_solver.push_back(toc-tic);
 
                     yarp::sig::Vector dq(state.size(), 0.0);
+                    Eigen::VectorXd _dq(dq.size()); _dq.setZero(_dq.rows());
                     double acc = 0.0;
                     for(unsigned int i = 0; i < step; ++i)
                     {
                         robot_model.updateiDyn3Model(state, true);
 
                         for(unsigned int j = 0; j < problem->stack_of_tasks.size(); ++j)
-                            problem->stack_of_tasks[j]->update(state);
-                        problem->bounds->update(state);
-                        constraintCoMVel->update(state);
-                        constraintConvexHull->update(state);
+                            problem->stack_of_tasks[j]->update(cartesian_utils::toEigen(state));
+                        problem->bounds->update(cartesian_utils::toEigen(state));
+                        constraintCoMVel->update(cartesian_utils::toEigen(state));
+                        constraintConvexHull->update(cartesian_utils::toEigen(state));
 
                         double tic = qpOASES::getCPUtime();
-                        ASSERT_TRUE(qp_solver_sparse->solve(dq));
+                        ASSERT_TRUE(qp_solver_sparse->solve(_dq));
                         double toc = qpOASES::getCPUtime();
                         acc += toc - tic;
+                        dq = cartesian_utils::fromEigentoYarp(_dq);
                         state += dq;
                     }
                     double t = acc/(double)(step);
                     std::cout<<"Medium Time to Solve sot "<<acc/(double)(step)<<"[s]"<<std::endl;
                     mean_time_solver.push_back(t);
 
-                    yarp::sig::Matrix waistActual = taskWaist->getActualPose();
+                    yarp::sig::Matrix waistActual = cartesian_utils::fromEigentoYarp(taskWaist->getActualPose());
                     std::cout<<GREEN<<"Waist Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistInit);
                     std::cout<<GREEN<<"Waist Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistRef);
                     std::cout<<GREEN<<"Waist Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(waistActual);
@@ -494,25 +509,27 @@ namespace
         // arm task
 
         OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", this->q, this->robot,linkA, "Waist"));
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
+                                                            cartesian_utils::toEigen(this->q), this->robot,linkA, "Waist"));
         task_left_arm->setOrientationErrorGain(0.1);
 
         OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", this->q, this->robot,linkB, "Waist"));
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist",
+                                                            cartesian_utils::toEigen(this->q), this->robot,linkB, "Waist"));
         task_right_arm->setOrientationErrorGain(0.1);
 
         yarp::sig::Matrix T_init_l_arm(4,4);
-        T_init_l_arm = task_left_arm->getReference();
+        T_init_l_arm = cartesian_utils::fromEigentoYarp(task_left_arm->getReference());
 
         yarp::sig::Matrix T_init_r_arm(4,4);
-        T_init_r_arm = task_right_arm->getReference();
+        T_init_r_arm = cartesian_utils::fromEigentoYarp(task_right_arm->getReference());
 
         yarp::sig::Matrix T_reference_l_arm(4,4);
-        T_reference_l_arm = task_left_arm->getReference();
+        T_reference_l_arm = cartesian_utils::fromEigentoYarp(task_left_arm->getReference());
         T_reference_l_arm(1,3) = 0.0;
-        task_left_arm->setReference(T_reference_l_arm);
+        task_left_arm->setReference(cartesian_utils::toEigen(T_reference_l_arm));
 
-        yarp::sig::Matrix T_reference_r_arm(4,4);
+        Eigen::MatrixXd T_reference_r_arm(4,4);
         T_reference_r_arm = task_right_arm->getReference();
         T_reference_r_arm(1,3) = 0.0;
         task_right_arm->setReference(T_reference_r_arm);
@@ -524,25 +541,27 @@ namespace
         // coincident with those of their child links, i.e., LFoot and RFoot.
 
         OpenSoT::tasks::velocity::Cartesian::Ptr task_left_leg(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", this->q, this->robot,"LFoot", "Waist"));
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg",
+                                                            cartesian_utils::toEigen(this->q), this->robot,"LFoot", "Waist"));
         task_left_leg->setOrientationErrorGain(0.1);
 
         OpenSoT::tasks::velocity::Cartesian::Ptr task_right_leg(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", this->q, this->robot,"RFoot", "Waist"));
+                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg",
+                                                            cartesian_utils::toEigen(this->q), this->robot,"RFoot", "Waist"));
         task_right_leg->setOrientationErrorGain(0.1);
 
-        yarp::sig::Matrix T_init_l_leg(4,4);
+        Eigen::MatrixXd T_init_l_leg(4,4);
         T_init_l_leg = task_left_leg->getReference();
 
-        yarp::sig::Matrix T_init_r_leg(4,4);
+        Eigen::MatrixXd T_init_r_leg(4,4);
         T_init_r_leg = task_right_leg->getReference();
 
-        yarp::sig::Matrix T_reference_l_leg(4,4);
+        Eigen::MatrixXd T_reference_l_leg(4,4);
         T_reference_l_leg = task_left_leg->getReference();
         T_reference_l_leg(1,3) = 0.0;
         task_left_leg->setReference(T_reference_l_leg);
 
-        yarp::sig::Matrix T_reference_r_leg(4,4);
+        Eigen::MatrixXd T_reference_r_leg(4,4);
         T_reference_r_leg = task_right_leg->getReference();
         T_reference_r_leg(1,3) = 0.0;
         task_right_leg->setReference(T_reference_r_leg);
@@ -563,11 +582,12 @@ namespace
         cartesianTasks.push_back(task_right_arm);
         cartesianTasks.push_back(task_left_leg);
         cartesianTasks.push_back(task_right_leg);
-        OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
+        OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
                     new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
         //taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
 
-        OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(this->q));
+        OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(
+                                                                  cartesian_utils::toEigen(this->q)));
         //postural_task->getConstraints().push_back(this->sc_constraint);
 
 
@@ -578,9 +598,9 @@ namespace
 
         int t = 100;
         OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-                    new OpenSoT::constraints::velocity::JointLimits(this->q,
-                                                                    this->robot.iDyn3_model.getJointBoundMax(),
-                                                                    this->robot.iDyn3_model.getJointBoundMin()));
+                    new OpenSoT::constraints::velocity::JointLimits(cartesian_utils::toEigen(this->q),
+                                                                    this->robot.getJointBoundMax(),
+                                                                    this->robot.getJointBoundMin()));
 
         OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
                     new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
@@ -591,64 +611,78 @@ namespace
         std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> globalConstraintsList;
         globalConstraintsList.push_back(this->sc_constraint);
         OpenSoT::constraints::Aggregated::Ptr globalConstraints(
-                    new OpenSoT::constraints::Aggregated(globalConstraintsList, this->q));
+                    new OpenSoT::constraints::Aggregated(globalConstraintsList, cartesian_utils::toEigen(this->q)));
 
-        OpenSoT::Solver<yarp::sig::Matrix, yarp::sig::Vector>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
+        OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
                     new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds, globalConstraints));
 
         yarp::sig::Vector dq(this->q.size(), 0.0);
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
         for(unsigned int i = 0; i < 50*t; ++i)
         {
             this->robot.updateiDyn3Model(this->q, true);
 
 
-            taskCartesianAggregated->update(this->q);
-            postural_task->update(this->q);
-            bounds->update(this->q);
-            globalConstraints->update(this->q);
+            taskCartesianAggregated->update(cartesian_utils::toEigen(this->q));
+            postural_task->update(cartesian_utils::toEigen(this->q));
+            bounds->update(cartesian_utils::toEigen(this->q));
+            globalConstraints->update(cartesian_utils::toEigen(this->q));
 
-            if(!sot->solve(dq)){
+            if(!sot->solve(_dq)){
                 std::cout<<"error"<<std::endl;
-                dq = 0.0;}
+                _dq.setZero(dq.size());}
+            dq = cartesian_utils::fromEigentoYarp(_dq);
             this->q += dq;
 
         }
 
         std::cout << "Q_final: " << q.toString() << std::endl;
 
-        std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_l_arm);
+        std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    T_init_l_arm);
         std::cout<<std::endl;
-        std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_l_arm);
+        std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    T_reference_l_arm);
         std::cout<<std::endl;
-        std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_left_arm->getActualPose());
+        std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_left_arm->getActualPose()));
 
         std::cout<<std::endl;
         std::cout<<std::endl;
 
-        std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_r_arm);
+        std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    T_init_r_arm);
         std::cout<<std::endl;
-        std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_r_arm);
+        std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_reference_r_arm));
         std::cout<<std::endl;
-        std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_right_arm->getActualPose());
+        std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_right_arm->getActualPose()));
 
         // showing the data of the legs
 
         std::cout<<std::endl;
 
-        std::cout<<"Initial Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_l_leg);
+        std::cout<<"Initial Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_init_l_leg));
         std::cout<<std::endl;
-        std::cout<<"Reference Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_l_leg);
+        std::cout<<"Reference Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_reference_l_leg));
         std::cout<<std::endl;
-        std::cout<<"Actual Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_left_leg->getActualPose());
+        std::cout<<"Actual Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_left_leg->getActualPose()));
 
         std::cout<<std::endl;
         std::cout<<std::endl;
 
-        std::cout<<"Initial Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_init_r_leg);
+        std::cout<<"Initial Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_init_r_leg));
         std::cout<<std::endl;
-        std::cout<<"Reference Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(T_reference_r_leg);
+        std::cout<<"Reference Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(T_reference_r_leg));
         std::cout<<std::endl;
-        std::cout<<"Actual Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(task_right_leg->getActualPose());
+        std::cout<<"Actual Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
+                    cartesian_utils::fromEigentoYarp(task_right_leg->getActualPose()));
 
         std::cout<<std::endl;
 

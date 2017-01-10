@@ -16,7 +16,6 @@
 */
 
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
-#include <yarp/math/Math.h>
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
@@ -28,15 +27,13 @@ void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
     e[i] = k[i];
 }
 
-using namespace yarp::math;
-
 using namespace OpenSoT::constraints::velocity;
 
 using namespace Eigen;
 
 const double SMALL_NUM = pow(10.0, -5);
 
-SelfCollisionAvoidance::SelfCollisionAvoidance(const yarp::sig::Vector& x,
+SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
                                                iDynUtils &robot,
                                                double detection_threshold,
                                                double linkPair_threshold,
@@ -83,7 +80,7 @@ void SelfCollisionAvoidance::setDetectionThreshold(const double detection_thresh
 }
 
 
-void SelfCollisionAvoidance::update(const yarp::sig::Vector &x)
+void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 {
     // we update _Aineq and _bupperBound only if x has changed
     if(!(x == _x_cache)) {
@@ -124,8 +121,8 @@ Eigen::MatrixXd SelfCollisionAvoidance::skewSymmetricOperator (const Eigen::Vect
 
 
 
-void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_fc,
-                                                      yarp::sig::Vector & bUpperB_fc )
+void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc,
+                                                      Eigen::VectorXd & bUpperB_fc )
 {
 
 //    robot_col.updateiDyn3Model(x, false);
@@ -151,11 +148,9 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
 
     Vector3d closepoint_dir;
 
-    yarp::sig::Matrix Link1_CP_Jaco_temp, Link2_CP_Jaco_temp;
     MatrixXd Link1_CP_Jaco, Link2_CP_Jaco;
 
-    yarp::sig::Matrix Waist_frame_world = robot_col.iDyn3_model.getPosition(base_index, true);
-    MatrixXd Waist_frame_world_Eigen = from_yarp_to_Eigen_matrix(Waist_frame_world);
+    MatrixXd Waist_frame_world_Eigen = robot_col.getPosition(base_index, true);
     Matrix3d Waist_frame_world_Eigen_Ro = Waist_frame_world_Eigen.block(0,0,3,3);
     MatrixXd temp_trans_matrix(6,6);
     temp_trans_matrix.block(0,0,3,3) = Waist_frame_world_Eigen_Ro;
@@ -201,14 +196,12 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
         closepoint_dir = closepoint_dir / Dm_LinkPair;
 
 
-        robot_col.iDyn3_model.getRelativeJacobian( Link1_index, base_index, Link1_CP_Jaco_temp, true);
-        Link1_CP_Jaco = from_yarp_to_Eigen_matrix (Link1_CP_Jaco_temp);
+        robot_col.getRelativeJacobian( Link1_index, base_index, Link1_CP_Jaco, true);
         Link1_CP_Jaco = temp_trans_matrix * Link1_CP_Jaco;
         Link1_CP_Jaco = skewSymmetricOperator(Link1_CP - Link1_origin) * Link1_CP_Jaco;
 
 
-        robot_col.iDyn3_model.getRelativeJacobian( Link2_index, base_index, Link2_CP_Jaco_temp, true);
-        Link2_CP_Jaco = from_yarp_to_Eigen_matrix (Link2_CP_Jaco_temp);
+        robot_col.getRelativeJacobian( Link2_index, base_index, Link2_CP_Jaco, true);
         Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
         Link2_CP_Jaco = skewSymmetricOperator(Link2_CP - Link2_origin) * Link2_CP_Jaco;
 
@@ -220,85 +213,8 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (yarp::sig::Matrix & Aineq_
 
     }
 
-    Aineq_fc = from_Eigen_to_Yarp_matrix(Aineq_fc_Eigen);
-    bUpperB_fc = from_Eigen_to_Yarp_vector(bUpperB_fc_Eigen);
-
-}
-
-
-MatrixXd SelfCollisionAvoidance::from_yarp_to_Eigen_matrix(const yarp::sig::Matrix& Y_M)
-{
-      int rows = Y_M.rows();
-      int columns = Y_M.cols();
-
-      MatrixXd A_M(rows, columns);
-
-      for(int i=0;i<rows;i++)
-      {
-       for(int j=0;j<columns;j++)
-       {
-
-        A_M(i,j) = Y_M(i,j);
-
-       }
-
-      }
-      return A_M;
-}
-
-yarp::sig::Matrix SelfCollisionAvoidance::from_Eigen_to_Yarp_matrix(const MatrixXd& E_M)
-{
-
-      int rows = E_M.rows();
-      int columns = E_M.cols();
-
-      yarp::sig::Matrix A_M(rows, columns);
-
-      for(int i=0;i<rows;i++)
-      {
-       for(int j=0;j<columns;j++)
-       {
-
-        A_M(i,j) = E_M(i,j);
-
-       }
-
-      }
-      return A_M;
-
-}
-
-VectorXd SelfCollisionAvoidance::from_yarp_to_Eigen_vector(const yarp::sig::Vector& Y_V)
-{
-
-      int length = Y_V.length();
-
-      VectorXd A_V(length);
-
-      for(int i=0;i<length;i++)
-      {
-
-         A_V(i) = Y_V(i);
-
-      }
-      return A_V;
-
-}
-
-yarp::sig::Vector SelfCollisionAvoidance::from_Eigen_to_Yarp_vector(const VectorXd& E_V)
-{
-
-      int rows = E_V.rows();
-
-      yarp::sig::Vector A_V(rows);
-
-      for(int i=0;i<rows;i++)
-      {
-
-        A_V(i) = E_V(i);
-
-      }
-      return A_V;
+    Aineq_fc = Aineq_fc_Eigen;
+    bUpperB_fc = bUpperB_fc_Eigen;
 
 }
 

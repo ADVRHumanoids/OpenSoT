@@ -72,7 +72,7 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasks)
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q, dq;
     q = model.iDyn3_model.getAng();
-    OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);
+    OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, cartesian_utils::toEigen(q));
 
     OpenSoT::AutoStack::Ptr subTaskTest = (DHS.leftArm_Orientation / DHS.postural)
                                             << DHS.jointLimits << DHS.velocityLimits;
@@ -96,20 +96,24 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasks)
     ASSERT_EQ(task->getTaskSize(),3);
 
     for(unsigned int i = 0; i < 1000; ++i) {
-        yarp::sig::Matrix H = task->getA().transposed() * task->getWeight() * task->getA();
-        yarp::sig::Vector g = -1.0 * task->getLambda() * task->getA().transposed() * task->getWeight() * task->getb();
+        Eigen::MatrixXd H = task->getA().transpose() * task->getWeight() * task->getA();
+        Eigen::VectorXd g = -1.0 * task->getLambda() * task->getA().transpose() * task->getWeight() * task->getb();
 
         ASSERT_EQ(H.rows(),q.size());
         ASSERT_EQ(H.cols(),q.size());
         ASSERT_EQ(g.size(),q.size());
     }
 
-    ASSERT_TRUE(solver->solve(dq));
+    Eigen::VectorXd _dq(dq.size());
+    _dq.setZero(dq.size());
+    ASSERT_TRUE(solver->solve(_dq));
+    dq = cartesian_utils::fromEigentoYarp(_dq);
 
     q += .01;
     model.updateiDyn3Model(q,true);
-    subTaskTest->update(q);
-    ASSERT_TRUE(solver->solve(dq));
+    subTaskTest->update(cartesian_utils::toEigen(q));
+    ASSERT_TRUE(solver->solve(_dq));
+    dq = cartesian_utils::fromEigentoYarp(_dq);
 }
 
 TEST_F(testQPOases_SubTask, testSolveUsingSubTasksAndAggregated)
@@ -119,19 +123,23 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasksAndAggregated)
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
     yarp::sig::Vector q, dq;
     q = model.iDyn3_model.getAng();
-    OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);
+    OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, cartesian_utils::toEigen(q));
 
     OpenSoT::AutoStack::Ptr subTaskTest = ((DHS.leftArm_Orientation + DHS.rightArm) / DHS.postural)
                                             << DHS.jointLimits << DHS.velocityLimits;
     OpenSoT::solvers::QPOases_sot::Ptr solver(
         new OpenSoT::solvers::QPOases_sot(subTaskTest->getStack(), subTaskTest->getBounds()));
 
-    ASSERT_TRUE(solver->solve(dq));
+    Eigen::VectorXd _dq(dq.size());
+    _dq.setZero(dq.size());
+    ASSERT_TRUE(solver->solve(_dq));
+    dq = cartesian_utils::fromEigentoYarp(_dq);
 
     q += .01;
     model.updateiDyn3Model(q,true);
-    subTaskTest->update(q);
-    ASSERT_TRUE(solver->solve(dq));
+    subTaskTest->update(cartesian_utils::toEigen(q));
+    ASSERT_TRUE(solver->solve(_dq));
+    dq = cartesian_utils::fromEigentoYarp(_dq);
 }
 
 TEST_F(testQPOases_SubTask, testSolveCartesianThroughSubTasksAndAggregated)
@@ -142,25 +150,28 @@ TEST_F(testQPOases_SubTask, testSolveCartesianThroughSubTasksAndAggregated)
     yarp::sig::Vector q, dq;
     q = getGoodInitialPosition(model);
     model.updateiDyn3Model(q,true);
-    OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, q);
+    OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, cartesian_utils::toEigen(q));
 
     OpenSoT::AutoStack::Ptr subTaskTest = ((DHS.leftArm_Position + DHS.leftArm_Orientation) / DHS.postural)
                                             << DHS.jointLimits << DHS.velocityLimits;
     OpenSoT::solvers::QPOases_sot::Ptr solver(
         new OpenSoT::solvers::QPOases_sot(subTaskTest->getStack(), subTaskTest->getBounds()));
-    yarp::sig::Matrix actualPose = DHS.leftArm->getActualPose();
-    yarp::sig::Matrix desiredPose = actualPose; desiredPose(0,3) = actualPose(0,3)+0.1;
+    yarp::sig::Matrix actualPose = cartesian_utils::fromEigentoYarp(DHS.leftArm->getActualPose());
+    yarp::sig::Matrix desiredPose = actualPose;
+    desiredPose(0,3) = actualPose(0,3)+0.1;
 
     unsigned int iterations = 10000;
-    while(yarp::math::norm(DHS.leftArm->getb()) > 1e-4 && iterations > 0)
+    while(sqrt(DHS.leftArm->getb().squaredNorm()) > 1e-4 && iterations > 0)
     {
         model.updateiDyn3Model(q, true);
-        subTaskTest->update(q);
-        ASSERT_TRUE(solver->solve(dq));
+        subTaskTest->update(cartesian_utils::toEigen(q));
+        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
+        ASSERT_TRUE(solver->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
         q += dq;
     }
 
-    ASSERT_TRUE(yarp::math::norm(DHS.leftArm->getb()) <= 1e-4);
+    ASSERT_TRUE(sqrt(DHS.leftArm->getb().squaredNorm()) <= 1e-4);
 }
 
 }

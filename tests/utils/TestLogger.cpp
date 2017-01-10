@@ -38,8 +38,8 @@ protected:
 
 TEST_F(testLogger, testDataFlusherWorks)
 {
-    yarp::sig::Vector v(3,0.0);
-    yarp::sig::Vector dq(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
+    Eigen::VectorXd v(3); v.setZero(3);
+    Eigen::VectorXd dq(_robot.iDyn3_model.getNrOfDOFs()); dq.setZero(dq.rows());
     double t = 0.0;
     OpenSoT::flushers::Flusher::Ptr dataFlusher;
 
@@ -77,10 +77,10 @@ TEST_F(testLogger, testDataFlusherWorks)
 
 TEST_F(testLogger, testDynamicsFlusherWork)
 {
-    yarp::sig::Vector q(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector dq = q*0.0;
+    Eigen::VectorXd q(_robot.iDyn3_model.getNrOfDOFs()); q.setZero(q.rows());
+    Eigen::VectorXd dq = q*0.0;
     _robot.switchAnchorAndFloatingBase(_robot.left_leg.end_effector_name);
-    _robot.updateiDyn3Model(q, true);
+    _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
     OpenSoT::DefaultHumanoidStack DHS(_robot, dT, q);
 
     double t = 0.0;
@@ -95,7 +95,9 @@ TEST_F(testLogger, testDynamicsFlusherWork)
         for(unsigned int i = 0; i < logger.model.right_arm.joint_numbers.size(); ++i)
             dq[logger.model.right_arm.joint_numbers[i]] += 0.0001;
 
-        _robot.updateiDyn3Model(q, dq/dT, true);
+        Eigen::VectorXd qdot = dq/dT;
+        _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q),
+                                cartesian_utils::fromEigentoYarp(qdot), true);
         DHS.torqueLimits->update(q);
         t+=dT;
         logger.update(t, dq);
@@ -106,8 +108,8 @@ TEST_F(testLogger, testDynamicsFlusherWork)
 
 TEST_F(testLogger, testLoggerCollationWorks)
 {
-    yarp::sig::Vector v(3,0.0);
-    yarp::sig::Vector dq(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
+    Eigen::VectorXd v(3); v.setZero(3);
+    Eigen::VectorXd dq(_robot.iDyn3_model.getNrOfDOFs()); dq.setZero(dq.rows());
     double t = 0.0;
     OpenSoT::flushers::Flusher::Ptr dataFlusher;
 
@@ -149,8 +151,8 @@ TEST_F(testLogger, testLoggerCollationWorks)
 
 TEST_F(testLogger, testAppendingWorks)
 {
-    yarp::sig::Vector v(3,0.0);
-    yarp::sig::Vector dq(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
+    Eigen::VectorXd v(3); v.setZero(3);
+    Eigen::VectorXd dq(_robot.iDyn3_model.getNrOfDOFs()); dq.setZero(dq.rows());
     double t = 0.0;
     OpenSoT::flushers::Flusher::Ptr dataFlusher;
 
@@ -214,8 +216,8 @@ TEST_F(testLogger, testAppendingWorks)
 
 TEST_F(testLogger, testPlotterWorks)
 {
-    yarp::sig::Vector v(3,0.0);
-    yarp::sig::Vector dq(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
+    Eigen::VectorXd v(3); v.setZero(3);
+    Eigen::VectorXd dq(_robot.iDyn3_model.getNrOfDOFs()); dq.setZero(dq.rows());
     double t = 0.0;
     OpenSoT::flushers::Flusher::Ptr dataFlusher;
 

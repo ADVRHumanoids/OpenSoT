@@ -6,7 +6,6 @@
 #include <cmath>
 #define  s 1.0
 
-using namespace OpenSoT::constraints::velocity;
 using namespace yarp::math;
 
 namespace {
@@ -29,9 +28,9 @@ class testJointLimits : public ::testing::Test {
       qUpperBounds = coman.iDyn3_model.getJointBoundMax();
       zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
 
-      jointLimits = new JointLimits(zeros,
-                                    qUpperBounds,
-                                    qLowerBounds);
+      jointLimits = new OpenSoT::constraints::velocity::JointLimits(cartesian_utils::toEigen(zeros),
+                                    cartesian_utils::toEigen(qUpperBounds),
+                                    cartesian_utils::toEigen(qLowerBounds));
   }
 
   virtual ~testJointLimits() {
@@ -49,7 +48,7 @@ class testJointLimits : public ::testing::Test {
     // Code here will be called immediately after the constructor (right
     // before each test).
       coman.updateiDyn3Model(zeros);
-      jointLimits->update(zeros);
+      jointLimits->update(cartesian_utils::toEigen(zeros));
   }
 
   virtual void TearDown() {
@@ -60,7 +59,7 @@ class testJointLimits : public ::testing::Test {
   // Objects declared here can be used by all tests in the test case for JointLimits.
 
   iDynUtils coman;
-  JointLimits* jointLimits;
+  OpenSoT::constraints::velocity::JointLimits* jointLimits;
 
   yarp::sig::Vector qLowerBounds;
   yarp::sig::Vector qUpperBounds;
@@ -71,8 +70,8 @@ class testJointLimits : public ::testing::Test {
 TEST_F(testJointLimits, sizesAreCorrect) {
     unsigned int x_size = coman.iDyn3_model.getNrOfDOFs();
 
-    yarp::sig::Vector lowerBound = jointLimits->getLowerBound();
-    yarp::sig::Vector upperBound = jointLimits->getUpperBound();
+    yarp::sig::Vector lowerBound = cartesian_utils::fromEigentoYarp(jointLimits->getLowerBound());
+    yarp::sig::Vector upperBound = cartesian_utils::fromEigentoYarp(jointLimits->getUpperBound());
 
     EXPECT_EQ(x_size, lowerBound.size()) << "lowerBound should have size"
                                          << x_size;
@@ -114,9 +113,9 @@ TEST_F(testJointLimits, BoundsAreCorrect) {
     q[24] = (qUpperBounds[22] + qLowerBounds[22])/2 + 1E-1;
 
     coman.updateiDyn3Model(q);
-    jointLimits->update(q);
-    yarp::sig::Vector lowerBound = jointLimits->getLowerBound();
-    yarp::sig::Vector upperBound = jointLimits->getUpperBound();
+    jointLimits->update(cartesian_utils::toEigen(q));
+    yarp::sig::Vector lowerBound = cartesian_utils::fromEigentoYarp(jointLimits->getLowerBound());
+    yarp::sig::Vector upperBound = cartesian_utils::fromEigentoYarp(jointLimits->getUpperBound());
 
     /* checking a joint outside bounds
     EXPECT_DOUBLE_EQ(0.0, lowerBound[16]) << "Joint 16 below lower bound " << q[16] << std::endl
@@ -172,14 +171,14 @@ TEST_F(testJointLimits, boundsDoUpdate) {
     yarp::sig::Vector q(zeros);
     yarp::sig::Vector q_next(zeros.size(), 0.1);
 
-    jointLimits->update(q);
-    yarp::sig::Vector oldLowerBound = jointLimits->getLowerBound();
-    yarp::sig::Vector oldUpperBound = jointLimits->getUpperBound();
+    jointLimits->update(cartesian_utils::toEigen(q));
+    yarp::sig::Vector oldLowerBound = cartesian_utils::fromEigentoYarp(jointLimits->getLowerBound());
+    yarp::sig::Vector oldUpperBound = cartesian_utils::fromEigentoYarp(jointLimits->getUpperBound());
 
-    jointLimits->update(q_next);
+    jointLimits->update(cartesian_utils::toEigen(q_next));
 
-    yarp::sig::Vector newLowerBound = jointLimits->getLowerBound();
-    yarp::sig::Vector newUpperBound = jointLimits->getUpperBound();
+    yarp::sig::Vector newLowerBound = cartesian_utils::fromEigentoYarp(jointLimits->getLowerBound());
+    yarp::sig::Vector newUpperBound = cartesian_utils::fromEigentoYarp(jointLimits->getUpperBound());
 
     EXPECT_FALSE(oldLowerBound == newLowerBound);
     EXPECT_FALSE(oldUpperBound == newUpperBound);
