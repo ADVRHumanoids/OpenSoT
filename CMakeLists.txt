@@ -83,6 +83,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/SelfCollisionAvoidance.cpp
                     src/constraints/velocity/Dynamics.cpp
                     src/constraints/force/FrictionCone.cpp
+                    src/constraints/torque/TorqueLimits.cpp
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/stacks/velocity/ManipulationStack.cpp

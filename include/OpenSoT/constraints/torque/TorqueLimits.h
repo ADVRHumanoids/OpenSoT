@@ -20,24 +20,24 @@
 
  #include <OpenSoT/Constraint.h>
 
- #include <yarp/sig/all.h>
+ #include <Eigen/Dense>
 
  namespace OpenSoT {
     namespace constraints {
-        namespace virtual_model {
+        namespace torque {
 
-            class TorqueLimits: public Constraint<yarp::sig::Matrix, yarp::sig::Vector> {
+            class TorqueLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<TorqueLimits> Ptr;
             private:
 
             public:
-                TorqueLimits(const yarp::sig::Vector& torque_limits);
+                TorqueLimits(const Eigen::VectorXd& torque_limits);
 
 
-                void getTorqueLimits(yarp::sig::Vector& torque_limits);
+                void getTorqueLimits(Eigen::VectorXd& torque_limits);
 
-                void setTorqueLimits(const yarp::sig::Vector& torque_limits);
+                void setTorqueLimits(const Eigen::VectorXd& torque_limits);
 
             };
         }

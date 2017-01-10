@@ -15,14 +15,12 @@
  * Public License for more details
 */
 
-#include <OpenSoT/constraints/virtual_model/TorqueLimits.h>
-#include <yarp/math/Math.h>
+#include <OpenSoT/constraints/torque/TorqueLimits.h>
 #include <cmath>
 
-using namespace OpenSoT::constraints::virtual_model;
-using namespace yarp::math;
+using namespace OpenSoT::constraints::torque;
 
-TorqueLimits::TorqueLimits(const yarp::sig::Vector& torque_limits) :
+TorqueLimits::TorqueLimits(const Eigen::VectorXd& torque_limits) :
     Constraint("torque_limits", torque_limits.size()){
 
     _upperBound = torque_limits;
@@ -30,12 +28,12 @@ TorqueLimits::TorqueLimits(const yarp::sig::Vector& torque_limits) :
 
 }
 
-void TorqueLimits::getTorqueLimits(yarp::sig::Vector& torque_limits)
+void TorqueLimits::getTorqueLimits(Eigen::VectorXd& torque_limits)
 {
     torque_limits = _upperBound;
 }
 
-void TorqueLimits::setTorqueLimits(const yarp::sig::Vector& torque_limits)
+void TorqueLimits::setTorqueLimits(const Eigen::VectorXd& torque_limits)
 {
     _upperBound = torque_limits;
     _lowerBound = -1.*torque_limits;
