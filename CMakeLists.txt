@@ -114,6 +114,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/Postural.cpp
                     src/tasks/force/CoM.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
+                    src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp
