@@ -227,6 +227,7 @@ void CartesianImpedanceCtrl::update_b() {
     linearVelocityError = _desiredTwist.segment(0,3) - xdot.segment(0,3);
     orientationVelocityError = _desiredTwist.segment(3,3) - xdot.segment(3,3);
 
+    /// TODO: add -Mc*(ddx_d - Jdot*qdot)
     Eigen::VectorXd F = getDamperForce() + getSpringForce();
 
     _b = _A*_J.transpose()*F;
