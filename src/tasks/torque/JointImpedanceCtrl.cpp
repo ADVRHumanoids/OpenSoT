@@ -168,3 +168,8 @@ Eigen::VectorXd JointImpedanceCtrl::getActualVelocities()
     return _x_dot;
 }
 
+void JointImpedanceCtrl::useInertiaMatrix(const bool use)
+{
+    _use_inertia_matrix = use;
+}
+
