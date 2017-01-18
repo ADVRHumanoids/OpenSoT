@@ -1,4 +1,5 @@
 #include <qpOASES.hpp>
+
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 

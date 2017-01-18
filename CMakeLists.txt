@@ -29,22 +29,22 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
-FIND_PACKAGE(YARP REQUIRED)
+# FIND_PACKAGE(YARP REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
-FIND_PACKAGE(iDynTree REQUIRED)
+# FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(orocos_kdl REQUIRED)
-FIND_PACKAGE(idynutils REQUIRED)
-FIND_PACKAGE(roslib REQUIRED)
-FIND_PACKAGE(rospack REQUIRED)
-FIND_PACKAGE(rosconsole REQUIRED)
+# FIND_PACKAGE(idynutils REQUIRED)
+# FIND_PACKAGE(roslib REQUIRED)
+# FIND_PACKAGE(rospack REQUIRED)
+# FIND_PACKAGE(rosconsole REQUIRED)
 FIND_PACKAGE(urdf REQUIRED)
 FIND_PACKAGE(kdl_parser REQUIRED)
-FIND_PACKAGE(srdfdom REQUIRED)
-FIND_PACKAGE(moveit_core REQUIRED)
+FIND_PACKAGE(srdfdom_advr REQUIRED)
+# FIND_PACKAGE(moveit_core REQUIRED)
 FIND_PACKAGE(PythonLibs)
-FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
-FIND_PACKAGE(tf REQUIRED)
-FIND_PACKAGE(interactive_markers REQUIRED)
+# FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
+# FIND_PACKAGE(tf REQUIRED)
+# FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
@@ -87,47 +87,47 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/Aggregated.cpp
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
-                    src/constraints/velocity/CartesianPositionConstraint.cpp
-                    src/constraints/velocity/CartesianVelocity.cpp
-                    src/constraints/velocity/CoMVelocity.cpp
-                    src/constraints/velocity/ConvexHull.cpp
-                    src/constraints/velocity/JointLimits.cpp
-                    src/constraints/velocity/VelocityLimits.cpp
-                    src/constraints/velocity/SelfCollisionAvoidance.cpp
-                    src/constraints/velocity/Dynamics.cpp
-                    src/constraints/force/FrictionCone.cpp
+#                     src/constraints/velocity/CartesianPositionConstraint.cpp
+#                     src/constraints/velocity/CartesianVelocity.cpp
+#                     src/constraints/velocity/CoMVelocity.cpp
+#                     src/constraints/velocity/ConvexHull.cpp
+#                     src/constraints/velocity/JointLimits.cpp
+#                     src/constraints/velocity/VelocityLimits.cpp
+#                     src/constraints/velocity/SelfCollisionAvoidance.cpp
+#                     src/constraints/velocity/Dynamics.cpp
+#                     src/constraints/force/FrictionCone.cpp
                     src/constraints/torque/TorqueLimits.cpp
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
-                    src/stacks/velocity/ManipulationStack.cpp
-                    src/stacks/velocity/WalkingStack.cpp
+#                     src/stacks/velocity/ManipulationStack.cpp
+#                     src/stacks/velocity/WalkingStack.cpp
                     src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
-                    src/tasks/velocity/Cartesian.cpp
-                    src/tasks/velocity/Gaze.cpp
-                    src/tasks/velocity/CoM.cpp
-                    src/tasks/velocity/Interaction.cpp
-                    src/tasks/velocity/Manipulability.cpp
-                    src/tasks/velocity/MinimizeAcceleration.cpp
-                    src/tasks/velocity/MinimumEffort.cpp
-                    src/tasks/velocity/MinimumVelocity.cpp
-                    src/tasks/velocity/Postural.cpp
-                    src/tasks/force/CoM.cpp
+#                     src/tasks/velocity/Cartesian.cpp
+#                     src/tasks/velocity/Gaze.cpp
+#                     src/tasks/velocity/CoM.cpp
+#                     src/tasks/velocity/Interaction.cpp
+#                     src/tasks/velocity/Manipulability.cpp
+#                     src/tasks/velocity/MinimizeAcceleration.cpp
+#                     src/tasks/velocity/MinimumEffort.cpp
+#                     src/tasks/velocity/MinimumVelocity.cpp
+#                     src/tasks/velocity/Postural.cpp
+#                     src/tasks/force/CoM.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
-                    src/tasks/torque/CartesianImpedanceCtrl.cpp
-                    src/utils/AutoStack.cpp
-                    src/utils/DefaultHumanoidStack.cpp
+#                     src/tasks/torque/CartesianImpedanceCtrl.cpp
+#                     src/utils/AutoStack.cpp
+#                     src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp
                     #src/utils/PreviewerUtils.cpp
-                    src/utils/VelocityAllocation.cpp
-                    src/utils/logger/L.cpp
-                    src/utils/logger/flushers/FakeFlusher.cpp
-                    src/utils/logger/flushers/Flusher.cpp
-                    src/utils/logger/flushers/RobotFlusher.cpp
-                    src/utils/logger/flushers/ScriptFlusher.cpp
-                    src/utils/logger/flushers/constraints/velocity/Dynamics.cpp
-                    src/utils/logger/flushers/tasks/velocity/Cartesian.cpp
-                    src/utils/logger/plotters/Plotter.cpp
+#                     src/utils/VelocityAllocation.cpp
+#                     src/utils/logger/L.cpp
+#                     src/utils/logger/flushers/FakeFlusher.cpp
+#                     src/utils/logger/flushers/Flusher.cpp
+#                     src/utils/logger/flushers/RobotFlusher.cpp
+#                     src/utils/logger/flushers/ScriptFlusher.cpp
+#                     src/utils/logger/flushers/constraints/velocity/Dynamics.cpp
+#                     src/utils/logger/flushers/tasks/velocity/Cartesian.cpp
+#                     src/utils/logger/plotters/Plotter.cpp
                     ${sot_INCLUDES})
 
 if(YARP_FOUND)
@@ -284,25 +284,25 @@ endif()
 
 include(AddUninstallTarget)
 
-add_subdirectory(app)
+# add_subdirectory(app)
 add_subdirectory(doc)
-
-########################
-# Add Examples target  #
-########################
-if(OPENSOT_COMPILE_EXAMPLES)
-    add_subdirectory(examples)
-endif()
-
-#######################
-# Add Testing target  #
-#######################
-if(OPENSOT_COMPILE_TESTS)
-  enable_testing()
-    add_subdirectory(tests)
-endif()
-
-if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
-    add_custom_target(copy_robot_model_files ALL
-                      ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
-endif()
+# 
+# ########################
+# # Add Examples target  #
+# ########################
+# if(OPENSOT_COMPILE_EXAMPLES)
+#     add_subdirectory(examples)
+# endif()
+# 
+# #######################
+# # Add Testing target  #
+# #######################
+# if(OPENSOT_COMPILE_TESTS)
+#   enable_testing()
+#     add_subdirectory(tests)
+# endif()
+# 
+# if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
+#     add_custom_target(copy_robot_model_files ALL
+#                       ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
+# endif()
