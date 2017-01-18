@@ -17,12 +17,10 @@
 
 #include <OpenSoT/constraints/TaskToConstraint.h>
 
-#include <yarp/math/Math.h>
 #include <assert.h>
 #include <limits>
 
 using namespace OpenSoT::constraints;
-using namespace yarp::math;
 
 TaskToConstraint::TaskToConstraint(TaskPtr task) :
     BilateralConstraint(task->getA(), task->getb(), task->getb()), _task(task)
