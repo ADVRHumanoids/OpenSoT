@@ -7,6 +7,7 @@
 
 #define DEFAULT_EPS_REGULARISATION 2E2
 
+
 namespace qpOASES {
     class SQProblem;
     class Options;
@@ -25,10 +26,10 @@ namespace OpenSoT{
     class QPOasesProblem {
     public:
         /**
-         * @brief MatrixXd: this typedef is needed since qpOASES wants RoWMajor organization
+         * @brief Eigen::MatrixXd: this typedef is needed since qpOASES wants RoWMajor organization
          * of matrices. Thanks to Arturo Laurenzi for the help finding this issue!
          */
-        typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXd;
+        //typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXd;
 
         /**
          * @brief QPOasesProblem constructor with creation of a QP problem.
@@ -98,8 +99,8 @@ namespace OpenSoT{
          * @param u upper bounds
          * @return true if the problem can be solved
          */
-        bool initProblem(const MatrixXd& H, const Eigen::VectorXd& g,
-                        const MatrixXd& A,
+        bool initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                        const Eigen::MatrixXd& A,
                         const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
                         const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
@@ -117,7 +118,7 @@ namespace OpenSoT{
          * @param g updated reference Eigen::VectorXd
          * @return true if task is correctly updated
          */
-        bool updateTask(const MatrixXd& H, const Eigen::VectorXd& g);
+        bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
 
         /**
          * @brief updateConstraints update internal A, lA and uA
@@ -130,7 +131,7 @@ namespace OpenSoT{
          * @param uA update upper constraint Eigen::VectorXd
          * @return true if constraints are correctly updated
          */
-        bool updateConstraints(const MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA);
+        bool updateConstraints(const Eigen::MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA);
 
         /**
          * @brief updateBounds update internal l and u
@@ -153,8 +154,8 @@ namespace OpenSoT{
          * @param u update upper bounds
          * @return if the problem is correctly updated
          */
-        bool updateProblem(const MatrixXd& H, const Eigen::VectorXd& g,
-                           const MatrixXd& A,
+        bool updateProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                           const Eigen::MatrixXd& A,
                            const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
                            const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
@@ -209,9 +210,9 @@ namespace OpenSoT{
         /**
          * Getters for internal matrices and Eigen::VectorXds
          */
-        const MatrixXd& getH(){return _H;}
+        const Eigen::MatrixXd& getH(){return _H;}
         const Eigen::VectorXd& getg(){return _g;}
-        const MatrixXd& getA(){return _A;}
+        const Eigen::MatrixXd& getA(){return _A;}
         const Eigen::VectorXd& getlA(){return _lA;}
         const Eigen::VectorXd& getuA(){return _uA;}
         const Eigen::VectorXd& getl(){return _l;}
@@ -270,13 +271,13 @@ namespace OpenSoT{
         /**
          * Define a cost function: ||Hx - g||
          */
-        MatrixXd _H;
+        Eigen::MatrixXd _H;
         Eigen::VectorXd _g;
 
         /**
          * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
-        MatrixXd _A;
+        Eigen::MatrixXd _A;
         Eigen::VectorXd _lA;
         Eigen::VectorXd _uA;
 
@@ -297,7 +298,7 @@ namespace OpenSoT{
          */
         boost::shared_ptr<qpOASES::Options> _opt;
 
-        inline void pile(MatrixXd& A, const MatrixXd& B)
+        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
         {
             A.conservativeResize(A.rows()+B.rows(), A.cols());
             A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
