@@ -32,12 +32,15 @@
             private:
 
             public:
-                TorqueLimits(const Eigen::VectorXd& torque_limits);
+                TorqueLimits(const Eigen::VectorXd& torque_max,
+                             const Eigen::VectorXd& torque_min);
 
 
-                void getTorqueLimits(Eigen::VectorXd& torque_limits);
+                void getTorqueLimits(Eigen::VectorXd& torque_max,
+                                     Eigen::VectorXd& torque_min);
 
-                void setTorqueLimits(const Eigen::VectorXd& torque_limits);
+                void setTorqueLimits(const Eigen::VectorXd& torque_max,
+                                     const Eigen::VectorXd& torque_min);
 
             };
         }
