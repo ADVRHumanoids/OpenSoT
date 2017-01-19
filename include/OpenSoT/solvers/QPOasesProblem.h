@@ -4,7 +4,6 @@
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
-#include <qpOASES/Matrices.hpp>
 
 #define DEFAULT_EPS_REGULARISATION 2E2
 

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <boost/make_shared.hpp>
 #include <iostream>
+#include <qpOASES/Matrices.hpp>
 
 
 #define GREEN "\033[0;32m"
