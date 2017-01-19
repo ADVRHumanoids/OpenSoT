@@ -32,7 +32,7 @@ CoM::CoM(   const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact
     _actualPosition(), _actualVelocity(),
     _desiredVariationAngularMomentum(), _desiredAngularMomentum(),
     positionError(), velocityError(), angularMomentumError(),
-    _links_in_contact(links_in_contact),
+    _links_in_contact(links_in_contact),_I(), _O(), _P(), _T(),
     _g(),
     _lambda2(1.0), _lambdaAngularMomentum(1.0)
 {

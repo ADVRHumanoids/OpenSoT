@@ -108,7 +108,7 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     std::cout<<"A = [ "<<A<<" ]"<<std::endl;
 
     Eigen::VectorXd b = force_com_task->getb();
-    EXPECT_DOUBLE_EQ(b.rows(), 6);
+    EXPECT_EQ(b.rows(), 6);
     std::cout<<"b = [ "<<b<<" ]"<<std::endl;
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;

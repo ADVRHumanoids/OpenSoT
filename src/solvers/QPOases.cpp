@@ -64,21 +64,21 @@ bool QPOases_sot::prepareSoT()
         Eigen::VectorXd g;
         computeCostFunction(_tasks[i], H, g);
 
-        OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
-        if(_globalConstraints)
-            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(
-                        new OpenSoT::constraints::Aggregated(constraints_task_i, _globalConstraints, _tasks[i]->getXSize()));
+        OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
+        if(_globalConstraints){
+            constraints_task_i.getConstraintsList().push_back(_globalConstraints);
+            constraints_task_i.generateAll();}
         else if(_bounds && _bounds->isConstraint())
         {
-            constraints_task_i->getConstraintsList().push_back(_bounds);
-            constraints_task_i->generateAll();
+            constraints_task_i.getConstraintsList().push_back(_bounds);
+            constraints_task_i.generateAll();
         }
 
-        std::string constraints_str = constraints_task_i->getConstraintID();
+        std::string constraints_str = constraints_task_i.getConstraintID();
 
-        Eigen::MatrixXd A = constraints_task_i->getAineq();
-        Eigen::VectorXd lA = constraints_task_i->getbLowerBound();
-        Eigen::VectorXd uA = constraints_task_i->getbUpperBound();
+        Eigen::MatrixXd A = constraints_task_i.getAineq();
+        Eigen::VectorXd lA = constraints_task_i.getbLowerBound();
+        Eigen::VectorXd uA = constraints_task_i.getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
@@ -97,10 +97,11 @@ bool QPOases_sot::prepareSoT()
             }
         }
 
-        if(_bounds && _bounds->isBound())   // if it is a constraint, it has already been added in #74
-            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
-        Eigen::VectorXd l = constraints_task_i->getLowerBound();
-        Eigen::VectorXd u = constraints_task_i->getUpperBound();
+        if(_bounds && _bounds->isBound()){   // if it is a constraint, it has already been added in #74
+            constraints_task_i.getConstraintsList().push_back(_bounds);
+            constraints_task_i.generateAll();}
+        Eigen::VectorXd l = constraints_task_i.getLowerBound();
+        Eigen::VectorXd u = constraints_task_i.getUpperBound();
 
         QPOasesProblem problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                  _epsRegularisation);
@@ -130,18 +131,18 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
         if(!_qp_stack_of_tasks[i].updateTask(H, g))
             return false;
 
-        OpenSoT::constraints::Aggregated::Ptr constraints_task_i(new OpenSoT::constraints::Aggregated(_tasks[i]->getConstraints(), _tasks[i]->getXSize()));
-        if(_globalConstraints)
-            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(
-                        new OpenSoT::constraints::Aggregated(constraints_task_i, _globalConstraints, _tasks[i]->getXSize()));
+        OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
+        if(_globalConstraints){
+            constraints_task_i.getConstraintsList().push_back(_globalConstraints);
+            constraints_task_i.generateAll();}
         else if(_bounds && _bounds->isConstraint())
         {
-            constraints_task_i->getConstraintsList().push_back(_bounds);
-            constraints_task_i->generateAll();
+            constraints_task_i.getConstraintsList().push_back(_bounds);
+            constraints_task_i.generateAll();
         }
-        Eigen::MatrixXd A = constraints_task_i->getAineq();
-        Eigen::VectorXd lA = constraints_task_i->getbLowerBound();
-        Eigen::VectorXd uA = constraints_task_i->getbUpperBound();
+        Eigen::MatrixXd A = constraints_task_i.getAineq();
+        Eigen::VectorXd lA = constraints_task_i.getbLowerBound();
+        Eigen::VectorXd uA = constraints_task_i.getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
@@ -160,12 +161,13 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
 
         if(_bounds && _bounds->isBound()) // if it is a constraint, it has already been added in #127
         {
-            constraints_task_i = OpenSoT::constraints::Aggregated::Ptr(new OpenSoT::constraints::Aggregated(constraints_task_i, _bounds, _tasks[i]->getXSize()));
+            constraints_task_i.getConstraintsList().push_back(_bounds);
+            constraints_task_i.generateAll();
         }
 
-        if(constraints_task_i->hasBounds()) // bounds specified everywhere will work
+        if(constraints_task_i.hasBounds()) // bounds specified everywhere will work
         {
-            if(!_qp_stack_of_tasks[i].updateBounds(constraints_task_i->getLowerBound(), constraints_task_i->getUpperBound()))
+            if(!_qp_stack_of_tasks[i].updateBounds(constraints_task_i.getLowerBound(), constraints_task_i.getUpperBound()))
                 return false;
         }
 
