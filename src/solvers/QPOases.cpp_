@@ -1,5 +1,4 @@
 #include <qpOASES.hpp>
-#include <yarp/math/Math.h>
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 
@@ -8,7 +7,6 @@
 #define RED "\033[0;31m"
 #define DEFAULT "\033[0m"
 
-using namespace yarp::math;
 using namespace OpenSoT::solvers;
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation):

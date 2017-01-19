@@ -57,6 +57,8 @@
                 Eigen::MatrixXd _M;
                 Eigen::MatrixXd _J;
 
+                Eigen::Affine3d _tmp_affine;
+
             public:
 
                 Eigen::VectorXd positionError;

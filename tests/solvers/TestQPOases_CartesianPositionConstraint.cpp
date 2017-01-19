@@ -186,7 +186,7 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
 
     OpenSoT::solvers::QPOases_sot::Ptr sot(
         new OpenSoT::solvers::QPOases_sot(stack->getStack(),
-                                          stack->getBounds(),2E10));
+                                          stack->getBounds()));
 
 
     //SET SOME REFERENCES
@@ -270,9 +270,9 @@ TEST_F(testQPOases_CartesianPositionConstraint, tryFollowingBounds) {
             <<" getting "<< distanceBetweenExpectedAndActualPosition << " instead";
 
         Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        if(sot->solve(_dq)){
-            dq = cartesian_utils::fromEigentoYarp(_dq);
-            q += dq;}
+        EXPECT_TRUE(sot->solve(_dq));
+        dq = cartesian_utils::fromEigentoYarp(_dq);
+        q += dq;
 
 #ifdef TRY_ON_SIMULATOR
         robot.move(q);

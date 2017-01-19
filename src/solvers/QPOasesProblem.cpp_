@@ -5,6 +5,7 @@
 #include <fstream>
 #include <boost/make_shared.hpp>
 #include <iostream>
+#include <qpOASES/Matrices.hpp>
 
 
 #define GREEN "\033[0;32m"
@@ -67,8 +68,8 @@ void QPOasesProblem::setOptions(const qpOASES::Options &options){
 qpOASES::Options QPOasesProblem::getOptions(){
     return _problem->getOptions();}
 
-bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
-                                 const MatrixXd &A,
+bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
+                                 const Eigen::MatrixXd &A,
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
@@ -90,14 +91,14 @@ bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
         assert(_lA.rows() == _uA.rows());}
 
     int nWSR = _nWSR;
-    qpOASES::SymSparseMat H_sparse(_H.rows(), _H.cols(), _H.rows(), _H.data());
-    H_sparse.createDiagInfo();
-    qpOASES::DenseMatrix A_dense(_A.rows(), _A.cols(), _A.cols(), _A.data());
 
-    qpOASES::returnValue val =_problem->init(H_sparse.duplicateSym(),_g.data(),
-                       A_dense.duplicate(), _l.data(), _u.data(),
+
+    qpOASES::returnValue val =_problem->init(_H.data(),_g.data(),
+                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
+
 
     if(val != qpOASES::SUCCESSFUL_RETURN)
     {
@@ -149,7 +150,7 @@ bool QPOasesProblem::initProblem(const MatrixXd &H, const Eigen::VectorXd &g,
     return true;
 }
 
-bool QPOasesProblem::updateTask(const MatrixXd &H, const Eigen::VectorXd &g)
+bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
     if(!(_g.rows() == _H.rows())){
         std::cout<<RED<<"g size: "<<_g.rows()<<DEFAULT<<std::endl;
@@ -185,7 +186,7 @@ bool QPOasesProblem::updateTask(const MatrixXd &H, const Eigen::VectorXd &g)
     }
 }
 
-bool QPOasesProblem::updateConstraints(const MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
+bool QPOasesProblem::updateConstraints(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA)
 {
     if(!(A.cols() == _H.cols())){
         std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
@@ -247,8 +248,8 @@ bool QPOasesProblem::updateBounds(const Eigen::VectorXd &l, const Eigen::VectorX
     return true;
 }
 
-bool QPOasesProblem::updateProblem(const MatrixXd &H, const Eigen::VectorXd &g,
-                                   const MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+bool QPOasesProblem::updateProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
+                                   const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                    const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
     bool success = true;
@@ -263,15 +264,12 @@ bool QPOasesProblem::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    qpOASES::SymSparseMat H_sparse(_H.rows(), _H.cols(), _H.rows(), _H.data());
-    H_sparse.createDiagInfo();
-    qpOASES::DenseMatrix A_dense(_A.rows(), _A.cols(), _A.cols(), _A.data());
 
-    qpOASES::returnValue val =_problem->hotstart(H_sparse.duplicateSym(),_g.data(),
-                       A_dense.duplicate(),
-                        _l.data(), _u.data(),
-                       _lA.data(),_uA.data(),
-                       nWSR,0);
+        qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
+                           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                            _l.data(), _u.data(),
+                           _lA.data(),_uA.data(),
+                           nWSR,0);
 
     if(val != qpOASES::SUCCESSFUL_RETURN){
 #ifndef NDEBUG
@@ -279,13 +277,15 @@ bool QPOasesProblem::solve()
         std::cout<<GREEN<<"RETRYING INITING WITH WARMSTART"<<DEFAULT<<std::endl;
 #endif
 
-        val =_problem->init(H_sparse.duplicateSym(),_g.data(),
-                           A_dense.duplicate(),
+
+        val =_problem->init(_H.data(),_g.data(),
+                           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,
                            _solution.data(), _dual_solution.data(),
                            _bounds.get(), _constraints.get());
+
 
         if(val != qpOASES::SUCCESSFUL_RETURN){
 #ifndef NDEBUG

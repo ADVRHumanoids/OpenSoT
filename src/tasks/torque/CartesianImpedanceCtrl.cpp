@@ -84,16 +84,15 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     if (_use_inertia_matrix)
     {
         _robot.getInertiaMatrix(_M);
-        _A = _A*_M.inverse();
+        _A = _J*_M.inverse();
     }
 
 
-    Eigen::Affine3d tmp;
     if(_base_link_is_world)
-        _robot.getPose(_distal_link, tmp);
+        _robot.getPose(_distal_link, _tmp_affine);
     else
-        _robot.getPose(_base_link, _distal_link, tmp);
-    _actualPose = tmp.matrix();
+        _robot.getPose(_base_link, _distal_link, _tmp_affine);
+    _actualPose = _tmp_affine.matrix();
 
     if(_desiredPose.rows() == 0) {
         /* initializing to zero error */
