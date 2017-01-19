@@ -31,8 +31,8 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _desiredTwist(6), _use_inertia_matrix(true)
-{
+    _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size)
+{   
     _desiredTwist.setZero(_desiredTwist.size());
 
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
@@ -202,16 +202,16 @@ const bool CartesianImpedanceCtrl::baseLinkIsWorld() const
 
 Eigen::VectorXd CartesianImpedanceCtrl::getSpringForce()
 {
-    Eigen::VectorXd tmp(positionError.size()+orientationError.size());
-    tmp<<positionError, -1.0*orientationError;
-    return _K*tmp;
+    _spring_force.resize(positionError.size()+orientationError.size());
+    _spring_force<<positionError, -1.0*orientationError;
+    return _K*_spring_force;
 }
 
 Eigen::VectorXd CartesianImpedanceCtrl::getDamperForce()
 {
-    Eigen::VectorXd tmp(linearVelocityError.size()+orientationVelocityError.size());
-    tmp<<linearVelocityError, orientationVelocityError;
-    return _D*tmp;
+    _damping_force.resize(linearVelocityError.size()+orientationVelocityError.size());
+    _damping_force<<linearVelocityError, orientationVelocityError;
+    return _D*_damping_force;
 }
 
 void CartesianImpedanceCtrl::update_b() {
@@ -220,16 +220,15 @@ void CartesianImpedanceCtrl::update_b() {
 
 
 
-    Eigen::VectorXd qdot(_x_size);
-    _robot.getJointVelocity(qdot);
-    Eigen::VectorXd xdot = _J*qdot;
-    linearVelocityError = _desiredTwist.segment(0,3) - xdot.segment(0,3);
-    orientationVelocityError = _desiredTwist.segment(3,3) - xdot.segment(3,3);
+    _robot.getJointVelocity(_qdot);
+    _xdot = _J*_qdot;
+    linearVelocityError = _desiredTwist.segment(0,3) - _xdot.segment(0,3);
+    orientationVelocityError = _desiredTwist.segment(3,3) - _xdot.segment(3,3);
 
     /// TODO: add -Mc*(ddx_d - Jdot*qdot)
-    Eigen::VectorXd F = getDamperForce() + getSpringForce();
+    _F = getDamperForce() + getSpringForce();
 
-    _b = _A*_J.transpose()*F;
+    _b = _A*_J.transpose()*_F;
 }
 
 bool CartesianImpedanceCtrl::isCartesianImpedanceCtrl(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)

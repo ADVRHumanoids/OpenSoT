@@ -58,6 +58,13 @@
                 Eigen::MatrixXd _J;
 
                 Eigen::Affine3d _tmp_affine;
+                Eigen::VectorXd _spring_force;
+                Eigen::VectorXd _damping_force;
+
+                Eigen::VectorXd _qdot;
+                Eigen::VectorXd _xdot;
+
+                Eigen::VectorXd _F;
 
             public:
 
