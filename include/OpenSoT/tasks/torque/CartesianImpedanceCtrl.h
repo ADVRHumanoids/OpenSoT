@@ -92,6 +92,7 @@
                 void _update(const Eigen::VectorXd& x);
 
                 void setReference(const Eigen::MatrixXd& desiredPose);
+                void setReference(const KDL::Frame& desiredPose);
 
                 void setReference(const Eigen::MatrixXd& desiredPose,
                                   const Eigen::VectorXd& desiredTwist);

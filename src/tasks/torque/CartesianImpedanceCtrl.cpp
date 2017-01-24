@@ -16,7 +16,7 @@
 */
 
 #include <OpenSoT/tasks/torque/CartesianImpedanceCtrl.h>
-#include <idynutils/cartesian_utils.h>
+#include <advr_humanoids_common_utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
@@ -145,6 +145,20 @@ void CartesianImpedanceCtrl::setReference(const Eigen::MatrixXd& desiredPose) {
     assert(desiredPose.cols() == 4);
 
     _desiredPose = desiredPose;
+    _desiredTwist.setZero(_desiredTwist.size());
+    this->update_b();
+}
+
+void CartesianImpedanceCtrl::setReference(const KDL::Frame& desiredPose)
+{
+    _desiredPose.setIdentity(4,4);
+    _desiredPose(0,0) = desiredPose.M(0,0); _desiredPose(0,1) = desiredPose.M(0,1); _desiredPose(0,2) = desiredPose.M(0,2);
+    _desiredPose(1,0) = desiredPose.M(1,0); _desiredPose(1,1) = desiredPose.M(1,1); _desiredPose(1,2) = desiredPose.M(1,2);
+    _desiredPose(2,0) = desiredPose.M(2,0); _desiredPose(2,1) = desiredPose.M(2,1); _desiredPose(2,2) = desiredPose.M(2,2);
+    _desiredPose(0,3) = desiredPose.p.x();
+    _desiredPose(1,3) = desiredPose.p.y();
+    _desiredPose(2,3) = desiredPose.p.z();
+
     _desiredTwist.setZero(_desiredTwist.size());
     this->update_b();
 }
