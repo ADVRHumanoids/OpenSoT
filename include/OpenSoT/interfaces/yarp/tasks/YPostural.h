@@ -6,6 +6,7 @@
 #include <OpenSoT/interfaces/yarp/yarp_msgs/yarp_position_joint_msg.h>
 #include <boost/thread/mutex.hpp>
 #include <Eigen/Dense>
+#include <idynutils/idynutils.h>
 
 
 namespace OpenSoT {

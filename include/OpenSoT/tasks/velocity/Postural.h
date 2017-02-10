@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_POSTURAL_H__
 
  #include <OpenSoT/Task.h>
- #include <idynutils/idynutils.h>
+
  #include <kdl/frames.hpp>
 #include <Eigen/Dense>
 

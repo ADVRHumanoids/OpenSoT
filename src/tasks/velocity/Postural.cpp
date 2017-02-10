@@ -16,7 +16,6 @@
 */
 
 #include <OpenSoT/tasks/velocity/Postural.h>
-#include <idynutils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 

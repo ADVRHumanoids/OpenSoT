@@ -1,4 +1,5 @@
 #include <idynutils/tests_utils.h>
+#include <idynutils/idynutils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Postural.h>

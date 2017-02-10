@@ -1,4 +1,5 @@
 #include <idynutils/tests_utils.h>
+#include <idynutils/idynutils.h>
 #include <gtest/gtest.h>
 #include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
