@@ -1,8 +1,42 @@
 cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(SET CMP0040 OLD)
 include(ExternalProject)
 
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
+
+FIND_PACKAGE(moveit_core REQUIRED)
+FIND_PACKAGE(fcl REQUIRED)
+
+# Detect Linux Distribution
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+     if(EXISTS "/etc/lsb-release")
+         execute_process(COMMAND cat /etc/lsb-release
+                         COMMAND grep DISTRIB_CODENAME
+                         COMMAND awk -F= "{ print $2 }"
+                         COMMAND tr "\n" " "
+                         COMMAND sed "s/ //"
+                         OUTPUT_VARIABLE UBUNTU_VERSION
+                         RESULT_VARIABLE UBUNTU_VERSION_RESULT
+         )
+     endif(EXISTS "/etc/lsb-release")
+
+     message(STATUS "Configuring idynutils to be built on Ubuntu ${UBUNTU_VERSION}")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+if(${UBUNTU_VERSION} MATCHES "xenial")
+     message(STATUS "Adding CXX support")
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    if(COMPILER_SUPPORTS_CXX11)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    elseif(COMPILER_SUPPORTS_CXX0X)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    else()
+        message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    endif()
+endif(${UBUNTU_VERSION} MATCHES "xenial")
 
 #TESTS THAT USES GAZEBO
 set(OPENSOT_COMPILE_SIMULATION_TESTS OFF CACHE BOOL "Flag to compile tests that uses Gazebo")
@@ -96,7 +130,7 @@ endif()
 # gTests for Velocity constraints
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES})
+               ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${moveit_core_LIBRARIES} fcl)
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 

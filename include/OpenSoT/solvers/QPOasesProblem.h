@@ -24,7 +24,7 @@ namespace OpenSoT{
 
     /**
      * @brief The QPOasesProblem class handle variables, options and execution of a
-     * single qpOases problem. Is implemented using yarp::sig Matrix and Vector.
+     * single qpOases problem. Is implemented using yarp::sig Matrix and yarp::sig::Vector.
      */
     class QPOasesProblem {
     public:
@@ -90,16 +90,16 @@ namespace OpenSoT{
          * @param H Task Matrix
          * @param g Task references
          * @param A Constraint Matrix
-         * @param lA lower constraint vector
-         * @param uA upper constraint vector
+         * @param lA lower constraint yarp::sig::Vector
+         * @param uA upper constraint yarp::sig::Vector
          * @param l lower bounds
          * @param u upper bounds
          * @return true if the problem can be solved
          */
-        bool initProblem(const yarp::sig::Matrix& H, const Vector& g,
+        bool initProblem(const yarp::sig::Matrix& H, const yarp::sig::Vector& g,
                         const yarp::sig::Matrix& A,
-                        const Vector& lA, const Vector& uA,
-                        const Vector& l, const Vector& u);
+                        const yarp::sig::Vector& lA, const yarp::sig::Vector& uA,
+                        const yarp::sig::Vector& l, const yarp::sig::Vector& u);
 
         /**
          * This set of function update current problem copying input data. Use these
@@ -112,10 +112,10 @@ namespace OpenSoT{
          * _g = g
          * for now is not possible to have different size of H and g wrt internal ones
          * @param H updated task matrix
-         * @param g updated reference vector
+         * @param g updated reference yarp::sig::Vector
          * @return true if task is correctly updated
          */
-        bool updateTask(const yarp::sig::Matrix& H, const Vector& g);
+        bool updateTask(const yarp::sig::Matrix& H, const yarp::sig::Vector& g);
 
         /**
          * @brief updateConstraints update internal A, lA and uA
@@ -124,11 +124,11 @@ namespace OpenSoT{
          * _uA = uA
          * A, lA and uA can change rows size to allow variable constraints
          * @param A update constraint matrix
-         * @param lA update lower constraint vector
-         * @param uA update upper constraint vector
+         * @param lA update lower constraint yarp::sig::Vector
+         * @param uA update upper constraint yarp::sig::Vector
          * @return true if constraints are correctly updated
          */
-        bool updateConstraints(const yarp::sig::Matrix& A, const Vector& lA, const Vector& uA);
+        bool updateConstraints(const yarp::sig::Matrix& A, const yarp::sig::Vector& lA, const yarp::sig::Vector& uA);
 
         /**
          * @brief updateBounds update internal l and u
@@ -138,42 +138,42 @@ namespace OpenSoT{
          * @param u update upper bounds
          * @return true if bounds are correctly updated
          */
-        bool updateBounds(const Vector& l, const Vector& u);
+        bool updateBounds(const yarp::sig::Vector& l, const yarp::sig::Vector& u);
 
         /**
          * @brief updateProblem update the whole problem see updateTask(), updateConstraints() and updateBounds()
          * @param H updated task matrix
-         * @param g updated reference vector
+         * @param g updated reference yarp::sig::Vector
          * @param A update constraint matrix
-         * @param lA update lower constraint vector
-         * @param uA update upper constraint vector
+         * @param lA update lower constraint yarp::sig::Vector
+         * @param uA update upper constraint yarp::sig::Vector
          * @param l update lower bounds
          * @param u update upper bounds
          * @return if the problem is correctly updated
          */
-        bool updateProblem(const yarp::sig::Matrix& H, const Vector& g,
+        bool updateProblem(const yarp::sig::Matrix& H, const yarp::sig::Vector& g,
                            const yarp::sig::Matrix& A,
-                           const Vector& lA, const Vector& uA,
-                           const Vector& l, const Vector& u);
+                           const yarp::sig::Vector& lA, const yarp::sig::Vector& uA,
+                           const yarp::sig::Vector& l, const yarp::sig::Vector& u);
 
         /**
          * @brief addTask pile a matrix H to internal _H and g to internal _g
          * so that _H = [_H; H] and _g = [_g; g]
          * @param H extra Task Matrix
-         * @param g extra reference vector
+         * @param g extra reference yarp::sig::Vector
          * @return true if the problem is initiazlized correctly
          */
-        bool addTask(const yarp::sig::Matrix& H, const Vector& g);
+        bool addTask(const yarp::sig::Matrix& H, const yarp::sig::Vector& g);
 
         /**
          * @brief addConstraints pile a matrix A to internal _A and lA/uA to internal _lA/_uA
          * so that _A = [_A; A], _lA = [_lA; lA], _uA = [_uA; uA]
          * @param A extra constraint matrix
-         * @param lA extra lower constraint vector
-         * @param uA extra upper constraint vector
+         * @param lA extra lower constraint yarp::sig::Vector
+         * @param uA extra upper constraint yarp::sig::Vector
          * @return true if the problem is initiazlized correctly
          */
-        bool addConstraints(const yarp::sig::Matrix& A, const Vector& lA, const Vector& uA);
+        bool addConstraints(const yarp::sig::Matrix& A, const yarp::sig::Vector& lA, const yarp::sig::Vector& uA);
 
         /**
          * @brief solve the QP problem
@@ -185,7 +185,7 @@ namespace OpenSoT{
          * @brief getSolution return the actual solution of the QP problem
          * @return solution
          */
-        const Vector& getSolution(){return _solution;}
+        const yarp::sig::Vector& getSolution(){return _solution;}
 
         /**
          * @brief getHessianType return the hessian type f the problem
@@ -224,7 +224,7 @@ namespace OpenSoT{
         const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
 
         /**
-         * Getters for internal matrices and vectors
+         * Getters for internal matrices and yarp::sig::Vectors
          */
         const yarp::sig::Matrix& getH(){return _H;}
         const yarp::sig::Vector& getg(){return _g;}
@@ -289,27 +289,27 @@ namespace OpenSoT{
          */
         yarp::sig::Matrix _H;
         boost::shared_ptr<qpOASES::SymSparseMat> H_sparse;
-        Vector _g;
+        yarp::sig::Vector _g;
 
         /**
          * Define a set of constraints weighted with A: lA <= Ax <= uA
          */
         yarp::sig::Matrix _A;
         boost::shared_ptr<qpOASES::DenseMatrix> A_dense;
-        Vector _lA;
-        Vector _uA;
+        yarp::sig::Vector _lA;
+        yarp::sig::Vector _uA;
 
         /**
          * Define a set of bounds on solution: l <= x <= u
          */
-        Vector _l;
-        Vector _u;
+        yarp::sig::Vector _l;
+        yarp::sig::Vector _u;
 
         /**
          * Solution and dual solution of the QP problem
          */
-        Vector _solution;
-        Vector _dual_solution;
+        yarp::sig::Vector _solution;
+        yarp::sig::Vector _dual_solution;
 
         /**
          * @brief _opt solver options

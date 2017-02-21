@@ -77,7 +77,9 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
     yarp::sig::Matrix W1 = aggregated1->getWeight();
     yarp::sig::Matrix W2 = aggregated2->getWeight();
     W.setSubmatrix(W1,0,0);
-    W.setSubmatrix(W1,W1.rows(), W1.cols());
+    W.setSubmatrix(W2,W1.rows(), W1.cols());
+    outAggregated->setWeight(W);
+
     outAggregated->getConstraints() = aggregated1->getConstraints();
     typedef std::list< OpenSoT::tasks::Aggregated::ConstraintPtr >::const_iterator it_c;
     for(it_c constraint = aggregated2->getConstraints().begin();
@@ -89,7 +91,6 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
            == outAggregated->getConstraints().end())
             outAggregated->getConstraints().push_back(*constraint);
     }
-
     return outAggregated;
 }
 

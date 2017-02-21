@@ -110,9 +110,12 @@ bool QPOases_sot::prepareSoT()
 
         if(problem_i.initProblem(H, g, A, lA, uA, l, u)){
             _qp_stack_of_tasks.push_back(problem_i);
+            std::string bounds_string = "";
+            if(_bounds)
+                bounds_string = _bounds->getConstraintID();
             _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID(),
                                                           constraints_str,
-                                                          _bounds->getConstraintID());}
+                                                          bounds_string);}
         else{
             std::cout<<RED<<"ERROR: INITIALIZING STACK "<<i<<DEFAULT<<std::endl;
             return false;}

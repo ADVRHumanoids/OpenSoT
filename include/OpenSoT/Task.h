@@ -24,9 +24,6 @@
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
  #include <boost/shared_ptr.hpp>
- #include <yarp/sig/Matrix.h>
- #include <yarp/math/Math.h>
- #include <yarp/math/SVD.h>
 
  namespace OpenSoT {
 
@@ -111,15 +108,28 @@
            bool operator()(int val) const {return val == true;}
         };
 
-        void applyActiveJointsMask(yarp::sig::Matrix& A)
+        /**
+         * @brief applyActiveJointsMask apply the active joint mask to the A matrix
+         * @param A matrix of the Task
+         */
+        void applyActiveJointsMask(Matrix_type& A)
         {
-            yarp::sig::Vector zeros(A.rows(), 0.0);
+            int rows = A.rows();
             for(unsigned int i = 0; i < _x_size; ++i)
+            {
                 if(!_active_joints_mask[i])
-                    A.setCol(i, zeros);
+                    for(unsigned int j = 0; j < rows; ++j)
+                        A(j,i) = 0.0;
+            }
+            //TODO: is necessary here to call update()?
         }
 
     public:
+        /**
+         * @brief Task define a task in terms of Ax = b
+         * @param task_id is a unique id
+         * @param x_size is the number of variables of the task
+         */
         Task(const std::string task_id,
              const unsigned int x_size) :
             _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size)
@@ -132,13 +142,30 @@
 
         virtual ~Task(){}
 
+        /**
+         * @brief getA
+         * @return the A matrix of the task
+         */
         const Matrix_type& getA() const {
             return _A;
         }
 
+        /**
+         * @brief getHessianAtype
+         * @return the Hessian type
+         */
         const HessianType getHessianAtype() { return _hessianType; }
+
+        /**
+         * @brief getb
+         * @return the b matrix of the task
+         */
         const Vector_type& getb() const { return _b; }
 
+        /**
+         * @brief getWeight
+         * @return the weight of the norm of the task error
+         */
         const Matrix_type& getWeight() const { return _W; }
 
         /**
@@ -155,12 +182,14 @@
             _W = W;
         }
 
-
+        /**
+         * @brief getLambda
+         * @return the lambda weight of the task
+         */
         const double getLambda() const { return _lambda; }
 
         virtual void setLambda(double lambda)
         {
-            assert(lambda >= 0.0);
             if(lambda >= 0.0){
                 _lambda = lambda;
             }
