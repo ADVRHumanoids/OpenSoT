@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_CARTESIAN_H__
 
  #include <OpenSoT/Task.h>
- #include <idynutils/idynutils.h>
+ #include <XBotInterface/ModelInterface.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
 
@@ -49,7 +49,7 @@
             public:
                 typedef boost::shared_ptr<Cartesian> Ptr;
             protected:
-                iDynUtils& _robot;
+                XBot::ModelInterface& _robot;
 
                 std::string _distal_link;
                 std::string _base_link;
@@ -57,8 +57,8 @@
                 int _distal_link_index;
                 int _base_link_index;
 
-                Eigen::MatrixXd _actualPose;
-                Eigen::MatrixXd _desiredPose;
+                Eigen::Affine3d _actualPose;
+                Eigen::Affine3d _desiredPose;
                 Eigen::VectorXd _desiredTwist;
 
                 bool _base_link_is_world;
@@ -66,6 +66,8 @@
                 void update_b();
 
                 double _orientationErrorGain;
+
+                bool _is_initialized;
 
             public:
 
@@ -88,7 +90,7 @@
                  */
                 Cartesian(std::string task_id,
                           const Eigen::VectorXd& x,
-                          iDynUtils &robot,
+                          XBot::ModelInterface &robot,
                           std::string distal_link,
                           std::string base_link);
 

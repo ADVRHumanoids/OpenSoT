@@ -20,13 +20,14 @@
 
 #include <OpenSoT/OpenSoT.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
+#include <advr_humanoids_common_utils/idynutils.h>
 
  namespace OpenSoT {
 
      class DefaultHumanoidStack
      {
         public:
-
+         typedef idynutils2 iDynUtils;
          typedef boost::shared_ptr<DefaultHumanoidStack> Ptr;
 
          /**
