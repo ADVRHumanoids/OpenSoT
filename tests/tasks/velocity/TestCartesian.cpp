@@ -314,7 +314,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
                                                               -orientationErrorGain*conversion_utils_YARP::toYARP(orientationError)))<<"]"<<std::endl;
 
     Eigen::MatrixXd x_now;
-    for(unsigned int i = 0; i < 1000; ++i)
+    for(unsigned int i = 0; i < 60; ++i)
     {
         _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole),true);
         cartesian._update(conversion_utils_YARP::toEigen(q_whole));
