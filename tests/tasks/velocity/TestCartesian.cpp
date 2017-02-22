@@ -648,79 +648,88 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
 
 }
 
-//TEST_F(testCartesianTask, testActiveJointsMask)
-//{
-//    bool update_world = true;
-//    // setting initial position with bent legs
-//    yarp::sig::Vector q_whole(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
+TEST_F(testCartesianTask, testActiveJointsMask)
+{
+    // setting initial position with bent legs
+    yarp::sig::Vector q_whole(_robot.iDynTree_model.getNrOfDOFs(), 0.0);
+    q_whole[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -20.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("LHipLat")] = 10.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("LHipYaw")] = 10.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = -80.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("LAnkLat")] = -10.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -10.0*M_PI/180.0;
 
-//    _robot.setFloatingBaseLink(_robot.left_leg.end_effector_name);
+    q_whole[_robot.iDynTree_model.getDOFIndex("WaistLat")] = -10.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("WaistSag")] = -10.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("WaistYaw")] = -10.0*M_PI/180.0;
 
-//    yarp::sig::Vector l_leg(_robot.left_leg.getNrOfDOFs(), 0.0);
-//    l_leg[0] = -20.0 * M_PI/180.0;
-//    l_leg[1] = 10.0 * M_PI/180.0;
-//    l_leg[2] = 10.0 * M_PI/180.0;
-//    l_leg[3] = -80.0 * M_PI/180.0;
-//    l_leg[4] = -10.0 * M_PI/180.0;
-//    l_leg[5] = -10.0 * M_PI/180.0;
-//    _robot.fromRobotToIDyn(l_leg, q_whole, _robot.left_leg);
-//    yarp::sig::Vector torso(_robot.torso.getNrOfDOFs(), 0.0);
-//    torso[0] = -10.0 * M_PI/180.0;
-//    torso[1] = -10.0 * M_PI/180.0;
-//    torso[2] = -10.0 * M_PI/180.0;
-//    _robot.fromRobotToIDyn(torso, q_whole, _robot.torso);
-
-//    _robot.updateiDyn3Model(q_whole, update_world);
-
-//    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
-//                                                 conversion_utils_YARP::toEigen(q_whole),
-//                                                 *(_model_ptr.get()),
-//                                                 "torso",
-//                                                 "world");
-
-//    cartesian.update(conversion_utils_YARP::toEigen(q_whole));
-//    std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
-//    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
-//        EXPECT_TRUE(active_joint_mask[i]);
-
-//    yarp::sig::Matrix J = cartesian_utils::fromEigentoYarp(cartesian.getA());
-
-//    yarp::sig::Matrix J_torso(6,_robot.torso.getNrOfDOFs());
-//    for(unsigned int i = 0; i < _robot.torso.getNrOfDOFs(); ++i)
-//        J_torso.setCol(i, J.getCol((int)_robot.torso.joint_numbers[i]));
-//    //std::cout<<"J_torso:\n "<<J_torso.toString()<<std::cout;
-//    std::cout<<std::endl;
-//    EXPECT_FALSE(J_torso == yarp::sig::Matrix(J_torso.rows(), J_torso.cols()));
-
-//    yarp::sig::Matrix J_left_leg(6,_robot.left_leg.getNrOfDOFs());
-//    for(unsigned int i = 0; i < _robot.left_leg.getNrOfDOFs(); ++i)
-//        J_left_leg.setCol(i, J.getCol((int)_robot.left_leg.joint_numbers[i]));
-//    //std::cout<<"J_left_leg:\n "<<J_left_leg.toString()<<std::cout;
-//    EXPECT_FALSE(J_left_leg == yarp::sig::Matrix(J_left_leg.rows(), J_left_leg.cols()));
-
-//    for(unsigned int i = 0; i < _robot.left_leg.getNrOfDOFs(); ++i)
-//        active_joint_mask[_robot.left_leg.joint_numbers[i]] = false;
-
-//    cartesian.setActiveJointsMask(active_joint_mask);
-
-//    J = cartesian_utils::fromEigentoYarp(cartesian.getA());
-
-//    yarp::sig::Matrix J_torso2(6,_robot.torso.getNrOfDOFs());
-//    for(unsigned int i = 0; i < _robot.torso.getNrOfDOFs(); ++i)
-//        J_torso2.setCol(i, J.getCol((int)_robot.torso.joint_numbers[i]));
-//    //std::cout<<"J_torso:\n "<<J_torso2.toString()<<std::cout;
-//    std::cout<<std::endl;
-//    EXPECT_FALSE(J_torso2 == yarp::sig::Matrix(J_torso.rows(), J_torso.cols()));
-//    EXPECT_TRUE(J_torso == J_torso2);
-
-//    for(unsigned int i = 0; i < _robot.left_leg.getNrOfDOFs(); ++i)
-//        J_left_leg.setCol(i, J.getCol((int)_robot.left_leg.joint_numbers[i]));
-//    //std::cout<<"J_left_leg:\n "<<J_left_leg.toString()<<std::cout;
-//    EXPECT_TRUE(J_left_leg == yarp::sig::Matrix(J_left_leg.rows(), J_left_leg.cols()));
+    _robot.switchAnchorAndFloatingBase("l_sole");
+    _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
 
 
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
+                                                 conversion_utils_YARP::toEigen(q_whole),
+                                                 *(_model_ptr.get()),
+                                                 "torso",
+                                                 "world");
 
-//}
+    cartesian.update(conversion_utils_YARP::toEigen(q_whole));
+    std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
+    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
+        EXPECT_TRUE(active_joint_mask[i]);
+
+    yarp::sig::Matrix J = conversion_utils_YARP::toYARP(cartesian.getA());
+
+    yarp::sig::Matrix J_torso(6,3);
+    J_torso.setCol(0, J.getCol((int)_robot.iDynTree_model.getDOFIndex("WaistLat")));
+    J_torso.setCol(1, J.getCol((int)_robot.iDynTree_model.getDOFIndex("WaistSag")));
+    J_torso.setCol(2, J.getCol((int)_robot.iDynTree_model.getDOFIndex("WaistYaw")));
+    //std::cout<<"J_torso:\n "<<J_torso.toString()<<std::cout;
+    std::cout<<std::endl;
+    EXPECT_FALSE(J_torso == yarp::sig::Matrix(J_torso.rows(), J_torso.cols()));
+
+    yarp::sig::Matrix J_left_leg(6,6);
+    J_left_leg.setCol(0, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LHipSag")));
+    J_left_leg.setCol(1, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LHipLat")));
+    J_left_leg.setCol(2, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LHipYaw")));
+    J_left_leg.setCol(3, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LKneeSag")));
+    J_left_leg.setCol(4, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LAnkLat")));
+    J_left_leg.setCol(5, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LAnkSag")));
+    //std::cout<<"J_left_leg:\n "<<J_left_leg.toString()<<std::cout;
+    EXPECT_FALSE(J_left_leg == yarp::sig::Matrix(J_left_leg.rows(), J_left_leg.cols()));
+
+    active_joint_mask[(int)_robot.iDynTree_model.getDOFIndex("LHipSag")] = false;
+    active_joint_mask[(int)_robot.iDynTree_model.getDOFIndex("LHipLat")] = false;
+    active_joint_mask[(int)_robot.iDynTree_model.getDOFIndex("LHipYaw")] = false;
+    active_joint_mask[(int)_robot.iDynTree_model.getDOFIndex("LKneeSag")] = false;
+    active_joint_mask[(int)_robot.iDynTree_model.getDOFIndex("LAnkLat")] = false;
+    active_joint_mask[(int)_robot.iDynTree_model.getDOFIndex("LAnkSag")] = false;
+
+    cartesian.setActiveJointsMask(active_joint_mask);
+
+    J = conversion_utils_YARP::toYARP(cartesian.getA());
+
+    yarp::sig::Matrix J_torso2(6,3);
+    J_torso2.setCol(0, J.getCol((int)_robot.iDynTree_model.getDOFIndex("WaistLat")));
+    J_torso2.setCol(1, J.getCol((int)_robot.iDynTree_model.getDOFIndex("WaistSag")));
+    J_torso2.setCol(2, J.getCol((int)_robot.iDynTree_model.getDOFIndex("WaistYaw")));
+    //std::cout<<"J_torso:\n "<<J_torso2.toString()<<std::cout;
+    std::cout<<std::endl;
+    EXPECT_FALSE(J_torso2 == yarp::sig::Matrix(J_torso.rows(), J_torso.cols()));
+    EXPECT_TRUE(J_torso == J_torso2);
+
+    J_left_leg.setCol(0, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LHipSag")));
+    J_left_leg.setCol(1, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LHipLat")));
+    J_left_leg.setCol(2, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LHipYaw")));
+    J_left_leg.setCol(3, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LKneeSag")));
+    J_left_leg.setCol(4, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LAnkLat")));
+    J_left_leg.setCol(5, J.getCol((int)_robot.iDynTree_model.getDOFIndex("LAnkSag")));
+    //std::cout<<"J_left_leg:\n "<<J_left_leg.toString()<<std::cout;
+    EXPECT_TRUE(J_left_leg == yarp::sig::Matrix(J_left_leg.rows(), J_left_leg.cols()));
+
+
+
+}
 
 }
 
