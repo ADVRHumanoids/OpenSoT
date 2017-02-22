@@ -65,16 +65,14 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world)
-        bool res = _robot.getJacobian(_distal_link,_A);
+        _robot.getJacobian(_distal_link,_A);
     else
-        bool res = _robot.getRelativeJacobian(_distal_link,
-                                              _base_link,
-                                              _A);
+        _robot.getRelativeJacobian(_base_link, _distal_link, _A);
 
     if(_base_link_is_world)
         _robot.getPose(_distal_link, _actualPose);
     else
-        _robot.getPose(_base_link, _distal_link, _actualPose);
+        _robot.getPose(_distal_link, _base_link, _actualPose);
 
     if(!_is_initialized) {
         /* initializing to zero error */
