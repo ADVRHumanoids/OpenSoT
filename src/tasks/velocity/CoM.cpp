@@ -16,8 +16,7 @@
 */
 
 #include <OpenSoT/tasks/velocity/CoM.h>
-
-#include <idynutils/cartesian_utils.h>
+#include <advr_humanoids_common_utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
@@ -28,7 +27,7 @@ using namespace OpenSoT::tasks::velocity;
 #define LAMBDA_THS 1E-12
 
 CoM::CoM(   const Eigen::VectorXd& x,
-            iDynUtils &robot) :
+            XBot::ModelInterface &robot) :
     Task("CoM", x.size()), _robot(robot)
 {
     _desiredPosition.setZero(3);
@@ -60,11 +59,9 @@ void CoM::_update(const Eigen::VectorXd &x)
 
     /************************* COMPUTING TASK *****************************/
 
-    _actualPosition = _robot.getCOM();
+    _robot.getCOM(_actualPosition);
 
-    bool res = _robot.getCOMJacobian(_A);
-    assert(res);
-    _A = _A.block(0,6,3,_x_size);
+    _robot.getCOMJacobian(_A);
 
     this->update_b();
 

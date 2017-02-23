@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_COM_H__
 
 #include <OpenSoT/Task.h>
-#include <idynutils/idynutils.h>
+#include <XBotInterface/ModelInterface.h>
 #include <kdl/frames.hpp>
 #include <Eigen/Dense>
 
@@ -50,11 +50,11 @@
             public:
                 typedef boost::shared_ptr<CoM> Ptr;
             private:
-                iDynUtils& _robot;
+                XBot::ModelInterface& _robot;
 
-                Eigen::VectorXd _actualPosition;
-                Eigen::VectorXd _desiredPosition;
-                Eigen::VectorXd _desiredVelocity;
+                Eigen::Vector3d _actualPosition;
+                Eigen::Vector3d _desiredPosition;
+                Eigen::Vector3d _desiredVelocity;
 
                 void update_b();
 
@@ -68,7 +68,7 @@
                  * @param robot the robot model, with floating base link set on the support foot
                  */
                 CoM(const Eigen::VectorXd& x,
-                    iDynUtils& robot);
+                    XBot::ModelInterface& robot);
 
                 ~CoM();
 
