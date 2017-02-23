@@ -62,7 +62,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testConvexHullVelocityConstraint
 #                      testDynamicsConstraint
                       testJointLimitsVelocityBounds
-#                      testVelocityLimitsVelocityBounds
+                      testVelocityLimitsVelocityBounds
 #                      testQPOasesSolver
 #                      testQPOases_AutoStack
 #                      testQPOases_CartesianPositionConstraint
@@ -141,9 +141,9 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
     add_dependencies(testJointLimitsVelocityBounds GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocityLimits.cpp)
-#    TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
-#    add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocityLimits.cpp)
+    TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
+    add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
@@ -291,7 +291,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 #    add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
     add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
-#    add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
+    add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 #    add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 #    add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 #    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
