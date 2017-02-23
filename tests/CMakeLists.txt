@@ -86,7 +86,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testMinimizeAccelerationTask
 #                      testMinimumEffortVelocityTask
 #                      testMinimumVelocityTask
-#                      testPosturalVelocityTask
+                      testPosturalVelocityTask
 #                      testSubTask
 #                      testAutoStack
 #                      testDefaultHumanoidStack
@@ -237,9 +237,9 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testMinimumVelocityTask ${TestLibs} ${PCL_LIBRARIES})
 #    add_dependencies(testMinimumVelocityTask GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
-#    TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
-#    add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
+    TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
+    add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
 #    TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
@@ -317,7 +317,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 #    add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_MinimumVelocity COMMAND testMinimumVelocityTask)
-#    add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
+    add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 #    add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 #    add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 #    add_test(NAME OpenSoT_utils_Logger COMMAND testLogger)
