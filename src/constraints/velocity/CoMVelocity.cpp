@@ -24,7 +24,7 @@ using namespace OpenSoT::constraints::velocity;
 CoMVelocity::CoMVelocity(const Eigen::VectorXd velocityLimits,
                          const double dT,
                          const Eigen::VectorXd& x,
-                         iDynUtils &robot) :
+                         XBot::ModelInterface &robot) :
 Constraint("CoMVelocity", x.size()), _dT(dT), _velocityLimits(velocityLimits),
 _robot(robot) {
 
@@ -42,16 +42,8 @@ _robot(robot) {
 
 void CoMVelocity::update(const Eigen::VectorXd &x) {
 
-    Eigen::MatrixXd JCoM;
-    if(!_robot.getCOMJacobian(JCoM))
-        throw "Error computing CoM Jacobian";
-    JCoM = JCoM.block(0,6,3,_x_size);
-
-    /************************ COMPUTING BOUNDS ****************************/
-
-    _Aineq = JCoM;
-
-    /**********************************************************************/
+    _robot.getCOMJacobian(_Aineq);
+    this->generatebBounds();
 }
 
 Eigen::VectorXd OpenSoT::constraints::velocity::CoMVelocity::getVelocityLimits()

@@ -16,12 +16,10 @@
 */
 
 #include <OpenSoT/constraints/velocity/CartesianVelocity.h>
-#include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
 
 CartesianVelocity::CartesianVelocity(const Eigen::VectorXd velocityLimits,
                          			 const double dT,

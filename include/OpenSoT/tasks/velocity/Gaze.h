@@ -20,7 +20,8 @@
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/SubTask.h>
-#include <idynutils/cartesian_utils.h>
+#include <advr_humanoids_common_utils/cartesian_utils.h>
+#include <XBotInterface/ModelInterface.h>
 
 namespace OpenSoT {
 namespace tasks {
@@ -33,7 +34,7 @@ public:
 
     Gaze(std::string task_id,
          const Eigen::VectorXd &x,
-         iDynUtils &robot,
+         XBot::ModelInterface &robot,
          std::string base_link);
 
     ~Gaze();
@@ -100,7 +101,7 @@ private:
     Eigen::MatrixXd _gaze_T_obj;
     Eigen::VectorXd _tmp_vector;
 
-    iDynUtils& _robot;
+    XBot::ModelInterface& _robot;
 
     Eigen::MatrixXd toEigen(const KDL::Frame& F)
     {

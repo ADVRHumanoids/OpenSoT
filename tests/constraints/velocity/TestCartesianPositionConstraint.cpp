@@ -1,13 +1,15 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/CartesianPositionConstraint.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
-#include <idynutils/idynutils.h>
+#include <advr_humanoids_common_utils/idynutils.h>
 #include <idynutils/tests_utils.h>
 #include <iCub/iDynTree/yarp_kdl.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 #include <cmath>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #define  s                1.0
 #define  dT               0.001* s
 #define  m_s              1.0
@@ -20,6 +22,9 @@ namespace {
 
 // The fixture for testing class CartesianPositionConstraint.
 class testCartesianPositionConstraint : public ::testing::Test{
+public:
+    typedef idynutils2 iDynUtils;
+    static void null_deleter(iDynUtils *) {}
  protected:
 
   // You can remove any or all of the following functions if its body
@@ -30,20 +35,34 @@ class testCartesianPositionConstraint : public ::testing::Test{
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
       zeros(coman.getJointNames().size(),0.0),
-      _DHS(coman, 3e-3, cartesian_utils::toEigen(zeros)),
+      _DHS(coman, 3e-3, conversion_utils_YARP::toEigen(zeros)),
       _A(1,3),
       _b(1,-0.5)
   {
+      std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+      std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+
+      _path_to_cfg = robotology_root + relative_path;
+
+      _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+              (XBot::ModelInterface::getModel(_path_to_cfg));
+      _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&coman, &null_deleter));
+
+      if(_model_ptr)
+          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+      else
+          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
     // You can do set-up work for each test here.
 
-      coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
+
       // A,b represent a plane with normal along the z axis. We are imposing the z coordinate of the right_arm
       // should be greater than 0.5
       _A.zero(); _A(0,2) = -1.0;
       _cartesianPositionConstraint = new CartesianPositionConstraint(
-                  cartesian_utils::toEigen(zeros), _DHS.leftArm,
-                                            cartesian_utils::toEigen(_A),
-                                            cartesian_utils::toEigen(_b));
+                  conversion_utils_YARP::toEigen(zeros), _DHS.leftArm,
+                                            conversion_utils_YARP::toEigen(_A),
+                                            conversion_utils_YARP::toEigen(_b));
   }
 
   virtual ~testCartesianPositionConstraint() {
@@ -60,8 +79,8 @@ class testCartesianPositionConstraint : public ::testing::Test{
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      _cartesianPositionConstraint->update(cartesian_utils::toEigen(zeros));
-      coman.updateiDyn3Model(zeros,true);
+      _cartesianPositionConstraint->update(conversion_utils_YARP::toEigen(zeros));
+      coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(zeros),true);
   }
 
   virtual void TearDown() {
@@ -80,6 +99,8 @@ class testCartesianPositionConstraint : public ::testing::Test{
   yarp::sig::Vector q;
   yarp::sig::Matrix _A;
   yarp::sig::Vector _b;
+  XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+  std::string _path_to_cfg;
 };
 
 yarp::sig::Vector getGoodInitialPosition(iDynUtils& model) {
@@ -109,9 +130,9 @@ TEST_F(testCartesianPositionConstraint, checkBoundsScaling) {
       _cartesianPositionConstraint = NULL;
     }
     _cartesianPositionConstraint = new CartesianPositionConstraint(
-                cartesian_utils::toEigen(zeros), _DHS.leftArm,
-                cartesian_utils::toEigen(_A),
-                cartesian_utils::toEigen(_b), 0.5);
+                conversion_utils_YARP::toEigen(zeros), _DHS.leftArm,
+                conversion_utils_YARP::toEigen(_A),
+                conversion_utils_YARP::toEigen(_b), 0.5);
 
     double boundSmall = _cartesianPositionConstraint->getbUpperBound()[0];
 
@@ -168,8 +189,8 @@ TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
     _DHS.leftArm->setLambda(0.3);
     q = getGoodInitialPosition(coman);
     coman.updateiDyn3Model(q, true);
-    _DHS.leftArm->update(cartesian_utils::toEigen(q));
-    _cartesianPositionConstraint->update(cartesian_utils::toEigen(q));
+    _DHS.leftArm->update(conversion_utils_YARP::toEigen(q));
+    _cartesianPositionConstraint->update(conversion_utils_YARP::toEigen(q));
 
     Eigen::MatrixXd p = _DHS.leftArm->getActualPose();
     p(2,3) = 0.5;
@@ -180,32 +201,32 @@ TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
 
     Eigen::MatrixXd tmp = -_DHS.leftArm->getA();
     EXPECT_TRUE(
-                cartesian_utils::fromEigentoYarp(_cartesianPositionConstraint->getAineq()) ==
-                cartesian_utils::fromEigentoYarp(tmp).submatrix(2,2,0,28))
+                conversion_utils_YARP::fromEigentoYarp(_cartesianPositionConstraint->getAineq()) ==
+                conversion_utils_YARP::fromEigentoYarp(tmp).submatrix(2,2,0,28))
         << "Aineq is \n"            <<
-           cartesian_utils::fromEigentoYarp(_cartesianPositionConstraint->getAineq()).toString()
-        << "\n while J(2,:) is \n"  << cartesian_utils::fromEigentoYarp(tmp).submatrix(2,2,0,28).toString();
+           conversion_utils_YARP::fromEigentoYarp(_cartesianPositionConstraint->getAineq()).toString()
+        << "\n while J(2,:) is \n"  << conversion_utils_YARP::fromEigentoYarp(tmp).submatrix(2,2,0,28).toString();
 
                                                                                                               ;
     // when above the position bound, z_dot > z_dot_limit = -bUpperBound
     // and we expect z_dot_limit to be NEGATIVE (we can go up, but also down)
     EXPECT_LT(-_cartesianPositionConstraint->getbUpperBound()(0),0.0);
     do {
-        std::cout<<"yarp::norm "<<norm(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb()))<<std::endl;
+        std::cout<<"yarp::norm "<<norm(conversion_utils_YARP::fromEigentoYarp(_DHS.leftArm->getb()))<<std::endl;
         std::cout<<"squared norm "<<sqrt(_DHS.leftArm->getb().squaredNorm())<<std::endl;
 
-        e = norm(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb()));
+        e = norm(conversion_utils_YARP::fromEigentoYarp(_DHS.leftArm->getb()));
         double previous_bUpperBound = -_cartesianPositionConstraint->getbUpperBound()(0);
-        q += pinv(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getA()),1E-7)*
-                cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb());
+        q += pinv(conversion_utils_YARP::fromEigentoYarp(_DHS.leftArm->getA()),1E-7)*
+                conversion_utils_YARP::fromEigentoYarp(_DHS.leftArm->getb());
         coman.updateiDyn3Model(q, true);
-        _DHS.leftArm->update(cartesian_utils::toEigen(q));
-        _cartesianPositionConstraint->update(cartesian_utils::toEigen(q));
+        _DHS.leftArm->update(conversion_utils_YARP::toEigen(q));
+        _cartesianPositionConstraint->update(conversion_utils_YARP::toEigen(q));
         EXPECT_GE(-_cartesianPositionConstraint->getbUpperBound()(0), previous_bUpperBound) << "@i=" << i;
         ++i;
     } while ( e > 1e-6 && i < 1000);
     ASSERT_TRUE(e < 1.51e-6);
-    ASSERT_NEAR(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getActualPose()).getCol(3).subVector(0,2)(2),0.5,1.5e-6);
+    ASSERT_NEAR(conversion_utils_YARP::fromEigentoYarp(_DHS.leftArm->getActualPose()).getCol(3).subVector(0,2)(2),0.5,1.5e-6);
     // when at the bound, z_dot > z_dot_limit = -bUpperBound
     // and we expect z_dot_limit to be ZERO (we can go up, but not down)
     EXPECT_NEAR(-_cartesianPositionConstraint->getbUpperBound()(0),0.0,1.5e-6);
@@ -218,11 +239,11 @@ TEST_F(testCartesianPositionConstraint, BoundsAreCorrect) {
     i = 0;
     do {
         e = sqrt(_DHS.leftArm->getb().squaredNorm());
-        q += pinv(cartesian_utils::fromEigentoYarp(_DHS.leftArm->getA()),1E-7)*_DHS.leftArm->getLambda()*
-                cartesian_utils::fromEigentoYarp(_DHS.leftArm->getb());
+        q += pinv(conversion_utils_YARP::fromEigentoYarp(_DHS.leftArm->getA()),1E-7)*_DHS.leftArm->getLambda()*
+                conversion_utils_YARP::fromEigentoYarp(_DHS.leftArm->getb());
         coman.updateiDyn3Model(q, true);
-        _DHS.leftArm->update(cartesian_utils::toEigen(q));
-        _cartesianPositionConstraint->update(cartesian_utils::toEigen(q));
+        _DHS.leftArm->update(conversion_utils_YARP::toEigen(q));
+        _cartesianPositionConstraint->update(conversion_utils_YARP::toEigen(q));
         ++i;
     } while ( e > 1e-6 && i < 1000);
     ASSERT_TRUE(e < 1.51e-6);

@@ -1,12 +1,12 @@
 #include <OpenSoT/tasks/velocity/Gaze.h>
-#include <idynutils/cartesian_utils.h>
+
 
 using namespace OpenSoT::tasks::velocity;
 
 
 Gaze::Gaze(std::string task_id,
            const Eigen::VectorXd& x,
-           iDynUtils &robot,
+           XBot::ModelInterface &robot,
            std::string base_link) :
     Task(task_id, x.size()),
     _distal_link("gaze"),
@@ -27,12 +27,9 @@ void Gaze::setGaze(const Eigen::MatrixXd &desiredGaze)
     KDL::Frame bl_T_gaze_kdl;
 
     if(_cartesian_task->baseLinkIsWorld())
-        bl_T_gaze_kdl = _robot.iDyn3_model.getPositionKDL(
-                        _robot.iDyn3_model.getLinkIndex(_distal_link));
+        _robot.getPose(_distal_link, bl_T_gaze_kdl);
     else
-        bl_T_gaze_kdl = _robot.iDyn3_model.getPositionKDL(
-                        _robot.iDyn3_model.getLinkIndex(_cartesian_task->getBaseLink()),
-                        _robot.iDyn3_model.getLinkIndex(_distal_link));
+        _robot.getPose(_distal_link, _cartesian_task->getBaseLink(), bl_T_gaze_kdl);
 
     _gaze_T_obj = toEigen(bl_T_gaze_kdl.Inverse())*desiredGaze;
     _tmp_vector(0) = _gaze_T_obj(0,3);

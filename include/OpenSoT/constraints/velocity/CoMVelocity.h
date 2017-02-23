@@ -20,7 +20,7 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/CoM.h>
- #include <idynutils/idynutils.h>
+ #include <XBotInterface/ModelInterface.h>
 
  namespace OpenSoT {
     namespace constraints {
@@ -29,7 +29,7 @@
             public:
                 typedef boost::shared_ptr<CoMVelocity> Ptr;
             private:
-                iDynUtils& _robot;
+                XBot::ModelInterface& _robot;
                 Eigen::VectorXd _velocityLimits;
                 double _dT;
 
@@ -47,7 +47,7 @@
                 CoMVelocity(const Eigen::VectorXd velocityLimits,
                             const double dT,
                             const Eigen::VectorXd& x,
-                            iDynUtils& robot);
+                            XBot::ModelInterface& robot);
 
                 virtual void update(const Eigen::VectorXd &x);
 

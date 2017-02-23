@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
-#include <idynutils/idynutils.h>
+#include <advr_humanoids_common_utils/idynutils.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 #include <cmath>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #define  s                1.0
 #define  dT               0.001* s
 #define  m_s              1.0
@@ -17,6 +19,9 @@ namespace {
 
 // The fixture for testing class CoMVelocity.
 class testCoMVelocity : public ::testing::Test {
+public:
+    typedef idynutils2 iDynUtils;
+    static void null_deleter(iDynUtils *) {}
  protected:
 
   // You can remove any or all of the following functions if its body
@@ -27,17 +32,30 @@ class testCoMVelocity : public ::testing::Test {
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
   {
+      std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+      std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+
+      _path_to_cfg = robotology_root + relative_path;
+
+      _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+              (XBot::ModelInterface::getModel(_path_to_cfg));
+      _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&coman, &null_deleter));
+
+      if(_model_ptr)
+          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+      else
+          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     // You can do set-up work for each test here.
 
       velocityLimits.resize(3,CoMVelocityLimit);
-      zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
+      zeros.resize(coman.iDynTree_model.getNrOfDOFs(),0.0);
 
-      coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
 
-      comVelocity = new CoMVelocity(cartesian_utils::toEigen(velocityLimits),
+
+      comVelocity = new CoMVelocity(conversion_utils_YARP::toEigen(velocityLimits),
                                     dT,
-                                    cartesian_utils::toEigen(zeros),
-                                    coman);
+                                    conversion_utils_YARP::toEigen(zeros),
+                                    *(_model_ptr.get()));
   }
 
   virtual ~testCoMVelocity() {
@@ -54,7 +72,7 @@ class testCoMVelocity : public ::testing::Test {
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      comVelocity->update(cartesian_utils::toEigen(zeros));
+      comVelocity->update(conversion_utils_YARP::toEigen(zeros));
   }
 
   virtual void TearDown() {
@@ -70,13 +88,15 @@ class testCoMVelocity : public ::testing::Test {
   yarp::sig::Vector velocityLimits;
   yarp::sig::Vector zeros;
   yarp::sig::Vector q;
+  XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+  std::string _path_to_cfg;
 };
 
 TEST_F(testCoMVelocity, sizesAreCorrect) {
-    unsigned int x_size = coman.iDyn3_model.getNrOfDOFs();
+    unsigned int x_size = coman.iDynTree_model.getNrOfDOFs();
 
-    yarp::sig::Vector bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
-    yarp::sig::Vector bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
+    yarp::sig::Vector bLowerBound = conversion_utils_YARP::toYARP(comVelocity->getbLowerBound());
+    yarp::sig::Vector bUpperBound = conversion_utils_YARP::toYARP(comVelocity->getbUpperBound());
 
     EXPECT_EQ(0, comVelocity->getLowerBound().size()) << "lowerBound should have size 0"
                                                         << "but has size"
@@ -129,12 +149,12 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     yarp::sig::Vector qDotOutNeg;
 
     yarp::sig::Vector q = zeros;
-    comVelocity->update(cartesian_utils::toEigen(q));
+    comVelocity->update(conversion_utils_YARP::toEigen(q));
 
-    Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
+    Aineq = conversion_utils_YARP::toYARP(comVelocity->getAineq());
     pAineq = pinv(Aineq);
-    bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
-    bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
+    bLowerBound = conversion_utils_YARP::toYARP(comVelocity->getbLowerBound());
+    bUpperBound = conversion_utils_YARP::toYARP(comVelocity->getbUpperBound());
     qDotInPos = pAineq * 0.5 * velocityLimits;
     qDotInNeg = pAineq * -0.5 * velocityLimits;
     qDotOutPos = pAineq * 1.5 * velocityLimits;
@@ -156,20 +176,21 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
 
     // integrate 1s of moving right
     for(unsigned int i = 0; i < 1/dT; ++i) {
-        yarp::sig::Matrix JCoM;
-        coman.updateiDyn3Model(qRight,true);
-        coman.iDyn3_model.getCOMJacobian(JCoM);
+        Eigen::MatrixXd _JCoM;
+        coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(qRight),true);
+        coman.getCOMJacobian(_JCoM);
+        yarp::sig::Matrix JCoM = conversion_utils_YARP::toYARP(_JCoM);
         JCoM = JCoM.removeCols(0,6);
         JCoM = JCoM.removeRows(3,3);
         qRight += pinv(JCoM) * dT * velocityLimits;
     }
 
-    comVelocity->update(cartesian_utils::toEigen(qRight));
+    comVelocity->update(conversion_utils_YARP::toEigen(qRight));
 
-    Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
+    Aineq = conversion_utils_YARP::toYARP(comVelocity->getAineq());
     pAineq = pinv(Aineq);
-    bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
-    bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
+    bLowerBound = conversion_utils_YARP::toYARP(comVelocity->getbLowerBound());
+    bUpperBound = conversion_utils_YARP::toYARP(comVelocity->getbUpperBound());
     qDotInPos = pAineq * 0.5 * velocityLimits;
     qDotInNeg = pAineq * -0.5 * velocityLimits;
     qDotOutPos = pAineq * 1.5 * velocityLimits;
@@ -191,19 +212,19 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     // integrate 1s of moving left
     for(unsigned int i = 0; i < 1/dT; ++i) {
         yarp::sig::Matrix JCoM;
-        coman.updateiDyn3Model(qLeft,true);
-        coman.iDyn3_model.getCOMJacobian(JCoM);
+        coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(qLeft),true);
+        coman.iDynTree_model.getCOMJacobian(JCoM);
         JCoM = JCoM.removeCols(0,6);
         JCoM = JCoM.removeRows(3,3);
         qLeft -= pinv(JCoM) * dT * velocityLimits;
     }
 
-    comVelocity->update(cartesian_utils::toEigen(qLeft));
+    comVelocity->update(conversion_utils_YARP::toEigen(qLeft));
 
-    Aineq = cartesian_utils::fromEigentoYarp(comVelocity->getAineq());
+    Aineq = conversion_utils_YARP::toYARP(comVelocity->getAineq());
     pAineq = pinv(Aineq);
-    bLowerBound = cartesian_utils::fromEigentoYarp(comVelocity->getbLowerBound());
-    bUpperBound = cartesian_utils::fromEigentoYarp(comVelocity->getbUpperBound());
+    bLowerBound = conversion_utils_YARP::toYARP(comVelocity->getbLowerBound());
+    bUpperBound = conversion_utils_YARP::toYARP(comVelocity->getbUpperBound());
     qDotInPos = pAineq * 0.5 * velocityLimits;
     qDotInNeg = pAineq * -0.5 * velocityLimits;
     qDotOutPos = pAineq * 1.5 * velocityLimits;

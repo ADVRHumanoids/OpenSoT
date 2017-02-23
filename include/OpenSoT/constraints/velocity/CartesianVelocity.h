@@ -20,7 +20,7 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
- #include <idynutils/idynutils.h>
+
 
  namespace OpenSoT {
     namespace constraints {
