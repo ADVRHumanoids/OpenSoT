@@ -61,7 +61,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testCoMVelocityVelocityConstraint
 #                      testConvexHullVelocityConstraint
 #                      testDynamicsConstraint
-#                      testJointLimitsVelocityBounds
+                      testJointLimitsVelocityBounds
 #                      testVelocityLimitsVelocityBounds
 #                      testQPOasesSolver
 #                      testQPOases_AutoStack
@@ -137,9 +137,9 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
 #    add_dependencies(testDynamicsConstraint GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLimits.cpp)
-#    TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
-#    add_dependencies(testJointLimitsVelocityBounds GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLimits.cpp)
+    TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
+    add_dependencies(testJointLimitsVelocityBounds GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocityLimits.cpp)
 #    TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
@@ -290,7 +290,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 #    add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 #    add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
-#    add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
+    add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
 #    add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 #    add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 #    add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
