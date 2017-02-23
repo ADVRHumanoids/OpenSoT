@@ -20,9 +20,11 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/CoM.h>
- #include <idynutils/idynutils.h>
+ #include <advr_humanoids_common_utils/idynutils.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
+ #include <XBotInterface/ModelInterface.h>
+ #include <advr_humanoids_common_utils/convex_hull_utils.h>
 
 #define BOUND_SCALING 0.01
 
@@ -43,10 +45,11 @@
             public:
                 typedef boost::shared_ptr<ConvexHull> Ptr;
             private:
-                iDynUtils &_robot;
+                XBot::ModelInterface &_robot;
                 double _boundScaling;
-                boost::shared_ptr<idynutils::convex_hull> _convex_hull;
+                boost::shared_ptr<convex_hull> _convex_hull;
                 std::vector<KDL::Vector> _ch;
+                std::list<std::string> _links_in_contact;
 
             public:
                 /**
@@ -56,7 +59,8 @@
                  * @param safetyMargin the margin, in [m], of the bounds margins
                  */
                 ConvexHull( const Eigen::VectorXd& x,
-                            iDynUtils& robot,
+                            XBot::ModelInterface& robot,
+                            const std::list<std::string>& links_in_contact,
                             const double safetyMargin = BOUND_SCALING);
 
                 /**
@@ -89,6 +93,16 @@
                 void setSafetyMargin(const double safetyMargin);
 
                 void update(const Eigen::VectorXd &x);
+
+                std::list<std::string> getLinksInContact()
+                {
+                    return _links_in_contact;
+                }
+
+                void setLinksInContact(const std::list<std::string>& links_inc_contact)
+                {
+                    _links_in_contact = links_inc_contact;
+                }
             };
         }
     }

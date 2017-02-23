@@ -16,18 +16,20 @@
 */
 
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
-#include <idynutils/convex_hull.h>
+#include <advr_humanoids_common_utils/convex_hull_utils.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::constraints::velocity;
 
 ConvexHull::ConvexHull(const Eigen::VectorXd& x,
-                       iDynUtils& robot,
+                       XBot::ModelInterface& robot,
+                       const std::list<std::string>& links_in_contact,
                        const double safetyMargin) :
-    Constraint("convex_hull", x.size()), _robot(robot),
+    Constraint("convex_hull", x.size()),
+    _links_in_contact(links_in_contact),_robot(robot),
     _boundScaling(safetyMargin),
-    _convex_hull(new idynutils::convex_hull())
+    _convex_hull(new convex_hull())
 {
 
     this->update(x);
@@ -37,9 +39,8 @@ void ConvexHull::update(const Eigen::VectorXd &x) {
 
     /************************ COMPUTING BOUNDS ****************************/
 
-    Eigen::MatrixXd JCoM;
+    Eigen::MatrixXd JCoM(3,_x_size);
     _robot.getCOMJacobian(JCoM);
-    JCoM = JCoM.block(0,6,2,_x_size);
 
     if(getConvexHull(_ch))
         this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
@@ -52,9 +53,9 @@ void ConvexHull::update(const Eigen::VectorXd &x) {
 
 
 
-    assert(JCoM.rows() == _Aineq.cols());
+    //assert(JCoM.rows() == _Aineq.cols());
 
-    _Aineq = _Aineq * JCoM;
+    _Aineq = _Aineq * JCoM.block(0,0,2,_x_size);
     /**********************************************************************/
 }
 
@@ -62,7 +63,7 @@ bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 {
     std::list<KDL::Vector> points;
     // get support polygon points w.r.t. COM
-    if(_robot.getSupportPolygonPoints(points,"COM")){
+    if(_convex_hull->getSupportPolygonPoints(points,_links_in_contact,_robot,"COM")){
         if(points.size() > 2)
         {
             std::vector<KDL::Vector> tmp_ch;

@@ -1,13 +1,15 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
-#include <idynutils/idynutils.h>
-#include <idynutils/convex_hull.h>
+#include <advr_humanoids_common_utils/idynutils.h>
+#include <advr_humanoids_common_utils/convex_hull_utils.h>
 #include <idynutils/tests_utils.h>
 #include <iCub/iDynTree/yarp_kdl.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 #include <cmath>
+#include<ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #define  s                1.0
 #define  dT               0.001* s
 #define  m_s              1.0
@@ -21,6 +23,9 @@ namespace {
 
 // The fixture for testing class ConvexHull.
 class testConvexHull : public ::testing::Test{
+public:
+    typedef idynutils2 iDynUtils;
+    static void null_deleter(iDynUtils *) {}
  protected:
 
   // You can remove any or all of the following functions if its body
@@ -31,12 +36,34 @@ class testConvexHull : public ::testing::Test{
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
   {
+      std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+      std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+
+      _path_to_cfg = robotology_root + relative_path;
+
+      _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+              (XBot::ModelInterface::getModel(_path_to_cfg));
+      _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&coman, &null_deleter));
+
+      if(_model_ptr)
+          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+      else
+          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     // You can do set-up work for each test here.
 
+      _links_in_contact.push_back("l_foot_lower_left_link");
+      _links_in_contact.push_back("l_foot_lower_right_link");
+      _links_in_contact.push_back("l_foot_upper_left_link");
+      _links_in_contact.push_back("l_foot_upper_right_link");
+      _links_in_contact.push_back("r_foot_lower_left_link");
+      _links_in_contact.push_back("r_foot_lower_right_link");
+      _links_in_contact.push_back("r_foot_upper_left_link");
+      _links_in_contact.push_back("r_foot_upper_right_link");
+
       velocityLimits.resize(3,CoMVelocityLimit);
-      zeros.resize(coman.iDyn3_model.getNrOfDOFs(),0.0);
-      coman.iDyn3_model.setFloatingBaseLink(coman.left_leg.index);
-      _convexHull = new ConvexHull(  cartesian_utils::toEigen(zeros), coman );
+      zeros.resize(coman.iDynTree_model.getNrOfDOFs(),0.0);
+      _convexHull = new ConvexHull(  conversion_utils_YARP::toEigen(zeros), *(_model_ptr.get()),
+                                     _links_in_contact);
   }
 
   virtual ~testConvexHull() {
@@ -53,8 +80,8 @@ class testConvexHull : public ::testing::Test{
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      _convexHull->update(cartesian_utils::toEigen(zeros));
-      coman.updateiDyn3Model(zeros,true);
+      _convexHull->update(conversion_utils_YARP::toEigen(zeros));
+      coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(zeros),true);
   }
 
   virtual void TearDown() {
@@ -65,18 +92,23 @@ class testConvexHull : public ::testing::Test{
   // Objects declared here can be used by all tests in the test case for ConvexHull.
 
   iDynUtils coman;
-  ConvexHull* _convexHull;
+  OpenSoT::constraints::velocity::ConvexHull* _convexHull;
 
   yarp::sig::Vector velocityLimits;
   yarp::sig::Vector zeros;
   yarp::sig::Vector q;
+
+  XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+  std::string _path_to_cfg;
+  std::list<std::string> _links_in_contact;
 };
 
-void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, iDynUtils& idynutils)
+void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, idynutils2& idynutils)
 {
-    static yarp::sig::Vector zeroes(q.size(),0.0);
+    static Eigen::VectorXd zeroes(q.size());
+    zeroes.setZero(zeroes.size());
 
-    idynutils.updateiDyn3Model(q,zeroes,zeroes, set_world_pose);
+    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q),zeroes,zeroes, set_world_pose);
 }
 
 //void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
@@ -109,35 +141,35 @@ void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, iDy
 // In fact, the old implementation was bogus...
 TEST_F(testConvexHull, checkImplementation) {
     // ------- Set The robot in a certain configuration ---------
-    yarp::sig::Vector q(coman.iDyn3_model.getNrOfDOFs(), 0.0);
-    q[coman.left_leg.joint_numbers[0]] = toRad(-23.5);
-    q[coman.left_leg.joint_numbers[1]] = toRad(2.0);
-    q[coman.left_leg.joint_numbers[2]] = toRad(-4.0);
-    q[coman.left_leg.joint_numbers[3]] = toRad(50.1);
-    q[coman.left_leg.joint_numbers[4]] = toRad(-2.0);
-    q[coman.left_leg.joint_numbers[5]] = toRad(-26.6);
+    yarp::sig::Vector q(coman.iDynTree_model.getNrOfDOFs(), 0.0);
+    q[coman.iDynTree_model.getDOFIndex("LHipSag")] = toRad(-23.5);
+    q[coman.iDynTree_model.getDOFIndex("LHipLat")] = toRad(2.0);
+    q[coman.iDynTree_model.getDOFIndex("LHipYaw")] = toRad(-4.0);
+    q[coman.iDynTree_model.getDOFIndex("LKneeSag")] = toRad(50.1);
+    q[coman.iDynTree_model.getDOFIndex("LAnkLat")] = toRad(-2.0);
+    q[coman.iDynTree_model.getDOFIndex("LAnkSag")] = toRad(-26.6);
 
-    q[coman.right_leg.joint_numbers[0]] = toRad(-23.5);
-    q[coman.right_leg.joint_numbers[1]] = toRad(-2.0);
-    q[coman.right_leg.joint_numbers[2]] = toRad(0.0);
-    q[coman.right_leg.joint_numbers[3]] = toRad(50.1);
-    q[coman.right_leg.joint_numbers[4]] = toRad(2.0);
-    q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
+    q[coman.iDynTree_model.getDOFIndex("RHipSag")] = toRad(-23.5);
+    q[coman.iDynTree_model.getDOFIndex("RHipLat")] = toRad(-2.0);
+    q[coman.iDynTree_model.getDOFIndex("RHipYaw")] = toRad(0.0);
+    q[coman.iDynTree_model.getDOFIndex("RKneeSag")] = toRad(50.1);
+    q[coman.iDynTree_model.getDOFIndex("RAnkLat")] = toRad(2.0);
+    q[coman.iDynTree_model.getDOFIndex("RAnkSag")] = toRad(-26.6);
 
     std::cout<<"---------------TEST-------------"<<std::endl;
 
     updateiDyn3Model(true, q, coman);
-    OpenSoT::constraints::velocity::ConvexHull localConvexHull( cartesian_utils::toEigen(q), coman, 0.00);
-    localConvexHull.update(cartesian_utils::toEigen(q));
+    OpenSoT::constraints::velocity::ConvexHull localConvexHull( conversion_utils_YARP::toEigen(q), *(_model_ptr.get()), _links_in_contact, 0.00);
+    localConvexHull.update(conversion_utils_YARP::toEigen(q));
 
     std::list<KDL::Vector> points;
     std::vector<KDL::Vector> ch;
-    idynutils::convex_hull huller;
+    convex_hull huller;
     Eigen::MatrixXd A_JCoM;
     Eigen::MatrixXd A;
     Eigen::VectorXd b;
 
-    coman.getSupportPolygonPoints(points,"COM");
+    huller.getSupportPolygonPoints(points,_links_in_contact,*(_model_ptr.get()),"COM");
     huller.getConvexHull(points, ch);
     OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A, b, 0.00);
 
@@ -145,18 +177,19 @@ TEST_F(testConvexHull, checkImplementation) {
     EXPECT_EQ(b.size(), A.rows());
     EXPECT_EQ(A.cols(), 2);
 
-    yarp::sig::Matrix Aineq = cartesian_utils::fromEigentoYarp(localConvexHull.getAineq());
-    yarp::sig::Vector bUpperBound = cartesian_utils::fromEigentoYarp(localConvexHull.getbUpperBound());
+    yarp::sig::Matrix Aineq = conversion_utils_YARP::toYARP(localConvexHull.getAineq());
+    yarp::sig::Vector bUpperBound = conversion_utils_YARP::toYARP(localConvexHull.getbUpperBound());
 
 
     // multiplying A by JCoM
-    yarp::sig::Matrix JCoM;
-    coman.iDyn3_model.getCOMJacobian(JCoM);
+    Eigen::MatrixXd _JCoM;
+    coman.getCOMJacobian(_JCoM);
+    yarp::sig::Matrix JCoM = conversion_utils_YARP::toYARP(_JCoM);
     JCoM = JCoM.removeCols(0,6);    // remove floating base
     JCoM = JCoM.removeRows(2,4);    // remove orientation + z
     assert(A.cols() == JCoM.rows());
     std::cout<<"test JCoM: "<<JCoM.toString()<<std::endl;
-    A_JCoM = A * cartesian_utils::toEigen(JCoM);
+    A_JCoM = A * conversion_utils_YARP::toEigen(JCoM);
 
     EXPECT_EQ(A_JCoM.rows(), Aineq.rows());
     EXPECT_EQ(A_JCoM.cols(), Aineq.cols());
@@ -188,9 +221,10 @@ TEST_F(testConvexHull, checkBoundsScaling) {
     // ------- Set The robot in a certain configuration ---------
 
     std::list<KDL::Vector> chPoints;
-    coman.getSupportPolygonPoints(chPoints,"COM");
+    convex_hull huller_tmp;
+    huller_tmp.getSupportPolygonPoints(chPoints,_links_in_contact,*(_model_ptr.get()),"COM");
 
-    idynutils::convex_hull idyn_convex_hull;
+    convex_hull idyn_convex_hull;
     std::vector<KDL::Vector> ch;
     idyn_convex_hull.getConvexHull(chPoints, ch);
 
@@ -214,13 +248,13 @@ TEST_F(testConvexHull, sizesAreCorrect) {
 
     std::list<KDL::Vector> points;
     std::vector<KDL::Vector> ch;
-    idynutils::convex_hull huller;
-    coman.getSupportPolygonPoints(points,"COM");
+    convex_hull huller;
+    huller.getSupportPolygonPoints(points,_links_in_contact,*(_model_ptr.get()),"COM");
     huller.getConvexHull(points, ch);
 
     unsigned int hullSize = ch.size();
 
-    unsigned int x_size = coman.iDyn3_model.getNrOfDOFs();
+    unsigned int x_size = coman.iDynTree_model.getNrOfDOFs();
 
     EXPECT_EQ(0, _convexHull->getLowerBound().size()) << "lowerBound should have size 0"
                                                       << "but has size"
@@ -238,8 +272,8 @@ TEST_F(testConvexHull, sizesAreCorrect) {
                                                <<  _convexHull->getbeq().size();
 
 
-    EXPECT_EQ(coman.iDyn3_model.getNrOfDOFs(),_convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
-                                                                              << coman.iDyn3_model.getNrOfDOFs()
+    EXPECT_EQ(coman.iDynTree_model.getNrOfDOFs(),_convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
+                                                                              << coman.iDynTree_model.getNrOfDOFs()
                                                                               << " but has has "
                                                                               << _convexHull->getAeq().cols()
                                                                               << " columns instead";
@@ -271,18 +305,18 @@ TEST_F(testConvexHull, NoZeroRowsPreset) {
     for(unsigned int i = 0; i < 10000; ++i)
     {
         if(i>1)
-            q = tests_utils::getRandomAngles(coman.iDyn3_model.getJointBoundMin(),
-                                             coman.iDyn3_model.getJointBoundMax(),
-                                             coman.iDyn3_model.getNrOfDOFs());
-        coman.updateiDyn3Model(q, true);
-        _convexHull->update(cartesian_utils::toEigen(q));
+            q = tests_utils::getRandomAngles(coman.iDynTree_model.getJointBoundMin(),
+                                             coman.iDynTree_model.getJointBoundMax(),
+                                             coman.iDynTree_model.getNrOfDOFs());
+        coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+        _convexHull->update(conversion_utils_YARP::toEigen(q));
         std::vector<KDL::Vector> ch;
         _convexHull->getConvexHull(ch);
         Eigen::MatrixXd A_ch;
         Eigen::VectorXd b_ch;
         _convexHull->getConstraints(ch,A_ch,b_ch,0.01);
         for(unsigned int i = 0; i < A_ch.rows(); ++i)
-            EXPECT_GT(norm(cartesian_utils::fromEigentoYarp(A_ch).getRow(i)),1E-5);
+            EXPECT_GT(norm(conversion_utils_YARP::toYARP(A_ch).getRow(i)),1E-5);
     }
 }
 
@@ -290,31 +324,33 @@ TEST_F(testConvexHull, NoZeroRowsPreset) {
 TEST_F(testConvexHull, BoundsAreCorrect) {
 
     // ------- Set The robot in a certain configuration ---------
-    yarp::sig::Vector q(coman.iDyn3_model.getNrOfDOFs(), 0.0);
-    q[coman.left_leg.joint_numbers[0]] = toRad(-23.5);
-    q[coman.left_leg.joint_numbers[1]] = toRad(2.0);
-    q[coman.left_leg.joint_numbers[2]] = toRad(-4.0);
-    q[coman.left_leg.joint_numbers[3]] = toRad(50.1);
-    q[coman.left_leg.joint_numbers[4]] = toRad(-2.0);
-    q[coman.left_leg.joint_numbers[5]] = toRad(-26.6);
+    yarp::sig::Vector q(coman.iDynTree_model.getNrOfDOFs(), 0.0);
+    q[coman.iDynTree_model.getDOFIndex("LHipSag")] = toRad(-23.5);
+    q[coman.iDynTree_model.getDOFIndex("LHipLat")] = toRad(2.0);
+    q[coman.iDynTree_model.getDOFIndex("LHipYaw")] = toRad(-4.0);
+    q[coman.iDynTree_model.getDOFIndex("LKneeSag")] = toRad(50.1);
+    q[coman.iDynTree_model.getDOFIndex("LAnkLat")] = toRad(-2.0);
+    q[coman.iDynTree_model.getDOFIndex("LAnkSag")] = toRad(-26.6);
 
-    q[coman.right_leg.joint_numbers[0]] = toRad(-23.5);
-    q[coman.right_leg.joint_numbers[1]] = toRad(-2.0);
-    q[coman.right_leg.joint_numbers[2]] = toRad(0.0);
-    q[coman.right_leg.joint_numbers[3]] = toRad(50.1);
-    q[coman.right_leg.joint_numbers[4]] = toRad(2.0);
-    q[coman.right_leg.joint_numbers[5]] = toRad(-26.6);
+    q[coman.iDynTree_model.getDOFIndex("RHipSag")] = toRad(-23.5);
+    q[coman.iDynTree_model.getDOFIndex("RHipLat")] = toRad(-2.0);
+    q[coman.iDynTree_model.getDOFIndex("RHipYaw")] = toRad(0.0);
+    q[coman.iDynTree_model.getDOFIndex("RKneeSag")] = toRad(50.1);
+    q[coman.iDynTree_model.getDOFIndex("RAnkLat")] = toRad(2.0);
+    q[coman.iDynTree_model.getDOFIndex("RAnkSag")] = toRad(-26.6);
+
 
     updateiDyn3Model(true, q, coman);
-    _convexHull->update(cartesian_utils::toEigen(q));
+    _convexHull->update(conversion_utils_YARP::toEigen(q));
 
     // Get Vector of CH's points from coman
     std::list<KDL::Vector> points;
-    coman.getSupportPolygonPoints(points,"COM");
+    convex_hull huller_tmp;
+    huller_tmp.getSupportPolygonPoints(points,_links_in_contact,*(_model_ptr.get()),"COM");
 
     // Compute CH from previous points
     std::vector<KDL::Vector> ch;
-    idynutils::convex_hull huller;
+    convex_hull huller;
     huller.getConvexHull(points, ch);
 
     //Compute CH from internal
