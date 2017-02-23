@@ -16,12 +16,11 @@
 */
 
 #include <OpenSoT/constraints/velocity/CartesianPositionConstraint.h>
-#include <yarp/math/Math.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
+
 
 CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd &x,
                                                          OpenSoT::tasks::velocity::Cartesian::Ptr cartesianTask,

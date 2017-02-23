@@ -20,9 +20,7 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
- #include <idynutils/idynutils.h>
- #include <idynutils/convex_hull.h>
- #include <kdl/frames.hpp>
+
 
 #define BOUND_SCALING 0.01
 
