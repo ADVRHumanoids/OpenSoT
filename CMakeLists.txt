@@ -114,18 +114,18 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/tasks/velocity/CoM.cpp
 #                    src/tasks/velocity/Interaction.cpp
 #                    src/tasks/velocity/Manipulability.cpp
-#                    src/tasks/velocity/MinimizeAcceleration.cpp
+                    src/tasks/velocity/MinimizeAcceleration.cpp
 #                    src/tasks/velocity/MinimumEffort.cpp
-#                    src/tasks/velocity/MinimumVelocity.cpp
+                    src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
 #                    src/tasks/force/CoM.cpp
 #                    src/tasks/torque/JointImpedanceCtrl.cpp
 #                    src/tasks/torque/CartesianImpedanceCtrl.cpp
-#                    src/utils/AutoStack.cpp
+                    src/utils/AutoStack.cpp
 #                    src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp
                     #src/utils/PreviewerUtils.cpp
-#                    src/utils/VelocityAllocation.cpp
+                    src/utils/VelocityAllocation.cpp
 #                    src/utils/logger/L.cpp
 #                    src/utils/logger/flushers/FakeFlusher.cpp
 #                    src/utils/logger/flushers/Flusher.cpp
