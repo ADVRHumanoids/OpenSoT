@@ -1,23 +1,28 @@
-#include <idynutils/idynutils.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #include <idynutils/tests_utils.h>
-#include <idynutils/comanutils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <OpenSoT/constraints/velocity/all.h>
 #include <OpenSoT/solvers/QPOases.h>
-#include <OpenSoT/tasks/velocity/all.h>
 #include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <qpOASES.hpp>
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
 #include <fstream>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 
 using namespace OpenSoT::constraints;
 using namespace OpenSoT::tasks::velocity;
 using namespace yarp::math;
+
+typedef idynutils2 iDynUtils;
+static void null_deleter(iDynUtils *) {}
 
 class testMinimizeAcceleration: public ::testing::Test
 {
@@ -44,20 +49,19 @@ protected:
 };
 
 yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
-    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-    leg[0] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[5] = -25.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-    arm[1] = -arm[1];
-    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+    yarp::sig::Vector q(idynutils.iDynTree_model.getNrOfDOFs(), 0.0);
+    q[idynutils.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[idynutils.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[idynutils.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+    q[idynutils.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[idynutils.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[idynutils.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+
+    q[idynutils.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[idynutils.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
+    q[idynutils.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+
     return q;
 }
 
@@ -70,53 +74,80 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
                          std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                          std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
+    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+
+    std::string _path_to_cfg = robotology_root + relative_path;
+
+    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+            (XBot::ModelInterface::getModel(_path_to_cfg));
+    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&idynutils, &null_deleter));
+
+    if(_model_ptr)
+        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr2;
+
+    _model_ptr2 = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+            (XBot::ModelInterface::getModel(_path_to_cfg));
+    _model_ptr2->loadModel(boost::shared_ptr<iDynUtils>(&idynutils2, &null_deleter));
+
+    if(_model_ptr2)
+        std::cout<<"pointer address: "<<_model_ptr2.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr2.get()<<std::endl;
+
     yarp::sig::Vector q = getGoodInitialPosition(idynutils);
-    idynutils.updateiDyn3Model(q, true);
-    idynutils2.updateiDyn3Model(q, true);
+
+    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+    idynutils2.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
 
     /// Cartesian Task
-    yarp::sig::Matrix T_init = idynutils.iDyn3_model.getPosition(
-                          idynutils.iDyn3_model.getLinkIndex("Waist"),
-                          idynutils.iDyn3_model.getLinkIndex("l_wrist"));
+    yarp::sig::Matrix T_init = idynutils.iDynTree_model.getPosition(
+                          idynutils.iDynTree_model.getLinkIndex("Waist"),
+                          idynutils.iDynTree_model.getLinkIndex("l_wrist"));
     OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                              cartesian_utils::toEigen(q), idynutils,"l_wrist", "Waist"));
+                              conversion_utils_YARP::toEigen(q), *(_model_ptr.get()),"l_wrist", "Waist"));
     yarp::sig::Matrix T_ref = T_init;
     T_ref(0,3) = T_ref(0,3) + 0.1;
     T_ref(1,3) = T_ref(1,3) + 0.1;
     T_ref(2,3) = T_ref(2,3) + 0.1;
-    cartesian_task->setReference(cartesian_utils::toEigen(T_ref));
-    cartesian_task->update(cartesian_utils::toEigen(q));
+    cartesian_task->setReference(conversion_utils_YARP::toEigen(T_ref));
+    cartesian_task->update(conversion_utils_YARP::toEigen(q));
 
     OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task2(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                                    cartesian_utils::toEigen(q), idynutils2,"l_wrist", "Waist"));
+                                    conversion_utils_YARP::toEigen(q), *(_model_ptr2.get()),"l_wrist", "Waist"));
     yarp::sig::Matrix T_ref2 = T_init;
     T_ref2(0,3) = T_ref2(0,3) + 0.1;
     T_ref2(1,3) = T_ref2(1,3) + 0.1;
     T_ref2(2,3) = T_ref2(2,3) + 0.1;
-    cartesian_task2->setReference(cartesian_utils::toEigen(T_ref2));
-    cartesian_task2->update(cartesian_utils::toEigen(q));
+    cartesian_task2->setReference(conversion_utils_YARP::toEigen(T_ref2));
+    cartesian_task2->update(conversion_utils_YARP::toEigen(q));
 
     /// Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
-    postural_task->setReference(cartesian_utils::toEigen(q));
+                new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
+    postural_task->setReference(conversion_utils_YARP::toEigen(q));
 
     /// MinAcc Task
     OpenSoT::tasks::velocity::MinimizeAcceleration::Ptr minacc_task(
-                new OpenSoT::tasks::velocity::MinimizeAcceleration(cartesian_utils::toEigen(q)));
+                new OpenSoT::tasks::velocity::MinimizeAcceleration(conversion_utils_YARP::toEigen(q)));
 
     int t = 100;
     /// Constraints set to the Cartesian Task
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
         new OpenSoT::constraints::velocity::JointLimits(
-                    cartesian_utils::toEigen(q), idynutils.getJointBoundMax(),
+                    conversion_utils_YARP::toEigen(q), idynutils.getJointBoundMax(),
                            idynutils.getJointBoundMin(), 0.2));
 
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits2(
         new OpenSoT::constraints::velocity::JointLimits(
-                    cartesian_utils::toEigen(q), idynutils2.getJointBoundMax(),
+                    conversion_utils_YARP::toEigen(q), idynutils2.getJointBoundMax(),
                            idynutils2.getJointBoundMin(), 0.2));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
@@ -172,43 +203,42 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
         yarp::sig::Vector dq_old2(q.size(), 0.0);
         dq_old2 = dq2;
 
-        idynutils.updateiDyn3Model(q, true);
-        idynutils2.updateiDyn3Model(q2, true);
+        idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+        idynutils2.updateiDynTreeModel(conversion_utils_YARP::toEigen(q2), true);
 
-        cartesian_task->update(cartesian_utils::toEigen(q));
-        postural_task->update(cartesian_utils::toEigen(q));
-        joint_constraints->update(cartesian_utils::toEigen(q));
+        cartesian_task->update(conversion_utils_YARP::toEigen(q));
+        postural_task->update(conversion_utils_YARP::toEigen(q));
+        joint_constraints->update(conversion_utils_YARP::toEigen(q));
 
-        cartesian_task2->update(cartesian_utils::toEigen(q2));
-        minacc_task->update(cartesian_utils::toEigen(q2));
+        cartesian_task2->update(conversion_utils_YARP::toEigen(q2));
+        minacc_task->update(conversion_utils_YARP::toEigen(q2));
         for(unsigned int i = 0; i < dq_old2.size(); ++i)
             ASSERT_NEAR(minacc_task->getb()[i], dq_old2[i], 1E-14);
-        joint_constraints2->update(cartesian_utils::toEigen(q2));
+        joint_constraints2->update(conversion_utils_YARP::toEigen(q2));
 
         Eigen::VectorXd _dq(dq.size());
         _dq.setZero(dq.size());
         sot.solve(_dq);
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        dq = conversion_utils_YARP::toYARP(_dq);
         q += dq;
         ddq = dq - dq_old;
-        this->_log<<ddq.subVector(idynutils.torso.joint_numbers[0],
-                idynutils.torso.joint_numbers[idynutils.torso.joint_numbers.size()-1]).toString()
+        this->_log<<ddq.subVector(idynutils.iDynTree_model.getDOFIndex("WaistLat"),
+                idynutils.iDynTree_model.getDOFIndex("WaistYaw")).toString()
                 <<" "<<
-                ddq.subVector(idynutils.left_arm.joint_numbers[0],
-                idynutils.left_arm.joint_numbers[idynutils.left_arm.joint_numbers.size()-1]).toString()<<" ";
+                ddq.subVector(idynutils.iDynTree_model.getDOFIndex("LShSag"),
+                idynutils.iDynTree_model.getDOFIndex("LWrj2")).toString()<<" ";
 
         Eigen::VectorXd _dq2(dq2.size());
         _dq2.setZero(dq2.size());
         sot2.solve(_dq2);
-        dq2 = cartesian_utils::fromEigentoYarp(_dq2);
+        dq2 = conversion_utils_YARP::toYARP(_dq2);
         q2 += dq2;
         ddq2 = dq2 - dq_old2;
-        this->_log<<ddq2.subVector(idynutils2.torso.joint_numbers[0],
-                idynutils2.torso.joint_numbers[idynutils2.torso.joint_numbers.size()-1]).toString()
+        this->_log<<ddq2.subVector(idynutils2.iDynTree_model.getDOFIndex("WaistLat"),
+                idynutils2.iDynTree_model.getDOFIndex("WaistYaw")).toString()
                 <<" "<<
-                ddq2.subVector(idynutils2.left_arm.joint_numbers[0],
-                idynutils2.left_arm.joint_numbers[idynutils.left_arm.joint_numbers.size()-1]).toString()<<" ";
-
+                ddq2.subVector(idynutils2.iDynTree_model.getDOFIndex("LShSag"),
+                idynutils2.iDynTree_model.getDOFIndex("LWrj2")).toString()<<" ";
 
         this->_log<<cartesian_task->getb()<<" "<<cartesian_task2->getb()<<std::endl;
 
@@ -233,13 +263,14 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     ASSERT_TRUE(integrator2 <= integrator1);
 
     std::cout<<"**************T1*************"<<std::endl;
-    idynutils.updateiDyn3Model(q);
-    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
-    yarp::sig::Matrix T = idynutils.iDyn3_model.getPosition(
-                idynutils.iDyn3_model.getLinkIndex("Waist"),
-                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T);
-    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q));
+    std::cout<<"INITIAL CONFIG: "<<
+               T_init.toString()<<std::endl;
+    yarp::sig::Matrix T = idynutils.iDynTree_model.getPosition(
+                idynutils.iDynTree_model.getLinkIndex("Waist"),
+                idynutils.iDynTree_model.getLinkIndex("l_wrist"));
+    std::cout<<"FINAL CONFIG: "<<T.toString()<<std::endl;
+    std::cout<<"DESIRED CONFIG: "<<T_ref.toString()<<std::endl;
 
     for(unsigned int i = 0; i <= 3; ++i){
         for(unsigned int j = 0; j <= 3; ++j)
@@ -249,13 +280,13 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     std::cout<<std::endl;
 
     std::cout<<"**************T2*************"<<std::endl;
-    idynutils2.updateiDyn3Model(q2);
-    std::cout<<"INITIAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_init);
-    yarp::sig::Matrix T2 = idynutils2.iDyn3_model.getPosition(
-                idynutils.iDyn3_model.getLinkIndex("Waist"),
-                idynutils.iDyn3_model.getLinkIndex("l_wrist"));
-    std::cout<<"FINAL CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T2);
-    std::cout<<"DESIRED CONFIG: "<<std::endl;cartesian_utils::printHomogeneousTransform(T_ref);
+    idynutils2.updateiDynTreeModel(conversion_utils_YARP::toEigen(q2));
+    std::cout<<"INITIAL CONFIG: "<<T_init.toString()<<std::endl;
+    yarp::sig::Matrix T2 = idynutils2.iDynTree_model.getPosition(
+                idynutils.iDynTree_model.getLinkIndex("Waist"),
+                idynutils.iDynTree_model.getLinkIndex("l_wrist"));
+    std::cout<<"FINAL CONFIG: "<<T2.toString()<<std::endl;
+    std::cout<<"DESIRED CONFIG: "<<T_ref.toString()<<std::endl;
 
     for(unsigned int i = 0; i <= 3; ++i){
         for(unsigned int j = 0; j <= 3; ++j)

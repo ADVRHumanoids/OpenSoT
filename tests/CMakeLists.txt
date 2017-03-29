@@ -83,7 +83,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
 #                      TestManipulabilityTask
-#                      testMinimizeAccelerationTask
+                      testMinimizeAccelerationTask
 #                      testMinimumEffortVelocityTask
 #                      testMinimumVelocityTask
                       testPosturalVelocityTask
@@ -226,9 +226,9 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${PCL_LIBRARIES})
 #    add_dependencies(testManipulabilityTask GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testMinimizeAccelerationTask tasks/velocity/TestMinimizeAcceleration.cpp)
-#    TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
-#    add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testMinimizeAccelerationTask tasks/velocity/TestMinimizeAcceleration.cpp)
+    TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${PCL_LIBRARIES})
+    add_dependencies(testMinimizeAccelerationTask GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
 #    TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
@@ -315,7 +315,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
-#    add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
+    add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
 #    add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_MinimumVelocity COMMAND testMinimumVelocityTask)
     add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
