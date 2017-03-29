@@ -29,11 +29,11 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
-FIND_PACKAGE(YARP REQUIRED)
+FIND_PACKAGE(YARP)
 FIND_PACKAGE(Eigen3 REQUIRED)
-FIND_PACKAGE(iDynTree REQUIRED)
+FIND_PACKAGE(iDynTree)
 FIND_PACKAGE(orocos_kdl REQUIRED)
-FIND_PACKAGE(idynutils REQUIRED)
+FIND_PACKAGE(idynutils)
 FIND_PACKAGE(roslib REQUIRED)
 FIND_PACKAGE(rospack REQUIRED)
 FIND_PACKAGE(rosconsole REQUIRED)
@@ -48,10 +48,10 @@ FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
-FIND_PACKAGE(cartesian_utils REQUIRED)
-FIND_PACKAGE(conversion_utils_YARP REQUIRED)
-FIND_PACKAGE(idynutils2 REQUIRED)
-FIND_PACKAGE(convex_hull_utils REQUIRED)
+FIND_PACKAGE(cartesian_utils)
+FIND_PACKAGE(conversion_utils_YARP)
+FIND_PACKAGE(idynutils2)
+FIND_PACKAGE(convex_hull_utils)
 
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
@@ -293,7 +293,10 @@ endif()
 
 include(AddUninstallTarget)
 
-add_subdirectory(app)
+if(YARP_FOUND)
+    add_subdirectory(app)
+endif()
+
 add_subdirectory(doc)
 
 ########################
