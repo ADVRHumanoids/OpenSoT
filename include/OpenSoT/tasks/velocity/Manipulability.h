@@ -19,160 +19,139 @@
 #define __TASKS_VELOCITY_MANIPULABILITY_H__
 
 #include <OpenSoT/Task.h>
-#include <idynutils/idynutils.h>
-#include <idynutils/cartesian_utils.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
+#include <advr_humanoids_common_utils/cartesian_utils.h>
 
 
-//namespace OpenSoT {
-//    namespace tasks {
-//        namespace velocity {
-//            /**
-//             * @brief The Manipulability class implements a task that tries to maximize the Manipulability
-//             * index computed as (Robotics: Modelling, Planning and Control, pag. 126):
-//             *
-//             *              w = sqrt(det(J*W*J'))
-//             *
-//             * The gradient of w is then computed and projected using the gardient projection method.
-//             * W is a CONSTANT weight matrix.
-//             */
-//            class Manipulability : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
-//            public:
-//                typedef boost::shared_ptr<Manipulability> Ptr;
 
-//                Manipulability(const Eigen::VectorXd& x, const iDynUtils& robot_model, const Cartesian::Ptr CartesianTask);
-//                Manipulability(const Eigen::VectorXd& x, const iDynUtils& robot_model, const CoM::Ptr CartesianTask);
+namespace OpenSoT {
+    namespace tasks {
+        namespace velocity {
+            /**
+             * @brief The Manipulability class implements a task that tries to maximize the Manipulability
+             * index computed as (Robotics: Modelling, Planning and Control, pag. 126):
+             *
+             *              w = sqrt(det(J*W*J'))
+             *
+             * The gradient of w is then computed and projected using the gardient projection method.
+             * W is a CONSTANT weight matrix.
+             */
+            class Manipulability : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+            public:
+                typedef boost::shared_ptr<Manipulability> Ptr;
 
-//                ~Manipulability();
+                Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const Cartesian::Ptr CartesianTask);
+                Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const CoM::Ptr CartesianTask);
 
-//                void _update(const Eigen::VectorXd& x);
+                ~Manipulability();
 
-//                /**
-//                 * @brief ComputeManipulabilityIndex
-//                 * @return the manipulability index at the actual configuration q (ast from latest update(q))
-//                 */
-//                double ComputeManipulabilityIndex();
+                void _update(const Eigen::VectorXd& x);
 
-//                /**
-//                 * @brief setW set a CONSTANT Weight matrix for the manipulability index
-//                 * @param W weight matrix
-//                 */
-//                void setW(const Eigen::MatrixXd& W){
-//                    _manipulabilityIndexGradientWorker.setW(W);
-//                }
+                /**
+                 * @brief ComputeManipulabilityIndex
+                 * @return the manipulability index at the actual configuration q (ast from latest update(q))
+                 */
+                double ComputeManipulabilityIndex();
 
-//                /**
-//                 * @brief getW get a Weight matrix for the manipulability index
-//                 */
-//                Eigen::MatrixXd getW(){
-//                    return _manipulabilityIndexGradientWorker.getW();
-//                }
+                /**
+                 * @brief setW set a CONSTANT Weight matrix for the manipulability index
+                 * @param W weight matrix
+                 */
+                void setW(const Eigen::MatrixXd& W){
+                    _manipulabilityIndexGradientWorker.setW(W);
+                }
 
-//                void setLambda(double lambda)
-//                {
-//                    if(lambda >= 0.0){
-//                        _lambda = lambda;
-//                        this->_update(_x);
-//                    }
-//                }
+                /**
+                 * @brief getW get a Weight matrix for the manipulability index
+                 */
+                Eigen::MatrixXd getW(){
+                    return _manipulabilityIndexGradientWorker.getW();
+                }
 
-//            protected:
+                void setLambda(double lambda)
+                {
+                    if(lambda >= 0.0){
+                        _lambda = lambda;
+                        this->_update(_x);
+                    }
+                }
 
-//                Eigen::VectorXd _x;
+            protected:
 
-//                /**
-//                 * @brief The ComputeManipulabilityIndexGradient class implements a worker class to computes
-//                 * the effort for a certain configuration.
-//                 */
-//                class ComputeManipulabilityIndexGradient: public cartesian_utils::CostFunction{
-//                public:
-//                    iDynUtils _robot;
-//                    const iDynUtils& _model;
-//                    Eigen::MatrixXd _W;
-//                    Eigen::VectorXd _zeros;
-//                    OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _CartesianTask;
+                Eigen::VectorXd _x;
 
-//                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const iDynUtils& robot_model,
-//                                                       const Cartesian::Ptr CartesianTask) :
-//                        _robot(robot_model.getRobotName(),
-//                               robot_model.getRobotURDFPath(),
-//                               robot_model.getRobotSRDFPath()),
-//                        _model(robot_model),
-//                        _W(q.rows(),q.rows()),
-//                        _zeros(q.rows())
-//                    {
-//                        _W.setIdentity(_W.rows(), _W.cols());
+                /**
+                 * @brief The ComputeManipulabilityIndexGradient class implements a worker class to computes
+                 * the effort for a certain configuration.
+                 */
+                class ComputeManipulabilityIndexGradient: public CostFunction{
+                public:
+                    XBot::ModelInterface::Ptr _robot;
+                    const XBot::ModelInterface& _model;
+                    Eigen::MatrixXd _W;
+                    Eigen::VectorXd _zeros;
+                    OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _CartesianTask;
 
-//                        _zeros.setZero(_zeros.rows());
+                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model,
+                                                       const Cartesian::Ptr CartesianTask) :
+                        _robot(XBot::ModelInterface::getModel(robot_model.getPathToConfig())),
+                        _model(robot_model),
+                        _W(q.rows(),q.rows()),
+                        _zeros(q.rows())
+                    {
+                        _W.setIdentity(_W.rows(), _W.cols());
 
-//                        _robot.updateiDyn3Model(_model.iDyn3_model.getAng(),
-//                                                _model.iDyn3_model.getDAng(),
-//                                                _model.iDyn3_model.getD2Ang(), true);
-//                        _robot.switchAnchor(_model.getAnchor());
-//                        _robot.setAnchor_T_World(_model.getAnchor_T_World());
+                        _zeros.setZero(_zeros.rows());
 
-//                        _CartesianTask = Cartesian::Ptr(new Cartesian(CartesianTask->getTaskID(), q,
-//                                                _robot, CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
-//                    }
+                        _robot->syncFrom(_model);
 
-//                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const iDynUtils& robot_model,
-//                                                       const CoM::Ptr CartesianTask) :
-//                        _robot(robot_model.getRobotName(),
-//                               robot_model.getRobotURDFPath(),
-//                               robot_model.getRobotSRDFPath()),
-//                        _model(robot_model),
-//                        _W(q.rows(),q.rows()),
-//                        _zeros(q.rows())
-//                    {
-//                        _W.setIdentity(_W.rows(), _W.cols());
+                        _CartesianTask = Cartesian::Ptr(new Cartesian(CartesianTask->getTaskID(), q,
+                                                *(_robot.get()), CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
+                    }
 
-//                        _zeros.setZero(_zeros.rows());
+                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model,
+                                                       const CoM::Ptr CartesianTask) :
+                        _robot(XBot::ModelInterface::getModel(robot_model.getPathToConfig())),
+                        _model(robot_model),
+                        _W(q.rows(),q.rows()),
+                        _zeros(q.rows())
+                    {
+                        _W.setIdentity(_W.rows(), _W.cols());
 
-//                        _robot.updateiDyn3Model(_model.iDyn3_model.getAng(),
-//                                                _model.iDyn3_model.getDAng(),
-//                                                _model.iDyn3_model.getD2Ang(), true);
-//                        _robot.switchAnchor(_model.getAnchor());
-//                        _robot.setAnchor_T_World(_model.getAnchor_T_World());
+                        _zeros.setZero(_zeros.rows());
 
-//                        _CartesianTask = CoM::Ptr(new OpenSoT::tasks::velocity::CoM(q, _robot));
-//                    }
+                        _robot->syncFrom(_model);
 
-//                    double compute(const Eigen::VectorXd &q)
-//                    {
-//                        if(_robot.getAnchor() != _model.getAnchor())
-//                            _robot.switchAnchor(_model.getAnchor());
+                        _CartesianTask = CoM::Ptr(new OpenSoT::tasks::velocity::CoM(q, *(_robot.get())));
+                    }
 
-//                        _robot.setAng(q);
-//                        _robot.iDyn3_model.kinematicRNEA();
+                    double compute(const Eigen::VectorXd &q)
+                    {
+                        _robot->setJointPosition(q);
+                        _robot->update(true);
 
-//                        if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
-//                        {
-//                            assert("if q and anchor are the same, anchor_t_world should be the same!");
 
-//                            _robot.setAnchor_T_World(_model.getAnchor_T_World());
-//                        }
+                        _CartesianTask->update(q);
 
-//                        _CartesianTask->update(q);
+                        return computeManipulabilityIndex();
+                    }
 
-//                        return computeManipulabilityIndex();
-//                    }
+                    void setW(const Eigen::MatrixXd& W) { _W = W; }
 
-//                    void setW(const Eigen::MatrixXd& W) { _W = W; }
+                    Eigen::MatrixXd& getW() {return _W;}
 
-//                    Eigen::MatrixXd& getW() {return _W;}
+                    double computeManipulabilityIndex()
+                    {
+                        Eigen::MatrixXd J = _CartesianTask->getA();
+                        return sqrt((J*_W*J.transpose()).determinant());
+                    }
+                };
 
-//                    double computeManipulabilityIndex()
-//                    {
-//                        Eigen::MatrixXd J = _CartesianTask->getA();
-//                        return sqrt((J*_W*J.transpose()).determinant());
-//                    }
-//                };
-
-//                ComputeManipulabilityIndexGradient _manipulabilityIndexGradientWorker;
-//            };
-//        }
-//    }
-//}
+                ComputeManipulabilityIndexGradient _manipulabilityIndexGradientWorker;
+            };
+        }
+    }
+}
 
 #endif
