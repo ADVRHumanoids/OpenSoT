@@ -20,7 +20,6 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/CoM.h>
- #include <advr_humanoids_common_utils/idynutils.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
  #include <XBotInterface/ModelInterface.h>
