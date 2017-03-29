@@ -1,11 +1,11 @@
 #include <idynutils/tests_utils.h>
-#include <idynutils/cartesian_utils.h>
-#include <idynutils/idynutils.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <OpenSoT/stacks/velocity/ManipulationStack.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 
 using namespace yarp::math;
 using namespace OpenSoT;
@@ -14,14 +14,31 @@ namespace {
 
 class testGazeTask: public ::testing::Test
 {
+public:
+    typedef idynutils2 iDynUtils;
+    static void null_deleter(iDynUtils *) {}
 protected:
     iDynUtils _robot;
+    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+    std::string _path_to_cfg;
 
     testGazeTask() : _robot("bigman",
                              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
                              std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf")
     {
+        std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+        std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
 
+        _path_to_cfg = robotology_root + relative_path;
+
+        _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+                (XBot::ModelInterface::getModel(_path_to_cfg));
+        _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&_robot, &null_deleter));
+
+        if(_model_ptr)
+            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+        else
+            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     }
 
     virtual ~testGazeTask() {
@@ -42,23 +59,22 @@ protected:
 TEST_F(testGazeTask, testGazeTaskWorldGlobal_)
 {
     // setting initial position with bent legs
-    yarp::sig::Vector q_leg(6, 0.0),
-                      q_whole(_robot.iDyn3_model.getNrOfDOFs(), 0.0);
-    q_leg[0] = -25.0*M_PI/180.0;
-    q_leg[3] =  50.0*M_PI/180.0;
-    q_leg[5] = -25.0*M_PI/180.0;
+    yarp::sig::Vector q_whole(_robot.iDynTree_model.getNrOfDOFs(), 0.0);
 
-    _robot.fromRobotToIDyn(q_leg, q_whole, _robot.right_leg);
-    _robot.updateiDyn3Model(q_whole, true);
+    q_whole[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    OpenSoT::DefaultHumanoidStack DHS(_robot, 0.001, cartesian_utils::toEigen(q_whole));
+    _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
+
+    OpenSoT::DefaultHumanoidStack DHS(_robot, 0.001, conversion_utils_YARP::toEigen(q_whole));
 
     DHS.velocityLimits->setVelocityLimits(0.6);
 
     EXPECT_EQ(DHS.gaze->getA().rows(), 2);
     EXPECT_EQ(DHS.gaze->getb().size(), 2);
 
-    EXPECT_TRUE(DHS.gaze->getWeight() == cartesian_utils::toEigen(yarp::sig::Matrix(2,2).eye()));
+    EXPECT_TRUE(DHS.gaze->getWeight() == conversion_utils_YARP::toEigen(yarp::sig::Matrix(2,2).eye()));
 
     EXPECT_TRUE(DHS.gaze->getConstraints().size() == 0);
 
@@ -87,30 +103,30 @@ TEST_F(testGazeTask, testGazeTaskWorldGlobal_)
                                     << DHS.jointLimits;
 
     //DHS.gaze->setGaze(x_ref);
-    stack->update(cartesian_utils::toEigen(q_whole));
-    yarp::sig::Matrix J_1 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
-    yarp::sig::Vector b_1 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
+    stack->update(conversion_utils_YARP::toEigen(q_whole));
+    yarp::sig::Matrix J_1 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_1 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getb());
 
     q_whole[_robot.right_arm.joint_numbers[0]] += 0.1;
     _robot.updateiDyn3Model(q_whole, true);
-    stack->update(cartesian_utils::toEigen(q_whole));
-    yarp::sig::Matrix J_2 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
-    yarp::sig::Vector b_2 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
+    stack->update(conversion_utils_YARP::toEigen(q_whole));
+    yarp::sig::Matrix J_2 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_2 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getb());
 
     q_whole[_robot.head.joint_numbers[0]] += 0.1;
     q_whole[_robot.head.joint_numbers[1]] += 0.1;
     _robot.updateiDyn3Model(q_whole, true);
-    stack->update(cartesian_utils::toEigen(q_whole));
-    yarp::sig::Matrix J_3 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
-    yarp::sig::Vector b_3 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
+    stack->update(conversion_utils_YARP::toEigen(q_whole));
+    yarp::sig::Matrix J_3 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_3 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getb());
 
     q_whole[_robot.torso.joint_numbers[0]] += 0.1;
     q_whole[_robot.torso.joint_numbers[1]] += 0.1;
     q_whole[_robot.torso.joint_numbers[2]] += 0.1;
     _robot.updateiDyn3Model(q_whole, true);
-    stack->update(cartesian_utils::toEigen(q_whole));
-    yarp::sig::Matrix J_4 = cartesian_utils::fromEigentoYarp(DHS.gaze->getA());
-    yarp::sig::Vector b_4 = cartesian_utils::fromEigentoYarp(DHS.gaze->getb());
+    stack->update(conversion_utils_YARP::toEigen(q_whole));
+    yarp::sig::Matrix J_4 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getA());
+    yarp::sig::Vector b_4 = conversion_utils_YARP::fromEigentoYarp(DHS.gaze->getb());
 
     EXPECT_TRUE(J_1 == J_2);
     EXPECT_TRUE(b_1 == b_2);
