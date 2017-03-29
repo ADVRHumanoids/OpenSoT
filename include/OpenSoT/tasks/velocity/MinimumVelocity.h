@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_MINIMUMVELOCITY_H__
 
  #include <OpenSoT/Task.h>
- #include <idynutils/idynutils.h>
+ #include <Eigen/Dense>
  #include <kdl/frames.hpp>
 
 /**

@@ -16,13 +16,10 @@
 */
 
 #include <OpenSoT/tasks/velocity/MinimumVelocity.h>
-#include <yarp/math/Math.h>
-#include <idynutils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::tasks::velocity;
-using namespace yarp::math;
 
 MinimumVelocity::MinimumVelocity(const int& x_size) :
     Task("MinimumVelocity", x_size)

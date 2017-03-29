@@ -3,6 +3,7 @@
 #include <OpenSoT/tasks/velocity/MinimumVelocity.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <yarp/math/Math.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 
 using namespace yarp::math;
 
@@ -41,8 +42,8 @@ TEST_F(testMinimumVelocityTask, testMinimumVelocityTask_)
 
     OpenSoT::tasks::velocity::MinimumVelocity minimumVelocity(q.size());
 
-    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(minimumVelocity.getA()) == yarp::sig::Matrix(q.size(), q.size()).eye());
-    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(minimumVelocity.getWeight()) == yarp::sig::Matrix(q.size(), q.size()).eye());
+    EXPECT_TRUE(conversion_utils_YARP::toYARP(minimumVelocity.getA()) == yarp::sig::Matrix(q.size(), q.size()).eye());
+    EXPECT_TRUE(conversion_utils_YARP::toYARP(minimumVelocity.getWeight()) == yarp::sig::Matrix(q.size(), q.size()).eye());
 
     EXPECT_TRUE(minimumVelocity.getConstraints().size() == 0);
 
@@ -50,13 +51,13 @@ TEST_F(testMinimumVelocityTask, testMinimumVelocityTask_)
     minimumVelocity.setLambda(K);
     EXPECT_DOUBLE_EQ(minimumVelocity.getLambda(), K);
 
-    minimumVelocity.update(cartesian_utils::toEigen(q));
-    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(minimumVelocity.getb()) == dq_zeros);
+    minimumVelocity.update(conversion_utils_YARP::toEigen(q));
+    EXPECT_TRUE(conversion_utils_YARP::toYARP(minimumVelocity.getb()) == dq_zeros);
 
     for(unsigned int i = 0; i < 100; ++i)
     {
-        minimumVelocity.update(cartesian_utils::toEigen(q));
-        q += minimumVelocity.getLambda()*cartesian_utils::fromEigentoYarp(minimumVelocity.getb());
+        minimumVelocity.update(conversion_utils_YARP::toEigen(q));
+        q += minimumVelocity.getLambda()*conversion_utils_YARP::toYARP(minimumVelocity.getb());
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)
