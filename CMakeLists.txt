@@ -22,6 +22,12 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+option(SET_SSE4_FLAG "set -msse4 flag to gcc" OFF)
+
+if(${SET_SSE4_FLAG})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4")
+endif()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type -Werror=address -Werror=parentheses " )
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -29,29 +35,29 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
-FIND_PACKAGE(YARP REQUIRED)
+FIND_PACKAGE(YARP QUIET)
 FIND_PACKAGE(Eigen3 REQUIRED)
-FIND_PACKAGE(iDynTree REQUIRED)
+FIND_PACKAGE(iDynTree QUIET)
 FIND_PACKAGE(orocos_kdl REQUIRED)
-FIND_PACKAGE(idynutils REQUIRED)
+FIND_PACKAGE(idynutils QUIET)
 FIND_PACKAGE(roslib REQUIRED)
 FIND_PACKAGE(rospack REQUIRED)
 FIND_PACKAGE(rosconsole REQUIRED)
 FIND_PACKAGE(urdf REQUIRED)
 FIND_PACKAGE(kdl_parser REQUIRED)
-FIND_PACKAGE(srdfdom REQUIRED)
-FIND_PACKAGE(moveit_core REQUIRED)
+FIND_PACKAGE(srdfdom_advr REQUIRED)
+FIND_PACKAGE(moveit_core QUIET)
 FIND_PACKAGE(PythonLibs)
-FIND_PACKAGE(PCL 1.7 REQUIRED COMPONENTS filters surface)
+FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(cartesian_utils REQUIRED)
-FIND_PACKAGE(conversion_utils_YARP REQUIRED)
-FIND_PACKAGE(idynutils2 REQUIRED)
-FIND_PACKAGE(convex_hull_utils REQUIRED)
+FIND_PACKAGE(conversion_utils_YARP QUIET)
+FIND_PACKAGE(idynutils2 QUIET)
+FIND_PACKAGE(convex_hull_utils QUIET)
 
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
@@ -96,7 +102,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/velocity/CartesianPositionConstraint.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
                     src/constraints/velocity/CoMVelocity.cpp
-                    src/constraints/velocity/ConvexHull.cpp
+#                     src/constraints/velocity/ConvexHull.cpp
                     src/constraints/velocity/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
 #                    src/constraints/velocity/SelfCollisionAvoidance.cpp
@@ -215,7 +221,7 @@ if(YARP_FOUND)
         #                      SOVERSION ${${VARS_PREFIX}_VERSION})
 endif()
 
-install(DIRECTORY include/ 
+install(DIRECTORY include/
         DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
         FILES_MATCHING PATTERN "*.h")
 
@@ -271,7 +277,7 @@ endif()
 
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
-        
+
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
 set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
 
