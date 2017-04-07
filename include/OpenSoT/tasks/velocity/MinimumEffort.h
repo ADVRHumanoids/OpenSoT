@@ -58,12 +58,13 @@
                 class ComputeGTauGradient : public CostFunction {
                     public:
                     XBot::ModelInterface::Ptr _robot;
-                    XBot::ModelInterface::Ptr _model;
+                    const XBot::ModelInterface& _model;
                     Eigen::MatrixXd _W;
                     Eigen::VectorXd _zeros, _tau;
+                    Eigen::VectorXd _tau_lim;
 
-                    ComputeGTauGradient(const Eigen::VectorXd& q, XBot::ModelInterface::Ptr robot_model) :
-                        _robot(XBot::ModelInterface::getModel(robot_model->getPathToConfig())),
+                    ComputeGTauGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model) :
+                        _robot(XBot::ModelInterface::getModel(robot_model.getPathToConfig())),
                         _model(robot_model),
                         _W(q.rows(),q.rows()),
                         _zeros(q.rows())
@@ -71,14 +72,14 @@
                         _zeros.setZero(q.rows());
                         _W.setIdentity(q.rows(),q.rows());
 
-                        Eigen::VectorXd tau_lim;
-                        _model->getEffortLimits(tau_lim);
+                        _robot->syncFrom(_model);
+
+                        _model.getEffortLimits(_tau_lim);
 
                         for(int i = 0; i < q.size(); ++i){
-                            _W(i,i) = 1.0 / std::pow(tau_lim(i), 2.0);
+                            _W(i,i) = 1.0 / std::pow(_tau_lim(i), 2.0);
                         }
 
-                        _robot->update();
 //                         _robot.switchAnchor(_model.getAnchor());
 //                         _robot.setAnchor_T_World(_model.getAnchor_T_World());
                     }
@@ -112,7 +113,7 @@
 
             public:
 
-                MinimumEffort(const Eigen::VectorXd& x, XBot::ModelInterface::Ptr robot_model);
+                MinimumEffort(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model);
 
                 ~MinimumEffort();
 
