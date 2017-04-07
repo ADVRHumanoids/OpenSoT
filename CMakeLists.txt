@@ -121,7 +121,8 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
-                    src/tasks/torque/JointImpedanceCtrl.cpp)
+                    src/tasks/torque/JointImpedanceCtrl.cpp
+                    src/tasks/torque/CartesianImpedanceCtrl.cpp)
 ##SOLVERS
 set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp)
@@ -142,7 +143,6 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/stacks/velocity/WalkingStack.cpp
 #                    src/tasks/velocity/Interaction.cpp
 #                    src/tasks/force/CoM.cpp
-#                    src/tasks/torque/CartesianImpedanceCtrl.cpp
 #                    src/utils/DefaultHumanoidStack.cpp
                     #src/utils/PreviewerUtils.cpp
 #                    src/utils/logger/L.cpp
