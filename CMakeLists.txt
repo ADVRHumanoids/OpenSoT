@@ -95,43 +95,55 @@ include_directories("${qpOASES_INCLUDE_DIRS}")
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
-ADD_LIBRARY(OpenSoT SHARED
-                    src/constraints/Aggregated.cpp
+##CONSTRAINTS
+set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
                     src/constraints/velocity/CartesianPositionConstraint.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
                     src/constraints/velocity/CoMVelocity.cpp
-#                     src/constraints/velocity/ConvexHull.cpp
                     src/constraints/velocity/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
-#                    src/constraints/velocity/SelfCollisionAvoidance.cpp
-#                    src/constraints/velocity/Dynamics.cpp
-#                    src/constraints/force/FrictionCone.cpp
-                    src/constraints/torque/TorqueLimits.cpp
-                    src/solvers/QPOases.cpp
-                    src/solvers/QPOasesProblem.cpp
-#                    src/stacks/velocity/ManipulationStack.cpp
-#                    src/stacks/velocity/WalkingStack.cpp
-                    src/tasks/Aggregated.cpp
+                    src/constraints/torque/TorqueLimits.cpp)
+if(${PCL_FOUND})
+    set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
+        src/constraints/velocity/ConvexHull.cpp)
+endif()
+##TASKS
+set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/Gaze.cpp
                     src/tasks/velocity/CoM.cpp
-#                    src/tasks/velocity/Interaction.cpp
                     src/tasks/velocity/Manipulability.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
-                    src/tasks/velocity/Postural.cpp
+                    src/tasks/velocity/Postural.cpp)
+##SOLVERS
+set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
+                    src/solvers/QPOasesProblem.cpp)
+##UTILS
+set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
+                    src/utils/Indices.cpp
+                    src/utils/VelocityAllocation.cpp)
+
+ADD_LIBRARY(OpenSoT SHARED
+                    ${OPENSOT_CONSTRAINTS_SOURCES}
+                    ${OPENSOT_TASKS_SOURCES}
+                    ${OPENSOT_SOLVERS_SOURCES}
+                    ${OPENSOT_UTILS_SOURCES}
+#                    src/constraints/velocity/SelfCollisionAvoidance.cpp
+#                    src/constraints/velocity/Dynamics.cpp
+#                    src/constraints/force/FrictionCone.cpp                    
+#                    src/stacks/velocity/ManipulationStack.cpp
+#                    src/stacks/velocity/WalkingStack.cpp
+#                    src/tasks/velocity/Interaction.cpp
 #                    src/tasks/force/CoM.cpp
 #                    src/tasks/torque/JointImpedanceCtrl.cpp
 #                    src/tasks/torque/CartesianImpedanceCtrl.cpp
-                    src/utils/AutoStack.cpp
 #                    src/utils/DefaultHumanoidStack.cpp
-                    src/utils/Indices.cpp
                     #src/utils/PreviewerUtils.cpp
-                    src/utils/VelocityAllocation.cpp
 #                    src/utils/logger/L.cpp
 #                    src/utils/logger/flushers/FakeFlusher.cpp
 #                    src/utils/logger/flushers/Flusher.cpp
@@ -142,7 +154,7 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/utils/logger/plotters/Plotter.cpp
                     ${sot_INCLUDES})
 
-if(YARP_FOUND)
+if(${YARP_FOUND})
 #    ADD_LIBRARY(OpenSoT_YTasks SHARED
 #                    src/interfaces/yarp/tasks/YCartesian.cpp
 #                    src/interfaces/yarp/tasks/YCoM.cpp
@@ -163,15 +175,14 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIE
                                       ${cartesian_utils_LIBRARIES}
                                       ${conversion_utils_YARP_LIBRARIES} ${idynutils2_LIBRARIES}
                                       ${convex_hull_utils_LIBRARIES})
-message("${cartesian_utils_LIBRARIES} ----------------")
 
-if(YARP_FOUND)
+if(${YARP_FOUND})
 #    target_link_libraries(OpenSoT_YTasks PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
 #                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
 endif()
 
 if(Boost_VERSION VERSION_GREATER 104701)
-    if(YARP_FOUND)
+    if(${YARP_FOUND})
 #        ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
 #        ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
 #        ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
