@@ -31,10 +31,9 @@ using namespace OpenSoT::constraints::velocity;
 
 using namespace Eigen;
 
-const double SMALL_NUM = pow(10.0, -5);
 
 SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
-                                               iDynUtils &robot,
+                                               XBot::ModelInterface &robot,
                                                double detection_threshold,
                                                double linkPair_threshold,
                                                const double boundScaling):
@@ -46,11 +45,8 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
     _x_cache(x),
     _boundScaling(boundScaling) {
 
-    std::string base_name = robot.getBaseLink();
-    base_index = robot_col.iDyn3_model.getLinkIndex(base_name);
+    base_name = "Waist";
 
-    if(base_index == -1)
-        std::cout << "Failed to get base_index" << std::endl;
 
     update(x);
 
@@ -133,7 +129,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
 
     /*//////////////////////////////////////////////////////////*/
 
-    MatrixXd Aineq_fc_Eigen(interested_LinkPairs.size(), robot_col.iDyn3_model.getNrOfDOFs());
+    MatrixXd Aineq_fc_Eigen(interested_LinkPairs.size(), robot_col.getJointNum());
     VectorXd bUpperB_fc_Eigen(interested_LinkPairs.size());
 
     double Dm_LinkPair;
@@ -150,8 +146,11 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
 
     MatrixXd Link1_CP_Jaco, Link2_CP_Jaco;
 
-    MatrixXd Waist_frame_world_Eigen = robot_col.getPosition(base_index, true);
-    Matrix3d Waist_frame_world_Eigen_Ro = Waist_frame_world_Eigen.block(0,0,3,3);
+    Affine3d Waist_frame_world_Eigen;
+    robot_col.getPose(base_name, Waist_frame_world_Eigen);
+    Waist_frame_world_Eigen.inverse();
+
+    Matrix3d Waist_frame_world_Eigen_Ro = Waist_frame_world_Eigen.matrix().block(0,0,3,3);
     MatrixXd temp_trans_matrix(6,6);
     temp_trans_matrix.block(0,0,3,3) = Waist_frame_world_Eigen_Ro;
     temp_trans_matrix.block(3,3,3,3) = Waist_frame_world_Eigen_Ro;
@@ -170,15 +169,10 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
         Link1_name = linkPair.getLinkNames().first;
         Link2_name = linkPair.getLinkNames().second;
 
-        Link1_index = robot_col.iDyn3_model.getLinkIndex(Link1_name);
-        if(Link1_index == -1)
-            std::cout << "Failed to get " << Link1_name << std::endl;
-        Link2_index = robot_col.iDyn3_model.getLinkIndex(Link2_name);
-        if(Link2_index == -1)
-            std::cout << "Failed to get " << Link2_name << std::endl;
 
-        Waist_T_Link1 = robot_col.iDyn3_model.getPositionKDL( base_index , Link1_index );
-        Waist_T_Link2 = robot_col.iDyn3_model.getPositionKDL( base_index , Link2_index );
+        robot_col.getPose(Link1_name, base_name, Waist_T_Link1);
+        robot_col.getPose(Link2_name, base_name, Waist_T_Link2);
+
         Waist_T_Link1_CP = Waist_T_Link1 * Link1_T_CP;
         Waist_T_Link2_CP = Waist_T_Link2 * Link2_T_CP;
         Link1_origin_kdl = Waist_T_Link1.p;
@@ -195,13 +189,13 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
         closepoint_dir = Link2_CP - Link1_CP;
         closepoint_dir = closepoint_dir / Dm_LinkPair;
 
+        robot_col.getRelativeJacobian(base_name, Link1_name, Link1_CP_Jaco);
 
-        robot_col.getRelativeJacobian( Link1_index, base_index, Link1_CP_Jaco, true);
         Link1_CP_Jaco = temp_trans_matrix * Link1_CP_Jaco;
         Link1_CP_Jaco = skewSymmetricOperator(Link1_CP - Link1_origin) * Link1_CP_Jaco;
 
+        robot_col.getRelativeJacobian(base_name, Link2_name, Link2_CP_Jaco);
 
-        robot_col.getRelativeJacobian( Link2_index, base_index, Link2_CP_Jaco, true);
         Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
         Link2_CP_Jaco = skewSymmetricOperator(Link2_CP - Link2_origin) * Link2_CP_Jaco;
 

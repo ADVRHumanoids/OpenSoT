@@ -57,7 +57,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testAggregatedConstraint
 #                      testBilateralConstraint
 #                      testCartesianPositionVelocityConstraint
-#                      testCollisionAvoidanceVelocityConstraint
+                      testCollisionAvoidanceVelocityConstraint
                       testCoMVelocityVelocityConstraint
                       testConvexHullVelocityConstraint
 #                      testDynamicsConstraint
@@ -108,7 +108,7 @@ if(YARP_FOUND)
                 ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                    ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                    ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
-                    ${convex_hull_utils_LIBRARIES})
+                    ${convex_hull_utils_LIBRARIES} ${collision_utils_LIBRARIES})
 
 #    ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
 #    TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
@@ -122,9 +122,9 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
 #    add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
-#    TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
-#    add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
+    TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
+    add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
 
     ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
     TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
@@ -287,7 +287,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 #    add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 #    add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
-#    add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
+    add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
     add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
     add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 #    add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)

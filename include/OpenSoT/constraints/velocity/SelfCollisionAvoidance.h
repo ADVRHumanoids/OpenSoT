@@ -21,8 +21,8 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
- #include <idynutils/idynutils.h>
- #include <idynutils/collision_utils.h>
+ #include <XBotInterface/ModelInterface.h>
+ #include <advr_humanoids_common_utils/collision_utils.h>
  #include <kdl/frames.hpp>
 
 #include <Eigen/Dense>
@@ -53,7 +53,7 @@
                  * @brief all the link pairs whose minimum distance are smaller than this "_Detection_threshold" would be dealt with further
                  */
                 double _detection_threshold;
-                iDynUtils& robot_col;
+                XBot::ModelInterface& robot_col;
                 ComputeLinksDistance computeLinksDistance;
 
                 /**
@@ -65,10 +65,10 @@
                 Eigen::VectorXd _x_cache;
 
                 /**
-                 * @brief base_index all the calculation and expression is described in
-                 * a base link frame which is "waist" link frame
+                 * @brief base_name all the calculation and expression is described in
+                 * a base link frame which is "Waist" link frame
                  */
-                int base_index;
+                std::string base_name;
             public:               
                 /**
                  * @brief Skew_symmetric_operator is used to get the transformation matrix which is used to transform
@@ -99,7 +99,7 @@
                  *        the linkPair_threshold more slowly)
                  */
                 SelfCollisionAvoidance(const Eigen::VectorXd& x,
-                                       iDynUtils &robot,
+                                       XBot::ModelInterface &robot,
                                        double detection_threshold = std::numeric_limits<double>::infinity(),
                                        double linkPair_threshold = 0.0,
                                        const double boundScaling = 1.0);
