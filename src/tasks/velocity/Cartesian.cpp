@@ -67,7 +67,7 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     if(_base_link_is_world)
         _robot.getJacobian(_distal_link,_A);
     else
-        _robot.getRelativeJacobian(_base_link, _distal_link, _A);
+        _robot.getRelativeJacobian(_distal_link, _base_link, _A);
 
     if(_base_link_is_world)
         _robot.getPose(_distal_link, _actualPose);

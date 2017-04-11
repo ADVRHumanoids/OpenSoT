@@ -276,7 +276,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
     std::cout<<"x_ref: "<<x_ref.toString()<<std::endl;
 
     KDL::Jacobian J; J.resize(q_whole.size());
-    _model_ptr->getRelativeJacobian("l_sole","l_wrist", J);
+    _model_ptr->getRelativeJacobian("l_wrist","l_sole", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
     std::cout<<"J model: "<<J.data<<std::endl;
     Eigen::MatrixXd JJ(6, q_whole.size());
@@ -376,7 +376,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
     std::cout<<"x_ref: "<<x_ref.toString()<<std::endl;
 
     KDL::Jacobian J; J.resize(q_whole.size());
-    _model_ptr->getRelativeJacobian("Waist","l_wrist", J);
+    _model_ptr->getRelativeJacobian("l_wrist","Waist", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
     std::cout<<"J model: "<<J.data<<std::endl;
     Eigen::MatrixXd JJ(6, q_whole.size());
@@ -481,7 +481,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     std::cout<<"x_ref: "<<x_ref.toString()<<std::endl;
 
     KDL::Jacobian J; J.resize(q_whole.size());
-    _model_ptr->getRelativeJacobian("l_sole","l_wrist", J);
+    _model_ptr->getRelativeJacobian("l_wrist","l_sole", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
     std::cout<<"J model: "<<J.data<<std::endl;
     Eigen::MatrixXd JJ(6, q_whole.size());
@@ -581,7 +581,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     std::cout<<"x_ref: "<<x_ref.toString()<<std::endl;
 
     KDL::Jacobian J; J.resize(q_whole.size());
-    _model_ptr->getRelativeJacobian("Waist","l_wrist", J);
+    _model_ptr->getRelativeJacobian("l_wrist","Waist", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
     std::cout<<"J model: "<<J.data<<std::endl;
     Eigen::MatrixXd JJ(6, q_whole.size());

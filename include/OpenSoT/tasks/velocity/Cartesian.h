@@ -38,6 +38,9 @@
              * @brief The Cartesian class implements a task that tries to impose a pose (position and orientation)
              * of a distal link w.r.t. a base link. The reference for the cartesian task is set in base link
              * coordinate frame, or in world if the base link name is set to "world".
+             * When relative Cartesian task is required,for example from link A to link B,
+             * the relative velocity considered is the the one of B respect to A expressed
+             * in A.
              * The Cartesian Task is implemented so that
              * \f$A={}^\text{base}J_\text{distal}\f$
              * and
