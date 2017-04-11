@@ -107,7 +107,8 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/velocity/CoMVelocity.cpp
                     src/constraints/velocity/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
-                    src/constraints/torque/TorqueLimits.cpp)
+                    src/constraints/torque/TorqueLimits.cpp
+                    src/constraints/torque/JointLimits.cpp)
 if(${PCL_FOUND} AND ${moveit_core_FOUND} AND ${convex_hull_utils_FOUND})
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/ConvexHull.cpp)
@@ -143,6 +144,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     ${OPENSOT_TASKS_SOURCES}
                     ${OPENSOT_SOLVERS_SOURCES}
                     ${OPENSOT_UTILS_SOURCES}
+#                    src/constraints/velocity/SelfCollisionAvoidance.cpp
 #                    src/constraints/velocity/Dynamics.cpp
 #                    src/constraints/force/FrictionCone.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
