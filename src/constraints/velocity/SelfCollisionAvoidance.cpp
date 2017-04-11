@@ -189,12 +189,12 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
         closepoint_dir = Link2_CP - Link1_CP;
         closepoint_dir = closepoint_dir / Dm_LinkPair;
 
-        robot_col.getRelativeJacobian(base_name, Link1_name, Link1_CP_Jaco);
+        robot_col.getRelativeJacobian(Link1_name, base_name,Link1_CP_Jaco);
 
         Link1_CP_Jaco = temp_trans_matrix * Link1_CP_Jaco;
         Link1_CP_Jaco = skewSymmetricOperator(Link1_CP - Link1_origin) * Link1_CP_Jaco;
 
-        robot_col.getRelativeJacobian(base_name, Link2_name, Link2_CP_Jaco);
+        robot_col.getRelativeJacobian(Link2_name, base_name, Link2_CP_Jaco);
 
         Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
         Link2_CP_Jaco = skewSymmetricOperator(Link2_CP - Link2_origin) * Link2_CP_Jaco;
