@@ -105,6 +105,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     src/constraints/torque/TorqueLimits.cpp
                     src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
+                    src/solvers/DampedPseudoInverse.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
                     src/tasks/Aggregated.cpp
