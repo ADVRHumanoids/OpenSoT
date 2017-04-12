@@ -282,7 +282,16 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
     Eigen::MatrixXd JJ(6, q_whole.size());
     _robot.getRelativeJacobian(_robot.iDynTree_model.getLinkIndex("l_wrist"),
                                _robot.iDynTree_model.getLinkIndex("l_sole"), JJ);
-    std::cout<<"J robot: "<<JJ<<std::endl;
+
+    KDL::Frame _tmp_kdl_frame = _robot.iDynTree_model.getPositionKDL(
+                _robot.iDynTree_model.getLinkIndex("l_sole"),
+                _robot.iDynTree_model.getLinkIndex("l_wrist"));
+
+    KDL::Jacobian JJ_KDL;
+    JJ_KDL.data = JJ;
+    JJ_KDL.changeBase(_tmp_kdl_frame.M);
+
+    std::cout<<"J robot: "<<JJ_KDL.data<<std::endl;
     EXPECT_TRUE(cartesian.getA() == J.data);
     EXPECT_EQ(cartesian.getA().rows(), 6);
     EXPECT_EQ(cartesian.getb().size(), 6);
