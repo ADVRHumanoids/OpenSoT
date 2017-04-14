@@ -16,7 +16,7 @@
 */
 
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
-#include <advr_humanoids_common_utils/convex_hull_utils.h>
+#include <OpenSoT/utils/convex_hull_utils.h>
 #include <exception>
 #include <cmath>
 

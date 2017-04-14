@@ -110,7 +110,7 @@ if(YARP_FOUND)
                 ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES}
                    ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                    ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
-                    ${convex_hull_utils_LIBRARIES} ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES})
+                   ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES})
 
 #    ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
 #    TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})

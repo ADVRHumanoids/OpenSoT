@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <advr_humanoids_common_utils/idynutils.h>
-#include <advr_humanoids_common_utils/convex_hull_utils.h>
+#include <OpenSoT/utils/convex_hull_utils.h>
 #include <idynutils/tests_utils.h>
 #include <iCub/iDynTree/yarp_kdl.h>
 #include <yarp/sig/Vector.h>

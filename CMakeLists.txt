@@ -48,7 +48,11 @@ FIND_PACKAGE(kdl_parser REQUIRED)
 FIND_PACKAGE(srdfdom_advr REQUIRED)
 FIND_PACKAGE(moveit_core QUIET)
 FIND_PACKAGE(PythonLibs)
-FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS filters surface)
+FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
+                                            filters
+                                            surface
+                                            search
+                                            io)
 FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
@@ -107,7 +111,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/velocity/VelocityLimits.cpp
                     src/constraints/torque/TorqueLimits.cpp
                     src/constraints/torque/JointLimits.cpp)
-if(${PCL_FOUND} AND ${moveit_core_FOUND} AND ${convex_hull_utils_FOUND})
+if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/ConvexHull.cpp)
 endif()
@@ -137,9 +141,15 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/Indices.cpp
                     src/utils/VelocityAllocation.cpp
                     src/utils/cartesian_utils.cpp)
-if(${fcl_FOUND} AND ${moveit_core_FOUND})
-    set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
-        src/utils/collision_utils.cpp)
+if(${moveit_core_FOUND})
+    if(${fcl_FOUND})
+        set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
+            src/utils/collision_utils.cpp)
+    endif()
+    if(${PCL_FOUND})
+        set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
+            src/utils/convex_hull_utils.cpp)
+    endif()
 endif()
 
 ADD_LIBRARY(OpenSoT SHARED
@@ -185,7 +195,6 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${srdfdom_advr_LIBRARIES} ${idynutils_LIBR
                                       ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES}
                                       ${XBotInterface_LIBRARIES}
                                       ${conversion_utils_YARP_LIBRARIES} ${idynutils2_LIBRARIES}
-                                      ${convex_hull_utils_LIBRARIES}
                                       ${fcl_LIBRARIES} )
 
 if(${YARP_FOUND})
