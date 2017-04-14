@@ -91,7 +91,7 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     if(_base_link_is_world)
         _robot.getPose(_distal_link, _tmp_affine);
     else
-        _robot.getPose(_base_link, _distal_link, _tmp_affine);
+        _robot.getPose(_distal_link, _base_link, _tmp_affine);
     _actualPose = _tmp_affine.matrix();
 
     if(_desiredPose.rows() == 0) {
