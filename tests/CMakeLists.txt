@@ -95,6 +95,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testVelocityAllocation
 #                      testYCartesian
 #                      testYPostural
+                       testCollisionUtils
         )
     endif()
 endif()
@@ -108,7 +109,7 @@ if(YARP_FOUND)
                 ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${idynutils_LIBRARIES}
                    ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                    ${iDynTree_LIBRARIES} ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
-                    ${convex_hull_utils_LIBRARIES} ${collision_utils_LIBRARIES})
+                    ${convex_hull_utils_LIBRARIES} ${fcl_LIBRARIES})
 
 #    ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
 #    TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
@@ -274,6 +275,11 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
 #    add_dependencies(testYPostural GTest-ext OpenSoT)
 
+
+    ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
+    TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
+    add_dependencies(testCollisionUtils GTest-ext OpenSoT)
+
 #    if(OPENSOT_COMPILE_EXAMPLES)
 #        include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
 #        ADD_EXECUTABLE(testKlamptController ../examples/KlamptController/tests/testKlamptController.cpp
@@ -326,6 +332,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 #    add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
 #    add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
+     add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
 endif()
 
 find_package(MATLAB QUIET)

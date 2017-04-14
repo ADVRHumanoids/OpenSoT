@@ -58,7 +58,6 @@ FIND_PACKAGE(cartesian_utils REQUIRED)
 FIND_PACKAGE(conversion_utils_YARP QUIET)
 FIND_PACKAGE(idynutils2 QUIET)
 FIND_PACKAGE(convex_hull_utils QUIET)
-FIND_PACKAGE(collision_utils QUIET)
 FIND_PACKAGE(fcl QUIET)
 
 # compilation flags
@@ -73,7 +72,7 @@ INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS} ${cartesian_utils_INCLUDE_DIRS}
                             ${conversion_utils_YARP_INCLUDE_DIRS} ${idynutils2_INCLUDE_DIRS}
                             ${convex_hull_utils_INCLUDE_DIRS}
-                            ${collision_utils_INCLUDE_DIRS})
+                            )
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
@@ -113,7 +112,7 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND} AND ${convex_hull_utils_FOUND})
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/ConvexHull.cpp)
 endif()
-if(${fcl_FOUND} AND ${moveit_core_FOUND} AND ${collision_utils_FOUND})
+if(${fcl_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/SelfCollisionAvoidance.cpp)
 endif()
@@ -138,6 +137,10 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/Indices.cpp
                     src/utils/VelocityAllocation.cpp)
+if(${fcl_FOUND} AND ${moveit_core_FOUND})
+    set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
+        src/utils/collision_utils.cpp)
+endif()
 
 ADD_LIBRARY(OpenSoT SHARED
                     ${OPENSOT_CONSTRAINTS_SOURCES}
@@ -184,7 +187,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIE
                                       ${cartesian_utils_LIBRARIES}
                                       ${conversion_utils_YARP_LIBRARIES} ${idynutils2_LIBRARIES}
                                       ${convex_hull_utils_LIBRARIES}
-                                      ${collision_utils_LIBRARIES})
+                                      ${fcl_LIBRARIES})
 
 if(${YARP_FOUND})
 #    target_link_libraries(OpenSoT_YTasks PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}

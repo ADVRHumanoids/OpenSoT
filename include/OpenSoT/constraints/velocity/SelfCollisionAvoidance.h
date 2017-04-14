@@ -22,7 +22,7 @@
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
  #include <XBotInterface/ModelInterface.h>
- #include <advr_humanoids_common_utils/collision_utils.h>
+ #include <OpenSoT/utils/collision_utils.h>
  #include <kdl/frames.hpp>
 
 #include <Eigen/Dense>
