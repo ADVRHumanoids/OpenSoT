@@ -16,7 +16,7 @@
 */
 
 #include <OpenSoT/tasks/torque/CartesianImpedanceCtrl.h>
-#include <advr_humanoids_common_utils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 

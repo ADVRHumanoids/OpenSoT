@@ -21,7 +21,7 @@
 
  #include <OpenSoT/Task.h>
  #include <XBotInterface/ModelInterface.h>
- #include <advr_humanoids_common_utils/cartesian_utils.h>
+ #include <OpenSoT/utils/cartesian_utils.h>
 
 
 /**

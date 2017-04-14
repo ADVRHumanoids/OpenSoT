@@ -21,7 +21,7 @@
 #include <OpenSoT/Task.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
-#include <advr_humanoids_common_utils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 
 
 

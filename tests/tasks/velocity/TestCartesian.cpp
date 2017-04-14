@@ -6,6 +6,7 @@
 #include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <boost/make_shared.hpp>
 #include <advr_humanoids_common_utils/conversion_utils_YARP.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 
 
 using namespace yarp::math;

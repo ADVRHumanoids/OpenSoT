@@ -54,7 +54,6 @@ FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
-FIND_PACKAGE(cartesian_utils REQUIRED)
 FIND_PACKAGE(conversion_utils_YARP QUIET)
 FIND_PACKAGE(idynutils2 QUIET)
 FIND_PACKAGE(convex_hull_utils QUIET)
@@ -69,9 +68,9 @@ INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
                             ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
                             ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS} ${tf_INCLUDE_DIRS}
                             ${interactive_markers_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS}
-                            ${XBotInterface_INCLUDE_DIRS} ${cartesian_utils_INCLUDE_DIRS}
+                            ${XBotInterface_INCLUDE_DIRS}
                             ${conversion_utils_YARP_INCLUDE_DIRS} ${idynutils2_INCLUDE_DIRS}
-                            ${convex_hull_utils_INCLUDE_DIRS}
+                            ${convex_hull_utils_INCLUDE_DIRS} ${srdfdom_advr_INCLUDE_DIRS}
                             )
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
@@ -136,7 +135,8 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/Indices.cpp
-                    src/utils/VelocityAllocation.cpp)
+                    src/utils/VelocityAllocation.cpp
+                    src/utils/cartesian_utils.cpp)
 if(${fcl_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
         src/utils/collision_utils.cpp)
@@ -180,14 +180,13 @@ endif()
 
 
 # we now add the YARP libraries to our project.
-TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
+TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${srdfdom_advr_LIBRARIES} ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
                               PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES}
                                       ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES}
                                       ${XBotInterface_LIBRARIES}
-                                      ${cartesian_utils_LIBRARIES}
                                       ${conversion_utils_YARP_LIBRARIES} ${idynutils2_LIBRARIES}
                                       ${convex_hull_utils_LIBRARIES}
-                                      ${fcl_LIBRARIES})
+                                      ${fcl_LIBRARIES} )
 
 if(${YARP_FOUND})
 #    target_link_libraries(OpenSoT_YTasks PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}

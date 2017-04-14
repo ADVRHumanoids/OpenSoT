@@ -16,7 +16,7 @@
 #include <yarp/os/all.h>
 #include <cmath>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <advr_humanoids_common_utils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 #include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 
 #define ENABLE_ROS false

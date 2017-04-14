@@ -20,7 +20,7 @@
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/SubTask.h>
-#include <advr_humanoids_common_utils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 #include <XBotInterface/ModelInterface.h>
 
 namespace OpenSoT {
