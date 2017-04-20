@@ -19,7 +19,7 @@
 #include <idynutils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
-#include <OpenSoT/constraints/velocity/Dynamics.h>
+
 
 using namespace OpenSoT::tasks::force;
 
@@ -50,6 +50,9 @@ CoM::CoM(   const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact
     positionError.setZero();
     velocityError.setZero();
     angularMomentumError.setZero();
+
+    _P.setZero();
+    _T.setZero();
 
     _g.setZero();
     _g(2) = -9.81;
@@ -165,6 +168,9 @@ Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeW(const std::vector<std::stri
     for(unsigned int i = 0; i < m; ++i){
         _T = _robot.getPosition(
             _robot.iDyn3_model.getLinkIndex(links_in_contact[i]));
+        _T(0,3) -= _actualPosition(0);
+        _T(1,3) -= _actualPosition(1);
+        _T(2,3) -= _actualPosition(2);
 
         _P(0,0) = 0.0;      _P(0,1) = -_T(2,3); _P(0,2) = _T(1,3);
         _P(1,0) = -_P(0,1); _P(1,1) = 0.0;      _P(1,2) = -_T(0,3);
