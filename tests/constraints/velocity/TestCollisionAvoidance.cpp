@@ -8,8 +8,7 @@
 #include <OpenSoT/solvers/QPOases.h>
 #include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <XBotInterface/ModelInterface.h>
-#include <idynutils/tests_utils.h>
-#include <iCub/iDynTree/yarp_kdl.h>
+#include <advr_humanoids_common_utils/test_utils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
