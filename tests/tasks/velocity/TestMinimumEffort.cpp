@@ -1,4 +1,3 @@
-#include <idynutils/tests_utils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <yarp/math/Math.h>

@@ -1,5 +1,6 @@
-#include <idynutils/tests_utils.h>
-#include <idynutils/idynutils.h>
+#include <advr_humanoids_common_utils/test_utils.h>
+#include <advr_humanoids_common_utils/idynutils.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #include <gtest/gtest.h>
 #include <yarp/math/Math.h>
 #include <idynutils/cartesian_utils.h>
@@ -7,6 +8,8 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 
 using namespace yarp::math;
+
+typedef idynutils2 iDynUtils;
 
 namespace {
 
@@ -72,7 +75,7 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
-    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
+    yarp::sig::Vector q(idynutils.iDynTree_model.getNrOfDOFs(), 0.0);
     yarp::sig::Vector q_next(q);
 
     for(unsigned int i = 0; i < q.size(); ++i) {
@@ -80,7 +83,7 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
         q_next[i] = tests_utils::getRandomAngle();
         assert((q[i]!=q_next[i]));
     }
-    idynutils.updateiDyn3Model(q);
+    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q));
 
     OpenSoT::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)) );
     OpenSoT::tasks::velocity::Postural::ConstraintPtr bound(
@@ -94,7 +97,7 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     yarp::sig::Vector old_b = cartesian_utils::fromEigentoYarp(postural->getb());
     yarp::sig::Vector old_LowerBound = cartesian_utils::fromEigentoYarp(bound->getLowerBound());
     yarp::sig::Vector old_UpperBound = cartesian_utils::fromEigentoYarp(bound->getUpperBound());
-    idynutils.updateiDyn3Model(q_next);
+    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_next));
     postural->update(cartesian_utils::toEigen(q_next));
     yarp::sig::Vector new_b = cartesian_utils::fromEigentoYarp(postural->getb());
     yarp::sig::Vector new_LowerBound = cartesian_utils::fromEigentoYarp(bound->getLowerBound());

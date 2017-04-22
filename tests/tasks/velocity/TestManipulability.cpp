@@ -1,4 +1,3 @@
-#include <idynutils/tests_utils.h>
 #include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>

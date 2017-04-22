@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/collision_utils.h>
 #include <advr_humanoids_common_utils/idynutils.h>
-#include <iCub/iDynTree/yarp_kdl.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 #include <yarp/sig/Vector.h>
