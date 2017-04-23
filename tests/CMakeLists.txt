@@ -77,7 +77,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOases_Sparse
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
-#                      testAggregatedTask
+                      testAggregatedTask
                       testCartesianVelocityTask
 #                      testCoMForceTask
 #                      testFrictionConeForceConstraint
@@ -196,9 +196,9 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
 #    add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
-#    TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
-#    add_dependencies(testAggregatedTask GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
+    TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
+    add_dependencies(testAggregatedTask GTest-ext OpenSoT)
 
     ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
     TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
@@ -309,7 +309,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
 #    add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 #    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
-#    add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
+    add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
     add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
     add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 #    add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)

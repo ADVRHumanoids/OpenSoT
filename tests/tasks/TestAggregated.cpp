@@ -1,17 +1,19 @@
-#include <idynutils/tests_utils.h>
+#include <advr_humanoids_common_utils/test_utils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
-#include <idynutils/idynutils.h>
-#include <idynutils/tests_utils.h>
+#include <advr_humanoids_common_utils/idynutils.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 
 using namespace yarp::math;
 using namespace OpenSoT::tasks;
+
+typedef idynutils2 iDynUtils;
 
 namespace {
 
@@ -29,8 +31,8 @@ protected:
         for(unsigned int i = 0; i < q.size(); ++i)
             q[i] = tests_utils::getRandomAngle();
 
-        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(cartesian_utils::toEigen(q))));
-        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(cartesian_utils::toEigen(2*q))));
+        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(conversion_utils_YARP::toEigen(q))));
+        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(conversion_utils_YARP::toEigen(2*q))));
     }
 
     virtual ~testAggregatedTask() {
@@ -50,7 +52,7 @@ protected:
 TEST_F(testAggregatedTask, testConcatenateTaskIds)
 {
     OpenSoT::tasks::velocity::Postural::Ptr postural_in_aggregated(
-            new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
+            new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
     std::list<Aggregated::TaskPtr> task_list;
     task_list.push_back(postural_in_aggregated);
     task_list.push_back(postural_in_aggregated);
@@ -65,13 +67,13 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     yarp::sig::Matrix posturalAOne, posturalATwo;
     yarp::sig::Vector posturalbOne, posturalbTwo;
 
-    posturalAOne = cartesian_utils::fromEigentoYarp((*(_tasks.begin()))->getA());
-    posturalATwo = cartesian_utils::fromEigentoYarp((*(++_tasks.begin()))->getA());
-    posturalbOne = cartesian_utils::fromEigentoYarp((*(_tasks.begin()))->getb());
-    posturalbTwo = cartesian_utils::fromEigentoYarp((*(++_tasks.begin()))->getb());
+    posturalAOne = conversion_utils_YARP::toYARP((*(_tasks.begin()))->getA());
+    posturalATwo = conversion_utils_YARP::toYARP((*(++_tasks.begin()))->getA());
+    posturalbOne = conversion_utils_YARP::toYARP((*(_tasks.begin()))->getb());
+    posturalbTwo = conversion_utils_YARP::toYARP((*(++_tasks.begin()))->getb());
 
-    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(aggregated.getA()) == yarp::math::pile(posturalAOne,posturalATwo));
-    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(aggregated.getb()) == yarp::math::cat(posturalbOne,posturalbTwo));
+    EXPECT_TRUE(conversion_utils_YARP::toYARP(aggregated.getA()) == yarp::math::pile(posturalAOne,posturalATwo));
+    EXPECT_TRUE(conversion_utils_YARP::toYARP(aggregated.getb()) == yarp::math::cat(posturalbOne,posturalbTwo));
 
     EXPECT_TRUE(aggregated.getConstraints().size() == 0);
 
@@ -80,26 +82,26 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     EXPECT_DOUBLE_EQ(aggregated.getLambda(), K);
 
     std::cout<<"aggregated.getWeight(): "<<aggregated.getWeight()<<std::endl;
-    EXPECT_TRUE(cartesian_utils::fromEigentoYarp(aggregated.getWeight()) == yarp::sig::Matrix(q.size()*2, q.size()*2).eye());
+    EXPECT_TRUE(conversion_utils_YARP::toYARP(aggregated.getWeight()) == yarp::sig::Matrix(q.size()*2, q.size()*2).eye());
 
     iDynUtils idynutils("coman",
                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                         std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-    idynutils.updateiDyn3Model(q, true);
+    yarp::sig::Vector q(idynutils.iDynTree_model.getNrOfDOFs(), 0.0);
+    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
     yarp::sig::Vector q_ref(q.size(), M_PI);
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_in_aggregated(
-            new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
-    postural_in_aggregated->setReference(cartesian_utils::toEigen(q_ref));
+            new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
+    postural_in_aggregated->setReference(conversion_utils_YARP::toEigen(q_ref));
     std::list<OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>::TaskPtr> task_list;
     task_list.push_back(postural_in_aggregated);
     OpenSoT::tasks::Aggregated::Ptr aggregated_task(
                 new OpenSoT::tasks::Aggregated(task_list, q.size()));
     aggregated_task->setLambda(0.1);
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
-    postural_task->setReference(cartesian_utils::toEigen(q_ref));
+            new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
+    postural_task->setReference(conversion_utils_YARP::toEigen(q_ref));
     postural_task->setLambda(0.1);
 
 //1. Here we use postural_task
@@ -107,12 +109,12 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     yarp::sig::Vector dq(q.size(), 0.0);
     for(unsigned int i = 0; i < 1000; ++i)
     {
-        postural_task->update(cartesian_utils::toEigen(q));
-        aggregated_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(conversion_utils_YARP::toEigen(q));
+        aggregated_task->update(conversion_utils_YARP::toEigen(q));
         EXPECT_TRUE(aggregated_task->getA() == postural_task->getA());
         EXPECT_TRUE(aggregated_task->getb() == postural_task->getb());
-        dq = pinv(cartesian_utils::fromEigentoYarp(postural_task->getA()),1E-7)*
-                cartesian_utils::fromEigentoYarp(postural_task->getb());
+        dq = pinv(conversion_utils_YARP::toYARP(postural_task->getA()),1E-7)*
+                conversion_utils_YARP::toYARP(postural_task->getb());
         q += dq;
     }
 
@@ -123,13 +125,13 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
 
     for(unsigned int i = 0; i < 1000; ++i)
     {
-        postural_task->update(cartesian_utils::toEigen(q));
-        aggregated_task->update(cartesian_utils::toEigen(q));
+        postural_task->update(conversion_utils_YARP::toEigen(q));
+        aggregated_task->update(conversion_utils_YARP::toEigen(q));
         EXPECT_TRUE(aggregated_task->getA() == postural_task->getA());
         EXPECT_TRUE(aggregated_task->getb() == postural_task->getb()) << "aggregated_task b is " << aggregated_task->getb() << std::endl
                                                                       << " while postural_task b is " << postural_task->getb();
-        dq = pinv(cartesian_utils::fromEigentoYarp(aggregated_task->getA()),1E-7)*
-                cartesian_utils::fromEigentoYarp(aggregated_task->getb());
+        dq = pinv(conversion_utils_YARP::toYARP(aggregated_task->getA()),1E-7)*
+                conversion_utils_YARP::toYARP(aggregated_task->getb());
         q += dq;
     }
 
@@ -151,14 +153,14 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
 //        robot.updateiDyn3Model(q, true);
 
 //        OpenSoT::tasks::velocity::Postural::Ptr taskPostural(
-//                    new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(q)));
+//                    new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
 //        OpenSoT::tasks::velocity::Cartesian::Ptr taskCartesianWaist(
 //                new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",
-//                                                        cartesian_utils::toEigen(q),robot, "Waist", "world"));
+//                                                        conversion_utils_YARP::toEigen(q),robot, "Waist", "world"));
 
 //        OpenSoT::constraints::velocity::ConvexHull::Ptr constraintConvexHull(
 //                new OpenSoT::constraints::velocity::ConvexHull(
-//                        cartesian_utils::toEigen(q), robot, 0.05));
+//                        conversion_utils_YARP::toEigen(q), robot, 0.05));
 //        OpenSoT::constraints::velocity::CoMVelocity::Ptr constraintCoMVelocity(
 //                new OpenSoT::constraints::velocity::CoMVelocity(yarp::sig::Vector(3,0.03), 0.01, q, robot));
 
