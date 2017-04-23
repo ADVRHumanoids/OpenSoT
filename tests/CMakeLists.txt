@@ -95,8 +95,6 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testLogger
 #                      #testPreviewer
 #                      testVelocityAllocation
-#                      testYCartesian
-#                      testYPostural
                        testCollisionUtils
                        testCartesianUtils
         )
@@ -270,15 +268,6 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 #    add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
-#    TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
-#    add_dependencies(testYCartesian GTest-ext OpenSoT)
-
-#    ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
-#    TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
-#    add_dependencies(testYPostural GTest-ext OpenSoT)
-
-
     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
     add_dependencies(testCollisionUtils GTest-ext OpenSoT)
@@ -338,8 +327,6 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_utils_Logger COMMAND testLogger)
 #    #add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 #    add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
-#    add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
-#    add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
      add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
      add_test(NAME OpenSoT_utils_cartesian_utils COMMAND testCartesianUtils)
 endif()
