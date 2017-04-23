@@ -53,7 +53,7 @@ FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
                                             surface
                                             search
                                             io)
-FIND_PACKAGE(tf REQUIRED)
+#FIND_PACKAGE(tf REQUIRED)
 #FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
@@ -68,13 +68,20 @@ option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS}
-                            ${paramHelp_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
-                            ${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS} ${tf_INCLUDE_DIRS}
-                            ${interactive_markers_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS}
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS}
+                            ${iDynTree_INCLUDE_DIRS}
+                            #${paramHelp_INCLUDE_DIRS}
+                            ${eigen_conversions_INCLUDE_DIRS}
+                            ${EIGEN3_INCLUDE_DIR}
+                            ${PCL_INCLUDE_DIRS}
+                            #${tf_INCLUDE_DIRS}
+                            #${interactive_markers_INCLUDE_DIRS}
+                            #${PYTHON_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
-                            ${conversion_utils_YARP_INCLUDE_DIRS} ${idynutils2_INCLUDE_DIRS}
-                            ${convex_hull_utils_INCLUDE_DIRS} ${srdfdom_advr_INCLUDE_DIRS}
+                            ${conversion_utils_YARP_INCLUDE_DIRS}
+                            ${idynutils2_INCLUDE_DIRS}
+                            ${convex_hull_utils_INCLUDE_DIRS}
+                            ${srdfdom_advr_INCLUDE_DIRS}
                             )
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
@@ -176,13 +183,6 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/utils/logger/plotters/Plotter.cpp
                     ${sot_INCLUDES})
 
-if(${YARP_FOUND})
-#    ADD_LIBRARY(OpenSoT_YTasks SHARED
-#                    src/interfaces/yarp/tasks/YCartesian.cpp
-#                    src/interfaces/yarp/tasks/YCoM.cpp
-#                    src/interfaces/yarp/tasks/YPostural.cpp)
-endif()
-
 # we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
     add_dependencies(OpenSoT qpOASES-ext)
@@ -190,39 +190,22 @@ endif()
 
 
 # we now add the YARP libraries to our project.
-TARGET_LINK_LIBRARIES(OpenSoT PUBLIC  ${srdfdom_advr_LIBRARIES} ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
-                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES}
-                                      ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES}
-                                      ${XBotInterface_LIBRARIES}
-                                      ${conversion_utils_YARP_LIBRARIES} ${idynutils2_LIBRARIES}
-                                      ${fcl_LIBRARIES} )
-
-if(${YARP_FOUND})
-#    target_link_libraries(OpenSoT_YTasks PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${eigen_conversions_LIBRARIES}
-#                              PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES} ${PYTHON_LIBRARIES})
-endif()
-
-if(Boost_VERSION VERSION_GREATER 104701)
-    if(${YARP_FOUND})
-#        ADD_EXECUTABLE(ros_yarp_Cartesian_interactive_marker src/interfaces/ros/tasks/ros_yarp_Cartesian_interactive_marker.cpp)
-#        ADD_EXECUTABLE(ros_yarp_gaze_interactive_marker src/interfaces/ros/tasks/ros_yarp_gaze_interactive_marker.cpp)
-#        ADD_EXECUTABLE(ros_yarp_postural_interactive_marker src/interfaces/ros/tasks/ros_yarp_postural_interactive_marker.cpp)
-
-#        TARGET_LINK_LIBRARIES(ros_yarp_Cartesian_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-#                                      PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-#        add_dependencies(ros_yarp_Cartesian_interactive_marker OpenSoT)
-
-#        TARGET_LINK_LIBRARIES(ros_yarp_gaze_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-#                                      PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-#        add_dependencies(ros_yarp_gaze_interactive_marker OpenSoT)
-
-#        TARGET_LINK_LIBRARIES(ros_yarp_postural_interactive_marker PUBLIC  OpenSoT ${idynutils_LIBRARIES} ${iDynTree_LIBRARIES} ${catkin_LIBRARIES}
-#                                      PRIVATE ${qpOASES_LIBRARIES} ${PCL_LIBRARIES} ${tf_LIBRARIES} ${interactive_markers_LIBRARIES})
-#        add_dependencies(ros_yarp_postural_interactive_marker OpenSoT)
-    endif()
-endif()
-
-
+TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
+                              ${srdfdom_advr_LIBRARIES}
+                              #${idynutils_LIBRARIES}
+                              ${iDynTree_LIBRARIES}
+                              ${eigen_conversions_LIBRARIES}
+                              PRIVATE
+                              ${qpOASES_LIBRARIES}
+                              ${PCL_LIBRARIES}
+                              #${tf_LIBRARIES}
+                              #${interactive_markers_LIBRARIES}
+                              #${PYTHON_LIBRARIES}
+                              ${XBotInterface_LIBRARIES}
+                              ${conversion_utils_YARP_LIBRARIES}
+                              ${idynutils2_LIBRARIES}
+                              ${fcl_LIBRARIES}
+                              )
 
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
@@ -245,13 +228,6 @@ target_include_directories(OpenSoT PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}
 set_target_properties(OpenSoT PROPERTIES VERSION ${${VARS_PREFIX}_VERSION}
                               SOVERSION ${${VARS_PREFIX}_VERSION})
 
-if(YARP_FOUND)
-#    target_include_directories(OpenSoT_YTasks PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>"
-#                                          "$<INSTALL_INTERFACE:${${VARS_PREFIX}_INSTALL_INCLUDEDIR}>")
-
-#    set_target_properties(OpenSoT_YTasks PROPERTIES VERSION ${${VARS_PREFIX}_VERSION}
-        #                      SOVERSION ${${VARS_PREFIX}_VERSION})
-endif()
 
 install(DIRECTORY include/
         DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
@@ -263,13 +239,6 @@ install(TARGETS OpenSoT
         RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
         LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
 
-if(YARP_FOUND)
-#    install(TARGETS OpenSoT_YTasks
-#        EXPORT OpenSoT_YTasks
-#        ARCHIVE DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT lib
-#        RUNTIME DESTINATION "${${VARS_PREFIX}_INSTALL_BINDIR}" COMPONENT bin
-#        LIBRARY DESTINATION "${${VARS_PREFIX}_INSTALL_LIBDIR}" COMPONENT shlib)
-endif()
 
 catkin_package(
  INCLUDE_DIRS include
@@ -278,20 +247,6 @@ catkin_package(
  DEPENDS system_lib
 )
 
-if(Boost_VERSION VERSION_GREATER 104701)
-    if(YARP_FOUND)
-#        message(STATUS "Compiling ros_yarp interactive markers for OpenSoT")
-
-#        install(TARGETS
-#                ros_yarp_Cartesian_interactive_marker
-#                ros_yarp_gaze_interactive_marker
-#                ros_yarp_postural_interactive_marker
-#        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#        )
-    endif()
-endif()
 
 install(TARGETS OpenSoT
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -299,13 +254,6 @@ install(TARGETS OpenSoT
        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
        )
 
-if(YARP_FOUND)
-#    install(TARGETS OpenSoT_YTasks
-#       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#       RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#       )
-endif()
 
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
@@ -320,14 +268,6 @@ install_basic_package_files(OpenSoT VARS_PREFIX ${VARS_PREFIX}
                                     COMPATIBILITY SameMajorVersion
                                     TARGETS_PROPERTY ${VARS_PREFIX}_TARGETS
                                     NO_CHECK_REQUIRED_COMPONENTS_MACRO)
-
-if(YARP_FOUND)
-#    install_basic_package_files(OpenSoT_YTasks VARS_PREFIX ${VARS_PREFIX}
-#                                    VERSION ${${VARS_PREFIX}_VERSION}
-#                                    COMPATIBILITY SameMajorVersion
-#                                    TARGETS_PROPERTY ${VARS_PREFIX}_TARGETS
-#                                    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
-endif()
 
 include(AddUninstallTarget)
 
