@@ -89,7 +89,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testMinimumEffortVelocityTask
                       testMinimumVelocityTask
                       testPosturalVelocityTask
-#                      testSubTask
+                      testSubTask
 #                      testAutoStack
 #                      testDefaultHumanoidStack
 #                      testLogger
@@ -244,9 +244,9 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
     add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
-#    TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
-#    add_dependencies(testSubTask GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
+    TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
+    add_dependencies(testSubTask GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
 #    TARGET_LINK_LIBRARIES(testAutoStack ${TestLibs})
@@ -310,7 +310,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 #    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
 #    add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
-#    add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
+    add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
     add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 #    add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 #    add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)

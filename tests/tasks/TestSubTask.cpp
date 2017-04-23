@@ -1,9 +1,12 @@
-#include <idynutils/tests_utils.h>
-#include <idynutils/idynutils.h>
+#include <advr_humanoids_common_utils/test_utils.h>
+#include <advr_humanoids_common_utils/idynutils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <yarp/math/Math.h>
+#include <yarp/sig/all.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 
 using namespace yarp::math;
 using namespace OpenSoT::tasks;
@@ -267,20 +270,21 @@ TEST_F(TestSubTask, testgetA)
     ASSERT_EQ(subTask->getA().rows(), 3);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     yarp::sig::Matrix A(3, _postural->getXSize());
-    A = cartesian_utils::fromEigentoYarp(_postural->getA()).submatrix(0,2,0,_postural->getXSize()-1);
-    EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getA()),A));
+    A = conversion_utils_YARP::toYARP(_postural->getA()).submatrix(0,2,0,_postural->getXSize()-1);
+    EXPECT_TRUE(tests_utils::matrixAreEqual(subTask->getA(),
+                conversion_utils_YARP::toEigen(A)));
 
     subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
                                                  Indices::range(5,6)));
     ASSERT_EQ(subTask->getA().rows(), 5);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     A.resize(5, _postural->getXSize());
-    A = cartesian_utils::fromEigentoYarp(_postural->getA()).submatrix(0,2,0,_postural->getXSize()-1);
+    A = conversion_utils_YARP::toYARP(_postural->getA()).submatrix(0,2,0,_postural->getXSize()-1);
     A = yarp::math::pile(A,
-                         cartesian_utils::fromEigentoYarp(_postural->getA()).submatrix(5,6,0,_postural->getXSize()-1));
+                         conversion_utils_YARP::toYARP(_postural->getA()).submatrix(5,6,0,_postural->getXSize()-1));
     EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getA()),A));
+                    subTask->getA(),
+                    conversion_utils_YARP::toEigen(A)));
 }
 
 TEST_F(TestSubTask, testGetHessianAType)
@@ -298,26 +302,30 @@ TEST_F(TestSubTask, testgetb)
     SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     ASSERT_EQ(subTask->getb().size(), 3);
     yarp::sig::Vector b(3), bLambda(3);
-    b = cartesian_utils::fromEigentoYarp(_postural->getb()).subVector(0,2);
+    b = conversion_utils_YARP::toYARP(_postural->getb()).subVector(0,2);
     EXPECT_TRUE(tests_utils::vectorAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getb()),b));
+                    subTask->getb(),
+                    conversion_utils_YARP::toEigen(b)));
 
     subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
                                                  Indices::range(5,6)));
     ASSERT_EQ(subTask->getb().size(), 5);
     b.resize(5);
-    b = cartesian_utils::fromEigentoYarp(_postural->getb()).subVector(0,2);
+    b = conversion_utils_YARP::toYARP(_postural->getb()).subVector(0,2);
     b = yarp::math::cat(b,
-                        cartesian_utils::fromEigentoYarp(_postural->getb()).subVector(5,6));
+                        conversion_utils_YARP::toYARP(_postural->getb()).subVector(5,6));
     EXPECT_TRUE(tests_utils::vectorAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getb()),b));
+                    subTask->getb(),
+                    conversion_utils_YARP::toEigen(b)));
 
-    b = cartesian_utils::fromEigentoYarp(subTask->getb());
+    b = conversion_utils_YARP::toYARP(subTask->getb());
     subTask->setLambda(0.1);
     subTask->update(_postural->getActualPositions());
-    bLambda = cartesian_utils::fromEigentoYarp(subTask->getb());
+    bLambda = conversion_utils_YARP::toYARP(subTask->getb());
 
-    EXPECT_TRUE(tests_utils::vectorAreEqual(bLambda, b*0.1));
+    EXPECT_TRUE(tests_utils::vectorAreEqual(
+                    conversion_utils_YARP::toEigen(bLambda),
+                    conversion_utils_YARP::toEigen(b)*0.1));
 }
 
 TEST_F(TestSubTask, testgetWeight)
@@ -327,16 +335,17 @@ TEST_F(TestSubTask, testgetWeight)
     yarp::sig::Vector W_diag(10);
     for(unsigned int i = 0; i < 10; ++i) W_diag(i) = i;
     yarp::sig::Matrix W(10,10); W.diagonal(W_diag);
-    _postural->setWeight(cartesian_utils::toEigen(W));
+    _postural->setWeight(conversion_utils_YARP::toEigen(W));
 
 
     SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
 
-    W = cartesian_utils::fromEigentoYarp(_postural->getWeight()).submatrix(0,2,0,2);
+    W = conversion_utils_YARP::toYARP(_postural->getWeight()).submatrix(0,2,0,2);
     EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getWeight()),W));
+                    subTask->getWeight(),
+                    conversion_utils_YARP::toEigen(W)));
 
     subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
                                                  Indices::range(5,6)));
@@ -349,7 +358,8 @@ TEST_F(TestSubTask, testgetWeight)
         for(unsigned int c = 0; c < indices.size(); ++c)
             W(r,c) = _postural->getWeight()(indices[r], indices[c]);
     EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getWeight()),W));
+                    subTask->getWeight(),
+                    conversion_utils_YARP::toEigen(W)));
 }
 
 TEST_F(TestSubTask, testsetWeight)
@@ -357,22 +367,24 @@ TEST_F(TestSubTask, testsetWeight)
     using namespace OpenSoT;
 
     yarp::sig::Vector W_diag(3);
-    yarp::sig::Matrix fullW = cartesian_utils::fromEigentoYarp(_postural->getWeight());
+    yarp::sig::Matrix fullW = conversion_utils_YARP::toYARP(_postural->getWeight());
     for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
     yarp::sig::Matrix W(3,3); W.diagonal(W_diag);
 
     SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
-    subTask->setWeight(cartesian_utils::toEigen(W));
+    subTask->setWeight(conversion_utils_YARP::toEigen(W));
 
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
 
     EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(_postural->getWeight()),fullW))  <<
+                    _postural->getWeight(),
+                    conversion_utils_YARP::toEigen(fullW)))  <<
         "_postural->getWeight() is:\n" << _postural->getWeight() <<
         "\nshould be:\n" << fullW.toString();
     EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getWeight()),W));
+                    subTask->getWeight(),
+                    conversion_utils_YARP::toEigen(W)));
 
     W.resize(5,5); W_diag.resize(5);
     for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
@@ -381,15 +393,17 @@ TEST_F(TestSubTask, testsetWeight)
 
     subTask = SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
                                                   Indices::range(5,6)));
-    subTask->setWeight(cartesian_utils::toEigen(W));
-    ASSERT_EQ(cartesian_utils::fromEigentoYarp(subTask->getWeight()).rows(), 5);
-    ASSERT_EQ(cartesian_utils::fromEigentoYarp(subTask->getWeight()).cols(), 5);
+    subTask->setWeight(conversion_utils_YARP::toEigen(W));
+    ASSERT_EQ(conversion_utils_YARP::toYARP(subTask->getWeight()).rows(), 5);
+    ASSERT_EQ(conversion_utils_YARP::toYARP(subTask->getWeight()).cols(), 5);
 
     EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(_postural->getWeight()),fullW)) << "\n"    << _postural->getWeight()
+                    _postural->getWeight(),
+                    conversion_utils_YARP::toEigen(fullW))) << "\n"    << _postural->getWeight()
                                                                            << "\nto\n" << fullW.toString() << "\n";
     EXPECT_TRUE(tests_utils::matrixAreEqual(
-                    cartesian_utils::fromEigentoYarp(subTask->getWeight()),W));
+                    subTask->getWeight(),
+                    conversion_utils_YARP::toEigen(W)));
 }
 
 
@@ -402,23 +416,23 @@ TEST_F(TestSubTask, testGetConstraints)
     SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
 
     yarp::sig::Vector lowerBounds =
-            cartesian_utils::fromEigentoYarp(subTask->getConstraints().front()->getLowerBound());
-    yarp::sig::Vector b = cartesian_utils::fromEigentoYarp(subTask->getb());
+            conversion_utils_YARP::toYARP(subTask->getConstraints().front()->getLowerBound());
+    yarp::sig::Vector b = conversion_utils_YARP::toYARP(subTask->getb());
 
-    subTask->update(cartesian_utils::toEigen(yarp::sig::Vector(DOFS, 1.0)));
+    subTask->update(conversion_utils_YARP::toEigen(yarp::sig::Vector(DOFS, 1.0)));
 
-    EXPECT_FALSE( b == cartesian_utils::fromEigentoYarp(subTask->getb()));
+    EXPECT_FALSE( b == conversion_utils_YARP::toYARP(subTask->getb()));
     EXPECT_FALSE( lowerBounds ==
-                  cartesian_utils::fromEigentoYarp(subTask->getConstraints().front()->getLowerBound()));
+                  conversion_utils_YARP::toYARP(subTask->getConstraints().front()->getLowerBound()));
 
-    lowerBounds = cartesian_utils::fromEigentoYarp(subTask->getConstraints().front()->getLowerBound());
-    b = cartesian_utils::fromEigentoYarp(subTask->getb());
+    lowerBounds = conversion_utils_YARP::toYARP(subTask->getConstraints().front()->getLowerBound());
+    b = conversion_utils_YARP::toYARP(subTask->getb());
 
-    subTask->update(cartesian_utils::toEigen(yarp::sig::Vector(DOFS, 0.5)));
+    subTask->update(conversion_utils_YARP::toEigen(yarp::sig::Vector(DOFS, 0.5)));
 
-    EXPECT_FALSE( b == cartesian_utils::fromEigentoYarp(subTask->getb()));
+    EXPECT_FALSE( b == conversion_utils_YARP::toYARP(subTask->getb()));
     EXPECT_FALSE( lowerBounds ==
-                  cartesian_utils::fromEigentoYarp(subTask->getConstraints().front()->getLowerBound()));
+                  conversion_utils_YARP::toYARP(subTask->getConstraints().front()->getLowerBound()));
 }
 
 TEST_F(TestSubTask, testUpdate)
