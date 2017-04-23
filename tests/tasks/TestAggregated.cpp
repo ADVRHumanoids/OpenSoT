@@ -9,11 +9,19 @@
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <advr_humanoids_common_utils/conversion_utils_YARP.h>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 
 using namespace yarp::math;
 using namespace OpenSoT::tasks;
 
 typedef idynutils2 iDynUtils;
+
+static void null_deleter(iDynUtils *) {}
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+
+std::string _path_to_cfg = robotology_root + relative_path;
+XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
 
 namespace {
 
@@ -139,171 +147,200 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
         EXPECT_NEAR(q[i],q_ref[i],1E-4);
 }
 
-//TEST_F(testAggregatedTask, testConstraintsUpdate)
-//{
-//    iDynUtils robot("coman",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    yarp::sig::Vector q(robot.iDyn3_model.getNrOfDOFs(), 0.0);
-//    for(unsigned int r = 0; r < 1e3; ++r)
-//    {
-//        q = tests_utils::getRandomAngles(robot.iDyn3_model.getJointBoundMin(),
-//                                         robot.iDyn3_model.getJointBoundMax(),
-//                                         robot.iDyn3_model.getNrOfDOFs());
-//        robot.updateiDyn3Model(q, true);
-
-//        OpenSoT::tasks::velocity::Postural::Ptr taskPostural(
-//                    new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
-//        OpenSoT::tasks::velocity::Cartesian::Ptr taskCartesianWaist(
-//                new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",
-//                                                        conversion_utils_YARP::toEigen(q),robot, "Waist", "world"));
-
-//        OpenSoT::constraints::velocity::ConvexHull::Ptr constraintConvexHull(
-//                new OpenSoT::constraints::velocity::ConvexHull(
-//                        conversion_utils_YARP::toEigen(q), robot, 0.05));
-//        OpenSoT::constraints::velocity::CoMVelocity::Ptr constraintCoMVelocity(
-//                new OpenSoT::constraints::velocity::CoMVelocity(yarp::sig::Vector(3,0.03), 0.01, q, robot));
-
-//        taskCartesianWaist->getConstraints().push_back(constraintConvexHull);
-
-//        std::list<OpenSoT::tasks::Aggregated::TaskPtr> taskList;
-//        taskList.push_back(taskPostural);
-//        OpenSoT::Task<yarp::sig::Matrix, yarp::sig::Vector>::TaskPtr _task0(
-//                new OpenSoT::tasks::Aggregated(taskList, q.size()));
-//        _task0->getConstraints().push_back(constraintConvexHull);
-//        EXPECT_EQ(_task0->getConstraints().size(), 1)<<"1"<<std::endl;
-//        _task0->getConstraints().push_back(constraintCoMVelocity);
-//        EXPECT_EQ(_task0->getConstraints().size(), 2)<<"2"<<std::endl;
-//        taskList.clear();
-
-//        taskList.push_back(taskCartesianWaist);
-//        OpenSoT::tasks::Aggregated::Ptr _task1(
-//                new OpenSoT::tasks::Aggregated(taskList, q.size()));
-//        EXPECT_EQ(_task1->getConstraints().size(), 1)<<"3.1"<<std::endl;
-//        _task1->getConstraints().push_back(constraintCoMVelocity);
-//        EXPECT_EQ(_task1->getConstraints().size(), 2)<<"3.2"<<std::endl;
-
-//        _task0->update(q);
-//        EXPECT_EQ(_task0->getConstraints().size(), 2)<<"4"<<std::endl;
-//        _task1->update(q);
-//        EXPECT_EQ(_task1->getConstraints().size(), 2)<<"5"<<std::endl;
-//        ASSERT_EQ(_task1->getOwnConstraints().size(), 1);
-//        ASSERT_EQ(_task1->getAggregatedConstraints().size(), 1);
-
-//        yarp::sig::Matrix A0 = _task0->getA();
-//        yarp::sig::Vector b0 = _task0->getb();
-//        std::list<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr> constraints0 =
-//                _task0->getConstraints();
-//        ASSERT_EQ(constraints0.size(), 2);
-//        yarp::sig::Matrix Aineq0_ch = constraints0.front()->getAineq();
-//        yarp::sig::Vector lA0_ch = constraints0.front()->getbLowerBound();
-//        yarp::sig::Vector uA0_ch = constraints0.front()->getbUpperBound();
-//        yarp::sig::Matrix Aineq0_comvel = constraints0.back()->getAineq();
-//        yarp::sig::Vector lA0_comvel = constraints0.back()->getbLowerBound();
-//        yarp::sig::Vector uA0_comvel = constraints0.back()->getbUpperBound();
-
-//        yarp::sig::Matrix A1 = _task1->getA();
-//        yarp::sig::Vector b1 = _task1->getb();
-//        std::list<OpenSoT::Constraint<yarp::sig::Matrix, yarp::sig::Vector>::ConstraintPtr> constraints1 =
-//                _task1->getConstraints();
-//        yarp::sig::Matrix Aineq1_ch = constraints1.front()->getAineq();
-//        yarp::sig::Vector lA1_ch = constraints1.front()->getbLowerBound();
-//        yarp::sig::Vector uA1_ch = constraints1.front()->getbUpperBound();
-//        yarp::sig::Matrix Aineq1_comvel = constraints1.back()->getAineq();
-//        yarp::sig::Vector lA1_comvel = constraints1.back()->getbLowerBound();
-//        yarp::sig::Vector uA1_comvel = constraints1.back()->getbUpperBound();
-
-//        ASSERT_TRUE(tests_utils::matrixAreEqual(Aineq0_ch,
-//                                                Aineq1_ch)) << "@r " << r << ": "
-//                                                            << "Aineq0 and Aineq1 "
-//                                                            << "are not equal: "
-//                                                            << "Aineq0_ch:" << std::endl
-//                                                            << Aineq0_ch.toString() << std::endl
-//                                                            << "Aineq1_ch:" << std::endl
-//                                                            << Aineq1_ch.toString() << std::endl;
-
-//        EXPECT_TRUE(tests_utils::matrixAreEqual(Aineq0_comvel,
-//                                                Aineq1_comvel)) << "Aineq0_comvel and Aineq1_comvel "
-//                                                                << "are not equal";
-
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_ch,
-//                                                lA1_ch))    << "lA0_ch and lA1_ch "
-//                                                            << "are not equal";
-
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_ch,
-//                                                uA1_ch))    << "uA0_ch and uA1_ch "
-//                                                            << "are not equal";
-
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_comvel,
-//                                                lA1_comvel))    << "lA0_comvel and lA1_comvel "
-//                                                                << "are not equal";
-
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_comvel,
-//                                                uA1_comvel))    << "uA0_comvel and uA1_comvel "
-//                                                                << "are not equal";
-
-//        q = tests_utils::getRandomAngles(robot.iDyn3_model.getJointBoundMin(),
-//                                         robot.iDyn3_model.getJointBoundMax(),
-//                                         robot.iDyn3_model.getNrOfDOFs());
-//        robot.updateiDyn3Model(q, true);
-
-//        _task0->update(q);
-//        EXPECT_EQ(_task0->getConstraints().size(), 2)<<"6"<<std::endl;
-//        _task1->update(q);
-//        EXPECT_EQ(_task1->getConstraints().size(), 2)<<"7"<<std::endl;
-
-//        A0 = _task0->getA();
-//        b0 = _task0->getb();
-//        constraints0 = _task0->getConstraints();
-//        ASSERT_EQ(constraints0.size(), 2);
-//        Aineq0_ch = constraints0.front()->getAineq();
-//        lA0_ch = constraints0.front()->getbLowerBound();
-//        uA0_ch = constraints0.front()->getbUpperBound();
-//        Aineq0_comvel = constraints0.back()->getAineq();
-//        lA0_comvel = constraints0.back()->getbLowerBound();
-//        uA0_comvel = constraints0.back()->getbUpperBound();
-
-//        A1 = _task1->getA();
-//        b1 = _task1->getb();
-//        constraints1 = _task1->getConstraints();
-//        ASSERT_EQ(constraints1.size(), 2);
-//        Aineq1_ch = constraints1.front()->getAineq();
-//        lA1_ch = constraints1.front()->getbLowerBound();
-//        uA1_ch = constraints1.front()->getbUpperBound();
-//        Aineq1_comvel = constraints1.back()->getAineq();
-//        lA1_comvel = constraints1.back()->getbLowerBound();
-//        uA1_comvel = constraints1.back()->getbUpperBound();
+TEST_F(testAggregatedTask, testConstraintsUpdate)
+{
+    iDynUtils robot("coman",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
 
-//        ASSERT_TRUE(tests_utils::matrixAreEqual(Aineq0_ch,
-//                                                Aineq1_ch)) << "Aineq0 and Aineq1 "
-//                                                            << "are not equal: "
-//                                                            << "Aineq0_ch:" << std::endl
-//                                                            << Aineq0_ch.toString() << std::endl
-//                                                            << "Aineq1_ch:" << std::endl
-//                                                            << Aineq1_ch.toString() << std::endl;
+    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+            (XBot::ModelInterface::getModel(_path_to_cfg));
+    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&robot, &null_deleter));
 
-//        EXPECT_TRUE(tests_utils::matrixAreEqual(Aineq0_comvel,
-//                                                Aineq1_comvel)) << "Aineq0_comvel and Aineq1_comvel "
-//                                                                << "are not equal";
+    if(_model_ptr)
+        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_ch,
-//                                                lA1_ch))    << "lA0_ch and lA1_ch "
-//                                                            << "are not equal";
 
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_ch,
-//                                                uA1_ch))    << "uA0_ch and uA1_ch "
-//                                                            << "are not equal";
 
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_comvel,
-//                                                lA1_comvel))    << "lA0_comvel and lA1_comvel "
-//                                                                << "are not equal";
+    yarp::sig::Vector q(robot.iDynTree_model.getNrOfDOFs(), 0.0);
+    for(unsigned int r = 0; r < 1e3; ++r)
+    {
+        q = conversion_utils_YARP::toYARP(
+                tests_utils::getRandomAngles(
+                conversion_utils_YARP::toEigen(robot.iDynTree_model.getJointBoundMin()),
+                conversion_utils_YARP::toEigen(robot.iDynTree_model.getJointBoundMax()),
+                                         robot.iDynTree_model.getNrOfDOFs()));
+        robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
 
-//        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_comvel,
-//                                                uA1_comvel))    << "uA0_comvel and uA1_comvel "
-//                                                                << "are not equal";
-//    }
-//}
+        OpenSoT::tasks::velocity::Postural::Ptr taskPostural(
+                    new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
+        OpenSoT::tasks::velocity::Cartesian::Ptr taskCartesianWaist(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",
+                                                        conversion_utils_YARP::toEigen(q),*(_model_ptr.get()), "Waist", "world"));
+
+        std::list<std::string> _links_in_contact;
+        _links_in_contact.push_back("l_foot_lower_left_link");
+        _links_in_contact.push_back("l_foot_lower_right_link");
+        _links_in_contact.push_back("l_foot_upper_left_link");
+        _links_in_contact.push_back("l_foot_upper_right_link");
+        _links_in_contact.push_back("r_foot_lower_left_link");
+        _links_in_contact.push_back("r_foot_lower_right_link");
+        _links_in_contact.push_back("r_foot_upper_left_link");
+        _links_in_contact.push_back("r_foot_upper_right_link");
+
+        OpenSoT::constraints::velocity::ConvexHull::Ptr constraintConvexHull(
+                new OpenSoT::constraints::velocity::ConvexHull(
+                        conversion_utils_YARP::toEigen(q), *(_model_ptr.get()),
+                        _links_in_contact, 0.05));
+        OpenSoT::constraints::velocity::CoMVelocity::Ptr constraintCoMVelocity(
+                new OpenSoT::constraints::velocity::CoMVelocity(
+                        conversion_utils_YARP::toEigen(yarp::sig::Vector(3,0.03)), 0.01,
+                        conversion_utils_YARP::toEigen(q), *(_model_ptr.get())));
+
+        taskCartesianWaist->getConstraints().push_back(constraintConvexHull);
+
+        std::list<OpenSoT::tasks::Aggregated::TaskPtr> taskList;
+        taskList.push_back(taskPostural);
+        OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _task0(
+                new OpenSoT::tasks::Aggregated(taskList, q.size()));
+        _task0->getConstraints().push_back(constraintConvexHull);
+        EXPECT_EQ(_task0->getConstraints().size(), 1)<<"1"<<std::endl;
+        _task0->getConstraints().push_back(constraintCoMVelocity);
+        EXPECT_EQ(_task0->getConstraints().size(), 2)<<"2"<<std::endl;
+        taskList.clear();
+
+        taskList.push_back(taskCartesianWaist);
+        OpenSoT::tasks::Aggregated::Ptr _task1(
+                new OpenSoT::tasks::Aggregated(taskList, q.size()));
+        EXPECT_EQ(_task1->getConstraints().size(), 1)<<"3.1"<<std::endl;
+        _task1->getConstraints().push_back(constraintCoMVelocity);
+        EXPECT_EQ(_task1->getConstraints().size(), 2)<<"3.2"<<std::endl;
+
+        _task0->update(conversion_utils_YARP::toEigen(q));
+        EXPECT_EQ(_task0->getConstraints().size(), 2)<<"4"<<std::endl;
+        _task1->update(conversion_utils_YARP::toEigen(q));
+        EXPECT_EQ(_task1->getConstraints().size(), 2)<<"5"<<std::endl;
+        ASSERT_EQ(_task1->getOwnConstraints().size(), 1);
+        ASSERT_EQ(_task1->getAggregatedConstraints().size(), 1);
+
+        Eigen::MatrixXd A0 = _task0->getA();
+        Eigen::VectorXd b0 = _task0->getb();
+        std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraints0 =
+                _task0->getConstraints();
+        ASSERT_EQ(constraints0.size(), 2);
+        Eigen::MatrixXd Aineq0_ch = constraints0.front()->getAineq();
+        Eigen::VectorXd lA0_ch = constraints0.front()->getbLowerBound();
+        Eigen::VectorXd uA0_ch = constraints0.front()->getbUpperBound();
+        Eigen::MatrixXd Aineq0_comvel = constraints0.back()->getAineq();
+        Eigen::VectorXd lA0_comvel = constraints0.back()->getbLowerBound();
+        Eigen::VectorXd uA0_comvel = constraints0.back()->getbUpperBound();
+
+        Eigen::MatrixXd A1 = _task1->getA();
+        Eigen::VectorXd b1 = _task1->getb();
+        std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraints1 =
+                _task1->getConstraints();
+        Eigen::MatrixXd Aineq1_ch = constraints1.front()->getAineq();
+        Eigen::VectorXd lA1_ch = constraints1.front()->getbLowerBound();
+        Eigen::VectorXd uA1_ch = constraints1.front()->getbUpperBound();
+        Eigen::MatrixXd Aineq1_comvel = constraints1.back()->getAineq();
+        Eigen::VectorXd lA1_comvel = constraints1.back()->getbLowerBound();
+        Eigen::VectorXd uA1_comvel = constraints1.back()->getbUpperBound();
+
+        ASSERT_TRUE(tests_utils::matrixAreEqual(Aineq0_ch,
+                                                Aineq1_ch)) << "@r " << r << ": "
+                                                            << "Aineq0 and Aineq1 "
+                                                            << "are not equal: "
+                                                            << "Aineq0_ch:" << std::endl
+                                                            << Aineq0_ch << std::endl
+                                                            << "Aineq1_ch:" << std::endl
+                                                            << Aineq1_ch << std::endl;
+
+        EXPECT_TRUE(tests_utils::matrixAreEqual(Aineq0_comvel,
+                                                Aineq1_comvel)) << "Aineq0_comvel and Aineq1_comvel "
+                                                                << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_ch,
+                                                lA1_ch))    << "lA0_ch and lA1_ch "
+                                                            << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_ch,
+                                                uA1_ch))    << "uA0_ch and uA1_ch "
+                                                            << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_comvel,
+                                                lA1_comvel))    << "lA0_comvel and lA1_comvel "
+                                                                << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_comvel,
+                                                uA1_comvel))    << "uA0_comvel and uA1_comvel "
+                                                                << "are not equal";
+
+        q = conversion_utils_YARP::toYARP(tests_utils::getRandomAngles(
+                conversion_utils_YARP::toEigen(robot.iDynTree_model.getJointBoundMin()),
+                conversion_utils_YARP::toEigen(robot.iDynTree_model.getJointBoundMax()),
+                                         robot.iDynTree_model.getNrOfDOFs()));
+        robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+
+        _task0->update(conversion_utils_YARP::toEigen(q));
+        EXPECT_EQ(_task0->getConstraints().size(), 2)<<"6"<<std::endl;
+        _task1->update(conversion_utils_YARP::toEigen(q));
+        EXPECT_EQ(_task1->getConstraints().size(), 2)<<"7"<<std::endl;
+
+        A0 = _task0->getA();
+        b0 = _task0->getb();
+        constraints0 = _task0->getConstraints();
+        ASSERT_EQ(constraints0.size(), 2);
+        Aineq0_ch = constraints0.front()->getAineq();
+        lA0_ch = constraints0.front()->getbLowerBound();
+        uA0_ch = constraints0.front()->getbUpperBound();
+        Aineq0_comvel = constraints0.back()->getAineq();
+        lA0_comvel = constraints0.back()->getbLowerBound();
+        uA0_comvel = constraints0.back()->getbUpperBound();
+
+        A1 = _task1->getA();
+        b1 = _task1->getb();
+        constraints1 = _task1->getConstraints();
+        ASSERT_EQ(constraints1.size(), 2);
+        Aineq1_ch = constraints1.front()->getAineq();
+        lA1_ch = constraints1.front()->getbLowerBound();
+        uA1_ch = constraints1.front()->getbUpperBound();
+        Aineq1_comvel = constraints1.back()->getAineq();
+        lA1_comvel = constraints1.back()->getbLowerBound();
+        uA1_comvel = constraints1.back()->getbUpperBound();
+
+
+        ASSERT_TRUE(tests_utils::matrixAreEqual(Aineq0_ch,
+                                                Aineq1_ch)) << "Aineq0 and Aineq1 "
+                                                            << "are not equal: "
+                                                            << "Aineq0_ch:" << std::endl
+                                                            << Aineq0_ch << std::endl
+                                                            << "Aineq1_ch:" << std::endl
+                                                            << Aineq1_ch << std::endl;
+
+        EXPECT_TRUE(tests_utils::matrixAreEqual(Aineq0_comvel,
+                                                Aineq1_comvel)) << "Aineq0_comvel and Aineq1_comvel "
+                                                                << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_ch,
+                                                lA1_ch))    << "lA0_ch and lA1_ch "
+                                                            << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_ch,
+                                                uA1_ch))    << "uA0_ch and uA1_ch "
+                                                            << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(lA0_comvel,
+                                                lA1_comvel))    << "lA0_comvel and lA1_comvel "
+                                                                << "are not equal";
+
+        EXPECT_TRUE(tests_utils::vectorAreEqual(uA0_comvel,
+                                                uA1_comvel))    << "uA0_comvel and uA1_comvel "
+                                                                << "are not equal";
+    }
+}
 
 }
 
