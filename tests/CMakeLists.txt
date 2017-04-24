@@ -56,7 +56,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       COMMAND ${CMAKE_CTEST_COMMAND}
                       MAIN_DEPENDENCY OpenSoT
                       DEPENDS
-#                      testAggregatedConstraint
+                      testAggregatedConstraint
                       testBilateralConstraint
 #                      testCartesianPositionVelocityConstraint
                       testCollisionAvoidanceVelocityConstraint
@@ -111,9 +111,9 @@ if(YARP_FOUND)
                 ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
                 ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES} ${test_utils_LIBRARIES})
 
-#    ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
-#    TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
-#    add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
+    TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
+    add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
 
     ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
     TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
@@ -286,7 +286,7 @@ if(YARP_FOUND)
 #    endif()
 
 
-#    add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
+    add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
     add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 #    add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
