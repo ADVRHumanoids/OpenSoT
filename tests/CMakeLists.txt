@@ -68,7 +68,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOasesSolver
 #                      testQPOases_AutoStack
 #                      testQPOases_CartesianPositionConstraint
-#                      testQPOases_ConvexHull
+                      testQPOases_ConvexHull
 #                      testQPOases_FF
 #                      testQPOases_GlobalConstraints
 #                      testQPOases_Options
@@ -106,11 +106,10 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 # gTests for Velocity constraints
 if(YARP_FOUND)
     SET(TestLibs OpenSoT
-                 #OpenSoT_YTasks
-                ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES}
-                   ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                   ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
-                   ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES} ${test_utils_LIBRARIES})
+                ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${qpOASES_LIBRARIES}
+                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
+                ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
+                ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES} ${test_utils_LIBRARIES})
 
 #    ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
 #    TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
@@ -160,9 +159,9 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
 #    add_dependencies(testQPOases_CartesianPositionConstraint GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
-#    add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
+    add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
@@ -299,7 +298,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 #    add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 #    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
-#    add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
+    add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 #    add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 #    add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
 #    add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
