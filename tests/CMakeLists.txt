@@ -28,6 +28,7 @@ endif()
 option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
 
 find_package(test_utils)
+find_package(trajectory_utils)
 
 # compite GTest
 find_package(GTest)
@@ -43,7 +44,7 @@ endif()
 
 find_package(ModelInterfaceIDYNUTILS REQUIRED)
 
-include_directories(${GTEST_INCLUDE_DIRS} ${ModelInterfaceIDYNUTILS_INCLUDE_DIRS})
+include_directories(${GTEST_INCLUDE_DIRS} ${ModelInterfaceIDYNUTILS_INCLUDE_DIRS} ${trajectory_utils_INCLUDE_DIRS})
 link_directories(${GTEST_LIB_DIRS})
 
 # add local include
@@ -77,6 +78,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOases_Sparse
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
+		      testQPOases_StaticWalk
                       testAggregatedTask
                       testCartesianVelocityTask
 #                      testCoMForceTask
@@ -108,7 +110,7 @@ if(YARP_FOUND)
     SET(TestLibs OpenSoT
                 ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${qpOASES_LIBRARIES}
                 ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
+                ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES} ${trajectory_utils_LIBRARIES}
                 ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES} ${test_utils_LIBRARIES})
 
     ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
@@ -194,6 +196,10 @@ if(YARP_FOUND)
 #    ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
 #    add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
+
+    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
+    add_dependencies(testQPOases_StaticWalk GTest-ext OpenSoT)
 
     ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
     TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
@@ -308,6 +314,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
 #    add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 #    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
+    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
     add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
     add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
