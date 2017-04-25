@@ -4,6 +4,7 @@
 #include <trajectory_utils/trajectory_utils.h>
 #include <gtest/gtest.h>
 #include <trajectory_utils/utils/ros_trj_publisher.h>
+#include <tf/transform_broadcaster.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
@@ -167,10 +168,21 @@ namespace{
 
     class testStaticWalk: public ::testing::Test{
     public:
-        testStaticWalk(){
+        testStaticWalk():
+            _robot("coman",
+                   std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
+                   std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
+            _q(_robot.iDynTree_model.getNrOfDOFs())
+        {
+            _q.setZero(_robot.iDynTree_model.getNrOfDOFs());
+            _robot.updateiDynTreeModel(_q,true);
+
             int argc = 0;
             char* argv[] = {};
             ros::init(argc, argv, "testStaticWalk_node");
+
+            _n.reset(new ros::NodeHandle());
+            world_broadcaster.reset(new tf::TransformBroadcaster());
         }
 
         ~testStaticWalk(){}
@@ -201,7 +213,7 @@ namespace{
                 new trajectory_utils::trajectory_publisher("r_sole_trj"));
             r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world");
 
-
+            joint_state_pub = _n->advertise<sensor_msgs::JointState>("joint_states", 1000);
         }
 
         void publishCoMAndFeet(const KDL::Frame& com,
@@ -252,11 +264,50 @@ namespace{
 
             Eigen::Affine3d text_pose; text_pose.Identity();
             text_pose(1,3) = -0.4;
-            std::string text = "Anchor: "+anchor;
+            std::string text = "Anchor: "+anchor+"\n";
+            text += "Robot Anchor: "+ _robot.getAnchorName()+"\n";
+            std::string floating_base;
+            _robot.iDynTree_model.getLinkName(_robot.iDynTree_model.getFloatingBaseLink(),
+                                              floating_base);
+            text += "Robot Floating Base: "+ floating_base+"\n";
             visual_tools->publishText(text_pose,text);
         }
 
 
+        void publishRobotState()
+        {
+            sensor_msgs::JointState joint_msg;
+            joint_msg.name = _robot.getJointNames();
+
+
+            for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
+                joint_msg.position.push_back(0.0);
+
+            for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
+            {
+                int id = _robot.iDynTree_model.getDOFIndex(joint_msg.name[i]);
+                joint_msg.position[id] = _q[i];
+            }
+
+            joint_msg.header.stamp = ros::Time::now();
+
+
+            tf::Transform anchor_T_world;
+            KDL::Frame anchor_T_world_KDL = _robot.getAnchor_T_World();
+            anchor_T_world.setOrigin(tf::Vector3(anchor_T_world_KDL.p.x(),
+                anchor_T_world_KDL.p.y(), anchor_T_world_KDL.p.z()));
+            double x,y,z,w;
+            anchor_T_world_KDL.M.GetQuaternion(x,y,z,w);
+            anchor_T_world.setRotation(tf::Quaternion(x,y,z,w));
+
+            world_broadcaster->sendTransform(tf::StampedTransform(
+                anchor_T_world, joint_msg.header.stamp,
+                _robot.getAnchorName(), "world"));
+
+
+            joint_state_pub.publish(joint_msg);
+
+        }
 
 
         boost::shared_ptr<walking_pattern_generator> walk_trj;
@@ -264,19 +315,30 @@ namespace{
         boost::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
         boost::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
 
+        ros::Publisher joint_state_pub;
+        boost::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
+
         rviz_visual_tools::RvizVisualToolsPtr visual_tools;
+
+        idynutils2 _robot;
+        Eigen::VectorXd _q;
+
+        boost::shared_ptr<ros::NodeHandle> _n;
 
     };
 
     TEST_F(testStaticWalk, testStaticWalk)
     {
         //We assume the world between the feet
-        KDL::Frame com_init; com_init.Identity();
-        com_init.p.z(.5);
-        KDL::Frame l_foot_init; l_foot_init.Identity();
-        l_foot_init.p.y(.15);
-        KDL::Frame r_foot_init; r_foot_init.Identity();
-        r_foot_init.p.y(-.15);
+
+        KDL::Vector com_vector = this->_robot.iDynTree_model.getCOMKDL();
+        KDL::Frame com_init; com_init.p = com_vector;
+        KDL::Frame l_foot_init = this->_robot.iDynTree_model.
+                getPositionKDL(
+                    this->_robot.iDynTree_model.getLinkIndex("l_sole"));
+        KDL::Frame r_foot_init = this->_robot.iDynTree_model.
+                getPositionKDL(
+                    this->_robot.iDynTree_model.getLinkIndex("r_sole"));
 
         this->initTrj(com_init, l_foot_init, r_foot_init);
         this->initTrjPublisher();
@@ -294,6 +356,7 @@ namespace{
                                     this->walk_trj->l_sole_trj.Pos(t),
                                     this->walk_trj->r_sole_trj.Pos(t),
                                     this->walk_trj->getAnchor(t));
+            this->publishRobotState();
 
             ros::spinOnce();
 
