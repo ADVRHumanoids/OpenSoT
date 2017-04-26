@@ -325,12 +325,36 @@ namespace{
 
         boost::shared_ptr<ros::NodeHandle> _n;
 
+        void setGoodInitialPosition() {
+            _q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+            _q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+            _q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("LShYaw")] = -15.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+
+            _q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("RShYaw")] = 15.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+
+        }
+
     };
+
 
     TEST_F(testStaticWalk, testStaticWalk)
     {
-        //We assume the world between the feet
+        this->setGoodInitialPosition();
+        this->_robot.updateiDynTreeModel(this->_q, true);
 
+        //We assume the world between the feet
         KDL::Vector com_vector = this->_robot.iDynTree_model.getCOMKDL();
         KDL::Frame com_init; com_init.p = com_vector;
         KDL::Frame l_foot_init = this->_robot.iDynTree_model.
@@ -349,8 +373,6 @@ namespace{
             this->com_trj_pub->publish();
             this->l_sole_trj_pub->publish();
             this->r_sole_trj_pub->publish();
-
-
 
             this->publishCoMAndFeet(this->walk_trj->com_trj.Pos(t),
                                     this->walk_trj->l_sole_trj.Pos(t),
