@@ -237,8 +237,11 @@ namespace{
 
         theWalkingStack(XBot::ModelInterface& _model,
                         const Eigen::VectorXd& q):
-            model_ref(_model)
+            model_ref(_model),
+            I(q.size(), q.size())
         {
+            I.setIdentity(q.size(), q.size());
+
             l_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_wrist", q,
                 model_ref, "l_wrist","DWYTorso"));
             r_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_wrist", q,
@@ -268,7 +271,7 @@ namespace{
             model_ref.getJointLimits(qmin, qmax);
             joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
 
-            vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2*M_PI, 0.01, q.size()));
+            vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2.*M_PI, 0.01, q.size()));
 
             auto_stack = (l_sole + r_sole)/
                     (gaze + com)/
@@ -278,12 +281,22 @@ namespace{
             auto_stack->update(q);
 
             solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
-                        auto_stack->getBounds(), 1e11));
+                        auto_stack->getBounds(), 1e10));
 
+        }
+
+        void setInertiaPostureTask()
+        {
+            Eigen::MatrixXd M;
+            model_ref.getInertiaMatrix(M);
+
+            postural->setWeight(M+I);
+            postural->setLambda(0.);
         }
 
         void update(const Eigen::VectorXd& q)
         {
+            setInertiaPostureTask();
             auto_stack->update(q);
         }
 
@@ -307,6 +320,8 @@ namespace{
         XBot::ModelInterface& model_ref;
 
         OpenSoT::solvers::QPOases_sot::Ptr solver;
+
+        Eigen::MatrixXd I;
 
     };
 
@@ -573,7 +588,7 @@ namespace{
             ws.l_sole->setReference(l_sole_d);
             ws.r_sole->setReference(r_sole_d);
 
-            ws.auto_stack->update(this->_q);
+            ws.update(this->_q);
 
             uint tic = ros::Time::now().nsec;
 
@@ -581,7 +596,18 @@ namespace{
                 dq.setZero(dq.size());
             this->_q += dq;
 
+
             uint toc = ros::Time::now().nsec;
+
+            this->_robot.updateiDynTreeModel(this->_q, true);
+
+            KDL::Frame tmp; tmp.p = _robot.iDynTree_model.getCOMKDL();
+            tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+            tests_utils::KDLFramesAreEqual(l_sole_d, _robot.iDynTree_model.getPositionKDL(
+                _robot.iDynTree_model.getLinkIndex("l_sole")),1e-3);
+            tests_utils::KDLFramesAreEqual(r_sole_d, _robot.iDynTree_model.getPositionKDL(
+                _robot.iDynTree_model.getLinkIndex("r_sole")),1e-3);
+
 
             loop_time.push_back((toc-tic)/1e6);
 
@@ -624,7 +650,7 @@ namespace{
             ws.com->setReference(com_d.p);
             ws.r_wrist->setReference(r_wrist_d);
 
-            ws.auto_stack->update(this->_q);
+            ws.update(this->_q);
 
             uint tic = ros::Time::now().nsec;
 
@@ -633,6 +659,16 @@ namespace{
             this->_q += dq;
 
             uint toc = ros::Time::now().nsec;
+
+            this->_robot.updateiDynTreeModel(this->_q, true);
+
+            KDL::Frame tmp; tmp.p = _robot.iDynTree_model.getCOMKDL();
+            tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+            tests_utils::KDLFramesAreEqual(r_wrist_d, this->_robot.iDynTree_model.
+                                           getPositionKDL(
+                                               this->_robot.iDynTree_model.getLinkIndex("DWYTorso"),
+                                               this->_robot.iDynTree_model.getLinkIndex("r_wrist")),1e-3);
+
 
             loop_time.push_back((toc-tic)/1e6);
 
@@ -673,7 +709,6 @@ namespace{
 
 
     t = 0.;
-    dq(this->_q.size());
     for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
     {
         KDL::Frame com_d = this->walk_trj->com_trj.Pos(t);
@@ -688,7 +723,7 @@ namespace{
         ws.l_sole->setReference(l_sole_d);
         ws.r_sole->setReference(r_sole_d);
 
-        ws.auto_stack->update(this->_q);
+        ws.update(this->_q);
 
         uint tic = ros::Time::now().nsec;
 
@@ -697,6 +732,16 @@ namespace{
         this->_q += dq;
 
         uint toc = ros::Time::now().nsec;
+
+        this->_robot.updateiDynTreeModel(this->_q, true);
+
+        KDL::Frame tmp; tmp.p = _robot.iDynTree_model.getCOMKDL();
+        tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+        tests_utils::KDLFramesAreEqual(l_sole_d, _robot.iDynTree_model.getPositionKDL(
+            _robot.iDynTree_model.getLinkIndex("l_sole")),1e-3);
+        tests_utils::KDLFramesAreEqual(r_sole_d, _robot.iDynTree_model.getPositionKDL(
+            _robot.iDynTree_model.getLinkIndex("r_sole")),1e-3);
+
 
         loop_time.push_back((toc-tic)/1e6);
 
