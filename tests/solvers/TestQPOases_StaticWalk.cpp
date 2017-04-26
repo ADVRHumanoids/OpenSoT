@@ -19,6 +19,55 @@ std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/confi
 std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace{
+    class manipulation_trajectories{
+    public:
+        manipulation_trajectories(const KDL::Frame& com_init,
+                                  const KDL::Frame& r_wrist_init):
+            com_trj(0.01, "world", "com"),
+            r_wrist_trj(0.01, "DWYTorso", "r_wrist")
+        {
+            T_trj = 1.;
+            double h_com = 0.1;
+            double arm_forward = 0.1;
+
+
+            KDL::Frame com_wp = com_init;
+            KDL::Frame r_wrist_wp = r_wrist_init;
+
+            std::vector<KDL::Frame> com_waypoints;
+            std::vector<KDL::Frame> r_wrist_waypoints;
+            //1. CoM goes down a little
+            com_waypoints.push_back(com_wp);
+            com_wp.p.z(com_wp.p.z()-h_com);
+            com_waypoints.push_back(com_wp);
+
+            r_wrist_waypoints.push_back(r_wrist_wp);
+            r_wrist_waypoints.push_back(r_wrist_wp);
+            //2. right arm move forward
+            com_waypoints.push_back(com_wp);
+
+            r_wrist_wp.p.x(r_wrist_wp.p.x()+arm_forward);
+            r_wrist_waypoints.push_back(r_wrist_wp);
+            //3. right arm move backward
+            com_waypoints.push_back(com_wp);
+
+            r_wrist_wp.p.x(r_wrist_wp.p.x()-arm_forward);
+            r_wrist_waypoints.push_back(r_wrist_wp);
+            //4. com goes back
+            com_wp.p.z(com_wp.p.z()+h_com);
+            com_waypoints.push_back(com_wp);
+            r_wrist_waypoints.push_back(r_wrist_wp);
+
+            com_trj.addMinJerkTrj(com_waypoints, T_trj);
+            r_wrist_trj.addMinJerkTrj(r_wrist_waypoints, T_trj);
+        }
+
+        trajectory_utils::trajectory_generator com_trj;
+        trajectory_utils::trajectory_generator r_wrist_trj;
+        double T_trj;
+    };
+
+
     /**
      * @brief The walking_pattern_generator class generate Cartesian trajectories
      * for COM, left/right feet for a "static walk" (the CoM is always inside the
@@ -191,9 +240,9 @@ namespace{
             model_ref(_model)
         {
             l_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_wrist", q,
-                model_ref, "l_wrist","Waist"));
+                model_ref, "l_wrist","DWYTorso"));
             r_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_wrist", q,
-                model_ref, "r_wrist","Waist"));
+                model_ref, "r_wrist","DWYTorso"));
             l_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_sole", q,
                 model_ref, "l_sole","world"));
             r_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_sole", q,
@@ -204,13 +253,13 @@ namespace{
 //            com->setWeight(Wcom);
             gaze.reset(new OpenSoT::tasks::velocity::Gaze("Cartesian::Gaze",q,
                             model_ref, "world"));
-//            std::vector<bool> ajm = gaze->getActiveJointsMask();
-//            for(unsigned int i = 0; i < ajm.size(); ++i)
-//                ajm[i] = false;
-//            ajm[model_ref.getDofIndex("WaistYaw")] = true;
-//            ajm[model_ref.getDofIndex("WaistSag")] = true;
-//            ajm[model_ref.getDofIndex("WaistLat")] = true;
-//            gaze->setActiveJointsMask(ajm);
+            std::vector<bool> ajm = gaze->getActiveJointsMask();
+            for(unsigned int i = 0; i < ajm.size(); ++i)
+                ajm[i] = false;
+            ajm[model_ref.getDofIndex("WaistYaw")] = true;
+            ajm[model_ref.getDofIndex("WaistSag")] = true;
+            ajm[model_ref.getDofIndex("WaistLat")] = true;
+            gaze->setActiveJointsMask(ajm);
 
 
             postural.reset(new OpenSoT::tasks::velocity::Postural(q));
@@ -305,10 +354,14 @@ namespace{
                                                          r_sole_init));
         }
 
+        void initManipTrj(const KDL::Frame& com_init,
+                const KDL::Frame& r_wrist_init)
+        {
+            manip_trj.reset(new manipulation_trajectories(com_init,r_wrist_init));
+        }
+
         void initTrjPublisher()
         {
-            visual_tools.reset(new rviz_visual_tools::RvizVisualTools("world", "/com_feet_visual_marker"));
-
             com_trj_pub.reset(
                 new trajectory_utils::trajectory_publisher("com_trj"));
             com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world");
@@ -321,7 +374,26 @@ namespace{
                 new trajectory_utils::trajectory_publisher("r_sole_trj"));
             r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world");
 
+            visual_tools.reset(new rviz_visual_tools::RvizVisualTools("world", "/com_feet_visual_marker"));
+
+
             joint_state_pub = _n->advertise<sensor_msgs::JointState>("joint_states", 1000);
+        }
+
+        void initManipTrjPublisher()
+        {
+            visual_tools->deleteAllMarkers();
+
+
+            com_trj_pub->deleteAllMarkers();
+            com_trj_pub->setTrj(manip_trj->com_trj.getTrajectory(), "world");
+
+            l_sole_trj_pub->deleteAllMarkers();
+            r_sole_trj_pub->deleteAllMarkers();
+
+            r_wrist_trj_pub.reset(
+                        new trajectory_utils::trajectory_publisher("r_wrist_trj"));
+            r_wrist_trj_pub->setTrj(manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso");
         }
 
         void publishCoMAndFeet(const KDL::Frame& com,
@@ -418,10 +490,12 @@ namespace{
         }
 
 
+        boost::shared_ptr<manipulation_trajectories> manip_trj;
         boost::shared_ptr<walking_pattern_generator> walk_trj;
         boost::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
         boost::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
         boost::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
+        boost::shared_ptr<trajectory_utils::trajectory_publisher> r_wrist_trj_pub;
 
         ros::Publisher joint_state_pub;
         boost::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
@@ -464,6 +538,8 @@ namespace{
         this->_robot.updateiDynTreeModel(this->_q, true);
         this->_robot.switchAnchorAndFloatingBase("l_sole");
 
+
+    //1. WALKING
         //We assume the world between the feet
         KDL::Vector com_vector = this->_robot.iDynTree_model.getCOMKDL();
         KDL::Frame com_init; com_init.p = com_vector;
@@ -523,10 +599,65 @@ namespace{
             usleep(10000);
         }
 
+
+    //2 MANIPULATION
+        com_vector = this->_robot.iDynTree_model.getCOMKDL();
+        com_init.p = com_vector;
+        KDL::Frame r_wrist_init = this->_robot.iDynTree_model.
+                getPositionKDL(
+                    this->_robot.iDynTree_model.getLinkIndex("DWYTorso"),
+                    this->_robot.iDynTree_model.getLinkIndex("r_wrist"));
+
+        this->initManipTrj(com_init,  r_wrist_init);
+        this->initManipTrjPublisher();
+
+
+        t = 0.0;
+        for(unsigned int i = 0; i < int(this->manip_trj->com_trj.Duration()) * 100; ++i)
+        {
+
+
+            KDL::Frame com_d = this->manip_trj->com_trj.Pos(t);
+            KDL::Frame r_wrist_d = this->manip_trj->r_wrist_trj.Pos(t);
+
+            this->_robot.updateiDynTreeModel(this->_q, true);
+
+            ws.com->setReference(com_d.p);
+            ws.r_wrist->setReference(r_wrist_d);
+
+            ws.auto_stack->update(this->_q);
+
+            uint tic = ros::Time::now().nsec;
+
+            if(!ws.solve(dq))
+                dq.setZero(dq.size());
+            this->_q += dq;
+
+            uint toc = ros::Time::now().nsec;
+
+            loop_time.push_back((toc-tic)/1e6);
+
+            this->com_trj_pub->publish();
+            this->r_wrist_trj_pub->publish();
+
+            this->publishRobotState();
+
+            ros::spinOnce();
+
+
+            t+=0.01;
+            usleep(10000);
+        }
+
+
+
+
+
+
         double acc = 0.;
         for(unsigned int i = 0; i < loop_time.size(); ++i)
             acc += loop_time[i];
-        std::cout<<"Medium time per loop: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
+        std::cout<<"Medium time per solve: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
     }
 }
 
