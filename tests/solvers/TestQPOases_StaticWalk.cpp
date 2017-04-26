@@ -5,6 +5,14 @@
 #include <gtest/gtest.h>
 #include <trajectory_utils/utils/ros_trj_publisher.h>
 #include <tf/transform_broadcaster.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/SubTask.h>
+#include <OpenSoT/tasks/velocity/Gaze.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
@@ -22,12 +30,12 @@ namespace{
         walking_pattern_generator(const KDL::Frame& com_init,
                                   const KDL::Frame& l_sole_init,
                                   const KDL::Frame& r_sole_init):
-            com_trj(0.001, "world", "com"),
-            l_sole_trj(0.001, "world", "l_sole"),
-            r_sole_trj(0.001, "world", "r_sole")
+            com_trj(0.01, "world", "com"),
+            l_sole_trj(0.01, "world", "l_sole"),
+            r_sole_trj(0.01, "world", "r_sole")
         {
-            T_com = 4.;
-            T_foot = 2.;
+            T_com = 3.;
+            T_foot = 1.;
 
             step_lenght = 0.1;
 
@@ -164,6 +172,93 @@ namespace{
         trajectory_utils::trajectory_generator com_trj;
         trajectory_utils::trajectory_generator l_sole_trj;
         trajectory_utils::trajectory_generator r_sole_trj;
+    };
+
+    class theWalkingStack
+    {
+    public:
+        void printAb(OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>& task)
+        {
+            std::cout<<"Task: "<<task.getTaskID()<<std::endl;
+            std::cout<<"A: "<<task.getA()<<std::endl;
+            std::cout<<"size of A: "<<task.getA().rows()<<"x"<<task.getA().cols()<<std::endl;
+            std::cout<<"b: "<<task.getb()<<std::endl;
+            std::cout<<std::endl;
+        }
+
+        theWalkingStack(XBot::ModelInterface& _model,
+                        const Eigen::VectorXd& q):
+            model_ref(_model)
+        {
+            l_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_wrist", q,
+                model_ref, "l_wrist","Waist"));
+            r_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_wrist", q,
+                model_ref, "r_wrist","Waist"));
+            l_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_sole", q,
+                model_ref, "l_sole","world"));
+            r_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_sole", q,
+                model_ref, "r_sole","world"));
+            com.reset(new OpenSoT::tasks::velocity::CoM(q, model_ref));
+//            Eigen::MatrixXd Wcom(3,3); Wcom.setZero(3,3);
+//            Wcom(0,0) = 0.5; Wcom(1,1) = 0.5;
+//            com->setWeight(Wcom);
+            gaze.reset(new OpenSoT::tasks::velocity::Gaze("Cartesian::Gaze",q,
+                            model_ref, "world"));
+//            std::vector<bool> ajm = gaze->getActiveJointsMask();
+//            for(unsigned int i = 0; i < ajm.size(); ++i)
+//                ajm[i] = false;
+//            ajm[model_ref.getDofIndex("WaistYaw")] = true;
+//            ajm[model_ref.getDofIndex("WaistSag")] = true;
+//            ajm[model_ref.getDofIndex("WaistLat")] = true;
+//            gaze->setActiveJointsMask(ajm);
+
+
+            postural.reset(new OpenSoT::tasks::velocity::Postural(q));
+
+            Eigen::VectorXd qmin, qmax;
+            model_ref.getJointLimits(qmin, qmax);
+            joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
+
+            vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2*M_PI, 0.01, q.size()));
+
+            auto_stack = (l_sole + r_sole)/
+                    (gaze + com)/
+                    (l_wrist + r_wrist)/
+                    (postural)<<joint_limits<<vel_limits;
+
+            auto_stack->update(q);
+
+            solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+                        auto_stack->getBounds(), 1e11));
+
+        }
+
+        void update(const Eigen::VectorXd& q)
+        {
+            auto_stack->update(q);
+        }
+
+        bool solve(Eigen::VectorXd& dq)
+        {
+            return solver->solve(dq);
+        }
+
+        OpenSoT::tasks::velocity::Cartesian::Ptr l_wrist;
+        OpenSoT::tasks::velocity::Cartesian::Ptr r_wrist;
+        OpenSoT::tasks::velocity::Cartesian::Ptr l_sole;
+        OpenSoT::tasks::velocity::Cartesian::Ptr r_sole;
+        OpenSoT::tasks::velocity::CoM::Ptr    com;
+        OpenSoT::tasks::velocity::Gaze::Ptr gaze;
+        OpenSoT::tasks::velocity::Postural::Ptr postural;
+        OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
+        OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
+
+        OpenSoT::AutoStack::Ptr auto_stack;
+
+        XBot::ModelInterface& model_ref;
+
+        OpenSoT::solvers::QPOases_sot::Ptr solver;
+
     };
 
     class testStaticWalk: public ::testing::Test{
@@ -349,12 +444,12 @@ namespace{
             _q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
             _q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 20.0*M_PI/180.0;
             _q[_robot.iDynTree_model.getDOFIndex("LShYaw")] = -15.0*M_PI/180.0;
             _q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
 
             _q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
+            _q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -20.0*M_PI/180.0;
             _q[_robot.iDynTree_model.getDOFIndex("RShYaw")] = 15.0*M_PI/180.0;
             _q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
 
@@ -367,6 +462,7 @@ namespace{
     {
         this->setGoodInitialPosition();
         this->_robot.updateiDynTreeModel(this->_q, true);
+        this->_robot.switchAnchorAndFloatingBase("l_sole");
 
         //We assume the world between the feet
         KDL::Vector com_vector = this->_robot.iDynTree_model.getCOMKDL();
@@ -381,17 +477,44 @@ namespace{
         this->initTrj(com_init, l_foot_init, r_foot_init);
         this->initTrjPublisher();
 
+
+        theWalkingStack ws(*(this->_model_ptr.get()), this->_q);
+
+
         double t = 0.;
+        Eigen::VectorXd dq(this->_q.size());
+        std::vector<double> loop_time;
         for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
         {
+            KDL::Frame com_d = this->walk_trj->com_trj.Pos(t);
+            KDL::Frame l_sole_d = this->walk_trj->l_sole_trj.Pos(t);
+            KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
+            std::string anchor_d = this->walk_trj->getAnchor(t);
+
+            this->_robot.switchAnchorAndFloatingBase(anchor_d);
+            this->_robot.updateiDynTreeModel(this->_q, true);
+
+            ws.com->setReference(com_d.p);
+            ws.l_sole->setReference(l_sole_d);
+            ws.r_sole->setReference(r_sole_d);
+
+            ws.auto_stack->update(this->_q);
+
+            uint tic = ros::Time::now().nsec;
+
+            if(!ws.solve(dq))
+                dq.setZero(dq.size());
+            this->_q += dq;
+
+            uint toc = ros::Time::now().nsec;
+
+            loop_time.push_back((toc-tic)/1e6);
+
             this->com_trj_pub->publish();
             this->l_sole_trj_pub->publish();
             this->r_sole_trj_pub->publish();
 
-            this->publishCoMAndFeet(this->walk_trj->com_trj.Pos(t),
-                                    this->walk_trj->l_sole_trj.Pos(t),
-                                    this->walk_trj->r_sole_trj.Pos(t),
-                                    this->walk_trj->getAnchor(t));
+            this->publishCoMAndFeet(com_d,l_sole_d,r_sole_d,anchor_d);
             this->publishRobotState();
 
             ros::spinOnce();
@@ -399,6 +522,11 @@ namespace{
             t+=0.01;
             usleep(10000);
         }
+
+        double acc = 0.;
+        for(unsigned int i = 0; i < loop_time.size(); ++i)
+            acc += loop_time[i];
+        std::cout<<"Medium time per loop: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
     }
 }
 
