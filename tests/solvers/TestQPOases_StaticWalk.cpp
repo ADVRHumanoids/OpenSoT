@@ -540,7 +540,6 @@ namespace{
 
 
     //1. WALKING
-        //We assume the world between the feet
         KDL::Vector com_vector = this->_robot.iDynTree_model.getCOMKDL();
         KDL::Frame com_init; com_init.p = com_vector;
         KDL::Frame l_foot_init = this->_robot.iDynTree_model.
@@ -649,7 +648,70 @@ namespace{
             usleep(10000);
         }
 
+        this->com_trj_pub->deleteAllMarkers();
+        this->r_wrist_trj_pub->deleteAllMarkers();
 
+    //3 WALKING (AGAIN)
+    //We want to be sure to start with the left foot again
+    _robot.switchAnchorAndFloatingBase("l_sole");
+    _robot.updateiDynTreeModel(this->_q, true);
+    ws.update(this->_q);
+
+    com_vector = this->_robot.iDynTree_model.getCOMKDL();
+    com_init; com_init.p = com_vector;
+    l_foot_init = this->_robot.iDynTree_model.
+            getPositionKDL(
+                this->_robot.iDynTree_model.getLinkIndex("l_sole"));
+    r_foot_init = this->_robot.iDynTree_model.
+            getPositionKDL(
+                this->_robot.iDynTree_model.getLinkIndex("r_sole"));
+
+    this->initTrj(com_init, l_foot_init, r_foot_init);
+    this->initTrjPublisher();
+
+
+
+
+    t = 0.;
+    dq(this->_q.size());
+    for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
+    {
+        KDL::Frame com_d = this->walk_trj->com_trj.Pos(t);
+        KDL::Frame l_sole_d = this->walk_trj->l_sole_trj.Pos(t);
+        KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
+        std::string anchor_d = this->walk_trj->getAnchor(t);
+
+        this->_robot.switchAnchorAndFloatingBase(anchor_d);
+        this->_robot.updateiDynTreeModel(this->_q, true);
+
+        ws.com->setReference(com_d.p);
+        ws.l_sole->setReference(l_sole_d);
+        ws.r_sole->setReference(r_sole_d);
+
+        ws.auto_stack->update(this->_q);
+
+        uint tic = ros::Time::now().nsec;
+
+        if(!ws.solve(dq))
+            dq.setZero(dq.size());
+        this->_q += dq;
+
+        uint toc = ros::Time::now().nsec;
+
+        loop_time.push_back((toc-tic)/1e6);
+
+        this->com_trj_pub->publish();
+        this->l_sole_trj_pub->publish();
+        this->r_sole_trj_pub->publish();
+
+        this->publishCoMAndFeet(com_d,l_sole_d,r_sole_d,anchor_d);
+        this->publishRobotState();
+
+        ros::spinOnce();
+
+        t+=0.01;
+        usleep(10000);
+    }
 
 
 
