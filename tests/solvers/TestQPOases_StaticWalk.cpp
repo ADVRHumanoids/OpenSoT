@@ -168,12 +168,25 @@ namespace{
 
     class testStaticWalk: public ::testing::Test{
     public:
+        static void null_deleter(idynutils2 *) {}
+
         testStaticWalk():
             _robot("coman",
                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
             _q(_robot.iDynTree_model.getNrOfDOFs())
         {
+            _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+                    (XBot::ModelInterface::getModel(_path_to_cfg));
+            _model_ptr->loadModel(boost::shared_ptr<idynutils2>(&_robot, &null_deleter));
+
+            if(_model_ptr)
+                std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+            else
+                std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+
             _q.setZero(_robot.iDynTree_model.getNrOfDOFs());
             _robot.updateiDynTreeModel(_q,true);
 
@@ -321,6 +334,7 @@ namespace{
         rviz_visual_tools::RvizVisualToolsPtr visual_tools;
 
         idynutils2 _robot;
+        XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
         Eigen::VectorXd _q;
 
         boost::shared_ptr<ros::NodeHandle> _n;
