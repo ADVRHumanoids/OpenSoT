@@ -99,6 +99,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testVelocityAllocation
                        testCollisionUtils
                        testCartesianUtils
+                       testBasicAlgebra
         )
     endif()
 endif()
@@ -282,6 +283,10 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testCartesianUtils ${TestLibs})
     add_dependencies(testCartesianUtils GTest-ext OpenSoT)
 
+    ADD_EXECUTABLE(testBasicAlgebra solvers/TestBasicAlgebra.cpp)
+    TARGET_LINK_LIBRARIES(testBasicAlgebra ${TestLibs})
+    add_dependencies(testBasicAlgebra GTest-ext OpenSoT)
+
 #    if(OPENSOT_COMPILE_EXAMPLES)
 #        include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
 #        ADD_EXECUTABLE(testKlamptController ../examples/KlamptController/tests/testKlamptController.cpp
@@ -335,6 +340,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
      add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
      add_test(NAME OpenSoT_utils_cartesian_utils COMMAND testCartesianUtils)
+     add_test(NAME OpenSoT_solvers_BasicAlgebra COMMAND testBasicAlgebra)
 endif()
 
 find_package(MATLAB QUIET)
