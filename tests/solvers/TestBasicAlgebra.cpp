@@ -44,6 +44,59 @@ unsigned int iter = 10000;
 unsigned int rows = 12;
 unsigned int cols = 30;
 
+template<typename _Matrix_Type_>
+_Matrix_Type_ pseudoInverse(const _Matrix_Type_ &a, double epsilon = std::numeric_limits<double>::epsilon())
+{
+    Eigen::JacobiSVD< _Matrix_Type_ > svd(a ,Eigen::ComputeThinU | Eigen::ComputeThinV);
+    double tolerance = epsilon * std::max(a.cols(), a.rows()) *svd.singularValues().array().abs()(0);
+    return svd.matrixV() *  (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
+}
+
+
+TEST_F(testBasicAlgebra, testQPPVM)
+{
+    Eigen::VectorXd t(iter);
+    Eigen::VectorXd t2(iter);
+
+    Eigen::MatrixXd H;
+    Eigen::VectorXd g;
+
+    Eigen::MatrixXd H2;
+    Eigen::VectorXd g2;
+    for(unsigned int i = 0; i < iter; ++i)
+    {
+        Eigen::MatrixXd J = Aed.setRandom(rows, cols);
+        Eigen::VectorXd f = bed.setRandom(rows);
+
+        Eigen::MatrixXd A;
+        Eigen::VectorXd b;
+
+        double tic = yarp::os::Time::now()*1e6;
+        A = J;
+        b = J*J.transpose()*f;
+        H = A.transpose()*A;
+        g = A.transpose()*b;
+        double toc = yarp::os::Time::now()*1e6;
+
+        t[i] = toc-tic;
+
+        tic = yarp::os::Time::now()*1e6;
+        J = (J.transpose()).eval();
+        A = pseudoInverse(J);
+        b = f;
+        H2 = A.transpose()*A;
+        g2 = A.transpose()*b;
+        toc = yarp::os::Time::now()*1e6;
+
+        t2[i] = toc-tic;
+    }
+
+
+    std::cout<<"QPPVM EIGEN DOUBLE----> Mean time 1 for "<<iter<<" iterations: "<<t.sum()/iter<<" us"<<std::endl;
+    std::cout<<"QPPVM EIGEN DOUBLE----> Mean time 2 for "<<iter<<" iterations: "<<t2.sum()/iter<<" us"<<std::endl;
+    EXPECT_LE(t.sum()/iter, t2.sum()/iter);
+}
+
 TEST_F(testBasicAlgebra, testMulEigenDouble)
 {
     Eigen::VectorXd t(iter);
@@ -121,6 +174,8 @@ TEST_F(testBasicAlgebra, testMulYarp)
 
     std::cout<<"YARP DOUBLE-----> Mean time for "<<iter<<" iterations: "<<t.sum()/iter<<" us"<<std::endl;
 }
+
+
 
 TEST_F(testBasicAlgebra, testqpOASES)
 {
