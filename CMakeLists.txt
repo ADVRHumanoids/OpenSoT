@@ -164,7 +164,6 @@ ADD_LIBRARY(OpenSoT SHARED
                     ${OPENSOT_TASKS_SOURCES}
                     ${OPENSOT_SOLVERS_SOURCES}
                     ${OPENSOT_UTILS_SOURCES}
-#                    src/constraints/velocity/SelfCollisionAvoidance.cpp
 #                    src/constraints/velocity/Dynamics.cpp
 #                    src/constraints/force/FrictionCone.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
