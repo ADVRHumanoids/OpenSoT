@@ -29,7 +29,7 @@ CoM::CoM(   const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact
             XBot::ModelInterface &robot) :
     Task("CoM", x.rows()), _robot(robot),
     _desiredPosition(), _desiredVelocity(), _desiredAcceleration(),
-    _actualPosition(), _actualVelocity(),
+    _actualPosition(), _actualVelocity(), _actualAngularMomentum(),
     _desiredVariationAngularMomentum(), _desiredAngularMomentum(),
     positionError(), velocityError(), angularMomentumError(),
     _links_in_contact(links_in_contact),_I(), _O(), _P(), _T(),
@@ -109,14 +109,14 @@ void CoM::_update(const Eigen::VectorXd &x)
 
     this->_desiredVelocity.setZero(this->_desiredVelocity.rows());
     this->_desiredAcceleration.setZero(this->_desiredAcceleration.rows());
-    this->_desiredAngularMomentum.setZero(this->_desiredAngularMomentum.rows());
+    //this->_desiredAngularMomentum.setZero(this->_desiredAngularMomentum.rows());
     this->_desiredVariationAngularMomentum.setZero(this->_desiredVariationAngularMomentum.rows());
 
     /**
       * Now I have to compute the Jacobian of the task that in this case is the matrix W
       * that maps the Fcom to the Fd
     **/
-    _A = computeW(_links_in_contact);
+    _A = computeA(_links_in_contact);
     /**********************************************************************/
 }
 
@@ -160,7 +160,7 @@ void CoM::setAngularReference(const Eigen::Vector3d& desiredAngularMomentum,
     _desiredVariationAngularMomentum = desiredVariationAngularMomentum;
 }
 
-Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeW(const std::vector<std::string> &links_in_contact)
+Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeA(const std::vector<std::string> &links_in_contact)
 {
     int m = links_in_contact.size();
 
@@ -262,7 +262,7 @@ void CoM::update_b()
 
     acceleration_ref = _robot.getMass()*(acceleration_ref-_g);
 
-    _b.resize(6);
+    _b.setZero(6);
     _b<<acceleration_ref,
         variationAngularMomentum_ref;
 }

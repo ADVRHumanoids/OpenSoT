@@ -177,7 +177,7 @@
 
                 Eigen::Vector3d getAngularMomentumError();
 
-                Eigen::MatrixXd computeW(const std::vector<std::string>& links_in_contact);
+                Eigen::MatrixXd computeA(const std::vector<std::string>& links_in_contact);
 
             };
         }

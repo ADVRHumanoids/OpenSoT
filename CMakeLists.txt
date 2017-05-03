@@ -165,11 +165,13 @@ ADD_LIBRARY(OpenSoT SHARED
                     ${OPENSOT_SOLVERS_SOURCES}
                     ${OPENSOT_UTILS_SOURCES}
 #                    src/constraints/velocity/Dynamics.cpp
-#                    src/constraints/force/FrictionCone.cpp
+                    src/constraints/force/FrictionCone.cpp
+                    src/constraints/force/WrenchLimits.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
 #                    src/tasks/velocity/Interaction.cpp
                     src/tasks/force/CoM.cpp
+                    src/tasks/force/Wrench.cpp
 #                    src/utils/DefaultHumanoidStack.cpp
                     #src/utils/PreviewerUtils.cpp
 #                    src/utils/logger/L.cpp

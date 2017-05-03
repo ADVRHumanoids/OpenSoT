@@ -4,7 +4,7 @@ namespace OpenSoT {
    namespace constraints {
        namespace force {
 
-       FrictionCone::FrictionCone(const Eigen::VectorXd &x, iDynUtils &robot,
+       FrictionCone::FrictionCone(const Eigen::VectorXd &x, XBot::ModelInterface &robot,
                                   const friction_cones& mu):
            Constraint("friction_cone", x.rows()),
            _robot(robot),
@@ -29,7 +29,9 @@ namespace OpenSoT {
 
            for(unsigned int i = 0; i < _n_of_contacts; ++i)
            {
-                FrictionCone::R w_R_n = _mu[i].first;
+               _robot.getPose(_mu[i].first, _wTl);
+
+
                 double __mu = _mu[i].second;
 
                 __mu = std::sqrt(2.*__mu)/2.;
@@ -40,7 +42,7 @@ namespace OpenSoT {
                 _Ci(3,0) = 0.; _Ci(3,1) = -1.; _Ci(3,2) = -__mu;
                 _Ci(4,0) = 0.; _Ci(4,1) = 0.; _Ci(4,2) = -1.;
 
-                _Ci = _Ci*w_R_n.transpose();
+                _Ci = _Ci*_wTl.matrix().block(0,0,3,3).transpose();
 
                 _Aineq.block(5*i, 6*i,5,3)<<_Ci;
            }
@@ -51,7 +53,9 @@ namespace OpenSoT {
        {
            if(_bUpperBound.rows() != 5*_n_of_contacts){
            _bUpperBound.resize(5*_n_of_contacts);
-           _bUpperBound.setZero(_bUpperBound.rows());}
+           _bUpperBound.setZero(_bUpperBound.rows());
+           _bLowerBound.resize(5*_n_of_contacts);
+           _bLowerBound = -std::numeric_limits<double>::max()*_bLowerBound.setOnes(_bLowerBound.size());}
        }
 
 

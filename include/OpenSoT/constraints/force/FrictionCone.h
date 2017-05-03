@@ -20,8 +20,7 @@
 
 
  #include <OpenSoT/Constraint.h>
- #include <idynutils/idynutils.h>
- #include <idynutils/collision_utils.h>
+ #include <XBotInterface/ModelInterface.h>
  #include <kdl/frames.hpp>
 
 #include <Eigen/Dense>
@@ -35,48 +34,47 @@
             class FrictionCone: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<FrictionCone> Ptr;
-            protected:
-                typedef Eigen::Matrix3d R; //Rotation
-                typedef std::pair<R, double> friction_cone;
+
+                typedef std::pair<std::string, double> friction_cone;
                 typedef std::vector<friction_cone> friction_cones;
 
         /**
-         * @brief _mu is a map between strings and friction cone: the rotation of the surface in world frame and the
-         * friction coefficent.
+         * @brief _mu is a map between contacts and friction cone: The rotation is the one from
+         * world frame to contact frame
          * NOTE that the rotation has the z-axiz parallel to the normal of the surface
-         * NOTE2 the strings represent links in contact! They have to be ordered in the same
-         * way of the optimized task!
          */
         friction_cones _mu; //Friction Coefficient associated to each contact surface
-		iDynUtils& _robot;
+        XBot::ModelInterface& _robot;
 
         Eigen::MatrixXd _Ci;
 
+        Eigen::Affine3d _wTl;
+
         int _n_of_contacts;
 
-            public:
+    public:
                 
         /**
-                 * @brief FrictionCone
-                 * @param x
-                 * @param robot
-                 * @param mu is a map between links in contact and associated friction coefficient mu
-                 * NOTE: that all the friction cones are specified in world frame!
-                 */
-                FrictionCone(const Eigen::VectorXd& x,
-                             iDynUtils &robot,
+         * @brief FrictionCone
+         * @param x
+         * @param robot
+         * @param mu is a map between links in contact and associated friction coefficient mu
+         * NOTE: that all the friction cones are specified in world frame!
+         */
+        FrictionCone(const Eigen::VectorXd& x,
+                             XBot::ModelInterface &robot,
                              const friction_cones & mu);
                 
                 
-                void update(const Eigen::VectorXd &x);
+        void update(const Eigen::VectorXd &x);
 
-                void setMu(const friction_cones& mu){ _mu = mu;}
+        void setMu(const friction_cones& mu){ _mu = mu;}
 
-                int getNumberOfContacts(){return _n_of_contacts;}
+        int getNumberOfContacts(){return _n_of_contacts;}
 
-            private:
-                void computeAineq();
-                void computeUpperBound();
+    private:
+        void computeAineq();
+        void computeUpperBound();
 
             };
         }
