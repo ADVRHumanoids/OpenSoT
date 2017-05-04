@@ -34,6 +34,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+find_package(YCM REQUIRED)
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
 FIND_PACKAGE(YARP QUIET)
 FIND_PACKAGE(Eigen3 REQUIRED)
@@ -60,7 +61,6 @@ FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(conversion_utils_YARP QUIET)
 FIND_PACKAGE(idynutils2 QUIET)
-FIND_PACKAGE(convex_hull_utils QUIET)
 FIND_PACKAGE(fcl QUIET)
 
 # compilation flags
@@ -80,7 +80,6 @@ INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
                             ${conversion_utils_YARP_INCLUDE_DIRS}
                             ${idynutils2_INCLUDE_DIRS}
-                            ${convex_hull_utils_INCLUDE_DIRS}
                             ${srdfdom_advr_INCLUDE_DIRS}
                             )
 
@@ -219,7 +218,7 @@ set(OPENSOT_MINOR_VERSION 2)
 set(OPENSOT_PATCH_VERSION 0)
 set(OPENSOT_VERSION ${OPENSOT_MAJOR_VERSION}.${OPENSOT_MINOR_VERSION}.${OPENSOT_PATCH_VERSION})
 
-find_package(YCM REQUIRED)
+
 include(YCMDefaultDirs)
 ycm_default_dirs(${VARS_PREFIX})
 
