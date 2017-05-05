@@ -13,6 +13,7 @@
 #include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <qpOASES.hpp>
 #include <OpenSoT/tasks/force/Wrench.h>
+#include <OpenSoT/constraints/force/WrenchLimits.h>
 
 
 using namespace yarp::math;
@@ -132,7 +133,11 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     std::cout<<"bUpper = ["<<fc->getbUpperBound()<<" "<<std::endl;
     std::cout<<"bLower = ["<<fc->getbLowerBound()<<" "<<std::endl;
 
+    OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits(
+                new OpenSoT::constraints::force::WrenchLimits(300., contact_wrenches_d.size()));
+
     force_com_task->getConstraints().push_back(fc);
+    force_com_task->getConstraints().push_back(wrench_limits);
     force_com_task->update(contact_wrenches_d);
 
     OpenSoT::tasks::force::Wrench::Ptr wrench(
@@ -143,14 +148,18 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     wrench_reference(8) = 100.;
     wrench_reference(14) = 100.;
     wrench->setReference(wrench_reference);
+    wrench->getConstraints().push_back(fc);
+    wrench->getConstraints().push_back(wrench_limits);
     wrench->update(contact_wrenches_d);
     std::cout<<"A = [ "<<wrench->getA()<<" ]"<<std::endl;
     std::cout<<"b = [ "<<wrench->getb()<<" ]"<<std::endl;
 
 
 
+
+
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-    //stack_of_tasks.push_back(force_com_task);
+    stack_of_tasks.push_back(force_com_task);
     stack_of_tasks.push_back(wrench);
 
 
@@ -184,6 +193,15 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     for(unsigned int i = 0; i < b.rows(); ++i)
         EXPECT_NEAR(Ax[i],b[i], 1E-6);
 
+
+    std::cout<<"Wrench desired for contact "<<links_in_contact[0]<<": ["<<
+               contact_wrenches_d.segment(0, 6)<<" ]"<<std::endl;
+
+    std::cout<<"Wrench desired for contact "<<links_in_contact[1]<<": ["<<
+               contact_wrenches_d.segment(6, 6)<<" ]"<<std::endl;
+
+    std::cout<<"Wrench desired for contact "<<links_in_contact[2]<<": ["<<
+               contact_wrenches_d.segment(12, 6)<<" ]"<<std::endl;
 }
 
 
