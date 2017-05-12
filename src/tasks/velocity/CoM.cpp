@@ -73,26 +73,25 @@ void CoM::_update(const Eigen::VectorXd &x)
 void CoM::setReference(const KDL::Vector& desiredPosition,
                   const KDL::Vector& desiredVelocity)
 {
-    Eigen::VectorXd tmp(3); tmp.setZero(3);
-    tmp(0) = desiredPosition.x();
-    tmp(1) = desiredPosition.y();
-    tmp(2) = desiredPosition.z();
+    _desiredPosition(0) = desiredPosition.x();
+    _desiredPosition(1) = desiredPosition.y();
+    _desiredPosition(2) = desiredPosition.z();
 
-    Eigen::VectorXd tmp2(3); tmp2.setZero(3);
-    tmp2(0) = desiredVelocity.x();
-    tmp2(1) = desiredVelocity.y();
-    tmp2(2) = desiredVelocity.z();
+    _desiredVelocity(0) = desiredVelocity.x();
+    _desiredVelocity(1) = desiredVelocity.y();
+    _desiredVelocity(2) = desiredVelocity.z();
 
-    setReference(tmp, tmp2);
+    this->update_b();
 }
 
 void CoM::setReference(const KDL::Vector& desiredPosition)
 {
-    Eigen::VectorXd tmp(3); tmp.setZero(3);
-    tmp(0) = desiredPosition.x();
-    tmp(1) = desiredPosition.y();
-    tmp(2) = desiredPosition.z();
-    setReference(tmp);
+    _desiredPosition(0) = desiredPosition.x();
+    _desiredPosition(1) = desiredPosition.y();
+    _desiredPosition(2) = desiredPosition.z();
+
+    _desiredVelocity.setZero(3);
+    this->update_b();
 }
 
 void CoM::setReference(const Eigen::VectorXd& desiredPosition)
@@ -143,7 +142,7 @@ std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
 
 void CoM::update_b()
 {
-    _b = _desiredVelocity + _lambda*this->getError();
+    _b = _desiredVelocity + _lambda*(_desiredPosition - _actualPosition);
 }
 
 void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)

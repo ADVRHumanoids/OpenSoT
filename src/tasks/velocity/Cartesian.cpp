@@ -31,8 +31,11 @@ Cartesian::Cartesian(std::string task_id,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _orientationErrorGain(1.0), _is_initialized(false)
+    _orientationErrorGain(1.0), _is_initialized(false),
+    _error(6)
 {
+    _error.setZero(6);
+
     _desiredTwist.setZero(6);
 
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
@@ -178,14 +181,6 @@ const void Cartesian::getActualPose(KDL::Frame& actual_pose) const
     actual_pose.M(2,0) = _actualPose(2,0); actual_pose.M(2,1) = _actualPose(2,1); actual_pose.M(2,2) = _actualPose(2,2);
 }
 
-const KDL::Frame Cartesian::getActualPoseKDL() const
-{
-    KDL::Frame actualPoseKDL;
-    getActualPose(actualPoseKDL);
-    return actualPoseKDL;
-}
-
-
 void Cartesian::setOrientationErrorGain(const double &orientationErrorGain)
 {
     this->_orientationErrorGain = orientationErrorGain;
@@ -219,18 +214,17 @@ void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
     }
 }
 
-Eigen::VectorXd OpenSoT::tasks::velocity::Cartesian::getError()
+const Eigen::VectorXd OpenSoT::tasks::velocity::Cartesian::getError() const
 {
-    Eigen::VectorXd tmp(6);
-    tmp<<positionError,-_orientationErrorGain*orientationError;
-    return tmp;
+    return _error;
 }
 
 void Cartesian::update_b() {
     cartesian_utils::computeCartesianError(_actualPose.matrix(), _desiredPose.matrix(),
                                            positionError, orientationError);
 
-    _b = _desiredTwist + _lambda*this->getError();
+    _error<<positionError,-_orientationErrorGain*orientationError;
+    _b = _desiredTwist + _lambda*_error;
 }
 
 bool OpenSoT::tasks::velocity::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)

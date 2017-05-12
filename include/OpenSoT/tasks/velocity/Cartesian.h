@@ -72,6 +72,8 @@
 
                 bool _is_initialized;
 
+                Eigen::VectorXd _error;
+
             public:
 
                 Eigen::VectorXd positionError;
@@ -157,13 +159,6 @@
                 const Eigen::MatrixXd getActualPose() const;
                 const void getActualPose(KDL::Frame& actual_pose) const;
                 
-                /**
-                 * @brief DEPRECATED getActualPoseKDL returns the distal_link actual pose as a KDL frame. You need to call _update(x) for the actual pose to change
-                 * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
-                 * for the distal_link in the base_link frame of reference as a KDL Pose.
-                 */
-                const KDL::Frame getActualPoseKDL() const;
-
                 void setOrientationErrorGain(const double& orientationErrorGain);
                 const double getOrientationErrorGain() const;
 
@@ -177,7 +172,7 @@
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
                  * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
                  */
-                Eigen::VectorXd getError();
+                const Eigen::VectorXd getError() const;
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
