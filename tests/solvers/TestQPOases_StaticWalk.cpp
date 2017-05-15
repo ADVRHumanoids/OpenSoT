@@ -19,7 +19,7 @@ std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
-bool IS_ROSCORE_RUNNING = ros::master::check();
+bool IS_ROSCORE_RUNNING;
 
 namespace{
     class manipulation_trajectories{
@@ -353,9 +353,6 @@ namespace{
             _robot.updateiDynTreeModel(_q,true);
 
             if(IS_ROSCORE_RUNNING){
-                int argc = 0;
-                char* argv[] = {};
-                ros::init(argc, argv, "testStaticWalk_node");
 
                 _n.reset(new ros::NodeHandle());
                 world_broadcaster.reset(new tf::TransformBroadcaster());
@@ -804,6 +801,8 @@ namespace{
 }
 
 int main(int argc, char **argv) {
+  ros::init(argc, argv, "testStaticWalk_node");
+  IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
