@@ -60,8 +60,6 @@ bool QPOases_sot::prepareSoT()
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        Eigen::MatrixXd H;
-        Eigen::VectorXd g;
         computeCostFunction(_tasks[i], H, g);
 
         OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
@@ -76,15 +74,13 @@ bool QPOases_sot::prepareSoT()
 
         std::string constraints_str = constraints_task_i.getConstraintID();
 
-        Eigen::MatrixXd A = constraints_task_i.getAineq();
-        Eigen::VectorXd lA = constraints_task_i.getbLowerBound();
-        Eigen::VectorXd uA = constraints_task_i.getbUpperBound();
+        A = constraints_task_i.getAineq();
+        lA = constraints_task_i.getbLowerBound();
+        uA = constraints_task_i.getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
             {
-                Eigen::MatrixXd tmp_A;
-                Eigen::VectorXd tmp_lA, tmp_uA;
                 computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
 
                 if(!constraints_str.compare("") == 0)
@@ -100,8 +96,8 @@ bool QPOases_sot::prepareSoT()
         if(_bounds && _bounds->isBound()){   // if it is a constraint, it has already been added in #74
             constraints_task_i.getConstraintsList().push_back(_bounds);
             constraints_task_i.generateAll();}
-        Eigen::VectorXd l = constraints_task_i.getLowerBound();
-        Eigen::VectorXd u = constraints_task_i.getUpperBound();
+        l = constraints_task_i.getLowerBound();
+        u = constraints_task_i.getUpperBound();
 
         QPOasesProblem problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                  _epsRegularisation);
@@ -125,8 +121,6 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
-        Eigen::MatrixXd H;
-        Eigen::VectorXd g;
         computeCostFunction(_tasks[i], H, g);
         if(!_qp_stack_of_tasks[i].updateTask(H, g))
             return false;
@@ -140,15 +134,13 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
             constraints_task_i.getConstraintsList().push_back(_bounds);
             constraints_task_i.generateAll();
         }
-        Eigen::MatrixXd A = constraints_task_i.getAineq();
-        Eigen::VectorXd lA = constraints_task_i.getbLowerBound();
-        Eigen::VectorXd uA = constraints_task_i.getbUpperBound();
+        A = constraints_task_i.getAineq();
+        lA = constraints_task_i.getbLowerBound();
+        uA = constraints_task_i.getbUpperBound();
         if(i > 0)
         {
             for(unsigned int j = 0; j < i; ++j)
             {
-                Eigen::MatrixXd tmp_A;
-                Eigen::VectorXd tmp_lA, tmp_uA;
                 computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
                 pile(A, tmp_A);
                 pile(lA, tmp_lA);
