@@ -2,6 +2,7 @@
 #include <yarp/sig/Matrix.h>
 //#define __USE_SINGLE_PRECISION__
 #include <qpOASES/QProblemB.hpp>
+#include <qpOASES/SQProblem.hpp>
 #include <yarp/os/Time.h>
 #include <yarp/math/Rand.h>
 #include <yarp/math/Math.h>
@@ -52,6 +53,69 @@ _Matrix_Type_ pseudoInverse(const _Matrix_Type_ &a, double epsilon = std::numeri
     return svd.matrixV() *  (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
 }
 
+TEST_F(testBasicAlgebra, testPinvVSQP)
+{
+    Eigen::MatrixXd A(rows, cols);
+    Eigen::MatrixXd H(cols, cols);
+    Eigen::VectorXd b(rows);
+    Eigen::VectorXd g(rows);
+
+    Eigen::VectorXd b_max(cols); b_max = b_max.setOnes(cols);
+    Eigen::VectorXd b_min(cols); b_min = -b_max.setOnes(cols);
+
+    Eigen::VectorXd t(iter);
+    Eigen::VectorXd t2(iter);
+
+    Eigen::VectorXd sol1(cols);
+    Eigen::VectorXd sol2(cols);
+    for(unsigned int i = 0; i < iter; ++i)
+    {
+        A.setRandom(rows, cols);
+        b.setRandom(rows);
+
+        double tic = yarp::os::Time::now()*1e6;
+        sol1 = pseudoInverse(A)*b;
+        double toc = yarp::os::Time::now()*1e6;
+
+        t[i] = toc-tic;
+
+        H = A.transpose()*A;
+        g = -1.0 * A.transpose()*b;
+
+        qpOASES::SQProblem solver(cols, 0, qpOASES::HST_SEMIDEF);
+        qpOASES::Options opt;
+        opt.setToMPC();
+        solver.setOptions(opt);
+        solver.setPrintLevel(qpOASES::PL_NONE);
+        int nrws = 64;
+
+
+        tic = yarp::os::Time::now()*1e6;
+        solver.init(H.data(), g.data(),NULL, b_min.data(), b_max.data(),NULL, NULL, nrws);
+        solver.getPrimalSolution(sol2.data());
+        toc = yarp::os::Time::now()*1e6;
+
+        t2[i] = toc-tic;
+
+
+        Eigen::VectorXd s1 = A*sol1;
+        Eigen::VectorXd s2 = A*sol2;
+        for(unsigned int i = 0; i < s1.size(); ++i)
+        {
+            EXPECT_NEAR(s1[i], b[i], 1e-5);
+            EXPECT_NEAR(s2[i], b[i], 1e-5);
+        }
+
+
+
+        //std::cout<<"sol 1:"<<sol1<<std::endl;
+        //std::cout<<"sol 2:"<<sol2<<std::endl;
+    }
+
+    std::cout<<"PSEUDOINVERSE----> Mean time for "<<iter<<" iterations: "<<t.sum()/iter<<" us"<<std::endl;
+    std::cout<<"QPOASES----> Mean time for "<<iter<<" iterations: "<<t2.sum()/iter<<" us"<<std::endl;
+}
+
 
 TEST_F(testBasicAlgebra, testQPPVM)
 {
@@ -92,8 +156,8 @@ TEST_F(testBasicAlgebra, testQPPVM)
     }
 
 
-    std::cout<<"QPPVM EIGEN DOUBLE----> Mean time 1 for "<<iter<<" iterations: "<<t.sum()/iter<<" us"<<std::endl;
-    std::cout<<"QPPVM EIGEN DOUBLE----> Mean time 2 for "<<iter<<" iterations: "<<t2.sum()/iter<<" us"<<std::endl;
+    std::cout<<"QPPVM EIGEN DOUBLE----> Mean time for "<<iter<<" iterations: "<<t.sum()/iter<<" us"<<std::endl;
+    std::cout<<"QPPVM EIGEN DOUBLE----> Mean time using PseudoInverse for "<<iter<<" iterations: "<<t2.sum()/iter<<" us"<<std::endl;
     EXPECT_LE(t.sum()/iter, t2.sum()/iter);
 }
 
@@ -188,8 +252,7 @@ TEST_F(testBasicAlgebra, testqpOASES)
     Eigen::VectorXd b_max(cols); b_max.setOnes(cols);
     Eigen::VectorXd b_min(cols); b_min = -b_max.setOnes(cols);
 
-    qpOASES::QProblemB solver(cols);
-    solver.setPrintLevel(qpOASES::PL_NONE);
+
     int nwsr = 32;
     for(unsigned int i = 0; i < iter; ++i)
     {
@@ -202,6 +265,9 @@ TEST_F(testBasicAlgebra, testqpOASES)
         H = Aed.transpose()*Wed*Aed;
         g = Aed.transpose()*Wed*bed;
 
+
+        qpOASES::QProblemB solver(cols);
+        solver.setPrintLevel(qpOASES::PL_NONE);
 
         solver.init(H.data(), g.data(), b_min.data(), b_max.data(), nwsr);
 
@@ -221,8 +287,6 @@ TEST_F(testBasicAlgebra, testqpOASES)
     Eigen::VectorXf b_max(cols); b_max.setOnes(cols);
     Eigen::VectorXf b_min(cols); b_min = -b_max.setOnes(cols);
 
-    qpOASES::QProblemB solver(cols);
-    solver.setPrintLevel(qpOASES::PL_NONE);
     int nwsr = 32;
     for(unsigned int i = 0; i < iter; ++i)
     {
@@ -234,6 +298,9 @@ TEST_F(testBasicAlgebra, testqpOASES)
         double tic = yarp::os::Time::now()*1e6;
         H = Aef.transpose()*Wef*Aef;
         g = Aef.transpose()*Wef*bef;
+
+        qpOASES::QProblemB solver(cols);
+        solver.setPrintLevel(qpOASES::PL_NONE);
 
         solver.init(H.data(), g.data(), b_min.data(), b_max.data(), nwsr);
 
