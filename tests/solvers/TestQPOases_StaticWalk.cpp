@@ -14,6 +14,8 @@
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
 #include <ros/master.h>
+#include <OpenSoT/constraints/TaskToConstraint.h>
+#include <qpOASES/Options.hpp>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
@@ -276,15 +278,31 @@ namespace{
 
             vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2.*M_PI, 0.01, q.size()));
 
+//            auto_stack = (l_sole + r_sole)/
+//                    (gaze + com)/
+//                    (l_wrist + r_wrist)/
+//                    (postural)<<joint_limits<<vel_limits;
+
             auto_stack = (l_sole + r_sole)/
-                    (gaze + com)/
-                    (l_wrist + r_wrist)/
+                    (l_wrist + r_wrist + gaze)/
                     (postural)<<joint_limits<<vel_limits;
 
+            com_constr.reset(new OpenSoT::constraints::TaskToConstraint(com));
+
+
             auto_stack->update(q);
+            com_constr->update(q);
 
             solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
-                        auto_stack->getBounds(), 1e10));
+                        auto_stack->getBounds(),com_constr, 1e6));
+
+
+            qpOASES::Options opt;
+            solver->getOptions(0, opt);
+            opt.numRefinementSteps = 0;
+            opt.numRegularisationSteps = 1;
+            for(unsigned int i = 0; i < 3; ++i)
+                solver->setOptions(i, opt);
 
         }
 
@@ -301,6 +319,8 @@ namespace{
         {
             setInertiaPostureTask();
             auto_stack->update(q);
+            com_constr->update(q);
+
         }
 
         bool solve(Eigen::VectorXd& dq)
@@ -317,6 +337,8 @@ namespace{
         OpenSoT::tasks::velocity::Postural::Ptr postural;
         OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
         OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
+
+        OpenSoT::constraints::TaskToConstraint::Ptr com_constr;
 
         OpenSoT::AutoStack::Ptr auto_stack;
 
