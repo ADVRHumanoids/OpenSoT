@@ -13,6 +13,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
+#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <ros/master.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <qpOASES/Options.hpp>
@@ -256,9 +257,6 @@ namespace{
             r_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_sole", q,
                 model_ref, "r_sole","world"));
             com.reset(new OpenSoT::tasks::velocity::CoM(q, model_ref));
-//            Eigen::MatrixXd Wcom(3,3); Wcom.setZero(3,3);
-//            Wcom(0,0) = 0.5; Wcom(1,1) = 0.5;
-//            com->setWeight(Wcom);
             gaze.reset(new OpenSoT::tasks::velocity::Gaze("Cartesian::Gaze",q,
                             model_ref, "world"));
             std::vector<bool> ajm = gaze->getActiveJointsMask();
@@ -278,6 +276,10 @@ namespace{
 
             vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2.*M_PI, 0.01, q.size()));
 
+            minAcc.reset(new OpenSoT::tasks::velocity::MinimizeAcceleration(q));
+            Eigen::MatrixXd W = minAcc->getWeight();
+            minAcc->setWeight(2.*W);
+
 //            auto_stack = (l_sole + r_sole)/
 //                    (gaze + com)/
 //                    (l_wrist + r_wrist)/
@@ -285,7 +287,7 @@ namespace{
 
             auto_stack = (l_sole + r_sole)/
                     (l_wrist + r_wrist + gaze)/
-                    (postural)<<joint_limits<<vel_limits;
+                    (postural + minAcc)<<joint_limits<<vel_limits;
 
             com_constr.reset(new OpenSoT::constraints::TaskToConstraint(com));
 
@@ -317,7 +319,7 @@ namespace{
 
         void update(const Eigen::VectorXd& q)
         {
-            setInertiaPostureTask();
+            //setInertiaPostureTask();
             auto_stack->update(q);
             com_constr->update(q);
 
@@ -335,9 +337,9 @@ namespace{
         OpenSoT::tasks::velocity::CoM::Ptr    com;
         OpenSoT::tasks::velocity::Gaze::Ptr gaze;
         OpenSoT::tasks::velocity::Postural::Ptr postural;
+        OpenSoT::tasks::velocity::MinimizeAcceleration::Ptr minAcc;
         OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
         OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
-
         OpenSoT::constraints::TaskToConstraint::Ptr com_constr;
 
         OpenSoT::AutoStack::Ptr auto_stack;
