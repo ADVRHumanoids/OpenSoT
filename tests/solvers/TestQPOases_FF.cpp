@@ -1,7 +1,5 @@
-#include <idynutils/idynutils.h>
-#include <idynutils/tests_utils.h>
-#include <idynutils/comanutils.h>
-#include <iCub/iDynTree/yarp_kdl.h>
+#include <advr_humanoids_common_utils/idynutils.h>
+#include <advr_humanoids_common_utils/test_utils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/trajectory.hpp>
@@ -23,7 +21,11 @@
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
 #include <fstream>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
+#include <yarp/os/SystemClock.h>
 
+typedef idynutils2 iDynUtils;
 
 using namespace yarp::math;
 
@@ -185,25 +187,34 @@ protected:
     }
 };
 
+yarp::sig::Vector getGoodInitialPosition(iDynUtils& _robot) {
+    yarp::sig::Vector _q(_robot.iDynTree_model.getNrOfDOFs(), 0.0);
 
-yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
-    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-    leg[0] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[5] = -25.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-    arm[1] = -arm[1];
-    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
-    return q;
+    _q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+    _q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+
+    _q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+
+    _q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
+    _q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+
+    return _q;
 }
 
+static void null_deleter(iDynUtils *) {}
+
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
 
 TEST_P(testQPOases_CartesianFF, testCartesianFF)
 {
@@ -219,10 +230,20 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     iDynUtils model("coman",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+            (XBot::ModelInterface::getModel(_path_to_cfg));
+    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
 
-    yarp::sig::Vector q = getGoodInitialPosition(model);
-    model.updateiDyn3Model(q, true);
-    model.switchAnchorAndFloatingBase(model.left_leg.end_effector_name);
+    if(_model_ptr)
+        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
+    model.updateiDynTreeModel(q, true);
+    model.switchAnchorAndFloatingBase("l_sole");
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -233,8 +254,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(
-                    cartesian_utils::toEigen(q),
+            new OpenSoT::constraints::velocity::JointLimits(q,
                         model.getJointBoundMax(),
                         model.getJointBoundMin()));
 
@@ -249,15 +269,13 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm_task(
-                new OpenSoT::tasks::velocity::Cartesian("l_arm",
-                                                        cartesian_utils::toEigen(q), model,
-                                                        model.left_arm.end_effector_name,
+                new OpenSoT::tasks::velocity::Cartesian("l_arm",q, *(_model_ptr.get()),
+                                                        "l_wrist",
                                                         "world"));
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(
-                    cartesian_utils::toEigen(q)));
+            new OpenSoT::tasks::velocity::Postural(q));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
 
@@ -269,7 +287,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
 
 
-    yarp::sig::Vector dq;
+    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
 
     double dt=3e-3;
 
@@ -279,15 +297,14 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     double R, Rdes, Rprev, P, Pdes, Pprev, Y, Ydes, Yprev;
 
 
-    dq = yarp::sig::Vector(q.size(), 0.0);
-    q = getGoodInitialPosition(model);
-    model.updateiDyn3Model(q, true);
-    l_arm_task->update(cartesian_utils::toEigen(q));
-    postural_task->update(cartesian_utils::toEigen(q));
-    bounds->update(cartesian_utils::toEigen(q));
+    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
+    model.updateiDynTreeModel(q, true);
+    l_arm_task->update(q);
+    postural_task->update(q);
+    bounds->update(q);
 
-    current_pose_y = cartesian_utils::fromEigentoYarp(l_arm_task->getActualPose());
-    YarptoKDL(current_pose_y,current_pose);
+    current_pose_y = conversion_utils_YARP::toYARP(l_arm_task->getActualPose());
+    conversion_utils_YARP::toKDLFrame(current_pose_y, current_pose);
 
     if(!hasInitialError) {
 
@@ -397,8 +414,8 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         yarp::sig::Vector desired_twist_y(6,0.0);
         desired_pose = trajectory->Pos(t);
         desired_twist = trajectory->Vel(t);
-        KDLtoYarp_position(desired_pose, desired_pose_y);
-        KDLtoYarp(desired_twist, desired_twist_y);
+        conversion_utils_YARP::toYARP(desired_pose, desired_pose_y);
+        conversion_utils_YARP::toYARP(desired_twist, desired_twist_y);
         l_arm_task->setReference(desired_pose, desired_twist*t_loop);
 
         // initializing previous norm
@@ -409,19 +426,17 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         if(t>=6)
             l_arm_task->setLambda(.6);
 
-        model.updateiDyn3Model(q, true);
+        model.updateiDynTreeModel(q, true);
 
-        l_arm_task->update(cartesian_utils::toEigen(q));
-        postural_task->update(cartesian_utils::toEigen(q));
-        bounds->update(cartesian_utils::toEigen(q));
+        l_arm_task->update(q);
+        postural_task->update(q);
+        bounds->update(q);
 
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        EXPECT_TRUE(sot->solve(_dq));
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        EXPECT_TRUE(sot->solve(dq));
         q += dq;
 
-        current_pose_y = cartesian_utils::fromEigentoYarp(l_arm_task->getActualPose());
-        YarptoKDL(current_pose_y,current_pose);
+        current_pose_y = conversion_utils_YARP::toYARP(l_arm_task->getActualPose());
+        conversion_utils_YARP::toKDLFrame(current_pose_y, current_pose);
 
 
         t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
@@ -556,10 +571,21 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     iDynUtils model("coman",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+            (XBot::ModelInterface::getModel(_path_to_cfg));
+    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
 
-    yarp::sig::Vector q = getGoodInitialPosition(model);
-    model.updateiDyn3Model(q, true);
-    model.switchAnchorAndFloatingBase(model.left_leg.end_effector_name);
+    if(_model_ptr)
+        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+
+    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
+    model.updateiDynTreeModel(q, true);
+    model.switchAnchorAndFloatingBase("l_sole");
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -570,8 +596,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(
-                    cartesian_utils::toEigen(q),
+            new OpenSoT::constraints::velocity::JointLimits(q,
                         model.getJointBoundMax(),
                         model.getJointBoundMin()));
 
@@ -586,13 +611,11 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::CoM::Ptr com(
-                new OpenSoT::tasks::velocity::CoM(
-                    cartesian_utils::toEigen(q), model));
+                new OpenSoT::tasks::velocity::CoM(q, *(_model_ptr)));
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(
-                    cartesian_utils::toEigen(q)));
+            new OpenSoT::tasks::velocity::Postural(q));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
 
@@ -604,7 +627,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 
 
 
-    yarp::sig::Vector dq;
+    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
 
     double dt=3e-3;
 
@@ -613,12 +636,11 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     yarp::sig::Vector current_position_y;
 
 
-    dq = yarp::sig::Vector(q.size(), 0.0);
-    q = getGoodInitialPosition(model);
-    model.updateiDyn3Model(q, true);
-    com->update(cartesian_utils::toEigen(q));
-    postural_task->update(cartesian_utils::toEigen(q));
-    bounds->update(cartesian_utils::toEigen(q));
+    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
+    model.updateiDynTreeModel(q, true);
+    com->update(q);
+    postural_task->update(q);
+    bounds->update(q);
 
 
     if(!hasInitialError) {
@@ -630,8 +652,10 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         _log.close();
         _log.open("testQPOases_FF_CoM_5cmfw_noerr.m");
 
-        current_position_y = cartesian_utils::fromEigentoYarp(com->getActualPosition());
-        YarptoKDL(current_position_y,current_pose.p);
+        current_position_y = conversion_utils_YARP::toYARP(com->getActualPosition());
+        current_pose.p.x(current_position_y(0));
+        current_pose.p.y(current_position_y(1));
+        current_pose.p.z(current_position_y(2));
         get5cmFwdLinearTraj(current_pose);
         desired_pose = trajectory->Pos(0.0);
 
@@ -646,8 +670,10 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         _log.close();
         _log.open("testQPOases_FF_CoM_5cmfw_1cmerr.m");
 
-        current_position_y = cartesian_utils::fromEigentoYarp(com->getActualPosition());
-        YarptoKDL(current_position_y,current_pose.p);
+        current_position_y = conversion_utils_YARP::toYARP(com->getActualPosition());
+        current_pose.p.x(current_position_y(0));
+        current_pose.p.y(current_position_y(1));
+        current_pose.p.z(current_position_y(2));
         desired_pose = current_pose;
         desired_pose.p[0] = current_pose.p[0] + .01;
         get5cmFwdLinearTraj(desired_pose);
@@ -685,8 +711,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         yarp::sig::Vector desired_twist_y(3,0.0);
         desired_pose = trajectory->Pos(t);
         desired_twist = trajectory->Vel(t);
-        KDLtoYarp(desired_pose.p, desired_position_y);
-        KDLtoYarp(desired_twist.vel, desired_twist_y);
+        desired_position_y(0) = desired_pose.p.x();
+        desired_position_y(1) = desired_pose.p.y();
+        desired_position_y(2) = desired_pose.p.z();
+        desired_twist_y(0) = desired_twist.vel.x();
+        desired_twist_y(1) = desired_twist.vel.y();
+        desired_twist_y(2) = desired_twist.vel.z();
         com->setReference(desired_pose.p, desired_twist.vel*t_loop);
 
         // initializing previous norm
@@ -697,19 +727,19 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         if(t>=6)
             com->setLambda(.6);
 
-        model.updateiDyn3Model(q, true);
+        model.updateiDynTreeModel(q, true);
 
-        com->update(cartesian_utils::toEigen(q));
-        postural_task->update(cartesian_utils::toEigen(q));
-        bounds->update(cartesian_utils::toEigen(q));
+        com->update(q);
+        postural_task->update(q);
+        bounds->update(q);
 
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        EXPECT_TRUE(sot->solve(_dq));
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        EXPECT_TRUE(sot->solve(dq));
         q += dq;
 
-        current_position_y = cartesian_utils::fromEigentoYarp(com->getActualPosition());
-        YarptoKDL(current_position_y,current_pose.p);
+        current_position_y = conversion_utils_YARP::toYARP(com->getActualPosition());
+        current_pose.p.x(current_position_y(0));
+        current_pose.p.y(current_position_y(1));
+        current_pose.p.z(current_position_y(2));
 
 
         t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
@@ -808,16 +838,26 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     iDynUtils model("coman",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
+    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+            (XBot::ModelInterface::getModel(_path_to_cfg));
+    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
 
-    double j_index = model.left_arm.joint_numbers[1];
+    if(_model_ptr)
+        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+    double j_index = model.iDynTree_model.getDOFIndex("LShLat");
     std::cout << "Applying trajectory to joint "
-              << model.left_arm.joint_names[1] << std::endl;
+              << "LShLat" << std::endl;
 
-    yarp::sig::Vector q = getGoodInitialPosition(model);
+    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
     q[j_index] = .0;
 
-    model.updateiDyn3Model(q, true);
-    model.switchAnchorAndFloatingBase(model.left_leg.end_effector_name);
+    model.updateiDynTreeModel(q, true);
+    model.switchAnchorAndFloatingBase("l_sole");
 
 #ifdef TRY_ON_SIMULATOR
     robot.setPositionDirectMode();
@@ -828,8 +868,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(
-                    cartesian_utils::toEigen(q),
+            new OpenSoT::constraints::velocity::JointLimits(q,
                         model.getJointBoundMax(),
                         model.getJointBoundMin()));
 
@@ -845,8 +884,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(
-                    cartesian_utils::toEigen(q)));
+            new OpenSoT::tasks::velocity::Postural(q));
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
 
@@ -856,19 +894,18 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds,1e9));
 
 
-    yarp::sig::Vector dq;
+    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
 
     double dt=3e-3;
 
     KDL::Frame current_pose, previous_pose, desired_pose;
     KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
 
-    dq = yarp::sig::Vector(q.size(), 0.0);
-    q = getGoodInitialPosition(model);
+    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
     q[j_index] = .0;
-    model.updateiDyn3Model(q, true);
-    postural_task->update(cartesian_utils::toEigen(q));
-    bounds->update(cartesian_utils::toEigen(q));
+    model.updateiDynTreeModel(q, true);
+    postural_task->update(q);
+    bounds->update(q);
 
     if(!hasInitialError) {
         /**************************************************
@@ -933,12 +970,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         yarp::sig::Vector desired_qdot(q.size(),0.0);
         desired_pose = trajectory->Pos(t);
         desired_twist = trajectory->Vel(t);
-        desired_q = q;
+        desired_q = conversion_utils_YARP::toYARP(q);
         desired_q[j_index] = desired_pose.p[0];
         desired_qdot[j_index] = desired_twist.vel[0];
         postural_task->setReference(
-                    cartesian_utils::toEigen(desired_q),
-                    cartesian_utils::toEigen(desired_qdot)*t_loop);
+                    conversion_utils_YARP::toEigen(desired_q),
+                    conversion_utils_YARP::toEigen(desired_qdot)*t_loop);
 
         // initializing previous norm
         if(previous_norm < 0)
@@ -948,14 +985,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         if(t>=6)
             postural_task->setLambda(.99);
 
-        model.updateiDyn3Model(q, true);
+        model.updateiDynTreeModel(q, true);
 
-        postural_task->update(cartesian_utils::toEigen(q));
-        bounds->update(cartesian_utils::toEigen(q));
+        postural_task->update(q);
+        bounds->update(q);
 
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        EXPECT_TRUE(sot->solve(_dq));
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        EXPECT_TRUE(sot->solve(dq));
 
         current_pose.p[0] = q[j_index];
 
