@@ -63,6 +63,43 @@ protected:
     }
 };
 
+TEST_F(testCartesianUtils, testPseudoInverse1)
+{
+    pseudoInverse<Eigen::MatrixXd> pinv;
+    Eigen::MatrixXd A(32,32);
+    Eigen::MatrixXd Ainv(32,32);
+    Eigen::MatrixXd Apinv(32,32);
+
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        A.setRandom(32,32);
+
+        Ainv = A.inverse();
+        pinv.compute(A, Apinv);
+
+        for(unsigned int j = 0; j < A.rows(); ++j)
+        {
+            for(unsigned int k = 0; k < A.cols(); ++k)
+                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-8);
+        }
+    }
+
+    pseudoInverse<Eigen::MatrixXd> pinv2(A, Apinv);
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        A.setRandom(32,32);
+
+        Ainv = A.inverse();
+        pinv2.compute(A, Apinv);
+
+        for(unsigned int j = 0; j < A.rows(); ++j)
+        {
+            for(unsigned int k = 0; k < A.cols(); ++k)
+                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-8);
+        }
+    }
+}
+
 TEST_F(testQuaternion, testQuaternionError)
 {
     EXPECT_DOUBLE_EQ(this->x, 0.0);

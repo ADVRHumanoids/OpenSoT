@@ -66,7 +66,8 @@ void JointImpedanceCtrl::_update(const Eigen::VectorXd &x) {
 
         _robot.getInertiaMatrix(_M);
 
-        _W = _M.inverse();
+        pinv.compute(_M, _W);
+        //_W = _M.inverse();
     }
 
     /************************* COMPUTING TASK *****************************/

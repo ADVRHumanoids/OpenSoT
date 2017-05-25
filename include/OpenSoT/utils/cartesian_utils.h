@@ -173,10 +173,43 @@ public:
     }
 };
 
+/**
+ * PseudoInverse provide a simple template Eigen-based class to compute Pseudoinverse
+ */
+template<class _Matrix_Type_> class pseudoInverse
+{
+public:
+    pseudoInverse(){}
+
+    pseudoInverse(const _Matrix_Type_ &a, _Matrix_Type_ &ainv, const double epsilon = std::numeric_limits<double>::epsilon()):
+        _epsilon(epsilon),
+        _svd(a, Eigen::ComputeThinU | Eigen::ComputeThinV)
+    {
+        _tolerance = epsilon * std::max(a.cols(), a.rows()) *_svd.singularValues().array().abs()(0);
+        ainv = _svd.matrixV() *  (_svd.singularValues().array().abs() > _tolerance).select(_svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * _svd.matrixU().adjoint();
+    }
+
+    void compute(const _Matrix_Type_ &a, _Matrix_Type_ &ainv, const double epsilon = std::numeric_limits<double>::epsilon())
+    {
+        _svd.compute(a, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        _tolerance = epsilon * std::max(a.cols(), a.rows()) *_svd.singularValues().array().abs()(0);
+        ainv = _svd.matrixV() *  (_svd.singularValues().array().abs() > _tolerance).select(_svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * _svd.matrixU().adjoint();
+    }
+
+    void setEpsilon(const double epsilon)
+    {
+        _epsilon = epsilon;
+    }
+
+private:
+    double _epsilon;
+    Eigen::JacobiSVD<_Matrix_Type_> _svd;
+    double _tolerance;
+};
+
 class cartesian_utils
 {
 public:
-
     /**
      * @brief pnpoly this code is EXACTLY the code of the PNPOLY - Point Inclusion in Polygon Test
         W. Randolph Franklin (WRF) to test if a point is inside a plygon
