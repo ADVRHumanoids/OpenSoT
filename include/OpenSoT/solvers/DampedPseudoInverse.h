@@ -3,14 +3,17 @@
 
 #include <OpenSoT/Solver.h>
 #include <Eigen/Core>
+#include <Eigen/Cholesky>
 
 namespace OpenSoT
 {
     
     class DampedPseudoInverse : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
-        Eigen::MatrixXd _W;
+        Eigen::MatrixXd _W, _Wchol;
+        Eigen::LLT _WcholSolver;
         std::vector<Eigen::MatrixXd> _P, _Jpinv; // occupy more memory, avoid reallocating during execution
+        std::vector<Eigen::JacobiSVD> _JPsvd, _Jsvd;
         int _x_size;
 
         
@@ -32,6 +35,8 @@ namespace OpenSoT
          *        eventually after adding a term deriving from Tikhonov regularization.
          *        The JacobiSVD method from Eigen is used, which uses QR decomposition
          *        by Householder transformations with column pivoting.
+         *        The SVD decomposition is also used the compute the projectors, since
+         *        we have that \f$AA^\dagger=U_1U_1^T\f$
          * @param threshold is the rank of \f$r = \text{rank}\left(J^TJ\right)\f$ is
          *                  the number of singular values \f$\sigma_i\f$ such that 
          *                  \f$\sigma_i > \text{threshold}\f$,which defaults to
@@ -61,7 +66,7 @@ namespace OpenSoT
         
                 /**
          * @brief setWeight sets the error metric for the PseudoInverse
-         * @param W the distance metric according to which we will manimize the squared error.
+         * @param W the distance metric according to which we will manimize the squared error. It needs to be a positive definite matrix.
          *          Notice it needs to be of compatible dimensions with the \f$x\f$ vector,
          *          that is \f$\mathbb{R}^{n\timesn}\f$
          */
