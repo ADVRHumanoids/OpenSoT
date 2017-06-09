@@ -29,6 +29,7 @@ option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
 
 find_package(test_utils)
 find_package(trajectory_utils)
+find_package(rviz_visual_tools)
 
 # compite GTest
 find_package(GTest)
@@ -112,7 +113,7 @@ if(YARP_FOUND)
                 ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${qpOASES_LIBRARIES}
                 ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                 ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES} ${trajectory_utils_LIBRARIES}
-                ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES} ${test_utils_LIBRARIES})
+                ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES} ${test_utils_LIBRARIES} ${rviz_visual_tools_LIBRARIES})
 
     ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
     TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
