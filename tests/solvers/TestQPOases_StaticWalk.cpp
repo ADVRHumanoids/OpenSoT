@@ -406,15 +406,15 @@ namespace{
             if(IS_ROSCORE_RUNNING){
                 com_trj_pub.reset(
                     new trajectory_utils::trajectory_publisher("com_trj"));
-                com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world");
+                com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world", "com");
 
                 l_sole_trj_pub.reset(
                     new trajectory_utils::trajectory_publisher("l_sole_trj"));
-                l_sole_trj_pub->setTrj(walk_trj->l_sole_trj.getTrajectory(), "world");
+                l_sole_trj_pub->setTrj(walk_trj->l_sole_trj.getTrajectory(), "world", "l_sole");
 
                 r_sole_trj_pub.reset(
                     new trajectory_utils::trajectory_publisher("r_sole_trj"));
-                r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world");
+                r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world", "r_sole");
 
                 visual_tools.reset(new rviz_visual_tools::RvizVisualTools("world", "/com_feet_visual_marker"));
 
@@ -431,14 +431,14 @@ namespace{
 
 
                 com_trj_pub->deleteAllMarkersAndTrj();
-                com_trj_pub->setTrj(manip_trj->com_trj.getTrajectory(), "world");
+                com_trj_pub->setTrj(manip_trj->com_trj.getTrajectory(), "world", "com");
 
                 l_sole_trj_pub->deleteAllMarkersAndTrj();
                 r_sole_trj_pub->deleteAllMarkersAndTrj();
 
                 r_wrist_trj_pub.reset(
                             new trajectory_utils::trajectory_publisher("r_wrist_trj"));
-                r_wrist_trj_pub->setTrj(manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso");
+                r_wrist_trj_pub->setTrj(manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso", "r_wrist");
             }
         }
 
