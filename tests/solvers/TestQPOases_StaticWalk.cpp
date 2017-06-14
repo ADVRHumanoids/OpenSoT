@@ -406,15 +406,15 @@ namespace{
             if(IS_ROSCORE_RUNNING){
                 com_trj_pub.reset(
                     new trajectory_utils::trajectory_publisher("com_trj"));
-                com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world");
+                com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world", "com");
 
                 l_sole_trj_pub.reset(
                     new trajectory_utils::trajectory_publisher("l_sole_trj"));
-                l_sole_trj_pub->setTrj(walk_trj->l_sole_trj.getTrajectory(), "world");
+                l_sole_trj_pub->setTrj(walk_trj->l_sole_trj.getTrajectory(), "world", "l_sole");
 
                 r_sole_trj_pub.reset(
                     new trajectory_utils::trajectory_publisher("r_sole_trj"));
-                r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world");
+                r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world", "r_sole");
 
                 visual_tools.reset(new rviz_visual_tools::RvizVisualTools("world", "/com_feet_visual_marker"));
 
@@ -430,15 +430,15 @@ namespace{
                 visual_tools->deleteAllMarkers();
 
 
-                com_trj_pub->deleteAllMarkers();
-                com_trj_pub->setTrj(manip_trj->com_trj.getTrajectory(), "world");
+                com_trj_pub->deleteAllMarkersAndTrj();
+                com_trj_pub->setTrj(manip_trj->com_trj.getTrajectory(), "world", "com");
 
-                l_sole_trj_pub->deleteAllMarkers();
-                r_sole_trj_pub->deleteAllMarkers();
+                l_sole_trj_pub->deleteAllMarkersAndTrj();
+                r_sole_trj_pub->deleteAllMarkersAndTrj();
 
                 r_wrist_trj_pub.reset(
                             new trajectory_utils::trajectory_publisher("r_wrist_trj"));
-                r_wrist_trj_pub->setTrj(manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso");
+                r_wrist_trj_pub->setTrj(manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso", "r_wrist");
             }
         }
 
@@ -719,7 +719,9 @@ namespace{
                 loop_time.push_back((toc-tic)/1e6);
 
                 this->com_trj_pub->publish();
-                this->r_wrist_trj_pub->publish();}
+                //this->r_wrist_trj_pub->setTrj(
+                //            this->manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso");
+                this->r_wrist_trj_pub->publish(true);}
 
             this->publishRobotState();
 
@@ -732,8 +734,8 @@ namespace{
         }
 
         if(IS_ROSCORE_RUNNING){
-            this->com_trj_pub->deleteAllMarkers();
-            this->r_wrist_trj_pub->deleteAllMarkers();}
+            this->com_trj_pub->deleteAllMarkersAndTrj();
+            this->r_wrist_trj_pub->deleteAllMarkersAndTrj();}
 
     //3 WALKING (AGAIN)
     //We want to be sure to start with the left foot again
