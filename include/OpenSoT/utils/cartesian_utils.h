@@ -186,14 +186,27 @@ public:
         _svd(a, Eigen::ComputeThinU | Eigen::ComputeThinV)
     {
         _tolerance = epsilon * std::max(a.cols(), a.rows()) *_svd.singularValues().array().abs()(0);
+        _singularValues = _svd.singularValues().array().abs();
         ainv = _svd.matrixV() *  (_svd.singularValues().array().abs() > _tolerance).select(_svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * _svd.matrixU().adjoint();
     }
 
     void compute(const _Matrix_Type_ &a, _Matrix_Type_ &ainv, const double epsilon = std::numeric_limits<double>::epsilon())
     {
         _svd.compute(a, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        _tolerance = epsilon * std::max(a.cols(), a.rows()) *_svd.singularValues().array().abs()(0);
-        ainv = _svd.matrixV() *  (_svd.singularValues().array().abs() > _tolerance).select(_svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * _svd.matrixU().adjoint();
+        _singularValues = _svd.singularValues().array().abs();
+        
+        _tolerance = epsilon * std::max(a.cols(), a.rows()) *_singularValues(0);
+        
+        for(unsigned int i = 0; i < _singularValues.size(); ++i)
+        {
+            if(_singularValues[i] < _tolerance)
+                _singularValues[i] = 0.0;
+            else
+                _singularValues[i] = 1./_singularValues[i];
+        }
+        
+        _tmp = _svd.matrixV() *  _singularValues.asDiagonal();
+        ainv.noalias() =  _tmp * _svd.matrixU().transpose();
     }
 
     void setEpsilon(const double epsilon)
@@ -205,6 +218,9 @@ private:
     double _epsilon;
     Eigen::JacobiSVD<_Matrix_Type_> _svd;
     double _tolerance;
+    
+    Eigen::VectorXd _singularValues;
+    Eigen::MatrixXd _tmp;
 };
 
 class cartesian_utils
