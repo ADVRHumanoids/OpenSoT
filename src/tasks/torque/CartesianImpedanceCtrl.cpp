@@ -31,7 +31,8 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size)
+    _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size),
+     inv(Eigen::MatrixXd::Identity(x.size(),x.size()))
 {   
     _desiredTwist.setZero(_desiredTwist.size());
 
@@ -84,7 +85,7 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     if (_use_inertia_matrix)
     {
         _robot.getInertiaMatrix(_M);
-        pinv.compute(_M, _Minv);
+        inv.compute(_M, _Minv);
         _A.noalias() = _J*_Minv;
     }
 

@@ -58,7 +58,8 @@
                 Eigen::MatrixXd _M;
                 Eigen::MatrixXd _Minv;
                 Eigen::MatrixXd _J;
-                pseudoInverse<Eigen::MatrixXd> pinv;
+                //pseudoInverse<Eigen::MatrixXd> pinv;
+                LDLTInverse<Eigen::MatrixXd> inv;
 
                 Eigen::Affine3d _tmp_affine;
                 Eigen::VectorXd _spring_force;

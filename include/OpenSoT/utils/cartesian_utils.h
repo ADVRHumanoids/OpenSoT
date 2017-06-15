@@ -25,6 +25,7 @@
 #include <list>
 #include <urdf/model.h>
 #include <Eigen/Dense>
+#include <Eigen/Cholesky>
 
 /**
  * @brief The CostFunction class pure virtual function used to describe functions for computeGradient method.
@@ -173,14 +174,33 @@ public:
     }
 };
 
+template<class _Matrix_Type_> class LDLTInverse
+{
+public:
+    LDLTInverse(const _Matrix_Type_ &a)
+    {
+        I.resize(a.rows(), a.cols()); I.setIdentity(I.rows(), I.cols());
+    }
+    
+    void compute(const _Matrix_Type_ &a, _Matrix_Type_ &ainv)
+    {
+        LDLT.compute(a);
+        ainv = LDLT.solve(I);
+    }
+    
+private:
+    Eigen::LDLT<_Matrix_Type_> LDLT;
+    _Matrix_Type_ I;
+};
+
+
+
 /**
  * PseudoInverse provide a simple template Eigen-based class to compute Pseudoinverse
  */
 template<class _Matrix_Type_> class pseudoInverse
 {
 public:
-    pseudoInverse(){}
-
     pseudoInverse(const _Matrix_Type_ &a, _Matrix_Type_ &ainv, const double epsilon = std::numeric_limits<double>::epsilon()):
         _epsilon(epsilon),
         _svd(a, Eigen::ComputeThinU | Eigen::ComputeThinV)

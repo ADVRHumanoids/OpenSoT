@@ -41,7 +41,9 @@
 
                 Eigen::MatrixXd _M;
 
-                pseudoInverse<Eigen::MatrixXd> pinv;
+                //pseudoInverse<Eigen::MatrixXd> pinv;
+                LDLTInverse<Eigen::MatrixXd> inv;
+                
 
                 bool _use_inertia_matrix;
 
