@@ -174,6 +174,10 @@ public:
     }
 };
 
+/**
+ * LDLTInverse provide a simple template Eigen-based (implemented using LDLT) class to compute Inverse
+ * NOTE: FAST, works with squared Positive/Negative-SemiDefinite matrices, RT-safe
+ */
 template<class _Matrix_Type_> class LDLTInverse
 {
 public:
@@ -196,18 +200,17 @@ private:
 
 
 /**
- * PseudoInverse provide a simple template Eigen-based class to compute Pseudoinverse
+ * SVDPseudoInverse provide a simple template Eigen-based (implemented using SVD) class to compute pseudo inverse
+ * NOTE: SLOW, works with any matrix, NON RT-safe
  */
-template<class _Matrix_Type_> class pseudoInverse
+template<class _Matrix_Type_> class SVDPseudoInverse
 {
 public:
-    pseudoInverse(const _Matrix_Type_ &a, _Matrix_Type_ &ainv, const double epsilon = std::numeric_limits<double>::epsilon()):
+    SVDPseudoInverse(const _Matrix_Type_ &a, const double epsilon = std::numeric_limits<double>::epsilon()):
         _epsilon(epsilon),
         _svd(a, Eigen::ComputeThinU | Eigen::ComputeThinV)
     {
-        _tolerance = epsilon * std::max(a.cols(), a.rows()) *_svd.singularValues().array().abs()(0);
-        _singularValues = _svd.singularValues().array().abs();
-        ainv = _svd.matrixV() *  (_svd.singularValues().array().abs() > _tolerance).select(_svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * _svd.matrixU().adjoint();
+
     }
 
     void compute(const _Matrix_Type_ &a, _Matrix_Type_ &ainv, const double epsilon = std::numeric_limits<double>::epsilon())

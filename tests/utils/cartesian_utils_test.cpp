@@ -65,13 +65,16 @@ protected:
 
 TEST_F(testCartesianUtils, testPseudoInverse1)
 {
-    pseudoInverse<Eigen::MatrixXd> pinv;
     Eigen::MatrixXd A(32,32);
     Eigen::MatrixXd Ainv(32,32);
     Eigen::MatrixXd Apinv(32,32);
 
+    SVDPseudoInverse<Eigen::MatrixXd> pinv(A);
+
+
     for(unsigned int i = 0; i < 1000; ++i)
     {
+        srand((unsigned int) time(0));
         A.setRandom(32,32);
 
         Ainv = A.inverse();
@@ -84,18 +87,22 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
         }
     }
 
-    pseudoInverse<Eigen::MatrixXd> pinv2(A, Apinv);
+    srand((unsigned int) time(0));
+    A.setRandom(32,32);
+    LDLTInverse<Eigen::MatrixXd> LDLTinv(A);
     for(unsigned int i = 0; i < 1000; ++i)
     {
+        srand((unsigned int) time(0));
         A.setRandom(32,32);
+        A = (A*A.transpose()).eval();
 
         Ainv = A.inverse();
-        pinv2.compute(A, Apinv);
+        LDLTinv.compute(A, Apinv);
 
         for(unsigned int j = 0; j < A.rows(); ++j)
         {
             for(unsigned int k = 0; k < A.cols(); ++k)
-                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-8);
+                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-6);
         }
     }
 }
