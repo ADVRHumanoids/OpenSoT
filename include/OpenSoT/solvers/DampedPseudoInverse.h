@@ -11,12 +11,11 @@ namespace OpenSoT
     class DampedPseudoInverse : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
         Eigen::MatrixXd _W, _Wchol;
-        Eigen::LLT _WcholSolver;
-        std::vector<Eigen::MatrixXd> _P, _Jpinv; // occupy more memory, avoid reallocating during execution
-        std::vector<Eigen::JacobiSVD> _JPsvd, _Jsvd;
+        Eigen::LLT<Eigen::MatrixXd> _WcholSolver;
+        std::vector<Eigen::MatrixXd> _P, _JP, _JPpinv; // occupy more memory, avoid reallocating during execution
+        std::vector<Eigen::JacobiSVD<Eigen::MatrixXd>> _JPsvd;
         int _x_size;
 
-        
         /**
          * @brief getDampedPinv computes the weighted, damped pseudoinverse of A
          *        The pseudoinverse is damped using one of the methods listed in 
@@ -41,16 +40,19 @@ namespace OpenSoT
          *                  the number of singular values \f$\sigma_i\f$ such that 
          *                  \f$\sigma_i > \text{threshold}\f$,which defaults to
          *                  Eigen::NumTraits<double>::epsilon()
-         * @param sigma_min is the minimum value which is accepted for a singular value
-         *                  before regularization is enabled
          * @param lambda_max is the maximum regularization term that is applied, when the
          *                   smallest singular value of J is \f$\sigma \eq \text{threshold}\f$
          * 
          */
         Eigen::MatrixXd getDampedPinv(  const Eigen::MatrixXd& J,
+                                        const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                                         double threshold = Eigen::NumTraits< double >::epsilon(),
-                                        double sigma_min = 1e-12,
                                         double lambda_max = 1e-6) const;
+                                        
+        /** @brief sigma_min is the minimum value which is accepted for 
+         *                   a singular value before regularization is enabled */
+        double sigma_min;
+
     public:
         /**
          * @brief creates a pseudoinverse solver for the current Stack
@@ -71,6 +73,10 @@ namespace OpenSoT
          *          that is \f$\mathbb{R}^{n\timesn}\f$
          */
         void setWeight(const Eigen::MatrixXd& W);
+        
+        double getSigmaMin() const;
+        
+        void setSigmaMin(const double& sigma_min);
         
         /**
          * @brief getWeight returns the metric that is currently used for the PseudoInverse
