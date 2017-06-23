@@ -43,18 +43,21 @@
                 VelocityLimits(const double qDotLimit,
                                const double dT,
                                const unsigned int x_size);
+                VelocityLimits(const Eigen::VectorXd& qDotLimit,
+                               const double dT);
 
                 /**
                  * @brief getVelocityLimits returns the current velocity limits.
                  * @return the joint velocity limits. It is always a positive double [rad/s]
                  */
-                double getVelocityLimits();
+                Eigen::VectorXd getVelocityLimits();
 
                 /**
                  * @brief setVelocityLimits
                  * @param qDotLimit the joint velocity limits. It needs be a positive number [rad/s]
                  */
                 void setVelocityLimits(const double qDotLimit);
+                void setVelocityLimits(const Eigen::VectorXd& qDotLimit);
 
                 /**
                  * @brief getDT returns the (constant) sample time we assume on the system.
@@ -63,7 +66,8 @@
                 double getDT();
 
             private:
-                void generateBounds();
+                void generateBounds(const double qDotLimit);
+                void generateBounds(const Eigen::VectorXd& qDotLimit);
             };
         }
     }
