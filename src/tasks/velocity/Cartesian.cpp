@@ -42,14 +42,15 @@ Cartesian::Cartesian(std::string task_id,
 
     if(!this->_base_link_is_world) {
         this->_base_link_index = _robot.getLinkID(_base_link);
-        assert(this->_base_link_index >= 0);
+        //assert(this->_base_link_index >= 0);
     }
 
     this->_distal_link_index = _robot.getLinkID(_distal_link);
-    assert(this->_distal_link_index >= 0);
+    //assert(this->_distal_link_index >= 0);
 
-    if(!this->_base_link_is_world)
-        assert(this->_distal_link_index != _base_link_index);
+    if(!this->_base_link_is_world){
+        std::cout<<"ERROR: base_link == distal_link !!!"<<std::endl;
+        assert(this->_distal_link_index != _base_link_index);}
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
