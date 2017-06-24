@@ -193,7 +193,7 @@ endif()
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${srdfdom_advr_LIBRARIES}
                               #${idynutils_LIBRARIES}
-                              ${iDynTree_LIBRARIES}
+                              #${iDynTree_LIBRARIES}
                               ${eigen_conversions_LIBRARIES}
                               PRIVATE
                               ${qpOASES_LIBRARIES}
@@ -203,8 +203,9 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               #${PYTHON_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
                               ${conversion_utils_YARP_LIBRARIES}
-                              ${idynutils2_LIBRARIES}
+                              #${idynutils2_LIBRARIES}
                               ${fcl_LIBRARIES}
+                              ${moveit_core_LIBRARIES}
                               )
 
 ########################################################################
