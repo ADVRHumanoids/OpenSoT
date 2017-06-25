@@ -25,6 +25,149 @@ std::string _path_to_cfg = robotology_root + relative_path;
 bool IS_ROSCORE_RUNNING;
 
 namespace{
+/**
+ * @brief The walking_pattern_generator class generate Cartesian trajectories
+ * for COM, left/right feet for a "static walk" (the CoM is always inside the
+ * support polygon)
+ * We consider 3 steps (hardcoded) and we always start with the right foot.
+ */
+class walking_pattern_generator{
+public:
+    walking_pattern_generator(const KDL::Frame& com_init,
+                              const KDL::Frame& l_sole_init,
+                              const KDL::Frame& r_sole_init):
+        com_trj(0.01, "world", "com"),
+        l_sole_trj(0.01, "world", "l_sole"),
+        r_sole_trj(0.01, "world", "r_sole")
+    {
+        T_com = 3.;
+        T_foot = 1.;
+
+        step_lenght = 0.1;
+
+        KDL::Vector plane_normal; plane_normal.Zero();
+        plane_normal.y(1.0);
+
+        KDL::Frame com_wp = com_init;
+
+        KDL::Frame r_sole_wp;
+        KDL::Frame l_sole_wp;
+
+        std::vector<double> com_time;
+        std::vector<KDL::Frame> com_waypoints;
+        com_waypoints.push_back(com_init);
+
+        //1. We assume the CoM is in the middle of the feet and it
+        //moves on top of the left feet (keeping the same height),
+        //left and right feet keep the same pose:
+        com_wp.p.x(l_sole_init.p.x());
+        com_wp.p.y(l_sole_init.p.y());
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_com);
+
+        l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_com);
+        r_sole_trj.addMinJerkTrj(r_sole_init, r_sole_init, T_com);
+        //2. Now the CoM is on the left foot, the right foot move forward
+        // while the left foot keep the position:
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_foot);
+        l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_foot);
+
+        KDL::Vector arc_center = r_sole_init.p;
+        arc_center.x(arc_center.x() + step_lenght/2.);
+        r_sole_trj.addArcTrj(r_sole_init, r_sole_init.M, M_PI, arc_center, plane_normal, T_foot);
+        //3. CoM pass from left to right foot, feet remains in the
+        // same position
+        r_sole_wp = r_sole_trj.Pos(r_sole_trj.Duration());
+        com_wp.p.x(r_sole_wp.p.x());
+        com_wp.p.y(r_sole_wp.p.y());
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_com);
+
+        l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_com);
+        r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
+        //4. Now the CoM is on the right foot, the left foot move forward
+        // while the right foot keep the position:
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_foot);
+        r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_foot);
+
+        arc_center = l_sole_init.p;
+        arc_center.x(arc_center.x() + step_lenght);
+        l_sole_trj.addArcTrj(l_sole_init, l_sole_init.M, M_PI, arc_center, plane_normal, T_foot);
+        //5. CoM pass from right to left foot, feet remains in the
+        // same position
+        l_sole_wp = l_sole_trj.Pos(l_sole_trj.Duration());
+        com_wp.p.x(l_sole_wp.p.x());
+        com_wp.p.y(l_sole_wp.p.y());
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_com);
+
+        l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_com);
+        r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
+        //6. Now the CoM is on the left foot, the right foot move forward
+        // while the left foot keep the position:
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_foot);
+        l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_foot);
+
+        arc_center = r_sole_wp.p;
+        arc_center.x(arc_center.x() + step_lenght);
+        r_sole_trj.addArcTrj(r_sole_wp, r_sole_wp.M, M_PI, arc_center, plane_normal, T_foot);
+        //7. CoM pass from left to right foot, feet remains in the
+        // same position
+        r_sole_wp = r_sole_trj.Pos(r_sole_trj.Duration());
+        com_wp.p.x(r_sole_wp.p.x());
+        com_wp.p.y(r_sole_wp.p.y());
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_com);
+
+        l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_com);
+        r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
+        //8. Now the CoM is on the right foot, the left foot move forward
+        // while the right foot keep the position:
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_foot);
+        r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_foot);
+
+        arc_center = l_sole_wp.p;
+        arc_center.x(arc_center.x() + step_lenght/2.);
+        l_sole_trj.addArcTrj(l_sole_wp, l_sole_wp.M, M_PI, arc_center, plane_normal, T_foot);
+        //9. The CoM goes back in the middle of the feet. Feet remain
+        // in the same position
+        com_wp.p.y(0.0);
+        com_waypoints.push_back(com_wp);
+        com_time.push_back(T_com);
+
+        l_sole_wp = l_sole_trj.Pos(l_sole_trj.Duration());
+        l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_com);
+        r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
+
+
+        com_trj.addMinJerkTrj(com_waypoints,com_time);
+
+    }
+
+    /**
+     * @brief T_COM trajectory time for the CoM
+     */
+    double T_com;
+    /**
+     * @brief T_foot trajectory time for the feet
+     */
+    double T_foot;
+
+    /**
+     * @brief step_lenght
+     */
+    double step_lenght;
+
+    trajectory_utils::trajectory_generator com_trj;
+    trajectory_utils::trajectory_generator l_sole_trj;
+    trajectory_utils::trajectory_generator r_sole_trj;
+};
+
+
 class manipulation_trajectories{
 public:
     manipulation_trajectories(const KDL::Frame& com_init,
@@ -242,13 +385,22 @@ public:
 
             _n.reset(new ros::NodeHandle());
             world_broadcaster.reset(new tf::TransformBroadcaster());
-            initTrjPublisher();
+
         }
     }
 
     ~testStaticWalkFloatingBase(){}
     virtual void SetUp(){}
     virtual void TearDown(){}
+    void initTrj(const KDL::Frame& com_init,
+            const KDL::Frame& l_sole_init,
+            const KDL::Frame& r_sole_init)
+    {
+        walk_trj.reset(new walking_pattern_generator(com_init,
+                                                     l_sole_init,
+                                                     r_sole_init));
+    }
+
 
     void initManipTrj(const KDL::Frame& com_init,
             const KDL::Frame& r_wrist_init)
@@ -261,15 +413,15 @@ public:
         if(IS_ROSCORE_RUNNING){
             com_trj_pub.reset(
                 new trajectory_utils::trajectory_publisher("com_trj"));
-            //com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world", "com");
+            com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world", "com");
 
-//            l_sole_trj_pub.reset(
-//                new trajectory_utils::trajectory_publisher("l_sole_trj"));
-            //l_sole_trj_pub->setTrj(walk_trj->l_sole_trj.getTrajectory(), "world", "l_sole");
+            l_sole_trj_pub.reset(
+                new trajectory_utils::trajectory_publisher("l_sole_trj"));
+            l_sole_trj_pub->setTrj(walk_trj->l_sole_trj.getTrajectory(), "world", "l_sole");
 
-//            r_sole_trj_pub.reset(
-//                new trajectory_utils::trajectory_publisher("r_sole_trj"));
-//            r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world", "r_sole");
+            r_sole_trj_pub.reset(
+                new trajectory_utils::trajectory_publisher("r_sole_trj"));
+            r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world", "r_sole");
 
             visual_tools.reset(new rviz_visual_tools::RvizVisualTools("world", "/com_feet_visual_marker"));
 
@@ -282,14 +434,14 @@ public:
     {
         if(IS_ROSCORE_RUNNING)
         {
-            //visual_tools->deleteAllMarkers();
+            visual_tools->deleteAllMarkers();
 
 
-            //com_trj_pub->deleteAllMarkersAndTrj();
+            com_trj_pub->deleteAllMarkersAndTrj();
             com_trj_pub->setTrj(manip_trj->com_trj.getTrajectory(), "world", "com");
 
-            //l_sole_trj_pub->deleteAllMarkersAndTrj();
-            //r_sole_trj_pub->deleteAllMarkersAndTrj();
+            l_sole_trj_pub->deleteAllMarkersAndTrj();
+            r_sole_trj_pub->deleteAllMarkersAndTrj();
 
             r_wrist_trj_pub.reset(
                         new trajectory_utils::trajectory_publisher("r_wrist_trj"));
@@ -300,8 +452,7 @@ public:
 
     void publishCoMAndFeet(const KDL::Frame& com,
                            const KDL::Frame& l_foot,
-                           const KDL::Frame& r_foot,
-                           const std::string& anchor)
+                           const KDL::Frame& r_foot)
     {
         if(IS_ROSCORE_RUNNING)
         {
@@ -405,7 +556,7 @@ public:
 
 
     boost::shared_ptr<manipulation_trajectories> manip_trj;
-    //boost::shared_ptr<walking_pattern_generator> walk_trj;
+    boost::shared_ptr<walking_pattern_generator> walk_trj;
     boost::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
     boost::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
     boost::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
@@ -472,11 +623,96 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     printKDLFrame(world_T_bl);
     //
 
+    //Walking
     KDL::Vector CoM;
     this->_model_ptr->getCOM(CoM);
     KDL::Frame CoM_frame; CoM_frame.p = CoM;
     std::cout<<"CoM init:"<<std::endl;
     this->printKDLFrame(CoM_frame);
+
+    KDL::Frame l_foot_init;
+    this->_model_ptr->getPose("l_sole", l_foot_init);
+    std::cout<<"l_sole init:"<<std::endl;
+    this->printKDLFrame(l_foot_init);
+
+    KDL::Frame r_foot_init;
+    this->_model_ptr->getPose("r_sole", r_foot_init);
+    std::cout<<"r_sole init:"<<std::endl;
+    this->printKDLFrame(r_foot_init);
+
+    this->initTrj(CoM_frame, l_foot_init, r_foot_init);
+    this->initTrjPublisher();
+
+    //Initialize Walking Stack
+    theWalkingStack ws(*(this->_model_ptr.get()), this->_q);
+
+    double t = 0.;
+    Eigen::VectorXd dq(this->_q.size()); dq.setZero(dq.size());
+    std::vector<double> loop_time;
+    for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
+    {
+        KDL::Frame com_d = this->walk_trj->com_trj.Pos(t);
+        KDL::Frame l_sole_d = this->walk_trj->l_sole_trj.Pos(t);
+        KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
+
+        this->update(this->_q);
+
+        ws.com->setReference(com_d.p);
+        ws.l_sole->setReference(l_sole_d);
+        ws.r_sole->setReference(r_sole_d);
+
+        ws.update(this->_q);
+
+        uint tic = 0.0;
+        if(IS_ROSCORE_RUNNING)
+            tic = ros::Time::now().nsec;
+
+        if(!ws.solve(dq)){
+            std::cout<<"SOLVER ERROR!"<<std::endl;
+            dq.setZero(dq.size());}
+        this->_q += dq;
+
+        uint toc = 0.0;
+        if(IS_ROSCORE_RUNNING)
+            toc = ros::Time::now().nsec;
+
+        this->update(this->_q);
+
+        KDL::Frame tmp; KDL::Vector tmp_vector;
+        this->_model_ptr->getCOM(tmp_vector);
+        tmp.p = tmp_vector;
+        tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+        KDL::Frame l_sole;
+        this->_model_ptr->getPose("l_sole", l_sole);
+        tests_utils::KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
+        KDL::Frame r_sole;
+        this->_model_ptr->getPose("r_sole", r_sole);
+        tests_utils::KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
+
+        if(IS_ROSCORE_RUNNING){
+            loop_time.push_back((toc-tic)/1e6);
+
+            this->com_trj_pub->publish();
+            this->l_sole_trj_pub->publish();
+            this->r_sole_trj_pub->publish();}
+
+        this->publishCoMAndFeet(com_d,l_sole_d,r_sole_d);
+        this->publishRobotState();
+
+        if(IS_ROSCORE_RUNNING)
+            ros::spinOnce();
+
+        t+=0.01;
+        usleep(10000);
+    }
+
+
+
+
+    //Manipulation
+
+    this->_model_ptr->getCOM(CoM);
+    CoM_frame; CoM_frame.p = CoM;
 
     KDL::Frame r_wrist_init;
     this->_model_ptr->getPose("r_wrist","DWYTorso",r_wrist_init);
@@ -486,12 +722,9 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     this->initManipTrj(CoM_frame,  r_wrist_init);
     this->initManipTrjPublisher();
 
-    //Initialize Walking Stack
-    theWalkingStack ws(*(this->_model_ptr.get()), this->_q);
 
-    double t = 0.0;
-    std::vector<double> loop_time;
-    Eigen::VectorXd dq(this->_q.size()); dq.setZero(dq.size());
+    dq.setZero(dq.size());
+    t = 0.0;
     std::cout<<"Starting whole-body manipulation"<<std::endl;
     for(unsigned int i = 0; i < int(this->manip_trj->com_trj.Duration()) * 100; ++i)
     {
@@ -545,11 +778,88 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     }
 
 
+    //Walking
+    t = 0.0;
+    dq.setZero(dq.size());
+    this->update(this->_q);
+
+    this->_model_ptr->getCOM(CoM);
+    CoM_frame.p = CoM;
+
+    this->_model_ptr->getPose("l_sole", l_foot_init);
+
+    this->_model_ptr->getPose("r_sole", r_foot_init);
+
+    this->initTrj(CoM_frame, l_foot_init, r_foot_init);
+    this->initTrjPublisher();
+
+    for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
+    {
+        KDL::Frame com_d = this->walk_trj->com_trj.Pos(t);
+        KDL::Frame l_sole_d = this->walk_trj->l_sole_trj.Pos(t);
+        KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
+
+        this->update(this->_q);
+
+        ws.com->setReference(com_d.p);
+        ws.l_sole->setReference(l_sole_d);
+        ws.r_sole->setReference(r_sole_d);
+
+        ws.update(this->_q);
+
+        uint tic = 0.0;
+        if(IS_ROSCORE_RUNNING)
+            tic = ros::Time::now().nsec;
+
+        if(!ws.solve(dq)){
+            std::cout<<"SOLVER ERROR!"<<std::endl;
+            dq.setZero(dq.size());}
+        this->_q += dq;
+
+        uint toc = 0.0;
+        if(IS_ROSCORE_RUNNING)
+            toc = ros::Time::now().nsec;
+
+        this->update(this->_q);
+
+        KDL::Frame tmp; KDL::Vector tmp_vector;
+        this->_model_ptr->getCOM(tmp_vector);
+        tmp.p = tmp_vector;
+        tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+        KDL::Frame l_sole;
+        this->_model_ptr->getPose("l_sole", l_sole);
+        tests_utils::KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
+        KDL::Frame r_sole;
+        this->_model_ptr->getPose("r_sole", r_sole);
+        tests_utils::KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
+
+        if(IS_ROSCORE_RUNNING){
+            loop_time.push_back((toc-tic)/1e6);
+
+            this->com_trj_pub->publish();
+            this->l_sole_trj_pub->publish();
+            this->r_sole_trj_pub->publish();}
+
+        this->publishCoMAndFeet(com_d,l_sole_d,r_sole_d);
+        this->publishRobotState();
+
+        if(IS_ROSCORE_RUNNING)
+            ros::spinOnce();
+
+        t+=0.01;
+        usleep(10000);
+    }
 
 
-//    while (ros::ok()) {
-//        this->publishRobotState();
-//    }
+
+    if(IS_ROSCORE_RUNNING){
+        double acc = 0.;
+        for(unsigned int i = 0; i < loop_time.size(); ++i)
+            acc += loop_time[i];
+        std::cout<<"Medium time per solve: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
+    }
+
+
 
 }
 
