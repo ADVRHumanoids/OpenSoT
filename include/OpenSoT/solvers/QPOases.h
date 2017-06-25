@@ -159,6 +159,7 @@ namespace OpenSoT{
             a.segment(a.rows()-b.rows(),b.rows())<<b;
         }
 
+        Eigen::MatrixXd tmp_M;
         Eigen::MatrixXd H;
         Eigen::VectorXd g;
 
@@ -168,9 +169,12 @@ namespace OpenSoT{
 
         Eigen::VectorXd l;
         Eigen::VectorXd u;
+        Eigen::VectorXd tmp_opt;
 
         Eigen::MatrixXd tmp_A;
         Eigen::VectorXd tmp_lA, tmp_uA;
+
+
 
     };
 

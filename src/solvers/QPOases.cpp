@@ -40,17 +40,34 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
 
 void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g)
 {
-    H = task->getA().transpose() * task->getWeight() * task->getA();
-    g = -1.0 * task->getA().transpose() * task->getWeight() * task->getb();
+//    H = task->getA().transpose() * task->getWeight() * task->getA();
+//    g = -1.0 * task->getA().transpose() * task->getWeight() * task->getb();
+
+    if(task->getWeight().isIdentity())
+        tmp_M = task->getA().transpose();
+    else
+        tmp_M = task->getA().transpose() * task->getWeight();
+
+    if(tmp_M.isIdentity())
+    {
+        H.setIdentity(task->getA().cols(), task->getA().cols());
+        g = -1.*task->getb();
+    }
+    else
+    {
+        H = tmp_M * task->getA();
+        g = -1.0 * tmp_M * task->getb();
+    }
 }
 
 void QPOases_sot::computeOptimalityConstraint(const TaskPtr& task, OpenSoT::solvers::QPOasesProblem &problem,
                                                      Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
+    tmp_opt = task->getA()*problem.getSolution();
     OpenSoT::constraints::BilateralConstraint optimality_bilateral_constraint(
                 task->getA(),
-                task->getA()*problem.getSolution(),
-                task->getA()*problem.getSolution());
+                tmp_opt,
+                tmp_opt);
     A = optimality_bilateral_constraint.getAineq();
     lA = optimality_bilateral_constraint.getbLowerBound();
     uA = optimality_bilateral_constraint.getbUpperBound();
