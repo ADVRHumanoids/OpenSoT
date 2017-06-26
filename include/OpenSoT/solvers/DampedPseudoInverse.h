@@ -4,6 +4,11 @@
 #include <OpenSoT/Solver.h>
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
+#include <Eigen/src/Core/util/Macros.h>
+
+#if EIGEN_MINOR_VERSION <= 0
+#include <Eigen/LU>
+#endif
 
 namespace OpenSoT
 {
@@ -15,6 +20,10 @@ namespace OpenSoT
         std::vector<Eigen::MatrixXd> _P, _JP, _JPpinv; // occupy more memory, avoid reallocating during execution
         std::vector<Eigen::JacobiSVD<Eigen::MatrixXd>> _JPsvd;
         int _x_size;
+
+#if EIGEN_MINOR_VERSION <= 0
+        std::vector<Eigen::FullPivLU<Eigen::MatrixXd>> _FPL;
+#endif
 
         /**
          * @brief getDampedPinv computes the weighted, damped pseudoinverse of A
@@ -44,10 +53,18 @@ namespace OpenSoT
          *                   smallest singular value of J is \f$\sigma \eq \text{threshold}\f$
          * 
          */
+        #if EIGEN_MINOR_VERSION <= 0
+        Eigen::MatrixXd getDampedPinv(  const Eigen::MatrixXd& J,
+                                const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
+                                const Eigen::FullPivLU<Eigen::MatrixXd>& fpl,
+                                double threshold = Eigen::NumTraits< double >::epsilon(),
+                                double lambda_max = 1e-6) const;
+        #else
         Eigen::MatrixXd getDampedPinv(  const Eigen::MatrixXd& J,
                                         const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                                         double threshold = Eigen::NumTraits< double >::epsilon(),
                                         double lambda_max = 1e-6) const;
+        #endif
                                         
         /** @brief sigma_min is the minimum value which is accepted for 
          *                   a singular value before regularization is enabled */
