@@ -19,7 +19,7 @@
 #define __TASKS_FORCE_COM_H__
 
 #include <OpenSoT/Task.h>
-#include <idynutils/idynutils.h>
+#include <XBotInterface/ModelInterface.h>
 #include <kdl/frames.hpp>
 
 
@@ -45,7 +45,7 @@
                 #define BASE_LINK_COM "world"
                 #define DISTAL_LINK_COM "CoM"
 
-                iDynUtils& _robot;
+                XBot::ModelInterface& _robot;
 
                 /**
                  * @brief _g gravity vector in world frame
@@ -69,6 +69,10 @@
                 Eigen::Vector3d _actualVelocity;
                 Eigen::Vector3d _actualAngularMomentum;
 
+                Eigen::Vector6d _centroidalMomentum;
+
+                Eigen::MatrixXd A;
+                Eigen::MatrixXd B;
 
                 double _lambda2;
 
@@ -80,7 +84,7 @@
 
                 Eigen::Matrix3d _I;
                 Eigen::Matrix3d _P;
-                Eigen::Matrix4d _T;
+                Eigen::Affine3d _T;
                 Eigen::Matrix3d _O;
 
             public:
@@ -95,7 +99,7 @@
                  * @param robot the robot model, with floating base link set on the support foot
                  */
                 CoM(const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact,
-                    iDynUtils& robot);
+                    XBot::ModelInterface& robot);
 
                 ~CoM();
 
@@ -173,7 +177,7 @@
 
                 Eigen::Vector3d getAngularMomentumError();
 
-                Eigen::MatrixXd computeW(const std::vector<std::string>& links_in_contact);
+                Eigen::MatrixXd computeA(const std::vector<std::string>& links_in_contact);
 
             };
         }

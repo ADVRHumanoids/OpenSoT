@@ -1,0 +1,25 @@
+# BIGMAN config
+XBotInterface:
+  urdf_path: "external/OpenSoT/tests/robots/bigman/bigman.urdf"
+  srdf_path: "external/OpenSoT/tests/robots/bigman/bigman.srdf"
+  joint_map_path: "external/OpenSoT/tests/configs/bigman/joint_map/bigman_ecat_joint_map.yaml"
+
+RobotInterface:
+  framework_name: "YARP"
+  
+ModelInterface:
+  model_type: "IDYNUTILS"
+  is_model_floating_base: "false"
+  
+RobotInterfaceYARP:
+  subclass_name: "RobotInterfaceYARP"
+  path_to_shared_lib: "libRobotInterfaceYARP.so"
+  subclass_factory_name: "robot_interface_yarp"
+  module_prefix: "test_YARP"
+  robot_name: "bigman"
+  # different config files for module_prefix
+
+ModelInterfaceIDYNUTILS:
+  subclass_name: "ModelInterfaceIDYNUTILS"
+  path_to_shared_lib: "libModelInterfaceIDYNUTILS.so"
+  subclass_factory_name: "model_interface_idynutils"

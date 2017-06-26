@@ -38,6 +38,9 @@
              * @brief The Cartesian class implements a task that tries to impose a pose (position and orientation)
              * of a distal link w.r.t. a base link. The reference for the cartesian task is set in base link
              * coordinate frame, or in world if the base link name is set to "world".
+             * When relative Cartesian task is required,for example from link A to link B,
+             * the relative velocity considered is the the one of B respect to A expressed
+             * in A.
              * The Cartesian Task is implemented so that
              * \f$A={}^\text{base}J_\text{distal}\f$
              * and
@@ -68,6 +71,8 @@
                 double _orientationErrorGain;
 
                 bool _is_initialized;
+
+                Eigen::VectorXd _error;
 
             public:
 
@@ -154,13 +159,6 @@
                 const Eigen::MatrixXd getActualPose() const;
                 const void getActualPose(KDL::Frame& actual_pose) const;
                 
-                /**
-                 * @brief DEPRECATED getActualPoseKDL returns the distal_link actual pose as a KDL frame. You need to call _update(x) for the actual pose to change
-                 * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
-                 * for the distal_link in the base_link frame of reference as a KDL Pose.
-                 */
-                const KDL::Frame getActualPoseKDL() const;
-
                 void setOrientationErrorGain(const double& orientationErrorGain);
                 const double getOrientationErrorGain() const;
 
@@ -174,7 +172,7 @@
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
                  * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
                  */
-                Eigen::VectorXd getError();
+                const Eigen::VectorXd getError() const;
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

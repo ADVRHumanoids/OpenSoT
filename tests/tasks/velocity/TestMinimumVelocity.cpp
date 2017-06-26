@@ -1,4 +1,4 @@
-#include <idynutils/tests_utils.h>
+#include <advr_humanoids_common_utils/test_utils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/MinimumVelocity.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>

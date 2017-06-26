@@ -1,5 +1,4 @@
 #include <advr_humanoids_common_utils/conversion_utils_YARP.h>
-#include <idynutils/tests_utils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>

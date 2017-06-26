@@ -22,6 +22,7 @@
  #include <OpenSoT/Task.h>
  #include <XBotInterface/ModelInterface.h>
  #include <kdl/frames.hpp>
+ #include <OpenSoT/utils/cartesian_utils.h>
 
  namespace OpenSoT {
     namespace tasks {
@@ -39,6 +40,10 @@
                 XBot::ModelInterface& _robot;
 
                 Eigen::MatrixXd _M;
+
+                //pseudoInverse<Eigen::MatrixXd> pinv;
+                LDLTInverse<Eigen::MatrixXd> inv;
+                
 
                 bool _use_inertia_matrix;
 

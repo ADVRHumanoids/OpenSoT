@@ -20,13 +20,22 @@
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/SubTask.h>
-#include <advr_humanoids_common_utils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 #include <XBotInterface/ModelInterface.h>
 
 namespace OpenSoT {
 namespace tasks {
 namespace velocity {
 
+
+/**
+ * @brief The Gaze class implement a Cartesian Task in which is controlled the gaze of
+ * the robot.
+ * The algorithm used is based on the paper: "Adaptive Predictive Gaze Control of a Redundant Humanoid
+ * Robot Head, IROS2011".
+ * Notice that the controlled distal link is always "gaze" in a certain base_link set
+ * by the user.
+ */
 class Gaze: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>
 {
 public:
@@ -92,6 +101,11 @@ public:
      */
     virtual bool setActiveJointsMask(const std::vector<bool>& active_joints_mask);
 
+    /**
+     * @brief getDistalLink return "gaze" as controlled link
+     * @return string with distal link name
+     */
+    std::string getDistalLink(){ return _distal_link;}
 
 private:
     std::string _distal_link;
@@ -103,15 +117,9 @@ private:
 
     XBot::ModelInterface& _robot;
 
-    Eigen::MatrixXd toEigen(const KDL::Frame& F)
-    {
-        Eigen::MatrixXd K(4,4);
-        K.setIdentity(4,4);
-        K(0,0) = F.M(0,0); K(0,1) = F.M(0,1); K(0,2) = F.M(0,2); K(0,3) = F.p.x();
-        K(1,0) = F.M(1,0); K(1,1) = F.M(1,1); K(1,2) = F.M(1,2); K(1,3) = F.p.y();
-        K(2,0) = F.M(2,0); K(2,1) = F.M(2,1); K(2,2) = F.M(2,2); K(2,3) = F.p.z();
-        return K;
-    }
+    KDL::Frame _bl_T_gaze_kdl;
+    KDL::Frame _gaze_goal;
+    Eigen::MatrixXd _tmpEigenM;
 
 
 

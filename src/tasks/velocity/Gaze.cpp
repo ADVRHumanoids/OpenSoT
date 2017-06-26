@@ -12,7 +12,8 @@ Gaze::Gaze(std::string task_id,
     _distal_link("gaze"),
     _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, base_link)),
     _subtask(new SubTask(_cartesian_task, Indices::range(4,5))),
-    _robot(robot), _gaze_T_obj(4,4), _tmp_vector(3)
+    _robot(robot), _gaze_T_obj(4,4), _tmp_vector(3), _bl_T_gaze_kdl(),
+    _gaze_goal(), _tmpEigenM(4,4)
 {
     this->_update(x);
 }
@@ -24,25 +25,30 @@ Gaze::~Gaze()
 
 void Gaze::setGaze(const Eigen::MatrixXd &desiredGaze)
 {    
-    KDL::Frame bl_T_gaze_kdl;
-
     if(_cartesian_task->baseLinkIsWorld())
-        _robot.getPose(_distal_link, bl_T_gaze_kdl);
+        _robot.getPose(_distal_link, _bl_T_gaze_kdl);
     else
-        _robot.getPose(_distal_link, _cartesian_task->getBaseLink(), bl_T_gaze_kdl);
+        _robot.getPose(_distal_link, _cartesian_task->getBaseLink(), _bl_T_gaze_kdl);
 
-    _gaze_T_obj = toEigen(bl_T_gaze_kdl.Inverse())*desiredGaze;
+    for(unsigned int i = 0; i < 3; ++i){
+        for(unsigned int j = 0; j < 3; ++j)
+            _tmpEigenM(i,j) = _bl_T_gaze_kdl.M(i,j);
+    }
+    _tmpEigenM(0,3) = _bl_T_gaze_kdl.p.x();
+    _tmpEigenM(1,3) = _bl_T_gaze_kdl.p.y();
+    _tmpEigenM(2,3) = _bl_T_gaze_kdl.p.z();
+
+
+    _gaze_T_obj = _tmpEigenM.inverse()*desiredGaze;
     _tmp_vector(0) = _gaze_T_obj(0,3);
     _tmp_vector(1) = _gaze_T_obj(1,3);
     _tmp_vector(2) = _gaze_T_obj(2,3);
 
-    KDL::Frame gaze_goal; gaze_goal = gaze_goal.Identity();
-    cartesian_utils::computePanTiltMatrix(_tmp_vector, gaze_goal);
+    _gaze_goal = _gaze_goal.Identity();
+    cartesian_utils::computePanTiltMatrix(_tmp_vector, _gaze_goal);
     //cartesian_utils::computePanTiltMatrix(gaze_T_obj.subcol(0, 3, 3), gaze_goal);
 
-    gaze_goal = bl_T_gaze_kdl*gaze_goal;
-
-    _cartesian_task->setReference(gaze_goal);
+    _cartesian_task->setReference(_bl_T_gaze_kdl*_gaze_goal);
 }
 
 void Gaze::setOrientationErrorGain(const double& orientationErrorGain)

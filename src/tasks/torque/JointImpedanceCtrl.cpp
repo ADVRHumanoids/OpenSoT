@@ -23,13 +23,15 @@ using namespace OpenSoT::tasks::torque;
 
 JointImpedanceCtrl::JointImpedanceCtrl(const Eigen::VectorXd& x, XBot::ModelInterface &robot) :
     Task("JointImpedanceCtrl", x.size()), _x(x), _x_dot(x), _robot(robot),
-    _x_desired(x.size()), _xdot_desired(x.size()), _use_inertia_matrix(true)
+    _x_desired(x.size()), _xdot_desired(x.size()), _use_inertia_matrix(true),
+    inv(Eigen::MatrixXd::Identity(x.size(),x.size()))
 {
     _x_desired.setZero(x.size());
     _xdot_desired.setZero(x.size());
 
     _W.resize(_x_size, _x_size);
     _W.setIdentity(_x_size, _x_size);
+    
 
     _K = _W;
     _K = 100.*_K;
@@ -66,7 +68,9 @@ void JointImpedanceCtrl::_update(const Eigen::VectorXd &x) {
 
         _robot.getInertiaMatrix(_M);
 
-        _W = _M.inverse();
+        //pinv.compute(_M, _W);
+        inv.compute(_M, _W);
+        //_W = _M.inverse();
     }
 
     /************************* COMPUTING TASK *****************************/

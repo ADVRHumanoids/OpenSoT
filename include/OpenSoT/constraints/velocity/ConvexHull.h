@@ -23,7 +23,7 @@
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
  #include <XBotInterface/ModelInterface.h>
- #include <advr_humanoids_common_utils/convex_hull_utils.h>
+ #include <OpenSoT/utils/convex_hull_utils.h>
 
 #define BOUND_SCALING 0.01
 

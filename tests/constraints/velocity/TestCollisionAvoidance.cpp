@@ -1,20 +1,33 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/constraints/velocity/all.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/CartesianPositionConstraint.h>
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
-#include <OpenSoT/tasks/velocity/all.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/solvers/QPOases.h>
-#include <idynutils/idynutils.h>
-#include <idynutils/collision_utils.h>
-#include <idynutils/tests_utils.h>
-#include <iCub/iDynTree/yarp_kdl.h>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
+#include <XBotInterface/ModelInterface.h>
+#include <advr_humanoids_common_utils/test_utils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
 #include <yarp/os/all.h>
 #include <cmath>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <idynutils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
+#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
+
+#define ENABLE_ROS false
+
+#if ENABLE_ROS
+#include <ros/ros.h>
+#include <sensor_msgs/JointState.h>
+#endif
+
+
+
+typedef idynutils2 iDynUtils;
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
@@ -44,23 +57,27 @@ KDL::Frame fcl2KDL(const fcl::Transform3f &in)
     return f;
 }
 
-yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
-    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-    leg[2] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[4] = -25.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
-    arm[2] = -15.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-    arm[1] = -arm[1];
-    arm[2] = -arm[2];
-    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
+yarp::sig::Vector getGoodInitialPosition(iDynUtils& _robot) {
+    yarp::sig::Vector q(_robot.iDynTree_model.getNrOfDOFs(), 0.0);
+
+    q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+    q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+    q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LShYaw")] = -15.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+
+    q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("RShYaw")] = 15.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+
 
     std::cout << "Q_initial: " << q.toString() << std::endl;
     return q;
@@ -225,17 +242,64 @@ namespace{
 
 
 class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
+public:
+    static void null_deleter(iDynUtils *) {}
+
+#if ENABLE_ROS
+    void publishJointStates(const Eigen::VectorXd& q)
+    {
+        for(unsigned int i = 0; i < q.size(); ++i)
+            joint_state.position[i] = q[i];
+        joint_state.header.stamp = ros::Time::now();
+
+        pub.publish(joint_state);
+        ros::spinOnce();
+    }
+#endif
+
  protected:
 
   testSelfCollisionAvoidanceConstraint():
       robot("bigman",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.urdf",
             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"bigman/bigman.srdf"),
-      q(robot.iDyn3_model.getNrOfDOFs(), 0.0),
-      compute_distance(robot),
-      sc_constraint(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
-                        cartesian_utils::toEigen(q), robot, std::numeric_limits<double>::infinity(), 0.005))
-  {}
+      q(robot.iDynTree_model.getNrOfDOFs(), 0.0)
+  {
+#if ENABLE_ROS
+      int argc = 0;
+      char **argv;
+      ros::init(argc, argv, "collision_avoidance_test");
+      n.reset(new ros::NodeHandle());
+      pub = n->advertise<sensor_msgs::JointState>("joint_states", 1000);
+#endif
+
+      std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+      std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman.yaml";
+
+      _path_to_cfg = robotology_root + relative_path;
+
+      _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
+              (XBot::ModelInterface::getModel(_path_to_cfg));
+      _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&robot, &null_deleter));
+
+      if(_model_ptr)
+          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+      else
+          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+      compute_distance.reset(new ComputeLinksDistance(*(_model_ptr.get())));
+
+      double padding = 0.005;//0.005;
+      sc_constraint.reset(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
+                        conversion_utils_YARP::toEigen(q), *(_model_ptr.get()),
+                              std::numeric_limits<double>::infinity(), padding));
+
+#if ENABLE_ROS
+      for(unsigned int i = 0; i < robot.getJointNames().size(); ++i){
+          joint_state.name.push_back(robot.getJointNames()[i]);
+          joint_state.position.push_back(0.0);}
+#endif
+  }
 
   virtual ~testSelfCollisionAvoidanceConstraint() {
   }
@@ -246,31 +310,44 @@ class testSelfCollisionAvoidanceConstraint : public ::testing::Test{
   virtual void TearDown() {
   }
 
+
+
+  XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+  std::string _path_to_cfg;
   iDynUtils robot;
   yarp::sig::Vector q;
-  ComputeLinksDistance compute_distance;
+  boost::shared_ptr<ComputeLinksDistance> compute_distance;
   OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sc_constraint;
+
+#if ENABLE_ROS
+  ///ROS
+  boost::shared_ptr<ros::NodeHandle> n;
+  ros::Publisher pub;
+  sensor_msgs::JointState joint_state;
+#endif
+
 
 };
 
 
 TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
 
-    this->robot.iDyn3_model.setFloatingBaseLink(this->robot.left_leg.index);
+    int idx = robot.iDynTree_model.getLinkIndex("l_sole");
+    this->robot.iDynTree_model.setFloatingBaseLink(idx);
     this->q = getGoodInitialPosition(this->robot);
-    this->robot.updateiDyn3Model(this->q, true);
+    this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_hand",
-                                                        cartesian_utils::toEigen(this->q), this->robot, linkA, "Waist"));
+                                                        conversion_utils_YARP::toEigen(this->q), *(_model_ptr.get()), linkA, "Waist"));
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::right_hand",
-                                                        cartesian_utils::toEigen(this->q), this->robot, linkB, "Waist"));
+                                                        conversion_utils_YARP::toEigen(this->q), *(_model_ptr.get()), linkB, "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -296,7 +373,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
        new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(cartesian_utils::toEigen(this->q)));
+                new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(this->q)));
 
 
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
@@ -304,9 +381,9 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
-    int t = 100;
+    int t = 10;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-        new OpenSoT::constraints::velocity::JointLimits(cartesian_utils::toEigen(this->q),
+        new OpenSoT::constraints::velocity::JointLimits(conversion_utils_YARP::toEigen(this->q),
                                                         this->robot.getJointBoundMax(),
                                                         this->robot.getJointBoundMin()));
 
@@ -323,16 +400,16 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     for(unsigned int i = 0; i < 50*t; ++i)
     {
-        this->robot.updateiDyn3Model(this->q, true);
+        this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
-        taskCartesianAggregated->update(cartesian_utils::toEigen(this->q));
-        postural_task->update(cartesian_utils::toEigen(this->q));
-        bounds->update(cartesian_utils::toEigen(this->q));
+        taskCartesianAggregated->update(conversion_utils_YARP::toEigen(this->q));
+        postural_task->update(conversion_utils_YARP::toEigen(this->q));
+        bounds->update(conversion_utils_YARP::toEigen(this->q));
 
         if(!sot->solve(_dq)){
             std::cout<<"error"<<std::endl;
             _dq.setZero(_dq.rows());}
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        dq = conversion_utils_YARP::toYARP(_dq);
         using namespace yarp::math;
         this->q += dq;
 
@@ -367,16 +444,16 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
 
     // check the distance betweem hands
 
-    int left_wrist_index = robot.iDyn3_model.getLinkIndex(linkA);
+    int left_wrist_index = robot.iDynTree_model.getLinkIndex(linkA);
     if(left_wrist_index == -1)
         std::cout << "Failed to get leftwrist_index" << std::endl;
 
-    int right_wrist_index = robot.iDyn3_model.getLinkIndex(linkB);
+    int right_wrist_index = robot.iDynTree_model.getLinkIndex(linkB);
     if(right_wrist_index == -1)
         std::cout << "Failed to get rightwrist_index" << std::endl;
 
-    KDL::Frame w_T_link_left_hand = robot.iDyn3_model.getPositionKDL(left_wrist_index);
-    KDL::Frame w_T_link_right_hand = robot.iDyn3_model.getPositionKDL(right_wrist_index);
+    KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_wrist_index);
+    KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_wrist_index);
 
     double actual_distance = ( w_T_link_left_hand.p - w_T_link_right_hand.p ).Norm();
 
@@ -387,9 +464,10 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
 
 TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
-    this->robot.iDyn3_model.setFloatingBaseLink(this->robot.left_leg.index);
+    int idx = robot.iDynTree_model.getLinkIndex("l_sole");
+    this->robot.iDynTree_model.setFloatingBaseLink(idx);
     this->q = getGoodInitialPosition(this->robot);
-    this->robot.updateiDyn3Model(this->q, true);
+    this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
 
     std::string linkA = "LSoftHandLink";
@@ -397,12 +475,12 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_hand",
-                                                        cartesian_utils::toEigen(this->q), this->robot, linkA, "Waist"));
+                                                        conversion_utils_YARP::toEigen(this->q), *(_model_ptr.get()), linkA, "Waist"));
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::right_hand",
-                                                        cartesian_utils::toEigen(this->q), this->robot, linkB, "Waist"));
+                                                        conversion_utils_YARP::toEigen(this->q), *(_model_ptr.get()), linkB, "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -435,7 +513,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(
-                                                              cartesian_utils::toEigen(this->q)));
+                                                              conversion_utils_YARP::toEigen(this->q)));
     postural_task->getConstraints().push_back(this->sc_constraint);
 
 
@@ -447,7 +525,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     int t = 100;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
                 new OpenSoT::constraints::velocity::JointLimits(
-                    cartesian_utils::toEigen(this->q),
+                    conversion_utils_YARP::toEigen(this->q),
                                             this->robot.getJointBoundMax(),
                                             this->robot.getJointBoundMin()));
 
@@ -464,22 +542,22 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     for(unsigned int i = 0; i < 50*t; ++i)
     {
-        this->robot.updateiDyn3Model(this->q, true);
+        this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
         double tic = yarp::os::SystemClock::nowSystem();
         this->sc_constraint->update(
-                    cartesian_utils::toEigen(this->q));
+                    conversion_utils_YARP::toEigen(this->q));
         std::cout << "Update time:" << yarp::os::SystemClock::nowSystem() - tic << std::endl;
 
         taskCartesianAggregated->update(
-                    cartesian_utils::toEigen(this->q));
-        postural_task->update(cartesian_utils::toEigen(this->q));
-        bounds->update(cartesian_utils::toEigen(this->q));
+                    conversion_utils_YARP::toEigen(this->q));
+        postural_task->update(conversion_utils_YARP::toEigen(this->q));
+        bounds->update(conversion_utils_YARP::toEigen(this->q));
 
         if(!sot->solve(_dq)){
             std::cout<<"error"<<std::endl;
             _dq.setZero(dq.size());}
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        dq = conversion_utils_YARP::toYARP(_dq);
         using namespace yarp::math;
         this->q += dq;
 
@@ -487,32 +565,26 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
     std::cout << "Q_final: " << this->q.toString() << std::endl;
 
-    std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_l_arm));
+    std::cout<<"Initial Left Arm: "<<T_init_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_l_arm));
+    std::cout<<"Reference Left Arm: "<<T_reference_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_left_arm->getActualPose()));
+    std::cout<<"Actual Left Arm: "<<task_left_arm->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
     std::cout<<std::endl;
 
-    std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_r_arm));
+    std::cout<<"Initial Right Arm: "<<T_init_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_r_arm));
+    std::cout<<"Reference Right Arm: "<<T_reference_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_right_arm->getActualPose()));
+    std::cout<<"Actual Right Arm: "<<task_right_arm->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
 
     // check the actual distance between the hand capsule pair
 
-    TestCapsuleLinksDistance compute_distance_observer(compute_distance);
+    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
 
     KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
             righthand_capsule_ep1, righthand_capsule_ep2;
@@ -522,16 +594,16 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
     capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
-    int left_wrist_index = robot.iDyn3_model.getLinkIndex(linkA);
+    int left_wrist_index = robot.iDynTree_model.getLinkIndex(linkA);
     if(left_wrist_index == -1)
         std::cout << "Failed to get leftwrist_index" << std::endl;
 
-    int right_wrist_index = robot.iDyn3_model.getLinkIndex(linkB);
+    int right_wrist_index = robot.iDynTree_model.getLinkIndex(linkB);
     if(right_wrist_index == -1)
         std::cout << "Failed to get rightwrist_index" << std::endl;
 
-    KDL::Frame w_T_link_left_hand = robot.iDyn3_model.getPositionKDL(left_wrist_index);
-    KDL::Frame w_T_link_right_hand = robot.iDyn3_model.getPositionKDL(right_wrist_index);
+    KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_wrist_index);
+    KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_wrist_index);
 
     lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
     lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
@@ -567,10 +639,19 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
 TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
-    this->robot.iDyn3_model.setFloatingBaseLink(this->robot.left_leg.index);
+    int idx = robot.iDynTree_model.getLinkIndex("l_sole");
+    this->robot.iDynTree_model.setFloatingBaseLink(idx);
     this->q = getGoodInitialPosition(this->robot);
-    this->robot.updateiDyn3Model(this->q, true);
+    this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
+#if ENABLE_ROS
+    this->publishJointStates(conversion_utils_YARP::toEigen(this->q));
+    this->publishJointStates(conversion_utils_YARP::toEigen(this->q));
+    this->publishJointStates(conversion_utils_YARP::toEigen(this->q));
+
+
+    sleep(1);
+#endif
 
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
@@ -579,13 +660,13 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     std::string linkD = "RFootmot";
 
     // arm task
-    Eigen::VectorXd q = cartesian_utils::toEigen(this->q);
+    Eigen::VectorXd q = conversion_utils_YARP::toEigen(this->q);
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, this->robot,linkA, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, *(_model_ptr.get()),linkA, "Waist"));
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", q, this->robot,linkB, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", q, *(_model_ptr.get()),linkB, "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -611,12 +692,20 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     // coincident with those of their child links, i.e., LFoot and RFoot.
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", q, this->robot,"LFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", q, *(_model_ptr.get()),"LFoot", "Waist"));
     task_left_leg->setOrientationErrorGain(0.1);
 
+    Eigen::MatrixXd W = task_left_leg->getWeight();
+    //W(1,1) = 1.1;
+    W(0,0) = 3.;
+    W(2,2) = 3.;
+    task_left_leg->setWeight(W);
+
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", q, this->robot,"RFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", q, *(_model_ptr.get()),"RFoot", "Waist"));
     task_right_leg->setOrientationErrorGain(0.1);
+
+    task_right_leg->setWeight(W);
 
     Eigen::MatrixXd T_init_l_leg(4,4);
     T_init_l_leg = task_left_leg->getReference();
@@ -680,69 +769,60 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     for(unsigned int i = 0; i < 50*t; ++i)
     {
-        this->robot.updateiDyn3Model(this->q, true);
+        this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
 
-        taskCartesianAggregated->update(cartesian_utils::toEigen(this->q));
-        postural_task->update(cartesian_utils::toEigen(this->q));
-        bounds->update(cartesian_utils::toEigen(this->q));
+        taskCartesianAggregated->update(conversion_utils_YARP::toEigen(this->q));
+        postural_task->update(conversion_utils_YARP::toEigen(this->q));
+        bounds->update(conversion_utils_YARP::toEigen(this->q));
 
         if(!sot->solve(_dq)){
             std::cout<<"error"<<std::endl;
             _dq.setZero(dq.size());}
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        dq = conversion_utils_YARP::toYARP(_dq);
         using namespace yarp::math;
         this->q += dq;
-
+#if ENABLE_ROS
+        this->publishJointStates(conversion_utils_YARP::toEigen(this->q));
+        usleep(0);
+#endif
     }
 
     std::cout << "Q_final: " << this->q.toString() << std::endl;
 
-    std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_l_arm));
+    std::cout<<"Initial Left Arm: "<<T_init_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_l_arm));
+    std::cout<<"Reference Left Arm: "<<T_reference_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_left_arm->getActualPose()));
+    std::cout<<"Actual Left Arm: "<<task_left_arm->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
     std::cout<<std::endl;
 
-    std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_r_arm));
+    std::cout<<"Initial Right Arm: "<<T_init_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_r_arm));
+    std::cout<<"Reference Right Arm: "<<T_reference_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_right_arm->getActualPose()));
+    std::cout<<"Actual Right Arm: "<<task_right_arm->getActualPose()<<std::endl;
 
     // showing the data of the legs
 
     std::cout<<std::endl;
 
-    std::cout<<"Initial Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_l_leg));
+    std::cout<<"Initial Left leg: "<<T_init_l_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_l_leg));
+    std::cout<<"Reference Left leg: "<<T_reference_l_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_left_leg->getActualPose()));
+    std::cout<<"Actual Left leg: "<<task_left_leg->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
     std::cout<<std::endl;
 
-    std::cout<<"Initial Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_r_leg));
+    std::cout<<"Initial Right leg: "<<T_init_r_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_r_leg));
+    std::cout<<"Reference Right leg: "<<T_reference_r_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_right_leg->getActualPose()));
+    std::cout<<"Actual Right leg: "<<task_right_leg->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
 
@@ -754,7 +834,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
 
 
-    TestCapsuleLinksDistance compute_distance_observer(compute_distance);
+    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
 
     int i;
     for (i=0; i < CasulePairs_vec.size(); i++)
@@ -773,16 +853,16 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
         capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
         capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
-        int left_wrist_index = robot.iDyn3_model.getLinkIndex(_linkA);
+        int left_wrist_index = robot.iDynTree_model.getLinkIndex(_linkA);
         if(left_wrist_index == -1)
             std::cout << "Failed to get index" << std::endl;
 
-        int right_wrist_index = robot.iDyn3_model.getLinkIndex(_linkB);
+        int right_wrist_index = robot.iDynTree_model.getLinkIndex(_linkB);
         if(right_wrist_index == -1)
             std::cout << "Failed to get index" << std::endl;
 
-        KDL::Frame w_T_link_left_hand = robot.iDyn3_model.getPositionKDL(left_wrist_index);
-        KDL::Frame w_T_link_right_hand = robot.iDyn3_model.getPositionKDL(right_wrist_index);
+        KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_wrist_index);
+        KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_wrist_index);
 
         lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
         lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
@@ -822,6 +902,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
         else
             std::cout << "The dimension of CasulePairs_vec is incorrect!" << std::endl;
 
+        std::cout<<"reference_distance: "<<reference_distance<<std::endl;
     }
 
 
@@ -830,9 +911,10 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
 TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
-    this->robot.iDyn3_model.setFloatingBaseLink(this->robot.left_leg.index);
+    int idx = robot.iDynTree_model.getLinkIndex("l_sole");
+    this->robot.iDynTree_model.setFloatingBaseLink(idx);
     this->q = getGoodInitialPosition(this->robot);
-    this->robot.updateiDyn3Model(this->q, true);
+    this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
 
     std::string linkA = "LSoftHandLink";
@@ -842,13 +924,13 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     std::string linkD = "RFootmot";
 
     // arm task
-    Eigen::VectorXd q = cartesian_utils::toEigen(this->q);
+    Eigen::VectorXd q = conversion_utils_YARP::toEigen(this->q);
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, this->robot, linkA, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, *(this->_model_ptr.get()), linkA, "Waist"));
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", q, this->robot, linkB, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", q, *(this->_model_ptr.get()), linkB, "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -874,12 +956,18 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     // coincident with those of their child links, i.e., LFoot and RFoot.
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", q, this->robot,"LFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", q, *(this->_model_ptr.get()),"LFoot", "Waist"));
     task_left_leg->setOrientationErrorGain(0.1);
+    Eigen::MatrixXd W = task_left_leg->getWeight();
+    //W(1,1) = 1.1;
+    W(0,0) = 3.;
+    W(2,2) = 3.;
+    task_left_leg->setWeight(W);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", q, this->robot,"RFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", q, *(this->_model_ptr.get()),"RFoot", "Waist"));
     task_right_leg->setOrientationErrorGain(0.1);
+    task_right_leg->setWeight(W);
 
     Eigen::MatrixXd T_init_l_leg(4,4);
     T_init_l_leg = task_left_leg->getReference();
@@ -943,17 +1031,17 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
     for(unsigned int i = 0; i < 50*t; ++i)
     {
-        this->robot.updateiDyn3Model(this->q, true);
+        this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
 
-        taskCartesianAggregated->update(cartesian_utils::toEigen(this->q));
-        postural_task->update(cartesian_utils::toEigen(this->q));
-        bounds->update(cartesian_utils::toEigen(this->q));
+        taskCartesianAggregated->update(conversion_utils_YARP::toEigen(this->q));
+        postural_task->update(conversion_utils_YARP::toEigen(this->q));
+        bounds->update(conversion_utils_YARP::toEigen(this->q));
 
         if(!sot->solve(_dq)){
             std::cout<<"error"<<std::endl;
             _dq.setZero(dq.size());}
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        dq = conversion_utils_YARP::toYARP(_dq);
         using namespace yarp::math;
         this->q += dq;
 
@@ -961,51 +1049,39 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
     std::cout << "Q_final: " << this->q.toString() << std::endl;
 
-    std::cout<<"Initial Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_l_arm));
+    std::cout<<"Initial Left Arm: "<<T_init_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_l_arm));
+    std::cout<<"Reference Left Arm: "<<T_reference_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Left Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_left_arm->getActualPose()));
+    std::cout<<"Actual Left Arm: "<<task_left_arm->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
     std::cout<<std::endl;
 
-    std::cout<<"Initial Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_r_arm));
+    std::cout<<"Initial Right Arm: "<<T_init_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_r_arm));
+    std::cout<<"Reference Right Arm: "<<T_reference_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Right Arm: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_right_arm->getActualPose()));
+    std::cout<<"Actual Right Arm: "<<task_right_arm->getActualPose()<<std::endl;
 
     // showing the data of the legs
 
     std::cout<<std::endl;
 
-    std::cout<<"Initial Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_l_leg));
+    std::cout<<"Initial Left leg: "<<T_init_l_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_l_leg));
+    std::cout<<"Reference Left leg: "<<T_reference_l_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Left leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_left_leg->getActualPose()));
+    std::cout<<"Actual Left leg: "<<task_left_leg->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
     std::cout<<std::endl;
 
-    std::cout<<"Initial Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_r_leg));
+    std::cout<<"Initial Right leg: "<<T_init_r_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_r_leg));
+    std::cout<<"Reference Right leg: "<<T_reference_r_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Right leg: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_right_leg->getActualPose()));
+    std::cout<<"Actual Right leg: "<<task_right_leg->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
 
@@ -1017,7 +1093,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
 
 
-    TestCapsuleLinksDistance compute_distance_observer(compute_distance);
+    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
 
     for (int i=0; i < CasulePairs_vec.size(); i++)
     {
@@ -1035,16 +1111,16 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
         capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
         capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
-        int left_wrist_index = robot.iDyn3_model.getLinkIndex(_linkA);
+        int left_wrist_index = robot.iDynTree_model.getLinkIndex(_linkA);
         if(left_wrist_index == -1)
             std::cout << "Failed to get leftwrist_index" << std::endl;
 
-        int right_wrist_index = robot.iDyn3_model.getLinkIndex(_linkB);
+        int right_wrist_index = robot.iDynTree_model.getLinkIndex(_linkB);
         if(right_wrist_index == -1)
             std::cout << "Failed to get rightwrist_index" << std::endl;
 
-        KDL::Frame w_T_link_left_hand = robot.iDyn3_model.getPositionKDL(left_wrist_index);
-        KDL::Frame w_T_link_right_hand = robot.iDyn3_model.getPositionKDL(right_wrist_index);
+        KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_wrist_index);
+        KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_wrist_index);
 
         lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
         lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
@@ -1100,17 +1176,17 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     _dq.setZero(dq.size());
     for(unsigned int i = 0; i < 50*t; ++i)
     {
-        this->robot.updateiDyn3Model(this->q, true);
+        this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
 
 
-        taskCartesianAggregated->update(cartesian_utils::toEigen(this->q));
-        postural_task->update(cartesian_utils::toEigen(this->q));
-        bounds->update(cartesian_utils::toEigen(this->q));
+        taskCartesianAggregated->update(conversion_utils_YARP::toEigen(this->q));
+        postural_task->update(conversion_utils_YARP::toEigen(this->q));
+        bounds->update(conversion_utils_YARP::toEigen(this->q));
 
         if(!sot->solve(_dq)){
             std::cout<<"error"<<std::endl;
             _dq.setZero(dq.size());}
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        dq = conversion_utils_YARP::toYARP(_dq);
         using namespace yarp::math;
         this->q += dq;
 
@@ -1118,51 +1194,39 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
     std::cout << "Q_final 2: " << this->q.toString() << std::endl;
 
-    std::cout<<"Initial Left Arm 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_l_arm));
+    std::cout<<"Initial Left Arm 2: "<<T_init_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Left Arm 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_l_arm));
+    std::cout<<"Reference Left Arm 2: "<<T_reference_l_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Left Arm 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_left_arm->getActualPose()));
+    std::cout<<"Actual Left Arm 2: "<<task_left_arm->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
     std::cout<<std::endl;
 
-    std::cout<<"Initial Right Arm 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_r_arm));
+    std::cout<<"Initial Right Arm 2: "<<T_init_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Right Arm 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_r_arm));
+    std::cout<<"Reference Right Arm 2: "<<T_reference_r_arm<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Right Arm 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_right_arm->getActualPose()));
+    std::cout<<"Actual Right Arm 2: "<<task_right_arm->getActualPose()<<std::endl;
 
     // showing the data of the legs
 
     std::cout<<std::endl;
 
-    std::cout<<"Initial Left leg 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_l_leg));
+    std::cout<<"Initial Left leg 2: "<<T_init_l_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Left leg 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_l_leg));
+    std::cout<<"Reference Left leg 2: "<<T_reference_l_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Left leg 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_left_leg->getActualPose()));
+    std::cout<<"Actual Left leg 2: "<<task_left_leg->getActualPose()<<std::endl;;
 
     std::cout<<std::endl;
     std::cout<<std::endl;
 
-    std::cout<<"Initial Right leg 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_init_r_leg));
+    std::cout<<"Initial Right leg 2: "<<T_init_r_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Reference Right leg 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(T_reference_r_leg));
+    std::cout<<"Reference Right leg 2: "<<T_reference_r_leg<<std::endl;
     std::cout<<std::endl;
-    std::cout<<"Actual Right leg 2: "<<std::endl; cartesian_utils::printHomogeneousTransform(
-                cartesian_utils::fromEigentoYarp(task_right_leg->getActualPose()));
+    std::cout<<"Actual Right leg 2: "<<task_right_leg->getActualPose()<<std::endl;
 
     std::cout<<std::endl;
 
@@ -1179,16 +1243,16 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
     capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
-    int left_wrist_index = robot.iDyn3_model.getLinkIndex(_linkA);
+    int left_wrist_index = robot.iDynTree_model.getLinkIndex(_linkA);
     if(left_wrist_index == -1)
         std::cout << "Failed to get leftwrist_index" << std::endl;
 
-    int right_wrist_index = robot.iDyn3_model.getLinkIndex(_linkB);
+    int right_wrist_index = robot.iDynTree_model.getLinkIndex(_linkB);
     if(right_wrist_index == -1)
         std::cout << "Failed to get rightwrist_index" << std::endl;
 
-    KDL::Frame w_T_link_left_hand = robot.iDyn3_model.getPositionKDL(left_wrist_index);
-    KDL::Frame w_T_link_right_hand = robot.iDyn3_model.getPositionKDL(right_wrist_index);
+    KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_wrist_index);
+    KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_wrist_index);
 
     lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
     lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;

@@ -16,7 +16,7 @@
 */
 
 #include <OpenSoT/tasks/torque/CartesianImpedanceCtrl.h>
-#include <advr_humanoids_common_utils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
@@ -31,7 +31,8 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
                      std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size)
+    _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size),
+     inv(Eigen::MatrixXd::Identity(x.size(),x.size()))
 {   
     _desiredTwist.setZero(_desiredTwist.size());
 
@@ -84,14 +85,15 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     if (_use_inertia_matrix)
     {
         _robot.getInertiaMatrix(_M);
-        _A = _J*_M.inverse();
+        inv.compute(_M, _Minv);
+        _A.noalias() = _J*_Minv;
     }
 
 
     if(_base_link_is_world)
         _robot.getPose(_distal_link, _tmp_affine);
     else
-        _robot.getPose(_base_link, _distal_link, _tmp_affine);
+        _robot.getPose(_distal_link, _base_link, _tmp_affine);
     _actualPose = _tmp_affine.matrix();
 
     if(_desiredPose.rows() == 0) {

@@ -16,26 +16,30 @@
 */
 
 #include <OpenSoT/tasks/force/CoM.h>
-#include <idynutils/cartesian_utils.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
-#include <OpenSoT/constraints/velocity/Dynamics.h>
+
 
 using namespace OpenSoT::tasks::force;
 
 #define LAMBDA_THS 1E-12
 
 CoM::CoM(   const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact,
-            iDynUtils &robot) :
+            XBot::ModelInterface &robot) :
     Task("CoM", x.rows()), _robot(robot),
     _desiredPosition(), _desiredVelocity(), _desiredAcceleration(),
-    _actualPosition(), _actualVelocity(),
+    _actualPosition(), _actualVelocity(), _actualAngularMomentum(),
     _desiredVariationAngularMomentum(), _desiredAngularMomentum(),
     positionError(), velocityError(), angularMomentumError(),
     _links_in_contact(links_in_contact),_I(), _O(), _P(), _T(),
     _g(),
-    _lambda2(1.0), _lambdaAngularMomentum(1.0)
+    _lambda2(1.0), _lambdaAngularMomentum(1.0),
+    A(3,6),B(3,6)
 {
+    A.setZero(3,6);
+    B.setZero(3,6);
+
     _desiredPosition.setZero();
     _desiredVelocity.setZero();
     _desiredAcceleration.setZero();
@@ -51,12 +55,18 @@ CoM::CoM(   const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact
     velocityError.setZero();
     angularMomentumError.setZero();
 
+    _centroidalMomentum.setZero();
+
+    _P.setZero();
+    _T.matrix().setZero();
+
     _g.setZero();
     _g(2) = -9.81;
 
-    _desiredPosition = _robot.getCOM();
-    _desiredVelocity = _robot.getVelCOM();
-    _desiredAngularMomentum = _robot.getCentroidalMomentum().segment(3,3);
+    _robot.getCOM(_desiredPosition);
+    _robot.getCOMVelocity(_desiredVelocity);
+    _robot.getCentroidalMomentum(_centroidalMomentum);
+    _desiredAngularMomentum = _centroidalMomentum.segment(3,3);
     /* first update. Setting desired pose equal to the actual pose */
 
     _W.resize(6,6);
@@ -90,22 +100,23 @@ void CoM::_update(const Eigen::VectorXd &x)
 {
 
     /************************* COMPUTING TASK *****************************/
-    _actualPosition = _robot.getCOM();
-    _actualVelocity = _robot.getVelCOM();
-    _actualAngularMomentum = _robot.getCentroidalMomentum().segment(3,3);
+    _robot.getCOM(_actualPosition);
+    _robot.getCOMVelocity(_actualVelocity);
+    _robot.getCentroidalMomentum(_centroidalMomentum);
+    _actualAngularMomentum = _centroidalMomentum.segment(3,3);
 
     this->update_b();
 
     this->_desiredVelocity.setZero(this->_desiredVelocity.rows());
     this->_desiredAcceleration.setZero(this->_desiredAcceleration.rows());
-    this->_desiredAngularMomentum.setZero(this->_desiredAngularMomentum.rows());
+    //this->_desiredAngularMomentum.setZero(this->_desiredAngularMomentum.rows());
     this->_desiredVariationAngularMomentum.setZero(this->_desiredVariationAngularMomentum.rows());
 
     /**
       * Now I have to compute the Jacobian of the task that in this case is the matrix W
       * that maps the Fcom to the Fd
     **/
-    _A = computeW(_links_in_contact);
+    _A = computeA(_links_in_contact);
     /**********************************************************************/
 }
 
@@ -149,22 +160,24 @@ void CoM::setAngularReference(const Eigen::Vector3d& desiredAngularMomentum,
     _desiredVariationAngularMomentum = desiredVariationAngularMomentum;
 }
 
-Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeW(const std::vector<std::string> &links_in_contact)
+Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeA(const std::vector<std::string> &links_in_contact)
 {
     int m = links_in_contact.size();
 
-    Eigen::MatrixXd W(6, 6*m); W.setZero(6, 6*m);
+    Eigen::MatrixXd G(6, 6*m); G.setZero(6, 6*m);
 
     _P.setZero();
 
     _T.setIdentity();
 
-    Eigen::MatrixXd A(3,6); A.setZero(3,6);
-    Eigen::MatrixXd B(3,6); B.setZero(3,6);
+    A.setZero(3,6);
+    B.setZero(3,6);
 
     for(unsigned int i = 0; i < m; ++i){
-        _T = _robot.getPosition(
-            _robot.iDyn3_model.getLinkIndex(links_in_contact[i]));
+        _robot.getPose(links_in_contact[i], _T);
+        _T.matrix()(0,3) -= _actualPosition(0);
+        _T.matrix()(1,3) -= _actualPosition(1);
+        _T.matrix()(2,3) -= _actualPosition(2);
 
         _P(0,0) = 0.0;      _P(0,1) = -_T(2,3); _P(0,2) = _T(1,3);
         _P(1,0) = -_P(0,1); _P(1,1) = 0.0;      _P(1,2) = -_T(0,3);
@@ -174,11 +187,11 @@ Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeW(const std::vector<std::stri
         A<<_I,_O;
         B<<_P,_I;
 
-        W.block(0,i*6,6,6)<<A,
+        G.block(0,i*6,6,6)<<A,
                             B;
     }
 
-    return W;
+    return G;
 }
 
 Eigen::Vector3d CoM::getLinearReference() const
@@ -246,12 +259,10 @@ void CoM::update_b()
     Eigen::Vector3d variationAngularMomentum_ref = _desiredVariationAngularMomentum +
             _lambdaAngularMomentum*getAngularMomentumError();
 
-    Eigen::MatrixXd M(6+_robot.iDyn3_model.getNrOfDOFs(), 6+_robot.iDyn3_model.getNrOfDOFs());
-    _robot.getFloatingBaseMassMatrix(M);
 
-    acceleration_ref = M(0,0)*(acceleration_ref-_g);
+    acceleration_ref = _robot.getMass()*(acceleration_ref-_g);
 
-    _b.resize(6);
+    _b.setZero(6);
     _b<<acceleration_ref,
         variationAngularMomentum_ref;
 }

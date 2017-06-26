@@ -20,8 +20,8 @@
 #define __TASKS_VELOCITY_MINIMUMEFFORT_H__
 
  #include <OpenSoT/Task.h>
- #include <idynutils/idynutils.h>
- #include <idynutils/cartesian_utils.h>
+ #include <XBotInterface/ModelInterface.h>
+ #include <OpenSoT/utils/cartesian_utils.h>
 
 
 /**
@@ -55,17 +55,16 @@
                  * of both flat foot on the ground. So in general this simple implementation of the gradient worker needs to be used
                  * in a minimum effort task together with a constraint (or a higher priority task) for the swing foot.
                  */
-                class ComputeGTauGradient : public cartesian_utils::CostFunction {
+                class ComputeGTauGradient : public CostFunction {
                     public:
-                    iDynUtils _robot;
-                    const iDynUtils& _model;
+                    XBot::ModelInterface::Ptr _robot;
+                    const XBot::ModelInterface& _model;
                     Eigen::MatrixXd _W;
-                    Eigen::VectorXd _zeros;
+                    Eigen::VectorXd _zeros, _tau;
+                    Eigen::VectorXd _tau_lim;
 
-                    ComputeGTauGradient(const Eigen::VectorXd& q, const iDynUtils& robot_model) :
-                        _robot(robot_model.getRobotName(),
-                               robot_model.getRobotURDFPath(),
-                               robot_model.getRobotSRDFPath()),
+                    ComputeGTauGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model) :
+                        _robot(XBot::ModelInterface::getModel(robot_model.getPathToConfig())),
                         _model(robot_model),
                         _W(q.rows(),q.rows()),
                         _zeros(q.rows())
@@ -73,46 +72,48 @@
                         _zeros.setZero(q.rows());
                         _W.setIdentity(q.rows(),q.rows());
 
-                        for(unsigned int i = 0; i < q.size(); ++i)
-                            _W(i,i) = 1.0 / (_robot.getJointTorqueMax()[i]
-                                                            *
-                                             _robot.getJointTorqueMax()[i]);
+                        _robot->syncFrom(_model);
 
-                        _robot.updateiDyn3Model(_model.iDyn3_model.getAng(),
-                                                _model.iDyn3_model.getDAng(),
-                                                _model.iDyn3_model.getD2Ang(), true);
-                        _robot.switchAnchor(_model.getAnchor());
-                        _robot.setAnchor_T_World(_model.getAnchor_T_World());
+                        _model.getEffortLimits(_tau_lim);
+
+                        for(int i = 0; i < q.size(); ++i){
+                            _W(i,i) = 1.0 / std::pow(_tau_lim(i), 2.0);
+                        }
+
+//                         _robot.switchAnchor(_model.getAnchor());
+//                         _robot.setAnchor_T_World(_model.getAnchor_T_World());
                     }
 
                     double compute(const Eigen::VectorXd &q)
                     {
-                        if(_robot.getAnchor() != _model.getAnchor())
-                            _robot.switchAnchor(_model.getAnchor());
+//                         if(_robot.getAnchor() != _model.getAnchor())
+//                             _robot.switchAnchor(_model.getAnchor());
 
-                        _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
+                        _robot->setJointPosition(q);
+                        _robot->update();
+//                         _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
 
-                        if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
-                        {
-                            assert("if q and anchor are the same, anchor_t_world should be the same!");
+//                         if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
+//                         {
+//                             assert("if q and anchor are the same, anchor_t_world should be the same!");
+//
+//                             _robot.setAnchor_T_World(_model.getAnchor_T_World());
+//                         }
 
-                            _robot.setAnchor_T_World(_model.getAnchor_T_World());
-                        }
-
-                        Eigen::VectorXd tau = _robot.getTorques();
-                        return tau.transpose()* _W * tau;
+                        _robot->computeGravityCompensation(_tau);
+                        return _tau.transpose()* _W * _tau;
                     }
 
                     void setW(const Eigen::MatrixXd& W) { _W = W; }
 
-                    Eigen::MatrixXd& getW() {return _W;}
+                    const Eigen::MatrixXd& getW() {return _W;}
                 };
 
                 ComputeGTauGradient _gTauGradientWorker;
 
             public:
 
-                MinimumEffort(const Eigen::VectorXd& x, const iDynUtils& robot_model);
+                MinimumEffort(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model);
 
                 ~MinimumEffort();
 
@@ -141,7 +142,7 @@
                 /**
                  * @brief getW get a Weight matrix for the manipulability index
                  */
-                Eigen::MatrixXd getW(){
+                const Eigen::MatrixXd& getW(){
                     return _gTauGradientWorker.getW();
                 }
 

@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <advr_humanoids_common_utils/idynutils.h>
-#include <advr_humanoids_common_utils/convex_hull_utils.h>
-#include <idynutils/tests_utils.h>
-#include <iCub/iDynTree/yarp_kdl.h>
+#include <OpenSoT/utils/convex_hull_utils.h>
+#include <advr_humanoids_common_utils/test_utils.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
 #include <yarp/math/SVD.h>
@@ -305,9 +304,11 @@ TEST_F(testConvexHull, NoZeroRowsPreset) {
     for(unsigned int i = 0; i < 10000; ++i)
     {
         if(i>1)
-            q = tests_utils::getRandomAngles(coman.iDynTree_model.getJointBoundMin(),
-                                             coman.iDynTree_model.getJointBoundMax(),
-                                             coman.iDynTree_model.getNrOfDOFs());
+            q = conversion_utils_YARP::toYARP(
+                        tests_utils::getRandomAngles(
+                            conversion_utils_YARP::toEigen(coman.iDynTree_model.getJointBoundMin()),
+                            conversion_utils_YARP::toEigen(coman.iDynTree_model.getJointBoundMax()),
+                                             coman.iDynTree_model.getNrOfDOFs()));
         coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
         _convexHull->update(conversion_utils_YARP::toEigen(q));
         std::vector<KDL::Vector> ch;

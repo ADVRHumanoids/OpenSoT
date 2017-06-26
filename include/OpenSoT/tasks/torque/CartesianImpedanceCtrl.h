@@ -22,6 +22,7 @@
  #include <XBotInterface/ModelInterface.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
+ #include <OpenSoT/utils/cartesian_utils.h>
 
  #define WORLD_FRAME_NAME "world"
 
@@ -55,7 +56,10 @@
                 void update_b();
 
                 Eigen::MatrixXd _M;
+                Eigen::MatrixXd _Minv;
                 Eigen::MatrixXd _J;
+                //pseudoInverse<Eigen::MatrixXd> pinv;
+                LDLTInverse<Eigen::MatrixXd> inv;
 
                 Eigen::Affine3d _tmp_affine;
                 Eigen::VectorXd _spring_force;
