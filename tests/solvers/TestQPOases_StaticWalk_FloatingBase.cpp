@@ -18,6 +18,8 @@
 #include <XBotInterface/ModelInterface.h>
 #include <sensor_msgs/JointState.h>
 
+#include <OpenSoT/solvers/DampedPseudoInverse.h>
+
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
@@ -268,14 +270,18 @@ public:
         Eigen::MatrixXd W = minAcc->getWeight();
         minAcc->setWeight(2.*W);
 
-//            auto_stack = (l_sole + r_sole)/
-//                    (gaze + com)/
-//                    (l_wrist + r_wrist)/
-//                    (postural)<<joint_limits<<vel_limits;
 
-        auto_stack = (l_sole + r_sole)/
-                (l_wrist + r_wrist + gaze)/
-                (postural + minAcc)<<joint_limits<<vel_limits;
+
+            auto_stack = (l_sole + r_sole)/
+                    (com)/
+                    (l_wrist + r_wrist + gaze)/
+                    (postural)<<joint_limits<<vel_limits;
+
+
+
+//        auto_stack = (l_sole + r_sole)/
+//                (l_wrist + r_wrist + gaze)/
+//                (postural + minAcc)<<joint_limits<<vel_limits;
 
         com_constr.reset(new OpenSoT::constraints::TaskToConstraint(com));
 
@@ -283,16 +289,21 @@ public:
         auto_stack->update(q);
         com_constr->update(q);
 
-        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
-                    auto_stack->getBounds(),com_constr, 1e6));
+
+//        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+//                    auto_stack->getBounds(),com_constr, 1e6));
+//        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+//                    auto_stack->getBounds(), 1e6));
+
+        solver.reset(new OpenSoT::solvers::DampedPseudoInverse(auto_stack->getStack()));
 
 
-        qpOASES::Options opt;
-        solver->getOptions(0, opt);
-        opt.numRefinementSteps = 0;
-        opt.numRegularisationSteps = 1;
-        for(unsigned int i = 0; i < 3; ++i)
-            solver->setOptions(i, opt);
+//        qpOASES::Options opt;
+//        solver->getOptions(0, opt);
+//        opt.numRefinementSteps = 0;
+//        opt.numRegularisationSteps = 1;
+//        for(unsigned int i = 0; i < 3; ++i)
+//            solver->setOptions(i, opt);
 
     }
 
@@ -334,7 +345,9 @@ public:
 
     XBot::ModelInterface& model_ref;
 
-    OpenSoT::solvers::QPOases_sot::Ptr solver;
+    //OpenSoT::solvers::QPOases_sot::Ptr solver;
+    OpenSoT::solvers::DampedPseudoInverse::Ptr solver;
+
 
     Eigen::MatrixXd I;
 

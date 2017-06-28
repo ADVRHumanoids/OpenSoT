@@ -2,28 +2,43 @@
 #define __SOLVERS__PSEUDOINVERSE__
 
 #include <OpenSoT/Solver.h>
-#include <Eigen/Core>
-#include <Eigen/Cholesky>
+#include <Eigen/Dense>
+//#include <Eigen/Core>
+//#include <Eigen/Cholesky>
 #include <Eigen/src/Core/util/Macros.h>
+#include <OpenSoT/tasks/Aggregated.h>
 
 #if EIGEN_MINOR_VERSION <= 0
 #include <Eigen/LU>
 #endif
 
-namespace OpenSoT
-{
+namespace OpenSoT{
+    namespace solvers{
+    struct stack_level
+    {
+        Eigen::MatrixXd _P;
+        Eigen::MatrixXd _JP;
+        Eigen::MatrixXd _JPpinv;
+        Eigen::JacobiSVD<Eigen::MatrixXd> _JPsvd;
+#if EIGEN_MINOR_VERSION <= 0
+        Eigen::FullPivLU<Eigen::MatrixXd> _FPL;
+#endif
+    };
     
     class DampedPseudoInverse : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
-        Eigen::MatrixXd _W, _Wchol;
-        Eigen::LLT<Eigen::MatrixXd> _WcholSolver;
-        std::vector<Eigen::MatrixXd> _P, _JP, _JPpinv; // occupy more memory, avoid reallocating during execution
-        std::vector<Eigen::JacobiSVD<Eigen::MatrixXd>> _JPsvd;
+//        Eigen::MatrixXd _W, _Wchol;
+//        Eigen::LLT<Eigen::MatrixXd> _WcholSolver;
+//        std::vector<Eigen::MatrixXd> _P, _JP, _JPpinv; // occupy more memory, avoid reallocating during execution
+//        std::vector<Eigen::JacobiSVD<Eigen::MatrixXd>> _JPsvd;
         int _x_size;
+        std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> _aggregated_tasks_vector;
+        std::vector<stack_level> _stack_levels;
 
-#if EIGEN_MINOR_VERSION <= 0
-        std::vector<Eigen::FullPivLU<Eigen::MatrixXd>> _FPL;
-#endif
+
+//#if EIGEN_MINOR_VERSION <= 0
+//        std::vector<Eigen::FullPivLU<Eigen::MatrixXd>> _FPL;
+//#endif
 
         /**
          * @brief getDampedPinv computes the weighted, damped pseudoinverse of A
@@ -71,6 +86,7 @@ namespace OpenSoT
         double sigma_min;
 
     public:
+        typedef boost::shared_ptr<DampedPseudoInverse> Ptr;
         /**
          * @brief creates a pseudoinverse solver for the current Stack
          */
@@ -94,13 +110,14 @@ namespace OpenSoT
         double getSigmaMin() const;
         
         void setSigmaMin(const double& sigma_min);
+
         
         /**
          * @brief getWeight returns the metric that is currently used for the PseudoInverse
          */
         Eigen::MatrixXd getWeight() const;
     };
-
+}
 }
 
 #endif
