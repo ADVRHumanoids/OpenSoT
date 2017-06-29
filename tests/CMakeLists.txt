@@ -121,10 +121,11 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testAutoStack
                       testDefaultHumanoidStack
                       testLogger
-                      testPreviewer
+                      #testPreviewer
                       testVelocityAllocation
-                      testYCartesian
-                      testYPostural)
+                      #testYCartesian
+                      #testYPostural
+		)
 endif()
 
 # gTests for Velocity constraints
@@ -278,21 +279,21 @@ ADD_EXECUTABLE(testLogger utils/TestLogger.cpp)
 TARGET_LINK_LIBRARIES(testLogger ${TestLibs})
 add_dependencies(testLogger GTest-ext OpenSoT)
 
-ADD_EXECUTABLE(testPreviewer utils/TestPreviewer.cpp)
-TARGET_LINK_LIBRARIES(testPreviewer ${TestLibs})
-add_dependencies(testPreviewer GTest-ext OpenSoT)
+#ADD_EXECUTABLE(testPreviewer utils/TestPreviewer.cpp)
+#TARGET_LINK_LIBRARIES(testPreviewer ${TestLibs})
+#add_dependencies(testPreviewer GTest-ext OpenSoT)
 
 ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
 TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 
-ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
-TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
-add_dependencies(testYCartesian GTest-ext OpenSoT)
+#ADD_EXECUTABLE(testYCartesian interfaces/yarp/tasks/testYCartesian.cpp)
+#TARGET_LINK_LIBRARIES(testYCartesian ${TestLibs})
+#add_dependencies(testYCartesian GTest-ext OpenSoT)
 
-ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
-TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
-add_dependencies(testYPostural GTest-ext OpenSoT)
+#ADD_EXECUTABLE(testYPostural interfaces/yarp/tasks/testYPostural.cpp)
+#TARGET_LINK_LIBRARIES(testYPostural ${TestLibs})
+#add_dependencies(testYPostural GTest-ext OpenSoT)
 
 if(OPENSOT_COMPILE_EXAMPLES)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
@@ -341,10 +342,10 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 add_test(NAME OpenSoT_utils_Logger COMMAND testLogger)
-add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
+#add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
-add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
-add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
+#add_test(NAME OpenSoT_interfaces_cartesian COMMAND testYCartesian)
+#add_test(NAME OpenSoT_interfaces_postural COMMAND testYPostural)
 
 
 find_package(MATLAB QUIET)
