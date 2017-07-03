@@ -27,18 +27,8 @@ namespace OpenSoT{
     
     class DampedPseudoInverse : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
-//        Eigen::MatrixXd _W, _Wchol;
-//        Eigen::LLT<Eigen::MatrixXd> _WcholSolver;
-//        std::vector<Eigen::MatrixXd> _P, _JP, _JPpinv; // occupy more memory, avoid reallocating during execution
-//        std::vector<Eigen::JacobiSVD<Eigen::MatrixXd>> _JPsvd;
         int _x_size;
-        std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> _aggregated_tasks_vector;
         std::vector<stack_level> _stack_levels;
-
-
-//#if EIGEN_MINOR_VERSION <= 0
-//        std::vector<Eigen::FullPivLU<Eigen::MatrixXd>> _FPL;
-//#endif
 
         /**
          * @brief getDampedPinv computes the weighted, damped pseudoinverse of A
@@ -99,23 +89,10 @@ namespace OpenSoT{
         */
         bool solve(Eigen::VectorXd& solution);
         
-                /**
-         * @brief setWeight sets the error metric for the PseudoInverse
-         * @param W the distance metric according to which we will manimize the squared error. It needs to be a positive definite matrix.
-         *          Notice it needs to be of compatible dimensions with the \f$x\f$ vector,
-         *          that is \f$\mathbb{R}^{n\timesn}\f$
-         */
-        void setWeight(const Eigen::MatrixXd& W);
         
         double getSigmaMin() const;
         
-        void setSigmaMin(const double& sigma_min);
-
-        
-        /**
-         * @brief getWeight returns the metric that is currently used for the PseudoInverse
-         */
-        Eigen::MatrixXd getWeight() const;
+        void setSigmaMin(const double& sigma_min);        
     };
 }
 }
