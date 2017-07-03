@@ -3,8 +3,6 @@
 
 #include <OpenSoT/Solver.h>
 #include <Eigen/Dense>
-//#include <Eigen/Core>
-//#include <Eigen/Cholesky>
 #include <Eigen/src/Core/util/Macros.h>
 #include <OpenSoT/tasks/Aggregated.h>
 
@@ -70,6 +68,9 @@ namespace OpenSoT{
         /** @brief sigma_min is the minimum value which is accepted for 
          *                   a singular value before regularization is enabled */
         double sigma_min;
+
+        void printProblemInformation(const int problem_number, const std::string& problem_id,
+                                     const std::string& constraints_id, const std::string& bounds_id);
 
     public:
         typedef boost::shared_ptr<DampedPseudoInverse> Ptr;

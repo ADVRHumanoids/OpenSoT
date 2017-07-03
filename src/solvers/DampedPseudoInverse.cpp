@@ -2,6 +2,10 @@
 #include <iostream>
 #include <cmath>
 
+#define GREEN "\033[0;32m"
+#define YELLOW "\033[0;33m"
+#define RED "\033[0;31m"
+#define DEFAULT "\033[0m"
 
 using namespace OpenSoT::solvers;
 
@@ -34,13 +38,22 @@ DampedPseudoInverse::DampedPseudoInverse(Stack& stack) : Solver<Eigen::MatrixXd,
                 #if EIGEN_MINOR_VERSION <= 0
                 lvl._FPL = Eigen::FullPivLU<Eigen::MatrixXd>(
                             _tasks[i-1]->getA().rows(), _x_size);
+
                 #endif
 
             }
             _stack_levels.push_back(lvl);
+
+            if(i < stack.size())
+                printProblemInformation(i, _tasks[i]->getTaskID(),
+                                    "NONE", "NONE");
         }
 
         this->setSigmaMin(1e-12);
+
+        for(unsigned int i = 0; i < stack.size(); ++i)
+            printProblemInformation(i, _tasks[i]->getTaskID(),
+                                    "NONE", "NONE");
     }
 }
 
@@ -134,27 +147,40 @@ double DampedPseudoInverse::getSigmaMin() const
 #if EIGEN_MINOR_VERSION <= 0
 void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
 {
-
-    for(unsigned int i = 0; i < _stack_levels.size(); ++i)
+    if(sigma_min > 0)
     {
-        if(sigma_min != Eigen::NumTraits<double>::epsilon() ||
-            sigma_min != this->sigma_min)
+        for(unsigned int i = 0; i < _stack_levels.size(); ++i)
             _stack_levels[i]._FPL.setThreshold(sigma_min);
-    }
 
-    this->sigma_min = sigma_min;
+        this->sigma_min = sigma_min;
+    }
 }
 #else
 void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
 {
-    
-    for(unsigned int i = 0; i < _JPsvd.size(); ++i)
+    if(sigma_min > 0)
     {
-        if(sigma_min != Eigen::NumTraits<double>::epsilon() ||
-            sigma_min != this->sigma_min)
+        for(unsigned int i = 0; i < _JPsvd.size(); ++i)
             _JPsvd[i].setThreshold(sigma_min);
+
+        this->sigma_min = sigma_min;
     }
-    
-    this->sigma_min = sigma_min;
 }
 #endif
+
+void DampedPseudoInverse::printProblemInformation(const int problem_number, const std::string& problem_id,
+                    const std::string& constraints_id, const std::string& bounds_id)
+{
+    std::cout<<std::endl;
+    if(problem_number == -1)
+        std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<problem_id<<std::endl;
+    else
+        std::cout<<GREEN<<"PROBLEM "<<problem_number<<" ID: "<<DEFAULT<<problem_id<<std::endl;
+    std::cout<<GREEN<<"sigman _min: "<<DEFAULT<<this->sigma_min<<std::endl;
+    std::cout<<GREEN<<"CONSTRAINTS ID: "<<DEFAULT<<constraints_id<<std::endl;
+    std::cout<<GREEN<<"     # OF CONSTRAINTS: "<<DEFAULT<<0<<std::endl;
+    std::cout<<GREEN<<"BOUNDS ID: "<<DEFAULT<<bounds_id<<std::endl;
+    std::cout<<GREEN<<"     # OF BOUNDS: "<<DEFAULT<<0<<std::endl;
+    std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_x_size<<std::endl;
+    std::cout<<std::endl;
+}
