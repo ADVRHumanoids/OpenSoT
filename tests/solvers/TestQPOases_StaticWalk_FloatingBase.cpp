@@ -20,13 +20,24 @@
 
 #include <OpenSoT/solvers/DampedPseudoInverse.h>
 
+#include <XBotInterface/Logger.hpp>
+
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
 bool IS_ROSCORE_RUNNING;
 
+XBot::MatLogger::Ptr logger;
+
+#define CHECK_JOINT_LIMITS true
+#define CHECK_CARTESIAN_ERROR false
+#define USE_WRONG_COM_REFERENCE true
+#define USE_INERTIA_MATRIX false
+#define USE_COM_AS_CONSTR false
+
 namespace{
+
 /**
  * @brief The walking_pattern_generator class generate Cartesian trajectories
  * for COM, left/right feet for a "static walk" (the CoM is always inside the
@@ -178,7 +189,11 @@ public:
         r_wrist_trj(0.01, "DWYTorso", "r_wrist")
     {
         T_trj = 1.;
+#if USE_WRONG_COM_REFERENCE
+        double h_com = 0.2;//0.1;
+#else
         double h_com = 0.1;
+#endif
         double arm_forward = 0.1;
 
 
@@ -272,16 +287,18 @@ public:
 
 
 
+
+#if USE_COM_AS_CONSTR
+        auto_stack = (l_sole + r_sole)/
+                (l_wrist + r_wrist + gaze)/
+                (postural + minAcc)<<joint_limits<<vel_limits;
+#else
             auto_stack = (l_sole + r_sole)/
                     (com)/
                     (l_wrist + r_wrist + gaze)/
                     (postural)<<joint_limits<<vel_limits;
+#endif
 
-
-
-//        auto_stack = (l_sole + r_sole)/
-//                (l_wrist + r_wrist + gaze)/
-//                (postural + minAcc)<<joint_limits<<vel_limits;
 
         com_constr.reset(new OpenSoT::constraints::TaskToConstraint(com));
 
@@ -289,21 +306,23 @@ public:
         auto_stack->update(q);
         com_constr->update(q);
 
+#if USE_COM_AS_CONSTR
+        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+                    auto_stack->getBounds(),com_constr, 1e6));
+#else
+        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+                    auto_stack->getBounds(), 1e6));
+#endif
 
-//        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
-//                    auto_stack->getBounds(),com_constr, 1e6));
-//        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
-//                    auto_stack->getBounds(), 1e6));
-
-        solver.reset(new OpenSoT::solvers::DampedPseudoInverse(auto_stack->getStack()));
+        //solver.reset(new OpenSoT::solvers::DampedPseudoInverse(auto_stack->getStack()));
 
 
-//        qpOASES::Options opt;
-//        solver->getOptions(0, opt);
-//        opt.numRefinementSteps = 0;
-//        opt.numRegularisationSteps = 1;
-//        for(unsigned int i = 0; i < 3; ++i)
-//            solver->setOptions(i, opt);
+        qpOASES::Options opt;
+        solver->getOptions(0, opt);
+        opt.numRefinementSteps = 0;
+        opt.numRegularisationSteps = 1;
+        for(unsigned int i = 0; i < 3; ++i)
+            solver->setOptions(i, opt);
 
     }
 
@@ -318,7 +337,9 @@ public:
 
     void update(const Eigen::VectorXd& q)
     {
-        //setInertiaPostureTask();
+#if USE_INERTIA_MATRIX
+        setInertiaPostureTask();
+#endif
         auto_stack->update(q);
         com_constr->update(q);
 
@@ -345,8 +366,8 @@ public:
 
     XBot::ModelInterface& model_ref;
 
-    //OpenSoT::solvers::QPOases_sot::Ptr solver;
-    OpenSoT::solvers::DampedPseudoInverse::Ptr solver;
+    OpenSoT::solvers::QPOases_sot::Ptr solver;
+    //OpenSoT::solvers::DampedPseudoInverse::Ptr solver;
 
 
     Eigen::MatrixXd I;
@@ -664,6 +685,16 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     std::vector<double> loop_time;
     for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
     {
+        //log
+//        logger->add("q", this->_q);
+//        logger->add("dq", dq);
+        Eigen::VectorXd qmin, qmax;
+        _model_ptr->getJointLimits(qmin, qmax);
+//        logger->add("qmin", qmin);
+//        logger->add("qmax", qmax);
+        //
+
+
         KDL::Frame com_d = this->walk_trj->com_trj.Pos(t);
         KDL::Frame l_sole_d = this->walk_trj->l_sole_trj.Pos(t);
         KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
@@ -691,6 +722,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
         this->update(this->_q);
 
+#if CHECK_CARTESIAN_ERROR
         KDL::Frame tmp; KDL::Vector tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
         tmp.p = tmp_vector;
@@ -701,6 +733,14 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         KDL::Frame r_sole;
         this->_model_ptr->getPose("r_sole", r_sole);
         tests_utils::KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
+#endif
+
+#if CHECK_JOINT_LIMITS
+        for(unsigned int i = 0; i < this->_q.size(); ++i){
+            EXPECT_LE(this->_q[i]-qmax[i], 1e-10)<<"i: "<<i<<"\n qmax: "<<qmax[i]<<"\n q: "<<this->_q[i]<<std::endl;
+            EXPECT_LE(qmin[i]-this->_q[i], 1e-10)<<"i: "<<i<<"\n qmin: "<<qmin[i]<<"\n q: "<<this->_q[i]<<std::endl;;}
+#endif
+
 
         if(IS_ROSCORE_RUNNING){
             loop_time.push_back((toc-tic)/1e6);
@@ -741,6 +781,17 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     std::cout<<"Starting whole-body manipulation"<<std::endl;
     for(unsigned int i = 0; i < int(this->manip_trj->com_trj.Duration()) * 100; ++i)
     {
+        //log
+        logger->add("q", this->_q);
+        logger->add("dq", dq);
+        Eigen::VectorXd qmin, qmax;
+        _model_ptr->getJointLimits(qmin, qmax);
+        logger->add("qmin", qmin);
+        logger->add("qmax", qmax);
+        //
+
+
+
         KDL::Frame com_d = this->manip_trj->com_trj.Pos(t);
         KDL::Frame r_wrist_d = this->manip_trj->r_wrist_trj.Pos(t);
 
@@ -764,6 +815,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         if(IS_ROSCORE_RUNNING)
             toc = ros::Time::now().nsec;
 
+#if CHECK_CARTESIAN_ERROR
         this->update(this->_q);
         KDL::Frame tmp; KDL::Vector tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
@@ -772,7 +824,14 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         KDL::Frame r_wrist;
         this->_model_ptr->getPose("r_wrist","DWYTorso",r_wrist);
         tests_utils::KDLFramesAreEqual(r_wrist_d, r_wrist, 1e-3);
+#endif
 
+
+#if CHECK_JOINT_LIMITS
+        for(unsigned int i = 0; i < this->_q.size(); ++i){
+            EXPECT_LE(this->_q[i]-qmax[i], 1e-10)<<"i: "<<i<<"\n qmax: "<<qmax[i]<<"\n q: "<<this->_q[i]<<std::endl;
+            EXPECT_LE(qmin[i]-this->_q[i], 1e-10)<<"i: "<<i<<"\n qmin: "<<qmin[i]<<"\n q: "<<this->_q[i]<<std::endl;;}
+#endif
 
         if(IS_ROSCORE_RUNNING){
             loop_time.push_back((toc-tic)/1e6);
@@ -808,6 +867,16 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
     for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
     {
+        //log
+//        logger->add("q", this->_q);
+//        logger->add("dq", dq);
+        Eigen::VectorXd qmin, qmax;
+        _model_ptr->getJointLimits(qmin, qmax);
+//        logger->add("qmin", qmin);
+//        logger->add("qmax", qmax);
+        //
+
+
         KDL::Frame com_d = this->walk_trj->com_trj.Pos(t);
         KDL::Frame l_sole_d = this->walk_trj->l_sole_trj.Pos(t);
         KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
@@ -835,6 +904,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
         this->update(this->_q);
 
+#if CHECK_CARTESIAN_ERROR
         KDL::Frame tmp; KDL::Vector tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
         tmp.p = tmp_vector;
@@ -845,6 +915,13 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         KDL::Frame r_sole;
         this->_model_ptr->getPose("r_sole", r_sole);
         tests_utils::KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
+#endif
+
+#if CHECK_JOINT_LIMITS
+        for(unsigned int i = 0; i < this->_q.size(); ++i){
+            EXPECT_LE(this->_q[i]-qmax[i], 1e-10)<<"i: "<<i<<"\n qmax: "<<qmax[i]<<"\n q: "<<this->_q[i]<<std::endl;
+            EXPECT_LE(qmin[i]-this->_q[i], 1e-10)<<"i: "<<i<<"\n qmin: "<<qmin[i]<<"\n q: "<<this->_q[i]<<std::endl;;}
+#endif
 
         if(IS_ROSCORE_RUNNING){
             loop_time.push_back((toc-tic)/1e6);
@@ -872,7 +949,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         std::cout<<"Medium time per solve: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
     }
 
-
+    logger->flush();
 
 }
 
@@ -881,6 +958,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "testStaticWalkFloatingBaseFloatingBase_node");
+  logger = XBot::MatLogger::getLogger("qpOASES_StaticWalk_FloatingBase");
   IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
