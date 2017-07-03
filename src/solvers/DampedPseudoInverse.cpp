@@ -57,7 +57,7 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
         _stack_levels[i]._FPL.compute(_stack_levels[i]._JP);
         _stack_levels[i]._JPpinv = this->getDampedPinv(
                     _stack_levels[i]._JP, _stack_levels[i]._JPsvd,
-                    _stack_levels[i]._FPL,1e-3);
+                    _stack_levels[i]._FPL);
 #else
 
 #endif
@@ -78,9 +78,7 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
 #if EIGEN_MINOR_VERSION <= 0
 Eigen::MatrixXd DampedPseudoInverse::getDampedPinv(  const Eigen::MatrixXd& J,
                         const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                        const Eigen::FullPivLU<Eigen::MatrixXd>& fpl,
-                        double threshold,
-                        double lambda_max) const
+                        const Eigen::FullPivLU<Eigen::MatrixXd>& fpl) const
 {
     int rank = fpl.rank();
     Eigen::MatrixXd singularValuesInv(J.cols(), J.rows());
@@ -95,35 +93,35 @@ Eigen::MatrixXd DampedPseudoInverse::getDampedPinv(  const Eigen::MatrixXd& J,
             singularValuesInv(i,i) = 1./svd.singularValues()[i];
     } else {
         //double lambda = std::pow(lambda_max,2) * (1. -  std::pow(svd.singularValues()[rank-1]/sigma_min,2));
-        for(unsigned int i = 0; i < rank; ++i){
+        for(unsigned int i = 0; i < rank; ++i)
             singularValuesInv(i,i) =
                     svd.singularValues()[i]/(std::pow(svd.singularValues()[i],2)+lambda*lambda);
-        }
     }
 
     return svd.matrixV()* singularValuesInv *svd.matrixU().transpose();
 }
 #else
 Eigen::MatrixXd DampedPseudoInverse::getDampedPinv( const Eigen::MatrixXd& J,
-                                                    const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                                    double threshold,
-                                                    double lambda_max) const
+                                                    const Eigen::JacobiSVD<Eigen::MatrixXd>& svd) const
 {
-    int rank = svd.rank();  // the rank is computed considering singular values greater than sigma_min
-    const Eigen::VectorXd &singularValues = svd.singularValues();
+    int rank = svd.rank();
     Eigen::MatrixXd singularValuesInv(J.cols(), J.rows());
     singularValuesInv.setZero();
-    
-    if(singularValues[rank-1] <= sigma_min)
+
+    double lambda = svd.singularValues().minCoeff();
+
+
+    if(svd.singularValues().minCoeff() >= sigma_min)
     {
         for(unsigned int i = 0; i < rank; ++i)
-            singularValuesInv(i,i) = 1/singularValues[i];
+            singularValuesInv(i,i) = 1./svd.singularValues()[i];
     } else {
-        double lambda = std::pow(lambda_max,2) * (1 -  std::pow(singularValues[rank-1]/sigma_min,2));
+        //double lambda = std::pow(lambda_max,2) * (1. -  std::pow(svd.singularValues()[rank-1]/sigma_min,2));
         for(unsigned int i = 0; i < rank; ++i)
-            singularValuesInv(i,i) = singularValues[i]/(std::pow(singularValues[i],2)+lambda);
+            singularValuesInv(i,i) =
+                    svd.singularValues()[i]/(std::pow(svd.singularValues()[i],2)+lambda*lambda);
     }
-    
+
     return svd.matrixV()* singularValuesInv *svd.matrixU().transpose();
 }
 #endif

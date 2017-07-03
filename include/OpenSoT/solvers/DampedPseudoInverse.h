@@ -24,7 +24,11 @@ namespace OpenSoT{
         Eigen::FullPivLU<Eigen::MatrixXd> _FPL;
 #endif
     };
-    
+    /**
+     * @brief The DampedPseudoInverse class implements a eHQP solver as the one used in:
+     * "Prioritized Multi-Task Motion Control of Redundant Robots under Hard Joint Constraints"
+     * by Fabrizio Flacco, Alessandro De Luca and Oussama Khatib
+     */
     class DampedPseudoInverse : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
         int _x_size;
@@ -46,29 +50,21 @@ namespace OpenSoT{
          *        Then \f$J^\dagger = V \Sigma^\dagger U^T\f$ with \f$\Sigma^\dagger\f$
          *        obtained by computing the inverse of every element in the diagonal,
          *        eventually after adding a term deriving from Tikhonov regularization.
+         *        The matrix is damped using the minimum singular value that is an index of
+         *        manipulability of the robot.
          *        The JacobiSVD method from Eigen is used, which uses QR decomposition
          *        by Householder transformations with column pivoting.
          *        The SVD decomposition is also used the compute the projectors, since
          *        we have that \f$AA^\dagger=U_1U_1^T\f$
-         * @param threshold is the rank of \f$r = \text{rank}\left(J^TJ\right)\f$ is
-         *                  the number of singular values \f$\sigma_i\f$ such that 
-         *                  \f$\sigma_i > \text{threshold}\f$,which defaults to
-         *                  Eigen::NumTraits<double>::epsilon()
-         * @param lambda_max is the maximum regularization term that is applied, when the
-         *                   smallest singular value of J is \f$\sigma \eq \text{threshold}\f$
-         * 
+         *
          */
         #if EIGEN_MINOR_VERSION <= 0
         Eigen::MatrixXd getDampedPinv(  const Eigen::MatrixXd& J,
                                 const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                const Eigen::FullPivLU<Eigen::MatrixXd>& fpl,
-                                double threshold = Eigen::NumTraits< double >::epsilon(),
-                                double lambda_max = 1e-6) const;
+                                const Eigen::FullPivLU<Eigen::MatrixXd>& fpl) const;
         #else
         Eigen::MatrixXd getDampedPinv(  const Eigen::MatrixXd& J,
-                                        const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                        double threshold = Eigen::NumTraits< double >::epsilon(),
-                                        double lambda_max = 1e-6) const;
+                                        const Eigen::JacobiSVD<Eigen::MatrixXd>& svd) const;
         #endif
                                         
         /** @brief sigma_min is the minimum value which is accepted for 
