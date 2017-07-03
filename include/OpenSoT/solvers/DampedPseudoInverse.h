@@ -21,6 +21,11 @@ namespace OpenSoT{
 #if EIGEN_MINOR_VERSION <= 0
         Eigen::FullPivLU<Eigen::MatrixXd> _FPL;
 #endif
+        /**
+         * @brief _WChol is used to handle weights for each task.
+         * We compute W = LL' and then we multiply L'A and L'b
+         */
+        Eigen::LLT<Eigen::MatrixXd> _WChol;
     };
     /**
      * @brief The DampedPseudoInverse class implements a eHQP solver as the one used in:

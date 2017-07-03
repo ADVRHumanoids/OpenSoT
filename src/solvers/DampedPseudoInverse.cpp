@@ -41,6 +41,7 @@ DampedPseudoInverse::DampedPseudoInverse(Stack& stack) : Solver<Eigen::MatrixXd,
 
                 #endif
 
+
             }
             _stack_levels.push_back(lvl);
 
@@ -62,8 +63,9 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
     solution.setZero(solution.size());
     for(unsigned int i = 1; i <= _tasks.size(); ++i)
     {
+        _stack_levels[i]._WChol.compute(_tasks[i-1]->getWeight());
 
-        _stack_levels[i]._JP = _tasks[i-1]->getA()*_stack_levels[i-1]._P;
+        _stack_levels[i]._JP = _stack_levels[i]._WChol.matrixL().transpose() * _tasks[i-1]->getA()*_stack_levels[i-1]._P;
         _stack_levels[i]._JPsvd.compute(_stack_levels[i]._JP);
 
 #if EIGEN_MINOR_VERSION <= 0
@@ -71,14 +73,11 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
         _stack_levels[i]._JPpinv = this->getDampedPinv(
                     _stack_levels[i]._JP, _stack_levels[i]._JPsvd,
                     _stack_levels[i]._FPL);
-#else
-
 #endif
 
-
          solution += _stack_levels[i]._JPpinv * (_tasks[i-1]->getLambda() *
-                     _tasks[i-1]->getb() -
-                 _tasks[i-1]->getA()*solution);
+                 (_stack_levels[i]._WChol.matrixL().transpose() * _tasks[i-1]->getb())-
+                 _stack_levels[i]._WChol.matrixL().transpose() * _tasks[i-1]->getA()*solution);
 
 
 
