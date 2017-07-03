@@ -70,15 +70,7 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
 
 
         _stack_levels[i]._P = _stack_levels[i-1]._P -
-                _stack_levels[i]._JPpinv * _stack_levels[i]._JP;
-
-        //solution += _JPpinv[i] * (_tasks[i]->getLambda() * _tasks[i]->getb() - _tasks[i]->getA()*solution);
-        //if(i < _tasks.size()-1){
-            // recursively computing P_i+1
-            //_P[i+1] = _P[i] + _JPsvd[i].matrixV()*_JPsvd[i].matrixV().transpose();
-          //  _P[i+1] = _P[i] - _JPpinv[i]*_JP[i];}
-        // notice how here we could do directly:
-        // svd.solve(rhs), with rhs = J*P*e;
+                _stack_levels[i]._JPsvd.matrixV() * _stack_levels[i]._JPsvd.matrixV().transpose();
     }
     return true;
 }
