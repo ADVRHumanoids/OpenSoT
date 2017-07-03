@@ -81,6 +81,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOases_VelocityAllocation
 		      testQPOases_StaticWalk
                       testQPOases_StaticWalk_FloatingBase ######
+                      testEigenSVD_StaticWalk_FloatingBase
                       testAggregatedTask
                       testCartesianVelocityTask
                       testCoMForceTask
@@ -210,6 +211,10 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testQPOases_StaticWalk_FloatingBase GTest-ext OpenSoT)
 
+    ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
+    TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
+    add_dependencies(testEigenSVD_StaticWalk_FloatingBase GTest-ext OpenSoT)
+
     ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
     TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
     add_dependencies(testAggregatedTask GTest-ext OpenSoT)
@@ -329,6 +334,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
     add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
     add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
+    add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
     add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
     add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
