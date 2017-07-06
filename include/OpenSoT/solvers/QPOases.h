@@ -26,6 +26,7 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include "QPOasesProblem.h"
 
+#define _CONSTRAINT_MATRIX_MAX_SIZE_ 50
 
 namespace qpOASES {
     class SQProblem;
@@ -45,6 +46,8 @@ namespace OpenSoT{
     {
     public:
 	typedef boost::shared_ptr<QPOases_sot> Ptr;
+    typedef Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, _CONSTRAINT_MATRIX_MAX_SIZE_, _CONSTRAINT_MATRIX_MAX_SIZE_> Matrix;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, 1, 0, _CONSTRAINT_MATRIX_MAX_SIZE_, 1> Vector;
         /**
          * @brief QPOases_sot constructor of the problem
          * @param stack_of_tasks a vector of tasks
@@ -145,19 +148,15 @@ namespace OpenSoT{
          * @param uA upper bounds
          */
         void computeOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
-                                         Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50>& A, 
-                                         Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1>& lA,
-                                         Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1>& uA);
+                                         Matrix& A, Vector& lA, Vector& uA);
 
-        inline void pile(Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50>& A, 
-                         Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50>& B)
+        inline void pile(Matrix& A, Matrix& B)
         {
             A.conservativeResize(A.rows()+B.rows(), A.cols());
             A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
         }
 
-        inline void pile(Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> &a, 
-                         Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> &b)
+        inline void pile(Vector &a,Vector &b)
         {
             a.conservativeResize(a.rows()+b.rows());
             a.segment(a.rows()-b.rows(),b.rows())<<b;
@@ -166,23 +165,16 @@ namespace OpenSoT{
         Eigen::MatrixXd H;
         Eigen::VectorXd g;
 
-        Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50> A;
-        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> lA;
-        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> uA;
+        Matrix A;
+        Vector lA;
+        Vector uA;
         
-//         Eigen::MatrixXd A;
-//         Eigen::VectorXd lA;
-//         Eigen::VectorXd uA;
-
         Eigen::VectorXd l;
         Eigen::VectorXd u;
-
-//         Eigen::MatrixXd tmp_A;
-//         Eigen::VectorXd tmp_lA, tmp_uA;
         
-        Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50> tmp_A;
-        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> tmp_lA;
-        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> tmp_uA;
+        Matrix tmp_A;
+        Vector tmp_lA;
+        Vector tmp_uA;
 
 
 
