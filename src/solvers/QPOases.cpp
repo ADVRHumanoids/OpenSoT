@@ -58,10 +58,9 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
 void QPOases_sot::computeOptimalityConstraint(  const TaskPtr& task, QPOasesProblem& problem,
                                                 Matrix& A, Vector& lA, Vector& uA)
 {
-    Eigen::VectorXd aux = task->getA()*problem.getSolution();
     A = task->getA();
-    lA = aux;
-    uA = aux;
+    lA = task->getA()*problem.getSolution();
+    uA = lA;
 }
 
 bool QPOases_sot::prepareSoT()
