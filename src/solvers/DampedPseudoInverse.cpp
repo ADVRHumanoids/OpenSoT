@@ -75,9 +75,10 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
                     _stack_levels[i]._FPL);
 #endif
 
-         solution += _stack_levels[i]._JPpinv * (_tasks[i-1]->getLambda() *
-                 (_stack_levels[i]._WChol.matrixL().transpose() * _tasks[i-1]->getb())-
-                 _stack_levels[i]._WChol.matrixL().transpose() * _tasks[i-1]->getA()*solution);
+         solution += _stack_levels[i]._JPpinv * (
+                     _stack_levels[i]._WChol.matrixL().transpose() * _tasks[i-1]->getb()-
+                 _stack_levels[i]._WChol.matrixL().transpose() * _tasks[i-1]->getA()*solution
+                 );
 
 
 
