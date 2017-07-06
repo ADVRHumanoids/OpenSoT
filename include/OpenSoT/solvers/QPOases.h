@@ -145,15 +145,19 @@ namespace OpenSoT{
          * @param uA upper bounds
          */
         void computeOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
-                                                Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA);
+                                         Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50>& A, 
+                                         Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1>& lA,
+                                         Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1>& uA);
 
-        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+        inline void pile(Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50>& A, 
+                         Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50>& B)
         {
             A.conservativeResize(A.rows()+B.rows(), A.cols());
             A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
         }
 
-        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+        inline void pile(Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> &a, 
+                         Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> &b)
         {
             a.conservativeResize(a.rows()+b.rows());
             a.segment(a.rows()-b.rows(),b.rows())<<b;
@@ -162,15 +166,23 @@ namespace OpenSoT{
         Eigen::MatrixXd H;
         Eigen::VectorXd g;
 
-        Eigen::MatrixXd A;
-        Eigen::VectorXd lA;
-        Eigen::VectorXd uA;
+        Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50> A;
+        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> lA;
+        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> uA;
+        
+//         Eigen::MatrixXd A;
+//         Eigen::VectorXd lA;
+//         Eigen::VectorXd uA;
 
         Eigen::VectorXd l;
         Eigen::VectorXd u;
 
-        Eigen::MatrixXd tmp_A;
-        Eigen::VectorXd tmp_lA, tmp_uA;
+//         Eigen::MatrixXd tmp_A;
+//         Eigen::VectorXd tmp_lA, tmp_uA;
+        
+        Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, 50, 50> tmp_A;
+        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> tmp_lA;
+        Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 50, 1> tmp_uA;
 
 
 
