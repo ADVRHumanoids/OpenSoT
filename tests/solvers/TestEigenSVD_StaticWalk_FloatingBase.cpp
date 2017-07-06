@@ -30,9 +30,9 @@ bool IS_ROSCORE_RUNNING;
 
 XBot::MatLogger::Ptr logger;
 
-#define CHECK_JOINT_LIMITS true
-#define CHECK_CARTESIAN_ERROR false
-#define USE_WRONG_COM_REFERENCE true
+#define CHECK_JOINT_LIMITS false
+#define CHECK_CARTESIAN_ERROR true
+#define USE_WRONG_COM_REFERENCE false
 #define USE_INERTIA_MATRIX false
 #define USE_COM_AS_CONSTR false
 
@@ -754,12 +754,12 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     for(unsigned int i = 0; i < int(this->manip_trj->com_trj.Duration()) * 100; ++i)
     {
         //log
-        logger->add("q", this->_q);
-        logger->add("dq", dq);
+        logger->add("Eigq", this->_q);
+        logger->add("Eigdq", dq);
         Eigen::VectorXd qmin, qmax;
         _model_ptr->getJointLimits(qmin, qmax);
-        logger->add("qmin", qmin);
-        logger->add("qmax", qmax);
+        logger->add("Eigqmin", qmin);
+        logger->add("Eigqmax", qmax);
         //
 
 
@@ -787,16 +787,22 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         if(IS_ROSCORE_RUNNING)
             toc = ros::Time::now().nsec;
 
-#if CHECK_CARTESIAN_ERROR
         this->update(this->_q);
         KDL::Frame tmp; KDL::Vector tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
         tmp.p = tmp_vector;
+#if CHECK_CARTESIAN_ERROR
         tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
         KDL::Frame r_wrist;
         this->_model_ptr->getPose("r_wrist","DWYTorso",r_wrist);
         tests_utils::KDLFramesAreEqual(r_wrist_d, r_wrist, 1e-3);
 #endif
+        //log
+        Eigen::VectorXd com(3); com[0] = tmp.p.x(); com[1] = tmp.p.y(); com[2] = tmp.p.z();
+        logger->add("EigCoM", com);
+        com[0] = com_d.p.x(); com[1] = com_d.p.y(); com[2] = com_d.p.z();
+        logger->add("EigCoMd", com);
+        //
 
 
 #if CHECK_JOINT_LIMITS
