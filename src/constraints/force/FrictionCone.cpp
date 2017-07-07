@@ -55,7 +55,7 @@ namespace OpenSoT {
            _bUpperBound.resize(5*_n_of_contacts);
            _bUpperBound.setZero(_bUpperBound.rows());
            _bLowerBound.resize(5*_n_of_contacts);
-           _bLowerBound = -std::numeric_limits<double>::max()*_bLowerBound.setOnes(_bLowerBound.size());}
+           _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bLowerBound.size());}
        }
 
 
