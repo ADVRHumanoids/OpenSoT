@@ -299,8 +299,11 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     EXPECT_LE(-wrench_in_r_sole[2],0.0);
 
 
-
-
+    std::cout<<"USING SVD:"<<std::endl;
+    wrench_in_l_sole = w_T_lsole.rotation().transpose()*SVDcontact_wrenches_d.segment(6,3);
+    std::cout<<"forces in l_sole = ["<<wrench_in_l_sole<<std::endl;
+    wrench_in_r_sole = w_T_rsole.rotation().transpose()*SVDcontact_wrenches_d.segment(0,3);
+    std::cout<<"forces in r_sole = ["<<wrench_in_r_sole<<std::endl;
 
 }
 }
