@@ -85,7 +85,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testAggregatedTask
                       testCartesianVelocityTask
                       testCoMForceTask
-#                      testFrictionConeForceConstraint
+                      testFrictionConeForceConstraint
                       testCoMVelocityTask
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
@@ -227,9 +227,9 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
     add_dependencies(testCoMForceTask GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
-#    TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
-#    add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
+    TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
+    add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
 
     ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
     TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
@@ -339,7 +339,7 @@ if(YARP_FOUND)
     add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
     add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
     add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
-#    add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
+    add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
     add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
