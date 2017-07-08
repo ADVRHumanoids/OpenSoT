@@ -116,7 +116,10 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/velocity/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
                     src/constraints/torque/TorqueLimits.cpp
-                    src/constraints/torque/JointLimits.cpp)
+                    src/constraints/torque/JointLimits.cpp
+                    src/constraints/force/FrictionCone.cpp
+                    src/constraints/force/WrenchLimits.cpp
+                    )
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/ConvexHull.cpp)
@@ -138,7 +141,10 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
-                    src/tasks/torque/CartesianImpedanceCtrl.cpp)
+                    src/tasks/torque/CartesianImpedanceCtrl.cpp
+                    src/tasks/force/CoM.cpp
+                    src/tasks/force/Wrench.cpp
+                    )
 ##SOLVERS
 set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
@@ -165,13 +171,9 @@ ADD_LIBRARY(OpenSoT SHARED
                     ${OPENSOT_SOLVERS_SOURCES}
                     ${OPENSOT_UTILS_SOURCES}
 #                    src/constraints/velocity/Dynamics.cpp
-                    src/constraints/force/FrictionCone.cpp
-                    src/constraints/force/WrenchLimits.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
 #                    src/tasks/velocity/Interaction.cpp
-                    src/tasks/force/CoM.cpp
-                    src/tasks/force/Wrench.cpp
 #                    src/utils/DefaultHumanoidStack.cpp
                     #src/utils/PreviewerUtils.cpp
 #                    src/utils/logger/L.cpp

@@ -59,7 +59,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       MAIN_DEPENDENCY OpenSoT
                       DEPENDS
                       testAggregatedConstraint
-                      testBilateralConstraint
+                      testBilateralConstraint #YARP FREE
 #                      testCartesianPositionVelocityConstraint
                       testCollisionAvoidanceVelocityConstraint
                       testCoMVelocityVelocityConstraint
