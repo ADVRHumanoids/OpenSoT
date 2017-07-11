@@ -181,9 +181,11 @@ public:
 
 TEST_F(testFrictionCones, testFrictionCones_) {
 
-    for(unsigned int i = 0; i < 10; ++i){
-        publishRobotState();
-        ros::spinOnce();
+    if(IS_ROSCORE_RUNNING){
+        for(unsigned int i = 0; i < 10000; ++i){
+            publishRobotState();
+            ros::spinOnce();
+        }
     }
 
     std::vector<std::string> links_in_contact;
@@ -304,6 +306,9 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     std::cout<<"forces in l_sole = ["<<wrench_in_l_sole<<std::endl;
     wrench_in_r_sole = w_T_rsole.rotation().transpose()*SVDcontact_wrenches_d.segment(0,3);
     std::cout<<"forces in r_sole = ["<<wrench_in_r_sole<<std::endl;
+
+    std::cout<<"robot mass is: "<<_model_ptr->getMass()<<" kg"<<std::endl;
+
 
 }
 }

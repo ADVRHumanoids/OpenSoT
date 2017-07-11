@@ -80,12 +80,12 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
 		      testQPOases_StaticWalk
-                      testQPOases_StaticWalk_FloatingBase ######
-                      testEigenSVD_StaticWalk_FloatingBase
+                      testQPOases_StaticWalk_FloatingBase #YARP FREE
+                      testEigenSVD_StaticWalk_FloatingBase #YARP FREE
                       testAggregatedTask
                       testCartesianVelocityTask
                       testCoMForceTask
-                      testFrictionConeForceConstraint
+                      testFrictionConeForceConstraint ###YARP FREE
                       testCoMVelocityTask
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
