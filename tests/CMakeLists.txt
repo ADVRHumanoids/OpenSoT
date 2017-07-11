@@ -59,7 +59,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       MAIN_DEPENDENCY OpenSoT
                       DEPENDS
                       testAggregatedConstraint
-                      testBilateralConstraint
+                      testBilateralConstraint #YARP FREE
 #                      testCartesianPositionVelocityConstraint
                       testCollisionAvoidanceVelocityConstraint
                       testCoMVelocityVelocityConstraint
@@ -80,11 +80,12 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
 		      testQPOases_StaticWalk
-                      testQPOases_StaticWalk_FloatingBase ######
+                      testQPOases_StaticWalk_FloatingBase #YARP FREE
+                      testEigenSVD_StaticWalk_FloatingBase #YARP FREE
                       testAggregatedTask
                       testCartesianVelocityTask
                       testCoMForceTask
-#                      testFrictionConeForceConstraint
+                      testFrictionConeForceConstraint ###YARP FREE
                       testCoMVelocityTask
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
@@ -210,6 +211,10 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testQPOases_StaticWalk_FloatingBase GTest-ext OpenSoT)
 
+    ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
+    TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
+    add_dependencies(testEigenSVD_StaticWalk_FloatingBase GTest-ext OpenSoT)
+
     ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
     TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
     add_dependencies(testAggregatedTask GTest-ext OpenSoT)
@@ -222,9 +227,9 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
     add_dependencies(testCoMForceTask GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
-#    TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
-#    add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
+    TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
+    add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
 
     ADD_EXECUTABLE(testCoMVelocityTask tasks/velocity/TestCoM.cpp)
     TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
@@ -329,11 +334,12 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
     add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
     add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
+    add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
     add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
     add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
     add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
-#    add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
+    add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
     add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 #    add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)

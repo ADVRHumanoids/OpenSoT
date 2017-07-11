@@ -1,28 +1,139 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/DampedPseudoInverse.h>
 #include <OpenSoT/tasks/force/CoM.h>
 #include <OpenSoT/constraints/force/FrictionCone.h>
+#include <OpenSoT/constraints/force/WrenchLimits.h>
 #include <cmath>
-#include <idynutils/tests_utils.h>
-#include <idynutils/RobotUtils.h>
 #include <fstream>
-#include <idynutils/cartesian_utils.h>
+#include <XBotInterface/ModelInterface.h>
+#include <XBotInterface/ModelInterface.h>
+#include <ros/master.h>
+#include <sensor_msgs/JointState.h>
+#include <tf/transform_broadcaster.h>
+
+
+
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
+
+bool IS_ROSCORE_RUNNING;
 
 namespace{
 
 class testFrictionCones : public ::testing::Test {
  protected:
 
-  testFrictionCones():
-      robot("coman",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
+  testFrictionCones()
   {
+      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-      yarp::sig::Vector q = getGoodInitialPosition(robot);
+      if(_model_ptr)
+          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+      else
+          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-      robot.updateiDyn3Model(q, true);
+      int number_of_dofs = _model_ptr->getJointNum();
+      std::cout<<"#DoFs: "<<number_of_dofs<<std::endl;
+
+      _q.resize(number_of_dofs);
+      _q.setZero(number_of_dofs);
+
+      _model_ptr->setJointPosition(_q);
+      _model_ptr->update();
+
+      //Update world according this new configuration:
+      KDL::Frame l_sole_T_Waist;
+      this->_model_ptr->getPose("Waist", "l_sole", l_sole_T_Waist);
+      std::cout<<"l_sole_T_Waist:"<<std::endl;
+      this->printKDLFrame(l_sole_T_Waist);
+
+      l_sole_T_Waist.p.x(0.0);
+      l_sole_T_Waist.p.y(0.0);
+
+      this->setWorld(l_sole_T_Waist, this->_q);
+      this->_model_ptr->setJointPosition(this->_q);
+      this->_model_ptr->update();
+
+
+      KDL::Frame world_T_bl;
+      _model_ptr->getPose("Waist",world_T_bl);
+
+      std::cout<<"world_T_bl:"<<std::endl;
+      printKDLFrame(world_T_bl);
+      //
+
+      _q[_model_ptr->getDofIndex("RAnkLat")] = -45.0*M_PI/180.0;
+      _q[_model_ptr->getDofIndex("LAnkLat")] = 45.0*M_PI/180.0;
+      _model_ptr->setJointPosition(_q);
+      _model_ptr->update();
+      //Update world according this new configuration:
+      world_T_bl.p.z(world_T_bl.p.z()+0.05);
+      this->setWorld(l_sole_T_Waist, this->_q);
+      this->_model_ptr->setJointPosition(this->_q);
+      this->_model_ptr->update();
+      //
+
+
+
+
+
+      if(IS_ROSCORE_RUNNING){
+
+          _n.reset(new ros::NodeHandle());
+          joint_state_pub = _n->advertise<sensor_msgs::JointState>("joint_states", 1000);
+          world_broadcaster.reset(new tf::TransformBroadcaster());
+      }
   }
+
+  void setWorld(const KDL::Frame& l_sole_T_Waist, Eigen::VectorXd& q)
+  {
+      this->_model_ptr->setFloatingBasePose(l_sole_T_Waist);
+
+      this->_model_ptr->getJointPosition(q);
+  }
+
+  void publishRobotState()
+  {
+      if(IS_ROSCORE_RUNNING)
+      {
+          sensor_msgs::JointState joint_msg;
+          joint_msg.name = _model_ptr->getEnabledJointNames();
+
+
+          for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
+              joint_msg.position.push_back(0.0);
+
+          for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
+          {
+              int id = _model_ptr->getDofIndex(joint_msg.name[i]);
+              joint_msg.position[id] = _q[i];
+          }
+
+          joint_msg.header.stamp = ros::Time::now();
+
+
+          KDL::Frame world_T_bl;
+          _model_ptr->getPose("Waist",world_T_bl);
+
+          tf::Transform anchor_T_world;
+          anchor_T_world.setOrigin(tf::Vector3(world_T_bl.p.x(),
+              world_T_bl.p.y(), world_T_bl.p.z()));
+          double x,y,z,w;
+          world_T_bl.M.GetQuaternion(x,y,z,w);
+          anchor_T_world.setRotation(tf::Quaternion(x,y,z,w));
+
+          world_broadcaster->sendTransform(tf::StampedTransform(
+              anchor_T_world.inverse(), joint_msg.header.stamp,
+              "Waist", "world"));
+
+
+          joint_state_pub.publish(joint_msg);
+      }
+
+  }
+
 
   virtual ~testFrictionCones() {
   }
@@ -33,29 +144,26 @@ class testFrictionCones : public ::testing::Test {
   virtual void TearDown() {
   }
 
-  yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
-      yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-      yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-      leg[0] = -25.0 * M_PI/180.0;
-      leg[3] =  50.0 * M_PI/180.0;
-      leg[5] = -25.0 * M_PI/180.0;
-      idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-      idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-      yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-      arm[0] = -90.0 * M_PI/180.0;
-      arm[1] = 0.0 * M_PI/180.0;
-      arm[3] = 0.0 * M_PI/180.0;
-      idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
 
-      return q;
-  }
 
 
 public:
-  iDynUtils robot;
+  void printKDLFrame(const KDL::Frame& F)
+  {
+      std::cout<<"    pose: ["<<F.p.x()<<", "<<F.p.y()<<", "<<F.p.z()<<"]"<<std::endl;
+      double qx, qy,qz,qw;
+      F.M.GetQuaternion(qx,qy,qz,qw);
+      std::cout<<"    quat: ["<<qx<<", "<<qy<<", "<<qz<<", "<<qw<<"]"<<std::endl;
+  }
+
+  XBot::ModelInterface::Ptr _model_ptr;
+  Eigen::VectorXd _q;
   OpenSoT::tasks::force::CoM::Ptr com;
+
+  OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits;
   OpenSoT::constraints::force::FrictionCone::Ptr friction_cones;
-  OpenSoT::solvers::QPOases_sot::Ptr solver;
+  OpenSoT::solvers::QPOases_sot::Ptr QPsolver;
+  OpenSoT::solvers::DampedPseudoInverse::Ptr SVDsolver;
 
   Eigen::MatrixXd A;
   Eigen::VectorXd b;
@@ -64,148 +172,150 @@ public:
   Eigen::MatrixXd Aineq;
   Eigen::VectorXd bUpperBoud;
   Eigen::VectorXd Aineqx;
+
+  boost::shared_ptr<ros::NodeHandle> _n;
+  ros::Publisher joint_state_pub;
+  boost::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
 };
 
 
 TEST_F(testFrictionCones, testFrictionCones_) {
 
+    if(IS_ROSCORE_RUNNING){
+        for(unsigned int i = 0; i < 10000; ++i){
+            publishRobotState();
+            ros::spinOnce();
+        }
+    }
+
     std::vector<std::string> links_in_contact;
     links_in_contact.push_back("r_sole");
     links_in_contact.push_back("l_sole");
-    links_in_contact.push_back("LSoftHand");
 
-    // l_sole and r_sole are on the plane
-    Eigen::Matrix3d w_R_r_sole; w_R_r_sole.setIdentity();
-    Eigen::Matrix3d w_R_l_sole; w_R_l_sole.setIdentity();
-    // LSoftHand is on a plane that is rotated of -45. deg wrt the world
-    KDL::Frame w_T_LSoftHand; w_T_LSoftHand.Identity();
-    w_T_LSoftHand.M.DoRotY(-45.*M_PI/180.);
-    Eigen::Matrix3d w_R_LSoftHand;
-    for(unsigned int i = 0; i < 3; ++i){
-        for(unsigned int j = 0; j < 3; ++j)
-            w_R_LSoftHand(i,j) = w_T_LSoftHand.M(i,j);
-    }
+    KDL::Frame w_T_r_sole;
+    _model_ptr->getPose("r_sole", w_T_r_sole);
+    KDL::Frame w_T_l_sole;
+    _model_ptr->getPose("l_sole", w_T_l_sole);
 
-    std::vector<std::pair<Eigen::Matrix3d, double> > friction__cones;
-    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_r_sole, 1.));
-    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_l_sole, 1.));
-    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_LSoftHand, 1.0));
 
-    Eigen::VectorXd contact_wrenches_d(6*links_in_contact.size());
-    contact_wrenches_d.setZero(contact_wrenches_d.rows());
-    com.reset(new OpenSoT::tasks::force::CoM(contact_wrenches_d, links_in_contact, robot));
-    com->update(contact_wrenches_d);
+    Eigen::VectorXd QPcontact_wrenches_d(6*links_in_contact.size());
+    QPcontact_wrenches_d.setZero(QPcontact_wrenches_d.rows());
+    Eigen::VectorXd SVDcontact_wrenches_d(6*links_in_contact.size());
+    SVDcontact_wrenches_d.setZero(SVDcontact_wrenches_d.rows());
 
-    friction_cones.reset(new OpenSoT::constraints::force::FrictionCone(contact_wrenches_d,
-                            robot, friction__cones));
+    com.reset(new OpenSoT::tasks::force::CoM(QPcontact_wrenches_d, links_in_contact, *_model_ptr));
+    com->update(QPcontact_wrenches_d);
 
-    EXPECT_EQ(friction_cones->getNumberOfContacts(), 3);
+
+    wrench_limits.reset(new OpenSoT::constraints::force::WrenchLimits(300., 6*links_in_contact.size()));
+
+    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(com);
+
+    QPsolver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,wrench_limits,2E10));
+    std::cout<<"QP Solver started"<<std::endl;
+    bool solved = false;
+    do{
+        solved = QPsolver->solve(QPcontact_wrenches_d);
+    }while(!solved);
+    std::cout<<"contact_wrenches_d w/o constraint :"<<std::endl;
+    std::cout<<"    r_sole = ["<<QPcontact_wrenches_d.segment(0,6)<<"]"<<std::endl;
+    std::cout<<"    l_sole = ["<<QPcontact_wrenches_d.segment(6,6)<<"]"<<std::endl;
+
+    SVDsolver.reset(new OpenSoT::solvers::DampedPseudoInverse(stack_of_tasks));
+    std::cout<<"SVD Solver started"<<std::endl;
+    SVDsolver->solve(SVDcontact_wrenches_d);
+    std::cout<<"contact_wrenches_d w/o constraint :"<<std::endl;
+    std::cout<<"    r_sole = ["<<SVDcontact_wrenches_d.segment(0,6)<<"]"<<std::endl;
+    std::cout<<"    l_sole = ["<<SVDcontact_wrenches_d.segment(6,6)<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6*links_in_contact.size(); ++i)
+        EXPECT_NEAR(QPcontact_wrenches_d[i],
+                    SVDcontact_wrenches_d[i], 1e-3);
+
+
+    std::vector<std::pair<std::string, double> > friction__cones;
+    double mu = 0.5;
+    friction__cones.push_back(std::pair<std::string, double>(links_in_contact[0], mu));
+    friction__cones.push_back(std::pair<std::string, double>(links_in_contact[1], mu));
+
+    friction_cones.reset(new OpenSoT::constraints::force::FrictionCone(QPcontact_wrenches_d,
+                            *_model_ptr, friction__cones));
+    friction_cones->update(QPcontact_wrenches_d);
+
+    EXPECT_EQ(friction_cones->getNumberOfContacts(), links_in_contact.size());
 
     EXPECT_EQ(friction_cones->getbUpperBound().rows(), 5*friction__cones.size());
     EXPECT_EQ(friction_cones->getAineq().rows(), 5*friction__cones.size());
     EXPECT_EQ(friction_cones->getAineq().cols(), 6*friction__cones.size());
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-    stack_of_tasks.push_back(com);
+    std::cout<<"friction_cones lb: "<<friction_cones->getbLowerBound()<<std::endl;
+    std::cout<<"friction_cones ub: "<<friction_cones->getbUpperBound()<<std::endl;
+    std::cout<<"friction_cones Aineq: "<<friction_cones->getAineq()<<std::endl;
 
-    solver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,2E3));
-    std::cout<<"Solver started"<<std::endl;
-    bool solved = false;
+
+
+    QPcontact_wrenches_d.setZero(QPcontact_wrenches_d.size());
+    QPsolver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,wrench_limits,friction_cones));
+    std::cout<<"QP Solver started"<<std::endl;
+    solved = false;
     do{
-        solved = solver->solve(contact_wrenches_d);
+        solved = QPsolver->solve(QPcontact_wrenches_d);
     }while(!solved);
-    std::cout<<"contact_wrenches_d w/o constraint :"<<std::endl;
-    std::cout<<"    r_sole = ["<<contact_wrenches_d.segment(0,6)<<"]"<<std::endl;
-    std::cout<<"    l_sole = ["<<contact_wrenches_d.segment(6,6)<<"]"<<std::endl;
-    std::cout<<"    LSoftHand = ["<<contact_wrenches_d.segment(12,6)<<"]"<<std::endl;
-
-
-    A = com->getA();
-    b = com->getb();
-    Ax = A*contact_wrenches_d;
-    std::cout<<"A = \n"<<A<<std::endl;
-    std::cout<<"A*x = \n"<<Ax<<std::endl;
-    std::cout<<"b = \n"<<b<<std::endl;
-
-    for(unsigned int i = 0; i < b.rows(); ++i)
-        EXPECT_NEAR(Ax[i],b[i], 1E-6);
+    std::cout<<"contact_wrenches_d w constraint :"<<std::endl;
+    std::cout<<"    r_sole = ["<<QPcontact_wrenches_d.segment(0,6)<<"]"<<std::endl;
+    std::cout<<"    l_sole = ["<<QPcontact_wrenches_d.segment(6,6)<<"]"<<std::endl;
 
     std::cout<<std::endl;
 
+    Eigen::VectorXd wrench_in_l_sole(6); wrench_in_l_sole.setZero(6);
+    Eigen::VectorXd wrench_in_r_sole(6); wrench_in_r_sole.setZero(6);
+    Eigen::Affine3d w_T_lsole;
+    _model_ptr->getPose("l_sole", w_T_lsole);
+    wrench_in_l_sole = w_T_lsole.rotation().transpose()*QPcontact_wrenches_d.segment(6,3);
+    std::cout<<"forces in l_sole = ["<<wrench_in_l_sole<<std::endl;
+    Eigen::Affine3d w_T_rsole;
+    _model_ptr->getPose("r_sole", w_T_rsole);
+    wrench_in_r_sole = w_T_rsole.rotation().transpose()*QPcontact_wrenches_d.segment(0,3);
+    std::cout<<"forces in r_sole = ["<<wrench_in_r_sole<<std::endl;
+
+    double c = std::sqrt(2.*mu)/2.;
+    std::cout<<"left friction cones constr: "<<std::endl;
+    std::cout<<-c*wrench_in_l_sole[2]<<" <= "<<wrench_in_l_sole[0]<<" <= "<<c*wrench_in_l_sole[2]<<std::endl;
+    std::cout<<-c*wrench_in_l_sole[2]<<" <= "<<wrench_in_l_sole[1]<<" <= "<<c*wrench_in_l_sole[2]<<std::endl;
+    std::cout<<-wrench_in_l_sole[2]<<" <= "<<0.0<<std::endl;
+    for(unsigned int i = 0; i < 2; ++i){
+        EXPECT_LE(-c*wrench_in_l_sole[2]-wrench_in_l_sole[i], 1e-6);
+        EXPECT_LE(-c*wrench_in_l_sole[2]+wrench_in_l_sole[i], 1e-6);
+    }
+    EXPECT_LE(-wrench_in_l_sole[2],0.0);
+
+    std::cout<<"right friction cones constr: "<<std::endl;
+    std::cout<<-c*wrench_in_r_sole[2]<<" <= "<<wrench_in_r_sole[0]<<" <= "<<c*wrench_in_r_sole[2]<<std::endl;
+    std::cout<<-c*wrench_in_r_sole[2]<<" <= "<<wrench_in_r_sole[1]<<" <= "<<c*wrench_in_r_sole[2]<<std::endl;
+    std::cout<<-wrench_in_r_sole[2]<<" <= "<<0.0<<std::endl;
+    for(unsigned int i = 0; i < 2; ++i){
+        EXPECT_LE(-c*wrench_in_r_sole[2]-wrench_in_r_sole[i], 1e-6);
+        EXPECT_LE(-c*wrench_in_r_sole[2]+wrench_in_r_sole[i], 1e-6);
+    }
+    EXPECT_LE(-wrench_in_r_sole[2],0.0);
 
 
-    com->getConstraints().push_back(friction_cones);
-    solved = false;
-    solver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,2E3));
-    std::cout<<"Solver started"<<std::endl;
-    do{
-        solved = solver->solve(contact_wrenches_d);
-    }while(!solved);
-    std::cout<<"contact_wrenches_d w constraint 1:"<<std::endl;
-    std::cout<<"    r_sole = ["<<contact_wrenches_d.segment(0,6)<<"]"<<std::endl;
-    std::cout<<"    l_sole = ["<<contact_wrenches_d.segment(6,6)<<"]"<<std::endl;
-    std::cout<<"    LSoftHand = ["<<contact_wrenches_d.segment(12,6)<<"]"<<std::endl;
+    std::cout<<"USING SVD:"<<std::endl;
+    wrench_in_l_sole = w_T_lsole.rotation().transpose()*SVDcontact_wrenches_d.segment(6,3);
+    std::cout<<"forces in l_sole = ["<<wrench_in_l_sole<<std::endl;
+    wrench_in_r_sole = w_T_rsole.rotation().transpose()*SVDcontact_wrenches_d.segment(0,3);
+    std::cout<<"forces in r_sole = ["<<wrench_in_r_sole<<std::endl;
 
-    Ax = A*contact_wrenches_d;
-    std::cout<<"A = \n"<<A<<std::endl;
-    std::cout<<"A*x = \n"<<Ax<<std::endl;
-    std::cout<<"b = \n"<<b<<std::endl;
+    std::cout<<"robot mass is: "<<_model_ptr->getMass()<<" kg"<<std::endl;
 
-    for(unsigned int i = 0; i < b.rows(); ++i)
-        EXPECT_NEAR(Ax[i],b[i], 1E-6);
-
-    Aineq = friction_cones->getAineq();
-    bUpperBoud = friction_cones->getbUpperBound();
-    Aineqx = Aineq*contact_wrenches_d;
-    std::cout<<"Aineq = \n"<<Aineq<<std::endl;
-    std::cout<<"Aineq*x = \n"<<Aineqx<<std::endl;
-    std::cout<<"bUpperBound = \n"<<bUpperBoud<<std::endl;
-
-    for(unsigned int i = 0; i < bUpperBoud.rows(); ++i)
-        EXPECT_LE(Aineqx[i],bUpperBoud[i]);
-
-
-    friction__cones.clear();
-    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_r_sole, 1.));
-    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_l_sole, 1.));
-    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(w_R_LSoftHand, 0.5));
-    friction_cones->setMu(friction__cones);
-    friction_cones->update(contact_wrenches_d);
-    com->update(contact_wrenches_d);
-
-    solver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,2E3));
-    std::cout<<"Solver started"<<std::endl;
-    solved = false;
-    do{
-        solved = solver->solve(contact_wrenches_d);
-    }while(!solved);
-    std::cout<<"contact_wrenches_d w constraint 2:"<<std::endl;
-    std::cout<<"    r_sole = ["<<contact_wrenches_d.segment(0,6)<<"]"<<std::endl;
-    std::cout<<"    l_sole = ["<<contact_wrenches_d.segment(6,6)<<"]"<<std::endl;
-    std::cout<<"    LSoftHand = ["<<contact_wrenches_d.segment(12,6)<<"]"<<std::endl;
-
-    Ax = A*contact_wrenches_d;
-    std::cout<<"A = \n"<<A<<std::endl;
-    std::cout<<"A*x = \n"<<Ax<<std::endl;
-    std::cout<<"b = \n"<<b<<std::endl;
-
-    for(unsigned int i = 0; i < b.rows(); ++i)
-        EXPECT_NEAR(Ax[i],b[i], 1E-6);
-
-    Aineq = friction_cones->getAineq();
-    bUpperBoud = friction_cones->getbUpperBound();
-    Aineqx = Aineq*contact_wrenches_d;
-    std::cout<<"Aineq = \n"<<Aineq<<std::endl;
-    std::cout<<"Aineq*x = \n"<<Aineqx<<std::endl;
-    std::cout<<"bUpperBound = \n"<<bUpperBoud<<std::endl;
-
-    for(unsigned int i = 0; i < bUpperBoud.rows(); ++i)
-        EXPECT_LE(Aineqx[i],bUpperBoud[i]);
 
 }
 }
 
 int main(int argc, char **argv) {
+  ros::init(argc, argv, "testFrictionCones_node");
+  IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

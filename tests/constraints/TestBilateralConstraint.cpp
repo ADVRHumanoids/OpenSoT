@@ -2,10 +2,8 @@
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <yarp/sig/all.h>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <string>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 
 namespace {
 
@@ -44,18 +42,17 @@ TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
     using namespace OpenSoT::constraints;
     const unsigned int nJ = 6;
 
-    yarp::sig::Vector q(nJ, 0.0);
-    yarp::sig::Vector q_next(nJ, M_PI - 0.01);
+    Eigen::VectorXd q(nJ); q.setZero(nJ);
+    Eigen::VectorXd q_next(nJ); q_next = Eigen::VectorXd::Constant(nJ, M_PI-0.01);
 
-    yarp::sig::Matrix A(nJ,nJ); A.eye();
-    yarp::sig::Vector bUpperBound(nJ,M_PI);
-    yarp::sig::Vector bLowerBound(nJ,0.0);
+    Eigen::MatrixXd A(nJ, nJ); A.setIdentity(nJ, nJ);
+
+    Eigen::VectorXd bLowerBound(nJ); bLowerBound.setZero(nJ);
+    Eigen::VectorXd bUpperBound(nJ);
+    bUpperBound = Eigen::VectorXd::Constant(nJ, M_PI);
+
     BilateralConstraint::ConstraintPtr bilateral(BilateralConstraint::ConstraintPtr(
-        new BilateralConstraint(conversion_utils_YARP::toEigen(A),
-                                conversion_utils_YARP::toEigen(bUpperBound),
-                                conversion_utils_YARP::toEigen(bLowerBound))
-                                                  )
-                          );
+        new BilateralConstraint(A,bUpperBound,bLowerBound)));
 
     /* we should mash joint limits and velocity limits in one */
     EXPECT_TRUE(bilateral->getLowerBound().size() == 0);
@@ -68,13 +65,13 @@ TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
     EXPECT_TRUE(bilateral->getAeq().rows() == 0);
     EXPECT_TRUE(bilateral->getbeq().size() == 0);
 
-    yarp::sig::Vector oldbLowerBound = conversion_utils_YARP::toYARP(bilateral->getbLowerBound());
-    yarp::sig::Vector oldbUpperBound = conversion_utils_YARP::toYARP(bilateral->getbUpperBound());
-    yarp::sig::Matrix oldAineq = conversion_utils_YARP::toYARP(bilateral->getAineq());
-    bilateral->update(conversion_utils_YARP::toEigen(q_next));
-    yarp::sig::Vector newbLowerBound = conversion_utils_YARP::toYARP(bilateral->getbLowerBound());
-    yarp::sig::Vector newbUpperBound = conversion_utils_YARP::toYARP(bilateral->getbUpperBound());
-    yarp::sig::Matrix newAineq = conversion_utils_YARP::toYARP(bilateral->getAineq());
+    Eigen::VectorXd oldbLowerBound = bilateral->getbLowerBound();
+    Eigen::VectorXd oldbUpperBound = bilateral->getbUpperBound();
+    Eigen::MatrixXd oldAineq = bilateral->getAineq();
+    bilateral->update(q_next);
+    Eigen::VectorXd newbLowerBound = bilateral->getbLowerBound();
+    Eigen::VectorXd newbUpperBound = bilateral->getbUpperBound();
+    Eigen::MatrixXd newAineq = bilateral->getAineq();
     EXPECT_TRUE(oldbLowerBound == newbLowerBound);
     EXPECT_TRUE(oldbUpperBound == newbUpperBound);
     EXPECT_TRUE(oldAineq == newAineq);

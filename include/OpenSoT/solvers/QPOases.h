@@ -26,7 +26,7 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include "QPOasesProblem.h"
 
-#define _CONSTRAINT_MATRIX_MAX_SIZE_ 50
+#define _CONSTRAINT_MATRIX_MAX_SIZE_ 100
 
 namespace qpOASES {
     class SQProblem;
@@ -161,6 +161,7 @@ namespace OpenSoT{
             a.conservativeResize(a.rows()+b.rows());
             a.segment(a.rows()-b.rows(),b.rows())<<b;
         }
+
 
         Eigen::MatrixXd H;
         Eigen::VectorXd g;

@@ -34,7 +34,7 @@ XBot::MatLogger::Ptr logger;
 #define CHECK_CARTESIAN_ERROR true
 #define USE_WRONG_COM_REFERENCE false
 #define USE_INERTIA_MATRIX false
-#define USE_COM_AS_CONSTR true
+#define USE_COM_AS_CONSTR false
 
 namespace{
 
@@ -288,41 +288,16 @@ public:
 
 
 
-#if USE_COM_AS_CONSTR
-        auto_stack = (l_sole + r_sole)/
-                (l_wrist + r_wrist + gaze)/
-                (postural + minAcc)<<joint_limits<<vel_limits;
-#else
             auto_stack = (l_sole + r_sole)/
                     (com)/
                     (l_wrist + r_wrist + gaze)/
                     (postural)<<joint_limits<<vel_limits;
-#endif
-
-
-        com_constr.reset(new OpenSoT::constraints::TaskToConstraint(com));
 
 
         auto_stack->update(q);
-        com_constr->update(q);
 
-#if USE_COM_AS_CONSTR
-        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
-                    auto_stack->getBounds(),com_constr, 1e6));
-#else
-        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
-                    auto_stack->getBounds(), 1e6));
-#endif
+        solver.reset(new OpenSoT::solvers::DampedPseudoInverse(auto_stack->getStack()));
 
-        //solver.reset(new OpenSoT::solvers::DampedPseudoInverse(auto_stack->getStack()));
-
-
-        qpOASES::Options opt;
-        solver->getOptions(0, opt);
-        opt.numRefinementSteps = 0;
-        opt.numRegularisationSteps = 1;
-        for(unsigned int i = 0; i < 3; ++i)
-            solver->setOptions(i, opt);
 
     }
 
@@ -341,7 +316,6 @@ public:
         setInertiaPostureTask();
 #endif
         auto_stack->update(q);
-        com_constr->update(q);
 
     }
 
@@ -360,14 +334,12 @@ public:
     OpenSoT::tasks::velocity::MinimizeAcceleration::Ptr minAcc;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
     OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
-    OpenSoT::constraints::TaskToConstraint::Ptr com_constr;
 
     OpenSoT::AutoStack::Ptr auto_stack;
 
     XBot::ModelInterface& model_ref;
 
-    OpenSoT::solvers::QPOases_sot::Ptr solver;
-    //OpenSoT::solvers::DampedPseudoInverse::Ptr solver;
+    OpenSoT::solvers::DampedPseudoInverse::Ptr solver;
 
 
     Eigen::MatrixXd I;
@@ -782,12 +754,12 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     for(unsigned int i = 0; i < int(this->manip_trj->com_trj.Duration()) * 100; ++i)
     {
         //log
-        logger->add("QPq", this->_q);
-        logger->add("QPdq", dq);
+        logger->add("Eigq", this->_q);
+        logger->add("Eigdq", dq);
         Eigen::VectorXd qmin, qmax;
         _model_ptr->getJointLimits(qmin, qmax);
-        logger->add("QPqmin", qmin);
-        logger->add("QPqmax", qmax);
+        logger->add("Eigqmin", qmin);
+        logger->add("Eigqmax", qmax);
         //
 
 
@@ -827,9 +799,9 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 #endif
         //log
         Eigen::VectorXd com(3); com[0] = tmp.p.x(); com[1] = tmp.p.y(); com[2] = tmp.p.z();
-        logger->add("QPCoM", com);
+        logger->add("EigCoM", com);
         com[0] = com_d.p.x(); com[1] = com_d.p.y(); com[2] = com_d.p.z();
-        logger->add("QPCoMd", com);
+        logger->add("EigCoMd", com);
         //
 
 
@@ -964,7 +936,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "testStaticWalkFloatingBaseFloatingBase_node");
-  logger = XBot::MatLogger::getLogger("qpOASES_StaticWalk_FloatingBase");
+  logger = XBot::MatLogger::getLogger("EigenSVD_StaticWalk_FloatingBase");
   IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
