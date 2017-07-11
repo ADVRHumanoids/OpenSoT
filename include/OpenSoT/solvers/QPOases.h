@@ -26,7 +26,7 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include "QPOasesProblem.h"
 
-#define _CONSTRAINT_MATRIX_MAX_SIZE_ 50
+#define _CONSTRAINT_MATRIX_MAX_SIZE_ 100
 
 namespace qpOASES {
     class SQProblem;
