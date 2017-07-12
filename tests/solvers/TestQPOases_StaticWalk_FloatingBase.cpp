@@ -578,7 +578,7 @@ public:
     void setWorld(const KDL::Frame& l_sole_T_Waist, Eigen::VectorXd& q)
     {
         this->_model_ptr->setFloatingBasePose(l_sole_T_Waist);
-
+        this->_model_ptr->update();
         this->_model_ptr->getJointPosition(q);
     }
 
@@ -646,9 +646,6 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     l_sole_T_Waist.p.y(0.0);
 
     this->setWorld(l_sole_T_Waist, this->_q);
-    this->_model_ptr->setJointPosition(this->_q);
-    this->_model_ptr->update();
-
 
     KDL::Frame world_T_bl;
     _model_ptr->getPose("Waist",world_T_bl);
