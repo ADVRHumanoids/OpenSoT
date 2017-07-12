@@ -23,7 +23,7 @@
 using namespace OpenSoT::constraints;
 
 TaskToConstraint::TaskToConstraint(TaskPtr task) :
-    BilateralConstraint(task->getA(), task->getb(), task->getb()), _task(task)
+    BilateralConstraint(task->getTaskID(), task->getA(), task->getb(), task->getb()), _task(task)
 {
     this->generateAll();
 }
