@@ -160,8 +160,11 @@ void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
 {
     if(sigma_min > 0)
     {
-        for(unsigned int i = 0; i < _JPsvd.size(); ++i)
-            _JPsvd[i].setThreshold(sigma_min);
+        // for(unsigned int i = 0; i < _JPsvd.size(); ++i)
+        //    _JPsvd[i].setThreshold(sigma_min);
+        for(unsigned int i = 0; i < _stack_levels.size(); ++i)
+            _stack_levels[i]._JPsvd.setThreshold(sigma_min);
+
 
         this->sigma_min = sigma_min;
     }
