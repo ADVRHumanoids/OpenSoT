@@ -4,6 +4,7 @@
 #include <yarp/math/SVD.h>
 #include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <advr_humanoids_common_utils/conversion_utils_YARP.h>
+#include <OpenSoT/utils/cartesian_utils.h>
 
 using namespace yarp::math;
 
@@ -64,7 +65,8 @@ protected:
 TEST_F(testCoMTask, testCoMTask_)
 {
     // setting initial position with bent legs
-    yarp::sig::Vector q_whole(_robot.iDynTree_model.getNrOfDOFs(), 1E-4);
+    Eigen::VectorXd q_whole(_robot.iDynTree_model.getNrOfDOFs());
+    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
     q_whole[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -73,12 +75,12 @@ TEST_F(testCoMTask, testCoMTask_)
     q_whole[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
     _robot.switchAnchorAndFloatingBase("l_sole");
-    _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
+    _robot.updateiDynTreeModel(q_whole, true);
 
     _fixed_robot.switchAnchorAndFloatingBase("l_sole");
-    _fixed_robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole));
+    _fixed_robot.updateiDynTreeModel(q_whole);
 
-    _normal_robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole));
+    _normal_robot.updateiDynTreeModel(q_whole);
 
     std::cout << "_robot.getCoM() is: " << _robot.getCOM() << std::endl;
     std::cout << "_robot.getCoM(\"l_sole\") is: " << _robot.iDynTree_model.getCOM(
@@ -93,7 +95,7 @@ TEST_F(testCoMTask, testCoMTask_)
     std::cout << "_normal_robot.getCoM(_\"l_sole\") is: " << _normal_robot.iDynTree_model.getCOM(
                      _robot.iDynTree_model.getLinkIndex("l_sole")).toString() << std::endl;
 
-    _normal_robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
+    _normal_robot.updateiDynTreeModel(q_whole, true);
 
     std::cout << "computing _normal_robot with proper world" << std::endl;
     std::cout << "_normal_robot.getCoM() is: " << _normal_robot.getCOM() << std::endl;
@@ -101,19 +103,19 @@ TEST_F(testCoMTask, testCoMTask_)
                      _robot.iDynTree_model.getLinkIndex("l_sole")).toString() << std::endl;
 
 
-    OpenSoT::tasks::velocity::CoM CoM(conversion_utils_YARP::toEigen(q_whole), *(_model_ptr.get()));
+    OpenSoT::tasks::velocity::CoM CoM(q_whole, *(_model_ptr.get()));
 
-    EXPECT_TRUE(conversion_utils_YARP::toYARP(CoM.getb()) == yarp::sig::Vector(3,0.0)) << "b = " << CoM.getb();
+    EXPECT_TRUE(CoM.getb() == Eigen::VectorXd::Zero(3)) << "b = " << CoM.getb();
 
     // setting x_ref with a delta offset along the z axis (+2cm)
-    yarp::sig::Vector delta_x(3,0.0);
-                      delta_x(2) = 0.02;
+    Eigen::VectorXd delta_x(3); delta_x.setZero(3);
+                    delta_x(2) = 0.02;
     Eigen::VectorXd x = _robot.getCOM();
-    yarp::sig::Vector x_ref = conversion_utils_YARP::toYARP(x) + delta_x;
+    Eigen::VectorXd x_ref = x + delta_x;
 
     Eigen::MatrixXd J;
     // hack! we need to compute world position in a smarter way....
-    _fixed_robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole),true);
+    _fixed_robot.updateiDynTreeModel(q_whole,true);
     _fixed_robot.getCOMJacobian(J);
     J = J.block(0,6,3,q_whole.size());
     EXPECT_TRUE(CoM.getA() == J);
@@ -132,34 +134,36 @@ TEST_F(testCoMTask, testCoMTask_)
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
-    CoM.setReference(conversion_utils_YARP::toEigen(x_ref));
-    yarp::sig::Vector positionError = x_ref - conversion_utils_YARP::toYARP(x);
+    CoM.setReference(x_ref);
+    Eigen::VectorXd positionError = x_ref - x;
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
-    _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
+    _robot.updateiDynTreeModel(q_whole, true);
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
     Eigen::VectorXd x_now;
+    SVDPseudoInverse<Eigen::MatrixXd> _pinv(CoM.getA(), 1E-6);
     for(unsigned int i = 0; i < 100; ++i)
     {
-        _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
+        _robot.updateiDynTreeModel(q_whole, true);
 
-        CoM.update(conversion_utils_YARP::toEigen(q_whole));
+        CoM.update(q_whole);
 
-        q_whole += pinv(conversion_utils_YARP::toYARP(CoM.getA()),1E-6)*
-                conversion_utils_YARP::toYARP(CoM.getb());
+        Eigen::MatrixXd Apinv;
+        _pinv.compute(CoM.getA(), Apinv);
+        q_whole += Apinv*CoM.getb();
 
-        _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
+        _robot.updateiDynTreeModel(q_whole, true);
         x_now = _robot.getCOM();
         std::cout << "Current error after iteration " << i << " is " << x_ref(2) - x_now(2) << std::endl;
     }
 
 
-    EXPECT_LT( findMax((x_ref - conversion_utils_YARP::toYARP(x_now))), 1E-3 ) << "x_ref:" << x_ref.toString() << std::endl
+    EXPECT_LT( (x_ref - x_now).maxCoeff(), 1E-3 ) << "x_ref:" << x_ref << std::endl
                                                 << "x_now:" << x_now << std::endl;
-    EXPECT_LT( abs(findMin((x_ref - conversion_utils_YARP::toYARP(x_now)))), 1E-3 );
+    EXPECT_LT( abs((x_ref - x_now).minCoeff()), 1E-3 );
 
     // checking for the position
     for(unsigned int i = 0; i < 3; ++i) {
