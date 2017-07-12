@@ -1,0 +1,25 @@
+# COMAN config
+XBotInterface:
+  urdf_path: "external/OpenSoT/tests/robots/coman/coman.urdf"
+  srdf_path: "external/OpenSoT/tests/robots/coman/coman.srdf"
+  joint_map_path: "external/OpenSoT/tests/configs/coman/joint_map/coman_ecat_joint_map.yaml"
+
+RobotInterface:
+  framework_name: "YARP"
+  
+ModelInterface:
+  model_type: "RBDL"
+  is_model_floating_base: "false"
+  
+RobotInterfaceYARP:
+  subclass_name: "RobotInterfaceYARP"
+  path_to_shared_lib: "libRobotInterfaceYARP.so"
+  subclass_factory_name: "robot_interface_yarp"
+  module_prefix: "test_YARP"
+  robot_name: "coman"
+  # different config files for module_prefix
+
+ModelInterfaceRBDL:
+  subclass_name: "ModelInterfaceRBDL"
+  path_to_shared_lib: "libModelInterfaceRBDL.so"
+  subclass_factory_name: "model_interface_rbdl"
