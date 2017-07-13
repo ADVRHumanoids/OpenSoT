@@ -144,7 +144,8 @@ namespace OpenSoT {
                     double computeManipulabilityIndex()
                     {
                         Eigen::MatrixXd J = _CartesianTask->getA();
-                        return sqrt((J*_W*J.transpose()).determinant());
+                        //fabs is to avoid nan when we have -1e-18!
+                        return sqrt(fabs((J*_W*J.transpose()).determinant()));
                     }
                 };
 
