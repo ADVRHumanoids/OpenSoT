@@ -20,7 +20,6 @@
 #ifndef _CONVEX_HULL_H__
 #define _CONVEX_HULL_H__
 
-#include <moveit/robot_model/robot_model.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <kdl/frames.hpp>
