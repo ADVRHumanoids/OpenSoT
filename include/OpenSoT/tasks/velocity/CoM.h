@@ -56,11 +56,13 @@
                 Eigen::Vector3d _desiredPosition;
                 Eigen::Vector3d _desiredVelocity;
 
+                Eigen::Vector3d _positionError;
+
                 void update_b();
 
             public:
 
-                Eigen::VectorXd positionError;
+
 
                 /**
                  * @brief CoM

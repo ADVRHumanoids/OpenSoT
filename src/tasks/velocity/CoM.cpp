@@ -32,7 +32,7 @@ CoM::CoM(   const Eigen::VectorXd& x,
 {
     _desiredPosition.setZero(3);
     _actualPosition.setZero(3);
-    positionError.setZero(3);
+    _positionError.setZero(3);
     _desiredVelocity.setZero(3);
 
     /* first update. Setting desired pose equal to the actual pose */
@@ -42,7 +42,7 @@ CoM::CoM(   const Eigen::VectorXd& x,
     /* initializing to zero error */
     _desiredPosition = _actualPosition;
     _b.setZero(3);
-    positionError = _b;
+    _positionError = _b;
 
     _W.resize(3,3);
     _W.setIdentity(3,3);
@@ -142,7 +142,8 @@ std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
 
 void CoM::update_b()
 {
-    _b = _desiredVelocity + _lambda*(_desiredPosition - _actualPosition);
+    _positionError = _desiredPosition - _actualPosition;
+    _b = _desiredVelocity + _lambda*_positionError;
 }
 
 void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
@@ -155,7 +156,7 @@ void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
 
 Eigen::VectorXd OpenSoT::tasks::velocity::CoM::getError()
 {
-    return _desiredPosition - _actualPosition;
+    return _positionError;
 }
 
 OpenSoT::tasks::velocity::CoM::Ptr OpenSoT::tasks::velocity::CoM::asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
