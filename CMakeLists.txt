@@ -159,10 +159,10 @@ if(${moveit_core_FOUND})
         set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
             src/utils/collision_utils.cpp)
     endif()
-    if(${PCL_FOUND})
-        set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
-            src/utils/convex_hull_utils.cpp)
-    endif()
+endif()
+if(${PCL_FOUND})
+    set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
+        src/utils/convex_hull_utils.cpp)
 endif()
 
 ADD_LIBRARY(OpenSoT SHARED
