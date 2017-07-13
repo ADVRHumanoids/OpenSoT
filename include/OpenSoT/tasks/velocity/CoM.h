@@ -83,7 +83,7 @@
                  * @param desiredPose the \f$R^{3}\f$ vector describing the desired position for the CoM
                  * in the world coordinate frame
                  */
-                void setReference(const Eigen::VectorXd& desiredPosition);
+                void setReference(const Eigen::Vector3d& desiredPosition);
                 void setReference(const KDL::Vector& desiredPosition);
 
                 /**
@@ -97,8 +97,8 @@
                  * instead of m/s. This means that if you have a linear velocity expressed in SI units, you have to call the function as
                  * setReference(desiredPosition, desiredVelocity*dt)
                  */
-                void setReference(const Eigen::VectorXd& desiredPosition,
-                                  const Eigen::VectorXd& desiredVelocity);
+                void setReference(const Eigen::Vector3d& desiredPosition,
+                                  const Eigen::Vector3d& desiredVelocity);
                 void setReference(const KDL::Vector& desiredPosition,
                                   const KDL::Vector& desiredVelocity);
 
@@ -117,15 +117,15 @@
                  * @param desireVelocity is a \f$R^{3}\f$ twist describing the desired trajectory velocity,
                  * and it represents a feed-forward term in the task computation
                  */
-                void getReference(Eigen::VectorXd& desiredPosition,
-                                  Eigen::VectorXd& desiredVelocity) const;
+                void getReference(Eigen::Vector3d& desiredPosition,
+                                  Eigen::Vector3d& desiredVelocity) const;
 
 
                 /**
                  * @brief getActualPosition returns the CoM actual position. You need to call _update(x) for the position to change
                  * @return the \f$R^{3}\f$ vector describing the actual CoM position in the world coordinate frame
                  */
-                Eigen::VectorXd getActualPosition() const;
+                Eigen::Vector3d getActualPosition() const;
 
                 /**
                  * @brief getBaseLink an utility function that always returns "world"
@@ -145,7 +145,7 @@
                  * @brief getError returns the position error between actual and reference positions
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
-                Eigen::VectorXd getError();
+                Eigen::Vector3d getError();
 
                 static bool isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

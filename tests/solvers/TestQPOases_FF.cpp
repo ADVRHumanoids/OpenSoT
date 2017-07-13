@@ -633,7 +633,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 
     KDL::Frame current_pose, previous_pose, desired_pose;
     KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
-    yarp::sig::Vector current_position_y;
+    Eigen::Vector3d current_position_y;
 
 
     q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
@@ -652,7 +652,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         _log.close();
         _log.open("testQPOases_FF_CoM_5cmfw_noerr.m");
 
-        current_position_y = conversion_utils_YARP::toYARP(com->getActualPosition());
+        current_position_y = com->getActualPosition();
         current_pose.p.x(current_position_y(0));
         current_pose.p.y(current_position_y(1));
         current_pose.p.z(current_position_y(2));
@@ -670,7 +670,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         _log.close();
         _log.open("testQPOases_FF_CoM_5cmfw_1cmerr.m");
 
-        current_position_y = conversion_utils_YARP::toYARP(com->getActualPosition());
+        current_position_y = com->getActualPosition();
         current_pose.p.x(current_position_y(0));
         current_pose.p.y(current_position_y(1));
         current_pose.p.z(current_position_y(2));
@@ -736,7 +736,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         EXPECT_TRUE(sot->solve(dq));
         q += dq;
 
-        current_position_y = conversion_utils_YARP::toYARP(com->getActualPosition());
+        current_position_y = com->getActualPosition();
         current_pose.p.x(current_position_y(0));
         current_pose.p.y(current_position_y(1));
         current_pose.p.z(current_position_y(2));

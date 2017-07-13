@@ -94,21 +94,16 @@ void CoM::setReference(const KDL::Vector& desiredPosition)
     this->update_b();
 }
 
-void CoM::setReference(const Eigen::VectorXd& desiredPosition)
+void CoM::setReference(const Eigen::Vector3d& desiredPosition)
 {
-    assert(desiredPosition.size() == 3);
-
 	_desiredPosition = desiredPosition;
     _desiredVelocity.setZero(3);
     this->update_b();
 }
 
-void OpenSoT::tasks::velocity::CoM::setReference(const Eigen::VectorXd &desiredPosition,
-                                                 const Eigen::VectorXd &desiredVelocity)
+void OpenSoT::tasks::velocity::CoM::setReference(const Eigen::Vector3d &desiredPosition,
+                                                 const Eigen::Vector3d &desiredVelocity)
 {
-    assert(desiredPosition.size() == 3);
-    assert(desiredVelocity.size() == 3);
-
     _desiredPosition = desiredPosition;
     _desiredVelocity = desiredVelocity;
     this->update_b();
@@ -119,13 +114,13 @@ Eigen::VectorXd CoM::getReference() const
     return _desiredPosition;
 }
 
-void OpenSoT::tasks::velocity::CoM::getReference(Eigen::VectorXd &desiredPosition, Eigen::VectorXd &desiredVelocity) const
+void OpenSoT::tasks::velocity::CoM::getReference(Eigen::Vector3d &desiredPosition, Eigen::Vector3d &desiredVelocity) const
 {
     desiredPosition = _desiredPosition;
     desiredVelocity = _desiredVelocity;
 }
 
-Eigen::VectorXd CoM::getActualPosition() const
+Eigen::Vector3d CoM::getActualPosition() const
 {
     return _actualPosition;
 }
@@ -154,7 +149,7 @@ void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
     }
 }
 
-Eigen::VectorXd OpenSoT::tasks::velocity::CoM::getError()
+Eigen::Vector3d OpenSoT::tasks::velocity::CoM::getError()
 {
     return _positionError;
 }

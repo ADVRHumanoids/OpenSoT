@@ -527,7 +527,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     com_task->setReference(conversion_utils_YARP::toEigen(T_com_p_ref));
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    double e = norm(T_com_p_ref - conversion_utils_YARP::toYARP(com_task->getActualPosition()));
+    yarp::sig::Vector tmp(3,0.0);
+    tmp(0) = com_task->getActualPosition()[0];
+    tmp(1) = com_task->getActualPosition()[1];
+    tmp(2) = com_task->getActualPosition()[2];
+    double e = norm(T_com_p_ref - tmp);
     double previous_e = 0.0;
 
     unsigned int i = 0;
@@ -550,10 +554,14 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
         _log << com_task->getActualPosition()[0] << ","
             << com_task->getActualPosition()[1] <<";";
-        e = norm(T_com_p_ref - conversion_utils_YARP::toYARP(com_task->getActualPosition()));
+        yarp::sig::Vector tmp(3,0.0);
+        tmp(0) = com_task->getActualPosition()[0];
+        tmp(1) = com_task->getActualPosition()[1];
+        tmp(2) = com_task->getActualPosition()[2];
+        e = norm(T_com_p_ref - tmp);
 
         if(fabs(previous_e - e) < 1e-13) {
-            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - conversion_utils_YARP::toYARP(com_task->getActualPosition())) << " . Error not decreasing. CONVERGED." << std::endl;
+            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - tmp) << " . Error not decreasing. CONVERGED." << std::endl;
             break;
         }
         previous_e = e;
@@ -575,7 +583,10 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 #endif
     }
 
-    ASSERT_NEAR(norm(T_com_p_ref - conversion_utils_YARP::toYARP(com_task->getActualPosition())),0,1E-9);
+    tmp(0) = com_task->getActualPosition()[0];
+    tmp(1) = com_task->getActualPosition()[1];
+    tmp(2) = com_task->getActualPosition()[2];
+    ASSERT_NEAR(norm(T_com_p_ref - tmp),0,1E-9);
 
     idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
     boundsConvexHull->update(conversion_utils_YARP::toEigen(q));
@@ -618,8 +629,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
         com_task->setReference(conversion_utils_YARP::toEigen(T_com_p_ref));
 
+        yarp::sig::Vector tmp(3,0.0);
+        tmp(0) = com_task->getActualPosition()[0];
+        tmp(1) = com_task->getActualPosition()[1];
+        tmp(2) = com_task->getActualPosition()[2];
+
         yarp::sig::Vector dq(q.size(), 0.0);
-        double e = norm(T_com_p_ref - conversion_utils_YARP::toYARP(com_task->getActualPosition()));
+        double e = norm(T_com_p_ref - tmp);
         double previous_e = 0.0;
         double oscillation_check_e = 0.0;
         for(i = 0; i < n_iterations; ++i)
@@ -633,7 +649,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
             _log << com_task->getActualPosition()[0] << ","
                 << com_task->getActualPosition()[1] <<";";
-            e = norm(T_com_p_ref - conversion_utils_YARP::toYARP(com_task->getActualPosition()));
+            yarp::sig::Vector tmp(3,0.0);
+            tmp(0) = com_task->getActualPosition()[0];
+            tmp(1) = com_task->getActualPosition()[1];
+            tmp(2) = com_task->getActualPosition()[2];
+            e = norm(T_com_p_ref - tmp);
 
             if(fabs(e - oscillation_check_e) < 1e-9)
             {
@@ -687,12 +707,15 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         }
 
 
+        tmp(0) = com_task->getActualPosition()[0];
+        tmp(1) = com_task->getActualPosition()[1];
+        tmp(2) = com_task->getActualPosition()[2];
 
         if(i == n_iterations)
             std::cout << "i: " << i << " e: " << norm(T_com_p_ref -
-                                                      conversion_utils_YARP::toYARP(com_task->getActualPosition())) << " -- Error not decreasing. STOPPING." << std::endl;
+                                                      tmp) << " -- Error not decreasing. STOPPING." << std::endl;
 
-        yarp::sig::Vector distance = T_com_p_ref - conversion_utils_YARP::toYARP(com_task->getActualPosition());
+        yarp::sig::Vector distance = T_com_p_ref - tmp;
         double d = norm(distance);
         yarp::sig::Vector exp_distance(2,0.01);
         double expected_d = norm(exp_distance);
