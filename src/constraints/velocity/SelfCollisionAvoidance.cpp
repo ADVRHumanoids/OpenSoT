@@ -52,6 +52,8 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
 
     update(x);
 
+
+
 }
 
 double SelfCollisionAvoidance::getLinkPairThreshold()
@@ -81,10 +83,12 @@ void SelfCollisionAvoidance::setDetectionThreshold(const double detection_thresh
 void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 {
     // we update _Aineq and _bupperBound only if x has changed
-    if(!(x == _x_cache)) {
+    //if(!(x == _x_cache)) {
         _x_cache = x;
         calculate_Aineq_bUpperB (_Aineq, _bUpperBound );
-    }
+        _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
+
+    //}
 //    std::cout << "_Aineq" << _Aineq.toString() << std::endl << std::endl;
     //    std::cout << "_bUpperBound" << _bUpperBound.toString() << std::endl << std::endl;
 }
@@ -93,6 +97,7 @@ bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteLi
 {
     bool ok = computeLinksDistance.setCollisionWhiteList(whiteList);
     this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
+    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
     return ok;
 }
 
@@ -100,6 +105,7 @@ bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionBlackLi
 {
     bool ok = computeLinksDistance.setCollisionBlackList(blackList);
     this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
+    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
     return ok;
 }
 
@@ -150,11 +156,9 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
     Waist_frame_world_Eigen.inverse();
 
     Matrix3d Waist_frame_world_Eigen_Ro = Waist_frame_world_Eigen.matrix().block(0,0,3,3);
-    MatrixXd temp_trans_matrix(6,6);
+    MatrixXd temp_trans_matrix(6,6); temp_trans_matrix.setZero(6,6);
     temp_trans_matrix.block(0,0,3,3) = Waist_frame_world_Eigen_Ro;
     temp_trans_matrix.block(3,3,3,3) = Waist_frame_world_Eigen_Ro;
-    temp_trans_matrix.block(0,3,3,3) = MatrixXd::Zero(3,3);
-    temp_trans_matrix.block(3,0,3,3) = MatrixXd::Zero(3,3);
 
     int linkPairIndex = 0;
     for (j = interested_LinkPairs.begin(); j != interested_LinkPairs.end(); ++j)
@@ -197,7 +201,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
         robot_col.getRelativeJacobian(Link2_name, base_name, Link2_CP_Jaco);
 
         Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
-        skewSymmetricOperator(Link1_CP - Link1_origin,_J_transform);
+        skewSymmetricOperator(Link2_CP - Link2_origin,_J_transform);
         Link2_CP_Jaco = _J_transform * Link2_CP_Jaco;
 
 
