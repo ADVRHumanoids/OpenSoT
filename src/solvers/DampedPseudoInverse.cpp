@@ -94,8 +94,8 @@ Eigen::MatrixXd DampedPseudoInverse::getDampedPinv(  const Eigen::MatrixXd& J,
                         const Eigen::FullPivLU<Eigen::MatrixXd>& fpl) const
 {
     int rank = fpl.rank();
-    Eigen::MatrixXd singularValuesInv(J.cols(), J.rows());
-    singularValuesInv.setZero();
+    Eigen::MatrixXd singularValuesInv(J.cols(), J.cols());
+    singularValuesInv.setZero(J.rows(), J.rows());
 
     double lambda = svd.singularValues().minCoeff();
 
@@ -110,6 +110,7 @@ Eigen::MatrixXd DampedPseudoInverse::getDampedPinv(  const Eigen::MatrixXd& J,
             singularValuesInv(i,i) =
                     svd.singularValues()[i]/(std::pow(svd.singularValues()[i],2)+lambda*lambda);
     }
+
 
     return svd.matrixV()* singularValuesInv *svd.matrixU().transpose();
 }
