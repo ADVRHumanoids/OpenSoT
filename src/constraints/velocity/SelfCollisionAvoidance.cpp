@@ -34,6 +34,7 @@ using namespace Eigen;
 
 SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
                                                XBot::ModelInterface &robot,
+                                               std::string& base_link,
                                                double detection_threshold,
                                                double linkPair_threshold,
                                                const double boundScaling):
@@ -43,10 +44,11 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
     computeLinksDistance(robot),
     robot_col(robot),
     _x_cache(x),
-    _boundScaling(boundScaling) {
+    _boundScaling(boundScaling),
+    base_name(base_link)
+{
 
-    base_name = "Waist";
-
+    _J_transform.setZero(3,6);
 
     update(x);
 
@@ -101,18 +103,15 @@ bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionBlackLi
     return ok;
 }
 
-Eigen::MatrixXd SelfCollisionAvoidance::skewSymmetricOperator (const Eigen::Vector3d & r_cp)
+void SelfCollisionAvoidance::skewSymmetricOperator (const Eigen::Vector3d & r_cp, Eigen::MatrixXd& J_transform)
 {
-    MatrixXd J_transform(3,6);
-    Matrix3d left_part, right_part;
-    left_part = MatrixXd::Identity(3,3);
-    right_part << 0, r_cp(2), -r_cp(1),
-                   -r_cp(2), 0, r_cp(0),
-                   r_cp(1), -r_cp(0), 0;
-    J_transform.block(0,0,3,3) = left_part;
-    J_transform.block(0,3,3,3) = right_part;
+    if(J_transform.rows() != 3 || J_transform.cols() != 6)
+        J_transform.setZero(3,6);
 
-    return J_transform;
+    J_transform.block(0,0,3,3) = Eigen::Matrix3d::Identity();
+    J_transform.block(0,3,3,3) <<       0,  r_cp(2), -r_cp(1),
+                                 -r_cp(2),        0,  r_cp(0),
+                                  r_cp(1), -r_cp(0),        0;
 }
 
 
@@ -192,12 +191,14 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
         robot_col.getRelativeJacobian(Link1_name, base_name,Link1_CP_Jaco);
 
         Link1_CP_Jaco = temp_trans_matrix * Link1_CP_Jaco;
-        Link1_CP_Jaco = skewSymmetricOperator(Link1_CP - Link1_origin) * Link1_CP_Jaco;
+        skewSymmetricOperator(Link1_CP - Link1_origin,_J_transform);
+        Link1_CP_Jaco = _J_transform * Link1_CP_Jaco;
 
         robot_col.getRelativeJacobian(Link2_name, base_name, Link2_CP_Jaco);
 
         Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
-        Link2_CP_Jaco = skewSymmetricOperator(Link2_CP - Link2_origin) * Link2_CP_Jaco;
+        skewSymmetricOperator(Link1_CP - Link1_origin,_J_transform);
+        Link2_CP_Jaco = _J_transform * Link2_CP_Jaco;
 
 
         Aineq_fc_Eigen.row(linkPairIndex) = closepoint_dir.transpose() * ( Link1_CP_Jaco - Link2_CP_Jaco );

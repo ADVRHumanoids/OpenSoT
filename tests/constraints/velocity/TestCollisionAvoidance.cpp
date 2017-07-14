@@ -290,8 +290,9 @@ public:
       compute_distance.reset(new ComputeLinksDistance(*(_model_ptr.get())));
 
       double padding = 0.005;//0.005;
+      std::string base_link = "Waist";
       sc_constraint.reset(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(
-                        conversion_utils_YARP::toEigen(q), *(_model_ptr.get()),
+                        conversion_utils_YARP::toEigen(q), *(_model_ptr.get()),base_link,
                               std::numeric_limits<double>::infinity(), padding));
 
 #if ENABLE_ROS

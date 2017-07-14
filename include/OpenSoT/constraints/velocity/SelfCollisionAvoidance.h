@@ -66,18 +66,20 @@
 
                 /**
                  * @brief base_name all the calculation and expression is described in
-                 * a base link frame which is "Waist" link frame
+                 * a base link frame
                  */
                 std::string base_name;
+
+                Eigen::MatrixXd _J_transform;
             public:               
                 /**
                  * @brief Skew_symmetric_operator is used to get the transformation matrix which is used to transform
                  * the base Jacobian to goal Jacobian
                  * @param r_cp the vector measured from the origin of the reference link frame to the closest point
-                 * @return Skew symmetric matrix of the input vector
+                 * @param J_transform Skew symmetric matrix of the input vector
                  * NOTE: the base Jacobian should be multiplied by the output matrix on its left side.
                  */
-                Eigen::MatrixXd skewSymmetricOperator (const Eigen::Vector3d & r_cp);
+                void skewSymmetricOperator (const Eigen::Vector3d & r_cp, Eigen::MatrixXd& J_transform);
 
                 /**
                  * @brief calculate_Aineq_bUpperB the core function which is used to update the variables Aineq and
@@ -92,6 +94,8 @@
                  * @brief SelfCollisionAvoidanceConstraint
                  * @param x the robot current configuration vector
                  * @param robot the robot model reference
+                 * @param base_link all the calculation and expression is described in
+                 * this frame
                  * @param Detection_threshold all the link pairs whose minimum distance are smaller than this Detection_threshold
                  * would be dealt with further
                  * @param linkPair_threshold the minimum distance between each Link pair
@@ -100,9 +104,11 @@
                  */
                 SelfCollisionAvoidance(const Eigen::VectorXd& x,
                                        XBot::ModelInterface &robot,
+                                       std::string& base_link,
                                        double detection_threshold = std::numeric_limits<double>::infinity(),
                                        double linkPair_threshold = 0.0,
                                        const double boundScaling = 1.0);
+
                 /**
                  * @brief getLinkPairThreshold
                  * @return _LinkPair_threshold
