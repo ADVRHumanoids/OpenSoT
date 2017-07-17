@@ -70,13 +70,9 @@ option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS}
                             ${iDynTree_INCLUDE_DIRS}
-                            #${paramHelp_INCLUDE_DIRS}
                             ${eigen_conversions_INCLUDE_DIRS}
                             ${EIGEN3_INCLUDE_DIR}
                             ${PCL_INCLUDE_DIRS}
-                            #${tf_INCLUDE_DIRS}
-                            #${interactive_markers_INCLUDE_DIRS}
-                            #${PYTHON_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
                             ${conversion_utils_YARP_INCLUDE_DIRS}
                             ${idynutils2_INCLUDE_DIRS}
@@ -195,18 +191,12 @@ endif()
 # we now add the YARP libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${srdfdom_advr_LIBRARIES}
-                              #${idynutils_LIBRARIES}
-                              #${iDynTree_LIBRARIES}
                               ${eigen_conversions_LIBRARIES}
                               PRIVATE
                               ${qpOASES_LIBRARIES}
                               ${PCL_LIBRARIES}
-                              #${tf_LIBRARIES}
-                              #${interactive_markers_LIBRARIES}
-                              #${PYTHON_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
                               ${conversion_utils_YARP_LIBRARIES}
-                              #${idynutils2_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
                               )
