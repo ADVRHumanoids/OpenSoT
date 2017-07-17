@@ -232,10 +232,14 @@ target_include_directories(OpenSoT PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}
 set_target_properties(OpenSoT PROPERTIES VERSION ${${VARS_PREFIX}_VERSION}
                               SOVERSION ${${VARS_PREFIX}_VERSION})
 
-
 install(DIRECTORY include/
-        DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
-        FILES_MATCHING PATTERN "*.h")
+    DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}"
+    FILES_MATCHING PATTERN "*.h")
+
+if(NOT qpOASES_FOUND)
+    install(DIRECTORY "${qpOASES_INCLUDE_DIRS}"
+        DESTINATION "${${VARS_PREFIX}_INSTALL_INCLUDEDIR}/..")
+endif()
 
 install(TARGETS OpenSoT
         EXPORT OpenSoT
@@ -245,12 +249,10 @@ install(TARGETS OpenSoT
 
 
 catkin_package(
- INCLUDE_DIRS include
- LIBRARIES idyn_ros_interface
- CATKIN_DEPENDS roscpp rospy roslib srdfdom
- DEPENDS system_lib
-)
-
+    INCLUDE_DIRS include
+    LIBRARIES idyn_ros_interface
+    CATKIN_DEPENDS roscpp rospy roslib srdfdom
+    DEPENDS system_lib)
 
 install(TARGETS OpenSoT
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
