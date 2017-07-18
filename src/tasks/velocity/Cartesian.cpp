@@ -227,6 +227,30 @@ void Cartesian::update_b() {
     _b = _desiredTwist + _lambda*_error;
 }
 
+bool Cartesian::setBaseLink(const std::string& base_link)
+{
+    if(base_link.compare(_base_link) == 0)
+        return true;
+
+    if(base_link.compare("world") == 0)
+        _robot.getPose(_base_link, _tmpMatrix);
+    else if(_base_link.compare("world") == 0){
+        _robot.getPose(base_link, _tmpMatrix2);
+        _tmpMatrix = _tmpMatrix2.inverse();
+    }
+    else if(_robot.getLinkID(base_link) == -1)
+        return false;
+    else
+        _robot.getPose(_base_link, base_link, _tmpMatrix);
+
+    _base_link = base_link;
+    this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
+    _tmpMatrix2 = _tmpMatrix*_desiredPose;
+    _desiredPose = _tmpMatrix2;
+
+    return true;
+}
+
 bool OpenSoT::tasks::velocity::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);

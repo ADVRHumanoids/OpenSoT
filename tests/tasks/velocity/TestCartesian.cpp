@@ -55,6 +55,56 @@ protected:
 
 };
 
+TEST_F(testCartesianTask, testSetBaseLink)
+{
+    Eigen::VectorXd q(_model_ptr->getJointNum());
+    q.setZero(q.size());
+
+    q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+
+    _robot.updateiDynTreeModel(q, true);
+
+    std::string distal_link = "l_wrist";
+    std::string base_link1 = "world";
+    std::string base_link2 = "l_sole";
+    std::string base_link3 = "Waist";
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm1(
+        new OpenSoT::tasks::velocity::Cartesian("l_arm",q,*(_model_ptr.get()),distal_link,
+                                                base_link1));
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm2(
+        new OpenSoT::tasks::velocity::Cartesian("l_arm",q,*(_model_ptr.get()),distal_link,
+                                                base_link2));
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm3(
+        new OpenSoT::tasks::velocity::Cartesian("l_arm",q,*(_model_ptr.get()),distal_link,
+                                                base_link3));
+
+    l_arm1->update(q);
+    l_arm2->update(q);
+    l_arm3->update(q);
+
+    EXPECT_TRUE(l_arm1->setBaseLink(base_link2));
+    l_arm1->update(q);
+
+    EXPECT_TRUE(l_arm1->getA() == l_arm2->getA());
+    EXPECT_TRUE(l_arm1->getb() == l_arm2->getb());
+    EXPECT_TRUE(l_arm1->getReference() == l_arm2->getReference());
+    EXPECT_TRUE(l_arm1->getActualPose() == l_arm2->getActualPose());
+
+    EXPECT_TRUE(l_arm1->setBaseLink(base_link3));
+    l_arm1->update(q);
+
+    EXPECT_TRUE(l_arm1->getA() == l_arm3->getA());
+    EXPECT_TRUE(l_arm1->getb() == l_arm3->getb());
+    EXPECT_TRUE(l_arm1->getReference() == l_arm3->getReference());
+    EXPECT_TRUE(l_arm1->getActualPose() == l_arm3->getActualPose());
+}
+
 
 TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
 {
