@@ -89,7 +89,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCoMVelocityTask
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
-                      TestManipulabilityTask
+                      TestManipulabilityTask # YARP FREE
                       testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
                       testMinimumVelocityTask

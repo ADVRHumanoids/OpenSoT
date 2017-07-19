@@ -1,4 +1,4 @@
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
+#include <XBotInterface/ModelInterface.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>
@@ -11,25 +11,16 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <qpOASES.hpp>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
 #include <fstream>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 
 using namespace OpenSoT::constraints::velocity;
 using namespace OpenSoT::tasks::velocity;
-using namespace yarp::math;
-
-typedef idynutils2 iDynUtils;
-static void null_deleter(iDynUtils *) {}
 
 namespace {
 
 class testManipolability: public ::testing::Test
 {
 protected:
-    std::ofstream _log;
-
     testManipolability()
     {
          //_log.open("testMinimizeAcceleration.m");
@@ -49,40 +40,38 @@ protected:
 
 };
 
+double computeManipIndex(const Eigen::MatrixXd& A)
+{
+    return sqrt((A*A.transpose()).determinant());
+}
+
 TEST_F(testManipolability, testManipolabilityTask)
 {
-    iDynUtils idynutils("coman",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+    XBot::ModelInterface::Ptr _model_ptr;
     std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
     std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
 
     std::string _path_to_cfg = robotology_root + relative_path;
 
-    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-            (XBot::ModelInterface::getModel(_path_to_cfg));
-    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&idynutils, &null_deleter));
-
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
     else
         std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
-    Eigen::VectorXd q(idynutils.iDynTree_model.getNrOfDOFs());
+    Eigen::VectorXd q(_model_ptr->getJointNum());
     q.setZero(q.size());
 
-    idynutils.updateiDynTreeModel(q, true);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
     /// Cartesian Tasks
-    yarp::sig::Matrix TL_init = idynutils.iDynTree_model.getPosition(
-                          idynutils.iDynTree_model.getLinkIndex("Waist"),
-                          idynutils.iDynTree_model.getLinkIndex("l_wrist"));
-    yarp::sig::Matrix TR_init = idynutils.iDynTree_model.getPosition(
-                          idynutils.iDynTree_model.getLinkIndex("Waist"),
-                          idynutils.iDynTree_model.getLinkIndex("r_wrist"));
+    KDL::Frame TL_init;
+    _model_ptr->getPose("Waist", "l_wrist", TL_init);
+    KDL::Frame TR_init;
+    _model_ptr->getPose("Waist", "r_wrist", TR_init);
+
     Cartesian::Ptr cartesian_task_L(new Cartesian("cartesian::left_wrist",
         q, *(_model_ptr.get()),"l_wrist", "Waist"));
     Cartesian::Ptr cartesian_task_R(new Cartesian("cartesian::right_wrist",
@@ -110,9 +99,11 @@ TEST_F(testManipolability, testManipolabilityTask)
 
     /// Constraints set to the Cartesian Task
     int t = 1000;
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin, qmax);
     JointLimits::Ptr joint_limits(
-        new JointLimits(q, idynutils.getJointBoundMax(),
-                           idynutils.getJointBoundMin(), 0.2));
+        new JointLimits(q, qmax,
+                           qmin, 0.2));
     VelocityLimits::Ptr joint_velocity_limits(
                 new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
 
@@ -133,7 +124,9 @@ TEST_F(testManipolability, testManipolabilityTask)
 
     for(unsigned int i = 0; i < 3*t; ++i)
     {
-        idynutils.updateiDynTreeModel(q, true);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
 
         cartesian_task->update(q);
         postural_task->update(q);
@@ -143,43 +136,38 @@ TEST_F(testManipolability, testManipolabilityTask)
         sot.solve(dq);
         q += dq;
 
-        double manip_index_L = sqrt(det(
-        conversion_utils_YARP::toYARP(cartesian_task_L->getA())*
-        conversion_utils_YARP::toYARP(cartesian_task_L->getA()).transposed()));
-        double manip_index_R = sqrt(det(
-        conversion_utils_YARP::toYARP(cartesian_task_R->getA())*
-        conversion_utils_YARP::toYARP(cartesian_task_R->getA()).transposed()));
+        double manip_index_L = computeManipIndex(cartesian_task_L->getA());
+        double manip_index_R = computeManipIndex(cartesian_task_R->getA());
 
         ASSERT_NEAR(manipulability_task_L->ComputeManipulabilityIndex(), manip_index_L, 1e-10);
         ASSERT_NEAR(manipulability_task_R->ComputeManipulabilityIndex(), manip_index_R, 1e-10);
     }
-    double manip_index_L = sqrt(det(
-    conversion_utils_YARP::toYARP(cartesian_task_L->getA())*
-    conversion_utils_YARP::toYARP(cartesian_task_L->getA()).transposed()));
-    double manip_index_R = sqrt(det(
-    conversion_utils_YARP::toYARP(cartesian_task_R->getA())*
-    conversion_utils_YARP::toYARP(cartesian_task_R->getA()).transposed()));
+    double manip_index_L = computeManipIndex(cartesian_task_L->getA());
+    double manip_index_R = computeManipIndex(cartesian_task_R->getA());
 
-    Eigen::VectorXd q_init(idynutils.iDynTree_model.getNrOfDOFs());
+    std::cout<<"MANIP INDEX L: "<<manip_index_L<<std::endl;
+    std::cout<<"MANIP INDEX R: "<<manip_index_R<<std::endl;
+
+    Eigen::VectorXd q_init(q.size());
     q_init = q;
-    idynutils.updateiDynTreeModel(q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-    std::cout<<"INITIAL CONFIG: "<<TL_init.toString()<<std::endl;
-    yarp::sig::Matrix TL = idynutils.iDynTree_model.getPosition(
-                idynutils.iDynTree_model.getLinkIndex("Waist"),
-                idynutils.iDynTree_model.getLinkIndex("l_wrist"));
-    std::cout<<"FINAL CONFIG: "<<TL.toString()<<std::endl;
+
+    std::cout<<"INITIAL CONFIG: "<<TL_init<<std::endl;
+    KDL::Frame TL;
+    _model_ptr->getPose("Waist", "l_wrist", TL);
+    std::cout<<"FINAL CONFIG: "<<TL<<std::endl;
 
     for(unsigned int i = 0; i <= 3; ++i){
         for(unsigned int j = 0; j <= 3; ++j)
             EXPECT_NEAR(TL_init(i,j), TL(i,j), 1E-3);
     }
 
-    std::cout<<"INITIAL CONFIG: "<<TR_init.toString()<<std::endl;
-    yarp::sig::Matrix TR = idynutils.iDynTree_model.getPosition(
-                idynutils.iDynTree_model.getLinkIndex("Waist"),
-                idynutils.iDynTree_model.getLinkIndex("r_wrist"));
-    std::cout<<"FINAL CONFIG: "<<TR.toString()<<std::endl;
+    std::cout<<"INITIAL CONFIG: "<<TR_init<<std::endl;
+    KDL::Frame TR;
+    _model_ptr->getPose("Waist", "r_wrist", TR);
+    std::cout<<"FINAL CONFIG: "<<TR<<std::endl;
 
     for(unsigned int i = 0; i <= 3; ++i){
         for(unsigned int j = 0; j <= 3; ++j)
@@ -195,7 +183,9 @@ TEST_F(testManipolability, testManipolabilityTask)
     dq.setZero(dq.size());
     for(unsigned int i = 0; i < 3*t; ++i)
     {
-        idynutils.updateiDynTreeModel(q, true);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
 
         cartesian_task->update(q);
         postural_task->update(q);
@@ -205,41 +195,29 @@ TEST_F(testManipolability, testManipolabilityTask)
         sot_manip.solve(dq);
         q += dq;
 
-        double manip_index_L = sqrt(det(
-                    conversion_utils_YARP::toYARP(cartesian_task_L->getA())*
-                    conversion_utils_YARP::toYARP(cartesian_task_L->getA()).transposed()));
-        double manip_index_R = sqrt(det(
-                    conversion_utils_YARP::toYARP(cartesian_task_R->getA())*
-                    conversion_utils_YARP::toYARP(cartesian_task_R->getA()).transposed()));
-
+        double manip_index_L = computeManipIndex(cartesian_task_L->getA());
+        double manip_index_R = computeManipIndex(cartesian_task_R->getA());
         EXPECT_NEAR(manipulability_task_L->ComputeManipulabilityIndex(), manip_index_L, 1e-10);
         EXPECT_NEAR(manipulability_task_R->ComputeManipulabilityIndex(), manip_index_R, 1e-10);
     }
-    double new_manip_index_L = sqrt(det(
-        conversion_utils_YARP::toYARP(cartesian_task_L->getA())*
-        conversion_utils_YARP::toYARP(cartesian_task_L->getA()).transposed()));
-    double new_manip_index_R = sqrt(det(
-        conversion_utils_YARP::toYARP(cartesian_task_R->getA())*
-        conversion_utils_YARP::toYARP(cartesian_task_R->getA()).transposed()));
+    double new_manip_index_L = computeManipIndex(cartesian_task_L->getA());
+    double new_manip_index_R = computeManipIndex(cartesian_task_R->getA());
 
-    idynutils.updateiDynTreeModel(q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-    std::cout<<"INITIAL CONFIG: "<<TL_init.toString()<<std::endl;
-    TL = idynutils.iDynTree_model.getPosition(
-                idynutils.iDynTree_model.getLinkIndex("Waist"),
-                idynutils.iDynTree_model.getLinkIndex("l_wrist"));
-    std::cout<<"FINAL CONFIG: "<<TL.toString()<<std::endl;
+    std::cout<<"INITIAL CONFIG: "<<TL_init<<std::endl;
+    _model_ptr->getPose("Waist", "l_wrist", TL);
+    std::cout<<"FINAL CONFIG: "<<TL<<std::endl;
 
     for(unsigned int i = 0; i <= 3; ++i){
         for(unsigned int j = 0; j <= 3; ++j)
             EXPECT_NEAR(TL_init(i,j), TL(i,j), 1E-3);
     }
 
-    std::cout<<"INITIAL CONFIG: "<<TR_init.toString()<<std::endl;
-    TR = idynutils.iDynTree_model.getPosition(
-                idynutils.iDynTree_model.getLinkIndex("Waist"),
-                idynutils.iDynTree_model.getLinkIndex("r_wrist"));
-    std::cout<<"FINAL CONFIG: "<<TR.toString()<<std::endl;
+    std::cout<<"INITIAL CONFIG: "<<TR_init<<std::endl;
+    _model_ptr->getPose("Waist", "r_wrist", TR);
+    std::cout<<"FINAL CONFIG: "<<TR<<std::endl;
 
     for(unsigned int i = 0; i <= 3; ++i){
         for(unsigned int j = 0; j <= 3; ++j)
@@ -255,39 +233,6 @@ TEST_F(testManipolability, testManipolabilityTask)
 
     EXPECT_TRUE(manip_index_L <= new_manip_index_L);
     EXPECT_TRUE(manip_index_R <= new_manip_index_R);
-
-    std::cout<<std::endl;
-
-//    std::cout<<"q_init left_arm: ";
-//    for(unsigned int i = 0; i < idynutils.left_arm.getNrOfDOFs(); ++i)
-//        std::cout<<q_init[idynutils.left_arm.joint_numbers[i]]<<" ";
-//    std::cout<<std::endl;
-//    std::cout<<"q_final left_arm: ";
-//    for(unsigned int i = 0; i < idynutils.left_arm.getNrOfDOFs(); ++i)
-//        std::cout<<q[idynutils.left_arm.joint_numbers[i]]<<" ";
-//    std::cout<<std::endl;
-
-//    std::cout<<std::endl;
-
-//    std::cout<<"q_init right_arm: ";
-//    for(unsigned int i = 0; i < idynutils.right_arm.getNrOfDOFs(); ++i)
-//        std::cout<<q_init[idynutils.right_arm.joint_numbers[i]]<<" ";
-//    std::cout<<std::endl;
-//    std::cout<<"q_final right_arm: ";
-//    for(unsigned int i = 0; i < idynutils.right_arm.getNrOfDOFs(); ++i)
-//        std::cout<<q[idynutils.right_arm.joint_numbers[i]]<<" ";
-//    std::cout<<std::endl;
-
-//    std::cout<<std::endl;
-
-//    std::cout<<"q_init torso: ";
-//    for(unsigned int i = 0; i < idynutils.torso.getNrOfDOFs(); ++i)
-//        std::cout<<q_init[idynutils.torso.joint_numbers[i]]<<" ";
-//    std::cout<<std::endl;
-//    std::cout<<"q_final torso: ";
-//    for(unsigned int i = 0; i < idynutils.torso.getNrOfDOFs(); ++i)
-//        std::cout<<q[idynutils.torso.joint_numbers[i]]<<" ";
-//    std::cout<<std::endl;
 
 }
 }
