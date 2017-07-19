@@ -71,9 +71,10 @@ TEST_F(testManipolability, testManipolabilityTask)
         std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
-    yarp::sig::Vector q(idynutils.iDynTree_model.getNrOfDOFs(), 0.0);
+    Eigen::VectorXd q(idynutils.iDynTree_model.getNrOfDOFs());
+    q.setZero(q.size());
 
-    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+    idynutils.updateiDynTreeModel(q, true);
 
     /// Cartesian Tasks
     yarp::sig::Matrix TL_init = idynutils.iDynTree_model.getPosition(
@@ -83,9 +84,9 @@ TEST_F(testManipolability, testManipolabilityTask)
                           idynutils.iDynTree_model.getLinkIndex("Waist"),
                           idynutils.iDynTree_model.getLinkIndex("r_wrist"));
     Cartesian::Ptr cartesian_task_L(new Cartesian("cartesian::left_wrist",
-        conversion_utils_YARP::toEigen(q), *(_model_ptr.get()),"l_wrist", "Waist"));
+        q, *(_model_ptr.get()),"l_wrist", "Waist"));
     Cartesian::Ptr cartesian_task_R(new Cartesian("cartesian::right_wrist",
-        conversion_utils_YARP::toEigen(q), *(_model_ptr.get()),"r_wrist", "Waist"));
+        q, *(_model_ptr.get()),"r_wrist", "Waist"));
     std::list< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > task_list;
     task_list.push_back(cartesian_task_L);
     task_list.push_back(cartesian_task_R);
@@ -94,13 +95,13 @@ TEST_F(testManipolability, testManipolabilityTask)
 
 
     /// Postural Task
-    Postural::Ptr postural_task(new Postural(conversion_utils_YARP::toEigen(q)));
+    Postural::Ptr postural_task(new Postural(q));
 
     /// Manipulability task
     Manipulability::Ptr manipulability_task_L(new Manipulability(
-                                                  conversion_utils_YARP::toEigen(q), *(_model_ptr.get()), cartesian_task_L));
+                                                  q, *(_model_ptr.get()), cartesian_task_L));
     Manipulability::Ptr manipulability_task_R(new Manipulability(
-                                                  conversion_utils_YARP::toEigen(q), *(_model_ptr.get()), cartesian_task_R));
+                                                  q, *(_model_ptr.get()), cartesian_task_R));
     std::list< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr > manip_list;
     manip_list.push_back(manipulability_task_L);
     manip_list.push_back(manipulability_task_R);
@@ -110,7 +111,7 @@ TEST_F(testManipolability, testManipolabilityTask)
     /// Constraints set to the Cartesian Task
     int t = 1000;
     JointLimits::Ptr joint_limits(
-        new JointLimits(conversion_utils_YARP::toEigen(q), idynutils.getJointBoundMax(),
+        new JointLimits(q, idynutils.getJointBoundMax(),
                            idynutils.getJointBoundMin(), 0.2));
     VelocityLimits::Ptr joint_velocity_limits(
                 new VelocityLimits(M_PI/2.0, (double)(1.0/t), q.size()));
@@ -127,20 +128,19 @@ TEST_F(testManipolability, testManipolabilityTask)
 
     OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
 
-    yarp::sig::Vector dq(q.size(), 0.0);
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(dq.size());
 
     for(unsigned int i = 0; i < 3*t; ++i)
     {
-        idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+        idynutils.updateiDynTreeModel(q, true);
 
-        cartesian_task->update(conversion_utils_YARP::toEigen(q));
-        postural_task->update(conversion_utils_YARP::toEigen(q));
-        manipulability_task->update(conversion_utils_YARP::toEigen(q));
-        joint_constraints->update(conversion_utils_YARP::toEigen(q));
+        cartesian_task->update(q);
+        postural_task->update(q);
+        manipulability_task->update(q);
+        joint_constraints->update(q);
 
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        sot.solve(_dq);
-        dq = conversion_utils_YARP::toYARP(_dq);
+        sot.solve(dq);
         q += dq;
 
         double manip_index_L = sqrt(det(
@@ -160,9 +160,9 @@ TEST_F(testManipolability, testManipolabilityTask)
     conversion_utils_YARP::toYARP(cartesian_task_R->getA())*
     conversion_utils_YARP::toYARP(cartesian_task_R->getA()).transposed()));
 
-    yarp::sig::Vector q_init(idynutils.iDynTree_model.getNrOfDOFs(), 0.0);
+    Eigen::VectorXd q_init(idynutils.iDynTree_model.getNrOfDOFs());
     q_init = q;
-    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q));
+    idynutils.updateiDynTreeModel(q);
 
     std::cout<<"INITIAL CONFIG: "<<TL_init.toString()<<std::endl;
     yarp::sig::Matrix TL = idynutils.iDynTree_model.getPosition(
@@ -192,18 +192,17 @@ TEST_F(testManipolability, testManipolabilityTask)
     stack_of_tasks.push_back(manipulability_task);
     OpenSoT::solvers::QPOases_sot sot_manip(stack_of_tasks, joint_constraints);
 
+    dq.setZero(dq.size());
     for(unsigned int i = 0; i < 3*t; ++i)
     {
-        idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+        idynutils.updateiDynTreeModel(q, true);
 
-        cartesian_task->update(conversion_utils_YARP::toEigen(q));
-        postural_task->update(conversion_utils_YARP::toEigen(q));
-        manipulability_task->update(conversion_utils_YARP::toEigen(q));
-        joint_constraints->update(conversion_utils_YARP::toEigen(q));
+        cartesian_task->update(q);
+        postural_task->update(q);
+        manipulability_task->update(q);
+        joint_constraints->update(q);
 
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        sot_manip.solve(_dq);
-        dq = conversion_utils_YARP::toYARP(_dq);
+        sot_manip.solve(dq);
         q += dq;
 
         double manip_index_L = sqrt(det(
@@ -223,7 +222,7 @@ TEST_F(testManipolability, testManipolabilityTask)
         conversion_utils_YARP::toYARP(cartesian_task_R->getA())*
         conversion_utils_YARP::toYARP(cartesian_task_R->getA()).transposed()));
 
-    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q));
+    idynutils.updateiDynTreeModel(q);
 
     std::cout<<"INITIAL CONFIG: "<<TL_init.toString()<<std::endl;
     TL = idynutils.iDynTree_model.getPosition(
