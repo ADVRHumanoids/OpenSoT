@@ -144,6 +144,14 @@ const Eigen::MatrixXd Cartesian::getReference() const {
     return _desiredPose.matrix();
 }
 
+const void Cartesian::getReference(KDL::Frame& desiredPose) const {
+    desiredPose.p.x(_desiredPose(0,3));
+    desiredPose.p.y(_desiredPose(1,3));
+    desiredPose.p.z(_desiredPose(2,3));
+    desiredPose.M(0,0) = _desiredPose(0,0); desiredPose.M(0,1) = _desiredPose(0,1); desiredPose.M(0,2) = _desiredPose(0,2);
+    desiredPose.M(1,0) = _desiredPose(1,0); desiredPose.M(1,1) = _desiredPose(1,1); desiredPose.M(1,2) = _desiredPose(1,2);
+    desiredPose.M(2,0) = _desiredPose(2,0); desiredPose.M(2,1) = _desiredPose(2,1); desiredPose.M(2,2) = _desiredPose(2,2);
+}
 
 void OpenSoT::tasks::velocity::Cartesian::getReference(Eigen::MatrixXd &desiredPose,
                                                        Eigen::VectorXd &desiredTwist) const
