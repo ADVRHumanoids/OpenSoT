@@ -38,22 +38,22 @@ void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
     e[i] = k[i];
 }
 
-void getGoodInitialPosition(Eigen::VectorXd& q, const idynutils2& robot) {
+void getGoodInitialPosition(Eigen::VectorXd& q, const XBot::ModelInterface::Ptr robot) {
 
-    q[robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[robot->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[robot->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[robot->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q[robot->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[robot->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[robot->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    q[robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+    q[robot->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[robot->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[robot->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    q[robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
-    q[robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+    q[robot->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[robot->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+    q[robot->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
 
 }
 
@@ -270,7 +270,7 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
       whiteList.push_back(std::pair<std::string,std::string>("LSoftHandLink","RSoftHandLink"));
       compute_distance->setCollisionWhiteList(whiteList);
 
-      getGoodInitialPosition(q,robot);
+      getGoodInitialPosition(q,_model_ptr);
       robot.updateiDynTreeModel(q, false);
 
       std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
@@ -288,7 +288,7 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
 
 TEST_F(testCollisionUtils, testCapsuleDistance) {
 
-    getGoodInitialPosition(q,robot);
+    getGoodInitialPosition(q,_model_ptr);
     robot.updateiDynTreeModel(q, false);
 
     std::string linkA = "LSoftHandLink";
@@ -411,7 +411,7 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
 TEST_F(testCollisionUtils, checkTimings)
 {
-    getGoodInitialPosition(q,robot);
+    getGoodInitialPosition(q,_model_ptr);
     robot.updateiDynTreeModel(q, false);
 
     std::string linkA = "LSoftHandLink";
@@ -524,7 +524,7 @@ TEST_F(testCollisionUtils, checkTimings)
 
 TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
 {
-    getGoodInitialPosition(q,robot);
+    getGoodInitialPosition(q,_model_ptr);
     robot.updateiDynTreeModel(q, false);
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
