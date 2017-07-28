@@ -1,14 +1,10 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/collision_utils.h>
-#include <advr_humanoids_common_utils/idynutils.h>
-#include <yarp/math/Math.h>
-#include <yarp/math/SVD.h>
-#include <yarp/sig/Vector.h>
-#include <yarp/os/all.h>
 #include <cmath>
 #include <fcl/distance.h>
 #include <fcl/shape/geometric_shapes.h>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
+#include <XBotInterface/ModelInterface.h>
+#include <chrono>
 
 #define  s                1.0
 #define  dT               0.001* s
@@ -216,32 +212,24 @@ namespace {
 
 class testCollisionUtils : public ::testing::Test{
 public:
-    typedef idynutils2 iDynUtils;
-    static void null_deleter(iDynUtils *) {}
 
 protected:
 
-  testCollisionUtils():
-      robot("bigman",
-            std::string(std::getenv("ROBOTOLOGY_ROOT"))+"/external/OpenSoT/tests/robots/bigman/bigman.urdf",
-            std::string(std::getenv("ROBOTOLOGY_ROOT"))+"/external/OpenSoT/tests/robots/bigman/bigman.srdf")
+  testCollisionUtils()
   {
-      q.setZero(robot.iDynTree_model.getNrOfDOFs());
-
-
       std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
       std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman.yaml";
 
       _path_to_cfg = robotology_root + relative_path;
 
-      _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-              (XBot::ModelInterface::getModel(_path_to_cfg));
-      _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&robot, &null_deleter));
+      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
       else
           std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+      q.setZero(_model_ptr->getJointNum());
 
       compute_distance.reset(new ComputeLinksDistance(*_model_ptr));
   }
@@ -255,10 +243,9 @@ protected:
   virtual void TearDown() {
   }
 
-  iDynUtils robot;
   Eigen::VectorXd q;
   boost::shared_ptr<ComputeLinksDistance> compute_distance;
-  XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+  XBot::ModelInterface::Ptr _model_ptr;
   std::string _path_to_cfg;
 
 
@@ -271,12 +258,14 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
       compute_distance->setCollisionWhiteList(whiteList);
 
       getGoodInitialPosition(q,_model_ptr);
-      robot.updateiDynTreeModel(q, false);
+      _model_ptr->setJointPosition(q);
+      _model_ptr->update();
 
       std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
       LinkPairDistance result1 = results.front();
 
-      robot.updateiDynTreeModel(q, false);
+      _model_ptr->setJointPosition(q);
+      _model_ptr->update();
       results.clear();
       results = compute_distance->getLinkDistances();
       LinkPairDistance result2 = results.front();
@@ -289,7 +278,8 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
 TEST_F(testCollisionUtils, testCapsuleDistance) {
 
     getGoodInitialPosition(q,_model_ptr);
-    robot.updateiDynTreeModel(q, false);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
@@ -317,16 +307,22 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     boost::shared_ptr<fcl::CollisionObject> collision_geometry_l = collision_objects_test[linkA];
     boost::shared_ptr<fcl::CollisionObject> collision_geometry_r = collision_objects_test[linkB];
 
-    int left_hand_index = robot.iDynTree_model.getLinkIndex(linkA);
+
+
+    int left_hand_index = _model_ptr->getLinkID(linkA);
     if(left_hand_index == -1)
         std::cout << "Failed to get lefthand_index" << std::endl;
 
-    int right_hand_index = robot.iDynTree_model.getLinkIndex(linkB);
+    int right_hand_index = _model_ptr->getLinkID(linkB);
     if(right_hand_index == -1)
         std::cout << "Failed to get righthand_index" << std::endl;
 
-    KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_hand_index);
-    KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_hand_index);
+
+
+    KDL::Frame w_T_link_left_hand;
+    _model_ptr->getPose(linkA, w_T_link_left_hand);
+    KDL::Frame w_T_link_right_hand;
+    _model_ptr->getPose(linkB, w_T_link_right_hand);
 
     double actual_distance_check =
         (   ( w_T_link_left_hand *
@@ -409,10 +405,14 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
 }
 
+
+
+
 TEST_F(testCollisionUtils, checkTimings)
 {
     getGoodInitialPosition(q,_model_ptr);
-    robot.updateiDynTreeModel(q, false);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
@@ -430,28 +430,34 @@ TEST_F(testCollisionUtils, checkTimings)
     boost::shared_ptr<fcl::CollisionObject> collision_geometry_l = collision_objects_test[linkA];
     boost::shared_ptr<fcl::CollisionObject> collision_geometry_r = collision_objects_test[linkB];
 
-    int left_hand_index = robot.iDynTree_model.getLinkIndex(linkA);
+    int left_hand_index = _model_ptr->getLinkID(linkA);
     if(left_hand_index == -1)
         std::cout << "Failed to get lefthand_index" << std::endl;
 
-    int right_hand_index = robot.iDynTree_model.getLinkIndex(linkB);
+    int right_hand_index = _model_ptr->getLinkID(linkB);
     if(right_hand_index == -1)
         std::cout << "Failed to get righthand_index" << std::endl;
 
-    double tic = yarp::os::SystemClock::nowSystem();
+    auto tic = std::chrono::high_resolution_clock::now();
     compute_distance_observer.updateCollisionObjects();
-    std::cout << "updateCollisionObjects t: " << yarp::os::SystemClock::nowSystem() - tic << std::endl;
+    auto toc = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = toc - tic;
+    std::cout << "updateCollisionObjects t: " << elapsed.count() << std::endl;
 
-    tic = yarp::os::SystemClock::nowSystem();
+    tic = std::chrono::high_resolution_clock::now();
     compute_distance->getLinkDistances();
-    std::cout << "getLinkDistances() t: " << yarp::os::SystemClock::nowSystem() - tic << std::endl;
+    toc = std::chrono::high_resolution_clock::now();
+    elapsed = toc - tic;
+    std::cout << "getLinkDistances() t: " << elapsed.count() << std::endl;
 
-    tic = yarp::os::SystemClock::nowSystem();
+    tic = std::chrono::high_resolution_clock::now();
     compute_distance->getLinkDistances(0.05);
-    std::cout << "getLinkDistances(0.05) t: " << yarp::os::SystemClock::nowSystem() - tic << std::endl;
+    toc = std::chrono::high_resolution_clock::now();
+    elapsed = toc - tic;
+    std::cout << "getLinkDistances(0.05) t: " << elapsed.count() << std::endl;
 
     {
-        tic = yarp::os::SystemClock::nowSystem();
+        tic = std::chrono::high_resolution_clock::now();
         fcl::DistanceRequest distance_request;
 #if FCL_MINOR_VERSION > 2
         distance_request.gjk_solver_type = fcl::GST_INDEP;
@@ -468,11 +474,13 @@ TEST_F(testCollisionUtils, checkTimings)
         fcl::distance(left_hand_collision_object, right_hand_collision_object,
                       distance_request,
                       distance_result);
-        std::cout << "fcl capsule-capsule t: " << yarp::os::SystemClock::nowSystem() - tic << std::endl;
+        toc = std::chrono::high_resolution_clock::now();
+        elapsed = toc - tic;
+        std::cout << "fcl capsule-capsule t: " << elapsed.count() << std::endl;
     }
 
     {
-        tic = yarp::os::SystemClock::nowSystem();
+        tic = std::chrono::high_resolution_clock::now();
         fcl::DistanceRequest distance_request;
 #if FCL_MINOR_VERSION > 2
         distance_request.gjk_solver_type = fcl::GST_INDEP;
@@ -489,10 +497,12 @@ TEST_F(testCollisionUtils, checkTimings)
         fcl::distance(left_hand_collision_object, right_hand_collision_object,
                       distance_request,
                       distance_result);
-        std::cout << "fcl capsule-capsule without closest-point query t: " << yarp::os::SystemClock::nowSystem() - tic << std::endl;
+        toc = std::chrono::high_resolution_clock::now();
+        elapsed = toc - tic;
+        std::cout << "fcl capsule-capsule without closest-point query t: " << elapsed.count() << std::endl;
     }
 
-    tic = yarp::os::SystemClock::nowSystem();
+    tic = std::chrono::high_resolution_clock::now();
     KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
                 righthand_capsule_ep1, righthand_capsule_ep2;
 
@@ -519,13 +529,18 @@ TEST_F(testCollisionUtils, checkTimings)
                                                     righthand_capsule_ep2_eigen,
                                                     lefthand_CP,
                                                     righthand_CP);
-    std::cout << "inline capsule-capsule t: " << yarp::os::SystemClock::nowSystem() - tic << std::endl;
+    toc = std::chrono::high_resolution_clock::now();
+    elapsed = toc - tic;
+    std::cout << "inline capsule-capsule t: " << elapsed.count() << std::endl;
 }
 
 TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
 {
     getGoodInitialPosition(q,_model_ptr);
-    robot.updateiDynTreeModel(q, false);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
 

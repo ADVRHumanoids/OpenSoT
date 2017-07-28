@@ -100,7 +100,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testLogger
 #                      #testPreviewer
 #                      testVelocityAllocation
-                       testCollisionUtils
+                       testCollisionUtils #YARP FREE
                        testCartesianUtils #YARP FREE
                        testBasicAlgebra
         )
