@@ -58,7 +58,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       COMMAND ${CMAKE_CTEST_COMMAND}
                       MAIN_DEPENDENCY OpenSoT
                       DEPENDS
-                      testAggregatedConstraint
+                      testAggregatedConstraint #YARP FREE
                       testBilateralConstraint #YARP FREE
 #                      testCartesianPositionVelocityConstraint
                       testCollisionAvoidanceVelocityConstraint
