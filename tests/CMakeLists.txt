@@ -92,9 +92,9 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       TestManipulabilityTask # YARP FREE
                       testMinimizeAccelerationTask
                       testMinimumEffortVelocityTask
-                      testMinimumVelocityTask
+                      testMinimumVelocityTask ##YARP FREE
                       testPosturalVelocityTask ## YARP FREE
-                      testSubTask
+                      testSubTask ## YARP FREE
 #                      testAutoStack
 #                      testDefaultHumanoidStack
 #                      testLogger
