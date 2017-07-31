@@ -1,11 +1,7 @@
-#include <advr_humanoids_common_utils/test_utils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/MinimumVelocity.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <yarp/math/Math.h>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 
-using namespace yarp::math;
 
 namespace {
 
