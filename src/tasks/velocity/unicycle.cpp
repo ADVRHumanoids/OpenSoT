@@ -15,7 +15,7 @@
  * Public License for more details
 */
 
-#include <OpenSoT/tasks/velocity/wheel.h>
+#include <OpenSoT/tasks/velocity/unicycle.h>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
