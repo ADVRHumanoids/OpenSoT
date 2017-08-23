@@ -15,8 +15,8 @@
  * Public License for more details
 */
 
-#ifndef __TASKS_VELOCITY_CARTESIAN_H__
-#define __TASKS_VELOCITY_CARTESIAN_H__
+#ifndef __TASKS_VELOCITY_UNICYCLE_H__
+#define __TASKS_VELOCITY_UNICYCLE_H__
 
  #include <OpenSoT/Task.h>
  #include <XBotInterface/ModelInterface.h>
@@ -48,9 +48,9 @@
              *
              * You can see an example in @ref example_cartesian.cpp
              */
-            class unicycle : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+            class Unicycle : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<unicycle> Ptr;
+                typedef boost::shared_ptr<Unicycle> Ptr;
             protected:
                 XBot::ModelInterface& _robot;
 
@@ -60,26 +60,14 @@
                 int _distal_link_index;
                 int _base_link_index;
 
-                Eigen::Affine3d _actualPose;
-                Eigen::Affine3d _desiredPose;
-                Eigen::VectorXd _desiredTwist;
 
                 bool _base_link_is_world;
 
-                void update_b();
-
-                double _orientationErrorGain;
-
-                bool _is_initialized;
-
-                Eigen::VectorXd _error;
-
-                Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
+                Eigen::MatrixXd _J;
+                Eigen::MatrixXd _constA;
 
             public:
 
-                Eigen::VectorXd positionError;
-                Eigen::VectorXd orientationError;
 
                 /*********** TASK PARAMETERS ************/
 
@@ -95,24 +83,21 @@
                  * @param distal_link the name of the distal link as expressed in the robot urdf
                  * @param base_link the name of the base link as expressed in the robot urdf. Can be set to "world"
                  */
-                unicycle(std::string task_id,
+                Unicycle(std::string task_id,
                           const Eigen::VectorXd& x,
                           XBot::ModelInterface &robot,
                           std::string distal_link,
-                          std::string base_link);
+                          std::string base_link,
+                          double wheel_radius);
 
-                ~unicycle();
+                ~Unicycle();
 
                 void _update(const Eigen::VectorXd& x);
 
                
-                const Eigen::MatrixXd getActualPose() const;
-                
-				const void getActualPose(KDL::Frame& actual_pose) const;
-                
-                void setOrientationErrorGain(const double& orientationErrorGain);
-                
-				const double getOrientationErrorGain() const;
+
+                double _wheel_radius;
+
 
                 const std::string getDistalLink() const;
                
@@ -122,11 +107,6 @@
 
                 void setLambda(double lambda);
 
-                /**
-                 * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
-                 * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
-                 */
-                const Eigen::VectorXd getError() const;
 
                 /**
                  * @brief setBaseLink change the base link of the task
@@ -135,9 +115,9 @@
                  */
                 bool setBaseLink(const std::string& base_link);
                 
-                static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+                static bool isUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
-                static OpenSoT::tasks::velocity::unicycle::Ptr asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+                static OpenSoT::tasks::velocity::Unicycle::Ptr asUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
             };
         }

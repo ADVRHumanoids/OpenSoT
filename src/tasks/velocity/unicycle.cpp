@@ -22,22 +22,16 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-#define LAMBDA_THS 1E-12
-
-unicycle::unicycle(std::string task_id,
+Unicycle::Unicycle(std::string task_id,
                      const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
                      std::string distal_link,
-                     std::string base_link) :
+                     std::string base_link,
+                     double wheel_radius) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _orientationErrorGain(1.0), _is_initialized(false),
-    _error(6)
+    _wheel_radius(wheel_radius)
 {
-    _error.setZero(6);
-
-    _desiredTwist.setZero(6);
-
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
     if(!this->_base_link_is_world) {
@@ -54,84 +48,68 @@ unicycle::unicycle(std::string task_id,
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
 
+    _A.setZero(3, robot.getJointNumber());
+    _constA = A;
+    /// HERE fill _constA
+
+
+    ///
+
+
+
+    _b.setZero(_A.rows());
+
+
     _W.setIdentity(_A.rows(), _A.rows());
 
     _hessianType = HST_SEMIDEF;
 }
 
-unicycle::~unicycle()
+Unicycle::~Unicycle()
 {
 }
 
-void unicycle::_update(const Eigen::VectorXd &x) {
+void Unicycle::_update(const Eigen::VectorXd &x) {
 
     /************************* COMPUTING TASK *****************************/
 
+    ///CHECK: HERE THE JACOBIANS ARE COMPUTED! We need e^J_{w,e} & e^J_{b,e}!
     if(_base_link_is_world)
-        _robot.getJacobian(_distal_link,_A);
+        _robot.getJacobian(_distal_link,_J); //w^J_{w,e}
     else
-        _robot.getRelativeJacobian(_distal_link, _base_link, _A);
+        _robot.getRelativeJacobian(_distal_link, _base_link, _J); //b^J_{b,e}
 
-    if(_base_link_is_world)
-        _robot.getPose(_distal_link, _actualPose);
-    else
-        _robot.getPose(_distal_link, _base_link, _actualPose);
+    ///
 
-    if(!_is_initialized) {
-        /* initializing to zero error */
-        _desiredPose = _actualPose;
-        _b.setZero(_A.rows());
-        _is_initialized = true;
-    }
+
+    _A = _constA*_J;
+
+
 
     this->update_b();
 
-    this->_desiredTwist.setZero(6);
+
 
     /**********************************************************************/
 }
 
-const Eigen::MatrixXd unicycle::getActualPose() const
-{
-    return _actualPose.matrix();
-}
 
-const void unicycle::getActualPose(KDL::Frame& actual_pose) const
-{
-    actual_pose.p.x(_actualPose(0,3));
-    actual_pose.p.y(_actualPose(1,3));
-    actual_pose.p.z(_actualPose(2,3));
-    actual_pose.M(0,0) = _actualPose(0,0); actual_pose.M(0,1) = _actualPose(0,1); actual_pose.M(0,2) = _actualPose(0,2);
-    actual_pose.M(1,0) = _actualPose(1,0); actual_pose.M(1,1) = _actualPose(1,1); actual_pose.M(1,2) = _actualPose(1,2);
-    actual_pose.M(2,0) = _actualPose(2,0); actual_pose.M(2,1) = _actualPose(2,1); actual_pose.M(2,2) = _actualPose(2,2);
-}
-
-void unicycle::setOrientationErrorGain(const double &orientationErrorGain)
-{
-    this->_orientationErrorGain = orientationErrorGain;
-}
-
-const double OpenSoT::tasks::velocity::unicycle::getOrientationErrorGain() const
-{
-    return _orientationErrorGain;
-}
-
-const std::string OpenSoT::tasks::velocity::unicycle::getDistalLink() const
+const std::string OpenSoT::tasks::velocity::Unicycle::getDistalLink() const
 {
     return _distal_link;
 }
 
-const std::string OpenSoT::tasks::velocity::unicycle::getBaseLink() const
+const std::string OpenSoT::tasks::velocity::Unicycle::getBaseLink() const
 {
     return _base_link;
 }
 
-const bool OpenSoT::tasks::velocity::unicycle::baseLinkIsWorld() const
+const bool OpenSoT::tasks::velocity::Unicycle::baseLinkIsWorld() const
 {
     return _base_link_is_world;
 }
 
-void OpenSoT::tasks::velocity::unicycle::setLambda(double lambda)
+void OpenSoT::tasks::velocity::Unicycle::setLambda(double lambda)
 {
     if(lambda >= 0.0){
         this->_lambda = lambda;
@@ -139,49 +117,27 @@ void OpenSoT::tasks::velocity::unicycle::setLambda(double lambda)
     }
 }
 
-const Eigen::VectorXd OpenSoT::tasks::velocity::unicycle::getError() const
-{
-    return _error;
-}
 
-void unicycle::update_b() {
-    cartesian_utils::computeCartesianError(_actualPose.matrix(), _desiredPose.matrix(),
-                                           positionError, orientationError);
-
-    _error<<positionError,-_orientationErrorGain*orientationError;
-    _b = _desiredTwist + _lambda*_error;
-}
-
-bool unicycle::setBaseLink(const std::string& base_link)
+bool Unicycle::setBaseLink(const std::string& base_link)
 {
     if(base_link.compare(_base_link) == 0)
         return true;
 
-    if(base_link.compare("world") == 0)
-        _robot.getPose(_base_link, _tmpMatrix);
-    else if(_base_link.compare("world") == 0){
-        _robot.getPose(base_link, _tmpMatrix2);
-        _tmpMatrix = _tmpMatrix2.inverse();
-    }
-    else if(_robot.getLinkID(base_link) == -1)
-        return false;
-    else
-        _robot.getPose(_base_link, base_link, _tmpMatrix);
+
 
     _base_link = base_link;
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
-    _tmpMatrix2 = _tmpMatrix*_desiredPose;
-    _desiredPose = _tmpMatrix2;
+
 
     return true;
 }
 
-bool OpenSoT::tasks::velocity::unicycle::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+bool OpenSoT::tasks::velocity::Unicycle::isUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::unicycle>(task);
+    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Unicycle>(task);
 }
 
-OpenSoT::tasks::velocity::unicycle::Ptr OpenSoT::tasks::velocity::unicycle::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+OpenSoT::tasks::velocity::Unicycle::Ptr OpenSoT::tasks::velocity::Unicycle::asUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::unicycle>(task);
+    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Unicycle>(task);
 }
