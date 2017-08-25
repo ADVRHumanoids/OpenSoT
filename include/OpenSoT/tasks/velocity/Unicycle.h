@@ -65,7 +65,11 @@
 
                 Eigen::MatrixXd _J;
                 Eigen::MatrixXd _constA;
-
+				Eigen::Affine3d _T;
+				Eigen::MatrixXd _R;
+				Eigen::VectorXd _Swheel;
+				Eigen::VectorXd _AuxVector;
+				
             public:
 
 
@@ -88,7 +92,7 @@
                           XBot::ModelInterface &robot,
                           std::string distal_link,
                           std::string base_link,
-                          double wheel_radius);
+                          double wheel_radius,int signcorrection);
 
                 ~Unicycle();
 
@@ -115,6 +119,8 @@
                  */
                 bool setBaseLink(const std::string& base_link);
                 
+				
+				 int _signcorrection;
                 static bool isUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
                 static OpenSoT::tasks::velocity::Unicycle::Ptr asUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);

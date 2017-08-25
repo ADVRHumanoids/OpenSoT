@@ -15,7 +15,7 @@
  * Public License for more details
 */
 
-#include <OpenSoT/tasks/velocity/unicycle.h>
+#include <OpenSoT/tasks/velocity/Unicycle.h>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
@@ -27,42 +27,57 @@ Unicycle::Unicycle(std::string task_id,
                      XBot::ModelInterface &robot,
                      std::string distal_link,
                      std::string base_link,
-                     double wheel_radius) :
+                     double wheel_radius, int signcorrection) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _wheel_radius(wheel_radius)
+    _wheel_radius(wheel_radius),
+    _Swheel(robot.getJointNum()),
+    _constA(3,6),
+    _R(6,6),
+    _J(6,robot.getJointNum()	
+	)
 {
-    this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
-
+	_signcorrection=signcorrection;
+	this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
+	
     if(!this->_base_link_is_world) {
         this->_base_link_index = _robot.getLinkID(_base_link);
         //assert(this->_base_link_index >= 0);
     }
-
+	
     this->_distal_link_index = _robot.getLinkID(_distal_link);
+	
     //assert(this->_distal_link_index >= 0);
-
     if(!this->_base_link_is_world)
         assert(this->_distal_link_index != _base_link_index);
 
+	
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(x);
-
-    _A.setZero(3, robot.getJointNumber());
-    _constA = A;
+	_Swheel.setZero(robot.getJointNum());
+	std::string wheel_joint_name = _robot.getUrdf().getLink(distal_link)->parent_joint->name;
+	
+	int id = _robot.getDofIndex(wheel_joint_name);
+	_Swheel(id)=wheel_radius;
+	_AuxVector=_Swheel;
+	_A.setZero(3, robot.getJointNum());
+    _constA.setZero(3,6);
     /// HERE fill _constA
+	_constA(0,1)=0;
+	_constA(1,3)=0.0;
+	_constA(2,0)=1;
+	
+	_b.setZero(_A.rows());
+	_R.setZero(6,6);
+	
+	_W.setIdentity(_A.rows(), _A.rows());
+	
+	_hessianType = HST_SEMIDEF;
+	    
 
+    this->_update(x);
 
     ///
 
-
-
-    _b.setZero(_A.rows());
-
-
-    _W.setIdentity(_A.rows(), _A.rows());
-
-    _hessianType = HST_SEMIDEF;
 }
 
 Unicycle::~Unicycle()
@@ -78,17 +93,20 @@ void Unicycle::_update(const Eigen::VectorXd &x) {
         _robot.getJacobian(_distal_link,_J); //w^J_{w,e}
     else
         _robot.getRelativeJacobian(_distal_link, _base_link, _J); //b^J_{b,e}
+	
+	if(_base_link_is_world)
+        _robot.getPose(_distal_link, _T);
+    else
+        _robot.getPose(_distal_link, _base_link, _T); //base_link_T_distal_link
 
+	_R.block(0,0,3,3) << _T.matrix().block(0,0,3,3).transpose();
+	_R.block(3,3,3,3) << _T.matrix().block(0,0,3,3).transpose();
     ///
 
 
-    _A = _constA*_J;
-
-
-
-    this->update_b();
-
-
+    _A = _constA*_J;//_R*_J;
+	_AuxVector=_A.row(2);
+	_A.row(2)=_AuxVector+_Swheel*_signcorrection;
 
     /**********************************************************************/
 }
@@ -113,7 +131,6 @@ void OpenSoT::tasks::velocity::Unicycle::setLambda(double lambda)
 {
     if(lambda >= 0.0){
         this->_lambda = lambda;
-        this->update_b();
     }
 }
 
