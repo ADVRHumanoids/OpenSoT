@@ -106,6 +106,8 @@
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
             }
 
+            virtual void _log(XBot::MatLogger::Ptr logger);
+
         public:
             /**
              * @brief Aggregated

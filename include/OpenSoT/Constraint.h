@@ -20,6 +20,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <string>
+#include <XBotInterface/Logger.hpp>
 
  namespace OpenSoT {
 
@@ -95,6 +96,15 @@
          */
         Vector_type _bUpperBound;
 
+        /**
+         * @brief _log can be used to log internal Constraint variables
+         * @param logger a shared pointer to a MatLogger
+         */
+        virtual void _log(XBot::MatLogger::Ptr logger)
+        {
+
+        }
+
     public:
         Constraint(const std::string constraint_id,
                    const unsigned int x_size) :
@@ -167,6 +177,22 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         virtual void update(const Vector_type& x) {}
+
+        /**
+         * @brief log logs common Constraint internal variables
+         * @param logger a shared pointer to a MathLogger
+         */
+        virtual void log(XBot::MatLogger::Ptr logger)
+        {
+            logger->add(_constraint_id + "_Aeq", _Aeq);
+            logger->add(_constraint_id + "_Aineq", _Aineq);
+            logger->add(_constraint_id + "_beq", _beq);
+            logger->add(_constraint_id + "_bLowerBound", _bLowerBound);
+            logger->add(_constraint_id + "_bUpperBound", _bUpperBound);
+            logger->add(_constraint_id + "_upperBound",  _upperBound);
+            logger->add(_constraint_id + "_lowerBound", _lowerBound);
+            _log(logger);
+        }
     };
  }
 

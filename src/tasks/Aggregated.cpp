@@ -227,3 +227,9 @@ bool OpenSoT::tasks::Aggregated::isAggregated(OpenSoT::Task<Eigen::MatrixXd, Eig
 {
     return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
 }
+
+void OpenSoT::tasks::Aggregated::_log(XBot::MatLogger::Ptr logger)
+{
+    for(auto task : _tasks)
+        task->log(logger);
+}

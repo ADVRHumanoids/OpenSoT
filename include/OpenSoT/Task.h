@@ -24,6 +24,7 @@
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
  #include <boost/shared_ptr.hpp>
+ #include <XBotInterface/Logger.hpp>
 
  namespace OpenSoT {
 
@@ -122,6 +123,15 @@
                         A(j,i) = 0.0;
             }
             //TODO: is necessary here to call update()?
+        }
+
+        /**
+         * @brief _log can be used to log internal Task variables
+         * @param logger a shared pointer to a MatLogger
+         */
+        virtual void _log(XBot::MatLogger::Ptr logger)
+        {
+
         }
 
     public:
@@ -260,6 +270,23 @@
                 return true;
             }
             return false;
+        }
+
+        /**
+         * @brief log logs common Task internal variables
+         * @param logger a shared pointer to a MathLogger
+         */
+        virtual void log(XBot::MatLogger::Ptr logger)
+        {
+            logger->add(_task_id + "_A", _A);
+            logger->add(_task_id + "_b", _b);
+            logger->add(_task_id + "_W", _W);
+            logger->add(_task_id + "_lambda", _lambda);
+            _log(logger);
+
+            for(auto constraint : _constraints)
+                constraint->log(logger);
+
         }
     };
 

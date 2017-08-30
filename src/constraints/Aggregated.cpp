@@ -239,3 +239,9 @@ const std::string Aggregated::concatenateConstraintsIds(const std::list<Constrai
     }
     return concatenatedId;
 }
+
+void Aggregated::_log(XBot::MatLogger::Ptr logger)
+{
+    for(auto bound : _bounds)
+        bound->log(logger);
+}

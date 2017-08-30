@@ -120,3 +120,8 @@ bool OpenSoT::SubTask::setActiveJointsMask(const std::vector<bool> &active_joint
 {
     return _taskPtr->setActiveJointsMask(active_joints_mask);
 }
+
+void OpenSoT::SubTask::_log(XBot::MatLogger::Ptr logger)
+{
+    _taskPtr->log(logger);
+}
