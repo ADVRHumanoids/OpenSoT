@@ -276,15 +276,17 @@ const bool CartesianImpedanceCtrl::baseLinkIsWorld() const
 Eigen::VectorXd CartesianImpedanceCtrl::getSpringForce()
 {
     _spring_force.resize(positionError.size()+orientationError.size());
-    _spring_force<<positionError, -1.0*orientationError;
-    return _K*_spring_force;
+    _spring_force<<_positionError, -1.0*orientationError;
+    _spring_force = _K*_spring_force;
+    return _spring_force;
 }
 
 Eigen::VectorXd CartesianImpedanceCtrl::getDamperForce()
 {
     _damping_force.resize(linearVelocityError.size()+orientationVelocityError.size());
     _damping_force<<linearVelocityError, orientationVelocityError;
-    return _D*_damping_force;
+    _damping_force = _D*_damping_force;
+    return _damping_force;
 }
 
 void CartesianImpedanceCtrl::update_b() {
