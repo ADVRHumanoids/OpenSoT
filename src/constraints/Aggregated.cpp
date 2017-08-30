@@ -87,6 +87,9 @@ void Aggregated::generateAll() {
     _bUpperBound.resize(0);
     _bLowerBound.resize(0);
 
+    if(_constraint_id.empty())
+        _constraint_id = concatenateConstraintsIds(getConstraintsList());
+
     /* iterating on all bounds.. */
     for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
