@@ -184,13 +184,20 @@
          */
         virtual void log(XBot::MatLogger::Ptr logger)
         {
-            logger->add(_constraint_id + "_Aeq", _Aeq);
-            logger->add(_constraint_id + "_Aineq", _Aineq);
-            logger->add(_constraint_id + "_beq", _beq);
-            logger->add(_constraint_id + "_bLowerBound", _bLowerBound);
-            logger->add(_constraint_id + "_bUpperBound", _bUpperBound);
-            logger->add(_constraint_id + "_upperBound",  _upperBound);
-            logger->add(_constraint_id + "_lowerBound", _lowerBound);
+            if(_Aeq.rows() > 0 && _Aeq.cols() > 0)
+                logger->add(_constraint_id + "_Aeq", _Aeq);
+            if(_Aineq.rows() > 0 && _Aineq.cols() > 0)
+                logger->add(_constraint_id + "_Aineq", _Aineq);
+            if(_beq.size() > 0)
+                logger->add(_constraint_id + "_beq", _beq);
+            if(_bLowerBound.size() > 0)
+                logger->add(_constraint_id + "_bLowerBound", _bLowerBound);
+            if(_bUpperBound.size() > 0)
+                logger->add(_constraint_id + "_bUpperBound", _bUpperBound);
+            if(_upperBound.size() > 0)
+                logger->add(_constraint_id + "_upperBound",  _upperBound);
+            if(_lowerBound.size() > 0)
+                logger->add(_constraint_id + "_lowerBound", _lowerBound);
             _log(logger);
         }
     };
