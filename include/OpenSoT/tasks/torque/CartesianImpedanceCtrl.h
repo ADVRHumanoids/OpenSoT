@@ -23,6 +23,7 @@
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
  #include <OpenSoT/utils/cartesian_utils.h>
+ #include <OpenSoT/utils/Indices.h>
 
  #define WORLD_FRAME_NAME "world"
 
@@ -72,7 +73,21 @@
 
                 virtual void _log(XBot::MatLogger::Ptr logger);
 
+                Indices _rows_indices;
 
+                void generateA();
+                void generateW();
+                void generateF();
+                inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+                {
+                    A.conservativeResize(A.rows()+B.rows(), A.cols());
+                    A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+                }
+                inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+                {
+                    a.conservativeResize(a.rows()+b.rows());
+                    a.segment(a.rows()-b.rows(),b.rows())<<b;
+                }
             public:
 
                 Eigen::VectorXd positionError;
@@ -92,7 +107,9 @@
                           const Eigen::VectorXd& x,
                           XBot::ModelInterface &robot,
                           std::string distal_link,
-                          std::string base_link);
+                          std::string base_link,
+                          const std::list<unsigned int> rowIndices =
+                        std::list<unsigned int>());
 
                 ~CartesianImpedanceCtrl();
 

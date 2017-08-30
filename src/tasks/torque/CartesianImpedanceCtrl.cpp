@@ -28,11 +28,12 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
                      const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
                      std::string distal_link,
-                     std::string base_link) :
+                     std::string base_link, const std::list<unsigned int> rowIndices) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size),
-     inv(Eigen::MatrixXd::Identity(x.size(),x.size()))
+     inv(Eigen::MatrixXd::Identity(x.size(),x.size())),
+     _rows_indices(rowIndices)
 {   
     _desiredTwist.setZero(_desiredTwist.size());
 
@@ -54,11 +55,11 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
     _D.resize(6, 6);
     _D.setIdentity(_D.rows(), _D.cols()); _D = 1.0*_D;
 
+    _W.resize(6, 6);
+    _W.setIdentity(6, 6);
+
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
-
-    _W.resize(_A.rows(), _A.rows());
-    _W.setIdentity(_W.rows(), _W.cols());
 
     _lambda = 1.0;
 
@@ -67,6 +68,59 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
 
 CartesianImpedanceCtrl::~CartesianImpedanceCtrl()
 {
+}
+
+void CartesianImpedanceCtrl::generateA()
+{
+    Eigen::MatrixXd _tmpA = _A;
+
+    this->_A.resize(0, this->getXSize());
+
+    for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
+        i != _rows_indices.getChunks().end();
+        ++i) {
+
+        if(_tmpA.rows() > i->back())
+            pile(this->_A,
+                //_taskPtr->getA().submatrix(i->front(),i->back(),0, _x_size-1));
+                _tmpA.block(i->front(),0,
+                                       i->back()-i->front()+1, _x_size));
+    }
+}
+
+void CartesianImpedanceCtrl::generateW()
+{
+    Eigen::MatrixXd _tmpW = _W;
+
+    this->_W.resize(0, this->getXSize());
+
+    for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
+        i != _rows_indices.getChunks().end();
+        ++i) {
+
+        if(_tmpW.rows() > i->back())
+            pile(this->_W,
+                //_taskPtr->getA().submatrix(i->front(),i->back(),0, _x_size-1));
+                _tmpW.block(i->front(),0,
+                                       i->back()-i->front()+1, _x_size));
+    }
+}
+
+void CartesianImpedanceCtrl::generateF()
+{
+    Eigen::VectorXd _tmpF = _F;
+
+    this->_F.resize(0);
+
+    for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
+        i != _rows_indices.getChunks().end();
+        ++i) {
+
+        if(_tmpF.size() > i->back())
+            pile(this->_F,
+                 //_taskPtr->getb().subVector(i->front(),i->back()));
+                 _tmpF.segment(i->front(),i->back()-i->front()+1));
+    }
 }
 
 void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
@@ -80,6 +134,9 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
         bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _A);
         assert(res);
     }
+    if(_rows_indices.size() > 0)
+        generateA();
+
     _J = _A;
 
     if (_use_inertia_matrix)
@@ -243,6 +300,9 @@ void CartesianImpedanceCtrl::update_b() {
 
     /// TODO: add -Mc*(ddx_d - Jdot*qdot)
     _F = getDamperForce() + getSpringForce();
+
+    if(_rows_indices.size() > 0)
+        generateF();
 
     _b = _A*_J.transpose()*_F;
 }
