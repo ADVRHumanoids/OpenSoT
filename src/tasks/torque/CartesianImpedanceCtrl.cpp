@@ -264,27 +264,27 @@ void CartesianImpedanceCtrl::useInertiaMatrix(const bool use)
 
 void CartesianImpedanceCtrl::_log(XBot::MatLogger::Ptr logger)
 {
-    logger->log(_task_id+"_actualPose", _actualPose);
-    logger->log(_task_id+"_desiredPose", _desiredPose);
-    logger->log(_task_id+"_desiredTwist", _desiredTwist);
+    logger->add(_task_id+"_actualPose", _actualPose);
+    logger->add(_task_id+"_desiredPose", _desiredPose);
+    logger->add(_task_id+"_desiredTwist", _desiredTwist);
 
-    logger->log(_task_id+"_K", _K);
-    logger->log(_task_id+"_D", _D);
+    logger->add(_task_id+"_K", _K);
+    logger->add(_task_id+"_D", _D);
 
-    logger->log(_task_id+"_positionError", positionError);
-    logger->log(_task_id+"_orientationError", orientationError);
-    logger->log(_task_id+"_linearVelocityError", linearVelocityError);
-    logger->log(_task_id+"_orientationVelocityError", orientationVelocityError);
+    logger->add(_task_id+"_positionError", positionError);
+    logger->add(_task_id+"_orientationError", orientationError);
+    logger->add(_task_id+"_linearVelocityError", linearVelocityError);
+    logger->add(_task_id+"_orientationVelocityError", orientationVelocityError);
 
-    logger->log(_task_id+"_M", _M);
-    logger->log(_task_id+"_Minv", _Minv);
-    logger->log(_task_id+"_J", _J);
+    logger->add(_task_id+"_M", _M);
+    logger->add(_task_id+"_Minv", _Minv);
+    logger->add(_task_id+"_J", _J);
 
-    logger->log(_task_id+"_qdot", _qdot);
-    logger->log(_task_id+"_xdot", _xdot);
+    logger->add(_task_id+"_qdot", _qdot);
+    logger->add(_task_id+"_xdot", _xdot);
 
-    logger->log(_task_id+"_spring_force", _spring_force);
-    logger->log(_task_id+"_damping_force", _damping_force);
+    logger->add(_task_id+"_spring_force", _spring_force);
+    logger->add(_task_id+"_damping_force", _damping_force);
 
-    logger->log(_task_id+"_F", _F);
+    logger->add(_task_id+"_F", _F);
 }

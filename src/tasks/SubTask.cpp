@@ -1,7 +1,7 @@
 #include "OpenSoT/SubTask.h"
 
 OpenSoT::SubTask::SubTask(OpenSoT::SubTask::TaskPtr taskPtr, const std::list<unsigned int> rowIndices) :
-    Task(taskPtr->getTaskID() + "::" + std::string(Indices(rowIndices)),
+    Task(taskPtr->getTaskID() + "_" + std::string(Indices(rowIndices)),
          taskPtr->getXSize()),
     _subTaskMap(rowIndices),
     _taskPtr(taskPtr)

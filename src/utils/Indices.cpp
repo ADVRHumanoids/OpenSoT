@@ -154,11 +154,11 @@ OpenSoT::Indices::operator std::string() const
             if(i->size() == 1) {
                 subTaskIdSuffix << i->front();
             } else {
-                subTaskIdSuffix << i->front() << "-" << i->back();
+                subTaskIdSuffix << i->front() << "to" << i->back();
             }
 
             if(i != _contiguousChunks.end() && i != --_contiguousChunks.end())
-                subTaskIdSuffix << "+";
+                subTaskIdSuffix << "plus";
         }
     }
     subTaskIdSuffix.sync();

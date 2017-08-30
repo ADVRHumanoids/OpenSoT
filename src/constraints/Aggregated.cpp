@@ -51,7 +51,7 @@ Aggregated::Aggregated(ConstraintPtr bound1,
                        ConstraintPtr bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
-    Constraint(bound1->getConstraintID() + "+" + bound2->getConstraintID(),
+    Constraint(bound1->getConstraintID() + "plus" + bound2->getConstraintID(),
                x_size), _aggregationPolicy(aggregationPolicy)
 {
     _bounds.push_back(bound1);
@@ -238,7 +238,7 @@ const std::string Aggregated::concatenateConstraintsIds(const std::list<Constrai
     for(std::list<ConstraintPtr>::const_iterator i = constraints.begin(); i != constraints.end(); ++i) {
         concatenatedId += (*i)->getConstraintID();
         if(--constraintSize > 0)
-            concatenatedId += "+";
+            concatenatedId += "plus";
     }
     return concatenatedId;
 }
