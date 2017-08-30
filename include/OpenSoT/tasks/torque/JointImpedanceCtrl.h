@@ -52,6 +52,9 @@
 
                 void update_b();
 
+                virtual void _log(XBot::MatLogger::Ptr logger);
+
+
             public:
 
                 JointImpedanceCtrl(const Eigen::VectorXd& x, XBot::ModelInterface &robot);

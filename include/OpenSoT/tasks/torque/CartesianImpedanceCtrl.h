@@ -70,6 +70,9 @@
 
                 Eigen::VectorXd _F;
 
+                virtual void _log(XBot::MatLogger::Ptr logger);
+
+
             public:
 
                 Eigen::VectorXd positionError;
