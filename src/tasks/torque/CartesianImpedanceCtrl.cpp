@@ -276,7 +276,7 @@ const bool CartesianImpedanceCtrl::baseLinkIsWorld() const
 Eigen::VectorXd CartesianImpedanceCtrl::getSpringForce()
 {
     _spring_force.resize(positionError.size()+orientationError.size());
-    _spring_force<<_positionError, -1.0*orientationError;
+    _spring_force<<positionError, -1.0*orientationError;
     _spring_force = _K*_spring_force;
     return _spring_force;
 }
