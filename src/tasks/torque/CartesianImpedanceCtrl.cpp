@@ -138,8 +138,9 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
 
     if (_use_inertia_matrix)
     {
-        _robot.getInertiaMatrix(_M);
-        inv.compute(_M, _Minv);
+        //_robot.getInertiaMatrix(_M);
+        //inv.compute(_M, _Minv);
+        _robot.getInertiaInverse(_Minv);
         _A.noalias() = _J*_Minv;
     }
 

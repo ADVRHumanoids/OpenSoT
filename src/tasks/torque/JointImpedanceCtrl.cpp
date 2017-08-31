@@ -66,10 +66,13 @@ void JointImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     {
         _hessianType = HST_POSDEF;
 
-        _robot.getInertiaMatrix(_M);
+        //_robot.getInertiaMatrix(_M);
 
         //pinv.compute(_M, _W);
-        inv.compute(_M, _W);
+        //inv.compute(_M, _W);
+
+        _robot.getInertiaInverse(_W);
+
         //_W = _M.inverse();
     }
 
