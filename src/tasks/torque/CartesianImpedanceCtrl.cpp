@@ -55,6 +55,15 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
     _D.resize(6, 6);
     _D.setIdentity(_D.rows(), _D.cols()); _D = 1.0*_D;
 
+    _tmpA.resize(6, _x_size);
+    _tmpA.setZero(6, _x_size);
+
+    _tmpF.resize(6);
+    _tmpF.setZero(6);
+
+    _tmp_vec.resize(_x_size);
+    _tmp_vec.setZero(_x_size);
+
     if(rowIndices.size() > 0)
     {
         _W.resize(rowIndices.size(), rowIndices.size());
@@ -78,10 +87,8 @@ CartesianImpedanceCtrl::~CartesianImpedanceCtrl()
 {
 }
 
-void CartesianImpedanceCtrl::generateA()
+void CartesianImpedanceCtrl::generateA(const Eigen::MatrixXd &_tmpA)
 {
-    Eigen::MatrixXd _tmpA = _A;
-
     this->_A.resize(0, this->getXSize());
 
     for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
@@ -90,16 +97,12 @@ void CartesianImpedanceCtrl::generateA()
 
         if(_tmpA.rows() > i->back())
             pile(this->_A,
-                //_taskPtr->getA().submatrix(i->front(),i->back(),0, _x_size-1));
-                _tmpA.block(i->front(),0,
-                                       i->back()-i->front()+1, _x_size));
+                _tmpA.block(i->front(),0, i->back()-i->front()+1, _x_size));
     }
 }
 
-void CartesianImpedanceCtrl::generateF()
+void CartesianImpedanceCtrl::generateF(const Eigen::VectorXd &_tmpF)
 {
-    Eigen::VectorXd _tmpF = _F;
-
     this->_F.resize(0);
 
     for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
@@ -118,15 +121,17 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world) {
-        bool res =_robot.getJacobian(_distal_link,_A);
+        bool res =_robot.getJacobian(_distal_link, _tmpJ);
         assert(res);
     } else{
-        bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _A);
+        bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _tmpJ);
         assert(res);
     }
-    _tmpJ = _A;
-    if(_rows_indices.size() > 0)
-        generateA();
+
+    if(_rows_indices.asVector().size() > 0)
+        generateA(_tmpJ);
+    else
+        _A = _tmpJ;
 
 
     _J = _A;
@@ -293,12 +298,15 @@ void CartesianImpedanceCtrl::update_b() {
     orientationVelocityError = _desiredTwist.segment(3,3) - _xdot.segment(3,3);
 
     /// TODO: add -Mc*(ddx_d - Jdot*qdot)
-    _F = getDamperForce() + getSpringForce();
+    _tmpF = getDamperForce() + getSpringForce();
 
     if(_rows_indices.size() > 0)
-        generateF();
+        generateF(_tmpF);
+    else
+        _F = _tmpF;
 
-    _b = _A*_J.transpose()*_F;
+    _tmp_vec = _J.transpose()*_F;
+    _b = _A*_tmp_vec;
 }
 
 bool CartesianImpedanceCtrl::isCartesianImpedanceCtrl(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)

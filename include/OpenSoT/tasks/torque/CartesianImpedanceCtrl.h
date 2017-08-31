@@ -71,13 +71,17 @@
                 Eigen::VectorXd _xdot;
 
                 Eigen::VectorXd _F;
+                Eigen::VectorXd _tmpF;
+
+                Eigen::VectorXd _tmp_vec;
+                Eigen::MatrixXd _tmpA;
 
                 virtual void _log(XBot::MatLogger::Ptr logger);
 
                 Indices _rows_indices;
 
-                void generateA();
-                void generateF();
+                void generateA(const Eigen::MatrixXd& _tmpA);
+                void generateF(const Eigen::VectorXd& _tmpF);
                 inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
                 {
                     A.conservativeResize(A.rows()+B.rows(), A.cols());
