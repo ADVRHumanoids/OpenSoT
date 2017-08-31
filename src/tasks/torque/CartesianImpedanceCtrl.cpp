@@ -66,6 +66,9 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
 
     if(rowIndices.size() > 0)
     {
+        _A.resize(rowIndices.size(), _x_size);
+        _F.resize(rowIndices.size());
+
         _W.resize(rowIndices.size(), rowIndices.size());
         _W.setIdentity(rowIndices.size(), rowIndices.size());
     }
@@ -89,31 +92,14 @@ CartesianImpedanceCtrl::~CartesianImpedanceCtrl()
 
 void CartesianImpedanceCtrl::generateA(const Eigen::MatrixXd &_tmpA)
 {
-    this->_A.resize(0, this->getXSize());
-
-    for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
-        i != _rows_indices.getChunks().end();
-        ++i) {
-
-        if(_tmpA.rows() > i->back())
-            pile(this->_A,
-                _tmpA.block(i->front(),0, i->back()-i->front()+1, _x_size));
-    }
+    for(unsigned int i = 0; i < _rows_indices.asVector().size(); ++i)
+        _A.row(i) = _tmpA.row(_rows_indices.asVector()[i]);
 }
 
 void CartesianImpedanceCtrl::generateF(const Eigen::VectorXd &_tmpF)
 {
-    this->_F.resize(0);
-
-    for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
-        i != _rows_indices.getChunks().end();
-        ++i) {
-
-        if(_tmpF.size() > i->back())
-            pile(this->_F,
-                 //_taskPtr->getb().subVector(i->front(),i->back()));
-                 _tmpF.segment(i->front(),i->back()-i->front()+1));
-    }
+    for(unsigned int i = 0; i < _rows_indices.asVector().size(); ++i)
+        _F.row(i) = _tmpF.row(_rows_indices.asVector()[i]);
 }
 
 void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
