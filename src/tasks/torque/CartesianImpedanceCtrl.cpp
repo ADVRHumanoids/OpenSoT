@@ -134,8 +134,10 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
         bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _A);
         assert(res);
     }
-    if(_rows_indices.size() > 0)
+    if(_rows_indices.size() > 0){
         generateA();
+        generateW();
+    }
 
     _J = _A;
 
