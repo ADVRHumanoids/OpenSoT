@@ -76,7 +76,6 @@
                 Indices _rows_indices;
 
                 void generateA();
-                void generateW();
                 void generateF();
                 inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
                 {

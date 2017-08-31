@@ -55,8 +55,16 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
     _D.resize(6, 6);
     _D.setIdentity(_D.rows(), _D.cols()); _D = 1.0*_D;
 
-    _W.resize(6, 6);
-    _W.setIdentity(6, 6);
+    if(rowIndices.size() > 0)
+    {
+        _W.resize(rowIndices.size(), rowIndices.size());
+        _W.setIdentity(rowIndices.size(), rowIndices.size());
+    }
+    else
+    {
+        _W.resize(6, 6);
+        _W.setIdentity(6, 6);
+    }
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
@@ -84,24 +92,6 @@ void CartesianImpedanceCtrl::generateA()
             pile(this->_A,
                 //_taskPtr->getA().submatrix(i->front(),i->back(),0, _x_size-1));
                 _tmpA.block(i->front(),0,
-                                       i->back()-i->front()+1, _x_size));
-    }
-}
-
-void CartesianImpedanceCtrl::generateW()
-{
-    Eigen::MatrixXd _tmpW = _W;
-
-    this->_W.resize(0, this->getXSize());
-
-    for(Indices::ChunkList::const_iterator i = _rows_indices.getChunks().begin();
-        i != _rows_indices.getChunks().end();
-        ++i) {
-
-        if(_tmpW.rows() > i->back())
-            pile(this->_W,
-                //_taskPtr->getA().submatrix(i->front(),i->back(),0, _x_size-1));
-                _tmpW.block(i->front(),0,
                                        i->back()-i->front()+1, _x_size));
     }
 }
@@ -134,10 +124,9 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
         bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _A);
         assert(res);
     }
-    if(_rows_indices.size() > 0){
+    if(_rows_indices.size() > 0)
         generateA();
-        generateW();
-    }
+
 
     _J = _A;
 
