@@ -198,3 +198,9 @@ bool QPOases_sot::getOptions(const unsigned int i, qpOASES::Options& opt)
     opt = _qp_stack_of_tasks[i].getOptions();
     return true;
 }
+
+void QPOases_sot::_log(XBot::MatLogger::Ptr logger)
+{
+    for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
+        _qp_stack_of_tasks[i].log(logger,i);
+}

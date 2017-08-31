@@ -112,6 +112,8 @@ namespace OpenSoT{
          */
         bool getOptions(const unsigned int i, qpOASES::Options& opt);
 
+        virtual void _log(XBot::MatLogger::Ptr logger);
+
     protected:
         /**
          * @brief _qp_stack_of_tasks vector of QPOases Problem

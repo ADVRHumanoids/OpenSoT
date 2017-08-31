@@ -40,6 +40,10 @@ using namespace std;
         vector <TaskPtr> _tasks;
         ConstraintPtr _bounds;
         ConstraintPtr _globalConstraints;
+        virtual void _log(XBot::MatLogger::Ptr logger)
+        {
+
+        }
 
 
     public:
@@ -75,6 +79,11 @@ using namespace std;
          * @return  true if solved/solvable
          */
         virtual bool solve(Vector_type& solution) = 0;
+
+        virtual void log(XBot::MatLogger::Ptr logger)
+        {
+            _log(logger);
+        }
     };
  }
 

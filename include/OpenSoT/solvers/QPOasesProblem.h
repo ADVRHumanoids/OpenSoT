@@ -223,6 +223,24 @@ namespace OpenSoT{
 
         bool writeQPIntoMFile(const std::string& file_name);
 
+        void log(XBot::MatLogger::Ptr logger, int i)
+        {
+            logger->add("H_"+std::to_string(i), _H);
+            logger->add("g_"+std::to_string(i), _g);
+            if(_A.rows() > 0 && _A.cols() > 0)
+                logger->add("A_"+std::to_string(i), _A);
+            if(_lA.size() > 0)
+                logger->add("lA_"+std::to_string(i), _lA);
+            if(_uA.size() > 0)
+                logger->add("lA_"+std::to_string(i), _uA);
+            if(_l.size() > 0)
+                logger->add("l_"+std::to_string(i), _l);
+            if(_u.size() > 0)
+                logger->add("u_"+std::to_string(i), _u);
+            if(_solution.size() > 0)
+                logger->add("solution_"+std::to_string(i), _solution);
+        }
+
     protected:
         /**
          * @brief checkInfeasibility function that print informations when the problem is not feasible
