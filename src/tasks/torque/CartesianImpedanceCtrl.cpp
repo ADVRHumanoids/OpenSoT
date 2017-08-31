@@ -124,6 +124,7 @@ void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
         bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _A);
         assert(res);
     }
+    _tmpJ = _A;
     if(_rows_indices.size() > 0)
         generateA();
 
@@ -287,7 +288,7 @@ void CartesianImpedanceCtrl::update_b() {
 
 
     _robot.getJointVelocity(_qdot);
-    _xdot = _J*_qdot;
+    _xdot = _tmpJ*_qdot;
     linearVelocityError = _desiredTwist.segment(0,3) - _xdot.segment(0,3);
     orientationVelocityError = _desiredTwist.segment(3,3) - _xdot.segment(3,3);
 

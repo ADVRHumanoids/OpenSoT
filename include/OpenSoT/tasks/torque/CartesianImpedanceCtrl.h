@@ -59,6 +59,7 @@
                 Eigen::MatrixXd _M;
                 Eigen::MatrixXd _Minv;
                 Eigen::MatrixXd _J;
+                Eigen::MatrixXd _tmpJ;
                 //pseudoInverse<Eigen::MatrixXd> pinv;
                 LDLTInverse<Eigen::MatrixXd> inv;
 
