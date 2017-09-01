@@ -134,6 +134,18 @@
 
         }
 
+    private:
+
+        /**
+         * @brief _WA Jacobian of the Task times the Weight
+         */
+        mutable Matrix_type _WA;
+
+        /**
+         * @brief _Wb error associated to the Task times the Weight
+         */
+        mutable Vector_type _Wb;
+
     public:
         /**
          * @brief Task define a task in terms of Ax = b
@@ -171,6 +183,24 @@
          * @return the b matrix of the task
          */
         const Vector_type& getb() const { return _b; }
+
+        /**
+         * @brief getWA
+         * @return the product between W and A
+         */
+        const Matrix_type& getWA() const {
+            _WA = _W*_A;
+            return _WA;
+        }
+
+        /**
+         * @brief getWb
+         * @return the product between W and b
+         */
+        const Vector_type& getWb() const {
+            _Wb = _W*_b;
+            return _Wb;
+        }
 
         /**
          * @brief getWeight

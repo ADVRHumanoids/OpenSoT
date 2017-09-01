@@ -50,8 +50,8 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
     }
     else
     {
-        H.noalias() = task->getA().transpose() * task->getWeight() * task->getA();
-        g.noalias() = -1.0 * task->getA().transpose() * task->getWeight() * task->getb();
+        H = task->getA().transpose() * task->getWA();
+        g = -1.0 * task->getA().transpose() * task->getWb();
     }
 }
 
