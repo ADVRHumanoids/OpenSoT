@@ -146,6 +146,11 @@
          */
         mutable Vector_type _Wb;
 
+        /**
+         * @brief _Atranspose Jacobian of the task transposed
+         */
+        mutable Matrix_type _Atranspose;
+
     public:
         /**
          * @brief Task define a task in terms of Ax = b
@@ -191,6 +196,15 @@
         const Matrix_type& getWA() const {
             _WA = _W*_A;
             return _WA;
+        }
+
+        /**
+         * @brief getATranspose()
+         * @return A transposed
+         */
+        const Matrix_type& getATranspose() const {
+            _Atranspose = _A.transpose(); //This brakes the use of the template!
+            return _Atranspose;
         }
 
         /**
