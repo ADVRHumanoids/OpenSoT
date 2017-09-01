@@ -93,14 +93,19 @@ void Aggregated::checkSizes() {
 
 
 void Aggregated::generateAll() {
-    _A.resize(0,_x_size);
-    _b.resize(0);
+    _tmpA.resize(0, _x_size);
+    _tmpb.resize(0);
+
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
-        pile(_A,t->getWeight()*t->getA());
-        pile(_b, t->getWeight()*t->getb());
+        pile(_tmpA,t->getWeight()*t->getA());
+        pile(_tmpb, t->getWeight()*t->getb());
     }
+
+    _A = _tmpA;
+    _b = _tmpb;
+
     generateConstraints();
 }
 

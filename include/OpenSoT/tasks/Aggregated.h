@@ -22,6 +22,7 @@
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <list>
+#include <OpenSoT/EigenDefinitions.h>
 
 
  namespace OpenSoT {
@@ -40,12 +41,17 @@
         class Aggregated: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
             typedef boost::shared_ptr<Aggregated> Ptr;
+            typedef Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, _AGGREGATED_MATRIX_MAX_SIZE_ROWS, _AGGREGATED_MATRIX_MAX_SIZE_COLS> Matrix;
+            typedef Eigen::Matrix<double, Eigen::Dynamic, 1, 0, _AGGREGATED_MATRIX_MAX_SIZE_ROWS, 1> Vector;
         protected:
 
             std::list< TaskPtr > _tasks;
 
             std::list< ConstraintPtr > _ownConstraints;
             std::list< ConstraintPtr > _aggregatedConstraints;
+
+            Matrix _tmpA;
+            Vector _tmpb;
 
             unsigned int _aggregationPolicy;
 
@@ -94,13 +100,13 @@
 
             static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
 
-            inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+            inline void pile(Matrix& A, const Matrix& B)
             {
                 A.conservativeResize(A.rows()+B.rows(), A.cols());
                 A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
             }
 
-            inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+            inline void pile(Vector &a, const Vector &b)
             {
                 a.conservativeResize(a.rows()+b.rows());
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
