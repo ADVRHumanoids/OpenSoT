@@ -189,6 +189,6 @@ void JointImpedanceCtrl::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id+"_K", _K);
     logger->add(_task_id+"_D", _D);
 
-    logger->add(_task_id+"_M", _M);
+//     logger->add(_task_id+"_M", _M);
 }
 

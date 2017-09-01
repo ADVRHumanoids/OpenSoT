@@ -325,7 +325,7 @@ void CartesianImpedanceCtrl::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id+"_linearVelocityError", linearVelocityError);
     logger->add(_task_id+"_orientationVelocityError", orientationVelocityError);
 
-    logger->add(_task_id+"_M", _M);
+//     logger->add(_task_id+"_M", _M);
     logger->add(_task_id+"_Minv", _Minv);
     logger->add(_task_id+"_J", _J);
 
