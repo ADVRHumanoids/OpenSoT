@@ -194,7 +194,7 @@
          * @return the product between W and A
          */
         const Matrix_type& getWA() const {
-            _WA = _W*_A;
+            _WA.noalias() = _W*_A;
             return _WA;
         }
 
