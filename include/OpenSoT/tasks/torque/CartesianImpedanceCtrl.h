@@ -56,12 +56,9 @@
 
                 void update_b();
 
-                Eigen::MatrixXd _M;
                 Eigen::MatrixXd _Minv;
                 Eigen::MatrixXd _J;
                 Eigen::MatrixXd _tmpJ;
-                //pseudoInverse<Eigen::MatrixXd> pinv;
-                LDLTInverse<Eigen::MatrixXd> inv;
 
                 Eigen::Affine3d _tmp_affine;
                 Eigen::VectorXd _spring_force;
@@ -124,16 +121,19 @@
 
                 void setReference(const Eigen::MatrixXd& desiredPose,
                                   const Eigen::VectorXd& desiredTwist);
+                void setReference(const KDL::Frame& desiredPose,
+                                  const KDL::Twist& desiredTwist);
 
-                const Eigen::MatrixXd getReference() const;
+                const void getReference(Eigen::MatrixXd& desired_pose) const;
+                const void getReference(KDL::Frame& desired_pose) const;
 
                 void getReference(Eigen::MatrixXd& desiredPose,
                                   Eigen::VectorXd& desiredTwist) const;
+                void getReference(KDL::Frame& desiredPose,
+                                  KDL::Twist& desiredTwist) const;
 
-
-                const Eigen::MatrixXd getActualPose() const;
-
-                const KDL::Frame getActualPoseKDL() const;
+                const void getActualPose(Eigen::MatrixXd& actual_pose) const;
+                const void getActualPose(KDL::Frame& actual_pose) const;
 
                 const std::string getDistalLink() const;
                 const std::string getBaseLink() const;
@@ -144,8 +144,8 @@
                 void setStiffnessDamping(const Eigen::MatrixXd& Stiffness,
                                          const Eigen::MatrixXd& Damping);
 
-                Eigen::MatrixXd getStiffness();
-                Eigen::MatrixXd getDamping();
+                void getStiffness(Eigen::MatrixXd& Stiffness);
+                void getDamping(Eigen::MatrixXd& Damping);
                 void getStiffnessDamping(Eigen::MatrixXd& Stiffness, Eigen::MatrixXd& Damping);
 
 
@@ -156,8 +156,8 @@
 
                 void useInertiaMatrix(const bool use);
 
-                Eigen::VectorXd getSpringForce();
-                Eigen::VectorXd getDamperForce();
+                void getSpringForce(Eigen::VectorXd& spring_force);
+                void getDamperForce(Eigen::VectorXd& damper_force);
 
             };
         }
