@@ -24,10 +24,13 @@ using namespace OpenSoT::tasks::torque;
 JointImpedanceCtrl::JointImpedanceCtrl(const Eigen::VectorXd& x, XBot::ModelInterface &robot) :
     Task("JointImpedanceCtrl", x.size()), _x(x), _x_dot(x), _robot(robot),
     _x_desired(x.size()), _xdot_desired(x.size()), _use_inertia_matrix(true),
-    inv(Eigen::MatrixXd::Identity(x.size(),x.size()))
+    _spring_force(x.size()), _damping_force(x.size())
 {
     _x_desired.setZero(x.size());
     _xdot_desired.setZero(x.size());
+
+    _spring_force.setZero(x.size());
+    _damping_force.setZero(x.size());
 
     _W.resize(_x_size, _x_size);
     _W.setIdentity(_x_size, _x_size);
@@ -66,14 +69,7 @@ void JointImpedanceCtrl::_update(const Eigen::VectorXd &x) {
     {
         _hessianType = HST_POSDEF;
 
-        //_robot.getInertiaMatrix(_M);
-
-        //pinv.compute(_M, _W);
-        //inv.compute(_M, _W);
-
         _robot.getInertiaInverse(_W);
-
-        //_W = _M.inverse();
     }
 
     /************************* COMPUTING TASK *****************************/
@@ -104,9 +100,9 @@ void JointImpedanceCtrl::setReference(const Eigen::VectorXd &x_desired,
     this->update_b();
 }
 
-Eigen::VectorXd JointImpedanceCtrl::getReference() const
+void JointImpedanceCtrl::getReference(Eigen::VectorXd& reference) const
 {
-    return _x_desired;
+    reference =  _x_desired;
 }
 
 void JointImpedanceCtrl::getReference(Eigen::VectorXd &x_desired,
@@ -117,17 +113,21 @@ void JointImpedanceCtrl::getReference(Eigen::VectorXd &x_desired,
 }
 
 void JointImpedanceCtrl::update_b() {
-    _b = getSpringForce() + getDampingForce();
+
+    getSpringForce(_spring_force);
+    getDampingForce(_damping_force);
+
+    _b = _spring_force + _damping_force;
 }
 
-Eigen::VectorXd JointImpedanceCtrl::getSpringForce()
+void JointImpedanceCtrl::getSpringForce(Eigen::VectorXd& spring_force)
 {
-    return _K*(_x_desired - _x);
+    spring_force =  _K*(_x_desired - _x);
 }
 
-Eigen::VectorXd JointImpedanceCtrl::getDampingForce()
+void JointImpedanceCtrl::getDampingForce(Eigen::VectorXd& damping_force)
 {
-    return _D*(_xdot_desired - _x_dot);
+    damping_force = _D*(_xdot_desired - _x_dot);
 }
 
 void JointImpedanceCtrl::setStiffness(const Eigen::MatrixXd &K)
@@ -148,30 +148,30 @@ void JointImpedanceCtrl::setStiffnessDamping(const Eigen::MatrixXd& K, const Eig
     setDamping(D);
 }
 
-Eigen::MatrixXd JointImpedanceCtrl::getStiffness()
+void JointImpedanceCtrl::getStiffness(Eigen::MatrixXd& K)
 {
-    return _K;
+    K = _K;
 }
 
-Eigen::MatrixXd JointImpedanceCtrl::getDamping()
+void JointImpedanceCtrl::getDamping(Eigen::MatrixXd& D)
 {
-    return _D;
+    D = _D;
 }
 
 void JointImpedanceCtrl::getStiffnessDamping(Eigen::MatrixXd &K, Eigen::MatrixXd &D)
 {
-    K = getStiffness();
-    D = getDamping();
+    getStiffness(K);
+    getDamping(D);
 }
 
-Eigen::VectorXd JointImpedanceCtrl::getActualPositions()
+void JointImpedanceCtrl::getActualPositions(Eigen::VectorXd& actual_positions)
 {
-    return _x;
+    actual_positions = _x;
 }
 
-Eigen::VectorXd JointImpedanceCtrl::getActualVelocities()
+void JointImpedanceCtrl::getActualVelocities(Eigen::VectorXd& actual_velocities)
 {
-    return _x_dot;
+    actual_velocities = _x_dot;
 }
 
 void JointImpedanceCtrl::useInertiaMatrix(const bool use)
@@ -189,6 +189,7 @@ void JointImpedanceCtrl::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id+"_K", _K);
     logger->add(_task_id+"_D", _D);
 
-//     logger->add(_task_id+"_M", _M);
+    logger->add(_task_id+"_spring_force", _spring_force);
+    logger->add(_task_id+"_damping_force", _damping_force);
 }
 
