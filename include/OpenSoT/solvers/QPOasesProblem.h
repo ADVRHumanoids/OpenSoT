@@ -221,8 +221,12 @@ namespace OpenSoT{
         void printProblemInformation(const int problem_number, const std::string& problem_id,
                                      const std::string& constraints_id, const std::string& bounds_id);
 
-        bool writeQPIntoMFile(const std::string& file_name);
 
+        /**
+         * @brief log Tasks, Constraints and Bounds matrices
+         * @param logger a pointer to a MatLogger
+         * @param i an index related to the particular index of the problem
+         */
         void log(XBot::MatLogger::Ptr logger, int i)
         {
             logger->add("H_"+std::to_string(i), _H);
