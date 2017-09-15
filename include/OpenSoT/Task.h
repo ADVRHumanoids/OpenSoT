@@ -110,10 +110,12 @@
         };
 
         /**
-         * @brief applyActiveJointsMask apply the active joint mask to the A matrix
+         * @brief applyActiveJointsMask apply the active joint mask to the A matrix:
+         * in tasks in which b does not depend on A, this is done setting to 0 the columns
+         * of A corresponding to the index set to false of the _active_joint_mask vector
          * @param A matrix of the Task
          */
-        void applyActiveJointsMask(Matrix_type& A)
+        virtual void applyActiveJointsMask(Matrix_type& A)
         {
             int rows = A.rows();
             for(unsigned int i = 0; i < _x_size; ++i)

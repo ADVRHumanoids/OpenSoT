@@ -100,6 +100,16 @@
                 }
 
                 void _update(const Eigen::VectorXd& x);
+
+                /**
+                 * @brief applyActiveJointsMask is not usable for this task, so we do nothing
+                 * @param A does not change!
+                 */
+                void applyActiveJointsMask(Eigen::MatrixXd& A)
+                {
+                    std::cout<<"ACTIVE JOINT MASK IS NOT AVAILABLE FOR "<<getTaskID()<<std::endl;
+                }
+
             public:
 
                 Eigen::VectorXd positionError;
