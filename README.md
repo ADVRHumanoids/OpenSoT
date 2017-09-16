@@ -1,15 +1,7 @@
-OpenSoT Post-DRC Edition
-=========
-This is the code of OpenSoT that the WALK-MAN Team have used in the DRC competition for all the manipulation tasks.
-
-New Features Includes:
------------------------
-- Joint Torque Limits Constraint
-- Gaze Task
-- Default Humanoid Stack
-- Tons of Tools  
-- Many Bug Fixes
-- Improved documentation (we hope!)
+OpenSoT Lite (v2.0)
+============
+New version of OpenSoT based mainly on Eigen3.0.
+Most of the code has been ported to Eigen to be real time safe. The Lite version represent a working progress in which we want to try to achieve real time performances where is possible. 
 
 An Open Source Task Solving library with Constraints
 
@@ -41,5 +33,49 @@ alt="CoM Vs Waist Walking with the SoT" width="480" height="360" border="10" /><
 Installation
 ------------
 
-To Install OpenSoT, the recommended way is to use the robotology superbuild http://www.github.com/robotology-playground/robotology-superbuild
+To Install OpenSoT, the recommended way is to use the OpenSoT-superbuild https://github.com/EnricoMingo/OpenSoT-superbuild
+
+How to cite this work:
+======================
+Please support ```OpenSoT``` development by referencing it in your works/publications/projects with:
+```
+@inproceedings{AlessioEnrico2015,
+  title={OpenSoT: a Whole-Body Control Library for the Compliant Humanoid Robot COMAN},
+  author={Rocchi, Alessio and Hoffman, Enrico Mingo and Caldwell, Darwin G. and Tsagarakis, Nikos G.},
+  booktitle={Robotics and Automation (ICRA), 2015 IEEE International Conference on},
+  pages={1093--1099},
+  year={2015},
+  organization={IEEE}
+}
+```
+
+```
+@inproceedings{Mingo16,
+  title={Robot Dynamics Constraint for Inverse Kinematics},
+  author={Mingo Hoffman, Enrico and Rocchi, Alessio and Tsagarakis, Nikos G. and Caldwell, Darwin G.},
+  booktitle={International Conference on Advances in Robot Kinematics, ARK 2016},
+  pages={280--286},
+  year={2016},
+  organization={IFToMM}
+}
+```
+
+```
+@inproceedings{Fang15,
+  added-at = {2016-01-06T00:00:00.000+0100},
+  author = {Fang, Cheng and Rocchi, Alessio and Hoffman, Enrico Mingo and Tsagarakis, Nikos G. and Caldwell, Darwin G.},
+  biburl = {http://www.bibsonomy.org/bibtex/2fed92aad7fab0089cd092a76f2d6e819/dblp},
+  booktitle = {Humanoids},
+  ee = {http://dx.doi.org/10.1109/HUMANOIDS.2015.7363500},
+  interhash = {a4dd115293f874acd3b67c9781b45a40},
+  intrahash = {fed92aad7fab0089cd092a76f2d6e819},
+  isbn = {978-1-4799-6885-5},
+  keywords = {dblp},
+  pages = {1060-1066},
+  publisher = {IEEE},
+  timestamp = {2016-01-07T11:44:55.000+0100},
+  title = {Efficient self-collision avoidance based on focus of interest for humanoid robots.},
+  year = 2015
+}
+```
 
