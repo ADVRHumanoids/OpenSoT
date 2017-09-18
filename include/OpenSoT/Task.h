@@ -150,6 +150,18 @@
          * @brief _Atranspose Jacobian of the task transposed
          */
         mutable Matrix_type _Atranspose;
+        
+        /**
+         * @brief ...
+         * 
+         */
+        bool _is_active;
+        
+        /**
+         * @brief ...
+         * 
+         */
+        Matrix_type _A_last_active;
 
     public:
         /**
@@ -159,7 +171,7 @@
          */
         Task(const std::string task_id,
              const unsigned int x_size) :
-            _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size)
+            _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size), _is_active(true)
         {
             _lambda = 1.0;
             _hessianType = HST_UNKNOWN;
@@ -169,6 +181,28 @@
 
         virtual ~Task(){}
 
+        /**
+         * @brief Activated / deactivates the task by setting the A matrix to zero.
+         * Important note: after activating a task, call the update() function in 
+         * order to recompute a proper A matrix.
+         */
+        void setActive(const bool active_flag){
+            
+            if(!_is_active && active_flag){
+                _A = _A_last_active;
+            }
+            
+            _is_active = active_flag;
+        }
+        
+        
+        /**
+         * @brief Returns a boolean which specifies if the task is active.
+         */
+        bool isActive() const {
+            return _is_active;
+        }
+        
         /**
          * @brief getA
          * @return the A matrix of the task
@@ -269,9 +303,17 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         void update(const Vector_type &x) {
+           
+            
             for(typename std::list< ConstraintPtr >::iterator i = this->getConstraints().begin();
                 i != this->getConstraints().end(); ++i) (*i)->update(x);
             this->_update(x);
+            
+            if(!_is_active){
+                _A_last_active = _A;
+                _A.setZero(_A.rows(), _A.cols());
+                return;
+            }
 
             typedef std::vector<bool>::const_iterator it_m;
             bool all_true = true;
@@ -283,6 +325,8 @@
             }
 
             if(!all_true) applyActiveJointsMask(_A);
+            
+            
         }
 
         /**
