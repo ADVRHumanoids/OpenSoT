@@ -129,6 +129,8 @@ endif()
 set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
+                    src/tasks/velocity/PureRolling.cpp
+                    src/tasks/velocity/RigidRotation.cpp
                     src/tasks/velocity/Gaze.cpp
                     src/tasks/velocity/Contact.cpp
                     src/tasks/velocity/CoM.cpp
