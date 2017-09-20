@@ -134,6 +134,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/Gaze.cpp
                     src/tasks/velocity/Contact.cpp
                     src/tasks/velocity/CoM.cpp
+                    src/tasks/velocity/AngularMomentum.cpp
                     src/tasks/velocity/Manipulability.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
                     src/tasks/velocity/MinimumEffort.cpp
