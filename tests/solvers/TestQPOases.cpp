@@ -1038,6 +1038,19 @@ TEST_F(testQPOases_sot, testMinEffort)
 
 }
 
+TEST_F(testQPOasesProblem, testNullHessian)
+{
+    OpenSoT::solvers::QPOasesProblem qp(30, 0, OpenSoT::HessianType::HST_ZERO, 1e10);
+
+    Eigen::MatrixXd H(30,30); H.setZero(30,30);
+    Eigen::VectorXd g(30); g.setRandom(30);
+
+    ASSERT_TRUE(qp.initProblem(H, g,
+                   Eigen::MatrixXd(), Eigen::VectorXd(), Eigen::VectorXd(),
+                   Eigen::VectorXd(), Eigen::VectorXd()));
+
+}
+
 }
 
 int main(int argc, char **argv) {
