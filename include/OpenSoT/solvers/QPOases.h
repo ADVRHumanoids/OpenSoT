@@ -112,11 +112,25 @@ namespace OpenSoT{
          */
         bool getOptions(const unsigned int i, qpOASES::Options& opt);
 
+        /**
+         * @brief setActiveStack select a stack to do not solve
+         * @param i stack index
+         * @param flag true or flase
+         */
+        void setActiveStack(const unsigned int i, const bool flag);
+
+        /**
+         * @brief activateAllStacks activate all stacks
+         */
+        void activateAllStacks();
+
     protected:
         /**
          * @brief _qp_stack_of_tasks vector of QPOases Problem
          */
         vector <QPOasesProblem> _qp_stack_of_tasks;
+
+        vector<bool> _active_stacks;
 
         /**
          * @brief _epsRegularisation regularisation factor for dumped least squares
