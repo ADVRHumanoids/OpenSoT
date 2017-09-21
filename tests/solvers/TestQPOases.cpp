@@ -1275,63 +1275,63 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 
 }
 
-//TEST_F(testQPOases_sot, testMinEffort)
-//{
-//    iDynUtils idynutils("coman",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                        std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    Eigen::VectorXd q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-//    Eigen::VectorXd leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-//    leg[5] = 45.0 * M_PI/180.0;
-//    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-//    idynutils.updateiDyn3Model(q,true);
+TEST_F(testQPOases_sot, testMinEffort)
+{
+    XBot::ModelInterface::Ptr _model_ptr;
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-//    OpenSoT::tasks::velocity::MinimumEffort::Ptr min_effort_task(
-//            new OpenSoT::tasks::velocity::MinimumEffort(
-//                    cartesian_utils::toEigen(q), idynutils));
+    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
+    q[_model_ptr->getDofIndex("LAnkSag")] = 45.0 * M_PI/180.0;
 
-//    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> task_list;
-//    task_list.push_back(min_effort_task);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-//    OpenSoT::tasks::Aggregated::Ptr joint_space_task(
-//                new OpenSoT::tasks::Aggregated(task_list, q.size()));
+    OpenSoT::tasks::velocity::MinimumEffort::Ptr min_effort_task(
+            new OpenSoT::tasks::velocity::MinimumEffort(
+                    q, *_model_ptr));
 
+    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> task_list;
+    task_list.push_back(min_effort_task);
 
-//    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_vel_limits(
-//        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
-
-//    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
-//    bounds_list.push_back(joint_vel_limits);
-
-//    OpenSoT::constraints::Aggregated::Ptr bounds(
-//                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+    OpenSoT::tasks::Aggregated::Ptr joint_space_task(
+                new OpenSoT::tasks::Aggregated(task_list, q.size()));
 
 
-//    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
-//    stack_of_tasks.push_back(joint_space_task);
-//    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_vel_limits(
+        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
 
-//    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
-//    Eigen::VectorXd dq(q.size());
-//    dq.setZero(q.size());
-//    old_gravity_gradient oldGravityGradient;
-//    for(unsigned int i = 0; i < 100; ++i)
-//    {
-//        joint_space_task->update(cartesian_utils::toEigen(q));
-//        bounds->update(cartesian_utils::toEigen(q));
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
+    bounds_list.push_back(joint_vel_limits);
 
-//        Eigen::VectorXd old_gradient = oldGravityGradient.computeMinEffort(q);
-
-//        for(unsigned int i = 0; i < q.size(); ++i)
-//            EXPECT_NEAR(joint_space_task->getb()[i], old_gradient[i], 1E-3);
+    OpenSoT::constraints::Aggregated::Ptr bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
 
-//        EXPECT_TRUE(sot.solve(dq));
-//        Eigen::VectorXd dq_ = cartesian_utils::fromEigentoYarp(dq);
-//        q += dq_;
-//    }
+    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    stack_of_tasks.push_back(joint_space_task);
+    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
 
-//}
+    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(q.size());
+    old_gravity_gradient oldGravityGradient;
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        joint_space_task->update(q);
+        bounds->update(q);
+
+        Eigen::VectorXd old_gradient = oldGravityGradient.computeMinEffort(q);
+
+        for(unsigned int i = 0; i < q.size(); ++i)
+            EXPECT_NEAR(joint_space_task->getb()[i], old_gradient[i], 1E-3);
+
+
+        EXPECT_TRUE(sot.solve(dq));
+        Eigen::VectorXd dq_ = dq;
+        q += dq_;
+    }
+
+}
 
 //TEST_F(testQPOases_sot, testAggregated2Tasks)
 //{
