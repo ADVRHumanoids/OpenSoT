@@ -67,7 +67,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testDynamicsConstraint
                       testJointLimitsVelocityBounds
                       testVelocityLimitsVelocityBounds
-#                      testQPOasesSolver
+                      testQPOasesSolver
 #                      testQPOases_AutoStack
 #                      testQPOases_CartesianPositionConstraint
                       testQPOases_ConvexHull
@@ -154,9 +154,9 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
     add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
-#    add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
+    TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
+    add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
@@ -319,7 +319,7 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
     add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
     add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
-#    add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
+    add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 #    add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 #    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
     add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
