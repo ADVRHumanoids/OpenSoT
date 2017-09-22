@@ -13,8 +13,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         typedef boost::shared_ptr<RigidRotation> Ptr;
         
         RigidRotation(std::string wheel_link_name, 
-                        std::string waist_link_name,
-                        const XBot::ModelInterface& model);
+                      std::string waist_link_name,
+                      const XBot::ModelInterface& model);
         
         void setReference(const Eigen::Vector6d& twist);
         
@@ -44,7 +44,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         Eigen::Vector3d _preferred_forward_axis;
         
-        Eigen::MatrixXd _Jc;
+        Eigen::MatrixXd _Jwheel;
         Eigen::MatrixXd _S;
         
         Eigen::VectorXd _qdot;

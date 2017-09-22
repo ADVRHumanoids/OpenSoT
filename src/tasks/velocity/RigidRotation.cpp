@@ -45,25 +45,33 @@ void OpenSoT::tasks::velocity::RigidRotation::setIcr()
 void OpenSoT::tasks::velocity::RigidRotation::_update(const Eigen::VectorXd& x)
 {
 
+    Eigen::MatrixXd _Jwaist, _Jrel;
+    
     setIcr();
 
+    /* Get some transforms */
     Eigen::Affine3d world_T_wheel;
     Eigen::Matrix3d world_R_wheel;
-    _model.getPose(_wheel_link_name, world_T_wheel);
-    world_R_wheel = world_T_wheel.linear();
-    
     Eigen::Affine3d wheel_T_waist;
     Eigen::Matrix3d wheel_R_waist;
+    
+    _model.getPose(_wheel_link_name, world_T_wheel);
+    world_R_wheel = world_T_wheel.linear();
     _model.getPose(_waist_link_name, _wheel_link_name, wheel_T_waist);
     wheel_R_waist = wheel_T_waist.linear();
 
-    _model.getJacobian(_wheel_link_name, _Jc);
+    /* Wheel jacobian and waist jacobian */
+    _model.getJacobian(_wheel_link_name, _Jwheel);
+    _model.getJacobian(_waist_link_name, _Jwaist);
     
+    /* Wheel formard axis (wheel frame) */
     _wheel_forward_axis = (_wheel_spinning_axis).cross(world_R_wheel.transpose()*_world_contact_plane_normal);
     _wheel_forward_axis /= _wheel_forward_axis.norm();
     
+    /* Wheel origin in waist frame */
     Eigen::Vector3d waist_pos_wheel = wheel_T_waist.inverse().translation();
     
+    /* The desired forward axis is perpendicular to the line joining the ICR to the wheel origin */
     _wheel_forward_axis_ref = _thetadot*(world_R_wheel.transpose()*_world_contact_plane_normal).cross(wheel_R_waist*(waist_pos_wheel - _waist_icr));
     _wheel_forward_axis_ref /= _wheel_forward_axis_ref.norm();
     
@@ -75,16 +83,21 @@ void OpenSoT::tasks::velocity::RigidRotation::_update(const Eigen::VectorXd& x)
         _wheel_forward_axis_ref *= -1.0;
     }
     
+    /* Also compute the forward axis in waist frame for logging */
     _waist_forward_axis = wheel_R_waist.transpose()*_wheel_forward_axis;
     _waist_forward_axis_ref = wheel_R_waist.transpose()*_wheel_forward_axis_ref;
     
-
+    /* Desired rotation aboud the contact plane normal */
     _world_omega_ref = _lambda*world_R_wheel*(_wheel_forward_axis).cross(_wheel_forward_axis_ref);
+    
+    /* Relative jacobian wheel-horizonatal frame */
+    _Jrel = _Jwheel;
+    _Jrel.topRows(3) -= _Jwaist.topRows(3);
     
     _S.setZero(1,6);
     _S << 0, 0, 0, _world_contact_plane_normal.transpose();
     
-    _A = _S * _Jc;
+    _A = _S * _Jwheel;
     _b = _world_contact_plane_normal.transpose() * _world_omega_ref;
     _W.setIdentity(1,1);
     
