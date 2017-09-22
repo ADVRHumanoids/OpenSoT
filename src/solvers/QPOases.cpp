@@ -227,7 +227,7 @@ bool QPOases_sot::getOptions(const unsigned int i, qpOASES::Options& opt)
 
 void QPOases_sot::setActiveStack(const unsigned int i, const bool flag)
 {
-    if(i > -1 && i < _active_stacks.size())
+    if(i >= 0 && i < _active_stacks.size())
         _active_stacks[i] = flag;
 }
 

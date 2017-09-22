@@ -133,10 +133,10 @@ TEST_F(testActivateStack, test_deactivate_task)
 
     for(unsigned int k = 0; k < 3; ++k){
         Eigen::VectorXd qq = solutions[k];
-        std::cout<<"q"<<k<<": "<<qq<<std::endl;}
+        std::cout<<"q"<<k<<": "<<qq.transpose()<<std::endl;}
 
-//    for(unsigned int k = 0; k < solutions[0].size(); ++k)
-//        EXPECT_NEAR(solutions[1][k], solutions[2][k], 1e-10);
+    for(unsigned int k = 0; k < solutions[0].size(); ++k)
+        EXPECT_NEAR(solutions[1][k], solutions[2][k], 1e-10);
 
 }
 
