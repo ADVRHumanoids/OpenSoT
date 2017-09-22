@@ -10,7 +10,7 @@ OpenSoT::tasks::velocity::Contact::Contact(std::string task_id,
     _model(model),
     _K(contact_matrix)
 {
-    _update(Eigen::VectorXd(0));
+    _update(Eigen::VectorXd());
     _W.setIdentity(getTaskSize(), getTaskSize());
 }
 
