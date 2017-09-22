@@ -67,11 +67,12 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testDynamicsConstraint
                       testJointLimitsVelocityBounds
                       testVelocityLimitsVelocityBounds
-#                      testQPOasesSolver
+                      testQPOasesSolver #YARP_FREE
 #                      testQPOases_AutoStack
 #                      testQPOases_CartesianPositionConstraint
                       testQPOases_ConvexHull
                       testQPOases_FF
+                      TestQPOases_SetActiveStack
 #                      testQPOases_GlobalConstraints
 #                      testQPOases_Options
 #                      testQPOases_PriorityInversion
@@ -154,9 +155,9 @@ if(YARP_FOUND)
     TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
     add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
-#    add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
+    TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
+    add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
@@ -173,6 +174,10 @@ if(YARP_FOUND)
     ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
     TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
     add_dependencies(testQPOases_FF GTest-ext OpenSoT)
+
+    ADD_EXECUTABLE(testQPOases_SetActiveStack solvers/TestQPOases_SetActiveStack.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_SetActiveStack ${TestLibs})
+    add_dependencies(testQPOases_SetActiveStack GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testQPOases_GlobalConstraints solvers/TestQPOases_GlobalConstraints.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_GlobalConstraints ${TestLibs} ${PCL_LIBRARIES})
@@ -319,11 +324,12 @@ if(YARP_FOUND)
 #    add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
     add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
     add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
-#    add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
+    add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 #    add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 #    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
     add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
     add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
+    add_test(NAME OpenSoT_solvers_qpOases_SetActiveStack COMMAND testQPOases_SetActiveStack)
 #    add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
 #    add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
 #    ##the following tests compile but don't get executed automatically. They are not proper tests ATM, rather case-studies and references for stack tuning.
