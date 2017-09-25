@@ -14,9 +14,12 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         RigidRotation(std::string wheel_link_name, 
                       std::string waist_link_name,
-                      const XBot::ModelInterface& model);
+                      const XBot::ModelInterface& model,
+                      double dt
+                     );
         
-        void setReference(const Eigen::Vector6d& twist);
+        void setReference(double theta, const Eigen::Vector3d& cart_vref);
+        void setReference(double theta, const Eigen::Vector3d& cart_vref, const Eigen::Vector2d& wheel_pos_ref);
         
         virtual void _update(const Eigen::VectorXd& x);
         
@@ -24,27 +27,29 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
     private:
         
-        void setIcr();
+        double _dt;
         
         const XBot::ModelInterface& _model;
         std::string _wheel_link_name;
         std::string _waist_link_name;
         std::string _parent_parent_link; /* HACK */
         
+        Eigen::Vector3d _cart_wheel_pos_ref;
         Eigen::Vector3d _world_contact_plane_normal;
-        Eigen::Vector3d _waist_icr;
-        double _thetadot;
+        Eigen::Vector3d _cart_vref;
+        Eigen::Matrix3d _world_R_cart;
         Eigen::Vector3d _wheel_spinning_axis;
         Eigen::Vector3d _wheel_forward_axis_ref;
         Eigen::Vector3d _wheel_forward_axis;
-        Eigen::Vector3d _waist_forward_axis_ref;
-        Eigen::Vector3d _waist_forward_axis;
-        Eigen::Vector3d _world_omega_ref;
-        Eigen::Vector6d _waist_ref_twist;
-        
+        Eigen::Vector3d _cart_forward_axis_ref;
+        Eigen::Vector3d _cart_forward_axis;
+        Eigen::Vector3d _cart_omega_ref;
+        Eigen::Vector3d _cart_wheel_pos;
         Eigen::Vector3d _preferred_forward_axis;
         
-        Eigen::MatrixXd _Jwheel;
+        Eigen::Vector3d _wheel_vel_ref;
+        Eigen::Vector3d _wheel_relative_vel_ref;
+        Eigen::MatrixXd _Jwheel, _Jwaist, _Jrel;
         Eigen::MatrixXd _S;
         
         Eigen::VectorXd _qdot;
