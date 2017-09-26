@@ -111,7 +111,7 @@ TEST_F(testActivateStack, test_deactivate_task)
         right_arm->setReference(T);
 
         Eigen::VectorXd q_ref(q.size());
-        q.setRandom(q.size());
+        q_ref = q;
         postural->setReference(q_ref);
 
         Eigen::VectorXd dq(q.size());
