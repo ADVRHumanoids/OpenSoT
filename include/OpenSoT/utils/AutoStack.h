@@ -23,6 +23,7 @@
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
+#include <XBotInterface/Logger.hpp>
 
 /**
  * @example example_autostack.cpp
@@ -67,6 +68,8 @@ namespace OpenSoT {
                       OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
 
             void update(const Eigen::VectorXd & state);
+
+            void log(XBot::MatLogger::Ptr logger);
 
             OpenSoT::solvers::QPOases_sot::Stack& getStack();
 

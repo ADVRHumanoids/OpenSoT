@@ -24,6 +24,7 @@
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
  #include <boost/shared_ptr.hpp>
+ #include <XBotInterface/Logger.hpp>
 
  namespace OpenSoT {
 
@@ -124,6 +125,44 @@
             //TODO: is necessary here to call update()?
         }
 
+        /**
+         * @brief _log can be used to log internal Task variables
+         * @param logger a shared pointer to a MatLogger
+         */
+        virtual void _log(XBot::MatLogger::Ptr logger)
+        {
+
+        }
+
+    private:
+
+        /**
+         * @brief _WA Jacobian of the Task times the Weight
+         */
+        mutable Matrix_type _WA;
+
+        /**
+         * @brief _Wb error associated to the Task times the Weight
+         */
+        mutable Vector_type _Wb;
+
+        /**
+         * @brief _Atranspose Jacobian of the task transposed
+         */
+        mutable Matrix_type _Atranspose;
+        
+        /**
+         * @brief ...
+         * 
+         */
+        bool _is_active;
+        
+        /**
+         * @brief ...
+         * 
+         */
+        Matrix_type _A_last_active;
+
     public:
         /**
          * @brief Task define a task in terms of Ax = b
@@ -132,7 +171,7 @@
          */
         Task(const std::string task_id,
              const unsigned int x_size) :
-            _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size)
+            _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size), _is_active(true)
         {
             _lambda = 1.0;
             _hessianType = HST_UNKNOWN;
@@ -142,6 +181,28 @@
 
         virtual ~Task(){}
 
+        /**
+         * @brief Activated / deactivates the task by setting the A matrix to zero.
+         * Important note: after activating a task, call the update() function in 
+         * order to recompute a proper A matrix.
+         */
+        void setActive(const bool active_flag){
+            
+            if(!_is_active && active_flag){
+                _A = _A_last_active;
+            }
+            
+            _is_active = active_flag;
+        }
+        
+        
+        /**
+         * @brief Returns a boolean which specifies if the task is active.
+         */
+        bool isActive() const {
+            return _is_active;
+        }
+        
         /**
          * @brief getA
          * @return the A matrix of the task
@@ -161,6 +222,33 @@
          * @return the b matrix of the task
          */
         const Vector_type& getb() const { return _b; }
+
+        /**
+         * @brief getWA
+         * @return the product between W and A
+         */
+        const Matrix_type& getWA() const {
+            _WA.noalias() = _W*_A;
+            return _WA;
+        }
+
+        /**
+         * @brief getATranspose()
+         * @return A transposed
+         */
+        const Matrix_type& getATranspose() const {
+            _Atranspose = _A.transpose(); //This brakes the use of the template!
+            return _Atranspose;
+        }
+
+        /**
+         * @brief getWb
+         * @return the product between W and b
+         */
+        const Vector_type& getWb() const {
+            _Wb = _W*_b;
+            return _Wb;
+        }
 
         /**
          * @brief getWeight
@@ -215,9 +303,17 @@
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
         void update(const Vector_type &x) {
+           
+            
             for(typename std::list< ConstraintPtr >::iterator i = this->getConstraints().begin();
                 i != this->getConstraints().end(); ++i) (*i)->update(x);
             this->_update(x);
+            
+            if(!_is_active){
+                _A_last_active = _A;
+                _A.setZero(_A.rows(), _A.cols());
+                return;
+            }
 
             typedef std::vector<bool>::const_iterator it_m;
             bool all_true = true;
@@ -229,6 +325,8 @@
             }
 
             if(!all_true) applyActiveJointsMask(_A);
+            
+            
         }
 
         /**
@@ -260,6 +358,23 @@
                 return true;
             }
             return false;
+        }
+
+        /**
+         * @brief log logs common Task internal variables
+         * @param logger a shared pointer to a MathLogger
+         */
+        virtual void log(XBot::MatLogger::Ptr logger)
+        {
+            logger->add(_task_id + "_A", _A);
+            logger->add(_task_id + "_b", _b);
+            logger->add(_task_id + "_W", _W);
+            logger->add(_task_id + "_lambda", _lambda);
+            _log(logger);
+
+            for(auto constraint : _constraints)
+                constraint->log(logger);
+
         }
     };
 

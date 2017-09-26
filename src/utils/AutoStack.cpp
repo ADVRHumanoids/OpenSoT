@@ -351,3 +351,11 @@ OpenSoT::solvers::QPOases_sot::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTa
     }
     return OpenSoT::solvers::QPOases_sot::TaskPtr();
 }
+
+void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)
+{
+    for(auto task : _stack)
+        task->log(logger);
+    if(_boundsAggregated)
+        _boundsAggregated->log(logger);
+}

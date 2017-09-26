@@ -112,21 +112,6 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
 
         std::cout<<RED<<"ERROR INITIALIZING QP PROBLEM "<<DEFAULT<<std::endl;
         std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
-
-
-        time_t rawtime;
-        struct tm * timeinfo;
-        char buffer [80];
-        time (&rawtime);
-        timeinfo = localtime (&rawtime);
-        strftime (buffer,80,"%Y%m%d_%H%M%S",timeinfo);
-        std::string file_name = "qp_problem_log_";
-        file_name.append(buffer);
-        file_name = file_name + ".m";
-        if(writeQPIntoMFile(file_name.c_str()))
-            std::cout<<"Wrote QP problem into mat file "<<file_name<<std::endl;
-        else
-            std::cout<<RED<<"ERROR while writing QP problem into mat file!"<<DEFAULT<<std::endl;
 #endif
 
         return false;
@@ -353,33 +338,7 @@ void QPOasesProblem::printProblemInformation(const int problem_number, const std
     std::cout<<GREEN<<"BOUNDS ID: "<<DEFAULT<<bounds_id<<std::endl;
     std::cout<<GREEN<<"     # OF BOUNDS: "<<DEFAULT<<_l.rows()<<std::endl;
     std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_problem->getNV()<<std::endl;
-//    std::cout<<GREEN<<"H: "<<DEFAULT<<_H<<std::endl;
-//    std::cout<<GREEN<<"g: "<<DEFAULT<<_g<<std::endl;
-//    std::cout<<GREEN<<"A: "<<DEFAULT<<_A<<std::endl;
-//    std::cout<<GREEN<<"lA: "<<DEFAULT<<_lA<<std::endl;
-//    std::cout<<GREEN<<"uA: "<<DEFAULT<<_uA<<std::endl;
-//    std::cout<<GREEN<<"u: "<<DEFAULT<<_u<<std::endl;
-//    std::cout<<GREEN<<"l: "<<DEFAULT<<_l<<std::endl;
     std::cout<<std::endl;
-}
-
-bool QPOasesProblem::writeQPIntoMFile(const std::string& file_name)
-{
-    std::ofstream file(file_name.c_str());
-    if(file.is_open())
-    {
-        file<<"H = [\n"<<_H<<"\n]\n\n";
-        file<<"g = [\n"<<_g<<"\n]\n\n";
-        file<<"A = [\n"<<_A<<"\n]\n\n";
-        file<<"lA = [\n"<<_lA<<"\n]\n\n";
-        file<<"uA = [\n"<<_uA<<"\n]\n\n";
-        file<<"l = [\n"<<_l<<"\n]\n\n";
-        file<<"u = [\n"<<_u<<"\n]";
-
-        file.close();
-        return true;
-    }
-    return false;
 }
 
 void QPOasesProblem::checkINFTY()

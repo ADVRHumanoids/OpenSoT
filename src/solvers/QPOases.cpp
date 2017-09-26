@@ -54,13 +54,13 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
 
     if(task->getWeight().isIdentity())
     {
-        H = task->getA().transpose() * task->getA();
-        g = -1.0 * task->getA().transpose() * task->getb();
+        H.noalias() = task->getATranspose() * task->getA();
+        g.noalias() = -1.0 * task->getATranspose() * task->getb();
     }
     else
     {
-        H = task->getA().transpose() * task->getWeight() * task->getA();
-        g = -1.0 * task->getA().transpose() * task->getWeight() * task->getb();
+        H.noalias() = task->getATranspose() * task->getWA();
+        g.noalias() = -1.0 * task->getATranspose() * task->getWb();
     }
 }
 
@@ -234,4 +234,11 @@ void QPOases_sot::setActiveStack(const unsigned int i, const bool flag)
 void QPOases_sot::activateAllStacks()
 {
     _active_stacks.assign(_active_stacks.size(), true);
+}
+
+
+void QPOases_sot::_log(XBot::MatLogger::Ptr logger)
+{
+    for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
+        _qp_stack_of_tasks[i].log(logger,i);
 }
