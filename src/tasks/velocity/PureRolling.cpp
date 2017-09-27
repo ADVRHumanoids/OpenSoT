@@ -19,14 +19,17 @@ OpenSoT::tasks::velocity::PureRolling::PureRolling(std::string wheel_link_name,
 void OpenSoT::tasks::velocity::PureRolling::_update(const Eigen::VectorXd& x)
 {
 
-    
+    /* Compute tranforms */
     _model.getPose(_wheel_link_name, _world_T_wheel);
     _world_R_wheel = _world_T_wheel.linear();
     
+    /* Compute the contact point (wheel frame) */
     _wheel_contact_point = -1.0 * _radius * _world_R_wheel.transpose() * _world_contact_plane_normal;
     
+    /* Compute the jacobian of the contact point (world frame) */
     _model.getJacobian(_wheel_link_name, _wheel_contact_point, _Jc);
     
+    /* The wheel forward axis is the cross product between the wheel spinning axis and the normal to the plane */
     Eigen::Vector3d _wheel_forward_axis = (_world_R_wheel*_wheel_axis).cross(_world_contact_plane_normal);
     _wheel_forward_axis /= _wheel_forward_axis.norm();
     
