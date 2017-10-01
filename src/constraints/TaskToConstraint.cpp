@@ -25,8 +25,8 @@ using namespace OpenSoT::constraints;
 TaskToConstraint::TaskToConstraint(TaskPtr task) :
     BilateralConstraint(task->getTaskID(), task->getA(), task->getb(), task->getb()),
     _task(task),
-    _err_lb(Eigen::VectorXd::Zero(task->getXSize())),
-    _err_ub(Eigen::VectorXd::Zero(task->getXSize()))
+    _err_lb(Eigen::VectorXd::Zero(task->getTaskSize())),
+    _err_ub(Eigen::VectorXd::Zero(task->getTaskSize()))
 {
     this->generateAll();
 }
