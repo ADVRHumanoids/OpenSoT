@@ -4,6 +4,19 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
+
+FIND_PACKAGE(YARP QUIET)
+FIND_PACKAGE(iDynTree QUIET)
+FIND_PACKAGE(conversion_utils_YARP QUIET)
+FIND_PACKAGE(idynutils2 QUIET)
+find_package(test_utils)
+find_package(trajectory_utils)
+find_package(rviz_visual_tools)
+
+
+
+
+
 #TESTS THAT USES GAZEBO
 set(OPENSOT_COMPILE_SIMULATION_TESTS OFF CACHE BOOL "Flag to compile tests that uses Gazebo")
 
@@ -27,9 +40,7 @@ endif()
 
 option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
 
-find_package(test_utils)
-find_package(trajectory_utils)
-find_package(rviz_visual_tools)
+
 
 # compite GTest
 find_package(GTest)
