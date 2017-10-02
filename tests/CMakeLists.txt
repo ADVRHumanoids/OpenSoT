@@ -83,27 +83,14 @@ link_directories(${GTEST_LIB_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} )
 enable_testing()
 
-if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
-  if(YARP_FOUND)
-    add_custom_command( TARGET OpenSoT POST_BUILD
-                      COMMAND ${CMAKE_CTEST_COMMAND}
-                      MAIN_DEPENDENCY OpenSoT
-                      DEPENDS
-                      testAggregatedConstraint #YARP FREE
+set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
                       testBilateralConstraint #YARP FREE
 #                      testCartesianPositionVelocityConstraint
-                      testCollisionAvoidanceVelocityConstraint
-                      testCoMVelocityVelocityConstraint
-                      testConvexHullVelocityConstraint
 #                      testDynamicsConstraint
                       testJointLimitsVelocityBounds #YARP FREE
-                      testVelocityLimitsVelocityBounds
                       testQPOasesSolver #YARP_FREE
 #                      testQPOases_AutoStack
 #                      testQPOases_CartesianPositionConstraint
-                      testQPOases_ConvexHull
-                      testQPOases_FF
-                      TestQPOases_SetActiveStack
 #                      testQPOases_GlobalConstraints
 #                      testQPOases_Options
 #                      testQPOases_PriorityInversion
@@ -111,19 +98,13 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOases_Sparse
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
-		      testQPOases_StaticWalk
                       testQPOases_StaticWalk_FloatingBase #YARP FREE
                       testEigenSVD_StaticWalk_FloatingBase #YARP FREE
-                      testAggregatedTask
-                      testCartesianVelocityTask
-                      testCoMForceTask
                       testFrictionConeForceConstraint ###YARP FREE
-                      testCoMVelocityTask
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
                       TestManipulabilityTask # YARP FREE
                       testMinimizeAccelerationTask #YARP FREE
-                      testMinimumEffortVelocityTask
                       testMinimumVelocityTask ##YARP FREE
                       testPosturalVelocityTask ## YARP FREE
                       testSubTask ## YARP FREE
@@ -134,21 +115,58 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testVelocityAllocation
                        testCollisionUtils #YARP FREE
                        testCartesianUtils #YARP FREE
-                       testBasicAlgebra
-        )
-    endif()
+)
+
+if(YARP_FOUND)
+    set(OPENSOT_TESTS ${OPENSOT_TESTS}
+                    testCollisionAvoidanceVelocityConstraint
+                    testCoMVelocityVelocityConstraint
+                    testConvexHullVelocityConstraint
+                    testVelocityLimitsVelocityBounds
+                    testQPOases_ConvexHull
+                    testQPOases_FF
+                    TestQPOases_SetActiveStack
+                    testQPOases_StaticWalk
+                    testAggregatedTask
+                    testCartesianVelocityTask
+                    testCoMForceTask
+                    testCoMVelocityTask
+                    testBasicAlgebra
+                    testMinimumEffortVelocityTask
+    )
+endif()
+
+
+
+if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
+    add_custom_command(TARGET OpenSoT POST_BUILD
+                      COMMAND ${CMAKE_CTEST_COMMAND}
+                      MAIN_DEPENDENCY OpenSoT
+                      DEPENDS
+                        ${OPENSOT_TESTS}
+    )
 endif()
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
-# gTests for Velocity constraints
-if(YARP_FOUND)
-    SET(TestLibs OpenSoT
-                ${GTEST_BOTH_LIBRARIES} ${idynutils_LIBRARIES} ${qpOASES_LIBRARIES}
-                ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES} ${trajectory_utils_LIBRARIES}
-                ${fcl_LIBRARIES} ${srdfdom_advr_LIBRARIES} ${test_utils_LIBRARIES} ${rviz_visual_tools_LIBRARIES}
-                ${idynutils2_LIBRARIES} ${iDynTree_LIBRARIES})
+SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
+                     ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
+                     ${srdfdom_advr_LIBRARIES})
+if(${fcl_FOUND})
+    SET(TestLibs ${TestLibs} ${fcl_LIBRARIES})
+endif()
+if(${YARP_FOUND} AND ${iDynTree_FOUND} AND ${idynutils2_FOUND} AND ${ModelInterfaceIDYNUTILS_FOUND})
+    SET(TestLibs ${TestLibs} ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
+                 ${idynutils2_LIBRARIES} ${iDynTree_LIBRARIES})
+endif()
+if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
+    SET(TestLibs ${TestLibs} ${trajectory_utils_LIBRARIES} ${rviz_visual_tools_LIBRARIES})
+endif()
+if(${test_utils_FOUND})
+    SET(TestLibs ${TestLibs} ${test_utils_LIBRARIES} )
+endif()
+
+
 
     ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
     TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
@@ -393,7 +411,7 @@ if(YARP_FOUND)
      add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
      add_test(NAME OpenSoT_utils_cartesian_utils COMMAND testCartesianUtils)
      add_test(NAME OpenSoT_solvers_BasicAlgebra COMMAND testBasicAlgebra)
-endif()
+
 
 find_package(MATLAB QUIET)
 find_package(PythonInterp)
