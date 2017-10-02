@@ -98,8 +98,6 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
 #                      testQPOases_Sparse
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
-                      testQPOases_StaticWalk_FloatingBase #YARP FREE
-                      testEigenSVD_StaticWalk_FloatingBase #YARP FREE
                       testFrictionConeForceConstraint ###YARP FREE
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
@@ -117,6 +115,13 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
                        testCartesianUtils #YARP FREE
                        TestQPOases_SetActiveStack #YARP_FREE
 )
+
+if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
+    set(OPENSOT_TESTS ${OPENSOT_TESTS}
+                  testQPOases_StaticWalk_FloatingBase #YARP FREE
+                  testEigenSVD_StaticWalk_FloatingBase #YARP FREE
+    )
+endif()
 
 if(${YARP_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
@@ -188,15 +193,17 @@ TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
-ADD_EXECUTABLE(testQPOases_StaticWalk_FloatingBase solvers/TestQPOases_StaticWalk_FloatingBase.cpp)
-TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
-add_dependencies(testQPOases_StaticWalk_FloatingBase GTest-ext OpenSoT)
-add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
+if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
+    ADD_EXECUTABLE(testQPOases_StaticWalk_FloatingBase solvers/TestQPOases_StaticWalk_FloatingBase.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
+    add_dependencies(testQPOases_StaticWalk_FloatingBase GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
 
-ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
-TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
-add_dependencies(testEigenSVD_StaticWalk_FloatingBase GTest-ext OpenSoT)
-add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
+    ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
+    TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
+    add_dependencies(testEigenSVD_StaticWalk_FloatingBase GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
+endif()
 
 ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
 TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
