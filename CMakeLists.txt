@@ -36,31 +36,20 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 find_package(YCM REQUIRED)
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
-FIND_PACKAGE(YARP QUIET)
 FIND_PACKAGE(Eigen3 REQUIRED)
-FIND_PACKAGE(iDynTree QUIET)
 FIND_PACKAGE(orocos_kdl REQUIRED)
-#FIND_PACKAGE(idynutils QUIET)
-#FIND_PACKAGE(roslib REQUIRED)
-#FIND_PACKAGE(rospack REQUIRED)
-#FIND_PACKAGE(rosconsole REQUIRED)
 FIND_PACKAGE(urdf REQUIRED)
 FIND_PACKAGE(kdl_parser REQUIRED)
 FIND_PACKAGE(srdfdom_advr REQUIRED)
 FIND_PACKAGE(moveit_core QUIET)
-#FIND_PACKAGE(PythonLibs)
 FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
                                             filters
                                             surface
                                             search
                                             io)
-#FIND_PACKAGE(tf REQUIRED)
-#FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
-FIND_PACKAGE(conversion_utils_YARP QUIET)
-FIND_PACKAGE(idynutils2 QUIET)
 FIND_PACKAGE(fcl QUIET)
 
 # compilation flags
@@ -68,14 +57,10 @@ option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS}
-                            ${iDynTree_INCLUDE_DIRS}
-                            ${eigen_conversions_INCLUDE_DIRS}
+INCLUDE_DIRECTORIES(include ${eigen_conversions_INCLUDE_DIRS}
                             ${EIGEN3_INCLUDE_DIR}
                             ${PCL_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
-                            ${conversion_utils_YARP_INCLUDE_DIRS}
-                            ${idynutils2_INCLUDE_DIRS}
                             ${srdfdom_advr_INCLUDE_DIRS}
                             )
 
@@ -192,7 +177,6 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${qpOASES_LIBRARIES}
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
-                              ${conversion_utils_YARP_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
                               )
