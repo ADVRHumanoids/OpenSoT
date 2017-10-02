@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/velocity/RigidRotation.h>
-
+#include <XBotInterface/Utils.h>
 
 
 OpenSoT::tasks::velocity::RigidRotation::RigidRotation(std::string wheel_link_name, 
@@ -21,9 +21,11 @@ OpenSoT::tasks::velocity::RigidRotation::RigidRotation(std::string wheel_link_na
     
     Eigen::Affine3d world_T_wheel;
     Eigen::Affine3d world_T_waist;
+    Eigen::Affine3d waist_T_wheel;
     
     _model.getPose(_wheel_link_name, world_T_wheel);
     _model.getPose(_waist_link_name, world_T_waist);
+    waist_T_wheel = world_T_waist.inverse()*world_T_wheel;
     
     Eigen::Vector3d cart_wheel_pos = world_T_wheel.translation() - world_T_waist.translation();
     
@@ -33,6 +35,9 @@ OpenSoT::tasks::velocity::RigidRotation::RigidRotation(std::string wheel_link_na
     model.getJointPosition(q);
     _update(q);
     
+    _preferred_forward_axis = (waist_T_wheel.linear()*_wheel_spinning_axis).cross(world_T_waist.inverse().linear()*_world_contact_plane_normal);
+    
+    
     _parent_parent_link = _model.getUrdf().getLink(_model.getUrdf().getLink(wheel_link_name)->parent_joint->parent_link_name)->parent_joint->parent_link_name;
     std::cout << "pp link: " << _parent_parent_link << std::endl;
     
@@ -41,11 +46,11 @@ OpenSoT::tasks::velocity::RigidRotation::RigidRotation(std::string wheel_link_na
 void OpenSoT::tasks::velocity::RigidRotation::setReference(double theta, 
                                                            const Eigen::Vector3d& cart_vref)
 {
-    _world_R_cart = Eigen::AngleAxisd(theta, Eigen::Vector3d::UnitZ());
-    _cart_vref = cart_vref;
-    if(_cart_vref.norm() < 1e-9){
-        _cart_vref << 1e-9, 0, 0;
+    if(cart_vref.norm() < 1e-9){
+       return;
     }
+    
+    _cart_vref = cart_vref;
 }
 
 void OpenSoT::tasks::velocity::RigidRotation::setReference(double theta, 
@@ -79,7 +84,6 @@ void OpenSoT::tasks::velocity::RigidRotation::_update(const Eigen::VectorXd& x)
     /* Compute world_R_cart from waist */
     double theta = std::atan2(world_R_waist(1,0), world_R_waist(0,0));
     _world_R_cart = Eigen::AngleAxisd(theta, Eigen::Vector3d::UnitZ());
-    
     cart_R_waist = _world_R_cart.transpose()*world_T_waist.linear();
 
     /* Wheel jacobian and waist jacobian */
@@ -96,7 +100,11 @@ void OpenSoT::tasks::velocity::RigidRotation::_update(const Eigen::VectorXd& x)
     /* Reference wheel velocity (cart frame) */
     _wheel_vel_ref.setZero();
     _wheel_relative_vel_ref.setZero();
+    
+    /* Relative vel ref is used to shape the support polygon (NOT USED) */
     _wheel_relative_vel_ref.head<2>() = _lambda * .0 * (_cart_wheel_pos_ref - _cart_wheel_pos).head<2>() / _dt; // NOTE ignore relative motion
+    
+    /* Wheel velocity referece (cart frame) */
     _wheel_vel_ref.head<2>() = _cart_vref.head<2>();
     _wheel_vel_ref += Eigen::Vector3d::UnitZ().cross(_cart_wheel_pos)*_cart_vref.z();
     _wheel_vel_ref += _wheel_relative_vel_ref;
@@ -105,31 +113,34 @@ void OpenSoT::tasks::velocity::RigidRotation::_update(const Eigen::VectorXd& x)
     _wheel_forward_axis_ref = _wheel_vel_ref;
     _wheel_forward_axis_ref /= _wheel_forward_axis_ref.norm();
     
-    /* Consider flipping waist forward axis ref */
+    /* Consider flipping forward axis ref according to a preferred axis */
     /* Margherita HACK */
-    Eigen::Matrix3d wheel_R_pp;
-    _model.getOrientation(_parent_parent_link, _wheel_link_name, wheel_R_pp);
-    if( wheel_R_pp.col(1).dot(world_R_wheel.transpose()*_world_R_cart*_wheel_forward_axis_ref) < 0 ){
+    if( _preferred_forward_axis.dot(_wheel_forward_axis_ref)  < 0 ){
         _wheel_forward_axis_ref *= -1.0;
     }
     
     /* Desired rotation relative to the cart frame about the contact plane normal */
     _cart_omega_ref = _lambda*(_wheel_forward_axis).cross(_wheel_forward_axis_ref);
     
-    /* Relative jacobian wheel-horizonatal frame */
-    _Jrel = _Jwheel;
-    _Jrel.topRows(3) -= _Jwaist.topRows(3);
-    _Jrel.topRows(3) = _world_R_cart.transpose() * _Jrel.topRows(3);
-    
-    _S.setZero(3,6);
-    _S << 1, 0, 0, 0, 0, 0,
+    _S.setZero(6,6);
+    _S << 1, 0, 0, 0, 0, 0, 
           0, 1, 0, 0, 0, 0,
+          0, 0, 1, 0, 0, 0,
+          0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0,
           0, 0, 0, _world_contact_plane_normal.transpose();
+          
+    /* Relative jacobian wheel-horizonatal frame */
+    _Jwaist = _S*_Jwaist;
+    _Jwaist.topRows<3>() += XBot::Utils::skewSymmetricMatrix(_world_R_cart*_cart_wheel_pos).transpose() * _Jwaist.bottomRows<3>();
+    _Jrel = (_Jwheel - _Jwaist);
     
-    _A = _S * _Jrel;
+    _A.setZero(3, _Jrel.cols());
+    _A << _Jrel.topRows<2>(), 
+          _Jrel.bottomRows<1>();
+          
     _b.setZero(3);
-    _b << (_wheel_vel_ref - _cart_vref).head<2>()*_dt, 
-        _world_contact_plane_normal.transpose() * (_cart_omega_ref + Eigen::Vector3d::UnitZ()*_cart_vref.z()*_dt);
+    _b << 0, 0, _world_contact_plane_normal.transpose() * _cart_omega_ref;
     
     
 }
@@ -139,6 +150,9 @@ void OpenSoT::tasks::velocity::RigidRotation::_log(XBot::MatLogger::Ptr logger)
     _model.getJointVelocity(_qdot);
     
     logger->add(_task_id + "_S", _S);
+    
+    logger->add(_task_id + "_Jrel", _Jrel);
+    logger->add(_task_id + "_Jwaist", _Jwaist);
     logger->add(_task_id + "_value", _A*_qdot - _b);
     logger->add(_task_id + "_wheel_forward_axis_ref", _wheel_forward_axis_ref);
     logger->add(_task_id + "_wheel_forward_axis", _wheel_forward_axis);
