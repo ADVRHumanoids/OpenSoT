@@ -57,14 +57,10 @@ option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS}
-                            ${iDynTree_INCLUDE_DIRS}
-                            ${eigen_conversions_INCLUDE_DIRS}
+INCLUDE_DIRECTORIES(include ${eigen_conversions_INCLUDE_DIRS}
                             ${EIGEN3_INCLUDE_DIR}
                             ${PCL_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
-                            ${conversion_utils_YARP_INCLUDE_DIRS}
-                            ${idynutils2_INCLUDE_DIRS}
                             ${srdfdom_advr_INCLUDE_DIRS}
                             )
 
@@ -181,7 +177,6 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${qpOASES_LIBRARIES}
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
-                              ${conversion_utils_YARP_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
                               )

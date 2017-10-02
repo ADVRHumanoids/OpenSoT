@@ -9,11 +9,31 @@ FIND_PACKAGE(YARP QUIET)
 FIND_PACKAGE(iDynTree QUIET)
 FIND_PACKAGE(conversion_utils_YARP QUIET)
 FIND_PACKAGE(idynutils2 QUIET)
-find_package(test_utils)
-find_package(trajectory_utils)
-find_package(rviz_visual_tools)
+find_package(test_utils QUIET)
+find_package(trajectory_utils QUIET)
+find_package(rviz_visual_tools QUIET)
+find_package(ModelInterfaceIDYNUTILS QUIET)
 
 
+if(${YARP_FOUND})
+    set(TEST_INCLUDES ${YARP_INCLUDE_DIRS})
+endif()
+if(${iDynTree_FOUND} AND ${idynutils2_FOUND} AND ${ModelInterfaceIDYNUTILS_FOUND})
+    set(TEST_INCLUDES ${TEST_INCLUDES}
+                      ${iDynTree_INCLUDE_DIRS}
+                      ${idynutils2_INCLUDE_DIRS}
+                      ${ModelInterfaceIDYNUTILS_INCLUDE_DIRS})
+endif()
+if(${conversion_utils_YARP_FOUND} AND ${test_utils_FOUND})
+    set(TEST_INCLUDES ${TEST_INCLUDES}
+                      ${conversion_utils_YARP_INCLUDE_DIRS}
+                      ${test_utils_INCLUDE_DIRS})
+endif()
+if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
+    set(TEST_INCLUDES ${TEST_INCLUDES}
+                      ${trajectory_utils_INCLUDE_DIRS}
+                      ${rviz_visual_tools_INCLUDE_DIRS})
+endif()
 
 
 
@@ -54,9 +74,9 @@ if (NOT GTEST_FOUND)
     set(GTEST_BOTH_LIBRARIES gtest gtest_main)
 endif()
 
-find_package(ModelInterfaceIDYNUTILS REQUIRED)
 
-include_directories(${GTEST_INCLUDE_DIRS} ${ModelInterfaceIDYNUTILS_INCLUDE_DIRS} ${trajectory_utils_INCLUDE_DIRS})
+
+include_directories(${GTEST_INCLUDE_DIRS} ${TEST_INCLUDES})
 link_directories(${GTEST_LIB_DIRS})
 
 # add local include
