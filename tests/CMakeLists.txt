@@ -16,7 +16,7 @@ find_package(ModelInterfaceIDYNUTILS QUIET)
 
 
 if(${YARP_FOUND})
-    set(TEST_INCLUDES ${TEST_INCLUDES} ${YARP_INCLUDE_DIRS})
+    set(TEST_INCLUDES ${TEST_INCLUDES} ${YARP_INCLUDE_DIRS} )
 endif()
 if(${iDynTree_FOUND} AND ${idynutils2_FOUND} AND ${ModelInterfaceIDYNUTILS_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES}
@@ -98,7 +98,6 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
 #                      testQPOases_Sparse
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
-                      testFrictionConeForceConstraint ###YARP FREE
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
                       TestManipulabilityTask # YARP FREE
@@ -121,8 +120,9 @@ endif()
 
 if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                  testQPOases_StaticWalk_FloatingBase #YARP FREE
-                  testEigenSVD_StaticWalk_FloatingBase #YARP FREE
+                  testQPOases_StaticWalk_FloatingBase
+                  testEigenSVD_StaticWalk_FloatingBase
+                  testFrictionConeForceConstraint
     )
 endif()
 
