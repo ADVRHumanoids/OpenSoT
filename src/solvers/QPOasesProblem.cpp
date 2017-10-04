@@ -44,13 +44,16 @@ void QPOasesProblem::setDefaultOptions()
 {
     qpOASES::Options opt;
     opt.setToMPC();
-    opt.printLevel = qpOASES::PL_NONE;
+	opt.printLevel = qpOASES::PL_NONE;
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= _epsRegularisation;
-    opt.numRegularisationSteps = 2;
-    opt.numRefinementSteps = 1;
+    opt.numRegularisationSteps = 1;
+    opt.numRefinementSteps = 0;
     opt.enableFlippingBounds = qpOASES::BT_TRUE;
 
+	//opt.terminationTolerance = 1e-3;
+	//opt.boundTolerance = 1e-6;
+	
     opt.ensureConsistency();
 
     _problem->setOptions(opt);

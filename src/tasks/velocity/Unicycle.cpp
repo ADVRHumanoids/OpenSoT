@@ -62,9 +62,16 @@ Unicycle::Unicycle(std::string task_id,
 	_A.setZero(3, robot.getJointNum());
     _constA.setZero(3,6);
     /// HERE fill _constA
-	_constA(0,1)=0;
-	_constA(1,3)=0.0;
-	_constA(2,0)=1;
+// 	_constA(0,1)=1*0;
+// 	_constA(1,3)=1.0*0;
+// 	_constA(2,0)=1;
+// 	
+	_constA(0,1)=1*0;    // no Y motion		
+	_constA(1,3)=1.0*0; //no rotation around X
+	_constA(2,0)=1;    //just motion in X
+	
+	
+	
 	
 	_b.setZero(_A.rows());
 	_R.setZero(6,6);
@@ -106,7 +113,7 @@ void Unicycle::_update(const Eigen::VectorXd &x) {
 
     _A = _constA*_J;//_R*_J;
 	_AuxVector=_A.row(2);
-	_A.row(2)=_AuxVector+_Swheel*_signcorrection;
+	_A.row(2)=_AuxVector+_Swheel*-_signcorrection;
 
     /**********************************************************************/
 }
