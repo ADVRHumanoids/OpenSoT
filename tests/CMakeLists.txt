@@ -16,7 +16,7 @@ find_package(ModelInterfaceIDYNUTILS QUIET)
 
 
 if(${YARP_FOUND})
-    set(TEST_INCLUDES ${YARP_INCLUDE_DIRS})
+    set(TEST_INCLUDES ${TEST_INCLUDES} ${YARP_INCLUDE_DIRS})
 endif()
 if(${iDynTree_FOUND} AND ${idynutils2_FOUND} AND ${ModelInterfaceIDYNUTILS_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES}
@@ -111,10 +111,13 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
 #                      testLogger
 #                      #testPreviewer
 #                      testVelocityAllocation
-                       testCollisionUtils #YARP FREE
-                       testCartesianUtils #YARP FREE
+                        #YARP FREE
                        TestQPOases_SetActiveStack #YARP_FREE
 )
+
+if(${fcl_FOUND})
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils)
+endif()
 
 if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
