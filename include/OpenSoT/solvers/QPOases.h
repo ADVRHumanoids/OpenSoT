@@ -25,8 +25,7 @@
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include "QPOasesProblem.h"
-
-#define _CONSTRAINT_MATRIX_MAX_SIZE_ 100
+#include <OpenSoT/EigenDefinitions.h>
 
 namespace qpOASES {
     class SQProblem;
@@ -46,8 +45,8 @@ namespace OpenSoT{
     {
     public:
 	typedef boost::shared_ptr<QPOases_sot> Ptr;
-    typedef Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, _CONSTRAINT_MATRIX_MAX_SIZE_, _CONSTRAINT_MATRIX_MAX_SIZE_> Matrix;
-    typedef Eigen::Matrix<double, Eigen::Dynamic, 1, 0, _CONSTRAINT_MATRIX_MAX_SIZE_, 1> Vector;
+    typedef Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, _CONSTRAINT_MATRIX_MAX_SIZE_ROWS, _CONSTRAINT_MATRIX_MAX_SIZE_COLS> Matrix;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, 1, 0, _CONSTRAINT_MATRIX_MAX_SIZE_ROWS, 1> Vector;
         /**
          * @brief QPOases_sot constructor of the problem
          * @param stack_of_tasks a vector of tasks
@@ -112,11 +111,27 @@ namespace OpenSoT{
          */
         bool getOptions(const unsigned int i, qpOASES::Options& opt);
 
+        /**
+         * @brief setActiveStack select a stack to do not solve
+         * @param i stack index
+         * @param flag true or flase
+         */
+        void setActiveStack(const unsigned int i, const bool flag);
+
+        /**
+         * @brief activateAllStacks activate all stacks
+         */
+        void activateAllStacks();
+
     protected:
+        virtual void _log(XBot::MatLogger::Ptr logger);
+        
         /**
          * @brief _qp_stack_of_tasks vector of QPOases Problem
          */
         vector <QPOasesProblem> _qp_stack_of_tasks;
+
+        vector<bool> _active_stacks;
 
         /**
          * @brief _epsRegularisation regularisation factor for dumped least squares

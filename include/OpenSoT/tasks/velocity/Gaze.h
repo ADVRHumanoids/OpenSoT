@@ -53,6 +53,7 @@ public:
      * @param desiredGaze pose of the object to observe in base_link
      */
     void setGaze(const Eigen::MatrixXd& desiredGaze);
+    void setGaze(const KDL::Frame& desiredGaze);
 
     void setOrientationErrorGain(const double& orientationErrorGain);
 
@@ -120,6 +121,7 @@ private:
     KDL::Frame _bl_T_gaze_kdl;
     KDL::Frame _gaze_goal;
     Eigen::MatrixXd _tmpEigenM;
+    Eigen::MatrixXd _tmpEigenM2;
 
 
 

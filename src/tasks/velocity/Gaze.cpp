@@ -13,7 +13,7 @@ Gaze::Gaze(std::string task_id,
     _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, base_link)),
     _subtask(new SubTask(_cartesian_task, Indices::range(4,5))),
     _robot(robot), _gaze_T_obj(4,4), _tmp_vector(3), _bl_T_gaze_kdl(),
-    _gaze_goal(), _tmpEigenM(4,4)
+    _gaze_goal(), _tmpEigenM(4,4), _tmpEigenM2(4,4)
 {
     this->_update(x);
 }
@@ -23,8 +23,20 @@ Gaze::~Gaze()
 
 }
 
+void Gaze::setGaze(const KDL::Frame& desiredGaze)
+{
+    _tmpEigenM2.setIdentity(4,4);
+    //Here we just need the position part
+    _tmpEigenM2(0,3) = desiredGaze.p.x();
+    _tmpEigenM2(1,3) = desiredGaze.p.y();
+    _tmpEigenM2(2,3) = desiredGaze.p.z();
+    setGaze(_tmpEigenM2);
+}
+
 void Gaze::setGaze(const Eigen::MatrixXd &desiredGaze)
 {    
+    _tmpEigenM.setIdentity(4,4);
+
     if(_cartesian_task->baseLinkIsWorld())
         _robot.getPose(_distal_link, _bl_T_gaze_kdl);
     else

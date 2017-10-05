@@ -41,6 +41,15 @@ using namespace std;
         ConstraintPtr _bounds;
         ConstraintPtr _globalConstraints;
 
+        /**
+         * @brief _log implement this on the solver to log data
+         * @param logger a pointer to a MatLogger
+         */
+        virtual void _log(XBot::MatLogger::Ptr logger)
+        {
+
+        }
+
 
     public:
 
@@ -75,6 +84,15 @@ using namespace std;
          * @return  true if solved/solvable
          */
         virtual bool solve(Vector_type& solution) = 0;
+
+        /**
+         * @brief log logs data related to the solver
+         * @param logger a pointer to a MatLogger
+         */
+        virtual void log(XBot::MatLogger::Ptr logger)
+        {
+            _log(logger);
+        }
     };
  }
 

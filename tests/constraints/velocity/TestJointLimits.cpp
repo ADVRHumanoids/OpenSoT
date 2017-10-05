@@ -1,15 +1,12 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <advr_humanoids_common_utils/idynutils.h>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
-#include <yarp/sig/Vector.h>
-#include <yarp/math/Math.h>
+#include <XBotInterface/ModelInterface.h>
 #include <cmath>
 #define  s 1.0
 
-using namespace yarp::math;
-
-typedef idynutils2 iDynUtils;
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace {
 
@@ -20,20 +17,22 @@ class testJointLimits : public ::testing::Test {
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testJointLimits()  :
-      coman("coman",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
+  testJointLimits()
   {
+
+      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+      if(_model_ptr)
+          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+      else
+          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     // You can do set-up work for each test here.
 
-      qLowerBounds = coman.iDynTree_model.getJointBoundMin();
-      qUpperBounds = coman.iDynTree_model.getJointBoundMax();
-      zeros.resize(coman.iDynTree_model.getNrOfDOFs(),0.0);
+      _model_ptr->getJointLimits(qLowerBounds, qUpperBounds);
+      zeros.setZero(_model_ptr->getJointNum());
 
-      jointLimits = new OpenSoT::constraints::velocity::JointLimits(conversion_utils_YARP::toEigen(zeros),
-                                    conversion_utils_YARP::toEigen(qUpperBounds),
-                                    conversion_utils_YARP::toEigen(qLowerBounds));
+      jointLimits = new OpenSoT::constraints::velocity::JointLimits(zeros,
+                                    qUpperBounds, qLowerBounds);
   }
 
   virtual ~testJointLimits() {
@@ -50,8 +49,9 @@ class testJointLimits : public ::testing::Test {
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(zeros));
-      jointLimits->update(conversion_utils_YARP::toEigen(zeros));
+      _model_ptr->setJointPosition(zeros);
+      _model_ptr->update();
+      jointLimits->update(zeros);
   }
 
   virtual void TearDown() {
@@ -61,20 +61,20 @@ class testJointLimits : public ::testing::Test {
 
   // Objects declared here can be used by all tests in the test case for JointLimits.
 
-  iDynUtils coman;
+  XBot::ModelInterface::Ptr _model_ptr;
   OpenSoT::constraints::velocity::JointLimits* jointLimits;
 
-  yarp::sig::Vector qLowerBounds;
-  yarp::sig::Vector qUpperBounds;
-  yarp::sig::Vector zeros;
-  yarp::sig::Vector q;
+  Eigen::VectorXd qLowerBounds;
+  Eigen::VectorXd qUpperBounds;
+  Eigen::VectorXd zeros;
+  Eigen::VectorXd q;
 };
 
 TEST_F(testJointLimits, sizesAreCorrect) {
-    unsigned int x_size = coman.iDynTree_model.getNrOfDOFs();
+    unsigned int x_size = _model_ptr->getJointNum();
 
-    yarp::sig::Vector lowerBound = conversion_utils_YARP::toYARP(jointLimits->getLowerBound());
-    yarp::sig::Vector upperBound = conversion_utils_YARP::toYARP(jointLimits->getUpperBound());
+    Eigen::VectorXd lowerBound = jointLimits->getLowerBound();
+    Eigen::VectorXd upperBound = jointLimits->getUpperBound();
 
     EXPECT_EQ(x_size, lowerBound.size()) << "lowerBound should have size"
                                          << x_size;
@@ -105,7 +105,7 @@ TEST_F(testJointLimits, sizesAreCorrect) {
 // Tests that the Foo::getLowerBounds() are zero at the bounds
 TEST_F(testJointLimits, BoundsAreCorrect) {
 
-    yarp::sig::Vector q = zeros;
+    Eigen::VectorXd q = zeros;
     q[16] = qLowerBounds[16] - 1E-1;
     q[17] = qLowerBounds[17];
     q[19] = qUpperBounds[19];
@@ -115,10 +115,11 @@ TEST_F(testJointLimits, BoundsAreCorrect) {
     q[23] = (qUpperBounds[22] + qLowerBounds[22])/2 - 1E-1;
     q[24] = (qUpperBounds[22] + qLowerBounds[22])/2 + 1E-1;
 
-    coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(q));
-    jointLimits->update(conversion_utils_YARP::toEigen(q));
-    yarp::sig::Vector lowerBound = conversion_utils_YARP::toYARP(jointLimits->getLowerBound());
-    yarp::sig::Vector upperBound = conversion_utils_YARP::toYARP(jointLimits->getUpperBound());
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+    jointLimits->update(q);
+    Eigen::VectorXd lowerBound = jointLimits->getLowerBound();
+    Eigen::VectorXd upperBound = jointLimits->getUpperBound();
 
     /* checking a joint outside bounds
     EXPECT_DOUBLE_EQ(0.0, lowerBound[16]) << "Joint 16 below lower bound " << q[16] << std::endl
@@ -171,17 +172,17 @@ TEST_F(testJointLimits, BoundsAreCorrect) {
 }
 
 TEST_F(testJointLimits, boundsDoUpdate) {
-    yarp::sig::Vector q(zeros);
-    yarp::sig::Vector q_next(zeros.size(), 0.1);
+    Eigen::VectorXd q(zeros.size()); q.setZero(q.size());
+    Eigen::VectorXd q_next = Eigen::VectorXd::Constant(q.size(), 0.1);
 
-    jointLimits->update(conversion_utils_YARP::toEigen(q));
-    yarp::sig::Vector oldLowerBound = conversion_utils_YARP::toYARP(jointLimits->getLowerBound());
-    yarp::sig::Vector oldUpperBound = conversion_utils_YARP::toYARP(jointLimits->getUpperBound());
+    jointLimits->update(q);
+    Eigen::VectorXd oldLowerBound = jointLimits->getLowerBound();
+    Eigen::VectorXd oldUpperBound = jointLimits->getUpperBound();
 
-    jointLimits->update(conversion_utils_YARP::toEigen(q_next));
+    jointLimits->update(q_next);
 
-    yarp::sig::Vector newLowerBound = conversion_utils_YARP::toYARP(jointLimits->getLowerBound());
-    yarp::sig::Vector newUpperBound = conversion_utils_YARP::toYARP(jointLimits->getUpperBound());
+    Eigen::VectorXd newLowerBound = jointLimits->getLowerBound();
+    Eigen::VectorXd newUpperBound = jointLimits->getUpperBound();
 
     EXPECT_FALSE(oldLowerBound == newLowerBound);
     EXPECT_FALSE(oldUpperBound == newUpperBound);
