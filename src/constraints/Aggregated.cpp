@@ -30,6 +30,7 @@ Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     assert(bounds.size()>0);
+    _number_of_bounds = _bounds.size();
 
     this->checkSizes();
     /* calling update to generate bounds */
@@ -42,6 +43,7 @@ Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
     Constraint(concatenateConstraintsIds(bounds), x_size),
                _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
+    _number_of_bounds = _bounds.size();
     this->checkSizes();
     /* calling update to generate bounds */
     this->generateAll();
@@ -56,6 +58,8 @@ Aggregated::Aggregated(ConstraintPtr bound1,
 {
     _bounds.push_back(bound1);
     _bounds.push_back(bound2);
+
+    _number_of_bounds = _bounds.size();
 
     this->checkSizes();
     /* calling update to generate bounds */
@@ -87,8 +91,9 @@ void Aggregated::generateAll() {
     _bUpperBound.resize(0);
     _bLowerBound.resize(0);
 
-    if(_constraint_id.empty())
-        _constraint_id = concatenateConstraintsIds(getConstraintsList());
+    if(_constraint_id.empty() || _number_of_bounds != _bounds.size()){
+        _number_of_bounds = _bounds.size();
+        _constraint_id = concatenateConstraintsIds(getConstraintsList());}
 
     /* iterating on all bounds.. */
     for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
