@@ -169,7 +169,6 @@ if(TARGET qpOASES-ext)
 endif()
 
 
-# we now add the YARP libraries to our project.
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${srdfdom_advr_LIBRARIES}
                               ${eigen_conversions_LIBRARIES}

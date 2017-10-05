@@ -16,7 +16,7 @@ find_package(ModelInterfaceIDYNUTILS QUIET)
 
 
 if(${YARP_FOUND})
-    set(TEST_INCLUDES ${YARP_INCLUDE_DIRS})
+    set(TEST_INCLUDES ${TEST_INCLUDES} ${YARP_INCLUDE_DIRS} )
 endif()
 if(${iDynTree_FOUND} AND ${idynutils2_FOUND} AND ${ModelInterfaceIDYNUTILS_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES}
@@ -98,7 +98,6 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
 #                      testQPOases_Sparse
 #                      testQPOases_SubTask
 #                      testQPOases_VelocityAllocation
-                      testFrictionConeForceConstraint ###YARP FREE
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
                       TestManipulabilityTask # YARP FREE
@@ -111,15 +110,19 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
 #                      testLogger
 #                      #testPreviewer
 #                      testVelocityAllocation
-                       testCollisionUtils #YARP FREE
-                       testCartesianUtils #YARP FREE
+                        #YARP FREE
                        TestQPOases_SetActiveStack #YARP_FREE
 )
 
+if(${fcl_FOUND})
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils)
+endif()
+
 if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                  testQPOases_StaticWalk_FloatingBase #YARP FREE
-                  testEigenSVD_StaticWalk_FloatingBase #YARP FREE
+                  testQPOases_StaticWalk_FloatingBase
+                  testEigenSVD_StaticWalk_FloatingBase
+                  testFrictionConeForceConstraint
     )
 endif()
 
@@ -203,12 +206,12 @@ if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testEigenSVD_StaticWalk_FloatingBase GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
-endif()
 
-ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
-TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
-add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
-add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
+    ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
+    TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
+    add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
+endif()
 
 ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
 TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${PCL_LIBRARIES})
@@ -235,10 +238,12 @@ TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
 add_dependencies(testSubTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 
-ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
-TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
-add_dependencies(testCollisionUtils GTest-ext OpenSoT)
-add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
+if(${fcl_FOUND})
+    ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
+    TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
+    add_dependencies(testCollisionUtils GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
+endif()
 
 ADD_EXECUTABLE(testCartesianUtils utils/cartesian_utils_test.cpp)
 TARGET_LINK_LIBRARIES(testCartesianUtils ${TestLibs})
