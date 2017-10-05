@@ -47,10 +47,8 @@ void CapturePointConstraint::update(const Eigen::VectorXd &x)
 {
     _cartesian_position_cstr->update(x);
     _cartesian_position_cstr->getCurrentPosition(com);
-    std::cout<<"com: "<<com<<std::endl;
 
     w = sqrt(fabs(com[2])/9.81)*(1.0/_dT);
-    std::cout<<"w: "<<w<<std::endl;
 
     _Aineq = w*_cartesian_position_cstr->getAineq();
     _bUpperBound = _cartesian_position_cstr->getbUpperBound();
