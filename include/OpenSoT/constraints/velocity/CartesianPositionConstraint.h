@@ -77,6 +77,8 @@
                                             const double boundScaling = 1.0);
 
                 void update(const Eigen::VectorXd &x);
+
+                void getCurrentPosition(Eigen::VectorXd& current_position);
             };
         }
     }

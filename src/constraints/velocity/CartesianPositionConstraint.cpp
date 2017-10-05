@@ -64,6 +64,11 @@ CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd& 
     this->update(x);
 }
 
+void CartesianPositionConstraint::getCurrentPosition(Eigen::VectorXd& current_position)
+{
+    current_position = currentPosition;
+}
+
 void CartesianPositionConstraint::update(const Eigen::VectorXd &x) {
 
     if(_is_Cartesian){
