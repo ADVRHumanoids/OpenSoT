@@ -64,6 +64,15 @@ CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd& 
     this->update(x);
 }
 
+void CartesianPositionConstraint::setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian)
+{
+    _A_Cartesian = A_Cartesian;
+    _b_Cartesian = b_Cartesian;
+
+    assert(_A_Cartesian.rows() == _b_Cartesian.rows() && "A and b must have the same size");
+    assert(_A_Cartesian.cols() == 3 && "A must have 3 columns");
+}
+
 void CartesianPositionConstraint::getCurrentPosition(Eigen::VectorXd& current_position)
 {
     current_position = currentPosition;

@@ -78,7 +78,19 @@
 
                 void update(const Eigen::VectorXd &x);
 
+                /**
+                 * @brief getCurrentPosition return the current Cartesian position of the bounded Task
+                 * @param current_position a 3x1 position vector
+                 */
                 void getCurrentPosition(Eigen::VectorXd& current_position);
+
+                /**
+                 * @brief setAbCartesian update with new A_Cartesian and b_Cartesian
+                 * @param A_Cartesian new matrix nx3 specifying the cartesian limits
+                 * @param b_Cartesian new vector of size n specifying the cartesian limits
+                 */
+                void setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian);
+
             };
         }
     }

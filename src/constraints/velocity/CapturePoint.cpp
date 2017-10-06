@@ -39,6 +39,7 @@ CapturePointConstraint::CapturePointConstraint(const Eigen::VectorXd &x,
 
     _cartesian_position_cstr.reset(new CartesianPositionConstraint(x, comTask, _A_Cartesian,
                                                                    _b_Cartesian, boundScaling));
+    w = 1.0;
     com.setZero(3);
     this->update(x);
 }
@@ -53,4 +54,18 @@ void CapturePointConstraint::update(const Eigen::VectorXd &x)
     _Aineq = w*_cartesian_position_cstr->getAineq();
     _bUpperBound = _cartesian_position_cstr->getbUpperBound();
     _bLowerBound = _cartesian_position_cstr->getbLowerBound();
+}
+
+void CapturePointConstraint::setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian)
+{
+    assert(A_Cartesian.rows() == b_Cartesian.rows() && "A and b must have the same size");
+    assert(A_Cartesian.cols() == 2 && "A must have 2 columns");
+
+    _A_Cartesian.setZero(A_Cartesian.rows(),3);
+    _A_Cartesian.block(0,0,A_Cartesian.rows(),2) = A_Cartesian;
+
+    _b_Cartesian.setZero(b_Cartesian.size());
+    _b_Cartesian = b_Cartesian;
+
+    _cartesian_position_cstr->setAbCartesian(_A_Cartesian, _b_Cartesian);
 }

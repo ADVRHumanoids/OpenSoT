@@ -23,6 +23,16 @@
 namespace OpenSoT {
    namespace constraints {
        namespace velocity {
+       /**
+         * @brief The CapturePointConstraint class implements a constraint on the capture point:
+         *
+         *  \f$ w\mathbf{A}_{\text{Cartesian}}\mathbf{J}_{\text{CoM}}\mathbf{\dot{q}} \leq \mathbf{b}_{\text{Cartesian}} -
+         *  \mathbf{A}_{\text{Cartesian}}\mathbf{x}_{\text{CoM}} \f$
+         *
+         * where \f$w = \sqrt{\frac{z_{\text{CoM}}}{g}} \f$
+         *
+         * The Constraint is based on the CartesianPositionConstraint
+         */
         class CapturePointConstraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
             typedef boost::shared_ptr<CapturePointConstraint> Ptr;
@@ -36,12 +46,30 @@ namespace OpenSoT {
             Eigen::MatrixXd _A_Cartesian;
             Eigen::VectorXd _b_Cartesian;
         public:
+            /**
+             * @brief CapturePointConstraint implement a constraint on the Capture Point
+             * @param x the current joint position of the robot
+             * @param comTask a com task
+             * @param A_Cartesian a matrix nx2 specifying the cartesian limits
+             * @param b_Cartesian a vector of size n specifying the cartesian limits
+             * @param dT control loop
+             * @param boundScaling a parameter which is inversely proportional to the number of steps
+             * needed to reach the cartesian task limits.
+             */
             CapturePointConstraint(const Eigen::VectorXd& x,
                                    OpenSoT::tasks::velocity::CoM::Ptr comTask,
                                    const Eigen::MatrixXd& A_Cartesian,
                                    const Eigen::VectorXd& b_Cartesian,
                                    const double dT,
                                    const double boundScaling = 1.0);
+
+            /**
+             * @brief setAbCartesian update with new A_Cartesian and b_Cartesian
+             * @param A_Cartesian new matrix nx2 specifying the cartesian limits
+             * @param b_Cartesian new vector of size n specifying the cartesian limits
+             */
+            void setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian);
+
             void update(const Eigen::VectorXd &x);
         };
        }
