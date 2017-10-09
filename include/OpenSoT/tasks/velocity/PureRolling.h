@@ -14,6 +14,9 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details
+ * 
+ * Acknowledgment: this task implementation is inspired from the insight provided by 
+ * Malgorzata Kamedula (malgorzata.kamedula@iit.it)
 */
 
 #ifndef __OPENSOT_TASKS_VELOCITY_PURE_ROLLING_H__
