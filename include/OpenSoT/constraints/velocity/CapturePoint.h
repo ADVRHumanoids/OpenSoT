@@ -45,6 +45,10 @@ namespace OpenSoT {
 
             Eigen::MatrixXd _A_Cartesian;
             Eigen::VectorXd _b_Cartesian;
+
+            Eigen::MatrixXd _H;
+            Eigen::MatrixXd _H2;
+            XBot::ModelInterface& _robot;
         public:
             /**
              * @brief CapturePointConstraint implement a constraint on the Capture Point
@@ -58,6 +62,7 @@ namespace OpenSoT {
              */
             CapturePointConstraint(const Eigen::VectorXd& x,
                                    OpenSoT::tasks::velocity::CoM::Ptr comTask,
+                                   XBot::ModelInterface& robot,
                                    const Eigen::MatrixXd& A_Cartesian,
                                    const Eigen::VectorXd& b_Cartesian,
                                    const double dT,

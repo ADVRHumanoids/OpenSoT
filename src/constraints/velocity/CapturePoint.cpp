@@ -21,12 +21,14 @@ using namespace OpenSoT::constraints::velocity;
 
 CapturePointConstraint::CapturePointConstraint(const Eigen::VectorXd &x,
                                                OpenSoT::tasks::velocity::CoM::Ptr comTask,
+                                               XBot::ModelInterface& robot,
                                                const Eigen::MatrixXd &A_Cartesian,
                                                const Eigen::VectorXd &b_Cartesian,
                                                const double dT,
                                                const double boundScaling):
     Constraint("capture_point_constraint", x.size()),
-    _dT(dT)
+    _dT(dT),
+    _robot(robot)
 {
     assert(A_Cartesian.rows() == b_Cartesian.rows() && "A and b must have the same size");
     assert(A_Cartesian.cols() == 2 && "A must have 2 columns");
@@ -41,6 +43,9 @@ CapturePointConstraint::CapturePointConstraint(const Eigen::VectorXd &x,
                                                                    _b_Cartesian, boundScaling));
     w = 1.0;
     com.setZero(3);
+
+    _H.resize(6, _x_size);
+    _H2.resize(2, _x_size);
     this->update(x);
 }
 
@@ -51,7 +56,13 @@ void CapturePointConstraint::update(const Eigen::VectorXd &x)
 
     w = sqrt(fabs(com[2])/9.81)*(1.0/_dT);
 
-    _Aineq = w*_cartesian_position_cstr->getAineq();
+    _robot.getCentroidalMomentumMatrix(_H);
+
+    _H = (w/(_robot.getMass()*com[2]))*_H;
+    _H2<<_H.block(4,0,1,_x_size),
+         -_H.block(3,0,1,_x_size);
+
+    _Aineq = w*_cartesian_position_cstr->getAineq() + _A_Cartesian.block(0,0,_A_Cartesian.rows(),2)*_H2;
     _bUpperBound = _cartesian_position_cstr->getbUpperBound();
     _bLowerBound = _cartesian_position_cstr->getbLowerBound();
 }
