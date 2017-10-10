@@ -49,9 +49,13 @@
              * You can see an example in @ref example_cartesian.cpp
              */
             class Cartesian : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+                
             public:
+                
                 typedef boost::shared_ptr<Cartesian> Ptr;
+                
             protected:
+                
                 XBot::ModelInterface& _robot;
 
                 std::string _distal_link;
@@ -182,6 +186,13 @@
                  * @return false if the base link does not exists
                  */
                 bool setBaseLink(const std::string& base_link);
+                
+                /**
+                 * @brief Changes the distal link of the task. It also resets the reference accorting to the currento robot pose.
+                 * @param distal_link the new distal link
+                 * @return false if the distal link does not exists
+                 */
+                bool setDistalLink(const std::string& distal_link);
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

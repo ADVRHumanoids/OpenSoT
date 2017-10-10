@@ -259,6 +259,32 @@ bool Cartesian::setBaseLink(const std::string& base_link)
     return true;
 }
 
+bool OpenSoT::tasks::velocity::Cartesian::setDistalLink(const std::string& distal_link)
+{
+    if(distal_link.compare(_distal_link) == 0){
+        return true;
+    }
+
+    if(distal_link.compare("world") == 0){
+        std::cerr << "Error in " << __func__ << ": cannot pass world as distal link." << std::endl;
+        return false;
+    }
+    
+    Eigen::Affine3d base_T_distal;
+    
+    if(!_robot.getPose(distal_link, _base_link, base_T_distal)){
+        std::cerr << "Error in " << __func__ << ": base link -> distal link transform cannot be obtained." << std::endl;
+        return false;
+    }
+    
+    _distal_link = distal_link;
+    
+    setReference(base_T_distal.matrix());
+
+    return true;
+}
+
+
 bool OpenSoT::tasks::velocity::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
