@@ -28,7 +28,8 @@ CapturePointConstraint::CapturePointConstraint(const Eigen::VectorXd &x,
                                                const double boundScaling):
     Constraint("capture_point_constraint", x.size()),
     _dT(dT),
-    _robot(robot)
+    _robot(robot),
+    _add_angular_momentum(false)
 {
     assert(A_Cartesian.rows() == b_Cartesian.rows() && "A and b must have the same size");
     assert(A_Cartesian.cols() == 2 && "A must have 2 columns");
@@ -49,6 +50,11 @@ CapturePointConstraint::CapturePointConstraint(const Eigen::VectorXd &x,
     this->update(x);
 }
 
+void CapturePointConstraint::computeAngularMomentumCorrection(const bool compute)
+{
+    _add_angular_momentum = compute;
+}
+
 void CapturePointConstraint::update(const Eigen::VectorXd &x)
 {
     _cartesian_position_cstr->update(x);
@@ -56,13 +62,19 @@ void CapturePointConstraint::update(const Eigen::VectorXd &x)
 
     w = sqrt(fabs(com[2])/9.81)*(1.0/_dT);
 
-    _robot.getCentroidalMomentumMatrix(_H);
+    if(_add_angular_momentum)
+    {
+        _robot.getCentroidalMomentumMatrix(_H);
 
-    _H = (w/(_robot.getMass()*com[2]))*_H;
-    _H2<<_H.block(4,0,1,_x_size),
-         -_H.block(3,0,1,_x_size);
+        _H = (w/(_robot.getMass()*com[2]))*_H;
+        _H2<<_H.block(4,0,1,_x_size),
+             -_H.block(3,0,1,_x_size);
 
-    _Aineq = w*_cartesian_position_cstr->getAineq() + _A_Cartesian.block(0,0,_A_Cartesian.rows(),2)*_H2;
+        _Aineq = w*_cartesian_position_cstr->getAineq() + _A_Cartesian.block(0,0,_A_Cartesian.rows(),2)*_H2;
+    }
+    else
+        _Aineq = w*_cartesian_position_cstr->getAineq();
+
     _bUpperBound = _cartesian_position_cstr->getbUpperBound();
     _bLowerBound = _cartesian_position_cstr->getbLowerBound();
 }

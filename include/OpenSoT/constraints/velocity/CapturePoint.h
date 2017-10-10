@@ -31,7 +31,18 @@ namespace OpenSoT {
          *
          * where \f$w = \sqrt{\frac{z_{\text{CoM}}}{g}} \f$
          *
-         * The Constraint is based on the CartesianPositionConstraint
+         * The Constraint is based on the CartesianPositionConstraint.
+         *
+         * If computeAngularMomentumCorrection(true), a correction proportional to the centroidal angular
+         * momentum is added to the constraint:
+         *
+         * w\mathbf{A}_{\text{Cartesian}} \left( \mathbf{J}_{\text{CoM}}\mathbf{\dot{q}} +
+         * n\times \frac{1}{Mz_{\text{CoM}}} \mathbf{L} \mathbf{\dot{q}} \right)
+         *
+         * This idea comes from the paper:
+         * "Capture Point: A Step toward Humanoid Push Recovery", by Jerry Pratt, John Carff, Sergey
+         * Drakunov Ambarish Goswami
+         *
          */
         class CapturePointConstraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
@@ -49,6 +60,8 @@ namespace OpenSoT {
             Eigen::MatrixXd _H;
             Eigen::MatrixXd _H2;
             XBot::ModelInterface& _robot;
+
+            bool _add_angular_momentum;
         public:
             /**
              * @brief CapturePointConstraint implement a constraint on the Capture Point
@@ -75,7 +88,18 @@ namespace OpenSoT {
              */
             void setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian);
 
+            /**
+             * @brief update constraint
+             * @param x input vector state
+             */
             void update(const Eigen::VectorXd &x);
+
+            /**
+             * @brief computeAngularMomentumCorrection if true, the computation of the centroidal angular
+             * momentum correction is added to the constraint
+             * @param compute true or false (dafult is false)
+             */
+            void computeAngularMomentumCorrection(const bool compute);
         };
        }
    }
