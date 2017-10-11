@@ -6,6 +6,6 @@
 //#include <OpenSoT/constraints/velocity/Dynamics.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
+// #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 
 #endif
