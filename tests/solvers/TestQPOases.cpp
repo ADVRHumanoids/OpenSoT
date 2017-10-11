@@ -3,6 +3,8 @@
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+
 #include <OpenSoT/constraints/velocity/all.h>
 #include <OpenSoT/solvers/QPOasesProblem.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
