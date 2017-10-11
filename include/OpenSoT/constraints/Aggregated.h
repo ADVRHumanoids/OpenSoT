@@ -55,9 +55,10 @@
                 UNILATERAL_TO_BILATERAL = 0x100
             };
 
-        private:
+        protected:
 
             std::list< ConstraintPtr > _bounds;
+            unsigned int _number_of_bounds;
             unsigned int _aggregationPolicy;
 
             void checkSizes();
@@ -75,6 +76,8 @@
                 a.conservativeResize(a.rows()+b.rows());
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
             }
+
+            virtual void _log(XBot::MatLogger::Ptr logger);
 
         public:
             /**

@@ -30,6 +30,7 @@ Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
     assert(bounds.size()>0);
+    _number_of_bounds = _bounds.size();
 
     this->checkSizes();
     /* calling update to generate bounds */
@@ -42,6 +43,7 @@ Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
     Constraint(concatenateConstraintsIds(bounds), x_size),
                _bounds(bounds), _aggregationPolicy(aggregationPolicy)
 {
+    _number_of_bounds = _bounds.size();
     this->checkSizes();
     /* calling update to generate bounds */
     this->generateAll();
@@ -51,11 +53,13 @@ Aggregated::Aggregated(ConstraintPtr bound1,
                        ConstraintPtr bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
-    Constraint(bound1->getConstraintID() + "+" + bound2->getConstraintID(),
+    Constraint(bound1->getConstraintID() + "plus" + bound2->getConstraintID(),
                x_size), _aggregationPolicy(aggregationPolicy)
 {
     _bounds.push_back(bound1);
     _bounds.push_back(bound2);
+
+    _number_of_bounds = _bounds.size();
 
     this->checkSizes();
     /* calling update to generate bounds */
@@ -86,6 +90,10 @@ void Aggregated::generateAll() {
     _Aineq.resize(0,_x_size);
     _bUpperBound.resize(0);
     _bLowerBound.resize(0);
+
+    if(_constraint_id.empty() || _number_of_bounds != _bounds.size()){
+        _number_of_bounds = _bounds.size();
+        _constraint_id = concatenateConstraintsIds(getConstraintsList());}
 
     /* iterating on all bounds.. */
     for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
@@ -235,7 +243,13 @@ const std::string Aggregated::concatenateConstraintsIds(const std::list<Constrai
     for(std::list<ConstraintPtr>::const_iterator i = constraints.begin(); i != constraints.end(); ++i) {
         concatenatedId += (*i)->getConstraintID();
         if(--constraintSize > 0)
-            concatenatedId += "+";
+            concatenatedId += "plus";
     }
     return concatenatedId;
+}
+
+void Aggregated::_log(XBot::MatLogger::Ptr logger)
+{
+    for(auto bound : _bounds)
+        bound->log(logger);
 }

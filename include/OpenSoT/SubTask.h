@@ -63,6 +63,8 @@
             a.segment(a.rows()-b.rows(),b.rows())<<b;
         }
 
+        virtual void _log(XBot::MatLogger::Ptr logger);
+
     public:
         /**
          * @brief SubTask create a SubTask object by specifying the father Task through a pointer,

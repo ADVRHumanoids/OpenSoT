@@ -20,7 +20,7 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
-
+ #include <OpenSoT/tasks/velocity/CoM.h>
 
 #define BOUND_SCALING 0.01
 
@@ -46,9 +46,13 @@
                 typedef boost::shared_ptr<CartesianPositionConstraint> Ptr;
             private:
                 OpenSoT::tasks::velocity::Cartesian::Ptr _cartesianTask;
+                OpenSoT::tasks::velocity::CoM::Ptr _comTask;
                 Eigen::MatrixXd _A_Cartesian;
                 Eigen::VectorXd _b_Cartesian;
                 double _boundScaling;
+                bool _is_Cartesian;
+                Eigen::MatrixXd J;
+                Eigen::VectorXd currentPosition;
 
             public:
                 /**
@@ -66,7 +70,27 @@
                                              const Eigen::VectorXd& b_Cartesian,
                                             const double boundScaling = 1.0);
 
+                CartesianPositionConstraint(const Eigen::VectorXd& x,
+                                             OpenSoT::tasks::velocity::CoM::Ptr comTask,
+                                             const Eigen::MatrixXd& A_Cartesian,
+                                             const Eigen::VectorXd& b_Cartesian,
+                                            const double boundScaling = 1.0);
+
                 void update(const Eigen::VectorXd &x);
+
+                /**
+                 * @brief getCurrentPosition return the current Cartesian position of the bounded Task
+                 * @param current_position a 3x1 position vector
+                 */
+                void getCurrentPosition(Eigen::VectorXd& current_position);
+
+                /**
+                 * @brief setAbCartesian update with new A_Cartesian and b_Cartesian
+                 * @param A_Cartesian new matrix nx3 specifying the cartesian limits
+                 * @param b_Cartesian new vector of size n specifying the cartesian limits
+                 */
+                void setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian);
+
             };
         }
     }

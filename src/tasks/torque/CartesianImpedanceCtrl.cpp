@@ -28,11 +28,11 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
                      const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
                      std::string distal_link,
-                     std::string base_link) :
+                     std::string base_link, const std::list<unsigned int> rowIndices) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size),
-     inv(Eigen::MatrixXd::Identity(x.size(),x.size()))
+     _rows_indices(rowIndices)
 {   
     _desiredTwist.setZero(_desiredTwist.size());
 
@@ -54,11 +54,31 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
     _D.resize(6, 6);
     _D.setIdentity(_D.rows(), _D.cols()); _D = 1.0*_D;
 
+    _tmpA.resize(6, _x_size);
+    _tmpA.setZero(6, _x_size);
+
+    _tmpF.resize(6);
+    _tmpF.setZero(6);
+
+    _tmp_vec.resize(_x_size);
+    _tmp_vec.setZero(_x_size);
+
+    if(rowIndices.size() > 0)
+    {
+        _A.resize(rowIndices.size(), _x_size);
+        _F.resize(rowIndices.size());
+
+        _W.resize(rowIndices.size(), rowIndices.size());
+        _W.setIdentity(rowIndices.size(), rowIndices.size());
+    }
+    else
+    {
+        _W.resize(6, 6);
+        _W.setIdentity(6, 6);
+    }
+
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
-
-    _W.resize(_A.rows(), _A.rows());
-    _W.setIdentity(_W.rows(), _W.cols());
 
     _lambda = 1.0;
 
@@ -69,23 +89,41 @@ CartesianImpedanceCtrl::~CartesianImpedanceCtrl()
 {
 }
 
+void CartesianImpedanceCtrl::generateA(const Eigen::MatrixXd &_tmpA)
+{
+    for(unsigned int i = 0; i < _rows_indices.asVector().size(); ++i)
+        _A.row(i) = _tmpA.row(_rows_indices.asVector()[i]);
+}
+
+void CartesianImpedanceCtrl::generateF(const Eigen::VectorXd &_tmpF)
+{
+    for(unsigned int i = 0; i < _rows_indices.asVector().size(); ++i)
+        _F.row(i) = _tmpF.row(_rows_indices.asVector()[i]);
+}
+
 void CartesianImpedanceCtrl::_update(const Eigen::VectorXd &x) {
 
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world) {
-        bool res =_robot.getJacobian(_distal_link,_A);
+        bool res =_robot.getJacobian(_distal_link, _tmpJ);
         assert(res);
     } else{
-        bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _A);
+        bool res = _robot.getRelativeJacobian(_distal_link, _base_link, _tmpJ);
         assert(res);
     }
+
+    if(_rows_indices.asVector().size() > 0)
+        generateA(_tmpJ);
+    else
+        _A = _tmpJ;
+
+
     _J = _A;
 
     if (_use_inertia_matrix)
     {
-        _robot.getInertiaMatrix(_M);
-        inv.compute(_M, _Minv);
+        _robot.getInertiaInverse(_Minv);
         _A.noalias() = _J*_Minv;
     }
 
@@ -127,19 +165,19 @@ void CartesianImpedanceCtrl::setStiffnessDamping(const Eigen::MatrixXd &Stiffnes
     setDamping(Damping);
 }
 
-Eigen::MatrixXd CartesianImpedanceCtrl::getStiffness()
+void CartesianImpedanceCtrl::getStiffness(Eigen::MatrixXd &Stiffness)
 {
-    return _K;
+    Stiffness = _K;
 }
 
-Eigen::MatrixXd CartesianImpedanceCtrl::getDamping(){
-    return _D;
+void CartesianImpedanceCtrl::getDamping(Eigen::MatrixXd &Damping){
+    Damping = _D;
 }
 
 void CartesianImpedanceCtrl::getStiffnessDamping(Eigen::MatrixXd &Stiffness, Eigen::MatrixXd &Damping)
 {
-    Stiffness = getStiffness();
-    Damping = getDamping();
+    getStiffness(Stiffness);
+    getDamping(Damping);
 }
 
 void CartesianImpedanceCtrl::setReference(const Eigen::MatrixXd& desiredPose) {
@@ -166,7 +204,7 @@ void CartesianImpedanceCtrl::setReference(const KDL::Frame& desiredPose)
 }
 
 void CartesianImpedanceCtrl::setReference(const Eigen::MatrixXd &desiredPose,
-                                                       const Eigen::VectorXd &desiredTwist)
+                                          const Eigen::VectorXd &desiredTwist)
 {
     assert(desiredTwist.size() == 6);
     assert(desiredPose.rows() == 4);
@@ -177,8 +215,42 @@ void CartesianImpedanceCtrl::setReference(const Eigen::MatrixXd &desiredPose,
     this->update_b();
 }
 
-const Eigen::MatrixXd CartesianImpedanceCtrl::getReference() const {
-    return _desiredPose;
+void CartesianImpedanceCtrl::setReference(const KDL::Frame& desiredPose,
+                                          const KDL::Twist& desiredTwist)
+{
+    _desiredPose.setIdentity(4,4);
+    _desiredPose(0,0) = desiredPose.M(0,0); _desiredPose(0,1) = desiredPose.M(0,1); _desiredPose(0,2) = desiredPose.M(0,2);
+    _desiredPose(1,0) = desiredPose.M(1,0); _desiredPose(1,1) = desiredPose.M(1,1); _desiredPose(1,2) = desiredPose.M(1,2);
+    _desiredPose(2,0) = desiredPose.M(2,0); _desiredPose(2,1) = desiredPose.M(2,1); _desiredPose(2,2) = desiredPose.M(2,2);
+    _desiredPose(0,3) = desiredPose.p.x();
+    _desiredPose(1,3) = desiredPose.p.y();
+    _desiredPose(2,3) = desiredPose.p.z();
+
+    _desiredTwist.setZero(6);
+    _desiredTwist[0] = desiredTwist.vel.x();
+    _desiredTwist[1] = desiredTwist.vel.y();
+    _desiredTwist[2] = desiredTwist.vel.z();
+    _desiredTwist[3] = desiredTwist.rot.x();
+    _desiredTwist[4] = desiredTwist.rot.y();
+    _desiredTwist[5] = desiredTwist.rot.z();
+
+    this->update_b();
+}
+
+const void CartesianImpedanceCtrl::getReference(Eigen::MatrixXd& desired_pose) const {
+    desired_pose = _desiredPose;
+}
+
+const void CartesianImpedanceCtrl::getReference(KDL::Frame& desired_pose) const {
+    desired_pose.Identity();
+
+    desired_pose.p.x(_desiredPose(0,3));
+    desired_pose.p.y(_desiredPose(1,3));
+    desired_pose.p.z(_desiredPose(2,3));
+
+    desired_pose.M(0,0) = _desiredPose(0,0); desired_pose.M(0,1) = _desiredPose(0,1); desired_pose.M(0,2) = _desiredPose(0,2);
+    desired_pose.M(1,0) = _desiredPose(1,0); desired_pose.M(1,1) = _desiredPose(1,1); desired_pose.M(1,2) = _desiredPose(1,2);
+    desired_pose.M(2,0) = _desiredPose(2,0); desired_pose.M(2,1) = _desiredPose(2,1); desired_pose.M(2,2) = _desiredPose(2,2);
 }
 
 void CartesianImpedanceCtrl::getReference(Eigen::MatrixXd &desiredPose,
@@ -188,17 +260,34 @@ void CartesianImpedanceCtrl::getReference(Eigen::MatrixXd &desiredPose,
     desiredTwist = _desiredTwist;
 }
 
-const Eigen::MatrixXd CartesianImpedanceCtrl::getActualPose() const
+void CartesianImpedanceCtrl::getReference(KDL::Frame& desiredPose,
+                                          KDL::Twist& desiredTwist) const
 {
-    return _actualPose;
+    getReference(desiredPose);
+    desiredTwist.vel.x(_desiredTwist[0]);
+    desiredTwist.vel.y(_desiredTwist[1]);
+    desiredTwist.vel.z(_desiredTwist[2]);
+    desiredTwist.rot.x(_desiredTwist[3]);
+    desiredTwist.rot.y(_desiredTwist[4]);
+    desiredTwist.rot.z(_desiredTwist[5]);
 }
 
-const KDL::Frame CartesianImpedanceCtrl::getActualPoseKDL() const
+const void CartesianImpedanceCtrl::getActualPose(Eigen::MatrixXd &actual_pose) const
 {
-    KDL::Frame actualPoseKDL;
-    Eigen::Affine3d tmp; tmp.matrix() = _actualPose;
-    tf::transformEigenToKDL(tmp, actualPoseKDL);
-    return actualPoseKDL;
+    actual_pose = _actualPose;
+}
+
+const void CartesianImpedanceCtrl::getActualPose(KDL::Frame& actual_pose) const
+{
+    actual_pose.Identity();
+
+    actual_pose.p.x(_actualPose(0,3));
+    actual_pose.p.y(_actualPose(1,3));
+    actual_pose.p.z(_actualPose(2,3));
+
+    actual_pose.M(0,0) = _actualPose(0,0); actual_pose.M(0,1) = _actualPose(0,1); actual_pose.M(0,2) = _actualPose(0,2);
+    actual_pose.M(1,0) = _actualPose(1,0); actual_pose.M(1,1) = _actualPose(1,1); actual_pose.M(1,2) = _actualPose(1,2);
+    actual_pose.M(2,0) = _actualPose(2,0); actual_pose.M(2,1) = _actualPose(2,1); actual_pose.M(2,2) = _actualPose(2,2);
 }
 
 const std::string CartesianImpedanceCtrl::getDistalLink() const
@@ -216,18 +305,18 @@ const bool CartesianImpedanceCtrl::baseLinkIsWorld() const
     return _base_link_is_world;
 }
 
-Eigen::VectorXd CartesianImpedanceCtrl::getSpringForce()
+void CartesianImpedanceCtrl::getSpringForce(Eigen::VectorXd &spring_force)
 {
-    _spring_force.resize(positionError.size()+orientationError.size());
-    _spring_force<<positionError, -1.0*orientationError;
-    return _K*_spring_force;
+    spring_force.resize(positionError.size()+orientationError.size());
+    spring_force<<positionError, -1.0*orientationError;
+    spring_force = _K*spring_force;
 }
 
-Eigen::VectorXd CartesianImpedanceCtrl::getDamperForce()
+void CartesianImpedanceCtrl::getDamperForce(Eigen::VectorXd &damper_force)
 {
-    _damping_force.resize(linearVelocityError.size()+orientationVelocityError.size());
-    _damping_force<<linearVelocityError, orientationVelocityError;
-    return _D*_damping_force;
+    damper_force.resize(linearVelocityError.size()+orientationVelocityError.size());
+    damper_force<<linearVelocityError, orientationVelocityError;
+    damper_force = _D*damper_force;
 }
 
 void CartesianImpedanceCtrl::update_b() {
@@ -237,14 +326,22 @@ void CartesianImpedanceCtrl::update_b() {
 
 
     _robot.getJointVelocity(_qdot);
-    _xdot = _J*_qdot;
+    _xdot = _tmpJ*_qdot;
     linearVelocityError = _desiredTwist.segment(0,3) - _xdot.segment(0,3);
     orientationVelocityError = _desiredTwist.segment(3,3) - _xdot.segment(3,3);
 
     /// TODO: add -Mc*(ddx_d - Jdot*qdot)
-    _F = getDamperForce() + getSpringForce();
+    getDamperForce(_damping_force);
+    getSpringForce(_spring_force);
+    _tmpF = _damping_force + _spring_force;
 
-    _b = _A*_J.transpose()*_F;
+    if(_rows_indices.size() > 0)
+        generateF(_tmpF);
+    else
+        _F = _tmpF;
+
+    _tmp_vec = _J.transpose()*_F;
+    _b = _A*_tmp_vec;
 }
 
 bool CartesianImpedanceCtrl::isCartesianImpedanceCtrl(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
@@ -260,4 +357,30 @@ CartesianImpedanceCtrl::Ptr CartesianImpedanceCtrl::asCartesianImpedanceCtrl(Ope
 void CartesianImpedanceCtrl::useInertiaMatrix(const bool use)
 {
     _use_inertia_matrix = use;
+}
+
+void CartesianImpedanceCtrl::_log(XBot::MatLogger::Ptr logger)
+{
+    logger->add(_task_id+"_actualPose", _actualPose);
+    logger->add(_task_id+"_desiredPose", _desiredPose);
+    logger->add(_task_id+"_desiredTwist", _desiredTwist);
+
+    logger->add(_task_id+"_K", _K);
+    logger->add(_task_id+"_D", _D);
+
+    logger->add(_task_id+"_positionError", positionError);
+    logger->add(_task_id+"_orientationError", orientationError);
+    logger->add(_task_id+"_linearVelocityError", linearVelocityError);
+    logger->add(_task_id+"_orientationVelocityError", orientationVelocityError);
+
+    logger->add(_task_id+"_Minv", _Minv);
+    logger->add(_task_id+"_J", _J);
+
+    logger->add(_task_id+"_qdot", _qdot);
+    logger->add(_task_id+"_xdot", _xdot);
+
+    logger->add(_task_id+"_spring_force", _spring_force);
+    logger->add(_task_id+"_damping_force", _damping_force);
+
+    logger->add(_task_id+"_F", _F);
 }

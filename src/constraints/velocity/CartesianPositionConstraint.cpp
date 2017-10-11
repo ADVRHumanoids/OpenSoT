@@ -31,7 +31,32 @@ CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd &
     _cartesianTask(cartesianTask),
     _A_Cartesian(A_Cartesian),
     _b_Cartesian(b_Cartesian),
-    _boundScaling(boundScaling)
+    _boundScaling(boundScaling),
+    _is_Cartesian(true),
+    J(3, x.size()),
+    currentPosition(3)
+{
+
+    assert(_A_Cartesian.rows() == _b_Cartesian.rows() && "A and b must have the same size");
+    assert(_A_Cartesian.cols() == 3 && "A must have 3 columns");
+
+    this->update(x);
+}
+
+
+CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd& x,
+                             OpenSoT::tasks::velocity::CoM::Ptr comTask,
+                             const Eigen::MatrixXd& A_Cartesian,
+                             const Eigen::VectorXd& b_Cartesian,
+                             const double boundScaling  ):
+    Constraint("position_constraint", x.size()),
+    _comTask(comTask),
+    _A_Cartesian(A_Cartesian),
+    _b_Cartesian(b_Cartesian),
+    _boundScaling(boundScaling),
+    _is_Cartesian(false),
+    J(3, x.size()),
+    currentPosition(3)
 {
     assert(_A_Cartesian.rows() == _b_Cartesian.rows() && "A and b must have the same size");
     assert(_A_Cartesian.cols() == 3 && "A must have 3 columns");
@@ -39,21 +64,45 @@ CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd &
     this->update(x);
 }
 
+void CartesianPositionConstraint::setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian)
+{
+    _A_Cartesian = A_Cartesian;
+    _b_Cartesian = b_Cartesian;
+
+    assert(_A_Cartesian.rows() == _b_Cartesian.rows() && "A and b must have the same size");
+    assert(_A_Cartesian.cols() == 3 && "A must have 3 columns");
+}
+
+void CartesianPositionConstraint::getCurrentPosition(Eigen::VectorXd& current_position)
+{
+    current_position = currentPosition;
+}
+
 void CartesianPositionConstraint::update(const Eigen::VectorXd &x) {
 
-    /************************ COMPUTING BOUNDS ****************************/
+    if(_is_Cartesian){
+        _cartesianTask->update(x);
+        /************************ COMPUTING BOUNDS ****************************/
+        J = _cartesianTask->getA().block(0,0,3,_x_size);
+        assert(J.rows() == 3 && "Jacobian doesn't have 3 rows. Something went wrong.");
 
-    Eigen::MatrixXd J = _cartesianTask->getA().block(0,0,3,_x_size);
-    assert(J.rows() == 3 && "Jacobian doesn't have 3 rows. Something went wrong.");
+        _Aineq = _A_Cartesian * J;
 
-    _Aineq = _A_Cartesian * J;
+        currentPosition(0) = _cartesianTask->getActualPose()(0,3);
+        currentPosition(1) = _cartesianTask->getActualPose()(1,3);
+        currentPosition(2) = _cartesianTask->getActualPose()(2,3);
+        assert(currentPosition.size() == 3 && "Current position doesn't have size 3. Something went wrong.");
 
-    Eigen::VectorXd currentPosition(3);
-    currentPosition(0) = _cartesianTask->getActualPose()(0,3);
-    currentPosition(1) = _cartesianTask->getActualPose()(1,3);
-    currentPosition(2) = _cartesianTask->getActualPose()(2,3);
-    assert(currentPosition.size() == 3 && "Current position doesn't have size 3. Something went wrong.");
+        /**********************************************************************/
+    }else{
+        _comTask->update(x);
+        J = _comTask->getA();
 
+        _Aineq = _A_Cartesian * J;
+
+        currentPosition = _comTask->getActualPosition();
+    }
     _bUpperBound = ( _b_Cartesian - _A_Cartesian*currentPosition)*_boundScaling;
-    /**********************************************************************/
+    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
+
 }

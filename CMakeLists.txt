@@ -107,6 +107,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
                     src/constraints/velocity/CartesianPositionConstraint.cpp
+                    src/constraints/velocity/CapturePoint.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
                     src/constraints/velocity/CoMVelocity.cpp
                     src/constraints/velocity/JointLimits.cpp
@@ -130,8 +131,12 @@ endif()
 set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/velocity/Cartesian.cpp
+                    src/tasks/velocity/PureRolling.cpp
+                    src/tasks/velocity/RigidRotation.cpp
                     src/tasks/velocity/Gaze.cpp
+                    src/tasks/velocity/Contact.cpp
                     src/tasks/velocity/CoM.cpp
+                    src/tasks/velocity/AngularMomentum.cpp
                     src/tasks/velocity/Manipulability.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
                     src/tasks/velocity/MinimumEffort.cpp

@@ -144,7 +144,7 @@ TEST_F(TestSubTaskMap, testSubMapToString)
     indices.push_back(11);
 
     OpenSoT::Indices subTaskMap(indices);
-    EXPECT_EQ(std::string(subTaskMap), "1-3+7-8+10-11+13+17-19");
+    EXPECT_EQ(std::string(subTaskMap), "1to3plus7to8plus10to11plus13plus17to19");
 }
 
 TEST_F(TestSubTaskMap, testSubMapOperatorPlus)
@@ -175,14 +175,14 @@ TEST_F(TestSubTaskMap, testSubMapOperatorPlus)
     OpenSoT::Indices subTaskMap2(indices2);
     OpenSoT::Indices subTaskMap3(indices3);
 
-    EXPECT_EQ(std::string(subTaskMap+subTaskMap2),"1-3+7-8");
+    EXPECT_EQ(std::string(subTaskMap+subTaskMap2),"1to3plus7to8");
     EXPECT_EQ(std::list<unsigned int>(subTaskMap+subTaskMap3),indices1_plus_3);
-    EXPECT_EQ(std::string(subTaskMap+subTaskMap3),"1-5");
+    EXPECT_EQ(std::string(subTaskMap+subTaskMap3),"1to5");
     EXPECT_EQ((subTaskMap+subTaskMap3).getChunks().size(),1);
-    EXPECT_EQ(std::string(subTaskMap2+subTaskMap3),"3-5+7-8");
-    EXPECT_EQ(std::string(subTaskMap2+subTaskMap3+9),"3-5+7-9");
-    EXPECT_EQ(std::string(subTaskMap2+10+subTaskMap3),"3-5+7-8+10");
-    EXPECT_EQ(std::string(subTaskMap2+10+11+12+subTaskMap3),"3-5+7-8+10-12");
+    EXPECT_EQ(std::string(subTaskMap2+subTaskMap3),"3to5plus7to8");
+    EXPECT_EQ(std::string(subTaskMap2+subTaskMap3+9),"3to5plus7to9");
+    EXPECT_EQ(std::string(subTaskMap2+10+subTaskMap3),"3to5plus7to8plus10");
+    EXPECT_EQ(std::string(subTaskMap2+10+11+12+subTaskMap3),"3to5plus7to8plus10to12");
 }
 
 TEST_F(TestSubTaskMap, testSubMapOperatorMinus)
@@ -206,7 +206,7 @@ TEST_F(TestSubTaskMap, testSubMapOperatorMinus)
     OpenSoT::Indices subTaskMap(indices.begin(),indices.end());
     OpenSoT::Indices subTaskMap3(indices3);
 
-    EXPECT_EQ(std::string(subTaskMap-subTaskMap3),"1-2");
+    EXPECT_EQ(std::string(subTaskMap-subTaskMap3),"1to2");
     EXPECT_EQ(std::list<unsigned int>(subTaskMap-subTaskMap3),indices1_minus_3);
     EXPECT_EQ(std::string(subTaskMap-1-2),"3");
 }
@@ -251,7 +251,7 @@ TEST_F(TestSubTaskMap, testRange)
     indices.push_back(3);
 
     OpenSoT::Indices subTaskMap(indices);
-    EXPECT_EQ("1-3", std::string(OpenSoT::Indices::range(1,3)));
+    EXPECT_EQ("1to3", std::string(OpenSoT::Indices::range(1,3)));
     EXPECT_EQ(subTaskMap, OpenSoT::Indices::range(1,3));
 }
 

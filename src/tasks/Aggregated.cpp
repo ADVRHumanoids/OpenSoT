@@ -42,7 +42,7 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
 Aggregated::Aggregated(TaskPtr task1,
                        TaskPtr task2,
                        const unsigned int x_size) :
-Task("(" + task1->getTaskID()+"+"+task2->getTaskID() + ")",x_size)
+Task(task1->getTaskID()+"plus"+task2->getTaskID(),x_size)
 {
     _tasks.push_back(task1);
     _tasks.push_back(task2);
@@ -93,14 +93,19 @@ void Aggregated::checkSizes() {
 
 
 void Aggregated::generateAll() {
-    _A.resize(0,_x_size);
-    _b.resize(0);
+    _tmpA.resize(0, _x_size);
+    _tmpb.resize(0);
+
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
-        pile(_A,t->getWeight()*t->getA());
-        pile(_b, t->getWeight()*t->getb());
+        pile(_tmpA,t->getWeight()*t->getA());
+        pile(_tmpb, t->getWeight()*t->getb());
     }
+
+    _A = _tmpA;
+    _b = _tmpb;
+
     generateConstraints();
 }
 
@@ -201,11 +206,8 @@ const std::string Aggregated::concatenateTaskIds(const std::list<TaskPtr> tasks)
     for(std::list<TaskPtr>::const_iterator i = tasks.begin(); i != tasks.end(); ++i) {
         concatenatedId += (*i)->getTaskID();
         if(--taskSize > 0)
-            concatenatedId += "+";
+            concatenatedId += "plus";
     }
-
-    if(tasks.size() > 1)
-        concatenatedId = "(" + concatenatedId + ")";
 
     return concatenatedId;
 }
@@ -226,4 +228,10 @@ void Aggregated::setLambda(double lambda)
 bool OpenSoT::tasks::Aggregated::isAggregated(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
+}
+
+void OpenSoT::tasks::Aggregated::_log(XBot::MatLogger::Ptr logger)
+{
+    for(auto task : _tasks)
+        task->log(logger);
 }
