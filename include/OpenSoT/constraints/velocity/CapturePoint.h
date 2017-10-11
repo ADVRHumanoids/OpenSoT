@@ -32,6 +32,11 @@ namespace OpenSoT {
          * where \f$w = \sqrt{\frac{z_{\text{CoM}}}{g}} \f$
          *
          * The Constraint is based on the CartesianPositionConstraint.
+         * 
+         * IMPORTANT: Here we are not considering the variation of the capture point \f$ \Delta\mathbf{x}_\text{cp} \f$ that
+         * is proportional to the joint accelerations, furthermore this constraint is quasi-static! We just constraint the 
+         * instantanous position of the capture point \f$ \mathbf{x}_\text{cp} \f$, instead of
+         * \f$ \mathbf{x}_\text{cp} + \Delta\mathbf{x}_\text{cp} \f$ !
          *
          * If computeAngularMomentumCorrection(true), a correction proportional to the centroidal angular
          * momentum is added to the constraint:
