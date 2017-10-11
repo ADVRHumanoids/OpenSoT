@@ -83,7 +83,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
 }
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string relative_path = "/external/OpenSoT-lite/tests/configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
 TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
