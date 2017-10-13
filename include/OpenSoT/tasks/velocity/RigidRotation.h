@@ -67,6 +67,9 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         Eigen::Vector3d _cart_omega_ref;
         Eigen::Vector3d _cart_wheel_pos;
         Eigen::Vector3d _preferred_forward_axis;
+        Eigen::Vector3d _pp_forward_axis_ref;
+        
+        double _hack_treshold, _hack_dot_product;
         
         Eigen::Vector3d _wheel_vel_ref;
         Eigen::Vector3d _wheel_relative_vel_ref;
