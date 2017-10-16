@@ -103,7 +103,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testVelocityAllocation
                        testCollisionUtils #YARP FREE
                        testCartesianUtils #YARP FREE
-                       testBasicAlgebra
+                       testBasicAlgebra #YARP FREE
         )
     endif()
 endif()
