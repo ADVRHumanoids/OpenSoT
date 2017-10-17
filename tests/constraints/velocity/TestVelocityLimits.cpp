@@ -1,8 +1,5 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <yarp/sig/Vector.h>
-#include <yarp/math/Math.h>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #include <cmath>
 #define  s 1.0
 #define  x_size 10u
@@ -10,7 +7,6 @@
 #define  dT 0.001*s
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
 
 namespace {
 
@@ -23,7 +19,8 @@ class testVelocityLimits : public ::testing::Test {
 
   testVelocityLimits() {
     // You can do set-up work for each test here.
-      zeros.resize(x_size,0.0);
+      zeros.resize(x_size);
+      zeros.setZero(x_size);
 
       velocityLimits = new VelocityLimits(  vel_lim,
                                             dT,
@@ -47,12 +44,12 @@ class testVelocityLimits : public ::testing::Test {
 
   VelocityLimits* velocityLimits;
 
-  yarp::sig::Vector zeros;
+  Eigen::VectorXd zeros;
 };
 
 TEST_F(testVelocityLimits, sizesAreCorrect) {
-    yarp::sig::Vector lowerBound = conversion_utils_YARP::toYARP(velocityLimits->getLowerBound());
-    yarp::sig::Vector upperBound = conversion_utils_YARP::toYARP(velocityLimits->getUpperBound());
+    Eigen::VectorXd lowerBound = velocityLimits->getLowerBound();
+    Eigen::VectorXd upperBound = velocityLimits->getUpperBound();
 
     EXPECT_EQ(x_size, lowerBound.size()) << "lowerBound should have size"
                                          << x_size;
@@ -84,8 +81,8 @@ TEST_F(testVelocityLimits, sizesAreCorrect) {
 // Tests that the Foo::getLowerBounds() are zero at the bounds
 TEST_F(testVelocityLimits, BoundsAreCorrect) {
 
-    yarp::sig::Vector lowerBound = conversion_utils_YARP::toYARP(velocityLimits->getLowerBound());
-    yarp::sig::Vector upperBound = conversion_utils_YARP::toYARP(velocityLimits->getUpperBound());
+    Eigen::VectorXd lowerBound = velocityLimits->getLowerBound();
+    Eigen::VectorXd upperBound = velocityLimits->getUpperBound();
     /* checking a joint at upper bound */
     EXPECT_DOUBLE_EQ(-dT*vel_lim, lowerBound[0]) << "Lower Velocity Limits should be "
                                                   << -dT*vel_lim << ", "

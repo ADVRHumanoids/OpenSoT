@@ -66,7 +66,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testConvexHullVelocityConstraint
 #                      testDynamicsConstraint
                       testJointLimitsVelocityBounds #YARP FREE
-                      testVelocityLimitsVelocityBounds
+                      testVelocityLimitsVelocityBounds #YARP FREE
                       testQPOasesSolver #YARP_FREE
 #                      testQPOases_AutoStack
 #                      testQPOases_CartesianPositionConstraint
