@@ -265,7 +265,6 @@ install_basic_package_files(OpenSoT VARS_PREFIX ${VARS_PREFIX}
 
 include(AddUninstallTarget)
 
-add_subdirectory(app)
 add_subdirectory(doc)
 
 ########################
