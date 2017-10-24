@@ -72,7 +72,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #                      testQPOases_CartesianPositionConstraint
                       testQPOases_ConvexHull
                       testQPOases_FF
-                      TestQPOases_SetActiveStack
+                      TestQPOases_SetActiveStack #YARP FREE
 #                      testQPOases_GlobalConstraints
 #                      testQPOases_Options
 #                      testQPOases_PriorityInversion
@@ -87,7 +87,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testCartesianVelocityTask
                       testCoMForceTask
                       testFrictionConeForceConstraint ###YARP FREE
-                      testCoMVelocityTask
+                      testCoMVelocityTask ##YARP FREE
 #                      testGazeVelocityTask
 #                      testInteractionVelocityTask
                       TestManipulabilityTask # YARP FREE
