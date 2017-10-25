@@ -6,6 +6,10 @@ OpenSoT::SubTask::SubTask(OpenSoT::SubTask::TaskPtr taskPtr, const std::list<uns
     _subTaskMap(rowIndices),
     _taskPtr(taskPtr)
 {
+    this->_A.resize(rowIndices.size(), _x_size);
+    this->_b.resize(rowIndices.size());
+    this->_W.resize(rowIndices.size(), rowIndices.size());
+
     this->generateA();
     this->generateb();
     this->generateHessianAtype();
@@ -14,17 +18,14 @@ OpenSoT::SubTask::SubTask(OpenSoT::SubTask::TaskPtr taskPtr, const std::list<uns
 
 void OpenSoT::SubTask::generateA()
 {
-    this->_A.resize(0, this->getXSize());
-
+    unsigned int chunk_size = 0;
+    unsigned int j = 0;
     for(Indices::ChunkList::const_iterator i = _subTaskMap.getChunks().begin();
-        i != _subTaskMap.getChunks().end();
-        ++i) {
-
-        if(_taskPtr->getA().rows() > i->back())
-            pile(this->_A,
-                //_taskPtr->getA().submatrix(i->front(),i->back(),0, _x_size-1));
-                _taskPtr->getA().block(i->front(),0,
-                                       i->back()-i->front()+1, _x_size));
+        i != _subTaskMap.getChunks().end(); ++i)
+    {
+        chunk_size = i->size();
+        this->_A.block(j,0,chunk_size,_x_size) = _taskPtr->getA().block(i->front(),0,i->back()-i->front()+1, _x_size);
+        j+=chunk_size;
     }
 }
 
@@ -39,16 +40,14 @@ void OpenSoT::SubTask::generateHessianAtype()
 
 void OpenSoT::SubTask::generateb()
 {
-    this->_b.resize(0);
-
+    unsigned int chunk_size = 0;
+    unsigned int j = 0;
     for(Indices::ChunkList::const_iterator i = _subTaskMap.getChunks().begin();
-        i != _subTaskMap.getChunks().end();
-        ++i) {
-
-        if(_taskPtr->getb().size() > i->back())
-            pile(this->_b,
-                 //_taskPtr->getb().subVector(i->front(),i->back()));
-                 _taskPtr->getb().segment(i->front(),i->back()-i->front()+1));
+        i != _subTaskMap.getChunks().end();++i)
+    {
+        chunk_size = i->size();
+        this->_b.segment(j,chunk_size) = _taskPtr->getb().segment(i->front(),i->back()-i->front()+1);
+        j+=chunk_size;
     }
 
     if(this->_b.size() > 0)
@@ -58,8 +57,7 @@ void OpenSoT::SubTask::generateb()
 
 void OpenSoT::SubTask::generateWeight()
 {
-        this->_W.resize(this->getTaskSize(), this->getTaskSize());
-        this->_W.setZero(this->getTaskSize(), this->getTaskSize());
+        this->_W.setZero(_W.rows(), _W.cols());
 
         for(unsigned int r = 0; r < this->getTaskSize(); ++r)
             for(unsigned int c = 0; c < this->getTaskSize(); ++c)
