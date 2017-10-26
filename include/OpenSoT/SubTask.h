@@ -53,6 +53,18 @@
 
         virtual void _log(XBot::MatLogger::Ptr logger);
 
+        void generateA();
+
+        void generateHessianAtype();
+
+        void generateb();
+
+        void generateWeight();
+
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
+            @param x variable state at the current step (input) */
+        virtual void _update(const Eigen::VectorXd &x);
+
     public:
         /**
          * @brief SubTask create a SubTask object by specifying the father Task through a pointer,
@@ -63,14 +75,6 @@
         SubTask(TaskPtr taskPtr, const std::list<unsigned int> rowIndices);
 
         virtual ~SubTask(){}
-
-        void generateA();
-
-        void generateHessianAtype();
-
-        void generateb();
-
-        void generateWeight();
 
         /**
          * @brief setWeight sets the task weight.
@@ -97,9 +101,6 @@
             @return the number of rows of A */
         virtual const unsigned int getTaskSize() const;
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-            @param x variable state at the current step (input) */
-        virtual void _update(const Eigen::VectorXd &x);
 
         /**
          * @brief getActiveJointsMask return a vector of length NumberOfDOFs.
