@@ -1,6 +1,3 @@
-#include <idynutils/idynutils.h>
-#include <idynutils/tests_utils.h>
-#include <idynutils/comanutils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>
@@ -10,14 +7,18 @@
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/tasks/velocity/all.h>
 #include <qpOASES.hpp>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
 #include <fstream>
-
-using namespace yarp::math;
+#include <XBotInterface/ModelInterface.h>
+#include <chrono>
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
+
+
+
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace{
 
@@ -30,8 +31,8 @@ namespace{
 class testIKProblem
 {
 public:
-    iDynUtils _idynutils;
-    yarp::sig::Matrix _T_initial_0;
+    XBot::ModelInterface::Ptr _model_ptr;
+    Eigen::Affine3d _T_initial_0;
     std::string _base_link_0;
     std::string _distal_link_0;
     OpenSoT::tasks::velocity::Cartesian::Ptr _cartesian_task_0;
@@ -41,45 +42,49 @@ public:
     OpenSoT::constraints::Aggregated::Ptr _joint_constraints;
     OpenSoT::solvers::QPOases_sot::Stack _stack_of_tasks;
     OpenSoT::solvers::QPOases_sot::Ptr _sot;
-    yarp::sig::Vector q;
-    yarp::sig::Matrix T_ref_0;
+    Eigen::VectorXd q;
+    Eigen::MatrixXd T_ref_0;
     std::ofstream _log;
     std::string _type;
     std::string _variable_name;
 
     testIKProblem(const double t, const qpOASES::Options &options, const std::string type):
-        _idynutils("coman", std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
         _base_link_0("Waist"),
         _distal_link_0("l_wrist"),
         _type(type)
     {
-        q = getGoodInitialPosition(_idynutils);
-        _idynutils.updateiDyn3Model(q, true);
+        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-        _T_initial_0 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_0),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_0));
+        if(_model_ptr)
+            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+        else
+            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+        q = getGoodInitialPosition(_model_ptr);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        _model_ptr->getPose(_distal_link_0,_base_link_0, _T_initial_0);
         _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
                     new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                        cartesian_utils::toEigen(q), _idynutils,
-                    _distal_link_0, _base_link_0));
+                        q, *_model_ptr, _distal_link_0, _base_link_0));
 
-        T_ref_0 = _T_initial_0;
+        T_ref_0 = _T_initial_0.matrix();
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
 
-        _cartesian_task_0->setReference(cartesian_utils::toEigen(T_ref_0));
-        _cartesian_task_0->update(cartesian_utils::toEigen(q));
+        _cartesian_task_0->setReference(T_ref_0);
+        _cartesian_task_0->update(q);
 
         _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
-                    new OpenSoT::tasks::velocity::Postural(
-                        cartesian_utils::toEigen(q)));
+                    new OpenSoT::tasks::velocity::Postural(q));
+
+        Eigen::VectorXd q_min, q_max;
+        _model_ptr->getJointLimits(q_min, q_max);
 
         _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(
-                        cartesian_utils::toEigen(q),
-                               _idynutils.getJointBoundMax(),
-                               _idynutils.getJointBoundMin()));
+                    new OpenSoT::constraints::velocity::JointLimits(q,
+                               q_max,q_min));
 
         _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
                     new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
@@ -110,11 +115,11 @@ public:
 
     double solve(Eigen::VectorXd& dq, bool& solved)
     {
-        double tic = yarp::os::Time::now();
+        auto tic = std::chrono::high_resolution_clock::now();
         solved = _sot->solve(dq);
-        double toc = yarp::os::Time::now();
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        double dt = toc - tic;
+        double dt = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
         _log<<dt<<std::endl;
         return dt;
     }
@@ -140,40 +145,43 @@ public:
         _log.close();
     }
 
+    Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
+        Eigen::VectorXd _q(_model_ptr->getJointNum());
+        _q.setZero(_q.size());
+        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils)
-    {
-        yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-        yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-        leg[0] = -25.0 * M_PI/180.0;
-        leg[3] =  50.0 * M_PI/180.0;
-        leg[5] = -25.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-        idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-        yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-        arm[0] = 20.0 * M_PI/180.0;
-        arm[1] = 10.0 * M_PI/180.0;
-        arm[3] = -80.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-        arm[1] = -arm[1];
-        idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
-        return q;
+        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        return _q;
     }
+
+
+
 
     void checkTask()
     {
-        yarp::sig::Matrix T_0 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_0),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_0));
+        Eigen::Affine3d T_0;
+        _model_ptr->getPose(_distal_link_0,_base_link_0, T_0);
 
-        std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(_T_initial_0);
-        std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_ref_0);
-        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_0);
+        std::cout<<GREEN<<"Arm Initial Pose: "<<_T_initial_0.matrix()<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Desired Pose: "<<T_ref_0<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Pose: "<<T_0.matrix()<<DEFAULT<<std::endl;
         for(unsigned int i = 0; i < 3; ++i)
-            EXPECT_NEAR(T_0(i,3), T_ref_0(i,3), 1E-3);
+            EXPECT_NEAR(T_0.matrix()(i,3), T_ref_0(i,3), 1E-3);
         for(unsigned int i = 0; i < 3; ++i)
             for(unsigned int j = 0; j < 3; ++j)
-                EXPECT_NEAR(T_0(i,j), T_ref_0(i,j), 1E-2);
+                EXPECT_NEAR(T_0.matrix()(i,j), T_ref_0(i,j), 1E-2);
     }
 };
 
@@ -186,11 +194,11 @@ public:
 class testIKProblem2
 {
 public:
-    iDynUtils _idynutils;
-    yarp::sig::Matrix _T_initial_0;
+    XBot::ModelInterface::Ptr _model_ptr;
+    Eigen::Affine3d _T_initial_0;
     std::string _base_link_0;
     std::string _distal_link_0;
-    yarp::sig::Matrix _T_initial_1;
+    Eigen::Affine3d _T_initial_1;
     std::string _base_link_1;
     std::string _distal_link_1;
     OpenSoT::tasks::velocity::Cartesian::Ptr _cartesian_task_0;
@@ -201,61 +209,65 @@ public:
     OpenSoT::constraints::Aggregated::Ptr _joint_constraints;
     OpenSoT::solvers::QPOases_sot::Stack _stack_of_tasks;
     OpenSoT::solvers::QPOases_sot::Ptr _sot;
-    yarp::sig::Vector q;
-    yarp::sig::Matrix T_ref_0;
-    yarp::sig::Matrix T_ref_1;
+    Eigen::VectorXd q;
+    Eigen::MatrixXd T_ref_0;
+    Eigen::MatrixXd T_ref_1;
     std::ofstream _log;
     std::string _type;
     std::string _variable_name;
 
     testIKProblem2(const double t, const qpOASES::Options &options, const std::string type):
-        _idynutils("coman", std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
         _base_link_0("Waist"),
         _distal_link_0("l_wrist"),
         _base_link_1("Waist"),
         _distal_link_1("r_wrist"),
         _type(type)
     {
-        q = getGoodInitialPosition(_idynutils);
-        _idynutils.updateiDyn3Model(q, true);
+        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-        _T_initial_0 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_0),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_0));
-        _T_initial_1 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_1),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_1));
+        if(_model_ptr)
+            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+        else
+            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+        q = getGoodInitialPosition(_model_ptr);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        _model_ptr->getPose(_distal_link_0,_base_link_0, _T_initial_0);
+        _model_ptr->getPose(_distal_link_1,_base_link_1, _T_initial_1);
+
+
         _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
                     new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                    cartesian_utils::toEigen(q), _idynutils,
+                    q, *_model_ptr,
                     _distal_link_0, _base_link_0));
         _cartesian_task_1 = OpenSoT::tasks::velocity::Cartesian::Ptr(
                     new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist",
-                    cartesian_utils::toEigen(q), _idynutils,
+                    q, *_model_ptr,
                     _distal_link_1, _base_link_1));
 
-        T_ref_0 = _T_initial_0;
+        T_ref_0 = _T_initial_0.matrix();
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
 
-        T_ref_1 = _T_initial_1;
+        T_ref_1 = _T_initial_1.matrix();
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
-        _cartesian_task_0->setReference(cartesian_utils::toEigen(T_ref_0));
-        _cartesian_task_0->update(cartesian_utils::toEigen(q));
+        _cartesian_task_0->setReference(T_ref_0);
+        _cartesian_task_0->update(q);
 
-        _cartesian_task_1->setReference(cartesian_utils::toEigen(T_ref_1));
-        _cartesian_task_1->update(cartesian_utils::toEigen(q));
+        _cartesian_task_1->setReference(T_ref_1);
+        _cartesian_task_1->update(q);
 
         _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
-                    new OpenSoT::tasks::velocity::Postural(
-                        cartesian_utils::toEigen(q)));
+                    new OpenSoT::tasks::velocity::Postural(q));
 
+        Eigen::VectorXd q_min, q_max;
+        _model_ptr->getJointLimits(q_min, q_max);
         _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(
-                        cartesian_utils::toEigen(q),
-                        _idynutils.getJointBoundMax(),
-                               _idynutils.getJointBoundMin()));
+                    new OpenSoT::constraints::velocity::JointLimits(q,
+                        q_max,q_min));
 
         _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
                     new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
@@ -287,11 +299,11 @@ public:
 
     double solve(Eigen::VectorXd& dq, bool& solved)
     {
-        double tic = yarp::os::Time::now();
+        auto tic = std::chrono::high_resolution_clock::now();
         solved = _sot->solve(dq);
-        double toc = yarp::os::Time::now();
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        double dt = toc - tic;
+        double dt = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
         _log<<dt<<std::endl;
         return dt;
     }
@@ -322,55 +334,57 @@ public:
     }
 
 
-    yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils)
-    {
-        yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-        yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-        leg[0] = -25.0 * M_PI/180.0;
-        leg[3] =  50.0 * M_PI/180.0;
-        leg[5] = -25.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-        idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-        yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-        arm[0] = 20.0 * M_PI/180.0;
-        arm[1] = 10.0 * M_PI/180.0;
-        arm[3] = -80.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-        arm[1] = -arm[1];
-        idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
-        return q;
+    Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
+        Eigen::VectorXd _q(_model_ptr->getJointNum());
+        _q.setZero(_q.size());
+        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        return _q;
     }
 
     void checkTask()
     {
-        yarp::sig::Matrix T_0 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_0),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_0));
+        Eigen::Affine3d T_0;
+        _model_ptr->getPose(_distal_link_0,_base_link_0, T_0);
+
 
         std::cout<<GREEN<<"TASK1: "<<DEFAULT<<std::endl;
-        std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(_T_initial_0);
-        std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_ref_0);
-        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_0);
+        std::cout<<GREEN<<"Arm Initial Pose: "<<_T_initial_0.matrix()<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Desired Pose: "<<T_ref_0<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Pose: "<<T_0.matrix()<<DEFAULT<<std::endl;
         for(unsigned int i = 0; i < 3; ++i)
-            EXPECT_NEAR(T_0(i,3), T_ref_0(i,3), 1E-3);
+            EXPECT_NEAR(T_0.matrix()(i,3), T_ref_0(i,3), 1E-3);
         for(unsigned int i = 0; i < 3; ++i)
             for(unsigned int j = 0; j < 3; ++j)
-                EXPECT_NEAR(T_0(i,j), T_ref_0(i,j), 1E-2);
+                EXPECT_NEAR(T_0.matrix()(i,j), T_ref_0(i,j), 1E-2);
 
-        yarp::sig::Matrix T_1 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_1),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_1));
+        Eigen::Affine3d T_1;
+        _model_ptr->getPose(_distal_link_1,_base_link_1, T_1);
+
 
         std::cout<<std::endl;
         std::cout<<GREEN<<"TASK2: "<<DEFAULT<<std::endl;
-        std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(_T_initial_1);
-        std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_ref_1);
-        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_1);
+        std::cout<<GREEN<<"Arm Initial Pose: "<<_T_initial_1.matrix()<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Desired Pose: "<<T_ref_1<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<T_1.matrix()<<std::endl;
         for(unsigned int i = 0; i < 3; ++i)
-            EXPECT_NEAR(T_1(i,3), T_ref_1(i,3), 1E-3);
+            EXPECT_NEAR(T_1.matrix()(i,3), T_ref_1(i,3), 1E-3);
         for(unsigned int i = 0; i < 3; ++i)
             for(unsigned int j = 0; j < 3; ++j)
-                EXPECT_NEAR(T_1(i,j), T_ref_1(i,j), 1E-2);
+                EXPECT_NEAR(T_1.matrix()(i,j), T_ref_1(i,j), 1E-2);
     }
 };
 
@@ -383,11 +397,11 @@ public:
 class testIKProblem3
 {
 public:
-    iDynUtils _idynutils;
-    yarp::sig::Matrix _T_initial_0;
+    XBot::ModelInterface::Ptr _model_ptr;
+    Eigen::Affine3d _T_initial_0;
     std::string _base_link_0;
     std::string _distal_link_0;
-    yarp::sig::Matrix _T_initial_1;
+    Eigen::Affine3d _T_initial_1;
     std::string _base_link_1;
     std::string _distal_link_1;
     OpenSoT::tasks::velocity::Cartesian::Ptr _cartesian_task_0;
@@ -396,64 +410,67 @@ public:
     OpenSoT::constraints::velocity::JointLimits::Ptr _joint_limits;
     OpenSoT::constraints::velocity::VelocityLimits::Ptr _joint_velocity_limits;
     OpenSoT::constraints::Aggregated::Ptr _joint_constraints;
-    OpenSoT::tasks::Aggregated::Ptr _cartesian_tasks;
     OpenSoT::solvers::QPOases_sot::Stack _stack_of_tasks;
     OpenSoT::solvers::QPOases_sot::Ptr _sot;
-    yarp::sig::Vector q;
-    yarp::sig::Matrix T_ref_0;
-    yarp::sig::Matrix T_ref_1;
+    Eigen::VectorXd q;
+    Eigen::MatrixXd T_ref_0;
+    Eigen::MatrixXd T_ref_1;
     std::ofstream _log;
     std::string _type;
     std::string _variable_name;
+    OpenSoT::tasks::Aggregated::Ptr _cartesian_tasks;
 
     testIKProblem3(const double t, const qpOASES::Options &options, const std::string type):
-        _idynutils("coman", std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
         _base_link_0("Waist"),
         _distal_link_0("l_wrist"),
         _base_link_1("Waist"),
         _distal_link_1("r_wrist"),
         _type(type)
     {
-        q = getGoodInitialPosition(_idynutils);
-        _idynutils.updateiDyn3Model(q, true);
+        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-        _T_initial_0 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_0),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_0));
-        _T_initial_1 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_1),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_1));
+        if(_model_ptr)
+            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+        else
+            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+        q = getGoodInitialPosition(_model_ptr);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        _model_ptr->getPose(_distal_link_0,_base_link_0, _T_initial_0);
+        _model_ptr->getPose(_distal_link_1,_base_link_1, _T_initial_1);
         _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
                     new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                cartesian_utils::toEigen(q), _idynutils,
+                q, *_model_ptr,
                     _distal_link_0, _base_link_0));
         _cartesian_task_1 = OpenSoT::tasks::velocity::Cartesian::Ptr(
                     new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist",
-                    cartesian_utils::toEigen(q), _idynutils,
+                    q, *_model_ptr,
                     _distal_link_1, _base_link_1));
 
-        T_ref_0 = _T_initial_0;
+        T_ref_0 = _T_initial_0.matrix();
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
 
-        T_ref_1 = _T_initial_1;
+        T_ref_1 = _T_initial_1.matrix();
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
-        _cartesian_task_0->setReference(cartesian_utils::toEigen(T_ref_0));
-        _cartesian_task_0->update(cartesian_utils::toEigen(q));
+        _cartesian_task_0->setReference(T_ref_0);
+        _cartesian_task_0->update(q);
 
-        _cartesian_task_1->setReference(cartesian_utils::toEigen(T_ref_1));
-        _cartesian_task_1->update(cartesian_utils::toEigen(q));
+        _cartesian_task_1->setReference(T_ref_1);
+        _cartesian_task_1->update(q);
 
         _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
                     new OpenSoT::tasks::velocity::Postural(
-                        cartesian_utils::toEigen(q)));
+                        q));
 
+        Eigen::VectorXd q_min, q_max;
+        _model_ptr->getJointLimits(q_min, q_max);
         _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
                     new OpenSoT::constraints::velocity::JointLimits(
-                        cartesian_utils::toEigen(q),
-                        _idynutils.getJointBoundMax(),
-                               _idynutils.getJointBoundMin()));
+                        q,q_max,q_min));
 
         _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
                     new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
@@ -491,11 +508,11 @@ public:
 
     double solve(Eigen::VectorXd& dq, bool& solved)
     {
-        double tic = yarp::os::Time::now();
+        auto tic = std::chrono::high_resolution_clock::now();
         solved = _sot->solve(dq);
-        double toc = yarp::os::Time::now();
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        double dt = toc - tic;
+        double dt = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
         _log<<dt<<std::endl;
         return dt;
     }
@@ -526,56 +543,60 @@ public:
     }
 
 
-    yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils)
-    {
-        yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-        yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-        leg[0] = -25.0 * M_PI/180.0;
-        leg[3] =  50.0 * M_PI/180.0;
-        leg[5] = -25.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-        idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-        yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-        arm[0] = 20.0 * M_PI/180.0;
-        arm[1] = 10.0 * M_PI/180.0;
-        arm[3] = -80.0 * M_PI/180.0;
-        idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-        arm[1] = -arm[1];
-        idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
-        return q;
+    Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
+        Eigen::VectorXd _q(_model_ptr->getJointNum());
+        _q.setZero(_q.size());
+        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        return _q;
     }
 
     void checkTask()
     {
-        yarp::sig::Matrix T_0 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_0),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_0));
+        Eigen::Affine3d T_0;
+        _model_ptr->getPose(_distal_link_0,_base_link_0, T_0);
+
 
         std::cout<<GREEN<<"TASK1: "<<DEFAULT<<std::endl;
-        std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(_T_initial_0);
-        std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_ref_0);
-        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_0);
+        std::cout<<GREEN<<"Arm Initial Pose: "<<_T_initial_0.matrix()<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Desired Pose: "<<T_ref_0<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Pose: "<<T_0.matrix()<<DEFAULT<<std::endl;
         for(unsigned int i = 0; i < 3; ++i)
-            EXPECT_NEAR(T_0(i,3), T_ref_0(i,3), 1E-3);
+            EXPECT_NEAR(T_0.matrix()(i,3), T_ref_0(i,3), 1E-3);
         for(unsigned int i = 0; i < 3; ++i)
             for(unsigned int j = 0; j < 3; ++j)
-                EXPECT_NEAR(T_0(i,j), T_ref_0(i,j), 1E-2);
+                EXPECT_NEAR(T_0.matrix()(i,j), T_ref_0(i,j), 1E-2);
 
-        yarp::sig::Matrix T_1 = _idynutils.iDyn3_model.getPosition(
-                              _idynutils.iDyn3_model.getLinkIndex(_base_link_1),
-                              _idynutils.iDyn3_model.getLinkIndex(_distal_link_1));
+        Eigen::Affine3d T_1;
+        _model_ptr->getPose(_distal_link_1,_base_link_1, T_1);
+
 
         std::cout<<std::endl;
         std::cout<<GREEN<<"TASK2: "<<DEFAULT<<std::endl;
-        std::cout<<GREEN<<"Arm Initial Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(_T_initial_1);
-        std::cout<<GREEN<<"Arm Desired Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_ref_1);
-        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<std::endl; cartesian_utils::printHomogeneousTransform(T_1);
+        std::cout<<GREEN<<"Arm Initial Pose: "<<_T_initial_1.matrix()<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Desired Pose: "<<T_ref_1<<DEFAULT<<std::endl;
+        std::cout<<GREEN<<"Arm Pose: "<<DEFAULT<<T_1.matrix()<<std::endl;
         for(unsigned int i = 0; i < 3; ++i)
-            EXPECT_NEAR(T_1(i,3), T_ref_1(i,3), 1E-3);
+            EXPECT_NEAR(T_1.matrix()(i,3), T_ref_1(i,3), 1E-3);
         for(unsigned int i = 0; i < 3; ++i)
             for(unsigned int j = 0; j < 3; ++j)
-                EXPECT_NEAR(T_1(i,j), T_ref_1(i,j), 1E-2);
+                EXPECT_NEAR(T_1.matrix()(i,j), T_ref_1(i,j), 1E-2);
     }
+
+
 };
 
 class testQPOases_Options: public ::testing::Test
@@ -615,20 +636,20 @@ TEST_F(testQPOases_Options, testOptionMPC)
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
 
-    yarp::sig::Vector dq(test0.q.size(), 0.0);
+
+    Eigen::VectorXd dq(test0.q.size());dq.setZero(dq.size());
     double acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test0._idynutils.updateiDyn3Model(test0.q, true);
+        test0._model_ptr->setJointPosition(test0.q);
+        test0._model_ptr->update();
 
-        test0.update(cartesian_utils::toEigen(test0.q));
+        test0.update(test0.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test0.solve(_dq, solved);
+        acc += test0.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test0.q = test0.q + dq;
     }
     acc = acc/double(T);
@@ -641,20 +662,19 @@ TEST_F(testQPOases_Options, testOptionMPC)
 
     std::cout<<GREEN<<"test1 options:"<<DEFAULT<<std::endl;
 
-    dq.zero();
+    dq.setZero(dq.size());
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test1._idynutils.updateiDyn3Model(test1.q, true);
+        test1._model_ptr->setJointPosition(test1.q);
+        test1._model_ptr->update();
 
-        test1.update(cartesian_utils::toEigen(test1.q));
+        test1.update(test1.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test1.solve(_dq, solved);
+        acc += test1.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test1.q = test1.q + dq;
     }
     acc = acc/double(T);
@@ -667,20 +687,19 @@ TEST_F(testQPOases_Options, testOptionMPC)
 
     std::cout<<GREEN<<"test2 options:"<<DEFAULT<<std::endl;
 
-    dq.zero();
+    dq.setZero(dq.size());
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test2._idynutils.updateiDyn3Model(test2.q, true);
+        test2._model_ptr->setJointPosition(test2.q);
+        test2._model_ptr->update();
 
-        test2.update(cartesian_utils::toEigen(test2.q));
+        test2.update(test2.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test2.solve(_dq, solved);
+        acc += test2.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test2.q = test2.q + dq;
     }
     acc = acc/double(T);
@@ -706,20 +725,19 @@ TEST_F(testQPOases_Options, testOptionReliable)
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
 
-    yarp::sig::Vector dq(test0.q.size(), 0.0);
+    Eigen::VectorXd dq(test0.q.size());dq.setZero(dq.size());
     double acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test0._idynutils.updateiDyn3Model(test0.q, true);
+        test0._model_ptr->setJointPosition(test0.q);
+        test0._model_ptr->update();
 
-        test0.update(cartesian_utils::toEigen(test0.q));
+        test0.update(test0.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test0.solve(_dq, solved);
+        acc += test0.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test0.q = test0.q + dq;
     }
     acc = acc/double(T);
@@ -731,20 +749,18 @@ TEST_F(testQPOases_Options, testOptionReliable)
 
     std::cout<<GREEN<<"test1 options:"<<DEFAULT<<std::endl;
 
-    dq.zero();
+    dq.setZero(dq.size());
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test1._idynutils.updateiDyn3Model(test1.q, true);
-
-        test1.update(cartesian_utils::toEigen(test1.q));
+        test1._model_ptr->setJointPosition(test1.q);
+        test1._model_ptr->update();
+        test1.update(test1.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test1.solve(_dq, solved);
+        acc += test1.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test1.q = test1.q + dq;
     }
     acc = acc/double(T);
@@ -756,20 +772,18 @@ TEST_F(testQPOases_Options, testOptionReliable)
 
     std::cout<<GREEN<<"test2 options:"<<DEFAULT<<std::endl;
 
-    dq.zero();
+    dq.setZero(dq.size());
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test2._idynutils.updateiDyn3Model(test2.q, true);
-
-        test2.update(cartesian_utils::toEigen(test2.q));
+        test2._model_ptr->setJointPosition(test2.q);
+        test2._model_ptr->update();
+        test2.update(test2.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test2.solve(_dq, solved);
+        acc += test2.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test2.q = test2.q + dq;
     }
     acc = acc/double(T);
@@ -795,20 +809,19 @@ TEST_F(testQPOases_Options, testOptionDefault)
 
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
 
-    yarp::sig::Vector dq(test0.q.size(), 0.0);
+    Eigen::VectorXd dq(test0.q.size());dq.setZero(dq.size());
     double acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test0._idynutils.updateiDyn3Model(test0.q, true);
+        test0._model_ptr->setJointPosition(test0.q);
+        test0._model_ptr->update();
 
-        test0.update(cartesian_utils::toEigen(test0.q));
+        test0.update(test0.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test0.solve(_dq, solved);
+        acc += test0.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test0.q = test0.q + dq;
     }
     acc = acc/double(T);
@@ -820,20 +833,18 @@ TEST_F(testQPOases_Options, testOptionDefault)
 
     std::cout<<GREEN<<"test1 options:"<<DEFAULT<<std::endl;
 
-    dq.zero();
+    dq.setZero(dq.size());
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test1._idynutils.updateiDyn3Model(test1.q, true);
-
-        test1.update(cartesian_utils::toEigen(test1.q));
+        test1._model_ptr->setJointPosition(test1.q);
+        test1._model_ptr->update();
+        test1.update(test1.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test1.solve(_dq, solved);
+        acc += test1.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test1.q = test1.q + dq;
     }
     acc = acc/double(T);
@@ -845,20 +856,19 @@ TEST_F(testQPOases_Options, testOptionDefault)
 
     std::cout<<GREEN<<"test2 options:"<<DEFAULT<<std::endl;
 
-    dq.zero();
+    dq.setZero(dq.size());
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
-        test2._idynutils.updateiDyn3Model(test2.q, true);
+        test2._model_ptr->setJointPosition(test2.q);
+        test2._model_ptr->update();
 
-        test2.update(cartesian_utils::toEigen(test2.q));
+        test2.update(test2.q);
 
         bool solved;
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        acc += test2.solve(_dq, solved);
+        acc += test2.solve(dq, solved);
         if(!solved)
-            _dq.setZero(dq.size());
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+            dq.setZero(dq.size());
         test2.q = test2.q + dq;
     }
     acc = acc/double(T);

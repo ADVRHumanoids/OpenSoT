@@ -74,7 +74,7 @@ if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
                       testQPOases_FF
                       TestQPOases_SetActiveStack #YARP FREE
 #                      testQPOases_GlobalConstraints
-#                      testQPOases_Options
+                      testQPOases_Options #YARP FREE
 #                      testQPOases_PriorityInversion
 #                      testQPOases_SelfCollisionAvoidance
 #                      testQPOases_Sparse
@@ -183,9 +183,9 @@ if(YARP_FOUND)
 #    TARGET_LINK_LIBRARIES(testQPOases_GlobalConstraints ${TestLibs} ${PCL_LIBRARIES})
 #    add_dependencies(testQPOases_GlobalConstraints GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
-#    add_dependencies(testQPOases_Options GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
+    add_dependencies(testQPOases_Options GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testQPOases_PriorityInversion solvers/TestQPOases_PriorityInversion.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_PriorityInversion ${TestLibs})
@@ -331,7 +331,7 @@ if(YARP_FOUND)
     add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
     add_test(NAME OpenSoT_solvers_qpOases_SetActiveStack COMMAND testQPOases_SetActiveStack)
 #    add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
-#    add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
+    add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
 #    ##the following tests compile but don't get executed automatically. They are not proper tests ATM, rather case-studies and references for stack tuning.
 #    #add_test(NAME OpenSoT_solvers_qpOases_PriorityInversion COMMAND testQPOases_PriorityInversion)
 #    add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
