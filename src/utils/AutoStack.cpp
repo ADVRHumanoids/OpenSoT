@@ -78,7 +78,7 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
     Eigen::MatrixXd W1 = aggregated1->getWeight();
     Eigen::MatrixXd W2 = aggregated2->getWeight();
     W.block(0,0,W1.rows(),W1.cols()) = W1;
-    W.block(W1.rows(),W1.cols(),W1.rows(),W1.cols()) = W2;
+    W.block(W1.rows(),W1.cols(),W2.rows(),W2.cols()) = W2;
     outAggregated->setWeight(W);
     outAggregated->getConstraints() = aggregated1->getConstraints();
     typedef std::list< OpenSoT::tasks::Aggregated::ConstraintPtr >::const_iterator it_c;
