@@ -153,6 +153,7 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
                     src/solvers/DampedPseudoInverse.cpp)
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
+                    src/utils/DefaultHumanoidStack.cpp
                     src/utils/Indices.cpp
                     src/utils/VelocityAllocation.cpp
                     src/utils/cartesian_utils.cpp)
@@ -176,7 +177,6 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
 #                    src/tasks/velocity/Interaction.cpp
-                    src/utils/DefaultHumanoidStack.cpp
                     #src/utils/PreviewerUtils.cpp
                     ${sot_INCLUDES})
 
