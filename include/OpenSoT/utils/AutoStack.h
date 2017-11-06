@@ -59,6 +59,8 @@ namespace OpenSoT {
             AutoStack(const double x_size);
 
         public:
+            AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
+
             AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack);
 
             AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,

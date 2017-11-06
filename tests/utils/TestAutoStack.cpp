@@ -273,6 +273,17 @@ TEST_F(testAutoStack, testOperatorRedirection)
     EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().front()->getConstraints().size(), 0);
 }
 
+TEST_F(testAutoStack, testTaskConstructor)
+{
+    using namespace OpenSoT;
+
+    AutoStack::Ptr autostack(new AutoStack(DHS->postural));
+    autostack = autostack<<DHS->jointLimits<<DHS->velocityLimits;
+
+    EXPECT_TRUE(autostack->getStack().size() == 1);
+    EXPECT_TRUE(autostack->getBoundsList().size() == 2);
+}
+
 }
 
 int main(int argc, char **argv) {

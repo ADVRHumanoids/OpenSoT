@@ -213,6 +213,15 @@ OpenSoT::AutoStack::AutoStack(const double x_size) :
 
 }
 
+OpenSoT::AutoStack::AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task):
+    _boundsAggregated(
+        new OpenSoT::constraints::Aggregated(
+            std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>(),
+            task->getXSize()))
+{
+    _stack.push_back(task);
+}
+
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack) :
     _stack(stack),
     _boundsAggregated(
