@@ -53,3 +53,54 @@ void OpenSoT::tasks::velocity::PureRolling::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id + "_world_contact_point", _world_T_wheel*_wheel_contact_point);
     logger->add(_task_id + "_value", _A*_qdot);
 }
+
+OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string wheel_link_name,
+                                                           double radius,
+                                                           const XBot::ModelInterface& model):
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_POSITION_" + wheel_link_name, model.getJointNum())
+{
+    _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
+                            wheel_link_name, radius, model));
+
+    _position_indices.push_back(0);
+    _position_indices.push_back(1);
+    _position_indices.push_back(2);
+
+    _subtask.reset(new OpenSoT::SubTask(_pure_rolling, _position_indices));
+
+    Eigen::VectorXd q;
+    model.getJointPosition(q);
+    _update(q);
+}
+
+void OpenSoT::tasks::velocity::PureRollingPosition::_update(const Eigen::VectorXd &x)
+{
+    _subtask->update(x);
+
+    _A = _subtask->getA();
+    _b = _subtask->getb();
+}
+
+OpenSoT::tasks::velocity::PureRollingOrientation::PureRollingOrientation(std::string wheel_link_name,
+                                                           double radius,
+                                                           const XBot::ModelInterface& model):
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_ORIENTATION_" + wheel_link_name, model.getJointNum())
+{
+    _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
+                            wheel_link_name, radius, model));
+
+    _orientation_indices.push_back(3);
+    _subtask.reset(new OpenSoT::SubTask(_pure_rolling, _orientation_indices));
+
+    Eigen::VectorXd q;
+    model.getJointPosition(q);
+    _update(q);
+}
+
+void OpenSoT::tasks::velocity::PureRollingOrientation::_update(const Eigen::VectorXd &x)
+{
+    _subtask->update(x);
+
+    _A = _subtask->getA();
+    _b = _subtask->getb();
+}

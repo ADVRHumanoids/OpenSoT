@@ -3,6 +3,7 @@
 
 #include <OpenSoT/Task.h>
 #include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/SubTask.h>
 
 namespace OpenSoT { namespace tasks { namespace velocity {
     
@@ -37,6 +38,44 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         Eigen::Affine3d _world_T_wheel;
     Eigen::Matrix3d _world_R_wheel;
         
+    };
+
+    class PureRollingPosition : public Task<Eigen::MatrixXd, Eigen::VectorXd>
+    {
+    public:
+        typedef boost::shared_ptr<PureRollingPosition> Ptr;
+
+        PureRollingPosition(std::string wheel_link_name,
+                    double radius,
+                    const XBot::ModelInterface& model);
+
+        virtual void _update(const Eigen::VectorXd& x);
+
+
+    private:
+        PureRolling::Ptr _pure_rolling;
+        OpenSoT::SubTask::Ptr _subtask;
+        std::list<unsigned int> _position_indices;
+
+    };
+
+    class PureRollingOrientation : public Task<Eigen::MatrixXd, Eigen::VectorXd>
+    {
+    public:
+        typedef boost::shared_ptr<PureRollingOrientation> Ptr;
+
+        PureRollingOrientation(std::string wheel_link_name,
+                    double radius,
+                    const XBot::ModelInterface& model);
+
+        virtual void _update(const Eigen::VectorXd& x);
+
+
+    private:
+        PureRolling::Ptr _pure_rolling;
+        OpenSoT::SubTask::Ptr _subtask;
+        std::list<unsigned int> _orientation_indices;
+
     };
     
 } } }
