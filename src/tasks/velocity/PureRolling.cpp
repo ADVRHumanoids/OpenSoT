@@ -56,7 +56,8 @@ void OpenSoT::tasks::velocity::PureRolling::_log(XBot::MatLogger::Ptr logger)
 
 OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string wheel_link_name,
                                                            double radius,
-                                                           const XBot::ModelInterface& model):
+                                                           const XBot::ModelInterface& model,
+                                                           const bool control_z):
     Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_POSITION_" + wheel_link_name, model.getJointNum())
 {
     _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
@@ -64,7 +65,8 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
 
     _position_indices.push_back(0);
     _position_indices.push_back(1);
-    _position_indices.push_back(2);
+    if(control_z)
+        _position_indices.push_back(2);
 
     _subtask.reset(new OpenSoT::SubTask(_pure_rolling, _position_indices));
 

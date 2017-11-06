@@ -47,7 +47,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
 
         PureRollingPosition(std::string wheel_link_name,
                     double radius,
-                    const XBot::ModelInterface& model);
+                    const XBot::ModelInterface& model,
+                    const bool control_z = false);
 
         virtual void _update(const Eigen::VectorXd& x);
 
