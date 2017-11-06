@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi, Enrico Mingo
+ * Author: Alessio Rocchi, Enrico Mingo Hoffman
  * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
@@ -20,14 +20,13 @@
 
 #include <OpenSoT/OpenSoT.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
-#include <advr_humanoids_common_utils/idynutils.h>
+#include <XBotInterface/ModelInterface.h>
 
  namespace OpenSoT {
 
      class DefaultHumanoidStack
      {
         public:
-         typedef idynutils2 iDynUtils;
          typedef boost::shared_ptr<DefaultHumanoidStack> Ptr;
 
          /**
@@ -37,79 +36,64 @@
           * @param dT the control time in [s].
           * @param state
           */
-         DefaultHumanoidStack(iDynUtils &model,
+         DefaultHumanoidStack(XBot::ModelInterface &model,
                               const double dT,
+                              std::string base_link,
+                              std::string l_hand, std::string r_hand,
+                              std::string l_foot, std::string r_foot,
+                              double joint_velocity_limits,
                               const Eigen::VectorXd& state);
 
          virtual ~DefaultHumanoidStack() {}
 
          // tasks
-         const tasks::velocity::Cartesian::Ptr leftArm;
-         const SubTask::Ptr leftArm_Position;
-         const SubTask::Ptr leftArm_Orientation;
+         tasks::velocity::Cartesian::Ptr leftArm;
+         SubTask::Ptr leftArm_Position;
+         SubTask::Ptr leftArm_Orientation;
 
-         const tasks::velocity::Cartesian::Ptr rightArm;
-         const SubTask::Ptr rightArm_Position;
-         const SubTask::Ptr rightArm_Orientation;
+         tasks::velocity::Cartesian::Ptr rightArm;
+         SubTask::Ptr rightArm_Position;
+         SubTask::Ptr rightArm_Orientation;
 
-         const tasks::velocity::Cartesian::Ptr TCP_L;
-         const tasks::velocity::Cartesian::Ptr TCP_R;
+         tasks::velocity::Cartesian::Ptr waist2LeftArm;
+         SubTask::Ptr  waist2LeftArm_Position;
+         SubTask::Ptr  waist2LeftArm_Orientation;
 
-         const tasks::velocity::Cartesian::Ptr waist2LeftArm;
-         const SubTask::Ptr  waist2LeftArm_Position;
-         const SubTask::Ptr  waist2LeftArm_Orientation;
+         tasks::velocity::Cartesian::Ptr waist2RightArm;
+         SubTask::Ptr   waist2RightArm_Position;
+         SubTask::Ptr   waist2RightArm_Orientation;
 
-         const tasks::velocity::Cartesian::Ptr waist2RightArm;
-         const SubTask::Ptr   waist2RightArm_Position;
-         const SubTask::Ptr   waist2RightArm_Orientation;
+         tasks::velocity::Cartesian::Ptr leftLeg;
+         SubTask::Ptr   leftLeg_Position;
+         SubTask::Ptr   leftLeg_Orientation;
 
-         const tasks::velocity::Cartesian::Ptr leftLeg;
-         const SubTask::Ptr   leftLeg_Position;
-         const SubTask::Ptr   leftLeg_Orientation;
+         tasks::velocity::Cartesian::Ptr rightLeg;
+         SubTask::Ptr   rightLeg_Position;
+         SubTask::Ptr   rightLeg_Orientation;
 
-         const tasks::velocity::Cartesian::Ptr rightLeg;
-         const SubTask::Ptr   rightLeg_Position;
-         const SubTask::Ptr   rightLeg_Orientation;
+         tasks::velocity::Cartesian::Ptr right2LeftLeg;
 
-         const tasks::velocity::Cartesian::Ptr right2LeftLeg;
+         tasks::velocity::Cartesian::Ptr waist;
+         SubTask::Ptr waist_Position;
+         SubTask::Ptr waist_Position_XY;
+         SubTask::Ptr waist_Position_Z;
+         SubTask::Ptr waist_Orientation;
 
-         const tasks::velocity::Cartesian::Ptr waist;
-         const SubTask::Ptr waist_Position;
-         const SubTask::Ptr waist_Position_XY;
-         const SubTask::Ptr waist_Position_Z;
-         const SubTask::Ptr waist_Orientation;
+         tasks::velocity::CoM::Ptr com;
+         SubTask::Ptr com_XY;
+         SubTask::Ptr com_Z;
 
-         const tasks::velocity::CoM::Ptr com;
-         const SubTask::Ptr com_XY;
-         const SubTask::Ptr com_Z;
+         tasks::velocity::Gaze::Ptr gaze;
+         tasks::velocity::Gaze::Ptr waist2gaze;
 
-         const tasks::velocity::Gaze::Ptr gaze;
-         const tasks::velocity::Gaze::Ptr waist2gaze;
-
-         const tasks::velocity::MinimumEffort::Ptr minimumEffort;
-         const tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
-         const tasks::velocity::Postural::Ptr postural;
-         // TODO do we need 5 duplicates of the Postural?
-         const tasks::velocity::Postural::Ptr posturalForTorso;
-         const tasks::velocity::Postural::Ptr posturalForArms;
-         const tasks::velocity::Postural::Ptr posturalForLegs;
-         const tasks::velocity::Postural::Ptr posturalForLimbs;
-         const tasks::velocity::Postural::Ptr posturalForLimbsAndHead;
-         const SubTask::Ptr postural_Torso;
-         const SubTask::Ptr postural_Arms;
-         const SubTask::Ptr postural_Legs;
-         const SubTask::Ptr postural_Limbs;
-         const SubTask::Ptr postural_LimbsAndHead;
-         const tasks::velocity::MinimizeAcceleration::Ptr minimumAcceleration;
+         tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
+         tasks::velocity::Postural::Ptr postural;
+         tasks::velocity::MinimizeAcceleration::Ptr minimumAcceleration;
 
 
-         // constraints
-         const constraints::velocity::CoMVelocity::Ptr comVelocity;
-         const constraints::velocity::ConvexHull::Ptr convexHull;
-         const constraints::velocity::JointLimits::Ptr jointLimits;
-         const constraints::velocity::SelfCollisionAvoidance::Ptr selfCollisionAvoidance;
-         const constraints::velocity::Dynamics::Ptr torqueLimits;
-         const constraints::velocity::VelocityLimits::Ptr velocityLimits;
+         constraints::velocity::CoMVelocity::Ptr comVelocity;
+         constraints::velocity::JointLimits::Ptr jointLimits;
+         constraints::velocity::VelocityLimits::Ptr velocityLimits;
      };
  };
 

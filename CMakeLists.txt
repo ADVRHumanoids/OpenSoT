@@ -176,7 +176,7 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
 #                    src/tasks/velocity/Interaction.cpp
-#                    src/utils/DefaultHumanoidStack.cpp
+                    src/utils/DefaultHumanoidStack.cpp
                     #src/utils/PreviewerUtils.cpp
                     ${sot_INCLUDES})
 
