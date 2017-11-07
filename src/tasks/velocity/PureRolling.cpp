@@ -62,13 +62,15 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
 {
     _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
                             wheel_link_name, radius, model));
-
+	
     _position_indices.push_back(0);
     _position_indices.push_back(1);
     if(control_z)
         _position_indices.push_back(2);
 
     _subtask.reset(new OpenSoT::SubTask(_pure_rolling, _position_indices));
+	
+	
 
     Eigen::VectorXd q;
     model.getJointPosition(q);
@@ -81,6 +83,7 @@ void OpenSoT::tasks::velocity::PureRollingPosition::_update(const Eigen::VectorX
 
     _A = _subtask->getA();
     _b = _subtask->getb();
+	_W = _subtask->getWeight();
 }
 
 OpenSoT::tasks::velocity::PureRollingOrientation::PureRollingOrientation(std::string wheel_link_name,
@@ -105,4 +108,5 @@ void OpenSoT::tasks::velocity::PureRollingOrientation::_update(const Eigen::Vect
 
     _A = _subtask->getA();
     _b = _subtask->getb();
+	_W = _subtask->getWeight();
 }
