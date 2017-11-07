@@ -18,7 +18,14 @@
 #ifndef __DEFAULTHUMANOIDSTACK_H__
 #define __DEFAULTHUMANOIDSTACK_H__
 
-#include <OpenSoT/OpenSoT.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
+#include <OpenSoT/tasks/velocity/MinimumVelocity.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/constraints/velocity/CoMVelocity.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
 #include <XBotInterface/ModelInterface.h>
 

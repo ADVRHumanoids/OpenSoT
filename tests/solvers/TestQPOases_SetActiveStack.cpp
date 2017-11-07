@@ -3,7 +3,8 @@
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <OpenSoT/constraints/velocity/all.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <fstream>

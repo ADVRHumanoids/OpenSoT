@@ -6,9 +6,14 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <OpenSoT/constraints/velocity/all.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/solvers/QPOases.h>
-#include <OpenSoT/tasks/velocity/all.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
+#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/ConvexHull.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <yarp/math/Math.h>
 #include <yarp/sig/all.h>
