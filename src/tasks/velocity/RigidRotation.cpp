@@ -124,7 +124,8 @@ void OpenSoT::tasks::velocity::RigidRotation::_update(const Eigen::VectorXd& x)
     _S.setZero(3,6);
     _S << 1, 0, 0, 0, 0, 0,
           0, 1, 0, 0, 0, 0,
-          0, 0, 0, _world_contact_plane_normal.transpose();
+		  //0, 0, 0, 0, 0, 0,
+		  0, 0, 0, _world_contact_plane_normal.transpose();
     
     _A = _S * _Jrel;
     _b.setZero(3);

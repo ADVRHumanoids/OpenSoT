@@ -113,7 +113,7 @@ void Unicycle::_update(const Eigen::VectorXd &x) {
 
     _A = _constA*_J;//_R*_J;
 	_AuxVector=_A.row(2);
-	_A.row(2)=_AuxVector+_Swheel*-_signcorrection;
+	_A.row(2)=_AuxVector+_Swheel*_signcorrection;
 
     /**********************************************************************/
 }
