@@ -167,7 +167,7 @@ public:
 
     }
 
-    std::map<std::string,fcl::CollisionGeometryPtr > getShapes()
+    std::map<std::string,boost::shared_ptr<fcl::CollisionGeometry> > getShapes()
     {
         return _computeDistance.shapes_;
     }

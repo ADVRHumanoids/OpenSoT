@@ -19,8 +19,8 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
         new OpenSoT::tasks::Aggregated(taskList,
                                        task->getXSize()));
 
-    yarp::sig::Matrix W = outAggregated->getWeight();
-    W.setSubmatrix(aggregated->getWeight(),0,0);
+    Eigen::MatrixXd W = outAggregated->getWeight();
+    W.block(0,0,aggregated->getWeight().rows(), aggregated->getWeight().cols()) = aggregated->getWeight();
     outAggregated->setWeight(W);
     //outAggregated->setLambda(aggregated->getLambda());
     outAggregated->getConstraints() = aggregated->getConstraints();
@@ -37,10 +37,11 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ta
         new OpenSoT::tasks::Aggregated(taskList,
                                        task->getXSize()));
 
-    yarp::sig::Matrix W = outAggregated->getWeight();
-    yarp::sig::Matrix W_aggregated = aggregated->getWeight();
-    W.setSubmatrix(W_aggregated,W.rows()-W_aggregated.rows(),
-                                W.cols()-W_aggregated.cols());
+    Eigen::MatrixXd W = outAggregated->getWeight();
+    Eigen::MatrixXd W_aggregated = aggregated->getWeight();
+    double r = W.rows()-W_aggregated.rows();
+    double c = W.cols()-W_aggregated.cols();
+    W.block(r,c,W_aggregated.rows(),W_aggregated.cols()) = W_aggregated;
     outAggregated->setWeight(W);
     //outAggregated->setLambda(aggregated->getLambda());
     outAggregated->getConstraints() = aggregated->getConstraints();
@@ -73,13 +74,12 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
                                             aggregated1->getXSize()));
     }
 
-    yarp::sig::Matrix W = outAggregated->getWeight();
-    yarp::sig::Matrix W1 = aggregated1->getWeight();
-    yarp::sig::Matrix W2 = aggregated2->getWeight();
-    W.setSubmatrix(W1,0,0);
-    W.setSubmatrix(W2,W1.rows(), W1.cols());
+    Eigen::MatrixXd W = outAggregated->getWeight();
+    Eigen::MatrixXd W1 = aggregated1->getWeight();
+    Eigen::MatrixXd W2 = aggregated2->getWeight();
+    W.block(0,0,W1.rows(),W1.cols()) = W1;
+    W.block(W1.rows(),W1.cols(),W1.rows(),W1.cols()) = W2;
     outAggregated->setWeight(W);
-
     outAggregated->getConstraints() = aggregated1->getConstraints();
     typedef std::list< OpenSoT::tasks::Aggregated::ConstraintPtr >::const_iterator it_c;
     for(it_c constraint = aggregated2->getConstraints().begin();
@@ -234,7 +234,7 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
 
 }
 
-void OpenSoT::AutoStack::update(const Vector &state)
+void OpenSoT::AutoStack::update(const Eigen::VectorXd &state)
 {
     _boundsAggregated->update(state);
     typedef std::vector<OpenSoT::tasks::Aggregated::TaskPtr>::iterator it_t;
