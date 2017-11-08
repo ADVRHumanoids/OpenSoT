@@ -56,6 +56,8 @@
                 
             protected:
                 
+                virtual void _log(XBot::MatLogger::Ptr logger);
+                
                 XBot::ModelInterface& _robot;
 
                 std::string _distal_link;
