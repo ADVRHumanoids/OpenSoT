@@ -284,6 +284,37 @@ TEST_F(testAutoStack, testTaskConstructor)
     EXPECT_TRUE(autostack->getBoundsList().size() == 2);
 }
 
+TEST_F(testAutoStack, testOperatorModulo)
+{
+    using namespace OpenSoT;
+
+    std::list<unsigned int> indices;
+    indices.push_back(0);
+    indices.push_back(2);
+    indices.push_back(3);
+
+    OpenSoT::SubTask::Ptr sub_task = DHS->leftArm%indices;
+
+    EXPECT_EQ(sub_task->getA().rows(), 3);
+    EXPECT_EQ(sub_task->getA().cols(), DHS->leftArm->getA().cols());
+    EXPECT_EQ(sub_task->getb().size(), 3);
+    EXPECT_EQ(sub_task->getWeight().rows(), 3);
+    EXPECT_EQ(sub_task->getWeight().cols(), 3);
+
+    KDL::Frame ref; ref.Identity();
+    DHS->leftArm->setReference(ref);
+
+    sub_task->update(Eigen::VectorXd::Zero(DHS->leftArm->getA().cols()));
+
+    EXPECT_TRUE(sub_task->getA().row(0) == DHS->leftArm->getA().row(0));
+    EXPECT_TRUE(sub_task->getA().row(1) == DHS->leftArm->getA().row(2));
+    EXPECT_TRUE(sub_task->getA().row(2) == DHS->leftArm->getA().row(3));
+
+    EXPECT_TRUE(sub_task->getb()[0] == DHS->leftArm->getb()[0]);
+    EXPECT_TRUE(sub_task->getb()[1] == DHS->leftArm->getb()[2]);
+    EXPECT_TRUE(sub_task->getb()[2] == DHS->leftArm->getb()[3]);
+}
+
 }
 
 int main(int argc, char **argv) {

@@ -24,6 +24,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <XBotInterface/Logger.hpp>
+#include <OpenSoT/SubTask.h>
 
 /**
  * @example example_autostack.cpp
@@ -96,6 +97,17 @@ namespace OpenSoT {
             OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& task_id);
     };    
 }
+
+/**
+ * @brief operator % takes a task and a list of indices, generates a subtask
+ * @param task a task pointer
+ * @param rowIndices list of indices
+ * @return a pointer to a SubTask generated from task with the given indices
+ * TODO: this will not work with tasks under the folder torque, in that case another solution
+ * should be found
+ */
+OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
+                                const std::list<unsigned int> rowIndices);
 
 /**
  * @brief operator + takes two tasks, generates a new Aggregated task
