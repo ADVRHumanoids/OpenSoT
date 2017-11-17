@@ -111,7 +111,9 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
 #                      #testPreviewer
 #                      testVelocityAllocation
                         #YARP FREE
-                       TestQPOases_SetActiveStack #YARP_FREE
+                       TestQPOases_SetActiveStack 
+                       testAffineHelper
+                       
 )
 
 if(${fcl_FOUND})
@@ -195,6 +197,12 @@ ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
+
+ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
+TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
+add_dependencies(testAffineHelper GTest-ext OpenSoT)
+add_test(NAME OpenSoT_utils_affineHelper COMMAND testAffineHelper)
+
 
 if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
     ADD_EXECUTABLE(testQPOases_StaticWalk_FloatingBase solvers/TestQPOases_StaticWalk_FloatingBase.cpp)

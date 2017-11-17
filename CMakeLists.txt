@@ -136,6 +136,7 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
                     src/solvers/DampedPseudoInverse.cpp)
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
+                    src/utils/AffineHelper.cpp
                     src/utils/Indices.cpp
                     src/utils/VelocityAllocation.cpp
                     src/utils/cartesian_utils.cpp)
@@ -150,11 +151,15 @@ if(${PCL_FOUND})
         src/utils/convex_hull_utils.cpp)
 endif()
 
+##VARIABLES
+set(OPENSOT_VARIABLES_SOURCES src/variables/Torque.cpp)
+
 ADD_LIBRARY(OpenSoT SHARED
                     ${OPENSOT_CONSTRAINTS_SOURCES}
                     ${OPENSOT_TASKS_SOURCES}
                     ${OPENSOT_SOLVERS_SOURCES}
                     ${OPENSOT_UTILS_SOURCES}
+                    ${OPENSOT_VARIABLES_SOURCES}
 #                    src/constraints/velocity/Dynamics.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
@@ -268,3 +273,4 @@ if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
     add_custom_target(copy_robot_model_files ALL
                       ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()
+
