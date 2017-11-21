@@ -40,7 +40,7 @@ class AffineVectorSum;
 
 /* Base class for AffineHelpers */
 
-template <typename DerivedM, typename DerivedQ>
+
 /**
  * @brief This class models an affine mapping between an "input variable" x,
  * and an "output variable" y. The underlying math is:
@@ -56,6 +56,8 @@ template <typename DerivedM, typename DerivedQ>
  * where x = tau, by passing the affine mapping y = x.
  * 
  */
+
+template <typename DerivedM, typename DerivedQ>
 class AffineHelperBase {
     
 public:
@@ -85,19 +87,7 @@ public:
     }
     
     template <typename OtherM, typename OtherQ>
-    AffineAffineSum<DerivedM, OtherM, DerivedQ, OtherQ> operator+(const AffineHelperBase<OtherM, OtherQ>& other) const;
-    
-    template <typename OtherM, typename OtherQ>
     AffineHelperBase<DerivedM, DerivedQ>& operator+=(const AffineHelperBase<OtherM, OtherQ>& other);
-    
-    template <typename DerivedVector>
-    AffineVectorSum<DerivedVector, DerivedM, DerivedQ> operator+(const DerivedVector& vector) const;
-    
-    template <typename DerivedVector>
-    AffineVectorSum<DerivedVector, DerivedM, DerivedQ> operator-(const DerivedVector& vector) const
-    {
-        return operator+(-vector);
-    }
     
     const DerivedM& getM() const { return _M; }
     const DerivedQ& getq() const { return _q; }
@@ -110,6 +100,14 @@ public:
         _M.setZero(output_size, input_size);
         _q.setZero(output_size);
         check_consistency();
+    }
+    
+    static AffineHelperBase<DerivedM, DerivedQ> Identity(int size)
+    {
+        DerivedM m = Eigen::MatrixBase<DerivedM>::Identity(size, size);
+        DerivedQ q = Eigen::MatrixBase<DerivedQ>::Zero(size, 1);
+        
+        return AffineHelperBase(m, q);
     }
     
     void setZero()
@@ -159,7 +157,9 @@ public:
     
     OptvarHelper(VariableVector name_size_pairs);
     
-    AffineHelper getVar(std::string name) const;
+    AffineHelper getVariable(std::string name) const;
+    
+    std::vector<AffineHelper> getAllVariables() const;
     
     int getSize() const;
     
@@ -168,6 +168,7 @@ private:
     struct VarInfo {
         int start_idx;
         int size;
+        std::string name;
     };
     
     std::vector<VarInfo> _vars;
@@ -199,6 +200,9 @@ namespace internal {
     
     template <typename Derived1, typename Derived2>
     using Product = Eigen::Product<Derived1, Derived2, 0>;
+    
+    template <typename VectorType>
+    using MinusType = Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, const VectorType >;
 }
 
 template <typename DerivedM1, typename DerivedM2, typename DerivedQ1, typename DerivedQ2>
@@ -241,7 +245,7 @@ class AffineVectorSum : public AffineHelperBase< const DerivedM&, internal::Sum<
     
 public:
     
-    AffineVectorSum(const DerivedVector& vector, 
+    AffineVectorSum(const Eigen::MatrixBase<DerivedVector>& vector, 
                         const AffineHelperBase<DerivedM, DerivedQ>& affine):
         AffineHelperBase< const DerivedM&, internal::Sum<DerivedVector, DerivedQ> >(affine.getM(), vector + affine.getq())
     {
@@ -250,32 +254,70 @@ public:
     
 };
 
-template <typename DerivedM, typename DerivedQ>
-template <typename OtherM, typename OtherQ>
-inline AffineAffineSum<DerivedM, OtherM, DerivedQ, OtherQ> AffineHelperBase<DerivedM, DerivedQ>::operator+(const AffineHelperBase<OtherM, OtherQ>& other) const
+template <typename DerivedM1, typename DerivedM2, 
+          typename DerivedQ1, typename DerivedQ2>
+inline AffineAffineSum<DerivedM1, DerivedM2, DerivedQ1, DerivedQ2> operator+(const AffineHelperBase<DerivedM1, DerivedQ1>& lhs, 
+                                                                             const AffineHelperBase<DerivedM2, DerivedQ2>& rhs)
 {
-    AffineAffineSum<DerivedM, OtherM, DerivedQ, OtherQ> sum(*this, other);
-    
+    AffineAffineSum<DerivedM1, DerivedM2, DerivedQ1, DerivedQ2> sum(lhs, rhs);
     return sum;
 }
 
-template <typename DerivedM, typename DerivedQ>
-template <typename DerivedVector>
-inline AffineVectorSum<DerivedVector, DerivedM, DerivedQ> AffineHelperBase<DerivedM, DerivedQ>::operator+(const DerivedVector& vector) const
+
+
+template <typename DerivedM1, typename DerivedQ1,
+          typename DerivedVector>
+inline AffineVectorSum<DerivedVector, DerivedM1, DerivedQ1> operator+(const AffineHelperBase<DerivedM1, DerivedQ1>& lhs,
+                                                                    const Eigen::MatrixBase<DerivedVector>& vector)
 {
-    AffineVectorSum<DerivedVector, DerivedM, DerivedQ> sum(vector, *this);
-    
+    AffineVectorSum<DerivedVector, DerivedM1, DerivedQ1> sum(vector, lhs);
     return sum;
 }
+
+
+template <typename DerivedM1, typename DerivedQ1,
+          typename DerivedVector>
+inline AffineVectorSum<internal::MinusType<DerivedVector>, DerivedM1, DerivedQ1> operator-(const AffineHelperBase<DerivedM1, DerivedQ1>& lhs,
+                                                                    const Eigen::MatrixBase<DerivedVector>& vector)
+{
+    AffineVectorSum<internal::MinusType<DerivedVector>, DerivedM1, DerivedQ1> sum(-vector, lhs);
+    return sum;
+}
+
 
 
 template <typename DerivedMatrix, typename DerivedM, typename DerivedQ>
-inline MatrixAffineProduct<DerivedMatrix, DerivedM, DerivedQ> operator*(const DerivedMatrix& matrix, const AffineHelperBase<DerivedM, DerivedQ>& affine)
+inline MatrixAffineProduct<DerivedMatrix, DerivedM, DerivedQ> operator*(const DerivedMatrix& matrix, 
+                                                                        const AffineHelperBase<DerivedM, DerivedQ>& affine)
 {
     MatrixAffineProduct<DerivedMatrix, DerivedM, DerivedQ> prod(matrix, affine);
     
     return prod;
 }
+
+
+template <typename DerivedM1, typename DerivedM2, 
+          typename DerivedQ1, typename DerivedQ2>
+inline AffineHelper operator/(const AffineHelperBase<DerivedM1, DerivedQ1>& lhs, 
+                              const AffineHelperBase<DerivedM2, DerivedQ2>& rhs)
+{
+    if(lhs.getInputSize() != rhs.getInputSize()){
+        throw std::invalid_argument("lhs.getInputSize() != rhs.getInputSize()");
+    }
+    
+    int input_size = lhs.getInputSize();
+    int output_size = lhs.getOutputSize() + rhs.getOutputSize();
+    
+    Eigen::MatrixXd M3(output_size, input_size);
+    Eigen::VectorXd q3(output_size);
+    
+    M3 << lhs.getM(), rhs.getM();
+    q3 << lhs.getq(), rhs.getq();
+    
+    return AffineHelper(M3, q3);
+    
+}
+
 
 
 

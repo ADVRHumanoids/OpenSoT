@@ -42,10 +42,10 @@ TEST_F(testAffineHelper, checkBasics)
     EXPECT_EQ( opt_helper.getSize(), 10+9+1+5 );
     
     
-    OpenSoT::AffineHelper var1 = opt_helper.getVar("var1");
-    OpenSoT::AffineHelper var2 = opt_helper.getVar("var2");
-    OpenSoT::AffineHelper var3 = opt_helper.getVar("var3");
-    OpenSoT::AffineHelper var4 = opt_helper.getVar("var4");
+    OpenSoT::AffineHelper var1 = opt_helper.getVariable("var1");
+    OpenSoT::AffineHelper var2 = opt_helper.getVariable("var2");
+    OpenSoT::AffineHelper var3 = opt_helper.getVariable("var3");
+    OpenSoT::AffineHelper var4 = opt_helper.getVariable("var4");
     
     EXPECT_EQ( var1.getInputSize(), opt_helper.getSize() );
     EXPECT_EQ( var1.getOutputSize(), 10 );
@@ -212,6 +212,29 @@ TEST_F( testAffineHelper, checkAffineBase ){
     aff1 = aff1 + b;
     
     EXPECT_NEAR( ( aff2.getq() + b - aff1.getq() ).norm(), 0, 0.00001 );
+    
+}
+
+
+TEST_F( testAffineHelper, checkOperatorPile )
+{
+    Eigen::MatrixXd M1, M2;
+    Eigen::VectorXd q1, q2;
+    
+    M1.setRandom(20, 50);
+    M2.setRandom(15, M1.cols());
+    
+    q1.setRandom(M1.rows());
+    q2.setRandom(M2.rows());
+    
+    OpenSoT::AffineHelper aff1(M1, q1);
+    OpenSoT::AffineHelper aff2(M2, q2);
+    
+    auto aff3 = aff1 / aff2;
+    
+    EXPECT_EQ( (aff3.getM().block(0,0,aff1.getOutputSize(),aff1.getInputSize()) - aff1.getM()).norm(), 0 );
+    EXPECT_EQ( (aff3.getM().bottomRows(aff2.getOutputSize()) - aff2.getM()).norm(), 0 );
+    
 }
 
 
@@ -224,12 +247,13 @@ TEST_F( testAffineHelper, checkTorque )
     model->setJointAcceleration(Eigen::VectorXd::Random(model->getJointNum()));
     model->update();
     
-    OpenSoT::OptvarHelper::VariableVector vars;
-    vars.emplace_back("qddot", model->getJointNum());
+    OpenSoT::OptvarHelper::VariableVector vars = {
+                                                    {"qddot", model->getJointNum()}
+                                                 };
     
     OpenSoT::OptvarHelper opt(vars);
     
-    auto qddot = opt.getVar("qddot");
+    auto qddot = opt.getVariable("qddot");
     
     OpenSoT::variables::Torque tau(model, qddot);
     

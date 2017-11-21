@@ -20,6 +20,7 @@ OpenSoT::OptvarHelper::OptvarHelper(std::vector< std::pair< std::string, int > >
         VarInfo vinfo;
         vinfo.size = pair.second;
         vinfo.start_idx = _size;
+        vinfo.name = pair.first;
         
         _size += vinfo.size;
         
@@ -29,7 +30,7 @@ OpenSoT::OptvarHelper::OptvarHelper(std::vector< std::pair< std::string, int > >
     }
 }
 
-OpenSoT::AffineHelper OpenSoT::OptvarHelper::getVar(std::string name) const
+OpenSoT::AffineHelper OpenSoT::OptvarHelper::getVariable(std::string name) const
 {
     auto it = _vars_map.find(name);
     
@@ -50,6 +51,17 @@ OpenSoT::AffineHelper OpenSoT::OptvarHelper::getVar(std::string name) const
     return OpenSoT::AffineHelper(M, q);
     
 }
+
+std::vector< OpenSoT::AffineHelper > OpenSoT::OptvarHelper::getAllVariables() const
+{
+    std::vector<OpenSoT::AffineHelper> all_vars;
+    for(auto v : _vars){
+        all_vars.push_back( getVariable(v.name) );
+    }
+    
+    return all_vars;
+}
+
 
 
 
