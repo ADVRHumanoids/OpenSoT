@@ -91,6 +91,7 @@ file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
+                    src/constraints/acceleration/DynamicFeasibility.cpp
                     src/constraints/velocity/CartesianPositionConstraint.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
                     src/constraints/velocity/CoMVelocity.cpp
@@ -113,6 +114,7 @@ endif()
 ##TASKS
 set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
+                    src/tasks/acceleration/Postural.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/PureRolling.cpp
                     src/tasks/velocity/RigidRotation.cpp
