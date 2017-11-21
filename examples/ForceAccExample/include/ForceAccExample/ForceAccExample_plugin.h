@@ -103,7 +103,7 @@ bool XBotPlugin::ForceAccExample::init_control_plugin(XBot::Handle::Ptr handle)
     
     
     
-    _solver = boost::make_shared<OpenSoT::solvers::QPOases_sot>();
+    
     
     _com_task = boost::make_shared<OpenSoT::tasks::force::CoM>(_wrenches, contact_links, *_model);
     
@@ -119,6 +119,10 @@ bool XBotPlugin::ForceAccExample::init_control_plugin(XBot::Handle::Ptr handle)
                                                                                           );
     
 //     _autostack = (_postural_task + _com_task) << _dyn_feas;
+    
+    _solver = boost::make_shared<OpenSoT::solvers::QPOases_sot>(_autostack->getStack(), _autostack->getBounds());
+    
+    return true;
 }
 
 
