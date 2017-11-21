@@ -25,8 +25,9 @@ using namespace OpenSoT::tasks::force;
 
 #define LAMBDA_THS 1E-12
 
-CoM::CoM(   const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact,
-            XBot::ModelInterface &robot) :
+CoM::CoM( const Eigen::VectorXd& x, 
+          std::vector<std::string>& links_in_contact,
+          XBot::ModelInterface &robot) :
     Task("CoM", x.rows()), _robot(robot),
     _desiredPosition(), _desiredVelocity(), _desiredAcceleration(),
     _actualPosition(), _actualVelocity(), _actualAngularMomentum(),
@@ -78,9 +79,87 @@ CoM::CoM(   const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact
     _O.setZero();
 
     this->_update(x);
+    
+    OptvarHelper::VariableVector var;
+    
+    for(auto l : links_in_contact){
+        var.emplace_back(l + "_wrench", 6);
+    }
+    
+    OptvarHelper opt(var);
+    
+    for( auto v : opt.getAllVariables() ){
+        _wrenches = _wrenches / v;
+    }
+    
 
     _hessianType = HST_SEMIDEF;
 }
+
+
+CoM::CoM( std::vector<AffineHelper> wrenches, 
+          std::vector<std::string>& links_in_contact,
+          XBot::ModelInterface &robot) :
+    Task("CoM", wrenches[0].getInputSize()), _robot(robot),
+    _desiredPosition(), _desiredVelocity(), _desiredAcceleration(),
+    _actualPosition(), _actualVelocity(), _actualAngularMomentum(),
+    _desiredVariationAngularMomentum(), _desiredAngularMomentum(),
+    positionError(), velocityError(), angularMomentumError(),
+    _links_in_contact(links_in_contact),_I(), _O(), _P(), _T(),
+    _g(),
+    _lambda2(1.0), _lambdaAngularMomentum(1.0),
+    A(3,6),B(3,6)
+{
+    A.setZero(3,6);
+    B.setZero(3,6);
+
+    _desiredPosition.setZero();
+    _desiredVelocity.setZero();
+    _desiredAcceleration.setZero();
+
+    _desiredVariationAngularMomentum.setZero();
+    _desiredAngularMomentum.setZero();
+
+    _actualPosition.setZero();
+    _actualVelocity.setZero();
+    _actualAngularMomentum.setZero();
+
+    positionError.setZero();
+    velocityError.setZero();
+    angularMomentumError.setZero();
+
+    _centroidalMomentum.setZero();
+
+    _P.setZero();
+    _T.matrix().setZero();
+
+    _g.setZero();
+    _g(2) = -9.81;
+
+    _robot.getCOM(_desiredPosition);
+    _robot.getCOMVelocity(_desiredVelocity);
+    _robot.getCentroidalMomentum(_centroidalMomentum);
+    _desiredAngularMomentum = _centroidalMomentum.segment(3,3);
+    /* first update. Setting desired pose equal to the actual pose */
+
+    _W.resize(6,6);
+    _W.setIdentity(6,6);
+    _lambda = 1.0;
+
+
+    _I.setIdentity();
+    _O.setZero();
+
+    this->_update(Eigen::VectorXd());
+    
+    for( auto v : wrenches ){
+        _wrenches = _wrenches / v;
+    }
+
+    _hessianType = HST_SEMIDEF;
+}
+
+
 
 CoM::~CoM()
 {
@@ -117,6 +196,12 @@ void CoM::_update(const Eigen::VectorXd &x)
       * that maps the Fcom to the Fd
     **/
     _A = computeA(_links_in_contact);
+    
+    
+    _com_task = _A*_wrenches + _b;
+    
+    _A = _com_task.getM();
+    _b = _com_task.getq();
     /**********************************************************************/
 }
 

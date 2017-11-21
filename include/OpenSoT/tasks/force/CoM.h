@@ -21,7 +21,7 @@
 #include <OpenSoT/Task.h>
 #include <XBotInterface/ModelInterface.h>
 #include <kdl/frames.hpp>
-
+#include <OpenSoT/utils/AffineHelper.h>
 
  namespace OpenSoT {
     namespace tasks {
@@ -39,12 +39,19 @@
              *
              */
             class CoM : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+                
             public:
+                
                 typedef boost::shared_ptr<CoM> Ptr;
+                
             private:
+                
                 #define BASE_LINK_COM "world"
                 #define DISTAL_LINK_COM "CoM"
-
+                
+                AffineHelper _wrenches;
+                AffineHelper _com_task;
+                
                 XBot::ModelInterface& _robot;
 
                 /**
@@ -89,6 +96,7 @@
 
             public:
 
+                
                 Eigen::Vector3d positionError;
                 Eigen::Vector3d velocityError;
                 Eigen::Vector3d angularMomentumError;
@@ -98,7 +106,13 @@
                  * @param x the initial configuration of the robot
                  * @param robot the robot model, with floating base link set on the support foot
                  */
-                CoM(const Eigen::VectorXd& x, std::vector<std::string>& links_in_contact,
+                CoM(const Eigen::VectorXd& x, 
+                    std::vector<std::string>& links_in_contact,
+                    XBot::ModelInterface& robot);
+                
+                
+                CoM(std::vector<AffineHelper> wrenches,
+                    std::vector<std::string>& links_in_contact,
                     XBot::ModelInterface& robot);
 
                 ~CoM();
