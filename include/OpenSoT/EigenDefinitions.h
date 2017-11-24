@@ -5,8 +5,8 @@
  * These sizes are computed considering the  EIGEN_STACK_ALLOCATION_LIMIT
  * that is 128*128*8 = 131072
  *
- * If you want more, uncomment the following:
- * #define EIGEN_STACK_ALLOCATION_LIMIT 1000000
+ * If you want more, enable OPENSOT_CHANGE_STACK_ALLOCATION_LIMIT in the CMakeLists.txt
+ * and change the limit inside the definition -DEIGEN_STACK_ALLOCATION_LIMIT.
  **/
 
 //These are used inside QPOases.h for the constraints matrix

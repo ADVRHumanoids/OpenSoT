@@ -40,22 +40,15 @@ FIND_PACKAGE(YARP QUIET)
 FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(iDynTree QUIET)
 FIND_PACKAGE(orocos_kdl REQUIRED)
-#FIND_PACKAGE(idynutils QUIET)
-#FIND_PACKAGE(roslib REQUIRED)
-#FIND_PACKAGE(rospack REQUIRED)
-#FIND_PACKAGE(rosconsole REQUIRED)
 FIND_PACKAGE(urdf REQUIRED)
 FIND_PACKAGE(kdl_parser REQUIRED)
 FIND_PACKAGE(srdfdom_advr REQUIRED)
 FIND_PACKAGE(moveit_core QUIET)
-#FIND_PACKAGE(PythonLibs)
 FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
                                             filters
                                             surface
                                             search
                                             io)
-#FIND_PACKAGE(tf REQUIRED)
-#FIND_PACKAGE(interactive_markers REQUIRED)
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
@@ -66,6 +59,12 @@ FIND_PACKAGE(fcl QUIET)
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
+option(OPENSOT_CHANGE_STACK_ALLOCATION_LIMIT "Enable the possibility to change Eigen stack allocation limit" FALSE)
+
+# definitions
+if(OPENSOT_CHANGE_STACK_ALLOCATION_LIMIT)
+    add_definitions(-DEIGEN_STACK_ALLOCATION_LIMIT=300000)
+endif()
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS}
