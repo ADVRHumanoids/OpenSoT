@@ -18,6 +18,7 @@
 */
 
 #include <ForceAccExample_plugin.h>
+#include <boost/make_shared.hpp>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 

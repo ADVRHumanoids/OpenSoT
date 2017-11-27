@@ -7,16 +7,17 @@
  *
  * If you want more, uncomment the following:
  * #define EIGEN_STACK_ALLOCATION_LIMIT 1000000
+ * NOTE: THIS IS AVAILABLE FROM EIGEN 3.3
  **/
 
 
 //These are used inside QPOases.h for the constraints matrix
-#define _CONSTRAINT_MATRIX_MAX_SIZE_ROWS 256
-#define _CONSTRAINT_MATRIX_MAX_SIZE_COLS 128
+#define _CONSTRAINT_MATRIX_MAX_SIZE_ROWS 200
+#define _CONSTRAINT_MATRIX_MAX_SIZE_COLS 80
 
 //These are used inside Aggregated.h for the Task matrix
-#define _AGGREGATED_MATRIX_MAX_SIZE_ROWS 256
-#define _AGGREGATED_MATRIX_MAX_SIZE_COLS 128
+#define _AGGREGATED_MATRIX_MAX_SIZE_ROWS 200
+#define _AGGREGATED_MATRIX_MAX_SIZE_COLS 80
 
 
 #endif

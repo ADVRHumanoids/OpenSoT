@@ -105,6 +105,7 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
                       testMinimizeAccelerationTask #YARP FREE
                       testMinimumVelocityTask ##YARP FREE
                       testPosturalVelocityTask ## YARP FREE
+                      testPosturalAccelerationTask
                       testSubTask ## YARP FREE
 #                      testAutoStack
 #                      testDefaultHumanoidStack
@@ -243,6 +244,11 @@ ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
 add_dependencies(testPosturalVelocityTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
+
+ADD_EXECUTABLE(testPosturalAccelerationTask tasks/acceleration/TestPostural.cpp)
+TARGET_LINK_LIBRARIES(testPosturalAccelerationTask ${TestLibs})
+add_dependencies(testPosturalAccelerationTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_task_acceleration_Postural COMMAND testPosturalAccelerationTask)
 
 ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
 TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})

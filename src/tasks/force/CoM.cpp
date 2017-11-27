@@ -78,7 +78,7 @@ CoM::CoM( const Eigen::VectorXd& x,
     _I.setIdentity();
     _O.setZero();
 
-    
+
     
     OptvarHelper::VariableVector var;
     
@@ -95,7 +95,6 @@ CoM::CoM( const Eigen::VectorXd& x,
     }
     
     this->_update(x);
-
     _hessianType = HST_SEMIDEF;
 }
 

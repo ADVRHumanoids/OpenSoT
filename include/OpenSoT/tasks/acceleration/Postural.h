@@ -33,8 +33,11 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         
         Postural(const std::string task_id, 
                  const XBot::ModelInterface& robot,
-                 AffineHelper qddot = AffineHelper()
-                );
+                 AffineHelper qddot = AffineHelper());
+
+        Postural(const std::string task_id,
+                 const XBot::ModelInterface& robot,
+                 const int x_size);
         
         virtual void _update(const Eigen::VectorXd& x);
         
