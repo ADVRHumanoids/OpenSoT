@@ -102,6 +102,12 @@ public:
         check_consistency();
     }
     
+    void setZero()
+    {
+        _M.setZero(_M.rows(), _M.cols());
+        _q.setZero(_q.rows());
+    }
+    
     static AffineHelperBase<DerivedM, DerivedQ> Identity(int size)
     {
         DerivedM m = Eigen::MatrixBase<DerivedM>::Identity(size, size);
@@ -110,11 +116,15 @@ public:
         return AffineHelperBase(m, q);
     }
     
-    void setZero()
+    static AffineHelperBase<DerivedM, DerivedQ> Zero(int input_size, int output_size)
     {
-        _M.setZero(_M.rows(), _M.cols());
-        _q.setZero(_q.rows());
+        DerivedM m = Eigen::MatrixBase<DerivedM>::Zero(output_size, input_size);
+        DerivedQ q = Eigen::MatrixBase<DerivedQ>::Zero(output_size, 1);
+        
+        return AffineHelperBase(m, q);
     }
+    
+
     
     template <typename Derived>
     void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value)
