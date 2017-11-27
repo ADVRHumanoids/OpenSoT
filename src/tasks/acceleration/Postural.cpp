@@ -10,14 +10,20 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
 {
     int na = _robot.getActuatedJointNum();
     
+    
     robot.getJointPosition(_qref);
+    robot.getPosturalJacobian(_Jpostural);
     
     if(_qddot.getInputSize() == 0){
         _qddot = AffineHelper::Identity(na);
     }
     
+    _A.setZero(na, _qddot.getInputSize());
+    
     setLambda(0.1);
     setWeight(Eigen::MatrixXd::Identity(na, na));
+    
+    _update(_q);
 }
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref)

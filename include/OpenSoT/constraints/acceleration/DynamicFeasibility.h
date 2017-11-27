@@ -40,6 +40,8 @@ public:
 
     virtual void update(const Eigen::VectorXd& x);
     
+    Eigen::VectorXd checkConstraint(const Eigen::VectorXd& x);
+    
     
     
 private:
@@ -52,12 +54,16 @@ private:
         
         std::vector<bool> _enabled_contacts;
         
-        Eigen::VectorXd _h;
-        Eigen::MatrixXd _B, _Jtmp;
+        Eigen::VectorXd _h, _hu;
+        Eigen::MatrixXd _B, _Bu, _Jtmp;
         Eigen::Matrix6d _Jf;
     
 };
     
 } } }
+
+
+
+
 
 #endif
