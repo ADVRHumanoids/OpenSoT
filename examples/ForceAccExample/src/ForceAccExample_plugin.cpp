@@ -19,6 +19,7 @@
 
 #include <ForceAccExample_plugin.h>
 #include <OpenSoT/SubTask.h>
+#include <OpenSoT/constraints/GenericConstraint.h>
 
 /* Specify that the class XBotPlugin::ForceAccExample is a XBot RT plugin with name "ForceAccExample" */
 REGISTER_XBOT_PLUGIN_(XBotPlugin::ForceAccExample)
@@ -69,6 +70,12 @@ bool XBotPlugin::ForceAccExample::init_control_plugin(XBot::Handle::Ptr handle)
     
     _qddot = opt.getVariable("qddot");
     
+    Eigen::VectorXd wrench_ub(6), wrench_lb(6);
+    wrench_ub << 1000, 1000, 1000, 1, 1, 1;
+    wrench_lb << -1000, -1000, 10, -1, -1, -1;
+    
+    std::vector<OpenSoT::constraints::GenericConstraint::Ptr> wrench_bounds;
+    
     for(auto cl : _contact_links){
         _wrenches.emplace_back(opt.getVariable(cl) / OpenSoT::AffineHelper::Zero(opt.getSize(), 3));
         
@@ -79,6 +86,13 @@ bool XBotPlugin::ForceAccExample::init_control_plugin(XBot::Handle::Ptr handle)
                                                                         "world", 
                                                                         _qddot)
                                  );
+        
+        wrench_bounds.push_back( boost::make_shared<OpenSoT::constraints::GenericConstraint>(cl+"_bound", 
+                                                                                             _wrenches.back(), 
+                                                                                             wrench_ub, 
+                                                                                             wrench_lb) 
+                               );
+        
     }
     
     
@@ -113,11 +127,13 @@ bool XBotPlugin::ForceAccExample::init_control_plugin(XBot::Handle::Ptr handle)
     auto feet_or_aggr = boost::make_shared<OpenSoT::SubTask>(feet_cart_aggr, or_idx);
     auto waist_or = boost::make_shared<OpenSoT::SubTask>(_waist_task, or_idx);
     
-    _autostack = (  _waist_task  ) / ( _postural_task + feet_cart_aggr  ) << _dyn_feas;
+    _autostack = (  _waist_task  ) / ( _postural_task + feet_cart_aggr  ) << 
+        _dyn_feas << 
+        wrench_bounds[0] << wrench_bounds[1] << wrench_bounds[2] << wrench_bounds[3];
     
     _solver = boost::make_shared<OpenSoT::solvers::QPOases_sot>(_autostack->getStack(), 
                                                                 _autostack->getBounds(), 
-                                                                _dyn_feas, 
+//                                                                 _dyn_feas, 
                                                                 1e4);
     
     
@@ -151,7 +167,7 @@ void XBotPlugin::ForceAccExample::on_start(double time)
 void XBotPlugin::ForceAccExample::control_loop(double time, double period)
 {
     const bool enable_torque_ctrl = true;
-    const bool enable_feedback = true;
+    const bool enable_feedback = false;
     
     if(enable_feedback){
         
@@ -160,7 +176,7 @@ void XBotPlugin::ForceAccExample::control_loop(double time, double period)
     }
     
     /* Set reference*/
-//     _waist_task->setPositionReference(_initial_com - 0.02*(time-_start_time)*Eigen::Vector3d::UnitZ());
+    _waist_task->setPositionReference(_initial_com - 0.1*Eigen::Vector3d::UnitZ());
     
     /* Update stack */
     _autostack->update(Eigen::VectorXd::Zero(1));
