@@ -237,10 +237,13 @@ TEST_F( testAffineHelper, checkOperatorPile )
     
 }
 
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT-lite/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
 
 TEST_F( testAffineHelper, checkTorque )
 {
-    auto model = XBot::ModelInterface::getModel(XBot::Utils::getXBotConfig());
+    auto model = XBot::ModelInterface::getModel(_path_to_cfg);
     
     model->setJointPosition(Eigen::VectorXd::Random(model->getJointNum()));
     model->setJointVelocity(Eigen::VectorXd::Random(model->getJointNum()));
