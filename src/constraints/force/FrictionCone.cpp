@@ -101,9 +101,9 @@ namespace OpenSoT {
                computeAineq();
                computeUpperBound();
                
-               _friction_cone = _Aineq * _wrenches - _upperBound;
+               _friction_cone = _Aineq * _wrenches - _bUpperBound;
                _Aineq = _friction_cone.getM();
-               _upperBound = - _friction_cone.getq();
+               _bUpperBound = - _friction_cone.getq();
                
        }
 
