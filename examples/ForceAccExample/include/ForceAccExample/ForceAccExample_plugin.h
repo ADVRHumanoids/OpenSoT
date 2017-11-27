@@ -22,6 +22,7 @@
 
 #include <XCM/XBotControlPlugin.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
+#include <OpenSoT/tasks/acceleration/Cartesian.h>
 #include <OpenSoT/constraints/acceleration/DynamicFeasibility.h>
 #include <OpenSoT/tasks/force/CoM.h>
 #include <OpenSoT/utils/AutoStack.h>
@@ -39,13 +40,13 @@ public:
 
     virtual bool init_control_plugin(XBot::Handle::Ptr handle);
 
-    virtual bool close();
+    virtual bool close(){ _logger->flush(); return true; }
 
     virtual void on_start(double time);
 
-    virtual void on_stop(double time);
+    virtual void on_stop(double time){}
     
-    virtual ~ForceAccExample();
+    virtual ~ForceAccExample(){}
 
 protected:
 
@@ -53,21 +54,33 @@ protected:
 
 private:
 
+    void sync_model();
+    
     XBot::RobotInterface::Ptr _robot;
     XBot::ModelInterface::Ptr _model;
+    XBot::ImuSensor::ConstPtr _imu;
+    
+    XBot::SharedObject<Eigen::Vector3d> _sh_fb_pos;
+    XBot::SharedObject<Eigen::Vector3d> _sh_fb_vel;
 
     double _start_time;
 
-    Eigen::VectorXd _q0;
+    Eigen::VectorXd _q0, _k, _d;
+    Eigen::Vector3d _initial_com;
 
     XBot::MatLogger::Ptr _logger;
-    
+    std::vector<std::string> _contact_links;
+    Eigen::VectorXd _x, _qddot_value, _q, _qdot, _tau, _tau_c;
+    Eigen::MatrixXd _Jtmp;
+    std::vector<Eigen::VectorXd> _wrench_value;
     OpenSoT::AffineHelper _qddot;
     std::vector<OpenSoT::AffineHelper> _wrenches;
     
+    OpenSoT::tasks::acceleration::Cartesian::Ptr _waist_task;
     OpenSoT::tasks::force::CoM::Ptr _com_task;
     OpenSoT::tasks::acceleration::Postural::Ptr _postural_task;
     OpenSoT::constraints::acceleration::DynamicFeasibility::Ptr _dyn_feas;
+    std::vector<OpenSoT::tasks::acceleration::Cartesian::Ptr> _feet_cartesian;
     
     OpenSoT::AutoStack::Ptr _autostack;
     OpenSoT::solvers::QPOases_sot::Ptr _solver;
@@ -77,53 +90,8 @@ private:
 }
 
 
-bool XBotPlugin::ForceAccExample::init_control_plugin(XBot::Handle::Ptr handle)
-{
-    _robot = handle->getRobotInterface();
-    _logger = XBot::MatLogger::getLogger("opensot_force_acc_example");
-    
-    _model = XBot::ModelInterface::getModel(handle->getPathToConfigFile());
-    
-    std::vector<std::string> contact_links = {"foot_fl", "foot_fr", "foot_hr", "foot_hl"};
-    
-    OpenSoT::OptvarHelper::VariableVector vars;
-    vars.emplace_back("qddot", _model->getJointNum());
-    
-    for(auto cl : contact_links){
-        vars.emplace_back(cl, 6);
-    }
-    
-    OpenSoT::OptvarHelper opt(vars);
-    
-    _qddot = opt.getVariable("qddot");
-    
-    for(auto cl : contact_links){
-        _wrenches.emplace_back(opt.getVariable(cl));
-    }
-    
-    
-    
-    
-    
-    _com_task = boost::make_shared<OpenSoT::tasks::force::CoM>(_wrenches, contact_links, *_model);
-    
-    _postural_task = boost::make_shared<OpenSoT::tasks::acceleration::Postural>("POSTURAL", 
-                                                                                *_model, 
-                                                                                _qddot);
-    
-    _dyn_feas = boost::make_shared<OpenSoT::constraints::acceleration::DynamicFeasibility>("DYN_FEAS", 
-                                                                                           *_model, 
-                                                                                           _qddot, 
-                                                                                           _wrenches,
-                                                                                            contact_links
-                                                                                          );
-    
-//     _autostack = (_postural_task + _com_task) << _dyn_feas;
-    
-    _solver = boost::make_shared<OpenSoT::solvers::QPOases_sot>(_autostack->getStack(), _autostack->getBounds());
-    
-    return true;
-}
+
+
 
 
 #endif // ForceAccExample_PLUGIN_H_
