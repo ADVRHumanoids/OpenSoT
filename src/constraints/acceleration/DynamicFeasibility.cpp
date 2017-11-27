@@ -1,4 +1,6 @@
 #include <OpenSoT/constraints/acceleration/DynamicFeasibility.h>
+#include <XBotInterface/RtLog.hpp>
+using XBot::Logger;
 
 OpenSoT::constraints::acceleration::DynamicFeasibility::DynamicFeasibility(const std::string constraint_id, 
                                                                            const XBot::ModelInterface& robot, 
@@ -21,8 +23,10 @@ void OpenSoT::constraints::acceleration::DynamicFeasibility::update(const Eigen:
 {
     _robot.getInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);
+    _Bu = _B.topRows(6);
+    _hu = _h.topRows(6);
     
-    _dyn_constraint = _B*_qddot + _h;
+    _dyn_constraint = _Bu*_qddot + _hu;
     
     for(int i = 0; i < _enabled_contacts.size(); i++)
     {
@@ -39,6 +43,11 @@ void OpenSoT::constraints::acceleration::DynamicFeasibility::update(const Eigen:
     _Aeq = _dyn_constraint.getM();
     _beq = -_dyn_constraint.getq();
     
-    
-    
+}
+
+Eigen::VectorXd OpenSoT::constraints::acceleration::DynamicFeasibility::checkConstraint(const Eigen::VectorXd& x)
+{
+    Eigen::VectorXd value;
+    _dyn_constraint.getValue(x, value);
+    return value;
 }
