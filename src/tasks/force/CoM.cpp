@@ -88,6 +88,8 @@ CoM::CoM( const Eigen::VectorXd& x,
     
     OptvarHelper opt(var);
     
+    _wrenches.setZero(x.size(), 0);
+    
     for( auto v : opt.getAllVariables() ){
         _wrenches = _wrenches / v;
     }
