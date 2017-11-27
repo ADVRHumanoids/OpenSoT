@@ -116,7 +116,8 @@ public:
         _q.setZero(_q.rows());
     }
     
-    void getValue(const Eigen::VectorXd& x, Eigen::VectorXd& value)
+    template <typename Derived>
+    void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value)
     {
         value.noalias() = _M*x + _q;
     }
@@ -302,7 +303,9 @@ inline AffineHelper operator/(const AffineHelperBase<DerivedM1, DerivedQ1>& lhs,
                               const AffineHelperBase<DerivedM2, DerivedQ2>& rhs)
 {
     if(lhs.getInputSize() != rhs.getInputSize()){
-        throw std::invalid_argument("lhs.getInputSize() != rhs.getInputSize()");
+        std::stringstream ss;
+        ss << "lhs.getInputSize() != rhs.getInputSize(): " << lhs.getInputSize() << " != " << rhs.getInputSize();
+        throw std::invalid_argument(ss.str());
     }
     
     int input_size = lhs.getInputSize();
