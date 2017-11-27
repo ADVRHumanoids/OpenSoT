@@ -73,6 +73,9 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
         _stack_levels[i]._JPpinv = this->getDampedPinv(
                     _stack_levels[i]._JP, _stack_levels[i]._JPsvd,
                     _stack_levels[i]._FPL);
+#else
+        _stack_levels[i]._JPpinv = this->getDampedPinv(_stack_levels[i]._JP,
+                                                       _stack_levels[i]._JPsvd);
 #endif
 
          solution += _stack_levels[i]._JPpinv * (
