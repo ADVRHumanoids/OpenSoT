@@ -13,6 +13,7 @@ find_package(test_utils QUIET)
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(ModelInterfaceIDYNUTILS QUIET)
+find_package(catkin REQUIRED tf roscpp)
 
 
 if(${YARP_FOUND})
@@ -215,11 +216,13 @@ if(${trajectory_utils_FOUND} AND ${test_utils_FOUND})
     add_dependencies(testEigenSVD_StaticWalk_FloatingBase GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
 
-    ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
-    TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs})
-    add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
+    
 endif()
+
+ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
+TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs} ${catkin_LIBRARIES})
+add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
 
 ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
 TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${PCL_LIBRARIES})
