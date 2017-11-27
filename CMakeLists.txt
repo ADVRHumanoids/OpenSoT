@@ -115,6 +115,7 @@ endif()
 set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/acceleration/Postural.cpp
+                    src/tasks/acceleration/Cartesian.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/PureRolling.cpp
                     src/tasks/velocity/RigidRotation.cpp
@@ -169,6 +170,8 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/utils/DefaultHumanoidStack.cpp
                     #src/utils/PreviewerUtils.cpp
                     ${sot_INCLUDES})
+                    
+add_definitions(-DEIGEN_STACK_ALLOCATION_LIMIT=300000)
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
