@@ -4,7 +4,8 @@ namespace OpenSoT {
    namespace constraints {
        namespace force {
 
-       FrictionCone::FrictionCone(const Eigen::VectorXd &x, XBot::ModelInterface &robot,
+       FrictionCone::FrictionCone(const Eigen::VectorXd &x, 
+                                  XBot::ModelInterface &robot,
                                   const friction_cones& mu):
            Constraint("friction_cone", x.rows()),
            _robot(robot),
@@ -15,6 +16,40 @@ namespace OpenSoT {
 
            computeAineq();
            computeUpperBound();
+           
+           OptvarHelper::VariableVector vars;
+           for(auto fc : mu){
+               vars.emplace_back(fc.first + "_wrench", 6);
+           }
+           
+           OptvarHelper opthelper(vars);
+           _wrenches.setZero(x.size(), 0);
+           
+           for(auto& w : opthelper.getAllVariables()){
+               _wrenches = _wrenches / w;
+           }
+
+       }
+       
+       
+       FrictionCone::FrictionCone(const std::vector<AffineHelper>& wrenches,
+                                  XBot::ModelInterface &robot,
+                                  const friction_cones& mu):
+           Constraint("friction_cone", wrenches[0].getInputSize()),
+           _robot(robot),
+           _mu(mu),
+           _Ci(5,3)
+       {
+           _n_of_contacts = _mu.size();
+
+           computeAineq();
+           computeUpperBound();
+           
+           _wrenches.setZero(wrenches[0].getInputSize(), 0);
+           
+           for(auto& w : wrenches){
+               _wrenches = _wrenches / w;
+           }
 
        }
 
@@ -22,8 +57,7 @@ namespace OpenSoT {
        {
            _Ci.setZero(5,3);
 
-           if(_Aineq.rows() != 5*_n_of_contacts)
-               _Aineq.resize(5*_n_of_contacts, 6*_n_of_contacts);
+            _Aineq.resize(5*_n_of_contacts, 6*_n_of_contacts);
 
            _Aineq.setZero(_Aineq.rows(), _Aineq.cols());
 
@@ -51,11 +85,10 @@ namespace OpenSoT {
 
        void FrictionCone::computeUpperBound()
        {
-           if(_bUpperBound.rows() != 5*_n_of_contacts){
            _bUpperBound.resize(5*_n_of_contacts);
            _bUpperBound.setZero(_bUpperBound.rows());
            _bLowerBound.resize(5*_n_of_contacts);
-           _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bLowerBound.size());}
+           _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bLowerBound.size());
        }
 
 
@@ -67,6 +100,11 @@ namespace OpenSoT {
 
                computeAineq();
                computeUpperBound();
+               
+               _friction_cone = _Aineq * _wrenches - _upperBound;
+               _Aineq = _friction_cone.getM();
+               _upperBound = - _friction_cone.getq();
+               
        }
 
        }

@@ -19,9 +19,10 @@
 #define FRICTIONCONE_H
 
 
- #include <OpenSoT/Constraint.h>
- #include <XBotInterface/ModelInterface.h>
- #include <kdl/frames.hpp>
+#include <OpenSoT/Constraint.h>
+#include <XBotInterface/ModelInterface.h>
+#include <kdl/frames.hpp>
+#include <OpenSoT/utils/AffineHelper.h>
 
 #include <Eigen/Dense>
 
@@ -51,6 +52,9 @@
         Eigen::Affine3d _wTl;
 
         int _n_of_contacts;
+        
+        AffineHelper _friction_cone;
+        AffineHelper _wrenches;
 
     public:
                 
@@ -62,8 +66,12 @@
          * NOTE: that all the friction cones are specified in world frame!
          */
         FrictionCone(const Eigen::VectorXd& x,
-                             XBot::ModelInterface &robot,
-                             const friction_cones & mu);
+                     XBot::ModelInterface &robot,
+                     const friction_cones & mu);
+        
+        FrictionCone(const std::vector<AffineHelper>& wrenches,
+                     XBot::ModelInterface &robot,
+                     const friction_cones & mu);
                 
                 
         void update(const Eigen::VectorXd &x);
