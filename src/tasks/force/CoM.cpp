@@ -150,13 +150,15 @@ CoM::CoM( std::vector<AffineHelper> wrenches,
     _I.setIdentity();
     _O.setZero();
 
-    this->_update(Eigen::VectorXd());
     
+    _wrenches.setZero(wrenches[0].getInputSize(), 0);
     for( auto v : wrenches ){
         _wrenches = _wrenches / v;
     }
-
+    
     _hessianType = HST_SEMIDEF;
+    
+    _update(Eigen::VectorXd());
 }
 
 
@@ -198,10 +200,10 @@ void CoM::_update(const Eigen::VectorXd &x)
     _A = computeA(_links_in_contact);
     
     
-    _com_task = _A*_wrenches + _b;
+    _com_task = _A*_wrenches - _b;
     
     _A = _com_task.getM();
-    _b = _com_task.getq();
+    _b = -_com_task.getq();
     /**********************************************************************/
 }
 
@@ -387,3 +389,11 @@ Eigen::Vector3d CoM::getAngularMomentumError()
     angularMomentumError = _desiredAngularMomentum - _actualAngularMomentum;
     return angularMomentumError;
 }
+
+void CoM::_log(XBot::MatLogger::Ptr logger)
+{
+
+    logger->add(getTaskID() + "_error", getError());
+    
+}
+
