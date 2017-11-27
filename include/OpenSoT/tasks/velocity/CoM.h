@@ -146,11 +146,16 @@
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
                 Eigen::Vector3d getError();
+                
+                virtual void _log(XBot::MatLogger::Ptr logger);
 
                 static bool isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
                 static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
             };
+            
+
+
         }
     }
  }

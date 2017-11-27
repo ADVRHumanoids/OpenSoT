@@ -164,3 +164,8 @@ bool OpenSoT::tasks::velocity::CoM::isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::
 {
     return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task);
 }
+
+void OpenSoT::tasks::velocity::CoM::_log(XBot::MatLogger::Ptr logger)
+{
+    logger->add(getTaskID() + "_position_err", _positionError);
+}
