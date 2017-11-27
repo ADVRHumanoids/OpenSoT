@@ -36,7 +36,7 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/../tests
 
 include_directories("${qpOASES_INCLUDE_DIRS}")
 
-if(YARP_FOUND)
+if(YARP_FOUND AND FALSE)
     ADD_EXECUTABLE(example_autostack example_autostack.cpp)
     ADD_EXECUTABLE(example_cartesian example_cartesian.cpp)
     ADD_EXECUTABLE(example_com example_com.cpp)

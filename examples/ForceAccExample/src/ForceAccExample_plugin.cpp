@@ -18,6 +18,7 @@
 */
 
 #include <ForceAccExample_plugin.h>
+#include <boost/make_shared.hpp>
 #include <OpenSoT/SubTask.h>
 
 /* Specify that the class XBotPlugin::ForceAccExample is a XBot RT plugin with name "ForceAccExample" */
