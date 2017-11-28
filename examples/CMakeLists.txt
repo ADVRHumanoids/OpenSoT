@@ -27,7 +27,7 @@ FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS filters surface)
 FIND_PACKAGE(tf REQUIRED)
 FIND_PACKAGE(YARP QUIET)
 FIND_PACKAGE(roscpp REQUIRED)
-FIND_PACKAGE(XCM QUIET)
+
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${iDynTree_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
@@ -79,6 +79,4 @@ if(YARP_FOUND AND FALSE)
     endif()
 endif()
 
-if(${XCM_FOUND})
-    add_subdirectory(ForceAccExample)
-endif()
+
