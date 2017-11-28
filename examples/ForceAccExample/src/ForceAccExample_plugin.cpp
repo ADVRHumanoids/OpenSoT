@@ -134,7 +134,6 @@ bool XBotPlugin::ForceAccExample::init_control_plugin(XBot::Handle::Ptr handle)
     
     _solver = boost::make_shared<OpenSoT::solvers::QPOases_sot>(_autostack->getStack(), 
                                                                 _autostack->getBounds(), 
-//                                                                 _dyn_feas, 
                                                                 1e4);
     
     
