@@ -106,6 +106,7 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
                       testMinimumVelocityTask ##YARP FREE
                       testPosturalVelocityTask ## YARP FREE
                       testPosturalAccelerationTask
+                      testCartesianAccelerationTask
                       testSubTask ## YARP FREE
 #                      testAutoStack
 #                      testDefaultHumanoidStack
@@ -367,6 +368,11 @@ if(${YARP_FOUND})
     TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
     add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
+
+    ADD_EXECUTABLE(testCartesianAccelerationTask tasks/acceleration/TestCartesian.cpp)
+    TARGET_LINK_LIBRARIES(testCartesianAccelerationTask ${TestLibs})
+    add_dependencies(testCartesianAccelerationTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_task_acceleration_Cartesian COMMAND testCartesianAccelerationTask)
 
     ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
     TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
