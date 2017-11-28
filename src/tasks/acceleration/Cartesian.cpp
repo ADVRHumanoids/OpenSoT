@@ -5,6 +5,32 @@ using XBot::Logger;
 const std::string OpenSoT::tasks::acceleration::Cartesian::world_name = "world";
 
 OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
+          const XBot::ModelInterface& robot,
+          const std::string& distal_link,
+          const std::string& base_link,
+          const Eigen::VectorXd& x
+         ):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x.size()),
+    _robot(robot),
+    _distal_link(distal_link),
+    _base_link(base_link)
+{
+    _qddot = AffineHelper::Identity(x.size());
+
+    resetReference();
+
+    _vel_ref.setZero();
+    _acc_ref.setZero();
+
+    _lambda = 100.;
+    _lambda2 = 2.*sqrt(_lambda);
+
+    setWeight(Eigen::MatrixXd::Identity(6,6));
+
+    update(Eigen::VectorXd(1));
+}
+
+OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
                                                    const XBot::ModelInterface& robot, 
                                                    const std::string& distal_link, 
                                                    const std::string& base_link, 
@@ -20,11 +46,12 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _vel_ref.setZero();
     _acc_ref.setZero();
     
-    _lambda = 10;
-    
-    update(Eigen::VectorXd(1));
+    _lambda = 100.;
+    _lambda2 = 2.*sqrt(_lambda);
     
     setWeight(Eigen::MatrixXd::Identity(6,6));
+
+    update(Eigen::VectorXd(1));
     
 }
 
@@ -36,8 +63,6 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
         _robot.getPose(_distal_link, _pose_current);
         _robot.getVelocityTwist(_distal_link, _vel_current);
         _robot.computeJdotQdot(_distal_link, Eigen::Vector3d::Zero(), _jdotqdot);
-        
-        Logger::info() << "JdQd: " << _jdotqdot.transpose() << Logger::endl();
     }
     else{
         /* TBD implement */
@@ -50,17 +75,50 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     
     _cartesian_task = _J*_qddot + _jdotqdot;
     _cartesian_task = _cartesian_task - _acc_ref 
-                                      - 2*_lambda*(_vel_ref - _vel_current) 
-                                      - _lambda*_lambda*_pose_error ;
+                                      - _lambda2*(_vel_ref - _vel_current)
+                                      - _lambda*_pose_error ;
     
     _A = _cartesian_task.getM();
     _b = -_cartesian_task.getq();
     
+    _vel_ref.setZero();
+    _acc_ref.setZero();
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setPositionReference(const Eigen::Vector3d& pos_ref)
 {
     _pose_ref.translation() = pos_ref;
+    _vel_ref.setZero();
+    _acc_ref.setZero();
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& ref)
+{
+    _pose_ref = ref;
+    _vel_ref.setZero();
+    _acc_ref.setZero();
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& pose_ref,
+                                                           const Eigen::Vector6d& vel_ref)
+{
+    _pose_ref = pose_ref;
+    _vel_ref = vel_ref;
+    _acc_ref.setZero();
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& pose_ref,
+                                                           const Eigen::Vector6d& vel_ref,
+                                                           const Eigen::Vector6d& acc_ref)
+{
+    _pose_ref = pose_ref;
+    _vel_ref = vel_ref;
+    _acc_ref = acc_ref;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setLambda2(const double lambda2)
+{
+    _lambda2 = lambda2;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::resetReference()
@@ -77,4 +135,14 @@ void OpenSoT::tasks::acceleration::Cartesian::resetReference()
 void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
 {
     logger->add(getTaskID() + "_pose_error", _pose_error);
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& ref)
+{
+    ref = _pose_ref;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getActualPose(Eigen::Affine3d& actual)
+{
+    actual = _pose_current;
 }

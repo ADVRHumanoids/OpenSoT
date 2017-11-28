@@ -10,7 +10,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
 
-    _qddot = AffineHelper::Identity(na);
+    _qddot = AffineHelper::Identity(x_size);
 
     _A.setZero(na, _qddot.getInputSize());
 
@@ -90,4 +90,7 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
 
     _A = _postural_task.getM();
     _b = - _postural_task.getq();
+
+    _qdot_ref.setZero(_qref.size());
+    _qddot_ref.setZero(_qref.size());
 }

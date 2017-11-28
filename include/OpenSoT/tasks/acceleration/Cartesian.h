@@ -31,6 +31,13 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
     public:
         
         typedef boost::shared_ptr<Cartesian> Ptr;
+
+        Cartesian(const std::string task_id,
+                  const XBot::ModelInterface& robot,
+                  const std::string& distal_link,
+                  const std::string& base_link,
+                  const Eigen::VectorXd& x
+                 );
         
         Cartesian(const std::string task_id,
                   const XBot::ModelInterface& robot, 
@@ -40,12 +47,23 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                  );
         
         void setPositionReference(const Eigen::Vector3d& pos_ref);
+        void setReference(const Eigen::Affine3d& ref);
+        void setReference(const Eigen::Affine3d& pose_ref,
+                          const Eigen::Vector6d& vel_ref);
+        void setReference(const Eigen::Affine3d& pose_ref,
+                          const Eigen::Vector6d& vel_ref,
+                          const Eigen::Vector6d& acc_ref);
+
+        void getReference(Eigen::Affine3d& ref);
+        void getActualPose(Eigen::Affine3d& actual);
         
         void resetReference();
 
         virtual void _update(const Eigen::VectorXd& x);
         
         virtual void _log(XBot::MatLogger::Ptr logger);
+
+        void setLambda2(const double lambda2);
         
     private:
         
@@ -63,6 +81,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Vector6d _pose_error, _vel_ref, _vel_current, _acc_ref;
         
         Eigen::Vector3d _orientation_error;
+
+        double _lambda2;
         
     };
     

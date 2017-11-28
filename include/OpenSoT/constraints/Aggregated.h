@@ -19,7 +19,7 @@
 #define __BOUNDS_AGGREGATED_H__
 
 #include <OpenSoT/Constraint.h>
-
+#include <OpenSoT/EigenDefinitions.h>
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <list>
@@ -43,6 +43,8 @@
         class Aggregated: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
 	    typedef boost::shared_ptr<Aggregated> Ptr;
+        typedef Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, _AGGREGATED_MATRIX_MAX_SIZE_ROWS, _AGGREGATED_MATRIX_MAX_SIZE_COLS> Matrix;
+        typedef Eigen::Matrix<double, Eigen::Dynamic, 1, 0, _AGGREGATED_MATRIX_MAX_SIZE_ROWS, 1> Vector;
 
             enum AggregationPolicy {
                 /** transform equalities Ax = b to inequalities b <= Ax <= b */
@@ -56,6 +58,15 @@
             };
 
         protected:
+            Vector _tmpupperBound;
+            Vector _tmplowerBound;
+
+            Matrix _tmpAeq;
+            Vector _tmpbeq;
+
+            Matrix _tmpAineq;
+            Vector _tmpbUpperBound;
+            Vector _tmpbLowerBound;
 
             std::list< ConstraintPtr > _bounds;
             unsigned int _aggregationPolicy;
@@ -64,13 +75,26 @@
 
             static const std::string concatenateConstraintsIds(const std::list<ConstraintPtr> constraints);
 
+
+            inline void pile(Matrix& A, const Eigen::MatrixXd& B)
+            {
+                A.conservativeResize(A.rows()+B.rows(), A.cols());
+                A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+            }
+
+            inline void pile(Vector&a, const Eigen::VectorXd&b)
+            {
+                a.conservativeResize(a.rows()+b.rows());
+                a.segment(a.rows()-b.rows(),b.rows())<<b;
+            }
+
             inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
             {
                 A.conservativeResize(A.rows()+B.rows(), A.cols());
                 A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
             }
 
-            inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+            inline void pile(Eigen::VectorXd&a, const Eigen::VectorXd&b)
             {
                 a.conservativeResize(a.rows()+b.rows());
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
