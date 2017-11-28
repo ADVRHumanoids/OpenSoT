@@ -122,8 +122,8 @@ Eigen::MatrixXd DampedPseudoInverse::getDampedPinv( const Eigen::MatrixXd& J,
                                                     const Eigen::JacobiSVD<Eigen::MatrixXd>& svd) const
 {
     int rank = svd.rank();
-    Eigen::MatrixXd singularValuesInv(J.cols(), J.rows());
-    singularValuesInv.setZero();
+    Eigen::MatrixXd singularValuesInv(J.cols(), J.cols());
+    singularValuesInv.setZero(J.rows(), J.rows());
 
     double lambda = svd.singularValues().minCoeff();
 
