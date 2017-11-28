@@ -205,7 +205,7 @@ void XBotPlugin::ForceAccExample::control_loop(double time, double period)
     _tau_c.setZero(_model->getJointNum());
     for(int i = 0; i < _contact_links.size(); i++){
         _model->getJacobian(_contact_links[i], _Jtmp);
-        _tau_c += _Jtmp.transpose()*_wrench_value[i];
+        _tau_c.noalias() += _Jtmp.transpose()*_wrench_value[i];
     }
     
     /* Set solution inside model */
@@ -221,8 +221,8 @@ void XBotPlugin::ForceAccExample::control_loop(double time, double period)
     _model->getJointPosition(_q);
     _model->getJointVelocity(_qdot);
     
-    _q += 0.5*period*period*_qddot_value + period*_qdot;
-    _qdot += period*_qddot_value;
+    _q.noalias() += 0.5*period*period*_qddot_value + period*_qdot;
+    _qdot.noalias() += period*_qddot_value;
     
     _model->setJointPosition(_q);
     _model->setJointVelocity(_qdot);
