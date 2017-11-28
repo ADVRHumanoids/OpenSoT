@@ -10,7 +10,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
 
-    _qddot = AffineHelper::Identity(na);
+    _qddot = AffineHelper::Identity(x_size);
 
     _A.setZero(na, _qddot.getInputSize());
 
