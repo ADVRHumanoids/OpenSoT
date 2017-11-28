@@ -180,7 +180,7 @@ void XBotPlugin::ForceAccExample::control_loop(double time, double period)
     _waist_task->setPositionReference(_initial_com - 0.1*Eigen::Vector3d::UnitZ());
     
     /* Update stack */
-    _autostack->update(Eigen::VectorXd::Zero(1));
+    _autostack->update(Eigen::VectorXd::Zero(0));
     _autostack->log(_logger);
     
     /* Solve QP */
