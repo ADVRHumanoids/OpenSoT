@@ -168,11 +168,13 @@ void XBotPlugin::ForceAccExample::on_start(double time)
 void XBotPlugin::ForceAccExample::control_loop(double time, double period)
 {
     const bool enable_torque_ctrl = true;
-    const bool enable_feedback = false;
+    const bool enable_feedback = true;
     
     if(enable_feedback){
         
         sync_model();
+        
+//         _model->syncFrom(*_robot);
         
     }
     
