@@ -24,10 +24,12 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
 
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
+    
+    update(Eigen::VectorXd(1));
 
     setWeight(Eigen::MatrixXd::Identity(6,6));
 
-    update(Eigen::VectorXd(1));
+    
 }
 
 OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
@@ -49,9 +51,9 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
     
-    setWeight(Eigen::MatrixXd::Identity(6,6));
-
     update(Eigen::VectorXd(1));
+    
+    setWeight(Eigen::MatrixXd::Identity(6,6));
     
 }
 
