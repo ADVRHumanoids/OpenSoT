@@ -117,6 +117,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/acceleration/Postural.cpp
                     src/tasks/acceleration/Cartesian.cpp
+                    src/tasks/acceleration/Contact.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/PureRolling.cpp
                     src/tasks/velocity/RigidRotation.cpp
