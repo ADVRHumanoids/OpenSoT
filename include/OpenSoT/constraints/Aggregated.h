@@ -88,6 +88,7 @@
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
             }
 
+#if _AGGREGATED_MATRIX_MAX_SIZE_COLS != -1 && _AGGREGATED_MATRIX_MAX_SIZE_ROWS != -1
             inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
             {
                 A.conservativeResize(A.rows()+B.rows(), A.cols());
@@ -99,6 +100,7 @@
                 a.conservativeResize(a.rows()+b.rows());
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
             }
+#endif
 
             virtual void _log(XBot::MatLogger::Ptr logger);
 
