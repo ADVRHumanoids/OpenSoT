@@ -80,6 +80,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
     EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
     Eigen::VectorXd dq(q.size());
+    dq.setZero(dq.size());
     double dT = 0.01;
     for(unsigned int i = 0; i < 10000; ++i)
     {

@@ -90,4 +90,7 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
 
     _A = _postural_task.getM();
     _b = - _postural_task.getq();
+
+    _qdot_ref.setZero(_qref.size());
+    _qddot_ref.setZero(_qref.size());
 }
