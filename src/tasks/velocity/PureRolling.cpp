@@ -34,6 +34,8 @@ void OpenSoT::tasks::velocity::PureRolling::_update(const Eigen::VectorXd& x)
     _wheel_forward_axis /= _wheel_forward_axis.norm();
     
     _S.setIdentity(4,6);
+    _S.row(2) << 0, 0, 0, 0,0,0;
+
     _S.row(3) << 0, 0, 0, _wheel_forward_axis.transpose();
     
     _A = _S * _Jc;
