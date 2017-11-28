@@ -5,7 +5,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
     _robot(robot)
 {
-    int na = _robot.getJointNum();
+    int na = _robot.getActuatedJointNum();
 
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
@@ -31,7 +31,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     _robot(robot),
     _qddot(qddot)
 {
-    int na = _robot.getJointNum();
+    int na = _robot.getActuatedJointNum();
     
     
     robot.getJointPosition(_qref);
