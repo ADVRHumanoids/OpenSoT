@@ -129,6 +129,8 @@ bool QPOases_sot::prepareSoT()
         else{
             std::cout<<RED<<"ERROR: INITIALIZING STACK "<<i<<DEFAULT<<std::endl;
             return false;}
+
+        constraints_task.push_back(constraints_task_i);
     }
     return true;
 }
@@ -143,15 +145,9 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
             if(!_qp_stack_of_tasks[i].updateTask(H, g))
                 return false;
 
-            OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
-            if(_globalConstraints){
-                constraints_task_i.getConstraintsList().push_back(_globalConstraints);
-                constraints_task_i.generateAll();}
-            else if(_bounds && _bounds->isConstraint())
-            {
-                constraints_task_i.getConstraintsList().push_back(_bounds);
-                constraints_task_i.generateAll();
-            }
+            OpenSoT::constraints::Aggregated& constraints_task_i = constraints_task[i];
+            constraints_task_i.generateAll();
+
             A = constraints_task_i.getAineq();
             lA = constraints_task_i.getbLowerBound();
             uA = constraints_task_i.getbUpperBound();
@@ -179,11 +175,6 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
             if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
                 return false;
 
-            if(_bounds && _bounds->isBound()) // if it is a constraint, it has already been added in #127
-            {
-                constraints_task_i.getConstraintsList().push_back(_bounds);
-                constraints_task_i.generateAll();
-            }
 
             if(constraints_task_i.hasBounds()) // bounds specified everywhere will work
             {

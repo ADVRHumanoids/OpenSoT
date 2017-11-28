@@ -125,6 +125,8 @@ namespace OpenSoT{
 
     protected:
         virtual void _log(XBot::MatLogger::Ptr logger);
+
+        vector <OpenSoT::constraints::Aggregated> constraints_task;
         
         /**
          * @brief _qp_stack_of_tasks vector of QPOases Problem
