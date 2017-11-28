@@ -42,6 +42,11 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         virtual void _update(const Eigen::VectorXd& x);
         
         void setReference(const Eigen::VectorXd& qref);
+        void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref);
+        void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
+                          const Eigen::VectorXd& ddqref);
+
+        void setLambda2(const double lambda2);
 
         
         
@@ -51,8 +56,10 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         AffineHelper _qddot;
         AffineHelper _postural_task;
         
-        Eigen::VectorXd _qddot_ref, _qref, _qdot, _q;
+        Eigen::VectorXd _qddot_d, _qddot_ref, _qref, _qdot, _q, _qdot_ref;
         Eigen::MatrixXd _Jpostural;
+
+        double _lambda2;
         
         
     };

@@ -81,7 +81,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     Eigen::VectorXd dq(q.size());
     double dT = 0.01;
-    for(unsigned int i = 0; i < 2000; ++i)
+    for(unsigned int i = 0; i < 10000; ++i)
     {
         _model_ptr->setJointPosition(q);
         _model_ptr->setJointVelocity(dq);
@@ -94,7 +94,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_NEAR(q[i], q_ref[i], 1E-3);
+        EXPECT_NEAR(q[i], q_ref[i], 1E-5);
 
     std::cout<<"q0: "<<q0.transpose()<<std::endl;
     std::cout<<"q: "<<q.transpose()<<std::endl;
