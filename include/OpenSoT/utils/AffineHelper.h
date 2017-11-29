@@ -129,7 +129,8 @@ public:
     template <typename Derived>
     void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value)
     {
-        value.noalias() = _M*x + _q;
+        value.noalias() = _M*x;
+	value += _q;
     }
     
     virtual void update () {}

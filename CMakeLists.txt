@@ -173,7 +173,7 @@ ADD_LIBRARY(OpenSoT SHARED
                     #src/utils/PreviewerUtils.cpp
                     ${sot_INCLUDES})
                     
-add_definitions(-DEIGEN_STACK_ALLOCATION_LIMIT=300000)
+
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
