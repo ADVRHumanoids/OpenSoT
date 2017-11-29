@@ -65,7 +65,7 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
 }
 
 void QPOases_sot::computeOptimalityConstraint(  const TaskPtr& task, QPOasesProblem& problem,
-                                                Matrix& A, Vector& lA, Vector& uA)
+                                                Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
     A = task->getA();
     lA = task->getA()*problem.getSolution();
@@ -90,22 +90,27 @@ bool QPOases_sot::prepareSoT()
 
         std::string constraints_str = constraints_task_i.getConstraintID();
 
-        A = constraints_task_i.getAineq();
-        lA = constraints_task_i.getbLowerBound();
-        uA = constraints_task_i.getbUpperBound();
+        A.set(constraints_task_i.getAineq());
+        lA.set(constraints_task_i.getbLowerBound());
+        uA.set(constraints_task_i.getbUpperBound());
         if(i > 0)
         {
+            Eigen::MatrixXd _tmp_A;
+            Eigen::VectorXd _tmp_lA, _tmp_uA;
             for(unsigned int j = 0; j < i; ++j)
             {
-                computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
+                computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], _tmp_A, _tmp_lA, _tmp_uA);
+                tmp_A.push_back(_tmp_A);
+                tmp_lA.push_back(_tmp_lA);
+                tmp_uA.push_back(_tmp_uA);
 
                 if(!constraints_str.compare("") == 0)
                     constraints_str = constraints_str + "+";
                 constraints_str = constraints_str + _tasks[j]->getTaskID() + "_optimality";
 
-                pile(A, tmp_A);
-                pile(lA, tmp_lA);
-                pile(uA, tmp_uA);
+                A.pile(tmp_A[j]);
+                lA.pile(tmp_lA[j]);
+                uA.pile(tmp_uA[j]);
             }
         }
 
@@ -118,7 +123,7 @@ bool QPOases_sot::prepareSoT()
         QPOasesProblem problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                  _epsRegularisation);
 
-        if(problem_i.initProblem(H, g, A, lA, uA, l, u)){
+        if(problem_i.initProblem(H, g, A.generate_and_get(), lA.generate_and_get(), uA.generate_and_get(), l, u)){
             _qp_stack_of_tasks.push_back(problem_i);
             std::string bounds_string = "";
             if(_bounds)
@@ -148,31 +153,32 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
             OpenSoT::constraints::Aggregated& constraints_task_i = constraints_task[i];
             constraints_task_i.generateAll();
 
-            A = constraints_task_i.getAineq();
-            lA = constraints_task_i.getbLowerBound();
-            uA = constraints_task_i.getbUpperBound();
+            A.set(constraints_task_i.getAineq());
+            lA.set(constraints_task_i.getbLowerBound());
+            uA.set(constraints_task_i.getbUpperBound());
             if(i > 0)
             {
                 for(unsigned int j = 0; j < i; ++j)
                 {
                     if(_active_stacks[j])
-                        computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A, tmp_lA, tmp_uA);
+                        computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
                     else
                     {
                         //Here we consider fake optimality constraints:
                         //
                         //    -1 <= 0x <= 1
-                        tmp_A.setZero(_tasks[j]->getA().rows(), _tasks[j]->getA().cols());
-                        tmp_lA.setConstant(_tasks[j]->getA().rows(), -1.0);
-                        tmp_uA.setConstant(_tasks[j]->getA().rows(), 1.0);
+                        tmp_A[j].setZero(_tasks[j]->getA().rows(), _tasks[j]->getA().cols());
+                        tmp_lA[j].setConstant(_tasks[j]->getA().rows(), -1.0);
+                        tmp_uA[j].setConstant(_tasks[j]->getA().rows(), 1.0);
                     }
-                    pile(A, tmp_A);
-                    pile(lA, tmp_lA);
-                    pile(uA, tmp_uA);
+                    A.pile(tmp_A[j]);
+                    lA.pile(tmp_lA[j]);
+                    uA.pile(tmp_uA[j]);
                 }
             }
 
-            if(!_qp_stack_of_tasks[i].updateConstraints(A, lA, uA))
+            if(!_qp_stack_of_tasks[i].updateConstraints(A.generate_and_get(),
+                                    lA.generate_and_get(), uA.generate_and_get()))
                 return false;
 
 

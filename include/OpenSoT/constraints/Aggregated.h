@@ -19,7 +19,6 @@
 #define __BOUNDS_AGGREGATED_H__
 
 #include <OpenSoT/Constraint.h>
-#include <OpenSoT/EigenDefinitions.h>
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/utils/Piler.h>

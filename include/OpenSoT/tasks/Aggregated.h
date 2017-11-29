@@ -22,7 +22,6 @@
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <list>
-#include <OpenSoT/EigenDefinitions.h>
 #include <OpenSoT/utils/Piler.h>
 
 using namespace OpenSoT::utils;

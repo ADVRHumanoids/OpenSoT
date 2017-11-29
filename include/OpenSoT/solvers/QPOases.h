@@ -25,7 +25,9 @@
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include "QPOasesProblem.h"
-#include <OpenSoT/EigenDefinitions.h>
+#include <OpenSoT/utils/Piler.h>
+
+using namespace OpenSoT::utils;
 
 namespace qpOASES {
     class SQProblem;
@@ -45,8 +47,7 @@ namespace OpenSoT{
     {
     public:
 	typedef boost::shared_ptr<QPOases_sot> Ptr;
-    typedef Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, _CONSTRAINT_MATRIX_MAX_SIZE_ROWS, _CONSTRAINT_MATRIX_MAX_SIZE_COLS> Matrix;
-    typedef Eigen::Matrix<double, Eigen::Dynamic, 1, 0, _CONSTRAINT_MATRIX_MAX_SIZE_ROWS, 1> Vector;
+    typedef MatrixPiler VectorPiler;
         /**
          * @brief QPOases_sot constructor of the problem
          * @param stack_of_tasks a vector of tasks
@@ -165,34 +166,24 @@ namespace OpenSoT{
          * @param uA upper bounds
          */
         void computeOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
-                                         Matrix& A, Vector& lA, Vector& uA);
+                                         Eigen::MatrixXd& A,
+                                         Eigen::VectorXd& lA, Eigen::VectorXd& uA);
 
-        inline void pile(Matrix& A, Matrix& B)
-        {
-            A.conservativeResize(A.rows()+B.rows(), A.cols());
-            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-        }
-
-        inline void pile(Vector &a,Vector &b)
-        {
-            a.conservativeResize(a.rows()+b.rows());
-            a.segment(a.rows()-b.rows(),b.rows())<<b;
-        }
 
 
         Eigen::MatrixXd H;
         Eigen::VectorXd g;
 
-        Matrix A;
-        Vector lA;
-        Vector uA;
+        MatrixPiler A;
+        VectorPiler lA;
+        VectorPiler uA;
         
         Eigen::VectorXd l;
         Eigen::VectorXd u;
         
-        Matrix tmp_A;
-        Vector tmp_lA;
-        Vector tmp_uA;
+        std::vector<Eigen::MatrixXd> tmp_A;
+        std::vector<Eigen::VectorXd> tmp_lA;
+        std::vector<Eigen::VectorXd> tmp_uA;
 
 
 

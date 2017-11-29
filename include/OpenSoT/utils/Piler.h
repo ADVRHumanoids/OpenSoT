@@ -23,7 +23,7 @@ namespace OpenSoT { namespace utils {
         template <typename Derived>
         void set(const Eigen::MatrixBase<Derived>& matrix);
         
-        const Eigen::MatrixXd& generate_and_get();
+        Eigen::Block<Eigen::MatrixXd> generate_and_get();
 
         int cols() const {return _mat.cols();}
         int rows() const {return _current_row;}
@@ -107,13 +107,13 @@ inline void OpenSoT::utils::MatrixPiler::reset(const int cols)
     }
 }
 
-inline const Eigen::MatrixXd& OpenSoT::utils::MatrixPiler::generate_and_get()
+inline Eigen::Block<Eigen::MatrixXd> OpenSoT::utils::MatrixPiler::generate_and_get()
 {
-    if(_current_row != _mat.rows()){
-        _mat.conservativeResize(_current_row, _cols);
-        Logger::info() << "Doing a conservativeResize!" << Logger::endl();
-    }
-    return _mat;
+//    if(_current_row != _mat.rows()){
+//        _mat.conservativeResize(_current_row, _cols);
+//        Logger::info() << "Doing a conservativeResize!" << Logger::endl();
+//    }
+    return _mat.block(0,0,_current_row, _cols);
 }
 
 #endif
