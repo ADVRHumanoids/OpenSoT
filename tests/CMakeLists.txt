@@ -116,6 +116,7 @@ set(OPENSOT_TESTS     testAggregatedConstraint #YARP FREE
                         #YARP FREE
                        TestQPOases_SetActiveStack 
                        testAffineHelper
+                       testPiler
                        
 )
 
@@ -423,6 +424,13 @@ if(${YARP_FOUND})
     TARGET_LINK_LIBRARIES(testBasicAlgebra ${TestLibs})
     add_dependencies(testBasicAlgebra GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_BasicAlgebra COMMAND testBasicAlgebra)
+
+    ADD_EXECUTABLE(testPiler utils/TestPiler.cpp)
+    TARGET_LINK_LIBRARIES(testPiler ${TestLibs})
+    add_dependencies(testPiler GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_utils_testPiler COMMAND testPiler)
+
+
 
 endif()
 

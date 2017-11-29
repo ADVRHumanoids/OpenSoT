@@ -1,17 +1,23 @@
 #include <Eigen/Dense>
+#include <XBotInterface/RtLog.hpp>
+
+using XBot::Logger;
 
 namespace OpenSoT { namespace utils {
    
-    class PilerHelper {
+    class MatrixPiler {
         
     public:
         
-        PilerHelper(int cols = -1);
+        MatrixPiler(int cols = -1);
         
         void reset();
         
         template <typename Derived>
         void pile(const Eigen::MatrixBase<Derived>& matrix);
+
+        template <typename Derived>
+        void set(const Eigen::MatrixBase<Derived>& matrix);
         
         const Eigen::MatrixXd& generate_and_get();
         
@@ -27,7 +33,7 @@ namespace OpenSoT { namespace utils {
 } }
 
 
-OpenSoT::utils::PilerHelper::PilerHelper(int cols):
+OpenSoT::utils::MatrixPiler::MatrixPiler(int cols):
     _cols(cols),
     _current_row(0)
 {
@@ -35,7 +41,7 @@ OpenSoT::utils::PilerHelper::PilerHelper(int cols):
 }
 
 template <typename Derived>
-void OpenSoT::utils::PilerHelper::pile(const Eigen::MatrixBase<Derived>& matrix)
+void OpenSoT::utils::MatrixPiler::pile(const Eigen::MatrixBase<Derived>& matrix)
 {
     if(matrix.cols() != _cols){
         throw std::runtime_error("matrix.cols() != _cols");
@@ -44,7 +50,7 @@ void OpenSoT::utils::PilerHelper::pile(const Eigen::MatrixBase<Derived>& matrix)
     int rows_needed = _current_row + matrix.rows();
     
     if( rows_needed > _mat.rows() ){
-        printf("PilerHelper: expanding to %d x %d \n", rows_needed, _cols);
+        Logger::info("PilerHelper: expanding to %d x %d \n", rows_needed, _cols);
         _mat.conservativeResize(rows_needed, _cols);
     }
     
@@ -54,14 +60,29 @@ void OpenSoT::utils::PilerHelper::pile(const Eigen::MatrixBase<Derived>& matrix)
     
 }
 
-void OpenSoT::utils::PilerHelper::reset()
+
+template <typename Derived>
+void OpenSoT::utils::MatrixPiler::set(const Eigen::MatrixBase<Derived>& matrix)
+{
+    _cols = matrix.cols();
+
+    _mat = matrix;
+
+    _current_row = _mat.rows();
+
+}
+
+void OpenSoT::utils::MatrixPiler::reset()
 {
     _current_row = 0;
 }
 
-const Eigen::MatrixXd& OpenSoT::utils::PilerHelper::generate_and_get()
+const Eigen::MatrixXd& OpenSoT::utils::MatrixPiler::generate_and_get()
 {
-    _mat.conservativeResize(_current_row, _cols);
+    if(_current_row != _mat.rows()){
+        _mat.conservativeResize(_current_row, _cols);
+        Logger::info() << "Doing a conservativeResize!" << Logger::endl();
+    }
     return _mat;
 }
 
