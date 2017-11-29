@@ -124,7 +124,9 @@ namespace OpenSoT{
          * @param uA update upper constraint Eigen::VectorXd
          * @return true if constraints are correctly updated
          */
-        bool updateConstraints(const Eigen::MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA);
+        bool updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A, 
+                               const Eigen::Ref<const Eigen::VectorXd> &lA, 
+                               const Eigen::Ref<const Eigen::VectorXd> &uA);
 
         /**
          * @brief updateBounds update internal l and u
