@@ -1,3 +1,6 @@
+#ifndef _OPENSOT_UTILS_PILER_H_
+#define _OPENSOT_UTILS_PILER_H_
+
 #include <Eigen/Dense>
 #include <XBotInterface/RtLog.hpp>
 
@@ -9,9 +12,10 @@ namespace OpenSoT { namespace utils {
         
     public:
         
-        MatrixPiler(int cols = -1);
+        MatrixPiler(const int cols = -1);
         
         void reset();
+        void reset(const int cols);
         
         template <typename Derived>
         void pile(const Eigen::MatrixBase<Derived>& matrix);
@@ -20,6 +24,12 @@ namespace OpenSoT { namespace utils {
         void set(const Eigen::MatrixBase<Derived>& matrix);
         
         const Eigen::MatrixXd& generate_and_get();
+
+        int cols() const {return _mat.cols();}
+        int rows() const {return _current_row;}
+
+        double& operator[](const int i){return _mat(i);}
+        double& operator()(const int i, const int j){return _mat(i,j);}
         
     private:
         
@@ -33,7 +43,9 @@ namespace OpenSoT { namespace utils {
 } }
 
 
-OpenSoT::utils::MatrixPiler::MatrixPiler(int cols):
+
+
+inline OpenSoT::utils::MatrixPiler::MatrixPiler(const int cols):
     _cols(cols),
     _current_row(0)
 {
@@ -41,7 +53,7 @@ OpenSoT::utils::MatrixPiler::MatrixPiler(int cols):
 }
 
 template <typename Derived>
-void OpenSoT::utils::MatrixPiler::pile(const Eigen::MatrixBase<Derived>& matrix)
+inline void OpenSoT::utils::MatrixPiler::pile(const Eigen::MatrixBase<Derived>& matrix)
 {
     if(matrix.cols() != _cols){
         throw std::runtime_error("matrix.cols() != _cols");
@@ -62,22 +74,40 @@ void OpenSoT::utils::MatrixPiler::pile(const Eigen::MatrixBase<Derived>& matrix)
 
 
 template <typename Derived>
-void OpenSoT::utils::MatrixPiler::set(const Eigen::MatrixBase<Derived>& matrix)
+inline void OpenSoT::utils::MatrixPiler::set(const Eigen::MatrixBase<Derived>& matrix)
 {
-    _cols = matrix.cols();
-
-    _mat = matrix;
-
-    _current_row = _mat.rows();
+    if(_cols == matrix.cols())
+    {
+        reset();
+        pile(matrix);
+    }
+    else
+    {
+       _cols = matrix.cols();
+       _mat = matrix;
+       _current_row = _mat.rows();
+    }
 
 }
 
-void OpenSoT::utils::MatrixPiler::reset()
+inline void OpenSoT::utils::MatrixPiler::reset()
 {
     _current_row = 0;
 }
 
-const Eigen::MatrixXd& OpenSoT::utils::MatrixPiler::generate_and_get()
+inline void OpenSoT::utils::MatrixPiler::reset(const int cols)
+{
+    if(_cols == cols)
+        reset();
+    else
+    {
+        _cols = cols;
+        _current_row = 0;
+        _mat.resize(0, _cols);
+    }
+}
+
+inline const Eigen::MatrixXd& OpenSoT::utils::MatrixPiler::generate_and_get()
 {
     if(_current_row != _mat.rows()){
         _mat.conservativeResize(_current_row, _cols);
@@ -86,3 +116,4 @@ const Eigen::MatrixXd& OpenSoT::utils::MatrixPiler::generate_and_get()
     return _mat;
 }
 
+#endif

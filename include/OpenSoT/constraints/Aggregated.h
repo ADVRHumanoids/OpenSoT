@@ -22,7 +22,10 @@
 #include <OpenSoT/EigenDefinitions.h>
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
+#include <OpenSoT/utils/Piler.h>
 #include <list>
+
+using namespace OpenSoT::utils;
 
  namespace OpenSoT {
     namespace constraints {
@@ -43,8 +46,7 @@
         class Aggregated: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
 	    typedef boost::shared_ptr<Aggregated> Ptr;
-        typedef Eigen::Matrix<double, Eigen::Dynamic,  Eigen::Dynamic, 0, _AGGREGATED_MATRIX_MAX_SIZE_ROWS, _AGGREGATED_MATRIX_MAX_SIZE_COLS> Matrix;
-        typedef Eigen::Matrix<double, Eigen::Dynamic, 1, 0, _AGGREGATED_MATRIX_MAX_SIZE_ROWS, 1> Vector;
+        typedef MatrixPiler VectorPiler;
 
             enum AggregationPolicy {
                 /** transform equalities Ax = b to inequalities b <= Ax <= b */
@@ -58,15 +60,15 @@
             };
 
         protected:
-            Vector _tmpupperBound;
-            Vector _tmplowerBound;
+            VectorPiler _tmpupperBound;
+            VectorPiler _tmplowerBound;
 
-            Matrix _tmpAeq;
-            Vector _tmpbeq;
+            MatrixPiler _tmpAeq;
+            VectorPiler _tmpbeq;
 
-            Matrix _tmpAineq;
-            Vector _tmpbUpperBound;
-            Vector _tmpbLowerBound;
+            MatrixPiler _tmpAineq;
+            VectorPiler _tmpbUpperBound;
+            VectorPiler _tmpbLowerBound;
 
             std::list< ConstraintPtr > _bounds;
             unsigned int _aggregationPolicy;
@@ -76,19 +78,7 @@
             static const std::string concatenateConstraintsIds(const std::list<ConstraintPtr> constraints);
 
 
-            inline void pile(Matrix& A, const Eigen::MatrixXd& B)
-            {
-                A.conservativeResize(A.rows()+B.rows(), A.cols());
-                A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-            }
 
-            inline void pile(Vector&a, const Eigen::VectorXd&b)
-            {
-                a.conservativeResize(a.rows()+b.rows());
-                a.segment(a.rows()-b.rows(),b.rows())<<b;
-            }
-
-#if _AGGREGATED_MATRIX_MAX_SIZE_COLS != -1 && _AGGREGATED_MATRIX_MAX_SIZE_ROWS != -1
             inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
             {
                 A.conservativeResize(A.rows()+B.rows(), A.cols());
@@ -100,7 +90,6 @@
                 a.conservativeResize(a.rows()+b.rows());
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
             }
-#endif
 
             virtual void _log(XBot::MatLogger::Ptr logger);
 
