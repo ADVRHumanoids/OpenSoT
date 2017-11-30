@@ -3,6 +3,7 @@
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
@@ -12,7 +13,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT-lite/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace {

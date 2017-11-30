@@ -64,9 +64,24 @@ CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd& 
     this->update(x);
 }
 
+void CartesianPositionConstraint::setAbCartesian(const Eigen::MatrixXd& A_Cartesian, const Eigen::VectorXd& b_Cartesian)
+{
+    _A_Cartesian = A_Cartesian;
+    _b_Cartesian = b_Cartesian;
+
+    assert(_A_Cartesian.rows() == _b_Cartesian.rows() && "A and b must have the same size");
+    assert(_A_Cartesian.cols() == 3 && "A must have 3 columns");
+}
+
+void CartesianPositionConstraint::getCurrentPosition(Eigen::VectorXd& current_position)
+{
+    current_position = currentPosition;
+}
+
 void CartesianPositionConstraint::update(const Eigen::VectorXd &x) {
 
     if(_is_Cartesian){
+        _cartesianTask->update(x);
         /************************ COMPUTING BOUNDS ****************************/
         J = _cartesianTask->getA().block(0,0,3,_x_size);
         assert(J.rows() == 3 && "Jacobian doesn't have 3 rows. Something went wrong.");
@@ -80,6 +95,7 @@ void CartesianPositionConstraint::update(const Eigen::VectorXd &x) {
 
         /**********************************************************************/
     }else{
+        _comTask->update(x);
         J = _comTask->getA();
 
         _Aineq = _A_Cartesian * J;

@@ -35,6 +35,12 @@ Installation
 
 To Install OpenSoT, the recommended way is to use the OpenSoT-superbuild https://github.com/EnricoMingo/OpenSoT-superbuild
 
+Developers:
+-----------
+Enrico Mingo Hoffman  
+Alessio Rocchi  
+Arturo Laurenzi
+
 How to cite this work:
 ======================
 Please support ```OpenSoT``` development by referencing it in your works/publications/projects with:

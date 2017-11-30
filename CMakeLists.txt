@@ -57,8 +57,7 @@ option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${eigen_conversions_INCLUDE_DIRS}
-                            ${EIGEN3_INCLUDE_DIR}
+INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
                             ${PCL_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
                             ${srdfdom_advr_INCLUDE_DIRS}
@@ -93,6 +92,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/TaskToConstraint.cpp
                     src/constraints/acceleration/DynamicFeasibility.cpp
                     src/constraints/velocity/CartesianPositionConstraint.cpp
+                    src/constraints/velocity/CapturePoint.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
                     src/constraints/velocity/CoMVelocity.cpp
                     src/constraints/velocity/JointLimits.cpp
@@ -125,6 +125,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/Contact.cpp
                     src/tasks/velocity/CoM.cpp
                     src/tasks/velocity/AngularMomentum.cpp
+                    src/tasks/velocity/LinearMomentum.cpp                    
                     src/tasks/velocity/Manipulability.cpp
                     src/tasks/velocity/MinimizeAcceleration.cpp
                     src/tasks/velocity/MinimumEffort.cpp
@@ -141,6 +142,7 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
                     src/solvers/DampedPseudoInverse.cpp)
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
+                    src/utils/DefaultHumanoidStack.cpp
                     src/utils/AffineHelper.cpp
                     src/utils/Indices.cpp
                     src/utils/VelocityAllocation.cpp
@@ -169,16 +171,15 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
 #                    src/tasks/velocity/Interaction.cpp
-#                    src/utils/DefaultHumanoidStack.cpp
+
                     #src/utils/PreviewerUtils.cpp
                     ${sot_INCLUDES})
-                    
-
 
 # we must wait for qpOASES-ext to be ready before building OpenSoT
 if(TARGET qpOASES-ext)
     add_dependencies(OpenSoT qpOASES-ext)
 endif()
+
 
 
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
@@ -264,9 +265,9 @@ add_subdirectory(doc)
 ########################
 # Add Examples target  #
 ########################
-if(OPENSOT_COMPILE_EXAMPLES)
-   add_subdirectory(examples)
-endif()
+#if(OPENSOT_COMPILE_EXAMPLES)
+#    add_subdirectory(examples)
+#endif()
 
 #######################
 # Add Testing target  #
@@ -280,4 +281,3 @@ if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
     add_custom_target(copy_robot_model_files ALL
                       ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()
-

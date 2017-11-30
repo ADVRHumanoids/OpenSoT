@@ -70,6 +70,7 @@ using namespace OpenSoT::utils;
             VectorPiler _tmpbLowerBound;
 
             std::list< ConstraintPtr > _bounds;
+            unsigned int _number_of_bounds;
             unsigned int _aggregationPolicy;
 
             void checkSizes();

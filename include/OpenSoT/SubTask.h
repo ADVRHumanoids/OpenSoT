@@ -51,19 +51,19 @@
         TaskPtr _taskPtr;
         Indices _subTaskMap;
 
-        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
-        {
-            A.conservativeResize(A.rows()+B.rows(), A.cols());
-            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-        }
-
-        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
-        {
-            a.conservativeResize(a.rows()+b.rows());
-            a.segment(a.rows()-b.rows(),b.rows())<<b;
-        }
-
         virtual void _log(XBot::MatLogger::Ptr logger);
+
+        void generateA();
+
+        void generateHessianAtype();
+
+        void generateb();
+
+        void generateWeight();
+
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
+            @param x variable state at the current step (input) */
+        virtual void _update(const Eigen::VectorXd &x);
 
     public:
         /**
@@ -75,14 +75,6 @@
         SubTask(TaskPtr taskPtr, const std::list<unsigned int> rowIndices);
 
         virtual ~SubTask(){}
-
-        void generateA();
-
-        void generateHessianAtype();
-
-        void generateb();
-
-        void generateWeight();
 
         /**
          * @brief setWeight sets the task weight.
@@ -109,9 +101,6 @@
             @return the number of rows of A */
         virtual const unsigned int getTaskSize() const;
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-            @param x variable state at the current step (input) */
-        virtual void _update(const Eigen::VectorXd &x);
 
         /**
          * @brief getActiveJointsMask return a vector of length NumberOfDOFs.

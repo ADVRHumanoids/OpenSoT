@@ -1,16 +1,8 @@
 #include <Eigen/Dense>
-#include <yarp/sig/Matrix.h>
 //#define __USE_SINGLE_PRECISION__
 #include <qpOASES/QProblemB.hpp>
 #include <qpOASES/SQProblem.hpp>
-#include <yarp/os/Time.h>
-#include <yarp/math/Rand.h>
-#include <yarp/math/Math.h>
-#include <yarp/math/RandnVector.h>
-#include <yarp/math/RandVector.h>
-
-
-
+#include <chrono>
 #include <gtest/gtest.h>
 
 namespace{
@@ -25,15 +17,12 @@ public:
     virtual void SetUp(){}
     virtual void TearDown(){}
 
-    yarp::sig::Matrix Ay;
     Eigen::MatrixXd Aed;
     Eigen::MatrixXf Aef;
 
-    yarp::sig::Matrix Wy;
     Eigen::MatrixXd Wed;
     Eigen::MatrixXf Wef;
 
-    yarp::sig::Vector by;
     Eigen::VectorXd bed;
     Eigen::VectorXf bef;
 
@@ -73,11 +62,12 @@ TEST_F(testBasicAlgebra, testPinvVSQP)
         A.setRandom(rows, cols);
         b.setRandom(rows);
 
-        double tic = yarp::os::Time::now()*1e6;
+        auto tic = std::chrono::high_resolution_clock::now();
         sol1 = pseudoInverse(A)*b;
-        double toc = yarp::os::Time::now()*1e6;
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        t[i] = toc-tic;
+
+        t[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
 
         H = A.transpose()*A;
         g = -1.0 * A.transpose()*b;
@@ -90,12 +80,12 @@ TEST_F(testBasicAlgebra, testPinvVSQP)
         int nrws = 64;
 
 
-        tic = yarp::os::Time::now()*1e6;
+        tic = std::chrono::high_resolution_clock::now();
         solver.init(H.data(), g.data(),NULL, b_min.data(), b_max.data(),NULL, NULL, nrws);
         solver.getPrimalSolution(sol2.data());
-        toc = yarp::os::Time::now()*1e6;
+        toc = std::chrono::high_resolution_clock::now();
 
-        t2[i] = toc-tic;
+        t2[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
 
 
         Eigen::VectorXd s1 = A*sol1;
@@ -135,24 +125,24 @@ TEST_F(testBasicAlgebra, testQPPVM)
         Eigen::MatrixXd A;
         Eigen::VectorXd b;
 
-        double tic = yarp::os::Time::now()*1e6;
+        auto tic = std::chrono::high_resolution_clock::now();
         A = J;
         b = J*J.transpose()*f;
         H = A.transpose()*A;
         g = A.transpose()*b;
-        double toc = yarp::os::Time::now()*1e6;
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        t[i] = toc-tic;
+        t[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
 
-        tic = yarp::os::Time::now()*1e6;
+        tic = std::chrono::high_resolution_clock::now();
         J = (J.transpose()).eval();
         A = pseudoInverse(J);
         b = f;
         H2 = A.transpose()*A;
         g2 = A.transpose()*b;
-        toc = yarp::os::Time::now()*1e6;
+        toc = std::chrono::high_resolution_clock::now();
 
-        t2[i] = toc-tic;
+        t2[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
     }
 
 
@@ -174,12 +164,12 @@ TEST_F(testBasicAlgebra, testMulEigenDouble)
         Wed = (Wed + Wed.transpose()).eval();
         bed.setRandom(rows);
 
-        double tic = yarp::os::Time::now()*1e6;
+        auto tic = std::chrono::high_resolution_clock::now();
         H = Aed.transpose()*Wed*Aed;
         g = Aed.transpose()*Wed*bed;
-        double toc = yarp::os::Time::now()*1e6;
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        t[i] = toc-tic;
+        t[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
     }
 
 
@@ -199,45 +189,18 @@ TEST_F(testBasicAlgebra, testMulEigenFloat)
         Wef = (Wef + Wef.transpose()).eval();
         bef.setRandom(rows);
 
-        double tic = yarp::os::Time::now()*1e6;
+        auto tic = std::chrono::high_resolution_clock::now();
         H = Aef.transpose()*Wef*Aef;
         g = Aef.transpose()*Wef*bef;
-        double toc = yarp::os::Time::now()*1e6;
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        t[i] = toc-tic;
+        t[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
     }
 
 
     std::cout<<"EIGEN FLOAT-----> Mean time for "<<iter<<" iterations: "<<t.sum()/iter<<" us"<<std::endl;
 }
 
-TEST_F(testBasicAlgebra, testMulYarp)
-{
-    using namespace yarp::math;
-
-
-    Eigen::VectorXf t(iter);
-
-    yarp::sig::Matrix H;
-    yarp::sig::Vector g;
-    for(unsigned int i = 0; i < iter; ++i)
-    {
-        Ay = Rand::matrix(rows, cols);
-        Wy = Rand::matrix(rows, rows);
-        Wy = Wy + Wy.transposed();
-        by = Rand::vector(rows);
-
-        double tic = yarp::os::Time::now()*1e6;
-        H = Ay.transposed()*Wy*Ay;
-        g = Ay.transposed()*Wy*by;
-        double toc = yarp::os::Time::now()*1e6;
-
-        t[i] = toc-tic;
-    }
-
-
-    std::cout<<"YARP DOUBLE-----> Mean time for "<<iter<<" iterations: "<<t.sum()/iter<<" us"<<std::endl;
-}
 
 
 
@@ -261,7 +224,7 @@ TEST_F(testBasicAlgebra, testqpOASES)
         Wed = (Wed + Wed.transpose()).eval();
         bed.setRandom(rows);
 
-        double tic = yarp::os::Time::now()*1e6;
+        auto tic = std::chrono::high_resolution_clock::now();
         H = Aed.transpose()*Wed*Aed;
         g = Aed.transpose()*Wed*bed;
 
@@ -271,9 +234,9 @@ TEST_F(testBasicAlgebra, testqpOASES)
 
         solver.init(H.data(), g.data(), b_min.data(), b_max.data(), nwsr);
 
-        double toc = yarp::os::Time::now()*1e6;
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        t[i] = toc-tic;
+        t[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
     }
 
 
@@ -295,7 +258,7 @@ TEST_F(testBasicAlgebra, testqpOASES)
         Wef = (Wef + Wef.transpose()).eval();
         bef.setRandom(rows);
 
-        double tic = yarp::os::Time::now()*1e6;
+        auto tic = std::chrono::high_resolution_clock::now();
         H = Aef.transpose()*Wef*Aef;
         g = Aef.transpose()*Wef*bef;
 
@@ -304,9 +267,9 @@ TEST_F(testBasicAlgebra, testqpOASES)
 
         solver.init(H.data(), g.data(), b_min.data(), b_max.data(), nwsr);
 
-        double toc = yarp::os::Time::now()*1e6;
+        auto toc = std::chrono::high_resolution_clock::now();
 
-        t[i] = toc-tic;
+        t[i] = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
     }
 
 

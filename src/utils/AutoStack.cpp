@@ -1,6 +1,14 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <algorithm>
 
+OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
+                                const std::list<unsigned int> rowIndices)
+{
+    OpenSoT::SubTask::Ptr sub_task;
+    sub_task.reset(new OpenSoT::SubTask(task, rowIndices));
+    return sub_task;
+}
+
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
                                             const OpenSoT::tasks::Aggregated::TaskPtr task2)
 {
@@ -213,6 +221,15 @@ OpenSoT::AutoStack::AutoStack(const double x_size) :
 
 }
 
+OpenSoT::AutoStack::AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task):
+    _boundsAggregated(
+        new OpenSoT::constraints::Aggregated(
+            std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>(),
+            task->getXSize()))
+{
+    _stack.push_back(task);
+}
+
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack) :
     _stack(stack),
     _boundsAggregated(
@@ -359,3 +376,5 @@ void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)
     if(_boundsAggregated)
         _boundsAggregated->log(logger);
 }
+
+

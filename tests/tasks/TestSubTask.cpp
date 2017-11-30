@@ -1,8 +1,13 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <XBotInterface/ModelInterface.h>
 
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
 
 using namespace OpenSoT::tasks;
 
@@ -30,6 +35,8 @@ protected:
 
     }
 
+
+
 };
 
 class TestSubTask: public ::testing::Test
@@ -49,6 +56,13 @@ protected:
         tmp1<<tmp1.setOnes(DOFS)*M_PI_2;
         _joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(tmp,tmp1,-tmp1));
 
+        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+        if(_model_ptr)
+            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+        else
+            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
     }
 
     virtual ~TestSubTask() {
@@ -61,6 +75,8 @@ protected:
     virtual void TearDown() {
 
     }
+
+    XBot::ModelInterface::Ptr _model_ptr;
 
 };
 
@@ -497,6 +513,198 @@ TEST_F(TestSubTask, testGetTaskSize)
     subTask = SubTask::Ptr(new SubTask(_postural, Indices::range(1,3) +
                                                   Indices::range(6,7)));
     ASSERT_EQ(subTask->getTaskSize(), 5);
+}
+
+void check_matrix_are_equal(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+{
+    EXPECT_EQ(A.rows(), B.rows());
+    EXPECT_EQ(A.cols(), B.cols());
+    for(unsigned int i = 0; i < A.rows(); ++i)
+    {
+        for(unsigned int j = 0; j < B.rows(); ++j)
+            EXPECT_NEAR(A(i,j),B(i,j),1e-10);
+    }
+}
+
+void check_vector_are_equal(const Eigen::VectorXd& A, const Eigen::VectorXd& B)
+{
+    EXPECT_EQ(A.size(), B.size());
+    for(unsigned int j = 0; j < B.size(); ++j)
+        EXPECT_NEAR(A(j),B(j),1e-10);
+}
+
+TEST_F(TestSubTask, testWithCartesian)
+{
+    using namespace OpenSoT::tasks::velocity;
+
+    // setting initial position with bent legs
+    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
+    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
+    q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+    Cartesian::Ptr left_leg(new Cartesian("lleg", q_whole, *_model_ptr,
+                                          "l_sole", "Waist"));
+    Eigen::MatrixXd ref(6,6); ref.setRandom(6,6);
+    Eigen::VectorXd vref(6); vref.setRandom(6);
+    left_leg->setReference(ref, vref);
+
+    std::list<unsigned int> indices;
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    OpenSoT::SubTask::Ptr pose(new OpenSoT::SubTask(left_leg, indices));
+
+    left_leg->update(q_whole);
+    pose->update(q_whole);
+
+
+    check_matrix_are_equal(pose->getA(), left_leg->getA().block(0,0,3,_model_ptr->getJointNum()));
+    std::cout<<"pose->getA(): "<<pose->getA()<<std::endl;
+    std::cout<<"left_leg->getA().block(0,0,3,_model_ptr->getJointNum()): "<<left_leg->getA().block(0,0,3,_model_ptr->getJointNum())<<std::endl;
+    check_vector_are_equal(pose->getb(), left_leg->getb().segment(0,3));
+    std::cout<<"pose->getb(): "<<pose->getb()<<std::endl;
+    std::cout<<"left_leg->getb().segment(0,3): "<<left_leg->getb().segment(0,3)<<std::endl;
+
+
+    indices.clear();
+    indices.push_back(3);
+    indices.push_back(4);
+    indices.push_back(5);
+    OpenSoT::SubTask::Ptr pose2(new OpenSoT::SubTask(left_leg, indices));
+
+    left_leg->update(q_whole);
+    pose2->update(q_whole);
+
+
+    check_matrix_are_equal(pose2->getA(), left_leg->getA().block(3,0,3,_model_ptr->getJointNum()));
+    std::cout<<"pose2->getA(): "<<pose->getA()<<std::endl;
+    std::cout<<"left_leg->getA().block(0,0,3,_model_ptr->getJointNum()): "<<left_leg->getA().block(3,0,3,_model_ptr->getJointNum())<<std::endl;
+    check_vector_are_equal(pose2->getb(), left_leg->getb().segment(3,3));
+    std::cout<<"pose2->getb(): "<<pose->getb()<<std::endl;
+    std::cout<<"left_leg->getb().segment(0,3): "<<left_leg->getb().segment(3,3)<<std::endl;
+
+
+
+    indices.clear();
+    indices.push_back(1);
+    indices.push_back(4);
+    indices.push_back(5);
+    OpenSoT::SubTask::Ptr subtask(new OpenSoT::SubTask(left_leg, indices));
+    subtask->update(q_whole);
+
+    EXPECT_EQ(subtask->getA().rows(), indices.size());
+    EXPECT_EQ(subtask->getA().cols(), _model_ptr->getJointNum());
+    EXPECT_EQ(subtask->getb().size(), indices.size());
+
+    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+        EXPECT_NEAR(subtask->getA().row(0)[i],left_leg->getA().row(1)[i],1e-10);
+    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+        EXPECT_NEAR(subtask->getA().row(1)[i],left_leg->getA().row(4)[i],1e-10);
+    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+        EXPECT_NEAR(subtask->getA().row(2)[i],left_leg->getA().row(5)[i],1e-10);
+
+    EXPECT_NEAR(subtask->getb()[0],left_leg->getb()[1],1e-10);
+    EXPECT_NEAR(subtask->getb()[1],left_leg->getb()[4],1e-10);
+    EXPECT_NEAR(subtask->getb()[2],left_leg->getb()[5],1e-10);
+
+
+
+
+    indices.clear();
+    indices.push_back(0);
+    indices.push_back(4);
+    OpenSoT::SubTask::Ptr subtask2(new OpenSoT::SubTask(left_leg, indices));
+    subtask2->update(q_whole);
+
+    EXPECT_EQ(subtask2->getA().rows(), indices.size());
+    EXPECT_EQ(subtask2->getA().cols(), _model_ptr->getJointNum());
+    EXPECT_EQ(subtask2->getb().size(), indices.size());
+
+    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+        EXPECT_NEAR(subtask2->getA().row(0)[i],left_leg->getA().row(0)[i],1e-10);
+    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+        EXPECT_NEAR(subtask2->getA().row(1)[i],left_leg->getA().row(4)[i],1e-10);
+
+    EXPECT_NEAR(subtask2->getb()[0],left_leg->getb()[0],1e-10);
+    EXPECT_NEAR(subtask2->getb()[1],left_leg->getb()[4],1e-10);
+
+    std::cout<<"subtask2->getb()"<<subtask2->getb()<<std::endl;
+    std::cout<<"left_leg->getb()"<<left_leg->getb()<<std::endl;
+
+}
+
+TEST_F(TestSubTask, testWithPostural)
+{
+    Eigen::VectorXd q(_model_ptr->getJointNum());
+    q.setRandom(q.size());
+    Eigen::VectorXd q_ref = q;
+    q_ref.setRandom(q.size());
+
+    using namespace OpenSoT::tasks;
+
+    velocity::Postural::Ptr postural(new velocity::Postural(q));
+    postural->setReference(q_ref);
+    postural->update(q);
+
+    std::list<unsigned int> indices;
+    // first chunk of size 3
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(3);
+    // second chunk of size 2
+    indices.push_back(7);
+    indices.push_back(8);
+    // third chunk of size 2 (11 will get added later)
+    indices.push_back(10);
+    // fourth chunk of size 1
+    indices.push_back(13);
+    // fifth chunk of size 3
+    indices.push_back(17);
+    indices.push_back(18);
+    indices.push_back(19);
+    // goes into third chunk and increases it to size 2
+    indices.push_back(11);
+
+    OpenSoT::SubTask::Ptr subtask(new OpenSoT::SubTask(postural, indices));
+    subtask->update(q);
+
+
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(0)[j], postural->getA().row(1)[j], 1e-10);
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(1)[j], postural->getA().row(2)[j], 1e-10);
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(2)[j], postural->getA().row(3)[j], 1e-10);
+
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(3)[j], postural->getA().row(7)[j], 1e-10);
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(4)[j], postural->getA().row(8)[j], 1e-10);
+
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(5)[j], postural->getA().row(10)[j], 1e-10);
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(6)[j], postural->getA().row(11)[j], 1e-10);
+
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(7)[j], postural->getA().row(13)[j], 1e-10);
+
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(8)[j], postural->getA().row(17)[j], 1e-10);
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(9)[j], postural->getA().row(18)[j], 1e-10);
+    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+        EXPECT_NEAR(subtask->getA().row(10)[j], postural->getA().row(19)[j], 1e-10);
+
+
 }
 
 
