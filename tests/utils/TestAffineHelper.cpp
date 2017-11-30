@@ -1,4 +1,4 @@
-#include <OpenSoT/utils/AffineHelper.h>
+#include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/variables/Torque.h>
 #include <gtest/gtest.h>
 
