@@ -1,7 +1,7 @@
 #ifndef __OPENSOT_VARIABLES_TORQUE_H__
 #define __OPENSOT_VARIABLES_TORQUE_H__
 
-#include <OpenSoT/utils/AffineHelper.h>
+#include <OpenSoT/utils/Affine.h>
 #include <XBotInterface/ModelInterface.h>
 #include <XBotInterface/Utils.h>
 

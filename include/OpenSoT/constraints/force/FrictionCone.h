@@ -22,7 +22,7 @@
 #include <OpenSoT/Constraint.h>
 #include <XBotInterface/ModelInterface.h>
 #include <kdl/frames.hpp>
-#include <OpenSoT/utils/AffineHelper.h>
+#include <OpenSoT/utils/Affine.h>
 
 #include <Eigen/Dense>
 

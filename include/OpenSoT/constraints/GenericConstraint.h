@@ -20,7 +20,7 @@
 #define __CONSTRAINT_GENERIC_CONSTRAINT_H__
 
 #include <OpenSoT/Constraint.h>
-#include <OpenSoT/utils/AffineHelper.h>
+#include <OpenSoT/utils/Affine.h>
 #include <XBotInterface/ModelInterface.h>
 
 namespace OpenSoT { namespace constraints  {

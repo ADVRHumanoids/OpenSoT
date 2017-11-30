@@ -20,7 +20,7 @@
 #define __TASKS_ACCELERATION_POSTURAL_H__
 
 #include <OpenSoT/Task.h>
-#include <OpenSoT/utils/AffineHelper.h>
+#include <OpenSoT/utils/Affine.h>
 #include <XBotInterface/ModelInterface.h>
 
 namespace OpenSoT { namespace tasks { namespace acceleration {

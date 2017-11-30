@@ -1,4 +1,4 @@
-#include <OpenSoT/utils/AffineHelper.h>
+#include <OpenSoT/utils/Affine.h>
 
 
 int OpenSoT::OptvarHelper::getSize() const
