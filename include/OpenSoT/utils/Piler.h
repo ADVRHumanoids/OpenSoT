@@ -12,7 +12,7 @@ namespace OpenSoT { namespace utils {
         
     public:
         
-        MatrixPiler(const int cols = -1);
+        MatrixPiler(const int cols = 0);
         
         void reset();
         void reset(const int cols);
