@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/acceleration/Contact.h>
-
+#include <XBotInterface/RtLog.hpp>
 
 void OpenSoT::tasks::acceleration::Contact::_update(const Eigen::VectorXd& x)
 {
@@ -23,12 +23,12 @@ void OpenSoT::tasks::acceleration::Contact::_log(XBot::MatLogger::Ptr logger)
 {
 }
 
-OpenSoT::tasks::acceleration::Contact::Contact(const std::string task_id, 
+OpenSoT::tasks::acceleration::Contact::Contact(const std::string& task_id, 
                                                const XBot::ModelInterface& robot, 
                                                const std::string& contact_link, 
                                                const OpenSoT::AffineHelper& qddot, 
                                                const Eigen::MatrixXd& contact_matrix): 
-    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, _qddot.getInputSize()),
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, qddot.getInputSize()),
     _robot(robot),
     _contact_link(contact_link),
     _qddot(qddot),
