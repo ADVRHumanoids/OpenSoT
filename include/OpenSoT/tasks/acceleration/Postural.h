@@ -46,7 +46,10 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
                           const Eigen::VectorXd& ddqref);
 
-        void setLambda2(const double lambda2);
+        void setLambda(double lambda1, double lambda2);
+        virtual void setLambda(double lambda);
+        
+        virtual void _log(XBot::MatLogger::Ptr logger);
 
         
         
@@ -55,6 +58,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         const XBot::ModelInterface& _robot;
         AffineHelper _qddot;
         AffineHelper _postural_task;
+        
+        int _na;
         
         Eigen::VectorXd _qddot_d, _qddot_ref, _qref, _qdot, _q, _qdot_ref;
         Eigen::MatrixXd _Jpostural;

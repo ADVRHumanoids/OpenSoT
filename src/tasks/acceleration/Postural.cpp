@@ -5,18 +5,17 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
     _robot(robot)
 {
-    int na = _robot.getActuatedJointNum();
+    _na = _robot.getActuatedJointNum();
 
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
 
     _qddot = AffineHelper::Identity(x_size);
 
-    _A.setZero(na, _qddot.getInputSize());
+    _A.setZero(_na, _qddot.getInputSize());
 
-    setLambda(10.);
-    setLambda2(2.*sqrt(_lambda));
-    setWeight(Eigen::MatrixXd::Identity(na, na));
+    setLambda(10.0);
+    setWeight(Eigen::MatrixXd::Identity(_na, _na));
 
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
@@ -31,21 +30,20 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     _robot(robot),
     _qddot(qddot)
 {
-    int na = _robot.getActuatedJointNum();
+    _na = _robot.getActuatedJointNum();
     
     
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
     
     if(_qddot.getInputSize() == 0){
-        _qddot = AffineHelper::Identity(na);
+        _qddot = AffineHelper::Identity(_na);
     }
     
-    _A.setZero(na, _qddot.getInputSize());
+    _A.setZero(_na, _qddot.getInputSize());
     
     setLambda(10.);
-    setLambda2(2.*sqrt(_lambda));
-    setWeight(Eigen::MatrixXd::Identity(na, na));
+    setWeight(Eigen::MatrixXd::Identity(_na, _na));
 
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
@@ -53,32 +51,54 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     _update(_q);
 }
 
+void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda)
+{
+    if(lambda < 0){
+        XBot::Logger::error("in %s: illegal lambda (%f < 0) \n", __func__, lambda);
+        return;
+    }
+    
+    
+    _lambda = lambda;
+    _lambda2 = 4*std::sqrt(lambda);
+}
+
+void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda1, double lambda2)
+{
+    if( lambda1 < 0 || lambda2 < 0 )
+    {
+        XBot::Logger::error("in %s: illegal lambda (%f < 0 || %f < 0) \n", __func__, lambda1, lambda2);
+        return;
+    }
+    
+    _lambda = lambda1;
+    _lambda2 = lambda2;
+}
+
+
+
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref)
 {
-    _qref = qref;
+    _qref.tail(_na) = qref.tail(_na);
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
 }
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref)
 {
-    _qref = qref;
-    _qdot_ref = dqref;
+    _qref.tail(_na) = qref.tail(_na);
+    _qdot_ref.tail(_na) = dqref.tail(_na);
     _qddot_ref.setZero(_qref.size());
 }
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
                   const Eigen::VectorXd& ddqref)
 {
-    _qref = qref;
-    _qdot_ref = dqref;
-    _qddot_ref = ddqref;
+    _qref.tail(_na) = qref.tail(_na);
+    _qdot_ref.tail(_na) = dqref.tail(_na);
+    _qddot_ref.tail(_na) = ddqref.tail(_na);
 }
 
-void OpenSoT::tasks::acceleration::Postural::setLambda2(const double lambda2)
-{
-    _lambda2 = lambda2;
-}
 
 void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
 {
@@ -94,3 +114,10 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
 }
+
+void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger::Ptr logger)
+{
+    logger->add(_task_id + "_error", _qref - _q);
+    logger->add(_task_id + "_qref", _qref);
+}
+
