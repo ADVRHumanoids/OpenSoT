@@ -22,6 +22,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <map>
+#include <type_traits>
 #include <memory>
 
 
@@ -62,6 +63,12 @@ class AffineHelperBase {
     
 public:
     
+    typedef typename std::remove_reference<DerivedM>::type * PtrM;
+    typedef typename std::remove_reference<DerivedQ>::type * PtrQ;
+    typedef typename std::remove_reference<DerivedM>::type const * ConstPtrM;
+    typedef typename std::remove_reference<DerivedQ>::type const * ConstPtrQ;
+    
+   
     AffineHelperBase() = default;
     AffineHelperBase(int input_size, int output_size)
     {
@@ -124,13 +131,32 @@ public:
         return AffineHelperBase(m, q);
     }
     
+    
+    auto segment(int start_idx, int size) const -> AffineHelperBase<decltype(std::declval<ConstPtrM>()->block(0,0,0,0)), decltype(std::declval<ConstPtrQ>()->segment(0,0))>
+    {
+        return AffineHelperBase<decltype(std::declval<ConstPtrM>()->block(0,0,0,0)), decltype(std::declval<ConstPtrQ>()->segment(0,0))>
+                            (_M.block(start_idx, 0, size, _M.cols()), 
+                             _q.segment(start_idx, size)
+                             );
+    }
+    
+    auto head(int size) -> decltype( segment(0,0) )
+    {
+        return segment(0, size);
+    }
+    
+    auto tail(int size) -> decltype( segment(0,0) )
+    {
+        return segment(_M.rows() - size, size);
+    }
+ 
 
     
     template <typename Derived>
     void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value)
     {
         value.noalias() = _M*x;
-	value += _q;
+        value += _q;
     }
     
     virtual void update () {}
@@ -205,66 +231,6 @@ private:
 
 /*** IMPL ***/
 
-// namespace internal {
-//     
-//     template <typename Derived1, typename Derived2>
-//     using Sum = Eigen::CwiseBinaryOp<Eigen::internal::scalar_sum_op<double>, const Derived1, const Derived2>;
-//     
-//     template <typename Derived1, typename Derived2>
-//     using Product = Eigen::Product<Derived1, Derived2, 0>;
-//     
-//     template <typename VectorType>
-//     using MinusType = Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, const VectorType >;
-// }
-
-// template <typename DerivedM1, typename DerivedM2, typename DerivedQ1, typename DerivedQ2>
-// class AffineAffineSum : public AffineHelperBase< internal::Sum<DerivedM1, DerivedM2>, internal::Sum<DerivedQ1, DerivedQ2> > {
-//     
-// public:
-//     
-//     AffineAffineSum(const AffineHelperBase<DerivedM1, DerivedQ1>& aff1,
-//                     const AffineHelperBase<DerivedM2, DerivedQ2>& aff2):
-//         AffineHelperBase< internal::Sum<DerivedM1, DerivedM2>, internal::Sum<DerivedQ1, DerivedQ2> >(aff1.getM() + aff2.getM(), aff1.getq() + aff2.getq())
-//     {
-//         if(aff1.getInputSize() != aff2.getInputSize()){
-//             throw std::runtime_error("aff1.getInputSize != aff2.getInputSize");
-//         }
-//         
-//         if(aff1.getOutputSize() != aff2.getOutputSize()){
-//             throw std::runtime_error("aff1.getOutputSize != aff2.getOutputSize");
-//         }
-//     }
-//     
-// };
-
-
-// template <typename DerivedMatrix, typename DerivedM, typename DerivedQ>
-// class MatrixAffineProduct : public AffineHelperBase< internal::Product<DerivedMatrix, DerivedM>, internal::Product<DerivedMatrix, DerivedQ> > {
-//     
-// public:
-//     
-//     MatrixAffineProduct(const DerivedMatrix& matrix, 
-//                         const AffineHelperBase<DerivedM, DerivedQ>& affine):
-//         AffineHelperBase< internal::Product<DerivedMatrix, DerivedM>, internal::Product<DerivedMatrix, DerivedQ> >(matrix*affine.getM(), matrix*affine.getq())
-//     {
-//         
-//     }
-//     
-// };
-
-// template <typename DerivedVector, typename DerivedM, typename DerivedQ>
-// class AffineVectorSum : public AffineHelperBase< const DerivedM&, internal::Sum<DerivedVector, DerivedQ> > {
-//     
-// public:
-//     
-//     AffineVectorSum(const Eigen::MatrixBase<DerivedVector>& vector, 
-//                         const AffineHelperBase<DerivedM, DerivedQ>& affine):
-//         AffineHelperBase< const DerivedM&, internal::Sum<DerivedVector, DerivedQ> >(affine.getM(), vector + affine.getq())
-//     {
-//         
-//     }
-//     
-// };
 
 template <typename DerivedM1, typename DerivedM2, 
           typename DerivedQ1, typename DerivedQ2>
