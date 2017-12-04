@@ -15,7 +15,7 @@
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT-lite/tests/configs/coman/configs/config_coman_floating_base.yaml";
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
 bool IS_ROSCORE_RUNNING;

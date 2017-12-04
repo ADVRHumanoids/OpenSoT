@@ -59,7 +59,7 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
 {
     XBot::ModelInterface::Ptr _model_ptr;
     std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-    std::string relative_path = "/external/OpenSoT-lite/tests/configs/coman/configs/config_coman.yaml";
+    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
 
     std::string _path_to_cfg = robotology_root + relative_path;
 
