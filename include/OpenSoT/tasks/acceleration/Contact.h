@@ -32,14 +32,14 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         
         typedef boost::shared_ptr<Contact> Ptr;
 
-        Contact(const std::string task_id,
+        Contact(const std::string& task_id,
                 const XBot::ModelInterface& robot,
                 const std::string& contact_link,
                 const Eigen::VectorXd& x,
                 const Eigen::MatrixXd& contact_matrix = Eigen::MatrixXd()
                 );
         
-        Contact(const std::string task_id,
+        Contact(const std::string& task_id,
                 const XBot::ModelInterface& robot, 
                 const std::string& contact_link,
                 const AffineHelper& qddot,
