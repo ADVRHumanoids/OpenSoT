@@ -118,8 +118,25 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _acc_ref = acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setLambda2(const double lambda2)
+void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda)
 {
+    if(lambda < 0){
+        XBot::Logger::error("in %s: illegal lambda (%f < 0) \n", __func__, lambda);
+        return;
+    }
+    _lambda = lambda;
+    _lambda2 = 2*std::sqrt(lambda);
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda1, double lambda2)
+{
+    if( lambda1 < 0 || lambda2 < 0 )
+    {
+        XBot::Logger::error("in %s: illegal lambda (%f < 0 || %f < 0) \n", __func__, lambda1, lambda2);
+        return;
+    }
+    
+    _lambda = lambda1;
     _lambda2 = lambda2;
 }
 
