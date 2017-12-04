@@ -1,4 +1,3 @@
-#include <advr_humanoids_common_utils/test_utils.h>
 #include <trajectory_utils/trajectory_utils.h>
 #include <gtest/gtest.h>
 #include <trajectory_utils/utils/ros_trj_publisher.h>
@@ -628,6 +627,23 @@ public:
     }
 
 };
+
+static inline void KDLFramesAreEqual(const KDL::Frame& a, const KDL::Frame& b,
+                                     const double near = 1e-10)
+{
+    EXPECT_NEAR(a.p.x(), b.p.x(), near);
+    EXPECT_NEAR(a.p.y(), b.p.y(), near);
+    EXPECT_NEAR(a.p.z(), b.p.z(), near);
+
+    double x,y,z,w; a.M.GetQuaternion(x,y,z,w);
+    double xx,yy,zz,ww; b.M.GetQuaternion(xx,yy,zz,ww);
+
+    EXPECT_NEAR(x,xx, near);
+    EXPECT_NEAR(y,yy, near);
+    EXPECT_NEAR(z,zz, near);
+    EXPECT_NEAR(w,ww, near);
+}
+
 TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 {
     this->setGoodInitialPosition();
@@ -723,13 +739,13 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         KDL::Frame tmp; KDL::Vector tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
         tmp.p = tmp_vector;
-        tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+        KDLFramesAreEqual(com_d, tmp, 1e-3);
         KDL::Frame l_sole;
         this->_model_ptr->getPose("l_sole", l_sole);
-        tests_utils::KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
+        KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
         KDL::Frame r_sole;
         this->_model_ptr->getPose("r_sole", r_sole);
-        tests_utils::KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
+        KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
 #endif
 
 #if CHECK_JOINT_LIMITS
@@ -817,10 +833,10 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         this->_model_ptr->getCOM(tmp_vector);
         tmp.p = tmp_vector;
 #if CHECK_CARTESIAN_ERROR
-        tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+        KDLFramesAreEqual(com_d, tmp, 1e-3);
         KDL::Frame r_wrist;
         this->_model_ptr->getPose("r_wrist","DWYTorso",r_wrist);
-        tests_utils::KDLFramesAreEqual(r_wrist_d, r_wrist, 1e-3);
+        KDLFramesAreEqual(r_wrist_d, r_wrist, 1e-3);
 #endif
         //log
         Eigen::VectorXd com(3); com[0] = tmp.p.x(); com[1] = tmp.p.y(); com[2] = tmp.p.z();
@@ -911,13 +927,13 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         KDL::Frame tmp; KDL::Vector tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
         tmp.p = tmp_vector;
-        tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
+        KDLFramesAreEqual(com_d, tmp, 1e-3);
         KDL::Frame l_sole;
         this->_model_ptr->getPose("l_sole", l_sole);
-        tests_utils::KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
+        KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
         KDL::Frame r_sole;
         this->_model_ptr->getPose("r_sole", r_sole);
-        tests_utils::KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
+        KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
 #endif
 
 #if CHECK_JOINT_LIMITS
