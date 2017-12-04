@@ -140,12 +140,12 @@ public:
                              );
     }
     
-    auto head(int size) -> decltype( segment(0,0) )
+    auto head(int size) -> decltype( this->segment(0,0) )
     {
         return segment(0, size);
     }
     
-    auto tail(int size) -> decltype( segment(0,0) )
+    auto tail(int size) -> decltype( this->segment(0,0) )
     {
         return segment(_M.rows() - size, size);
     }
