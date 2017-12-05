@@ -165,7 +165,7 @@ endif()
                       
 #                      testDefaultHumanoidStack
 #                      testLogger
-#                      #testPreviewer
+
 #                      testVelocityAllocation
                        
 if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
