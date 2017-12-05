@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi, Enrico Mingo
- * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+ * Author: Juan Alejandro Castano, Enrico Mingo
+ * email:  juan.castano@iit.it, enrico.mingo@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -62,14 +62,13 @@ Unicycle::Unicycle(std::string task_id,
 	_A.setZero(3, robot.getJointNum());
     _constA.setZero(3,6);
     /// HERE fill _constA
-// 	_constA(0,1)=1*0;
-// 	_constA(1,3)=1.0*0;
-// 	_constA(2,0)=1;
-// 	
+ 	
+	
 	_constA(0,1)=1*0;    // no Y motion		
 	_constA(1,3)=1.0*0; //no rotation around X
-	_constA(2,0)=1;    //just motion in X
-	_constA(2,1)=1;    //just motion in X
+	_constA(2,0)=1;    //just motion in X  
+	_constA(2,1)=1;    //just motion in X /// By using this option, the Y direction also can rotate to dicipate energy if t
+										  /// wheels are alligned in the lateral plane
 	
 	
 	
@@ -110,8 +109,11 @@ void Unicycle::_update(const Eigen::VectorXd &x) {
 	_R.block(3,3,3,3) << _T.matrix().block(0,0,3,3).transpose();
     ///
 
+	/// BUG: If the Rotation is used, the motion of the wheels is allowed only if perfectly alligned
+	/// If this case we does not include the Rotation matrix allowing the wheels to spin
+	/// also when there are not aligned with the direction of the motion.
 
-    _A = _constA*_J;//_R*_J;
+    _A = _constA*_J;//_R*_J;   
 	_AuxVector=_A.row(2);
 	_A.row(2)=_AuxVector+_Swheel*_signcorrection;
 

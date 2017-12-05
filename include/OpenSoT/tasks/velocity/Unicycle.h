@@ -31,6 +31,18 @@
  * of a distal link w.r.t. a base link.
  */
 
+/**
+ * @brief Unicycle task defines a rotation around fix axes task to allow the spin of wheels in a robot
+ * In this implementation, the rotation of the frame at the end effector is not consider which avoid the
+ * requierment of full alligment between the wheels and the motion direction. Eventhough this introduces
+ * a mismatch in the global carteasian position of the robot it allows us to explote better the robot
+ * capabilities.
+ */
+
+/**
+ * @bug Rotation matrix should be consider in further implementation without limiting the spinning capabilities
+ */ 
+
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
@@ -80,12 +92,14 @@
                 /****************************************/
 
                 /**
-                 * @brief Cartesian creates a new Cartesian task
+                 * @brief Unicycle creates a new Cartesian task at the wheels
                  * @param task_id an identifier for the task.
                  * @param x the robot configuration. The Cartesian task will be created so that the task error is zero in position x.
                  * @param robot the robot model. Cartesian expects the robot model to be updated externally.
                  * @param distal_link the name of the distal link as expressed in the robot urdf
                  * @param base_link the name of the base link as expressed in the robot urdf. Can be set to "world"
+				 * @param wheel_radius radios of each wheel
+				 * @param signcorrection indicates the negative/positive direction in which the motion is alligned so that all wheels spin in the same direction
                  */
                 Unicycle(std::string task_id,
                           const Eigen::VectorXd& x,
@@ -98,10 +112,7 @@
 
                 void _update(const Eigen::VectorXd& x);
 
-               
-
                 double _wheel_radius;
-
 
                 const std::string getDistalLink() const;
                
@@ -120,8 +131,9 @@
                 bool setBaseLink(const std::string& base_link);
                 
 				
-				 int _signcorrection;
-                static bool isUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+				int _signcorrection;
+                
+				static bool isUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
                 static OpenSoT::tasks::velocity::Unicycle::Ptr asUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
