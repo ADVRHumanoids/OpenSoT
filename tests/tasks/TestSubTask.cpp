@@ -552,7 +552,7 @@ TEST_F(TestSubTask, testWithCartesian)
 
     Cartesian::Ptr left_leg(new Cartesian("lleg", q_whole, *_model_ptr,
                                           "l_sole", "Waist"));
-    Eigen::MatrixXd ref(6,6); ref.setRandom(6,6);
+    Eigen::MatrixXd ref(4,4); ref.setRandom(4,4);
     Eigen::VectorXd vref(6); vref.setRandom(6);
     left_leg->setReference(ref, vref);
 
