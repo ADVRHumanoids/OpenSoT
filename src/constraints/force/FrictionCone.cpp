@@ -14,8 +14,7 @@ namespace OpenSoT {
        {
            _n_of_contacts = _mu.size();
 
-           computeAineq();
-           computeUpperBound();
+           
            
            OptvarHelper::VariableVector vars;
            for(auto fc : mu){
@@ -28,6 +27,8 @@ namespace OpenSoT {
            for(auto& w : opthelper.getAllVariables()){
                _wrenches = _wrenches / w;
            }
+           
+           update(Eigen::VectorXd::Zero(0));
 
        }
        
@@ -42,14 +43,15 @@ namespace OpenSoT {
        {
            _n_of_contacts = _mu.size();
 
-           computeAineq();
-           computeUpperBound();
+           
            
            _wrenches.setZero(wrenches[0].getInputSize(), 0);
            
            for(auto& w : wrenches){
                _wrenches = _wrenches / w;
            }
+           
+           update(Eigen::VectorXd::Zero(0));
 
        }
 
