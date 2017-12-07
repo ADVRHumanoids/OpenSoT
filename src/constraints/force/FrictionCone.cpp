@@ -78,7 +78,7 @@ namespace OpenSoT {
                 _Ci(3,0) = 0.; _Ci(3,1) = -1.; _Ci(3,2) = -__mu;
                 _Ci(4,0) = 0.; _Ci(4,1) = 0.; _Ci(4,2) = -1.;
 
-                _Ci = _Ci*_wTl.matrix().block(0,0,3,3).transpose();
+//                 _Ci = _Ci*_wTl.matrix().block(0,0,3,3).transpose();
 
                 _Aineq.block(5*i, 6*i,5,3)<<_Ci;
            }
