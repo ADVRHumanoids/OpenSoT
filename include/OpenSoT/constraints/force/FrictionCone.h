@@ -49,7 +49,7 @@
 
         Eigen::MatrixXd _Ci;
 
-        Eigen::Affine3d _wTl;
+        std::vector<Eigen::Affine3d> _wTl;
 
         int _n_of_contacts;
         
