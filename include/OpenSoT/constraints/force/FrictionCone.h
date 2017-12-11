@@ -31,7 +31,7 @@
     namespace constraints {
         namespace force {
 
-            
+
             class FrictionCone: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<FrictionCone> Ptr;
@@ -47,17 +47,20 @@
         friction_cones _mu; //Friction Coefficient associated to each contact surface
         XBot::ModelInterface& _robot;
 
-        Eigen::MatrixXd _Ci;
+        Eigen::Matrix<double, 5, 3> _Ci;
 
         std::vector<Eigen::Affine3d> _wTl;
 
         int _n_of_contacts;
-        
+
+        Eigen::MatrixXd _A;
+        Eigen::VectorXd _b;
+
         AffineHelper _friction_cone;
         AffineHelper _wrenches;
 
     public:
-                
+
         /**
          * @brief FrictionCone
          * @param x
@@ -68,12 +71,12 @@
         FrictionCone(const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
                      const friction_cones & mu);
-        
+
         FrictionCone(const std::vector<AffineHelper>& wrenches,
                      XBot::ModelInterface &robot,
                      const friction_cones & mu);
-                
-                
+
+
         void update(const Eigen::VectorXd &x);
 
         void setMu(const friction_cones& mu){ _mu = mu;}
