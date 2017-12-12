@@ -46,6 +46,9 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                   const AffineHelper& qddot
                  );
         
+        const std::string& getBaseLink() const;
+        const std::string& getDistalLink() const;
+        
         void setPositionReference(const Eigen::Vector3d& pos_ref);
         void setReference(const Eigen::Affine3d& ref);
         void setReference(const Eigen::Affine3d& pose_ref,
@@ -65,6 +68,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         void setLambda(double lambda1, double lambda2);
         virtual void setLambda(double lambda);
+        void setOrientationGain(double orientation_gain);
         
     private:
         
@@ -82,6 +86,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Vector6d _pose_error, _vel_ref, _vel_current, _acc_ref;
         
         Eigen::Vector3d _orientation_error;
+        
+        double _orientation_gain;
 
         double _lambda2;
         

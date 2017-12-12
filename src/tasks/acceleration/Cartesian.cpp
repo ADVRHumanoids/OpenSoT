@@ -13,7 +13,8 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x.size()),
     _robot(robot),
     _distal_link(distal_link),
-    _base_link(base_link)
+    _base_link(base_link),
+    _orientation_gain(1.0)
 {
     _qddot = AffineHelper::Identity(x.size());
 
@@ -41,7 +42,8 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _robot(robot),
     _distal_link(distal_link),
     _base_link(base_link),
-    _qddot(qddot)
+    _qddot(qddot),
+    _orientation_gain(1.0)
 {
     resetReference();
     
@@ -54,6 +56,21 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     update(Eigen::VectorXd(1));
     
     setWeight(Eigen::MatrixXd::Identity(6,6));
+    
+}
+
+const std::string& OpenSoT::tasks::acceleration::Cartesian::getBaseLink() const
+{
+    return _base_link;
+}
+
+const std::string& OpenSoT::tasks::acceleration::Cartesian::getDistalLink() const
+{
+    return _distal_link;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setOrientationGain(double orientation_gain)
+{
     
 }
 
@@ -73,7 +90,7 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     XBot::Utils::computeOrientationError(_pose_ref.linear(), _pose_current.linear(), _orientation_error);
     
     _pose_error.head<3>() = _pose_ref.translation() - _pose_current.translation();
-    _pose_error.tail<3>() = _orientation_error;
+    _pose_error.tail<3>() = _orientation_gain * _orientation_error;
     
     _cartesian_task = _J*_qddot + _jdotqdot;
     _cartesian_task = _cartesian_task - _acc_ref 
