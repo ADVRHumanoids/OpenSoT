@@ -71,7 +71,13 @@ const std::string& OpenSoT::tasks::acceleration::Cartesian::getDistalLink() cons
 
 void OpenSoT::tasks::acceleration::Cartesian::setOrientationGain(double orientation_gain)
 {
+    if(orientation_gain < 0)
+    {
+        Logger::error("in %s: orientation gain is %f < 0! \n", __func__, orientation_gain);
+        return;
+    }
     
+    _orientation_gain = orientation_gain;
 }
 
 
