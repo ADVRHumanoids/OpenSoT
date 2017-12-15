@@ -3,19 +3,21 @@
 OpenSoT::constraints::GenericConstraint::GenericConstraint(std::string task_id, 
                                                            const OpenSoT::AffineHelper& variable, 
                                                            const Eigen::VectorXd& upper_bound, 
-                                                           const Eigen::VectorXd& lower_bound): 
+                                                           const Eigen::VectorXd& lower_bound,
+                                                           const Type constraint_type):
     Constraint< Eigen::MatrixXd, Eigen::VectorXd >(task_id, variable.getInputSize()),
     _ub(upper_bound),
     _lb(lower_bound),
     _var(variable)
 {
-    if(!setBounds(upper_bound, lower_bound)){
+    if(!setBounds(upper_bound, lower_bound, constraint_type)){
         throw std::invalid_argument("Bounds not valid");
     }
 }
 
 bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& upper_bound, 
-                                                        const Eigen::VectorXd& lower_bound)
+                                                        const Eigen::VectorXd& lower_bound,
+                                                        const Type constraint_type)
 {
     if( ((upper_bound - lower_bound).array() < 0).any() ){
         return false;
@@ -28,9 +30,19 @@ bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& u
     _ub = upper_bound;
     _lb = lower_bound;
     
-    _Aineq = _var.getM();
-    _bUpperBound = _ub - _var.getq();
-    _bLowerBound = _lb - _var.getq();
+    if(constraint_type == Type::CONSTRAINT)
+    {
+        _Aineq = _var.getM();
+        _bUpperBound = _ub - _var.getq();
+        _bLowerBound = _lb - _var.getq();
+    }
+    else if(constraint_type == Type::BOUND)
+    {
+        _upperBound = _ub - _var.getq();
+        _lowerBound = _lb - _var.getq();
+    }
+    else
+        return false;
     
     return true;
 }
@@ -38,5 +50,5 @@ bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& u
 
 void OpenSoT::constraints::GenericConstraint::update(const Eigen::VectorXd& x)
 {
-    
+
 }

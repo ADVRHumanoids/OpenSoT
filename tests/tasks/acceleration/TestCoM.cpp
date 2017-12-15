@@ -1,10 +1,15 @@
 #include <OpenSoT/tasks/acceleration/Cartesian.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
+#include <OpenSoT/tasks/acceleration/CoM.h>
+#include <OpenSoT/tasks/acceleration/CoM.h>
+#include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/QPOases.h>
 #include <gtest/gtest.h>
 #include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
@@ -12,11 +17,11 @@ std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace{
 
-class testCartesianTask: public ::testing::Test
+class testCoMTask: public ::testing::Test
 {
 protected:
 
-    testCartesianTask()
+    testCoMTask()
     {
         _model = XBot::ModelInterface::getModel(_path_to_cfg);
         _q.setZero(_model->getJointNum());
@@ -36,25 +41,41 @@ protected:
         this->setWorld(l_sole_T_Waist, _q);
 
 
-        l_arm.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("l_arm", *_model, "LSoftHand", "world", _q));
-        l_arm->getReference(_l_arm_ref);
-        std::cout<<"_l_arm_initial: "<<_l_arm_ref.matrix()<<std::endl;
-        r_arm.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("r_arm", *_model, "RSoftHand", "world", _q));
-        r_arm->getReference(_r_arm_ref);
-        std::cout<<"_r_arm_initial: "<<_r_arm_ref.matrix()<<std::endl;
+        com.reset(
+            new OpenSoT::tasks::acceleration::CoM(*_model, _q));
+        com->getReference(_com_ref);
+        std::cout<<"_com_initial: \n"<<_com_ref.matrix()<<std::endl;
+        l_sole.reset(
+            new OpenSoT::tasks::acceleration::Cartesian("l_sole", *_model, "l_sole", "world", _q));
+        l_sole->getReference(_l_sole_ref);
+        std::cout<<"_l_sole_initial: \n"<<_l_sole_ref.matrix()<<std::endl;
+        r_sole.reset(
+            new OpenSoT::tasks::acceleration::Cartesian("r_sole", *_model, "r_sole", "world", _q));
+        r_sole->getReference(_r_sole_ref);
+        std::cout<<"_r_sole_initial: \n"<<_r_sole_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new
             OpenSoT::tasks::acceleration::Postural("Postural", *_model,_q.size()));
 
-        autostack = (l_arm + r_arm)/(postural);
+
+        OpenSoT::AffineHelper var = OpenSoT::AffineHelper::Identity(_q.size());
+        Eigen::VectorXd ddq_max = 1.*Eigen::VectorXd::Ones(_q.size());
+        Eigen::VectorXd ddq_min = -ddq_max;
+        acc_lims.reset(
+            new OpenSoT::constraints::GenericConstraint("acc_lims", var, ddq_max, ddq_min,
+                                                        OpenSoT::constraints::GenericConstraint::Type::BOUND));
+
+
+
+
+
+        autostack = ((l_sole + r_sole)/(com)/(postural))<<acc_lims;
         autostack->update(_q);
 
-        eHQP.reset(new OpenSoT::solvers::DampedPseudoInverse(autostack->getStack()));
+        iHQP.reset(new OpenSoT::solvers::QPOases_sot(autostack->getStack(), autostack->getBounds()));
 
     }
 
-    virtual ~testCartesianTask() {
+    virtual ~testCoMTask() {
 
     }
 
@@ -96,29 +117,38 @@ protected:
 
     Eigen::VectorXd _q, _dq;
     XBot::ModelInterface::Ptr _model;
-    Eigen::Affine3d _l_arm_ref, _r_arm_ref;
-    OpenSoT::tasks::acceleration::Cartesian::Ptr l_arm, r_arm;
+    Eigen::Affine3d _l_sole_ref, _r_sole_ref;
+    Eigen::Vector3d _com_ref;
+    OpenSoT::tasks::acceleration::Cartesian::Ptr l_sole, r_sole;
+    OpenSoT::tasks::acceleration::CoM::Ptr com;
+    OpenSoT::constraints::GenericConstraint::Ptr acc_lims;
     OpenSoT::AutoStack::Ptr autostack;
-    OpenSoT::solvers::DampedPseudoInverse::Ptr eHQP;
+    OpenSoT::solvers::QPOases_sot::Ptr iHQP;
 };
 
-TEST_F(testCartesianTask, testCartesianTask_)
+TEST_F(testCoMTask, testCoMTask_)
 {
-    _r_arm_ref.matrix()(1,3) += 0.1;
-    std::cout<<"_r_arm_ref: "<<_r_arm_ref.matrix()<<std::endl;
-    this->r_arm->setReference(_r_arm_ref);
+    _com_ref[2] -= 0.1;
+    std::cout<<"_com_ref: \n"<<_com_ref<<std::endl;
+    std::cout<<"_r_sole_ref: \n"<<_r_sole_ref.matrix()<<std::endl;
+    std::cout<<"_l_sole_ref: \n"<<_l_sole_ref.matrix()<<std::endl;
+    this->com->setReference(_com_ref);
 
     double dt = 0.001;
-    Eigen::VectorXd ddq(_q.size()); ddq.setZero(ddq.size());
+    Eigen::VectorXd ddq(_q.size());
+    ddq.setZero(ddq.size());
+    std::cout<<"q: "<<_q<<std::endl;
     for(unsigned int i = 0; i < 10000; ++i)
     {
-        _model->setJointPosition(_q);
-        _model->setJointVelocity(_dq);
-        _model->update();
 
-        autostack->update(_q);
+        this->_model->setJointPosition(_q);
+        this->_model->setJointVelocity(_dq);
+        this->_model->update();
 
-        if(!(eHQP->solve(ddq)))
+        this->autostack->update(_q);
+
+
+        if(!(iHQP->solve(ddq)))
             std::cout<<"CAN NOT SOLVE"<<std::endl;
 
         _dq += ddq*dt;
@@ -126,23 +156,31 @@ TEST_F(testCartesianTask, testCartesianTask_)
     }
 
     Eigen::Affine3d r_actual, l_actual;
-    this->r_arm->getActualPose(r_actual);
-    this->l_arm->getActualPose(l_actual);
-    std::cout<<"r_actual: "<<r_actual.matrix()<<std::endl;
-    std::cout<<"l_actual: "<<l_actual.matrix()<<std::endl;
+    this->r_sole->getActualPose(r_actual);
+    this->l_sole->getActualPose(l_actual);
+    std::cout<<"r_actual: \n"<<r_actual.matrix()<<std::endl;
+    std::cout<<"l_actual: \n"<<l_actual.matrix()<<std::endl;
 
     for(unsigned int i = 0; i < 4; ++i)
     {
         for(unsigned int j = 0; j < 4; ++j)
-            EXPECT_LE(r_actual.matrix()(i,j) - _r_arm_ref.matrix()(i,j), 1e-4);
+            EXPECT_LE(r_actual.matrix()(i,j) - _r_sole_ref.matrix()(i,j), 1e-4);
     }
 
     for(unsigned int i = 0; i < 4; ++i)
     {
         for(unsigned int j = 0; j < 4; ++j)
-            EXPECT_LE(l_actual.matrix()(i,j) - _l_arm_ref.matrix()(i,j), 1e-4);
+            EXPECT_LE(l_actual.matrix()(i,j) - _l_sole_ref.matrix()(i,j), 1e-4);
     }
+
+    Eigen::Vector3d com_actual;
+    this->com->getActualPose(com_actual);
+    std::cout<<"com_actual \n"<<com_actual<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_LE(com_actual[i] - _com_ref[i], 1e-4);
 }
+
 
 }
 
@@ -150,4 +188,3 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

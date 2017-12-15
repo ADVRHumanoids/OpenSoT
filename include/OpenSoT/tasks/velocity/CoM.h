@@ -24,27 +24,18 @@
 #include <Eigen/Dense>
 
 
-
-/**
-  * @example example_com.cpp
-  * The CoM class implements a task that tries to impose a position
-  * of the CoM w.r.t. the support foot.
-  */
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
 
         /**
-          * Note that this is the frame where you have to specify the velocity for the DISTAL_LINK_COM.
-          * The floating_base_link instead is placed in the idynutils model!
+          * Here we hardcode the base_link and distal_link frames
           */
         #define BASE_LINK_COM "world"
         #define DISTAL_LINK_COM "CoM"
             /**
              * @brief The CoM class implements a task that tries to impose a position
-             * of the CoM w.r.t. the support foot. Notice how you need to use it with a model with
-             * the floating base link set as the support foot.
-             * You can see an example in @ref example_com.cpp
+             * of the CoM w.r.t. the world frame.
              */
             class CoM : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
@@ -67,7 +58,7 @@
                 /**
                  * @brief CoM
                  * @param x the initial configuration of the robot
-                 * @param robot the robot model, with floating base link set on the support foot
+                 * @param robot the robot model
                  */
                 CoM(const Eigen::VectorXd& x,
                     XBot::ModelInterface& robot);

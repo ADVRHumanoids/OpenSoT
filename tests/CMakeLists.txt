@@ -90,6 +90,7 @@ set(OPENSOT_TESTS testAggregatedConstraint
                   testQPOasesSolver  
                   testQPOases_SetActiveStack 
                   testQPOases_Options  
+                  testQPOases_SubTask
                   testFrictionConeForceConstraint 
                   testCoMVelocityTask
                   testManipulabilityTask
@@ -102,6 +103,7 @@ set(OPENSOT_TESTS testAggregatedConstraint
                   testBasicAlgebra 
                   testPosturalAccelerationTask
                   testCartesianAccelerationTask
+                  testCoMAccelerationTask
 )
 
 #THIS TEST DEPEND ON fcl
@@ -151,7 +153,7 @@ endif()
 #                      testQPOases_PriorityInversion
 #                      testQPOases_SelfCollisionAvoidance
 #                      testQPOases_Sparse
-#                      testQPOases_SubTask
+
 #                      testQPOases_VelocityAllocation
 
     
@@ -357,9 +359,10 @@ if(${YARP_FOUND})
 #    TARGET_LINK_LIBRARIES(testQPOases_Sparse ${TestLibs})
 #    add_dependencies(testQPOases_Sparse GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOases_SubTask solvers/TestQPOases_SubTask.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_SubTask ${TestLibs})
-#    add_dependencies(testQPOases_SubTask GTest-ext OpenSoT)
+    ADD_EXECUTABLE(testQPOases_SubTask solvers/TestQPOases_SubTask.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_SubTask ${TestLibs})
+    add_dependencies(testQPOases_SubTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
 
 #    ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
@@ -380,6 +383,11 @@ if(${YARP_FOUND})
     TARGET_LINK_LIBRARIES(testCartesianAccelerationTask ${TestLibs})
     add_dependencies(testCartesianAccelerationTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_task_acceleration_Cartesian COMMAND testCartesianAccelerationTask)
+
+    ADD_EXECUTABLE(testCoMAccelerationTask tasks/acceleration/TestCoM.cpp)
+    TARGET_LINK_LIBRARIES(testCoMAccelerationTask ${TestLibs})
+    add_dependencies(testCoMAccelerationTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_task_acceleration_com COMMAND testCoMAccelerationTask)
 
     ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
     TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
@@ -474,7 +482,7 @@ endif()
 #    #add_test(NAME OpenSoT_solvers_qpOases_PriorityInversion COMMAND testQPOases_PriorityInversion)
 #    add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
 #    add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
-#    add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
+
 #    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
 
 

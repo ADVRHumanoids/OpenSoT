@@ -301,7 +301,6 @@ public:
 
         com_constr.reset(new OpenSoT::constraints::TaskToConstraint(com));
 
-
         auto_stack->update(q);
         com_constr->update(q);
 
