@@ -100,9 +100,13 @@ bool QPOases_sot::prepareSoT()
             for(unsigned int j = 0; j < i; ++j)
             {
                 computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], _tmp_A, _tmp_lA, _tmp_uA);
-                tmp_A.push_back(_tmp_A);
-                tmp_lA.push_back(_tmp_lA);
-                tmp_uA.push_back(_tmp_uA);
+
+                if( j == i-1)
+                {
+                    tmp_A.push_back(_tmp_A);
+                    tmp_lA.push_back(_tmp_lA);
+                    tmp_uA.push_back(_tmp_uA);
+                }
 
                 if(!constraints_str.compare("") == 0)
                     constraints_str = constraints_str + "+";
