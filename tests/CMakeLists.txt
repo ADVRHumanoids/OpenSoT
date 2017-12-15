@@ -103,6 +103,7 @@ set(OPENSOT_TESTS testAggregatedConstraint
                   testBasicAlgebra 
                   testPosturalAccelerationTask
                   testCartesianAccelerationTask
+                  testCoMAccelerationTask
 )
 
 #THIS TEST DEPEND ON fcl
@@ -382,6 +383,11 @@ if(${YARP_FOUND})
     TARGET_LINK_LIBRARIES(testCartesianAccelerationTask ${TestLibs})
     add_dependencies(testCartesianAccelerationTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_task_acceleration_Cartesian COMMAND testCartesianAccelerationTask)
+
+    ADD_EXECUTABLE(testCoMAccelerationTask tasks/acceleration/TestCoM.cpp)
+    TARGET_LINK_LIBRARIES(testCoMAccelerationTask ${TestLibs})
+    add_dependencies(testCoMAccelerationTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_task_acceleration_com COMMAND testCoMAccelerationTask)
 
     ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
     TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})

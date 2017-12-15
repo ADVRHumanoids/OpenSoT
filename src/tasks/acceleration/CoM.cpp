@@ -58,10 +58,9 @@ const std::string& OpenSoT::tasks::acceleration::CoM::getDistalLink() const
 void OpenSoT::tasks::acceleration::CoM::_update(const Eigen::VectorXd& x)
 {
 
-    _robot.getCOMJacobian(_J);
+    _robot.getCOMJacobian(_J, _jdotqdot);
     _robot.getCOM(_pose_current);
     _robot.getCOMVelocity(_vel_current);
-    ///TODO: _robot.computeJdotQdot(_distal_link, Eigen::Vector3d::Zero(), _jdotqdot);
 
 
     _pose_error = _pose_ref - _pose_current;
