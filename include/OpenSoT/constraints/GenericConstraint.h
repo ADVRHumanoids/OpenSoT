@@ -28,17 +28,29 @@ namespace OpenSoT { namespace constraints  {
 class GenericConstraint : public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
   
 public:
+    enum class Type {
+        /** The GenericConstraint is of the type:
+          *     lb <= x <= ub
+         **/
+        BOUND,
+        /** The GenericConstraint is of the type:
+         *      L <= Ax <= U
+         **/
+        CONSTRAINT
+    };
     
     typedef boost::shared_ptr<GenericConstraint> Ptr;
     
     GenericConstraint(std::string task_id, 
                       const AffineHelper& variable,
                       const Eigen::VectorXd& upper_bound,
-                      const Eigen::VectorXd& lower_bound
+                      const Eigen::VectorXd& lower_bound,
+                      const Type constraint_type
                       );
     
     bool setBounds(const Eigen::VectorXd& upper_bound,
-                   const Eigen::VectorXd& lower_bound);
+                   const Eigen::VectorXd& lower_bound,
+                   const Type constraint_type);
 
     virtual void update(const Eigen::VectorXd& x);
     
@@ -49,6 +61,8 @@ private:
         AffineHelper _var, _bound;
         
         Eigen::VectorXd _ub, _lb;
+
+
     
 };
     
