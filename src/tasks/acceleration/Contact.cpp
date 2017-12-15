@@ -46,6 +46,8 @@ OpenSoT::tasks::acceleration::Contact::Contact(const std::string& task_id,
     }
     
     update(Eigen::VectorXd());
+
+    _hessianType = HST_SEMIDEF;
     
     setWeight(Eigen::MatrixXd::Identity(_K.rows(), _K.rows()));
     

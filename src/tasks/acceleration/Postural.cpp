@@ -7,6 +7,8 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
 {
     _na = _robot.getActuatedJointNum();
 
+    _hessianType = HST_IDENTITY;
+
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
 
@@ -32,6 +34,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
 {
     _na = _robot.getActuatedJointNum();
     
+    _hessianType = HST_IDENTITY;
     
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);

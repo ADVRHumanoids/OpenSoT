@@ -20,6 +20,8 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
 
     resetReference();
 
+    _hessianType = HST_SEMIDEF;
+
     _vel_ref.setZero();
     _acc_ref.setZero();
 
@@ -46,6 +48,8 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _orientation_gain(1.0)
 {
     resetReference();
+
+    _hessianType = HST_SEMIDEF;
     
     _vel_ref.setZero();
     _acc_ref.setZero();
