@@ -12,6 +12,8 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot, const 
 {
     _qddot = AffineHelper::Identity(x.size());
 
+    _hessianType = HST_SEMIDEF;
+
     resetReference();
 
     _vel_ref.setZero();
@@ -33,6 +35,8 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface &robot, const 
     _qddot(qddot)
 {
     resetReference();
+
+    _hessianType = HST_SEMIDEF;
 
     _vel_ref.setZero();
     _acc_ref.setZero();
@@ -143,4 +147,9 @@ void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref)
 void OpenSoT::tasks::acceleration::CoM::getActualPose(Eigen::Vector3d& actual)
 {
     actual = _pose_current;
+}
+
+void OpenSoT::tasks::acceleration::CoM::getPosError(Eigen::Vector3d& error)
+{
+    error = _pose_error;
 }

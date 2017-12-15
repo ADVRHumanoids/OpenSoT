@@ -97,6 +97,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         void getActualPose(Eigen::Vector3d& actual);
 
+        void getPosError(Eigen::Vector3d& error);
+
         /**
          * @brief resetReference ste the actual position as the postion reference, set to zero
          * velocity and acceleration references
