@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
@@ -23,6 +25,7 @@ protected:
     {
         _model = XBot::ModelInterface::getModel(_path_to_cfg);
         _q.setZero(_model->getJointNum());
+        setGoodInitialPosition();
         _dq.setZero(_model->getJointNum());
 
         _model->setJointPosition(_q);
@@ -55,10 +58,12 @@ protected:
 
 
         OpenSoT::AffineHelper var = OpenSoT::AffineHelper::Identity(_q.size());
-        Eigen::VectorXd ddq_max = 10.*Eigen::VectorXd::Ones(_q.size());
+        Eigen::VectorXd ddq_max = 1.*Eigen::VectorXd::Ones(_q.size());
         Eigen::VectorXd ddq_min = -ddq_max;
         acc_lims.reset(
-            new OpenSoT::constraints::GenericConstraint("acc_lims", var, ddq_max, ddq_min));
+            new OpenSoT::constraints::GenericConstraint("acc_lims", var, ddq_max, ddq_min,
+                                                        OpenSoT::constraints::GenericConstraint::Type::BOUND));
+
 
 
 
@@ -121,23 +126,27 @@ protected:
     OpenSoT::solvers::QPOases_sot::Ptr iHQP;
 };
 
-TEST_F(testCoMTask, testCoMTask)
+TEST_F(testCoMTask, testCoMTask_)
 {
     _com_ref[2] -= 0.1;
     std::cout<<"_com_ref: \n"<<_com_ref<<std::endl;
     std::cout<<"_r_sole_ref: \n"<<_r_sole_ref.matrix()<<std::endl;
     std::cout<<"_l_sole_ref: \n"<<_l_sole_ref.matrix()<<std::endl;
+    this->com->setReference(_com_ref);
 
     double dt = 0.001;
     Eigen::VectorXd ddq(_q.size());
     ddq.setZero(ddq.size());
+    std::cout<<"q: "<<_q<<std::endl;
     for(unsigned int i = 0; i < 10000; ++i)
     {
-        _model->setJointPosition(_q);
-        _model->setJointPosition(_dq);
-        _model->update();
 
-        autostack->update(_q);
+        this->_model->setJointPosition(_q);
+        this->_model->setJointVelocity(_dq);
+        this->_model->update();
+
+        this->autostack->update(_q);
+
 
         if(!(iHQP->solve(ddq)))
             std::cout<<"CAN NOT SOLVE"<<std::endl;

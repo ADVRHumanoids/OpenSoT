@@ -20,6 +20,7 @@ protected:
     {
         _model = XBot::ModelInterface::getModel(_path_to_cfg);
         _q.setZero(_model->getJointNum());
+        setGoodInitialPosition();
         _dq.setZero(_model->getJointNum());
 
         _model->setJointPosition(_q);
@@ -101,7 +102,7 @@ protected:
     OpenSoT::solvers::DampedPseudoInverse::Ptr eHQP;
 };
 
-TEST_F(testCartesianTask, testCartesianTask)
+TEST_F(testCartesianTask, testCartesianTask_)
 {
     _r_arm_ref.matrix()(1,3) += 0.1;
     std::cout<<"_r_arm_ref: "<<_r_arm_ref.matrix()<<std::endl;
@@ -112,7 +113,7 @@ TEST_F(testCartesianTask, testCartesianTask)
     for(unsigned int i = 0; i < 10000; ++i)
     {
         _model->setJointPosition(_q);
-        _model->setJointPosition(_dq);
+        _model->setJointVelocity(_dq);
         _model->update();
 
         autostack->update(_q);
