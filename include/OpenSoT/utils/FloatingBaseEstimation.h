@@ -33,13 +33,15 @@ namespace OpenSoT {
                                const Eigen::MatrixXd& contact_matrix):
             _model(model),
             _imu(imu),
-            _contact_links(contact_links),
             _contact_matrix(contact_matrix)
         {
             if(_contact_matrix.rows()>6)
                 throw std::invalid_argument("contact_matrix rows > 6 is invalid");
             if(_contact_matrix.cols() != 6)
                 throw std::invalid_argument("contact_matrix cols != 6 is invalid");
+
+            for(unsigned int i = 0; i < contact_links.size(); ++i)
+                _contact_links[contact_links[i]] = true;
 
             update(0);
         }
@@ -68,10 +70,23 @@ namespace OpenSoT {
         {
             return _q.segment(0,6);
         }
+
+        bool setContactState(const std::string& contact_link, const bool state)
+        {
+            auto it = _contact_links.find(contact_link);
+            if(it != _contact_links.end())
+                it->second() = state;
+            else{
+                XBot::Logger::error("contact_link %s is not in contact_link list \n", contact_link.c_str());
+                return false;}
+
+            return true;
+        }
+
     protected:
         XBot::ModelInterface::Ptr _model;
         XBot::ImuSensor::ConstPtr _imu;
-        std::vector<std::string> _contact_links;
+        std::map<std::string,bool> _contact_links;
         Eigen::MatrixXd _contact_matrix;
         Eigen::VectorXd _q;
         Eigen::VectorXd _qdot;
