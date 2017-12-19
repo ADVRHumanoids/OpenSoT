@@ -45,7 +45,7 @@ protected:
         r_arm->getReference(_r_arm_ref);
         std::cout<<"_r_arm_initial: "<<_r_arm_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new
-            OpenSoT::tasks::acceleration::Postural("Postural", *_model,_q.size()));
+            OpenSoT::tasks::acceleration::Postural(*_model,_q.size()));
 
         autostack = (l_arm + r_arm)/(postural);
         autostack->update(_q);

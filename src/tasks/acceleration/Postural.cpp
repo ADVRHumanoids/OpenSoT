@@ -1,18 +1,18 @@
 #include <OpenSoT/tasks/acceleration/Postural.h>
 
-OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
+OpenSoT::tasks::acceleration::Postural::Postural(
          const XBot::ModelInterface& robot,const int x_size):
-    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
+    Task< Eigen::MatrixXd, Eigen::VectorXd >("Postural", x_size),
     _robot(robot)
 {
     _na = _robot.getActuatedJointNum();
 
-    _hessianType = HST_IDENTITY;
+    _hessianType = HST_SEMIDEF;
 
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
 
-    _qddot = AffineHelper::Identity(x_size);
+    _qddot = AffineHelper::Identity(robot.getJointNum());
 
     _A.setZero(_na, _qddot.getInputSize());
 
@@ -25,22 +25,21 @@ OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id,
     _update(_q);
 }
 
-OpenSoT::tasks::acceleration::Postural::Postural(const std::string task_id, 
-                                                 const XBot::ModelInterface& robot, 
+OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& robot,
                                                  OpenSoT::AffineHelper qddot): 
-    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, qddot.getInputSize()),
+    Task< Eigen::MatrixXd, Eigen::VectorXd >("Postural", qddot.getInputSize()),
     _robot(robot),
     _qddot(qddot)
 {
     _na = _robot.getActuatedJointNum();
     
-    _hessianType = HST_IDENTITY;
+    _hessianType = HST_SEMIDEF;
     
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
     
     if(_qddot.getInputSize() == 0){
-        _qddot = AffineHelper::Identity(_na);
+        _qddot = AffineHelper::Identity(robot.getJointNum());
     }
     
     _A.setZero(_na, _qddot.getInputSize());

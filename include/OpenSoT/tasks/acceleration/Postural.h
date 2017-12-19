@@ -31,12 +31,10 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         
         typedef boost::shared_ptr<Postural> Ptr;
         
-        Postural(const std::string task_id, 
-                 const XBot::ModelInterface& robot,
+        Postural(const XBot::ModelInterface& robot,
                  AffineHelper qddot = AffineHelper());
 
-        Postural(const std::string task_id,
-                 const XBot::ModelInterface& robot,
+        Postural(const XBot::ModelInterface& robot,
                  const int x_size);
         
         virtual void _update(const Eigen::VectorXd& x);

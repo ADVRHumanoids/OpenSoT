@@ -54,7 +54,7 @@ protected:
         r_sole->getReference(_r_sole_ref);
         std::cout<<"_r_sole_initial: \n"<<_r_sole_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new
-            OpenSoT::tasks::acceleration::Postural("Postural", *_model,_q.size()));
+            OpenSoT::tasks::acceleration::Postural(*_model,_q.size()));
 
 
         OpenSoT::AffineHelper var = OpenSoT::AffineHelper::Identity(_q.size());

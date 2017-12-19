@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
-//#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/SubTask.h>
+#include <OpenSoT/utils/AutoStack.h>
 #include <XBotInterface/ModelInterface.h>
 
 
@@ -50,15 +51,60 @@ double getRandomAngle()
 }
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
+
+TEST_F(testPosturalTask, testPosturalTask_subtask)
+{
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        q[i] = getRandomAngle();
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::tasks::acceleration::Postural::Ptr postural(
+                new OpenSoT::tasks::acceleration::Postural(*_model_ptr, q.size()));
+    postural->update(q);
+
+    q.setZero(q.size());
+    postural->setReference(q);
+    postural->update(q);
+
+
+    //std::list<unsigned int> idx = {_model_ptr->getDofIndex("WaistLat")};
+    std::list<unsigned int> idx = {_model_ptr->getDofIndex("RWrj2")-6};
+
+    std::cout<<"idx: "<<*(idx.begin())<<std::endl;
+    OpenSoT::SubTask::Ptr sub_postural = postural%idx;
+
+    sub_postural->update(q);
+
+    std::cout<<"A task: "<<postural->getA()<<std::endl;
+    std::cout<<"b task: "<<postural->getb()<<std::endl;
+
+    std::cout<<"A subtask: "<<sub_postural->getA()<<std::endl;
+    std::cout<<"b subtask: "<<sub_postural->getb()<<std::endl;
+
+
+    EXPECT_EQ(sub_postural->getA().rows(), 1);
+    for(unsigned int i = 0; i < sub_postural->getA().cols(); ++i)
+    {
+        if(i == *(idx.begin())+6)
+            EXPECT_EQ(sub_postural->getA()(0,i), 1)<<"i: "<<i;
+        else
+            EXPECT_EQ(sub_postural->getA()(0,i), 0)<<"i: "<<i;
+    }
+}
 
 TEST_F(testPosturalTask, testPosturalTask_)
 {
     XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
 
-    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero();
+    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
     for(unsigned int i = 0; i < q.size(); ++i)
         q[i] = getRandomAngle();
 
@@ -69,11 +115,13 @@ TEST_F(testPosturalTask, testPosturalTask_)
 
     Eigen::VectorXd q_ref(q.size()); q_ref.setZero();
 
-    OpenSoT::tasks::acceleration::Postural postural("postural",*_model_ptr, q_ref.size());
+    OpenSoT::tasks::acceleration::Postural postural(*_model_ptr, q_ref.size());
     postural.setReference(q_ref);
     std::cout<<"Postural Task Inited"<<std::endl;
-    EXPECT_TRUE(postural.getA() == Eigen::MatrixXd::Identity(q.size(), q.size()));
-    EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(q.size(), q.size()));
+    Eigen::MatrixXd A(q.size()-6, q.size());
+    A << Eigen::MatrixXd::Zero(q.size()-6,6), Eigen::MatrixXd::Identity(q.size()-6,q.size()-6);
+    EXPECT_TRUE(postural.getA() == A);
+    EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(q.size()-6, q.size()-6));
 
     double K = 1.;
     postural.setLambda(K);
@@ -89,16 +137,19 @@ TEST_F(testPosturalTask, testPosturalTask_)
         _model_ptr->update();
 
         postural.update(q);
-        Eigen::VectorXd ddq = postural.getb();
+        Eigen::VectorXd ddq(q.size());
+        ddq.setZero(ddq.size());
+        ddq.segment(6, ddq.size()-6) = postural.getb();
         dq += ddq*dT;
         q += dq*dT + 0.5*ddq*dT*dT;
     }
 
-    for(unsigned int i = 0; i < q.size(); ++i)
+    for(unsigned int i = 6; i < q.size(); ++i)
         EXPECT_NEAR(q[i], q_ref[i], 1E-5);
 
     std::cout<<"q0: "<<q0.transpose()<<std::endl;
     std::cout<<"q: "<<q.transpose()<<std::endl;
+    std::cout<<"q_ref: "<<q_ref.transpose()<<std::endl;
 }
 
 
