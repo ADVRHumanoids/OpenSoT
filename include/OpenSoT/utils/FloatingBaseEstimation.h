@@ -43,21 +43,24 @@ namespace OpenSoT {
             for(unsigned int i = 0; i < contact_links.size(); ++i)
                 _contact_links[contact_links[i]] = true;
 
-            update(0);
         }
 
-        ~FloatingBaseEstimation();
-
-        virtual void update(double dT) = 0;
-
-        void log(XBot::MatLogger::Ptr logger)
+        ~FloatingBaseEstimation()
         {
 
         }
 
-        const Eigen::Vector6d& getFloatingBaseVelocity() const
+        virtual bool update(double dT) = 0;
+
+        virtual void log(XBot::MatLogger::Ptr logger)
         {
-            return _qdot.segment(0,6);
+
+        }
+
+        const Eigen::VectorXd& getFloatingBaseVelocity()
+        {
+            _Qdot = _qdot.segment(0,6);
+            return _Qdot;
         }
 
         const Eigen::Affine3d& getFloatingBasePose()
@@ -66,16 +69,17 @@ namespace OpenSoT {
             return _fb_pose;
         }
 
-        const Eigen::Vector6d& getFloatingBaseJoints() const
+        const Eigen::Vector6d& getFloatingBaseJoints()
         {
-            return _q.segment(0,6);
+            _Q = _q.segment(0,6);
+            return _Q;
         }
 
-        bool setContactState(const std::string& contact_link, const bool state)
+        virtual bool setContactState(const std::string& contact_link, const bool state)
         {
             auto it = _contact_links.find(contact_link);
             if(it != _contact_links.end())
-                it->second() = state;
+                it->second = state;
             else{
                 XBot::Logger::error("contact_link %s is not in contact_link list \n", contact_link.c_str());
                 return false;}
@@ -91,6 +95,10 @@ namespace OpenSoT {
         Eigen::VectorXd _q;
         Eigen::VectorXd _qdot;
         Eigen::Affine3d _fb_pose;
+
+        Eigen::VectorXd _Qdot;
+        Eigen::Vector6d _Q;
+
     };
 }
 
