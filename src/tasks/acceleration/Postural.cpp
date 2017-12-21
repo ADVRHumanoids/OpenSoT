@@ -119,7 +119,8 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
 
 void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger::Ptr logger)
 {
-    logger->add(_task_id + "_error", _qref - _q);
+    logger->add(_task_id + "_position_error", _qref - _q);
+    logger->add(_task_id + "_velocity_error", _qdot_ref - _qdot);
     logger->add(_task_id + "_qref", _qref);
 }
 
