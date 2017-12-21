@@ -1,6 +1,7 @@
 #include <qpOASES.hpp>
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
+#include <XBotInterface/Logger.hpp>
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -17,7 +18,7 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation)
         _active_stacks.push_back(true);
 
     if(!prepareSoT())
-        throw "Can Not initizalize SoT!";
+        throw std::runtime_error("Can Not initizalize SoT!");
 }
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
@@ -29,8 +30,8 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
 
-    if(!prepareSoT())
-        throw "Can Not initizalize SoT with bounds!";
+    if(!prepareSoT())      
+        throw std::runtime_error("Can Not initizalize SoT with bounds!");
 }
 
 QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
@@ -44,7 +45,7 @@ QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
         _active_stacks.push_back(true);
 
     if(!prepareSoT())
-        throw "Can Not initizalize SoT with bounds!";
+        throw std::runtime_error("Can Not initizalize SoT with bounds!");
 }
 
 void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g)
@@ -136,7 +137,7 @@ bool QPOases_sot::prepareSoT()
                                                           constraints_str,
                                                           bounds_string);}
         else{
-            std::cout<<RED<<"ERROR: INITIALIZING STACK "<<i<<DEFAULT<<std::endl;
+            XBot::Logger::error("ERROR: INITIALIZING STACK %i \n", i);
             return false;}
 
         constraints_task.push_back(constraints_task_i);
@@ -208,7 +209,7 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
 bool QPOases_sot::setOptions(const unsigned int i, const qpOASES::Options &opt)
 {
     if(i > _qp_stack_of_tasks.size()){
-        std::cout<<RED<<"ERROR Index out of range!"<<DEFAULT<<std::endl;
+        XBot::Logger::error("ERROR Index out of range! \n");
         return false;}
 
     _qp_stack_of_tasks[i].setOptions(opt);
@@ -219,7 +220,7 @@ bool QPOases_sot::getOptions(const unsigned int i, qpOASES::Options& opt)
 {
 
     if(i > _qp_stack_of_tasks.size()){
-        std::cout<<RED<<"Index out of range!"<<DEFAULT<<std::endl;
+        XBot::Logger::error("ERROR Index out of range! \n");
         return false;}
 
     opt = _qp_stack_of_tasks[i].getOptions();
