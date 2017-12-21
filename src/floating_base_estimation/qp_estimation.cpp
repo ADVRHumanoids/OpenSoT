@@ -18,13 +18,21 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
 
     _aggregated_tasks.reset(new tasks::Aggregated(_contact_tasks, 6));
 
+    if(imu){
+        _imu_task.reset(new OpenSoT::tasks::floating_base::IMU(*_model, imu));
+        Eigen::MatrixXd W = 100.*Eigen::MatrixXd::Identity(3,3);
+        _imu_task->setWeight(W);}
+
     AffineHelper var = AffineHelper::Identity(6);
     Eigen::VectorXd ub = 10.*Eigen::VectorXd::Ones(6);
     Eigen::VectorXd lb = -ub;
     _fb_limits.reset(new constraints::GenericConstraint("fb_limits", var, ub, lb,
         constraints::GenericConstraint::Type::BOUND));
 
-    _autostack.reset(new AutoStack(_aggregated_tasks));
+    if(imu)
+        _autostack.reset(new AutoStack(_aggregated_tasks + _imu_task));
+    else
+        _autostack.reset(new AutoStack(_aggregated_tasks));
     _autostack<<_fb_limits;
 
     _solver.reset(new solvers::QPOases_sot(_autostack->getStack(), _autostack->getBounds()));
@@ -54,6 +62,10 @@ bool OpenSoT::floating_base_estimation::qp_estimation::setContactState(
 
 bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT)
 {
+    if(_imu){
+        _model->setFloatingBaseState(_imu);
+        _model->update();}
+
     _model->getJointPosition(_q);
     _model->getJointVelocity(_qdot);
 

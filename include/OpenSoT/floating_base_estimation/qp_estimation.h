@@ -6,7 +6,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
-
+#include <OpenSoT/tasks/floating_base/IMU.h>
 
 
 namespace OpenSoT{
@@ -28,6 +28,7 @@ namespace floating_base_estimation{
 
     private:
         std::list<OpenSoT::tasks::Aggregated::TaskPtr> _contact_tasks;
+        OpenSoT::tasks::floating_base::IMU::Ptr _imu_task;
         std::map<std::string, unsigned int> _map_tasks;
         tasks::Aggregated::Ptr _aggregated_tasks;
         solvers::QPOases_sot::Ptr _solver;

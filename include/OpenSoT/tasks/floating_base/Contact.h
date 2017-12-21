@@ -20,7 +20,6 @@
 
 #include <OpenSoT/Task.h>
 #include <XBotInterface/ModelInterface.h>
-#include <OpenSoT/utils/Piler.h>
 
 namespace OpenSoT{
     namespace tasks{
