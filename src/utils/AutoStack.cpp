@@ -1,6 +1,8 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <algorithm>
 
+namespace OpenSoT{
+
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
                                 const std::list<unsigned int> rowIndices)
 {
@@ -209,6 +211,7 @@ OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
         autoStack->getBoundsList().push_back(bound);
 
     return autoStack;
+}
 }
 
 OpenSoT::AutoStack::AutoStack(const double x_size) :

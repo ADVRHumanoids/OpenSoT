@@ -96,7 +96,7 @@ namespace OpenSoT {
             OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
             OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& task_id);
     };    
-}
+
 
 /**
  * @brief operator % takes a task and a list of indices, generates a subtask
@@ -250,5 +250,5 @@ OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task
  */
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
                                     const OpenSoT::constraints::Aggregated::ConstraintPtr bound);
-
+}
 #endif
