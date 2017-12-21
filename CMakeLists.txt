@@ -34,6 +34,17 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+# Set a default build type for single-configuration
+# CMake generators if no build type is set.
+IF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+   SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+ENDIF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+
+# Select flags.
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
+SET(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
+
 find_package(YCM REQUIRED)
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
@@ -165,12 +176,16 @@ endif()
 ##VARIABLES
 set(OPENSOT_VARIABLES_SOURCES src/variables/Torque.cpp)
 
+##VARIABLES
+set(OPENSOT_FLOATING_BASE_ESTIMATION_SOURCES src/floating_base_estimation/qp_estimation.cpp)
+
 ADD_LIBRARY(OpenSoT SHARED
                     ${OPENSOT_CONSTRAINTS_SOURCES}
                     ${OPENSOT_TASKS_SOURCES}
                     ${OPENSOT_SOLVERS_SOURCES}
                     ${OPENSOT_UTILS_SOURCES}
                     ${OPENSOT_VARIABLES_SOURCES}
+                    ${OPENSOT_FLOATING_BASE_ESTIMATION_SOURCES}
 #                    src/constraints/velocity/Dynamics.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
