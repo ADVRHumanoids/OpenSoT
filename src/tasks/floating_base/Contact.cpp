@@ -25,10 +25,7 @@ OpenSoT::tasks::floating_base::Contact::Contact(XBot::ModelInterface &robot,
 {
     _hessianType = HST_SEMIDEF;
 
-    _W.setIdentity(6,6);
-
-    _J.setZero(6,_robot.getJointNum());
-    _A.setZero(6,6);
+    _W.setIdentity(contact_matrix.rows(), contact_matrix.rows());
 
     _dqm.setZero(_robot.getJointNum());
 
@@ -46,8 +43,8 @@ void OpenSoT::tasks::floating_base::Contact::_update(const Eigen::VectorXd &x)
     _Jcontact = _contact_matrix*_J;
     _robot.getJointVelocity(_dqm);
 
-    _A = _Jcontact.block(0,0,6,6);
-    _b = -_Jcontact.block(0,6,6,_dqm.size()-6)*_dqm.segment(6,_dqm.size()-6);
+    _A = _Jcontact.leftCols(6);
+    _b = -_Jcontact.rightCols(_dqm.size()-6)*_dqm.tail(_dqm.size()-6);
 }
 
 const std::string& OpenSoT::tasks::floating_base::Contact::getLinkInContact() const
