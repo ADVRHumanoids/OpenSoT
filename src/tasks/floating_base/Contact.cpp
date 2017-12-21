@@ -20,7 +20,7 @@
 OpenSoT::tasks::floating_base::Contact::Contact(XBot::ModelInterface &robot,
                                         const std::string link_in_contact,
                                         const Eigen::MatrixXd contact_matrix):
-    Task("Postural", 6),_robot(robot),_link_in_contact(link_in_contact),
+    Task("Contact_"+link_in_contact, 6),_robot(robot),_link_in_contact(link_in_contact),
     _contact_matrix(contact_matrix)
 {
     _hessianType = HST_SEMIDEF;
