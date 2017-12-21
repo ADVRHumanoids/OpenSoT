@@ -24,7 +24,8 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
         _imu_task->setWeight(W);}
 
     AffineHelper var = AffineHelper::Identity(6);
-    Eigen::VectorXd ub = 10.*Eigen::VectorXd::Ones(6);
+    Eigen::VectorXd ub(6);
+    ub<<5.*Eigen::VectorXd::Ones(3),M_PI*Eigen::VectorXd::Ones(3);
     Eigen::VectorXd lb = -ub;
     _fb_limits.reset(new constraints::GenericConstraint("fb_limits", var, ub, lb,
         constraints::GenericConstraint::Type::BOUND));
@@ -58,6 +59,7 @@ bool OpenSoT::floating_base_estimation::qp_estimation::setContactState(
     std::list<OpenSoT::tasks::Aggregated::TaskPtr>::iterator it =
             std::next(_contact_tasks.begin(), i);
     (*it)->setActive(state);
+    return true;
 }
 
 bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT)
