@@ -1,3 +1,6 @@
+#ifndef _OPENSOT_FLOATING_BASE_ESTIMATION_QP_ESTIMATION_
+#define _OPENSOT_FLOATING_BASE_ESTIMATION_QP_ESTIMATION_
+
 #include <OpenSoT/utils/FloatingBaseEstimation.h>
 #include <OpenSoT/tasks/floating_base/Contact.h>
 #include <OpenSoT/utils/AutoStack.h>
@@ -35,3 +38,5 @@ namespace floating_base_estimation{
 }
 
 }
+
+#endif
