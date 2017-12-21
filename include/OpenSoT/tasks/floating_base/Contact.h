@@ -24,10 +24,22 @@
 namespace OpenSoT{
     namespace tasks{
         namespace floating_base{
+            /**
+             * @brief The Contact class estimates floating_base velocities (linear and angular)
+             * from the joint velocities. We consider a link in contact with the environment which
+             * does not move wrt the world
+             */
             class Contact: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>{
             public:
                 typedef boost::shared_ptr<Contact> Ptr;
 
+                /**
+                 * @brief Contact constructor which accept a robot model, a link name which represent
+                 * the link in contact and a contact matrix (default is Identity)
+                 * @param robot
+                 * @param link_in_contact
+                 * @param contact_matrix
+                 */
                 Contact(XBot::ModelInterface& robot, const std::string link_in_contact,
                         const Eigen::MatrixXd contact_matrix = Eigen::MatrixXd::Identity(6,6));
                 ~Contact();

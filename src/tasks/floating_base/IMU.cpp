@@ -10,6 +10,15 @@ OpenSoT::tasks::floating_base::IMU::IMU(XBot::ModelInterface &robot, XBot::ImuSe
 
     _robot.getFloatingBaseLink(_fb_link);
 
+    std::string imu_link;
+    imu_link = _imu->getSensorName();
+
+    Eigen::MatrixXd tmp;
+    robot.getJacobian(_fb_link, imu_link, tmp);
+    if(tmp.norm() < 1e-6)
+        throw std::runtime_error("Imu is not attached in floating_base link!");
+
+
     _update(Eigen::VectorXd::Zero(robot.getJointNum()));
 }
 

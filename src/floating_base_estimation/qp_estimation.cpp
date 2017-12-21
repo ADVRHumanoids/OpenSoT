@@ -102,4 +102,6 @@ void OpenSoT::floating_base_estimation::qp_estimation::log(XBot::MatLogger::Ptr 
 {
     _solver->log(logger);
     _autostack->log(logger);
+    logger->add("qp_estimation_Q", _Q);
+    logger->add("qp_estimation_Qdot", _Qdot);
 }

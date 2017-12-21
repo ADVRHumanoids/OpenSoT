@@ -24,10 +24,20 @@
 namespace OpenSoT{
     namespace tasks{
         namespace floating_base{
+        /**
+         * @brief The IMU class estimates the orientation velocities of the floating base from the
+         * angular velocities of the IMU.
+         * NOTE: we consider the IMU attached to the floating_base link
+         */
         class IMU: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>{
             public:
                 typedef boost::shared_ptr<IMU> Ptr;
-
+            /**
+                 * @brief IMU accept a robot model and an imu, throws an error if the imu is
+                 * not attached to the floating_base
+                 * @param robot
+                 * @param imu
+                 */
                 IMU(XBot::ModelInterface& robot, XBot::ImuSensor::ConstPtr imu);
                 ~IMU();
 

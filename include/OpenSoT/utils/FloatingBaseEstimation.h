@@ -22,7 +22,9 @@
 #include <XBotInterface/ModelInterface.h>
 
 namespace OpenSoT {
-
+    /**
+     * @brief The FloatingBaseEstimation class interface to a floating base estimator
+     */
     class FloatingBaseEstimation{
     public:
         typedef boost::shared_ptr<FloatingBaseEstimation> Ptr;
@@ -57,24 +59,43 @@ namespace OpenSoT {
 
         }
 
+        /**
+         * @brief getFloatingBaseVelocity
+         * @return a vector of six dimension with the floating base virtual joint velocities
+         */
         const Eigen::VectorXd& getFloatingBaseVelocity()
         {
             _Qdot = _qdot.segment(0,6);
             return _Qdot;
         }
 
+        /**
+         * @brief getFloatingBasePose
+         * @return the transformation of the floating_base in world frame
+         */
         const Eigen::Affine3d& getFloatingBasePose()
         {
             _model->getFloatingBasePose(_fb_pose);
             return _fb_pose;
         }
 
+        /**
+         * @brief getFloatingBaseJoints
+         * @return the value of the virtual joint position of the floating base
+         */
         const Eigen::Vector6d& getFloatingBaseJoints()
         {
             _Q = _q.segment(0,6);
             return _Q;
         }
 
+        /**
+         * @brief setContactState permits to set the stus of a link between contact and
+         * free
+         * @param contact_link
+         * @param state true if the link is in contact
+         * @return false if the contact is not in the contact list
+         */
         virtual bool setContactState(const std::string& contact_link, const bool state)
         {
             auto it = _contact_links.find(contact_link);

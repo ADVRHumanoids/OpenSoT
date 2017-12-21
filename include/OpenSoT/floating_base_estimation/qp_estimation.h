@@ -11,6 +11,11 @@
 
 namespace OpenSoT{
 namespace floating_base_estimation{
+/**
+     * @brief The qp_estimation class uses a QP to estimate the floating base pose and velocities from
+     * contact information and IMU (optional).
+     * The QP solved is a weighted sum of the measurements.
+     */
     class qp_estimation: public OpenSoT::FloatingBaseEstimation
     {
     public:
