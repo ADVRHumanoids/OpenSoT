@@ -3,10 +3,8 @@
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/constraints/Aggregated.h>
-#include <OpenSoT/constraints/velocity/all.h>
 #include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <OpenSoT/tasks/velocity/all.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
 #include <fstream>
