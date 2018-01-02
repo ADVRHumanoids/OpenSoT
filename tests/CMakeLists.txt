@@ -83,8 +83,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} )
 enable_testing()
 
 #ALL THE FOLLOWING TESTS ARE YARP FREE
-set(OPENSOT_TESTS testAggregatedConstraint
-                  testBilateralConstraint
+set(OPENSOT_TESTS testBilateralConstraint
                   testJointLimitsVelocityBounds
                   testVelocityLimitsVelocityBounds 
                   testQPOasesSolver  
@@ -105,6 +104,10 @@ set(OPENSOT_TESTS testAggregatedConstraint
                   testCartesianAccelerationTask
                   testCoMAccelerationTask
 )
+
+if(${PCL_FOUND} AND ${moveit_core_FOUND})
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint)
+endif()
 
 #THIS TEST DEPEND ON fcl
 if(${fcl_FOUND})
