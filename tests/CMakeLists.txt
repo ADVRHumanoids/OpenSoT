@@ -14,12 +14,6 @@ find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(ModelInterfaceIDYNUTILS QUIET)
 find_package(catkin REQUIRED tf roscpp)
-FIND_PACKAGE(moveit_core QUIET)
-FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
-                                            filters
-                                            surface
-                                            search
-                                            io)
 
 
 if(${YARP_FOUND})
@@ -208,11 +202,12 @@ if(${test_utils_FOUND})
 endif()
 
     
-
-ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
-TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
-add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
-add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
+if(${PCL_FOUND} AND ${moveit_core_FOUND})
+    ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
+    TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
+    add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
+endif()
 
 ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
 TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
