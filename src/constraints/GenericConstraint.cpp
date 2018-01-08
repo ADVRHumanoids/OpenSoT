@@ -8,16 +8,16 @@ OpenSoT::constraints::GenericConstraint::GenericConstraint(std::string task_id,
     Constraint< Eigen::MatrixXd, Eigen::VectorXd >(task_id, variable.getInputSize()),
     _ub(upper_bound),
     _lb(lower_bound),
-    _var(variable)
+    _var(variable),
+    _type(constraint_type)
 {
-    if(!setBounds(upper_bound, lower_bound, constraint_type)){
+    if(!setBounds(upper_bound, lower_bound)){
         throw std::invalid_argument("Bounds not valid");
     }
 }
 
 bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& upper_bound, 
-                                                        const Eigen::VectorXd& lower_bound,
-                                                        const Type constraint_type)
+                                                        const Eigen::VectorXd& lower_bound)
 {
     if( ((upper_bound - lower_bound).array() < 0).any() ){
         return false;
@@ -30,13 +30,13 @@ bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& u
     _ub = upper_bound;
     _lb = lower_bound;
     
-    if(constraint_type == Type::CONSTRAINT)
+    if(_type == Type::CONSTRAINT)
     {
         _Aineq = _var.getM();
         _bUpperBound = _ub - _var.getq();
         _bLowerBound = _lb - _var.getq();
     }
-    else if(constraint_type == Type::BOUND)
+    else if(_type == Type::BOUND)
     {
         _upperBound = _ub - _var.getq();
         _lowerBound = _lb - _var.getq();

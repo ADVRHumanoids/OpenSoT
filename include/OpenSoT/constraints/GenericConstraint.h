@@ -28,6 +28,7 @@ namespace OpenSoT { namespace constraints  {
 class GenericConstraint : public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
   
 public:
+    
     enum class Type {
         /** The GenericConstraint is of the type:
           *     lb <= x <= ub
@@ -49,8 +50,7 @@ public:
                       );
     
     bool setBounds(const Eigen::VectorXd& upper_bound,
-                   const Eigen::VectorXd& lower_bound,
-                   const Type constraint_type);
+                   const Eigen::VectorXd& lower_bound);
 
     virtual void update(const Eigen::VectorXd& x);
     
@@ -61,6 +61,8 @@ private:
         AffineHelper _var, _bound;
         
         Eigen::VectorXd _ub, _lb;
+        
+        Type _type;
 
 
     
