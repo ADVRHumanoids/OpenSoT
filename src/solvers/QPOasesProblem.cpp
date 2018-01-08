@@ -6,6 +6,7 @@
 #include <boost/make_shared.hpp>
 #include <iostream>
 #include <qpOASES/Matrices.hpp>
+#include <XBotInterface/Logger.hpp>
 
 
 #define GREEN "\033[0;32m"
@@ -55,7 +56,7 @@ void QPOasesProblem::setDefaultOptions()
 
     _problem->setOptions(opt);
 
-    std::cout<<GREEN<<"Solver Default Options:"<<DEFAULT<<std::endl;
+    XBot::Logger::info("Solver Default Options: \n");
     opt.print();
 
     _opt.reset(new qpOASES::Options(opt));
@@ -78,17 +79,20 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
 
 
     if(!(_l.rows() == _u.rows())){
-        std::cout<<RED<<"l size: "<<_l.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"u size: "<<_u.rows()<<DEFAULT<<std::endl;
-        assert(_l.rows() == _u.rows());}
+        XBot::Logger::error("l size: %i \n", _l.rows());
+        XBot::Logger::error("u size: %i \n", _u.rows());
+        assert(_l.rows() == _u.rows());
+        return false;}
     if(!(_lA.rows() == _A.rows())){
-        std::cout<<RED<<"lA size: "<<_lA.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"A rows: "<<_A.rows()<<DEFAULT<<std::endl;
-        assert(_lA.rows() == _A.rows());}
+        XBot::Logger::error("lA size: %i \n", _lA.rows());
+        XBot::Logger::error("A rows: %i \n", _A.rows());
+        assert(_lA.rows() == _A.rows());
+        return false;}
     if(!(_lA.rows() == _uA.rows())){
-        std::cout<<RED<<"lA size: "<<_lA.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"uA size: "<<_uA.rows()<<DEFAULT<<std::endl;
-        assert(_lA.rows() == _uA.rows());}
+        XBot::Logger::error("lA size: %i \n", _lA.rows());
+        XBot::Logger::error("uA size: %i \n", _uA.rows());
+        assert(_lA.rows() == _uA.rows());
+        return false;}
 
     int nWSR = _nWSR;
 
@@ -110,8 +114,8 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
         if(val == qpOASES::RET_INIT_FAILED_INFEASIBILITY)
             checkInfeasibility();
 
-        std::cout<<RED<<"ERROR INITIALIZING QP PROBLEM "<<DEFAULT<<std::endl;
-        std::cout<<RED<<"CODE ERROR: "<<val<<DEFAULT<<std::endl;
+        XBot::Logger::error("ERROR INITIALIZING QP PROBLEM \n");
+        XBot::Logger::error("CODE ERROR: %i \n", val);
 #endif
 
         return false;
@@ -131,7 +135,7 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
 
     if(success != qpOASES::SUCCESSFUL_RETURN){
 #ifndef NDEBUG
-        std::cout<<RED<<"ERROR GETTING PRIMAL SOLUTION IN INITIALIZATION! ERROR "<<success<<DEFAULT<<std::endl;
+        XBot::Logger::error("ERROR GETTING PRIMAL SOLUTION IN INITIALIZATION! ERROR %i \n", success);
 #endif
         return false;}
     return true;
@@ -140,8 +144,9 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
 bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
     if(!(_g.rows() == _H.rows())){
-        std::cout<<RED<<"g size: "<<_g.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"H rows: "<<_H.rows()<<DEFAULT<<std::endl;
+        XBot::Logger::error("g size: %i \n", _g.rows());
+        XBot::Logger::error("H size: %i \n", _H.rows());
+        assert(_g.rows() == _H.rows());
         return false;}
     if(!(_H.cols() == H.cols())){
         std::cout<<RED<<"H cols: "<<H.cols()<<DEFAULT<<std::endl;

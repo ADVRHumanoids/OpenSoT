@@ -103,6 +103,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testPosturalAccelerationTask
                   testCartesianAccelerationTask
                   testCoMAccelerationTask
+                  testContactFloatingBaseTask
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -416,6 +417,11 @@ if(${YARP_FOUND})
     add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 
+    ADD_EXECUTABLE(testContactFloatingBaseTask tasks/floating_base/TestContact.cpp)
+    TARGET_LINK_LIBRARIES(testContactFloatingBaseTask ${TestLibs})
+    add_dependencies(testContactFloatingBaseTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_task_floating_base_Postural COMMAND testContactFloatingBaseTask)
+
     ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
     TARGET_LINK_LIBRARIES(testAutoStack ${TestLibs})
     add_dependencies(testAutoStack GTest-ext OpenSoT)
@@ -452,6 +458,7 @@ if(${YARP_FOUND})
     TARGET_LINK_LIBRARIES(testPiler ${TestLibs})
     add_dependencies(testPiler GTest-ext OpenSoT)
     add_test(NAME OpenSoT_utils_testPiler COMMAND testPiler)
+
 
 endif()
 

@@ -137,6 +137,8 @@ void OpenSoT::tasks::acceleration::CoM::resetReference()
 void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger::Ptr logger)
 {
     logger->add(getTaskID() + "_pose_error", _pose_error);
+    logger->add(getTaskID() + "_linear_velocity_error", _vel_ref - _vel_current);
+    logger->add(getTaskID() + "_jdotqdot", _jdotqdot);
 }
 
 void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref)
