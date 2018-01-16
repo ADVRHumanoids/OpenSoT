@@ -97,10 +97,37 @@ namespace OpenSoT {
             OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& task_id);
     };    
 
+/**
+ * @brief operator * takes a weight matrix and a task, apply the weight to the task
+ * NOTE: the weight is set taking into account the one already set:
+ *  Wfinal = W*Woriginal
+ * @param W weight matrix
+ * @param task a task
+ * @return a task ptr
+ */
 OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
                                               OpenSoT::tasks::Aggregated::TaskPtr task);
 
-OpenSoT::tasks::Aggregated::Ptr operator*(const Eigen::MatrixXd& W,
+/**
+ * @brief operator * takes a weight and a task, apply the weight to the task
+ * NOTE: the weight is set taking into account the one already set:
+ *  Wfinal = w*Woriginal
+ * @param w a weight
+ * @param task a task
+ * @return  a task ptr
+ */
+OpenSoT::tasks::Aggregated::TaskPtr operator*(const double w,
+                                              OpenSoT::tasks::Aggregated::TaskPtr task);
+
+/**
+ * @brief operator * a weight and a task, apply the weight to the task
+ * NOTE: the weight is set the same for all the tasks in the aggregate, taking into account the originals
+ *  Wfinal = w*Woriginal
+ * @param w a weight
+ * @param task a task
+ * @return a task ptr
+ */
+OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
                                           OpenSoT::tasks::Aggregated::Ptr task);
 
 /**

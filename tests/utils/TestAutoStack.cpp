@@ -347,37 +347,41 @@ TEST_F(testAutoStack, testOperatorTimes)
         }
     }
 
-    std::cout<<"------------------------"<<std::endl;
+    double w = 10.;
+    OpenSoT::tasks::Aggregated::TaskPtr TASK2 = w*TASK;
+    WleftArm = DHS->leftArm->getWeight();
+    WTASK = TASK->getWeight();
+    Eigen::MatrixXd WTASK2 = TASK2->getWeight();
 
-    Eigen::MatrixXd I(6,6); I.setIdentity(6,6);
-    DHS->leftArm->setWeight(I);
+    std::cout<<"WleftArm: \n"<<WleftArm<<std::endl;
+    std::cout<<"WTASK: \n"<<WTASK<<std::endl;
+    std::cout<<"WTASK2: \n"<<WTASK2<<std::endl;
 
-    OpenSoT::tasks::Aggregated::Ptr TASKS = W*(DHS->leftArm + DHS->rightArm);
+    for(unsigned int i = 0; i < 6; ++i)
+    {
+        for(unsigned int j = 0; j < 6; ++j)
+        {
+            EXPECT_EQ(WleftArm(i,j), w*W(i,j));
+            EXPECT_EQ(WTASK(i,j), w*W(i,j));
+            EXPECT_EQ(WTASK2(i,j), w*W(i,j));
+        }
+    }
+
+    OpenSoT::tasks::Aggregated::Ptr TASKS = w*(DHS->leftArm + DHS->rightArm);
     WleftArm = DHS->leftArm->getWeight();
     Eigen::MatrixXd WrightArm = DHS->rightArm->getWeight();
+    WTASK = TASK->getWeight();
+    WTASK2 = TASK2->getWeight();
     Eigen::MatrixXd WTASKS = TASKS->getWeight();
 
-    std::cout<<"W: \n"<<W<<std::endl;
     std::cout<<"WleftArm: \n"<<WleftArm<<std::endl;
+    std::cout<<"WTASK: \n"<<WTASK<<std::endl;
+    std::cout<<"WTASK2: \n"<<WTASK2<<std::endl;
     std::cout<<"WrightArm: \n"<<WrightArm<<std::endl;
     std::cout<<"WTASKS: \n"<<WTASKS<<std::endl;
 
-    EXPECT_TRUE(WTASKS == Eigen::MatrixXd::Identity(WTASKS.rows(), WTASKS.cols()));
-    EXPECT_TRUE(WleftArm == W);
-    EXPECT_TRUE(WrightArm == W);
-
-    std::cout<<"ATASKS: \n"<<TASKS->getA()<<std::endl;
-    std::cout<<"AleftArm: \n"<<DHS->leftArm->getA()<<std::endl;
-    std::cout<<"ArightArm: \n"<<DHS->rightArm->getA()<<std::endl;
-
-    std::cout<<"ATASKS block 1: \n"<<TASKS->getA().block(0,0,6,DHS->com->getXSize())<<std::endl;
-    std::cout<<"AleftArm: \n"<<DHS->leftArm->getWeight()*DHS->leftArm->getA()<<std::endl;
-
-    EXPECT_TRUE(TASKS->getA().block(0,0,6,DHS->com->getXSize()) ==
-                (DHS->leftArm->getWeight()*DHS->leftArm->getA()));
-    EXPECT_TRUE(TASKS->getA().block(6,0,6,DHS->com->getXSize()) ==
-                (DHS->rightArm->getWeight()*DHS->rightArm->getA()));
-
+    for(unsigned int i = 0; i < TASKS->getA().rows(); ++i)
+        EXPECT_EQ(WTASKS(i,i),10.);
 
 }
 

@@ -6,18 +6,25 @@ namespace OpenSoT{
 OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
                                               OpenSoT::tasks::Aggregated::TaskPtr task)
 {
-    task->setWeight(W);
+    Eigen::MatrixXd Wtask = task->getWeight();
+    task->setWeight(W*Wtask);
     return OpenSoT::tasks::Aggregated::TaskPtr(task);
 }
 
-OpenSoT::tasks::Aggregated::Ptr operator*(const Eigen::MatrixXd& W,
+OpenSoT::tasks::Aggregated::TaskPtr operator*(const double w,
+                                              OpenSoT::tasks::Aggregated::TaskPtr task)
+{
+    Eigen::MatrixXd I = task->getWeight();
+    I.setIdentity(I.rows(), I.cols());
+    I = w*I;
+    return I*task;
+}
+
+OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
                                           OpenSoT::tasks::Aggregated::Ptr task)
 {
-    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> task_list = task->getTaskList();
-    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr>::iterator it = task_list.begin();
-    for(it; it != task_list.end(); it++)
-        (*it)->setWeight(W);
-    task->update(Eigen::VectorXd::Zero(task->getA().rows()));
+    Eigen::MatrixXd Wtask = task->getWeight();
+    task->setWeight(w*Wtask);
     return OpenSoT::tasks::Aggregated::Ptr(task);
 }
 
