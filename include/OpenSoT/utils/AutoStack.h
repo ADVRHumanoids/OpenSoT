@@ -97,6 +97,11 @@ namespace OpenSoT {
             OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& task_id);
     };    
 
+OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
+                                              OpenSoT::tasks::Aggregated::TaskPtr task);
+
+OpenSoT::tasks::Aggregated::Ptr operator*(const Eigen::MatrixXd& W,
+                                          OpenSoT::tasks::Aggregated::Ptr task);
 
 /**
  * @brief operator % takes a task and a list of indices, generates a subtask

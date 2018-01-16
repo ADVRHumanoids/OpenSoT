@@ -3,6 +3,25 @@
 
 namespace OpenSoT{
 
+OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
+                                              OpenSoT::tasks::Aggregated::TaskPtr task)
+{
+    task->setWeight(W);
+    return OpenSoT::tasks::Aggregated::TaskPtr(task);
+}
+
+OpenSoT::tasks::Aggregated::Ptr operator*(const Eigen::MatrixXd& W,
+                                          OpenSoT::tasks::Aggregated::Ptr task)
+{
+    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> task_list = task->getTaskList();
+    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr>::iterator it = task_list.begin();
+    for(it; it != task_list.end(); it++)
+        (*it)->setWeight(W);
+    task->update(Eigen::VectorXd::Zero(task->getA().rows()));
+    return OpenSoT::tasks::Aggregated::Ptr(task);
+}
+
+
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
                                 const std::list<unsigned int> rowIndices)
 {
