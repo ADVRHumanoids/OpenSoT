@@ -156,7 +156,7 @@ public:
 
     }
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionGeometry> > getShapes()
+    std::map<std::string,std::shared_ptr<fcl::CollisionGeometry> > getShapes()
     {
         return _computeDistance.shapes_;
     }
@@ -296,7 +296,7 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     ASSERT_EQ(result.getLinkNames().second, linkB);
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
-    std::map<std::string,boost::shared_ptr<fcl::CollisionGeometry> > shapes_test;
+    std::map<std::string,std::shared_ptr<fcl::CollisionGeometry> > shapes_test;
     std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
@@ -419,7 +419,7 @@ TEST_F(testCollisionUtils, checkTimings)
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionGeometry> > shapes_test;
+    std::map<std::string,std::shared_ptr<fcl::CollisionGeometry> > shapes_test;
     std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
