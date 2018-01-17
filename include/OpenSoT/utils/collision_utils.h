@@ -32,6 +32,14 @@
 #include <moveit/robot_model/robot_model.h>
 #include <urdf/model.h>
 
+#if FCL_MINOR_VERSION <= 3
+    template <typename T>
+    using shared_ptr =  boost::shared_ptr<T>;
+#else
+    template <typename T>
+    using shared_ptr =  std::shared_ptr<T>;
+#endif
+
 
 /**
  * @brief The LinkPairDistance class represents the minimum distance information between two links.
@@ -185,7 +193,7 @@ private:
     /**
      * @brief shapes_ is a map of collision geometries
      */
-    std::map<std::string,std::shared_ptr<fcl::CollisionGeometry> > shapes_;
+    std::map<std::string,shared_ptr<fcl::CollisionGeometry> > shapes_;
 
     /**
      * @brief custom_capsules_ is a map of custom capsules specified as endpoints + radius

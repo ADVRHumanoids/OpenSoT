@@ -9,6 +9,7 @@
 #include <geometric_shapes/shapes.h>
 #include <geometric_shapes/shape_operations.h>
 #include <boost/make_shared.hpp>
+#include <fcl/config.h>
 
 // construct vector
 KDL::Vector toKdl(urdf::Vector3 v)
@@ -76,7 +77,8 @@ bool ComputeLinksDistance::parseCollisionObjects(const std::string &robot_urdf_p
                 link->collision->geometry->type == urdf::Geometry::BOX      ||
                 link->collision->geometry->type == urdf::Geometry::MESH) {
 
-                std::shared_ptr<fcl::CollisionGeometry> shape;
+
+                shared_ptr<fcl::CollisionGeometry> shape;
                 KDL::Frame shape_origin;
 
                 if (link->collision->geometry->type == urdf::Geometry::CYLINDER) {
