@@ -212,7 +212,11 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
     stack_of_tasks.push_back(com);
 
+#if EIGEN_MINOR_VERSION <= 0
     QPsolver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,wrench_limits,2E10));
+#else
+    QPsolver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,wrench_limits,2E5));
+#endif
     std::cout<<"QP Solver started"<<std::endl;
     bool solved = false;
     do{
