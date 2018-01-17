@@ -217,7 +217,7 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 
 TEST_F(testQPOasesProblem, test_update_constraint)
 {
-    OpenSoT::solvers::QPOasesProblem qp(3,3);
+    OpenSoT::solvers::QPOasesProblem qp(3,0);
     Eigen::MatrixXd H(1,3);
     H<<1,1,1;
     Eigen::VectorXd b(1);
@@ -278,7 +278,7 @@ TEST_F(testQPOasesProblem, test_update_constraint)
 
 TEST_F(testQPOasesProblem, test_update_task)
 {
-    OpenSoT::solvers::QPOasesProblem qp(3,3);
+    OpenSoT::solvers::QPOasesProblem qp(3,0);
     Eigen::MatrixXd H(2,3);
     H<<1,1,1,
        0,1,1;
@@ -764,19 +764,25 @@ TEST_F(testQPOasesTask, testCartesian)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, *_model_ptr,
                 "l_wrist", "Waist"));
 
+    cartesian_task->update(q);
+
+    Eigen::MatrixXd T_actual = cartesian_task->getActualPose();
+    std::cout<<"T_actual: \n"<<T_actual<<std::endl;
+
 
     Eigen::MatrixXd T_ref = T.matrix();
     T_ref(0,3) = T_ref(0,3) + 0.02;
+    std::cout<<"T_ref: \n"<<T_ref<<std::endl;
 
     cartesian_task->setReference(T_ref);
     cartesian_task->update(q);
 
     OpenSoT::solvers::QPOasesProblem qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
     ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb(),
-                                                Eigen::MatrixXd(), Eigen::VectorXd(), Eigen::VectorXd(),
-                                                Eigen::VectorXd(), Eigen::VectorXd()));
+                                                Eigen::MatrixXd(0,0), Eigen::VectorXd(), Eigen::VectorXd(),
+                                                -0.003*Eigen::VectorXd::Ones(q.size()), 0.003*Eigen::VectorXd::Ones(q.size())));
 
-    for(unsigned int i = 0; i < 100; ++i)
+    for(unsigned int i = 0; i < 10000; ++i)
     {
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
@@ -790,6 +796,9 @@ TEST_F(testQPOasesTask, testCartesian)
     }
 
     _model_ptr->getPose("l_wrist", "Waist", T);
+
+    std::cout<<"T: \n"<<T.matrix()<<std::endl;
+    std::cout<<"T_ref: \n"<<T_ref<<std::endl;
 
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(T(i,3), T_ref(i,3), 1E-4);
