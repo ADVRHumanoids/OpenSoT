@@ -76,7 +76,7 @@ bool ComputeLinksDistance::parseCollisionObjects(const std::string &robot_urdf_p
                 link->collision->geometry->type == urdf::Geometry::BOX      ||
                 link->collision->geometry->type == urdf::Geometry::MESH) {
 
-                boost::shared_ptr<fcl::CollisionGeometry> shape;
+                std::shared_ptr<fcl::CollisionGeometry> shape;
                 KDL::Frame shape_origin;
 
                 if (link->collision->geometry->type == urdf::Geometry::CYLINDER) {
@@ -163,6 +163,7 @@ bool ComputeLinksDistance::parseCollisionObjects(const std::string &robot_urdf_p
 
                 boost::shared_ptr<fcl::CollisionObject> collision_object(
                         new fcl::CollisionObject(shape));
+
 
                 collision_objects_[link->name] = collision_object;
                 shapes_[link->name] = shape;

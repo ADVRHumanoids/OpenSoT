@@ -185,7 +185,7 @@ private:
     /**
      * @brief shapes_ is a map of collision geometries
      */
-    std::map<std::string,boost::shared_ptr<fcl::CollisionGeometry> > shapes_;
+    std::map<std::string,std::shared_ptr<fcl::CollisionGeometry> > shapes_;
 
     /**
      * @brief custom_capsules_ is a map of custom capsules specified as endpoints + radius
