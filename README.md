@@ -44,6 +44,17 @@ Arturo Laurenzi
 How to cite this work:
 ======================
 Please support ```OpenSoT``` development by referencing it in your works/publications/projects with:
+
+```
+@inproceedings{OpenSot17,
+  title = {Robot Control for Dummies: Insights and Examples using OpenSoT},
+  author = {Mingo Hoffman, Enrico and Rocchi, Alessio and Laurenzi, Arturo and Tsagarakis, Nikos G.},
+  pages     = {736-741},
+  booktitle = {17th {IEEE-RAS} International Conference on Humanoid Robots, Humanoids},
+  year = {2017}
+}
+```
+
 ```
 @inproceedings{AlessioEnrico2015,
   title={OpenSoT: a Whole-Body Control Library for the Compliant Humanoid Robot COMAN},
