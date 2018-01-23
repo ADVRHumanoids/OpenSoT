@@ -28,15 +28,6 @@
 
 namespace OpenSoT { 
 
-// /* Forward declarations */
-// template <typename DerivedM1, typename DerivedM2, typename DerivedQ1, typename DerivedQ2>
-// class AffineAffineSum;
-// 
-// template <typename DerivedMatrix, typename DerivedM, typename DerivedQ>
-// class MatrixAffineProduct;
-// 
-// template <typename DerivedVector, typename DerivedM, typename DerivedQ>
-// class AffineVectorSum;
 
 
 /* Base class for AffineHelpers */
@@ -153,7 +144,7 @@ public:
 
     
     template <typename Derived>
-    void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value)
+    void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value) const
     {
         value.noalias() = _M*x;
         value += _q;
