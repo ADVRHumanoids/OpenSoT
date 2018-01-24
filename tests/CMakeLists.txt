@@ -96,8 +96,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testMinimizeAccelerationTask
                   testMinimumVelocityTask
                   testMinimumEffortVelocityTask
-                  testPosturalVelocityTask
-                  testAggregatedTask
+                  testPosturalVelocityTask          
                   testSubTask
                   testAutoStack 
                   testCartesianUtils 
@@ -109,7 +108,8 @@ set(OPENSOT_TESTS testBilateralConstraint
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint)
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
+                                       testAggregatedTask)
 endif()
 
 #THIS TEST DEPEND ON fcl
@@ -207,6 +207,11 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
     add_dependencies(testAggregatedConstraint GTest-ext OpenSoT)
     add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
+
+    ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
+    TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
+    add_dependencies(testAggregatedTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
 
 ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
@@ -303,11 +308,6 @@ ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocit
 TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
 add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
 add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
-
-ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
-TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
-add_dependencies(testAggregatedTask GTest-ext OpenSoT)
-add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 
 ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
