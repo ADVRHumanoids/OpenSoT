@@ -95,6 +95,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testManipulabilityTask
                   testMinimizeAccelerationTask
                   testMinimumVelocityTask
+                  testMinimumEffortVelocityTask
                   testPosturalVelocityTask
                   testSubTask
                   testAutoStack 
@@ -135,7 +136,6 @@ if(${YARP_FOUND})
                     testAggregatedTask
                     testCartesianVelocityTask
                     testCoMForceTask
-                    testMinimumEffortVelocityTask
     )
 endif()
 
@@ -295,6 +295,11 @@ TARGET_LINK_LIBRARIES(testQPOases_SetActiveStack ${TestLibs})
 add_dependencies(testQPOases_SetActiveStack GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases_SetActiveStack COMMAND testQPOases_SetActiveStack)
 
+ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
+TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
+add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
+
 if(${YARP_FOUND})
 #    ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
@@ -411,11 +416,6 @@ if(${YARP_FOUND})
 #    ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
 #    TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
 #    add_dependencies(testInteractionVelocityTask GTest-ext OpenSoT)
-
-    ADD_EXECUTABLE(testMinimumEffortVelocityTask tasks/velocity/TestMinimumEffort.cpp)
-    TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
-    add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 
     ADD_EXECUTABLE(testContactFloatingBaseTask tasks/floating_base/TestContact.cpp)
     TARGET_LINK_LIBRARIES(testContactFloatingBaseTask ${TestLibs})

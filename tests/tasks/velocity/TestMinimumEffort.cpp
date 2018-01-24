@@ -1,44 +1,44 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
-#include <yarp/math/Math.h>
-#include <yarp/math/SVD.h>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <boost/make_shared.hpp>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
+#include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <ros/master.h>
+#include <sensor_msgs/JointState.h>
 
-using namespace yarp::math;
+
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
+
+bool IS_ROSCORE_RUNNING;
 
 namespace {
 
 class testMinimumEffortTask: public ::testing::Test
 {
-public:
-    typedef idynutils2 iDynUtils;
-    static void null_deleter(iDynUtils *) {}
+
 protected:
-    iDynUtils _robot;
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
-    std::string _path_to_cfg;
+    XBot::ModelInterface::Ptr _model_ptr;
     int nJ;
 
-    testMinimumEffortTask() : _robot("coman",
-                                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                                     std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
+
+
+    testMinimumEffortTask()
     {
-        nJ = _robot.iDynTree_model.getNrOfDOFs();
-        std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-        std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-        _path_to_cfg = robotology_root + relative_path;
-
-        _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-                (XBot::ModelInterface::getModel(_path_to_cfg));
-        _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&_robot, &null_deleter));
+        nJ = _model_ptr->getJointNum();
 
         if(_model_ptr)
             std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
         else
             std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+
+
+
     }
 
     virtual ~testMinimumEffortTask() {
@@ -57,60 +57,141 @@ protected:
 
 TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 {
+    boost::shared_ptr<ros::NodeHandle> _n;
+    ros::Publisher joint_state_pub;
+    if(IS_ROSCORE_RUNNING){
+        _n.reset(new ros::NodeHandle());
+        joint_state_pub = _n->advertise<sensor_msgs::JointState>("joint_states", 1000);
+    }
+
+
     // setting initial position with bent legs
-    yarp::sig::Vector q_whole(nJ, 1E-2);
-    q_whole[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
-    q_whole[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    Eigen::VectorXd q_whole(nJ); q_whole.setZero(nJ);
+    double angle = 45;
+    q_whole[_model_ptr->getDofIndex("RShSag")] = -angle*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RShLat")] = 0.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RElbj")] = -angle*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LShSag")] = -angle*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LShLat")] = 0.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LElbj")] = -angle*M_PI/180.0;
 
-
-    _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole));
-
-    OpenSoT::tasks::velocity::MinimumEffort minimumEffort(
-                conversion_utils_YARP::toEigen(q_whole), *(_model_ptr.get()));
-
-    EXPECT_EQ(minimumEffort.getA().rows(), nJ);
-    EXPECT_EQ(minimumEffort.getb().size(), nJ);
-
-    EXPECT_TRUE(minimumEffort.getWeight().rows() == nJ);
-    EXPECT_TRUE(minimumEffort.getWeight().cols() == nJ);
-
-    EXPECT_TRUE(minimumEffort.getConstraints().size() == 0);
-
-    double K = 0.1;//0.8;
-    minimumEffort.setLambda(K);
-    EXPECT_DOUBLE_EQ(minimumEffort.getLambda(), K);
-    _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
-    double initial_effort = yarp::math::dot(_robot.iDynTree_model.getTorques(),
-                                    conversion_utils_YARP::toYARP(minimumEffort.getWeight())*_robot.iDynTree_model.getTorques());
-    std::cout<<"Initial Effort: "<<initial_effort<<std::endl;
-    double initial_effort2 = minimumEffort.computeEffort();
-    std::cout<<"Initial Effort2: "<<initial_effort2<<std::endl;
-    for(unsigned int i = 0; i < 25; ++i)
+    if(IS_ROSCORE_RUNNING)
     {
-        minimumEffort.update(conversion_utils_YARP::toEigen(q_whole));
-        double old_effort = minimumEffort.computeEffort();
+        sensor_msgs::JointState joint_msg;
+        for(unsigned int i = 0; i < _model_ptr->getEnabledJointNames().size(); ++i)
+        {
+            joint_msg.name.push_back(_model_ptr->getEnabledJointNames()[i]);
+            joint_msg.position.push_back(q_whole[_model_ptr->getDofIndex(_model_ptr->getEnabledJointNames()[i])]);
+            joint_msg.velocity.push_back(0.0);
+            joint_msg.effort.push_back(0.0);
+        }
+        joint_msg.header.stamp = ros::Time::now();
+    //    while(ros::ok())
+    //        joint_state_pub.publish(joint_msg);
+    }
 
-        q_whole += pinv(conversion_utils_YARP::toYARP(minimumEffort.getA()),1E-6)
-                *minimumEffort.getLambda()*conversion_utils_YARP::toYARP(minimumEffort.getb());
 
-        minimumEffort.update(conversion_utils_YARP::toEigen(q_whole));
-        EXPECT_LE(minimumEffort.computeEffort(), old_effort);
-        std::cout << "Effort at step" << i << ": " << minimumEffort.computeEffort() << std::endl;
+
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::MinimumEffort::Ptr minimumEffort;
+    minimumEffort.reset(new OpenSoT::tasks::velocity::MinimumEffort(q_whole, *(_model_ptr.get())));
+    minimumEffort->update(q_whole);
+
+
+    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack;
+    stack.push_back(minimumEffort);
+
+    OpenSoT::solvers::DampedPseudoInverse solver(stack);
+
+    EXPECT_EQ(minimumEffort->getA().rows(), nJ);
+    EXPECT_EQ(minimumEffort->getb().size(), nJ);
+
+    EXPECT_TRUE(minimumEffort->getWeight().rows() == nJ);
+    EXPECT_TRUE(minimumEffort->getWeight().cols() == nJ);
+
+    EXPECT_TRUE(minimumEffort->getConstraints().size() == 0);
+
+    double K = 1.;//0.8;
+    minimumEffort->setLambda(K);
+    EXPECT_DOUBLE_EQ(minimumEffort->getLambda(), K);
+
+    Eigen::MatrixXd W(q_whole.size(), q_whole.size()); W.setIdentity(q_whole.size(), q_whole.size());
+    minimumEffort->setW(1e-5*W);
+
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+
+    Eigen::VectorXd tau_g;
+    _model_ptr->computeGravityCompensation(tau_g);
+
+    double initial_effort = tau_g.transpose()*minimumEffort->getW()*tau_g;
+    std::cout<<"Initial Effort: "<<initial_effort<<std::endl;
+
+    double initial_effort2 = minimumEffort->computeEffort();
+    std::cout<<"Initial Effort2: "<<initial_effort2<<std::endl;
+
+    Eigen::VectorXd dq(q_whole.size()); dq.setZero(q_whole.size());
+    for(unsigned int i = 0; i < 1250; ++i)
+    {
+
+
+//        _model_ptr->setJointPosition(q_whole);
+//        _model_ptr->update();
+
+        minimumEffort->update(q_whole);
+        double old_effort = minimumEffort->computeEffort();
+
+
+        solver.solve(dq);
+
+
+        q_whole += dq;
+
+
+
+        if(IS_ROSCORE_RUNNING)
+        {
+            sensor_msgs::JointState joint_msg;
+            for(unsigned int i = 0; i < _model_ptr->getEnabledJointNames().size(); ++i)
+            {
+                joint_msg.name.push_back(_model_ptr->getEnabledJointNames()[i]);
+                joint_msg.position.push_back(q_whole[_model_ptr->getDofIndex(_model_ptr->getEnabledJointNames()[i])]);
+            }
+            joint_msg.header.stamp = ros::Time::now();
+            joint_state_pub.publish(joint_msg);
+        }
+
+
+
+
+        minimumEffort->update(q_whole);
+        EXPECT_LE(minimumEffort->computeEffort(), old_effort);
+        std::cout << "Effort at step" << i << ": " << minimumEffort->computeEffort() << std::endl;
+
+        if(IS_ROSCORE_RUNNING)
+        {
+            usleep(100);
+            ros::spinOnce();
+        }
 
     }
-    _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
-    double final_effort = yarp::math::dot(_robot.iDynTree_model.getTorques(),
-                                    conversion_utils_YARP::toYARP(minimumEffort.getWeight())*_robot.iDynTree_model.getTorques());
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+    _model_ptr->computeGravityCompensation(tau_g);
+
+    double final_effort = tau_g.transpose()*minimumEffort->getW()*tau_g;
     EXPECT_LT(final_effort, initial_effort);
 }
 
 }
 
 int main(int argc, char **argv) {
+  ros::init(argc, argv, "testMinimumEffort_node");
+  IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
