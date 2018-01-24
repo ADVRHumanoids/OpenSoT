@@ -129,7 +129,6 @@ if(${YARP_FOUND})
                     testCollisionAvoidanceVelocityConstraint
                     testCoMVelocityVelocityConstraint
                     testConvexHullVelocityConstraint
-                    testVelocityLimitsVelocityBounds
                     testQPOases_ConvexHull
                     testQPOases_FF
                     testQPOases_StaticWalk
@@ -300,6 +299,11 @@ TARGET_LINK_LIBRARIES(testMinimumEffortVelocityTask ${TestLibs})
 add_dependencies(testMinimumEffortVelocityTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 
+ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocityLimits.cpp)
+TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
+add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
+
 if(${YARP_FOUND})
 #    ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
@@ -325,10 +329,6 @@ if(${YARP_FOUND})
 #    TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
 #    add_dependencies(testDynamicsConstraint GTest-ext OpenSoT)
 
-    ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocityLimits.cpp)
-    TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
-    add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 
 #    ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
