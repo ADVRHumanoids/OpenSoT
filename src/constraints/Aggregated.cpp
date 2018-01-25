@@ -250,7 +250,7 @@ void Aggregated::checkSizes()
 }
 
 const std::string Aggregated::concatenateConstraintsIds(const std::list<ConstraintPtr> constraints) {
-    std::string concatenatedId;
+    std::string concatenatedId = "AGGR_";
     int constraintSize = constraints.size();
     for(std::list<ConstraintPtr>::const_iterator i = constraints.begin(); i != constraints.end(); ++i) {
         concatenatedId += (*i)->getConstraintID();
