@@ -262,11 +262,6 @@ const std::string Aggregated::concatenateConstraintsIds(const std::list<Constrai
 
 void Aggregated::_log(XBot::MatLogger::Ptr logger)
 {
-    if(_bounds.size() > 1)
-    {
-        
-        for(auto bound : _bounds)
-            bound->log(logger);
-        
-    }
+    for(auto bound : _bounds)
+        bound->log(logger);
 }
