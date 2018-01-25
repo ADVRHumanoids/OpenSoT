@@ -13,4 +13,5 @@ OpenSoT::tasks::MinimizeVariable::MinimizeVariable(std::string task_id,
 {
     _A = _var.getM();
     _b = -_var.getq();
+    _W.setIdentity(_A.rows(), _A.rows());
 }
