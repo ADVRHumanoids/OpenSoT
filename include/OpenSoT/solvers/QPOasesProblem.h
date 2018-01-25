@@ -238,7 +238,7 @@ namespace OpenSoT{
             if(_lA.size() > 0)
                 logger->add("lA_"+std::to_string(i), _lA);
             if(_uA.size() > 0)
-                logger->add("lA_"+std::to_string(i), _uA);
+                logger->add("uA_"+std::to_string(i), _uA);
             if(_l.size() > 0)
                 logger->add("l_"+std::to_string(i), _l);
             if(_u.size() > 0)
