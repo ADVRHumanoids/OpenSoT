@@ -35,6 +35,8 @@ public:
                       const AffineHelper& variable
                       );
     
+    bool setReference(const Eigen::VectorXd& ref);
+    
     virtual void _update(const Eigen::VectorXd& x);
     
     
@@ -42,6 +44,7 @@ public:
 private:
     
         AffineHelper _var;
+        Eigen::VectorXd _ref;
     
 };
     
