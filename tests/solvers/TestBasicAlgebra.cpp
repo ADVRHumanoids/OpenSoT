@@ -4,6 +4,7 @@
 #include <qpOASES/SQProblem.hpp>
 #include <chrono>
 #include <gtest/gtest.h>
+#include <XBotInterface/MatLogger.hpp>
 
 namespace{
 class testBasicAlgebra: public ::testing::Test{
@@ -277,6 +278,99 @@ TEST_F(testBasicAlgebra, testqpOASES)
 #endif
 }
 
+
+TEST_F(testBasicAlgebra, checkProductOptimization)
+{
+    auto logger = XBot::MatLogger::getLogger("/tmp/checkProductOptimization");
+    
+    
+    
+    
+    int n_task = 250;
+    int n_vars = 108;
+    
+    
+    Eigen::MatrixXd A = Eigen::MatrixXd::Random(n_task, n_vars);
+    Eigen::MatrixXd At = A.transpose();
+    Eigen::VectorXd w_diag = Eigen::VectorXd::Random(n_task);
+    w_diag = w_diag.abs();
+    Eigen::MatrixXd W = w_diag.asDiagonal();
+    Eigen::MatrixXd WA = W*A;
+    
+    Eigen::VectorXd b = Eigen::VectorXd::Random(n_task);
+    Eigen::VectorXd Wb = W*b;
+    
+    Eigen::MatrixXd H(n_vars, n_vars);
+    Eigen::VectorXd g(n_vars);
+    
+    
+    /* Naive implementation */
+    const int N_runs = 1000;
+    
+    for(int i = 0; i < N_runs; i++)
+    {
+        auto tic = std::chrono::high_resolution_clock::now();
+        
+        At = A.transpose();
+        WA.noalias() = W*A;
+        
+        H.noalias() = At*WA;
+        
+        auto toc = std::chrono::high_resolution_clock::now();
+
+        double dt_H = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+        
+        tic = std::chrono::high_resolution_clock::now();
+        
+        At = A.transpose();
+        Wb.noalias() = W*b;
+        
+        g.noalias() = At*Wb;
+        
+        toc = std::chrono::high_resolution_clock::now();
+            
+        double dt_g = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+        
+        logger->add("H_naive_time", dt_H);
+        logger->add("g_naive_time", dt_g);
+        logger->add("naive_time", dt_g +  dt_H);
+    }
+    
+    
+    
+    for(int i = 0; i < N_runs; i++)
+    {
+        auto tic = std::chrono::high_resolution_clock::now();
+        
+        At = A.transpose();
+        WA.noalias() = w_diag.asDiagonal()*A;
+        
+        H.noalias() = At*WA;
+        
+        auto toc = std::chrono::high_resolution_clock::now();
+
+        double dt_H = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+        
+        tic = std::chrono::high_resolution_clock::now();
+        
+        At = A.transpose();
+        Wb.noalias() = w_diag.asDiagonal()*b;
+        
+        g.noalias() = At*Wb;
+        
+        toc = std::chrono::high_resolution_clock::now();
+            
+        double dt_g = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+        
+        logger->add("H_diag_time", dt_H);
+        logger->add("g_diag_time", dt_g);
+        logger->add("diag_time", dt_g +  dt_H);
+    }
+    
+    
+    logger->flush();
+    
+}
 
 }
 
