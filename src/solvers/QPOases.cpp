@@ -55,12 +55,16 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
 
     if(task->getWeight().isIdentity())
     {
-        H.noalias() = task->getATranspose() * task->getA();
+        H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getA();
+        H.triangularView<Eigen::Lower>() = H.selfadjointView<Eigen::Upper>();
+        //H.noalias() = task->getATranspose() * task->getA();
         g.noalias() = -1.0 * task->getATranspose() * task->getb();
     }
     else
     {
-        H.noalias() = task->getATranspose() * task->getWA();
+        H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getWA();
+        H.triangularView<Eigen::Lower>() = H.selfadjointView<Eigen::Upper>();
+        //H.noalias() = task->getATranspose() * task->getWA();
         g.noalias() = -1.0 * task->getATranspose() * task->getWb();
     }
 }
