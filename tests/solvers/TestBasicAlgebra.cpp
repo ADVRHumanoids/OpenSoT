@@ -293,7 +293,7 @@ TEST_F(testBasicAlgebra, checkProductOptimization)
     Eigen::MatrixXd A = Eigen::MatrixXd::Random(n_task, n_vars);
     Eigen::MatrixXd At = A.transpose();
     Eigen::VectorXd w_diag = Eigen::VectorXd::Random(n_task);
-    w_diag = w_diag.abs();
+    w_diag = w_diag.array().abs();
     Eigen::MatrixXd W = w_diag.asDiagonal();
     Eigen::MatrixXd WA = W*A;
     
