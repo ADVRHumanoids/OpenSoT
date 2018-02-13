@@ -96,7 +96,8 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testMinimizeAccelerationTask
                   testMinimumVelocityTask
                   testMinimumEffortVelocityTask
-                  testPosturalVelocityTask          
+                  testPosturalVelocityTask
+                  testCartesianVelocityTask
                   testSubTask
                   testAutoStack 
                   testCartesianUtils 
@@ -133,7 +134,6 @@ if(${YARP_FOUND})
                     testQPOases_ConvexHull
                     testQPOases_FF
                     testQPOases_StaticWalk
-                    testCartesianVelocityTask
                     testCoMForceTask
     )
 endif()
@@ -349,6 +349,11 @@ TARGET_LINK_LIBRARIES(testContactFloatingBaseTask ${TestLibs})
 add_dependencies(testContactFloatingBaseTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_floating_base_Postural COMMAND testContactFloatingBaseTask)
 
+ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
+TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
+add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
+
 if(${YARP_FOUND})
 #    ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
@@ -417,11 +422,6 @@ if(${YARP_FOUND})
 #    TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
 #    add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
 
-
-    ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
-    TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
-    add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 
     ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
     TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
