@@ -204,20 +204,26 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     q_whole[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    _robot.switchAnchorAndFloatingBase("r_sole");
+    //_robot.switchAnchorAndFloatingBase("r_sole");
     _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
 
 
+//    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
+//                                                 conversion_utils_YARP::toEigen(q_whole),
+//                                                 *(_model_ptr.get()),
+//                                                 "l_sole",
+//                                                 "world");
     OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
                                                  conversion_utils_YARP::toEigen(q_whole),
                                                  *(_model_ptr.get()),
                                                  "l_sole",
-                                                 "world");
+                                                 "r_sole");
 
     // setting x_ref with a delta offset along the z axis (-2cm)
     yarp::sig::Matrix delta_x(4,4); delta_x.zero();
                       delta_x(2,3) = -0.02;
-    Eigen::MatrixXd x = _robot.getPosition(_robot.iDynTree_model.getLinkIndex("l_sole"));
+    Eigen::MatrixXd x = _robot.getPosition(_robot.iDynTree_model.getLinkIndex("r_sole"),
+                                           _robot.iDynTree_model.getLinkIndex("l_sole"));
 
     std::cout<<"cartesian actual pose: "<<cartesian.getActualPose()<<std::endl;
     std::cout<<"x: "<<x<<std::endl;
@@ -227,7 +233,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     std::cout<<"x_ref: "<<x_ref.toString()<<std::endl;
 
     KDL::Jacobian J; J.resize(q_whole.size());
-    _model_ptr->getJacobian("l_sole",KDL::Vector::Zero(), J);
+    _model_ptr->getRelativeJacobian("l_sole","r_sole", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
     EXPECT_TRUE(cartesian.getA() == J.data);
     EXPECT_EQ(cartesian.getA().rows(), 6);
@@ -250,9 +256,15 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == conversion_utils_YARP::toEigen(cartesian.getLambda()*cat(
-                                        conversion_utils_YARP::toYARP(positionError),
-                                        -orientationErrorGain*conversion_utils_YARP::toYARP(orientationError))));
+    Eigen::VectorXd tmp = conversion_utils_YARP::toEigen(cartesian.getLambda()*cat(
+                                                             conversion_utils_YARP::toYARP(positionError),
+                                                             -orientationErrorGain*conversion_utils_YARP::toYARP(orientationError)));
+
+    EXPECT_NEAR((cartesian.getb() - tmp).norm(), 0.0,1e-9);
+
+//    EXPECT_TRUE(cartesian.getb() == conversion_utils_YARP::toEigen(cartesian.getLambda()*cat(
+//                                        conversion_utils_YARP::toYARP(positionError),
+//                                        -orientationErrorGain*conversion_utils_YARP::toYARP(orientationError))));
 
     std::cout<<"cartesian.getb(): ["<<cartesian.getb()<<"]"<<std::endl;
     std::cout<<"error: ["<<conversion_utils_YARP::toEigen(cartesian.getLambda()*cat(
@@ -267,7 +279,8 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
         q_whole += pinv(conversion_utils_YARP::toYARP(cartesian.getA()),1E-7)*
                 conversion_utils_YARP::toYARP(cartesian.getb());
         _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole),true);
-        x_now = _robot.getPosition(_robot.iDynTree_model.getLinkIndex("l_sole"));
+        x_now = _robot.getPosition(_robot.iDynTree_model.getLinkIndex("r_sole"),
+                                   _robot.iDynTree_model.getLinkIndex("l_sole"));
         std::cout << "Current error at iteration " << i << " is " << x_ref(2,3) - x_now(2,3) << std::endl;
     }
 
@@ -299,7 +312,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeNoUpdateWorld_)
     q_whole[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _robot.switchAnchorAndFloatingBase("l_sole");
+    //_robot.switchAnchorAndFloatingBase("l_sole");
     _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), false);
 
 
@@ -408,7 +421,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistNoUpdateWorld_)
     q_whole[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _robot.switchAnchorAndFloatingBase("l_sole");
+    //_robot.switchAnchorAndFloatingBase("l_sole");
     _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), false);
 
 
@@ -513,7 +526,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     q_whole[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _robot.switchAnchorAndFloatingBase("l_sole");
+    //_robot.switchAnchorAndFloatingBase("l_sole");
     _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
 
 
@@ -613,7 +626,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     q_whole[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _robot.switchAnchorAndFloatingBase("l_sole");
+    //_robot.switchAnchorAndFloatingBase("l_sole");
     _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
 
 
@@ -668,14 +681,14 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     double orientationErrorGain = 1.0;
     cartesian.setOrientationErrorGain(orientationErrorGain);
 
-    EXPECT_TRUE(cartesian.getb() == conversion_utils_YARP::toEigen(cartesian.getLambda()*cat(
-                                        conversion_utils_YARP::toYARP(positionError),
-                                        -orientationErrorGain*conversion_utils_YARP::toYARP(orientationError))));
+    Eigen::VectorXd tmp = conversion_utils_YARP::toEigen(cartesian.getLambda()*cat(
+                                                             conversion_utils_YARP::toYARP(positionError),
+                                                             -orientationErrorGain*conversion_utils_YARP::toYARP(orientationError)));
+
+    EXPECT_NEAR((cartesian.getb() - tmp).norm(), 0.0, 1e-9 );
 
     std::cout<<"cartesian.getb(): ["<<cartesian.getb()<<"]"<<std::endl;
-    std::cout<<"error: ["<<conversion_utils_YARP::toEigen(cartesian.getLambda()*cat(
-                                                              conversion_utils_YARP::toYARP(positionError),
-                                                              -orientationErrorGain*conversion_utils_YARP::toYARP(orientationError)))<<"]"<<std::endl;
+    std::cout<<"error: ["<<tmp<<"]"<<std::endl;
 
     Eigen::MatrixXd x_now;
     for(unsigned int i = 0; i < 120; ++i)
@@ -722,7 +735,7 @@ TEST_F(testCartesianTask, testActiveJointsMask)
     q_whole[_robot.iDynTree_model.getDOFIndex("WaistSag")] = -10.0*M_PI/180.0;
     q_whole[_robot.iDynTree_model.getDOFIndex("WaistYaw")] = -10.0*M_PI/180.0;
 
-    _robot.switchAnchorAndFloatingBase("l_sole");
+    //_robot.switchAnchorAndFloatingBase("l_sole");
     _robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(q_whole), true);
 
 
@@ -730,7 +743,12 @@ TEST_F(testCartesianTask, testActiveJointsMask)
                                                  conversion_utils_YARP::toEigen(q_whole),
                                                  *(_model_ptr.get()),
                                                  "torso",
-                                                 "world");
+                                                 "l_sole");
+//    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
+//                                                 conversion_utils_YARP::toEigen(q_whole),
+//                                                 *(_model_ptr.get()),
+//                                                 "torso",
+//                                                 "world");
 
     cartesian.update(conversion_utils_YARP::toEigen(q_whole));
     std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
