@@ -66,7 +66,7 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 
 using namespace OpenSoT::tasks::velocity;
 using namespace OpenSoT::constraints::velocity;
-TEST_F(testActivateStack, test_deactivate_tasks)
+TEST_F(testActivateStack, test_deactivate_task)
 {
     XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
     Eigen::VectorXd q(_model_ptr->getJointNum());
@@ -168,7 +168,7 @@ TEST_F(testActivateStack, test_deactivate_tasks)
 
 }
 
-TEST_F(testActivateStack, test_deactivate_task)
+TEST_F(testActivateStack, test_deactivate_stack)
 {
     std::vector<Eigen::VectorXd> solutions;
     XBot::ModelInterface::Ptr _model_ptr;
