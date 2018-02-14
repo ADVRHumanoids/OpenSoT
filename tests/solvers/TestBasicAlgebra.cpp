@@ -286,22 +286,27 @@ TEST_F(testBasicAlgebra, checkProductOptimization)
     
     
     
-    int n_task = 250;
-    int n_vars = 108;
+    int n_task = 256;
+    int n_vars = 128;
     
     
     Eigen::MatrixXd A = Eigen::MatrixXd::Random(n_task, n_vars);
     Eigen::MatrixXd At = A.transpose();
     Eigen::VectorXd w_diag = Eigen::VectorXd::Random(n_task);
-    w_diag = w_diag.abs();
+    w_diag = w_diag.array().abs();
     Eigen::MatrixXd W = w_diag.asDiagonal();
     Eigen::MatrixXd WA = W*A;
+    Eigen::MatrixXd AtW = A.transpose()*W;
     
     Eigen::VectorXd b = Eigen::VectorXd::Random(n_task);
     Eigen::VectorXd Wb = W*b;
     
     Eigen::MatrixXd H(n_vars, n_vars);
     Eigen::VectorXd g(n_vars);
+
+
+    Eigen::MatrixXd H_naive;
+    Eigen::VectorXd g_naive;
     
     
     /* Naive implementation */
@@ -334,6 +339,45 @@ TEST_F(testBasicAlgebra, checkProductOptimization)
         logger->add("H_naive_time", dt_H);
         logger->add("g_naive_time", dt_g);
         logger->add("naive_time", dt_g +  dt_H);
+
+        H_naive = H;
+        g_naive = g;
+    }
+
+    int mini_batches_size = 128;
+    //ASSERT_TRUE(n_task%mini_batches_size == 0);
+    for(int i = 0; i < N_runs; i++)
+    {
+
+        auto tic = std::chrono::high_resolution_clock::now();
+        H.setZero(n_vars, n_vars);
+        At = A.transpose();
+        WA.noalias() = W*A;
+        for(int j = 0; j < (n_task/mini_batches_size); j++)
+            H += At.block(0,j*mini_batches_size,At.rows(),mini_batches_size)*
+                 WA.block(j*mini_batches_size,0,mini_batches_size,WA.cols());
+        //H += At.block(0,15*mini_batches_size,At.rows(),6) * WA.block(15*mini_batches_size,0,6,WA.cols());
+
+        auto toc = std::chrono::high_resolution_clock::now();
+
+        double dt_H = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+
+        tic = std::chrono::high_resolution_clock::now();
+
+        At = A.transpose();
+        Wb.noalias() = W*b;
+
+        g.noalias() = At*Wb;
+
+        toc = std::chrono::high_resolution_clock::now();
+
+        double dt_g = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+
+        logger->add("H_sum_time", dt_H);
+        logger->add("g_sum_time", dt_g);
+        logger->add("sum_time", dt_g +  dt_H);
+
+        EXPECT_NEAR((H-H_naive).norm(), 0.0, 1e-9);
     }
     
     
@@ -365,6 +409,68 @@ TEST_F(testBasicAlgebra, checkProductOptimization)
         logger->add("H_diag_time", dt_H);
         logger->add("g_diag_time", dt_g);
         logger->add("diag_time", dt_g +  dt_H);
+
+        EXPECT_NEAR((H-H_naive).norm(), 0.0, 1e-9);
+    }
+
+    for(int i = 0; i < N_runs; i++)
+    {
+        auto tic = std::chrono::high_resolution_clock::now();
+
+        At = A.transpose();
+        WA.noalias() = w_diag.asDiagonal()*A;
+
+        H.triangularView<Eigen::Upper>() = At*WA;
+        H = H.selfadjointView<Eigen::Upper>();
+
+        auto toc = std::chrono::high_resolution_clock::now();
+
+        double dt_H = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+
+        tic = std::chrono::high_resolution_clock::now();
+
+        At = A.transpose();
+        Wb.noalias() = w_diag.asDiagonal()*b;
+
+        g.noalias() = At*Wb;
+
+        toc = std::chrono::high_resolution_clock::now();
+
+        double dt_g = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+
+        logger->add("H_sym_time", dt_H);
+        logger->add("g_sym_time", dt_g);
+        logger->add("sym_time", dt_g +  dt_H);
+
+        EXPECT_NEAR((H-H_naive).norm(), 0.0, 1e-9);
+    }
+
+    for(int i = 0; i < N_runs; i++)
+    {
+        auto tic = std::chrono::high_resolution_clock::now();
+
+        AtW = A.transpose()*w_diag.asDiagonal();
+
+        H.triangularView<Eigen::Upper>() = AtW*A;
+        H = H.selfadjointView<Eigen::Upper>();
+
+        auto toc = std::chrono::high_resolution_clock::now();
+
+        double dt_H = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+
+        tic = std::chrono::high_resolution_clock::now();
+
+        g.noalias() = AtW*b;
+
+        toc = std::chrono::high_resolution_clock::now();
+
+        double dt_g = std::chrono::duration_cast<std::chrono::nanoseconds>(toc-tic).count()*1e6;
+
+        logger->add("H_sym2_time", dt_H);
+        logger->add("g_sym2_time", dt_g);
+        logger->add("sym2_time", dt_g +  dt_H);
+
+        EXPECT_NEAR((H-H_naive).norm(), 0.0, 1e-9);
     }
     
     

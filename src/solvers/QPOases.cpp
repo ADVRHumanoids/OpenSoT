@@ -53,14 +53,18 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
 //    H = task->getA().transpose() * task->getWeight() * task->getA();
 //    g = -1.0 * task->getA().transpose() * task->getWeight() * task->getb();
 
+
+    H.resize(task->getXSize(), task->getXSize());
     if(task->getWeight().isIdentity())
     {
-        H.noalias() = task->getATranspose() * task->getA();
+        H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getA();
+        H = H.selfadjointView<Eigen::Upper>();
         g.noalias() = -1.0 * task->getATranspose() * task->getb();
     }
     else
     {
-        H.noalias() = task->getATranspose() * task->getWA();
+        H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getWA();
+        H = H.selfadjointView<Eigen::Upper>();
         g.noalias() = -1.0 * task->getATranspose() * task->getWb();
     }
 }
