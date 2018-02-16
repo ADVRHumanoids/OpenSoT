@@ -39,6 +39,16 @@ void Gaze::setGaze(const KDL::Frame& desiredGaze)
     setGaze(_tmpEigenM2);
 }
 
+void Gaze::setGaze(const Eigen::MatrixXd& desiredGaze)
+{
+    _tmpEigenM2.setIdentity();
+    //Here we just need the position part
+    _tmpEigenM2.translation().x() = desiredGaze(0,3);
+    _tmpEigenM2.translation().y() = desiredGaze(1,3);
+    _tmpEigenM2.translation().z() = desiredGaze(2,3);
+    setGaze(_tmpEigenM2);
+}
+
 void Gaze::setGaze(const Eigen::Affine3d &desiredGaze)
 {    
     _tmpEigenM.setIdentity();
