@@ -108,6 +108,10 @@ public:
      */
     std::string getDistalLink(){ return _distal_link;}
 
+    /**
+     * @brief getLambda
+     * @return the lambda weight of the task
+     */
     virtual void setLambda(double lambda);
 
 private:
