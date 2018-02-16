@@ -108,6 +108,8 @@ public:
      */
     std::string getDistalLink(){ return _distal_link;}
 
+    virtual void setLambda(double lambda);
+
 private:
     std::string _distal_link;
     Cartesian::Ptr _cartesian_task;

@@ -23,6 +23,12 @@ Gaze::~Gaze()
 
 }
 
+void Gaze::setLambda(double lambda)
+{
+    _subtask->setLambda(lambda);
+    _lambda = _subtask->getLambda();
+}
+
 void Gaze::setGaze(const KDL::Frame& desiredGaze)
 {
     _tmpEigenM2.setIdentity(4,4);
