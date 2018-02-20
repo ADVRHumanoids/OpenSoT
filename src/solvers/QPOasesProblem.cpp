@@ -24,7 +24,7 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
                                     (qpOASES::HessianType)(hessian_type))),
     _bounds(new qpOASES::Bounds()),
     _constraints(new qpOASES::Constraints()),
-    _nWSR(132),
+    _nWSR(13200),
     _epsRegularisation(eps_regularisation),
     _solution(number_of_variables), _dual_solution(number_of_variables),
     _opt(new qpOASES::Options())
@@ -51,6 +51,7 @@ void QPOasesProblem::setDefaultOptions()
     opt.numRegularisationSteps = 2;
     opt.numRefinementSteps = 1;
     opt.enableFlippingBounds = qpOASES::BT_TRUE;
+//     opt.enableDropInfeasibles = qpOASES::BT_TRUE;
 
     opt.ensureConsistency();
 
@@ -106,7 +107,7 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
                        _lA.data(),_uA.data(),
                        nWSR,0);
 
-    if(val != qpOASES::SUCCESSFUL_RETURN)
+    if(qpOASES::getSimpleStatus(val) < 0)
     {
 #ifndef NDEBUG
         _problem->printProperties();
@@ -300,7 +301,7 @@ bool QPOasesProblem::solve()
     _problem->getBounds(*_bounds);
     _problem->getConstraints(*_constraints);
 
-    if(success != qpOASES::SUCCESSFUL_RETURN){
+    if(qpOASES::getSimpleStatus(success) < 0){
 #ifndef NDEBUG
         std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
 #endif

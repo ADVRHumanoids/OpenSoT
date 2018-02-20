@@ -67,6 +67,8 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
         H = H.selfadjointView<Eigen::Upper>();
         g.noalias() = -1.0 * task->getATranspose() * task->getWb();
     }
+    
+    
 }
 
 void QPOases_sot::computeOptimalityConstraint(  const TaskPtr& task, QPOasesProblem& problem,
