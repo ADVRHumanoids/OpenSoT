@@ -52,6 +52,7 @@ public:
      * @brief setGaze
      * @param desiredGaze pose of the object to observe in base_link
      */
+    void setGaze(const Eigen::Affine3d& desiredGaze);
     void setGaze(const Eigen::MatrixXd& desiredGaze);
     void setGaze(const KDL::Frame& desiredGaze);
 
@@ -108,20 +109,26 @@ public:
      */
     std::string getDistalLink(){ return _distal_link;}
 
+    /**
+     * @brief getLambda
+     * @return the lambda weight of the task
+     */
+    virtual void setLambda(double lambda);
+
 private:
     std::string _distal_link;
     Cartesian::Ptr _cartesian_task;
     SubTask::Ptr   _subtask;
 
-    Eigen::MatrixXd _gaze_T_obj;
+    Eigen::Affine3d _gaze_T_obj;
     Eigen::VectorXd _tmp_vector;
 
     XBot::ModelInterface& _robot;
 
     KDL::Frame _bl_T_gaze_kdl;
     KDL::Frame _gaze_goal;
-    Eigen::MatrixXd _tmpEigenM;
-    Eigen::MatrixXd _tmpEigenM2;
+    Eigen::Affine3d _tmpEigenM;
+    Eigen::Affine3d _tmpEigenM2;
 
 
 

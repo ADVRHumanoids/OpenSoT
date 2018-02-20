@@ -66,8 +66,109 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 
 using namespace OpenSoT::tasks::velocity;
 using namespace OpenSoT::constraints::velocity;
-
 TEST_F(testActivateStack, test_deactivate_task)
+{
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    Eigen::VectorXd q(_model_ptr->getJointNum());
+    q.setRandom(q.size());
+
+    //1) Test setActive with postural task
+    OpenSoT::tasks::velocity::Postural::Ptr taskA(new OpenSoT::tasks::velocity::Postural(q));
+    taskA->update(q);
+    Eigen::MatrixXd JA = taskA->getA();
+
+    //here we deactivate the task
+    taskA->setActive(false);
+    taskA->update(q);
+
+    EXPECT_TRUE(taskA->getA() == Eigen::MatrixXd::Zero(JA.rows(), JA.cols()));
+
+    //here we reactivate the task
+    taskA->setActive(true);
+    taskA->update(q);
+
+    EXPECT_TRUE(taskA->getA() == JA);
+
+    //2) Test setActive with Cartesian task
+    OpenSoT::tasks::velocity::Cartesian::Ptr taskB(new OpenSoT::tasks::velocity::Cartesian("foo", q, *_model_ptr,
+                                                                                           "l_sole", "Waist"));
+    taskB->update(q);
+    Eigen::MatrixXd JB = taskB->getA();
+
+    //here we deactivate the task
+    taskB->setActive(false);
+    taskB->update(q);
+
+    EXPECT_TRUE(taskB->getA() == Eigen::MatrixXd::Zero(JB.rows(), JB.cols()));
+
+    //here we reactivate the task
+    taskB->setActive(true);
+    taskB->update(q);
+
+    EXPECT_TRUE(taskB->getA() == JB);
+
+    //3) Test setActive with postural + Cartesian tasks
+    OpenSoT::tasks::Aggregated::Ptr taskAB = (taskA + taskB);
+    taskAB->update(q);
+    Eigen::MatrixXd JAB = taskAB->getA();
+
+    //here we deactivate the postural task
+    taskA->setActive(false);
+    taskAB->update(q);
+
+    EXPECT_TRUE(taskAB->getA().block(0,0,JA.rows(),JA.cols()) == Eigen::MatrixXd::Zero(JA.rows(), JA.cols()));
+    EXPECT_TRUE(taskAB->getA().block(JA.rows(),0,JB.rows(),JA.cols()) == JB);
+
+    //here we reactivate the postural task and we deactivate the Cartesian task
+    taskA->setActive(true);
+    taskB->setActive(false);
+    taskAB->update(q);
+
+    EXPECT_TRUE(taskAB->getA().block(0,0,JA.rows(),JA.cols()) == JA);
+    EXPECT_TRUE(taskAB->getA().block(JA.rows(),0,JB.rows(),JA.cols()) == Eigen::MatrixXd::Zero(JB.rows(), JB.cols()));
+
+    //here both tasks are active
+    taskA->setActive(true);
+    taskB->setActive(true);
+    taskAB->update(q);
+
+    EXPECT_TRUE(taskAB->getA() == JAB);
+
+    //here both tasks are not active
+    taskA->setActive(false);
+    taskB->setActive(false);
+    taskAB->update(q);
+
+    EXPECT_TRUE(taskAB->getA() == Eigen::MatrixXd::Zero(JA.rows() + JB.rows(), JB.cols()));
+
+    //another way to have both the tasks deactiated using the Aggregated
+    taskA->setActive(true);
+    taskB->setActive(true);
+    taskAB->setActive(false);
+    taskAB->update(q);
+
+    EXPECT_TRUE(taskAB->getA() == Eigen::MatrixXd::Zero(JA.rows() + JB.rows(), JB.cols()));
+
+    //4)Check  Cartesian task with q update
+    taskB->setActive(false);
+    taskB->update(q);
+
+    q = Eigen::VectorXd::Random(q.size());
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    taskB->update(q);
+    EXPECT_TRUE(taskB->getA() == Eigen::MatrixXd::Zero(JB.rows(), JB.cols()));
+
+    //The Jacobian is changed wrt the previous q!
+    taskB->setActive(true);
+    taskB->update(q);
+    EXPECT_FALSE(taskB->getA() == JB);
+
+
+}
+
+TEST_F(testActivateStack, test_deactivate_stack)
 {
     std::vector<Eigen::VectorXd> solutions;
     XBot::ModelInterface::Ptr _model_ptr;
