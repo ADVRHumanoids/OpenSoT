@@ -3,7 +3,7 @@
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/constraints/Aggregated.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
@@ -82,8 +82,8 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasks)
 
     OpenSoT::AutoStack::Ptr subTaskTest = (DHS.leftArm_Orientation / DHS.postural)
                                             << DHS.jointLimits << DHS.velocityLimits;
-    OpenSoT::solvers::QPOases_sot::Ptr solver(
-        new OpenSoT::solvers::QPOases_sot(subTaskTest->getStack(), subTaskTest->getBounds()));
+    OpenSoT::solvers::iHQP::Ptr solver(
+        new OpenSoT::solvers::iHQP(subTaskTest->getStack(), subTaskTest->getBounds()));
     ASSERT_EQ(DHS.leftArm_Orientation->getTaskSize(),3);
     ASSERT_EQ(DHS.leftArm_Orientation->getA().rows(),3);
     ASSERT_EQ(DHS.leftArm_Orientation->getA().cols(),q.size());
@@ -140,8 +140,8 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasksAndAggregated)
 
     OpenSoT::AutoStack::Ptr subTaskTest = ((DHS.leftArm_Orientation + DHS.rightArm) / DHS.postural)
                                             << DHS.jointLimits << DHS.velocityLimits;
-    OpenSoT::solvers::QPOases_sot::Ptr solver(
-        new OpenSoT::solvers::QPOases_sot(subTaskTest->getStack(), subTaskTest->getBounds()));
+    OpenSoT::solvers::iHQP::Ptr solver(
+        new OpenSoT::solvers::iHQP(subTaskTest->getStack(), subTaskTest->getBounds()));
 
 
     ASSERT_TRUE(solver->solve(dq));
@@ -169,8 +169,8 @@ TEST_F(testQPOases_SubTask, testSolveCartesianThroughSubTasksAndAggregated)
 
     OpenSoT::AutoStack::Ptr subTaskTest = ((DHS.leftArm_Position + DHS.leftArm_Orientation) / DHS.postural)
                                             << DHS.jointLimits << DHS.velocityLimits;
-    OpenSoT::solvers::QPOases_sot::Ptr solver(
-        new OpenSoT::solvers::QPOases_sot(subTaskTest->getStack(), subTaskTest->getBounds()));
+    OpenSoT::solvers::iHQP::Ptr solver(
+        new OpenSoT::solvers::iHQP(subTaskTest->getStack(), subTaskTest->getBounds()));
     Eigen::MatrixXd actualPose = DHS.leftArm->getActualPose();
     Eigen::MatrixXd desiredPose = actualPose;
     desiredPose(0,3) = actualPose(0,3)+0.1;

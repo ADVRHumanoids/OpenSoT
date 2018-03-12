@@ -4,7 +4,7 @@
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <OpenSoT/tasks/velocity/Manipulability.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
@@ -117,7 +117,7 @@ TEST_F(testManipolability, testManipolabilityTask)
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, joint_constraints);
 
     Eigen::VectorXd dq(q.size());
     dq.setZero(dq.size());
@@ -178,7 +178,7 @@ TEST_F(testManipolability, testManipolabilityTask)
     stack_of_tasks.clear();
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(manipulability_task);
-    OpenSoT::solvers::QPOases_sot sot_manip(stack_of_tasks, joint_constraints);
+    OpenSoT::solvers::iHQP sot_manip(stack_of_tasks, joint_constraints);
 
     dq.setZero(dq.size());
     for(unsigned int i = 0; i < 3*t; ++i)

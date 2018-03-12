@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/force/CoM.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/math/Math.h>
@@ -158,13 +158,13 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
 
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(force_com_task);
     stack_of_tasks.push_back(wrench);
 
 
-    OpenSoT::solvers::QPOases_sot::Ptr sot(
-                new OpenSoT::solvers::QPOases_sot(stack_of_tasks,1E7));
+    OpenSoT::solvers::iHQP::Ptr sot(
+                new OpenSoT::solvers::iHQP(stack_of_tasks,1E7));
     std::cout<<"Solver started"<<std::endl;
 
 

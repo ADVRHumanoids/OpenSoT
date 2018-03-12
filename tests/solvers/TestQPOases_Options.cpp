@@ -5,7 +5,7 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
@@ -43,8 +43,8 @@ public:
     OpenSoT::constraints::velocity::JointLimits::Ptr _joint_limits;
     OpenSoT::constraints::velocity::VelocityLimits::Ptr _joint_velocity_limits;
     OpenSoT::constraints::Aggregated::Ptr _joint_constraints;
-    OpenSoT::solvers::QPOases_sot::Stack _stack_of_tasks;
-    OpenSoT::solvers::QPOases_sot::Ptr _sot;
+    OpenSoT::solvers::iHQP::Stack _stack_of_tasks;
+    OpenSoT::solvers::iHQP::Ptr _sot;
     Eigen::VectorXd q;
     Eigen::MatrixXd T_ref_0;
     std::ofstream _log;
@@ -102,7 +102,7 @@ public:
         _stack_of_tasks.push_back(_cartesian_task_0);
         _stack_of_tasks.push_back(_postural_task);
 
-        _sot = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(_stack_of_tasks, _joint_constraints));
+        _sot = OpenSoT::solvers::iHQP::Ptr(new OpenSoT::solvers::iHQP(_stack_of_tasks, _joint_constraints));
 
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
@@ -212,8 +212,8 @@ public:
     OpenSoT::constraints::velocity::JointLimits::Ptr _joint_limits;
     OpenSoT::constraints::velocity::VelocityLimits::Ptr _joint_velocity_limits;
     OpenSoT::constraints::Aggregated::Ptr _joint_constraints;
-    OpenSoT::solvers::QPOases_sot::Stack _stack_of_tasks;
-    OpenSoT::solvers::QPOases_sot::Ptr _sot;
+    OpenSoT::solvers::iHQP::Stack _stack_of_tasks;
+    OpenSoT::solvers::iHQP::Ptr _sot;
     Eigen::VectorXd q;
     Eigen::MatrixXd T_ref_0;
     Eigen::MatrixXd T_ref_1;
@@ -288,7 +288,7 @@ public:
         _stack_of_tasks.push_back(_cartesian_task_1);
         _stack_of_tasks.push_back(_postural_task);
 
-        _sot = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(_stack_of_tasks, _joint_constraints));
+        _sot = OpenSoT::solvers::iHQP::Ptr(new OpenSoT::solvers::iHQP(_stack_of_tasks, _joint_constraints));
 
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
@@ -417,8 +417,8 @@ public:
     OpenSoT::constraints::velocity::JointLimits::Ptr _joint_limits;
     OpenSoT::constraints::velocity::VelocityLimits::Ptr _joint_velocity_limits;
     OpenSoT::constraints::Aggregated::Ptr _joint_constraints;
-    OpenSoT::solvers::QPOases_sot::Stack _stack_of_tasks;
-    OpenSoT::solvers::QPOases_sot::Ptr _sot;
+    OpenSoT::solvers::iHQP::Stack _stack_of_tasks;
+    OpenSoT::solvers::iHQP::Ptr _sot;
     Eigen::VectorXd q;
     Eigen::MatrixXd T_ref_0;
     Eigen::MatrixXd T_ref_1;
@@ -499,7 +499,7 @@ public:
         _stack_of_tasks.push_back(_cartesian_tasks);
         _stack_of_tasks.push_back(_postural_task);
 
-        _sot = OpenSoT::solvers::QPOases_sot::Ptr(new OpenSoT::solvers::QPOases_sot(_stack_of_tasks, _joint_constraints));
+        _sot = OpenSoT::solvers::iHQP::Ptr(new OpenSoT::solvers::iHQP(_stack_of_tasks, _joint_constraints));
 
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);

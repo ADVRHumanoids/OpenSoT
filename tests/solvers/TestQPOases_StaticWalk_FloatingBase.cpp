@@ -305,10 +305,10 @@ public:
         com_constr->update(q);
 
 #if USE_COM_AS_CONSTR
-        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+        solver.reset(new OpenSoT::solvers::iHQP(auto_stack->getStack(),
                     auto_stack->getBounds(),com_constr, 1e6));
 #else
-        solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+        solver.reset(new OpenSoT::solvers::iHQP(auto_stack->getStack(),
                     auto_stack->getBounds(), 1e6));
 #endif
 
@@ -366,7 +366,7 @@ public:
 
     XBot::ModelInterface& model_ref;
 
-    OpenSoT::solvers::QPOases_sot::Ptr solver;
+    OpenSoT::solvers::iHQP::Ptr solver;
     //OpenSoT::solvers::DampedPseudoInverse::Ptr solver;
 
 

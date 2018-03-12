@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/solvers/DampedPseudoInverse.h>
 #include <OpenSoT/tasks/force/CoM.h>
 #include <OpenSoT/constraints/force/FrictionCone.h>
@@ -162,7 +162,7 @@ public:
 
   OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits;
   OpenSoT::constraints::force::FrictionCone::Ptr friction_cones;
-  OpenSoT::solvers::QPOases_sot::Ptr QPsolver;
+  OpenSoT::solvers::iHQP::Ptr QPsolver;
   OpenSoT::solvers::DampedPseudoInverse::Ptr SVDsolver;
 
   Eigen::MatrixXd A;
@@ -209,13 +209,13 @@ TEST_F(testFrictionCones, testFrictionCones_) {
 
     wrench_limits.reset(new OpenSoT::constraints::force::WrenchLimits(300., 6*links_in_contact.size()));
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(com);
 
 #if EIGEN_MINOR_VERSION <= 0
-    QPsolver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,wrench_limits,2E10));
+    QPsolver.reset(new OpenSoT::solvers::iHQP(stack_of_tasks,wrench_limits,2E10));
 #else
-    QPsolver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,wrench_limits,2E5));
+    QPsolver.reset(new OpenSoT::solvers::iHQP(stack_of_tasks,wrench_limits,2E5));
 #endif
     std::cout<<"QP Solver started"<<std::endl;
     bool solved = false;
@@ -260,7 +260,7 @@ TEST_F(testFrictionCones, testFrictionCones_) {
 
 
     QPcontact_wrenches_d.setZero(QPcontact_wrenches_d.size());
-    QPsolver.reset(new OpenSoT::solvers::QPOases_sot(stack_of_tasks,wrench_limits,friction_cones));
+    QPsolver.reset(new OpenSoT::solvers::iHQP(stack_of_tasks,wrench_limits,friction_cones));
     std::cout<<"QP Solver started"<<std::endl;
     solved = false;
     do{

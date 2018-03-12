@@ -4,10 +4,9 @@
 #include <OpenSoT/tasks/acceleration/CoM.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <gtest/gtest.h>
 #include <XBotInterface/ModelInterface.h>
-#include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/solvers/DampedPseudoInverse.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 
@@ -71,7 +70,7 @@ protected:
         autostack = ((l_sole + r_sole)/(com)/(postural))<<acc_lims;
         autostack->update(_q);
 
-        iHQP.reset(new OpenSoT::solvers::QPOases_sot(autostack->getStack(), autostack->getBounds()));
+        iHQP.reset(new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds()));
 
     }
 
@@ -123,7 +122,7 @@ protected:
     OpenSoT::tasks::acceleration::CoM::Ptr com;
     OpenSoT::constraints::GenericConstraint::Ptr acc_lims;
     OpenSoT::AutoStack::Ptr autostack;
-    OpenSoT::solvers::QPOases_sot::Ptr iHQP;
+    OpenSoT::solvers::iHQP::Ptr iHQP;
 };
 
 TEST_F(testCoMTask, testCoMTask_)

@@ -36,7 +36,7 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
         _autostack.reset(new AutoStack(_aggregated_tasks));
     _autostack<<_fb_limits;
 
-    _solver.reset(new solvers::QPOases_sot(_autostack->getStack(), _autostack->getBounds()));
+    _solver.reset(new solvers::iHQP(_autostack->getStack(), _autostack->getBounds()));
 
     _Qdot.setZero(6);
     _Q.setZero();

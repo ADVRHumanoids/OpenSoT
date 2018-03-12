@@ -135,7 +135,7 @@ OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Pt
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
                                     const OpenSoT::tasks::Aggregated::TaskPtr task2)
 {
-    OpenSoT::solvers::QPOases_sot::Stack stack;
+    OpenSoT::solvers::iHQP::Stack stack;
     stack.push_back(task1);
     stack.push_back(task2);
     return OpenSoT::AutoStack::Ptr(
@@ -145,7 +145,7 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr ta
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack,
                                     const OpenSoT::tasks::Aggregated::TaskPtr task)
 {
-    OpenSoT::solvers::QPOases_sot::Stack outStack(stack->getStack());
+    OpenSoT::solvers::iHQP::Stack outStack(stack->getStack());
     outStack.push_back(task);
     if(stack->getBoundsList().size() > 0)
         return OpenSoT::AutoStack::Ptr(
@@ -159,7 +159,7 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack,
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task,
                                     OpenSoT::AutoStack::Ptr stack)
 {
-    OpenSoT::solvers::QPOases_sot::Stack outStack;
+    OpenSoT::solvers::iHQP::Stack outStack;
     outStack.push_back(task);
     outStack.insert(outStack.end(),
                     stack->getStack().begin(),
@@ -177,7 +177,7 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr ta
 OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
                                     const OpenSoT::AutoStack::Ptr stack2)
 {
-    OpenSoT::solvers::QPOases_sot::Stack outStack;
+    OpenSoT::solvers::iHQP::Stack outStack;
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> outBounds;
 
     outStack.insert(outStack.end(),
@@ -259,7 +259,7 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task):
     _stack.push_back(task);
 }
 
-OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack) :
+OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack) :
     _stack(stack),
     _boundsAggregated(
         new OpenSoT::constraints::Aggregated(
@@ -269,8 +269,8 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack) :
 
 }
 
-OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
-                              std::list<OpenSoT::solvers::QPOases_sot::ConstraintPtr> bounds) :
+OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack,
+                              std::list<OpenSoT::solvers::iHQP::ConstraintPtr> bounds) :
     _stack(stack),
     _boundsAggregated(
         new OpenSoT::constraints::Aggregated(
@@ -311,32 +311,32 @@ OpenSoT::constraints::Aggregated::ConstraintPtr OpenSoT::AutoStack::getBounds()
     return _boundsAggregated;
 }
 
-OpenSoT::solvers::QPOases_sot::Stack& OpenSoT::AutoStack::getStack()
+OpenSoT::solvers::iHQP::Stack& OpenSoT::AutoStack::getStack()
 {
     return _stack;
 }
 
 
-std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> OpenSoT::AutoStack::flattenTask(
-        OpenSoT::solvers::QPOases_sot::TaskPtr task)
+std::vector<OpenSoT::solvers::iHQP::TaskPtr> OpenSoT::AutoStack::flattenTask(
+        OpenSoT::solvers::iHQP::TaskPtr task)
 {
-    std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector;
+    std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector;
     if(!OpenSoT::tasks::Aggregated::isAggregated(task))
         task_vector.push_back(task);
     else
     {
         boost::shared_ptr<OpenSoT::tasks::Aggregated> aggregated =
                 boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
-        std::list<OpenSoT::solvers::QPOases_sot::TaskPtr> tasks_list = aggregated->getTaskList();
+        std::list<OpenSoT::solvers::iHQP::TaskPtr> tasks_list = aggregated->getTaskList();
 
-        std::list<OpenSoT::solvers::QPOases_sot::TaskPtr>::iterator it;
+        std::list<OpenSoT::solvers::iHQP::TaskPtr>::iterator it;
         for(it = tasks_list.begin(); it != tasks_list.end(); it++)
         {
             if(!OpenSoT::tasks::Aggregated::isAggregated(task))
                 task_vector.push_back(*it);
             else
             {
-                std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector_tmp = flattenTask(*it);
+                std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector_tmp = flattenTask(*it);
                 task_vector.insert(task_vector.begin(), task_vector_tmp.begin(), task_vector_tmp.end());
             }
         }
@@ -344,13 +344,13 @@ std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> OpenSoT::AutoStack::flattenT
     return task_vector;
 }
 
-OpenSoT::solvers::QPOases_sot::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
+OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
         const std::string& base_link, const std::string& distal_link)
 {
-    std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector;
+    std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector;
     for(unsigned int i = 0; i < _stack.size(); ++i)
     {
-        std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector_tmp = flattenTask(_stack[i]);
+        std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector_tmp = flattenTask(_stack[i]);
         task_vector.insert(task_vector.begin(), task_vector_tmp.begin(), task_vector_tmp.end());
     }
 
@@ -376,16 +376,16 @@ OpenSoT::solvers::QPOases_sot::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTa
                 return task_vector[i];
         }
     }
-    return OpenSoT::solvers::QPOases_sot::TaskPtr();
+    return OpenSoT::solvers::iHQP::TaskPtr();
 }
 
-OpenSoT::solvers::QPOases_sot::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
+OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
         const std::string& task_id)
 {
-    std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector;
+    std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector;
     for(unsigned int i = 0; i < _stack.size(); ++i)
     {
-        std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> task_vector_tmp = flattenTask(_stack[i]);
+        std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector_tmp = flattenTask(_stack[i]);
         task_vector.insert(task_vector.begin(), task_vector_tmp.begin(), task_vector_tmp.end());
     }
 
@@ -395,7 +395,7 @@ OpenSoT::solvers::QPOases_sot::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTa
         if(_task_id.compare(task_id) == 0)
             return task_vector[i];
     }
-    return OpenSoT::solvers::QPOases_sot::TaskPtr();
+    return OpenSoT::solvers::iHQP::TaskPtr();
 }
 
 void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)

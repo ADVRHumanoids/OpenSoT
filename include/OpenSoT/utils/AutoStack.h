@@ -20,7 +20,7 @@
 
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/Aggregated.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <XBotInterface/Logger.hpp>
@@ -49,12 +49,12 @@ namespace OpenSoT {
         public:
         typedef boost::shared_ptr<OpenSoT::AutoStack> Ptr;
         private:
-        OpenSoT::solvers::QPOases_sot::Stack _stack;
+        OpenSoT::solvers::iHQP::Stack _stack;
 
         OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
 
-        std::vector<OpenSoT::solvers::QPOases_sot::TaskPtr> flattenTask(
-                OpenSoT::solvers::QPOases_sot::TaskPtr task);
+        std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
+                OpenSoT::solvers::iHQP::TaskPtr task);
 
         protected:
             AutoStack(const double x_size);
@@ -62,19 +62,19 @@ namespace OpenSoT {
         public:
             AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
 
-            AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack);
+            AutoStack(OpenSoT::solvers::iHQP::Stack stack);
 
-            AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
+            AutoStack(OpenSoT::solvers::iHQP::Stack stack,
                       std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
 
-            /*AutoStack(OpenSoT::solvers::QPOases_sot::Stack stack,
+            /*AutoStack(OpenSoT::solvers::iHQP::Stack stack,
                       OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
 
             void update(const Eigen::VectorXd & state);
 
             void log(XBot::MatLogger::Ptr logger);
 
-            OpenSoT::solvers::QPOases_sot::Stack& getStack();
+            OpenSoT::solvers::iHQP::Stack& getStack();
 
             std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& getBoundsList();
 
@@ -93,8 +93,8 @@ namespace OpenSoT {
 
             OpenSoT::constraints::Aggregated::ConstraintPtr getBounds();
 
-            OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
-            OpenSoT::solvers::QPOases_sot::TaskPtr getOperationalSpaceTask(const std::string& task_id);
+            OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
+            OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& task_id);
     };    
 
 /**

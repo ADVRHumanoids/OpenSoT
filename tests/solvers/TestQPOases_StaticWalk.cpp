@@ -295,7 +295,7 @@ namespace{
             auto_stack->update(q);
             com_constr->update(q);
 
-            solver.reset(new OpenSoT::solvers::QPOases_sot(auto_stack->getStack(),
+            solver.reset(new OpenSoT::solvers::iHQP(auto_stack->getStack(),
                         auto_stack->getBounds(),com_constr, 1e6));
 
 
@@ -348,7 +348,7 @@ namespace{
 
         XBot::ModelInterface& model_ref;
 
-        OpenSoT::solvers::QPOases_sot::Ptr solver;
+        OpenSoT::solvers::iHQP::Ptr solver;
 
         Eigen::MatrixXd I;
 

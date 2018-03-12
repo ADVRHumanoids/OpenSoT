@@ -154,9 +154,10 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     )
 ##SOLVERS
 set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
-                    src/solvers/QPOases.cpp
-                    src/solvers/QPOasesProblem.cpp
-                    src/solvers/DampedPseudoInverse.cpp)
+                            src/solvers/BackEndFactory.cpp
+                            src/solvers/iHQP.cpp
+                            src/solvers/QPOasesBackEnd.cpp
+                            src/solvers/DampedPseudoInverse.cpp)
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp

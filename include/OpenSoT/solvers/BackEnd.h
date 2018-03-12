@@ -9,10 +9,13 @@
 
 namespace OpenSoT{
     namespace solvers{
+
     class BackEnd{
     public:
         BackEnd(const int number_of_variables, const int number_of_constraints);
         ~BackEnd();
+
+        typedef boost::shared_ptr<BackEnd> Ptr;
 
         /**
          * @brief getSolution return the actual solution of the QP problem

@@ -8,11 +8,11 @@
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <OpenSoT/solvers/QPOasesProblem.h>
+#include <OpenSoT/solvers/QPOasesBackEnd.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <fstream>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <XBotInterface/ModelInterface.h>
 
@@ -170,17 +170,17 @@ protected:
     }
 };
 
-class testQPOases_sot: public ::testing::Test
+class testiHQP: public ::testing::Test
 {
 protected:
     std::ofstream _log;
 
-    testQPOases_sot()
+    testiHQP()
     {
-        _log.open("testQPOases_sot.m");
+        _log.open("testiHQP.m");
     }
 
-    virtual ~testQPOases_sot() {
+    virtual ~testiHQP() {
         _log.close();
     }
 
@@ -622,7 +622,7 @@ TEST_F(testQPOasesTask, test_on_eigen)
     std::cout<<"a: "<<a<<std::endl;
 }
 
-TEST_F(testQPOases_sot, testContructor1Problem)
+TEST_F(testiHQP, testContructor1Problem)
 {
     XBot::ModelInterface::Ptr _model_ptr;
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -652,9 +652,9 @@ TEST_F(testQPOases_sot, testContructor1Problem)
     OpenSoT::constraints::Aggregated::Ptr bounds(
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
-    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds);
 
     EXPECT_TRUE(sot.getNumberOfTasks() == 1);
     Eigen::VectorXd dq(q.size());
@@ -807,7 +807,7 @@ TEST_F(testQPOasesTask, testCartesian)
                 EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
 }
 
-TEST_F(testQPOases_sot, testContructor2Problems)
+TEST_F(testiHQP, testContructor2Problems)
 {
     XBot::ModelInterface::Ptr _model_ptr;
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -857,14 +857,14 @@ TEST_F(testQPOases_sot, testContructor2Problems)
                 new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
 
     //Create the SoT
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(postural_task);
 
     std::cout<<"Initial Position Error: "<<cartesian_task->positionError<<std::endl;
     std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError<<std::endl;
 
-    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, joint_constraints);
 
 
     KDL::Frame T_ref_kdl;
@@ -912,7 +912,7 @@ TEST_F(testQPOases_sot, testContructor2Problems)
 
 }
 
-TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
+TEST_F(testiHQP, testContructor1ProblemAggregated)
 {
     int n_dofs = 5;
     Eigen::VectorXd q(n_dofs); q.setZero(n_dofs);
@@ -954,7 +954,7 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 //1. Here we use postural_task
     std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
-    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds);
 
     EXPECT_TRUE(sot.getNumberOfTasks() == 1);
     Eigen::VectorXd dq(q.size());
@@ -975,7 +975,7 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 ////2. Here we use joint_space_task
     std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks2;
     stack_of_tasks2.push_back(joint_space_task);
-    OpenSoT::solvers::QPOases_sot sot2(stack_of_tasks2, bounds2);
+    OpenSoT::solvers::iHQP sot2(stack_of_tasks2, bounds2);
 
     EXPECT_TRUE(sot2.getNumberOfTasks() == 1);
     Eigen::VectorXd dq2(q2.size());
@@ -993,7 +993,7 @@ TEST_F(testQPOases_sot, testContructor1ProblemAggregated)
 
 }
 
-TEST_F(testQPOases_sot, testMinEffort)
+TEST_F(testiHQP, testMinEffort)
 {
     XBot::ModelInterface::Ptr _model_ptr;
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -1025,9 +1025,9 @@ TEST_F(testQPOases_sot, testMinEffort)
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(joint_space_task);
-    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, bounds);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds);
 
     EXPECT_TRUE(sot.getNumberOfTasks() == 1);
     Eigen::VectorXd dq(q.size());

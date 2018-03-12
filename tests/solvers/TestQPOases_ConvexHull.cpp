@@ -8,7 +8,7 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
@@ -495,7 +495,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     if(footStrategy == USE_TASK)
     {
         _log.close();
@@ -516,8 +516,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     stack_of_tasks.push_back(com_task);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::QPOases_sot::Ptr sot(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks,
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(stack_of_tasks,
                                           bounds));
 
     //SET SOME REFERENCES

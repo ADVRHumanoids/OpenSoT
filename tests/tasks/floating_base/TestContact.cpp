@@ -4,7 +4,7 @@
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/tasks/floating_base/Contact.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <XBotInterface/ModelInterface.h>
@@ -56,7 +56,7 @@ protected:
         autostack->update(q);
 
         ik_solver.reset(
-            new OpenSoT::solvers::QPOases_sot(autostack->getStack(), autostack->getBounds(), 1e6));
+            new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(), 1e6));
 
 
     }
@@ -107,7 +107,7 @@ protected:
     Postural::Ptr postural;
     VelocityLimits::Ptr vel_lims;
     OpenSoT::AutoStack::Ptr autostack;
-    OpenSoT::solvers::QPOases_sot::Ptr ik_solver;
+    OpenSoT::solvers::iHQP::Ptr ik_solver;
 
     XBot::ModelInterface::Ptr model;
 
@@ -149,8 +149,8 @@ TEST_F(testPosturalTask, floating_base_open_loop)
     autostack_fb<<fb_lims;
     autostack_fb->update(qm);
 
-    OpenSoT::solvers::QPOases_sot::Ptr solver_fb(
-        new OpenSoT::solvers::QPOases_sot(autostack_fb->getStack(), autostack_fb->getBounds(), 0.));
+    OpenSoT::solvers::iHQP::Ptr solver_fb(
+        new OpenSoT::solvers::iHQP(autostack_fb->getStack(), autostack_fb->getBounds(), 0.));
 
     Eigen::Vector3d com_ref = com->getActualPosition();
     com_ref[2] -= 0.1;

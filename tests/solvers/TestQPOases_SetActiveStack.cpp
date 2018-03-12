@@ -8,7 +8,7 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <fstream>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/utils/AutoStack.h>
 
@@ -198,7 +198,7 @@ TEST_F(testActivateStack, test_deactivate_stack)
 
         autostack->update(q);
 
-        OpenSoT::solvers::QPOases_sot sot(autostack->getStack(), autostack->getBounds());
+        OpenSoT::solvers::iHQP sot(autostack->getStack(), autostack->getBounds());
 
         if(j == 1)
             sot.setActiveStack(1, false);

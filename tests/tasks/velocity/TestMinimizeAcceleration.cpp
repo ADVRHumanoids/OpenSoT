@@ -3,7 +3,7 @@
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <qpOASES.hpp>
 #include <XBotInterface/ModelInterface.h>
@@ -164,9 +164,9 @@ TEST_F(testMinimizeAcceleration, testMinimizeAccelerationInCartesianTask)
     stack_of_tasks2.push_back(cartesian_task2);
     stack_of_tasks2.push_back(minacc_task);
 
-    OpenSoT::solvers::QPOases_sot sot(stack_of_tasks, joint_constraints);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, joint_constraints);
 
-    OpenSoT::solvers::QPOases_sot sot2(stack_of_tasks2, joint_constraints2);
+    OpenSoT::solvers::iHQP sot2(stack_of_tasks2, joint_constraints2);
 
     //Solve SoT
     Eigen::VectorXd dq(q.size()); dq.setZero(q.size());

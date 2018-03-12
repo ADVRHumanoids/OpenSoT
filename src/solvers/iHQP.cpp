@@ -1,54 +1,49 @@
 #include <qpOASES.hpp>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <XBotInterface/Logger.hpp>
 
-#define GREEN "\033[0;32m"
-#define YELLOW "\033[0;33m"
-#define RED "\033[0;31m"
-#define DEFAULT "\033[0m"
-
 using namespace OpenSoT::solvers;
 
-QPOases_sot::QPOases_sot(Stack &stack_of_tasks, const double eps_regularisation):
+iHQP::iHQP(Stack &stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks),
     _epsRegularisation(eps_regularisation)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
 
-    if(!prepareSoT())
+    if(!prepareSoT(be_solver))
         throw std::runtime_error("Can Not initizalize SoT!");
 }
 
-QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
+iHQP::iHQP(Stack &stack_of_tasks,
                          ConstraintPtr bounds,
-                         const double eps_regularisation):
+                         const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks, bounds),
     _epsRegularisation(eps_regularisation)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
 
-    if(!prepareSoT())      
+    if(!prepareSoT(be_solver))
         throw std::runtime_error("Can Not initizalize SoT with bounds!");
 }
 
-QPOases_sot::QPOases_sot(Stack &stack_of_tasks,
+iHQP::iHQP(Stack &stack_of_tasks,
                          ConstraintPtr bounds,
                          ConstraintPtr globalConstraints,
-                         const double eps_regularisation):
+                         const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks, bounds, globalConstraints),
     _epsRegularisation(eps_regularisation)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
 
-    if(!prepareSoT())
+    if(!prepareSoT(be_solver))
         throw std::runtime_error("Can Not initizalize SoT with bounds!");
 }
 
-void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g)
+void iHQP::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g)
 {
 //    H = task->getA().transpose() * task->getWeight() * task->getA();
 //    g = -1.0 * task->getA().transpose() * task->getWeight() * task->getb();
@@ -69,15 +64,15 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
     }
 }
 
-void QPOases_sot::computeOptimalityConstraint(  const TaskPtr& task, QPOasesBackEnd& problem,
+void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& problem,
                                                 Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
     A = task->getA();
-    lA = task->getA()*problem.getSolution();
+    lA = task->getA()*problem->getSolution();
     uA = lA;
 }
 
-bool QPOases_sot::prepareSoT()
+bool iHQP::prepareSoT(const solver_back_ends be_solver)
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
@@ -129,15 +124,17 @@ bool QPOases_sot::prepareSoT()
         l = constraints_task_i.getLowerBound();
         u = constraints_task_i.getUpperBound();
 
-        QPOasesBackEnd problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
-                                 _epsRegularisation);
+//        QPOasesBackEnd problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
+//                                 _epsRegularisation);
+        BackEnd::Ptr problem_i = BackEndFactory(be_solver,_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
+                                           _epsRegularisation);
 
-        if(problem_i.initProblem(H, g, A.generate_and_get(), lA.generate_and_get(), uA.generate_and_get(), l, u)){
+        if(problem_i->initProblem(H, g, A.generate_and_get(), lA.generate_and_get(), uA.generate_and_get(), l, u)){
             _qp_stack_of_tasks.push_back(problem_i);
             std::string bounds_string = "";
             if(_bounds)
                 bounds_string = _bounds->getConstraintID();
-            _qp_stack_of_tasks[i].printProblemInformation(i, _tasks[i]->getTaskID(),
+            _qp_stack_of_tasks[i]->printProblemInformation(i, _tasks[i]->getTaskID(),
                                                           constraints_str,
                                                           bounds_string);}
         else{
@@ -149,14 +146,14 @@ bool QPOases_sot::prepareSoT()
     return true;
 }
 
-bool QPOases_sot::solve(Eigen::VectorXd &solution)
+bool iHQP::solve(Eigen::VectorXd &solution)
 {
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         if(_active_stacks[i])
         {
             computeCostFunction(_tasks[i], H, g);
-            if(!_qp_stack_of_tasks[i].updateTask(H, g))
+            if(!_qp_stack_of_tasks[i]->updateTask(H, g))
                 return false;
 
             OpenSoT::constraints::Aggregated& constraints_task_i = constraints_task[i];
@@ -186,21 +183,21 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
                 }
             }
 
-            if(!_qp_stack_of_tasks[i].updateConstraints(A.generate_and_get(),
+            if(!_qp_stack_of_tasks[i]->updateConstraints(A.generate_and_get(),
                                     lA.generate_and_get(), uA.generate_and_get()))
                 return false;
 
 
             if(constraints_task_i.hasBounds()) // bounds specified everywhere will work
             {
-                if(!_qp_stack_of_tasks[i].updateBounds(constraints_task_i.getLowerBound(), constraints_task_i.getUpperBound()))
+                if(!_qp_stack_of_tasks[i]->updateBounds(constraints_task_i.getLowerBound(), constraints_task_i.getUpperBound()))
                     return false;
             }
 
-            if(!_qp_stack_of_tasks[i].solve())
+            if(!_qp_stack_of_tasks[i]->solve())
                 return false;
 
-            solution = _qp_stack_of_tasks[i].getSolution();
+            solution = _qp_stack_of_tasks[i]->getSolution();
         }
         else
         {
@@ -210,41 +207,41 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
     return true;
 }
 
-bool QPOases_sot::setOptions(const unsigned int i, const boost::any &opt)
+bool iHQP::setOptions(const unsigned int i, const boost::any &opt)
 {
     if(i > _qp_stack_of_tasks.size()){
         XBot::Logger::error("ERROR Index out of range! \n");
         return false;}
 
-    _qp_stack_of_tasks[i].setOptions(opt);
+    _qp_stack_of_tasks[i]->setOptions(opt);
     return true;
 }
 
-bool QPOases_sot::getOptions(const unsigned int i, boost::any& opt)
+bool iHQP::getOptions(const unsigned int i, boost::any& opt)
 {
 
     if(i > _qp_stack_of_tasks.size()){
         XBot::Logger::error("ERROR Index out of range! \n");
         return false;}
 
-    opt = _qp_stack_of_tasks[i].getOptions();
+    opt = _qp_stack_of_tasks[i]->getOptions();
     return true;
 }
 
-void QPOases_sot::setActiveStack(const unsigned int i, const bool flag)
+void iHQP::setActiveStack(const unsigned int i, const bool flag)
 {
     if(i >= 0 && i < _active_stacks.size())
         _active_stacks[i] = flag;
 }
 
-void QPOases_sot::activateAllStacks()
+void iHQP::activateAllStacks()
 {
     _active_stacks.assign(_active_stacks.size(), true);
 }
 
 
-void QPOases_sot::_log(XBot::MatLogger::Ptr logger)
+void iHQP::_log(XBot::MatLogger::Ptr logger)
 {
     for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
-        _qp_stack_of_tasks[i].log(logger,i);
+        _qp_stack_of_tasks[i]->log(logger,i);
 }

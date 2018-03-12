@@ -1,7 +1,7 @@
 #include <OpenSoT/tasks/acceleration/Cartesian.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <gtest/gtest.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/DampedPseudoInverse.h>

@@ -16,7 +16,7 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
@@ -280,13 +280,13 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(l_arm_task);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::QPOases_sot::Ptr sot(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds,1e9));
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
 
 
 
@@ -620,13 +620,13 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(com);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::QPOases_sot::Ptr sot(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds,1e9));
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
 
 
 
@@ -889,12 +889,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::QPOases_sot::Ptr sot(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds,1e9));
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
 
 
     Eigen::VectorXd dq(q.size()); dq.setZero(q.size());

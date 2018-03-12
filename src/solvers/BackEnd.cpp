@@ -128,14 +128,14 @@ void BackEnd::printProblemInformation(const int problem_number, const std::strin
 {
     std::cout<<std::endl;
     if(problem_number == -1)
-        XBot::Logger::info("PROBLEM ID: %s \n", problem_id);
+        XBot::Logger::info("PROBLEM ID: %s \n", problem_id.c_str());
     else
-        XBot::Logger::info("PROBLEM %i ID: %s \n", problem_number, problem_id);
+        XBot::Logger::info("PROBLEM %i ID: %s \n", problem_number, problem_id.c_str());
 
-    XBot::Logger::info("CONSTRAINTS ID: %s \n", constraints_id);
+    XBot::Logger::info("CONSTRAINTS ID: %s \n", constraints_id.c_str());
     XBot::Logger::info("    # OF CONSTRAINTS: %i \n", _A.rows());
 
-    XBot::Logger::info("BOUNDS ID: %s \n", bounds_id);
+    XBot::Logger::info("BOUNDS ID: %s \n", bounds_id.c_str());
     XBot::Logger::info("    # OF BOUNDS: %i \n", _l.size());
 
     XBot::Logger::info("# OF VARIABLES: %i \n", _H.rows());

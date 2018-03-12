@@ -57,7 +57,7 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
             DHS->postural;
     auto_stack->update(Eigen::VectorXd::Zero(_robot->getJointNum()));
 
-    OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(com_task != NULL);
     boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
             boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
@@ -65,11 +65,11 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     EXPECT_TRUE(task_CoM->getTaskID().compare(task_id) == 0);
 
     task_id = "mammeta";
-    OpenSoT::solvers::QPOases_sot::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(mammeta_task == NULL);
 
     task_id = "cartesian::l_wrist";
-    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(Cartesian_task != NULL);
     boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
             boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
@@ -77,7 +77,7 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     EXPECT_TRUE(left_arm->getTaskID().compare(task_id) == 0);
 
     task_id = "cartesian:r2l_sole";
-    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(Cartesian_task2 != NULL);
     boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
             boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
@@ -96,7 +96,7 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
             DHS->postural;
     auto_stack->update(Eigen::VectorXd::Zero(_robot->getJointNum()));
 
-    OpenSoT::solvers::QPOases_sot::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(com_task != NULL);
     boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
             boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
@@ -105,12 +105,12 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
     EXPECT_TRUE(task_CoM->getDistalLink().compare(distal_link) == 0);
 
     base_link = "mammeta";
-    OpenSoT::solvers::QPOases_sot::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    OpenSoT::solvers::iHQP::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(mammeta_task == NULL);
 
     base_link = "world";
     distal_link = "LSoftHand";
-    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(Cartesian_task != NULL);
     boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
             boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
@@ -120,7 +120,7 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
 
     base_link = "l_sole";
     distal_link = "r_sole";
-    OpenSoT::solvers::QPOases_sot::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(base_link, distal_link);
+    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(Cartesian_task2 != NULL);
     boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
             boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
@@ -208,7 +208,7 @@ TEST_F(testAutoStack, testOperatorFraction)
     AutoStack::Ptr auto1 = DHS->leftArm / DHS->rightArm;
     EXPECT_TRUE(auto1->getStack().size() == 2);
 
-    AutoStack::Ptr auto2(new AutoStack(solvers::QPOases_sot::Stack(1,aggr1)));
+    AutoStack::Ptr auto2(new AutoStack(solvers::iHQP::Stack(1,aggr1)));
     EXPECT_EQ(auto2->getStack().size(), 1);
 
     AutoStack::Ptr auto3 = auto2 / DHS->leftLeg;

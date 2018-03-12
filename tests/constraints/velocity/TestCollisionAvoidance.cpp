@@ -5,7 +5,7 @@
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
-#include <OpenSoT/solvers/QPOases.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <XBotInterface/ModelInterface.h>
 #include <advr_humanoids_common_utils/test_utils.h>
@@ -377,7 +377,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
                 new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(this->q)));
 
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
@@ -394,8 +394,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
                 new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
 
-    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
-        new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
+    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     yarp::sig::Vector dq(this->q.size(), 0.0);
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
@@ -518,7 +518,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     postural_task->getConstraints().push_back(this->sc_constraint);
 
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
@@ -536,8 +536,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
                 new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
 
-    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
-                new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
+    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
+                new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     yarp::sig::Vector dq(this->q.size(), 0.0);
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
@@ -746,7 +746,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     postural_task->getConstraints().push_back(this->sc_constraint);
 
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
@@ -763,8 +763,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
                 new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
 
-    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
-                new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
+    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
+                new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     yarp::sig::Vector dq(this->q.size(), 0.0);
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
@@ -1008,7 +1008,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     postural_task->getConstraints().push_back(this->sc_constraint);
 
 
-    OpenSoT::solvers::QPOases_sot::Stack stack_of_tasks;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
@@ -1025,8 +1025,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
                 new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
 
-    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::QPOases_sot::Ptr(
-                new OpenSoT::solvers::QPOases_sot(stack_of_tasks, bounds));
+    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
+                new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     yarp::sig::Vector dq(this->q.size(), 0.0);
     Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());

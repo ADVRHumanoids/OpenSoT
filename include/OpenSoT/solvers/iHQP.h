@@ -24,64 +24,59 @@
 #include <OpenSoT/Task.h>
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
-#include "QPOasesProblem.h"
+#include <OpenSoT/solvers/BackEndFactory.h>
 #include <OpenSoT/utils/Piler.h>
 
 using namespace OpenSoT::utils;
-
-namespace qpOASES {
-    class SQProblem;
-    class Options;
-    class Bounds;
-    class Constraints;
-}
-
 
 namespace OpenSoT{
     namespace solvers{
 
     /**
-     * @brief The QPOases_sot class implement a solver that accept a Stack of Tasks with Bounds and Constraints
+     * @brief The iHQP class implement a solver that accept a Stack of Tasks with Bounds and Constraints
      */
-    class QPOases_sot: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
+    class iHQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-	typedef boost::shared_ptr<QPOases_sot> Ptr;
+    typedef boost::shared_ptr<iHQP> Ptr;
     typedef MatrixPiler VectorPiler;
         /**
-         * @brief QPOases_sot constructor of the problem
+         * @brief iHQP constructor of the problem
          * @param stack_of_tasks a vector of tasks
          * @param eps_regularisation regularisation factor
          * @throw exception if the stack can not be initialized
          */
-        QPOases_sot(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+        iHQP(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+             const solver_back_ends be_solver = solver_back_ends::qpOASES);
 
         /**
-         * @brief QPOases_sot constructor of the problem
+         * @brief iHQP constructor of the problem
          * @param stack_of_tasks a vector of tasks
          * @param bounds a vector of bounds passed to all the stacks
          * @param eps_regularisation regularisation factor
          * @throw exception if the stack can not be initialized
          */
-        QPOases_sot(Stack& stack_of_tasks,
+        iHQP(Stack& stack_of_tasks,
                     ConstraintPtr bounds,
-                    const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+                    const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+                    const solver_back_ends be_solver = solver_back_ends::qpOASES);
 
         /**
-         * @brief QPOases_sot constructor of the problem
+         * @brief iHQP constructor of the problem
          * @param stack_of_tasks a vector of tasks
          * @param bounds a vector of bounds passed to all the stacks
          * @param globalConstraints a vector of constraints passed to all the stacks
          * @param eps_regularisation regularisation factor
          * @throw exception if the stack can not be initialized
          */
-        QPOases_sot(Stack& stack_of_tasks,
+        iHQP(Stack& stack_of_tasks,
                     ConstraintPtr bounds,
                     ConstraintPtr globalConstraints,
-                    const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+                    const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+                    const solver_back_ends be_solver = solver_back_ends::qpOASES);
 
 
-        ~QPOases_sot(){}
+        ~iHQP(){}
 
         /**
          * @brief solve a stack of tasks
@@ -132,7 +127,7 @@ namespace OpenSoT{
         /**
          * @brief _qp_stack_of_tasks vector of QPOases Problem
          */
-        vector <QPOasesBackEnd> _qp_stack_of_tasks;
+        vector <BackEnd::Ptr> _qp_stack_of_tasks;
 
         vector<bool> _active_stacks;
 
@@ -145,7 +140,7 @@ namespace OpenSoT{
          * @brief prepareSoT initialize the complete stack
          * @return true if stack is correctly initialized
          */
-        bool prepareSoT();
+        bool prepareSoT(const solver_back_ends be_solver);
 
         /**
          * @brief computeCostFunction compute a cost function for velocity control:
@@ -165,7 +160,7 @@ namespace OpenSoT{
          * @param lA lower bounds
          * @param uA upper bounds
          */
-        void computeOptimalityConstraint(const TaskPtr& task, QPOasesBackEnd& problem,
+        void computeOptimalityConstraint(const TaskPtr& task, BackEnd::Ptr& problem,
                                          Eigen::MatrixXd& A,
                                          Eigen::VectorXd& lA, Eigen::VectorXd& uA);
 

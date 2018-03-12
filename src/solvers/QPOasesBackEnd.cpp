@@ -1,4 +1,4 @@
-#include <OpenSoT/solvers/QPOasesProblem.h>
+#include <OpenSoT/solvers/QPOasesBackEnd.h>
 #include <qpOASES.hpp>
 #include <ctime>
 #include <qpOASES/Utils.hpp>
