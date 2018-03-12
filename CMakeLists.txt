@@ -153,7 +153,8 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/floating_base/IMU.cpp
                     )
 ##SOLVERS
-set(OPENSOT_SOLVERS_SOURCES src/solvers/QPOases.cpp
+set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
+                    src/solvers/QPOases.cpp
                     src/solvers/QPOasesProblem.cpp
                     src/solvers/DampedPseudoInverse.cpp)
 ##UTILS
