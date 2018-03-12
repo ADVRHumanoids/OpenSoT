@@ -69,7 +69,7 @@ void QPOases_sot::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, E
     }
 }
 
-void QPOases_sot::computeOptimalityConstraint(  const TaskPtr& task, QPOasesProblem& problem,
+void QPOases_sot::computeOptimalityConstraint(  const TaskPtr& task, QPOasesBackEnd& problem,
                                                 Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
     A = task->getA();
@@ -129,7 +129,7 @@ bool QPOases_sot::prepareSoT()
         l = constraints_task_i.getLowerBound();
         u = constraints_task_i.getUpperBound();
 
-        QPOasesProblem problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
+        QPOasesBackEnd problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                  _epsRegularisation);
 
         if(problem_i.initProblem(H, g, A.generate_and_get(), lA.generate_and_get(), uA.generate_and_get(), l, u)){
@@ -210,7 +210,7 @@ bool QPOases_sot::solve(Eigen::VectorXd &solution)
     return true;
 }
 
-bool QPOases_sot::setOptions(const unsigned int i, const qpOASES::Options &opt)
+bool QPOases_sot::setOptions(const unsigned int i, const boost::any &opt)
 {
     if(i > _qp_stack_of_tasks.size()){
         XBot::Logger::error("ERROR Index out of range! \n");
@@ -220,7 +220,7 @@ bool QPOases_sot::setOptions(const unsigned int i, const qpOASES::Options &opt)
     return true;
 }
 
-bool QPOases_sot::getOptions(const unsigned int i, qpOASES::Options& opt)
+bool QPOases_sot::getOptions(const unsigned int i, boost::any& opt)
 {
 
     if(i > _qp_stack_of_tasks.size()){

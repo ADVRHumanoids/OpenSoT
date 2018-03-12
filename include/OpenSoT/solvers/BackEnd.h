@@ -49,9 +49,12 @@ namespace OpenSoT{
          * @param u update upper bounds
          * @return if the problem is correctly updated
          */
-        bool QPOasesProblem::updateProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
+        bool updateProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
                                            const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                            const Eigen::VectorXd &l, const Eigen::VectorXd &u);
+
+        void printProblemInformation(const int problem_number, const std::string& problem_id,
+                                     const std::string& constraints_id, const std::string& bounds_id);
 
         ///VIRTUAL METHODS
 
@@ -92,6 +95,8 @@ namespace OpenSoT{
          */
         virtual bool updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
+
+
         ///PURE VIRTUAL METHODS:
 
         /**
@@ -124,13 +129,13 @@ namespace OpenSoT{
          * @brief getOptions return the options of the QP problem
          * @return options, a boost::any object since we do not know the type of the object which depends on the solver
          */
-        boost::any getOptions() = 0;
+        virtual boost::any getOptions() = 0;
 
         /**
          * @brief setOptions of the QP problem.
          * @param options, a boost::any object since we do not know the type of the object which depends on the solver
          */
-        void setOptions(const boost::any& options) = 0;
+        virtual void setOptions(const boost::any& options) = 0;
 
     protected:
         ///VIRTUAL METHODS
@@ -139,7 +144,12 @@ namespace OpenSoT{
          * @param logger a pointer to a Matlogger
          * @param i an index related to the particular index of the problem
          */
-        void _log(XBot::MatLogger::Ptr logger, int i){}
+        virtual void _log(XBot::MatLogger::Ptr logger, int i){}
+
+        /**
+         * @brief _printProblemInformation can be used to print extra information
+         */
+        virtual void _printProblemInformation(){}
 
         /**
          * Define a cost function: ||Hx - g||

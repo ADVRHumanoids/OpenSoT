@@ -107,7 +107,9 @@ public:
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
             qpOASES::Options opti;
-            _sot->getOptions(i, opti);
+            boost::any any_opti;
+            _sot->getOptions(i, any_opti);
+            opti = boost::any_cast<qpOASES::Options>(any_opti);
             opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
@@ -291,7 +293,9 @@ public:
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
             qpOASES::Options opti;
-            _sot->getOptions(i, opti);
+            boost::any any_opti;
+            _sot->getOptions(i, any_opti);
+            opti = boost::any_cast<qpOASES::Options>(any_opti);
             opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";
@@ -500,7 +504,9 @@ public:
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
             qpOASES::Options opti;
-            _sot->getOptions(i, opti);
+            boost::any any_opti;
+            _sot->getOptions(i, any_opti);
+            opti = boost::any_cast<qpOASES::Options>(any_opti);
             opti.print();}
 
         std::string file_name = "test_option_" + _type + ".m";

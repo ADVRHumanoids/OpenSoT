@@ -102,7 +102,7 @@ namespace OpenSoT{
          * @param opt options for task i
          * @return true if succeed
          */
-        bool setOptions(const unsigned int i, const qpOASES::Options &opt);
+        bool setOptions(const unsigned int i, const boost::any &opt);
 
         /**
          * @brief getOptions
@@ -110,7 +110,7 @@ namespace OpenSoT{
          * @param opt
          * @return
          */
-        bool getOptions(const unsigned int i, qpOASES::Options& opt);
+        bool getOptions(const unsigned int i, boost::any& opt);
 
         /**
          * @brief setActiveStack select a stack to do not solve
@@ -132,7 +132,7 @@ namespace OpenSoT{
         /**
          * @brief _qp_stack_of_tasks vector of QPOases Problem
          */
-        vector <QPOasesProblem> _qp_stack_of_tasks;
+        vector <QPOasesBackEnd> _qp_stack_of_tasks;
 
         vector<bool> _active_stacks;
 
@@ -165,7 +165,7 @@ namespace OpenSoT{
          * @param lA lower bounds
          * @param uA upper bounds
          */
-        void computeOptimalityConstraint(const TaskPtr& task, QPOasesProblem& problem,
+        void computeOptimalityConstraint(const TaskPtr& task, QPOasesBackEnd& problem,
                                          Eigen::MatrixXd& A,
                                          Eigen::VectorXd& lA, Eigen::VectorXd& uA);
 

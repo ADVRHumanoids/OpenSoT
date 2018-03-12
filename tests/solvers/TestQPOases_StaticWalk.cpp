@@ -300,7 +300,9 @@ namespace{
 
 
             qpOASES::Options opt;
-            solver->getOptions(0, opt);
+            boost::any any_opt;
+            solver->getOptions(0, any_opt);
+            opt = boost::any_cast<qpOASES::Options>(any_opt);
             opt.numRefinementSteps = 0;
             opt.numRegularisationSteps = 1;
             for(unsigned int i = 0; i < 3; ++i)

@@ -261,7 +261,7 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
 
     USING_NAMESPACE_QPOASES
 
-    static OpenSoT::solvers::QPOasesProblem qp0(nj, 0, OpenSoT::HST_SEMIDEF);
+    static OpenSoT::solvers::QPOasesBackEnd qp0(nj, 0, OpenSoT::HST_SEMIDEF);
     qp0.setnWSR(127);
     static bool result0 = false;
     static bool isQProblemInitialized0 = false;
@@ -295,7 +295,7 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
         yarp::sig::Vector lA1 = b1;
         yarp::sig::Vector uA1 = b1;
 
-        static OpenSoT::solvers::QPOasesProblem qp1(nj, njTask0, t1HessianType);
+        static OpenSoT::solvers::QPOasesBackEnd qp1(nj, njTask0, t1HessianType);
         qp1.setnWSR(127);
         static bool result1 = false;
         static bool isQProblemInitialized1 = false;

@@ -4,6 +4,8 @@ using namespace OpenSoT::solvers;
 
 BackEnd::BackEnd(const int number_of_variables, const int number_of_constraints)
 {
+    _solution.setZero(number_of_variables);
+
     _H.setZero(number_of_variables,number_of_variables);
     _g.setZero(number_of_variables);
     _A.setZero(number_of_constraints,number_of_variables);
@@ -41,7 +43,7 @@ bool BackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
         return false;
 }
 
-BackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
+bool BackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
     if(!(_g.rows() == _H.rows())){
         XBot::Logger::error("g size: %i \n", _g.rows());
@@ -119,4 +121,26 @@ void BackEnd::log(XBot::MatLogger::Ptr logger, int i)
         logger->add("solution_"+std::to_string(i), _solution);
 
     _log(logger, i);
+}
+
+void BackEnd::printProblemInformation(const int problem_number, const std::string& problem_id,
+                                      const std::string& constraints_id, const std::string& bounds_id)
+{
+    std::cout<<std::endl;
+    if(problem_number == -1)
+        XBot::Logger::info("PROBLEM ID: %s \n", problem_id);
+    else
+        XBot::Logger::info("PROBLEM %i ID: %s \n", problem_number, problem_id);
+
+    XBot::Logger::info("CONSTRAINTS ID: %s \n", constraints_id);
+    XBot::Logger::info("    # OF CONSTRAINTS: %i \n", _A.rows());
+
+    XBot::Logger::info("BOUNDS ID: %s \n", bounds_id);
+    XBot::Logger::info("    # OF BOUNDS: %i \n", _l.size());
+
+    XBot::Logger::info("# OF VARIABLES: %i \n", _H.rows());
+
+    _printProblemInformation();
+
+    XBot::Logger::info("\n");
 }

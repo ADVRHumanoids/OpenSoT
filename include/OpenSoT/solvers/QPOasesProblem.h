@@ -1,7 +1,7 @@
-#ifndef _WB_SOT_SOLVERS_QP_OASES_PROBLEM_H_
-#define _WB_SOT_SOLVERS_QP_OASES_PROBLEM_H_
+#ifndef _WB_SOT_SOLVERS_QP_OASES_BE_H_
+#define _WB_SOT_SOLVERS_QP_OASES_BE_H_
 
-#include <Eigen/Dense>
+#include <OpenSoT/solvers/BackEnd.h>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
 
@@ -22,7 +22,7 @@ namespace OpenSoT{
      * single qpOases problem. Is implemented using Eigen.
      * This represent the Back-End.
      */
-    class QPOasesProblem {
+    class QPOasesBackEnd:  public BackEnd{
     public:
         /**
          * @brief QPOasesProblem constructor with creation of a QP problem.
@@ -33,7 +33,7 @@ namespace OpenSoT{
          *             final_eps_regularisation = standard_eps_regularisation * eps_regularisation
          *        this parameter is particular important for the optimization!
          */
-        QPOasesProblem(const int number_of_variables,
+        QPOasesBackEnd(const int number_of_variables,
                        const int number_of_constraints,
                        OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
                        const double eps_regularisation = DEFAULT_EPS_REGULARISATION); //2E2
@@ -41,7 +41,7 @@ namespace OpenSoT{
         /**
           * @brief ~QPOasesProblem destructor
           */
-        ~QPOasesProblem();
+        ~QPOasesBackEnd();
 
         /**
          * @brief setDefaultOptions to internal qpOases problem.
@@ -67,13 +67,13 @@ namespace OpenSoT{
          * @brief getOptions return the options of the QP problem
          * @return options
          */
-        qpOASES::Options getOptions();
+        virtual boost::any getOptions();
 
         /**
          * @brief setOptions of the QP problem.
          * @param options
          */
-        void setOptions(const qpOASES::Options& options);
+        virtual void setOptions(const boost::any& options);
 
         /**
          * @brief initProblem initialize the QP problem and get the solution, the dual solution,
@@ -92,7 +92,7 @@ namespace OpenSoT{
          * @param u upper bounds
          * @return true if the problem can be solved
          */
-        bool initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+        virtual bool initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
                         const Eigen::MatrixXd& A,
                         const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
                         const Eigen::VectorXd& l, const Eigen::VectorXd& u);
@@ -111,7 +111,7 @@ namespace OpenSoT{
          * @param g updated reference Eigen::VectorXd
          * @return true if task is correctly updated
          */
-        bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
+        virtual bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
 
         /**
          * @brief updateConstraints update internal A, lA and uA
@@ -124,47 +124,17 @@ namespace OpenSoT{
          * @param uA update upper constraint Eigen::VectorXd
          * @return true if constraints are correctly updated
          */
-        bool updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A, 
+        virtual bool updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
                                const Eigen::Ref<const Eigen::VectorXd> &lA, 
                                const Eigen::Ref<const Eigen::VectorXd> &uA);
 
-        /**
-         * @brief updateBounds update internal l and u
-         * _l = l
-         * _u = u
-         * @param l update lower bounds
-         * @param u update upper bounds
-         * @return true if bounds are correctly updated
-         */
-        bool updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& u);
-
-        /**
-         * @brief updateProblem update the whole problem see updateTask(), updateConstraints() and updateBounds()
-         * @param H updated task matrix
-         * @param g updated reference Eigen::VectorXd
-         * @param A update constraint matrix
-         * @param lA update lower constraint Eigen::VectorXd
-         * @param uA update upper constraint Eigen::VectorXd
-         * @param l update lower bounds
-         * @param u update upper bounds
-         * @return if the problem is correctly updated
-         */
-        bool updateProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
-                           const Eigen::MatrixXd& A,
-                           const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
-                           const Eigen::VectorXd& l, const Eigen::VectorXd& u);
 
         /**
          * @brief solve the QP problem
          * @return true if the QP problem is solved
          */
-        bool solve();
+        virtual bool solve();
 
-        /**
-         * @brief getSolution return the actual solution of the QP problem
-         * @return solution
-         */
-        const Eigen::VectorXd& getSolution(){return _solution;}
 
         /**
          * @brief getHessianType return the hessian type f the problem
@@ -196,22 +166,22 @@ namespace OpenSoT{
          */
         const qpOASES::Bounds& getActiveBounds(){return *_bounds;}
 
-        /**
+        /**        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
+        {
+            A.conservativeResize(A.rows()+B.rows(), A.cols());
+            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
+        }
+
+        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
+        {
+            a.conservativeResize(a.rows()+b.rows());
+            a.segment(a.rows()-b.rows(),b.rows())<<b;
+        }
          * @brief getActiveConstraints return the active constraints of the solved QP problem
          * @return active constraints
          */
         const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
 
-        /**
-         * Getters for internal matrices and Eigen::VectorXds
-         */
-        const Eigen::MatrixXd& getH(){return _H;}
-        const Eigen::VectorXd& getg(){return _g;}
-        const Eigen::MatrixXd& getA(){return _A;}
-        const Eigen::VectorXd& getlA(){return _lA;}
-        const Eigen::VectorXd& getuA(){return _uA;}
-        const Eigen::VectorXd& getl(){return _l;}
-        const Eigen::VectorXd& getu(){return _u;}
 
         /**
          * @brief printProblemInformation print some extra information about the problem
@@ -220,32 +190,8 @@ namespace OpenSoT{
          * @param constraints_id a string to identify the constraints associated to the problem
          * @param bounds_id a string to identify the bounds associated to the problem
          */
-        void printProblemInformation(const int problem_number, const std::string& problem_id,
-                                     const std::string& constraints_id, const std::string& bounds_id);
+        virtual void _printProblemInformation();
 
-
-        /**
-         * @brief log Tasks, Constraints and Bounds matrices
-         * @param logger a pointer to a MatLogger
-         * @param i an index related to the particular index of the problem
-         */
-        void log(XBot::MatLogger::Ptr logger, int i)
-        {
-            logger->add("H_"+std::to_string(i), _H);
-            logger->add("g_"+std::to_string(i), _g);
-            if(_A.rows() > 0 && _A.cols() > 0)
-                logger->add("A_"+std::to_string(i), _A);
-            if(_lA.size() > 0)
-                logger->add("lA_"+std::to_string(i), _lA);
-            if(_uA.size() > 0)
-                logger->add("uA_"+std::to_string(i), _uA);
-            if(_l.size() > 0)
-                logger->add("l_"+std::to_string(i), _l);
-            if(_u.size() > 0)
-                logger->add("u_"+std::to_string(i), _u);
-            if(_solution.size() > 0)
-                logger->add("solution_"+std::to_string(i), _solution);
-        }
 
     protected:
         /**
@@ -285,47 +231,17 @@ namespace OpenSoT{
          */
         double _epsRegularisation;
 
-        /**
-         * Define a cost function: ||Hx - g||
-         */
-        Eigen::MatrixXd _H;
-        Eigen::VectorXd _g;
-
-        /**
-         * Define a set of constraints weighted with A: lA <= Ax <= uA
-         */
-        Eigen::MatrixXd _A;
-        Eigen::VectorXd _lA;
-        Eigen::VectorXd _uA;
-
-        /**
-         * Define a set of bounds on solution: l <= x <= u
-         */
-        Eigen::VectorXd _l;
-        Eigen::VectorXd _u;
-
-        /**
-         * Solution and dual solution of the QP problem
-         */
-        Eigen::VectorXd _solution;
-        Eigen::VectorXd _dual_solution;
 
         /**
          * @brief _opt solver options
          */
         boost::shared_ptr<qpOASES::Options> _opt;
 
-        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
-        {
-            A.conservativeResize(A.rows()+B.rows(), A.cols());
-            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-        }
+        /**
+         * Solution of the QP problem
+         */
+        Eigen::VectorXd _dual_solution;
 
-        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
-        {
-            a.conservativeResize(a.rows()+b.rows());
-            a.segment(a.rows()-b.rows(),b.rows())<<b;
-        }
     };
     }
 }

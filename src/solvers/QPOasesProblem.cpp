@@ -16,9 +16,10 @@
 
 using namespace OpenSoT::solvers;
 
-QPOasesProblem::QPOasesProblem(const int number_of_variables,
+QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
                                const int number_of_constraints,
                                OpenSoT::HessianType hessian_type, const double eps_regularisation):
+    BackEnd(number_of_variables, number_of_constraints),
     _problem(new qpOASES::SQProblem(number_of_variables,
                                     number_of_constraints,
                                     (qpOASES::HessianType)(hessian_type))),
@@ -26,22 +27,16 @@ QPOasesProblem::QPOasesProblem(const int number_of_variables,
     _constraints(new qpOASES::Constraints()),
     _nWSR(132),
     _epsRegularisation(eps_regularisation),
-    _solution(number_of_variables), _dual_solution(number_of_variables),
+    _dual_solution(number_of_variables),
     _opt(new qpOASES::Options())
 {
-    _H.setZero(0,0);
-    _g.setZero(0);
-    _A.setZero(0,0);
-    _lA.setZero(0);
-    _uA.setZero(0);
-    _l.setZero(0);
-    _u.setZero(0);
-    setDefaultOptions();}
+    setDefaultOptions();
+}
 
-QPOasesProblem::~QPOasesProblem()
+QPOasesBackEnd::~QPOasesBackEnd()
 {}
 
-void QPOasesProblem::setDefaultOptions()
+void QPOasesBackEnd::setDefaultOptions()
 {
     qpOASES::Options opt;
     opt.setToMPC();
@@ -62,14 +57,14 @@ void QPOasesProblem::setDefaultOptions()
     _opt.reset(new qpOASES::Options(opt));
 }
 
-void QPOasesProblem::setOptions(const qpOASES::Options &options){
-    _opt.reset(new qpOASES::Options(options));
-    _problem->setOptions(options);}
+void QPOasesBackEnd::setOptions(const boost::any &options){
+    _opt.reset(new qpOASES::Options(boost::any_cast<qpOASES::Options>(options)));
+    _problem->setOptions(boost::any_cast<qpOASES::Options>(options));}
 
-qpOASES::Options QPOasesProblem::getOptions(){
+boost::any QPOasesBackEnd::getOptions(){
     return _problem->getOptions();}
 
-bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
+bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
                                  const Eigen::MatrixXd &A,
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
@@ -141,7 +136,7 @@ bool QPOasesProblem::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
     return true;
 }
 
-bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
+bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
     if(!(_g.rows() == _H.rows())){
         XBot::Logger::error("g size: %i \n", _g.rows());
@@ -178,7 +173,7 @@ bool QPOasesProblem::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
     }
 }
 
-bool QPOasesProblem::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A, 
+bool QPOasesBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
                                const Eigen::Ref<const Eigen::VectorXd> &lA, 
                                const Eigen::Ref<const Eigen::VectorXd> &uA)
 {
@@ -221,39 +216,8 @@ bool QPOasesProblem::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& 
     }
 }
 
-bool QPOasesProblem::updateBounds(const Eigen::VectorXd &l, const Eigen::VectorXd &u)
-{
-    if(!(l.rows() == _l.rows())){
-        std::cout<<RED<<"l size: "<<l.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"should be: "<<_l.rows()<<DEFAULT<<std::endl;
-        return false;}
-    if(!(u.rows() == _u.rows())){
-        std::cout<<RED<<"u size: "<<u.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"should be: "<<_u.rows()<<DEFAULT<<std::endl;
-        return false;}
-    if(!(l.rows() == u.rows())){
-        std::cout<<RED<<"l size: "<<l.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"u size: "<<u.rows()<<DEFAULT<<std::endl;
-        return false;}
 
-    _l = l;
-    _u = u;
-
-    return true;
-}
-
-bool QPOasesProblem::updateProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
-                                   const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
-                                   const Eigen::VectorXd &l, const Eigen::VectorXd &u)
-{
-    bool success = true;
-    success = success && updateBounds(l, u);
-    success = success && updateConstraints(A, lA, uA);
-    success = success && updateTask(H, g);
-    return success;
-}
-
-bool QPOasesProblem::solve()
+bool QPOasesBackEnd::solve()
 {
     int nWSR = _nWSR;
     checkINFTY();
@@ -310,11 +274,11 @@ bool QPOasesProblem::solve()
 }
 
 
-OpenSoT::HessianType QPOasesProblem::getHessianType() {return (OpenSoT::HessianType)(_problem->getHessianType());}
+OpenSoT::HessianType QPOasesBackEnd::getHessianType() {return (OpenSoT::HessianType)(_problem->getHessianType());}
 
-void QPOasesProblem::setHessianType(const OpenSoT::HessianType ht){_problem->setHessianType((qpOASES::HessianType)(ht));}
+void QPOasesBackEnd::setHessianType(const OpenSoT::HessianType ht){_problem->setHessianType((qpOASES::HessianType)(ht));}
 
-void QPOasesProblem::checkInfeasibility()
+void QPOasesBackEnd::checkInfeasibility()
 {
     qpOASES::Constraints infeasibleConstraints;
     _problem->getConstraints(infeasibleConstraints);
@@ -331,24 +295,14 @@ void QPOasesProblem::checkInfeasibility()
     std::cout<<"--------------------------------------------"<<std::endl;
 }
 
-void QPOasesProblem::printProblemInformation(const int problem_number, const std::string& problem_id,
-                                             const std::string& constraints_id, const std::string& bounds_id)
+void QPOasesBackEnd::_printProblemInformation()
 {
-    std::cout<<std::endl;
-    if(problem_number == -1)
-        std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<problem_id<<std::endl;
-    else
-        std::cout<<GREEN<<"PROBLEM "<<problem_number<<" ID: "<<DEFAULT<<problem_id<<std::endl;
-    std::cout<<GREEN<<"eps Regularisation factor: "<<DEFAULT<<_problem->getOptions().epsRegularisation<<std::endl;
-    std::cout<<GREEN<<"CONSTRAINTS ID: "<<DEFAULT<<constraints_id<<std::endl;
-    std::cout<<GREEN<<"     # OF CONSTRAINTS: "<<DEFAULT<<_problem->getNC()<<std::endl;
-    std::cout<<GREEN<<"BOUNDS ID: "<<DEFAULT<<bounds_id<<std::endl;
-    std::cout<<GREEN<<"     # OF BOUNDS: "<<DEFAULT<<_l.rows()<<std::endl;
-    std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_problem->getNV()<<std::endl;
-    std::cout<<std::endl;
+    XBot::Logger::info("eps Regularisation factor: %s \n", _problem->getOptions().epsRegularisation);
+    XBot::Logger::info("qpOASES # OF CONSTRAINTS: %i\n", _problem->getNC());
+    XBot::Logger::info("qpOASES # OF VARIABLES: %i\n", _problem->getNV());
 }
 
-void QPOasesProblem::checkINFTY()
+void QPOasesBackEnd::checkINFTY()
 {
     unsigned int constraints_size = _lA.rows();
     for(unsigned int i = 0; i < constraints_size; ++i){

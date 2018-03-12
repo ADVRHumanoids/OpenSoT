@@ -217,7 +217,7 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 
 TEST_F(testQPOasesProblem, test_update_constraint)
 {
-    OpenSoT::solvers::QPOasesProblem qp(3,0);
+    OpenSoT::solvers::QPOasesBackEnd qp(3,0);
     Eigen::MatrixXd H(1,3);
     H<<1,1,1;
     Eigen::VectorXd b(1);
@@ -278,7 +278,7 @@ TEST_F(testQPOasesProblem, test_update_constraint)
 
 TEST_F(testQPOasesProblem, test_update_task)
 {
-    OpenSoT::solvers::QPOasesProblem qp(3,0);
+    OpenSoT::solvers::QPOasesBackEnd qp(3,0);
     Eigen::MatrixXd H(2,3);
     H<<1,1,1,
        0,1,1;
@@ -350,7 +350,7 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
     Eigen::VectorXd x(2);
     simpleProblem sp;
 
-    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
+    OpenSoT::solvers::QPOasesBackEnd testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
 
     testProblem.initProblem(sp.H,
                             sp.g,
@@ -384,7 +384,7 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     Eigen::VectorXd x(2);
     simpleProblem sp;
 
-    OpenSoT::solvers::QPOasesProblem testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
+    OpenSoT::solvers::QPOasesBackEnd testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
 
     testProblem.initProblem(sp.H,
                             sp.g,
@@ -496,7 +496,7 @@ TEST_F(testQPOasesTask, testQPOasesTask)
     postural_task->update(q);
     std::cout<<"error: "<<postural_task->getb()<<std::endl;
 
-    OpenSoT::solvers::QPOasesProblem qp_postural_problem(postural_task->getXSize(), 0,
+    OpenSoT::solvers::QPOasesBackEnd qp_postural_problem(postural_task->getXSize(), 0,
                                                          postural_task->getHessianAtype());
 
     EXPECT_TRUE(qp_postural_problem.initProblem(postural_task->getA(), -1.0*postural_task->getb(),
@@ -535,7 +535,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         postural_task->getConstraints().push_back(joint_limits);
         postural_task->setLambda(0.1);
 
-        OpenSoT::solvers::QPOasesProblem qp_postural_problem(postural_task->getXSize(), 0,
+        OpenSoT::solvers::QPOasesBackEnd qp_postural_problem(postural_task->getXSize(), 0,
                                                              postural_task->getHessianAtype());
         std::list< OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraint_list =
                 postural_task->getConstraints();
@@ -709,7 +709,7 @@ TEST_F(testQPOasesTask, testCoMTask)
             com_task->getConstraints();
     OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr constraint = constraint_list.front();
 
-    OpenSoT::solvers::QPOasesProblem qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
+    OpenSoT::solvers::QPOasesBackEnd qp_CoM_problem(com_task->getXSize(), constraint->getAineq().rows(),
                                                     com_task->getHessianAtype());
     ASSERT_TRUE(qp_CoM_problem.initProblem(com_task->getA().transpose()*com_task->getA(), -1.0*com_task->getA().transpose()*com_task->getb(),
                                                 constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
@@ -777,7 +777,7 @@ TEST_F(testQPOasesTask, testCartesian)
     cartesian_task->setReference(T_ref);
     cartesian_task->update(q);
 
-    OpenSoT::solvers::QPOasesProblem qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
+    OpenSoT::solvers::QPOasesBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
     ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb(),
                                                 Eigen::MatrixXd(0,0), Eigen::VectorXd(), Eigen::VectorXd(),
                                                 -0.003*Eigen::VectorXd::Ones(q.size()), 0.003*Eigen::VectorXd::Ones(q.size())));
@@ -1053,7 +1053,7 @@ TEST_F(testQPOases_sot, testMinEffort)
 
 TEST_F(testQPOasesProblem, testNullHessian)
 {
-    OpenSoT::solvers::QPOasesProblem qp(30, 0, OpenSoT::HessianType::HST_ZERO, 1e10);
+    OpenSoT::solvers::QPOasesBackEnd qp(30, 0, OpenSoT::HessianType::HST_ZERO, 1e10);
 
     Eigen::MatrixXd H(30,30); H.setZero(30,30);
     Eigen::VectorXd g(30); g.setRandom(30);
