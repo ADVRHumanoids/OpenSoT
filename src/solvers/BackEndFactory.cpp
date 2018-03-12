@@ -12,3 +12,13 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
         throw std::runtime_error("Back-end is not available!");
 
 }
+
+std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
+{
+    if(be_solver == solver_back_ends::qpOASES)
+        return "qpOASES";
+    else
+        return "????";
+}
+
+

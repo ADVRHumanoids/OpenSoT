@@ -14,6 +14,8 @@ namespace OpenSoT{
                                const int number_of_constraints,
                                OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
                                const double eps_regularisation = DEFAULT_EPS_REGULARISATION);
+
+        std::string whichBackEnd(const solver_back_ends be_solver);
     }
 }
 

@@ -7,7 +7,8 @@ using namespace OpenSoT::solvers;
 
 iHQP::iHQP(Stack &stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks),
-    _epsRegularisation(eps_regularisation)
+    _epsRegularisation(eps_regularisation),
+    _be_solver(be_solver)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
@@ -20,7 +21,8 @@ iHQP::iHQP(Stack &stack_of_tasks,
                          ConstraintPtr bounds,
                          const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks, bounds),
-    _epsRegularisation(eps_regularisation)
+    _epsRegularisation(eps_regularisation),
+    _be_solver(be_solver)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
@@ -34,7 +36,8 @@ iHQP::iHQP(Stack &stack_of_tasks,
                          ConstraintPtr globalConstraints,
                          const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks, bounds, globalConstraints),
-    _epsRegularisation(eps_regularisation)
+    _epsRegularisation(eps_regularisation),
+    _be_solver(be_solver)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
@@ -74,6 +77,7 @@ void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& prob
 
 bool iHQP::prepareSoT(const solver_back_ends be_solver)
 {
+    XBot::Logger::info("#USING BACK-END: %s\n", getBackEndName().c_str());
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         computeCostFunction(_tasks[i], H, g);
@@ -244,4 +248,9 @@ void iHQP::_log(XBot::MatLogger::Ptr logger)
 {
     for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
         _qp_stack_of_tasks[i]->log(logger,i);
+}
+
+std::string iHQP::getBackEndName()
+{
+    return OpenSoT::solvers::whichBackEnd(_be_solver);
 }

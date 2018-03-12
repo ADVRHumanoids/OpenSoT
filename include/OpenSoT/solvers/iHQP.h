@@ -119,6 +119,8 @@ namespace OpenSoT{
          */
         void activateAllStacks();
 
+        std::string getBackEndName();
+
     protected:
         virtual void _log(XBot::MatLogger::Ptr logger);
 
@@ -180,6 +182,8 @@ namespace OpenSoT{
         std::vector<Eigen::VectorXd> tmp_lA;
         std::vector<Eigen::VectorXd> tmp_uA;
 
+
+        solver_back_ends _be_solver;
 
 
     };
