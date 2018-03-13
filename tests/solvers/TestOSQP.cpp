@@ -6,7 +6,8 @@
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-
+#include <OpenSoT/solvers/iHQP.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
@@ -366,6 +367,114 @@ TEST_F(testOSQPProblem, testCartesian)
         for(unsigned int i = 0; i < 3; ++i)
             for(unsigned int j = 0; j < 3; ++j)
                 EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
+}
+
+TEST_F(testOSQPProblem, testContructor2Problems)
+{
+    XBot::ModelInterface::Ptr _model_ptr;
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
+
+    Eigen::VectorXd torso(q.size()); torso.setZero(q.size());
+    torso[0] = getRandomAngle(-20.0*M_PI/180.0, 20.0*M_PI/180.0);
+    torso[1] = getRandomAngle(0.0, 45.0*M_PI/180.0);
+    torso[2] = getRandomAngle(-30.0*M_PI/180.0, 30.0*M_PI/180.0);
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    Eigen::Affine3d T_init;
+    _model_ptr->getPose("l_wrist", "Waist", T_init);
+    std::cout<<"INITIAL CONFIG: "<<T_init.matrix()<<std::endl;
+
+
+    //2 Tasks: Cartesian & Postural
+    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist", q, *_model_ptr,
+                                                       "l_wrist", "Waist"));
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+                new OpenSoT::tasks::velocity::Postural(q));
+
+    postural_task->setReference(q);
+    cartesian_task->setReference(T_init.matrix());
+
+    int t = 50;
+    //Constraints set to the Cartesian Task
+    Eigen::VectorXd q_min, q_max;
+    _model_ptr->getJointLimits(q_min, q_max);
+
+    std::cout<<"q_min: ["<<q_min.transpose()<<"]"<<std::endl;
+    std::cout<<"q_max: ["<<q_max.transpose()<<"]"<<std::endl;
+
+    JointLimits::Ptr joint_limits(
+        new JointLimits(q, q_max,
+                           q_min));
+    joint_limits->setBoundScaling((double)(1.0/t));
+
+    VelocityLimits::Ptr joint_velocity_limits(
+                new VelocityLimits(0.3, (double)(1.0/t), q.size()));
+
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
+    joint_constraints_list.push_back(joint_limits);
+    joint_constraints_list.push_back(joint_velocity_limits);
+
+    OpenSoT::constraints::Aggregated::Ptr joint_constraints(
+                new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
+
+    //Create the SoT
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+    stack_of_tasks.push_back(cartesian_task);
+    stack_of_tasks.push_back(postural_task);
+
+    std::cout<<"Initial Position Error: "<<cartesian_task->positionError<<std::endl;
+    std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError<<std::endl;
+
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, joint_constraints, 0., OpenSoT::solvers::solver_back_ends::OSQP);
+
+
+    KDL::Frame T_ref_kdl;
+    T_ref_kdl.p[0] = 0.283; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.499;
+    T_ref_kdl.M = T_ref_kdl.M.Quaternion(0.0, 0.975, 0.0, -0.221);
+    cartesian_task->setReference(T_ref_kdl);
+
+    //Solve SoT
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(q.size());
+    for(unsigned int i = 0; i < 10*t; ++i)
+    {
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        cartesian_task->update(q);
+        postural_task->update(q);
+        joint_constraints->update(q);
+
+        ASSERT_TRUE(sot.solve(dq));
+        Eigen::VectorXd _dq = dq;
+        //std::cout<<"Solution: ["<<dq<<"]"<<std::endl;
+        q += _dq;
+    }
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+    std::cout<<"INITIAL CONFIG: "<<T_init.matrix()<<std::endl;
+    KDL::Frame T_kdl;
+    _model_ptr->getPose("l_wrist", "Waist", T_kdl);
+    std::cout<<"FINAL CONFIG: "<<T_kdl<<std::endl;
+    std::cout<<"DESIRED CONFIG: "<<T_ref_kdl<<std::endl;
+
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T_kdl.p[i], T_ref_kdl.p[i], 1E-3);
+    for(unsigned int i = 0; i < 3; ++i)
+        for(unsigned int j = 0; j < 3; ++j)
+            EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
+
+
 }
 
 }

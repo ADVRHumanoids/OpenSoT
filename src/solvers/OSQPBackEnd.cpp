@@ -86,6 +86,12 @@ bool OSQPBackEnd::solve()
     _workspace.get()->data->A = _Acsc.get();
     _workspace.get()->data->P = _Pcsc.get();
 
+
+    ///QUESTO è DA RIMUOVERE!!!
+    _workspace.reset(osqp_setup(_data.get(), _settings.get()));
+
+
+
     osqp_update_warm_start(_workspace.get(), 1);
     osqp_warm_start(_workspace.get(), _solution.data(), _workspace->solution->y); //We try with both primal/dual initial guess
 
