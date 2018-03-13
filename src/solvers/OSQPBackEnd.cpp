@@ -74,12 +74,13 @@ bool OSQPBackEnd::solve()
 
 boost::any OSQPBackEnd::getOptions()
 {
-
+    return _settings;
 }
 
 void OSQPBackEnd::setOptions(const boost::any &options)
 {
-
+    _settings.reset(new OSQPSettings(boost::any_cast<OSQPSettings>(options)));
+    _workspace->settings = _settings.get();
 }
 
 bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
