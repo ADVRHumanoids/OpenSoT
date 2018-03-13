@@ -62,6 +62,7 @@ FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(fcl QUIET)
+FIND_PACKAGE(osqp QUIET)
 
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
@@ -158,6 +159,9 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
                             src/solvers/iHQP.cpp
                             src/solvers/QPOasesBackEnd.cpp
                             src/solvers/DampedPseudoInverse.cpp)
+if(${osqp_FOUND})
+    set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/OSQPBackEnd.cpp)
+endif()
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
@@ -211,7 +215,10 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${XBotInterface_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
+                              osqp::osqp
                               )
+
+
 
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #

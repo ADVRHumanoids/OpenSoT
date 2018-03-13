@@ -108,6 +108,10 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testContactFloatingBaseTask
 )
 
+if(${osqp_FOUND})
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver)
+endif()
+
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
                                        testAggregatedTask)
@@ -228,6 +232,13 @@ ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
+
+if(${osqp_FOUND})
+    ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
+    TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs})
+    add_dependencies(testOSQPSolver GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_osqp COMMAND testOSQPSolver)
+endif()
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
 TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
