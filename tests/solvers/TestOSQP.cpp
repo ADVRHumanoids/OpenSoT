@@ -66,27 +66,29 @@ TEST_F(testOSQPProblem, testSimpleProblem)
     OpenSoT::solvers::QPOasesBackEnd testProblemQPOASES(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
     OpenSoT::solvers::OSQPBackEnd testProblemOSQP(x.size(), sp.A.rows());
 
-    testProblemQPOASES.initProblem(sp.H,
+    EXPECT_TRUE(testProblemQPOASES.initProblem(sp.H,
                             sp.g,
                             sp.A,
                             sp.lA,
                             sp.uA,
                             sp.l,
-                            sp.u);
+                            sp.u));
 
-    testProblemOSQP.initProblem(sp.H,
+    EXPECT_TRUE(testProblemOSQP.initProblem(sp.H,
                             sp.g,
                             sp.A,
                             sp.lA,
                             sp.uA,
                             sp.l,
-                            sp.u);
+                            sp.u));
 
     Eigen::VectorXd s_qpoases = testProblemQPOASES.getSolution();
     Eigen::VectorXd s_osqp = testProblemOSQP.getSolution();
 
     std::cout<<"solution QPOASES: "<<s_qpoases.transpose()<<std::endl;
     std::cout<<"solution OSQP: "<<s_osqp.transpose()<<std::endl;
+
+    EXPECT_NEAR((s_qpoases - s_osqp).norm(),0.0, 1e-12);
 
 //    EXPECT_TRUE(testProblem.solve());
 //    Eigen::VectorXd s_qpoases = testProblem.getSolution();

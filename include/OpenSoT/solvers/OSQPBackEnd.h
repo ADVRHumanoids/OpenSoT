@@ -64,6 +64,8 @@ namespace OpenSoT{
          */
         void toData();
 
+        void print_csc_matrix_raw(csc* a, const std::string& name);
+
 
     };
     }

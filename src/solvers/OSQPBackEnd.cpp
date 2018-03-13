@@ -1,4 +1,5 @@
 #include <OpenSoT/solvers/OSQPBackEnd.h>
+#include <osqp/glob_opts.h>
 
 using namespace OpenSoT::solvers;
 
@@ -12,7 +13,7 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
 
     I.setIdentity(number_of_variables, number_of_variables);
 
-    osqp_set_default_settings(_settings.get());
+    osqp_set_default_settings(_settings.get());    
 }
 
 bool OSQPBackEnd::solve()
@@ -35,6 +36,11 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+#ifdef DLONG
+    XBot::Logger::error("DLONG option in OSQP should be set to OFF in CMakeLists!");
+    return false;
+#endif
+
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
     _Apiled.pile(_A);
@@ -60,44 +66,11 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     _Asp = _Apiled.generate_and_get().sparseView();
     _Psp = _H.sparseView();
 
-    std::cout<<"_Asp: \n"<<_Asp<<std::endl;
-
     _Asp.makeCompressed();
     _Acsc.reset(csc_matrix(_Asp.rows(), _Asp.cols(), _Asp.nonZeros(), _Asp.valuePtr(), _Asp.innerIndexPtr(), _Asp.outerIndexPtr()));
 
     _Psp.makeCompressed();
     _Pcsc.reset(csc_matrix(_Psp.rows(), _Psp.cols(), _Psp.nonZeros(), _Psp.valuePtr(), _Psp.innerIndexPtr(), _Psp.outerIndexPtr()));
-
-
-//    std::cout<<"_Asp.innerIndexPtr():{ ";
-//    for (int i=0; i< sizeof(_Asp.innerIndexPtr())/sizeof(_Asp.innerIndexPtr()[0]); i++)
-//            std::cout <<_Asp.innerIndexPtr()[i]<<" ";
-//    std::cout<<"}"<<std::endl;
-//    std::cout<<"_Asp.outerIndexPtr():{ ";
-//    for (int i=0; i< sizeof(_Asp.outerIndexPtr())/sizeof(_Asp.outerIndexPtr()[0]); i++)
-//            std::cout <<_Asp.outerIndexPtr()[i]<<" ";
-//    std::cout<<"}"<<std::endl;
-
-
-
-//    std::cout<<"_Acsc->m: "<<_Acsc->m<<std::endl;
-//    std::cout<<"_Acsc->n: "<<_Acsc->n<<std::endl;
-//    std::cout<<"_Acsc->nzmax: "<<_Acsc->nzmax<<std::endl;
-//    std::cout<<"_Acsc->x:{ ";
-//    for (int i=0; i< sizeof(_Acsc->x)/sizeof(_Acsc->x[0]); i++)
-//            std::cout <<_Acsc->x[i]<<" ";
-//    std::cout<<"}"<<std::endl;
-//    std::cout<<"_Acsc->i:{ ";
-//    for (int i=0; i< sizeof(_Acsc->i)/sizeof(_Acsc->i[0]); i++)
-//            std::cout <<_Acsc->i[i]<<" ";
-//    std::cout<<"}"<<std::endl;
-//    std::cout<<"_Acsc->p:{ ";
-//    for (int i=0; i< sizeof(_Acsc->p)/sizeof(_Acsc->p[0]); i++)
-//            std::cout <<_Acsc->p[i]<<" ";
-//    std::cout<<"}"<<std::endl;
-
-    print_csc_matrix(_Acsc.get(), "_Acsc");
-    print_csc_matrix(_Pcsc.get(), "_Pcsc");
 
     toData();
 
@@ -125,6 +98,27 @@ void OSQPBackEnd::toData()
     _data->l = _lApiled.generate_and_get().data(); //Constraints lower
     _data->u = _uApiled.generate_and_get().data(); //Constraints upper
 
+}
+
+void OSQPBackEnd::print_csc_matrix_raw(csc* a, const std::string& name)
+{
+    XBot::Logger::info("%s->m: %i\n",name.c_str(), a->m);
+    XBot::Logger::info("%s->n: %i\n",name.c_str(), a->n);
+    XBot::Logger::info("%s->nzmax: %i\n",name.c_str(), a->nzmax);
+    XBot::Logger::info("%s->nz: %i\n",name.c_str(), a->nz);
+
+    XBot::Logger::info("%s->x:{",name.c_str());
+    for (int i=0; i< sizeof(a->x)/sizeof(a->x[0]); i++)
+        XBot::Logger::info("%f ",a->x[i]);
+    XBot::Logger::info("}\n");
+    XBot::Logger::info("%s->i:{",name.c_str());
+    for (int i=0; i< sizeof(a->i)/sizeof(a->i[0]); i++)
+        XBot::Logger::info("%f ",a->i[i]);
+    XBot::Logger::info("}\n");
+    XBot::Logger::info("%s->p:{",name.c_str());
+    for (int i=0; i< sizeof(a->p)/sizeof(a->p[0]); i++)
+        XBot::Logger::info("%f ",a->p[i]);
+    XBot::Logger::info("}\n");
 }
 
 OSQPBackEnd::~OSQPBackEnd()
