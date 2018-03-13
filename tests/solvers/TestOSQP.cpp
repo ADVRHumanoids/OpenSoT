@@ -90,19 +90,27 @@ TEST_F(testOSQPProblem, testSimpleProblem)
 
     EXPECT_NEAR((s_qpoases - s_osqp).norm(),0.0, 1e-12);
 
-//    EXPECT_TRUE(testProblem.solve());
-//    Eigen::VectorXd s_qpoases = testProblem.getSolution();
-//    EXPECT_EQ(-sp.g[0], s[0]);
-//    EXPECT_EQ(-sp.g[1], s[1]);
+    EXPECT_TRUE(testProblemQPOASES.solve());
+    EXPECT_TRUE(testProblemOSQP.solve());
+    s_qpoases = testProblemQPOASES.getSolution();
+    s_osqp = testProblemOSQP.getSolution();
+    EXPECT_EQ(-sp.g[0], s_osqp[0]);
+    EXPECT_EQ(-sp.g[1], s_osqp[1]);
+    EXPECT_NEAR((s_qpoases - s_osqp).norm(),0.0, 1e-12);
+    std::cout<<"solution QPOASES: "<<s_qpoases.transpose()<<std::endl;
+    std::cout<<"solution OSQP: "<<s_osqp.transpose()<<std::endl;
 
-//    for(unsigned int i = 0; i < 10; ++i)
-//    {
-//        EXPECT_TRUE(testProblem.solve());
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        EXPECT_TRUE(testProblemOSQP.solve());
+        EXPECT_TRUE(testProblemQPOASES.solve());
 
-//        Eigen::VectorXd s = testProblem.getSolution();
-//        EXPECT_EQ(-sp.g[0], s[0]);
-//        EXPECT_EQ(-sp.g[1], s[1]);
-//    }
+        Eigen::VectorXd s_osqp = testProblemOSQP.getSolution();
+        Eigen::VectorXd s_qpoases = testProblemQPOASES.getSolution();
+        EXPECT_EQ(-sp.g[0], s_osqp[0]);
+        EXPECT_EQ(-sp.g[1], s_osqp[1]);
+        EXPECT_NEAR((s_qpoases - s_osqp).norm(),0.0, 1e-12);
+    }
 
 }
 

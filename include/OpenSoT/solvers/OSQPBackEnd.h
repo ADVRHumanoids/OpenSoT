@@ -66,6 +66,8 @@ namespace OpenSoT{
 
         void print_csc_matrix_raw(csc* a, const std::string& name);
 
+        void setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A);
+
 
     };
     }

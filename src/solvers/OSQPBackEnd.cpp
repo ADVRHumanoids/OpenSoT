@@ -13,11 +13,62 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
 
     I.setIdentity(number_of_variables, number_of_variables);
 
-    osqp_set_default_settings(_settings.get());    
+    osqp_set_default_settings(_settings.get());
+    _settings.get()->verbose = 0;
+}
+
+void OSQPBackEnd::setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A)
+{
+    a->m = A.rows();
+    a->n = A.cols();
+    a->nzmax = A.nonZeros();
+    a->x = A.valuePtr();
+    a->i = A.innerIndexPtr();
+    a->p = A.outerIndexPtr();
 }
 
 bool OSQPBackEnd::solve()
 {
+    _Apiled.set(_A);
+    _Apiled.pile(I);
+
+    _lApiled.set(_lA);
+    _lApiled.pile(_l);
+
+    _uApiled.set(_uA);
+    _uApiled.pile(_u);
+
+    _Asp = _Apiled.generate_and_get().sparseView();
+    _Psp = _H.sparseView();
+
+    _Asp.makeCompressed();
+    _Psp.makeCompressed();
+
+    setCSCMatrix(_Acsc.get(), _Asp);
+    setCSCMatrix(_Pcsc.get(), _Psp);
+
+    osqp_update_lin_cost(_workspace.get(), _g.data());
+    osqp_update_bounds(_workspace.get(), _lApiled.generate_and_get().data(), _uApiled.generate_and_get().data());
+    _workspace.get()->data->A = _Acsc.get();
+    _workspace.get()->data->P = _Pcsc.get();
+
+    osqp_update_warm_start(_workspace.get(), 1);
+
+    bool exitflag = osqp_solve(_workspace.get());
+
+    if(exitflag != 0)
+    {
+        osqp_update_warm_start(_workspace.get(), 0);
+
+        exitflag = osqp_solve(_workspace.get());
+
+        if(exitflag != 0)
+            return false;
+
+        _solution = Eigen::Map<Eigen::VectorXd>(_workspace->solution->x, _solution.size());
+        return true;
+    }
+    _solution = Eigen::Map<Eigen::VectorXd>(_workspace->solution->x, _solution.size());
     return true;
 }
 
