@@ -27,6 +27,29 @@ void OSQPBackEnd::setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A)
     a->p = A.outerIndexPtr();
 }
 
+bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
+{
+    if(!(_g.rows() == _H.rows())){
+        XBot::Logger::error("g size: %i \n", _g.rows());
+        XBot::Logger::error("H size: %i \n", _H.rows());
+        assert(_g.rows() == _H.rows());
+        return false;}
+    if(!(_H.cols() == H.cols())){
+        XBot::Logger::error("H cols: %i \n", H.cols());
+        XBot::Logger::error("should be: %i \n", _H.cols());
+        return false;}
+
+    if(_H.rows() == H.rows())
+    {
+        _H = H.triangularView<Eigen::Upper>();
+        _g = g;
+
+        return true;
+    }
+    else
+        return false;
+}
+
 bool OSQPBackEnd::solve()
 {
     if(_A.rows() > 0)
@@ -52,8 +75,8 @@ bool OSQPBackEnd::solve()
     _Asp = _Apiled.generate_and_get().sparseView();
     _Psp = _H.sparseView();
 
-        _Asp.makeCompressed();
-        _Psp.makeCompressed();
+    _Asp.makeCompressed();
+    _Psp.makeCompressed();
 
     setCSCMatrix(_Acsc.get(), _Asp);
     setCSCMatrix(_Pcsc.get(), _Psp);
@@ -112,7 +135,7 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     return false;
 #endif
 
-    _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
+    _H = H.triangularView<Eigen::Upper>(); _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
     if(_A.rows() > 0)
     {
@@ -143,7 +166,7 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
         return false;}
 
     _Asp = _Apiled.generate_and_get().sparseView();
-    _Psp = _H.sparseView();
+    _Psp = _H.sparseView(); //_H.sparseView();
 
     _Asp.makeCompressed();
     _Acsc.reset(csc_matrix(_Asp.rows(), _Asp.cols(), _Asp.nonZeros(), _Asp.valuePtr(), _Asp.innerIndexPtr(), _Asp.outerIndexPtr()));
@@ -181,26 +204,26 @@ void OSQPBackEnd::toData()
 
 }
 
-void OSQPBackEnd::print_csc_matrix_raw(csc* a, const std::string& name)
-{
-    XBot::Logger::info("%s->m: %i\n",name.c_str(), a->m);
-    XBot::Logger::info("%s->n: %i\n",name.c_str(), a->n);
-    XBot::Logger::info("%s->nzmax: %i\n",name.c_str(), a->nzmax);
-    XBot::Logger::info("%s->nz: %i\n",name.c_str(), a->nz);
+//void OSQPBackEnd::print_csc_matrix_raw(csc* a, const std::string& name)
+//{
+//    XBot::Logger::info("%s->m: %i\n",name.c_str(), a->m);
+//    XBot::Logger::info("%s->n: %i\n",name.c_str(), a->n);
+//    XBot::Logger::info("%s->nzmax: %i\n",name.c_str(), a->nzmax);
+//    XBot::Logger::info("%s->nz: %i\n",name.c_str(), a->nz);
 
-    XBot::Logger::info("%s->x:{",name.c_str());
-    for (int i=0; i< sizeof(a->x)/sizeof(a->x[0]); i++)
-        XBot::Logger::info("%f ",a->x[i]);
-    XBot::Logger::info("}\n");
-    XBot::Logger::info("%s->i:{",name.c_str());
-    for (int i=0; i< sizeof(a->i)/sizeof(a->i[0]); i++)
-        XBot::Logger::info("%f ",a->i[i]);
-    XBot::Logger::info("}\n");
-    XBot::Logger::info("%s->p:{",name.c_str());
-    for (int i=0; i< sizeof(a->p)/sizeof(a->p[0]); i++)
-        XBot::Logger::info("%f ",a->p[i]);
-    XBot::Logger::info("}\n");
-}
+//    XBot::Logger::info("%s->x:{",name.c_str());
+//    for (int i=0; i< sizeof(a->x)/sizeof(a->x[0]); i++)
+//        XBot::Logger::info("%f ",a->x[i]);
+//    XBot::Logger::info("}\n");
+//    XBot::Logger::info("%s->i:{",name.c_str());
+//    for (int i=0; i< sizeof(a->i)/sizeof(a->i[0]); i++)
+//        XBot::Logger::info("%f ",a->i[i]);
+//    XBot::Logger::info("}\n");
+//    XBot::Logger::info("%s->p:{",name.c_str());
+//    for (int i=0; i< sizeof(a->p)/sizeof(a->p[0]); i++)
+//        XBot::Logger::info("%f ",a->p[i]);
+//    XBot::Logger::info("}\n");
+//}
 
 OSQPBackEnd::~OSQPBackEnd()
 {

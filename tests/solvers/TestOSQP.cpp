@@ -341,9 +341,9 @@ TEST_F(testOSQPProblem, testCartesian)
     OpenSoT::solvers::OSQPBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0);
     ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb(),
                                                 Eigen::MatrixXd(0,0), Eigen::VectorXd(), Eigen::VectorXd(),
-                                                -0.003*Eigen::VectorXd::Ones(q.size()), 0.003*Eigen::VectorXd::Ones(q.size())));
+                                                -0.001*Eigen::VectorXd::Ones(q.size()), 0.001*Eigen::VectorXd::Ones(q.size())));
 
-    for(unsigned int i = 0; i < 1000; ++i)
+    for(unsigned int i = 0; i < 10000; ++i)
     {
         _model_ptr->setJointPosition(q);
         _model_ptr->update();

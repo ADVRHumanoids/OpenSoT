@@ -31,6 +31,8 @@ namespace OpenSoT{
 
           virtual void setOptions(const boost::any& options);
 
+          virtual bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
+
     private:
         /**
          * @brief _problem is the internal OSQPWorkspace
@@ -64,7 +66,7 @@ namespace OpenSoT{
          */
         void toData();
 
-        void print_csc_matrix_raw(csc* a, const std::string& name);
+//        void print_csc_matrix_raw(csc* a, const std::string& name);
 
         void setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A);
 
