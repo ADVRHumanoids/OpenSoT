@@ -52,8 +52,8 @@ bool OSQPBackEnd::solve()
     _Asp = _Apiled.generate_and_get().sparseView();
     _Psp = _H.sparseView();
 
-    _Asp.makeCompressed();
-    _Psp.makeCompressed();
+        _Asp.makeCompressed();
+        _Psp.makeCompressed();
 
     setCSCMatrix(_Acsc.get(), _Asp);
     setCSCMatrix(_Pcsc.get(), _Psp);
@@ -64,17 +64,25 @@ bool OSQPBackEnd::solve()
     _workspace.get()->data->P = _Pcsc.get();
 
     osqp_update_warm_start(_workspace.get(), 1);
+    osqp_warm_start(_workspace.get(), _solution.data(), _workspace->solution->y); //We try with both primal/dual initial guess
 
     bool exitflag = osqp_solve(_workspace.get());
 
     if(exitflag != 0)
     {
-        osqp_update_warm_start(_workspace.get(), 0);
+        osqp_warm_start_x(_workspace.get(), _solution.data()); //We try only with primal initial guess
 
         exitflag = osqp_solve(_workspace.get());
 
         if(exitflag != 0)
-            return false;
+        {
+            osqp_update_warm_start(_workspace.get(), 0); //We try without warm start
+            exitflag = osqp_solve(_workspace.get());
+            if(exitflag != 0)
+                return false;
+            _solution = Eigen::Map<Eigen::VectorXd>(_workspace->solution->x, _solution.size());
+            return true;
+        }
 
         _solution = Eigen::Map<Eigen::VectorXd>(_workspace->solution->x, _solution.size());
         return true;
@@ -141,7 +149,9 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     _Acsc.reset(csc_matrix(_Asp.rows(), _Asp.cols(), _Asp.nonZeros(), _Asp.valuePtr(), _Asp.innerIndexPtr(), _Asp.outerIndexPtr()));
 
     _Psp.makeCompressed();
-    _Pcsc.reset(csc_matrix(_Psp.rows(), _Psp.cols(), _Psp.nonZeros(), _Psp.valuePtr(), _Psp.innerIndexPtr(), _Psp.outerIndexPtr()));
+    _Pcsc.reset(csc_matrix(_Psp.rows(), _Psp.cols(), _Psp.nonZeros(),
+                           _Psp.valuePtr(),
+                           _Psp.innerIndexPtr(), _Psp.outerIndexPtr()));
 
     toData();
 

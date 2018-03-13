@@ -5,6 +5,7 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
@@ -281,6 +282,90 @@ TEST_F(testOSQPProblem, testProblemWithConstraint)
             else
                 EXPECT_NEAR( q[i], q_ref[i], 1E-4);
         }
+}
+
+
+Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
+    Eigen::VectorXd _q(_model_ptr->getJointNum());
+    _q.setZero(_q.size());
+    _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+    _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+    _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+
+    _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+
+    return _q;
+}
+
+TEST_F(testOSQPProblem, testCartesian)
+{
+    XBot::ModelInterface::Ptr _model_ptr;
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    Eigen::Affine3d T;
+    _model_ptr->getPose("l_wrist", "Waist", T);
+
+
+    //2 Tasks: Cartesian & Postural
+    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, *_model_ptr,
+                "l_wrist", "Waist"));
+
+    cartesian_task->update(q);
+
+    Eigen::MatrixXd T_actual = cartesian_task->getActualPose();
+    std::cout<<"T_actual: \n"<<T_actual<<std::endl;
+
+
+    Eigen::MatrixXd T_ref = T.matrix();
+    T_ref(0,3) = T_ref(0,3) + 0.02;
+    std::cout<<"T_ref: \n"<<T_ref<<std::endl;
+
+    cartesian_task->setReference(T_ref);
+    cartesian_task->update(q);
+
+    OpenSoT::solvers::OSQPBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0);
+    ASSERT_TRUE(qp_cartesian_problem.initProblem(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb(),
+                                                Eigen::MatrixXd(0,0), Eigen::VectorXd(), Eigen::VectorXd(),
+                                                -0.003*Eigen::VectorXd::Ones(q.size()), 0.003*Eigen::VectorXd::Ones(q.size())));
+
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+
+        cartesian_task->update(q);
+        qp_cartesian_problem.updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
+        ASSERT_TRUE(qp_cartesian_problem.solve());
+        Eigen::VectorXd dq = qp_cartesian_problem.getSolution();
+        q += dq;
+    }
+
+    _model_ptr->getPose("l_wrist", "Waist", T);
+
+    std::cout<<"T: \n"<<T.matrix()<<std::endl;
+    std::cout<<"T_ref: \n"<<T_ref<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T(i,3), T_ref(i,3), 1E-4);
+        for(unsigned int i = 0; i < 3; ++i)
+            for(unsigned int j = 0; j < 3; ++j)
+                EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
 }
 
 }

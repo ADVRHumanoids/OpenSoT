@@ -68,7 +68,6 @@ namespace OpenSoT{
 
         void setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A);
 
-
     };
     }
 }
