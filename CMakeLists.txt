@@ -215,7 +215,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${XBotInterface_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
-                              osqp::osqp
+                              osqp
                               )
 
 
