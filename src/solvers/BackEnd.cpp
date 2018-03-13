@@ -144,3 +144,14 @@ void BackEnd::printProblemInformation(const int problem_number, const std::strin
 
     XBot::Logger::info("\n");
 }
+
+int OpenSoT::solvers::BackEnd::getNumConstraints() const
+{
+    return _A.rows();
+}
+
+int OpenSoT::solvers::BackEnd::getNumVariables() const
+{
+    return _H.rows();
+}
+

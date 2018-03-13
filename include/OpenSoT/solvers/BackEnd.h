@@ -33,6 +33,9 @@ namespace OpenSoT{
         const Eigen::VectorXd& getuA(){return _uA;}
         const Eigen::VectorXd& getl(){return _l;}
         const Eigen::VectorXd& getu(){return _u;}
+        
+        int getNumVariables() const;
+        int getNumConstraints() const;
 
         /**
          * @brief log Tasks, Constraints and Bounds matrices
