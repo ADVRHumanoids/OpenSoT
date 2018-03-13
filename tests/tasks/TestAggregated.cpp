@@ -5,7 +5,7 @@
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <XBotInterface/ModelInterface.h>
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
@@ -160,7 +160,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack;
     stack.push_back(postural_task);
 
-    OpenSoT::solvers::DampedPseudoInverse solver(stack);
+    OpenSoT::solvers::eHQP solver(stack);
 
 //1. Here we use postural_task
 
@@ -190,7 +190,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
 
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack2;
     stack2.push_back(aggregated_task);
-    OpenSoT::solvers::DampedPseudoInverse solver2(stack2);
+    OpenSoT::solvers::eHQP solver2(stack2);
 
 
     for(unsigned int i = 0; i < 1000; ++i)

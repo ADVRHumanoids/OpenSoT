@@ -17,7 +17,7 @@
 #include <XBotInterface/ModelInterface.h>
 #include <sensor_msgs/JointState.h>
 
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 
 #include <XBotInterface/Logger.hpp>
 
@@ -295,7 +295,7 @@ public:
 
         auto_stack->update(q);
 
-        solver.reset(new OpenSoT::solvers::DampedPseudoInverse(auto_stack->getStack()));
+        solver.reset(new OpenSoT::solvers::eHQP(auto_stack->getStack()));
 
 
     }
@@ -338,7 +338,7 @@ public:
 
     XBot::ModelInterface& model_ref;
 
-    OpenSoT::solvers::DampedPseudoInverse::Ptr solver;
+    OpenSoT::solvers::eHQP::Ptr solver;
 
 
     Eigen::MatrixXd I;

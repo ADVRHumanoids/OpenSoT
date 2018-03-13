@@ -17,7 +17,7 @@
 #include <XBotInterface/ModelInterface.h>
 #include <sensor_msgs/JointState.h>
 
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 
 #include <XBotInterface/Logger.hpp>
 

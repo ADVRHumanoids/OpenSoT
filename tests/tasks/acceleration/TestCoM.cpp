@@ -7,7 +7,7 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <gtest/gtest.h>
 #include <XBotInterface/ModelInterface.h>
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");

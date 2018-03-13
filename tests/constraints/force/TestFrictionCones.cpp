@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/solvers/iHQP.h>
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/tasks/force/CoM.h>
 #include <OpenSoT/constraints/force/FrictionCone.h>
 #include <OpenSoT/constraints/force/WrenchLimits.h>
@@ -163,7 +163,7 @@ public:
   OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits;
   OpenSoT::constraints::force::FrictionCone::Ptr friction_cones;
   OpenSoT::solvers::iHQP::Ptr QPsolver;
-  OpenSoT::solvers::DampedPseudoInverse::Ptr SVDsolver;
+  OpenSoT::solvers::eHQP::Ptr SVDsolver;
 
   Eigen::MatrixXd A;
   Eigen::VectorXd b;
@@ -226,7 +226,7 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     std::cout<<"    r_sole = ["<<QPcontact_wrenches_d.segment(0,6)<<"]"<<std::endl;
     std::cout<<"    l_sole = ["<<QPcontact_wrenches_d.segment(6,6)<<"]"<<std::endl;
 
-    SVDsolver.reset(new OpenSoT::solvers::DampedPseudoInverse(stack_of_tasks));
+    SVDsolver.reset(new OpenSoT::solvers::eHQP(stack_of_tasks));
     std::cout<<"SVD Solver started"<<std::endl;
     SVDsolver->solve(SVDcontact_wrenches_d);
     std::cout<<"contact_wrenches_d w/o constraint :"<<std::endl;

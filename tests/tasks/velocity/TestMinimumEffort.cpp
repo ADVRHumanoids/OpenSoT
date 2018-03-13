@@ -2,7 +2,7 @@
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <boost/make_shared.hpp>
 #include <XBotInterface/ModelInterface.h>
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 #include <ros/master.h>
 #include <sensor_msgs/JointState.h>
 
@@ -103,7 +103,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack;
     stack.push_back(minimumEffort);
 
-    OpenSoT::solvers::DampedPseudoInverse solver(stack);
+    OpenSoT::solvers::eHQP solver(stack);
 
     EXPECT_EQ(minimumEffort->getA().rows(), nJ);
     EXPECT_EQ(minimumEffort->getb().size(), nJ);

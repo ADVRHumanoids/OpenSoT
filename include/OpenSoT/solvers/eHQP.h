@@ -28,11 +28,11 @@ namespace OpenSoT{
         Eigen::LLT<Eigen::MatrixXd> _WChol;
     };
     /**
-     * @brief The DampedPseudoInverse class implements a eHQP solver as the one used in:
+     * @brief The eHQP class implements an equality Hierarchical QP solver as the one used in:
      * "Prioritized Multi-Task Motion Control of Redundant Robots under Hard Joint Constraints"
      * by Fabrizio Flacco, Alessandro De Luca and Oussama Khatib
      */
-    class DampedPseudoInverse : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
+    class eHQP : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
         int _x_size;
         std::vector<stack_level> _stack_levels;
@@ -78,11 +78,11 @@ namespace OpenSoT{
                                      const std::string& constraints_id, const std::string& bounds_id);
 
     public:
-        typedef boost::shared_ptr<DampedPseudoInverse> Ptr;
+        typedef boost::shared_ptr<eHQP> Ptr;
         /**
          * @brief creates a pseudoinverse solver for the current Stack
          */
-        DampedPseudoInverse(Stack& stack);
+        eHQP(Stack& stack);
         
         /**
         * @brief solve solve the optimization problem by minimizing the error in the weighted least squares sense

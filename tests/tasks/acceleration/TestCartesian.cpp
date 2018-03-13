@@ -4,7 +4,7 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <gtest/gtest.h>
 #include <XBotInterface/ModelInterface.h>
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
@@ -50,7 +50,7 @@ protected:
         autostack = (l_arm + r_arm)/(postural);
         autostack->update(_q);
 
-        eHQP.reset(new OpenSoT::solvers::DampedPseudoInverse(autostack->getStack()));
+        eHQP.reset(new OpenSoT::solvers::eHQP(autostack->getStack()));
 
     }
 
@@ -99,7 +99,7 @@ protected:
     Eigen::Affine3d _l_arm_ref, _r_arm_ref;
     OpenSoT::tasks::acceleration::Cartesian::Ptr l_arm, r_arm;
     OpenSoT::AutoStack::Ptr autostack;
-    OpenSoT::solvers::DampedPseudoInverse::Ptr eHQP;
+    OpenSoT::solvers::eHQP::Ptr eHQP;
 };
 
 TEST_F(testCartesianTask, testCartesianTask_)

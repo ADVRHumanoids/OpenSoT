@@ -158,7 +158,7 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
                             src/solvers/BackEndFactory.cpp
                             src/solvers/iHQP.cpp
                             src/solvers/QPOasesBackEnd.cpp
-                            src/solvers/DampedPseudoInverse.cpp)
+                            src/solvers/eHQP.cpp)
 if(${osqp_FOUND})
     set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/OSQPBackEnd.cpp)
 endif()

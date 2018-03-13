@@ -1,4 +1,4 @@
-#include <OpenSoT/solvers/DampedPseudoInverse.h>
+#include <OpenSoT/solvers/eHQP.h>
 #include <iostream>
 #include <cmath>
 
@@ -9,7 +9,7 @@
 
 using namespace OpenSoT::solvers;
 
-DampedPseudoInverse::DampedPseudoInverse(Stack& stack) : Solver<Eigen::MatrixXd, Eigen::VectorXd>(stack), sigma_min(Eigen::NumTraits<double>::epsilon())
+eHQP::eHQP(Stack& stack) : Solver<Eigen::MatrixXd, Eigen::VectorXd>(stack), sigma_min(Eigen::NumTraits<double>::epsilon())
 {
     if(stack.size() > 0)
     {
@@ -58,7 +58,7 @@ DampedPseudoInverse::DampedPseudoInverse(Stack& stack) : Solver<Eigen::MatrixXd,
     }
 }
 
-bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
+bool eHQP::solve(Eigen::VectorXd& solution)
 {
     solution.setZero(solution.size());
     for(unsigned int i = 1; i <= _tasks.size(); ++i)
@@ -92,7 +92,7 @@ bool DampedPseudoInverse::solve(Eigen::VectorXd& solution)
 }
 
 #if EIGEN_MINOR_VERSION <= 0
-Eigen::MatrixXd DampedPseudoInverse::getDampedPinv(  const Eigen::MatrixXd& J,
+Eigen::MatrixXd eHQP::getDampedPinv(  const Eigen::MatrixXd& J,
                         const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                         const Eigen::FullPivLU<Eigen::MatrixXd>& fpl) const
 {
@@ -118,7 +118,7 @@ Eigen::MatrixXd DampedPseudoInverse::getDampedPinv(  const Eigen::MatrixXd& J,
     return svd.matrixV()* singularValuesInv *svd.matrixU().transpose();
 }
 #else
-Eigen::MatrixXd DampedPseudoInverse::getDampedPinv( const Eigen::MatrixXd& J,
+Eigen::MatrixXd eHQP::getDampedPinv( const Eigen::MatrixXd& J,
                                                     const Eigen::JacobiSVD<Eigen::MatrixXd>& svd) const
 {
     int rank = svd.rank();
@@ -143,13 +143,13 @@ Eigen::MatrixXd DampedPseudoInverse::getDampedPinv( const Eigen::MatrixXd& J,
 }
 #endif
 
-double DampedPseudoInverse::getSigmaMin() const
+double eHQP::getSigmaMin() const
 {
     return sigma_min;
 }
 
 #if EIGEN_MINOR_VERSION <= 0
-void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
+void eHQP::setSigmaMin(const double& sigma_min)
 {
     if(sigma_min > 0)
     {
@@ -160,7 +160,7 @@ void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
     }
 }
 #else
-void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
+void eHQP::setSigmaMin(const double& sigma_min)
 {
     if(sigma_min > 0)
     {
@@ -175,7 +175,7 @@ void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
 }
 #endif
 
-void DampedPseudoInverse::printProblemInformation(const int problem_number, const std::string& problem_id,
+void eHQP::printProblemInformation(const int problem_number, const std::string& problem_id,
                                       const std::string& constraints_id, const std::string& bounds_id)
 {
     std::cout<<std::endl;
