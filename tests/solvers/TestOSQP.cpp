@@ -2,6 +2,7 @@
 #include <OpenSoT/solvers/QPOasesBackEnd.h>
 #include <qpOASES.hpp>
 #include <gtest/gtest.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
 
 namespace {
 
@@ -112,6 +113,89 @@ TEST_F(testOSQPProblem, testSimpleProblem)
         EXPECT_NEAR((s_qpoases - s_osqp).norm(),0.0, 1e-12);
     }
 
+}
+
+void initializeIfNeeded()
+{
+    static bool is_initialized = false;
+
+    if(!is_initialized) {
+        time_t seed = time(NULL);
+        seed48((unsigned short*)(&seed));
+        srand((unsigned int)(seed));
+
+        is_initialized = true;
+    }
+
+}
+
+double getRandomAngle()
+{
+    initializeIfNeeded();
+    return drand48()*2.0*M_PI-M_PI;
+}
+
+double getRandomAngle(const double min, const double max)
+{
+    initializeIfNeeded();
+    assert(min <= max);
+    if(min < -M_PI || max > M_PI)
+        return getRandomAngle();
+
+    return (double)rand()/RAND_MAX * (max-min) + min;
+}
+
+Eigen::VectorXd getRandomAngles(const Eigen::VectorXd &min,
+                                               const Eigen::VectorXd &max,
+                                               const int size)
+{
+    initializeIfNeeded();
+    Eigen::VectorXd q(size);
+    assert(min.size() >= size);
+    assert(max.size() >= size);
+    for(unsigned int i = 0; i < size; ++i)
+        q(i) = getRandomAngle(min[i],max[i]);
+    return q;
+}
+
+TEST_F(testOSQPProblem, testTask)
+{
+    Eigen::VectorXd q_ref(10); q_ref.setZero(q_ref.size());
+    Eigen::VectorXd q(q_ref.size()); q.setZero(q_ref.size());
+    for(unsigned int i = 0; i < q.size(); ++i)
+        q[i] = getRandomAngle();
+
+    OpenSoT::tasks::velocity::Postural postural_task(q);
+    postural_task.setReference(q_ref);
+    postural_task.update(q);
+
+    Eigen::MatrixXd H(q.size(),q.size()); H.setIdentity(H.rows(), H.cols());
+    Eigen::VectorXd g(-1.0*postural_task.getb());
+
+    OpenSoT::solvers::OSQPBackEnd qp_postural_problem(postural_task.getXSize(), 0);
+    qp_postural_problem.initProblem(H,g,Eigen::MatrixXd(0,0),Eigen::VectorXd(0),Eigen::VectorXd(0),Eigen::VectorXd(0),Eigen::VectorXd(0));
+
+    Eigen::VectorXd dq = qp_postural_problem.getSolution();
+
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        q += dq;
+        postural_task.update(q);
+
+        qp_postural_problem.updateTask(H, -1.0*postural_task.getb());
+
+        EXPECT_TRUE(qp_postural_problem.solve());
+        dq = qp_postural_problem.getSolution();
+
+        std::cout<<"dq: "<<dq.transpose()<<std::endl;
+    }
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
+
+
+    std::cout<<"q+dq: "<<(q + dq).transpose()<<std::endl;
+    std::cout<<"q_ref: "<<q_ref.transpose()<<std::endl;
 }
 
 }

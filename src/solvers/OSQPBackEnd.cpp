@@ -29,14 +29,17 @@ void OSQPBackEnd::setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A)
 
 bool OSQPBackEnd::solve()
 {
-    _Apiled.set(_A);
-    _Apiled.pile(I);
+    if(_A.rows() > 0)
+    {
+        _Apiled.set(_A);
+        _Apiled.pile(I);
 
-    _lApiled.set(_lA);
-    _lApiled.pile(_l);
+        _lApiled.set(_lA);
+        _lApiled.pile(_l);
 
-    _uApiled.set(_uA);
-    _uApiled.pile(_u);
+        _uApiled.set(_uA);
+        _uApiled.pile(_u);
+    }
 
     _Asp = _Apiled.generate_and_get().sparseView();
     _Psp = _H.sparseView();
@@ -95,14 +98,17 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
-    _Apiled.pile(_A);
-    _Apiled.pile(I);
+    if(_A.rows() > 0)
+    {
+        _Apiled.pile(_A);
+        _Apiled.pile(I);
 
-    _lApiled.pile(_lA);
-    _lApiled.pile(_l);
+        _lApiled.pile(_lA);
+        _lApiled.pile(_l);
 
-    _uApiled.pile(_uA);
-    _uApiled.pile(_u);
+        _uApiled.pile(_uA);
+        _uApiled.pile(_u);
+    }
 
     if(!(_lApiled.rows() == _uApiled.rows())){
         XBot::Logger::error("lApiled size: %i \n", _lApiled.rows());
