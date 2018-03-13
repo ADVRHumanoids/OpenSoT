@@ -176,18 +176,24 @@ void DampedPseudoInverse::setSigmaMin(const double& sigma_min)
 #endif
 
 void DampedPseudoInverse::printProblemInformation(const int problem_number, const std::string& problem_id,
-                    const std::string& constraints_id, const std::string& bounds_id)
+                                      const std::string& constraints_id, const std::string& bounds_id)
 {
     std::cout<<std::endl;
     if(problem_number == -1)
-        std::cout<<GREEN<<"PROBLEM ID: "<<DEFAULT<<problem_id<<std::endl;
+        XBot::Logger::info("PROBLEM ID: %s \n", problem_id.c_str());
     else
-        std::cout<<GREEN<<"PROBLEM "<<problem_number<<" ID: "<<DEFAULT<<problem_id<<std::endl;
-    std::cout<<GREEN<<"sigman _min: "<<DEFAULT<<this->sigma_min<<std::endl;
-    std::cout<<GREEN<<"CONSTRAINTS ID: "<<DEFAULT<<constraints_id<<std::endl;
-    std::cout<<GREEN<<"     # OF CONSTRAINTS: "<<DEFAULT<<0<<std::endl;
-    std::cout<<GREEN<<"BOUNDS ID: "<<DEFAULT<<bounds_id<<std::endl;
-    std::cout<<GREEN<<"     # OF BOUNDS: "<<DEFAULT<<0<<std::endl;
-    std::cout<<GREEN<<"# OF VARIABLES: "<<DEFAULT<<_x_size<<std::endl;
-    std::cout<<std::endl;
+        XBot::Logger::info("PROBLEM %i ID: %s \n", problem_number, problem_id.c_str());
+
+    XBot::Logger::info("CONSTRAINTS ID: %s \n", constraints_id.c_str());
+    XBot::Logger::info("    # OF CONSTRAINTS: %i \n", 0);
+
+    XBot::Logger::info("BOUNDS ID: %s \n", bounds_id.c_str());
+    XBot::Logger::info("    # OF BOUNDS: %i \n", 0);
+
+    XBot::Logger::info("# OF VARIABLES: %i \n", _x_size);
+
+    XBot::Logger::info("sigman _min: %f", this->sigma_min);
+
+    XBot::Logger::info("\n");
 }
+
