@@ -32,13 +32,21 @@ bool OSQPBackEnd::solve()
     if(_A.rows() > 0)
     {
         _Apiled.set(_A);
-        _Apiled.pile(I);
-
         _lApiled.set(_lA);
-        _lApiled.pile(_l);
-
         _uApiled.set(_uA);
-        _uApiled.pile(_u);
+
+        if(_l.rows() > 0)
+        {
+            _Apiled.pile(I);
+            _lApiled.pile(_l);
+            _uApiled.pile(_u);
+        }
+    }
+    else if(_l.rows() > 0)
+    {
+        _Apiled.set(I);
+        _lApiled.set(_l);
+        _uApiled.set(_u);
     }
 
     _Asp = _Apiled.generate_and_get().sparseView();
@@ -101,12 +109,17 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     if(_A.rows() > 0)
     {
         _Apiled.pile(_A);
-        _Apiled.pile(I);
 
         _lApiled.pile(_lA);
-        _lApiled.pile(_l);
 
         _uApiled.pile(_uA);
+
+    }
+
+    if(_l.rows() > 0)
+    {
+        _Apiled.pile(I);
+        _lApiled.pile(_l);
         _uApiled.pile(_u);
     }
 
