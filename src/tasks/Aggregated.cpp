@@ -99,8 +99,10 @@ void Aggregated::generateAll() {
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
-        _tmpA.pile(t->getWeight()*t->getA());
-        _tmpb.pile(t->getWeight()*t->getb());
+//        _tmpA.pile(t->getWeight()*t->getA()); //This is potentially not RT safe
+//        _tmpb.pile(t->getWeight()*t->getb());
+        _tmpA.pile(t->getWA());
+        _tmpb.pile(t->getWb());
     }
 
     _A = _tmpA.generate_and_get();
