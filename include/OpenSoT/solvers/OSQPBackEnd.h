@@ -48,7 +48,7 @@ private:
     typedef Eigen::SparseMatrix<double> SparseMatrix;
     typedef Eigen::SparseMatrix<double, Eigen::RowMajor> SparseMatrixRowMajor;
     
-    void __generate_data_struct();
+    void __generate_data_struct(const int number_of_variables, const int number_of_constraints, const int number_of_bounds);
     void update_data_struct();
     
     void upper_triangular_sparse_update();
@@ -82,10 +82,7 @@ private:
     boost::shared_ptr<csc> _Acsc;
     boost::shared_ptr<csc> _Pcsc;
 
-    /**
-    * @brief toData copies all the internal Eigen Matrices to OSQPData
-    */
-    void toData();
+
 
 //        void print_csc_matrix_raw(csc* a, const std::string& name);
 

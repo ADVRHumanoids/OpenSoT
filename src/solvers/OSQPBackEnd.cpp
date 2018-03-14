@@ -24,17 +24,15 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
     _data.reset(new OSQPData());
     _Pcsc.reset(new csc());
     _Acsc.reset(new csc());
-    
-    _lb_piled.setConstant(getNumVariables() + getNumConstraints(), -1.0);
-    _ub_piled.setConstant(getNumVariables() + getNumConstraints(),  1.0);
- 
-    __generate_data_struct();
-    
+       
     
 }
 
-void OSQPBackEnd::__generate_data_struct()
+void OSQPBackEnd::__generate_data_struct(const int number_of_variables, const int number_of_constraints, const int number_of_bounds)
 {
+    _lb_piled.setConstant(number_of_bounds + number_of_constraints, -1.0);
+    _ub_piled.setConstant(number_of_bounds + number_of_constraints,  1.0);
+
     /* Set appropriate sparsity pattern to P (upper triangular) */
     
     Eigen::MatrixXd sp_pattern, ones;
@@ -49,13 +47,12 @@ void OSQPBackEnd::__generate_data_struct()
     setCSCMatrix(_Pcsc.get(), _Psparse);
     _Pcsc->x = _P_values.data();
     
-    std::cout << "Psparse \n" << _Psparse << std::endl;
     
     /* Set appropriate sparsity pattern to A (dense + diagonal) */
-    ones.setOnes(getNumConstraints(), getNumVariables());
-    sp_pattern.setZero(getNumConstraints() + getNumVariables(), getNumVariables());
-    sp_pattern.topRows(getNumConstraints()) = ones;
-    sp_pattern.bottomRows(getNumVariables()) = Eigen::MatrixXd::Identity(getNumVariables(), getNumVariables());
+    ones.setOnes(number_of_constraints, number_of_variables);
+    sp_pattern.setZero(number_of_constraints + number_of_bounds, number_of_variables);
+    sp_pattern.topRows(number_of_constraints) = ones;
+    sp_pattern.bottomRows(number_of_bounds) = Eigen::MatrixXd::Identity(number_of_bounds, number_of_bounds);
     
     _Asparse_upper = ones.sparseView();
     _Asparse = sp_pattern.sparseView();
@@ -70,16 +67,14 @@ void OSQPBackEnd::__generate_data_struct()
     
     /* Fill data */
     
-    _data->n = getNumVariables();
-    _data->m = getNumConstraints() + getNumVariables();
+    _data->n = number_of_variables;
+    _data->m = number_of_constraints + number_of_bounds;
     _data->l = _lb_piled.data();
     _data->u = _ub_piled.data();
     _data->q = _g.data();
     _data->A = _Acsc.get();
     _data->P = _Pcsc.get();
-    
-    std::cout << "l: " << _data->l << std::endl;
-    std::cout << "u: " << _data->u << std::endl;
+
     
     
 }
@@ -131,42 +126,48 @@ bool OSQPBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
                                 const Eigen::Ref<const Eigen::VectorXd>& lA, 
                                 const Eigen::Ref<const Eigen::VectorXd>& uA)
 {
-    bool success = BackEnd::updateConstraints(A, lA, uA);
-    
-    if(!success)
+    if(A.rows())
     {
-        return false;
-    }
-        
-    /* Update values in A upper part (constraints) */
-    memcpy(_Asparse_upper.valuePtr(), A.data(), A.size()*sizeof(double));
-    _Asparse_rowmaj.topRows(getNumConstraints()) = _Asparse_upper;
-    _Asparse = _Asparse_rowmaj;
+        bool success = BackEnd::updateConstraints(A, lA, uA);
 
-    setCSCMatrix(_Acsc.get(), _Asparse); // Asparse may be reallocated???
-    
-    /* Update constraints bounds */
-    _lb_piled.head(getNumConstraints()) = lA;
-    _ub_piled.head(getNumConstraints()) = uA;
-    _data->l = _lb_piled.data();
-    _data->u = _ub_piled.data();
+        if(!success)
+        {
+            return false;
+        }
+
+        /* Update values in A upper part (constraints) */
+        memcpy(_Asparse_upper.valuePtr(), A.data(), A.size()*sizeof(double));
+        _Asparse_rowmaj.topRows(getNumConstraints()) = _Asparse_upper;
+        _Asparse = _Asparse_rowmaj;
+
+        setCSCMatrix(_Acsc.get(), _Asparse); // Asparse may be reallocated???
+
+        /* Update constraints bounds */
+        _lb_piled.head(getNumConstraints()) = lA;
+        _ub_piled.head(getNumConstraints()) = uA;
+        _data->l = _lb_piled.data();
+        _data->u = _ub_piled.data();
+    }
     
     return true;
 }
 
 bool OSQPBackEnd::updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& u)
 {
-    bool success =  OpenSoT::solvers::BackEnd::updateBounds(l, u);
-    
-    if(!success)
+    if(l.rows() > 0)
     {
-        return false;
+        bool success =  OpenSoT::solvers::BackEnd::updateBounds(l, u);
+
+        if(!success)
+        {
+            return false;
+        }
+
+        _lb_piled.tail(getNumVariables()) = l;
+        _ub_piled.tail(getNumVariables()) = u;
+        _data->l = _lb_piled.data(); // lb_piled may be reallocated???
+        _data->u = _ub_piled.data(); // ub_piled may be reallocated???
     }
-    
-    _lb_piled.tail(getNumVariables()) = l;
-    _ub_piled.tail(getNumVariables()) = u;
-    _data->l = _lb_piled.data(); // lb_piled may be reallocated???
-    _data->u = _ub_piled.data(); // ub_piled may be reallocated???
     
     return true;
 }
@@ -207,10 +208,14 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+    __generate_data_struct(H.rows(), A.rows(), l.size());
+
     bool success = true;
     success = updateTask(H, g) && success;
-    success = updateConstraints(A, lA, uA) && success;
-    success = updateBounds(l, u) && success;
+    if(A.rows() > 0)
+        success = updateConstraints(A, lA, uA) && success;
+    if(l.rows() > 0)
+        success = updateBounds(l, u) && success;
     
     if( ((_ub_piled - _lb_piled).array() < 0).any() )
     {
@@ -229,21 +234,6 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     success = solve() && success;
     
     return success;
-}
-
-
-void OSQPBackEnd::toData()
-{
-    _data->n = _H.rows(); //number of variables
-    _data->m = _A.rows() + _data->n; //number of constraints + bounds
-
-    _data->P = _Pcsc.get(); //Hessian
-    _data->A = _Acsc.get(); //Constraints
-
-    _data->q = _g.data(); //Gradient
-    _data->l = _lb_piled.data(); //Constraints lower
-    _data->u = _ub_piled.data(); //Constraints lower
-
 }
 
 //void OSQPBackEnd::print_csc_matrix_raw(csc* a, const std::string& name)

@@ -118,8 +118,8 @@ TEST_F(testOSQPProblem, testSimpleProblem)
 
         Eigen::VectorXd s_osqp = testProblemOSQP.getSolution();
         Eigen::VectorXd s_qpoases = testProblemQPOASES.getSolution();
-        EXPECT_EQ(-sp.g[0], s_osqp[0]);
-        EXPECT_EQ(-sp.g[1], s_osqp[1]);
+        EXPECT_NEAR(-sp.g[0], s_osqp[0], 1e-12);
+        EXPECT_NEAR(-sp.g[1], s_osqp[1], 1e-12);
         EXPECT_NEAR((s_qpoases - s_osqp).norm(),0.0, 1e-12);
     }
 
@@ -394,11 +394,13 @@ TEST_F(testOSQPProblem, testContructor2Problems)
                                                        "l_wrist", "Waist"));
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
                 new OpenSoT::tasks::velocity::Postural(q));
+    cartesian_task->setLambda(0.1);
+    postural_task->setLambda(0.1);
 
     postural_task->setReference(q);
     cartesian_task->setReference(T_init.matrix());
 
-    int t = 50;
+    int t = 100;
     //Constraints set to the Cartesian Task
     Eigen::VectorXd q_min, q_max;
     _model_ptr->getJointLimits(q_min, q_max);
@@ -412,7 +414,7 @@ TEST_F(testOSQPProblem, testContructor2Problems)
     joint_limits->setBoundScaling((double)(1.0/t));
 
     VelocityLimits::Ptr joint_velocity_limits(
-                new VelocityLimits(0.3, (double)(1.0/t), q.size()));
+                new VelocityLimits(1.0, (double)(1.0/t), q.size()));
 
     std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
     joint_constraints_list.push_back(joint_limits);
