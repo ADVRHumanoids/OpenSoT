@@ -16,9 +16,10 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
     _P_values.resize(getNumVariables()*(getNumVariables() + 1)/2);
     
     _settings.reset(new OSQPSettings());
+     osqp_set_default_settings(_settings.get());
     _settings->verbose = 0;
     
-    osqp_set_default_settings(_settings.get());
+   
     
     _data.reset(new OSQPData());
     _Pcsc.reset(new csc());
@@ -43,10 +44,12 @@ void OSQPBackEnd::__generate_data_struct()
     sp_pattern.triangularView<Eigen::Upper>() = ones;
     
     _Psparse = sp_pattern.sparseView();
+    _Psparse.makeCompressed();
     
     setCSCMatrix(_Pcsc.get(), _Psparse);
+    _Pcsc->x = _P_values.data();
     
-    
+    std::cout << "Psparse \n" << _Psparse << std::endl;
     
     /* Set appropriate sparsity pattern to A (dense + diagonal) */
     ones.setOnes(getNumConstraints(), getNumVariables());
@@ -57,6 +60,10 @@ void OSQPBackEnd::__generate_data_struct()
     _Asparse_upper = ones.sparseView();
     _Asparse = sp_pattern.sparseView();
     _Asparse_rowmaj = sp_pattern.sparseView();
+    
+    _Asparse_upper.makeCompressed();
+    _Asparse.makeCompressed();
+    _Asparse_rowmaj.makeCompressed();
     
     setCSCMatrix(_Acsc.get(), _Asparse);
     
@@ -71,7 +78,14 @@ void OSQPBackEnd::__generate_data_struct()
     _data->A = _Acsc.get();
     _data->P = _Pcsc.get();
     
+    std::cout << "l: " << _data->l << std::endl;
+    std::cout << "u: " << _data->u << std::endl;
     
+    
+}
+
+void OpenSoT::solvers::OSQPBackEnd::update_data_struct()
+{
 }
 
 
@@ -102,6 +116,10 @@ bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
         idx += c+1;
     }
     
+//     std::cout << "Pvalues: " << _P_values.transpose() << std::endl;
+    setCSCMatrix(_Pcsc.get(), _Psparse);
+    _data->P->x = _P_values.data();
+    _data->q = _g.data();
     
     return true;
 }
@@ -124,10 +142,14 @@ bool OSQPBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
     memcpy(_Asparse_upper.valuePtr(), A.data(), A.size()*sizeof(double));
     _Asparse_rowmaj.topRows(getNumConstraints()) = _Asparse_upper;
     _Asparse = _Asparse_rowmaj;
+
+    setCSCMatrix(_Acsc.get(), _Asparse); // Asparse may be reallocated???
     
     /* Update constraints bounds */
     _lb_piled.head(getNumConstraints()) = lA;
     _ub_piled.head(getNumConstraints()) = uA;
+    _data->l = _lb_piled.data();
+    _data->u = _ub_piled.data();
     
     return true;
 }
@@ -143,6 +165,8 @@ bool OSQPBackEnd::updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& 
     
     _lb_piled.tail(getNumVariables()) = l;
     _ub_piled.tail(getNumVariables()) = u;
+    _data->l = _lb_piled.data(); // lb_piled may be reallocated???
+    _data->u = _ub_piled.data(); // ub_piled may be reallocated???
     
     return true;
 }
@@ -158,11 +182,12 @@ bool OSQPBackEnd::solve()
     osqp_update_P(_workspace.get(), _P_values.data(), nullptr, _P_values.size());
     
     
-    bool exitflag = osqp_solve(_workspace.get());
+    
+    int exitflag = osqp_solve(_workspace.get());
     
     _solution = Eigen::Map<Eigen::VectorXd>(_workspace->solution->x, _solution.size());
     
-    return exitflag;
+    return exitflag == 0;
     
 }
 
@@ -187,7 +212,19 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     success = updateConstraints(A, lA, uA) && success;
     success = updateBounds(l, u) && success;
     
+    if( ((_ub_piled - _lb_piled).array() < 0).any() )
+    {
+        XBot::Logger::error("OSQP: invalid bounds\n");
+        return false;
+    }
+    
     _workspace.reset( osqp_setup(_data.get(), _settings.get()) );
+    
+    if(!_workspace)
+    {
+        XBot::Logger::error("OSQP: unable to setup workspace\n");
+        return false;
+    }
     
     success = solve() && success;
     

@@ -49,7 +49,7 @@ private:
     typedef Eigen::SparseMatrix<double, Eigen::RowMajor> SparseMatrixRowMajor;
     
     void __generate_data_struct();
-    void update_osqp_data();
+    void update_data_struct();
     
     void upper_triangular_sparse_update();
     
