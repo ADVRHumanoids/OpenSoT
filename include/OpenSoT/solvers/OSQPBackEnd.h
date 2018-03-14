@@ -77,7 +77,7 @@ private:
     SparseMatrix _Asparse, _Asparse_upper;
     SparseMatrixRowMajor _Asparse_rowmaj;
     SparseMatrix _Psparse;
-    Eigen::MatrixXd _Pdense;
+    Eigen::MatrixXd _Adense;
     Eigen::VectorXd _P_values;
 
     Eigen::MatrixXd _eye;

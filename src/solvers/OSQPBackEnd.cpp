@@ -31,7 +31,9 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
     
 }
 
-void OSQPBackEnd::__generate_data_struct(const int number_of_variables, const int number_of_constraints, const int number_of_bounds)
+void OSQPBackEnd::__generate_data_struct(const int number_of_variables, 
+                                         const int number_of_constraints, 
+                                         const int number_of_bounds)
 {
     _lb_piled.setConstant(number_of_bounds + number_of_constraints, -1.0);
     _ub_piled.setConstant(number_of_bounds + number_of_constraints,  1.0);
@@ -49,27 +51,28 @@ void OSQPBackEnd::__generate_data_struct(const int number_of_variables, const in
     
     setCSCMatrix(_Pcsc.get(), _Psparse);
     _Pcsc->x = _P_values.data();
-    
-    
+
+
     /* Set appropriate sparsity pattern to A (dense + diagonal) */
     ones.setOnes(number_of_constraints, number_of_variables);
     sp_pattern.setZero(number_of_constraints + number_of_bounds, number_of_variables);
     sp_pattern.topRows(number_of_constraints) = ones;
     sp_pattern.bottomRows(number_of_bounds) = Eigen::MatrixXd::Identity(number_of_bounds, number_of_bounds);
-    
-    _Asparse_upper = ones.sparseView();
+
     _Asparse = sp_pattern.sparseView();
-    _Asparse_rowmaj = sp_pattern.sparseView();
-    
-    _Asparse_upper.makeCompressed();
     _Asparse.makeCompressed();
-    _Asparse_rowmaj.makeCompressed();
-    
+
+    int bounds_defined = number_of_bounds > 0 ? 1 : 0;
+    _Adense.setOnes(number_of_constraints + bounds_defined, number_of_variables);
+
     setCSCMatrix(_Acsc.get(), _Asparse);
-    
-    
+    _Acsc->x = _Adense.data();
+
+
+
+
     /* Fill data */
-    
+
     _data->n = number_of_variables;
     _data->m = number_of_constraints + number_of_bounds;
     _data->l = _lb_piled.data();
@@ -137,14 +140,13 @@ bool OSQPBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
         {
             return false;
         }
+        
 
         /* Update values in A upper part (constraints) */
-        memcpy(_Asparse_upper.valuePtr(), _A.data(), _A.size()*sizeof(double));
-        _Asparse_rowmaj.topRows(getNumConstraints()) = _Asparse_upper;
-        _Asparse = _Asparse_rowmaj;
-
+        _Adense.topRows(getNumConstraints()) = _A;
         setCSCMatrix(_Acsc.get(), _Asparse); // Asparse may be reallocated???
-
+        _data->A->x = _Adense.data();
+        
         /* Update constraints bounds */
         _lb_piled.head(getNumConstraints()) = _lA;
         _ub_piled.head(getNumConstraints()) = _uA;
@@ -182,7 +184,7 @@ bool OSQPBackEnd::solve()
     
     osqp_update_lin_cost(_workspace.get(), _g.data());
     osqp_update_bounds(_workspace.get(), _lb_piled.data(), _ub_piled.data());
-    osqp_update_A(_workspace.get(), _Asparse.valuePtr(), nullptr, _Asparse.nonZeros());
+    osqp_update_A(_workspace.get(), _Adense.data(), nullptr, _Adense.size());
     osqp_update_P(_workspace.get(), _P_values.data(), nullptr, _P_values.size());
     
     
