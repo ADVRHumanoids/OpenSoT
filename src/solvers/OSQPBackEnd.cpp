@@ -105,19 +105,16 @@ bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
     {
         return false;
     }
-
-    if(_eps_regularisation > 0.){
-        _H += _eps_regularisation*_I.asDiagonal();}
     
     
     int idx = 0;
     for(int c = 0; c < getNumVariables(); c++)
     {
         _P_values.segment(idx, c+1) = _H.col(c).head(c+1);
+        _P_values.segment(idx, c+1)(c) += _eps_regularisation;
         idx += c+1;
     }
     
-//     std::cout << "Pvalues: " << _P_values.transpose() << std::endl;
     setCSCMatrix(_Pcsc.get(), _Psparse);
     _data->P->x = _P_values.data();
     _data->q = _g.data();
