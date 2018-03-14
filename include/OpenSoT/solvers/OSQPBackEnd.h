@@ -8,6 +8,8 @@
 #include <OpenSoT/utils/Piler.h>
 #include <Eigen/Sparse>
 
+#define OSQP_DEFAULT_EPS_REGULARISATION 0
+
 using namespace OpenSoT::utils;
 
 namespace OpenSoT{
@@ -20,7 +22,8 @@ public:
     typedef MatrixPiler VectorPiler;
 
     OSQPBackEnd(const int number_of_variables,
-                const int number_of_constraints);
+                const int number_of_constraints,
+                const double eps_regularisation = OSQP_DEFAULT_EPS_REGULARISATION);
     
     ~OSQPBackEnd();
 
@@ -81,6 +84,9 @@ private:
 
     boost::shared_ptr<csc> _Acsc;
     boost::shared_ptr<csc> _Pcsc;
+
+    double _eps_regularisation;
+    Eigen::VectorXd _I;
 
 
 

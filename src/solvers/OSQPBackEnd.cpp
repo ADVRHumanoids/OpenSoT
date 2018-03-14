@@ -4,8 +4,11 @@
 using namespace OpenSoT::solvers;
 
 OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
-                         const int number_of_constraints):
-    BackEnd(number_of_variables, number_of_constraints)
+                         const int number_of_constraints,
+                         const double eps_regularisation):
+    BackEnd(number_of_variables, number_of_constraints),
+    _eps_regularisation(eps_regularisation),
+    _I(number_of_variables)
 {
     
     #ifdef DLONG
@@ -102,12 +105,15 @@ bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
     {
         return false;
     }
+
+    if(_eps_regularisation > 0.){
+        _H += _eps_regularisation*_I.asDiagonal();}
     
     
     int idx = 0;
     for(int c = 0; c < getNumVariables(); c++)
     {
-        _P_values.segment(idx, c+1) = H.col(c).head(c+1);
+        _P_values.segment(idx, c+1) = _H.col(c).head(c+1);
         idx += c+1;
     }
     
@@ -136,15 +142,15 @@ bool OSQPBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
         }
 
         /* Update values in A upper part (constraints) */
-        memcpy(_Asparse_upper.valuePtr(), A.data(), A.size()*sizeof(double));
+        memcpy(_Asparse_upper.valuePtr(), _A.data(), _A.size()*sizeof(double));
         _Asparse_rowmaj.topRows(getNumConstraints()) = _Asparse_upper;
         _Asparse = _Asparse_rowmaj;
 
         setCSCMatrix(_Acsc.get(), _Asparse); // Asparse may be reallocated???
 
         /* Update constraints bounds */
-        _lb_piled.head(getNumConstraints()) = lA;
-        _ub_piled.head(getNumConstraints()) = uA;
+        _lb_piled.head(getNumConstraints()) = _lA;
+        _ub_piled.head(getNumConstraints()) = _uA;
         _data->l = _lb_piled.data();
         _data->u = _ub_piled.data();
     }
@@ -163,8 +169,8 @@ bool OSQPBackEnd::updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& 
             return false;
         }
 
-        _lb_piled.tail(getNumVariables()) = l;
-        _ub_piled.tail(getNumVariables()) = u;
+        _lb_piled.tail(getNumVariables()) = _l;
+        _ub_piled.tail(getNumVariables()) = _u;
         _data->l = _lb_piled.data(); // lb_piled may be reallocated???
         _data->u = _ub_piled.data(); // ub_piled may be reallocated???
     }
@@ -208,6 +214,7 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+    _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u; //this is needed since updateX should be used just to update and not init (maybe can be done in the base class)
     __generate_data_struct(H.rows(), A.rows(), l.size());
 
     bool success = true;

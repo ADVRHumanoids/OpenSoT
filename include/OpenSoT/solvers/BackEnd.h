@@ -5,8 +5,6 @@
 #include <XBotInterface/Logger.hpp>
 #include <boost/any.hpp>
 
-#define DEFAULT_EPS_REGULARISATION 2E2
-
 namespace OpenSoT{
     namespace solvers{
 

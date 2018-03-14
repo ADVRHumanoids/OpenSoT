@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/Task.h>
 
-#define DEFAULT_EPS_REGULARISATION 2E2
+#define QPOASES_DEFAULT_EPS_REGULARISATION 2E2
 
 namespace qpOASES {
     class SQProblem;
@@ -36,7 +36,7 @@ namespace OpenSoT{
         QPOasesBackEnd(const int number_of_variables,
                        const int number_of_constraints,
                        OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
-                       const double eps_regularisation = DEFAULT_EPS_REGULARISATION); //2E2
+                       const double eps_regularisation = QPOASES_DEFAULT_EPS_REGULARISATION); //2E2
 
         /**
           * @brief ~QPOasesProblem destructor

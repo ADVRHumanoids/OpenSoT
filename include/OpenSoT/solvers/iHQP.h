@@ -29,6 +29,8 @@
 
 using namespace OpenSoT::utils;
 
+#define DEFAULT_EPS_REGULARISATION 2E2 //THIS VALUE IS HISTORICALLY USED IN QPOASES
+
 namespace OpenSoT{
     namespace solvers{
 
