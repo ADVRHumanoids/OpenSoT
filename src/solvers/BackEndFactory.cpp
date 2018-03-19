@@ -10,7 +10,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
                     QPOasesBackEnd(number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     if(be_solver == solver_back_ends::OSQP)
         return boost::make_shared<OSQPBackEnd>(
-                    OSQPBackEnd(number_of_variables, number_of_constraints));
+                    OSQPBackEnd(number_of_variables, number_of_constraints, eps_regularisation));
     else
         throw std::runtime_error("Back-end is not available!");
 
