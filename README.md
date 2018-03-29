@@ -5,11 +5,19 @@ Most of the code has been ported to Eigen to be real time safe. The Lite version
 
 An Open Source Task Solving library with Constraints
 
+Available Solvers:
+------------------
+- iHQP: implemented using qpOASES (https://projects.coin-or.org/qpOASES) or osqp (http://osqp.readthedocs.io/en/latest/)
+- eHQP: implemented using Eigen-based Damped Pseudo Inverse
+
+The default iHQP solver is based on qpOASES. 
+
 Introduction
 ------------
 OpenSoT is a library dedicated to hierarchical whole-body control of robots subject to constraints such as joint limits, joint velocities, cartesian constraints... The main idea behind OpenSoT is to decouple Task and Constraints description from the Solver used to compute the robot commands and the Type of Control available on the robot to perform them.
 
-OpenSoT is developed under the European Project WALK-MAN: http://www.walk-man.eu/.
+OpenSoT was initially developed under the EU Project WALK-MAN (http://www.walk-man.eu/).
+At the moment the project is developed under the EU Projects CogIMon (https://cogimon.eu/) and CENTAURO (http://www.centauro-project.eu/). 
 
 Its homepage resides in http://github.com/robotology-playground/OpenSoT
 You can also find a wiki there.
@@ -18,17 +26,17 @@ An online version of this documentation can be obtained in http://opensot.github
 
 Some videos from OpenSoT channel in YouTube:
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=Avs6pqUCqVo
-" target="_blank"><img src="http://img.youtube.com/vi/Avs6pqUCqVo/0.jpg" 
-alt="OpenSoT + PI" width="480" height="360" border="10" /><br>OpenSoT + PI</a>
+<a href="https://www.youtube.com/watch?v=Q1u2vZ0dhh0
+" target="_blank"><img src="http://img.youtube.com/vi/Q1u2vZ0dhh0/0.jpg" 
+alt="Self Collision Avoidance" width="480" height="360" border="10" /><br>Self Collision Avoidance</a>
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=cBggRy7WPUE&list=UUkkZXunCN6eJwww1CeK7DrA
-" target="_blank"><img src="http://img.youtube.com/vi/cBggRy7WPUE/0.jpg" 
-alt="Minimum Effort + Drawing Task" width="480" height="360" border="10" /><br>Minimum Effort + Drawing Task</a>
+<a href="https://www.youtube.com/watch?v=-n3jxAZaK5Q
+" target="_blank"><img src="http://img.youtube.com/vi/-n3jxAZaK5Q/0.jpg" 
+alt="WALK-MAN Whole-Body, floating-base, walking" width="480" height="360" border="10" /><br>WALK-MAN Whole-Body, floating-base, walking</a>
 
-<a href="https://www.youtube.com/watch?v=aYwSLnBZtuA
-" target="_blank"><img src="http://img.youtube.com/vi/aYwSLnBZtuA/0.jpg" 
-alt="CoM Vs Waist Walking with the SoT" width="480" height="360" border="10" /><br>CoM Vs Waist Walking with the SoT</a>
+<a href="https://www.youtube.com/watch?v=W6ug-wtAfTk&t=3s
+" target="_blank"><img src="http://img.youtube.com/vi/W6ug-wtAfTk&t/0.jpg" 
+alt="Whole-body compliant control of iCub with OpenSoT" width="480" height="360" border="10" /><br>Whole-body compliant control of iCub with OpenSoT</a>
 
 Installation
 ------------
@@ -38,7 +46,6 @@ To Install OpenSoT, the recommended way is to use the OpenSoT-superbuild https:/
 Developers:
 -----------
 Enrico Mingo Hoffman  
-Alessio Rocchi  
 Arturo Laurenzi
 
 How to cite this work:
