@@ -24,7 +24,7 @@ You can also find a wiki there.
 
 An online version of this documentation can be obtained in http://opensot.github.io
 
-Some videos from OpenSoT channel in YouTube:
+Some videos from OpenSoT YouTube channel (https://www.youtube.com/channel/UCkkZXunCN6eJwww1CeK7DrA):
 
 <a href="https://www.youtube.com/watch?v=Q1u2vZ0dhh0
 " target="_blank"><img src="http://img.youtube.com/vi/Q1u2vZ0dhh0/0.jpg" 
@@ -33,10 +33,6 @@ alt="Self Collision Avoidance" width="480" height="360" border="10" /><br>Self C
 <a href="https://www.youtube.com/watch?v=-n3jxAZaK5Q
 " target="_blank"><img src="http://img.youtube.com/vi/-n3jxAZaK5Q/0.jpg" 
 alt="WALK-MAN Whole-Body, floating-base, walking" width="480" height="360" border="10" /><br>WALK-MAN Whole-Body, floating-base, walking</a>
-
-<a href="https://www.youtube.com/watch?v=W6ug-wtAfTk&t=3s
-" target="_blank"><img src="http://img.youtube.com/vi/W6ug-wtAfTk&t/0.jpg" 
-alt="Whole-body compliant control of iCub with OpenSoT" width="480" height="360" border="10" /><br>Whole-body compliant control of iCub with OpenSoT</a>
 
 Installation
 ------------
