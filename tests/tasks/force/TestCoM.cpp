@@ -1,29 +1,20 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/force/CoM.h>
-#include <yarp/sig/Vector.h>
-#include <yarp/math/Math.h>
 #include <cmath>
-#include <advr_humanoids_common_utils/test_utils.h>
 #include <fstream>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <OpenSoT/constraints/force/FrictionCone.h>
 #include <ros/ros.h>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <qpOASES.hpp>
 #include <OpenSoT/tasks/force/Wrench.h>
 #include <OpenSoT/constraints/force/WrenchLimits.h>
+#include <XBotInterface/ModelInterface.h>
 
-
-using namespace yarp::math;
-
-typedef idynutils2 iDynUtils;
-static void null_deleter(iDynUtils *) {}
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
-
 std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace{
@@ -49,35 +40,29 @@ class testForceCoM : public ::testing::Test {
 
 };
 
-Eigen::VectorXd getGoodInitialPosition1(iDynUtils& _robot) {
-    Eigen::VectorXd _q(_robot.iDynTree_model.getNrOfDOFs());
+Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
+    Eigen::VectorXd _q(_model_ptr->getJointNum());
     _q.setZero(_q.size());
-    _q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  -90.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("LForearmPlate")] =  -90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LShSag")] =  -90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LForearmPlate")] = -90.0*M_PI/180.0;
 
-    _q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  -90.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("RForearmPlate")] =  90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RShSag")] =  -90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RForearmPlate")] = -90.0*M_PI/180.0;
+
     return _q;
 }
 
 
 TEST_F(testForceCoM, testForceCoM_StaticCase) {
-    iDynUtils coman("coman",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
-    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-            (XBot::ModelInterface::getModel(_path_to_cfg));
-    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&coman, &null_deleter));
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -86,9 +71,10 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
 
 
-    Eigen::VectorXd q = getGoodInitialPosition1(coman);
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
 
-    coman.updateiDynTreeModel(q, true);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
     std::vector<std::string> links_in_contact;
     links_in_contact.push_back("r_sole");
@@ -167,8 +153,8 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
                 new OpenSoT::solvers::iHQP(stack_of_tasks,1E7));
     std::cout<<"Solver started"<<std::endl;
 
-
-    coman.updateiDynTreeModel(q, true);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
     force_com_task->update(contact_wrenches_d);
     wrench->update(contact_wrenches_d);
 
@@ -178,10 +164,8 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     EXPECT_TRUE(sot->solve(contact_wrenches_d));
     std::cout<<"contact_wrenches_d = [ "<<contact_wrenches_d<<" ]"<<std::endl;
 
-    yarp::sig::Matrix M(6+coman.iDynTree_model.getNrOfDOFs(),
-                        6+coman.iDynTree_model.getNrOfDOFs());
-    coman.iDynTree_model.getFloatingBaseMassMatrix(M);
-    double m = M(0,0);
+
+    double m = _model_ptr->getMass();
 
     EXPECT_NEAR(contact_wrenches_d[2] + contact_wrenches_d[8]
             + contact_wrenches_d[14], m*9.81, 1E-6);

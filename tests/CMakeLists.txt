@@ -106,6 +106,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testCartesianAccelerationTask
                   testCoMAccelerationTask
                   testContactFloatingBaseTask
+                  testCoMForceTask
 )
 
 if(${osqp_FOUND})
@@ -138,7 +139,6 @@ if(${YARP_FOUND})
                     testQPOases_ConvexHull
                     testQPOases_FF
                     testQPOases_StaticWalk
-                    testCoMForceTask
     )
 endif()
 
