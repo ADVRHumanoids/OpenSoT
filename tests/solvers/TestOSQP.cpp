@@ -186,7 +186,7 @@ TEST_F(testOSQPProblem, testTask)
     Eigen::VectorXd g(-1.0*postural_task.getb());
 
     OpenSoT::solvers::OSQPBackEnd qp_postural_problem(postural_task.getXSize(), 0);
-    qp_postural_problem.initProblem(H,g,Eigen::MatrixXd(0,0),Eigen::VectorXd(0),Eigen::VectorXd(0),Eigen::VectorXd(0),Eigen::VectorXd(0));
+    qp_postural_problem.initProblem(H,g,Eigen::MatrixXd(0,0),Eigen::VectorXd(),Eigen::VectorXd(),Eigen::VectorXd(),Eigen::VectorXd());
 
     Eigen::VectorXd dq = qp_postural_problem.getSolution();
 
