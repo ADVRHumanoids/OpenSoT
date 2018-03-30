@@ -232,6 +232,16 @@ bool iHQP::getOptions(const unsigned int i, boost::any& opt)
     return true;
 }
 
+bool iHQP::getObjective(const unsigned int i, double& val)
+{
+    if(i > _qp_stack_of_tasks.size()){
+        XBot::Logger::error("ERROR Index out of range! \n");
+        return false;}
+
+    val = _qp_stack_of_tasks[i]->getObjective();
+    return true;
+}
+
 void iHQP::setActiveStack(const unsigned int i, const bool flag)
 {
     if(i >= 0 && i < _active_stacks.size())

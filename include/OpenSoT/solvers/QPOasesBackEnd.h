@@ -18,14 +18,14 @@ namespace OpenSoT{
     namespace solvers{
 
     /**
-     * @brief The QPOasesProblem class handle variables, options and execution of a
+     * @brief The QPOasesBackEnd class handle variables, options and execution of a
      * single qpOases problem. Is implemented using Eigen.
      * This represent the Back-End.
      */
     class QPOasesBackEnd:  public BackEnd{
     public:
         /**
-         * @brief QPOasesProblem constructor with creation of a QP problem.
+         * @brief QPOasesBackEnd constructor with creation of a QP problem.
          * @param number_of_variables of the QP problem
          * @param number_of_constraints of the QP problem
          * @param hessian_type of the QP problem
@@ -39,7 +39,7 @@ namespace OpenSoT{
                        const double eps_regularisation = QPOASES_DEFAULT_EPS_REGULARISATION); //2E2
 
         /**
-          * @brief ~QPOasesProblem destructor
+          * @brief ~QPOasesBackEnd destructor
           */
         ~QPOasesBackEnd();
 
@@ -166,17 +166,7 @@ namespace OpenSoT{
          */
         const qpOASES::Bounds& getActiveBounds(){return *_bounds;}
 
-        /**        inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
-        {
-            A.conservativeResize(A.rows()+B.rows(), A.cols());
-            A.block(A.rows()-B.rows(),0,B.rows(),A.cols())<<B;
-        }
-
-        inline void pile(Eigen::VectorXd &a, const Eigen::VectorXd &b)
-        {
-            a.conservativeResize(a.rows()+b.rows());
-            a.segment(a.rows()-b.rows(),b.rows())<<b;
-        }
+        /**
          * @brief getActiveConstraints return the active constraints of the solved QP problem
          * @return active constraints
          */
@@ -191,6 +181,13 @@ namespace OpenSoT{
          * @param bounds_id a string to identify the bounds associated to the problem
          */
         virtual void _printProblemInformation();
+
+        /**
+         * @brief getObjective return the value of the cost function at the optimum
+         * @return finite value: Optimal objective function value (QP was solved)
+         *            +infinity: QP was not yet solved
+         */
+        virtual double getObjective();
 
 
     protected:

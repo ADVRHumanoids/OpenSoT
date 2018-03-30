@@ -242,6 +242,11 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     return success;
 }
 
+double OSQPBackEnd::getObjective()
+{
+    return _workspace->info->obj_val;
+}
+
 //void OSQPBackEnd::print_csc_matrix_raw(csc* a, const std::string& name)
 //{
 //    XBot::Logger::info("%s->m: %i\n",name.c_str(), a->m);

@@ -302,6 +302,11 @@ void QPOasesBackEnd::_printProblemInformation()
     XBot::Logger::info("qpOASES # OF VARIABLES: %i\n", _problem->getNV());
 }
 
+double QPOasesBackEnd::getObjective()
+{
+    return _problem->getObjVal();
+}
+
 void QPOasesBackEnd::checkINFTY()
 {
     unsigned int constraints_size = _lA.rows();

@@ -141,6 +141,12 @@ namespace OpenSoT{
          */
         virtual void setOptions(const boost::any& options) = 0;
 
+        /**
+         * @brief getObjective to retrieve the value of the objective function
+         * @return the value of the objective function at the optimum
+         */
+        virtual double getObjective() = 0;
+
     protected:
         ///VIRTUAL METHODS
         /**

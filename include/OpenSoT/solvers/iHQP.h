@@ -95,19 +95,27 @@ namespace OpenSoT{
 
         /**
          * @brief setOptions set option to a particular task
-         * @param i number of task to set the option
+         * @param i number of stack to set the option
          * @param opt options for task i
-         * @return true if succeed
+         * @return false if i-th problem does not exists or does not succeed
          */
         bool setOptions(const unsigned int i, const boost::any &opt);
 
         /**
-         * @brief getOptions
-         * @param i
-         * @param opt
-         * @return
+         * @brief getOptions return the options of the i-th qp problem
+         * @param i number of stack to get the option
+         * @param opt a data structure which has to be converted to particular structure used by the BackEnd implementation
+         * @return false if i-th problem does not exists
          */
         bool getOptions(const unsigned int i, boost::any& opt);
+
+        /**
+         * @brief getObjective return the value of the objective function at the optimum for the i-th qp problem
+         * @param i number of stack to get the value of the objective function
+         * @param val value of the objective function at the optimum
+         * @return false if i-th problem does not exists
+         */
+        bool getObjective(const unsigned int i, double& val);
 
         /**
          * @brief setActiveStack select a stack to do not solve
