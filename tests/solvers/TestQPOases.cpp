@@ -655,18 +655,28 @@ TEST_F(testiHQP, testContructor1Problem)
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
     OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds);
+    double obj;
+    sot.getObjective(0, obj);
+    obj = norm(obj);
 
     EXPECT_TRUE(sot.getNumberOfTasks() == 1);
     Eigen::VectorXd dq(q.size());
     dq.setZero(q.size());
+    double obj_;
     for(unsigned int i = 0; i < 100; ++i)
     {
         postural_task->update(q);
         bounds->update(q);
 
         EXPECT_TRUE(sot.solve(dq));
+        sot.getObjective(0,obj_);
+        obj_ = norm(obj_);
+        EXPECT_TRUE(obj_ <= obj);
+        obj = obj_;
         Eigen::VectorXd _dq = dq;
         q += _dq;
+
+        std::cout<<"obj: "<<obj<<std::endl;
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)

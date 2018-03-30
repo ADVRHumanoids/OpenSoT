@@ -13,6 +13,9 @@ std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
+#define GREEN "\033[0;32m"
+#define DEFAULT "\033[0m"
+
 
 namespace {
 
@@ -478,6 +481,107 @@ TEST_F(testOSQPProblem, testContructor2Problems)
 
 
 }
+
+class testiHQP: public ::testing::Test
+{
+protected:
+
+    testiHQP()
+    {
+    }
+
+    virtual ~testiHQP() {
+    }
+
+    virtual void SetUp() {
+
+    }
+
+    virtual void TearDown() {
+
+    }
+};
+
+TEST_F(testiHQP, testContructor1Problem)
+{
+    XBot::ModelInterface::Ptr _model_ptr;
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
+    Eigen::VectorXd q_ref(q.size()); q_ref.setConstant(q.size(), M_PI);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+            new OpenSoT::tasks::velocity::Postural(q));
+    postural_task->setReference(q_ref);
+
+
+    Eigen::VectorXd q_min, q_max;
+    _model_ptr->getJointLimits(q_min, q_max);
+
+    JointLimits::Ptr joint_limits(
+        new JointLimits(q,
+                        q_max,
+                        q_min));
+    postural_task->setLambda(0.1);
+
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
+    bounds_list.push_back(joint_limits);
+
+    OpenSoT::constraints::Aggregated::Ptr bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+    stack_of_tasks.push_back(postural_task);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds, 1e-6, OpenSoT::solvers::solver_back_ends::OSQP);
+    double obj;
+    sot.getObjective(0, obj);
+    obj = norm(obj);
+    std::cout<<"obj: "<<obj<<std::endl;
+
+    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(q.size());
+    double obj_;
+    for(unsigned int i = 0; i < 100; ++i)
+    {
+        postural_task->update(q);
+        bounds->update(q);
+
+        EXPECT_TRUE(sot.solve(dq));
+        sot.getObjective(0,obj_);
+        obj_ = norm(obj_);
+        if(i > 0)
+        {
+            if(obj_ > 1e-9)
+                EXPECT_LE(obj_,obj);
+        }
+        obj = obj_;
+        Eigen::VectorXd _dq = dq;
+        q += _dq;
+
+        std::cout<<"obj: "<<obj<<std::endl;
+    }
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+    {
+        if(q_ref[i] >= q_max[i])
+        {
+            std::cout<<GREEN<<"On the Upper Bound!"<<DEFAULT<<std::endl;
+            EXPECT_NEAR( q[i], q_max[i], 1E-4);
+        }
+        else if(q_ref[i] <= q_min[i])
+        {
+            std::cout<<GREEN<<"On the Lower Bound!"<<DEFAULT<<std::endl;
+            EXPECT_NEAR( q[i], q_min[i], 1E-4);
+        }
+        else
+            EXPECT_NEAR( q[i], q_ref[i], 1E-4);
+
+    }
+}
+
 
 }
 
