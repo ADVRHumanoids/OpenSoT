@@ -65,6 +65,8 @@ void iHQP::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::V
         H = H.selfadjointView<Eigen::Upper>();
         g.noalias() = -1.0 * task->getATranspose() * task->getWb();
     }
+    
+    
 }
 
 void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& problem,

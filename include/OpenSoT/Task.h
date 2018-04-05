@@ -25,6 +25,7 @@
  #include <assert.h>
  #include <boost/shared_ptr.hpp>
  #include <XBotInterface/Logger.hpp>
+ #include <XBotInterface/ModelInterface.h>
 
  namespace OpenSoT {
 
@@ -360,6 +361,24 @@
                 return true;
             }
             return false;
+        }
+        
+        
+        virtual bool setActiveChainsMask(const std::vector<std::string>& active_chain_mask, 
+                                         XBot::ModelInterface::ConstPtr model)
+        {
+            _active_joints_mask.assign(_active_joints_mask.size(), false);
+            
+            for(const auto& ch : active_chain_mask){
+                
+                for(const auto& jid : model->chain(ch).getJointIds())
+                {
+                    _active_joints_mask[ model->getDofIndex(jid) ] = true;
+                }
+            }
+            
+            return true;
+            
         }
 
         /**
