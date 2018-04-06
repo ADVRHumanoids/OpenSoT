@@ -54,10 +54,12 @@ void QPOasesBackEnd::setDefaultOptions()
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
 
+    _opt.reset();
     _opt.reset(new qpOASES::Options(opt));
 }
 
 void QPOasesBackEnd::setOptions(const boost::any &options){
+    _opt.reset();
     _opt.reset(new qpOASES::Options(boost::any_cast<qpOASES::Options>(options)));
     _problem->setOptions(boost::any_cast<qpOASES::Options>(options));}
 
