@@ -150,6 +150,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/tasks/force/CoM.cpp
                     src/tasks/force/Wrench.cpp
+                    src/tasks/force/FloatingBase.cpp
                     src/tasks/floating_base/Contact.cpp
                     src/tasks/floating_base/IMU.cpp
                     )
