@@ -1,0 +1,160 @@
+#include <gtest/gtest.h>
+#include <OpenSoT/tasks/GenericTask.h>
+#include <OpenSoT/solvers/BackEndFactory.h>
+#include <OpenSoT/constraints/GenericConstraint.h>
+#include <OpenSoT/utils/Affine.h>
+#include <OpenSoT/solvers/iHQP.h>
+#include <OpenSoT/utils/AutoStack.h>
+#include <qpOASES/Options.hpp>
+
+namespace {
+
+class testGenericTask: public ::testing::Test
+{
+protected:
+
+    testGenericTask()
+    {
+        A.resize(1,2);
+        A.setRandom(1,2);
+        b.resize(1);
+        b.setRandom(1);
+        _generic_task = boost::make_shared<OpenSoT::tasks::GenericTask>(
+                    OpenSoT::tasks::GenericTask("test_task",A,b));
+    }
+
+    virtual ~testGenericTask() {
+
+    }
+
+    virtual void SetUp() {
+
+    }
+
+    virtual void TearDown() {
+
+    }
+
+public:
+
+    Eigen::MatrixXd A;
+    Eigen::VectorXd b;
+    OpenSoT::tasks::GenericTask::Ptr _generic_task;
+};
+
+TEST_F(testGenericTask, testMethods)
+{
+    EXPECT_EQ(this->A, this->_generic_task->getA());
+    std::cout<<"this->A: "<<this->A<<std::endl;
+    std::cout<<"this->_generic_task->getA(): "<<this->_generic_task->getA()<<std::endl;
+    EXPECT_EQ(this->b, this->_generic_task->getb());
+    std::cout<<"this->b: "<<this->b<<std::endl;
+    std::cout<<"this->_generic_task->getb(): "<<this->_generic_task->getb()<<std::endl;
+
+
+    Eigen::MatrixXd newA(this->A.rows(), this->A.cols());
+    newA = 2.*this->A;
+    EXPECT_TRUE(this->_generic_task->setA(newA));
+    this->_generic_task->update(Eigen::VectorXd(1));
+    EXPECT_EQ(newA, this->_generic_task->getA());
+    std::cout<<"newA: "<<newA<<std::endl;
+    std::cout<<"this->_generic_task->getA(): "<<this->_generic_task->getA()<<std::endl;
+    EXPECT_EQ(this->b, this->_generic_task->getb());
+    std::cout<<"this->b: "<<this->b<<std::endl;
+    std::cout<<"this->_generic_task->getb(): "<<this->_generic_task->getb()<<std::endl;
+
+    Eigen::VectorXd newb(this->b.size());
+    newb = 3.*this->b;
+    EXPECT_TRUE(this->_generic_task->setb(newb));
+    this->_generic_task->update(Eigen::VectorXd(1));
+    EXPECT_EQ(newA, this->_generic_task->getA());
+    std::cout<<"newA: "<<newA<<std::endl;
+    std::cout<<"this->_generic_task->getA(): "<<this->_generic_task->getA()<<std::endl;
+    EXPECT_EQ(newb, this->_generic_task->getb());
+    std::cout<<"newb: "<<newb<<std::endl;
+    std::cout<<"this->_generic_task->getb(): "<<this->_generic_task->getb()<<std::endl;
+
+    Eigen::MatrixXd F(4,4);
+    F.setRandom(4,4);
+    Eigen::VectorXd g(4);
+    g.setRandom(4);
+    EXPECT_FALSE(this->_generic_task->setAb(F,g));
+    F.setRandom(4,this->A.cols());
+
+    EXPECT_TRUE(this->_generic_task->setAb(F,g));
+    this->_generic_task->update(Eigen::VectorXd(1));
+    EXPECT_EQ(F, this->_generic_task->getA());
+    std::cout<<"F: "<<F<<std::endl;
+    std::cout<<"this->_generic_task->getA(): "<<this->_generic_task->getA()<<std::endl;
+    EXPECT_EQ(g, this->_generic_task->getb());
+    std::cout<<"g: "<<g<<std::endl;
+    std::cout<<"this->_generic_task->getb(): "<<this->_generic_task->getb()<<std::endl;
+}
+
+TEST_F(testGenericTask, testGenericTaskWithQPOASES)
+{
+    Eigen::MatrixXd A(1,2);
+    A<<1.,1.;
+    Eigen::VectorXd b(1);
+    b<<1.;
+    OpenSoT::tasks::GenericTask::Ptr generic_task = boost::make_shared<OpenSoT::tasks::GenericTask>(
+                OpenSoT::tasks::GenericTask("test_task",A,b));
+
+    OpenSoT::AffineHelper var(2,2);
+    Eigen::VectorXd u(2);
+    u<<5.,5.;
+    OpenSoT::constraints::GenericConstraint::Ptr bounds = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+                OpenSoT::constraints::GenericConstraint("bounds",var,u,-u,OpenSoT::constraints::GenericConstraint::Type::BOUND));
+
+    OpenSoT::AutoStack::Ptr autostack = boost::make_shared<OpenSoT::AutoStack>(
+                OpenSoT::AutoStack(generic_task));
+    autostack<<bounds;
+
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(),1.));
+
+
+    Eigen::VectorXd x(2);
+    sot->solve(x);
+
+    std::cout<<"x: "<<x.transpose()<<std::endl;
+    EXPECT_NEAR(x.sum(), b[0], 1e-9);
+}
+
+TEST_F(testGenericTask, testGenericTaskWithOSQP)
+{
+    Eigen::MatrixXd A(1,2);
+    A<<1.,1.;
+    Eigen::VectorXd b(1);
+    b<<1.;
+    OpenSoT::tasks::GenericTask::Ptr generic_task = boost::make_shared<OpenSoT::tasks::GenericTask>(
+                OpenSoT::tasks::GenericTask("test_task",A,b));
+
+    OpenSoT::AffineHelper var(2,2);
+    Eigen::VectorXd u(2);
+    u<<5.,5.;
+    OpenSoT::constraints::GenericConstraint::Ptr bounds = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+                OpenSoT::constraints::GenericConstraint("bounds",var,u,-u,OpenSoT::constraints::GenericConstraint::Type::BOUND));
+
+    OpenSoT::AutoStack::Ptr autostack = boost::make_shared<OpenSoT::AutoStack>(
+                OpenSoT::AutoStack(generic_task));
+    autostack<<bounds;
+
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(),1e-9,OpenSoT::solvers::solver_back_ends::OSQP));
+
+    Eigen::VectorXd x(2);
+    sot->solve(x);
+
+    std::cout<<"x: "<<x.transpose()<<std::endl;
+    EXPECT_NEAR(x.sum(), b[0], 1e-9);
+
+
+}
+
+}
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

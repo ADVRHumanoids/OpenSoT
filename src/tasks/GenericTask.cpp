@@ -49,7 +49,7 @@ GenericTask::~GenericTask()
 
 void GenericTask::_update(const Eigen::VectorXd &x)
 {
-    _task = __A*_var + __b;
+    _task = __A*_var - __b;
 
     _A = _task.getM();
     _b = -_task.getq();
@@ -60,6 +60,12 @@ bool GenericTask::setA(const Eigen::MatrixXd& A)
     if(A.rows() != _b.size())
     {
         XBot::Logger::error() << "in " << __func__ << ": size not correct" << XBot::Logger::endl();
+        return false;
+    }
+
+    if(A.cols() != _var.getInputSize())
+    {
+        XBot::Logger::error() << "in " << __func__ << ": size not correct A.cols() != x.size()" << XBot::Logger::endl();
         return false;
     }
 
@@ -76,6 +82,7 @@ bool GenericTask::setb(const Eigen::VectorXd& b)
         XBot::Logger::error() << "in " << __func__ << ": size not correct" << XBot::Logger::endl();
         return false;
     }
+
     __b = b;
     return true;
 }
@@ -84,7 +91,13 @@ bool GenericTask::setAb(const Eigen::MatrixXd& A, const Eigen::VectorXd& b)
 {
     if(A.rows() != b.size())
     {
-        XBot::Logger::error() << "in " << __func__ << ": size not correct" << XBot::Logger::endl();
+        XBot::Logger::error() << "in " << __func__ << ": size not correct A.rows() != b.size()" << XBot::Logger::endl();
+        return false;
+    }
+
+    if(A.cols() != _var.getInputSize())
+    {
+        XBot::Logger::error() << "in " << __func__ << ": size not correct A.cols() != x.size()" << XBot::Logger::endl();
         return false;
     }
 
@@ -98,6 +111,8 @@ bool GenericTask::setAb(const Eigen::MatrixXd& A, const Eigen::VectorXd& b)
 
     __A = A;
     __b = b;
+
+    return true;
 }
 
 

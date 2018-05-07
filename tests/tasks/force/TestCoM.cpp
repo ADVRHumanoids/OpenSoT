@@ -150,7 +150,7 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
 
     OpenSoT::solvers::iHQP::Ptr sot(
-                new OpenSoT::solvers::iHQP(stack_of_tasks,1E7));
+                new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
     std::cout<<"Solver started"<<std::endl;
 
     _model_ptr->setJointPosition(q);
