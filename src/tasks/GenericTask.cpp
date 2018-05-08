@@ -24,7 +24,8 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
 }
 
 GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, const Eigen::VectorXd& b, const AffineHelper &var):
-    Task(task_id, var.getInputSize())
+    Task(task_id, var.getInputSize()),
+    _var(var)
 {
     if(A.rows() != b.size())
         throw std::runtime_error(task_id + " has A.rows() != b.size()");
