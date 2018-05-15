@@ -7,7 +7,7 @@
 #include <iostream>
 #include <qpOASES/Matrices.hpp>
 #include <XBotInterface/Logger.hpp>
-
+#include <XBotInterface/SoLib.h>
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -15,6 +15,20 @@
 #define DEFAULT "\033[0m"
 
 using namespace OpenSoT::solvers;
+
+
+/* Define factories for dynamic loading */
+extern "C" BackEnd * create_instance(const int number_of_variables,
+                               const int number_of_constraints,
+                               OpenSoT::HessianType hessian_type, const double eps_regularisation)
+{
+    return new QPOasesBackEnd(number_of_variables, number_of_constraints, hessian_type, eps_regularisation);
+}
+
+extern "C" void destroy_instance( BackEnd * instance )
+{
+    delete instance;
+}
 
 QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
                                const int number_of_constraints,

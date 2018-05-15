@@ -1,7 +1,23 @@
 #include <OpenSoT/solvers/OSQPBackEnd.h>
 #include <osqp/glob_opts.h>
 #include <exception>
+#include <XBotInterface/SoLib.h>
 using namespace OpenSoT::solvers;
+
+
+/* Define factories for dynamic loading */
+extern "C" BackEnd * create_instance(const int number_of_variables,
+                               const int number_of_constraints,
+                               OpenSoT::HessianType hessian_type, const double eps_regularisation)
+{
+    return new OSQPBackEnd(number_of_variables, number_of_constraints, eps_regularisation);
+}
+
+extern "C" void destroy_instance( BackEnd * instance )
+{
+    delete instance;
+}
+
 
 OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
                          const int number_of_constraints,

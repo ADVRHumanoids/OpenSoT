@@ -1,7 +1,7 @@
-#include <qpOASES.hpp>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <XBotInterface/Logger.hpp>
+
 
 using namespace OpenSoT::solvers;
 

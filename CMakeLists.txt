@@ -62,7 +62,7 @@ FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(fcl QUIET)
-FIND_PACKAGE(osqp QUIET)
+
 
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
@@ -77,22 +77,6 @@ INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
-# Find package qpOASES or build it using ExternalProject
-find_package(qpOASES QUIET)
-if(NOT qpOASES_FOUND)
-    set(qpOASES_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
-    set(qpOASES_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
-
-    ExternalProject_Add(qpOASES-ext SOURCE_DIR "${qpOASES_SOURCE_DIR}"
-                                    PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
-                                    INSTALL_COMMAND ""
-                                    CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
-    link_directories("${qpOASES_BINARY_DIR}/libs/")
-    set(qpOASES_INCLUDE_DIRS "${qpOASES_SOURCE_DIR}/include")
-    set(qpOASES_LIBRARIES qpOASES)
-endif()
-
-include_directories("${qpOASES_INCLUDE_DIRS}")
 
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
@@ -160,11 +144,8 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
 set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
                             src/solvers/BackEndFactory.cpp
                             src/solvers/iHQP.cpp
-                            src/solvers/QPOasesBackEnd.cpp
                             src/solvers/eHQP.cpp)
-if(${osqp_FOUND})
-    set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/OSQPBackEnd.cpp)
-endif()
+
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/DefaultHumanoidStack.cpp
@@ -222,6 +203,46 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               )
 
 
+########################################################################
+# Compile and install back ends                                        #
+########################################################################
+# Find package qpOASES or build it using ExternalProject
+find_package(qpOASES QUIET)
+if(NOT qpOASES_FOUND)
+    set(qpOASES_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
+    set(qpOASES_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
+
+    ExternalProject_Add(qpOASES-ext SOURCE_DIR "${qpOASES_SOURCE_DIR}"
+                                    PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
+                                    INSTALL_COMMAND ""
+                                    CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC")
+    link_directories("${qpOASES_BINARY_DIR}/libs/")
+    set(qpOASES_INCLUDE_DIRS "${qpOASES_SOURCE_DIR}/include")
+    set(qpOASES_LIBRARIES qpOASES)
+    set(qpOASES_FOUND TRUE)
+endif()
+
+include_directories("${qpOASES_INCLUDE_DIRS}")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+include(MacroInstallLib)
+
+if(${qpOASES_FOUND})
+
+    add_library(OpenSotBackEndQPOases SHARED src/solvers/QPOasesBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndQPOases OpenSoT qpOASES)
+    library_install(OpenSotBackEndQPOases 1 0 0)
+
+endif()
+
+FIND_PACKAGE(osqp QUIET)
+if(${osqp_FOUND})
+
+    add_library(OpenSotBackEndOSQP SHARED src/solvers/OSQPBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndOSQP OpenSoT osqp)
+    library_install(OpenSotBackEndOSQP 1 0 0)
+
+endif()
 
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
