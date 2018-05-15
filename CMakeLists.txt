@@ -113,6 +113,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/torque/JointLimits.cpp
                     src/constraints/force/FrictionCone.cpp
                     src/constraints/force/WrenchLimits.cpp
+                    src/constraints/force/CoP.cpp
                     src/constraints/GenericConstraint.cpp
                     )
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -128,6 +129,7 @@ endif()
 set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/MinimizeVariable.cpp
+                    src/tasks/GenericTask.cpp
                     src/tasks/acceleration/Postural.cpp
                     src/tasks/acceleration/Cartesian.cpp
                     src/tasks/acceleration/Contact.cpp
@@ -150,6 +152,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/tasks/force/CoM.cpp
                     src/tasks/force/Wrench.cpp
+                    src/tasks/force/FloatingBase.cpp
                     src/tasks/floating_base/Contact.cpp
                     src/tasks/floating_base/IMU.cpp
                     )

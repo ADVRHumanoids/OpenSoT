@@ -43,7 +43,7 @@ void QPOasesBackEnd::setDefaultOptions()
     opt.printLevel = qpOASES::PL_NONE;
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= _epsRegularisation;
-    opt.numRegularisationSteps = 2;
+    opt.numRegularisationSteps = 0;
     opt.numRefinementSteps = 1;
     opt.enableFlippingBounds = qpOASES::BT_TRUE;
 //     opt.enableDropInfeasibles = qpOASES::BT_TRUE;
@@ -55,10 +55,12 @@ void QPOasesBackEnd::setDefaultOptions()
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
 
+    _opt.reset();
     _opt.reset(new qpOASES::Options(opt));
 }
 
 void QPOasesBackEnd::setOptions(const boost::any &options){
+    _opt.reset();
     _opt.reset(new qpOASES::Options(boost::any_cast<qpOASES::Options>(options)));
     _problem->setOptions(boost::any_cast<qpOASES::Options>(options));}
 
