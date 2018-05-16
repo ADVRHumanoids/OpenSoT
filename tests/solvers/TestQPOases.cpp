@@ -219,7 +219,7 @@ TEST_F(testQPOasesProblem, test_update_constraint)
 {
     //OpenSoT::solvers::QPOasesBackEnd qp(3,0);
     OpenSoT::solvers::BackEnd::Ptr qp = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::qpOASES, 3, 0, OpenSoT::HST_SEMIDEF,1e5);
+                OpenSoT::solvers::solver_back_ends::qpOASES, 3, 0, OpenSoT::HST_SEMIDEF,1e4);
 
     Eigen::MatrixXd H(1,3);
     H<<1,1,1;
