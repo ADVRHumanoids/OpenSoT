@@ -84,7 +84,6 @@ enable_testing()
 
 #ALL THE FOLLOWING TESTS ARE YARP FREE
 set(OPENSOT_TESTS testBilateralConstraint
-                  testGenericTask
                   testJointLimitsVelocityBounds
                   testVelocityLimitsVelocityBounds 
                   testQPOasesSolver  
@@ -111,7 +110,7 @@ set(OPENSOT_TESTS testBilateralConstraint
 )
 
 if(${osqp_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
 endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -224,11 +223,6 @@ TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
 add_dependencies(testBilateralConstraint GTest-ext OpenSoT)
 add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 
-ADD_EXECUTABLE(testGenericTask     tasks/TestGenericTask.cpp)
-TARGET_LINK_LIBRARIES(testGenericTask ${TestLibs})
-add_dependencies(testGenericTask GTest-ext OpenSoT)
-add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
-
 ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLimits.cpp)
 TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
 add_dependencies(testJointLimitsVelocityBounds GTest-ext OpenSoT)
@@ -244,6 +238,11 @@ if(${osqp_FOUND})
     TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs})
     add_dependencies(testOSQPSolver GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_osqp COMMAND testOSQPSolver)
+
+    ADD_EXECUTABLE(testGenericTask     tasks/TestGenericTask.cpp)
+    TARGET_LINK_LIBRARIES(testGenericTask ${TestLibs})
+    add_dependencies(testGenericTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
 endif()
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
