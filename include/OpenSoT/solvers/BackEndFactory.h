@@ -1,8 +1,7 @@
 #ifndef _WB_SOT_SOLVERS_BE_FACTORY_H_
 #define _WB_SOT_SOLVERS_BE_FACTORY_H_
 
-#include <OpenSoT/solvers/QPOasesBackEnd.h>
-#include <OpenSoT/solvers/OSQPBackEnd.h>
+#include <OpenSoT/solvers/BackEnd.h>
 #include <boost/make_shared.hpp>
 
 namespace OpenSoT{

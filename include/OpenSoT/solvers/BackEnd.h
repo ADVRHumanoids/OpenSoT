@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <XBotInterface/Logger.hpp>
 #include <boost/any.hpp>
+#include <OpenSoT/Task.h>
 
 namespace OpenSoT{
     namespace solvers{

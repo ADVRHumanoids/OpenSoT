@@ -3,7 +3,6 @@
 
 #include <OpenSoT/solvers/BackEnd.h>
 #include <boost/shared_ptr.hpp>
-#include <OpenSoT/Task.h>
 
 #define QPOASES_DEFAULT_EPS_REGULARISATION 2E2
 

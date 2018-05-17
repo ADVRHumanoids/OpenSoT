@@ -9,6 +9,7 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/solvers/iHQP.h>
+#include <OpenSoT/solvers/QPOasesBackEnd.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
