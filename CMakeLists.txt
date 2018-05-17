@@ -194,12 +194,10 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${srdfdom_advr_LIBRARIES}
                               ${eigen_conversions_LIBRARIES}
                               PRIVATE
-                              ${qpOASES_LIBRARIES}
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
-                              osqp
                               )
 
 
