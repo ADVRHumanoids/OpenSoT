@@ -80,7 +80,6 @@ ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
-file(GLOB_RECURSE sot_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/python" *.py)
 
 ##CONSTRAINTS
 set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
