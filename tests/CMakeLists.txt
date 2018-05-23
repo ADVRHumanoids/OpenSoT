@@ -90,7 +90,8 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_SetActiveStack 
                   testQPOases_Options  
                   testQPOases_SubTask
-                  testFrictionConeForceConstraint 
+                  testFrictionConeForceConstraint
+                  testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
                   testManipulabilityTask
                   testMinimizeAccelerationTask
@@ -134,7 +135,6 @@ endif()
 if(${YARP_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
                     testCollisionAvoidanceVelocityConstraint
-                    testCoMVelocityVelocityConstraint
                     testConvexHullVelocityConstraint
                     testQPOases_ConvexHull
                     testQPOases_FF
@@ -370,6 +370,11 @@ TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 
+ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
+TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
+add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
+
 if(${YARP_FOUND})
 #    ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
@@ -380,11 +385,6 @@ if(${YARP_FOUND})
     TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
     add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
-
-    ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
-    TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
-    add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
 
     ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
     TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
