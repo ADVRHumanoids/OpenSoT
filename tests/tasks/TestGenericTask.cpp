@@ -6,6 +6,7 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <qpOASES/Options.hpp>
+#include <OpenSoT/tasks/MinimizeVariable.h>
 
 namespace {
 
@@ -89,6 +90,10 @@ TEST_F(testGenericTask, testMethods)
     EXPECT_EQ(g, this->_generic_task->getb());
     std::cout<<"g: "<<g<<std::endl;
     std::cout<<"this->_generic_task->getb(): "<<this->_generic_task->getb()<<std::endl;
+
+    Eigen::MatrixXd W = this->_generic_task->getWeight();
+    EXPECT_TRUE(W.rows() == this->_generic_task->getA().rows());
+    EXPECT_TRUE(W.cols() == this->_generic_task->getA().rows());
 }
 
 TEST_F(testGenericTask, testGenericTaskWithQPOASES)
@@ -150,6 +155,40 @@ TEST_F(testGenericTask, testGenericTaskWithOSQP)
     EXPECT_NEAR(x.sum(), b[0], 1e-9);
 
 
+}
+
+TEST_F(testGenericTask, testGenericTaskVSMinimizeVariables)
+{
+    Eigen::MatrixXd M(12,48);
+    M.setZero(12,48);
+    M.leftCols(12).setIdentity();
+
+    Eigen::VectorXd q(12);
+    q.setZero(12);
+
+    OpenSoT::AffineHelper var(M,q);
+
+    OpenSoT::tasks::MinimizeVariable::Ptr min_var;
+    min_var.reset(new OpenSoT::tasks::MinimizeVariable("min_var", var));
+
+    OpenSoT::tasks::GenericTask::Ptr generic_min_var;
+    generic_min_var.reset(new OpenSoT::tasks::GenericTask("generic_min_tas", var.getM(), var.getq()));
+
+    min_var->update(Eigen::VectorXd(1));
+    generic_min_var->update(Eigen::VectorXd(1));
+
+    for(unsigned int i = 0; i < M.rows(); ++i)
+    {
+        for(unsigned int j = 0; j < M.cols(); ++j)
+            EXPECT_NEAR(min_var->getA()(i,j), generic_min_var->getA()(i,j), 1e-12);
+    }
+    std::cout<<"min_var->getA():\n"<<min_var->getA()<<std::endl;
+    std::cout<<"generic_min_var->getA():\n"<<generic_min_var->getA()<<std::endl;
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_NEAR(min_var->getb()(i), generic_min_var->getb()(i), 1e-12);
+    std::cout<<"min_var->getb():\n"<<min_var->getb()<<std::endl;
+    std::cout<<"generic_min_var->getb():\n"<<generic_min_var->getb()<<std::endl;
 }
 
 }
