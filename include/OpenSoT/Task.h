@@ -443,6 +443,15 @@
                 return false;
             }
 
+            if(_constraints.size() > 0)
+            {
+                for(unsigned int i = 0; i < _constraints.size(); ++i)
+                {
+                    if(!(_constraints[i]->checkConsistency()))
+                        return false;
+                }
+            }
+
             return true;
 
         }
