@@ -200,6 +200,156 @@
                 logger->add(_constraint_id + "_lowerBound", _lowerBound);
             _log(logger);
         }
+
+        /**
+         * @brief checkConsistency checks if all internal matrices and vectors are correctly instantiated and the right size
+         * @return true if everything is ok
+         */
+        bool checkConsistency()
+        {
+//          //1) If isInequalityConstraint()
+            if(isInequalityConstraint())
+            {
+                if(_Aineq.cols() != _x_size)
+                {
+                    XBot::Logger::error("%s: _Aineq.cols() != _x_size -> %i != %i", _constraint_id.c_str(), _Aineq.cols(), _x_size);
+                    return false;
+                }
+                if(isUnilateralConstraint())
+                {
+                    if(_bUpperBound.size() > 0)
+                    {
+                        if(_Aineq.rows() != _bUpperBound.size())
+                        {
+                            XBot::Logger::error("%s: _Aineq.rows() != _bUpperBound.size() -> %i != %i",
+                                                _constraint_id.c_str(), _Aineq.rows(), _bUpperBound.size());
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if(_Aineq.rows() != _bLowerBound.size())
+                        {
+                            XBot::Logger::error("%s: _Aineq.rows() != _bUpperLower.size() -> %i != %i",
+                                                _constraint_id.c_str(), _Aineq.rows(), _bLowerBound.size());
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    if(_bUpperBound.size() != _bLowerBound.size()){
+                        XBot::Logger::error("%s: __bUpperBound.size() != _bLowerBound.size() -> %i != %i",
+                                            _constraint_id.c_str(), _bLowerBound.size(), _bUpperBound.size());
+                        return false;
+                    }
+                    if(_Aineq.rows() != _bLowerBound.size())
+                    {
+                        XBot::Logger::error("%s: _Aineq.rows() != _bUpperLower.size() -> %i != %i",
+                                            _constraint_id.c_str(), _Aineq.rows(), _bLowerBound.size());
+                        return false;
+                    }
+                }
+                if(isBound())
+                {
+                    XBot::Logger::error("%s isInequalityConstraint = true and isBound = true at the same time!", _constraint_id.c_str());
+                    return false;
+                }
+                if(isEqualityConstraint())
+                {
+                    XBot::Logger::error("%s isInequalityConstraint = true and isEqualityConstraint = true at the same time!", _constraint_id.c_str());
+                    return false;
+                }
+                if(_beq.size() != 0)
+                {
+                    XBot::Logger::error("%s: _beq.size() = %i, should be 0!", _constraint_id.c_str(), _beq.size());
+                    return false;
+                }
+            }
+            //2) If isBound()
+            else if(isBound())
+            {
+                if(_lowerBound.size() > 0 && _upperBound.size() > 0)
+                {
+                    if(_lowerBound.size() != _upperBound.size())
+                    {
+                        XBot::Logger::error("%s: _lowerBound.size() != _upperBound.size_t() -> %i != %i",
+                                            _constraint_id.c_str(), _lowerBound.size(), _upperBound.size());
+                        return false;
+                    }
+                    if(_lowerBound.size() != _x_size)
+                    {
+                        XBot::Logger::error("%s: _lowerBound.size() != _x_size -> %i != %i",
+                                            _constraint_id.c_str(), _lowerBound.size(), _x_size);
+                        return false;
+                    }
+                }
+                else if(_lowerBound.size() > 0)
+                {
+                    if(_lowerBound.size() != _x_size)
+                    {
+                        XBot::Logger::error("%s: _lowerBound.size() != _x_size -> %i != %i",
+                                            _constraint_id.c_str(), _lowerBound.size(), _x_size);
+                        return false;
+                    }
+                    XBot::Logger::warning("%s: _upperBound.size() = 0", _constraint_id.c_str());
+                }
+                else
+                {
+                    if(_upperBound.size() != _x_size)
+                    {
+                        XBot::Logger::error("%s: _upperBound.size() != _x_size -> %i != %i",
+                                            _constraint_id.c_str(), _upperBound.size(), _x_size);
+                        return false;
+                    }
+                    XBot::Logger::warning("%s: _lowerBound.size() = 0", _constraint_id.c_str());
+                }
+                if(isEqualityConstraint())
+                {
+                    XBot::Logger::error("%s isBound = true and isEqualityConstraint = true at the same time!", _constraint_id.c_str());
+                    return false;
+                }
+                if(_beq.size() > 0)
+                {
+                    XBot::Logger::error("%s: _beq.size() = %i, should be 0!", _constraint_id.c_str(), _beq.size());
+                    return false;
+                }
+                if(_bUpperBound.size() > 0 || _bLowerBound.size() > 0)
+                {
+                    XBot::Logger::error("%s: _bLowerBound.size() = %i, _bLowerBound.size() = %i, both should be 0",
+                                        _constraint_id, _bLowerBound.size(), _bUpperBound.size());
+                    return false;
+                }
+
+            }
+            //3) If isEqualityConstraint()
+            else if(isEqualityConstraint())
+            {
+                if(_Aeq.rows() != _beq.size())
+                {
+                    XBot::Logger::error("%s: _Aeq.rows() != _beq.size() -> %i != %i", _constraint_id.c_str(), _Aeq.rows(), _beq.size());
+                    return false;
+                }
+                if(_Aeq.cols() != _x_size)
+                {
+                    XBot::Logger::error("%s: _Aeq.cols() != _x_size -> %i != %i", _constraint_id.c_str(), _Aeq.cols(), _x_size);
+                    return false;
+                }
+                if(_bUpperBound.size() > 0 || _bLowerBound.size() > 0)
+                {
+                    XBot::Logger::error("%s: _bLowerBound.size() = %i, _bLowerBound.size() = %i, both should be 0",
+                                        _constraint_id, _bLowerBound.size(), _bUpperBound.size());
+                    return false;
+                }
+            }
+            else
+            {
+                XBot::Logger::error("%s: isEqualityConstraint() = false, isInequalityConstraint() = false, isBound() = false!");
+                return false;
+            }
+
+            return true;
+        }
     };
  }
 
