@@ -445,9 +445,10 @@
 
             if(_constraints.size() > 0)
             {
-                for(unsigned int i = 0; i < _constraints.size(); ++i)
+
+                for(auto constraint : _constraints)
                 {
-                    if(!(_constraints[i]->checkConsistency()))
+                    if(!(constraint->checkConsistency()))
                         return false;
                 }
             }
