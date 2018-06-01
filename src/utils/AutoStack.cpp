@@ -406,4 +406,20 @@ void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)
         _boundsAggregated->log(logger);
 }
 
+bool OpenSoT::AutoStack::checkConsistency()
+{
+    for(auto task : _stack)
+    {
+        if(!task->checkConsistency())
+            return false;
+    }
+    if(_boundsAggregated)
+    {
+        if(!_boundsAggregated->checkConsistency())
+            return false;
+    }
+
+    return true;
+}
+
 

@@ -74,6 +74,8 @@ namespace OpenSoT {
 
             void log(XBot::MatLogger::Ptr logger);
 
+            bool checkConsistency();
+
             OpenSoT::solvers::iHQP::Stack& getStack();
 
             std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& getBoundsList();
