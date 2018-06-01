@@ -363,7 +363,12 @@
             return false;
         }
         
-        
+        /**
+         * @brief setActiveChainsMask set a mask (of true) on the Jacobian of a vector of kinematic chains
+         * @param active_chain_mask vector of kinematic chains to set the active joint mask
+         * @param model to retrieve the joint names from the kinematic chains
+         * @return true
+         */
         virtual bool setActiveChainsMask(const std::vector<std::string>& active_chain_mask, 
                                          XBot::ModelInterface::ConstPtr model)
         {
@@ -397,6 +402,51 @@
                 constraint->log(logger);
 
         }
+
+        /**
+         * @brief checkConsistency checks if all internal matrices and vectors are correctly instantiated and the right size
+         * @return true if everything is ok
+         */
+        bool checkConsistency()
+        {
+            //1) Check A,b,W sizes != 0
+            if(_A.rows() == 0 || _A.cols() == 0){
+                XBot::Logger::error("%s: _A is [%i x %i]!", _task_id.c_str(), _A.rows(), _A.cols());
+                return false;
+            }
+            if(_b.size() == 0){
+                XBot::Logger::error("%s: _b size is %i!", _task_id.c_str(), _b.size());
+                return false;
+            }
+            if(_W.rows() == 0 || _W.cols() == 0){
+                XBot::Logger::error("%s: _W is [%i x %i]!", _task_id.c_str(), _W.rows(), _W.cols());
+                return false;
+            }
+            if(_W.rows() != _W.cols()){
+                XBot::Logger::error("%s: _W.rows() != _W.cols() -> %i != %i!", _task_id.c_str(), _W.rows(), _W.cols());
+                return false;
+            }
+
+            //2) Check consistency between matrices
+            if(_A.rows() != _b.size()){
+                XBot::Logger::error("%s: _A.rows() != _b.size() -> %i != %i", _task_id.c_str(), _A.rows(), _b.size());
+                return false;
+            }
+            if(_A.rows() != _W.rows()){
+                XBot::Logger::error("%s: _A.rows() != _W.rows() -> %i != %i", _task_id.c_str(), _A.rows(), _W.rows());
+                return false;
+            }
+
+            //3) Check task size
+            if(_A.cols() != _x_size){
+                XBot::Logger::error("%s: _A.cols() != _x_size -> %i != %i", _task_id.c_str(), _A.cols(), _x_size);
+                return false;
+            }
+
+            return true;
+
+        }
+
     };
 
 
