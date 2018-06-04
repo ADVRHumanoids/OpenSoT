@@ -108,6 +108,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testCoMAccelerationTask
                   testContactFloatingBaseTask
                   testCoMForceTask
+                  testTask
 )
 
 if(${osqp_FOUND})
@@ -217,6 +218,11 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_dependencies(testAggregatedTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
+
+ADD_EXECUTABLE(testTask     tasks/TestTask.cpp)
+TARGET_LINK_LIBRARIES(testTask ${TestLibs})
+add_dependencies(testTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_tasks_Task COMMAND testTask)
 
 ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
 TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
