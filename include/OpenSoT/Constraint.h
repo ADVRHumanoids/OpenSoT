@@ -338,7 +338,7 @@
                 if(_bUpperBound.size() > 0 || _bLowerBound.size() > 0)
                 {
                     XBot::Logger::error("%s: _bLowerBound.size() = %i, _bLowerBound.size() = %i, both should be 0",
-                                        _constraint_id, _bLowerBound.size(), _bUpperBound.size());
+                                        _constraint_id.c_str(), _bLowerBound.size(), _bUpperBound.size());
                     return false;
                 }
             }
