@@ -64,7 +64,7 @@
                     Eigen::VectorXd _tau_lim;
 
                     ComputeGTauGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model) :
-                        _robot(XBot::ModelInterface::getModel(robot_model.getPathToConfig())),
+                        _robot(XBot::ModelInterface::getModel(robot_model.getConfigOptions())),
                         _model(robot_model),
                         _W(q.rows(),q.rows()),
                         _zeros(q.rows())
