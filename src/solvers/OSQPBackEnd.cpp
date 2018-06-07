@@ -196,20 +196,31 @@ bool OSQPBackEnd::updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& 
 
 bool OSQPBackEnd::solve()
 {
-    
-    
     osqp_update_lin_cost(_workspace.get(), _g.data());
-    osqp_update_bounds(_workspace.get(), _lb_piled.data(), _ub_piled.data());
-    osqp_update_A(_workspace.get(), _Adense.data(), nullptr, _Adense.size());
-    osqp_update_P(_workspace.get(), _P_values.data(), nullptr, _P_values.size());
+    c_int update_bound_flag = osqp_update_bounds(_workspace.get(), _lb_piled.data(), _ub_piled.data());
+    if(update_bound_flag != 0)
+        return false;
+    c_int update_A_flag = osqp_update_A(_workspace.get(), _Adense.data(), nullptr, _Adense.size());
+    if(update_A_flag != 0)
+        return false;
+    c_int update_P_flag = osqp_update_P(_workspace.get(), _P_values.data(), nullptr, _P_values.size());
+    if(update_P_flag != 0)
+        return false;
     
     
     
-    int exitflag = osqp_solve(_workspace.get());
+    c_int exitflag = osqp_solve(_workspace.get());
+    if(exitflag != 0)
+        return false;
     
+    c_int workspace_flag = _workspace->info->status_val;
+    if(workspace_flag != 1 && workspace_flag != 2){
+        XBot::Logger::error("%s", _workspace->info->status);
+        return false;}
+
     _solution = Eigen::Map<Eigen::VectorXd>(_workspace->solution->x, _solution.size());
-    
-    return exitflag == 0;
+
+    return true;
     
 }
 
