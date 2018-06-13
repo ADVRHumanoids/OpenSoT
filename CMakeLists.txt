@@ -62,6 +62,7 @@ FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(fcl QUIET)
+FIND_PACKAGE(XBotLogger REQUIRED)
 
 
 # compilation flags
@@ -72,6 +73,7 @@ option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
                             ${PCL_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
+                            ${XBotLogger_INCLUDE_DIRS}
                             ${srdfdom_advr_INCLUDE_DIRS}
                             )
 
@@ -182,11 +184,6 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/tasks/velocity/Interaction.cpp
                     ${sot_INCLUDES})
 
-# we must wait for qpOASES-ext to be ready before building OpenSoT
-if(TARGET qpOASES-ext)
-    add_dependencies(OpenSoT qpOASES-ext)
-endif()
-
 
 
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
@@ -195,6 +192,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               PRIVATE
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
+                              ${XBotLogger_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
                               )
@@ -225,8 +223,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(MacroInstallLib)
 
 if(${qpOASES_FOUND})
-
     add_library(OpenSotBackEndQPOases SHARED src/solvers/QPOasesBackEnd.cpp)
+
+    if(TARGET qpOASES-ext)
+        add_dependencies(OpenSotBackEndQPOases qpOASES-ext)
+    endif()
+
     target_link_libraries(OpenSotBackEndQPOases OpenSoT qpOASES)
     library_install(OpenSotBackEndQPOases 1 0 0)
 
