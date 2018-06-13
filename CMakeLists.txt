@@ -62,7 +62,6 @@ FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(fcl QUIET)
-FIND_PACKAGE(XBotLogger REQUIRED)
 
 
 # compilation flags
@@ -73,7 +72,6 @@ option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
                             ${PCL_INCLUDE_DIRS}
                             ${XBotInterface_INCLUDE_DIRS}
-                            ${XBotLogger_INCLUDE_DIRS}
                             ${srdfdom_advr_INCLUDE_DIRS}
                             )
 
@@ -189,10 +187,10 @@ ADD_LIBRARY(OpenSoT SHARED
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${srdfdom_advr_LIBRARIES}
                               ${eigen_conversions_LIBRARIES}
+			      
                               PRIVATE
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
-                              ${XBotLogger_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
                               )
