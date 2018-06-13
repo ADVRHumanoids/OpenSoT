@@ -99,11 +99,15 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/force/CoP.cpp
                     src/constraints/GenericConstraint.cpp
                     )
+
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
+    message("Adding src/constraints/velocity/ConvexHull.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/ConvexHull.cpp)
 endif()
+
 if(${fcl_FOUND} AND ${moveit_core_FOUND})
+    message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/SelfCollisionAvoidance.cpp)
 endif()
@@ -152,13 +156,15 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/Indices.cpp
                     src/utils/VelocityAllocation.cpp
                     src/utils/cartesian_utils.cpp)
-if(${moveit_core_FOUND})
-    if(${fcl_FOUND})
+
+if(${fcl_FOUND} AND ${moveit_core_FOUND})
+        message("Adding src/utils/collision_utils.cpp to compilation")
         set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
             src/utils/collision_utils.cpp)
-    endif()
 endif()
+
 if(${PCL_FOUND})
+    message("Adding src/utils/convex_hull_utils.cpp to compilation")
     set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
         src/utils/convex_hull_utils.cpp)
 endif()
@@ -202,6 +208,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
 # Find package qpOASES or build it using ExternalProject
 find_package(qpOASES QUIET)
 if(NOT qpOASES_FOUND)
+    message("Internal qpOASES will be used!")
     set(qpOASES_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
     set(qpOASES_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
 
@@ -221,6 +228,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(MacroInstallLib)
 
 if(${qpOASES_FOUND})
+    message("Adding src/solvers/QPOasesBackEnd.cpp to compilation")
     add_library(OpenSotBackEndQPOases SHARED src/solvers/QPOasesBackEnd.cpp)
 
     if(TARGET qpOASES-ext)
@@ -234,6 +242,7 @@ endif()
 
 FIND_PACKAGE(osqp QUIET)
 if(${osqp_FOUND})
+    message("Adding src/solvers/OSQPBackEnd.cpp to compilation")
 
     add_library(OpenSotBackEndOSQP SHARED src/solvers/OSQPBackEnd.cpp)
     target_link_libraries(OpenSotBackEndOSQP OpenSoT osqp)
