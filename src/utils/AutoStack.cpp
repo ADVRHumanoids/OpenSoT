@@ -30,7 +30,7 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
 
 
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
-                                const std::list<unsigned int> rowIndices)
+                                const std::list<unsigned int>& rowIndices)
 {
     OpenSoT::SubTask::Ptr sub_task;
     sub_task.reset(new OpenSoT::SubTask(task, rowIndices));
@@ -201,7 +201,7 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
                 outBounds.push_back(*bound);
     }
 
-    if(outBounds.size() > 0)
+    if(!outBounds.empty())
         return OpenSoT::AutoStack::Ptr(
                 new OpenSoT::AutoStack(outStack, outBounds));
     else
