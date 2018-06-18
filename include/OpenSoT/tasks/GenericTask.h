@@ -93,6 +93,7 @@ private:
 
     Eigen::MatrixXd __A;
     Eigen::VectorXd __b;
+    Eigen::VectorXd __c;
 
 
 };

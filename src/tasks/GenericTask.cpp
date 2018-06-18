@@ -11,13 +11,15 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
     __A = A;
     __b = b;
 
+    __c.setZero(__A.cols());
+
     _var = AffineHelper::Identity(A.cols());
 
     _hessianType = HST_SEMIDEF;
 
     _update(Eigen::VectorXd(1));
     
-    _W.setIdentity(_A.rows(), _A.rows());
+    _W.setIdentity(__A.rows(), __A.rows());
 }
 
 GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, const Eigen::VectorXd& b, const AffineHelper &var):
@@ -30,9 +32,11 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
     __A = A;
     __b = b;
 
+    __c.setZero(__A.cols());
+
     _hessianType = HST_SEMIDEF;
 
-    _W.setIdentity(_A.rows(), _A.rows());
+    _W.setIdentity(__A.rows(), __A.rows());
 
     _update(Eigen::VectorXd(1));
 }
@@ -48,17 +52,21 @@ void GenericTask::_update(const Eigen::VectorXd &x)
 
     _A = _task.getM();
     _b = -_task.getq();
+
+    _c = _var.getM().transpose()*__c;
 }
 
 bool GenericTask::setc(const Eigen::VectorXd& c)
 {
-    if(c.size() != _b.size())
+    if(c.size() != _var.getOutputSize())
     {
         XBot::Logger::error() << "in " << __func__ << ": size not correct" << XBot::Logger::endl();
         return false;
     }
 
-    _c = c;
+    __c = c;
+
+    _update(Eigen::VectorXd(1));
 
     return true;
 }
@@ -100,7 +108,6 @@ bool GenericTask::setAb(const Eigen::MatrixXd& A, const Eigen::VectorXd& b)
         XBot::Logger::error() << "in " << __func__ << ": size not correct A.rows() != b.size()" << XBot::Logger::endl();
         return false;
     }
-
     if(A.cols() != _var.getInputSize())
     {
         XBot::Logger::error() << "in " << __func__ << ": size not correct A.cols() != x.size()" << XBot::Logger::endl();
