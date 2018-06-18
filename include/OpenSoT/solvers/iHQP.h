@@ -129,7 +129,22 @@ namespace OpenSoT{
          */
         void activateAllStacks();
 
+        /**
+         * @brief getBackEndName retrieve the name of the solver
+         * @return a string with the name of the solver, right now:
+         *      "qpOASES"
+         *      "OSQP"
+         *      "????"
+         */
         std::string getBackEndName();
+
+        /**
+         * @brief getBackEnd retrieve the back-end associated to the i-th qp problem
+         * @param i priority level
+         * @param back_end
+         * @return false if the level does not exists
+         */
+        bool getBackEnd(const unsigned int i, BackEnd::Ptr& back_end);
 
     protected:
         virtual void _log(XBot::MatLogger::Ptr logger);

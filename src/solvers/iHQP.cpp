@@ -266,3 +266,14 @@ std::string iHQP::getBackEndName()
 {
     return OpenSoT::solvers::whichBackEnd(_be_solver);
 }
+
+bool iHQP::getBackEnd(const unsigned int i, BackEnd::Ptr& back_end)
+{
+    if(i >= _qp_stack_of_tasks.size())
+    {
+        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n");
+        return false;
+    }
+    back_end = _qp_stack_of_tasks[i];
+    return true;
+}

@@ -946,7 +946,12 @@ TEST_F(testiHQP, testContructor2Problems)
         for(unsigned int j = 0; j < 3; ++j)
             EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
 
+    OpenSoT::solvers::BackEnd::Ptr back_end_i;
+    EXPECT_FALSE(sot.getBackEnd(2, back_end_i));
 
+    EXPECT_TRUE(sot.getBackEnd(1, back_end_i));
+
+    EXPECT_TRUE(back_end_i->getH() == postural_task->getA().transpose()*postural_task->getA());
 }
 
 TEST_F(testiHQP, testContructor1ProblemAggregated)
