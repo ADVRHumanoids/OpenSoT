@@ -4,6 +4,8 @@
 #include <XBotInterface/SoLib.h>
 using namespace OpenSoT::solvers;
 
+#define BASE_REGULARISATION 1E-12
+
 
 /* Define factories for dynamic loading */
 extern "C" BackEnd * create_instance(const int number_of_variables,
@@ -130,7 +132,7 @@ bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
     for(int c = 0; c < getNumVariables(); c++)
     {
         _P_values.segment(idx, c+1) = _H.col(c).head(c+1);
-        _P_values.segment(idx, c+1)(c) += _eps_regularisation;
+        _P_values.segment(idx, c+1)(c) += _eps_regularisation*BASE_REGULARISATION; //TO HAVE COMPATIBILITY WITH THE QPOASES ONE!
         idx += c+1;
     }
     
