@@ -91,6 +91,11 @@
         double _lambda;
 
         /**
+         * @brief _weight_is_diagonal, if true the computation of W*A and W*b is optimized (default is false)
+         */
+        bool _weight_is_diagonal;
+
+        /**
          * @brief _bounds related to the Task
          */
         std::list< ConstraintPtr > _constraints;
@@ -174,7 +179,7 @@
          */
         Task(const std::string task_id,
              const unsigned int x_size) :
-            _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size), _is_active(true)
+            _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size), _is_active(true), _weight_is_diagonal(false)
         {
             _lambda = 1.0;
             _hessianType = HST_UNKNOWN;
@@ -183,6 +188,19 @@
         }
 
         virtual ~Task(){}
+
+        /**
+         * @brief getWeightIsDiagonal return the flag _weight_is_diagonal
+         * @return true or false
+         */
+        bool getWeightIsDiagonalFlag(){return _weight_is_diagonal;}
+
+        /**
+         * @brief setWeightIsDiagonalFlag set the flag _weight_is_diagonal (NOTE that no check on Weight matrix is performed, we trust you)
+         * @param flag true or false
+         */
+        void setWeightIsDiagonalFlag(const bool flag){
+            _weight_is_diagonal = flag;}
 
         /**
          * @brief Activated / deactivates the task by setting the A matrix to zero.
@@ -231,7 +249,10 @@
          * @return the product between W and A
          */
         const Matrix_type& getWA() const {
-            _WA.noalias() = _W*_A;
+            if(_weight_is_diagonal)
+                _WA.noalias() = _W.diagonal()*_A;
+            else
+                _WA.noalias() = _W*_A;
             return _WA;
         }
 
@@ -249,7 +270,10 @@
          * @return the product between W and b
          */
         const Vector_type& getWb() const {
-            _Wb = _W*_b;
+            if(_weight_is_diagonal)
+                _Wb = _W.diagonal()*_b;
+            else
+                _Wb = _W*_b;
             return _Wb;
         }
 

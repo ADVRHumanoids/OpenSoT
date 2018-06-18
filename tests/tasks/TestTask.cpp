@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/Task.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
+#include <chrono>
 
 namespace {
 class fooTask: public OpenSoT::Task <Eigen::MatrixXd, Eigen::VectorXd>
@@ -105,6 +106,45 @@ TEST_F(testTask, testCheckConsistency)
     footask->setA(fooA);
     EXPECT_TRUE(footask->checkConsistency());
 }
+
+TEST_F(testTask, testDiagonalWeight)
+{
+    Eigen::VectorXd q(30);
+    q.setRandom(q.size());
+    OpenSoT::tasks::velocity::Postural::Ptr postural(
+        new OpenSoT::tasks::velocity::Postural(q));
+
+    EXPECT_FALSE(postural->getWeightIsDiagonalFlag());
+
+    auto start = std::chrono::steady_clock::now();
+    postural->getWA();
+    auto stop = std::chrono::steady_clock::now();
+    auto time_for_WA = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+    std::cout<<"Time elapsed for getWA with NOT diagonal weight: "<<time_for_WA<<" [micro s]"<<std::endl;
+
+    start = std::chrono::steady_clock::now();
+    postural->getWb();
+    stop = std::chrono::steady_clock::now();
+    auto time_for_Wb = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+    std::cout<<"Time elapsed for getWb with NOT diagonal weight: "<<time_for_Wb<<" [micro s]"<<std::endl;
+
+    postural->setWeightIsDiagonalFlag(true);
+    EXPECT_TRUE(postural->getWeightIsDiagonalFlag());
+
+    start = std::chrono::steady_clock::now();
+    postural->getWA();
+     stop = std::chrono::steady_clock::now();
+     time_for_WA = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+    std::cout<<"Time elapsed for getWA with diagonal weight: "<<time_for_WA<<" [micro s]"<<std::endl;
+
+    start = std::chrono::steady_clock::now();
+    postural->getWb();
+    stop = std::chrono::steady_clock::now();
+    time_for_Wb = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+    std::cout<<"Time elapsed for getWb with diagonal weight: "<<time_for_Wb<<" [micro s]"<<std::endl;
+
+}
+
 }
 
 int main(int argc, char **argv) {
