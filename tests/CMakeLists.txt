@@ -90,6 +90,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_SetActiveStack 
                   testQPOases_Options  
                   testQPOases_SubTask
+                  testLP
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
@@ -238,6 +239,11 @@ ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
+
+ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
+TARGET_LINK_LIBRARIES(testLP ${TestLibs})
+add_dependencies(testLP GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
 
 if(${osqp_FOUND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
