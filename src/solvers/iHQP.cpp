@@ -256,10 +256,10 @@ void iHQP::activateAllStacks()
 }
 
 
-void iHQP::_log(XBot::MatLogger::Ptr logger)
+void iHQP::_log(XBot::MatLogger::Ptr logger, const std::string& prefix)
 {
     for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
-        _qp_stack_of_tasks[i]->log(logger,i);
+        _qp_stack_of_tasks[i]->log(logger,i, prefix);
 }
 
 std::string iHQP::getBackEndName()

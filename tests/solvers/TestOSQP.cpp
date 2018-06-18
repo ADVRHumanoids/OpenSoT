@@ -599,6 +599,50 @@ TEST_F(testiHQP, testContructor1Problem)
     }
 }
 
+///THIS TESTS WORKS BUT DOES NOT TEST ANYTHING DURING THE EXECUTION, IT JUST LOG THE TWO SOLVERS.
+//TEST_F(testiHQP, testMultipleSolversLogs)
+//{
+//    Eigen::VectorXd q(30);
+//    q.setRandom(q.size());
+
+//    Eigen::VectorXd q_ref(q.size());
+//    q_ref.setZero(q_ref.size());
+
+//    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+//            new OpenSoT::tasks::velocity::Postural(q));
+//    postural_task->setReference(q_ref);
+//    postural_task->update(q);
+
+
+//    Eigen::VectorXd q_min(q_ref.size()), q_max(q_ref.size());
+//    q_min = -10.*Eigen::VectorXd::Ones(q.size());
+//    q_max = -q_min;
+
+//    JointLimits::Ptr joint_limits(new JointLimits(q,q_max,q_min));
+//    joint_limits->update(q);
+
+//    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+//    stack_of_tasks.push_back(postural_task);
+
+//    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
+//        bounds_list.push_back(joint_limits);
+
+//        OpenSoT::constraints::Aggregated::Ptr bounds(
+//                    new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+
+//    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds, 1e-6, OpenSoT::solvers::solver_back_ends::OSQP);
+
+//    OpenSoT::solvers::iHQP sot2(stack_of_tasks, bounds, 1e-6, OpenSoT::solvers::solver_back_ends::OSQP);
+//    sot2.setSolverID("sot2");
+
+
+//    XBot::MatLogger::Ptr logger = XBot::MatLogger::getLogger("testMultipleSolversLogs");
+
+//    sot.log(logger);
+//    sot2.log(logger);
+
+//    logger->flush();
+//}
 
 }
 

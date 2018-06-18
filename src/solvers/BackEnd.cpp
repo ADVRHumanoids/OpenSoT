@@ -103,24 +103,24 @@ BackEnd::~BackEnd()
 
 }
 
-void BackEnd::log(XBot::MatLogger::Ptr logger, int i)
+void BackEnd::log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix)
 {
-    logger->add("H_"+std::to_string(i), _H);
-    logger->add("g_"+std::to_string(i), _g);
+    logger->add(prefix+"H_"+std::to_string(i), _H);
+    logger->add(prefix+"g_"+std::to_string(i), _g);
     if(_A.rows() > 0 && _A.cols() > 0)
-        logger->add("A_"+std::to_string(i), _A);
+        logger->add(prefix+"A_"+std::to_string(i), _A);
     if(_lA.size() > 0)
-        logger->add("lA_"+std::to_string(i), _lA);
+        logger->add(prefix+"lA_"+std::to_string(i), _lA);
     if(_uA.size() > 0)
-        logger->add("uA_"+std::to_string(i), _uA);
+        logger->add(prefix+"uA_"+std::to_string(i), _uA);
     if(_l.size() > 0)
-        logger->add("l_"+std::to_string(i), _l);
+        logger->add(prefix+"l_"+std::to_string(i), _l);
     if(_u.size() > 0)
-        logger->add("u_"+std::to_string(i), _u);
+        logger->add(prefix+"u_"+std::to_string(i), _u);
     if(_solution.size() > 0)
-        logger->add("solution_"+std::to_string(i), _solution);
+        logger->add(prefix+"solution_"+std::to_string(i), _solution);
 
-    _log(logger, i);
+    _log(logger, i, prefix);
 }
 
 void BackEnd::printProblemInformation(const int problem_number, const std::string& problem_id,

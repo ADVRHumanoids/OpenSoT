@@ -40,16 +40,17 @@ using namespace std;
         vector <TaskPtr> _tasks;
         ConstraintPtr _bounds;
         ConstraintPtr _globalConstraints;
+        std::string _solver_id;
 
         /**
          * @brief _log implement this on the solver to log data
          * @param logger a pointer to a MatLogger
+         * @param prefix used to log variables
          */
-        virtual void _log(XBot::MatLogger::Ptr logger)
+        virtual void _log(XBot::MatLogger::Ptr logger, const std::string& prefix)
         {
 
         }
-
 
     public:
 
@@ -57,7 +58,7 @@ using namespace std;
          * @brief Solver an interface for a generic solver
          * @param stack a vector of pointers to tasks
          */
-        Solver(vector <TaskPtr>& stack) : _tasks(stack){}
+        Solver(vector <TaskPtr>& stack) : _tasks(stack), _solver_id(""){}
 
         /**
          * @brief Solver an interface for a generic solver
@@ -65,7 +66,7 @@ using namespace std;
          * @param bounds a global bound for the problem
          */
         Solver(vector <TaskPtr>& stack,
-               ConstraintPtr bounds) : _tasks(stack), _bounds(bounds) {}
+               ConstraintPtr bounds) : _tasks(stack), _bounds(bounds), _solver_id(""){}
 
         /**
          * @brief Solver an interface for a generic solver
@@ -74,7 +75,7 @@ using namespace std;
          * @param globalConstraints a global constrains for the problem
          */
         Solver(vector<TaskPtr> &stack, ConstraintPtr bounds, ConstraintPtr globalConstraints):
-            _tasks(stack), _bounds(bounds), _globalConstraints(globalConstraints) {}
+            _tasks(stack), _bounds(bounds), _globalConstraints(globalConstraints), _solver_id(""){}
 
         virtual ~Solver(){}
 
@@ -86,12 +87,31 @@ using namespace std;
         virtual bool solve(Vector_type& solution) = 0;
 
         /**
+        * @brief getSolverID
+        * @return string with the solver id
+        */
+       std::string getSolverID(){return _solver_id;}
+
+       /**
+        * @brief setSolverID set an id to the solver. This id will be used as prefix in the logs!
+        * NOTE: if two solver are used, to avoid loggin errors, at least one of the two solvers should have an id.
+        * @param solver_id name of the solver
+        */
+       void setSolverID(const std::string& solver_id){
+           _solver_id = solver_id;
+       }
+
+        /**
          * @brief log logs data related to the solver
          * @param logger a pointer to a MatLogger
+         * @param prefix used to log variables
          */
         virtual void log(XBot::MatLogger::Ptr logger)
         {
-            _log(logger);
+            if(_solver_id.empty())
+                _log(logger, _solver_id);
+            else
+                _log(logger, _solver_id+"_");
         }
     };
  }

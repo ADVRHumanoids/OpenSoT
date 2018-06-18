@@ -40,8 +40,9 @@ namespace OpenSoT{
          * @brief log Tasks, Constraints and Bounds matrices
          * @param logger a pointer to a MatLogger
          * @param i an index related to the particular index of the problem
+         * @param prefix a prefix before the logged matrices
          */
-        void log(XBot::MatLogger::Ptr logger, int i);
+        void log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix);
 
         /**
          * @brief updateProblem update the whole problem see updateTask(), updateConstraints() and updateBounds()
@@ -154,8 +155,9 @@ namespace OpenSoT{
          * @brief _log can be used to log extra information
          * @param logger a pointer to a Matlogger
          * @param i an index related to the particular index of the problem
+         * @param prefix a prefix before the logged matrices
          */
-        virtual void _log(XBot::MatLogger::Ptr logger, int i){}
+        virtual void _log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix){}
 
         /**
          * @brief _printProblemInformation can be used to print extra information
