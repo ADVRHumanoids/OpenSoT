@@ -41,8 +41,19 @@ public:
     };
     
     typedef boost::shared_ptr<GenericConstraint> Ptr;
+
+    /**
+     * @brief GenericConstraint specific constructor for BOUND type
+     * @param constraint_id
+     * @param upper_bound
+     * @param lower_bound
+     */
+    GenericConstraint(std::string constraint_id,
+                      const Eigen::VectorXd& upper_bound,
+                      const Eigen::VectorXd& lower_bound,
+                      const int x_size);
     
-    GenericConstraint(std::string task_id, 
+    GenericConstraint(std::string constraint_id,
                       const AffineHelper& variable,
                       const Eigen::VectorXd& upper_bound,
                       const Eigen::VectorXd& lower_bound,
