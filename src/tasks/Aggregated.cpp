@@ -103,6 +103,7 @@ void Aggregated::generateAll() {
 //        _tmpb.pile(t->getWeight()*t->getb());
         _tmpA.pile(t->getWA());
         _tmpb.pile(t->getWb());
+        _c += t->getc();
     }
 
     _A = _tmpA.generate_and_get();

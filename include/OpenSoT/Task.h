@@ -41,7 +41,8 @@
     };
 
     /**
-     * @brief Task represents a task in the form \f$T(A,b)\f$ where \f$A\f$ is the task error jacobian and \f$b\f$ is the task error
+     * @brief Task represents a task in the form \f$T(A,b,c)\f$ where \f$A\f$ is the task error jacobian, \f$b\f$ is the task error
+     * and \f$c\f$ is used for LP
     */
     template <class Matrix_type, class Vector_type>
     class Task {
@@ -77,6 +78,11 @@
          * @brief _b error associated to the Task
          */
         Vector_type _b;
+
+        /**
+         * @brief _c vector used for LP Tasks
+         */
+        Vector_type _c;
 
         /**
          * @brief _W Weight multiplied to the task Jacobian
@@ -181,6 +187,12 @@
              const unsigned int x_size) :
             _task_id(task_id), _x_size(x_size), _active_joints_mask(x_size), _is_active(true), _weight_is_diagonal(false)
         {
+            //Eigen:
+            _A.setZero(0,x_size);
+            _b.setZero(0);
+            _c.setZero(x_size);
+            //
+
             _lambda = 1.0;
             _hessianType = HST_UNKNOWN;
             for(unsigned int i = 0; i < x_size; ++i)
@@ -275,6 +287,14 @@
             else
                 _Wb = _W*_b;
             return _Wb;
+        }
+
+        /**
+         * @brief getc
+         * @return the _c vector of the task
+         */
+        const Vector_type& getc() const {
+            return _c;
         }
 
         /**
@@ -416,9 +436,14 @@
          */
         virtual void log(XBot::MatLogger::Ptr logger)
         {
-            logger->add(_task_id + "_A", _A);
-            logger->add(_task_id + "_b", _b);
-            logger->add(_task_id + "_W", _W);
+            if(_A.rows() > 0)
+                logger->add(_task_id + "_A", _A);
+            if(_b.size() > 0)
+                logger->add(_task_id + "_b", _b);
+            if(_W.rows() > 0)
+                logger->add(_task_id + "_W", _W);
+            if(_c.size() > 0)
+                logger->add(_task_id + "_c", _c);
             logger->add(_task_id + "_lambda", _lambda);
             _log(logger);
 
@@ -434,37 +459,74 @@
         bool checkConsistency()
         {
             //1) Check A,b,W sizes != 0
-            if(_A.rows() == 0 || _A.cols() == 0){
-                XBot::Logger::error("%s: _A is [%i x %i]! \n", _task_id.c_str(), _A.rows(), _A.cols());
-                return false;
-            }
-            if(_b.size() == 0){
-                XBot::Logger::error("%s: _b size is %i!  \n", _task_id.c_str(), _b.size());
-                return false;
-            }
-            if(_W.rows() == 0 || _W.cols() == 0){
-                XBot::Logger::error("%s: _W is [%i x %i]! \n", _task_id.c_str(), _W.rows(), _W.cols());
-                return false;
-            }
-            if(_W.rows() != _W.cols()){
-                XBot::Logger::error("%s: _W.rows() != _W.cols() -> %i != %i! \n", _task_id.c_str(), _W.rows(), _W.cols());
-                return false;
-            }
+            if(_hessianType != HST_ZERO)
+            {
+                if(_A.rows() == 0 || _A.cols() == 0){
+                    XBot::Logger::error("%s: _A is [%i x %i]! \n", _task_id.c_str(), _A.rows(), _A.cols());
+                    return false;
+                }
+                if(_b.size() == 0){
+                    XBot::Logger::error("%s: _b size is %i!  \n", _task_id.c_str(), _b.size());
+                    return false;
+                }
+                if(_W.rows() == 0 || _W.cols() == 0){
+                    XBot::Logger::error("%s: _W is [%i x %i]! \n", _task_id.c_str(), _W.rows(), _W.cols());
+                    return false;
+                }
+                if(_W.rows() != _W.cols()){
+                    XBot::Logger::error("%s: _W.rows() != _W.cols() -> %i != %i! \n", _task_id.c_str(), _W.rows(), _W.cols());
+                    return false;
+                }
 
-            //2) Check consistency between matrices
-            if(_A.rows() != _b.size()){
-                XBot::Logger::error("%s: _A.rows() != _b.size() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _b.size());
-                return false;
-            }
-            if(_A.rows() != _W.rows()){
-                XBot::Logger::error("%s: _A.rows() != _W.rows() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _W.rows());
-                return false;
-            }
+                //2) Check consistency between matrices
+                if(_A.rows() != _b.size()){
+                    XBot::Logger::error("%s: _A.rows() != _b.size() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _b.size());
+                    return false;
+                }
+                if(_A.rows() != _W.rows()){
+                    XBot::Logger::error("%s: _A.rows() != _W.rows() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _W.rows());
+                    return false;
+                }
 
-            //3) Check task size
-            if(_A.cols() != _x_size){
-                XBot::Logger::error("%s: _A.cols() != _x_size -> %i != %i! \n", _task_id.c_str(), _A.cols(), _x_size);
-                return false;
+                //3) Check task size
+                if(_A.cols() != _x_size){
+                    XBot::Logger::error("%s: _A.cols() != _x_size -> %i != %i! \n", _task_id.c_str(), _A.cols(), _x_size);
+                    return false;
+                }
+
+                //4) Check eventually c
+                if(_c.size() > 0)
+                {
+                    if(_c.size() != _x_size){
+                        XBot::Logger::error("%s: _c.size() != _x_size -> %i != %i! \n", _task_id.c_str(), _c.size(), _x_size);
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                //When HESSIAN_TYPE is ZERO we check that A,b and W are zeros and c is not zero
+                if(_b.size() != 0){
+                    XBot::Logger::error("%s: _b size is %i! Should be 0! \n", _task_id.c_str(), _b.size());
+                    return false;
+                }
+                if(_A.rows() != 0 || _A.cols() != 0){
+                    XBot::Logger::error("%s: _A is [%i x %i]! Should be 0! \n", _task_id.c_str(), _A.rows(), _A.cols());
+                    return false;
+                }
+                if(_W.rows() != 0 || _W.cols() != 0){
+                    XBot::Logger::error("%s: _W is [%i x %i]! Should be 0! \n", _task_id.c_str(), _W.rows(), _W.cols());
+                    return false;
+                }
+                if(_c.size() == 0){
+                    XBot::Logger::error("%s: _c size is %i!  \n", _task_id.c_str(), _c.size());
+                    return false;
+                }
+                if(_c.size() != _x_size){
+                    XBot::Logger::error("%s: _c.size() != _x_size -> %i != %i! \n", _task_id.c_str(), _c.size(), _x_size);
+                    return false;
+                }
+
             }
 
             if(_constraints.size() > 0)

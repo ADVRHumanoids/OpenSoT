@@ -50,6 +50,19 @@ void GenericTask::_update(const Eigen::VectorXd &x)
     _b = -_task.getq();
 }
 
+bool GenericTask::setc(const Eigen::VectorXd& c)
+{
+    if(c.size() != _b.size())
+    {
+        XBot::Logger::error() << "in " << __func__ << ": size not correct" << XBot::Logger::endl();
+        return false;
+    }
+
+    _c = c;
+
+    return true;
+}
+
 bool GenericTask::setA(const Eigen::MatrixXd& A)
 {
     if(A.rows() != _b.size())
@@ -101,6 +114,11 @@ bool GenericTask::setAb(const Eigen::MatrixXd& A, const Eigen::VectorXd& b)
     __b = b;
 
     return true;
+}
+
+void GenericTask::setHessianType(const HessianType hessian_type)
+{
+    _hessianType = hessian_type;
 }
 
 

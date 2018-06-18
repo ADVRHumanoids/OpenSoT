@@ -31,6 +31,8 @@ namespace OpenSoT{
      * @brief The eHQP class implements an equality Hierarchical QP solver as the one used in:
      * "Prioritized Multi-Task Motion Control of Redundant Robots under Hard Joint Constraints"
      * by Fabrizio Flacco, Alessandro De Luca and Oussama Khatib
+     *
+     * NOTE: Here we do not take into account the c paramter in Task.h for Linear Programming!
      */
     class eHQP : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
