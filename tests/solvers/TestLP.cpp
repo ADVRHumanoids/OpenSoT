@@ -94,6 +94,10 @@ TEST_F(testLProblem, testSingleLPProblem)
         EXPECT_NEAR(solution[i], lb[i], 1e-8);
 }
 
+//// This test is interisting since minimize a Quadratic task using the L1 norm:
+///
+///     min ||Ax-b||_2 + ||x||_1
+///
 TEST_F(testLProblem, testQuadraticLPProblem)
 {
     OpenSoT::OptvarHelper::VariableVector vars;
