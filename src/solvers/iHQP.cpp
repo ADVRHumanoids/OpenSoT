@@ -57,13 +57,15 @@ void iHQP::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::V
     {
         H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getA();
         H = H.selfadjointView<Eigen::Upper>();
-        g.noalias() = -1.0 * task->getATranspose() * task->getb() + task->getc();
+        g.noalias() = -1.0 * task->getATranspose() * task->getb();
+        g += task->getc();
     }
     else
     {
         H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getWA();
         H = H.selfadjointView<Eigen::Upper>();
-        g.noalias() = -1.0 * task->getATranspose() * task->getWb() + task->getc();
+        g.noalias() = -1.0 * task->getATranspose() * task->getWb();
+        g += task->getc();
     }
     
     
