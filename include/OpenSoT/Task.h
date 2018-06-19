@@ -262,7 +262,7 @@
          */
         const Matrix_type& getWA() const {
             if(_weight_is_diagonal)
-                _WA.noalias() = _W.diagonal()*_A;
+                _WA.noalias() = _W.diagonal().asDiagonal()*_A;
             else
                 _WA.noalias() = _W*_A;
             return _WA;
@@ -283,7 +283,7 @@
          */
         const Vector_type& getWb() const {
             if(_weight_is_diagonal)
-                _Wb = _W.diagonal()*_b;
+                _Wb = _W.diagonal().asDiagonal()*_b;
             else
                 _Wb = _W*_b;
             return _Wb;
