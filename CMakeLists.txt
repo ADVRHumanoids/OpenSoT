@@ -24,13 +24,13 @@ endif()
 
 option(SET_SSE4_FLAG "set -msse4 flag to gcc" OFF)
 
-if(${SET_SSE4_FLAG})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4")
-endif()
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type -Werror=address -Werror=parentheses " )
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG" )
+endif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
@@ -40,10 +40,6 @@ IF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
    SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 ENDIF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
-# Select flags.
-#SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-#SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
-#SET(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
 
 find_package(YCM REQUIRED)
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
@@ -67,6 +63,11 @@ FIND_PACKAGE(fcl QUIET)
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
+option(OPENSOT_VERBOSE "Some additional prints" FALSE)
+
+if(${OPENSOT_VERBOSE})
+    add_definitions(-DOPENSOT_VERBOSE)
+endif()
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
