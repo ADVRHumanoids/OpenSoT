@@ -36,7 +36,7 @@ if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
                       ${rviz_visual_tools_INCLUDE_DIRS})
 endif()
 
-
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 
 #TESTS THAT USES GAZEBO
 set(OPENSOT_COMPILE_SIMULATION_TESTS OFF CACHE BOOL "Flag to compile tests that uses Gazebo")
@@ -46,6 +46,7 @@ if (OPENSOT_COMPILE_SIMULATION_TESTS)
     #Gazebo
     find_package(Gazebo   REQUIRED)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+    message("**************TEST CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
     link_directories(${GAZEBO_LIBRARY_DIRS})
     include_directories(${GAZEBO_INCLUDE_DIRS})
 

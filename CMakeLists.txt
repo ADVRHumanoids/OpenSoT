@@ -29,7 +29,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG" )
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -std=c++11 -Wmaybe-uninitialized -Wuninitialized" )
 endif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
