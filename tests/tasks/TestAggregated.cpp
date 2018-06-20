@@ -162,6 +162,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
 
     OpenSoT::solvers::eHQP solver(stack);
 
+
 //1. Here we use postural_task
 
     Eigen::VectorXd dq(q.size());
