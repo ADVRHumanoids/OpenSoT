@@ -75,7 +75,7 @@ void OSQPBackEnd::__generate_data_struct(const int number_of_variables,
     ones.setOnes(number_of_constraints, number_of_variables);
     sp_pattern.setZero(number_of_constraints + number_of_bounds, number_of_variables);
     sp_pattern.topRows(number_of_constraints) = ones;
-    sp_pattern.bottomRows(number_of_bounds) = Eigen::MatrixXd::Identity(number_of_bounds, number_of_bounds);
+    sp_pattern.bottomRows(number_of_bounds) = Eigen::MatrixXd::Identity(number_of_bounds, number_of_variables);
 
     _Asparse = sp_pattern.sparseView();
     _Asparse.makeCompressed();
