@@ -8,7 +8,8 @@ namespace OpenSoT{
     namespace solvers{
         enum class solver_back_ends{
             qpOASES,
-            OSQP
+            OSQP,
+            CBC
         };
 
         /**

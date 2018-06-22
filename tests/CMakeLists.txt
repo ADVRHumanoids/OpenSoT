@@ -117,6 +117,10 @@ if(${osqp_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
 endif()
 
+if(${CBC_FOUND} AND ${OSICBC_FOUND})
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testCBCSolver)
+endif()
+
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
                                        testAggregatedTask)
@@ -256,6 +260,13 @@ if(${osqp_FOUND})
     TARGET_LINK_LIBRARIES(testGenericTask ${TestLibs})
     add_dependencies(testGenericTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
+endif()
+
+if(${CBC_FOUND} AND ${OSICBC_FOUND})
+    ADD_EXECUTABLE(testCBCSolver solvers/TestCBC.cpp)
+    TARGET_LINK_LIBRARIES(testCBCSolver ${TestLibs})
+    add_dependencies(testCBCSolver GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_cbc COMMAND testCBCSolver)
 endif()
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)

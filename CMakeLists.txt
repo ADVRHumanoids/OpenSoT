@@ -59,7 +59,6 @@ FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(fcl QUIET)
 
-
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
@@ -251,6 +250,16 @@ if(${osqp_FOUND})
 
 endif()
 
+
+pkg_check_modules(CBC QUIET cbc)
+pkg_check_modules(OSICBC QUIET osi-cbc)
+if(${CBC_FOUND} AND ${OSICBC_FOUND})
+    message("Adding src/solvers/CBCBackEnd.cpp to compilation")
+
+    add_library(OpenSotBackEndCBC SHARED src/solvers/CBCBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndCBC OpenSoT ${CBC_LIBRARIES} ${OSICBC_LIBRARIES})
+    library_install(OpenSotBackEndCBC 1 0 0)
+endif()
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
 ########################################################################
