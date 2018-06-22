@@ -50,6 +50,8 @@ namespace OpenSoT{
          */
         iHQP(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks, const double eps_regularisation,
+             const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief iHQP constructor of the problem
@@ -62,6 +64,10 @@ namespace OpenSoT{
                     ConstraintPtr bounds,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
                     const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks,
+                    ConstraintPtr bounds,
+                    const double eps_regularisation,
+                    const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief iHQP constructor of the problem
@@ -76,6 +82,11 @@ namespace OpenSoT{
                     ConstraintPtr globalConstraints,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
                     const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks,
+                    ConstraintPtr bounds,
+                    ConstraintPtr globalConstraints,
+                    const double eps_regularisation,
+                    const std::vector<solver_back_ends> be_solver);
 
 
         ~iHQP(){}
@@ -136,7 +147,7 @@ namespace OpenSoT{
          *      "OSQP"
          *      "????"
          */
-        std::string getBackEndName();
+        std::string getBackEndName(const unsigned int i);
 
         /**
          * @brief getBackEnd retrieve the back-end associated to the i-th qp problem
@@ -167,7 +178,7 @@ namespace OpenSoT{
          * @brief prepareSoT initialize the complete stack
          * @return true if stack is correctly initialized
          */
-        bool prepareSoT(const solver_back_ends be_solver);
+        bool prepareSoT(const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief computeCostFunction compute a cost function for velocity control:
@@ -208,7 +219,7 @@ namespace OpenSoT{
         std::vector<Eigen::VectorXd> tmp_uA;
 
 
-        solver_back_ends _be_solver;
+        std::vector<solver_back_ends> _be_solver;
 
 
     };

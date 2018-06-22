@@ -7,13 +7,27 @@ using namespace OpenSoT::solvers;
 
 iHQP::iHQP(Stack &stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks),
+    _epsRegularisation(eps_regularisation)
+{
+    for(unsigned int i = 0; i < stack_of_tasks.size(); ++i){
+        _active_stacks.push_back(true);
+        _be_solver.push_back(be_solver);
+    }
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT!");
+}
+
+iHQP::iHQP(Stack& stack_of_tasks, const double eps_regularisation,
+     const std::vector<solver_back_ends> be_solver):
+    Solver(stack_of_tasks),
     _epsRegularisation(eps_regularisation),
     _be_solver(be_solver)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
 
-    if(!prepareSoT(be_solver))
+    if(!prepareSoT(_be_solver))
         throw std::runtime_error("Can Not initizalize SoT!");
 }
 
@@ -21,13 +35,29 @@ iHQP::iHQP(Stack &stack_of_tasks,
                          ConstraintPtr bounds,
                          const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks, bounds),
+    _epsRegularisation(eps_regularisation)
+{
+    for(unsigned int i = 0; i < stack_of_tasks.size(); ++i){
+        _active_stacks.push_back(true);
+        _be_solver.push_back(be_solver);
+    }
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT with bounds!");
+}
+
+iHQP::iHQP(Stack& stack_of_tasks,
+            ConstraintPtr bounds,
+            const double eps_regularisation,
+            const std::vector<solver_back_ends> be_solver):
+    Solver(stack_of_tasks, bounds),
     _epsRegularisation(eps_regularisation),
     _be_solver(be_solver)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
 
-    if(!prepareSoT(be_solver))
+    if(!prepareSoT(_be_solver))
         throw std::runtime_error("Can Not initizalize SoT with bounds!");
 }
 
@@ -36,13 +66,30 @@ iHQP::iHQP(Stack &stack_of_tasks,
                          ConstraintPtr globalConstraints,
                          const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks, bounds, globalConstraints),
+    _epsRegularisation(eps_regularisation)
+{
+    for(unsigned int i = 0; i < stack_of_tasks.size(); ++i){
+        _active_stacks.push_back(true);
+        _be_solver.push_back(be_solver);
+    }
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT with bounds!");
+}
+
+iHQP::iHQP(Stack& stack_of_tasks,
+            ConstraintPtr bounds,
+            ConstraintPtr globalConstraints,
+            const double eps_regularisation,
+            const std::vector<solver_back_ends> be_solver):
+    Solver(stack_of_tasks, bounds, globalConstraints),
     _epsRegularisation(eps_regularisation),
     _be_solver(be_solver)
 {
     for(unsigned int i = 0; i < stack_of_tasks.size(); ++i)
         _active_stacks.push_back(true);
 
-    if(!prepareSoT(be_solver))
+    if(!prepareSoT(_be_solver))
         throw std::runtime_error("Can Not initizalize SoT with bounds!");
 }
 
@@ -79,11 +126,11 @@ void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& prob
     uA = lA;
 }
 
-bool iHQP::prepareSoT(const solver_back_ends be_solver)
-{
-    XBot::Logger::info("#USING BACK-END: %s\n", getBackEndName().c_str());
+bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
+{   
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
+        XBot::Logger::info("#USING BACK-END @LEVEL %i: %s\n", i, getBackEndName(i).c_str());
         computeCostFunction(_tasks[i], H, g);
 
         OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
@@ -134,7 +181,8 @@ bool iHQP::prepareSoT(const solver_back_ends be_solver)
 
 //        QPOasesBackEnd problem_i(_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
 //                                 _epsRegularisation);
-        BackEnd::Ptr problem_i = BackEndFactory(be_solver,_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
+
+        BackEnd::Ptr problem_i = BackEndFactory(be_solver[i],_tasks[i]->getXSize(), A.rows(), (OpenSoT::HessianType)(_tasks[i]->getHessianAtype()),
                                            _epsRegularisation);
 
         if(problem_i->initProblem(H, g, A.generate_and_get(), lA.generate_and_get(), uA.generate_and_get(), l, u)){
@@ -148,6 +196,7 @@ bool iHQP::prepareSoT(const solver_back_ends be_solver)
         else{
             XBot::Logger::error("ERROR: INITIALIZING STACK %i \n", i);
             return false;}
+
 
         constraints_task.push_back(constraints_task_i);
     }
@@ -264,9 +313,14 @@ void iHQP::_log(XBot::MatLogger::Ptr logger, const std::string& prefix)
         _qp_stack_of_tasks[i]->log(logger,i, prefix);
 }
 
-std::string iHQP::getBackEndName()
+std::string iHQP::getBackEndName(const unsigned int i)
 {
-    return OpenSoT::solvers::whichBackEnd(_be_solver);
+    if(i >= _qp_stack_of_tasks.size())
+    {
+        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n");
+        return "";
+    }
+    return OpenSoT::solvers::whichBackEnd(_be_solver[i]);
 }
 
 bool iHQP::getBackEnd(const unsigned int i, BackEnd::Ptr& back_end)
