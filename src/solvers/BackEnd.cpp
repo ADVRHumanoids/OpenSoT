@@ -2,7 +2,8 @@
 
 using namespace OpenSoT::solvers;
 
-BackEnd::BackEnd(const int number_of_variables, const int number_of_constraints)
+BackEnd::BackEnd(const int number_of_variables, const int number_of_constraints):
+    _number_of_variables(number_of_variables)
 {
     _solution.setZero(number_of_variables);
 
@@ -152,6 +153,6 @@ int OpenSoT::solvers::BackEnd::getNumConstraints() const
 
 int OpenSoT::solvers::BackEnd::getNumVariables() const
 {
-    return _H.rows();
+    return _number_of_variables;
 }
 
