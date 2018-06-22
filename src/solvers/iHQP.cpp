@@ -315,9 +315,9 @@ void iHQP::_log(XBot::MatLogger::Ptr logger, const std::string& prefix)
 
 std::string iHQP::getBackEndName(const unsigned int i)
 {
-    if(i >= _qp_stack_of_tasks.size())
+    if(i >= _be_solver.size())
     {
-        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n");
+        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n", i);
         return "";
     }
     return OpenSoT::solvers::whichBackEnd(_be_solver[i]);
@@ -327,7 +327,7 @@ bool iHQP::getBackEnd(const unsigned int i, BackEnd::Ptr& back_end)
 {
     if(i >= _qp_stack_of_tasks.size())
     {
-        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n");
+        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n", i);
         return false;
     }
     back_end = _qp_stack_of_tasks[i];
