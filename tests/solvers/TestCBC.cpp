@@ -4,6 +4,7 @@
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
+#include <chrono>
 
 namespace {
 
@@ -64,15 +65,25 @@ TEST_F(testCBCProblem, testMILPProblem)
 
     OpenSoT::solvers::CBCBackEnd::Ptr solver = OpenSoT::solvers::BackEndFactory(
                 OpenSoT::solvers::solver_back_ends::CBC, 3, 2, task->getHessianAtype(), 0.0);
+    auto start = std::chrono::steady_clock::now();
     EXPECT_TRUE(solver->initProblem(Eigen::MatrixXd(0,0), task->getc(),
                        constr->getAineq(), constr->getbLowerBound(), constr->getbUpperBound(),
                        bounds->getLowerBound(), bounds->getUpperBound()));
+    auto stop = std::chrono::steady_clock::now();
+    auto time_for_initProblem = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+    std::cout<<"Time elapsed for time_for_initProblem: "<<time_for_initProblem/1000.<<" [ms]"<<std::endl;
     std::cout<<"Solution from initProblem: "<<solver->getSolution()<<std::endl;
 
+    std::vector<double> times;
     for(unsigned int i = 0; i<10; ++i)
     {
+        start = std::chrono::steady_clock::now();
         EXPECT_TRUE(solver->solve());
+        stop = std::chrono::steady_clock::now();
         std::cout<<"Solution from solve: "<<solver->getSolution()<<std::endl;
+
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+        times.push_back(duration);
     }
 
 
@@ -92,7 +103,11 @@ TEST_F(testCBCProblem, testMILPProblem)
     //WE CHANGE BOUNDS
     ub[1] = 5.5;
     solver->updateBounds(lb, ub);
+    start = std::chrono::steady_clock::now();
     EXPECT_TRUE(solver->solve());
+    stop = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+    times.push_back(duration);
 
     std::cout<<"Solution from solve: \n"<<solver->getSolution()<<std::endl;
     EXPECT_DOUBLE_EQ(solver->getSolution()[0], 0.0);
@@ -104,7 +119,11 @@ TEST_F(testCBCProblem, testMILPProblem)
 
     solver->setOptions(opt);
     solver->printProblemInformation(0, "", "", "");
+    start = std::chrono::steady_clock::now();
     EXPECT_TRUE(solver->solve());
+    stop = std::chrono::steady_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+    times.push_back(duration);
     std::cout<<"Solution from solve: \n"<<solver->getSolution()<<std::endl;
 
     EXPECT_DOUBLE_EQ(solver->getSolution()[0], 0.25);
@@ -114,6 +133,11 @@ TEST_F(testCBCProblem, testMILPProblem)
     solver->printProblemInformation(0, "", "", "");
 
     std::cout<<"get objective: "<<solver->getObjective()<<std::endl;
+
+    double total_time = 0.;
+    for(unsigned int i = 0; i < times.size(); ++i)
+        total_time += times[i];
+    std::cout<<"Average time for solve: "<<(total_time/times.size())/1000.<<" [ms]"<<std::endl;
 }
 
 }
