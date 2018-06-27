@@ -6,7 +6,23 @@ namespace OpenSoT{
 OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
                                               OpenSoT::tasks::Aggregated::TaskPtr task)
 {
+    if(!(W.rows() == W.cols()))
+        throw std::runtime_error("W matrix has W.rows() != W.cols()");
+
     Eigen::MatrixXd Wtask = task->getWeight();
+
+    if(Wtask.rows() == 0)
+        throw std::runtime_error("task->getWeight().rows() == 0");
+    if(Wtask.cols() == 0)
+        throw std::runtime_error("task->getWeight().cols() == 0");
+    if(Wtask.cols() != Wtask.rows())
+        throw std::runtime_error("task->getWeight().cols() != task->getWeight().rows()");
+
+    if(!(W.rows() == Wtask.rows()))
+        throw std::runtime_error("W.rows() != task->getWeight().rows()");
+    if(!(W.cols() == Wtask.cols()))
+        throw std::runtime_error("W.cols() != task->getWeight().cols()");
+
     task->setWeight(W*Wtask);
     return OpenSoT::tasks::Aggregated::TaskPtr(task);
 }
@@ -24,6 +40,15 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
                                           OpenSoT::tasks::Aggregated::Ptr task)
 {
     Eigen::MatrixXd Wtask = task->getWeight();
+
+    if(Wtask.rows() == 0)
+        throw std::runtime_error("task->getWeight().rows() == 0");
+    if(Wtask.cols() == 0)
+        throw std::runtime_error("task->getWeight().cols() == 0");
+    if(Wtask.cols() != Wtask.rows())
+        throw std::runtime_error("task->getWeight().cols() != task->getWeight().rows()");
+
+
     task->setWeight(w*Wtask);
     return OpenSoT::tasks::Aggregated::Ptr(task);
 }
