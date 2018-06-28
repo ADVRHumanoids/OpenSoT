@@ -91,7 +91,6 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_SetActiveStack 
                   testQPOases_Options  
                   testQPOases_SubTask
-                  testLP
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
@@ -114,7 +113,7 @@ set(OPENSOT_TESTS testBilateralConstraint
 )
 
 if(${osqp_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask testLP)
 endif()
 
 if(${CBC_FOUND} AND ${OSICBC_FOUND})
@@ -245,11 +244,6 @@ TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
-ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
-TARGET_LINK_LIBRARIES(testLP ${TestLibs})
-add_dependencies(testLP GTest-ext OpenSoT)
-add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
-
 if(${osqp_FOUND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
     TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs})
@@ -260,6 +254,11 @@ if(${osqp_FOUND})
     TARGET_LINK_LIBRARIES(testGenericTask ${TestLibs})
     add_dependencies(testGenericTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
+
+    ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
+    TARGET_LINK_LIBRARIES(testLP ${TestLibs})
+    add_dependencies(testLP GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
 endif()
 
 if(${CBC_FOUND} AND ${OSICBC_FOUND})
