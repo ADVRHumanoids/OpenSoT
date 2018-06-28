@@ -18,7 +18,8 @@ extern "C" void destroy_instance( BackEnd * instance )
 CBCBackEnd::CBCBackEnd(const int number_of_variables, const int number_of_constraints, const double eps_regularisation): 
     BackEnd(number_of_variables, number_of_constraints)
 {   
-    __generate_data_struct(number_of_variables, number_of_constraints);   
+    __generate_data_struct(number_of_variables, number_of_constraints);
+    _integer_variables.reserve(number_of_variables);
 }
 bool CBCBackEnd::solve()
 {
@@ -59,7 +60,7 @@ bool CBCBackEnd::initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
         return false;}
         
     _ACP.copyOf(true, _A.rows(), _A.cols(), _AS.nonZeros(), _A.data(), _AS.innerIndexPtr(), _AS.outerIndexPtr(), _AS.innerNonZeroPtr());
-    
+
     OsiCbcSolverInterface *_solver = new OsiCbcSolverInterface;
 
     _solver->loadProblem(_ACP, _l.data(), _u.data(), _g.data(), _lA.data(), _uA.data());
@@ -103,6 +104,9 @@ void CBCBackEnd::setOptions(const boost::any& options)
         XBot::Logger::error("Index of integer variable greater than number of variables! Options will not be applied!");
     else
     {
+        if(!_integer_variables.empty())
+            _integer_variables.clear();
+
         if(_opt.integer_ind.size() <= getNumVariables())
         {
             for(unsigned int i = 0; i < _opt.integer_ind.size(); ++i)

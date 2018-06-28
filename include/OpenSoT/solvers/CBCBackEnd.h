@@ -30,7 +30,11 @@ namespace solvers{
                                      const Eigen::MatrixXd &A,
                                      const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                      const Eigen::VectorXd &l, const Eigen::VectorXd &u);
-            
+            /**
+             * @brief setOptions
+             * @param options
+             * NOTE: THIS IS NOT RT SAFE!
+             */
             virtual void setOptions(const boost::any& options);
             boost::any getOptions();
             bool solve();
