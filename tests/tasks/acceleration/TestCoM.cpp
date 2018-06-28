@@ -57,7 +57,7 @@ protected:
 
 
         OpenSoT::AffineHelper var = OpenSoT::AffineHelper::Identity(_q.size());
-        Eigen::VectorXd ddq_max = 1.*Eigen::VectorXd::Ones(_q.size());
+        Eigen::VectorXd ddq_max = 20.*Eigen::VectorXd::Ones(_q.size());
         Eigen::VectorXd ddq_min = -ddq_max;
         acc_lims.reset(
             new OpenSoT::constraints::GenericConstraint("acc_lims", var, ddq_max, ddq_min,
@@ -137,9 +137,8 @@ TEST_F(testCoMTask, testCoMTask_)
     Eigen::VectorXd ddq(_q.size());
     ddq.setZero(ddq.size());
     std::cout<<"q: "<<_q<<std::endl;
-    for(unsigned int i = 0; i < 10000; ++i)
+    for(unsigned int i = 0; i < 1000; ++i)
     {
-
         this->_model->setJointPosition(_q);
         this->_model->setJointVelocity(_dq);
         this->_model->update();
