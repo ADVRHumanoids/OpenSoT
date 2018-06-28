@@ -116,13 +116,7 @@ void CBCBackEnd::setOptions(const boost::any& options)
              XBot::Logger::error("Size of integer variable greater than number of variables! Options will not be applied!");
     }
 
-    __H = _H;
-    __g = _g;
-    __A = _A;
-    __lA = _lA;
-    __uA = _uA;
-    __l = _l;
-    __u = _u;
+    __H = _H; __g = _g; __A = _A; __lA = _lA; __uA = _uA; __l = _l; __u = _u;
     initProblem(__H, __g, __A, __lA, __uA, __l, __u);
 }
 
@@ -176,6 +170,11 @@ double CBCBackEnd::getObjective()
 
 void CBCBackEnd::_printProblemInformation()
 {
-    XBot::Logger::info("CBC # OF INTEGER VARIABLES: %i", _model->numberIntegers());
+    XBot::Logger::info("CBC # OF INTEGER VARIABLES: %i \n", _model->numberIntegers());
+    XBot::Logger::info("CBC INTEGER VARIABLES: [ ");
+    for(unsigned int i = 0; i < _model->numberIntegers(); ++i)
+        XBot::Logger::log()<<_model->integerVariable()[i]<<" ";
+    XBot::Logger::log()<<"]"<<XBot::Logger::endl();
+
 }
     
