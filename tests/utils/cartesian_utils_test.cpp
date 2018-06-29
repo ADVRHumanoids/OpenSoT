@@ -66,8 +66,11 @@ protected:
 TEST_F(testCartesianUtils, testPseudoInverse1)
 {
     Eigen::MatrixXd A(32,32);
+    A.setZero(A.rows(), A.cols());
     Eigen::MatrixXd Ainv(32,32);
+    Ainv.setZero(Ainv.rows(), Ainv.cols());
     Eigen::MatrixXd Apinv(32,32);
+    Ainv.setZero(Apinv.rows(), Apinv.cols());
 
     SVDPseudoInverse<Eigen::MatrixXd> pinv(A);
 
