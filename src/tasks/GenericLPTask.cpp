@@ -5,8 +5,8 @@ using namespace OpenSoT::tasks;
 GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd &c):
     Task(task_id, c.size())
 {
-    Eigen::MatrixXd O(c.size(), c.size()); O.setZero(O.rows(), O.cols());
-    Eigen::VectorXd o(c.size()); o.setZero(o.size());
+    Eigen::MatrixXd O(0, c.size()); O.setZero(0, O.cols());
+    Eigen::VectorXd o(0); o.setZero(0);
     _task.reset(new GenericTask(task_id+"_internal", O, o));
     _hessianType = HST_ZERO;
     _task->setc(c);
@@ -24,8 +24,8 @@ GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd &
 GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd& c, const AffineHelper &var):
     Task(task_id, c.size())
 {
-    Eigen::MatrixXd O(c.size(), c.size()); O.setZero(O.rows(), O.cols());
-    Eigen::VectorXd o(c.size()); o.setZero(o.size());
+    Eigen::MatrixXd O(0, c.size()); O.setZero(0, O.cols());
+    Eigen::VectorXd o(0); o.setZero(0);
     _task.reset(new GenericTask(task_id+"_internal", O, o, var));
     _hessianType = HST_ZERO;
     _task->setc(c);

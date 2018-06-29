@@ -79,11 +79,13 @@ TEST_F(testGenericLPTask, testMethods)
     Eigen::VectorXd new_c(this->_generic_lp_task->getc().size());
     new_c.setOnes(new_c.size());
 
+    std::cout<<"new_c: "<<new_c<<std::endl;
+
     this->_generic_lp_task->setc(new_c);
     this->_generic_lp_task->update(Eigen::VectorXd(1));
 
-    EXPECT_TRUE(this->_generic_lp_task->getA() == Eigen::MatrixXd::Zero(new_c.size(), new_c.size()));
-    EXPECT_TRUE(this->_generic_lp_task->getb() == Eigen::VectorXd::Zero(new_c.size()));
+    EXPECT_TRUE(this->_generic_lp_task->getA() == Eigen::MatrixXd::Zero(0, new_c.size()));
+    EXPECT_TRUE(this->_generic_lp_task->getb() == Eigen::VectorXd::Zero(0));
     EXPECT_TRUE(this->_generic_lp_task->getc() == new_c);
     EXPECT_TRUE(this->_generic_lp_task->checkConsistency());
 

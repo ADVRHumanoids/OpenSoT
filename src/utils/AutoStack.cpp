@@ -433,18 +433,19 @@ void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)
 
 bool OpenSoT::AutoStack::checkConsistency()
 {
+    bool a = true;
     for(auto task : _stack)
     {
         if(!task->checkConsistency())
-            return false;
+            a = false;
     }
     if(_boundsAggregated)
     {
         if(!_boundsAggregated->checkConsistency())
-            return false;
+            a = false;
     }
 
-    return true;
+    return a;
 }
 
 
