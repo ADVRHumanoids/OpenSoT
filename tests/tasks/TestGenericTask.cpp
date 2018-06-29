@@ -7,6 +7,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <qpOASES/Options.hpp>
 #include <OpenSoT/tasks/MinimizeVariable.h>
+#include <OpenSoT/tasks/GenericLPTask.h>
 
 namespace {
 
@@ -42,6 +43,54 @@ public:
     Eigen::VectorXd b;
     OpenSoT::tasks::GenericTask::Ptr _generic_task;
 };
+
+class testGenericLPTask: public ::testing::Test
+{
+protected:
+
+    testGenericLPTask()
+    {
+        c.resize(10);
+        c.setRandom(10);
+        _generic_lp_task = boost::make_shared<OpenSoT::tasks::GenericLPTask>(
+                    OpenSoT::tasks::GenericLPTask("test_lp_task",c));
+    }
+
+    virtual ~testGenericLPTask() {
+
+    }
+
+    virtual void SetUp() {
+
+    }
+
+    virtual void TearDown() {
+
+    }
+
+public:
+
+    Eigen::VectorXd c;
+    OpenSoT::tasks::GenericLPTask::Ptr _generic_lp_task;
+};
+
+TEST_F(testGenericLPTask, testMethods)
+{
+    Eigen::VectorXd new_c(this->_generic_lp_task->getc().size());
+    new_c.setOnes(new_c.size());
+
+    this->_generic_lp_task->setc(new_c);
+    this->_generic_lp_task->update(Eigen::VectorXd(1));
+
+    EXPECT_TRUE(this->_generic_lp_task->getA() == Eigen::MatrixXd::Zero(new_c.size(), new_c.size()));
+    EXPECT_TRUE(this->_generic_lp_task->getb() == Eigen::VectorXd::Zero(new_c.size()));
+    EXPECT_TRUE(this->_generic_lp_task->getc() == new_c);
+    EXPECT_TRUE(this->_generic_lp_task->checkConsistency());
+
+    std::cout<<"this->_generic_lp_task->getA(): "<<this->_generic_lp_task->getA()<<std::endl;
+    std::cout<<"this->_generic_lp_task->getb(): "<<this->_generic_lp_task->getb()<<std::endl;
+    std::cout<<"this->_generic_lp_task->getc(): "<<this->_generic_lp_task->getc()<<std::endl;
+}
 
 TEST_F(testGenericTask, testMethods)
 {

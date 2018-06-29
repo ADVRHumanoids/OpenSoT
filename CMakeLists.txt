@@ -117,6 +117,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/MinimizeVariable.cpp
                     src/tasks/GenericTask.cpp
+                    src/tasks/GenericLPTask.cpp
                     src/tasks/acceleration/Postural.cpp
                     src/tasks/acceleration/Cartesian.cpp
                     src/tasks/acceleration/Contact.cpp
