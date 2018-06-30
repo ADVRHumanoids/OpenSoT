@@ -877,392 +877,376 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 }
 
 
-//TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
-
-//    int idx = robot.iDynTree_model.getLinkIndex("l_sole");
-//    this->robot.iDynTree_model.setFloatingBaseLink(idx);
-//    this->q = getGoodInitialPosition(this->robot);
-//    this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
-
-
-//    std::string linkA = "LSoftHandLink";
-//    std::string linkB = "RSoftHandLink";
-
-//    std::string linkC = "LFootmot";
-//    std::string linkD = "RFootmot";
-
-//    // arm task
-//    Eigen::VectorXd q = conversion_utils_YARP::toEigen(this->q);
-//    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-//                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, *(this->_model_ptr.get()), linkA, "Waist"));
-//    task_left_arm->setOrientationErrorGain(0.1);
-
-//    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-//                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", q, *(this->_model_ptr.get()), linkB, "Waist"));
-//    task_right_arm->setOrientationErrorGain(0.1);
-
-//    Eigen::MatrixXd T_init_l_arm(4,4);
-//    T_init_l_arm = task_left_arm->getReference();
-
-//    Eigen::MatrixXd T_init_r_arm(4,4);
-//    T_init_r_arm = task_right_arm->getReference();
-
-//    Eigen::MatrixXd T_reference_l_arm(4,4);
-//    T_reference_l_arm = task_left_arm->getReference();
-//    T_reference_l_arm(1,3) = 0.0;
-//    task_left_arm->setReference(T_reference_l_arm);
-
-//    Eigen::MatrixXd T_reference_r_arm(4,4);
-//    T_reference_r_arm = task_right_arm->getReference();
-//    T_reference_r_arm(1,3) = 0.0;
-//    task_right_arm->setReference(T_reference_r_arm);
-
-//    // leg task
-//    // Note: for now, we don't have the capsule information for the links LFoot and RFoot. In the meantime, we can only use these
-//    // links to realize the full posture kinematical contronl with enough DOFs (at least 6). So, we implement the Cartesian task for
-//    // these two links, while implement the self-collision avoidance constraint for the links LFootmot and RFootmot whose origin are
-//    // coincident with those of their child links, i.e., LFoot and RFoot.
-
-//    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_leg(
-//                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", q, *(this->_model_ptr.get()),"LFoot", "Waist"));
-//    task_left_leg->setOrientationErrorGain(0.1);
-//    Eigen::MatrixXd W = task_left_leg->getWeight();
-//    //W(1,1) = 1.1;
-//    W(0,0) = 3.;
-//    W(2,2) = 3.;
-//    task_left_leg->setWeight(W);
-
-//    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_leg(
-//                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", q, *(this->_model_ptr.get()),"RFoot", "Waist"));
-//    task_right_leg->setOrientationErrorGain(0.1);
-//    task_right_leg->setWeight(W);
+TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
+
+    this->q = getGoodInitialPosition(this->_model_ptr);
+    this->_model_ptr->setJointPosition(this->q);
+    this->_model_ptr->update();
+
+    std::string linkA = "LSoftHandLink";
+    std::string linkB = "RSoftHandLink";
+
+    std::string linkC = "LFootmot";
+    std::string linkD = "RFootmot";
+
+    // arm task
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", this->q, *(this->_model_ptr.get()), linkA, "Waist"));
+    task_left_arm->setOrientationErrorGain(0.1);
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", this->q, *(this->_model_ptr.get()), linkB, "Waist"));
+    task_right_arm->setOrientationErrorGain(0.1);
+
+    Eigen::MatrixXd T_init_l_arm(4,4);
+    T_init_l_arm = task_left_arm->getReference();
+
+    Eigen::MatrixXd T_init_r_arm(4,4);
+    T_init_r_arm = task_right_arm->getReference();
+
+    Eigen::MatrixXd T_reference_l_arm(4,4);
+    T_reference_l_arm = task_left_arm->getReference();
+    T_reference_l_arm(1,3) = 0.0;
+    task_left_arm->setReference(T_reference_l_arm);
+
+    Eigen::MatrixXd T_reference_r_arm(4,4);
+    T_reference_r_arm = task_right_arm->getReference();
+    T_reference_r_arm(1,3) = 0.0;
+    task_right_arm->setReference(T_reference_r_arm);
+
+    // leg task
+    // Note: for now, we don't have the capsule information for the links LFoot and RFoot. In the meantime, we can only use these
+    // links to realize the full posture kinematical contronl with enough DOFs (at least 6). So, we implement the Cartesian task for
+    // these two links, while implement the self-collision avoidance constraint for the links LFootmot and RFootmot whose origin are
+    // coincident with those of their child links, i.e., LFoot and RFoot.
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_leg(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", this->q, *(this->_model_ptr.get()),"LFoot", "Waist"));
+    task_left_leg->setOrientationErrorGain(0.1);
+    Eigen::MatrixXd W = task_left_leg->getWeight();
+    //W(1,1) = 1.1;
+    W(0,0) = 3.;
+    W(2,2) = 3.;
+    task_left_leg->setWeight(W);
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_leg(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", this->q, *(this->_model_ptr.get()),"RFoot", "Waist"));
+    task_right_leg->setOrientationErrorGain(0.1);
+    task_right_leg->setWeight(W);
+
+    Eigen::MatrixXd T_init_l_leg(4,4);
+    T_init_l_leg = task_left_leg->getReference();
+
+    Eigen::MatrixXd T_init_r_leg(4,4);
+    T_init_r_leg = task_right_leg->getReference();
+
+    Eigen::MatrixXd T_reference_l_leg(4,4);
+    T_reference_l_leg = task_left_leg->getReference();
+    T_reference_l_leg(1,3) = 0.0;
+    task_left_leg->setReference(T_reference_l_leg);
+
+    Eigen::MatrixXd T_reference_r_leg(4,4);
+    T_reference_r_leg = task_right_leg->getReference();
+    T_reference_r_leg(1,3) = 0.0;
+    task_right_leg->setReference(T_reference_r_leg);
+
+    // set whitelist
+
+    std::cout << "xxx Setting whitelist" << std::endl;
+    std::list<std::pair<std::string,std::string> > whiteList;
+    whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
+    whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
+    this->sc_constraint->setCollisionWhiteList(whiteList);
+    std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
+
+    std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
+    cartesianTasks.push_back(task_left_arm);
+    cartesianTasks.push_back(task_right_arm);
+    cartesianTasks.push_back(task_left_leg);
+    cartesianTasks.push_back(task_right_leg);
+    OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
+                new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
+    taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(this->q));
+    postural_task->getConstraints().push_back(this->sc_constraint);
+
 
-//    Eigen::MatrixXd T_init_l_leg(4,4);
-//    T_init_l_leg = task_left_leg->getReference();
-
-//    Eigen::MatrixXd T_init_r_leg(4,4);
-//    T_init_r_leg = task_right_leg->getReference();
-
-//    Eigen::MatrixXd T_reference_l_leg(4,4);
-//    T_reference_l_leg = task_left_leg->getReference();
-//    T_reference_l_leg(1,3) = 0.0;
-//    task_left_leg->setReference(T_reference_l_leg);
-
-//    Eigen::MatrixXd T_reference_r_leg(4,4);
-//    T_reference_r_leg = task_right_leg->getReference();
-//    T_reference_r_leg(1,3) = 0.0;
-//    task_right_leg->setReference(T_reference_r_leg);
-
-//    // set whitelist
-
-//    std::cout << "xxx Setting whitelist" << std::endl;
-//    std::list<std::pair<std::string,std::string> > whiteList;
-//    whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
-//    whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
-//    this->sc_constraint->setCollisionWhiteList(whiteList);
-//    std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
-//    std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
-//    cartesianTasks.push_back(task_left_arm);
-//    cartesianTasks.push_back(task_right_arm);
-//    cartesianTasks.push_back(task_left_leg);
-//    cartesianTasks.push_back(task_right_leg);
-//    OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
-//                new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
-//    taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
+    stack_of_tasks.push_back(taskCartesianAggregated);
+    stack_of_tasks.push_back(postural_task);
 
-//    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(q));
-//    postural_task->getConstraints().push_back(this->sc_constraint);
+    int t = 10;
+    Eigen::VectorXd qmin,qmax;
+    this->_model_ptr->getJointLimits(qmin,qmax);
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
+                new OpenSoT::constraints::velocity::JointLimits(q,qmax,qmin));
 
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
+                new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
 
-//    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+    OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
+                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
 
-//    stack_of_tasks.push_back(taskCartesianAggregated);
-//    stack_of_tasks.push_back(postural_task);
+    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
+                new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
-//    int t = 100;
-//    OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-//                new OpenSoT::constraints::velocity::JointLimits(q,
-//                                                                this->robot.getJointBoundMax(),
-//                                                                this->robot.getJointBoundMin()));
+    Eigen::VectorXd dq(this->q.size()); dq.setZero(dq.size());
+    for(unsigned int i = 0; i < 50*t; ++i)
+    {
+        this->_model_ptr->setJointPosition(this->q);
+        this->_model_ptr->update();
 
-//    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
-//                new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
+        taskCartesianAggregated->update(this->q);
+        postural_task->update(this->q);
+        bounds->update(this->q);
 
-//    OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
-//                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
+        if(!sot->solve(dq)){
+            std::cout<<"error"<<std::endl;
+            dq.setZero(dq.size());}
+        this->q += dq;
+#if ENABLE_ROS
+        this->publishJointStates(this->q);
+        usleep(10000);
+#endif
+    }
 
-//    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
-//                new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
+    std::cout << "Q_final: " << this->q.transpose() << std::endl;
 
-//    yarp::sig::Vector dq(this->q.size(), 0.0);
-//    Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-//    for(unsigned int i = 0; i < 50*t; ++i)
-//    {
-//        this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
+    std::cout<<"Initial Left Arm: "<<T_init_l_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Left Arm: "<<T_reference_l_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Left Arm: "<<task_left_arm->getActualPose()<<std::endl;
+
+    std::cout<<std::endl;
+    std::cout<<std::endl;
 
+    std::cout<<"Initial Right Arm: "<<T_init_r_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Right Arm: "<<T_reference_r_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Right Arm: "<<task_right_arm->getActualPose()<<std::endl;
 
-//        taskCartesianAggregated->update(conversion_utils_YARP::toEigen(this->q));
-//        postural_task->update(conversion_utils_YARP::toEigen(this->q));
-//        bounds->update(conversion_utils_YARP::toEigen(this->q));
+    // showing the data of the legs
 
-//        if(!sot->solve(_dq)){
-//            std::cout<<"error"<<std::endl;
-//            _dq.setZero(dq.size());}
-//        dq = conversion_utils_YARP::toYARP(_dq);
-//        using namespace yarp::math;
-//        this->q += dq;
+    std::cout<<std::endl;
 
-//    }
+    std::cout<<"Initial Left leg: "<<T_init_l_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Left leg: "<<T_reference_l_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Left leg: "<<task_left_leg->getActualPose()<<std::endl;
 
-//    std::cout << "Q_final: " << this->q.toString() << std::endl;
+    std::cout<<std::endl;
+    std::cout<<std::endl;
 
-//    std::cout<<"Initial Left Arm: "<<T_init_l_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Left Arm: "<<T_reference_l_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Left Arm: "<<task_left_arm->getActualPose()<<std::endl;
+    std::cout<<"Initial Right leg: "<<T_init_r_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Right leg: "<<T_reference_r_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Right leg: "<<task_right_leg->getActualPose()<<std::endl;
+
+    std::cout<<std::endl;
+
+    // start checking the distances of the capsules
+
+    typedef std::pair<std::string,std::string> CapsulePair;
+    std::vector<CapsulePair> CasulePairs_vec;
+    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkA,linkB));
+    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
+
+
+    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
+
+    for (int i=0; i < CasulePairs_vec.size(); i++)
+    {
+
+        std::string _linkA = CasulePairs_vec[i].first;
+        std::string _linkB = CasulePairs_vec[i].second;
+
+        //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
+
+        KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
+                righthand_capsule_ep1, righthand_capsule_ep2;
+
+        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
+        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
+        capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
+        capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
+
+        KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
+        _model_ptr->getPose(_linkA, w_T_link_left_hand);
+        _model_ptr->getPose(_linkB, w_T_link_right_hand);
+
+        lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
+        lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
+        righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
+        righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
+
+        Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
+                righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
+
+        Eigen::Vector3d lefthand_CP, righthand_CP;
+        double reference_distance;
+
+        vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
+        vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
+        vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
+        vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
 
-//    std::cout<<std::endl;
-//    std::cout<<std::endl;
+        reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
+                                                        lefthand_capsule_ep2_eigen,
+                                                        righthand_capsule_ep1_eigen,
+                                                        righthand_capsule_ep2_eigen,
+                                                        lefthand_CP,
+                                                        righthand_CP);
 
-//    std::cout<<"Initial Right Arm: "<<T_init_r_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Right Arm: "<<T_reference_r_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Right Arm: "<<task_right_arm->getActualPose()<<std::endl;
+        reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
 
-//    // showing the data of the legs
 
-//    std::cout<<std::endl;
+        if (i == 0)
+        {
+            std::cout << "checking the distance between hands" << std::endl;
+            EXPECT_NEAR(0.005, reference_distance, 1e-4);
+        }
+        else if (i ==1)
+        {
+            std::cout << "checking the distance between legs" << std::endl;
+            EXPECT_NEAR(0.005, reference_distance, 1e-4);
+        }
+        else
+            std::cout << "The dimension of CasulePairs_vec is incorrect!" << std::endl;
 
-//    std::cout<<"Initial Left leg: "<<T_init_l_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Left leg: "<<T_reference_l_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Left leg: "<<task_left_leg->getActualPose()<<std::endl;
+    }
 
-//    std::cout<<std::endl;
-//    std::cout<<std::endl;
 
-//    std::cout<<"Initial Right leg: "<<T_init_r_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Right leg: "<<T_reference_r_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Right leg: "<<task_right_leg->getActualPose()<<std::endl;
+    // change whitelist: release the foot pair
 
-//    std::cout<<std::endl;
+    // reset whitelist
 
-//    // start checking the distances of the capsules
+    std::cout << "xxx Resetting whitelist" << std::endl;
+    whiteList.pop_back();
+    this->sc_constraint->setCollisionWhiteList(whiteList);
+    std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
+
+    dq.setZero(dq.size());
+    for(unsigned int i = 0; i < 50*t; ++i)
+    {
+        this->_model_ptr->setJointPosition(this->q);
+        this->_model_ptr->update();
 
-//    typedef std::pair<std::string,std::string> CapsulePair;
-//    std::vector<CapsulePair> CasulePairs_vec;
-//    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkA,linkB));
-//    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
+        taskCartesianAggregated->update(this->q);
+        postural_task->update(this->q);
+        bounds->update(this->q);
 
+        if(!sot->solve(dq)){
+            std::cout<<"error"<<std::endl;
+            dq.setZero(dq.size());}
+        this->q += dq;
+#if ENABLE_ROS
+        this->publishJointStates(this->q);
+        usleep(10000);
+#endif
+    }
 
-//    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
+    std::cout << "Q_final 2: " << this->q.transpose() << std::endl;
 
-//    for (int i=0; i < CasulePairs_vec.size(); i++)
-//    {
+    std::cout<<"Initial Left Arm 2: "<<T_init_l_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Left Arm 2: "<<T_reference_l_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Left Arm 2: "<<task_left_arm->getActualPose()<<std::endl;
 
-//        std::string _linkA = CasulePairs_vec[i].first;
-//        std::string _linkB = CasulePairs_vec[i].second;
+    std::cout<<std::endl;
+    std::cout<<std::endl;
 
-//        //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
+    std::cout<<"Initial Right Arm 2: "<<T_init_r_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Right Arm 2: "<<T_reference_r_arm<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Right Arm 2: "<<task_right_arm->getActualPose()<<std::endl;
 
-//        KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
-//                righthand_capsule_ep1, righthand_capsule_ep2;
+    // showing the data of the legs
 
-//        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-//        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
-//        capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
-//        capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
+    std::cout<<std::endl;
 
-//        int left_wrist_index = robot.iDynTree_model.getLinkIndex(_linkA);
-//        if(left_wrist_index == -1)
-//            std::cout << "Failed to get leftwrist_index" << std::endl;
+    std::cout<<"Initial Left leg 2: "<<T_init_l_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Left leg 2: "<<T_reference_l_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Left leg 2: "<<task_left_leg->getActualPose()<<std::endl;;
 
-//        int right_wrist_index = robot.iDynTree_model.getLinkIndex(_linkB);
-//        if(right_wrist_index == -1)
-//            std::cout << "Failed to get rightwrist_index" << std::endl;
+    std::cout<<std::endl;
+    std::cout<<std::endl;
 
-//        KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_wrist_index);
-//        KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_wrist_index);
+    std::cout<<"Initial Right leg 2: "<<T_init_r_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Reference Right leg 2: "<<T_reference_r_leg<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Actual Right leg 2: "<<task_right_leg->getActualPose()<<std::endl;
 
-//        lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
-//        lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
-//        righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
-//        righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
+    std::cout<<std::endl;
 
-//        Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
-//                righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
+    // start rechecking the distances of the capsules
 
-//        Eigen::Vector3d lefthand_CP, righthand_CP;
-//        double reference_distance;
+    std::string _linkA = CasulePairs_vec[0].first;
+    std::string _linkB = CasulePairs_vec[0].second;
 
-//        vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-//        vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-//        vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-//        vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
+    KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
+            righthand_capsule_ep1, righthand_capsule_ep2;
 
-//        reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
-//                                                        lefthand_capsule_ep2_eigen,
-//                                                        righthand_capsule_ep1_eigen,
-//                                                        righthand_capsule_ep2_eigen,
-//                                                        lefthand_CP,
-//                                                        righthand_CP);
+    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
+    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
+    capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
+    capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
-//        reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
+    KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
+    _model_ptr->getPose(_linkA, w_T_link_left_hand);
+    _model_ptr->getPose(_linkB, w_T_link_right_hand);
 
+    lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
+    lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
+    righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
+    righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
 
-//        if (i == 0)
-//        {
-//            std::cout << "checking the distance between hands" << std::endl;
-//            EXPECT_NEAR(0.005, reference_distance, 1e-4);
-//        }
-//        else if (i ==1)
-//        {
-//            std::cout << "checking the distance between legs" << std::endl;
-//            EXPECT_NEAR(0.005, reference_distance, 1e-4);
-//        }
-//        else
-//            std::cout << "The dimension of CasulePairs_vec is incorrect!" << std::endl;
+    Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
+            righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
 
-//    }
+    Eigen::Vector3d lefthand_CP, righthand_CP;
+    double reference_distance;
 
+    vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
+    vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
+    vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
+    vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
 
-//    // change whitelist: release the foot pair
+    reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
+                                                    lefthand_capsule_ep2_eigen,
+                                                    righthand_capsule_ep1_eigen,
+                                                    righthand_capsule_ep2_eigen,
+                                                    lefthand_CP,
+                                                    righthand_CP);
 
-//    // reset whitelist
+    reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
 
-//    std::cout << "xxx Resetting whitelist" << std::endl;
-//    whiteList.pop_back();
-//    this->sc_constraint->setCollisionWhiteList(whiteList);
-//    std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
+    //checking the distance between hands
 
-//    _dq.setZero(dq.size());
-//    for(unsigned int i = 0; i < 50*t; ++i)
-//    {
-//        this->robot.updateiDynTreeModel(conversion_utils_YARP::toEigen(this->q), true);
+    EXPECT_NEAR(0.005, reference_distance, 1e-4);
 
+    //checking if actual positions of the feet are coincident with the goal reference positions
 
-//        taskCartesianAggregated->update(conversion_utils_YARP::toEigen(this->q));
-//        postural_task->update(conversion_utils_YARP::toEigen(this->q));
-//        bounds->update(conversion_utils_YARP::toEigen(this->q));
+    for(unsigned int i = 0; i < 4; ++i)
+        for(unsigned int j = 0; j < 4; ++j)
+            EXPECT_NEAR(task_left_leg->getActualPose()(i,j), T_reference_l_leg(i,j), 1E-4);
 
-//        if(!sot->solve(_dq)){
-//            std::cout<<"error"<<std::endl;
-//            _dq.setZero(dq.size());}
-//        dq = conversion_utils_YARP::toYARP(_dq);
-//        using namespace yarp::math;
-//        this->q += dq;
+    for(unsigned int i = 0; i < 4; ++i)
+        for(unsigned int j = 0; j < 4; ++j)
+            EXPECT_NEAR(task_right_leg->getActualPose()(i,j), T_reference_r_leg(i,j), 1E-4);
 
-//    }
 
-//    std::cout << "Q_final 2: " << this->q.toString() << std::endl;
-
-//    std::cout<<"Initial Left Arm 2: "<<T_init_l_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Left Arm 2: "<<T_reference_l_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Left Arm 2: "<<task_left_arm->getActualPose()<<std::endl;
-
-//    std::cout<<std::endl;
-//    std::cout<<std::endl;
-
-//    std::cout<<"Initial Right Arm 2: "<<T_init_r_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Right Arm 2: "<<T_reference_r_arm<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Right Arm 2: "<<task_right_arm->getActualPose()<<std::endl;
-
-//    // showing the data of the legs
-
-//    std::cout<<std::endl;
-
-//    std::cout<<"Initial Left leg 2: "<<T_init_l_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Left leg 2: "<<T_reference_l_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Left leg 2: "<<task_left_leg->getActualPose()<<std::endl;;
-
-//    std::cout<<std::endl;
-//    std::cout<<std::endl;
-
-//    std::cout<<"Initial Right leg 2: "<<T_init_r_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Reference Right leg 2: "<<T_reference_r_leg<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"Actual Right leg 2: "<<task_right_leg->getActualPose()<<std::endl;
-
-//    std::cout<<std::endl;
-
-//    // start rechecking the distances of the capsules
-
-//    std::string _linkA = CasulePairs_vec[0].first;
-//    std::string _linkB = CasulePairs_vec[0].second;
-
-//    KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
-//            righthand_capsule_ep1, righthand_capsule_ep2;
-
-//    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-//    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
-//    capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
-//    capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
-
-//    int left_wrist_index = robot.iDynTree_model.getLinkIndex(_linkA);
-//    if(left_wrist_index == -1)
-//        std::cout << "Failed to get leftwrist_index" << std::endl;
-
-//    int right_wrist_index = robot.iDynTree_model.getLinkIndex(_linkB);
-//    if(right_wrist_index == -1)
-//        std::cout << "Failed to get rightwrist_index" << std::endl;
-
-//    KDL::Frame w_T_link_left_hand = robot.iDynTree_model.getPositionKDL(left_wrist_index);
-//    KDL::Frame w_T_link_right_hand = robot.iDynTree_model.getPositionKDL(right_wrist_index);
-
-//    lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
-//    lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
-//    righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
-//    righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
-
-//    Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
-//            righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
-
-//    Eigen::Vector3d lefthand_CP, righthand_CP;
-//    double reference_distance;
-
-//    vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-//    vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-//    vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-//    vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
-
-//    reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
-//                                                    lefthand_capsule_ep2_eigen,
-//                                                    righthand_capsule_ep1_eigen,
-//                                                    righthand_capsule_ep2_eigen,
-//                                                    lefthand_CP,
-//                                                    righthand_CP);
-
-//    reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
-
-//    //checking the distance between hands
-
-//    EXPECT_NEAR(0.005, reference_distance, 1e-4);
-
-//    //checking if actual positions of the feet are coincident with the goal reference positions
-
-//    for(unsigned int i = 0; i < 4; ++i)
-//        for(unsigned int j = 0; j < 4; ++j)
-//            EXPECT_NEAR(task_left_leg->getActualPose()(i,j), T_reference_l_leg(i,j), 1E-4);
-
-//    for(unsigned int i = 0; i < 4; ++i)
-//        for(unsigned int j = 0; j < 4; ++j)
-//            EXPECT_NEAR(task_right_leg->getActualPose()(i,j), T_reference_r_leg(i,j), 1E-4);
-
-
-//}
+}
 
 
 }
