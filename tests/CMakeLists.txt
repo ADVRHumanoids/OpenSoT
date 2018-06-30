@@ -13,7 +13,7 @@ find_package(test_utils QUIET)
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(ModelInterfaceIDYNUTILS QUIET)
-find_package(catkin REQUIRED tf roscpp)
+find_package(catkin REQUIRED tf roscpp robot_state_publisher)
 
 
 if(${YARP_FOUND})
@@ -196,7 +196,7 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES})
+                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
 if(${fcl_FOUND})
     SET(TestLibs ${TestLibs} ${fcl_LIBRARIES})
 endif()
