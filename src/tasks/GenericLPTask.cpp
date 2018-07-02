@@ -24,7 +24,7 @@ GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd &
 GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd& c, const AffineHelper &var):
     Task(task_id, c.size())
 {
-    Eigen::MatrixXd O(0, c.size()); O.setZero(0, O.cols());
+    Eigen::MatrixXd O(0, var.getInputSize()); O.setZero(0, O.cols());
     Eigen::VectorXd o(0); o.setZero(0);
     _task.reset(new GenericTask(task_id+"_internal", O, o, var));
     _hessianType = HST_ZERO;
