@@ -191,7 +191,7 @@ namespace OpenSoT{
         /**
          * @brief _number_of_variables which remain constant during BE existence
          */
-        double _number_of_variables;
+        int _number_of_variables;
     };
 
     }
