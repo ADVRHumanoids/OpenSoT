@@ -21,6 +21,7 @@ CBCBackEnd::CBCBackEnd(const int number_of_variables, const int number_of_constr
     __generate_data_struct(number_of_variables, number_of_constraints);
     _integer_variables.reserve(number_of_variables);
 }
+
 bool CBCBackEnd::solve()
 {
     _model->solver()->loadProblem(_ACP, _l.data(), _u.data(), _g.data(), _lA.data(), _uA.data());
