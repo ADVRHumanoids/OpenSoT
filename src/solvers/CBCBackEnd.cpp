@@ -1,5 +1,6 @@
 #include <OpenSoT/solvers/CBCBackEnd.h>
 #include <XBotInterface/SoLib.h>
+#include <boost/make_shared.hpp>
 
 using namespace OpenSoT::solvers;
 
@@ -24,11 +25,20 @@ CBCBackEnd::CBCBackEnd(const int number_of_variables, const int number_of_constr
 
 bool CBCBackEnd::solve()
 {
+    _model->resetToReferenceSolver();
+    
     _model->solver()->loadProblem(_ACP, _l.data(), _u.data(), _g.data(), _lA.data(), _uA.data());
-    _model->branchAndBound();
+
+     for(unsigned int i = 0; i < _integer_variables.size(); ++i)
+         _model->solver()->setInteger(_integer_variables[i]);
+     
+    _model->solver()->initialSolve();
+     
+    _model->solver()->branchAndBound();
+    
     
     if(!_model->isProvenInfeasible())
-        _solution = Eigen::Map<const Eigen::VectorXd>(_model->getColSolution(), getNumVariables());
+        _solution = Eigen::Map<const Eigen::VectorXd>(_model->solver()->getColSolution(), getNumVariables());
     else
     {
         XBot::Logger::error("CbcModel return unfeasible solution in solve!");
@@ -71,7 +81,6 @@ bool CBCBackEnd::initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
 
     _solver->initialSolve();
 
-    
     _model.reset(new CbcModel(*_solver));
     _model->setLogLevel(0);
     _model->solver()->setHintParam(OsiDoReducePrint, true, OsiHintTry);
@@ -110,8 +119,8 @@ void CBCBackEnd::setOptions(const boost::any& options)
 
         if(_opt.integer_ind.size() <= getNumVariables())
         {
-            for(unsigned int i = 0; i < _opt.integer_ind.size(); ++i)
-                _integer_variables.push_back(_opt.integer_ind[i]);
+             for(unsigned int i = 0; i < _opt.integer_ind.size(); ++i)
+                 _integer_variables.push_back(_opt.integer_ind[i]);
         }
         else
              XBot::Logger::error("Size of integer variable greater than number of variables! Options will not be applied!");

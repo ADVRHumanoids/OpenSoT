@@ -55,7 +55,7 @@ namespace solvers{
             
         private:
             
-            boost::shared_ptr<CbcModel> _model;
+            boost::shared_ptr<CbcModel> _model;          
             
             CoinPackedMatrix _ACP;
             Eigen::SparseMatrix<double> _AS;
