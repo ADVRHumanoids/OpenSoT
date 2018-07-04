@@ -59,7 +59,7 @@ void QPOasesBackEnd::setDefaultOptions()
     opt.epsRegularisation *= _epsRegularisation;
     opt.numRegularisationSteps = 0;
     opt.numRefinementSteps = 1;
-    opt.enableFlippingBounds = qpOASES::BT_TRUE;
+//    opt.enableFlippingBounds = qpOASES::BT_TRUE; // <- THIS IS NOT RT SAFE!
 //     opt.enableDropInfeasibles = qpOASES::BT_TRUE;
 
     opt.ensureConsistency();
