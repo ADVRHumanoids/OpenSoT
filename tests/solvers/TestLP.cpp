@@ -197,6 +197,18 @@ TEST_F(testLProblem, testQuadraticLPProblem)
 
 }
 
+
+/*  HERE WE TEST TWO PRIORITY LEVELS WHERE IN THE FIRST STACK A QP IS SOLVED WHILE IN THE
+ *  SECOND A LP IS SOLVED.
+ *
+ *  WE CONSIDER THE FOLLOWING CASES:
+ *
+ *  1. QPOASES -> CBC
+ *  2. OSQP -> CBC
+ *  3. QPOASES -> OSQP
+ *  4. OSQP ->QPOSES
+ *
+ */
 TEST_F(testLProblem, testMILPProblem)
 {
     Eigen::MatrixXd A_qp(1,3); A_qp << 4., 2., 0.;

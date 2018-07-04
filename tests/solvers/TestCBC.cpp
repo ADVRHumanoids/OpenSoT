@@ -4,6 +4,7 @@
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
+#include <OpenSoT/solvers/iHQP.h>
 #include <chrono>
 
 namespace {
@@ -138,6 +139,71 @@ TEST_F(testCBCProblem, testMILPProblem)
     for(unsigned int i = 0; i < times.size(); ++i)
         total_time += times[i];
     std::cout<<"Average time for solve: "<<(total_time/times.size())/1000.<<" [ms]"<<std::endl;
+}
+
+TEST_F(testCBCProblem, testSetIntegerVariables)
+{
+    Eigen::MatrixXd A(3,3); A.setZero(3,3);
+    Eigen::VectorXd b(3); b.setZero(3);
+    GenericTask::Ptr task(new GenericTask("task",A,b));
+    Eigen::VectorXd c(3);
+    c<<-3.,-2.,-1;
+    task->setHessianType(OpenSoT::HST_ZERO);
+    task->setc(c);
+    task->update(Eigen::VectorXd(1));
+
+    Eigen::VectorXd lb(3), ub(3);
+    lb.setZero(3);
+    ub<<1e30, 5.5, 1.;
+    GenericConstraint::Ptr bounds(new GenericConstraint("bounds", ub, lb, 3));
+    bounds->update(Eigen::VectorXd(1));
+
+    Eigen::MatrixXd Ac(2,3);
+    Ac<<1.,1.,1.,
+        4.,2.,1.;
+    Eigen::VectorXd lA(2), uA(2);
+    lA<<-1e30, 12.;
+    uA<<7., 12.;
+
+    OpenSoT::AffineHelper var(Ac, Eigen::VectorXd::Zero(2));
+    GenericConstraint::Ptr constr(new GenericConstraint("constraint", var, uA, lA, GenericConstraint::Type::CONSTRAINT));
+    constr->update(Eigen::VectorXd(1));
+
+
+    OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack;
+    stack.push_back(task);
+
+
+    OpenSoT::solvers::iHQP::Ptr solver;
+    solver.reset(new OpenSoT::solvers::iHQP(stack, bounds, constr, 0.0,
+                    OpenSoT::solvers::solver_back_ends::CBC));
+
+    OpenSoT::solvers::BackEnd::Ptr CBCBE;
+    solver->getBackEnd(0, CBCBE);
+
+    OpenSoT::solvers::CBCBackEnd::CBCBackEndOptions opt;
+    opt.integer_ind.push_back(1);
+    opt.integer_ind.push_back(0);
+    CBCBE->setOptions(opt);
+
+
+    Eigen::VectorXd solution(3); solution.setZero(3);
+    for(unsigned int i = 0; i<10; ++i)
+    {
+        EXPECT_TRUE(solver->solve(solution));
+        std::cout<<"Solution from iHQP: "<<solution.transpose()<<std::endl;
+
+        std::cout<<"Solution from CBCE: "<<CBCBE->getSolution().transpose()<<std::endl;
+
+        EXPECT_TRUE(solution == CBCBE->getSolution());
+
+        EXPECT_NEAR(solution[0], 1., 1e-9);
+        EXPECT_NEAR(solution[1], 4., 1e-9);
+        EXPECT_NEAR(solution[2], 0.0, 1e-9);
+
+        CBCBE->printProblemInformation(-1,"","","");
+    }
+
 }
 
 }
