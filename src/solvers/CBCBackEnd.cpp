@@ -194,31 +194,31 @@ bool CBCBackEnd::solverReturnError()
     bool a = false;
 
     if(_model->solver()->isAbandoned()){
-        XBot::Logger::error("CBC solver isAbandoned() return false");
+        XBot::Logger::error("CBC solver isAbandoned() return true");
         a = true;}
 
 //    if(_model->solver()->isProvenOptimal()){
-//        XBot::Logger::error("CBC solver isProvenOptimal() return false");
+//        XBot::Logger::error("CBC solver isProvenOptimal() return true");
 //        a = true;}
 
     if(_model->solver()->isProvenPrimalInfeasible()){
-        XBot::Logger::error("CBC solver isProvenPrimalInfeasible() return false");
+        XBot::Logger::error("CBC solver isProvenPrimalInfeasible() return true");
         a = true;}
 
     if(_model->solver()->isProvenDualInfeasible()){
-        XBot::Logger::error("CBC solver isProvenDualInfeasible() return false");
+        XBot::Logger::error("CBC solver isProvenDualInfeasible() return true");
         a = true;}
 
     if(_model->solver()->isPrimalObjectiveLimitReached()){
-        XBot::Logger::error("CBC solver isPrimalObjectiveLimitReached() return false");
+        XBot::Logger::error("CBC solver isPrimalObjectiveLimitReached() return true");
         a = true;}
 
     if(_model->solver()->isDualObjectiveLimitReached()){
-        XBot::Logger::error("CBC solver isDualObjectiveLimitReached() return false");
+        XBot::Logger::error("CBC solver isDualObjectiveLimitReached() return true");
         a = true;}
 
     if(_model->solver()->isIterationLimitReached()){
-        XBot::Logger::error("CBC solver isIterationLimitReached() return false");
+        XBot::Logger::error("CBC solver isIterationLimitReached() return true");
         a = true;}
 
     return a;
