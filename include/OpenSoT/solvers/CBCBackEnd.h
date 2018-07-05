@@ -54,6 +54,7 @@ namespace solvers{
 
             bool solverReturnError();
 
+            virtual void _log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix);
             
         private:
             
@@ -75,6 +76,8 @@ namespace solvers{
             Eigen::VectorXd __uA = _uA;
             Eigen::VectorXd __l = _l;
             Eigen::VectorXd __u = _u;
+
+            Eigen::VectorXi _integer_variables_mask;
             
     };
     

@@ -17,10 +17,12 @@ extern "C" void destroy_instance( BackEnd * instance )
 }
 
 CBCBackEnd::CBCBackEnd(const int number_of_variables, const int number_of_constraints, const double eps_regularisation): 
-    BackEnd(number_of_variables, number_of_constraints)
+    BackEnd(number_of_variables, number_of_constraints),
+    _integer_variables_mask(number_of_variables)
 {   
     __generate_data_struct(number_of_variables, number_of_constraints);
     _integer_variables.reserve(number_of_variables);
+    _integer_variables_mask.setZero(number_of_variables);
 }
 
 bool CBCBackEnd::solve()
@@ -222,5 +224,14 @@ bool CBCBackEnd::solverReturnError()
         a = true;}
 
     return a;
+}
+
+void CBCBackEnd::_log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix)
+{
+    _integer_variables_mask.setZero(_integer_variables_mask.size());
+    for(unsigned int i = 0; i < _integer_variables.size(); ++i)
+        _integer_variables_mask[_integer_variables[i]] = 1;
+
+    logger->add(prefix+"integer_variables_mask_"+std::to_string(i), _integer_variables_mask);
 }
     
