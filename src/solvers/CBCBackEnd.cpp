@@ -35,9 +35,10 @@ bool CBCBackEnd::solve()
     _model->solver()->initialSolve();
      
     _model->solver()->branchAndBound();
-    
-    
-    if(!_model->isProvenInfeasible())
+
+
+
+    if(!solverReturnError())
         _solution = Eigen::Map<const Eigen::VectorXd>(_model->solver()->getColSolution(), getNumVariables());
     else
     {
@@ -87,7 +88,7 @@ bool CBCBackEnd::initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
     _model->branchAndBound(); 
 
     
-    if(!_model->isProvenInfeasible())
+    if(!solverReturnError())
         _solution = Eigen::Map<const Eigen::VectorXd>(_model->solver()->getColSolution(), getNumVariables());
 
     else
@@ -186,5 +187,40 @@ void CBCBackEnd::_printProblemInformation()
         XBot::Logger::log()<<_model->integerVariable()[i]<<" ";
     XBot::Logger::log()<<"]"<<XBot::Logger::endl();
 
+}
+
+bool CBCBackEnd::solverReturnError()
+{
+    bool a = false;
+
+    if(_model->solver()->isAbandoned()){
+        XBot::Logger::error("CBC solver isAbandoned() return false");
+        a = true;}
+
+//    if(_model->solver()->isProvenOptimal()){
+//        XBot::Logger::error("CBC solver isProvenOptimal() return false");
+//        a = true;}
+
+    if(_model->solver()->isProvenPrimalInfeasible()){
+        XBot::Logger::error("CBC solver isProvenPrimalInfeasible() return false");
+        a = true;}
+
+    if(_model->solver()->isProvenDualInfeasible()){
+        XBot::Logger::error("CBC solver isProvenDualInfeasible() return false");
+        a = true;}
+
+    if(_model->solver()->isPrimalObjectiveLimitReached()){
+        XBot::Logger::error("CBC solver isPrimalObjectiveLimitReached() return false");
+        a = true;}
+
+    if(_model->solver()->isDualObjectiveLimitReached()){
+        XBot::Logger::error("CBC solver isDualObjectiveLimitReached() return false");
+        a = true;}
+
+    if(_model->solver()->isIterationLimitReached()){
+        XBot::Logger::error("CBC solver isIterationLimitReached() return false");
+        a = true;}
+
+    return a;
 }
     

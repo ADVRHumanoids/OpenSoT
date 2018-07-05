@@ -52,6 +52,8 @@ namespace solvers{
 
             virtual void _printProblemInformation();
 
+            bool solverReturnError();
+
             
         private:
             
