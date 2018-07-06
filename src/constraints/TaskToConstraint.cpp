@@ -54,8 +54,6 @@ TaskToConstraint::TaskToConstraint(TaskToConstraint::TaskPtr task,
 
 void TaskToConstraint::update(const Eigen::VectorXd &q)
 {
-    assert(q.rows() == _task->getXSize());
-
     _task->update(q);
     this->generateAll();
 }
