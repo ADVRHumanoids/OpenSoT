@@ -114,7 +114,12 @@ set(OPENSOT_TESTS testBilateralConstraint
 )
 
 if(${osqp_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask testLP)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
+
+    if(${CBC_FOUND} AND ${OSICBC_FOUND})
+        set(OPENSOT_TEST ${OPENSOT_TESTS}  testLP)
+    endif()
+
 endif()
 
 if(${CBC_FOUND} AND ${OSICBC_FOUND})
@@ -256,10 +261,14 @@ if(${osqp_FOUND})
     add_dependencies(testGenericTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
 
-    ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
-    TARGET_LINK_LIBRARIES(testLP ${TestLibs})
-    add_dependencies(testLP GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
+
+    if(${CBC_FOUND} AND ${OSICBC_FOUND})
+        ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
+        TARGET_LINK_LIBRARIES(testLP ${TestLibs})
+        add_dependencies(testLP GTest-ext OpenSoT)
+        add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
+    endif()
+
 endif()
 
 if(${CBC_FOUND} AND ${OSICBC_FOUND})
@@ -268,6 +277,7 @@ if(${CBC_FOUND} AND ${OSICBC_FOUND})
     add_dependencies(testCBCSolver GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_cbc COMMAND testCBCSolver)
 endif()
+
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
 TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
