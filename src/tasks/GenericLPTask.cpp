@@ -6,7 +6,7 @@ GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd &
     Task(task_id, c.size())
 {
     Eigen::MatrixXd O(0, c.size()); O.setZero(0, O.cols());
-    Eigen::VectorXd o(0); o.setZero(0);
+    Eigen::VectorXd o;// o.setZero(0);
     _task.reset(new GenericTask(task_id+"_internal", O, o));
     _hessianType = HST_ZERO;
     _task->setc(c);
@@ -25,7 +25,7 @@ GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd& 
     Task(task_id, var.getInputSize())
 {
     Eigen::MatrixXd O(0, var.getOutputSize()); O.setZero(0, O.cols());
-    Eigen::VectorXd o(0); o.setZero(o.size());
+    Eigen::VectorXd o;// o.setZero(o.size());
 
     _task.reset(new GenericTask(task_id+"_internal", O, o, var));
     _hessianType = HST_ZERO;
