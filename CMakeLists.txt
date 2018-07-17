@@ -252,15 +252,13 @@ if(${osqp_FOUND})
 
 endif()
 
+pkg_check_modules(GLPK QUIET glpk)
+if(${GLPK_FOUND})
+    message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
 
-pkg_check_modules(CBC QUIET cbc)
-pkg_check_modules(OSICBC QUIET osi-cbc)
-if(${CBC_FOUND} AND ${OSICBC_FOUND})
-    message("Adding src/solvers/CBCBackEnd.cpp to compilation")
-
-    add_library(OpenSotBackEndCBC SHARED src/solvers/CBCBackEnd.cpp)
-    target_link_libraries(OpenSotBackEndCBC OpenSoT ${CBC_LIBRARIES} ${OSICBC_LIBRARIES})
-    library_install(OpenSotBackEndCBC 1 0 0)
+    add_library(OpenSotBackEndGLPK SHARED src/solvers/GLPKBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndGLPK OpenSoT -lglpk)
+    library_install(OpenSotBackEndGLPK 1 0 0)
 endif()
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
