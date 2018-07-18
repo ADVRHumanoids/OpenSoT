@@ -22,6 +22,7 @@
  #include <XBotInterface/ModelInterface.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
+ #include <OpenSoT/utils/Affine.h>
 
  #define WORLD_FRAME_NAME "world"
 
@@ -58,7 +59,7 @@
                 
                 virtual void _log(XBot::MatLogger::Ptr logger);
                 
-                XBot::ModelInterface& _robot;
+                const XBot::ModelInterface& _robot;
 
                 std::string _distal_link;
                 std::string _base_link;
@@ -82,6 +83,12 @@
 
                 Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
 
+                AffineHelper _qdot;
+                AffineHelper _cartesian_task;
+
+                Eigen::MatrixXd __A;
+                Eigen::VectorXd __b;
+
             public:
 
                 Eigen::VectorXd positionError;
@@ -101,11 +108,17 @@
                  * @param distal_link the name of the distal link as expressed in the robot urdf
                  * @param base_link the name of the base link as expressed in the robot urdf. Can be set to "world"
                  */
-                Cartesian(std::string task_id,
+                Cartesian(const std::string task_id,
                           const Eigen::VectorXd& x,
-                          XBot::ModelInterface &robot,
-                          std::string distal_link,
-                          std::string base_link);
+                          const XBot::ModelInterface &robot,
+                          const std::string distal_link,
+                          const std::string base_link);
+
+                Cartesian(const std::string task_id,
+                          const XBot::ModelInterface& robot,
+                          const std::string& distal_link,
+                          const std::string& base_link,
+                          const AffineHelper& qdot);
 
                 ~Cartesian();
 

@@ -24,11 +24,11 @@ using namespace OpenSoT::tasks::velocity;
 
 #define LAMBDA_THS 1E-12
 
-Cartesian::Cartesian(std::string task_id,
+Cartesian::Cartesian(const std::string task_id,
                      const Eigen::VectorXd& x,
-                     XBot::ModelInterface &robot,
-                     std::string distal_link,
-                     std::string base_link) :
+                     const XBot::ModelInterface &robot,
+                     const std::string distal_link,
+                     const std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
@@ -51,10 +51,46 @@ Cartesian::Cartesian(std::string task_id,
     if(!this->_base_link_is_world)
         assert(this->_distal_link_index != _base_link_index);
 
+    _qdot = AffineHelper::Identity(x.size());
+
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
 
-    _W.setIdentity(_A.rows(), _A.rows());
+    _W.setIdentity(__A.rows(), __A.rows());
+
+    _hessianType = HST_SEMIDEF;
+}
+
+Cartesian::Cartesian(const std::string task_id,
+          const XBot::ModelInterface& robot,
+          const std::string& distal_link,
+          const std::string& base_link,
+          const AffineHelper& qdot):
+    Task(task_id, qdot.getInputSize()), _robot(robot),
+    _distal_link(distal_link), _base_link(base_link),
+    _orientationErrorGain(1.0), _is_initialized(false),
+    _error(6), _qdot(qdot)
+{
+    _error.setZero(6);
+    _desiredTwist.setZero(6);
+
+    this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
+
+    if(!this->_base_link_is_world) {
+        this->_base_link_index = _robot.getLinkID(_base_link);
+        //assert(this->_base_link_index >= 0);
+    }
+
+    this->_distal_link_index = _robot.getLinkID(_distal_link);
+    //assert(this->_distal_link_index >= 0);
+
+    if(!this->_base_link_is_world)
+        assert(this->_distal_link_index != _base_link_index);
+
+    /* first update. Setting desired pose equal to the actual pose */
+    this->_update(Eigen::VectorXd(1));
+
+    _W.setIdentity(__A.rows(), __A.rows());
 
     _hessianType = HST_SEMIDEF;
 }
@@ -68,9 +104,9 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world)
-        _robot.getJacobian(_distal_link,_A);
+        _robot.getJacobian(_distal_link,__A);
     else
-        _robot.getRelativeJacobian(_distal_link, _base_link, _A);
+        _robot.getRelativeJacobian(_distal_link, _base_link, __A);
 
     if(_base_link_is_world)
         _robot.getPose(_distal_link, _actualPose);
@@ -80,11 +116,19 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     if(!_is_initialized) {
         /* initializing to zero error */
         _desiredPose = _actualPose;
-        _b.setZero(_A.rows());
+        __b.setZero(__A.rows());
         _is_initialized = true;
     }
 
     this->update_b();
+
+    //HERE __A and __b are updated
+    _cartesian_task = __A*_qdot;
+    _cartesian_task = _cartesian_task - __b;
+
+    _A = _cartesian_task.getM();
+    _b = -_cartesian_task.getq();
+    //
 
     this->_desiredTwist.setZero(6);
 
@@ -232,7 +276,7 @@ void Cartesian::update_b() {
                                            positionError, orientationError);
 
     _error<<positionError,-_orientationErrorGain*orientationError;
-    _b = _desiredTwist + _lambda*_error;
+    __b = _desiredTwist + _lambda*_error;
 }
 
 bool Cartesian::setBaseLink(const std::string& base_link)
