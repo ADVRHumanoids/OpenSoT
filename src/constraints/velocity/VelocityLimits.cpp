@@ -21,33 +21,79 @@
 using namespace OpenSoT::constraints::velocity;
 
 VelocityLimits::VelocityLimits(const double qDotLimit,
-                               const double dT,
-                               const unsigned int x_size) :
-    Constraint("velocity_limits", x_size), _dT(dT) {
-
-    _lowerBound.setZero(_x_size);
-    _upperBound.setZero(_x_size);
+               const double dT,
+               const AffineHelper& var):
+    Constraint("velocity_limits", var.getInputSize()), _dT(dT),
+    _constr("velocity_limits_internal_generic_constr", var,
+            Eigen::VectorXd::Constant(var.getOutputSize(), qDotLimit*dT),
+            Eigen::VectorXd::Constant(var.getOutputSize(), -qDotLimit*dT),
+            GenericConstraint::Type::BOUND)
+{
+    __lowerBound.setZero(var.getOutputSize());
+    __upperBound.setZero(var.getOutputSize());
 
    this->setVelocityLimits(qDotLimit);
 
     this->generateBounds(qDotLimit);
+
+    this->update(Eigen::VectorXd(1));
+}
+
+VelocityLimits::VelocityLimits(const Eigen::VectorXd& qDotLimit,
+               const double dT,
+               const AffineHelper& var):
+    Constraint("velocity_limits", var.getInputSize()), _dT(dT),
+    _constr("velocity_limits_internal_generic_constr", var,
+            qDotLimit*dT, -qDotLimit*dT, GenericConstraint::Type::BOUND)
+{
+    __lowerBound.setZero(qDotLimit.size());
+    __upperBound.setZero(qDotLimit.size());
+
+   this->setVelocityLimits(qDotLimit);
+
+    this->generateBounds(qDotLimit);
+
+    this->update(Eigen::VectorXd(1));
+}
+
+VelocityLimits::VelocityLimits(const double qDotLimit,
+                               const double dT,
+                               const unsigned int x_size) :
+    Constraint("velocity_limits", x_size), _dT(dT),
+    _constr("velocity_limits_internal_generic_constr",
+            Eigen::VectorXd::Constant(x_size, qDotLimit*dT),
+            Eigen::VectorXd::Constant(x_size, -qDotLimit*dT), x_size)
+{
+
+    __lowerBound.setZero(x_size);
+    __upperBound.setZero(x_size);
+
+   this->setVelocityLimits(qDotLimit);
+
+    this->generateBounds(qDotLimit);
+
+    this->update(Eigen::VectorXd(1));
 }
 
 VelocityLimits::VelocityLimits(const Eigen::VectorXd& qDotLimit,
                                const double dT) :
-    Constraint("velocity_limits", qDotLimit.size()), _dT(dT) {
+    Constraint("velocity_limits", qDotLimit.size()), _dT(dT),
+    _constr("velocity_limits_internal_generic_constr", qDotLimit*dT, -qDotLimit*dT, qDotLimit.size())
+{
 
-    _lowerBound.setZero(_x_size);
-    _upperBound.setZero(_x_size);
+    __lowerBound.setZero(qDotLimit.size());
+    __upperBound.setZero(qDotLimit.size());
 
    this->setVelocityLimits(qDotLimit);
 
     this->generateBounds(qDotLimit);
+
+    this->update(Eigen::VectorXd(1));
 }
 
 Eigen::VectorXd OpenSoT::constraints::velocity::VelocityLimits::getVelocityLimits()
 {
-    return _upperBound/_dT;
+    return __upperBound/_dT;
 }
 
 void OpenSoT::constraints::velocity::VelocityLimits::setVelocityLimits(const double qDotLimit)
@@ -70,8 +116,8 @@ double OpenSoT::constraints::velocity::VelocityLimits::getDT()
 void VelocityLimits::generateBounds(const double qDotLimit)
 {
     /************************ COMPUTING BOUNDS ****************************/
-        _lowerBound<<_lowerBound.setOnes(_x_size)*-1.0*_qDotLimit*_dT;
-        _upperBound<<_upperBound.setOnes(_x_size)*1.0*_qDotLimit*_dT;
+        __lowerBound<<__lowerBound.setOnes(__lowerBound.size())*-1.0*_qDotLimit*_dT;
+        __upperBound<<__upperBound.setOnes(__upperBound.size())*1.0*_qDotLimit*_dT;
 
     /**********************************************************************/
 }
@@ -81,7 +127,15 @@ void VelocityLimits::generateBounds(const Eigen::VectorXd& qDotLimit)
     assert(qDotLimit.size() == _x_size);
     for(unsigned int i = 0; i < qDotLimit.size(); ++i)
     {
-        _lowerBound[i] = -1.0*std::fabs(qDotLimit[i])*_dT;
-        _upperBound[i] = 1.0*std::fabs(qDotLimit[i])*_dT;
+        __lowerBound[i] = -1.0*std::fabs(qDotLimit[i])*_dT;
+        __upperBound[i] = 1.0*std::fabs(qDotLimit[i])*_dT;
     }
+}
+
+void VelocityLimits::update(const Eigen::VectorXd& x)
+{
+    _constr.setBounds(__upperBound, __lowerBound);
+
+    _upperBound = _constr.getUpperBound();
+    _lowerBound = _constr.getLowerBound();
 }

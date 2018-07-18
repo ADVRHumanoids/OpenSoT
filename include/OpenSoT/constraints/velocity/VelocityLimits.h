@@ -20,6 +20,7 @@
 
  #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
+#include <OpenSoT/constraints/GenericConstraint.h>
 
  namespace OpenSoT {
     namespace constraints {
@@ -33,6 +34,11 @@
             private:
                 double _qDotLimit;
                 double _dT;
+
+                Eigen::VectorXd __upperBound;
+                Eigen::VectorXd __lowerBound;
+
+                GenericConstraint _constr;
             public:
                 /**
                  * @brief VelocityLimits constructor
@@ -45,6 +51,15 @@
                                const unsigned int x_size);
                 VelocityLimits(const Eigen::VectorXd& qDotLimit,
                                const double dT);
+
+                VelocityLimits(const double qDotLimit,
+                               const double dT,
+                               const AffineHelper& var);
+                VelocityLimits(const Eigen::VectorXd& qDotLimit,
+                               const double dT,
+                               const AffineHelper& var);
+
+                void update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief getVelocityLimits returns the current velocity limits.
