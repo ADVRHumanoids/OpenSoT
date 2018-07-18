@@ -314,7 +314,7 @@ void QPOasesBackEnd::checkInfeasibility()
 
 void QPOasesBackEnd::_printProblemInformation()
 {
-    XBot::Logger::info("eps Regularisation factor: %d \n", _problem->getOptions().epsRegularisation);
+    XBot::Logger::info("eps Regularisation factor: %f \n", _problem->getOptions().epsRegularisation);
     XBot::Logger::info("qpOASES # OF CONSTRAINTS: %i\n", _problem->getNC());
     XBot::Logger::info("qpOASES # OF VARIABLES: %i\n", _problem->getNV());
 }
