@@ -44,7 +44,7 @@ JointLimits::JointLimits(const Eigen::VectorXd &q,
             const Eigen::VectorXd &jointBoundMin,
             const AffineHelper& var,
             const double boundScaling):
-    Constraint("joint_limits", q.size()),
+    Constraint("joint_limits", var.getInputSize()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
     _boundScaling(boundScaling),
