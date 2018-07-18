@@ -36,12 +36,13 @@ bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& u
                                                         const Eigen::VectorXd& lower_bound)
 {
     if( ((upper_bound - lower_bound).array() < 0).any() ){
-        XBot::Logger::error("((upper_bound - lower_bound).array() < 0).any() in setBounds! \n");
+        XBot::Logger::error("%s: ((upper_bound - lower_bound).array() < 0).any() in setBounds! \n", getConstraintID().c_str());
         return false;
     }
     
     if( (upper_bound.size() != _var.getOutputSize()) || (lower_bound.size() != _var.getOutputSize()) ){
-        XBot::Logger::error("(upper_bound.size() != _var.getOutputSize()) || (lower_bound.size() != _var.getOutputSize()) in setBounds! \n");
+        XBot::Logger::error("%s: (upper_bound.size() != _var.getOutputSize()) || (lower_bound.size() != _var.getOutputSize()) in setBounds! \n",
+                            getConstraintID().c_str());
         return false;
     }
     
