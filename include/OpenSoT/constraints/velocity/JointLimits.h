@@ -20,6 +20,7 @@
 
  #include <OpenSoT/Constraint.h>
  #include <Eigen/Dense>
+#include <OpenSoT/constraints/GenericConstraint.h>
 
 
  namespace OpenSoT {
@@ -35,6 +36,11 @@
                 double _boundScaling;
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
+
+                Eigen::VectorXd __upperBound;
+                Eigen::VectorXd __lowerBound;
+
+                GenericConstraint _constr;
             public:
                 /**
                  * @brief JointLimits constructor
@@ -46,6 +52,12 @@
                 JointLimits(const Eigen::VectorXd &q,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
+                            const double boundScaling = 1.0);
+
+                JointLimits(const Eigen::VectorXd &q,
+                            const Eigen::VectorXd &jointBoundMax,
+                            const Eigen::VectorXd &jointBoundMin,
+                            const AffineHelper& var,
                             const double boundScaling = 1.0);
 
                 void update(const Eigen::VectorXd &x);

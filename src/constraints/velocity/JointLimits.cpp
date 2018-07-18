@@ -26,27 +26,57 @@ JointLimits::JointLimits(   const Eigen::VectorXd& q,
     Constraint("joint_limits", q.size()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
-    _boundScaling(boundScaling) {
+    _boundScaling(boundScaling),
+    _constr("joint_limits_internal_generic_constr",jointBoundMax, jointBoundMin, q.size())
+{
 
-    assert(q.rows() == _jointLimitsMax.rows());
-    assert(q.rows() == _jointLimitsMin.rows());
-    /* calling update to generate bounds */
+    if(q.size() != _jointLimitsMax.size())
+        throw std::runtime_error("q.size() != _jointLimitsMax.size()");
+    if(q.size() != _jointLimitsMin.size())
+        throw std::runtime_error("q.size() != _jointLimitsMin.size()");
+    /* calling update to generate bounds */       
+
     update(q);
 }
+
+JointLimits::JointLimits(const Eigen::VectorXd &q,
+            const Eigen::VectorXd &jointBoundMax,
+            const Eigen::VectorXd &jointBoundMin,
+            const AffineHelper& var,
+            const double boundScaling):
+    Constraint("joint_limits", q.size()),
+    _jointLimitsMax(jointBoundMax),
+    _jointLimitsMin(jointBoundMin),
+    _boundScaling(boundScaling),
+    _constr("joint_limits_internal_generic_constr",var, jointBoundMax, jointBoundMin, GenericConstraint::Type::BOUND)
+{
+    if(q.size() != _jointLimitsMax.size())
+        throw std::runtime_error("q.size() != _jointLimitsMax.size()");
+    if(q.size() != _jointLimitsMin.size())
+        throw std::runtime_error("q.size() != _jointLimitsMin.size()");
+    /* calling update to generate bounds */
+
+    update(q);
+}
+
 
 void JointLimits::update(const Eigen::VectorXd& x)
 {
 
 /************************ COMPUTING BOUNDS ****************************/
 
-    _upperBound = ( _jointLimitsMax - x)*_boundScaling;
-    _lowerBound = ( _jointLimitsMin - x)*_boundScaling;
+    __upperBound = ( _jointLimitsMax - x)*_boundScaling;
+    __lowerBound = ( _jointLimitsMin - x)*_boundScaling;
     
-    _upperBound = _upperBound.cwiseMax(0.0);
-    _lowerBound = _lowerBound.cwiseMin(0.0);
+    __upperBound = __upperBound.cwiseMax(0.0);
+    __lowerBound = __lowerBound.cwiseMin(0.0);
 
 /**********************************************************************/
 
+    _constr.setBounds(__upperBound, __lowerBound);
+
+    _upperBound = _constr.getUpperBound();
+    _lowerBound = _constr.getLowerBound();
 }
 
 void JointLimits::setBoundScaling(const double boundScaling)
