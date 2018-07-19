@@ -3,11 +3,29 @@
 #include <OpenSoT/tasks/GenericTask.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/Affine.h>
-#include <OpenSoT/solvers/BackEndFactory.h>
+#include <OpenSoT/solvers/BackEndFactory.h> 
 #include <chrono>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/tasks/GenericLPTask.h>
 
 using namespace OpenSoT::constraints;
 using namespace OpenSoT::tasks;
+
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
+
+#define ENABLE_ROS true
+
+#if ENABLE_ROS
+#include <ros/ros.h>
+#include <sensor_msgs/JointState.h>
+#include <robot_state_publisher/robot_state_publisher.h>
+#endif
 
 namespace {
 
@@ -17,7 +35,32 @@ protected:
 
     testGLPKProblem()
     {
+        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
+        if(_model_ptr)
+            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+        else
+            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+
+
+
+#if ENABLE_ROS
+      int argc = 0;
+      char **argv;
+      ros::init(argc, argv, "glpk_test");
+      n.reset(new ros::NodeHandle());
+      pub = n->advertise<sensor_msgs::JointState>("joint_states", 1000);
+
+      KDL::Tree my_tree;
+      if (!kdl_parser::treeFromFile(_model_ptr->getUrdfPath(), my_tree)){
+        ROS_ERROR("Failed to construct kdl tree");}
+      rsp.reset(new robot_state_publisher::RobotStatePublisher(my_tree));
+      n->setParam("/robot_description", _model_ptr->getUrdfString());
+
+      for(unsigned int i = 0; i < this->_model_ptr->getEnabledJointNames().size(); ++i){
+          joint_state.name.push_back(this->_model_ptr->getEnabledJointNames()[i]);
+          joint_state.position.push_back(0.0);}
+#endif
     }
 
     virtual ~testGLPKProblem() {
@@ -32,7 +75,259 @@ protected:
 
     }
 
+    void setGoodInitialPosition(Eigen::VectorXd& _q) {
+        _q.setZero(_q.size());
+        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LShSag")] =  0.0;//20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")] = 0.0;//20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShYaw")] = 0.0;//-15.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+
+    }
+
+#if ENABLE_ROS
+    void publishJointStates(const Eigen::VectorXd& q)
+    {
+        std::map<std::string, double> joint_map;
+        for(unsigned int i = 0; i < q.size(); ++i){
+            joint_state.position[i] = q[i];
+            joint_map[joint_state.name[i]] = joint_state.position[i];
+        }
+        joint_state.header.stamp = ros::Time::now();
+
+        pub.publish(joint_state);
+
+        rsp->publishTransforms(joint_map, ros::Time::now(), "");
+        rsp->publishFixedTransforms("");
+
+        ros::spinOnce();
+    }
+#endif
+
+    XBot::ModelInterface::Ptr _model_ptr;
+
+#if ENABLE_ROS
+  boost::shared_ptr<ros::NodeHandle> n;
+  ros::Publisher pub;
+  sensor_msgs::JointState joint_state;
+  boost::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
+#endif
+
 };
+
+using namespace OpenSoT::tasks::velocity;
+using namespace OpenSoT::constraints::velocity;
+
+TEST_F(testGLPKProblem, testIKMILP)
+{
+    std::cout<<"        FIRST RUN"<<std::endl;
+/////////////////////////////////QP-QP-QP
+
+    Eigen::VectorXd q(_model_ptr->getJointNum());
+    setGoodInitialPosition(q);
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+#if ENABLE_ROS
+    this->publishJointStates(q);
+    this->publishJointStates(q);
+    this->publishJointStates(q);
+
+
+    sleep(1);
+#endif
+
+    OpenSoT::OptvarHelper::VariableVector vars;
+    vars.emplace_back("dq", _model_ptr->getJointNum());
+
+    OpenSoT::OptvarHelper opt(vars);
+
+    Cartesian::Ptr RFoot;
+    RFoot.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt.getVariable("dq")));
+
+    Cartesian::Ptr LArm;
+    LArm.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt.getVariable("dq")));
+
+    Postural::Ptr postural;
+    postural.reset(new Postural(q));
+
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin, qmax);
+    JointLimits::Ptr joint_lims;
+    joint_lims.reset(new JointLimits(q,qmax, qmin,opt.getVariable("dq")));
+
+    VelocityLimits::Ptr vel_lims;
+    vel_lims.reset(new VelocityLimits(0.5,0.01, opt.getVariable("dq")));
+
+    OpenSoT::AutoStack::Ptr autostack = (RFoot / LArm / postural)<<joint_lims<<vel_lims;
+
+    OpenSoT::solvers::iHQP::Ptr solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6,
+                                                                                    OpenSoT::solvers::solver_back_ends::qpOASES);
+
+
+    KDL::Frame ref;
+    LArm->getReference(ref);
+    ref.M.DoRotZ(-M_PI_2);
+    LArm->setReference(ref);
+
+
+    int t = 5;
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(dq.size());
+    for(unsigned int i = 0; i < 50*t; ++i)
+    {
+        this->_model_ptr->setJointPosition(q);
+        this->_model_ptr->update();
+
+        autostack->update(q);
+
+
+        EXPECT_TRUE(solver->solve(dq));
+        q+=dq;
+
+#if ENABLE_ROS
+        this->publishJointStates(q);
+        usleep(10000);
+#endif
+    }
+
+/////////////////////////////////QP-QP-MILP
+
+std::cout<<"        SECOND RUN"<<std::endl;
+    q.resize(_model_ptr->getJointNum());
+    setGoodInitialPosition(q);
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+#if ENABLE_ROS
+    this->publishJointStates(q);
+    this->publishJointStates(q);
+    this->publishJointStates(q);
+
+
+    sleep(1);
+#endif
+
+    OpenSoT::OptvarHelper::VariableVector vars2;
+    vars2.emplace_back("dq", q.size());
+    vars2.emplace_back("delta", q.size());
+
+    OpenSoT::OptvarHelper opt2(vars2);
+
+    Cartesian::Ptr RFoot2;
+    RFoot2.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
+
+    Cartesian::Ptr LArm2;
+    LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt2.getVariable("dq")));
+    LArm2->setReference(ref);
+
+    JointLimits::Ptr joint_lims2;
+    joint_lims2.reset(new JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
+
+    VelocityLimits::Ptr vel_lims2;
+    vel_lims2.reset(new VelocityLimits(0.1,0.01, opt2.getVariable("dq")));
+    std::cout<<"vel_lims2->getUpperBound().size(): "<<vel_lims2->getUpperBound().size()<<std::endl;
+    std::cout<<"vel_lims2->getLowerBound().size(): "<<vel_lims2->getLowerBound().size()<<std::endl;
+
+
+    OpenSoT::tasks::GenericLPTask::Ptr milp_task;
+    Eigen::VectorXd c(q.size());
+    c.setOnes(c.size());
+    milp_task.reset(new OpenSoT::tasks::GenericLPTask("milp_task", c, opt2.getVariable("delta")));
+    std::cout<<"milp_task A: \n"<<milp_task->getA()<<std::endl;
+    std::cout<<"milp_task b: \n"<<milp_task->getb()<<std::endl;
+    std::cout<<"milp_task c: \n"<<milp_task->getc()<<std::endl;
+    std::cout<<"milp_task A size: \n"<<milp_task->getA().rows()<<" x "<<milp_task->getA().cols()<<std::endl;
+    std::cout<<"milp_task b size: \n"<<milp_task->getb().size()<<std::endl;
+    std::cout<<"milp_task c size: \n"<<milp_task->getc().size()<<std::endl;
+
+
+    OpenSoT::constraints::GenericConstraint::Ptr milp_condition;
+    double M =  1e1;
+    double m = -1e1;
+    double eps = 1e-3;
+    double inf = 1e3;
+    Eigen::MatrixXd a1(q.size(),2*q.size());
+    a1<<Eigen::MatrixXd::Identity(q.size(), q.size()), -M*Eigen::MatrixXd::Identity(q.size(), q.size());
+
+    Eigen::MatrixXd a2(q.size(),2*q.size());
+    a2<<Eigen::MatrixXd::Identity(q.size(), q.size()), (m-eps)*Eigen::MatrixXd::Identity(q.size(), q.size());
+
+    Eigen::MatrixXd A(2*q.size(), 2*q.size());
+    A<<a1,
+       a2;
+
+    Eigen::VectorXd u(2*q.size());
+    u<<inf*Eigen::VectorXd::Ones(q.size()), inf*Eigen::VectorXd::Ones(q.size());
+
+    Eigen::VectorXd l(2*q.size());
+    l<<-(M-eps)*Eigen::VectorXd::Ones(q.size()), Eigen::VectorXd::Zero(q.size());
+
+    milp_condition.reset(new OpenSoT::constraints::GenericConstraint("milp_condition",u,l,2*q.size()));
+
+
+
+
+
+    OpenSoT::AutoStack::Ptr autostack2 = (RFoot2 / LArm2 / milp_task)<<vel_lims2<<joint_lims2<<milp_condition;
+
+
+    OpenSoT::solvers::solver_back_ends solver_1 = OpenSoT::solvers::solver_back_ends::qpOASES;
+    OpenSoT::solvers::solver_back_ends solver_2 = OpenSoT::solvers::solver_back_ends::qpOASES;
+    OpenSoT::solvers::solver_back_ends solver_3 = OpenSoT::solvers::solver_back_ends::GLPK;
+
+    std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_2, solver_3};
+
+    OpenSoT::solvers::iHQP::Ptr solver2 = boost::make_shared<OpenSoT::solvers::iHQP>(autostack2->getStack(), autostack2->getBounds(), 1e6,
+                                                                                    solver_vector);
+
+    OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions optGLPK;
+    for(unsigned int i = 0; i < q.size(); ++i)
+        optGLPK.var_id_kind_.push_back(std::pair<int, int>(q.size()+i, GLP_BV));
+
+    OpenSoT::solvers::BackEnd::Ptr GLPK;
+    solver2->getBackEnd(2,GLPK);
+    GLPK->setOptions(optGLPK);
+
+
+    Eigen::VectorXd dx(2*q.size());
+    dx.setZero(dx.size());
+    OpenSoT::AffineHelper dqVar = opt2.getVariable("dq");
+    for(unsigned int i = 0; i < 50*t; ++i)
+    {
+        this->_model_ptr->setJointPosition(q);
+        this->_model_ptr->update();
+
+        autostack2->update(q);
+
+
+        EXPECT_TRUE(solver2->solve(dx));
+
+        dqVar.getValue(dx, dq);
+
+        q+=dq;
+
+#if ENABLE_ROS
+        this->publishJointStates(q);
+        usleep(10000);
+#endif
+    }
+
+}
 
 TEST_F(testGLPKProblem, testMILPProblem)
 {

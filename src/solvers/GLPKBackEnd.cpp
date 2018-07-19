@@ -51,6 +51,7 @@ bool GLPKBackEnd::solve()
     //SETTING CONSTRAINT MATRIX
     glp_load_matrix(_mip, _A.rows()*_A.cols(), _rows.data(), _cols.data(), _a.data());
 
+    _param.presolve = GLP_ON;
     if(!(glp_intopt(_mip, &_param) == 0))
     {
         XBot::Logger::error("GLPK return false in solve!");
@@ -101,8 +102,7 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
     glp_init_iocp(&_param);
     _param.presolve = GLP_ON;
-    _param.msg_lev = GLP_MSG_ERR;
-
+    _param.msg_lev = GLP_MSG_ALL;
 
     if(!(glp_intopt(_mip, &_param) == 0))
     {
