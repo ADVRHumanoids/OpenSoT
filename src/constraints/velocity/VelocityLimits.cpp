@@ -27,7 +27,7 @@ VelocityLimits::VelocityLimits(const double qDotLimit,
     _constr("velocity_limits_internal_generic_constr", var,
             Eigen::VectorXd::Constant(var.getOutputSize(), qDotLimit*dT),
             Eigen::VectorXd::Constant(var.getOutputSize(), -qDotLimit*dT),
-            GenericConstraint::Type::BOUND)
+            GenericConstraint::Type::CONSTRAINT)
 {
     __lowerBound.setZero(var.getOutputSize());
     __upperBound.setZero(var.getOutputSize());
@@ -44,7 +44,7 @@ VelocityLimits::VelocityLimits(const Eigen::VectorXd& qDotLimit,
                const AffineHelper& var):
     Constraint("velocity_limits", var.getInputSize()), _dT(dT),
     _constr("velocity_limits_internal_generic_constr", var,
-            qDotLimit*dT, -qDotLimit*dT, GenericConstraint::Type::BOUND)
+            qDotLimit*dT, -qDotLimit*dT, GenericConstraint::Type::CONSTRAINT)
 {
     __lowerBound.setZero(qDotLimit.size());
     __upperBound.setZero(qDotLimit.size());

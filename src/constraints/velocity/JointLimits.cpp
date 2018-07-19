@@ -48,7 +48,7 @@ JointLimits::JointLimits(const Eigen::VectorXd &q,
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
     _boundScaling(boundScaling),
-    _constr("joint_limits_internal_generic_constr",var, jointBoundMax, jointBoundMin, GenericConstraint::Type::BOUND)
+    _constr("joint_limits_internal_generic_constr",var, jointBoundMax, jointBoundMin, GenericConstraint::Type::CONSTRAINT)
 {
     if(q.size() != _jointLimitsMax.size())
         throw std::runtime_error("q.size() != _jointLimitsMax.size()");
