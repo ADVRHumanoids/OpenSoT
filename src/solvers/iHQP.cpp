@@ -102,17 +102,27 @@ void iHQP::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::V
     H.resize(task->getXSize(), task->getXSize());
     if(task->getWeight().isIdentity())
     {
-        H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getA();
-        H = H.selfadjointView<Eigen::Upper>();
-        g.noalias() = -1.0 * task->getATranspose() * task->getb();
-        g += task->getc();
+        if(task->getA().size() != 0)
+        {
+            H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getA();
+            H = H.selfadjointView<Eigen::Upper>();
+            g.noalias() = -1.0 * task->getATranspose() * task->getb();
+            g += task->getc();
+        }
+        else
+            g = task->getc();
     }
     else
     {
-        H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getWA();
-        H = H.selfadjointView<Eigen::Upper>();
-        g.noalias() = -1.0 * task->getATranspose() * task->getWb();
-        g += task->getc();
+        if(task->getA().size() != 0)
+        {
+            H.triangularView<Eigen::Upper>() = task->getATranspose()*task->getWA();
+            H = H.selfadjointView<Eigen::Upper>();
+            g.noalias() = -1.0 * task->getATranspose() * task->getWb();
+            g += task->getc();
+        }
+        else
+            g = task->getc();
     }
     
     
