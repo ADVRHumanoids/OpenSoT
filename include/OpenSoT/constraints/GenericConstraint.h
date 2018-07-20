@@ -64,6 +64,8 @@ public:
                    const Eigen::VectorXd& lower_bound);
 
     virtual void update(const Eigen::VectorXd& x);
+
+    Type getType(){return _type;}
     
     
     
