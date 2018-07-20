@@ -38,16 +38,24 @@ GLPKBackEnd::~GLPKBackEnd()
 
 bool GLPKBackEnd::solve()
 {
+
+    std::cout<<"_lA: \n"<<_lA<<std::endl;
+    std::cout<<"_uA: \n"<<_uA<<std::endl;
+
     createsVectorsFromConstraintsMatrix();
     roundBounds();
 
     //SETTING BOUNDS & COST FUNCTION
-    for(unsigned int i = 0; i < _l.rows(); ++i){
+    for(unsigned int i = 0; i < _l.rows(); ++i)
         glp_set_col_bnds(_mip, i+1, checkConstrType(_u[i], _l[i]), _l[i], _u[i]);
-        glp_set_obj_coef(_mip, i+1, _g[i]);}
+    for(unsigned int i = 0; i < _g[i]; ++i)
+        glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
-    for(unsigned int i = 0; i < _A.rows(); ++i)
+    for(unsigned int i = 0; i < _A.rows(); ++i){
         glp_set_row_bnds(_mip, i+1, checkConstrType(_uA[i], _lA[i]), _lA[i], _uA[i]);
+
+        std::cout<<"ROW "<<i<<"TYPE: "<<glp_get_row_type(_mip,i+1)<<std::endl;
+    }
     //SETTING CONSTRAINT MATRIX
     glp_load_matrix(_mip, _A.rows()*_A.cols(), _rows.data(), _cols.data(), _a.data());
 
@@ -68,6 +76,9 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
                          const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
+
+    std::cout<<"_lA: \n"<<_lA<<std::endl;
+    std::cout<<"_uA: \n"<<_uA<<std::endl;
 
     createsVectorsFromConstraintsMatrix();
     roundBounds();
@@ -90,9 +101,10 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
         return false;}
 
     //SETTING BOUNDS & COST FUNCTION
-    for(unsigned int i = 0; i < _l.rows(); ++i){
+    for(unsigned int i = 0; i < _l.rows(); ++i)
         glp_set_col_bnds(_mip, i+1, checkConstrType(_u[i], _l[i]), _l[i], _u[i]);
-        glp_set_obj_coef(_mip, i+1, _g[i]);}
+    for(unsigned int i = 0; i < _g[i]; ++i)
+        glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
     for(unsigned int i = 0; i < _A.rows(); ++i)
         glp_set_row_bnds(_mip, i+1, checkConstrType(_uA[i], _lA[i]), _lA[i], _uA[i]);

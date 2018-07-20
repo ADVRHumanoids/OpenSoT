@@ -11,6 +11,7 @@
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
+#include <OpenSoT/constraints/TaskToConstraint.h>
 
 using namespace OpenSoT::constraints;
 using namespace OpenSoT::tasks;
@@ -170,7 +171,7 @@ TEST_F(testGLPKProblem, testIKMILP)
     joint_lims.reset(new JointLimits(q,qmax, qmin,opt.getVariable("dq")));
 
     VelocityLimits::Ptr vel_lims;
-    vel_lims.reset(new VelocityLimits(0.5,0.01, opt.getVariable("dq")));
+    vel_lims.reset(new VelocityLimits(M_PI,0.01, opt.getVariable("dq")));
 
     OpenSoT::AutoStack::Ptr autostack = (RFoot / LArm / postural)<<joint_lims<<vel_lims;
 
@@ -230,52 +231,55 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
     Cartesian::Ptr RFoot2;
     RFoot2.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
+    std::cout<<"RFoot2: "<<RFoot2->getA()<<std::endl;
+    std::cout<<"RFoot2 size: "<<"[ "<<RFoot2->getA().rows()<<" x "<<RFoot2->getA().cols()<<" ]"<<std::endl;
 
     Cartesian::Ptr LArm2;
     LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt2.getVariable("dq")));
+    LArm2->getReference(ref);
+    ref.M.DoRotZ(-M_PI_2);
     LArm2->setReference(ref);
 
     JointLimits::Ptr joint_lims2;
     joint_lims2.reset(new JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
+    std::cout<<"joint_lims2->getbUpperBound().size(): "<<joint_lims2->getbUpperBound().size()<<std::endl;
+    std::cout<<"joint_lims2->getbLowerBound().size(): "<<joint_lims2->getbLowerBound().size()<<std::endl;
+
 
     VelocityLimits::Ptr vel_lims2;
-    vel_lims2.reset(new VelocityLimits(0.1,0.01, opt2.getVariable("dq")));
-    std::cout<<"vel_lims2->getUpperBound().size(): "<<vel_lims2->getUpperBound().size()<<std::endl;
-    std::cout<<"vel_lims2->getLowerBound().size(): "<<vel_lims2->getLowerBound().size()<<std::endl;
+    vel_lims2.reset(new VelocityLimits(M_PI,0.01, opt2.getVariable("dq")));
+    std::cout<<"vel_lims2->getbUpperBound().size(): "<<vel_lims2->getbUpperBound().size()<<std::endl;
+    std::cout<<"vel_lims2->getbLowerBound().size(): "<<vel_lims2->getbLowerBound().size()<<std::endl;
 
 
     OpenSoT::tasks::GenericLPTask::Ptr milp_task;
     Eigen::VectorXd c(q.size());
     c.setOnes(c.size());
-    milp_task.reset(new OpenSoT::tasks::GenericLPTask("milp_task", c, opt2.getVariable("delta")));
-    std::cout<<"milp_task A: \n"<<milp_task->getA()<<std::endl;
-    std::cout<<"milp_task b: \n"<<milp_task->getb()<<std::endl;
-    std::cout<<"milp_task c: \n"<<milp_task->getc()<<std::endl;
+    milp_task.reset(new OpenSoT::tasks::GenericLPTask("milp_task",c, opt2.getVariable("delta")));
     std::cout<<"milp_task A size: \n"<<milp_task->getA().rows()<<" x "<<milp_task->getA().cols()<<std::endl;
     std::cout<<"milp_task b size: \n"<<milp_task->getb().size()<<std::endl;
     std::cout<<"milp_task c size: \n"<<milp_task->getc().size()<<std::endl;
 
 
     OpenSoT::constraints::GenericConstraint::Ptr milp_condition;
-    double M =  1e1;
-    double m = -1e1;
-    double eps = 1e-3;
-    double inf = 1e3;
+    double M =  0.1;
+    double m = -0.1;
+    double inf = 1e21;
     Eigen::MatrixXd a1(q.size(),2*q.size());
     a1<<Eigen::MatrixXd::Identity(q.size(), q.size()), -M*Eigen::MatrixXd::Identity(q.size(), q.size());
 
     Eigen::MatrixXd a2(q.size(),2*q.size());
-    a2<<Eigen::MatrixXd::Identity(q.size(), q.size()), (m-eps)*Eigen::MatrixXd::Identity(q.size(), q.size());
+    a2<<-Eigen::MatrixXd::Identity(q.size(), q.size()), m*Eigen::MatrixXd::Identity(q.size(), q.size());
 
     Eigen::MatrixXd A(2*q.size(), 2*q.size());
     A<<a1,
        a2;
 
     Eigen::VectorXd u(2*q.size());
-    u<<inf*Eigen::VectorXd::Ones(q.size()), inf*Eigen::VectorXd::Ones(q.size());
+    u<<Eigen::VectorXd::Zero(q.size()), Eigen::VectorXd::Zero(q.size());
 
     Eigen::VectorXd l(2*q.size());
-    l<<-(M-eps)*Eigen::VectorXd::Ones(q.size()), Eigen::VectorXd::Zero(q.size());
+    l<<-inf*Eigen::VectorXd::Ones(q.size()), -inf*Eigen::VectorXd::Zero(q.size());
 
     milp_condition.reset(new OpenSoT::constraints::GenericConstraint("milp_condition",u,l,2*q.size()));
 
@@ -284,6 +288,11 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
 
     OpenSoT::AutoStack::Ptr autostack2 = (RFoot2 / LArm2 / milp_task)<<vel_lims2<<joint_lims2<<milp_condition;
+//    OpenSoT::AutoStack::Ptr autostack2;
+//    autostack2.reset(new OpenSoT::AutoStack(milp_task));
+//    autostack2<<vel_lims2;
+//    autostack2<<OpenSoT::constraints::TaskToConstraint::Ptr(new OpenSoT::constraints::TaskToConstraint(RFoot2+LArm2));
+//    autostack2<<milp_condition;
 
 
     OpenSoT::solvers::solver_back_ends solver_1 = OpenSoT::solvers::solver_back_ends::qpOASES;
@@ -291,6 +300,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
     OpenSoT::solvers::solver_back_ends solver_3 = OpenSoT::solvers::solver_back_ends::GLPK;
 
     std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_2, solver_3};
+//    std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_3};
 
     OpenSoT::solvers::iHQP::Ptr solver2 = boost::make_shared<OpenSoT::solvers::iHQP>(autostack2->getStack(), autostack2->getBounds(), 1e6,
                                                                                     solver_vector);
@@ -335,7 +345,7 @@ TEST_F(testGLPKProblem, testMILPProblem)
     Eigen::VectorXd b(3); b.setZero(3);
     GenericTask::Ptr task(new GenericTask("task",A,b));
     Eigen::VectorXd c(3);
-    c<<-3.,-2.,-1;
+    c<<3.,-2.,-1;
     task->setHessianType(OpenSoT::HST_ZERO);
     task->setc(c);
     task->update(Eigen::VectorXd(1));
