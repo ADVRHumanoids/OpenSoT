@@ -67,7 +67,7 @@ Unicycle::Unicycle(std::string task_id,
 	_constA(0,1)=1*0;    // no Y motion		
 	_constA(1,3)=1.0*0; //no rotation around X
 	_constA(2,0)=1;    //just motion in X  
-	_constA(2,1)=1*0;    //just motion in X /// By using this option, the Y direction also can rotate to dicipate energy if t
+	_constA(2,1)=1;    //just motion in X /// By using this option, the Y direction also can rotate to dicipate energy if t
 										  /// wheels are alligned in the lateral plane
 	
 	
