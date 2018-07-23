@@ -110,7 +110,7 @@ TEST_F(testCartesianTask, testCartesianTask_)
 
     double dt = 0.001;
     Eigen::VectorXd ddq(_q.size()); ddq.setZero(ddq.size());
-    for(unsigned int i = 0; i < 10000; ++i)
+    for(unsigned int i = 0; i < 1000; ++i)
     {
         _model->setJointPosition(_q);
         _model->setJointVelocity(_dq);

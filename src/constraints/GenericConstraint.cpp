@@ -1,11 +1,11 @@
 #include <OpenSoT/constraints/GenericConstraint.h>
 
-OpenSoT::constraints::GenericConstraint::GenericConstraint(std::string task_id, 
+OpenSoT::constraints::GenericConstraint::GenericConstraint(std::string constraint_id,
                                                            const OpenSoT::AffineHelper& variable, 
                                                            const Eigen::VectorXd& upper_bound, 
                                                            const Eigen::VectorXd& lower_bound,
                                                            const Type constraint_type):
-    Constraint< Eigen::MatrixXd, Eigen::VectorXd >(task_id, variable.getInputSize()),
+    Constraint< Eigen::MatrixXd, Eigen::VectorXd >(constraint_id, variable.getInputSize()),
     _ub(upper_bound),
     _lb(lower_bound),
     _var(variable),
@@ -16,14 +16,32 @@ OpenSoT::constraints::GenericConstraint::GenericConstraint(std::string task_id,
     }
 }
 
+OpenSoT::constraints::GenericConstraint::GenericConstraint(std::string constraint_id,
+                                                          const Eigen::VectorXd& upper_bound,
+                                                          const Eigen::VectorXd& lower_bound,
+                                                          const int x_size):
+    Constraint< Eigen::MatrixXd, Eigen::VectorXd >(constraint_id, x_size),
+    _ub(upper_bound),
+    _lb(lower_bound)
+{
+    _var = _var.Identity(x_size);
+    _type = Type::BOUND;
+
+    if(!setBounds(upper_bound, lower_bound)){
+        throw std::invalid_argument("Bounds not valid");
+    }
+}
+
 bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& upper_bound, 
                                                         const Eigen::VectorXd& lower_bound)
 {
     if( ((upper_bound - lower_bound).array() < 0).any() ){
+        XBot::Logger::error("((upper_bound - lower_bound).array() < 0).any() in setBounds! \n");
         return false;
     }
     
     if( (upper_bound.size() != _var.getOutputSize()) || (lower_bound.size() != _var.getOutputSize()) ){
+        XBot::Logger::error("(upper_bound.size() != _var.getOutputSize()) || (lower_bound.size() != _var.getOutputSize()) in setBounds! \n");
         return false;
     }
     
@@ -42,7 +60,9 @@ bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& u
         _lowerBound = _lb - _var.getq();
     }
     else
-        return false;
+    {
+        XBot::Logger::error("Type not defined in setBounds!");
+        return false;}
     
     return true;
 }

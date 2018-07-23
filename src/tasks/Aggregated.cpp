@@ -95,6 +95,7 @@ void Aggregated::checkSizes() {
 void Aggregated::generateAll() {
     _tmpA.reset(_x_size);
     _tmpb.reset(1);
+    _c.setZero(_x_size);
 
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
@@ -103,6 +104,7 @@ void Aggregated::generateAll() {
 //        _tmpb.pile(t->getWeight()*t->getb());
         _tmpA.pile(t->getWA());
         _tmpb.pile(t->getWb());
+        _c += t->getc();
     }
 
     _A = _tmpA.generate_and_get();

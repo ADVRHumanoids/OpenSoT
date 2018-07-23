@@ -50,6 +50,8 @@ namespace OpenSoT{
          */
         iHQP(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks, const double eps_regularisation,
+             const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief iHQP constructor of the problem
@@ -62,6 +64,10 @@ namespace OpenSoT{
                     ConstraintPtr bounds,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
                     const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks,
+                    ConstraintPtr bounds,
+                    const double eps_regularisation,
+                    const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief iHQP constructor of the problem
@@ -76,6 +82,11 @@ namespace OpenSoT{
                     ConstraintPtr globalConstraints,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
                     const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks,
+                    ConstraintPtr bounds,
+                    ConstraintPtr globalConstraints,
+                    const double eps_regularisation,
+                    const std::vector<solver_back_ends> be_solver);
 
 
         ~iHQP(){}
@@ -129,10 +140,25 @@ namespace OpenSoT{
          */
         void activateAllStacks();
 
-        std::string getBackEndName();
+        /**
+         * @brief getBackEndName retrieve the name of the solver
+         * @return a string with the name of the solver, right now:
+         *      "qpOASES"
+         *      "OSQP"
+         *      "????"
+         */
+        std::string getBackEndName(const unsigned int i);
+
+        /**
+         * @brief getBackEnd retrieve the back-end associated to the i-th qp problem
+         * @param i priority level
+         * @param back_end
+         * @return false if the level does not exists
+         */
+        bool getBackEnd(const unsigned int i, BackEnd::Ptr& back_end);
 
     protected:
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger::Ptr logger, const std::string& prefix);
 
         vector <OpenSoT::constraints::Aggregated> constraints_task;
         
@@ -152,7 +178,7 @@ namespace OpenSoT{
          * @brief prepareSoT initialize the complete stack
          * @return true if stack is correctly initialized
          */
-        bool prepareSoT(const solver_back_ends be_solver);
+        bool prepareSoT(const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief computeCostFunction compute a cost function for velocity control:
@@ -193,7 +219,7 @@ namespace OpenSoT{
         std::vector<Eigen::VectorXd> tmp_uA;
 
 
-        solver_back_ends _be_solver;
+        std::vector<solver_back_ends> _be_solver;
 
 
     };

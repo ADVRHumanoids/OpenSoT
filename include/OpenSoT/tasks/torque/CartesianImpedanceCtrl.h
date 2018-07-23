@@ -78,6 +78,7 @@
 
                 Eigen::VectorXd _F;
                 Eigen::VectorXd _tmpF;
+                Eigen::VectorXd _F_ff;
 
                 Eigen::VectorXd _tmp_vec;
                 Eigen::MatrixXd _tmpA;
@@ -142,6 +143,22 @@
                         std::list<unsigned int>());
 
                 ~CartesianImpedanceCtrl();
+
+
+                /**
+                 * @brief setFeedForwardForces permits to set an offset in the Desired Impedance Law
+                 * PS: not sure the forces will be tracked correctly
+                 * @param Fff desired wrenches
+                 */
+                void setFeedForwardForces(const Eigen::VectorXd& Fff);
+                void setFeedForwardForces(const KDL::Wrench& Fff);
+
+                /**
+                 * @brief getFeedForwardForces get the set offset in the Desired Impedance Law
+                 * @param Fff
+                 */
+                void getFeedForwardForces(Eigen::VectorXd& Fff);
+                void getFeedForwardForces(KDL::Wrench& Fff);
 
                 /**
                  * @brief setReference set desired pose for the end-effector in base_link

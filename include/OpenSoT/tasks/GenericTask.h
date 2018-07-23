@@ -11,7 +11,7 @@ namespace OpenSoT { namespace tasks  {
  * @brief The GenericTask class implements a task where the A and b matrix can be updated outside the task itself,
  * the task has the generic form:
  *
- * ||Ax - b||
+ * ||Ax - b|| + c'x
  */
 class GenericTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
   public:
@@ -65,12 +65,35 @@ class GenericTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
      */
     bool setAb(const Eigen::MatrixXd& A, const Eigen::VectorXd& b);
 
+    /**
+     * @brief setc update the c of the task
+     * @param c vector
+     * @return false if c.size() != b.size()
+     */
+    bool setc(const Eigen::VectorXd& c);
+
+    /**
+     * @brief setHessianType
+     * @param hessian_type
+     * enum HessianType
+     *   {
+     *       HST_ZERO,                   < Hessian is zero matrix (i.e. LP formulation).
+     *       HST_IDENTITY,               < Hessian is identity matrix.
+     *       HST_POSDEF,                 < Hessian is (strictly) positive definite.
+     *       HST_POSDEF_NULLSPACE,       < Hessian is positive definite on null space of active bounds/constraints.
+     *       HST_SEMIDEF,                < Hessian is positive semi-definite.
+     *       HST_UNKNOWN                 < Hessian type is unknown.
+     *   };
+     */
+    void setHessianType(const HessianType hessian_type);
+
 private:
     AffineHelper _var;
     AffineHelper _task;
 
     Eigen::MatrixXd __A;
     Eigen::VectorXd __b;
+    Eigen::VectorXd __c;
 
 
 };

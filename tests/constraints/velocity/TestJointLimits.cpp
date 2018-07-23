@@ -188,6 +188,81 @@ TEST_F(testJointLimits, boundsDoUpdate) {
     EXPECT_FALSE(oldUpperBound == newUpperBound);
 }
 
+TEST_F(testJointLimits, startingOutsideBoundsPositive)
+{
+    //Bounds between -1 and 1
+    Eigen::VectorXd q_min(10);
+    q_min = -Eigen::VectorXd::Ones(q_min.size());
+    Eigen::VectorXd q_max = -q_min;
+
+    //q all zero but q[5] = 2
+    Eigen::VectorXd q(q_min.size());
+    q.setZero(q.size());
+    q[5] = 2;
+
+    OpenSoT::constraints::velocity::JointLimits joint_lims(q, q_max, q_min);
+    joint_lims.update(q);
+
+    Eigen::VectorXd lb = joint_lims.getLowerBound();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ(lb[i], q_min[i] - q[i]);
+
+    Eigen::VectorXd ub = joint_lims.getUpperBound();
+    for(unsigned int i = 0; i < q.size(); ++i){
+        if(i == 5)
+            EXPECT_DOUBLE_EQ(ub[i], 0.0);
+        else
+            EXPECT_DOUBLE_EQ(ub[i], q_max[i] - q[i]);
+    }
+
+    q[5] = 0;
+    joint_lims.update(q);
+    lb = joint_lims.getLowerBound();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ(lb[i], q_min[i] - q[i]);
+
+    ub = joint_lims.getUpperBound();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ(ub[i], q_max[i] - q[i]);
+}
+
+TEST_F(testJointLimits, startingOutsideBoundsNegative)
+{
+    //Bounds between -1 and 1
+    Eigen::VectorXd q_min(10);
+    q_min = -Eigen::VectorXd::Ones(q_min.size());
+    Eigen::VectorXd q_max = -q_min;
+
+    //q all zero but q[5] = -2
+    Eigen::VectorXd q(q_min.size());
+    q.setZero(q.size());
+    q[5] = -2;
+
+    OpenSoT::constraints::velocity::JointLimits joint_lims(q, q_max, q_min);
+    joint_lims.update(q);
+
+    Eigen::VectorXd lb = joint_lims.getLowerBound();
+    for(unsigned int i = 0; i < q.size(); ++i){
+        if(i == 5)
+            EXPECT_DOUBLE_EQ(lb[i], 0.0);
+        else
+            EXPECT_DOUBLE_EQ(lb[i], q_min[i] - q[i]);}
+
+    Eigen::VectorXd ub = joint_lims.getUpperBound();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ(ub[i], q_max[i] - q[i]);
+
+    q[5] = 0;
+    joint_lims.update(q);
+    lb = joint_lims.getLowerBound();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ(lb[i], q_min[i] - q[i]);
+
+    ub = joint_lims.getUpperBound();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        EXPECT_DOUBLE_EQ(ub[i], q_max[i] - q[i]);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {

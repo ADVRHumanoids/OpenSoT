@@ -24,13 +24,13 @@ endif()
 
 option(SET_SSE4_FLAG "set -msse4 flag to gcc" OFF)
 
-if(${SET_SSE4_FLAG})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4")
-endif()
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type -Werror=address -Werror=parentheses " )
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -std=c++11 -Wmaybe-uninitialized -Wuninitialized" )
+endif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
@@ -40,10 +40,6 @@ IF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
    SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 ENDIF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
-# Select flags.
-#SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-#SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
-#SET(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
 
 find_package(YCM REQUIRED)
 FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
@@ -62,11 +58,16 @@ FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(fcl QUIET)
-
+FIND_PACKAGE(PkgConfig REQUIRED)
 
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
+option(OPENSOT_VERBOSE "Some additional prints" FALSE)
+
+if(${OPENSOT_VERBOSE})
+    add_definitions(-DOPENSOT_VERBOSE)
+endif()
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
@@ -99,11 +100,15 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/force/CoP.cpp
                     src/constraints/GenericConstraint.cpp
                     )
+
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
+    message("Adding src/constraints/velocity/ConvexHull.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/ConvexHull.cpp)
 endif()
+
 if(${fcl_FOUND} AND ${moveit_core_FOUND})
+    message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/SelfCollisionAvoidance.cpp)
 endif()
@@ -113,6 +118,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/SubTask.cpp
                     src/tasks/MinimizeVariable.cpp
                     src/tasks/GenericTask.cpp
+                    src/tasks/GenericLPTask.cpp
                     src/tasks/acceleration/Postural.cpp
                     src/tasks/acceleration/Cartesian.cpp
                     src/tasks/acceleration/Contact.cpp
@@ -152,13 +158,15 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/Indices.cpp
                     src/utils/VelocityAllocation.cpp
                     src/utils/cartesian_utils.cpp)
-if(${moveit_core_FOUND})
-    if(${fcl_FOUND})
+
+if(${fcl_FOUND} AND ${moveit_core_FOUND})
+        message("Adding src/utils/collision_utils.cpp to compilation")
         set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
             src/utils/collision_utils.cpp)
-    endif()
 endif()
+
 if(${PCL_FOUND})
+    message("Adding src/utils/convex_hull_utils.cpp to compilation")
     set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
         src/utils/convex_hull_utils.cpp)
 endif()
@@ -182,16 +190,12 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/tasks/velocity/Interaction.cpp
                     ${sot_INCLUDES})
 
-# we must wait for qpOASES-ext to be ready before building OpenSoT
-if(TARGET qpOASES-ext)
-    add_dependencies(OpenSoT qpOASES-ext)
-endif()
-
 
 
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${srdfdom_advr_LIBRARIES}
                               ${eigen_conversions_LIBRARIES}
+			      
                               PRIVATE
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
@@ -206,6 +210,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
 # Find package qpOASES or build it using ExternalProject
 find_package(qpOASES QUIET)
 if(NOT qpOASES_FOUND)
+    message("Internal qpOASES will be used!")
     set(qpOASES_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/qpOASES-ext/")
     set(qpOASES_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/src/qpOASES-ext-build/")
 
@@ -225,8 +230,13 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(MacroInstallLib)
 
 if(${qpOASES_FOUND})
-
+    message("Adding src/solvers/QPOasesBackEnd.cpp to compilation")
     add_library(OpenSotBackEndQPOases SHARED src/solvers/QPOasesBackEnd.cpp)
+
+    if(TARGET qpOASES-ext)
+        add_dependencies(OpenSotBackEndQPOases qpOASES-ext)
+    endif()
+
     target_link_libraries(OpenSotBackEndQPOases OpenSoT qpOASES)
     library_install(OpenSotBackEndQPOases 1 0 0)
 
@@ -234,6 +244,7 @@ endif()
 
 FIND_PACKAGE(osqp QUIET)
 if(${osqp_FOUND})
+    message("Adding src/solvers/OSQPBackEnd.cpp to compilation")
 
     add_library(OpenSotBackEndOSQP SHARED src/solvers/OSQPBackEnd.cpp)
     target_link_libraries(OpenSotBackEndOSQP OpenSoT osqp)
@@ -241,6 +252,16 @@ if(${osqp_FOUND})
 
 endif()
 
+
+pkg_check_modules(CBC QUIET cbc)
+pkg_check_modules(OSICBC QUIET osi-cbc)
+if(${CBC_FOUND} AND ${OSICBC_FOUND})
+    message("Adding src/solvers/CBCBackEnd.cpp to compilation")
+
+    add_library(OpenSotBackEndCBC SHARED src/solvers/CBCBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndCBC OpenSoT ${CBC_LIBRARIES} ${OSICBC_LIBRARIES})
+    library_install(OpenSotBackEndCBC 1 0 0)
+endif()
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
 ########################################################################

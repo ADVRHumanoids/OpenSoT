@@ -95,7 +95,7 @@ namespace OpenSoT {
 
                     ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model,
                                                        const Cartesian::Ptr CartesianTask) :
-                        _robot(XBot::ModelInterface::getModel(robot_model.getPathToConfig())),
+                        _robot(XBot::ModelInterface::getModel(robot_model.getConfigOptions())),
                         _model(robot_model),
                         _W(q.rows(),q.rows()),
                         _zeros(q.rows())

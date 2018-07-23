@@ -59,7 +59,7 @@ void QPOasesBackEnd::setDefaultOptions()
     opt.epsRegularisation *= _epsRegularisation;
     opt.numRegularisationSteps = 0;
     opt.numRefinementSteps = 1;
-    opt.enableFlippingBounds = qpOASES::BT_TRUE;
+//    opt.enableFlippingBounds = qpOASES::BT_TRUE; // <- THIS IS NOT RT SAFE!
 //     opt.enableDropInfeasibles = qpOASES::BT_TRUE;
 
     opt.ensureConsistency();
@@ -120,7 +120,7 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
 
     if(qpOASES::getSimpleStatus(val) < 0)
     {
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
         _problem->printProperties();
 
         if(val == qpOASES::RET_INIT_FAILED_INFEASIBILITY)
@@ -146,7 +146,7 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
     _problem->getConstraints(*_constraints);
 
     if(success != qpOASES::SUCCESSFUL_RETURN){
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
         XBot::Logger::error("ERROR GETTING PRIMAL SOLUTION IN INITIALIZATION! ERROR %i \n", success);
 #endif
         return false;}
@@ -246,7 +246,7 @@ bool QPOasesBackEnd::solve()
                        nWSR,0);
 
     if(val != qpOASES::SUCCESSFUL_RETURN){
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
         std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN HOTSTART! ERROR "<<val<<DEFAULT<<std::endl;
         std::cout<<GREEN<<"RETRYING INITING WITH WARMSTART"<<DEFAULT<<std::endl;
 #endif
@@ -260,7 +260,7 @@ bool QPOasesBackEnd::solve()
                            _bounds.get(), _constraints.get());
 
         if(val != qpOASES::SUCCESSFUL_RETURN){
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
             std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN WARMSTART! ERROR "<<val<<DEFAULT<<std::endl;
             std::cout<<GREEN<<"RETRYING INITING"<<DEFAULT<<std::endl;
 #endif
@@ -282,7 +282,7 @@ bool QPOasesBackEnd::solve()
     _problem->getConstraints(*_constraints);
 
     if(qpOASES::getSimpleStatus(success) < 0){
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
         std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
 #endif
         return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);
@@ -314,7 +314,7 @@ void QPOasesBackEnd::checkInfeasibility()
 
 void QPOasesBackEnd::_printProblemInformation()
 {
-    XBot::Logger::info("eps Regularisation factor: %s \n", _problem->getOptions().epsRegularisation);
+    XBot::Logger::info("eps Regularisation factor: %d \n", _problem->getOptions().epsRegularisation);
     XBot::Logger::info("qpOASES # OF CONSTRAINTS: %i\n", _problem->getNC());
     XBot::Logger::info("qpOASES # OF VARIABLES: %i\n", _problem->getNV());
 }

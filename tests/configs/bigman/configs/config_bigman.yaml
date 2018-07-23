@@ -8,7 +8,7 @@ RobotInterface:
   framework_name: "YARP"
   
 ModelInterface:
-  model_type: "IDYNUTILS"
+  model_type: "RBDL"
   is_model_floating_base: "false"
   
 RobotInterfaceYARP:

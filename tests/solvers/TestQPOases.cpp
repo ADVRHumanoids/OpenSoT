@@ -15,6 +15,7 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/utils/AutoStack.h>
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
@@ -945,7 +946,12 @@ TEST_F(testiHQP, testContructor2Problems)
         for(unsigned int j = 0; j < 3; ++j)
             EXPECT_NEAR(T_kdl.M(i,j), T_ref_kdl.M(i,j), 1E-2);
 
+    OpenSoT::solvers::BackEnd::Ptr back_end_i;
+    EXPECT_FALSE(sot.getBackEnd(2, back_end_i));
 
+    EXPECT_TRUE(sot.getBackEnd(1, back_end_i));
+
+    EXPECT_TRUE(back_end_i->getH() == postural_task->getA().transpose()*postural_task->getA());
 }
 
 TEST_F(testiHQP, testContructor1ProblemAggregated)
@@ -1027,6 +1033,39 @@ TEST_F(testiHQP, testContructor1ProblemAggregated)
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_NEAR( q2[i], q_ref2[i], 1E-4);
 
+}
+
+TEST_F(testiHQP, testSingleTask)
+{
+    Eigen::VectorXd q0(2);
+    q0.setRandom(q0.size());
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural;
+    postural.reset(new OpenSoT::tasks::velocity::Postural(q0));
+
+    Eigen::VectorXd qmin(q0.size()), qmax(q0.size());
+    qmax = 1000. * Eigen::VectorXd::Ones(q0.size());
+    qmin = -qmax;
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
+    joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(q0, qmax, qmin));
+
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
+    vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2., 0.001, q0.size()));
+
+    OpenSoT::AutoStack::Ptr autostack(new OpenSoT::AutoStack(postural));
+    autostack = autostack<<joint_limits<<vel_limits;
+    autostack->update(q0);
+
+    OpenSoT::solvers::iHQP::Ptr solver;
+    solver.reset(new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(), 1e8));
+
+    Eigen::VectorXd x(q0.size());
+    EXPECT_TRUE(solver->solve(x));
+
+    autostack->update(q0);
+
+    solver.reset(new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(), 1e8));
+    EXPECT_TRUE(solver->solve(x));
 }
 
 TEST_F(testiHQP, testMinEffort)
