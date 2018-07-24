@@ -36,12 +36,46 @@ GLPKBackEnd::~GLPKBackEnd()
     glp_delete_prob(_mip);
 }
 
+void GLPKBackEnd::printErrorOutput(const int out)
+{
+    if(out == GLP_EBOUND)
+        XBot::Logger::error("Unable to start the search, because some double-bounded "
+                            "variables have incorrect bounds or some integer variables "
+                            "have non-integer (fractional) bounds. \n");
+    if(out == GLP_EROOT)
+        XBot::Logger::error("Unable to start the search, because optimal basis for initial "
+                            "LP relaxation is not provided. (This code may appear only "
+                            "if the presolver is disabled.) \n");
+    if(out == GLP_ENOPFS)
+        XBot::Logger::error("Unable to start the search, because LP relaxation of the "
+                            "MIP problem instance has no primal feasible solution. "
+                            "(This code may appear only if the presolver is enabled.) \n");
+    if(out == GLP_ENODFS)
+        XBot::Logger::error("Unable to start the search, because LP relaxation of the "
+                            "MIP problem instance has no dual feasible solution. In "
+                            "other word, this code means that if the LP relaxation has "
+                            "at least one primal feasible solution, its optimal solution is "
+                            "unbounded, so if the MIP problem has at least one integer "
+                            "feasible solution, its (integer) optimal solution is also unbounded. "
+                            "(This code may appear only if the presolver is "
+                            "enabled.) \n");
+    if(out == GLP_EFAIL)
+        XBot::Logger::error("The search was prematurely terminated due to the solver "
+                            "failure. \n");
+    if(out == GLP_EMIPGAP)
+        XBot::Logger::error("The search was prematurely terminated, because the relative "
+                            "mip gap tolerance has been reached. \n");
+    if(out == GLP_ETMLIM)
+        XBot::Logger::error("The search was prematurely terminated, because the time "
+                            "limit has been exceeded. \n");
+    if(out == GLP_ESTOP)
+        XBot::Logger::error("The search was prematurely terminated by application. "
+                            "(This code may appear only if the advanced solver interface "
+                            "is used.) \n");
+}
+
 bool GLPKBackEnd::solve()
 {
-
-    std::cout<<"_lA: \n"<<_lA<<std::endl;
-    std::cout<<"_uA: \n"<<_uA<<std::endl;
-
     createsVectorsFromConstraintsMatrix();
     roundBounds();
 
@@ -51,18 +85,17 @@ bool GLPKBackEnd::solve()
     for(unsigned int i = 0; i < _g[i]; ++i)
         glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
-    for(unsigned int i = 0; i < _A.rows(); ++i){
+    for(unsigned int i = 0; i < _A.rows(); ++i)
         glp_set_row_bnds(_mip, i+1, checkConstrType(_uA[i], _lA[i]), _lA[i], _uA[i]);
-
-        std::cout<<"ROW "<<i<<"TYPE: "<<glp_get_row_type(_mip,i+1)<<std::endl;
-    }
     //SETTING CONSTRAINT MATRIX
     glp_load_matrix(_mip, _A.rows()*_A.cols(), _rows.data(), _cols.data(), _a.data());
 
     _param.presolve = GLP_ON;
-    if(!(glp_intopt(_mip, &_param) == 0))
+    int out = glp_intopt(_mip, &_param);
+    if(out != 0)
     {
-        XBot::Logger::error("GLPK return false in solve!");
+        XBot::Logger::error("GLPK return false in solve!\n");
+        printErrorOutput(out);
         return false;
     }
 
@@ -76,9 +109,6 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
                          const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
-
-    std::cout<<"_lA: \n"<<_lA<<std::endl;
-    std::cout<<"_uA: \n"<<_uA<<std::endl;
 
     createsVectorsFromConstraintsMatrix();
     roundBounds();
@@ -114,11 +144,14 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
     glp_init_iocp(&_param);
     _param.presolve = GLP_ON;
+    _param.binarize = GLP_ON;
     _param.msg_lev = GLP_MSG_ALL;
 
-    if(!(glp_intopt(_mip, &_param) == 0))
+    int out = glp_intopt(_mip, &_param);
+    if(out != 0)
     {
-        XBot::Logger::error("GLPK return false in initProblem!");
+        XBot::Logger::error("GLPK return false in solve!\n");
+        printErrorOutput(out);
         return false;
     }
 

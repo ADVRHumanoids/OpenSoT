@@ -74,8 +74,11 @@ private:
 
     std::vector<var_id_kind> _var_id_kind;
 
-
-
+    /**
+     * @brief printErrorOutput prints outputs error meaning (taken directly from the documentation of GLPK)
+     * @param out the error code
+     */
+    void printErrorOutput(const int out);
 
 };
 
