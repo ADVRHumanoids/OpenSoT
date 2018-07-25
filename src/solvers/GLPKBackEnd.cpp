@@ -29,6 +29,7 @@ GLPKBackEnd::GLPKBackEnd(const int number_of_variables, const int number_of_cons
     //at this stage the BE creates a LP with no extra variables
     glp_add_rows(_mip, number_of_constraints);
     glp_add_cols(_mip, number_of_variables);
+
 }
 
 GLPKBackEnd::~GLPKBackEnd()
@@ -72,6 +73,8 @@ void GLPKBackEnd::printErrorOutput(const int out)
         XBot::Logger::error("The search was prematurely terminated by application. "
                             "(This code may appear only if the advanced solver interface "
                             "is used.) \n");
+
+    glp_print_mip(_mip, "mip_problem");
 }
 
 bool GLPKBackEnd::solve()
@@ -80,8 +83,21 @@ bool GLPKBackEnd::solve()
     roundBounds();
 
     //SETTING BOUNDS & COST FUNCTION
-    for(unsigned int i = 0; i < _l.rows(); ++i)
-        glp_set_col_bnds(_mip, i+1, checkConstrType(_u[i], _l[i]), _l[i], _u[i]);
+    if(_l.rows() != 0)
+    {
+        for(unsigned int i = 0; i < _l.rows(); ++i)
+            glp_set_col_bnds(_mip, i+1, checkConstrType(_u[i], _l[i]), _l[i], _u[i]);
+    }
+    else
+    {
+        for(unsigned int i = 0; i < getNumVariables(); ++i)
+        {
+            int type = glp_get_col_type(_mip, i+1);
+            if(type == GLP_FX)
+                glp_set_col_bnds(_mip, i+1, GLP_DB, -1e10, 1e10);
+        }
+    }
+
     for(unsigned int i = 0; i < _g[i]; ++i)
         glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
