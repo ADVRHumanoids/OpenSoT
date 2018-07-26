@@ -444,8 +444,8 @@ TEST_F(testGLPKProblem, testMILPProblem)
     }
 
     EXPECT_NEAR(solver->getSolution()[0],0.0, 1e-12);
-    EXPECT_NEAR(solver->getSolution()[1],5.5, 1e-12);
-    EXPECT_NEAR(solver->getSolution()[2],1.0, 1e-12);
+    EXPECT_NEAR(solver->getSolution()[1],6., 1e-12);
+    EXPECT_NEAR(solver->getSolution()[2],0.0, 1e-12);
 
     ub[1] = 5;
     solver->updateBounds(lb, ub);
