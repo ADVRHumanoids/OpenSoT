@@ -48,7 +48,7 @@ public:
     bool solve();
     void setOptions(const boost::any& options);
     boost::any getOptions(){return _opt;}
-    double getObjective(){ return glp_mip_obj_val(_mip); }
+    double getObjective();
 
     Eigen::VectorXd getGLPKUpperBounds();
     Eigen::VectorXd getGLPKLowerBounds();
