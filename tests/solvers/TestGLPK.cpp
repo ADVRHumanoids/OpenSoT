@@ -173,9 +173,12 @@ TEST_F(testGLPKProblem, testIKMILP)
     joint_lims.reset(new JointLimits(q,qmax, qmin,opt.getVariable("dq")));
 
     VelocityLimits::Ptr vel_lims;
-    vel_lims.reset(new VelocityLimits(M_PI_2,0.01, opt.getVariable("dq")));
+    vel_lims.reset(new VelocityLimits(M_PI,0.01, opt.getVariable("dq")));
 
-    OpenSoT::AutoStack::Ptr autostack = (RFoot / LArm / postural)<<joint_lims<<vel_lims;
+    VelocityLimits::Ptr vel_lims_p;
+    vel_lims_p.reset(new VelocityLimits(2.*M_PI,0.01, opt.getVariable("dq")));
+
+    OpenSoT::AutoStack::Ptr autostack = ((RFoot<<vel_lims) / (LArm<<vel_lims) / (postural<<vel_lims_p))<<joint_lims;
 
     OpenSoT::solvers::iHQP::Ptr solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6,
                                                                                     OpenSoT::solvers::solver_back_ends::qpOASES);
@@ -187,9 +190,10 @@ TEST_F(testGLPKProblem, testIKMILP)
     LArm->setReference(ref);
 
 
-    int t = 50;
+    int t = 100;
     Eigen::VectorXd dq(q.size());
     dq.setZero(dq.size());
+    Eigen::VectorXd solve_time(t);
     for(unsigned int i = 0; i < t; ++i)
     {
         this->_model_ptr->setJointPosition(q);
@@ -197,10 +201,15 @@ TEST_F(testGLPKProblem, testIKMILP)
 
         autostack->update(q);
 
-
+        auto tic = std::chrono::steady_clock::now();
         EXPECT_TRUE(solver->solve(dq));
+        auto toc = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(toc-tic).count();
+        solve_time[i] = duration;
+
         q+=dq;
 
+        log1->add("solve_time", duration);
         log1->add("q", q);
         log1->add("dq", dq);
         log1->add("RFoot_b: ", RFoot->getb());
@@ -242,11 +251,9 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
     Cartesian::Ptr RFoot2;
     RFoot2.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
-    std::cout<<"RFoot2: "<<RFoot2->getA()<<std::endl;
-    std::cout<<"RFoot2 size: "<<"[ "<<RFoot2->getA().rows()<<" x "<<RFoot2->getA().cols()<<" ]"<<std::endl;
 
     Cartesian::Ptr LArm2;
-    LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt2.getVariable("dq")));
+    LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "Waist", opt2.getVariable("dq")));
     LArm2->getReference(ref);
     ref.M.DoRotZ(-M_PI_2);
     LArm2->setReference(ref);
@@ -254,14 +261,10 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
     JointLimits::Ptr joint_lims2;
     joint_lims2.reset(new JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
-    std::cout<<"joint_lims2->getbUpperBound().size(): "<<joint_lims2->getbUpperBound().size()<<std::endl;
-    std::cout<<"joint_lims2->getbLowerBound().size(): "<<joint_lims2->getbLowerBound().size()<<std::endl;
 
 
     VelocityLimits::Ptr vel_lims2;
     vel_lims2.reset(new VelocityLimits(M_PI,0.01, opt2.getVariable("dq")));
-    std::cout<<"vel_lims2->getbUpperBound().size(): "<<vel_lims2->getbUpperBound().size()<<std::endl;
-    std::cout<<"vel_lims2->getbLowerBound().size(): "<<vel_lims2->getbLowerBound().size()<<std::endl;
 
 
     OpenSoT::tasks::GenericLPTask::Ptr milp_task;
@@ -270,35 +273,48 @@ std::cout<<"        SECOND RUN"<<std::endl;
     milp_task.reset(new OpenSoT::tasks::GenericLPTask("milp_task",c, opt2.getVariable("delta")));
 
     OpenSoT::constraints::GenericConstraint::Ptr milp_condition;
-    double M =  M_PI*0.01 + 1e-3;
-    double m = -M_PI*0.01 - 1e-3;
-    double inf = 1e9;
+    double M =  15.;
+    double m = -M;
+    double inf = 1e30;
     Eigen::MatrixXd a1(q.size(),2*q.size());
     a1<<Eigen::MatrixXd::Identity(q.size(), q.size()), -M*Eigen::MatrixXd::Identity(q.size(), q.size());
 
     Eigen::MatrixXd a2(q.size(),2*q.size());
-    a2<<-Eigen::MatrixXd::Identity(q.size(), q.size()), m*Eigen::MatrixXd::Identity(q.size(), q.size());
+    a2<<-1.0*Eigen::MatrixXd::Identity(q.size(), q.size()), m*Eigen::MatrixXd::Identity(q.size(), q.size());
 
     Eigen::MatrixXd A(2*q.size(), 2*q.size());
     A<<a1,
        a2;
-
     OpenSoT::AffineHelper tmp(A, Eigen::VectorXd::Zero(2*q.size()));
+    EXPECT_TRUE(A == tmp.getM());
+    EXPECT_TRUE(tmp.getq() == Eigen::VectorXd::Zero(2*q.size()));
 
     Eigen::VectorXd u(2*q.size());
-    u<<Eigen::VectorXd::Zero(q.size()), Eigen::VectorXd::Zero(q.size());
+    u<<Eigen::VectorXd::Zero(q.size()),Eigen::VectorXd::Zero(q.size());
 
     Eigen::VectorXd l(2*q.size());
     l<<-inf*Eigen::VectorXd::Ones(q.size()), -inf*Eigen::VectorXd::Ones(q.size());
 
     milp_condition.reset(new OpenSoT::constraints::GenericConstraint("milp_condition",tmp,u,l,
-                                                                     OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
+        OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
+
+    Eigen::VectorXd L(2*q.size()), U(2*q.size());
+    L<<-2.*M_PI*0.01*Eigen::VectorXd::Ones(q.size()),     Eigen::VectorXd::Zero(q.size());
+    U<< 2.*M_PI*0.01*Eigen::VectorXd::Ones(q.size()),     Eigen::VectorXd::Ones(q.size());
+
+    OpenSoT::constraints::GenericConstraint::Ptr milp_bounds;
+    milp_bounds.reset(new OpenSoT::constraints::GenericConstraint(
+                          "milp_bounds", U, L, 2*q.size()));
 
 
 
-    OpenSoT::AutoStack::Ptr autostack2 = ((RFoot2)/
-                                          (LArm2)/
-                                          (milp_task<<milp_condition))<<vel_lims2<<joint_lims2;
+    OpenSoT::AutoStack::Ptr autostack2 = ((RFoot2<<vel_lims2)/
+                                          (LArm2<<vel_lims2)/
+                                          (milp_task<<milp_bounds<<milp_condition))<<joint_lims2;
+
+//    OpenSoT::AutoStack::Ptr autostack2; autostack2.reset(new OpenSoT::AutoStack(LArm2));
+//    autostack2<<vel_lims2;
+
 //    OpenSoT::AutoStack::Ptr autostack2;
 //    autostack2.reset(new OpenSoT::AutoStack(milp_task));
 //    autostack2<<vel_lims2;
@@ -311,14 +327,14 @@ std::cout<<"        SECOND RUN"<<std::endl;
     OpenSoT::solvers::solver_back_ends solver_3 = OpenSoT::solvers::solver_back_ends::GLPK;
 
     std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_2, solver_3};
-//    std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_2};
+//    std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_3};
 
     OpenSoT::solvers::iHQP::Ptr solver2 = boost::make_shared<OpenSoT::solvers::iHQP>(autostack2->getStack(), autostack2->getBounds(), 1e6,
                                                                                     solver_vector);
 
     OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions optGLPK;
     for(unsigned int i = 0; i < q.size(); ++i)
-        optGLPK.var_id_kind_.push_back(std::pair<int, int>(q.size()+i, GLP_BV));
+        optGLPK.var_id_kind_.push_back(std::pair<int, int>(q.size()+i, GLP_IV));
 
     OpenSoT::solvers::BackEnd::Ptr GLPK;
     solver2->getBackEnd(2,GLPK);
@@ -331,6 +347,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
     delta.setZero(delta.size());
     OpenSoT::AffineHelper dqVar = opt2.getVariable("dq");
     OpenSoT::AffineHelper deltaVar = opt2.getVariable("delta");
+    Eigen::VectorXd solve_time2(t);
     for(unsigned int i = 0; i < t; ++i)
     {        
         this->_model_ptr->setJointPosition(q);
@@ -338,12 +355,24 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
         autostack2->update(q);
 
-        solver2->solve(dx);
+        bool a = solver2->solve(dx);
         dqVar.getValue(dx, dq);
         deltaVar.getValue(dx, delta);
 
-        q+=dq;
+        auto tic = std::chrono::steady_clock::now();
+        solver2->log(log2);
+        auto toc = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(toc-tic).count();
+        solve_time2[i] = duration;
 
+
+        if(a)
+            q+=dq;
+
+        double obj;
+        obj = GLPK->getObjective();
+        log2->add("solve_time", duration);
+        log2->add("cost", obj);
         log2->add("q", q);
         log2->add("dq", dq);
         log2->add("delta", delta);
