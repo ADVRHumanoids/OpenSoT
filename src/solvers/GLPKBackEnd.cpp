@@ -106,7 +106,6 @@ bool GLPKBackEnd::solve()
     //SETTING CONSTRAINT MATRIX
     glp_load_matrix(_mip, _A.rows()*_A.cols(), _rows.data(), _cols.data(), _a.data());
 
-    _param.presolve = GLP_ON;
     int out = glp_intopt(_mip, &_param);
     if(out != 0)
     {
@@ -118,6 +117,11 @@ bool GLPKBackEnd::solve()
     for(unsigned int i = 0; i < _solution.size(); ++i)
         _solution[i] = glp_mip_col_val(_mip, i+1);
     return true;
+}
+
+double GLPKBackEnd::getObjective()
+{
+    return glp_mip_obj_val(_mip);
 }
 
 bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
@@ -159,9 +163,17 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
 
     glp_init_iocp(&_param);
-    _param.presolve = GLP_ON;
-    _param.binarize = GLP_ON;
-    _param.msg_lev = GLP_MSG_ALL;
+    _param.msg_lev = GLP_MSG_OFF;
+    glp_simplex(_mip, NULL);
+//    _param.msg_lev = GLP_MSG_ALL;
+//    _param.binarize = GLP_ON;
+//    _param.mir_cuts = GLP_ON;
+//    _param.gmi_cuts = GLP_ON;
+//    _param.clq_cuts = GLP_ON;
+//    _param.cov_cuts = GLP_ON;
+//    _param.bt_tech = GLP_BT_BPH;
+//    _param.br_tech = GLP_BR_MFV;
+//    _param.mip_gap = 1e-4;
 
     int out = glp_intopt(_mip, &_param);
     if(out != 0)
