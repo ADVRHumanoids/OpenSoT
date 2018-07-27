@@ -20,7 +20,7 @@ std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
-#define ENABLE_ROS true
+#define ENABLE_ROS false
 
 #if ENABLE_ROS
 #include <ros/ros.h>
@@ -189,6 +189,9 @@ TEST_F(testGLPKProblem, testIKMILP)
     ref.M.DoRotZ(-M_PI_2);
     LArm->setReference(ref);
 
+    KDL::Frame foot_ref;
+    RFoot->getReference(foot_ref);
+
 
     int t = 100;
     Eigen::VectorXd dq(q.size());
@@ -221,6 +224,19 @@ TEST_F(testGLPKProblem, testIKMILP)
 #endif
     }
 
+    KDL::Frame LArm_pose;
+    LArm->getActualPose(LArm_pose);
+
+    EXPECT_TRUE(LArm_pose.p == ref.p);
+    EXPECT_TRUE(LArm_pose.M == ref.M);
+
+    KDL::Frame RFoot_pose;
+    RFoot->getActualPose(RFoot_pose);
+
+    EXPECT_TRUE(RFoot_pose.p == foot_ref.p);
+    EXPECT_TRUE(RFoot_pose.M == foot_ref.M);
+
+
     log1->flush();
 
 /////////////////////////////////QP-QP-MILP
@@ -251,6 +267,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
     Cartesian::Ptr RFoot2;
     RFoot2.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
+    RFoot2->getReference(foot_ref);
 
     Cartesian::Ptr LArm2;
     LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "Waist", opt2.getVariable("dq")));
@@ -384,6 +401,17 @@ std::cout<<"        SECOND RUN"<<std::endl;
         usleep(10000);
 #endif
     }
+
+    LArm2->getActualPose(LArm_pose);
+
+    EXPECT_TRUE(LArm_pose.p == ref.p);
+    EXPECT_TRUE(LArm_pose.M == ref.M);
+
+    RFoot2->getActualPose(RFoot_pose);
+
+    EXPECT_TRUE(RFoot_pose.p == foot_ref.p);
+    EXPECT_TRUE(RFoot_pose.M == foot_ref.M);
+
 
     log2->flush();
 }
