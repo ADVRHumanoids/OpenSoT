@@ -1,6 +1,7 @@
 #include <OpenSoT/solvers/GLPKBackEnd.h>
 #include <XBotInterface/SoLib.h>
 #include <boost/make_shared.hpp>
+#include <boost/date_time.hpp>
 
 
 using namespace OpenSoT::solvers;
@@ -30,6 +31,7 @@ GLPKBackEnd::GLPKBackEnd(const int number_of_variables, const int number_of_cons
     glp_add_rows(_mip, number_of_constraints);
     glp_add_cols(_mip, number_of_variables);
 
+    glp_term_out(GLP_OFF);
 }
 
 GLPKBackEnd::~GLPKBackEnd()
@@ -74,7 +76,17 @@ void GLPKBackEnd::printErrorOutput(const int out)
                             "(This code may appear only if the advanced solver interface "
                             "is used.) \n");
 
-    glp_print_mip(_mip, "mip_problem");
+
+    boost::posix_time::ptime time = boost::posix_time::second_clock::local_time();
+    std::stringstream ss;
+    ss<<"mip_priblem_"+time.date().year();
+    ss<<"_"+time.date().month();
+    ss<<"_"+time.date().day();
+    ss<<"_"+time.time_of_day().hours();
+    ss<<"_"+time.time_of_day().minutes();
+    ss<<"_"+time.time_of_day().seconds();
+
+    glp_print_mip(_mip, ss.str().c_str());
 }
 
 bool GLPKBackEnd::solve()
@@ -163,17 +175,9 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
 
     glp_init_iocp(&_param);
-    _param.msg_lev = GLP_MSG_OFF;
-    glp_simplex(_mip, NULL);
-//    _param.msg_lev = GLP_MSG_ALL;
-//    _param.binarize = GLP_ON;
-//    _param.mir_cuts = GLP_ON;
-//    _param.gmi_cuts = GLP_ON;
-//    _param.clq_cuts = GLP_ON;
-//    _param.cov_cuts = GLP_ON;
-//    _param.bt_tech = GLP_BT_BPH;
-//    _param.br_tech = GLP_BR_MFV;
-//    _param.mip_gap = 1e-4;
+    glp_init_smcp(&_param_simplex);
+
+    glp_simplex(_mip, &_param_simplex);//EVENTUALLY WE NEED TO CHECK ALSO THIS OUTPUT!
 
     int out = glp_intopt(_mip, &_param);
     if(out != 0)
@@ -283,7 +287,13 @@ void GLPKBackEnd::setOptions(const boost::any& options)
     _opt = boost::any_cast<GLPKBackEndOptions>(options);
 
     if(_opt.param)
+    {
         _param = *(_opt.param);
+
+        if(_param.cb_info != GLP_MSG_OFF)
+            glp_term_out(GLP_ON);
+    }
+
 
     if(!(_opt.var_id_kind_.empty()))
         _var_id_kind = _opt.var_id_kind_;

@@ -59,6 +59,7 @@ public:
 private:
     glp_prob* _mip;
     glp_iocp _param;
+    glp_smcp _param_simplex;
 
     Eigen::VectorXi _rows;
     Eigen::VectorXi _cols;
