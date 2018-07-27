@@ -267,16 +267,19 @@ TEST_F(testLProblem, testMILPProblem)
         OpenSoT::solvers::iHQP::Ptr solver;
         solver = boost::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), _autostack->getBounds(), 1.0, solver_vector);
 
+        Eigen::VectorXd sol(3);
         for(unsigned int i = 0; i < 10; ++i)
         {
-            Eigen::VectorXd sol(3); sol.setZero(3);
+            sol.setZero(3);
             EXPECT_TRUE(solver->solve(sol));
             std::cout<<"Solution from FE solve: \n"<<sol<<std::endl;
 
-            EXPECT_NEAR(sol[0], 0.0, 1e-6);
-            EXPECT_NEAR(sol[1], 6.0, 1e-6);
-            EXPECT_NEAR(sol[2], 1.0, 1e-6);
+
         }
+        //WE CHECK THE FINAL SOLUTION SINCE THE SOLVER NEEDS COUPLE OF LOOP TO CONVERGE...
+        EXPECT_NEAR(sol[0], 0.0, 1e-9);
+        EXPECT_NEAR(sol[1], 6.0, 1e-9);
+        EXPECT_NEAR(sol[2], 1.0, 1e-9);
     }
 }
 
