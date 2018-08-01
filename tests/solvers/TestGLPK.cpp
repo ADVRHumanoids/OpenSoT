@@ -145,13 +145,15 @@ TEST_F(testGLPKProblem, testIKMILP)
     _model_ptr->update();
 
 #if ENABLE_ROS
-    this->publishJointStates(q);
-    this->publishJointStates(q);
-    this->publishJointStates(q);
-
-
+    for(unsigned int i = 0; i<10; ++i)
+    {
+        this->publishJointStates(q);
+        usleep(100000);
+    }
     sleep(1);
 #endif
+
+
 
     OpenSoT::OptvarHelper::VariableVector vars;
     vars.emplace_back("dq", _model_ptr->getJointNum());
