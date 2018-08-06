@@ -416,6 +416,12 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
 
     log2->flush();
+
+    double media_solve_time = solve_time.sum()/solve_time.size();
+    double media_solve_time2 = solve_time2.sum()/solve_time2.size();
+
+    std::cout<<"iHQP media solve time: "<<media_solve_time<<std::endl;
+    std::cout<<"MILP-IK media solve time: "<<media_solve_time2<<std::endl;
 }
 
 TEST_F(testGLPKProblem, testMILPProblem)
