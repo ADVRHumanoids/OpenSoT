@@ -217,8 +217,8 @@ TEST_F(testGLPKProblem, testIKMILP)
         log1->add("solve_time", duration);
         log1->add("q", q);
         log1->add("dq", dq);
-        log1->add("RFoot_b: ", RFoot->getb());
-        log1->add("LArm_b: ", LArm->getb());
+        log1->add("RFoot_b ", RFoot->getb());
+        log1->add("LArm_b ", LArm->getb());
 
 #if ENABLE_ROS
         this->publishJointStates(q);
