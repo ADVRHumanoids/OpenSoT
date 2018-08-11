@@ -217,8 +217,7 @@ TEST_F(testGLPKProblem, testIKMILP)
         log1->add("solve_time", duration);
         log1->add("q", q);
         log1->add("dq", dq);
-        log1->add("RFoot_b ", RFoot->getb());
-        log1->add("LArm_b ", LArm->getb());
+        autostack->log(log1);
 
 #if ENABLE_ROS
         this->publishJointStates(q);
@@ -391,12 +390,10 @@ std::cout<<"        SECOND RUN"<<std::endl;
         double obj;
         obj = GLPK->getObjective();
         log2->add("solve_time", duration);
-        log2->add("cost", obj);
         log2->add("q", q);
         log2->add("dq", dq);
         log2->add("delta", delta);
-        log2->add("RFoot2_b", RFoot2->getb());
-        log2->add("LArm2_b", LArm2->getb());
+        autostack2->log(log2);
 
 #if ENABLE_ROS
         this->publishJointStates(q);
