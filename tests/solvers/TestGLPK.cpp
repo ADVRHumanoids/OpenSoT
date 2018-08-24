@@ -16,6 +16,12 @@
 using namespace OpenSoT::constraints;
 using namespace OpenSoT::tasks;
 
+#define VEL_LIMS M_PI_2/2.
+#define VEL_LIMS2 M_PI_2/2.
+#define LAMBDA 0.02
+#define OR_GAIN 0.1
+#define dT 0.003
+
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
@@ -86,10 +92,10 @@ protected:
         _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
         _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")] =  0.0;//20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShSag")] =  45.0*M_PI/180.;//20.0*M_PI/180.0;
         _q[_model_ptr->getDofIndex("LShLat")] = 0.0;//20.0*M_PI/180.0;
         _q[_model_ptr->getDofIndex("LShYaw")] = 0.0;//-15.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")] = -135.0*M_PI/180.0;
 
         _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
         _q[_model_ptr->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
@@ -162,12 +168,17 @@ TEST_F(testGLPKProblem, testIKMILP)
 
     Cartesian::Ptr RFoot;
     RFoot.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt.getVariable("dq")));
+    RFoot->setLambda(LAMBDA);
+    RFoot->setOrientationErrorGain(OR_GAIN);
 
     Cartesian::Ptr LArm;
     LArm.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt.getVariable("dq")));
+    LArm->setLambda(LAMBDA);
+    LArm->setOrientationErrorGain(OR_GAIN);
 
     Postural::Ptr postural;
     postural.reset(new Postural(q));
+    postural->setLambda(0.0);
 
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
@@ -175,12 +186,15 @@ TEST_F(testGLPKProblem, testIKMILP)
     joint_lims.reset(new JointLimits(q,qmax, qmin,opt.getVariable("dq")));
 
     VelocityLimits::Ptr vel_lims;
-    vel_lims.reset(new VelocityLimits(M_PI,0.01, opt.getVariable("dq")));
+    vel_lims.reset(new VelocityLimits(VEL_LIMS, dT, opt.getVariable("dq")));
 
     VelocityLimits::Ptr vel_lims_p;
-    vel_lims_p.reset(new VelocityLimits(2.*M_PI,0.01, opt.getVariable("dq")));
+    vel_lims_p.reset(new VelocityLimits(VEL_LIMS2, dT, opt.getVariable("dq")));
 
-    OpenSoT::AutoStack::Ptr autostack = ((RFoot<<vel_lims) / (LArm<<vel_lims) / (postural<<vel_lims_p))<<joint_lims;
+    OpenSoT::AutoStack::Ptr autostack = ((RFoot<<vel_lims)
+                                         / (LArm<<vel_lims)
+                                         / (postural<<vel_lims_p)
+                                         )<<joint_lims;
 
     OpenSoT::solvers::iHQP::Ptr solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6,
                                                                                     OpenSoT::solvers::solver_back_ends::qpOASES);
@@ -195,7 +209,7 @@ TEST_F(testGLPKProblem, testIKMILP)
     RFoot->getReference(foot_ref);
 
 
-    int t = 100;
+    int t = 10000;
     Eigen::VectorXd dq(q.size());
     dq.setZero(dq.size());
     Eigen::VectorXd solve_time(t);
@@ -221,21 +235,35 @@ TEST_F(testGLPKProblem, testIKMILP)
 
 #if ENABLE_ROS
         this->publishJointStates(q);
-        usleep(10000);
+        usleep(100);
 #endif
     }
 
     KDL::Frame LArm_pose;
     LArm->getActualPose(LArm_pose);
 
-    EXPECT_TRUE(LArm_pose.p == ref.p);
-    EXPECT_TRUE(LArm_pose.M == ref.M);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(LArm_pose.p[i], ref.p[i], 1e-6);
 
+    Eigen::Vector3d refRPY;
+    ref.M.GetRPY(refRPY[0],refRPY[1],refRPY[2]);
+
+    Eigen::Vector3d poseRPY;
+    LArm_pose.M.GetRPY(poseRPY[0],poseRPY[1],poseRPY[2]);
+
+
+    for(unsigned int i = 0; i < 3; ++i)
+    {
+        EXPECT_NEAR(poseRPY[i], refRPY[i], 1e-3);
+    }
     KDL::Frame RFoot_pose;
     RFoot->getActualPose(RFoot_pose);
 
     EXPECT_TRUE(RFoot_pose.p == foot_ref.p);
     EXPECT_TRUE(RFoot_pose.M == foot_ref.M);
+
+
+
 
 
     log1->flush();
@@ -269,20 +297,24 @@ std::cout<<"        SECOND RUN"<<std::endl;
     Cartesian::Ptr RFoot2;
     RFoot2.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
     RFoot2->getReference(foot_ref);
+    RFoot2->setLambda(LAMBDA);
+    RFoot2->setOrientationErrorGain(OR_GAIN);
+
 
     Cartesian::Ptr LArm2;
-    LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "Waist", opt2.getVariable("dq")));
+    LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt2.getVariable("dq")));
     LArm2->getReference(ref);
     ref.M.DoRotZ(-M_PI_2);
     LArm2->setReference(ref);
-
+    LArm2->setLambda(LAMBDA);
+    LArm2->setOrientationErrorGain(OR_GAIN);
 
     JointLimits::Ptr joint_lims2;
     joint_lims2.reset(new JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
 
 
     VelocityLimits::Ptr vel_lims2;
-    vel_lims2.reset(new VelocityLimits(M_PI,0.01, opt2.getVariable("dq")));
+    vel_lims2.reset(new VelocityLimits(VEL_LIMS, dT, opt2.getVariable("dq")));
 
 
     OpenSoT::tasks::GenericLPTask::Ptr milp_task;
@@ -291,9 +323,9 @@ std::cout<<"        SECOND RUN"<<std::endl;
     milp_task.reset(new OpenSoT::tasks::GenericLPTask("milp_task",c, opt2.getVariable("delta")));
 
     OpenSoT::constraints::GenericConstraint::Ptr milp_condition;
-    double M =  15.;
+    double M =  VEL_LIMS2*dT + 1.*dT;
     double m = -M;
-    double inf = 1e30;
+    double inf = 1e20;
     Eigen::MatrixXd a1(q.size(),2*q.size());
     a1<<Eigen::MatrixXd::Identity(q.size(), q.size()), -M*Eigen::MatrixXd::Identity(q.size(), q.size());
 
@@ -317,8 +349,8 @@ std::cout<<"        SECOND RUN"<<std::endl;
         OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
 
     Eigen::VectorXd L(2*q.size()), U(2*q.size());
-    L<<-2.*M_PI*0.01*Eigen::VectorXd::Ones(q.size()),     Eigen::VectorXd::Zero(q.size());
-    U<< 2.*M_PI*0.01*Eigen::VectorXd::Ones(q.size()),     Eigen::VectorXd::Ones(q.size());
+    L<<-VEL_LIMS2*dT*Eigen::VectorXd::Ones(q.size()),     Eigen::VectorXd::Zero(q.size());
+    U<< VEL_LIMS2*dT*Eigen::VectorXd::Ones(q.size()),     Eigen::VectorXd::Ones(q.size());
 
     OpenSoT::constraints::GenericConstraint::Ptr milp_bounds;
     milp_bounds.reset(new OpenSoT::constraints::GenericConstraint(
@@ -326,26 +358,16 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
 
 
-    OpenSoT::AutoStack::Ptr autostack2 = ((RFoot2<<vel_lims2)/
-                                          (LArm2<<vel_lims2)/
-                                          (milp_task<<milp_bounds<<milp_condition))<<joint_lims2;
-
-//    OpenSoT::AutoStack::Ptr autostack2; autostack2.reset(new OpenSoT::AutoStack(LArm2));
-//    autostack2<<vel_lims2;
-
-//    OpenSoT::AutoStack::Ptr autostack2;
-//    autostack2.reset(new OpenSoT::AutoStack(milp_task));
-//    autostack2<<vel_lims2;
-//    autostack2<<OpenSoT::constraints::TaskToConstraint::Ptr(new OpenSoT::constraints::TaskToConstraint(RFoot2+LArm2));
-//    autostack2<<milp_condition;
-
+    OpenSoT::AutoStack::Ptr autostack2 = ((RFoot2<<vel_lims2)
+                                          / (LArm2<<vel_lims2)
+                                          / (milp_task<<milp_bounds<<milp_condition)
+                                          )<<joint_lims2;
 
     OpenSoT::solvers::solver_back_ends solver_1 = OpenSoT::solvers::solver_back_ends::qpOASES;
     OpenSoT::solvers::solver_back_ends solver_2 = OpenSoT::solvers::solver_back_ends::qpOASES;
     OpenSoT::solvers::solver_back_ends solver_3 = OpenSoT::solvers::solver_back_ends::GLPK;
 
     std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_2, solver_3};
-//    std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_3};
 
     OpenSoT::solvers::iHQP::Ptr solver2 = boost::make_shared<OpenSoT::solvers::iHQP>(autostack2->getStack(), autostack2->getBounds(), 1e6,
                                                                                     solver_vector);
@@ -373,22 +395,23 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
         autostack2->update(q);
 
-        bool a = solver2->solve(dx);
-        dqVar.getValue(dx, dq);
-        deltaVar.getValue(dx, delta);
-
         auto tic = std::chrono::steady_clock::now();
-        solver2->log(log2);
+        bool a = solver2->solve(dx);
         auto toc = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(toc-tic).count();
         solve_time2[i] = duration;
 
 
+        dqVar.getValue(dx, dq);
+        deltaVar.getValue(dx, delta);
+
+
+        solver2->log(log2);
+
+
         if(a)
             q+=dq;
 
-        double obj;
-        obj = GLPK->getObjective();
         log2->add("solve_time", duration);
         log2->add("q", q);
         log2->add("dq", dq);
@@ -397,14 +420,25 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
 #if ENABLE_ROS
         this->publishJointStates(q);
-        usleep(10000);
+        usleep(100);
 #endif
     }
 
     LArm2->getActualPose(LArm_pose);
 
-    EXPECT_TRUE(LArm_pose.p == ref.p);
-    EXPECT_TRUE(LArm_pose.M == ref.M);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(LArm_pose.p[i], ref.p[i], 1e-6);
+
+    ref.M.GetRPY(refRPY[0],refRPY[1],refRPY[2]);
+
+    LArm_pose.M.GetRPY(poseRPY[0],poseRPY[1],poseRPY[2]);
+
+
+    for(unsigned int i = 0; i < 3; ++i)
+    {
+        EXPECT_NEAR(poseRPY[i], refRPY[i], 1e-3);
+    }
+
 
     RFoot2->getActualPose(RFoot_pose);
 
