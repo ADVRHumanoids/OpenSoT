@@ -218,6 +218,10 @@ TEST_F(testGLPKProblem, testIKMILP)
         this->_model_ptr->setJointPosition(q);
         this->_model_ptr->update();
 
+//        Eigen::MatrixXd M;
+//        this->_model_ptr->getInertiaMatrix(M);
+//        postural->setWeight(M);
+
         autostack->update(q);
 
         auto tic = std::chrono::steady_clock::now();
