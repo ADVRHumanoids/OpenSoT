@@ -732,7 +732,10 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 
         // initializing previous norm
         if(previous_norm < 0)
+        {
+            com->update(Eigen::VectorXd(1));
             previous_norm = sqrt(com->getb().squaredNorm());
+        }
 
         // checking variation of gain during trajectory following
         if(t>=6)

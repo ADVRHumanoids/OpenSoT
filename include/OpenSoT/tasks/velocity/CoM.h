@@ -22,6 +22,7 @@
 #include <XBotInterface/ModelInterface.h>
 #include <kdl/frames.hpp>
 #include <Eigen/Dense>
+#include <OpenSoT/utils/Affine.h>
 
 
  namespace OpenSoT {
@@ -51,6 +52,12 @@
 
                 void update_b();
 
+                Eigen::MatrixXd __A;
+                Eigen::VectorXd __b;
+
+                AffineHelper _qdot;
+                AffineHelper _com_task;
+
             public:
 
 
@@ -62,6 +69,8 @@
                  */
                 CoM(const Eigen::VectorXd& x,
                     XBot::ModelInterface& robot);
+                CoM(XBot::ModelInterface& robot,
+                    const AffineHelper& qdot);
 
                 ~CoM();
 

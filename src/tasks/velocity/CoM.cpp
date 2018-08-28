@@ -35,17 +35,48 @@ CoM::CoM(   const Eigen::VectorXd& x,
     _positionError.setZero(3);
     _desiredVelocity.setZero(3);
 
+    _qdot = AffineHelper::Identity(x.size());
+
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(x);
+    _robot.getCOM(_actualPosition);
 
 
     /* initializing to zero error */
     _desiredPosition = _actualPosition;
-    _b.setZero(3);
-    _positionError = _b;
+    __b.setZero(3);
+    _positionError = __b;
 
-    _W.resize(3,3);
-    _W.setIdentity(3,3);
+    this->_update(x);
+
+    _W.resize(__A.rows(), __A.rows());
+    _W.setIdentity(__A.rows(), __A.rows());
+
+    _hessianType = HST_SEMIDEF;
+}
+
+CoM::CoM( XBot::ModelInterface &robot,
+          const AffineHelper& qdot ):
+    Task("CoM", qdot.getInputSize()), _robot(robot), _qdot(qdot)
+{
+    _desiredPosition.setZero(3);
+    _actualPosition.setZero(3);
+    _positionError.setZero(3);
+    _desiredVelocity.setZero(3);
+
+    /* first update. Setting desired pose equal to the actual pose */
+    _robot.getCOM(_actualPosition);
+
+
+    /* initializing to zero error */
+    _desiredPosition = _actualPosition;
+    __b.setZero(3);
+    _positionError = __b;
+
+    this->_update(Eigen::VectorXd(1));
+
+    _W.resize(__A.rows(), __A.rows());
+    _W.setIdentity(__A.rows(), __A.rows());
+
 
     _hessianType = HST_SEMIDEF;
 }
@@ -61,9 +92,17 @@ void CoM::_update(const Eigen::VectorXd &x)
 
     _robot.getCOM(_actualPosition);
 
-    _robot.getCOMJacobian(_A);
+    _robot.getCOMJacobian(__A);
 
     this->update_b();
+
+    //HERE __A and __b are updated
+    _com_task = __A*_qdot;
+    _com_task = _com_task - __b;
+
+    _A = _com_task.getM();
+    _b = -_com_task.getq();
+    //
 
     this->_desiredVelocity.setZero(3);
 
@@ -138,7 +177,7 @@ std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
 void CoM::update_b()
 {
     _positionError = _desiredPosition - _actualPosition;
-    _b = _desiredVelocity + _lambda*_positionError;
+    __b = _desiredVelocity + _lambda*_positionError;
 }
 
 void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)

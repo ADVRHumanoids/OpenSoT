@@ -89,10 +89,8 @@ TEST_F(testCoMTask, testCoMTask_)
         EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
     CoM.setReference(x_ref);
+    CoM.update(q_whole);
     Eigen::VectorXd positionError = x_ref - x;
-    for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
-
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
