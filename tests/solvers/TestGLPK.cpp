@@ -5,7 +5,7 @@
 #include <OpenSoT/solvers/BackEndFactory.h> 
 #include <chrono>
 #include <OpenSoT/tasks/velocity/affine/Cartesian.h>
-#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/tasks/velocity/affine/Postural.h>
 #include <OpenSoT/constraints/velocity/affine/JointLimits.h>
 #include <OpenSoT/constraints/velocity/affine/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
@@ -170,8 +170,8 @@ TEST_F(testGLPKProblem, testIKMILP)
     LArm->setLambda(LAMBDA);
     LArm->setOrientationErrorGain(OR_GAIN);
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural;
-    postural.reset(new OpenSoT::tasks::velocity::Postural(q));
+    OpenSoT::tasks::velocity::affine::Postural::Ptr postural;
+    postural.reset(new OpenSoT::tasks::velocity::affine::Postural(q));
     postural->setLambda(0.0);
 
     Eigen::VectorXd qmin, qmax;
