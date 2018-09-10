@@ -15,18 +15,20 @@
  * Public License for more details
 */
 
-#ifndef __TASKS_VELOCITY_COM_H__
-#define __TASKS_VELOCITY_COM_H__
+#ifndef __TASKS_VELOCITY_COM_AFFINE_H__
+#define __TASKS_VELOCITY_COM_AFFINE_H__
 
 #include <OpenSoT/Task.h>
 #include <XBotInterface/ModelInterface.h>
 #include <kdl/frames.hpp>
 #include <Eigen/Dense>
+#include <OpenSoT/utils/Affine.h>
 
 
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
+        namespace affine{
 
         /**
           * Here we hardcode the base_link and distal_link frames
@@ -51,6 +53,12 @@
 
                 void update_b();
 
+                Eigen::MatrixXd __A;
+                Eigen::VectorXd __b;
+
+                AffineHelper _qdot;
+                AffineHelper _com_task;
+
             public:
 
 
@@ -62,6 +70,8 @@
                  */
                 CoM(const Eigen::VectorXd& x,
                     XBot::ModelInterface& robot);
+                CoM(XBot::ModelInterface& robot,
+                    const AffineHelper& qdot);
 
                 ~CoM();
 
@@ -142,11 +152,11 @@
 
                 static bool isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
-                static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+                static CoM::Ptr asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
             };
             
 
-
+        }
         }
     }
  }
