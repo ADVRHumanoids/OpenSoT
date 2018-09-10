@@ -7,7 +7,7 @@
 #include <chrono>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
-#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/affine/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
@@ -182,8 +182,8 @@ TEST_F(testGLPKProblem, testIKMILP)
 
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
-    JointLimits::Ptr joint_lims;
-    joint_lims.reset(new JointLimits(q,qmax, qmin,opt.getVariable("dq")));
+    affine::JointLimits::Ptr joint_lims;
+    joint_lims.reset(new affine::JointLimits(q,qmax, qmin,opt.getVariable("dq")));
 
     VelocityLimits::Ptr vel_lims;
     vel_lims.reset(new VelocityLimits(VEL_LIMS, dT, opt.getVariable("dq")));
@@ -313,8 +313,8 @@ std::cout<<"        SECOND RUN"<<std::endl;
     LArm2->setLambda(LAMBDA);
     LArm2->setOrientationErrorGain(OR_GAIN);
 
-    JointLimits::Ptr joint_lims2;
-    joint_lims2.reset(new JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
+    affine::JointLimits::Ptr joint_lims2;
+    joint_lims2.reset(new affine::JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
 
 
     VelocityLimits::Ptr vel_lims2;

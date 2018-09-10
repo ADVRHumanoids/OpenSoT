@@ -15,18 +15,21 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_VELOCITY_JOINTLIMITS_H__
-#define __BOUNDS_VELOCITY_JOINTLIMITS_H__
+#ifndef __BOUNDS_VELOCITY_JOINTLIMITS_AFFINE_H__
+#define __BOUNDS_VELOCITY_JOINTLIMITS_AFFINE_H__
 
  #include <OpenSoT/Constraint.h>
  #include <Eigen/Dense>
+#include <OpenSoT/constraints/GenericConstraint.h>
 
 
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
+            namespace affine{
             /**
-             * @brief The JointLimits class implements bounds on joints positions
+             * @brief The JointLimits class implements bounds on joints positions using internally the
+             * GenericConstraint and affine variables
              */
             class JointLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
@@ -35,6 +38,11 @@
                 double _boundScaling;
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
+
+                Eigen::VectorXd __upperBound;
+                Eigen::VectorXd __lowerBound;
+
+                GenericConstraint _constr;
             public:
                 /**
                  * @brief JointLimits constructor
@@ -48,9 +56,16 @@
                             const Eigen::VectorXd &jointBoundMin,
                             const double boundScaling = 1.0);
 
+                JointLimits(const Eigen::VectorXd &q,
+                            const Eigen::VectorXd &jointBoundMax,
+                            const Eigen::VectorXd &jointBoundMin,
+                            const AffineHelper& var,
+                            const double boundScaling = 1.0);
+
                 void update(const Eigen::VectorXd &x);
                 void setBoundScaling(const double boundScaling);
             };
+           }
         }
     }
  }

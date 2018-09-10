@@ -26,67 +26,27 @@ JointLimits::JointLimits(   const Eigen::VectorXd& q,
     Constraint("joint_limits", q.size()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
-    _boundScaling(boundScaling),
-    _constr("joint_limits_internal_generic_constr",jointBoundMax, jointBoundMin, q.size())
-{
+    _boundScaling(boundScaling) {
 
-    if(q.size() != _jointLimitsMax.size())
-        throw std::runtime_error("q.size() != _jointLimitsMax.size()");
-    if(q.size() != _jointLimitsMin.size())
-        throw std::runtime_error("q.size() != _jointLimitsMin.size()");
-    /* calling update to generate bounds */       
-
-    update(q);
-}
-
-JointLimits::JointLimits(const Eigen::VectorXd &q,
-            const Eigen::VectorXd &jointBoundMax,
-            const Eigen::VectorXd &jointBoundMin,
-            const AffineHelper& var,
-            const double boundScaling):
-    Constraint("joint_limits", var.getInputSize()),
-    _jointLimitsMax(jointBoundMax),
-    _jointLimitsMin(jointBoundMin),
-    _boundScaling(boundScaling),
-    _constr("joint_limits_internal_generic_constr",var, jointBoundMax, jointBoundMin, GenericConstraint::Type::CONSTRAINT)
-{
-    if(q.size() != _jointLimitsMax.size())
-        throw std::runtime_error("q.size() != _jointLimitsMax.size()");
-    if(q.size() != _jointLimitsMin.size())
-        throw std::runtime_error("q.size() != _jointLimitsMin.size()");
+    assert(q.rows() == _jointLimitsMax.rows());
+    assert(q.rows() == _jointLimitsMin.rows());
     /* calling update to generate bounds */
-
     update(q);
 }
-
 
 void JointLimits::update(const Eigen::VectorXd& x)
 {
 
 /************************ COMPUTING BOUNDS ****************************/
 
-    __upperBound = ( _jointLimitsMax - x)*_boundScaling;
-    __lowerBound = ( _jointLimitsMin - x)*_boundScaling;
+    _upperBound = ( _jointLimitsMax - x)*_boundScaling;
+    _lowerBound = ( _jointLimitsMin - x)*_boundScaling;
     
-    __upperBound = __upperBound.cwiseMax(0.0);
-    __lowerBound = __lowerBound.cwiseMin(0.0);
+    _upperBound = _upperBound.cwiseMax(0.0);
+    _lowerBound = _lowerBound.cwiseMin(0.0);
 
 /**********************************************************************/
 
-    if(!_constr.setBounds(__upperBound, __lowerBound))
-        XBot::Logger::error("%s: error in _constr.setBounds(__upperBound, __lowerBound)!", getConstraintID());
-
-    if(_constr.getType() == GenericConstraint::Type::BOUND)
-    {
-        _upperBound = _constr.getUpperBound();
-        _lowerBound = _constr.getLowerBound();
-    }
-    else if(_constr.getType() == GenericConstraint::Type::CONSTRAINT)
-    {
-        _Aineq = _constr.getAineq();
-        _bUpperBound = _constr.getbUpperBound();
-        _bLowerBound = _constr.getbLowerBound();
-    }
 }
 
 void JointLimits::setBoundScaling(const double boundScaling)
