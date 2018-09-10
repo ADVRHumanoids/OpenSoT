@@ -15,15 +15,17 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_VELOCITY_VELOCITYLIMITS_H__
-#define __BOUNDS_VELOCITY_VELOCITYLIMITS_H__
+#ifndef __BOUNDS_VELOCITY_VELOCITYLIMITS_AFFINE_H__
+#define __BOUNDS_VELOCITY_VELOCITYLIMITS_AFFINE_H__
 
  #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
+#include <OpenSoT/constraints/GenericConstraint.h>
 
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
+            namespace affine{
             /**
              * @brief The VelocityLimits class implements a bound on joint velocities
              */
@@ -33,6 +35,11 @@
             private:
                 double _qDotLimit;
                 double _dT;
+
+                Eigen::VectorXd __upperBound;
+                Eigen::VectorXd __lowerBound;
+
+                GenericConstraint _constr;
             public:
                 /**
                  * @brief VelocityLimits constructor
@@ -45,6 +52,15 @@
                                const unsigned int x_size);
                 VelocityLimits(const Eigen::VectorXd& qDotLimit,
                                const double dT);
+
+                VelocityLimits(const double qDotLimit,
+                               const double dT,
+                               const AffineHelper& var);
+                VelocityLimits(const Eigen::VectorXd& qDotLimit,
+                               const double dT,
+                               const AffineHelper& var);
+
+                void update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief getVelocityLimits returns the current velocity limits.
@@ -69,6 +85,7 @@
                 void generateBounds(const double qDotLimit);
                 void generateBounds(const Eigen::VectorXd& qDotLimit);
             };
+        }
         }
     }
  }

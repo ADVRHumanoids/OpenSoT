@@ -8,7 +8,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/affine/JointLimits.h>
-#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/constraints/velocity/affine/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
@@ -185,11 +185,11 @@ TEST_F(testGLPKProblem, testIKMILP)
     affine::JointLimits::Ptr joint_lims;
     joint_lims.reset(new affine::JointLimits(q,qmax, qmin,opt.getVariable("dq")));
 
-    VelocityLimits::Ptr vel_lims;
-    vel_lims.reset(new VelocityLimits(VEL_LIMS, dT, opt.getVariable("dq")));
+    affine::VelocityLimits::Ptr vel_lims;
+    vel_lims.reset(new affine::VelocityLimits(VEL_LIMS, dT, opt.getVariable("dq")));
 
-    VelocityLimits::Ptr vel_lims_p;
-    vel_lims_p.reset(new VelocityLimits(VEL_LIMS2, dT, opt.getVariable("dq")));
+    affine::VelocityLimits::Ptr vel_lims_p;
+    vel_lims_p.reset(new affine::VelocityLimits(VEL_LIMS2, dT, opt.getVariable("dq")));
 
     OpenSoT::AutoStack::Ptr autostack = ((RFoot<<vel_lims)
                                          / (LArm<<vel_lims)
@@ -317,8 +317,8 @@ std::cout<<"        SECOND RUN"<<std::endl;
     joint_lims2.reset(new affine::JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
 
 
-    VelocityLimits::Ptr vel_lims2;
-    vel_lims2.reset(new VelocityLimits(VEL_LIMS, dT, opt2.getVariable("dq")));
+    affine::VelocityLimits::Ptr vel_lims2;
+    vel_lims2.reset(new affine::VelocityLimits(VEL_LIMS, dT, opt2.getVariable("dq")));
 
 
     OpenSoT::tasks::GenericLPTask::Ptr milp_task;

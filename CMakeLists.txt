@@ -94,6 +94,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/velocity/JointLimits.cpp
                     src/constraints/velocity/affine/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
+                    src/constraints/velocity/affine/VelocityLimits.cpp
                     src/constraints/torque/TorqueLimits.cpp
                     src/constraints/torque/JointLimits.cpp
                     src/constraints/force/FrictionCone.cpp
