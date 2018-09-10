@@ -2,19 +2,15 @@
 #include <OpenSoT/solvers/GLPKBackEnd.h>
 #include <OpenSoT/tasks/GenericTask.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
-#include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/solvers/BackEndFactory.h> 
 #include <chrono>
-#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/affine/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/affine/JointLimits.h>
 #include <OpenSoT/constraints/velocity/affine/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
-
-using namespace OpenSoT::constraints;
-using namespace OpenSoT::tasks;
 
 #define VEL_LIMS M_PI_2/2.
 #define VEL_LIMS2 M_PI_2/2.
@@ -134,8 +130,6 @@ protected:
 
 };
 
-using namespace OpenSoT::tasks::velocity;
-using namespace OpenSoT::constraints::velocity;
 
 TEST_F(testGLPKProblem, testIKMILP)
 {
@@ -166,30 +160,30 @@ TEST_F(testGLPKProblem, testIKMILP)
 
     OpenSoT::OptvarHelper opt(vars);
 
-    Cartesian::Ptr RFoot;
-    RFoot.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt.getVariable("dq")));
+    OpenSoT::tasks::velocity::affine::Cartesian::Ptr RFoot;
+    RFoot.reset(new OpenSoT::tasks::velocity::affine::Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt.getVariable("dq")));
     RFoot->setLambda(LAMBDA);
     RFoot->setOrientationErrorGain(OR_GAIN);
 
-    Cartesian::Ptr LArm;
-    LArm.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt.getVariable("dq")));
+    OpenSoT::tasks::velocity::affine::Cartesian::Ptr LArm;
+    LArm.reset(new OpenSoT::tasks::velocity::affine::Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt.getVariable("dq")));
     LArm->setLambda(LAMBDA);
     LArm->setOrientationErrorGain(OR_GAIN);
 
-    Postural::Ptr postural;
-    postural.reset(new Postural(q));
+    OpenSoT::tasks::velocity::Postural::Ptr postural;
+    postural.reset(new OpenSoT::tasks::velocity::Postural(q));
     postural->setLambda(0.0);
 
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
-    affine::JointLimits::Ptr joint_lims;
-    joint_lims.reset(new affine::JointLimits(q,qmax, qmin,opt.getVariable("dq")));
+    OpenSoT::constraints::velocity::affine::JointLimits::Ptr joint_lims;
+    joint_lims.reset(new OpenSoT::constraints::velocity::affine::JointLimits(q,qmax, qmin,opt.getVariable("dq")));
 
-    affine::VelocityLimits::Ptr vel_lims;
-    vel_lims.reset(new affine::VelocityLimits(VEL_LIMS, dT, opt.getVariable("dq")));
+    OpenSoT::constraints::velocity::affine::VelocityLimits::Ptr vel_lims;
+    vel_lims.reset(new OpenSoT::constraints::velocity::affine::VelocityLimits(VEL_LIMS, dT, opt.getVariable("dq")));
 
-    affine::VelocityLimits::Ptr vel_lims_p;
-    vel_lims_p.reset(new affine::VelocityLimits(VEL_LIMS2, dT, opt.getVariable("dq")));
+    OpenSoT::constraints::velocity::affine::VelocityLimits::Ptr vel_lims_p;
+    vel_lims_p.reset(new OpenSoT::constraints::velocity::affine::VelocityLimits(VEL_LIMS2, dT, opt.getVariable("dq")));
 
     OpenSoT::AutoStack::Ptr autostack = ((RFoot<<vel_lims)
                                          / (LArm<<vel_lims)
@@ -298,27 +292,27 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
     OpenSoT::OptvarHelper opt2(vars2);
 
-    Cartesian::Ptr RFoot2;
-    RFoot2.reset(new Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
+    OpenSoT::tasks::velocity::affine::Cartesian::Ptr RFoot2;
+    RFoot2.reset(new OpenSoT::tasks::velocity::affine::Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
     RFoot2->getReference(foot_ref);
     RFoot2->setLambda(LAMBDA);
     RFoot2->setOrientationErrorGain(OR_GAIN);
 
 
-    Cartesian::Ptr LArm2;
-    LArm2.reset(new Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt2.getVariable("dq")));
+    OpenSoT::tasks::velocity::affine::Cartesian::Ptr LArm2;
+    LArm2.reset(new OpenSoT::tasks::velocity::affine::Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt2.getVariable("dq")));
     LArm2->getReference(ref);
     ref.M.DoRotZ(-M_PI_2);
     LArm2->setReference(ref);
     LArm2->setLambda(LAMBDA);
     LArm2->setOrientationErrorGain(OR_GAIN);
 
-    affine::JointLimits::Ptr joint_lims2;
-    joint_lims2.reset(new affine::JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
+    OpenSoT::constraints::velocity::affine::JointLimits::Ptr joint_lims2;
+    joint_lims2.reset(new OpenSoT::constraints::velocity::affine::JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
 
 
-    affine::VelocityLimits::Ptr vel_lims2;
-    vel_lims2.reset(new affine::VelocityLimits(VEL_LIMS, dT, opt2.getVariable("dq")));
+    OpenSoT::constraints::velocity::affine::VelocityLimits::Ptr vel_lims2;
+    vel_lims2.reset(new OpenSoT::constraints::velocity::affine::VelocityLimits(VEL_LIMS, dT, opt2.getVariable("dq")));
 
 
     OpenSoT::tasks::GenericLPTask::Ptr milp_task;
@@ -463,7 +457,7 @@ TEST_F(testGLPKProblem, testMILPProblem)
 {
     Eigen::MatrixXd A(3,3); A.setZero(3,3);
     Eigen::VectorXd b(3); b.setZero(3);
-    GenericTask::Ptr task(new GenericTask("task",A,b));
+    OpenSoT::tasks::GenericTask::Ptr task(new OpenSoT::tasks::GenericTask("task",A,b));
     Eigen::VectorXd c(3);
     c<<3.,-2.,-1;
     task->setHessianType(OpenSoT::HST_ZERO);
@@ -473,7 +467,7 @@ TEST_F(testGLPKProblem, testMILPProblem)
     Eigen::VectorXd lb(3), ub(3);
     lb.setZero(3);
     ub<<1e30, 1e30, 1.;
-    GenericConstraint::Ptr bounds(new GenericConstraint("bounds", ub, lb, 3));
+    OpenSoT::constraints::GenericConstraint::Ptr bounds(new OpenSoT::constraints::GenericConstraint("bounds", ub, lb, 3));
     bounds->update(Eigen::VectorXd(1));
 
     Eigen::MatrixXd Ac(2,3);
@@ -484,7 +478,7 @@ TEST_F(testGLPKProblem, testMILPProblem)
     uA<<7., 12.;
 
     OpenSoT::AffineHelper var(Ac, Eigen::VectorXd::Zero(2));
-    GenericConstraint::Ptr constr(new GenericConstraint("constraint", var, uA, lA, GenericConstraint::Type::CONSTRAINT));
+    OpenSoT::constraints::GenericConstraint::Ptr constr(new OpenSoT::constraints::GenericConstraint("constraint", var, uA, lA, OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
     constr->update(Eigen::VectorXd(1));
     std::cout<<"lA: "<<constr->getbLowerBound();
 

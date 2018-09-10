@@ -15,20 +15,20 @@
  * Public License for more details
 */
 
-#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/affine/Cartesian.h>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <exception>
 #include <cmath>
 
-using namespace OpenSoT::tasks::velocity;
+using namespace OpenSoT::tasks::velocity::affine;
 
 #define LAMBDA_THS 1E-12
 
-Cartesian::Cartesian(std::string task_id,
+Cartesian::Cartesian(const std::string task_id,
                      const Eigen::VectorXd& x,
-                     XBot::ModelInterface &robot,
-                     std::string distal_link,
-                     std::string base_link) :
+                     const XBot::ModelInterface &robot,
+                     const std::string distal_link,
+                     const std::string base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
@@ -51,10 +51,46 @@ Cartesian::Cartesian(std::string task_id,
     if(!this->_base_link_is_world)
         assert(this->_distal_link_index != _base_link_index);
 
+    _qdot = AffineHelper::Identity(x.size());
+
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
 
-    _W.setIdentity(_A.rows(), _A.rows());
+    _W.setIdentity(__A.rows(), __A.rows());
+
+    _hessianType = HST_SEMIDEF;
+}
+
+Cartesian::Cartesian(const std::string task_id,
+          const XBot::ModelInterface& robot,
+          const std::string& distal_link,
+          const std::string& base_link,
+          const AffineHelper& qdot):
+    Task(task_id, qdot.getInputSize()), _robot(robot),
+    _distal_link(distal_link), _base_link(base_link),
+    _orientationErrorGain(1.0), _is_initialized(false),
+    _error(6), _qdot(qdot)
+{
+    _error.setZero(6);
+    _desiredTwist.setZero(6);
+
+    this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
+
+    if(!this->_base_link_is_world) {
+        this->_base_link_index = _robot.getLinkID(_base_link);
+        //assert(this->_base_link_index >= 0);
+    }
+
+    this->_distal_link_index = _robot.getLinkID(_distal_link);
+    //assert(this->_distal_link_index >= 0);
+
+    if(!this->_base_link_is_world)
+        assert(this->_distal_link_index != _base_link_index);
+
+    /* first update. Setting desired pose equal to the actual pose */
+    this->_update(Eigen::VectorXd(1));
+
+    _W.setIdentity(__A.rows(), __A.rows());
 
     _hessianType = HST_SEMIDEF;
 }
@@ -68,9 +104,9 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     /************************* COMPUTING TASK *****************************/
 
     if(_base_link_is_world)
-        _robot.getJacobian(_distal_link,_A);
+        _robot.getJacobian(_distal_link,__A);
     else
-        _robot.getRelativeJacobian(_distal_link, _base_link, _A);
+        _robot.getRelativeJacobian(_distal_link, _base_link, __A);
 
     if(_base_link_is_world)
         _robot.getPose(_distal_link, _actualPose);
@@ -80,11 +116,19 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     if(!_is_initialized) {
         /* initializing to zero error */
         _desiredPose = _actualPose;
-        _b.setZero(_A.rows());
+        __b.setZero(__A.rows());
         _is_initialized = true;
     }
 
     this->update_b();
+
+    //HERE __A and __b are updated
+    _cartesian_task = __A*_qdot;
+    _cartesian_task = _cartesian_task - __b;
+
+    _A = _cartesian_task.getM();
+    _b = -_cartesian_task.getq();
+    //
 
     this->_desiredTwist.setZero(6);
 
@@ -153,7 +197,7 @@ const void Cartesian::getReference(KDL::Frame& desiredPose) const {
     desiredPose.M(2,0) = _desiredPose(2,0); desiredPose.M(2,1) = _desiredPose(2,1); desiredPose.M(2,2) = _desiredPose(2,2);
 }
 
-void OpenSoT::tasks::velocity::Cartesian::getReference(Eigen::MatrixXd &desiredPose,
+void Cartesian::getReference(Eigen::MatrixXd &desiredPose,
                                                        Eigen::VectorXd &desiredTwist) const
 {
     desiredPose = _desiredPose.matrix();
@@ -194,27 +238,27 @@ void Cartesian::setOrientationErrorGain(const double &orientationErrorGain)
     this->_orientationErrorGain = orientationErrorGain;
 }
 
-const double OpenSoT::tasks::velocity::Cartesian::getOrientationErrorGain() const
+const double Cartesian::getOrientationErrorGain() const
 {
     return _orientationErrorGain;
 }
 
-const std::string OpenSoT::tasks::velocity::Cartesian::getDistalLink() const
+const std::string Cartesian::getDistalLink() const
 {
     return _distal_link;
 }
 
-const std::string OpenSoT::tasks::velocity::Cartesian::getBaseLink() const
+const std::string Cartesian::getBaseLink() const
 {
     return _base_link;
 }
 
-const bool OpenSoT::tasks::velocity::Cartesian::baseLinkIsWorld() const
+const bool Cartesian::baseLinkIsWorld() const
 {
     return _base_link_is_world;
 }
 
-void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
+void Cartesian::setLambda(double lambda)
 {
     if(lambda >= 0.0){
         this->_lambda = lambda;
@@ -222,7 +266,7 @@ void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
     }
 }
 
-const Eigen::VectorXd OpenSoT::tasks::velocity::Cartesian::getError() const
+const Eigen::VectorXd Cartesian::getError() const
 {
     return _error;
 }
@@ -232,7 +276,7 @@ void Cartesian::update_b() {
                                            positionError, orientationError);
 
     _error<<positionError,-_orientationErrorGain*orientationError;
-    _b = _desiredTwist + _lambda*_error;
+    __b = _desiredTwist + _lambda*_error;
 }
 
 bool Cartesian::setBaseLink(const std::string& base_link)
@@ -259,7 +303,7 @@ bool Cartesian::setBaseLink(const std::string& base_link)
     return true;
 }
 
-bool OpenSoT::tasks::velocity::Cartesian::setDistalLink(const std::string& distal_link)
+bool Cartesian::setDistalLink(const std::string& distal_link)
 {
     if(distal_link.compare(_distal_link) == 0){
         return true;
@@ -285,14 +329,14 @@ bool OpenSoT::tasks::velocity::Cartesian::setDistalLink(const std::string& dista
 }
 
 
-bool OpenSoT::tasks::velocity::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+bool Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
+    return (bool)boost::dynamic_pointer_cast<Cartesian>(task);
 }
 
-OpenSoT::tasks::velocity::Cartesian::Ptr OpenSoT::tasks::velocity::Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+Cartesian::Ptr Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
+    return boost::dynamic_pointer_cast<Cartesian>(task);
 }
 
 void Cartesian::_log(XBot::MatLogger::Ptr logger)
