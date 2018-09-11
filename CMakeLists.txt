@@ -304,7 +304,6 @@ install(TARGETS OpenSoT
 
 catkin_package(
     INCLUDE_DIRS include
-    LIBRARIES idyn_ros_interface
     CATKIN_DEPENDS roscpp rospy roslib srdfdom
     DEPENDS system_lib)
 
@@ -313,10 +312,6 @@ install(TARGETS OpenSoT
        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
        )
-
-
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
 set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
