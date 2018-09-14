@@ -8,7 +8,6 @@
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
-#include <OpenSoT/solvers/CBCBackEnd.h>
 
 namespace {
 
@@ -203,8 +202,6 @@ TEST_F(testLProblem, testQuadraticLPProblem)
  *
  *  WE CONSIDER THE FOLLOWING CASES:
  *
- *  1. QPOASES -> CBC
- *  2. OSQP -> CBC
  *  3. QPOASES -> OSQP
  *  4. OSQP ->QPOSES
  *
@@ -212,13 +209,9 @@ TEST_F(testLProblem, testQuadraticLPProblem)
 TEST_F(testLProblem, testMILPProblem)
 {
 
-    for(unsigned int i = 0; i < 4; ++i)
+    for(unsigned int i = 2; i < 4; ++i)
     {
-        if(i == 0){
-            std::cout<<"***************QPOASES/CBC***************"<<std::endl;}
-        else if(i == 1){
-            std::cout<<"***************OSQP/CBC***************"<<std::endl;}
-        else if(i == 2){
+        if(i == 2){
             std::cout<<"***************QPOASES/OSQP***************"<<std::endl;}
         else if(i == 3){
             std::cout<<"***************OSQP/QPOASES***************"<<std::endl;}
@@ -263,42 +256,30 @@ TEST_F(testLProblem, testMILPProblem)
         /* FrontEnd (iHQP) with multiple solvers */
         OpenSoT::solvers::solver_back_ends solver_1 = OpenSoT::solvers::solver_back_ends::qpOASES;
         OpenSoT::solvers::solver_back_ends solver_2 = OpenSoT::solvers::solver_back_ends::OSQP;
-        OpenSoT::solvers::solver_back_ends solver_3 = OpenSoT::solvers::solver_back_ends::CBC;
 
         std::vector<OpenSoT::solvers::solver_back_ends> solver_vector(2);
-        if(i == 0){
-            solver_vector[0]=solver_1; solver_vector[1]=solver_3;}
-        else if(i == 1){
-            solver_vector[0]=solver_2; solver_vector[1]=solver_3;}
-        else if(i == 2){
+        if(i == 2){
             solver_vector[0]=solver_1; solver_vector[1]=solver_2;}
         else if(i == 3){
             solver_vector[0]=solver_2; solver_vector[1]=solver_1;}
 
-        OpenSoT::solvers::CBCBackEnd::CBCBackEndOptions opt_CBC;
-        opt_CBC.integer_ind.push_back(2);
 
         OpenSoT::solvers::iHQP::Ptr solver;
         solver = boost::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), _autostack->getBounds(), 1.0, solver_vector);
 
-        if(i == 0 || i == 1){
-            OpenSoT::solvers::BackEnd::Ptr CBC_Ptr;
-            solver->getBackEnd(1,CBC_Ptr);
-            CBC_Ptr->setOptions(opt_CBC);
-
-
-            CBC_Ptr->printProblemInformation(0, "", "", "");}
-
+        Eigen::VectorXd sol(3);
         for(unsigned int i = 0; i < 10; ++i)
         {
-            Eigen::VectorXd sol(3); sol.setZero(3);
+            sol.setZero(3);
             EXPECT_TRUE(solver->solve(sol));
             std::cout<<"Solution from FE solve: \n"<<sol<<std::endl;
 
-            EXPECT_NEAR(sol[0], 0.0, 1e-6);
-            EXPECT_NEAR(sol[1], 6.0, 1e-6);
-            EXPECT_NEAR(sol[2], 1.0, 1e-6);
+
         }
+        //WE CHECK THE FINAL SOLUTION SINCE THE SOLVER NEEDS COUPLE OF LOOP TO CONVERGE...
+        EXPECT_NEAR(sol[0], 0.0, 1e-9);
+        EXPECT_NEAR(sol[1], 6.0, 1e-9);
+        EXPECT_NEAR(sol[2], 1.0, 1e-9);
     }
 }
 

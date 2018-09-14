@@ -421,9 +421,17 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         conversion_utils_YARP::toYARP(desired_twist, desired_twist_y);
         l_arm_task->setReference(desired_pose, desired_twist*t_loop);
 
+
         // initializing previous norm
-        if(previous_norm < 0)
-            previous_norm = sqrt(l_arm_task->getb().squaredNorm());
+        if(previous_norm < 0){
+
+            Eigen::VectorXd twist(6);
+            twist<<Eigen::Vector3d(desired_twist.vel.data), Eigen::Vector3d(desired_twist.rot.data);
+
+            Eigen::VectorXd b = twist*t_loop + l_arm_task->getLambda()*l_arm_task->getError();
+            previous_norm = sqrt(b.squaredNorm());
+            //previous_norm = sqrt(l_arm_task->getb().squaredNorm());
+        }
 
         // checking variation of gain during trajectory following
         if(t>=6)
@@ -724,7 +732,10 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 
         // initializing previous norm
         if(previous_norm < 0)
+        {
+            com->update(Eigen::VectorXd(1));
             previous_norm = sqrt(com->getb().squaredNorm());
+        }
 
         // checking variation of gain during trajectory following
         if(t>=6)

@@ -6,7 +6,10 @@
 
 find_package(Doxygen QUIET)
 
-if(DOXYGEN_FOUND)
+message("Doxygen found: " ${DOXYGEN_FOUND})
+
+if(${DOXYGEN_FOUND})
+    message("Creating Documentation")
     set(DOX_GENERATE_HTML YES)
     set(DOX_GENERATE_XML NO)
     option(OPENSOT_DOXYGEN_XML "Generate doxygen XML output, for use by SWIG" NO)

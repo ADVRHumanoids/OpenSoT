@@ -92,7 +92,9 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
                     src/constraints/velocity/CoMVelocity.cpp
                     src/constraints/velocity/JointLimits.cpp
+                    src/constraints/velocity/affine/JointLimits.cpp
                     src/constraints/velocity/VelocityLimits.cpp
+                    src/constraints/velocity/affine/VelocityLimits.cpp
                     src/constraints/torque/TorqueLimits.cpp
                     src/constraints/torque/JointLimits.cpp
                     src/constraints/force/FrictionCone.cpp
@@ -124,12 +126,14 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/acceleration/Contact.cpp
                     src/tasks/acceleration/CoM.cpp
                     src/tasks/velocity/Cartesian.cpp
+                    src/tasks/velocity/affine/Cartesian.cpp
                     src/tasks/velocity/PureRolling.cpp
                     src/tasks/velocity/RigidRotation.cpp
                     src/tasks/velocity/Unicycle.cpp
                     src/tasks/velocity/Gaze.cpp
                     src/tasks/velocity/Contact.cpp
                     src/tasks/velocity/CoM.cpp
+                    src/tasks/velocity/affine/CoM.cpp
                     src/tasks/velocity/AngularMomentum.cpp
                     src/tasks/velocity/LinearMomentum.cpp                    
                     src/tasks/velocity/Manipulability.cpp
@@ -137,6 +141,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
+                    src/tasks/velocity/affine/Postural.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/tasks/force/CoM.cpp
@@ -252,15 +257,13 @@ if(${osqp_FOUND})
 
 endif()
 
+pkg_check_modules(GLPK QUIET glpk)
+if(${GLPK_FOUND})
+    message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
 
-pkg_check_modules(CBC QUIET cbc)
-pkg_check_modules(OSICBC QUIET osi-cbc)
-if(${CBC_FOUND} AND ${OSICBC_FOUND})
-    message("Adding src/solvers/CBCBackEnd.cpp to compilation")
-
-    add_library(OpenSotBackEndCBC SHARED src/solvers/CBCBackEnd.cpp)
-    target_link_libraries(OpenSotBackEndCBC OpenSoT ${CBC_LIBRARIES} ${OSICBC_LIBRARIES})
-    library_install(OpenSotBackEndCBC 1 0 0)
+    add_library(OpenSotBackEndGLPK SHARED src/solvers/GLPKBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndGLPK OpenSoT -lglpk)
+    library_install(OpenSotBackEndGLPK 1 0 0)
 endif()
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
@@ -301,7 +304,6 @@ install(TARGETS OpenSoT
 
 catkin_package(
     INCLUDE_DIRS include
-    LIBRARIES idyn_ros_interface
     CATKIN_DEPENDS roscpp rospy roslib srdfdom
     DEPENDS system_lib)
 
@@ -310,10 +312,6 @@ install(TARGETS OpenSoT
        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
        )
-
-
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 
 #enabling it will add all OpenSoT dependencies as dependencies for third party users
 set_property(GLOBAL APPEND PROPERTY ${VARS_PREFIX}_TARGETS OpenSoT)
@@ -331,12 +329,6 @@ include(AddUninstallTarget)
 
 add_subdirectory(doc)
 
-########################
-# Add Examples target  #
-########################
-#if(OPENSOT_COMPILE_EXAMPLES)
-#    add_subdirectory(examples)
-#endif()
 
 #######################
 # Add Testing target  #

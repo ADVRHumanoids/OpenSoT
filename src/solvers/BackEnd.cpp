@@ -106,9 +106,10 @@ BackEnd::~BackEnd()
 
 void BackEnd::log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix)
 {
-    logger->add(prefix+"H_"+std::to_string(i), _H);
+    if(_H.size() > 0)
+        logger->add(prefix+"H_"+std::to_string(i), _H);
     logger->add(prefix+"g_"+std::to_string(i), _g);
-    if(_A.rows() > 0 && _A.cols() > 0)
+    if(_A.size() > 0)
         logger->add(prefix+"A_"+std::to_string(i), _A);
     if(_lA.size() > 0)
         logger->add(prefix+"lA_"+std::to_string(i), _lA);
