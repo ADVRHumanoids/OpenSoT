@@ -458,76 +458,61 @@
          */
         bool checkConsistency()
         {
-            //1) Check A,b,W sizes != 0
-            if(_hessianType != HST_ZERO)
+            bool a = true;
+            //1) Check Weight is square
+            if(_W.rows() != _W.cols()){
+                XBot::Logger::error("%s: _W.rows() != _W.cols() -> %i != %i! \n", _task_id.c_str(), _W.rows(), _W.cols());
+                a = false;
+            }
+
+            //2) Check consistency between matrices
+            if(_A.rows() != _b.size()){
+                XBot::Logger::error("%s: _A.rows() != _b.size() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _b.size());
+                a = false;
+            }
+            if(_A.rows() != _W.rows()){
+                XBot::Logger::error("%s: _A.rows() != _W.rows() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _W.rows());
+                a = false;
+            }
+
+            //3) Check task size
+            if(_A.cols() != _x_size){
+                XBot::Logger::error("%s: _A.cols() != _x_size -> %i != %i! \n", _task_id.c_str(), _A.cols(), _x_size);
+                a = false;
+            }
+
+            //4) Check eventually c
+            if(_c.size() != _x_size){
+                    XBot::Logger::error("%s: _c.size() != _x_size -> %i != %i! \n", _task_id.c_str(), _c.size(), _x_size);
+                    a = false;
+            }
+
+            //5) If the Hessian Type is ZERO we want to check that all the entries of _A and _b are zeros!
+            if(_hessianType == HST_ZERO)
             {
+                if(!_A.isZero()){
+                    XBot::Logger::error("%s: Hessian is HST_ZERO but _A is not all zeros! \n", _task_id.c_str());
+                    a = false;
+                }
+
+                if(!_b.isZero()){
+                    XBot::Logger::error("%s: Hessian is HST_ZERO but _b is not all zeros! \n", _task_id.c_str());
+                    a = false;
+                }
+            }
+            else{
+            //6) If the Hessian Type is NOT ZERO we want to check that _A and _b exists!
                 if(_A.rows() == 0 || _A.cols() == 0){
                     XBot::Logger::error("%s: _A is [%i x %i]! \n", _task_id.c_str(), _A.rows(), _A.cols());
-                    return false;
+                    a = false;
                 }
                 if(_b.size() == 0){
                     XBot::Logger::error("%s: _b size is %i!  \n", _task_id.c_str(), _b.size());
-                    return false;
-                }
-                if(_W.rows() == 0 || _W.cols() == 0){
-                    XBot::Logger::error("%s: _W is [%i x %i]! \n", _task_id.c_str(), _W.rows(), _W.cols());
-                    return false;
-                }
-                if(_W.rows() != _W.cols()){
-                    XBot::Logger::error("%s: _W.rows() != _W.cols() -> %i != %i! \n", _task_id.c_str(), _W.rows(), _W.cols());
-                    return false;
-                }
-
-                //2) Check consistency between matrices
-                if(_A.rows() != _b.size()){
-                    XBot::Logger::error("%s: _A.rows() != _b.size() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _b.size());
-                    return false;
-                }
-                if(_A.rows() != _W.rows()){
-                    XBot::Logger::error("%s: _A.rows() != _W.rows() -> %i != %i! \n", _task_id.c_str(), _A.rows(), _W.rows());
-                    return false;
-                }
-
-                //3) Check task size
-                if(_A.cols() != _x_size){
-                    XBot::Logger::error("%s: _A.cols() != _x_size -> %i != %i! \n", _task_id.c_str(), _A.cols(), _x_size);
-                    return false;
-                }
-
-                //4) Check eventually c
-                if(_c.size() > 0)
-                {
-                    if(_c.size() != _x_size){
-                        XBot::Logger::error("%s: _c.size() != _x_size -> %i != %i! \n", _task_id.c_str(), _c.size(), _x_size);
-                        return false;
-                    }
+                    a = false;
                 }
             }
-            else
-            {
-                //When HESSIAN_TYPE is ZERO we check that A,b and W are zeros and c is not zero
-                if(_b.size() != 0){
-                    XBot::Logger::error("%s: _b size is %i! Should be 0! \n", _task_id.c_str(), _b.size());
-                    return false;
-                }
-                if(_A.rows() != 0 || _A.cols() != 0){
-                    XBot::Logger::error("%s: _A is [%i x %i]! Should be 0! \n", _task_id.c_str(), _A.rows(), _A.cols());
-                    return false;
-                }
-                if(_W.rows() != 0 || _W.cols() != 0){
-                    XBot::Logger::error("%s: _W is [%i x %i]! Should be 0! \n", _task_id.c_str(), _W.rows(), _W.cols());
-                    return false;
-                }
-                if(_c.size() == 0){
-                    XBot::Logger::error("%s: _c size is %i!  \n", _task_id.c_str(), _c.size());
-                    return false;
-                }
-                if(_c.size() != _x_size){
-                    XBot::Logger::error("%s: _c.size() != _x_size -> %i != %i! \n", _task_id.c_str(), _c.size(), _x_size);
-                    return false;
-                }
 
-            }
+
 
             if(_constraints.size() > 0)
             {
@@ -535,11 +520,11 @@
                 for(auto constraint : _constraints)
                 {
                     if(!(constraint->checkConsistency()))
-                        return false;
+                        a = false;
                 }
             }
 
-            return true;
+            return a;
 
         }
 

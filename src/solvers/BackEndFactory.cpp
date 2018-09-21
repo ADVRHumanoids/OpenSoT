@@ -34,6 +34,14 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
         return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>("OpenSotBackEndOSQP.so", 
                                                   "OpenSotBackEndOSQP", 
                                                   number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+    if(be_solver == solver_back_ends::CBC)
+        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>("OpenSotBackEndCBC.so",
+                                                  "OpenSotBackEndCBC",
+                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+    if(be_solver == solver_back_ends::GLPK)
+        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>("OpenSotBackEndGLPK.so",
+                                                  "OpenSotBackEndGLPK",
+                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     else
         throw std::runtime_error("Back-end is not available!");
 
@@ -45,6 +53,10 @@ std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
         return "qpOASES";
     if(be_solver == solver_back_ends::OSQP)
         return "OSQP";
+    if(be_solver == solver_back_ends::CBC)
+        return "CBC";
+    if(be_solver == solver_back_ends::GLPK)
+        return "GLPK";
     else
         return "????";
 }

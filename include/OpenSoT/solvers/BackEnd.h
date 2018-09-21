@@ -188,6 +188,10 @@ namespace OpenSoT{
          */
         Eigen::VectorXd _solution;
 
+        /**
+         * @brief _number_of_variables which remain constant during BE existence
+         */
+        int _number_of_variables;
     };
 
     }

@@ -19,7 +19,7 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
 
     _update(Eigen::VectorXd(1));
     
-    _W.setIdentity(__A.rows(), __A.rows());
+    _W.setIdentity(_A.rows(), _A.rows());
 }
 
 GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, const Eigen::VectorXd& b, const AffineHelper &var):
@@ -36,9 +36,9 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
 
     _hessianType = HST_SEMIDEF;
 
-    _W.setIdentity(__A.rows(), __A.rows());
-
     _update(Eigen::VectorXd(1));
+
+    _W.setIdentity(_A.rows(), _A.rows());
 }
 
 GenericTask::~GenericTask()

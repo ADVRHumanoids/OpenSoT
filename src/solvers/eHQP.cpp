@@ -19,17 +19,17 @@ eHQP::eHQP(Stack& stack) : Solver<Eigen::MatrixXd, Eigen::VectorXd>(stack), sigm
         stack_level lvl;
         for(unsigned int i = 0; i <= stack.size(); ++i)
         {
-            if(_tasks[i]->getHessianAtype() == HessianType::HST_ZERO){
-                std::stringstream error_ss;
-                error_ss << "Task "<<i<<" has Hessian Type HST_ZERO which is not handled by eHQP, aborting!"<<std::endl;
-                throw std::runtime_error(error_ss.str());}
-
             if(i == 0)
             {
                 lvl._P = Eigen::MatrixXd::Identity(_x_size, _x_size);
             }
             else
             {
+                if(_tasks[i-1]->getHessianAtype() == HessianType::HST_ZERO){
+                    std::stringstream error_ss;
+                    error_ss << "Task "<<i-1<<" has Hessian Type HST_ZERO which is not handled by eHQP, aborting!"<<std::endl;
+                    throw std::runtime_error(error_ss.str());}
+
                 lvl._P = Eigen::MatrixXd::Identity(_x_size, _x_size);
                 lvl._JP = Eigen::MatrixXd::Identity(
                     _tasks[i-1]->getA().rows(), _x_size);
@@ -75,7 +75,7 @@ bool eHQP::solve(Eigen::VectorXd& solution)
         _stack_levels[i]._FPL.compute(_stack_levels[i]._JP);
         _stack_levels[i]._JPpinv = this->getDampedPinv(
                     _stack_levels[i]._JP, _stack_levels[i]._JPsvd,
-                    _stack_levels[i]._FPLstringstream);
+                    _stack_levels[i]._FPL);
 #else
         _stack_levels[i]._JPpinv = this->getDampedPinv(_stack_levels[i]._JP,
                                                        _stack_levels[i]._JPsvd);

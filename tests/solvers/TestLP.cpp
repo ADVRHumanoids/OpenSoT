@@ -6,6 +6,8 @@
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/Affine.h>
+#include <OpenSoT/tasks/GenericLPTask.h>
+#include <OpenSoT/constraints/GenericConstraint.h>
 
 namespace {
 
@@ -192,6 +194,93 @@ TEST_F(testLProblem, testQuadraticLPProblem)
     EXPECT_NEAR(solution[2], 0.0, 1e-4);
     EXPECT_NEAR(solution[3], 1.875, 1e-4);
 
+}
+
+
+/*  HERE WE TEST TWO PRIORITY LEVELS WHERE IN THE FIRST STACK A QP IS SOLVED WHILE IN THE
+ *  SECOND A LP IS SOLVED.
+ *
+ *  WE CONSIDER THE FOLLOWING CASES:
+ *
+ *  3. QPOASES -> OSQP
+ *  4. OSQP ->QPOSES
+ *
+ */
+TEST_F(testLProblem, testMILPProblem)
+{
+
+    for(unsigned int i = 2; i < 4; ++i)
+    {
+        if(i == 2){
+            std::cout<<"***************QPOASES/OSQP***************"<<std::endl;}
+        else if(i == 3){
+            std::cout<<"***************OSQP/QPOASES***************"<<std::endl;}
+
+
+        Eigen::MatrixXd A_qp(1,3); A_qp << 4., 2., 0.;
+        Eigen::VectorXd b_qp(1); b_qp<<12;
+        OpenSoT::tasks::GenericTask::Ptr task_qp(new OpenSoT::tasks::GenericTask("task_qp",A_qp,b_qp));
+        task_qp->update(Eigen::VectorXd(1));
+
+        Eigen::VectorXd c_CBC(3);
+        c_CBC<<-3.,-2.,-1;
+        OpenSoT::tasks::GenericLPTask::Ptr task_CBC(new OpenSoT::tasks::GenericLPTask("task_CBC",c_CBC));
+        task_CBC->update(Eigen::VectorXd(1));
+
+        Eigen::VectorXd lb(3), ub(3);
+        lb.setZero(3);
+        ub<<1e30, 1e30, 1.;
+        OpenSoT::constraints::GenericConstraint::Ptr bounds(new OpenSoT::constraints::GenericConstraint("bounds", ub, lb, 3));
+        bounds->update(Eigen::VectorXd(1));
+
+        Eigen::MatrixXd Ac_CBC(1,3);
+        Ac_CBC<<1.,1.,1;
+        Eigen::VectorXd lA_CBC(1), uA_CBC(1);
+        lA_CBC<<-1e30;
+        uA_CBC<<7.;
+
+        OpenSoT::AffineHelper var(Ac_CBC, Eigen::VectorXd::Zero(1));
+        OpenSoT::constraints::GenericConstraint::Ptr constr(
+                                 new OpenSoT::constraints::GenericConstraint("constraint", var, uA_CBC, lA_CBC,
+                                                                OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
+        constr->update(Eigen::VectorXd(1));
+
+        /* _autostack */
+        OpenSoT::AutoStack::Ptr _autostack;
+        task_CBC  << constr;
+
+        _autostack = (task_qp/task_CBC);
+
+        _autostack << bounds;
+
+        /* FrontEnd (iHQP) with multiple solvers */
+        OpenSoT::solvers::solver_back_ends solver_1 = OpenSoT::solvers::solver_back_ends::qpOASES;
+        OpenSoT::solvers::solver_back_ends solver_2 = OpenSoT::solvers::solver_back_ends::OSQP;
+
+        std::vector<OpenSoT::solvers::solver_back_ends> solver_vector(2);
+        if(i == 2){
+            solver_vector[0]=solver_1; solver_vector[1]=solver_2;}
+        else if(i == 3){
+            solver_vector[0]=solver_2; solver_vector[1]=solver_1;}
+
+
+        OpenSoT::solvers::iHQP::Ptr solver;
+        solver = boost::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), _autostack->getBounds(), 1.0, solver_vector);
+
+        Eigen::VectorXd sol(3);
+        for(unsigned int i = 0; i < 10; ++i)
+        {
+            sol.setZero(3);
+            EXPECT_TRUE(solver->solve(sol));
+            std::cout<<"Solution from FE solve: \n"<<sol<<std::endl;
+
+
+        }
+        //WE CHECK THE FINAL SOLUTION SINCE THE SOLVER NEEDS COUPLE OF LOOP TO CONVERGE...
+        EXPECT_NEAR(sol[0], 0.0, 1e-9);
+        EXPECT_NEAR(sol[1], 6.0, 1e-9);
+        EXPECT_NEAR(sol[2], 1.0, 1e-9);
+    }
 }
 
 }

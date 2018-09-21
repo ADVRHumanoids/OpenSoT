@@ -2,7 +2,8 @@
 
 using namespace OpenSoT::solvers;
 
-BackEnd::BackEnd(const int number_of_variables, const int number_of_constraints)
+BackEnd::BackEnd(const int number_of_variables, const int number_of_constraints):
+    _number_of_variables(number_of_variables)
 {
     _solution.setZero(number_of_variables);
 
@@ -105,9 +106,10 @@ BackEnd::~BackEnd()
 
 void BackEnd::log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix)
 {
-    logger->add(prefix+"H_"+std::to_string(i), _H);
+    if(_H.size() > 0)
+        logger->add(prefix+"H_"+std::to_string(i), _H);
     logger->add(prefix+"g_"+std::to_string(i), _g);
-    if(_A.rows() > 0 && _A.cols() > 0)
+    if(_A.size() > 0)
         logger->add(prefix+"A_"+std::to_string(i), _A);
     if(_lA.size() > 0)
         logger->add(prefix+"lA_"+std::to_string(i), _lA);
@@ -152,6 +154,6 @@ int OpenSoT::solvers::BackEnd::getNumConstraints() const
 
 int OpenSoT::solvers::BackEnd::getNumVariables() const
 {
-    return _H.rows();
+    return _number_of_variables;
 }
 

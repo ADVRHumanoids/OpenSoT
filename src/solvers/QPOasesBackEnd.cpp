@@ -59,7 +59,7 @@ void QPOasesBackEnd::setDefaultOptions()
     opt.epsRegularisation *= _epsRegularisation;
     opt.numRegularisationSteps = 0;
     opt.numRefinementSteps = 1;
-    opt.enableFlippingBounds = qpOASES::BT_TRUE;
+//    opt.enableFlippingBounds = qpOASES::BT_TRUE; // <- THIS IS NOT RT SAFE!
 //     opt.enableDropInfeasibles = qpOASES::BT_TRUE;
 
     opt.ensureConsistency();
@@ -314,7 +314,9 @@ void QPOasesBackEnd::checkInfeasibility()
 
 void QPOasesBackEnd::_printProblemInformation()
 {
-    XBot::Logger::info("eps Regularisation factor: %s \n", _problem->getOptions().epsRegularisation);
+    std::ostringstream oss;
+    oss << std::scientific << _problem->getOptions().epsRegularisation;
+    XBot::Logger::info("eps Regularisation factor: %s \n", oss.str().c_str());
     XBot::Logger::info("qpOASES # OF CONSTRAINTS: %i\n", _problem->getNC());
     XBot::Logger::info("qpOASES # OF VARIABLES: %i\n", _problem->getNV());
 }
