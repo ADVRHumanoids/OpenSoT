@@ -30,6 +30,8 @@ FloatingBase::FloatingBase(XBot::ModelInterface &model,
 {
     if(wrenches.size() != contact_links.size())
         throw std::invalid_argument("wrench and contact_links has different sizes!");
+    
+    _floating_base_torque.setZero();
 
     update(Eigen::VectorXd());
     _W.setIdentity(_A.rows(), _A.rows());
