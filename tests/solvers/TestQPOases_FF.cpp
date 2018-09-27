@@ -1,5 +1,3 @@
-#include <advr_humanoids_common_utils/idynutils.h>
-#include <advr_humanoids_common_utils/test_utils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/trajectory.hpp>
@@ -21,21 +19,14 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <qpOASES.hpp>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
 #include <fstream>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
-#include <yarp/os/SystemClock.h>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 
 #include <XBotInterface/ModelInterface.h>
 #include <chrono>
 #include <ctime>
 #include <thread>
 
-typedef idynutils2 iDynUtils;
 
-using namespace yarp::math;
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -221,352 +212,343 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _robot) {
 }
 
 
-static void null_deleter(iDynUtils *) {}
 
-//std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-//std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
-//std::string _path_to_cfg = robotology_root + relative_path;
+TEST_P(testQPOases_CartesianFF, testCartesianFF)
+{
 
-//TEST_P(testQPOases_CartesianFF, testCartesianFF)
-//{
+    KDL::Path::IdentifierType  trajType = GetParam().first;
+    bool hasInitialError = GetParam().second;
 
-//    KDL::Path::IdentifierType  trajType = GetParam().first;
-//    bool hasInitialError = GetParam().second;
 
-//#ifdef TRY_ON_SIMULATOR
-//    yarp::os::Network init;
-//    ComanUtils robot("testCartesianFF");
-//#endif
 
-//    iDynUtils model("coman",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
-//    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-//            (XBot::ModelInterface::getModel(_path_to_cfg));
-//    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
+    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
 
-//    if(_model_ptr)
-//        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-//    else
-//        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+    std::string _path_to_cfg = robotology_root + relative_path;
 
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-//    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-//    model.updateiDynTreeModel(q, true);
-//    model.switchAnchorAndFloatingBase("l_sole");
+    if(_model_ptr)
+        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-//#ifdef TRY_ON_SIMULATOR
-//    robot.setPositionDirectMode();
-//    robot.move(q);
-//    yarp::os::Time::delay(3);
-//#endif
 
-//    // BOUNDS
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-//    OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-//            new OpenSoT::constraints::velocity::JointLimits(q,
-//                        model.getJointBoundMax(),
-//                        model.getJointBoundMin()));
 
-//    OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
-//            new OpenSoT::constraints::velocity::VelocityLimits( 0.6,3e-3,q.size()));
 
-//    std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
-//    bounds_list.push_back(boundsJointLimits);
-//    bounds_list.push_back(boundsVelocityLimits);
+    // BOUNDS
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin, qmax);
 
-//    OpenSoT::constraints::Aggregated::Ptr bounds(
-//                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+    OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
+            new OpenSoT::constraints::velocity::JointLimits(q,qmax,qmin));
 
-//    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm_task(
-//                new OpenSoT::tasks::velocity::Cartesian("l_arm",q, *(_model_ptr.get()),
-//                                                        "l_wrist",
-//                                                        "world"));
+    OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
+            new OpenSoT::constraints::velocity::VelocityLimits( 0.6,3e-3,q.size()));
 
-//    // Postural Task
-//    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-//            new OpenSoT::tasks::velocity::Postural(q));
+    std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
+    bounds_list.push_back(boundsJointLimits);
+    bounds_list.push_back(boundsVelocityLimits);
 
-//    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+    OpenSoT::constraints::Aggregated::Ptr bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
-//    stack_of_tasks.push_back(l_arm_task);
-//    stack_of_tasks.push_back(postural_task);
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm_task(
+                new OpenSoT::tasks::velocity::Cartesian("l_arm",q, *(_model_ptr.get()),
+                                                        "l_wrist",
+                                                        "world"));
 
-//    OpenSoT::solvers::iHQP::Ptr sot(
-//        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
+    // Postural Task
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+            new OpenSoT::tasks::velocity::Postural(q));
 
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
+    stack_of_tasks.push_back(l_arm_task);
+    stack_of_tasks.push_back(postural_task);
 
-//    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
 
-//    double dt=3e-3;
 
-//    KDL::Frame current_pose, previous_pose, desired_pose;
-//    KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
-//    yarp::sig::Matrix current_pose_y;
-//    double R, Rdes, Rprev, P, Pdes, Pprev, Y, Ydes, Yprev;
 
+    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
 
-//    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-//    model.updateiDynTreeModel(q, true);
-//    l_arm_task->update(q);
-//    postural_task->update(q);
-//    bounds->update(q);
+    double dt=3e-3;
 
-//    current_pose_y = conversion_utils_YARP::toYARP(l_arm_task->getActualPose());
-//    conversion_utils_YARP::toKDLFrame(current_pose_y, current_pose);
+    KDL::Frame current_pose, previous_pose, desired_pose;
+    KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
+    Eigen::MatrixXd current_pose_y;
+    double R, Rdes, Rprev, P, Pdes, Pprev, Y, Ydes, Yprev;
 
-//    if(!hasInitialError) {
 
-//        if(trajType == KDL::Path::ID_LINE) {
-//            /************************************************
-//             * COMMANDING 5cm FORWARD FROM CURRENT POSITION
-//             * meaning zero error at trajectory begin
-//             ***********************************************/
-
-//            _log.close();
-//            _log.open("testQPOases_FF_Cartesian_5cmfw_noerr.m");
-
-
-//            get5cmFwdLinearTraj(current_pose);
-
-//            l_arm_task->setOrientationErrorGain(.1);
-//        } else {
-//            /************************************************
-//             * COMMANDING 1rad CLOCKWISE FROM CURRENT POSITION
-//             * meaning zero error at trajectory begin
-//             ***********************************************/
-
-//            _log.close();
-//            _log.open("testQPOases_FF_Cartesian_1rad_noerr.m");
-
-//            get1radCircularTraj(current_pose);
-
-//            l_arm_task->setOrientationErrorGain(.5);
-//        }
-
-//        desired_pose = trajectory->Pos(0.0);
-
-//        l_arm_task->setLambda(.6);
-
-//    } else {
-//        if(trajType == KDL::Path::ID_LINE) {
-//            /*************************************************
-//             * COMMANDING 5cm FORWARD FROM PERTURBED POSITION
-//             * 1cm error at trajectory startup
-//             *************************************************/
-
-//            _log.close();
-//            _log.open("testQPOases_FF_Cartesian_5cmfw_1cmerr.m");
-
-//            desired_pose = current_pose;
-//            desired_pose.p[0] = current_pose.p[0] + .01;
-//            get5cmFwdLinearTraj(desired_pose);
-//            desired_pose = trajectory->Pos(0.0);
-
-//            l_arm_task->setOrientationErrorGain(.1);
-//            /* setting lambda lower than this can cause tracking problems
-//             * along the trajectory on secondary variables (e.g. the one that
-//             * we want fixed at 0) */
-//            l_arm_task->setLambda(.1);
-//        } else {
-//            /*************************************************
-//             * COMMANDING 1rad CLOCKWISE FROM PERTURBED POSITION
-//             * 1e-1rad error at trajectory startup
-//             *************************************************/
-
-//            _log.close();
-//            _log.open("testQPOases_FF_Cartesian_1rad_1draderr.m");
-
-//            desired_pose = current_pose;
-//            desired_pose.M.DoRotX(.1);
-//            get1radCircularTraj(desired_pose);
-//            desired_pose = trajectory->Pos(0.0);
-
-//            l_arm_task->setOrientationErrorGain(.4);
-//            /* setting lambda lower than this can cause tracking problems
-//             * along the trajectory on secondary variables (e.g. the one that
-//             * we want fixed at 0) */
-//            l_arm_task->setLambda(.3);
-//        }
-//    }
-
-//    previous_pose = current_pose;
-//    desired_twist = trajectory->Vel(0.0);
-
-//    double t_loop = dt;
-//    double t_compute = 0;
-
-//    double previous_norm = -1;
-//    double current_norm;
-//    double previous_error;
-//    if(trajType == KDL::Path::ID_LINE) {
-//        previous_error = desired_pose.p[0] - current_pose.p[0];
-//    } else {
-//        desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
-//        current_pose.M.GetRPY(R,P,Y);
-//        previous_error = Rdes - R;
-//    }
-
-//    _log << "% t,\t"
-//         << "estimated_twist,\t"
-//         << "desired_twist,\t"
-//         << "current_pose,\t"
-//         << "desired_pose,\t"
-//         << "t_update_and_solve,\t"
-//         << "t_loop(333Hz)" << std::endl;
-//    _log << "pos_des_x = [" << std::endl;
-
-//    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
-//    {
-//        double t_begin = yarp::os::SystemClock::nowSystem();
-//        yarp::sig::Matrix desired_pose_y(4,0.0);
-//        yarp::sig::Vector desired_twist_y(6,0.0);
-//        desired_pose = trajectory->Pos(t);
-//        desired_twist = trajectory->Vel(t);
-//        conversion_utils_YARP::toYARP(desired_pose, desired_pose_y);
-//        conversion_utils_YARP::toYARP(desired_twist, desired_twist_y);
-//        l_arm_task->setReference(desired_pose, desired_twist*t_loop);
-
-
-//        // initializing previous norm
-//        if(previous_norm < 0){
-
-//            Eigen::VectorXd twist(6);
-//            twist<<Eigen::Vector3d(desired_twist.vel.data), Eigen::Vector3d(desired_twist.rot.data);
-
-//            Eigen::VectorXd b = twist*t_loop + l_arm_task->getLambda()*l_arm_task->getError();
-//            previous_norm = sqrt(b.squaredNorm());
-//            //previous_norm = sqrt(l_arm_task->getb().squaredNorm());
-//        }
-
-//        // checking variation of gain during trajectory following
-//        if(t>=6)
-//            l_arm_task->setLambda(.6);
-
-//        model.updateiDynTreeModel(q, true);
-
-//        l_arm_task->update(q);
-//        postural_task->update(q);
-//        bounds->update(q);
-
-//        EXPECT_TRUE(sot->solve(dq));
-//        q += dq;
-
-//        current_pose_y = conversion_utils_YARP::toYARP(l_arm_task->getActualPose());
-//        conversion_utils_YARP::toKDLFrame(current_pose_y, current_pose);
-
-
-//        t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
-//        yarp::os::SystemClock::delaySystem(dt-t_compute);
-//        t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
-
-//        /* first order fading filter -> to implement in Matlab
-//        double beta = 0.3; double G = 1-beta;
-//        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
-//        twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
-//        */
-//        double twist_measure;
-//        if(trajType == KDL::Path::ID_LINE) {
-//            twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
-//        } else {
-//            current_pose.M.GetRPY(R,P,Y);
-//            previous_pose.M.GetRPY(Rprev,Pprev,Yprev);
-//            twist_measure = (R - Rprev)/t_loop;
-//        }
-
-//        twist_estimate[0] = twist_measure;
-
-//        current_norm = sqrt(l_arm_task->getb().squaredNorm());
-
-//        if(trajType == KDL::Path::ID_LINE) {
-//            _log << t << ",\t"
-//                 << twist_estimate[0] << ",\t"
-//                 << desired_twist[0]   << ",\t"
-//                 << current_pose.p[0]  << ",\t"
-//                 << desired_pose.p[0]  << ",\t"
-//                 << t_compute          << ",\t"
-//                 << t_loop             << ",\t"
-//                 << current_norm       << ";" << std::endl;
-//        } else {
-//            desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
-//            _log << t << ",\t"
-//                 << twist_estimate[0] << ",\t"
-//                 << desired_twist.rot.x()   << ",\t"
-//                 << R  << ",\t"
-//                 << Rdes  << ",\t"
-//                 << t_compute          << ",\t"
-//                 << t_loop             << ",\t"
-//                 << current_norm       << ";" << std::endl;
-//        }
-
-//        // also velocities and accelerations are available !
-//        previous_pose = current_pose;
-//        previous_twist_estimate[0] = twist_estimate[0];
-
-//        if(!hasInitialError) {
-//            if(trajType == KDL::Path::ID_LINE) {
-//                EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;;
-//                EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 5e-4) << " @t= " << t;;
-//            } else {
-//                EXPECT_NEAR(R, Rdes,3e-3) << " @t= " << t;;
-//                EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1.5e-2) << " @t= " << t;;
-//            }
-//        } else {
-//            if(t<=1.3) {
-//                double current_error;
-
-//                if(trajType == KDL::Path::ID_LINE) {
-//                    current_error = desired_pose.p[0] - current_pose.p[0];
-
-//                    /* error should always decrease, or at least accept
-//                     * a local increment of 1e-4 */
-//                    EXPECT_GE(previous_error - current_error, -1e-4) << " @t= " << t;
-//                    EXPECT_GE(previous_norm - current_norm, -8e-4) << " @t= " << t;
-
-//                } else {
-//                    desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
-//                    current_pose.M.GetRPY(R,P,Y);
-//                    current_error = Rdes - R;
-
-//                    /* error should always decrease, or at least accept
-//                     * a local increment of 1e-4 */
-//                    EXPECT_GE(previous_error - current_error, -3e-3) << " @t= " << t;
-//                    EXPECT_GE(previous_norm - current_norm, -2.4e-2) << " @t= " << t;
-//                }
-
-//                previous_error = current_error;
-//                previous_norm = current_norm;
-//            } else {
-//                if(trajType == KDL::Path::ID_LINE) {
-//                    EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1.5e-4) << " @t= " << t;
-//                    EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1.5e-3) << " @t= " << t;
-//                } else {
-//                    EXPECT_NEAR(R, Rdes,2e-3);
-//                    EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1e-2);
-//                }
-//            }
-//        }
-//    }
-
-//    _log << "];" << std::endl;
-
-//    _log << "figure" << std::endl;
-//    _log << "subplot(2,1,1);" << std::endl;
-//    _log << "%moving average filter" << std::endl;
-//    _log << "filt_window = 25;" << std::endl;
-//    _log << "a = 1; b = 1/filt_window*ones(1,filt_window);" << std::endl;
-//    _log << "twist_estimate = filter(b,a,pos_des_x(:,2));" << std::endl;
-//    _log << "plot(pos_des_x(:,1),[twist_estimate, pos_des_x(:,3)]);" << std::endl;
-//    _log << "legend('Actual Velocity Profile','Desired Velocity Profile');" << std::endl;
-//    _log << "subplot(2,1,2);" << std::endl;
-//    _log << "plot(pos_des_x(:,1),pos_des_x(:,4:5));" << std::endl;
-//    _log << "legend('Actual Position','Desired Position','Location','SouthEast');" << std::endl;
-//    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,6:7)); title('Computation time'); legend('Solve time','loop time (333Hz)');" << std::endl;
-//    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,8)); title('Tracking Error'); legend('Cartesian 6d tracking error');" << std::endl;
-
-//}
+    q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+    l_arm_task->update(q);
+    postural_task->update(q);
+    bounds->update(q);
+
+    current_pose_y = l_arm_task->getActualPose();
+    l_arm_task->getActualPose(current_pose);
+
+    if(!hasInitialError) {
+
+        if(trajType == KDL::Path::ID_LINE) {
+            /************************************************
+             * COMMANDING 5cm FORWARD FROM CURRENT POSITION
+             * meaning zero error at trajectory begin
+             ***********************************************/
+
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_5cmfw_noerr.m");
+
+
+            get5cmFwdLinearTraj(current_pose);
+
+            l_arm_task->setOrientationErrorGain(.1);//0.1
+        } else {
+            /************************************************
+             * COMMANDING 1rad CLOCKWISE FROM CURRENT POSITION
+             * meaning zero error at trajectory begin
+             ***********************************************/
+
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_1rad_noerr.m");
+
+            get1radCircularTraj(current_pose);
+
+            l_arm_task->setOrientationErrorGain(.5);//0.5
+        }
+
+        desired_pose = trajectory->Pos(0.0);
+
+        l_arm_task->setLambda(.6);//0.6
+
+    } else {
+        if(trajType == KDL::Path::ID_LINE) {
+            /*************************************************
+             * COMMANDING 5cm FORWARD FROM PERTURBED POSITION
+             * 1cm error at trajectory startup
+             *************************************************/
+
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_5cmfw_1cmerr.m");
+
+            desired_pose = current_pose;
+            desired_pose.p[0] = current_pose.p[0] + .01;
+            get5cmFwdLinearTraj(desired_pose);
+            desired_pose = trajectory->Pos(0.0);
+
+            l_arm_task->setOrientationErrorGain(.1);
+            /* setting lambda lower than this can cause tracking problems
+             * along the trajectory on secondary variables (e.g. the one that
+             * we want fixed at 0) */
+            l_arm_task->setLambda(.1);
+        } else {
+            /*************************************************
+             * COMMANDING 1rad CLOCKWISE FROM PERTURBED POSITION
+             * 1e-1rad error at trajectory startup
+             *************************************************/
+
+            _log.close();
+            _log.open("testQPOases_FF_Cartesian_1rad_1draderr.m");
+
+            desired_pose = current_pose;
+            desired_pose.M.DoRotX(.1);
+            get1radCircularTraj(desired_pose);
+            desired_pose = trajectory->Pos(0.0);
+
+            l_arm_task->setOrientationErrorGain(.4);
+            /* setting lambda lower than this can cause tracking problems
+             * along the trajectory on secondary variables (e.g. the one that
+             * we want fixed at 0) */
+            l_arm_task->setLambda(.3);
+        }
+    }
+
+    previous_pose = current_pose;
+    desired_twist = trajectory->Vel(0.0);
+
+    std::chrono::duration<double> t_loop = std::chrono::duration<double>(dt);
+    double t_compute = 0;
+
+    double previous_norm = -1;
+    double current_norm;
+    double previous_error;
+    if(trajType == KDL::Path::ID_LINE) {
+        previous_error = desired_pose.p[0] - current_pose.p[0];
+    } else {
+        desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
+        current_pose.M.GetRPY(R,P,Y);
+        previous_error = Rdes - R;
+    }
+
+    _log << "% t,\t"
+         << "estimated_twist,\t"
+         << "desired_twist,\t"
+         << "current_pose,\t"
+         << "desired_pose,\t"
+         << "t_update_and_solve,\t"
+         << "t_loop(333Hz)" << std::endl;
+    _log << "pos_des_x = [" << std::endl;
+
+    std::chrono::time_point<std::chrono::system_clock> t_begin;
+    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop.count())
+    {
+        t_begin = std::chrono::system_clock::now();
+        Eigen::MatrixXd desired_pose_y(4,4); desired_pose_y.setZero(4,4);
+        Eigen::VectorXd desired_twist_y(6); desired_twist_y.setZero(6);
+        desired_pose = trajectory->Pos(t);
+        desired_twist = trajectory->Vel(t);
+        l_arm_task->setReference(desired_pose, desired_twist*t_loop.count());
+
+
+        // initializing previous norm
+        if(previous_norm < 0){
+
+            Eigen::VectorXd twist(6);
+            twist<<Eigen::Vector3d(desired_twist.vel.data), Eigen::Vector3d(desired_twist.rot.data);
+
+            Eigen::VectorXd b = twist*t_loop.count() + l_arm_task->getLambda()*l_arm_task->getError();
+            previous_norm = sqrt(b.squaredNorm());
+            //previous_norm = sqrt(l_arm_task->getb().squaredNorm());
+        }
+
+        // checking variation of gain during trajectory following
+        if(t>=6)
+            l_arm_task->setLambda(.6);
+
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        l_arm_task->update(q);
+        postural_task->update(q);
+        bounds->update(q);
+
+        EXPECT_TRUE(sot->solve(dq));
+        q += dq;
+
+        current_pose_y = l_arm_task->getActualPose();
+        l_arm_task->getActualPose(current_pose);
+
+
+        std::chrono::duration<double> t_compute = std::chrono::system_clock::now() - t_begin;
+
+        std::chrono::duration<double> time_for_sleep = std::chrono::duration<double>(dt) - t_compute;
+
+        std::this_thread::sleep_for(time_for_sleep);
+        t_loop = std::chrono::system_clock::now() - t_begin;
+
+        /* first order fading filter -> to implement in Matlab
+        double beta = 0.3; double G = 1-beta;
+        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
+        */
+        double twist_measure;
+        if(trajType == KDL::Path::ID_LINE) {
+            twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop.count();
+        } else {
+            current_pose.M.GetRPY(R,P,Y);
+            previous_pose.M.GetRPY(Rprev,Pprev,Yprev);
+            twist_measure = (R - Rprev)/t_loop.count();
+        }
+
+        twist_estimate[0] = twist_measure;
+
+        current_norm = sqrt(l_arm_task->getb().squaredNorm());
+
+        if(trajType == KDL::Path::ID_LINE) {
+            _log << t << ",\t"
+                 << twist_estimate[0] << ",\t"
+                 << desired_twist[0]   << ",\t"
+                 << current_pose.p[0]  << ",\t"
+                 << desired_pose.p[0]  << ",\t"
+                 << t_compute.count()          << ",\t"
+                 << t_loop.count()             << ",\t"
+                 << current_norm       << ";" << std::endl;
+        } else {
+            desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
+            _log << t << ",\t"
+                 << twist_estimate[0] << ",\t"
+                 << desired_twist.rot.x()   << ",\t"
+                 << R  << ",\t"
+                 << Rdes  << ",\t"
+                 << t_compute.count()          << ",\t"
+                 << t_loop.count()             << ",\t"
+                 << current_norm       << ";" << std::endl;
+        }
+
+        // also velocities and accelerations are available !
+        previous_pose = current_pose;
+        previous_twist_estimate[0] = twist_estimate[0];
+
+        if(!hasInitialError) {
+            if(trajType == KDL::Path::ID_LINE) {
+                EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;;
+                EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 5e-4) << " @t= " << t;;
+            } else {
+                EXPECT_NEAR(R, Rdes,3e-3) << " @t= " << t;;
+                EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1.5e-2) << " @t= " << t;;
+            }
+        } else {
+            if(t<=1.3) {
+                double current_error;
+
+                if(trajType == KDL::Path::ID_LINE) {
+                    current_error = desired_pose.p[0] - current_pose.p[0];
+
+                    /* error should always decrease, or at least accept
+                     * a local increment of 1e-4 */
+                    EXPECT_GE(previous_error - current_error, -1e-4) << " @t= " << t;
+                    EXPECT_GE(previous_norm - current_norm, -8e-4) << " @t= " << t;
+
+                } else {
+                    desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
+                    current_pose.M.GetRPY(R,P,Y);
+                    current_error = Rdes - R;
+
+                    /* error should always decrease, or at least accept
+                     * a local increment of 1e-4 */
+                    EXPECT_GE(previous_error - current_error, -3e-3) << " @t= " << t;
+                    EXPECT_GE(previous_norm - current_norm, -2.4e-2) << " @t= " << t;
+                }
+
+                previous_error = current_error;
+                previous_norm = current_norm;
+            } else {
+                if(trajType == KDL::Path::ID_LINE) {
+                    EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1.5e-4) << " @t= " << t;
+                    EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1.5e-3) << " @t= " << t;
+                } else {
+                    EXPECT_NEAR(R, Rdes,2e-3);
+                    EXPECT_NEAR(sqrt(l_arm_task->getb().squaredNorm()), 0, 1e-2);
+                }
+            }
+        }
+    }
+
+    _log << "];" << std::endl;
+
+    _log << "figure" << std::endl;
+    _log << "subplot(2,1,1);" << std::endl;
+    _log << "%moving average filter" << std::endl;
+    _log << "filt_window = 25;" << std::endl;
+    _log << "a = 1; b = 1/filt_window*ones(1,filt_window);" << std::endl;
+    _log << "twist_estimate = filter(b,a,pos_des_x(:,2));" << std::endl;
+    _log << "plot(pos_des_x(:,1),[twist_estimate, pos_des_x(:,3)]);" << std::endl;
+    _log << "legend('Actual Velocity Profile','Desired Velocity Profile');" << std::endl;
+    _log << "subplot(2,1,2);" << std::endl;
+    _log << "plot(pos_des_x(:,1),pos_des_x(:,4:5));" << std::endl;
+    _log << "legend('Actual Position','Desired Position','Location','SouthEast');" << std::endl;
+    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,6:7)); title('Computation time'); legend('Solve time','loop time (333Hz)');" << std::endl;
+    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,8)); title('Tracking Error'); legend('Cartesian 6d tracking error');" << std::endl;
+
+}
 
 
 
@@ -1077,13 +1059,13 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 
 }
 
-//INSTANTIATE_TEST_CASE_P(FFTests,
-//                        testQPOases_CartesianFF,
-//                        ::testing::Values(
-//    std::make_pair(KDL::Path::ID_LINE,false),
-//    std::make_pair(KDL::Path::ID_LINE, true),
-//    std::make_pair(KDL::Path::ID_CIRCLE, true),
-//    std::make_pair(KDL::Path::ID_CIRCLE, false)));
+INSTANTIATE_TEST_CASE_P(FFTests,
+                        testQPOases_CartesianFF,
+                        ::testing::Values(
+    std::make_pair(KDL::Path::ID_LINE,false),
+    std::make_pair(KDL::Path::ID_LINE, true),
+    std::make_pair(KDL::Path::ID_CIRCLE, true),
+    std::make_pair(KDL::Path::ID_CIRCLE, false)));
 
 INSTANTIATE_TEST_CASE_P(FFTests,
                         testQPOases_CoMAndPosturalFF,
