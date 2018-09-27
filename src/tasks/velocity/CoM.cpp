@@ -169,3 +169,18 @@ void OpenSoT::tasks::velocity::CoM::_log(XBot::MatLogger::Ptr logger)
 {
     logger->add(getTaskID() + "_position_err", _positionError);
 }
+
+bool OpenSoT::tasks::velocity::CoM::reset()
+{
+    _robot.getCOM(_actualPosition);
+
+    _robot.getCOMJacobian(_A);
+
+    this->_desiredVelocity.setZero(3);
+
+    _desiredPosition = _actualPosition;
+
+    this->update_b();
+
+    return true;
+}

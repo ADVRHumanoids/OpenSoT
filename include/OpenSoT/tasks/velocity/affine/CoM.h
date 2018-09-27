@@ -147,6 +147,12 @@
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
                 Eigen::Vector3d getError();
+
+                /**
+                 * @brief reset set as actual Cartesian reference the actual pose
+                 * @return
+                 */
+                bool reset();
                 
                 virtual void _log(XBot::MatLogger::Ptr logger);
 
