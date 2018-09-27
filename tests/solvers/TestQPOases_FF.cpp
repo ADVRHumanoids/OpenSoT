@@ -26,6 +26,7 @@
 #include <fstream>
 #include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #include <yarp/os/SystemClock.h>
+#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 
 #include <XBotInterface/ModelInterface.h>
 #include <chrono>
@@ -577,257 +578,255 @@ static void null_deleter(iDynUtils *) {}
 
 
 
-//TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
-//{
-//    bool hasInitialError = GetParam();
+TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
+{
+    bool hasInitialError = GetParam();
 
-//#ifdef TRY_ON_SIMULATOR
-//    yarp::os::Network init;
-//    ComanUtils robot("testCoMFF");
-//#endif
+    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 
-//    iDynUtils model("coman",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-//                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-//    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
-//    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-//            (XBot::ModelInterface::getModel(_path_to_cfg));
-//    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
+    std::string _path_to_cfg = robotology_root + relative_path;
 
-//    if(_model_ptr)
-//        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-//    else
-//        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    if(_model_ptr)
+        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+    else
+        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-//    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-//    model.updateiDynTreeModel(q, true);
-//    model.switchAnchorAndFloatingBase("l_sole");
+Eigen::Affine3d floating_base_pose;
+_model_ptr->getFloatingBasePose(floating_base_pose);
+std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
 
-//#ifdef TRY_ON_SIMULATOR
-//    robot.setPositionDirectMode();
-//    robot.move(q);
-//    yarp::os::Time::delay(3);
-//#endif
 
-//    // BOUNDS
+    // BOUNDS
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin, qmax);
+    OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
+            new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
 
-//    OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-//            new OpenSoT::constraints::velocity::JointLimits(q,
-//                        model.getJointBoundMax(),
-//                        model.getJointBoundMin()));
+    OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
+            new OpenSoT::constraints::velocity::VelocityLimits( 0.9,3e-3,q.size()));
 
-//    OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
-//            new OpenSoT::constraints::velocity::VelocityLimits( 0.9,3e-3,q.size()));
+    std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
+    bounds_list.push_back(boundsJointLimits);
+    bounds_list.push_back(boundsVelocityLimits);
 
-//    std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
-//    bounds_list.push_back(boundsJointLimits);
-//    bounds_list.push_back(boundsVelocityLimits);
+    OpenSoT::constraints::Aggregated::Ptr bounds(
+                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
-//    OpenSoT::constraints::Aggregated::Ptr bounds(
-//                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+    OpenSoT::tasks::velocity::CoM::Ptr com(
+                new OpenSoT::tasks::velocity::CoM(q, *(_model_ptr)));
 
-//    OpenSoT::tasks::velocity::CoM::Ptr com(
-//                new OpenSoT::tasks::velocity::CoM(q, *(_model_ptr)));
+    // Postural Task
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
+            new OpenSoT::tasks::velocity::Postural(q));
 
-//    // Postural Task
-//    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-//            new OpenSoT::tasks::velocity::Postural(q));
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
-//    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+    stack_of_tasks.push_back(com);
+    stack_of_tasks.push_back(postural_task);
 
-//    stack_of_tasks.push_back(com);
-//    stack_of_tasks.push_back(postural_task);
-
-//    OpenSoT::solvers::iHQP::Ptr sot(
-//        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
+    OpenSoT::solvers::iHQP::Ptr sot(
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
 
 
 
-//    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
+    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
 
-//    double dt=3e-3;
+    double dt=3e-3;
 
-//    KDL::Frame current_pose, previous_pose, desired_pose;
-//    KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
-//    Eigen::Vector3d current_position_y;
-
-
-//    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-//    model.updateiDynTreeModel(q, true);
-//    com->update(q);
-//    postural_task->update(q);
-//    bounds->update(q);
+    KDL::Frame current_pose, previous_pose, desired_pose;
+    KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
+    Eigen::Vector3d current_position_y;
 
 
-//    if(!hasInitialError) {
-//        /**********************************************
-//         * COMMANDING 5cm FORWARD FROM CURRENT POSITION
-//         * meaning zero error at trajectory begin
-//         ********************************************/
+    q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-//        _log.close();
-//        _log.open("testQPOases_FF_CoM_5cmfw_noerr.m");
-
-//        current_position_y = com->getActualPosition();
-//        current_pose.p.x(current_position_y(0));
-//        current_pose.p.y(current_position_y(1));
-//        current_pose.p.z(current_position_y(2));
-//        get5cmFwdLinearTraj(current_pose);
-//        desired_pose = trajectory->Pos(0.0);
-
-//        com->setLambda(.6);
-
-//    } else {
-//        /**********************************************
-//         * COMMANDING 5cm FORWARD FROM PERTURBED POSITION
-//         * 1cm error at trajectory startup
-//         ********************************************/
-
-//        _log.close();
-//        _log.open("testQPOases_FF_CoM_5cmfw_1cmerr.m");
-
-//        current_position_y = com->getActualPosition();
-//        current_pose.p.x(current_position_y(0));
-//        current_pose.p.y(current_position_y(1));
-//        current_pose.p.z(current_position_y(2));
-//        desired_pose = current_pose;
-//        desired_pose.p[0] = current_pose.p[0] + .01;
-//        get5cmFwdLinearTraj(desired_pose);
-//        desired_pose = trajectory->Pos(0.0);
-
-//        /* setting lambda lower than this can cause tracking problems
-//         * along the trajectory on secondary variables (e.g. the one that
-//         * we want fixed at 0) */
-//        com->setLambda(.1);
-//    }
-
-//    previous_pose = current_pose;
-//    desired_twist = trajectory->Vel(0.0);
-
-//    double t_loop = dt;
-//    double t_compute = 0;
-
-//    double previous_norm = -1;
-//    double current_norm;
-//    double previous_error = desired_pose.p[0] - current_pose.p[0];
-
-//    _log << "% t,\t"
-//         << "estimated_twist,\t"
-//         << "desired_twist,\t"
-//         << "current_pose,\t"
-//         << "desired_pose,\t"
-//         << "t_update_and_solve,\t"
-//         << "t_loop(333Hz)" << std::endl;
-//    _log << "pos_des_x = [" << std::endl;
-
-//    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
-//    {
-//        double t_begin = yarp::os::SystemClock::nowSystem();
-//        yarp::sig::Vector desired_position_y(3,0.0);
-//        yarp::sig::Vector desired_twist_y(3,0.0);
-//        desired_pose = trajectory->Pos(t);
-//        desired_twist = trajectory->Vel(t);
-//        desired_position_y(0) = desired_pose.p.x();
-//        desired_position_y(1) = desired_pose.p.y();
-//        desired_position_y(2) = desired_pose.p.z();
-//        desired_twist_y(0) = desired_twist.vel.x();
-//        desired_twist_y(1) = desired_twist.vel.y();
-//        desired_twist_y(2) = desired_twist.vel.z();
-//        com->setReference(desired_pose.p, desired_twist.vel*t_loop);
-
-//        // initializing previous norm
-//        if(previous_norm < 0)
-//        {
-//            com->update(Eigen::VectorXd(1));
-//            previous_norm = sqrt(com->getb().squaredNorm());
-//        }
-
-//        // checking variation of gain during trajectory following
-//        if(t>=6)
-//            com->setLambda(.6);
-
-//        model.updateiDynTreeModel(q, true);
-
-//        com->update(q);
-//        postural_task->update(q);
-//        bounds->update(q);
-
-//        EXPECT_TRUE(sot->solve(dq));
-//        q += dq;
-
-//        current_position_y = com->getActualPosition();
-//        current_pose.p.x(current_position_y(0));
-//        current_pose.p.y(current_position_y(1));
-//        current_pose.p.z(current_position_y(2));
+    com->update(q);
+    postural_task->update(q);
+    bounds->update(q);
 
 
-//        t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
-//        yarp::os::SystemClock::delaySystem(dt-t_compute);
-//        t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
+    if(!hasInitialError) {
+        /**********************************************
+         * COMMANDING 5cm FORWARD FROM CURRENT POSITION
+         * meaning zero error at trajectory begin
+         ********************************************/
 
-//        /* first order fading filter -> to implement in Matlab
-//        double beta = 0.3; double G = 1-beta;
-//        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
-//        twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
-//        */
-//        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
-//        twist_estimate[0] = twist_measure;
+        _log.close();
+        _log.open("testQPOases_FF_CoM_5cmfw_noerr.m");
 
-//        current_norm = sqrt(com->getb().squaredNorm());
+        current_position_y = com->getActualPosition();
+        current_pose.p.x(current_position_y(0));
+        current_pose.p.y(current_position_y(1));
+        current_pose.p.z(current_position_y(2));
+        get5cmFwdLinearTraj(current_pose);
+        desired_pose = trajectory->Pos(0.0);
 
-//        _log << t << ",\t"
-//             << twist_estimate[0] << ",\t"
-//             << desired_twist[0]   << ",\t"
-//             << current_pose.p[0]  << ",\t"
-//             << desired_pose.p[0]  << ",\t"
-//             << t_compute          << ",\t"
-//             << t_loop             << ",\t"
-//             << current_norm       << ";" << std::endl;
-//        // also velocities and accelerations are available !
-//        previous_pose = current_pose;
-//        previous_twist_estimate[0] = twist_estimate[0];
+        com->setLambda(.6);
 
-//        if(!hasInitialError) {
-//            EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4);
-//            EXPECT_NEAR(current_norm, 0, 5e-4);
-//        } else {
-//            if(t<=1.3) {
-//                double current_error = desired_pose.p[0] - current_pose.p[0];
+    } else {
+        /**********************************************
+         * COMMANDING 5cm FORWARD FROM PERTURBED POSITION
+         * 1cm error at trajectory startup
+         ********************************************/
 
-//                /* error should always decrease, or at least accept
-//                 * a local increment of 1e-4 */
-//                EXPECT_GE(previous_error - current_error, -1e-4) << " @t= " << t;
-//                EXPECT_GE(previous_norm - current_norm, -8e-4) << " @t= " << t;
+        _log.close();
+        _log.open("testQPOases_FF_CoM_5cmfw_1cmerr.m");
 
-//                previous_error = current_error;
-//                previous_norm = current_norm;
-//            } else {
+        current_position_y = com->getActualPosition();
+        current_pose.p.x(current_position_y(0));
+        current_pose.p.y(current_position_y(1));
+        current_pose.p.z(current_position_y(2));
+        desired_pose = current_pose;
+        desired_pose.p[0] = current_pose.p[0] + .01;
+        get5cmFwdLinearTraj(desired_pose);
+        desired_pose = trajectory->Pos(0.0);
 
-//                EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;
-//                EXPECT_NEAR(current_norm, 0, 1.3e-3) << " @t= " << t;
-//            }
-//        }
-//    }
+        /* setting lambda lower than this can cause tracking problems
+         * along the trajectory on secondary variables (e.g. the one that
+         * we want fixed at 0) */
+        com->setLambda(.1);
+    }
 
-//    _log << "];" << std::endl;
+    previous_pose = current_pose;
+    desired_twist = trajectory->Vel(0.0);
 
-//    _log << "figure" << std::endl;
-//    _log << "subplot(2,1,1);" << std::endl;
-//    _log << "%moving average filter" << std::endl;
-//    _log << "filt_window = 25;" << std::endl;
-//    _log << "a = 1; b = 1/filt_window*ones(1,filt_window);" << std::endl;
-//    _log << "twist_estimate = filter(b,a,pos_des_x(:,2));" << std::endl;
-//    _log << "plot(pos_des_x(:,1),[twist_estimate, pos_des_x(:,3)]);" << std::endl;
-//    _log << "legend('Actual Velocity Profile','Desired Velocity Profile');" << std::endl;
-//    _log << "subplot(2,1,2);" << std::endl;
-//    _log << "plot(pos_des_x(:,1),pos_des_x(:,4:5));" << std::endl;
-//    _log << "legend('Actual Position','Desired Position','Location','SouthEast');" << std::endl;
-//    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,6:7)); title('Computation time'); legend('Solve time','loop time (333Hz)');" << std::endl;
-//    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,8)); title('Tracking Error'); legend('CoM 3d tracking error');" << std::endl;
+    std::chrono::duration<double> t_loop = std::chrono::duration<double>(dt);
+    double t_compute = 0;
 
-//}
+    double previous_norm = -1;
+    double current_norm;
+    double previous_error = desired_pose.p[0] - current_pose.p[0];
+
+    _log << "% t,\t"
+         << "estimated_twist,\t"
+         << "desired_twist,\t"
+         << "current_pose,\t"
+         << "desired_pose,\t"
+         << "t_update_and_solve,\t"
+         << "t_loop(333Hz)" << std::endl;
+    _log << "pos_des_x = [" << std::endl;
+
+    std::chrono::time_point<std::chrono::system_clock> t_begin;
+    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop.count())
+    {
+        t_begin = std::chrono::system_clock::now();
+        Eigen::Vector3d desired_position_y; desired_position_y.setZero();
+        Eigen::Vector3d desired_twist_y; desired_twist_y.setZero();
+        desired_pose = trajectory->Pos(t);
+        desired_twist = trajectory->Vel(t);
+        desired_position_y(0) = desired_pose.p.x();
+        desired_position_y(1) = desired_pose.p.y();
+        desired_position_y(2) = desired_pose.p.z();
+        desired_twist_y(0) = desired_twist.vel.x();
+        desired_twist_y(1) = desired_twist.vel.y();
+        desired_twist_y(2) = desired_twist.vel.z();
+        com->setReference(desired_pose.p, desired_twist.vel*t_loop.count());
+
+        // initializing previous norm
+        if(previous_norm < 0)
+        {
+            com->update(Eigen::VectorXd(1));
+            previous_norm = sqrt(com->getb().squaredNorm());
+        }
+
+        // checking variation of gain during trajectory following
+        if(t>=6)
+            com->setLambda(.6);
+
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        com->update(q);
+        postural_task->update(q);
+        bounds->update(q);
+
+        EXPECT_TRUE(sot->solve(dq));
+        q += dq;
+
+        current_position_y = com->getActualPosition();
+        current_pose.p.x(current_position_y(0));
+        current_pose.p.y(current_position_y(1));
+        current_pose.p.z(current_position_y(2));
+
+
+        std::chrono::duration<double> t_compute = std::chrono::system_clock::now() - t_begin;
+
+        std::chrono::duration<double> time_for_sleep = std::chrono::duration<double>(dt) - t_compute;
+
+        std::this_thread::sleep_for(time_for_sleep);
+        t_loop = std::chrono::system_clock::now() - t_begin;
+
+        /* first order fading filter -> to implement in Matlab
+        double beta = 0.3; double G = 1-beta;
+        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
+        */
+        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop.count();
+        twist_estimate[0] = twist_measure;
+
+        current_norm = sqrt(com->getb().squaredNorm());
+
+        _log << t << ",\t"
+             << twist_estimate[0] << ",\t"
+             << desired_twist[0]   << ",\t"
+             << current_pose.p[0]  << ",\t"
+             << desired_pose.p[0]  << ",\t"
+             << t_compute.count()          << ",\t"
+             << t_loop.count()             << ",\t"
+             << current_norm       << ";" << std::endl;
+        // also velocities and accelerations are available !
+        previous_pose = current_pose;
+        previous_twist_estimate[0] = twist_estimate[0];
+
+        if(!hasInitialError) {
+            EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4);
+            EXPECT_NEAR(current_norm, 0, 5e-4);
+        } else {
+            if(t<=1.3) {
+                double current_error = desired_pose.p[0] - current_pose.p[0];
+
+                /* error should always decrease, or at least accept
+                 * a local increment of 1e-4 */
+                EXPECT_GE(previous_error - current_error, -1e-4) << " @t= " << t;
+                EXPECT_GE(previous_norm - current_norm, -8e-4) << " @t= " << t;
+
+                previous_error = current_error;
+                previous_norm = current_norm;
+            } else {
+
+                EXPECT_NEAR(current_pose.p[0], desired_pose.p[0],1e-4) << " @t= " << t;
+                EXPECT_NEAR(current_norm, 0, 1.3e-3) << " @t= " << t;
+            }
+        }
+    }
+
+    _log << "];" << std::endl;
+
+    _log << "figure" << std::endl;
+    _log << "subplot(2,1,1);" << std::endl;
+    _log << "%moving average filter" << std::endl;
+    _log << "filt_window = 25;" << std::endl;
+    _log << "a = 1; b = 1/filt_window*ones(1,filt_window);" << std::endl;
+    _log << "twist_estimate = filter(b,a,pos_des_x(:,2));" << std::endl;
+    _log << "plot(pos_des_x(:,1),[twist_estimate, pos_des_x(:,3)]);" << std::endl;
+    _log << "legend('Actual Velocity Profile','Desired Velocity Profile');" << std::endl;
+    _log << "subplot(2,1,2);" << std::endl;
+    _log << "plot(pos_des_x(:,1),pos_des_x(:,4:5));" << std::endl;
+    _log << "legend('Actual Position','Desired Position','Location','SouthEast');" << std::endl;
+    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,6:7)); title('Computation time'); legend('Solve time','loop time (333Hz)');" << std::endl;
+    _log << "figure; plot(pos_des_x(:,1),pos_des_x(:,8)); title('Tracking Error'); legend('CoM 3d tracking error');" << std::endl;
+
+}
 
 
 
