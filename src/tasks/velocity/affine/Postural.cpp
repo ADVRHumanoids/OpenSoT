@@ -109,5 +109,13 @@ Eigen::VectorXd Postural::getActualPositions()
     return _x;
 }
 
+bool Postural::reset()
+{
+    _x_desired = _x;
+    _update(_x_desired);
+
+    return true;
+}
+
 
 

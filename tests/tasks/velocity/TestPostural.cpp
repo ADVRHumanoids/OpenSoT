@@ -131,6 +131,53 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
 
 }
 
+TEST_F(testPosturalTask, testReset)
+{
+    Eigen::VectorXd q(6); q.setZero();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        q[i] = getRandomAngle();
+
+    OpenSoT::tasks::velocity::Postural postural(q);
+
+    std::cout<<"INITIALIZATION: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
+    Eigen::VectorXd actual_q = postural.getActualPositions();
+    std::cout<<"actual_q: \n"<<actual_q<<std::endl;
+    Eigen::VectorXd reference_q = postural.getReference();
+    std::cout<<"reference_q: \n"<<reference_q<<std::endl;
+    std::cout<<"b: \n"<<postural.getb()<<std::endl;
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+    {
+        EXPECT_EQ(actual_q[i], reference_q[i]);
+        EXPECT_EQ(postural.getb()[i], 0.0);
+    }
+
+    std::cout<<"CHANGING q: ACTUAL AND REFERENCE DIFFERENT, b IS NOT 0"<<std::endl;
+    q.setRandom(q.size());
+
+    postural.update(q);
+
+    actual_q = postural.getActualPositions();
+    std::cout<<"actual_q: \n"<<actual_q<<std::endl;
+    reference_q = postural.getReference();
+    std::cout<<"reference_q: \n"<<reference_q<<std::endl;
+    std::cout<<"b: \n"<<postural.getb()<<std::endl;
+
+    std::cout<<"RESET: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
+    postural.reset();
+    actual_q = postural.getActualPositions();
+    std::cout<<"actual_q: \n"<<actual_q<<std::endl;
+    reference_q = postural.getReference();
+    std::cout<<"reference_q: \n"<<reference_q<<std::endl;
+    std::cout<<"b: \n"<<postural.getb()<<std::endl;
+
+    for(unsigned int i = 0; i < q.size(); ++i)
+    {
+        EXPECT_EQ(actual_q[i], reference_q[i]);
+        EXPECT_EQ(postural.getb()[i], 0.0);
+    }
+}
+
 }
 
 int main(int argc, char **argv) {
