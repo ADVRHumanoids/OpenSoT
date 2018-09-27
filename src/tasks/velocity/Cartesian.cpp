@@ -302,3 +302,11 @@ void Cartesian::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id + "_pos_actual", _actualPose.translation());
     logger->add(_task_id + "_pose_ref", _desiredPose.matrix());
 }
+
+bool Cartesian::reset()
+{
+    _is_initialized = false;
+    _update(Eigen::VectorXd(1));
+
+    return true;
+}

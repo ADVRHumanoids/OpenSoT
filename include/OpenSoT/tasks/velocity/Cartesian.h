@@ -195,6 +195,12 @@
                  * @return false if the distal link does not exists
                  */
                 bool setDistalLink(const std::string& distal_link);
+
+                /**
+                 * @brief reset set as actual Cartesian reference the actual pose
+                 * @return
+                 */
+                bool reset();
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

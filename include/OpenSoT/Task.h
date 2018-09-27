@@ -148,6 +148,17 @@
 
         }
 
+        /**
+         * @brief reset permits to reset a task and all related variables. The correctness of the implementation depends to the
+         * particular task. Default implementation does nothing and return false.
+         * @return false
+         */
+        virtual bool reset()
+        {
+            XBot::Logger::error("reset is not implemented for task %s \n", _task_id.c_str());
+            return false;
+        }
+
     private:
 
         /**
