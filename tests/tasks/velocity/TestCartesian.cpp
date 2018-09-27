@@ -565,6 +565,85 @@ TEST_F(testCartesianTask, testActiveJointsMask)
     std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
 }
 
+TEST_F(testCartesianTask, testReset)
+{
+    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
+    q_whole.setZero(q_whole.size());
+
+
+    q_whole[_model_ptr->getDofIndex("LHipSag")] = -20.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LHipLat")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LHipYaw")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LKneeSag")] = -80.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LAnkLat")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -10.0*M_PI/180.0;
+
+    q_whole[_model_ptr->getDofIndex("WaistLat")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("WaistSag")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("WaistYaw")] = -10.0*M_PI/180.0;
+
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
+                                                 q_whole,
+                                                 *(_model_ptr.get()),
+                                                 "torso",
+                                                 "l_sole");
+
+    std::cout<<"INITIALIZATION: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
+    Eigen::MatrixXd actual_pose = cartesian.getActualPose();
+    std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
+    Eigen::MatrixXd reference_pose = cartesian.getReference();
+    std::cout<<"reference_pose: \n"<<reference_pose<<std::endl;
+    std::cout<<"b: \n"<<cartesian.getb()<<std::endl;
+
+    for(unsigned int i = 0; i < 4; ++i)
+    {
+        for(unsigned int j = 0; j < 4; ++j)
+            EXPECT_EQ(actual_pose(i,j), reference_pose(i,j));
+    }
+
+
+    for(unsigned int i = 0; i < 6; ++i)
+        EXPECT_EQ(cartesian.getb()[i], 0);
+
+
+    std::cout<<"CHANGING q: ACTUAL AND REFERENCE DIFFERENT, b IS NOT 0"<<std::endl;
+    q_whole.setRandom(q_whole.size());
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+    cartesian.update(q_whole);
+
+    actual_pose = cartesian.getActualPose();
+    std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
+    reference_pose = cartesian.getReference();
+    std::cout<<"reference_pose: \n"<<reference_pose<<std::endl;
+    std::cout<<"b: \n"<<cartesian.getb()<<std::endl;
+
+    std::cout<<"RESET: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
+    EXPECT_TRUE(cartesian.reset());
+    actual_pose = cartesian.getActualPose();
+    std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
+    reference_pose = cartesian.getReference();
+    std::cout<<"reference_pose: \n"<<reference_pose<<std::endl;
+    std::cout<<"b: \n"<<cartesian.getb()<<std::endl;
+
+    for(unsigned int i = 0; i < 4; ++i)
+    {
+        for(unsigned int j = 0; j < 4; ++j)
+            EXPECT_EQ(actual_pose(i,j), reference_pose(i,j));
+    }
+
+
+    for(unsigned int i = 0; i < 6; ++i)
+        EXPECT_EQ(cartesian.getb()[i], 0);
+
+
+}
+
 }
 
 int main(int argc, char **argv) {
