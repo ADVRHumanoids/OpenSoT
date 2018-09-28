@@ -78,14 +78,14 @@
 
                 bool _is_initialized;
 
-                Eigen::VectorXd _error;
+                Eigen::Vector6d _error;
 
                 Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
 
             public:
 
-                Eigen::VectorXd positionError;
-                Eigen::VectorXd orientationError;
+                Eigen::Vector3d positionError;
+                Eigen::Vector3d orientationError;
 
                 /*********** TASK PARAMETERS ************/
 
@@ -180,7 +180,7 @@
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
                  * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
                  */
-                const Eigen::VectorXd getError() const;
+                const Eigen::Vector6d getError() const;
 
                 /**
                  * @brief setBaseLink change the base link of the task

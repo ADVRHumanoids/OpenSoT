@@ -222,13 +222,13 @@ void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
     }
 }
 
-const Eigen::VectorXd OpenSoT::tasks::velocity::Cartesian::getError() const
+const Eigen::Vector6d OpenSoT::tasks::velocity::Cartesian::getError() const
 {
     return _error;
 }
 
 void Cartesian::update_b() {
-    cartesian_utils::computeCartesianError(_actualPose.matrix(), _desiredPose.matrix(),
+    cartesian_utils::computeCartesianError(_actualPose, _desiredPose,
                                            positionError, orientationError);
 
     _error<<positionError,-_orientationErrorGain*orientationError;

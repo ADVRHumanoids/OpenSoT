@@ -118,6 +118,25 @@ void cartesian_utils::computeCartesianError(const Eigen::MatrixXd &T,
     orientation_error(2) = xerr_o.z();
 }
 
+void cartesian_utils::computeCartesianError(const Eigen::Affine3d &T,
+                                  const Eigen::Affine3d &Td,
+                                  Eigen::Vector3d& position_error,
+                                  Eigen::Vector3d& orientation_error)
+{
+    Eigen::Quaterniond q(T.rotation());
+    Eigen::Quaterniond qd(Td.rotation());
+
+    position_error = Td.translation()- T.translation();
+
+    //This is needed to move along the short path in the quaternion error
+    if(quaternion::dot(q, qd) < 0.0)
+        orientation_error = quaternion::error(-q.x(), -q.y(), -q.z(), -q.w(),
+                                              qd.x(), qd.y(), qd.z(), qd.w());
+    else
+        orientation_error = quaternion::error(q.x(),  q.y(),  q.z(),  q.w(),
+                                              qd.x(), qd.y(), qd.z(), qd.w());
+}
+
 Eigen::VectorXd cartesian_utils::computeGradient(const Eigen::VectorXd &x,
                                                     CostFunction& fun,
                                                     const double& step) {
