@@ -53,6 +53,7 @@ public:
      * @param desiredGaze pose of the object to observe in base_link
      */
     void setGaze(const Eigen::Affine3d& desiredGaze);
+    [[deprecated]]
     void setGaze(const Eigen::MatrixXd& desiredGaze);
     void setGaze(const KDL::Frame& desiredGaze);
 
