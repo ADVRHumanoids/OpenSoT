@@ -22,8 +22,6 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-#define LAMBDA_THS 1E-12
-
 Cartesian::Cartesian(std::string task_id,
                      const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
@@ -91,6 +89,12 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     /**********************************************************************/
 }
 
+void Cartesian::setReference(const Eigen::Affine3d& desiredPose)
+{
+    _desiredPose = desiredPose;
+    this->update_b();
+}
+
 void Cartesian::setReference(const Eigen::MatrixXd& desiredPose) {
     assert(desiredPose.rows() == 4);
     assert(desiredPose.cols() == 4);
@@ -109,6 +113,14 @@ void Cartesian::setReference(const KDL::Frame& desiredPose)
     _desiredPose(2,0) = desiredPose.M(2,0); _desiredPose(2,1) = desiredPose.M(2,1); _desiredPose(2,2) = desiredPose.M(2,2);
 
     _desiredTwist.setZero(6);
+    this->update_b();
+}
+
+void Cartesian::setReference(const Eigen::Affine3d& desiredPose,
+                  const Eigen::Vector6d& desiredTwist)
+{
+    _desiredPose = desiredPose;
+    _desiredTwist = desiredTwist;
     this->update_b();
 }
 
@@ -140,6 +152,11 @@ void Cartesian::setReference(const KDL::Frame& desiredPose,
     this->update_b();
 }
 
+const void Cartesian::getReference(Eigen::Affine3d& desiredPose) const
+{
+    desiredPose = _desiredPose;
+}
+
 const Eigen::MatrixXd Cartesian::getReference() const {
     return _desiredPose.matrix();
 }
@@ -151,6 +168,13 @@ const void Cartesian::getReference(KDL::Frame& desiredPose) const {
     desiredPose.M(0,0) = _desiredPose(0,0); desiredPose.M(0,1) = _desiredPose(0,1); desiredPose.M(0,2) = _desiredPose(0,2);
     desiredPose.M(1,0) = _desiredPose(1,0); desiredPose.M(1,1) = _desiredPose(1,1); desiredPose.M(1,2) = _desiredPose(1,2);
     desiredPose.M(2,0) = _desiredPose(2,0); desiredPose.M(2,1) = _desiredPose(2,1); desiredPose.M(2,2) = _desiredPose(2,2);
+}
+
+void Cartesian::getReference(Eigen::Affine3d& desiredPose,
+                  Eigen::Vector6d& desiredTwist) const
+{
+    desiredPose = _desiredPose;
+    desiredTwist = _desiredTwist;
 }
 
 void OpenSoT::tasks::velocity::Cartesian::getReference(Eigen::MatrixXd &desiredPose,
@@ -172,6 +196,11 @@ void Cartesian::getReference(KDL::Frame& desiredPose,
 
     desiredTwist[0] = _desiredTwist(0); desiredTwist[1] = _desiredTwist(1); desiredTwist[2] = _desiredTwist(2);
     desiredTwist[3] = _desiredTwist(3); desiredTwist[4] = _desiredTwist(4); desiredTwist[5] = _desiredTwist(5);
+}
+
+const void Cartesian::getActualPose(Eigen::Affine3d& actual_pose) const
+{
+    actual_pose = _actualPose;
 }
 
 const Eigen::MatrixXd Cartesian::getActualPose() const
@@ -270,16 +299,14 @@ bool OpenSoT::tasks::velocity::Cartesian::setDistalLink(const std::string& dista
         return false;
     }
     
-    Eigen::Affine3d base_T_distal;
-    
-    if(!_robot.getPose(distal_link, _base_link, base_T_distal)){
+    if(!_robot.getPose(distal_link, _base_link, _base_T_distal)){
         std::cerr << "Error in " << __func__ << ": base link -> distal link transform cannot be obtained." << std::endl;
         return false;
     }
     
     _distal_link = distal_link;
     
-    setReference(base_T_distal.matrix());
+    setReference(_base_T_distal);
 
     return true;
 }
