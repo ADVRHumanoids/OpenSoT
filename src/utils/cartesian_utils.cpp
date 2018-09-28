@@ -23,13 +23,12 @@
 
 #define toDeg(X) (X*180.0/M_PI)
 
-Eigen::VectorXd cartesian_utils::computeCapturePoint(const Eigen::VectorXd& floating_base_velocity,
-                                                     const Eigen::VectorXd& com_velocity,
+Eigen::VectorXd cartesian_utils::computeCapturePoint(const Eigen::VectorXd& com_velocity,
                                                      const Eigen::VectorXd& com_pose)
 {
     Eigen::VectorXd cp(3); cp.setZero(3);
 
-    Eigen::VectorXd com_velocity_ = com_velocity + floating_base_velocity;
+    Eigen::VectorXd com_velocity_ = com_velocity;
 
     double g = 9.81;
 

@@ -273,8 +273,7 @@ public:
 
     /**
      * @brief computeCapturePoint computes the capture point position in world frame
-     * @param floating_base_velocity is the velocity of the floating base in world frame
-     * @param com_velocity is the velocity of the com in world frame (computed only by joint values)
+     * @param com_velocity is the velocity of the com in world frame
      * @param com_pose_z is the height of the com in world frame
      * @return capture point in world frame computed as:
      *
@@ -282,9 +281,8 @@ public:
      *
      * as in "Capture Point: A Step toward Humanoid Push Recovery" by Jerry Pratt et al.
      */
-    static Eigen::VectorXd computeCapturePoint(const Eigen::VectorXd& floating_base_velocity,
-                                                 const Eigen::VectorXd& com_velocity,
-                                                 const Eigen::VectorXd& com_pose);
+    static Eigen::VectorXd computeCapturePoint(const Eigen::VectorXd& com_velocity,
+                                               const Eigen::VectorXd& com_pose);
 
     /**
      * @brief computeFootZMP compute the MEASURED ZMP for a foot in contact, given forces and torques measured
