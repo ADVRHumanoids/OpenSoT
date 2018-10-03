@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/velocity/Gaze.h>
-
+#define GAZE_THRESHOLD 0.2 //[m]
 
 using namespace OpenSoT::tasks::velocity;
 
@@ -73,10 +73,12 @@ void Gaze::setGaze(const Eigen::Affine3d &desiredGaze)
     _tmp_vector(2) = _gaze_T_obj.translation().z();
 
     _gaze_goal = _gaze_goal.Identity();
-    cartesian_utils::computePanTiltMatrix(_tmp_vector, _gaze_goal);
+
+    if(_tmp_vector.norm() >= GAZE_THRESHOLD){
+        cartesian_utils::computePanTiltMatrix(_tmp_vector, _gaze_goal);
     //cartesian_utils::computePanTiltMatrix(gaze_T_obj.subcol(0, 3, 3), gaze_goal);
 
-    _cartesian_task->setReference(_bl_T_gaze_kdl*_gaze_goal);
+        _cartesian_task->setReference(_bl_T_gaze_kdl*_gaze_goal);}
 }
 
 void Gaze::setOrientationErrorGain(const double& orientationErrorGain)
@@ -122,4 +124,9 @@ std::vector<bool> Gaze::getActiveJointsMask()
 bool Gaze::setActiveJointsMask(const std::vector<bool> &active_joints_mask)
 {
     return _subtask->setActiveJointsMask(active_joints_mask);
+}
+
+bool Gaze::setBaseLink(const std::string& base_link)
+{
+    return _cartesian_task->setBaseLink(base_link);
 }
