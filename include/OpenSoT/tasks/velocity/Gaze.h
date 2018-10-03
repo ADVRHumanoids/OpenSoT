@@ -116,6 +116,13 @@ public:
      */
     virtual void setLambda(double lambda);
 
+    /**
+     * @brief setBaseLink change the base link of the task
+     * @param base_link the new base link
+     * @return false if the base link does not exists
+     */
+    bool setBaseLink(const std::string& base_link);
+
 private:
     std::string _distal_link;
     Cartesian::Ptr _cartesian_task;
