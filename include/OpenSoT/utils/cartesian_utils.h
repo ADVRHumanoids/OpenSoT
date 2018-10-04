@@ -105,11 +105,6 @@ public:
         return a.w*b.w + a.x*b.x + a.y*b.y + a.z*b.z;
     }
 
-    static double dot(const Eigen::Quaterniond& a, const Eigen::Quaterniond& b)
-    {
-        return a.w()*b.w() + a.x()*b.x() + a.y()*b.y() + a.z()*b.z();
-    }
-
     /**
      * @brief operator * product between a quaternion and a scalar
      * @param a scalar

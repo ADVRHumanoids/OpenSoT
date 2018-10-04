@@ -129,7 +129,7 @@ void cartesian_utils::computeCartesianError(const Eigen::Affine3d &T,
     position_error = Td.translation()- T.translation();
 
     //This is needed to move along the short path in the quaternion error
-    if(quaternion::dot(q, qd) < 0.0)
+    if(q.dot(qd) < 0.0)
         orientation_error = quaternion::error(-q.x(), -q.y(), -q.z(), -q.w(),
                                               qd.x(), qd.y(), qd.z(), qd.w());
     else
