@@ -7,9 +7,10 @@ using namespace OpenSoT::tasks::velocity;
 Gaze::Gaze(std::string task_id,
            const Eigen::VectorXd& x,
            XBot::ModelInterface &robot,
-           std::string base_link) :
+           std::string base_link,
+           std::string distal_link) :
     Task(task_id, x.size()),
-    _distal_link("gaze"),
+    _distal_link(distal_link),
     _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, base_link)),
     _subtask(new SubTask(_cartesian_task, Indices::range(4,5))),
     _robot(robot), _tmp_vector(3), _bl_T_gaze_kdl(),

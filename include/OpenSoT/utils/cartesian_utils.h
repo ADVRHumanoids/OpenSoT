@@ -157,6 +157,24 @@ public:
         return e;
     }
 
+    static Eigen::Vector3d error(const double& qx,const double& qy,const double& qz,const double& qw,
+                                 const double& qdx,const double& qdy,const double& qdz,const double& qdw)
+    {
+        Eigen::Vector3d e(0.0, 0.0, 0.0);
+
+        Eigen::Vector3d eps(qx, qy, qz);
+        Eigen::Vector3d epsd(qdx, qdy, qdz);
+
+        Eigen::Matrix3d skew;
+        skew<<  0.0,  -qdz,  qdy,
+             qdz,   0.0, -qdx,
+            -qdy, qdx,    0.0;
+
+        e = qdw*eps - qw*epsd + skew*eps;
+
+        return e;
+    }
+
     /**
      * @brief normalize a given quaternion:
      * Given q = (x, y, z, w)
@@ -273,8 +291,7 @@ public:
 
     /**
      * @brief computeCapturePoint computes the capture point position in world frame
-     * @param floating_base_velocity is the velocity of the floating base in world frame
-     * @param com_velocity is the velocity of the com in world frame (computed only by joint values)
+     * @param com_velocity is the velocity of the com in world frame
      * @param com_pose_z is the height of the com in world frame
      * @return capture point in world frame computed as:
      *
@@ -282,9 +299,8 @@ public:
      *
      * as in "Capture Point: A Step toward Humanoid Push Recovery" by Jerry Pratt et al.
      */
-    static Eigen::VectorXd computeCapturePoint(const Eigen::VectorXd& floating_base_velocity,
-                                                 const Eigen::VectorXd& com_velocity,
-                                                 const Eigen::VectorXd& com_pose);
+    static Eigen::VectorXd computeCapturePoint(const Eigen::VectorXd& com_velocity,
+                                               const Eigen::VectorXd& com_pose);
 
     /**
      * @brief computeFootZMP compute the MEASURED ZMP for a foot in contact, given forces and torques measured
@@ -356,10 +372,22 @@ public:
      * @param position_error position error [3x1]
      * @param orientation_error orientation error [3x1]
      */
+    [[deprecated]]
     static void computeCartesianError(const Eigen::MatrixXd &T,
                                       const Eigen::MatrixXd &Td,
                                       Eigen::VectorXd& position_error,
                                       Eigen::VectorXd& orientation_error);
+    /**
+     * @brief computeCartesianError orientation and position error
+     * @param T actual pose
+     * @param Td desired pose
+     * @param position_error position error
+     * @param orientation_error orientation error
+     */
+    static void computeCartesianError(const Eigen::Affine3d &T,
+                                      const Eigen::Affine3d &Td,
+                                      Eigen::Vector3d& position_error,
+                                      Eigen::Vector3d& orientation_error);
 
     /**
      * @brief computeGradient compute numerical gradient of a function using 2 points formula:

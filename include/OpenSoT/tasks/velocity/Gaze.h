@@ -44,7 +44,8 @@ public:
     Gaze(std::string task_id,
          const Eigen::VectorXd &x,
          XBot::ModelInterface &robot,
-         std::string base_link);
+         std::string base_link,
+         std::string distal_link = "gaze");
 
     ~Gaze();
 
@@ -53,6 +54,7 @@ public:
      * @param desiredGaze pose of the object to observe in base_link
      */
     void setGaze(const Eigen::Affine3d& desiredGaze);
+    [[deprecated]]
     void setGaze(const Eigen::MatrixXd& desiredGaze);
     void setGaze(const KDL::Frame& desiredGaze);
 
