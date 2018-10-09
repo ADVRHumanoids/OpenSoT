@@ -56,6 +56,13 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
 
     tau = _tau_val;
 
+    for(unsigned int i = 0; i < 6; ++i)
+    {
+        if(fabs(tau[i]) > 10e-3){
+            XBot::Logger::error("Floating Base Wrench is not 0!");
+            return false;}
+    }
+
     return true;
 }
 
