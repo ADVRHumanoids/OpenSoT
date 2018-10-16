@@ -5,6 +5,9 @@
 
 using namespace OpenSoT::solvers;
 
+const std::string iHQP::_IHQP_CONSTRAINTS_PLUS_ = "+";
+const std::string iHQP::_IHQP_CONSTRAINTS_OPTIMALITY_ = "_OPTIMALITY";
+
 iHQP::iHQP(Stack &stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks),
     _epsRegularisation(eps_regularisation)
@@ -174,8 +177,8 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
                 }
 
                 if(!constraints_str.compare("") == 0)
-                    constraints_str = constraints_str + "+";
-                constraints_str = constraints_str + _tasks[j]->getTaskID() + "_optimality";
+                    constraints_str = constraints_str + _IHQP_CONSTRAINTS_PLUS_;
+                constraints_str = constraints_str + _tasks[j]->getTaskID() + _IHQP_CONSTRAINTS_OPTIMALITY_;
 
                 A.pile(tmp_A[j]);
                 lA.pile(tmp_lA[j]);

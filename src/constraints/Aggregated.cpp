@@ -23,6 +23,10 @@
 
 using namespace OpenSoT::constraints;
 
+const std::string Aggregated::_CONSTRAINT_PLUS_ = "+";
+const std::string Aggregated::_CONSTRAINT_AGGREGATED_ = "AGGR_";
+std::string Aggregated::concatenatedId = "";
+
 Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const Eigen::VectorXd &q,
                        const unsigned int aggregationPolicy) :
@@ -53,7 +57,7 @@ Aggregated::Aggregated(ConstraintPtr bound1,
                        ConstraintPtr bound2,
                        const unsigned int &x_size,
                        const unsigned int aggregationPolicy) :
-    Constraint(bound1->getConstraintID() + "plus" + bound2->getConstraintID(),
+    Constraint(bound1->getConstraintID() + _CONSTRAINT_PLUS_ + bound2->getConstraintID(),
                x_size), _aggregationPolicy(aggregationPolicy)
 {
     _bounds.push_back(bound1);
@@ -250,13 +254,18 @@ void Aggregated::checkSizes()
 }
 
 const std::string Aggregated::concatenateConstraintsIds(const std::list<ConstraintPtr> constraints) {
-    std::string concatenatedId = "AGGR_";
-    int constraintSize = constraints.size();
-    for(std::list<ConstraintPtr>::const_iterator i = constraints.begin(); i != constraints.end(); ++i) {
-        concatenatedId += (*i)->getConstraintID();
-        if(--constraintSize > 0)
-            concatenatedId += "plus";
+    concatenatedId = "";
+    if(constraints.size() > 0)
+    {
+        concatenatedId = _CONSTRAINT_AGGREGATED_;
+        int constraintSize = constraints.size();
+        for(std::list<ConstraintPtr>::const_iterator i = constraints.begin(); i != constraints.end(); ++i) {
+            concatenatedId += (*i)->getConstraintID();
+            if(--constraintSize > 0)
+                concatenatedId += _CONSTRAINT_PLUS_;
+        }
     }
+
     return concatenatedId;
 }
 

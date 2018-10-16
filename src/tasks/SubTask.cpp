@@ -1,7 +1,9 @@
 #include "OpenSoT/SubTask.h"
 
+const std::string OpenSoT::SubTask::_SUBTASK_SEPARATION_ = "_";
+
 OpenSoT::SubTask::SubTask(OpenSoT::SubTask::TaskPtr taskPtr, const std::list<unsigned int> rowIndices) :
-    Task(taskPtr->getTaskID() + "_" + std::string(Indices(rowIndices)),
+    Task(taskPtr->getTaskID() + _SUBTASK_SEPARATION_ + std::string(Indices(rowIndices)),
          taskPtr->getXSize()),
     _subTaskMap(rowIndices),
     _taskPtr(taskPtr)

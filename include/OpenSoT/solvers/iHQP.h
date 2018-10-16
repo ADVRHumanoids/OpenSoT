@@ -221,6 +221,9 @@ namespace OpenSoT{
 
         std::vector<solver_back_ends> _be_solver;
 
+        static const std::string _IHQP_CONSTRAINTS_PLUS_;
+        static const std::string _IHQP_CONSTRAINTS_OPTIMALITY_;
+
 
     };
 

@@ -23,6 +23,9 @@
 
 using namespace OpenSoT::tasks;
 
+const std::string Aggregated::_TASK_PLUS_ = "+";
+std::string Aggregated::concatenatedId = "";
+
 Aggregated::Aggregated(const std::list<TaskPtr> tasks,
                        const unsigned int x_size) :
     Task(concatenateTaskIds(tasks),x_size), _tasks(tasks)
@@ -42,7 +45,7 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
 Aggregated::Aggregated(TaskPtr task1,
                        TaskPtr task2,
                        const unsigned int x_size) :
-Task(task1->getTaskID()+"plus"+task2->getTaskID(),x_size)
+Task(task1->getTaskID()+_TASK_PLUS_+task2->getTaskID(),x_size)
 {
     _tasks.push_back(task1);
     _tasks.push_back(task2);
@@ -205,12 +208,12 @@ OpenSoT::HessianType OpenSoT::tasks::Aggregated::computeHessianType()
 }
 
 const std::string Aggregated::concatenateTaskIds(const std::list<TaskPtr> tasks) {
-    std::string concatenatedId;
+    concatenatedId = "";
     int taskSize = tasks.size();
     for(std::list<TaskPtr>::const_iterator i = tasks.begin(); i != tasks.end(); ++i) {
         concatenatedId += (*i)->getTaskID();
         if(--taskSize > 0)
-            concatenatedId += "plus";
+            concatenatedId += _TASK_PLUS_;
     }
 
     return concatenatedId;

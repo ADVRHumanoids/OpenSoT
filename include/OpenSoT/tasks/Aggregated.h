@@ -102,6 +102,9 @@ using namespace OpenSoT::utils;
 
             virtual void _log(XBot::MatLogger::Ptr logger);
 
+            static const std::string _TASK_PLUS_;
+            static std::string concatenatedId;
+
         public:
             /**
              * @brief Aggregated
