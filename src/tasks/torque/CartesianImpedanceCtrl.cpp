@@ -41,14 +41,10 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
 
     if(!this->_base_link_is_world) {
         this->_base_link_index = robot.getLinkID(_base_link);
-        assert(this->_base_link_index >= 0);
     }
 
     this->_distal_link_index = robot.getLinkID(_distal_link);
-    assert(this->_distal_link_index >= 0);
 
-    if(!this->_base_link_is_world)
-        assert(this->_distal_link_index != _base_link_index);
 
     _K.resize(6, 6);
     _K.setIdentity(_K.rows(), _K.cols()); _K = 100.0*_K;
