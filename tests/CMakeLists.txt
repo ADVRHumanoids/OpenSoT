@@ -112,6 +112,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testCoMForceTask
                   testTask
                   testPiler
+                  testKinematicEstimationFloatingBase
 )
 
 if(${osqp_FOUND})
@@ -225,6 +226,12 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_dependencies(testAggregatedTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
+
+
+ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
+TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})
+add_dependencies(testKinematicEstimationFloatingBase GTest-ext OpenSoT)
+add_test(NAME OpenSoT_floating_base_KinematicEstimation COMMAND testKinematicEstimationFloatingBase)
 
 ADD_EXECUTABLE(testTask     tasks/TestTask.cpp)
 TARGET_LINK_LIBRARIES(testTask ${TestLibs})

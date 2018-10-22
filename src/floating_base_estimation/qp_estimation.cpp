@@ -107,3 +107,74 @@ void OpenSoT::floating_base_estimation::qp_estimation::log(XBot::MatLogger::Ptr 
     logger->add("qp_estimation_Q", _Q);
     logger->add("qp_estimation_Qdot", _Qdot);
 }
+
+
+////////////////
+OpenSoT::floating_base_estimation::kinematic_estimation::kinematic_estimation(XBot::ModelInterface::Ptr model,
+                                                                              const std::string& anchor_link,
+                                                                              const Eigen::Affine3d& anchor_pose):
+    _model(model)
+{
+    if(_model->getLinkID(anchor_link) == -1)
+        throw std::runtime_error(anchor_link + " for anchor link does not exists!");
+    _anchor_link = anchor_link;
+
+    _world_T_anchor = anchor_pose;
+
+    _model->getFloatingBaseLink(_base_link);
+
+}
+
+
+const std::string& OpenSoT::floating_base_estimation::kinematic_estimation::getAnchor()
+{
+    return _anchor_link;
+}
+
+bool OpenSoT::floating_base_estimation::kinematic_estimation::setAnchor(const std::string& anchor_link)
+{
+    if(_model->getLinkID(anchor_link) == -1)
+        return false;
+
+    _model->getPose(anchor_link, _anchor_link, _old_anchor_T_new_anchor);
+    _anchor_link = anchor_link;
+    _world_T_new_anchor = _world_T_anchor*_old_anchor_T_new_anchor;
+    setAnchorPose(_world_T_new_anchor);
+
+    return true;
+}
+
+const Eigen::Affine3d& OpenSoT::floating_base_estimation::kinematic_estimation::getAnchorPose()
+{
+    return _world_T_anchor;
+}
+
+void OpenSoT::floating_base_estimation::kinematic_estimation::getAnchorPose(Eigen::Affine3d& anchor_pose)
+{
+    anchor_pose = _world_T_anchor;
+}
+
+void OpenSoT::floating_base_estimation::kinematic_estimation::setAnchorPose(const Eigen::Affine3d& world_T_anchor)
+{
+    _world_T_anchor = world_T_anchor;
+}
+
+void OpenSoT::floating_base_estimation::kinematic_estimation::update(const bool update_model)
+{
+    _model->getPose(_base_link, _anchor_link, _anchor_T_base_link);
+
+    _world_T_base_link = _world_T_anchor * _anchor_T_base_link;
+
+
+    if(update_model)
+    {
+        _model->setFloatingBasePose(_world_T_base_link);
+        _model->update();
+    }
+}
+
+const Eigen::Affine3d& OpenSoT::floating_base_estimation::kinematic_estimation::getFloatingBasePose()
+{
+    return _world_T_base_link;
+}
+
