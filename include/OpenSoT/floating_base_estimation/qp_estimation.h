@@ -40,6 +40,88 @@ namespace floating_base_estimation{
         AutoStack::Ptr _autostack;
 
     };
+
+    class kinematic_estimation
+    {
+    public:
+        /**
+         * @brief kinematic_estimation, at the moment only the pose of the floating base is computed
+         * @param model
+         * @param anchor_link
+         * @param anchor_pose is the pose of the anchor in world frame
+         */
+        kinematic_estimation(XBot::ModelInterface::Ptr model, const std::string& anchor_link,
+                             const Eigen::Affine3d& anchor_pose = Eigen::Affine3d::Identity());
+
+
+        /**
+         * @brief getAnchor
+         * @return link which represents the anchor
+         */
+        const std::string& getAnchor();
+
+        /**
+         * @brief setAnchor permits to change the anchor link.
+         * @param anchor_link
+         * @return true if anchor_link exists
+         */
+        bool setAnchor(const std::string& anchor_link);
+
+        /**
+         * @brief getAnchorPose
+         * @return the anchor pose in world frame
+         */
+        const Eigen::Affine3d& getAnchorPose();
+        void getAnchorPose(Eigen::Affine3d& anchor_pose);
+        /**
+         * @brief setAnchorPose set the pose of the anchor in world frame
+         * @param world_T_anchor
+         */
+        void setAnchorPose(const Eigen::Affine3d& world_T_anchor);
+
+        /**
+         * @brief update computes the new pose of the floating base in world considering the actual anchor link
+         * @param update_model if false the model is not updated with the new computed floating base pose, otherwise is udpated
+         */
+        void update(const bool update_model = true);
+
+        /**
+         * @brief getFloatingBasePose
+         * @return the last updated floating base pose in world frame
+         */
+        const Eigen::Affine3d& getFloatingBasePose();
+
+        /**
+         * @brief getFloatingBaseTwist
+         * @return the last updated floating base twist in world frame
+         */
+        const Eigen::Vector6d& getFloatingBaseTwist();
+
+    private:
+        /**
+         * @brief _anchor_link is a link of the robot which is assumed fixed wrt the world frame.
+         */
+        std::string _anchor_link;
+
+        std::string _base_link;
+
+        /**
+         * @brief _world_T_anchor is the pose of the anchor in world frame
+         */
+        Eigen::Affine3d _world_T_anchor;
+
+        XBot::ModelInterface::Ptr _model;
+
+        Eigen::Affine3d _old_anchor_T_new_anchor;
+        Eigen::Affine3d _world_T_new_anchor;
+        Eigen::Affine3d _anchor_T_base_link;
+
+        /**
+         * @brief _world_T_base_link pose of base_link in world_frame
+         */
+        Eigen::Affine3d _world_T_base_link;
+
+    };
 }
 
 }
