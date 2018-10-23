@@ -6,7 +6,14 @@ OpenSoT::tasks::floating_base::IMU::IMU(XBot::ModelInterface &robot, XBot::ImuSe
 {
     _hessianType = HST_SEMIDEF;
 
-    _W.setIdentity(3, 3);
+    _W.setIdentity(6, 6);
+    _W(0,0) = 0.0;
+    _W(1,1) = 0.0;
+    _W(2,2) = 0.0;
+
+    _b.setZero(6);
+
+    _A.setIdentity(6,6);
 
     _robot.getFloatingBaseLink(_fb_link);
 
@@ -32,7 +39,7 @@ void OpenSoT::tasks::floating_base::IMU::_update(const Eigen::VectorXd &x)
     _robot.getJacobian(_fb_link, _J);
     _imu->getAngularVelocity(_angular_velocity);
 
-    _A = _J.block<3,6>(3,0);
+    _A.block(3,0,3,6) = _J.block<3,6>(3,0);
 
     Eigen::Matrix3d R;
     _robot.getOrientation(_imu->getSensorName(), R);
