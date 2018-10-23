@@ -44,6 +44,8 @@ namespace floating_base_estimation{
     class kinematic_estimation
     {
     public:
+        typedef boost::shared_ptr<kinematic_estimation> Ptr;
+
         /**
          * @brief kinematic_estimation, at the moment only the pose of the floating base is computed
          * @param model

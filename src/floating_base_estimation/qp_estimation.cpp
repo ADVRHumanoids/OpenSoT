@@ -20,12 +20,12 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
 
     if(imu){
         _imu_task.reset(new OpenSoT::tasks::floating_base::IMU(*_model, imu));
-        Eigen::MatrixXd W = 100.*Eigen::MatrixXd::Identity(3,3);
+        Eigen::MatrixXd W = 500.*Eigen::MatrixXd::Identity(3,3);
         _imu_task->setWeight(W);}
 
     AffineHelper var = AffineHelper::Identity(6);
     Eigen::VectorXd ub(6);
-    ub<<5.*Eigen::VectorXd::Ones(3),M_PI*Eigen::VectorXd::Ones(3);
+    ub<<1e6*Eigen::VectorXd::Ones(3),1e6*Eigen::VectorXd::Ones(3);
     Eigen::VectorXd lb = -ub;
     _fb_limits.reset(new constraints::GenericConstraint("fb_limits", var, ub, lb,
         constraints::GenericConstraint::Type::BOUND));
@@ -37,6 +37,7 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
     _autostack<<_fb_limits;
 
     _solver.reset(new solvers::iHQP(_autostack->getStack(), _autostack->getBounds()));
+    _solver->setSolverID("FloatingBaseEstimation");
 
     _Qdot.setZero(6);
     _Q.setZero();
@@ -78,7 +79,7 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT)
         XBot::Logger::error("Solver in floating base estimation return false!\n");
         return false;
     }
-    
+
     if(!_imu)
     {
         _Q += _Qdot*dT;
