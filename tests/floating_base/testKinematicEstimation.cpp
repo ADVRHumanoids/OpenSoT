@@ -259,6 +259,84 @@ TEST_F(testKinematicEstimation, kinematic_floating_base_estimation)
     _logger->flush();
 }
 
+TEST_F(testKinematicEstimation, control_with_estimation)
+{
+    Eigen::VectorXd q;
+    q.setZero(_model_ptr->getJointNum());
+    setGoodInitialPosition(q, _model_ptr);
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    std::string anchor_link = "l_sole";
+    OpenSoT::floating_base_estimation::kinematic_estimation kinematic_estimation(_model_ptr, anchor_link);
+    kinematic_estimation.update();
+    _model_ptr->getJointPosition(q);
+
+    std::string floating_base;
+    _model_ptr->getFloatingBaseLink(floating_base);
+
+    //Here we create some tasks to control the floating base
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_sole(new OpenSoT::tasks::velocity::Cartesian(
+                                                        "l_sole", q, *_model_ptr,"l_sole", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_sole(new OpenSoT::tasks::velocity::Cartesian(
+                                                        "r_sole", q, *_model_ptr,"r_sole", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr base  (new OpenSoT::tasks::velocity::Cartesian(
+                                                        "floating_base", q, *_model_ptr,floating_base, "world"));
+    base->setLambda(0.1);
+
+    Eigen::Affine3d base_initial;
+    base->getActualPose(base_initial);
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(q));
+
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_lims(new OpenSoT::constraints::velocity::VelocityLimits(
+                                                                     M_PI, 0.001, q.size()));
+
+    OpenSoT::AutoStack::Ptr autostack = ((l_sole + r_sole)/base/postural)<<vel_lims;
+
+
+    OpenSoT::solvers::iHQP::Ptr solver(
+        new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(),1e6));
+
+    KDL::Frame base_goal;
+    base->getReference(base_goal);
+    std::cout<<"base_actual: "<<base_goal<<std::endl;
+    base_goal.M.DoRotX(25.*M_PI/180.);
+    base->setReference(base_goal);
+    base->getReference(base_goal);
+    std::cout<<"base_goal: "<<base_goal<<std::endl;
+    Eigen::VectorXd dq(q.size());
+    dq.setZero(dq.size());
+    std::cout<<"START LOOP"<<std::endl;
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        _model_ptr->setJointPosition(q);
+        kinematic_estimation.update();
+        _model_ptr->getJointPosition(q);
+
+
+
+        autostack->update(q);
+
+
+        EXPECT_TRUE(solver->solve(dq));
+        q.tail(q.size()-6) += dq.tail(q.size()-6);
+    }
+
+    Eigen::Affine3d actual_pose, goal_pose;
+    base->getReference(goal_pose);
+    _model_ptr->getPose(floating_base, actual_pose);
+
+    std::cout<<"initial_pose: \n"<<base_initial.matrix()<<std::endl;
+    std::cout<<"goal_pose: \n"<<goal_pose.matrix()<<std::endl;
+    std::cout<<"actual_pose: \n"<<actual_pose.matrix()<<std::endl;
+
+
+}
+
 }
 
 int main(int argc, char **argv) {
