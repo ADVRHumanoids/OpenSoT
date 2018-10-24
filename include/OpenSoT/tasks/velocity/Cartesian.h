@@ -22,6 +22,7 @@
  #include <XBotInterface/ModelInterface.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
+ #include <OpenSoT/utils/RegularizeJacobian.h>
 
  #define WORLD_FRAME_NAME "world"
 
@@ -57,6 +58,8 @@
             protected:
                 
                 virtual void _log(XBot::MatLogger::Ptr logger);
+                
+                JacobianRegularizer _jac_reg;
                 
                 XBot::ModelInterface& _robot;
 

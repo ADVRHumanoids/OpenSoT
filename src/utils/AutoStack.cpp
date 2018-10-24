@@ -30,10 +30,10 @@ OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
 OpenSoT::tasks::Aggregated::TaskPtr operator*(const double w,
                                               OpenSoT::tasks::Aggregated::TaskPtr task)
 {
-    Eigen::MatrixXd I = task->getWeight();
-    I.setIdentity(I.rows(), I.cols());
-    I = w*I;
-    return I*task;
+    Eigen::MatrixXd eye = task->getWeight();
+    eye.setIdentity(eye.rows(), eye.cols());
+    eye = w*eye;
+    return eye*task;
 }
 
 OpenSoT::tasks::Aggregated::Ptr operator*(const double w,

@@ -201,18 +201,18 @@ template<class _Matrix_Type_> class LDLTInverse
 public:
     LDLTInverse(const _Matrix_Type_ &a)
     {
-        I.resize(a.rows(), a.cols()); I.setIdentity(I.rows(), I.cols());
+        Inv.resize(a.rows(), a.cols()); Inv.setIdentity(Inv.rows(), Inv.cols());
     }
     
     void compute(const _Matrix_Type_ &a, _Matrix_Type_ &ainv)
     {
         LDLT.compute(a);
-        ainv = LDLT.solve(I);
+        ainv = LDLT.solve(Inv);
     }
     
 private:
     Eigen::LDLT<_Matrix_Type_> LDLT;
-    _Matrix_Type_ I;
+    _Matrix_Type_ Inv;
 };
 
 

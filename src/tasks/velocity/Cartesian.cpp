@@ -20,6 +20,8 @@
 #include <exception>
 #include <cmath>
 
+#define MIN_SINGULAR_VALUE 0.05
+
 using namespace OpenSoT::tasks::velocity;
 
 Cartesian::Cartesian(std::string task_id,
@@ -30,7 +32,8 @@ Cartesian::Cartesian(std::string task_id,
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
-    _error(6)
+    _error(6),
+    _jac_reg(6, x.size(), MIN_SINGULAR_VALUE, task_id)
 {
     _error.setZero(6);
 
@@ -81,10 +84,14 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
         _b.setZero(_A.rows());
         _is_initialized = true;
     }
+    
+    _jac_reg.regularize(_A);
 
     this->update_b();
 
     this->_desiredTwist.setZero(6);
+    
+    
 
     /**********************************************************************/
 }
@@ -261,7 +268,8 @@ void Cartesian::update_b() {
                                            positionError, orientationError);
 
     _error<<positionError,-_orientationErrorGain*orientationError;
-    _b = _desiredTwist + _lambda*_error;
+    
+    _b = _desiredTwist + _lambda *_error;
 }
 
 bool Cartesian::setBaseLink(const std::string& base_link)
