@@ -92,6 +92,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_Options  
                   testQPOases_SubTask
                   testQPOases_FF
+                  testConvexHullVelocityConstraint
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
@@ -145,7 +146,6 @@ endif()
 #THESE TESTS DEPEND ON YARP
 if(${YARP_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                    testConvexHullVelocityConstraint
                     testQPOases_ConvexHull
                     testQPOases_StaticWalk
     )
@@ -424,15 +424,17 @@ TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
 add_dependencies(testQPOases_FF GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 
+ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
+add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
+
 if(${YARP_FOUND})
 #    ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
 #    add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
 
-    ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
-    TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
-    add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
+
 
 #    ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
 #    TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
