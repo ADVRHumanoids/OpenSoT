@@ -1,14 +1,8 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
-#include <advr_humanoids_common_utils/idynutils.h>
 #include <OpenSoT/utils/convex_hull_utils.h>
-#include <advr_humanoids_common_utils/test_utils.h>
-#include <yarp/sig/Vector.h>
-#include <yarp/math/Math.h>
-#include <yarp/math/SVD.h>
 #include <cmath>
-#include<ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
+#include <XBotInterface/ModelInterface.h>
 #define  s                1.0
 #define  dT               0.001* s
 #define  m_s              1.0
@@ -16,33 +10,27 @@
 #define toRad(X) (X * M_PI/180.0)
 
 using namespace OpenSoT::constraints::velocity;
-using namespace yarp::math;
+
 
 namespace {
 
 // The fixture for testing class ConvexHull.
 class testConvexHull : public ::testing::Test{
 public:
-    typedef idynutils2 iDynUtils;
-    static void null_deleter(iDynUtils *) {}
+
  protected:
 
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testConvexHull() :
-      coman("coman",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf")
+  testConvexHull()
   {
       std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-      std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+      std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 
       _path_to_cfg = robotology_root + relative_path;
 
-      _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-              (XBot::ModelInterface::getModel(_path_to_cfg));
-      _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&coman, &null_deleter));
+      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -59,10 +47,9 @@ public:
       _links_in_contact.push_back("r_foot_upper_left_link");
       _links_in_contact.push_back("r_foot_upper_right_link");
 
-      velocityLimits.resize(3,CoMVelocityLimit);
-      zeros.resize(coman.iDynTree_model.getNrOfDOFs(),0.0);
-      _convexHull = new ConvexHull(  conversion_utils_YARP::toEigen(zeros), *(_model_ptr.get()),
-                                     _links_in_contact);
+      velocityLimits.setZero(3); velocityLimits<<CoMVelocityLimit,CoMVelocityLimit,CoMVelocityLimit;
+      zeros.resize(_model_ptr->getJointNum()); zeros.setZero(zeros.size());
+      _convexHull = new ConvexHull(  zeros, *(_model_ptr.get()), _links_in_contact);
   }
 
   virtual ~testConvexHull() {
@@ -79,8 +66,9 @@ public:
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      _convexHull->update(conversion_utils_YARP::toEigen(zeros));
-      coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(zeros),true);
+      _convexHull->update(zeros);
+      _model_ptr->setJointPosition(zeros);
+      _model_ptr->update();
   }
 
   virtual void TearDown() {
@@ -90,24 +78,21 @@ public:
 
   // Objects declared here can be used by all tests in the test case for ConvexHull.
 
-  iDynUtils coman;
   OpenSoT::constraints::velocity::ConvexHull* _convexHull;
 
-  yarp::sig::Vector velocityLimits;
-  yarp::sig::Vector zeros;
-  yarp::sig::Vector q;
+  Eigen::VectorXd velocityLimits;
+  Eigen::VectorXd zeros;
+  Eigen::VectorXd q;
 
-  XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+  XBot::ModelInterface::Ptr _model_ptr;
   std::string _path_to_cfg;
   std::list<std::string> _links_in_contact;
 };
 
-void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, idynutils2& idynutils)
+void updateModel(const Eigen::VectorXd& q, XBot::ModelInterface::Ptr model)
 {
-    static Eigen::VectorXd zeroes(q.size());
-    zeroes.setZero(zeroes.size());
-
-    idynutils.updateiDynTreeModel(conversion_utils_YARP::toEigen(q),zeroes,zeroes, set_world_pose);
+    model->setJointPosition(q);
+    model->update();
 }
 
 //void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
@@ -140,26 +125,26 @@ void updateiDyn3Model(const bool set_world_pose, const yarp::sig::Vector& q, idy
 // In fact, the old implementation was bogus...
 TEST_F(testConvexHull, checkImplementation) {
     // ------- Set The robot in a certain configuration ---------
-    yarp::sig::Vector q(coman.iDynTree_model.getNrOfDOFs(), 0.0);
-    q[coman.iDynTree_model.getDOFIndex("LHipSag")] = toRad(-23.5);
-    q[coman.iDynTree_model.getDOFIndex("LHipLat")] = toRad(2.0);
-    q[coman.iDynTree_model.getDOFIndex("LHipYaw")] = toRad(-4.0);
-    q[coman.iDynTree_model.getDOFIndex("LKneeSag")] = toRad(50.1);
-    q[coman.iDynTree_model.getDOFIndex("LAnkLat")] = toRad(-2.0);
-    q[coman.iDynTree_model.getDOFIndex("LAnkSag")] = toRad(-26.6);
+    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
+    q[_model_ptr->getDofIndex("LHipSag")] = toRad(-23.5);
+    q[_model_ptr->getDofIndex("LHipLat")] = toRad(2.0);
+    q[_model_ptr->getDofIndex("LHipYaw")] = toRad(-4.0);
+    q[_model_ptr->getDofIndex("LKneeSag")] = toRad(50.1);
+    q[_model_ptr->getDofIndex("LAnkLat")] = toRad(-2.0);
+    q[_model_ptr->getDofIndex("LAnkSag")] = toRad(-26.6);
 
-    q[coman.iDynTree_model.getDOFIndex("RHipSag")] = toRad(-23.5);
-    q[coman.iDynTree_model.getDOFIndex("RHipLat")] = toRad(-2.0);
-    q[coman.iDynTree_model.getDOFIndex("RHipYaw")] = toRad(0.0);
-    q[coman.iDynTree_model.getDOFIndex("RKneeSag")] = toRad(50.1);
-    q[coman.iDynTree_model.getDOFIndex("RAnkLat")] = toRad(2.0);
-    q[coman.iDynTree_model.getDOFIndex("RAnkSag")] = toRad(-26.6);
+    q[_model_ptr->getDofIndex("RHipSag")] = toRad(-23.5);
+    q[_model_ptr->getDofIndex("RHipLat")] = toRad(-2.0);
+    q[_model_ptr->getDofIndex("RHipYaw")] = toRad(0.0);
+    q[_model_ptr->getDofIndex("RKneeSag")] = toRad(50.1);
+    q[_model_ptr->getDofIndex("RAnkLat")] = toRad(2.0);
+    q[_model_ptr->getDofIndex("RAnkSag")] = toRad(-26.6);
 
     std::cout<<"---------------TEST-------------"<<std::endl;
 
-    updateiDyn3Model(true, q, coman);
-    OpenSoT::constraints::velocity::ConvexHull localConvexHull( conversion_utils_YARP::toEigen(q), *(_model_ptr.get()), _links_in_contact, 0.00);
-    localConvexHull.update(conversion_utils_YARP::toEigen(q));
+    updateModel(q, _model_ptr);
+    OpenSoT::constraints::velocity::ConvexHull localConvexHull( q, *(_model_ptr.get()), _links_in_contact, 0.00);
+    localConvexHull.update(q);
 
     std::list<KDL::Vector> points;
     std::vector<KDL::Vector> ch;
@@ -176,19 +161,22 @@ TEST_F(testConvexHull, checkImplementation) {
     EXPECT_EQ(b.size(), A.rows());
     EXPECT_EQ(A.cols(), 2);
 
-    yarp::sig::Matrix Aineq = conversion_utils_YARP::toYARP(localConvexHull.getAineq());
-    yarp::sig::Vector bUpperBound = conversion_utils_YARP::toYARP(localConvexHull.getbUpperBound());
+    Eigen::MatrixXd Aineq = localConvexHull.getAineq();
+    Eigen::VectorXd bUpperBound = localConvexHull.getbUpperBound();
 
 
     // multiplying A by JCoM
     Eigen::MatrixXd _JCoM;
-    coman.getCOMJacobian(_JCoM);
-    yarp::sig::Matrix JCoM = conversion_utils_YARP::toYARP(_JCoM);
-    JCoM = JCoM.removeCols(0,6);    // remove floating base
-    JCoM = JCoM.removeRows(2,4);    // remove orientation + z
+    _model_ptr->getCOMJacobian(_JCoM);
+    Eigen::MatrixXd JCoM = _JCoM.block(0,0,2,_JCoM.cols());
+
+
+    std::cout<<"A.cols(): "<<A.cols()<<std::endl;
+    std::cout<<"JCoM.rows(): "<<JCoM.rows()<<std::endl;
+
     assert(A.cols() == JCoM.rows());
-    std::cout<<"test JCoM: "<<JCoM.toString()<<std::endl;
-    A_JCoM = A * conversion_utils_YARP::toEigen(JCoM);
+    std::cout<<"test JCoM: "<<JCoM<<std::endl;
+    A_JCoM = A * JCoM;
 
     EXPECT_EQ(A_JCoM.rows(), Aineq.rows());
     EXPECT_EQ(A_JCoM.cols(), Aineq.cols());
@@ -198,7 +186,7 @@ TEST_F(testConvexHull, checkImplementation) {
     std::cout<<"Aineq cols: "<<Aineq.cols()<<std::endl;
     std::cout<<"A_JCoM rows: "<<A_JCoM.rows()<<std::endl;
     std::cout<<"A_JCoM cols: "<<A_JCoM.cols()<<std::endl;
-    std::cout<<"Aineq: "<<Aineq.toString()<<std::endl; std::cout<<std::endl;
+    std::cout<<"Aineq: "<<Aineq<<std::endl; std::cout<<std::endl;
     std::cout<<"A_JCoM: "<<A_JCoM<<std::endl;
     for(unsigned int i = 0; i < A_JCoM.rows(); ++i)
     {
@@ -211,9 +199,9 @@ TEST_F(testConvexHull, checkImplementation) {
         EXPECT_DOUBLE_EQ(b[i], bUpperBound[i]);
 
     std::cout<<"A: "<<A<<std::endl;
-    std::cout<<"Aineq: "<<Aineq.toString()<<std::endl;
+    std::cout<<"Aineq: "<<Aineq<<std::endl;
     std::cout<<"b: "<<b<<std::endl;
-    std::cout<<"bUpperBound: "<<bUpperBound.toString()<<std::endl;
+    std::cout<<"bUpperBound: "<<bUpperBound<<std::endl;
 }
 
 TEST_F(testConvexHull, checkBoundsScaling) {
@@ -253,7 +241,7 @@ TEST_F(testConvexHull, sizesAreCorrect) {
 
     unsigned int hullSize = ch.size();
 
-    unsigned int x_size = coman.iDynTree_model.getNrOfDOFs();
+    unsigned int x_size = _model_ptr->getJointNum();
 
     EXPECT_EQ(0, _convexHull->getLowerBound().size()) << "lowerBound should have size 0"
                                                       << "but has size"
@@ -271,8 +259,8 @@ TEST_F(testConvexHull, sizesAreCorrect) {
                                                <<  _convexHull->getbeq().size();
 
 
-    EXPECT_EQ(coman.iDynTree_model.getNrOfDOFs(),_convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
-                                                                              << coman.iDynTree_model.getNrOfDOFs()
+    EXPECT_EQ(_model_ptr->getJointNum(),_convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
+                                                                              << _model_ptr->getJointNum()
                                                                               << " but has has "
                                                                               << _convexHull->getAeq().cols()
                                                                               << " columns instead";
@@ -296,28 +284,70 @@ TEST_F(testConvexHull, sizesAreCorrect) {
                                                              << _convexHull->getbUpperBound().size();
 }
 
+void initializeIfNeeded()
+{
+    static bool is_initialized = false;
+
+    if(!is_initialized) {
+        time_t seed = time(NULL);
+        seed48((unsigned short*)(&seed));
+        srand((unsigned int)(seed));
+
+        is_initialized = true;
+    }
+
+}
+double getRandomAngle()
+{
+    initializeIfNeeded();
+    return drand48()*2.0*M_PI-M_PI;
+}
+
+double getRandomAngle(const double min, const double max)
+{
+    initializeIfNeeded();
+    assert(min <= max);
+    if(min < -M_PI || max > M_PI)
+        return getRandomAngle();
+
+    return (double)rand()/RAND_MAX * (max-min) + min;
+}
+
+Eigen::VectorXd getRandomAngles(const Eigen::VectorXd &min,const Eigen::VectorXd &max, const int size)
+{
+    initializeIfNeeded();
+    Eigen::VectorXd q(size);
+    assert(min.size() >= size);
+    assert(max.size() >= size);
+    for(unsigned int i = 0; i < size; ++i)
+        q(i) = getRandomAngle(min[i],max[i]);
+    return q;
+}
+
 TEST_F(testConvexHull, NoZeroRowsPreset) {
-    double qVector[29] = {-0.431797,	 0.005336,	 0.000954,	 0.878479,	-0.000438,	-0.417689,	-0.435283,	-0.000493,	 0.000097,	 0.873527,	-0.000018,	-0.436310,	 0.000606,	-0.002125,	 0.000050,	 0.349666,	 0.174536,	 0.000010,	-1.396576,	-0.000000,	-0.000029,	-0.000000,	 0.349665,	-0.174895,	-0.000196,	-1.396547,	-0.000000,	-0.000026,	-0.000013};
-    yarp::sig::Vector q(29, qVector);
+    Eigen::VectorXd q(35);
+    q<<0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.431797,	 0.005336,	 0.000954,	 0.878479,	-0.000438,	-0.417689,	-0.435283,	-0.000493,	 0.000097,	 0.873527,	-0.000018,	-0.436310,	 0.000606,	-0.002125,	 0.000050,	 0.349666,	 0.174536,	 0.000010,	-1.396576,	-0.000000,	-0.000029,	-0.000000,	 0.349665,	-0.174895,	-0.000196,	-1.396547,	-0.000000,	-0.000026,	-0.000013;
+
     // TODO implement a test that checks, for this specific configuration,
     // that the solution for the convex null does not contain a row full of zeroes
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin,qmax);
     for(unsigned int i = 0; i < 10000; ++i)
     {
-        if(i>1)
-            q = conversion_utils_YARP::toYARP(
-                        tests_utils::getRandomAngles(
-                            conversion_utils_YARP::toEigen(coman.iDynTree_model.getJointBoundMin()),
-                            conversion_utils_YARP::toEigen(coman.iDynTree_model.getJointBoundMax()),
-                                             coman.iDynTree_model.getNrOfDOFs()));
-        coman.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
-        _convexHull->update(conversion_utils_YARP::toEigen(q));
+        if(i>1){
+            q = getRandomAngles(qmin,qmax,_model_ptr->getJointNum());
+            q.head(6) = Eigen::Vector6d::Zero();}
+
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+        _convexHull->update(q);
         std::vector<KDL::Vector> ch;
         _convexHull->getConvexHull(ch);
         Eigen::MatrixXd A_ch;
         Eigen::VectorXd b_ch;
         _convexHull->getConstraints(ch,A_ch,b_ch,0.01);
         for(unsigned int i = 0; i < A_ch.rows(); ++i)
-            EXPECT_GT(norm(conversion_utils_YARP::toYARP(A_ch).getRow(i)),1E-5);
+            EXPECT_GT(A_ch.row(i).norm(),1E-5);
     }
 }
 
@@ -325,24 +355,24 @@ TEST_F(testConvexHull, NoZeroRowsPreset) {
 TEST_F(testConvexHull, BoundsAreCorrect) {
 
     // ------- Set The robot in a certain configuration ---------
-    yarp::sig::Vector q(coman.iDynTree_model.getNrOfDOFs(), 0.0);
-    q[coman.iDynTree_model.getDOFIndex("LHipSag")] = toRad(-23.5);
-    q[coman.iDynTree_model.getDOFIndex("LHipLat")] = toRad(2.0);
-    q[coman.iDynTree_model.getDOFIndex("LHipYaw")] = toRad(-4.0);
-    q[coman.iDynTree_model.getDOFIndex("LKneeSag")] = toRad(50.1);
-    q[coman.iDynTree_model.getDOFIndex("LAnkLat")] = toRad(-2.0);
-    q[coman.iDynTree_model.getDOFIndex("LAnkSag")] = toRad(-26.6);
+    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
+    q[_model_ptr->getDofIndex("LHipSag")] = toRad(-23.5);
+    q[_model_ptr->getDofIndex("LHipLat")] = toRad(2.0);
+    q[_model_ptr->getDofIndex("LHipYaw")] = toRad(-4.0);
+    q[_model_ptr->getDofIndex("LKneeSag")] = toRad(50.1);
+    q[_model_ptr->getDofIndex("LAnkLat")] = toRad(-2.0);
+    q[_model_ptr->getDofIndex("LAnkSag")] = toRad(-26.6);
 
-    q[coman.iDynTree_model.getDOFIndex("RHipSag")] = toRad(-23.5);
-    q[coman.iDynTree_model.getDOFIndex("RHipLat")] = toRad(-2.0);
-    q[coman.iDynTree_model.getDOFIndex("RHipYaw")] = toRad(0.0);
-    q[coman.iDynTree_model.getDOFIndex("RKneeSag")] = toRad(50.1);
-    q[coman.iDynTree_model.getDOFIndex("RAnkLat")] = toRad(2.0);
-    q[coman.iDynTree_model.getDOFIndex("RAnkSag")] = toRad(-26.6);
+    q[_model_ptr->getDofIndex("RHipSag")] = toRad(-23.5);
+    q[_model_ptr->getDofIndex("RHipLat")] = toRad(-2.0);
+    q[_model_ptr->getDofIndex("RHipYaw")] = toRad(0.0);
+    q[_model_ptr->getDofIndex("RKneeSag")] = toRad(50.1);
+    q[_model_ptr->getDofIndex("RAnkLat")] = toRad(2.0);
+    q[_model_ptr->getDofIndex("RAnkSag")] = toRad(-26.6);
 
 
-    updateiDyn3Model(true, q, coman);
-    _convexHull->update(conversion_utils_YARP::toEigen(q));
+    updateModel(q, _model_ptr);
+    _convexHull->update(q);
 
     // Get Vector of CH's points from coman
     std::list<KDL::Vector> points;
