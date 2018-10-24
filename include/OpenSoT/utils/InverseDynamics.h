@@ -48,7 +48,9 @@ public:
      * @param x optimized variables
      * @param tau computed torques
      */
-    bool computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau);
+    bool computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau, Eigen::VectorXd& qddot);
+    
+    
 
     /**
      * @brief log internal variables: wrenches, tau and qddot
