@@ -33,7 +33,7 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
     }
 }
 
-bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau)
+bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau, Eigen::VectorXd& qddot)
 {
     if(x.size() != _serializer->getSize())
     {
@@ -55,6 +55,7 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
     }
 
     tau = _tau_val;
+    qddot = _qddot_val;
 
     for(unsigned int i = 0; i < 6; ++i)
     {
