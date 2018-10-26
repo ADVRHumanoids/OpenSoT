@@ -20,7 +20,7 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
 
     if(imu){
         _imu_task.reset(new OpenSoT::tasks::floating_base::IMU(*_model, imu));
-        Eigen::MatrixXd W = 500.*Eigen::MatrixXd::Identity(3,3);
+        Eigen::MatrixXd W = 500.*Eigen::MatrixXd::Identity(6,6);
         _imu_task->setWeight(W);}
 
     AffineHelper var = AffineHelper::Identity(6);
