@@ -114,7 +114,7 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
 
     _cartesian_task = _J*_qddot + _jdotqdot;
     _cartesian_task = _cartesian_task - _acc_ref 
-                                      - _lambda2*_velocity_error;
+                                      - _lambda2*_velocity_error
                                       - _lambda*_pose_error ;
     
     _A = _cartesian_task.getM();
