@@ -135,7 +135,7 @@ void VelocityLimits::generateBounds(const Eigen::VectorXd& qDotLimit)
 void VelocityLimits::update(const Eigen::VectorXd& x)
 {
     if(!_constr.setBounds(__upperBound, __lowerBound))
-        XBot::Logger::error("%s: error in _constr.setBounds(__upperBound, __lowerBound)!", getConstraintID());
+        XBot::Logger::error("%s: error in _constr.setBounds(__upperBound, __lowerBound)!", getConstraintID().c_str());
 
     if(_constr.getType() == GenericConstraint::Type::BOUND)
     {
