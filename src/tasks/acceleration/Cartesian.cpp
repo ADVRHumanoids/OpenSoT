@@ -99,7 +99,10 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
         _robot.computeJdotQdot(_distal_link, Eigen::Vector3d::Zero(), _jdotqdot);
     }
     else{
-        /* TBD implement */
+        _robot.getRelativeJacobian(_distal_link, _base_link, _J);
+        _robot.getPose(_distal_link, _base_link, _pose_current);
+        _robot.getVelocityTwist(_distal_link, _base_link, _vel_current);
+        _jdotqdot.setZero(); ///TODO: computeJdotQdot relative!
     }
     
     XBot::Utils::computeOrientationError(_pose_ref.linear(), _pose_current.linear(), _orientation_error);
@@ -204,7 +207,7 @@ void OpenSoT::tasks::acceleration::Cartesian::resetReference()
         _robot.getPose(_distal_link, _pose_ref);
     }
     else{
-        throw std::invalid_argument("Relative cartesian task not yet supported!");
+        _robot.getPose(_distal_link, _base_link, _pose_ref);
     }
 }
 
@@ -213,6 +216,8 @@ bool OpenSoT::tasks::acceleration::Cartesian::reset()
     resetReference();
     _vel_ref.setZero();
     _acc_ref.setZero();
+
+    return true;
 }
 
 
