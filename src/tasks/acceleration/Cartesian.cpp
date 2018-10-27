@@ -5,10 +5,10 @@ using XBot::Logger;
 const std::string OpenSoT::tasks::acceleration::Cartesian::world_name = "world";
 
 OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
+          const Eigen::VectorXd& x,
           const XBot::ModelInterface& robot,
           const std::string& distal_link,
-          const std::string& base_link,
-          const Eigen::VectorXd& x
+          const std::string& base_link
          ):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x.size()),
     _robot(robot),
@@ -84,6 +84,11 @@ void OpenSoT::tasks::acceleration::Cartesian::setOrientationGain(double orientat
     _orientation_gain = orientation_gain;
 }
 
+const double OpenSoT::tasks::acceleration::Cartesian::getOrientationErrorGain() const
+{
+    return _orientation_gain;
+}
+
 
 void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
 {
@@ -121,6 +126,13 @@ void OpenSoT::tasks::acceleration::Cartesian::setPositionReference(const Eigen::
     _acc_ref.setZero();
 }
 
+void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& ref)
+{
+    tf::transformKDLToEigen(ref, _pose_ref);
+    _vel_ref.setZero();
+    _acc_ref.setZero();
+}
+
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& ref)
 {
     _pose_ref = ref;
@@ -136,6 +148,14 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _acc_ref.setZero();
 }
 
+void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pose_ref,
+                                                            const KDL::Twist& vel_ref)
+{
+    tf::transformKDLToEigen(pose_ref, _pose_ref);
+    tf::twistKDLToEigen(vel_ref, _vel_ref);
+    _acc_ref.setZero();
+}
+
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& pose_ref,
                                                            const Eigen::Vector6d& vel_ref,
                                                            const Eigen::Vector6d& acc_ref)
@@ -143,6 +163,15 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _pose_ref = pose_ref;
     _vel_ref = vel_ref;
     _acc_ref = acc_ref;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pose_ref,
+                  const KDL::Twist& vel_ref,
+                  const KDL::Twist& acc_ref)
+{
+    tf::transformKDLToEigen(pose_ref, _pose_ref);
+    tf::twistKDLToEigen(vel_ref, _vel_ref);
+    tf::twistKDLToEigen(acc_ref, _acc_ref);
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda)
@@ -177,6 +206,13 @@ void OpenSoT::tasks::acceleration::Cartesian::resetReference()
     }
 }
 
+bool OpenSoT::tasks::acceleration::Cartesian::reset()
+{
+    resetReference();
+    _vel_ref.setZero();
+    _acc_ref.setZero();
+}
+
 
 void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
 {
@@ -190,7 +226,75 @@ void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& ref)
     ref = _pose_ref;
 }
 
+void OpenSoT::tasks::acceleration::Cartesian::getReference(KDL::Frame& ref)
+{
+    tf::transformEigenToKDL(_pose_ref, ref);
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& desiredPose,
+                  Eigen::Vector6d& desiredTwist)
+{
+    desiredPose = _pose_ref;
+    desiredTwist = _vel_ref;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getReference(KDL::Frame& desiredPose,
+                  KDL::Twist& desiredTwist)
+{
+    tf::transformEigenToKDL(_pose_ref, desiredPose);
+    tf::twistEigenToKDL(_vel_ref, desiredTwist);
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& desiredPose,
+                  Eigen::Vector6d& desiredTwist,
+                  Eigen::Vector6d& desiredAcceleration)
+{
+    desiredPose = _pose_ref;
+    desiredTwist = _vel_ref;
+    desiredAcceleration = _acc_ref;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getReference(KDL::Frame& desiredPose,
+                  KDL::Twist& desiredTwist,
+                  KDL::Twist& desiredAcceleration)
+{
+    tf::transformEigenToKDL(_pose_ref, desiredPose);
+    tf::twistEigenToKDL(_vel_ref, desiredTwist);
+    tf::twistEigenToKDL(_acc_ref, desiredAcceleration);
+}
+
+
 void OpenSoT::tasks::acceleration::Cartesian::getActualPose(Eigen::Affine3d& actual)
 {
     actual = _pose_current;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getActualPose(KDL::Frame& actual)
+{
+    tf::transformEigenToKDL(_pose_current, actual);
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getActualTwist(Eigen::Vector6d& actual)
+{
+    actual = _vel_current;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getActualTwist(KDL::Twist& actual)
+{
+    tf::twistEigenToKDL(_vel_current, actual);
+}
+
+const bool OpenSoT::tasks::acceleration::Cartesian::baseLinkIsWorld() const
+{
+    return _base_link == world_name;
+}
+
+bool OpenSoT::tasks::acceleration::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
+}
+
+OpenSoT::tasks::acceleration::Cartesian::Ptr OpenSoT::tasks::acceleration::Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return boost::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
 }

@@ -37,11 +37,11 @@ protected:
 
 
         l_arm.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("l_arm", *_model, "LSoftHand", "world", _q));
+            new OpenSoT::tasks::acceleration::Cartesian("l_arm",_q, *_model, "LSoftHand", "world"));
         l_arm->getReference(_l_arm_ref);
         std::cout<<"_l_arm_initial: "<<_l_arm_ref.matrix()<<std::endl;
         r_arm.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("r_arm", *_model, "RSoftHand", "world", _q));
+            new OpenSoT::tasks::acceleration::Cartesian("r_arm",_q, *_model, "RSoftHand", "world"));
         r_arm->getReference(_r_arm_ref);
         std::cout<<"_r_arm_initial: "<<_r_arm_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new

@@ -33,10 +33,10 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         typedef boost::shared_ptr<Cartesian> Ptr;
 
         Cartesian(const std::string task_id,
+                  const Eigen::VectorXd& x,
                   const XBot::ModelInterface& robot,
                   const std::string& distal_link,
-                  const std::string& base_link,
-                  const Eigen::VectorXd& x
+                  const std::string& base_link
                  );
         
         Cartesian(const std::string task_id,
@@ -49,18 +49,50 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         const std::string& getBaseLink() const;
         const std::string& getDistalLink() const;
         
+        [[deprecated]]
         void setPositionReference(const Eigen::Vector3d& pos_ref);
+
         void setReference(const Eigen::Affine3d& ref);
+        void setReference(const KDL::Frame& ref);
+
         void setReference(const Eigen::Affine3d& pose_ref,
                           const Eigen::Vector6d& vel_ref);
+        void setReference(const KDL::Frame& pose_ref,
+                          const KDL::Twist& vel_ref);
+
         void setReference(const Eigen::Affine3d& pose_ref,
                           const Eigen::Vector6d& vel_ref,
                           const Eigen::Vector6d& acc_ref);
+        void setReference(const KDL::Frame& pose_ref,
+                          const KDL::Twist& vel_ref,
+                          const KDL::Twist& acc_ref);
+
 
         void getReference(Eigen::Affine3d& ref);
+        void getReference(KDL::Frame& ref);
+
+        void getReference(Eigen::Affine3d& desiredPose,
+                          Eigen::Vector6d& desiredTwist);
+        void getReference(KDL::Frame& desiredPose,
+                          KDL::Twist& desiredTwist);
+
+        void getReference(Eigen::Affine3d& desiredPose,
+                          Eigen::Vector6d& desiredTwist,
+                          Eigen::Vector6d& desiredAcceleration);
+        void getReference(KDL::Frame& desiredPose,
+                          KDL::Twist& desiredTwist,
+                          KDL::Twist& desiredAcceleration);
+
+
         void getActualPose(Eigen::Affine3d& actual);
+        void getActualPose(KDL::Frame& actual);
+
+        void getActualTwist(Eigen::Vector6d& actual);
+        void getActualTwist(KDL::Twist& actual);
         
+        [[deprecated]]
         void resetReference();
+        bool reset();
 
         virtual void _update(const Eigen::VectorXd& x);
         
@@ -68,7 +100,15 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         void setLambda(double lambda1, double lambda2);
         virtual void setLambda(double lambda);
+
         void setOrientationGain(double orientation_gain);
+        const double getOrientationErrorGain() const;
+
+        const bool baseLinkIsWorld() const;
+
+        static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+
+        static OpenSoT::tasks::acceleration::Cartesian::Ptr asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
         
     private:
         

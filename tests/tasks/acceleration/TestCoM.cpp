@@ -45,11 +45,11 @@ protected:
         com->getReference(_com_ref);
         std::cout<<"_com_initial: \n"<<_com_ref.matrix()<<std::endl;
         l_sole.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("l_sole", *_model, "l_sole", "world", _q));
+            new OpenSoT::tasks::acceleration::Cartesian("l_sole",_q, *_model, "l_sole", "world"));
         l_sole->getReference(_l_sole_ref);
         std::cout<<"_l_sole_initial: \n"<<_l_sole_ref.matrix()<<std::endl;
         r_sole.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("r_sole", *_model, "r_sole", "world", _q));
+            new OpenSoT::tasks::acceleration::Cartesian("r_sole",_q, *_model, "r_sole", "world"));
         r_sole->getReference(_r_sole_ref);
         std::cout<<"_r_sole_initial: \n"<<_r_sole_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new
