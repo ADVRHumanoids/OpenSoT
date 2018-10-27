@@ -898,8 +898,8 @@ TEST_F(testiHQP, testContructor2Problems)
     stack_of_tasks.push_back(cartesian_task);
     stack_of_tasks.push_back(postural_task);
 
-    std::cout<<"Initial Position Error: "<<cartesian_task->positionError<<std::endl;
-    std::cout<<"Initial Orientation Error: "<<cartesian_task->orientationError<<std::endl;
+    std::cout<<"Initial Position Error: "<<cartesian_task->getError().head(3)<<std::endl;
+    std::cout<<"Initial Orientation Error: "<<cartesian_task->getError().tail(3)<<std::endl;
 
     OpenSoT::solvers::iHQP sot(stack_of_tasks, joint_constraints);
 

@@ -87,11 +87,10 @@
                  */
                 Eigen::Affine3d _base_T_distal;
 
-            public:
-
                 Eigen::Vector3d positionError;
                 Eigen::Vector3d orientationError;
 
+            public:
                 /*********** TASK PARAMETERS ************/
 
 
