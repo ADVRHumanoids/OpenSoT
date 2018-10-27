@@ -106,12 +106,35 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         const bool baseLinkIsWorld() const;
 
+        /**
+         * @brief Changes the distal link of the task. It also resets the reference according to the current robot pose.
+         * @param distal_link the new distal link
+         * @return false if the distal link does not exists
+         */
+        bool setDistalLink(const std::string& distal_link);
+
+        /**
+         * @brief setBaseLink change the base link of the task
+         * @param base_link the new base link
+         * @return false if the base link does not exists
+         */
+        bool setBaseLink(const std::string& base_link);
+
         static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
         static OpenSoT::tasks::acceleration::Cartesian::Ptr asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
         
+        /**
+         * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
+         * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
+         */
+        const Eigen::Vector6d getError() const;
+        const Eigen::Vector6d getVelocityError() const;
+
     private:
-        
+        Eigen::Vector6d _velocity_error;
+
+
         static const std::string world_name;
         
         std::string _base_link, _distal_link;
@@ -130,6 +153,13 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         double _orientation_gain;
 
         double _lambda2;
+
+        /**
+         * @brief _base_T_distal is used to change new distal link!
+         */
+        Eigen::Affine3d _base_T_distal;
+
+        Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
         
     };
     

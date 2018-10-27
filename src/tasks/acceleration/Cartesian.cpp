@@ -107,9 +107,11 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     _pose_error.head<3>() = _pose_ref.translation() - _pose_current.translation();
     _pose_error.tail<3>() = _orientation_gain * _orientation_error;
     
+    _velocity_error = _vel_ref - _vel_current;
+
     _cartesian_task = _J*_qddot + _jdotqdot;
     _cartesian_task = _cartesian_task - _acc_ref 
-                                      - _lambda2*(_vel_ref - _vel_current)
+                                      - _lambda2*_velocity_error;
                                       - _lambda*_pose_error ;
     
     _A = _cartesian_task.getM();
@@ -217,7 +219,7 @@ bool OpenSoT::tasks::acceleration::Cartesian::reset()
 void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
 {
     logger->add(getTaskID() + "_pose_error", _pose_error);
-    logger->add(getTaskID() + "_velocity_error", _vel_ref - _vel_current);
+    logger->add(getTaskID() + "_velocity_error", _velocity_error);
     logger->add(getTaskID() + "_jdotqdot", _jdotqdot);
 }
 
@@ -297,4 +299,60 @@ bool OpenSoT::tasks::acceleration::Cartesian::isCartesian(OpenSoT::Task<Eigen::M
 OpenSoT::tasks::acceleration::Cartesian::Ptr OpenSoT::tasks::acceleration::Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return boost::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
+}
+
+bool OpenSoT::tasks::acceleration::Cartesian::setDistalLink(const std::string& distal_link)
+{
+    if(distal_link.compare(_distal_link) == 0){
+        return true;
+    }
+
+    if(distal_link.compare("world") == 0){
+        std::cerr << "Error in " << __func__ << ": cannot pass world as distal link." << std::endl;
+        return false;
+    }
+
+    if(!_robot.getPose(distal_link, _base_link, _base_T_distal)){
+        std::cerr << "Error in " << __func__ << ": base link -> distal link transform cannot be obtained." << std::endl;
+        return false;
+    }
+
+    _distal_link = distal_link;
+
+    setReference(_base_T_distal);
+
+    return true;
+}
+
+bool OpenSoT::tasks::acceleration::Cartesian::setBaseLink(const std::string& base_link)
+{
+    if(base_link.compare(_base_link) == 0)
+        return true;
+
+    if(base_link.compare("world") == 0)
+        _robot.getPose(_base_link, _tmpMatrix);
+    else if(_base_link.compare("world") == 0){
+        _robot.getPose(base_link, _tmpMatrix2);
+        _tmpMatrix = _tmpMatrix2.inverse();
+    }
+    else if(_robot.getLinkID(base_link) == -1)
+        return false;
+    else
+        _robot.getPose(_base_link, base_link, _tmpMatrix);
+
+    _base_link = base_link;
+    _tmpMatrix2 = _tmpMatrix*_pose_ref;
+    _pose_ref = _tmpMatrix2;
+
+    return true;
+}
+
+const Eigen::Vector6d OpenSoT::tasks::acceleration::Cartesian::getError() const
+{
+    return _pose_error;
+}
+
+const Eigen::Vector6d OpenSoT::tasks::acceleration::Cartesian::getVelocityError() const
+{
+    return _velocity_error;
 }
