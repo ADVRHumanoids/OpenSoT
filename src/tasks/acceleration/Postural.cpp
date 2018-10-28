@@ -107,7 +107,10 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
     
-    _qddot_d = _qddot_ref + _lambda2*(_qdot_ref - _qdot) + _lambda*(_qref - _q);
+    _position_error = _qref - _q;
+    _velocity_error = _qdot_ref - _qdot;
+
+    _qddot_d = _qddot_ref + _lambda2*_velocity_error + _lambda*_position_error;
     _postural_task = _Jpostural * (_qddot - _qddot_d);
 
     _A = _postural_task.getM();
@@ -119,8 +122,53 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
 
 void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger::Ptr logger)
 {
-    logger->add(_task_id + "_position_error", _qref - _q);
-    logger->add(_task_id + "_velocity_error", _qdot_ref - _qdot);
+    logger->add(_task_id + "_position_error", _position_error);
+    logger->add(_task_id + "_velocity_error", _velocity_error);
     logger->add(_task_id + "_qref", _qref);
 }
 
+Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getReference() const
+{
+    return _qref;
+}
+
+void OpenSoT::tasks::acceleration::Postural::getReference(Eigen::VectorXd& q_desired) const
+{
+    q_desired = _qref;
+}
+void OpenSoT::tasks::acceleration::Postural::getReference(Eigen::VectorXd& q_desired,
+                  Eigen::VectorXd& qdot_desired) const
+{
+    q_desired = _qref;
+    qdot_desired = _qdot_ref;
+}
+
+void OpenSoT::tasks::acceleration::Postural::getReference(Eigen::VectorXd& q_desired,
+                  Eigen::VectorXd& qdot_desired,
+                  Eigen::VectorXd& qddot_desired) const
+{
+    q_desired = _qref;
+    qdot_desired = _qdot_ref;
+    qddot_desired = _qddot_ref;
+}
+
+Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getActualPositions()
+{
+    return _q;
+}
+
+Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getError()
+{
+    return _position_error;
+}
+
+Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getVelocityError()
+{
+    return _velocity_error;
+}
+
+bool OpenSoT::tasks::acceleration::Postural::reset()
+{
+    _robot.getJointPosition(_qref);
+    return true;
+}

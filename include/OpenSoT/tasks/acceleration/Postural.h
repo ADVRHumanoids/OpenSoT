@@ -44,14 +44,41 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
                           const Eigen::VectorXd& ddqref);
 
+        /**
+         * @brief getReference
+         * @return joint position desidred
+         */
+        Eigen::VectorXd getReference() const;
+
+        void getReference(Eigen::VectorXd& q_desired) const;
+        void getReference(Eigen::VectorXd& q_desired,
+                          Eigen::VectorXd& qdot_desired) const;
+        void getReference(Eigen::VectorXd& q_desired,
+                          Eigen::VectorXd& qdot_desired,
+                          Eigen::VectorXd& qddot_desired) const;
+
+        Eigen::VectorXd getActualPositions();
+
+        /**
+         * @brief getError
+         * @return position error
+         */
+        Eigen::VectorXd getError();
+
+        Eigen::VectorXd getVelocityError();
+
+
         void setLambda(double lambda1, double lambda2);
         virtual void setLambda(double lambda);
+
+        bool reset();
         
         virtual void _log(XBot::MatLogger::Ptr logger);
 
         
         
     private:
+        Eigen::VectorXd _position_error, _velocity_error;
         
         const XBot::ModelInterface& _robot;
         AffineHelper _qddot;
