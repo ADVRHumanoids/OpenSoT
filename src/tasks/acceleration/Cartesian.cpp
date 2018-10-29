@@ -110,7 +110,7 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     _pose_error.head<3>() = _pose_ref.translation() - _pose_current.translation();
     _pose_error.tail<3>() = _orientation_gain * _orientation_error;
     
-    _velocity_error = _vel_ref - _vel_current;
+    _velocity_error = _vel_ref - _vel_current; ///Maybe here we should multiply the _orientation_gain as well?
 
     _cartesian_task = _J*_qddot + _jdotqdot;
     _cartesian_task = _cartesian_task - _acc_ref 
