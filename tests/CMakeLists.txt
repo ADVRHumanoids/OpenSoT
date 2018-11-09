@@ -140,6 +140,7 @@ endif()
 if(${trajectory_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
                   testQPOases_StaticWalk_FloatingBase
+                  testQPOases_StaticWalk
                   testEigenSVD_StaticWalk_FloatingBase)
 endif()
 
@@ -147,7 +148,7 @@ endif()
 if(${YARP_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
                     testQPOases_ConvexHull
-                    testQPOases_StaticWalk
+
     )
 endif()
 
@@ -290,6 +291,11 @@ if(${trajectory_utils_FOUND})
     TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testQPOases_StaticWalk_FloatingBase GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
+
+    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
+    add_dependencies(testQPOases_StaticWalk GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
 
     ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
@@ -503,11 +509,6 @@ if(${YARP_FOUND})
 #    TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 #    add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 
-
-    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
-    add_dependencies(testQPOases_StaticWalk GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
 
 endif()
 

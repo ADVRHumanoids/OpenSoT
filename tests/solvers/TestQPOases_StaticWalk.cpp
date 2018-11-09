@@ -1,10 +1,9 @@
-#include <advr_humanoids_common_utils/idynutils.h>
-#include <advr_humanoids_common_utils/test_utils.h>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 #include <trajectory_utils/trajectory_utils.h>
 #include <gtest/gtest.h>
 #include <trajectory_utils/utils/ros_trj_publisher.h>
 #include <tf/transform_broadcaster.h>
+#include <tf_conversions/tf_eigen.h>
+#include <tf_conversions/tf_kdl.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
@@ -17,9 +16,11 @@
 #include <ros/master.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <qpOASES/Options.hpp>
+#include <OpenSoT/floating_base_estimation/qp_estimation.h>
+#include <sensor_msgs/JointState.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
 bool IS_ROSCORE_RUNNING;
@@ -184,7 +185,7 @@ namespace{
             l_sole_trj.addArcTrj(l_sole_wp, l_sole_wp.M, M_PI, arc_center, plane_normal, T_foot);
             //9. The CoM goes back in the middle of the feet. Feet remain
             // in the same position
-            com_wp.p.y(0.0);
+            com_wp.p.y(com_init.p.y());
             com_waypoints.push_back(com_wp);
             com_time.push_back(T_com);
 
@@ -269,6 +270,7 @@ namespace{
 
 
             postural.reset(new OpenSoT::tasks::velocity::Postural(q));
+            postural->setLambda(0.1);
 
             Eigen::VectorXd qmin, qmax;
             model_ref.getJointLimits(qmin, qmax);
@@ -356,17 +358,9 @@ namespace{
 
     class testStaticWalk: public ::testing::Test{
     public:
-        static void null_deleter(idynutils2 *) {}
-
-        testStaticWalk():
-            _robot("coman",
-                   std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                   std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf"),
-            _q(_robot.iDynTree_model.getNrOfDOFs())
+        testStaticWalk()
         {
-            _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-                    (XBot::ModelInterface::getModel(_path_to_cfg));
-            _model_ptr->loadModel(boost::shared_ptr<idynutils2>(&_robot, &null_deleter));
+            _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
             if(_model_ptr)
                 std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -374,9 +368,12 @@ namespace{
                 std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
+            _q.setZero(_model_ptr->getJointNum());
 
-            _q.setZero(_robot.iDynTree_model.getNrOfDOFs());
-            _robot.updateiDynTreeModel(_q,true);
+            _model_ptr->setJointPosition(_q);
+            _model_ptr->update();
+            _fb.reset(new OpenSoT::floating_base_estimation::kinematic_estimation(_model_ptr,"r_sole"));
+            _fb->update();
 
             if(IS_ROSCORE_RUNNING){
 
@@ -492,13 +489,13 @@ namespace{
                 visual_tools->publishWireframeRectangle(_l_foot, 0.05, 0.1);
                 visual_tools->publishWireframeRectangle(_r_foot, 0.05, 0.1);
 
+
                 Eigen::Affine3d text_pose; text_pose.Identity();
                 text_pose(1,3) = -0.4;
                 std::string text = "Anchor: "+anchor+"\n";
-                text += "Robot Anchor: "+ _robot.getAnchorName()+"\n";
+                text += "Robot Anchor: "+ _fb->getAnchor()+"\n";
                 std::string floating_base;
-                _robot.iDynTree_model.getLinkName(_robot.iDynTree_model.getFloatingBaseLink(),
-                                                  floating_base);
+                _model_ptr->getFloatingBaseLink(floating_base);
                 text += "Robot Floating Base: "+ floating_base+"\n";
                 visual_tools->publishText(text_pose,text);
             }
@@ -510,7 +507,7 @@ namespace{
             if(IS_ROSCORE_RUNNING)
             {
                 sensor_msgs::JointState joint_msg;
-                joint_msg.name = _robot.getJointNames();
+                joint_msg.name = _model_ptr->getEnabledJointNames();
 
 
                 for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
@@ -518,7 +515,7 @@ namespace{
 
                 for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
                 {
-                    int id = _robot.iDynTree_model.getDOFIndex(joint_msg.name[i]);
+                    int id = _model_ptr->getDofIndex(joint_msg.name[i]);
                     joint_msg.position[id] = _q[i];
                 }
 
@@ -526,7 +523,10 @@ namespace{
 
 
                 tf::Transform anchor_T_world;
-                KDL::Frame anchor_T_world_KDL = _robot.getAnchor_T_World();
+                Eigen::Affine3d world_T_anchor = _fb->getAnchorPose();
+                KDL::Frame anchor_T_world_KDL;
+                tf::transformEigenToKDL(world_T_anchor.inverse(), anchor_T_world_KDL);
+
                 anchor_T_world.setOrigin(tf::Vector3(anchor_T_world_KDL.p.x(),
                     anchor_T_world_KDL.p.y(), anchor_T_world_KDL.p.z()));
                 double x,y,z,w;
@@ -535,7 +535,7 @@ namespace{
 
                 world_broadcaster->sendTransform(tf::StampedTransform(
                     anchor_T_world, joint_msg.header.stamp,
-                    _robot.getAnchorName(), "world"));
+                    _fb->getAnchor(), "world"));
 
 
                 joint_state_pub.publish(joint_msg);
@@ -556,52 +556,68 @@ namespace{
 
         rviz_visual_tools::RvizVisualToolsPtr visual_tools;
 
-        idynutils2 _robot;
-        XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
+        OpenSoT::floating_base_estimation::kinematic_estimation::Ptr _fb;
+        XBot::ModelInterface::Ptr _model_ptr;
         Eigen::VectorXd _q;
 
         boost::shared_ptr<ros::NodeHandle> _n;
 
         void setGoodInitialPosition() {
-            _q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-            _q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-            _q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 20.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("LShYaw")] = -15.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
 
-            _q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -20.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("RShYaw")] = 15.0*M_PI/180.0;
-            _q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
+            _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
 
         }
 
     };
 
+    static inline void KDLFramesAreEqual(const KDL::Frame& a, const KDL::Frame& b,
+                                         const double near = 1e-10)
+    {
+        EXPECT_NEAR(a.p.x(), b.p.x(), near);
+        EXPECT_NEAR(a.p.y(), b.p.y(), near);
+        EXPECT_NEAR(a.p.z(), b.p.z(), near);
+
+        double x,y,z,w; a.M.GetQuaternion(x,y,z,w);
+        double xx,yy,zz,ww; b.M.GetQuaternion(xx,yy,zz,ww);
+
+        EXPECT_NEAR(x,xx, near);
+        EXPECT_NEAR(y,yy, near);
+        EXPECT_NEAR(z,zz, near);
+        EXPECT_NEAR(w,ww, near);
+    }
+
 
     TEST_F(testStaticWalk, testStaticWalk)
     {
         this->setGoodInitialPosition();
-        this->_robot.updateiDynTreeModel(this->_q, true);
-        this->_robot.switchAnchorAndFloatingBase("l_sole");
+        this->_model_ptr->setJointPosition(_q);
+        this->_model_ptr->update();
+
+        EXPECT_TRUE(this->_fb->setAnchor("r_sole"));
+        this->_fb->update();
+
 
 
     //1. WALKING
-        KDL::Vector com_vector = this->_robot.iDynTree_model.getCOMKDL();
+        KDL::Vector com_vector; this->_model_ptr->getCOM(com_vector);
         KDL::Frame com_init; com_init.p = com_vector;
-        KDL::Frame l_foot_init = this->_robot.iDynTree_model.
-                getPositionKDL(
-                    this->_robot.iDynTree_model.getLinkIndex("l_sole"));
-        KDL::Frame r_foot_init = this->_robot.iDynTree_model.
-                getPositionKDL(
-                    this->_robot.iDynTree_model.getLinkIndex("r_sole"));
+        KDL::Frame l_foot_init; this->_model_ptr->getPose("l_sole", l_foot_init);
+        KDL::Frame r_foot_init; this->_model_ptr->getPose("r_sole", r_foot_init);
 
         this->initTrj(com_init, l_foot_init, r_foot_init);
         this->initTrjPublisher();
@@ -620,8 +636,10 @@ namespace{
             KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
             std::string anchor_d = this->walk_trj->getAnchor(t);
 
-            this->_robot.switchAnchorAndFloatingBase(anchor_d);
-            this->_robot.updateiDynTreeModel(this->_q, true);
+            _model_ptr->setJointPosition(_q);
+            _model_ptr->update();
+            _fb->setAnchor(anchor_d);
+            _fb->update();
 
             ws.com->setReference(com_d.p);
             ws.l_sole->setReference(l_sole_d);
@@ -641,14 +659,16 @@ namespace{
             if(IS_ROSCORE_RUNNING)
                 toc = ros::Time::now().nsec;
 
-            this->_robot.updateiDynTreeModel(this->_q, true);
+            _model_ptr->setJointPosition(_q);
+            _model_ptr->update();
+            _fb->update();
 
-            KDL::Frame tmp; tmp.p = _robot.iDynTree_model.getCOMKDL();
-            tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
-            tests_utils::KDLFramesAreEqual(l_sole_d, _robot.iDynTree_model.getPositionKDL(
-                _robot.iDynTree_model.getLinkIndex("l_sole")),1e-3);
-            tests_utils::KDLFramesAreEqual(r_sole_d, _robot.iDynTree_model.getPositionKDL(
-                _robot.iDynTree_model.getLinkIndex("r_sole")),1e-3);
+            KDL::Frame tmp; _model_ptr->getCOM(tmp.p);
+            KDLFramesAreEqual(com_d, tmp, 1e-3);
+            _model_ptr->getPose("l_sole", tmp);
+            KDLFramesAreEqual(l_sole_d, tmp ,1e-3);
+            _model_ptr->getPose("r_sole", tmp);
+            KDLFramesAreEqual(r_sole_d, tmp,1e-3);
 
             if(IS_ROSCORE_RUNNING){
                 loop_time.push_back((toc-tic)/1e6);
@@ -669,12 +689,9 @@ namespace{
 
 
     //2 MANIPULATION
-        com_vector = this->_robot.iDynTree_model.getCOMKDL();
+        _model_ptr->getCOM(com_vector);
         com_init.p = com_vector;
-        KDL::Frame r_wrist_init = this->_robot.iDynTree_model.
-                getPositionKDL(
-                    this->_robot.iDynTree_model.getLinkIndex("DWYTorso"),
-                    this->_robot.iDynTree_model.getLinkIndex("r_wrist"));
+        KDL::Frame r_wrist_init; _model_ptr->getPose("r_wrist","DWYTorso",r_wrist_init);
 
         this->initManipTrj(com_init,  r_wrist_init);
         this->initManipTrjPublisher();
@@ -688,7 +705,10 @@ namespace{
             KDL::Frame com_d = this->manip_trj->com_trj.Pos(t);
             KDL::Frame r_wrist_d = this->manip_trj->r_wrist_trj.Pos(t);
 
-            this->_robot.updateiDynTreeModel(this->_q, true);
+            _model_ptr->setJointPosition(_q);
+            _model_ptr->update();
+            _fb->update();
+
 
             ws.com->setReference(com_d.p);
             ws.r_wrist->setReference(r_wrist_d);
@@ -707,14 +727,15 @@ namespace{
             if(IS_ROSCORE_RUNNING)
                 toc = ros::Time::now().nsec;
 
-            this->_robot.updateiDynTreeModel(this->_q, true);
+            _model_ptr->setJointPosition(_q);
+            _model_ptr->update();
+            _fb->update();
 
-            KDL::Frame tmp; tmp.p = _robot.iDynTree_model.getCOMKDL();
-            tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
-            tests_utils::KDLFramesAreEqual(r_wrist_d, this->_robot.iDynTree_model.
-                                           getPositionKDL(
-                                               this->_robot.iDynTree_model.getLinkIndex("DWYTorso"),
-                                               this->_robot.iDynTree_model.getLinkIndex("r_wrist")),1e-3);
+
+            KDL::Frame tmp; _model_ptr->getCOM(tmp.p);
+            KDLFramesAreEqual(com_d, tmp, 1e-3);
+            _model_ptr->getPose("r_wrist", "DWYTorso", tmp);
+            KDLFramesAreEqual(r_wrist_d, tmp,1e-3);
 
 
             if(IS_ROSCORE_RUNNING){
@@ -741,24 +762,20 @@ namespace{
 
     //3 WALKING (AGAIN)
     //We want to be sure to start with the left foot again
-    _robot.switchAnchorAndFloatingBase("l_sole");
-    _robot.updateiDynTreeModel(this->_q, true);
+    _fb->setAnchor("l_sole");
+    _model_ptr->setJointPosition(_q);
+    _model_ptr->update();
+    _fb->update();
+
     ws.update(this->_q);
 
-    com_vector = this->_robot.iDynTree_model.getCOMKDL();
-    com_init; com_init.p = com_vector;
-    l_foot_init = this->_robot.iDynTree_model.
-            getPositionKDL(
-                this->_robot.iDynTree_model.getLinkIndex("l_sole"));
-    r_foot_init = this->_robot.iDynTree_model.
-            getPositionKDL(
-                this->_robot.iDynTree_model.getLinkIndex("r_sole"));
+    this->_model_ptr->getCOM(com_vector);
+    com_init.p = com_vector;
+    this->_model_ptr->getPose("l_sole", l_foot_init);
+    this->_model_ptr->getPose("r_sole", r_foot_init);
 
     this->initTrj(com_init, l_foot_init, r_foot_init);
     this->initTrjPublisher();
-
-
-
 
     t = 0.;
     for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
@@ -768,8 +785,10 @@ namespace{
         KDL::Frame r_sole_d = this->walk_trj->r_sole_trj.Pos(t);
         std::string anchor_d = this->walk_trj->getAnchor(t);
 
-        this->_robot.switchAnchorAndFloatingBase(anchor_d);
-        this->_robot.updateiDynTreeModel(this->_q, true);
+        _model_ptr->setJointPosition(_q);
+        _model_ptr->update();
+        _fb->setAnchor(anchor_d);
+        _fb->update();
 
         ws.com->setReference(com_d.p);
         ws.l_sole->setReference(l_sole_d);
@@ -790,14 +809,17 @@ namespace{
         if(IS_ROSCORE_RUNNING)
             toc = ros::Time::now().nsec;
 
-        this->_robot.updateiDynTreeModel(this->_q, true);
+        _model_ptr->setJointPosition(_q);
+        _model_ptr->update();
+        _fb->setAnchor(anchor_d);
+        _fb->update();
 
-        KDL::Frame tmp; tmp.p = _robot.iDynTree_model.getCOMKDL();
-        tests_utils::KDLFramesAreEqual(com_d, tmp, 1e-3);
-        tests_utils::KDLFramesAreEqual(l_sole_d, _robot.iDynTree_model.getPositionKDL(
-            _robot.iDynTree_model.getLinkIndex("l_sole")),1e-3);
-        tests_utils::KDLFramesAreEqual(r_sole_d, _robot.iDynTree_model.getPositionKDL(
-            _robot.iDynTree_model.getLinkIndex("r_sole")),1e-3);
+        KDL::Frame tmp; _model_ptr->getCOM(tmp.p);
+        KDLFramesAreEqual(com_d, tmp, 1e-3);
+        _model_ptr->getPose("l_sole", tmp);
+        KDLFramesAreEqual(l_sole_d, tmp ,1e-3);
+        _model_ptr->getPose("r_sole", tmp);
+        KDLFramesAreEqual(r_sole_d, tmp,1e-3);
 
 
         if(IS_ROSCORE_RUNNING){
