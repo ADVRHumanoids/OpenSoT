@@ -137,6 +137,9 @@ bool OpenSoT::floating_base_estimation::kinematic_estimation::setAnchor(const st
     if(_model->getLinkID(anchor_link) == -1)
         return false;
 
+    if(_anchor_link == anchor_link)
+        return true;
+
     _model->getPose(anchor_link, _anchor_link, _old_anchor_T_new_anchor);
     _anchor_link = anchor_link;
     _world_T_new_anchor = _world_T_anchor*_old_anchor_T_new_anchor;
