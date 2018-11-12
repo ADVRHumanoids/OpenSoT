@@ -109,5 +109,13 @@ Eigen::VectorXd OpenSoT::tasks::velocity::Postural::getActualPositions()
     return _x;
 }
 
+bool OpenSoT::tasks::velocity::Postural::reset()
+{
+    _x_desired = _x;
+    _update(_x_desired);
+
+    return true;
+}
+
 
 

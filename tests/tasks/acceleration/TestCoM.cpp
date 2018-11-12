@@ -45,11 +45,11 @@ protected:
         com->getReference(_com_ref);
         std::cout<<"_com_initial: \n"<<_com_ref.matrix()<<std::endl;
         l_sole.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("l_sole", *_model, "l_sole", "world", _q));
+            new OpenSoT::tasks::acceleration::Cartesian("l_sole",_q, *_model, "l_sole", "world"));
         l_sole->getReference(_l_sole_ref);
         std::cout<<"_l_sole_initial: \n"<<_l_sole_ref.matrix()<<std::endl;
         r_sole.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("r_sole", *_model, "r_sole", "world", _q));
+            new OpenSoT::tasks::acceleration::Cartesian("r_sole",_q, *_model, "r_sole", "world"));
         r_sole->getReference(_r_sole_ref);
         std::cout<<"_r_sole_initial: \n"<<_r_sole_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new
@@ -57,7 +57,7 @@ protected:
 
 
         OpenSoT::AffineHelper var = OpenSoT::AffineHelper::Identity(_q.size());
-        Eigen::VectorXd ddq_max = 1.*Eigen::VectorXd::Ones(_q.size());
+        Eigen::VectorXd ddq_max = 20.*Eigen::VectorXd::Ones(_q.size());
         Eigen::VectorXd ddq_min = -ddq_max;
         acc_lims.reset(
             new OpenSoT::constraints::GenericConstraint("acc_lims", var, ddq_max, ddq_min,
@@ -137,9 +137,8 @@ TEST_F(testCoMTask, testCoMTask_)
     Eigen::VectorXd ddq(_q.size());
     ddq.setZero(ddq.size());
     std::cout<<"q: "<<_q<<std::endl;
-    for(unsigned int i = 0; i < 10000; ++i)
+    for(unsigned int i = 0; i < 1000; ++i)
     {
-
         this->_model->setJointPosition(_q);
         this->_model->setJointVelocity(_dq);
         this->_model->update();

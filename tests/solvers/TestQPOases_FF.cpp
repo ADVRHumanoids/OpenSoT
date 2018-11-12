@@ -1,5 +1,3 @@
-#include <advr_humanoids_common_utils/idynutils.h>
-#include <advr_humanoids_common_utils/test_utils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/trajectory.hpp>
@@ -21,16 +19,14 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <qpOASES.hpp>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
 #include <fstream>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
-#include <yarp/os/SystemClock.h>
 
-typedef idynutils2 iDynUtils;
+#include <XBotInterface/ModelInterface.h>
+#include <chrono>
+#include <ctime>
+#include <thread>
 
-using namespace yarp::math;
+
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -190,34 +186,32 @@ protected:
     }
 };
 
-yarp::sig::Vector getGoodInitialPosition(iDynUtils& _robot) {
-    yarp::sig::Vector _q(_robot.iDynTree_model.getNrOfDOFs(), 0.0);
+Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _robot) {
 
-    _q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    Eigen::VectorXd _q(_robot->getJointNum());
+    _q.setZero(_q.size());
 
-    _q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_robot->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_robot->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_robot->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
+    _q[_robot->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_robot->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_robot->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+    _q[_robot->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+    _q[_robot->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+    _q[_robot->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
-    _q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+    _q[_robot->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+    _q[_robot->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+    _q[_robot->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
 
     return _q;
+
 }
 
-static void null_deleter(iDynUtils *) {}
 
-std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
-std::string _path_to_cfg = robotology_root + relative_path;
 
 TEST_P(testQPOases_CartesianFF, testCartesianFF)
 {
@@ -225,18 +219,14 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     KDL::Path::IdentifierType  trajType = GetParam().first;
     bool hasInitialError = GetParam().second;
 
-#ifdef TRY_ON_SIMULATOR
-    yarp::os::Network init;
-    ComanUtils robot("testCartesianFF");
-#endif
 
-    iDynUtils model("coman",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
-    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-            (XBot::ModelInterface::getModel(_path_to_cfg));
-    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
+
+    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+
+    std::string _path_to_cfg = robotology_root + relative_path;
+
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -244,22 +234,18 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
-    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-    model.updateiDynTreeModel(q, true);
-    model.switchAnchorAndFloatingBase("l_sole");
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-#ifdef TRY_ON_SIMULATOR
-    robot.setPositionDirectMode();
-    robot.move(q);
-    yarp::os::Time::delay(3);
-#endif
+
 
     // BOUNDS
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(q,
-                        model.getJointBoundMax(),
-                        model.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(q,qmax,qmin));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits( 0.6,3e-3,q.size()));
@@ -296,18 +282,19 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
     KDL::Frame current_pose, previous_pose, desired_pose;
     KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
-    yarp::sig::Matrix current_pose_y;
+    Eigen::MatrixXd current_pose_y;
     double R, Rdes, Rprev, P, Pdes, Pprev, Y, Ydes, Yprev;
 
 
-    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-    model.updateiDynTreeModel(q, true);
+    q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
     l_arm_task->update(q);
     postural_task->update(q);
     bounds->update(q);
 
-    current_pose_y = conversion_utils_YARP::toYARP(l_arm_task->getActualPose());
-    conversion_utils_YARP::toKDLFrame(current_pose_y, current_pose);
+    current_pose_y = l_arm_task->getActualPose();
+    l_arm_task->getActualPose(current_pose);
 
     if(!hasInitialError) {
 
@@ -323,7 +310,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
             get5cmFwdLinearTraj(current_pose);
 
-            l_arm_task->setOrientationErrorGain(.1);
+            l_arm_task->setOrientationErrorGain(.1);//0.1
         } else {
             /************************************************
              * COMMANDING 1rad CLOCKWISE FROM CURRENT POSITION
@@ -335,12 +322,12 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
             get1radCircularTraj(current_pose);
 
-            l_arm_task->setOrientationErrorGain(.5);
+            l_arm_task->setOrientationErrorGain(.5);//0.5
         }
 
         desired_pose = trajectory->Pos(0.0);
 
-        l_arm_task->setLambda(.6);
+        l_arm_task->setLambda(.6);//0.6
 
     } else {
         if(trajType == KDL::Path::ID_LINE) {
@@ -387,7 +374,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     previous_pose = current_pose;
     desired_twist = trajectory->Vel(0.0);
 
-    double t_loop = dt;
+    std::chrono::duration<double> t_loop = std::chrono::duration<double>(dt);
     double t_compute = 0;
 
     double previous_norm = -1;
@@ -410,26 +397,34 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
          << "t_loop(333Hz)" << std::endl;
     _log << "pos_des_x = [" << std::endl;
 
-    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
+    std::chrono::time_point<std::chrono::system_clock> t_begin;
+    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop.count())
     {
-        double t_begin = yarp::os::SystemClock::nowSystem();
-        yarp::sig::Matrix desired_pose_y(4,0.0);
-        yarp::sig::Vector desired_twist_y(6,0.0);
+        t_begin = std::chrono::system_clock::now();
+        Eigen::MatrixXd desired_pose_y(4,4); desired_pose_y.setZero(4,4);
+        Eigen::VectorXd desired_twist_y(6); desired_twist_y.setZero(6);
         desired_pose = trajectory->Pos(t);
         desired_twist = trajectory->Vel(t);
-        conversion_utils_YARP::toYARP(desired_pose, desired_pose_y);
-        conversion_utils_YARP::toYARP(desired_twist, desired_twist_y);
-        l_arm_task->setReference(desired_pose, desired_twist*t_loop);
+        l_arm_task->setReference(desired_pose, desired_twist*t_loop.count());
+
 
         // initializing previous norm
-        if(previous_norm < 0)
-            previous_norm = sqrt(l_arm_task->getb().squaredNorm());
+        if(previous_norm < 0){
+
+            Eigen::VectorXd twist(6);
+            twist<<Eigen::Vector3d(desired_twist.vel.data), Eigen::Vector3d(desired_twist.rot.data);
+
+            Eigen::VectorXd b = twist*t_loop.count() + l_arm_task->getLambda()*l_arm_task->getError();
+            previous_norm = sqrt(b.squaredNorm());
+            //previous_norm = sqrt(l_arm_task->getb().squaredNorm());
+        }
 
         // checking variation of gain during trajectory following
         if(t>=6)
             l_arm_task->setLambda(.6);
 
-        model.updateiDynTreeModel(q, true);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
 
         l_arm_task->update(q);
         postural_task->update(q);
@@ -438,13 +433,16 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         EXPECT_TRUE(sot->solve(dq));
         q += dq;
 
-        current_pose_y = conversion_utils_YARP::toYARP(l_arm_task->getActualPose());
-        conversion_utils_YARP::toKDLFrame(current_pose_y, current_pose);
+        current_pose_y = l_arm_task->getActualPose();
+        l_arm_task->getActualPose(current_pose);
 
 
-        t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
-        yarp::os::SystemClock::delaySystem(dt-t_compute);
-        t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
+        std::chrono::duration<double> t_compute = std::chrono::system_clock::now() - t_begin;
+
+        std::chrono::duration<double> time_for_sleep = std::chrono::duration<double>(dt) - t_compute;
+
+        std::this_thread::sleep_for(time_for_sleep);
+        t_loop = std::chrono::system_clock::now() - t_begin;
 
         /* first order fading filter -> to implement in Matlab
         double beta = 0.3; double G = 1-beta;
@@ -453,11 +451,11 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         */
         double twist_measure;
         if(trajType == KDL::Path::ID_LINE) {
-            twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+            twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop.count();
         } else {
             current_pose.M.GetRPY(R,P,Y);
             previous_pose.M.GetRPY(Rprev,Pprev,Yprev);
-            twist_measure = (R - Rprev)/t_loop;
+            twist_measure = (R - Rprev)/t_loop.count();
         }
 
         twist_estimate[0] = twist_measure;
@@ -470,8 +468,8 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
                  << desired_twist[0]   << ",\t"
                  << current_pose.p[0]  << ",\t"
                  << desired_pose.p[0]  << ",\t"
-                 << t_compute          << ",\t"
-                 << t_loop             << ",\t"
+                 << t_compute.count()          << ",\t"
+                 << t_loop.count()             << ",\t"
                  << current_norm       << ";" << std::endl;
         } else {
             desired_pose.M.GetRPY(Rdes,Pdes,Ydes);
@@ -480,8 +478,8 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
                  << desired_twist.rot.x()   << ",\t"
                  << R  << ",\t"
                  << Rdes  << ",\t"
-                 << t_compute          << ",\t"
-                 << t_loop             << ",\t"
+                 << t_compute.count()          << ",\t"
+                 << t_loop.count()             << ",\t"
                  << current_norm       << ";" << std::endl;
         }
 
@@ -566,18 +564,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 {
     bool hasInitialError = GetParam();
 
-#ifdef TRY_ON_SIMULATOR
-    yarp::os::Network init;
-    ComanUtils robot("testCoMFF");
-#endif
+    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 
-    iDynUtils model("coman",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
-    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-            (XBot::ModelInterface::getModel(_path_to_cfg));
-    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
+    std::string _path_to_cfg = robotology_root + relative_path;
+
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -585,23 +577,20 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-    model.updateiDynTreeModel(q, true);
-    model.switchAnchorAndFloatingBase("l_sole");
+Eigen::Affine3d floating_base_pose;
+_model_ptr->getFloatingBasePose(floating_base_pose);
+std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
 
-#ifdef TRY_ON_SIMULATOR
-    robot.setPositionDirectMode();
-    robot.move(q);
-    yarp::os::Time::delay(3);
-#endif
 
     // BOUNDS
-
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(q,
-                        model.getJointBoundMax(),
-                        model.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits( 0.9,3e-3,q.size()));
@@ -639,8 +628,10 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     Eigen::Vector3d current_position_y;
 
 
-    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
-    model.updateiDynTreeModel(q, true);
+    q = getGoodInitialPosition(_model_ptr);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
     com->update(q);
     postural_task->update(q);
     bounds->update(q);
@@ -691,7 +682,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
     previous_pose = current_pose;
     desired_twist = trajectory->Vel(0.0);
 
-    double t_loop = dt;
+    std::chrono::duration<double> t_loop = std::chrono::duration<double>(dt);
     double t_compute = 0;
 
     double previous_norm = -1;
@@ -707,11 +698,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
          << "t_loop(333Hz)" << std::endl;
     _log << "pos_des_x = [" << std::endl;
 
-    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
+    std::chrono::time_point<std::chrono::system_clock> t_begin;
+    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop.count())
     {
-        double t_begin = yarp::os::SystemClock::nowSystem();
-        yarp::sig::Vector desired_position_y(3,0.0);
-        yarp::sig::Vector desired_twist_y(3,0.0);
+        t_begin = std::chrono::system_clock::now();
+        Eigen::Vector3d desired_position_y; desired_position_y.setZero();
+        Eigen::Vector3d desired_twist_y; desired_twist_y.setZero();
         desired_pose = trajectory->Pos(t);
         desired_twist = trajectory->Vel(t);
         desired_position_y(0) = desired_pose.p.x();
@@ -720,17 +712,21 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         desired_twist_y(0) = desired_twist.vel.x();
         desired_twist_y(1) = desired_twist.vel.y();
         desired_twist_y(2) = desired_twist.vel.z();
-        com->setReference(desired_pose.p, desired_twist.vel*t_loop);
+        com->setReference(desired_pose.p, desired_twist.vel*t_loop.count());
 
         // initializing previous norm
         if(previous_norm < 0)
+        {
+            com->update(Eigen::VectorXd(1));
             previous_norm = sqrt(com->getb().squaredNorm());
+        }
 
         // checking variation of gain during trajectory following
         if(t>=6)
             com->setLambda(.6);
 
-        model.updateiDynTreeModel(q, true);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
 
         com->update(q);
         postural_task->update(q);
@@ -745,16 +741,19 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
         current_pose.p.z(current_position_y(2));
 
 
-        t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
-        yarp::os::SystemClock::delaySystem(dt-t_compute);
-        t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
+        std::chrono::duration<double> t_compute = std::chrono::system_clock::now() - t_begin;
+
+        std::chrono::duration<double> time_for_sleep = std::chrono::duration<double>(dt) - t_compute;
+
+        std::this_thread::sleep_for(time_for_sleep);
+        t_loop = std::chrono::system_clock::now() - t_begin;
 
         /* first order fading filter -> to implement in Matlab
         double beta = 0.3; double G = 1-beta;
         double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
         twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
         */
-        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop.count();
         twist_estimate[0] = twist_measure;
 
         current_norm = sqrt(com->getb().squaredNorm());
@@ -764,8 +763,8 @@ TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
              << desired_twist[0]   << ",\t"
              << current_pose.p[0]  << ",\t"
              << desired_pose.p[0]  << ",\t"
-             << t_compute          << ",\t"
-             << t_loop             << ",\t"
+             << t_compute.count()          << ",\t"
+             << t_loop.count()             << ",\t"
              << current_norm       << ";" << std::endl;
         // also velocities and accelerations are available !
         previous_pose = current_pose;
@@ -833,18 +832,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 {
     bool hasInitialError = GetParam();
 
-#ifdef TRY_ON_SIMULATOR
-    yarp::os::Network init;
-    ComanUtils robot("testCoMFF");
-#endif
+    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
 
-    iDynUtils model("coman",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr;
-    _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-            (XBot::ModelInterface::getModel(_path_to_cfg));
-    _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&model, &null_deleter));
+    std::string _path_to_cfg = robotology_root + relative_path;
+
+    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -852,28 +845,23 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
-    double j_index = model.iDynTree_model.getDOFIndex("LShLat");
+    double j_index = _model_ptr->getDofIndex("LShLat");
     std::cout << "Applying trajectory to joint "
               << "LShLat" << std::endl;
 
-    Eigen::VectorXd q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
     q[j_index] = .0;
 
-    model.updateiDynTreeModel(q, true);
-    model.switchAnchorAndFloatingBase("l_sole");
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-#ifdef TRY_ON_SIMULATOR
-    robot.setPositionDirectMode();
-    robot.move(q);
-    yarp::os::Time::delay(3);
-#endif
 
     // BOUNDS
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(q,
-                        model.getJointBoundMax(),
-                        model.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(q,qmax,qmin));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits( 1.5,3e-3,q.size()));
@@ -904,9 +892,12 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     KDL::Frame current_pose, previous_pose, desired_pose;
     KDL::Twist twist_estimate, previous_twist_estimate, desired_twist;
 
-    q = conversion_utils_YARP::toEigen(getGoodInitialPosition(model));
+    q = getGoodInitialPosition(_model_ptr);
     q[j_index] = .0;
-    model.updateiDynTreeModel(q, true);
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
     postural_task->update(q);
     bounds->update(q);
 
@@ -949,7 +940,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     previous_pose = current_pose;
     desired_twist = trajectory->Vel(0.0);
 
-    double t_loop = dt;
+    std::chrono::duration<double> t_loop = std::chrono::duration<double>(dt);
     double t_compute = 0;
 
     double previous_norm = -1;
@@ -965,20 +956,19 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
          << "t_loop(333Hz)" << std::endl;
     _log << "pos_des_x = [" << std::endl;
 
-    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop)
+    std::chrono::time_point<std::chrono::system_clock> t_begin;
+    for (double t=0.0; t <= trajectory->Duration(); t+= t_loop.count())
     {
-        double t_begin = yarp::os::SystemClock::nowSystem();
+        t_begin = std::chrono::system_clock::now();
 
-        yarp::sig::Vector desired_q(q.size(),0.0);
-        yarp::sig::Vector desired_qdot(q.size(),0.0);
+        Eigen::VectorXd desired_q(q.size()); desired_q.setZero(desired_q.size());
+        Eigen::VectorXd desired_qdot(q.size()); desired_qdot.setZero(desired_q.size());
         desired_pose = trajectory->Pos(t);
         desired_twist = trajectory->Vel(t);
-        desired_q = conversion_utils_YARP::toYARP(q);
+        desired_q = q;
         desired_q[j_index] = desired_pose.p[0];
         desired_qdot[j_index] = desired_twist.vel[0];
-        postural_task->setReference(
-                    conversion_utils_YARP::toEigen(desired_q),
-                    conversion_utils_YARP::toEigen(desired_qdot)*t_loop);
+        postural_task->setReference(desired_q,desired_qdot*t_loop.count());
 
         // initializing previous norm
         if(previous_norm < 0)
@@ -988,7 +978,8 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         if(t>=6)
             postural_task->setLambda(.99);
 
-        model.updateiDynTreeModel(q, true);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
 
         postural_task->update(q);
         bounds->update(q);
@@ -999,16 +990,19 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 
         q += dq;
 
-        t_compute = yarp::os::SystemClock::nowSystem() - t_begin;
-        yarp::os::SystemClock::delaySystem(dt-t_compute);
-        t_loop = yarp::os::SystemClock::nowSystem() - t_begin;
+        std::chrono::duration<double> t_compute = std::chrono::system_clock::now() - t_begin;
+
+        std::chrono::duration<double> time_for_sleep = std::chrono::duration<double>(dt) - t_compute;
+
+        std::this_thread::sleep_for(time_for_sleep);
+        t_loop = std::chrono::system_clock::now() - t_begin;
 
         /* first order fading filter -> to implement in Matlab
         double beta = 0.3; double G = 1-beta;
         double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
         twist_estimate[0] = twist_estimate[0] + G*(twist_measure - twist_estimate[0]);
         */
-        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop;
+        double twist_measure = (current_pose.p[0] - previous_pose.p[0])/t_loop.count();
         twist_estimate[0] = twist_measure;
 
         current_norm = sqrt(postural_task->getb().squaredNorm());
@@ -1018,8 +1012,8 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
              << desired_twist[0]   << ",\t"
              << current_pose.p[0]  << ",\t"
              << desired_pose.p[0]  << ",\t"
-             << t_compute          << ",\t"
-             << t_loop             << ",\t"
+             << t_compute.count()          << ",\t"
+             << t_loop.count()             << ",\t"
              << current_norm       << ";" << std::endl;
         // also velocities and accelerations are available !
         previous_pose = current_pose;

@@ -1,7 +1,25 @@
 #include <OpenSoT/solvers/OSQPBackEnd.h>
 #include <osqp/glob_opts.h>
 #include <exception>
+#include <XBotInterface/SoLib.h>
 using namespace OpenSoT::solvers;
+
+#define BASE_REGULARISATION 1E-12
+
+
+/* Define factories for dynamic loading */
+extern "C" BackEnd * create_instance(const int number_of_variables,
+                               const int number_of_constraints,
+                               OpenSoT::HessianType hessian_type, const double eps_regularisation)
+{
+    return new OSQPBackEnd(number_of_variables, number_of_constraints, eps_regularisation);
+}
+
+extern "C" void destroy_instance( BackEnd * instance )
+{
+    delete instance;
+}
+
 
 OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
                          const int number_of_constraints,
@@ -57,7 +75,7 @@ void OSQPBackEnd::__generate_data_struct(const int number_of_variables,
     ones.setOnes(number_of_constraints, number_of_variables);
     sp_pattern.setZero(number_of_constraints + number_of_bounds, number_of_variables);
     sp_pattern.topRows(number_of_constraints) = ones;
-    sp_pattern.bottomRows(number_of_bounds) = Eigen::MatrixXd::Identity(number_of_bounds, number_of_bounds);
+    sp_pattern.bottomRows(number_of_bounds) = Eigen::MatrixXd::Identity(number_of_bounds, number_of_variables);
 
     _Asparse = sp_pattern.sparseView();
     _Asparse.makeCompressed();
@@ -114,7 +132,7 @@ bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
     for(int c = 0; c < getNumVariables(); c++)
     {
         _P_values.segment(idx, c+1) = _H.col(c).head(c+1);
-        _P_values.segment(idx, c+1)(c) += _eps_regularisation;
+        _P_values.segment(idx, c+1)(c) += _eps_regularisation*BASE_REGULARISATION; //TO HAVE COMPATIBILITY WITH THE QPOASES ONE!
         idx += c+1;
     }
     
@@ -180,20 +198,31 @@ bool OSQPBackEnd::updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& 
 
 bool OSQPBackEnd::solve()
 {
-    
-    
     osqp_update_lin_cost(_workspace.get(), _g.data());
-    osqp_update_bounds(_workspace.get(), _lb_piled.data(), _ub_piled.data());
-    osqp_update_A(_workspace.get(), _Adense.data(), nullptr, _Adense.size());
-    osqp_update_P(_workspace.get(), _P_values.data(), nullptr, _P_values.size());
+    c_int update_bound_flag = osqp_update_bounds(_workspace.get(), _lb_piled.data(), _ub_piled.data());
+    if(update_bound_flag != 0)
+        return false;
+    c_int update_A_flag = osqp_update_A(_workspace.get(), _Adense.data(), nullptr, _Adense.size());
+    if(update_A_flag != 0)
+        return false;
+    c_int update_P_flag = osqp_update_P(_workspace.get(), _P_values.data(), nullptr, _P_values.size());
+    if(update_P_flag != 0)
+        return false;
     
     
     
-    int exitflag = osqp_solve(_workspace.get());
+    c_int exitflag = osqp_solve(_workspace.get());
+    if(exitflag != 0)
+        return false;
     
+    c_int workspace_flag = _workspace->info->status_val;
+    if(workspace_flag != 1 && workspace_flag != 2){
+        XBot::Logger::error("%s", _workspace->info->status);
+        return false;}
+
     _solution = Eigen::Map<Eigen::VectorXd>(_workspace->solution->x, _solution.size());
-    
-    return exitflag == 0;
+
+    return true;
     
 }
 
@@ -240,6 +269,11 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     success = solve() && success;
     
     return success;
+}
+
+double OSQPBackEnd::getObjective()
+{
+    return _workspace->info->obj_val;
 }
 
 //void OSQPBackEnd::print_csc_matrix_raw(csc* a, const std::string& name)

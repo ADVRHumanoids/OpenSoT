@@ -13,7 +13,7 @@ find_package(test_utils QUIET)
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(ModelInterfaceIDYNUTILS QUIET)
-find_package(catkin REQUIRED tf roscpp)
+find_package(catkin REQUIRED tf roscpp robot_state_publisher)
 
 
 if(${YARP_FOUND})
@@ -36,7 +36,7 @@ if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
                       ${rviz_visual_tools_INCLUDE_DIRS})
 endif()
 
-
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 
 #TESTS THAT USES GAZEBO
 set(OPENSOT_COMPILE_SIMULATION_TESTS OFF CACHE BOOL "Flag to compile tests that uses Gazebo")
@@ -46,6 +46,7 @@ if (OPENSOT_COMPILE_SIMULATION_TESTS)
     #Gazebo
     find_package(Gazebo   REQUIRED)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+    message("**************TEST CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
     link_directories(${GAZEBO_LIBRARY_DIRS})
     include_directories(${GAZEBO_INCLUDE_DIRS})
 
@@ -90,7 +91,10 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_SetActiveStack 
                   testQPOases_Options  
                   testQPOases_SubTask
-                  testFrictionConeForceConstraint 
+                  testQPOases_FF
+                  testConvexHullVelocityConstraint
+                  testFrictionConeForceConstraint
+                  testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
                   testManipulabilityTask
                   testMinimizeAccelerationTask
@@ -106,10 +110,19 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testCartesianAccelerationTask
                   testCoMAccelerationTask
                   testContactFloatingBaseTask
+                  testCoMForceTask
+                  testTask
+                  testPiler
+                  testKinematicEstimationFloatingBase
 )
 
 if(${osqp_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testLP)
+endif()
+
+if(${GLPK_FOUND})
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver)
 endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -119,26 +132,23 @@ endif()
 
 #THIS TEST DEPEND ON fcl
 if(${fcl_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils)
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
+                                       testCollisionAvoidanceVelocityConstraint)
 endif()
 
 #THESE TESTS DEPEND ON trajectory_utils
 if(${trajectory_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
                   testQPOases_StaticWalk_FloatingBase
+                  testQPOases_StaticWalk
                   testEigenSVD_StaticWalk_FloatingBase)
 endif()
 
 #THESE TESTS DEPEND ON YARP
 if(${YARP_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                    testCollisionAvoidanceVelocityConstraint
-                    testCoMVelocityVelocityConstraint
-                    testConvexHullVelocityConstraint
                     testQPOases_ConvexHull
-                    testQPOases_FF
-                    testQPOases_StaticWalk
-                    testCoMForceTask
+
     )
 endif()
 
@@ -190,7 +200,7 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES})
+                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
 if(${fcl_FOUND})
     SET(TestLibs ${TestLibs} ${fcl_LIBRARIES})
 endif()
@@ -218,6 +228,17 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
 
+
+ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
+TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})
+add_dependencies(testKinematicEstimationFloatingBase GTest-ext OpenSoT)
+add_test(NAME OpenSoT_floating_base_KinematicEstimation COMMAND testKinematicEstimationFloatingBase)
+
+ADD_EXECUTABLE(testTask     tasks/TestTask.cpp)
+TARGET_LINK_LIBRARIES(testTask ${TestLibs})
+add_dependencies(testTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_tasks_Task COMMAND testTask)
+
 ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
 TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
 add_dependencies(testBilateralConstraint GTest-ext OpenSoT)
@@ -238,6 +259,25 @@ if(${osqp_FOUND})
     TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs})
     add_dependencies(testOSQPSolver GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_osqp COMMAND testOSQPSolver)
+
+    ADD_EXECUTABLE(testGenericTask     tasks/TestGenericTask.cpp)
+    TARGET_LINK_LIBRARIES(testGenericTask ${TestLibs})
+    add_dependencies(testGenericTask GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
+
+
+    ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
+    TARGET_LINK_LIBRARIES(testLP ${TestLibs})
+    add_dependencies(testLP GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
+
+endif()
+
+if(${GLPK_FOUND})
+    ADD_EXECUTABLE(testGLPKSolver solvers/TestGLPK.cpp)
+    TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs})
+    add_dependencies(testGLPKSolver GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
 endif()
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
@@ -251,6 +291,11 @@ if(${trajectory_utils_FOUND})
     TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testQPOases_StaticWalk_FloatingBase GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
+
+    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
+    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
+    add_dependencies(testQPOases_StaticWalk GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
 
     ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
@@ -298,6 +343,11 @@ if(${fcl_FOUND})
     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
     add_dependencies(testCollisionUtils GTest-ext OpenSoT)
     add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
+
+    ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
+    TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
+    add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 endif()
 
 ADD_EXECUTABLE(testCartesianUtils utils/cartesian_utils_test.cpp)
@@ -365,26 +415,32 @@ TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
 
+ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
+TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
+add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
+
+ADD_EXECUTABLE(testPiler utils/TestPiler.cpp)
+TARGET_LINK_LIBRARIES(testPiler ${TestLibs})
+add_dependencies(testPiler GTest-ext OpenSoT)
+add_test(NAME OpenSoT_utils_testPiler COMMAND testPiler)
+
+ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
+add_dependencies(testQPOases_FF GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
+
+ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
+add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
+
 if(${YARP_FOUND})
 #    ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
 #    add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
 
 
-    ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
-    TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
-    add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
-
-    ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
-    TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
-    add_dependencies(testCoMVelocityVelocityConstraint GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_constraints_velocity_CoMVelocity COMMAND testCoMVelocityVelocityConstraint)
-
-    ADD_EXECUTABLE(testConvexHullVelocityConstraint constraints/velocity/TestConvexHull.cpp)
-    TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
-    add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 
 #    ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
 #    TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
@@ -404,10 +460,6 @@ if(${YARP_FOUND})
     add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 
-    ADD_EXECUTABLE(testQPOases_FF solvers/TestQPOases_FF.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_FF ${TestLibs})
-    add_dependencies(testQPOases_FF GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_FF COMMAND testQPOases_FF)
 
 #    ADD_EXECUTABLE(testQPOases_GlobalConstraints solvers/TestQPOases_GlobalConstraints.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_GlobalConstraints ${TestLibs} ${PCL_LIBRARIES})
@@ -453,29 +505,9 @@ if(${YARP_FOUND})
 #    TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
 #    add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testLogger utils/TestLogger.cpp)
-#    TARGET_LINK_LIBRARIES(testLogger ${TestLibs})
-#    add_dependencies(testLogger GTest-ext OpenSoT)
-
-    #ADD_EXECUTABLE(testPreviewer utils/TestPreviewer.cpp)
-    #TARGET_LINK_LIBRARIES(testPreviewer ${TestLibs})
-    #add_dependencies(testPreviewer GTest-ext OpenSoT)
-
 #    ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
 #    TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 #    add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
-
-
-    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
-    add_dependencies(testQPOases_StaticWalk GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
-
-
-    ADD_EXECUTABLE(testPiler utils/TestPiler.cpp)
-    TARGET_LINK_LIBRARIES(testPiler ${TestLibs})
-    add_dependencies(testPiler GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_utils_testPiler COMMAND testPiler)
 
 
 endif()
@@ -530,8 +562,6 @@ endif()
 
 
 #    add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
-#    add_test(NAME OpenSoT_utils_Logger COMMAND testLogger)
-#    #add_test(NAME OpenSoT_utils_Previewer COMMAND testPreviewer)
 #    add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 

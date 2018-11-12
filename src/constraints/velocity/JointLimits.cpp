@@ -41,6 +41,9 @@ void JointLimits::update(const Eigen::VectorXd& x)
 
     _upperBound = ( _jointLimitsMax - x)*_boundScaling;
     _lowerBound = ( _jointLimitsMin - x)*_boundScaling;
+    
+    _upperBound = _upperBound.cwiseMax(0.0);
+    _lowerBound = _lowerBound.cwiseMin(0.0);
 
 /**********************************************************************/
 

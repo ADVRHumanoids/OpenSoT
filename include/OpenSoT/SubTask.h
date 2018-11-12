@@ -65,6 +65,8 @@
             @param x variable state at the current step (input) */
         virtual void _update(const Eigen::VectorXd &x);
 
+        static const std::string _SUBTASK_SEPARATION_;
+
     public:
         /**
          * @brief SubTask create a SubTask object by specifying the father Task through a pointer,

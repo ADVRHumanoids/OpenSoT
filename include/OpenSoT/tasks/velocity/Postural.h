@@ -105,6 +105,12 @@
                  */
                 Eigen::VectorXd getError();
 
+                /**
+                 * @brief reset set as actual joint reference the actual pose
+                 * @return
+                 */
+                bool reset();
+
             };
         }
     }

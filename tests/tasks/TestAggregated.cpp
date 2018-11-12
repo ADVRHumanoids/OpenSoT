@@ -9,7 +9,7 @@
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
 
 std::string _path_to_cfg = robotology_root + relative_path;
 XBot::ModelInterface::Ptr _model_ptr;
@@ -102,7 +102,7 @@ TEST_F(testAggregatedTask, testConcatenateTaskIds)
     task_list.push_back(postural_in_aggregated);
     task_list.push_back(postural_in_aggregated);
 
-    EXPECT_TRUE(Aggregated(task_list,q.size()).getTaskID() == postural_in_aggregated->getTaskID()+"plus"+postural_in_aggregated->getTaskID());
+    EXPECT_TRUE(Aggregated(task_list,q.size()).getTaskID() == postural_in_aggregated->getTaskID()+"+"+postural_in_aggregated->getTaskID());
 }
 
 TEST_F(testAggregatedTask, testAggregatedTask_)
@@ -161,6 +161,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     stack.push_back(postural_task);
 
     OpenSoT::solvers::eHQP solver(stack);
+
 
 //1. Here we use postural_task
 

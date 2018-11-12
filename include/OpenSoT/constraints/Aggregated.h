@@ -77,6 +77,9 @@ using namespace OpenSoT::utils;
 
             static const std::string concatenateConstraintsIds(const std::list<ConstraintPtr> constraints);
 
+            static const std::string _CONSTRAINT_PLUS_;
+            static const std::string _CONSTRAINT_AGGREGATED_;
+            static std::string concatenatedId;
 
 
             inline void pile(Eigen::MatrixXd& A, const Eigen::MatrixXd& B)

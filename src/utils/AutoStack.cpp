@@ -6,7 +6,23 @@ namespace OpenSoT{
 OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
                                               OpenSoT::tasks::Aggregated::TaskPtr task)
 {
+    if(!(W.rows() == W.cols()))
+        throw std::runtime_error("W matrix has W.rows() != W.cols()");
+
     Eigen::MatrixXd Wtask = task->getWeight();
+
+    if(Wtask.rows() == 0)
+        throw std::runtime_error("task->getWeight().rows() == 0");
+    if(Wtask.cols() == 0)
+        throw std::runtime_error("task->getWeight().cols() == 0");
+    if(Wtask.cols() != Wtask.rows())
+        throw std::runtime_error("task->getWeight().cols() != task->getWeight().rows()");
+
+    if(!(W.rows() == Wtask.rows()))
+        throw std::runtime_error("W.rows() != task->getWeight().rows()");
+    if(!(W.cols() == Wtask.cols()))
+        throw std::runtime_error("W.cols() != task->getWeight().cols()");
+
     task->setWeight(W*Wtask);
     return OpenSoT::tasks::Aggregated::TaskPtr(task);
 }
@@ -24,13 +40,22 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
                                           OpenSoT::tasks::Aggregated::Ptr task)
 {
     Eigen::MatrixXd Wtask = task->getWeight();
+
+    if(Wtask.rows() == 0)
+        throw std::runtime_error("task->getWeight().rows() == 0");
+    if(Wtask.cols() == 0)
+        throw std::runtime_error("task->getWeight().cols() == 0");
+    if(Wtask.cols() != Wtask.rows())
+        throw std::runtime_error("task->getWeight().cols() != task->getWeight().rows()");
+
+
     task->setWeight(w*Wtask);
     return OpenSoT::tasks::Aggregated::Ptr(task);
 }
 
 
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
-                                const std::list<unsigned int> rowIndices)
+                                const std::list<unsigned int>& rowIndices)
 {
     OpenSoT::SubTask::Ptr sub_task;
     sub_task.reset(new OpenSoT::SubTask(task, rowIndices));
@@ -201,7 +226,7 @@ OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
                 outBounds.push_back(*bound);
     }
 
-    if(outBounds.size() > 0)
+    if(!outBounds.empty())
         return OpenSoT::AutoStack::Ptr(
                 new OpenSoT::AutoStack(outStack, outBounds));
     else
@@ -404,6 +429,23 @@ void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)
         task->log(logger);
     if(_boundsAggregated)
         _boundsAggregated->log(logger);
+}
+
+bool OpenSoT::AutoStack::checkConsistency()
+{
+    bool a = true;
+    for(auto task : _stack)
+    {
+        if(!task->checkConsistency())
+            a = false;
+    }
+    if(_boundsAggregated)
+    {
+        if(!_boundsAggregated->checkConsistency())
+            a = false;
+    }
+
+    return a;
 }
 
 

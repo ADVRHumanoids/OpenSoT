@@ -68,7 +68,7 @@
 
                 Eigen::Affine3d _actualPose;
                 Eigen::Affine3d _desiredPose;
-                Eigen::VectorXd _desiredTwist;
+                Eigen::Vector6d _desiredTwist;
 
                 bool _base_link_is_world;
 
@@ -78,15 +78,19 @@
 
                 bool _is_initialized;
 
-                Eigen::VectorXd _error;
+                Eigen::Vector6d _error;
 
                 Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
 
+                /**
+                 * @brief _base_T_distal is used to change new distal link!
+                 */
+                Eigen::Affine3d _base_T_distal;
+
+                Eigen::Vector3d positionError;
+                Eigen::Vector3d orientationError;
+
             public:
-
-                Eigen::VectorXd positionError;
-                Eigen::VectorXd orientationError;
-
                 /*********** TASK PARAMETERS ************/
 
 
@@ -118,6 +122,8 @@
                  * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
+                void setReference(const Eigen::Affine3d& desiredPose);
+                [[deprecated]]
                 void setReference(const Eigen::MatrixXd& desiredPose);
                 void setReference(const KDL::Frame& desiredPose);
 
@@ -133,6 +139,9 @@
                  * instead of units/s. This means that if you have a twist expressed in SI units, you have to call the function as
                  * setReference(desiredPose, desiredTwist*dt)
                  */
+                void setReference(const Eigen::Affine3d& desiredPose,
+                                  const Eigen::Vector6d& desiredTwist);
+                [[deprecated]]
                 void setReference(const Eigen::MatrixXd& desiredPose,
                                   const Eigen::VectorXd& desiredTwist);
                 void setReference(const KDL::Frame& desiredPose,
@@ -143,6 +152,8 @@
                  * @return the Cartesian task reference \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
+                const void getReference(Eigen::Affine3d& desiredPose) const;
+                [[deprecated]]
                 const Eigen::MatrixXd getReference() const;
                 const void getReference(KDL::Frame& desiredPose) const;
 
@@ -153,6 +164,9 @@
                  * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
                  * a feed-forward term in the cartesian task computation
                  */
+                void getReference(Eigen::Affine3d& desiredPose,
+                                  Eigen::Vector6d& desiredTwist) const;
+                [[deprecated]]
                 void getReference(Eigen::MatrixXd& desiredPose,
                                   Eigen::VectorXd& desiredTwist) const;
                 void getReference(KDL::Frame& desiredPose,
@@ -164,6 +178,8 @@
                  * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
                  * for the distal_link in the base_link frame of reference.
                  */
+                const void getActualPose(Eigen::Affine3d& actual_pose) const;
+                [[deprecated]]
                 const Eigen::MatrixXd getActualPose() const;
                 const void getActualPose(KDL::Frame& actual_pose) const;
                 
@@ -180,7 +196,7 @@
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
                  * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
                  */
-                const Eigen::VectorXd getError() const;
+                const Eigen::Vector6d getError() const;
 
                 /**
                  * @brief setBaseLink change the base link of the task
@@ -190,11 +206,17 @@
                 bool setBaseLink(const std::string& base_link);
                 
                 /**
-                 * @brief Changes the distal link of the task. It also resets the reference accorting to the currento robot pose.
+                 * @brief Changes the distal link of the task. It also resets the reference according to the current robot pose.
                  * @param distal_link the new distal link
                  * @return false if the distal link does not exists
                  */
                 bool setDistalLink(const std::string& distal_link);
+
+                /**
+                 * @brief reset set as actual Cartesian reference the actual pose
+                 * @return
+                 */
+                bool reset();
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

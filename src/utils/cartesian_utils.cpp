@@ -23,13 +23,12 @@
 
 #define toDeg(X) (X*180.0/M_PI)
 
-Eigen::VectorXd cartesian_utils::computeCapturePoint(const Eigen::VectorXd& floating_base_velocity,
-                                                     const Eigen::VectorXd& com_velocity,
+Eigen::VectorXd cartesian_utils::computeCapturePoint(const Eigen::VectorXd& com_velocity,
                                                      const Eigen::VectorXd& com_pose)
 {
     Eigen::VectorXd cp(3); cp.setZero(3);
 
-    Eigen::VectorXd com_velocity_ = com_velocity + floating_base_velocity;
+    Eigen::VectorXd com_velocity_ = com_velocity;
 
     double g = 9.81;
 
@@ -117,6 +116,25 @@ void cartesian_utils::computeCartesianError(const Eigen::MatrixXd &T,
     orientation_error(0) = xerr_o.x();
     orientation_error(1) = xerr_o.y();
     orientation_error(2) = xerr_o.z();
+}
+
+void cartesian_utils::computeCartesianError(const Eigen::Affine3d &T,
+                                  const Eigen::Affine3d &Td,
+                                  Eigen::Vector3d& position_error,
+                                  Eigen::Vector3d& orientation_error)
+{
+    Eigen::Quaterniond q(T.rotation());
+    Eigen::Quaterniond qd(Td.rotation());
+
+    position_error = Td.translation()- T.translation();
+
+    //This is needed to move along the short path in the quaternion error
+    if(q.dot(qd) < 0.0)
+        orientation_error = quaternion::error(-q.x(), -q.y(), -q.z(), -q.w(),
+                                              qd.x(), qd.y(), qd.z(), qd.w());
+    else
+        orientation_error = quaternion::error(q.x(),  q.y(),  q.z(),  q.w(),
+                                              qd.x(), qd.y(), qd.z(), qd.w());
 }
 
 Eigen::VectorXd cartesian_utils::computeGradient(const Eigen::VectorXd &x,

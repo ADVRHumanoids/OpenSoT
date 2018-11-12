@@ -89,10 +89,8 @@ TEST_F(testCoMTask, testCoMTask_)
         EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
     CoM.setReference(x_ref);
+    CoM.update(q_whole);
     Eigen::VectorXd positionError = x_ref - x;
-    for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
-
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
 
@@ -122,6 +120,64 @@ TEST_F(testCoMTask, testCoMTask_)
     for(unsigned int i = 0; i < 3; ++i) {
         EXPECT_NEAR(x_ref(i),x_now(i),1E-4);
     }
+
+}
+
+TEST_F(testCoMTask, testReset)
+{
+    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
+    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
+    q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::CoM CoM(q_whole, *(_model_ptr.get()));
+
+    std::cout<<"INITIALIZATION: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
+    Eigen::Vector3d actual_pose = CoM.getActualPosition();
+    std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
+    Eigen::Vector3d reference_pose = CoM.getReference();
+    std::cout<<"reference_pose: \n"<<reference_pose<<std::endl;
+    std::cout<<"b: \n"<<CoM.getb()<<std::endl;
+
+    for(unsigned int j = 0; j < 3; ++j)
+        EXPECT_EQ(actual_pose[j], reference_pose[j]);
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_EQ(CoM.getb()[i], 0);
+
+    std::cout<<"CHANGING q: ACTUAL AND REFERENCE DIFFERENT, b IS NOT 0"<<std::endl;
+    q_whole.setRandom(q_whole.size());
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+    CoM.update(q_whole);
+
+    actual_pose = CoM.getActualPosition();
+    std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
+    reference_pose = CoM.getReference();
+    std::cout<<"reference_pose: \n"<<reference_pose<<std::endl;
+    std::cout<<"b: \n"<<CoM.getb()<<std::endl;
+
+    std::cout<<"RESET: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
+    EXPECT_TRUE(CoM.reset());
+    actual_pose = CoM.getActualPosition();
+    std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
+    reference_pose = CoM.getReference();
+    std::cout<<"reference_pose: \n"<<reference_pose<<std::endl;
+    std::cout<<"b: \n"<<CoM.getb()<<std::endl;
+
+    for(unsigned int j = 0; j < 3; ++j)
+        EXPECT_EQ(actual_pose[j], reference_pose[j]);
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_EQ(CoM.getb()[i], 0);
 
 }
 

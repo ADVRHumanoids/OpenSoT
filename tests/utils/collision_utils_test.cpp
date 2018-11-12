@@ -218,7 +218,7 @@ protected:
   testCollisionUtils()
   {
       std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-      std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman.yaml";
+      std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman_RBDL.yaml";
 
       _path_to_cfg = robotology_root + relative_path;
 

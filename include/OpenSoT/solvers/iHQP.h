@@ -50,6 +50,8 @@ namespace OpenSoT{
          */
         iHQP(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks, const double eps_regularisation,
+             const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief iHQP constructor of the problem
@@ -62,6 +64,10 @@ namespace OpenSoT{
                     ConstraintPtr bounds,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
                     const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks,
+                    ConstraintPtr bounds,
+                    const double eps_regularisation,
+                    const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief iHQP constructor of the problem
@@ -76,6 +82,11 @@ namespace OpenSoT{
                     ConstraintPtr globalConstraints,
                     const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
                     const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(Stack& stack_of_tasks,
+                    ConstraintPtr bounds,
+                    ConstraintPtr globalConstraints,
+                    const double eps_regularisation,
+                    const std::vector<solver_back_ends> be_solver);
 
 
         ~iHQP(){}
@@ -95,19 +106,27 @@ namespace OpenSoT{
 
         /**
          * @brief setOptions set option to a particular task
-         * @param i number of task to set the option
+         * @param i number of stack to set the option
          * @param opt options for task i
-         * @return true if succeed
+         * @return false if i-th problem does not exists or does not succeed
          */
         bool setOptions(const unsigned int i, const boost::any &opt);
 
         /**
-         * @brief getOptions
-         * @param i
-         * @param opt
-         * @return
+         * @brief getOptions return the options of the i-th qp problem
+         * @param i number of stack to get the option
+         * @param opt a data structure which has to be converted to particular structure used by the BackEnd implementation
+         * @return false if i-th problem does not exists
          */
         bool getOptions(const unsigned int i, boost::any& opt);
+
+        /**
+         * @brief getObjective return the value of the objective function at the optimum for the i-th qp problem
+         * @param i number of stack to get the value of the objective function
+         * @param val value of the objective function at the optimum
+         * @return false if i-th problem does not exists
+         */
+        bool getObjective(const unsigned int i, double& val);
 
         /**
          * @brief setActiveStack select a stack to do not solve
@@ -121,10 +140,25 @@ namespace OpenSoT{
          */
         void activateAllStacks();
 
-        std::string getBackEndName();
+        /**
+         * @brief getBackEndName retrieve the name of the solver
+         * @return a string with the name of the solver, right now:
+         *      "qpOASES"
+         *      "OSQP"
+         *      "????"
+         */
+        std::string getBackEndName(const unsigned int i);
+
+        /**
+         * @brief getBackEnd retrieve the back-end associated to the i-th qp problem
+         * @param i priority level
+         * @param back_end
+         * @return false if the level does not exists
+         */
+        bool getBackEnd(const unsigned int i, BackEnd::Ptr& back_end);
 
     protected:
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger::Ptr logger, const std::string& prefix);
 
         vector <OpenSoT::constraints::Aggregated> constraints_task;
         
@@ -144,7 +178,7 @@ namespace OpenSoT{
          * @brief prepareSoT initialize the complete stack
          * @return true if stack is correctly initialized
          */
-        bool prepareSoT(const solver_back_ends be_solver);
+        bool prepareSoT(const std::vector<solver_back_ends> be_solver);
 
         /**
          * @brief computeCostFunction compute a cost function for velocity control:
@@ -185,7 +219,10 @@ namespace OpenSoT{
         std::vector<Eigen::VectorXd> tmp_uA;
 
 
-        solver_back_ends _be_solver;
+        std::vector<solver_back_ends> _be_solver;
+
+        static const std::string _IHQP_CONSTRAINTS_PLUS_;
+        static const std::string _IHQP_CONSTRAINTS_OPTIMALITY_;
 
 
     };

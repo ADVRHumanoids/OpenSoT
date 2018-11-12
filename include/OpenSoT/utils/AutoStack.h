@@ -74,6 +74,8 @@ namespace OpenSoT {
 
             void log(XBot::MatLogger::Ptr logger);
 
+            bool checkConsistency();
+
             OpenSoT::solvers::iHQP::Stack& getStack();
 
             std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& getBoundsList();
@@ -139,7 +141,7 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
  * should be found
  */
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
-                                const std::list<unsigned int> rowIndices);
+                                const std::list<unsigned int>& rowIndices);
 
 /**
  * @brief operator + takes two tasks, generates a new Aggregated task

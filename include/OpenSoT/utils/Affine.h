@@ -221,6 +221,15 @@ private:
 
 
 /*** IMPL ***/
+template <typename DerivedM1, typename DerivedM2,
+          typename DerivedQ1, typename DerivedQ2>
+inline auto operator-(const AffineHelperBase<DerivedM1, DerivedQ1>& lhs,
+                      const AffineHelperBase<DerivedM2, DerivedQ2>& rhs) ->
+                      AffineHelperBase<decltype(lhs.getM()-rhs.getM()), decltype(lhs.getq()-rhs.getq())>
+{
+    return AffineHelperBase<decltype(lhs.getM()-rhs.getM()), decltype(lhs.getq()-rhs.getq())>(lhs.getM()-rhs.getM(),
+                                                                                              lhs.getq()-rhs.getq());
+}
 
 
 template <typename DerivedM1, typename DerivedM2, 

@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/velocity/Gaze.h>
-
+#define GAZE_THRESHOLD 0.2 //[m]
 
 using namespace OpenSoT::tasks::velocity;
 
@@ -7,9 +7,10 @@ using namespace OpenSoT::tasks::velocity;
 Gaze::Gaze(std::string task_id,
            const Eigen::VectorXd& x,
            XBot::ModelInterface &robot,
-           std::string base_link) :
+           std::string base_link,
+           std::string distal_link) :
     Task(task_id, x.size()),
-    _distal_link("gaze"),
+    _distal_link(distal_link),
     _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, base_link)),
     _subtask(new SubTask(_cartesian_task, Indices::range(4,5))),
     _robot(robot), _tmp_vector(3), _bl_T_gaze_kdl(),
@@ -73,10 +74,12 @@ void Gaze::setGaze(const Eigen::Affine3d &desiredGaze)
     _tmp_vector(2) = _gaze_T_obj.translation().z();
 
     _gaze_goal = _gaze_goal.Identity();
-    cartesian_utils::computePanTiltMatrix(_tmp_vector, _gaze_goal);
+
+    if(_tmp_vector.norm() >= GAZE_THRESHOLD){
+        cartesian_utils::computePanTiltMatrix(_tmp_vector, _gaze_goal);
     //cartesian_utils::computePanTiltMatrix(gaze_T_obj.subcol(0, 3, 3), gaze_goal);
 
-    _cartesian_task->setReference(_bl_T_gaze_kdl*_gaze_goal);
+        _cartesian_task->setReference(_bl_T_gaze_kdl*_gaze_goal);}
 }
 
 void Gaze::setOrientationErrorGain(const double& orientationErrorGain)
@@ -122,4 +125,9 @@ std::vector<bool> Gaze::getActiveJointsMask()
 bool Gaze::setActiveJointsMask(const std::vector<bool> &active_joints_mask)
 {
     return _subtask->setActiveJointsMask(active_joints_mask);
+}
+
+bool Gaze::setBaseLink(const std::string& base_link)
+{
+    return _cartesian_task->setBaseLink(base_link);
 }

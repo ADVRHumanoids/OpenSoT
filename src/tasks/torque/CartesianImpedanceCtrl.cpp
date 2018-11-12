@@ -31,23 +31,20 @@ CartesianImpedanceCtrl::CartesianImpedanceCtrl(std::string task_id,
                      std::string base_link, const std::list<unsigned int> rowIndices) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
-    _desiredTwist(6), _use_inertia_matrix(true), _qdot(_x_size),
+    _desiredTwist(6), _F_ff(6), _use_inertia_matrix(true), _qdot(_x_size),
      _rows_indices(rowIndices)
 {   
     _desiredTwist.setZero(_desiredTwist.size());
+    _F_ff.setZero(_F_ff.size());
 
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
     if(!this->_base_link_is_world) {
         this->_base_link_index = robot.getLinkID(_base_link);
-        assert(this->_base_link_index >= 0);
     }
 
     this->_distal_link_index = robot.getLinkID(_distal_link);
-    assert(this->_distal_link_index >= 0);
 
-    if(!this->_base_link_is_world)
-        assert(this->_distal_link_index != _base_link_index);
 
     _K.resize(6, 6);
     _K.setIdentity(_K.rows(), _K.cols()); _K = 100.0*_K;
@@ -178,6 +175,36 @@ void CartesianImpedanceCtrl::getStiffnessDamping(Eigen::MatrixXd &Stiffness, Eig
 {
     getStiffness(Stiffness);
     getDamping(Damping);
+}
+
+void CartesianImpedanceCtrl::setFeedForwardForces(const Eigen::VectorXd& Fff)
+{
+    _F_ff = Fff;
+}
+
+void CartesianImpedanceCtrl::setFeedForwardForces(const KDL::Wrench& Fff)
+{
+    _F_ff[0] = Fff.force.x();
+    _F_ff[1] = Fff.force.y();
+    _F_ff[2] = Fff.force.z();
+    _F_ff[3] = Fff.torque.x();
+    _F_ff[4] = Fff.torque.y();
+    _F_ff[5] = Fff.torque.z();
+}
+
+void CartesianImpedanceCtrl::getFeedForwardForces(Eigen::VectorXd& Fff)
+{
+    Fff = _F_ff;
+}
+
+void CartesianImpedanceCtrl::getFeedForwardForces(KDL::Wrench& Fff)
+{
+    Fff.force.x(_F_ff[0]);
+    Fff.force.y(_F_ff[1]);
+    Fff.force.z(_F_ff[2]);
+    Fff.torque.x(_F_ff[3]);
+    Fff.torque.y(_F_ff[4]);
+    Fff.torque.z(_F_ff[5]);
 }
 
 void CartesianImpedanceCtrl::setReference(const Eigen::MatrixXd& desiredPose) {
@@ -333,7 +360,7 @@ void CartesianImpedanceCtrl::update_b() {
     /// TODO: add -Mc*(ddx_d - Jdot*qdot)
     getDamperForce(_damping_force);
     getSpringForce(_spring_force);
-    _tmpF = _damping_force + _spring_force;
+    _tmpF = _damping_force + _spring_force + _F_ff;
 
     if(_rows_indices.size() > 0)
         generateF(_tmpF);

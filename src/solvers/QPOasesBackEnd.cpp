@@ -7,7 +7,7 @@
 #include <iostream>
 #include <qpOASES/Matrices.hpp>
 #include <XBotInterface/Logger.hpp>
-
+#include <XBotInterface/SoLib.h>
 
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
@@ -15,6 +15,20 @@
 #define DEFAULT "\033[0m"
 
 using namespace OpenSoT::solvers;
+
+
+/* Define factories for dynamic loading */
+extern "C" BackEnd * create_instance(const int number_of_variables,
+                               const int number_of_constraints,
+                               OpenSoT::HessianType hessian_type, const double eps_regularisation)
+{
+    return new QPOasesBackEnd(number_of_variables, number_of_constraints, hessian_type, eps_regularisation);
+}
+
+extern "C" void destroy_instance( BackEnd * instance )
+{
+    delete instance;
+}
 
 QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
                                const int number_of_constraints,
@@ -25,7 +39,7 @@ QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
                                     (qpOASES::HessianType)(hessian_type))),
     _bounds(new qpOASES::Bounds()),
     _constraints(new qpOASES::Constraints()),
-    _nWSR(132),
+    _nWSR(13200),
     _epsRegularisation(eps_regularisation),
     _dual_solution(number_of_variables),
     _opt(new qpOASES::Options())
@@ -43,9 +57,10 @@ void QPOasesBackEnd::setDefaultOptions()
     opt.printLevel = qpOASES::PL_NONE;
     opt.enableRegularisation = qpOASES::BT_TRUE;
     opt.epsRegularisation *= _epsRegularisation;
-    opt.numRegularisationSteps = 2;
+    opt.numRegularisationSteps = 0;
     opt.numRefinementSteps = 1;
-    opt.enableFlippingBounds = qpOASES::BT_TRUE;
+//    opt.enableFlippingBounds = qpOASES::BT_TRUE; // <- THIS IS NOT RT SAFE!
+//     opt.enableDropInfeasibles = qpOASES::BT_TRUE;
 
     opt.ensureConsistency();
 
@@ -54,10 +69,12 @@ void QPOasesBackEnd::setDefaultOptions()
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
 
+    _opt.reset();
     _opt.reset(new qpOASES::Options(opt));
 }
 
 void QPOasesBackEnd::setOptions(const boost::any &options){
+    _opt.reset();
     _opt.reset(new qpOASES::Options(boost::any_cast<qpOASES::Options>(options)));
     _problem->setOptions(boost::any_cast<qpOASES::Options>(options));}
 
@@ -101,9 +118,9 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
                        _lA.data(),_uA.data(),
                        nWSR,0);
 
-    if(val != qpOASES::SUCCESSFUL_RETURN)
+    if(qpOASES::getSimpleStatus(val) < 0)
     {
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
         _problem->printProperties();
 
         if(val == qpOASES::RET_INIT_FAILED_INFEASIBILITY)
@@ -129,7 +146,7 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
     _problem->getConstraints(*_constraints);
 
     if(success != qpOASES::SUCCESSFUL_RETURN){
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
         XBot::Logger::error("ERROR GETTING PRIMAL SOLUTION IN INITIALIZATION! ERROR %i \n", success);
 #endif
         return false;}
@@ -229,7 +246,7 @@ bool QPOasesBackEnd::solve()
                        nWSR,0);
 
     if(val != qpOASES::SUCCESSFUL_RETURN){
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
         std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN HOTSTART! ERROR "<<val<<DEFAULT<<std::endl;
         std::cout<<GREEN<<"RETRYING INITING WITH WARMSTART"<<DEFAULT<<std::endl;
 #endif
@@ -243,7 +260,7 @@ bool QPOasesBackEnd::solve()
                            _bounds.get(), _constraints.get());
 
         if(val != qpOASES::SUCCESSFUL_RETURN){
-#ifndef NDEBUG
+#ifdef OPENSOT_VERBOSE
             std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN WARMSTART! ERROR "<<val<<DEFAULT<<std::endl;
             std::cout<<GREEN<<"RETRYING INITING"<<DEFAULT<<std::endl;
 #endif
@@ -264,8 +281,8 @@ bool QPOasesBackEnd::solve()
     _problem->getBounds(*_bounds);
     _problem->getConstraints(*_constraints);
 
-    if(success != qpOASES::SUCCESSFUL_RETURN){
-#ifndef NDEBUG
+    if(qpOASES::getSimpleStatus(success) < 0){
+#ifdef OPENSOT_VERBOSE
         std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
 #endif
         return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);
@@ -297,9 +314,16 @@ void QPOasesBackEnd::checkInfeasibility()
 
 void QPOasesBackEnd::_printProblemInformation()
 {
-    XBot::Logger::info("eps Regularisation factor: %s \n", _problem->getOptions().epsRegularisation);
+    std::ostringstream oss;
+    oss << std::scientific << _problem->getOptions().epsRegularisation;
+    XBot::Logger::info("eps Regularisation factor: %s \n", oss.str().c_str());
     XBot::Logger::info("qpOASES # OF CONSTRAINTS: %i\n", _problem->getNC());
     XBot::Logger::info("qpOASES # OF VARIABLES: %i\n", _problem->getNV());
+}
+
+double QPOasesBackEnd::getObjective()
+{
+    return _problem->getObjVal();
 }
 
 void QPOasesBackEnd::checkINFTY()
