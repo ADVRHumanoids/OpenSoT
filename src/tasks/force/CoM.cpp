@@ -40,6 +40,7 @@ CoM::CoM( const Eigen::VectorXd& x,
 {
     A.setZero(3,6);
     B.setZero(3,6);
+    G.setZero(6, 6*links_in_contact.size());
 
     _desiredPosition.setZero();
     _desiredVelocity.setZero();
@@ -114,6 +115,7 @@ CoM::CoM( std::vector<AffineHelper> wrenches,
 {
     A.setZero(3,6);
     B.setZero(3,6);
+    G.setZero(6, 6*links_in_contact.size());
 
     _desiredPosition.setZero();
     _desiredVelocity.setZero();
@@ -192,17 +194,17 @@ void CoM::_update(const Eigen::VectorXd &x)
 
     this->_desiredVelocity.setZero(this->_desiredVelocity.rows());
     this->_desiredAcceleration.setZero(this->_desiredAcceleration.rows());
-    //this->_desiredAngularMomentum.setZero(this->_desiredAngularMomentum.rows());
+    this->_desiredAngularMomentum.setZero(this->_desiredAngularMomentum.rows());
     this->_desiredVariationAngularMomentum.setZero(this->_desiredVariationAngularMomentum.rows());
 
     /**
       * Now I have to compute the Jacobian of the task that in this case is the matrix W
       * that maps the Fcom to the Fd
     **/
-    _A = computeA(_links_in_contact);
+    __A = computeA(_links_in_contact);
     
     
-    _com_task = _A*_wrenches - _b;
+    _com_task = __A*_wrenches - __b;
     
     _A = _com_task.getM();
     _b = -_com_task.getq();
@@ -249,11 +251,10 @@ void CoM::setAngularReference(const Eigen::Vector3d& desiredAngularMomentum,
     _desiredVariationAngularMomentum = desiredVariationAngularMomentum;
 }
 
-Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeA(const std::vector<std::string> &links_in_contact)
+const Eigen::MatrixXd &OpenSoT::tasks::force::CoM::computeA(const std::vector<std::string> &links_in_contact)
 {
-    int m = links_in_contact.size();
 
-    Eigen::MatrixXd G(6, 6*m); G.setZero(6, 6*m);
+    G.setZero(6, 6*links_in_contact.size());
 
     _P.setZero();
 
@@ -262,7 +263,7 @@ Eigen::MatrixXd OpenSoT::tasks::force::CoM::computeA(const std::vector<std::stri
     A.setZero(3,6);
     B.setZero(3,6);
 
-    for(unsigned int i = 0; i < m; ++i){
+    for(unsigned int i = 0; i < links_in_contact.size(); ++i){
         _robot.getPose(links_in_contact[i], _T);
         _T.matrix()(0,3) -= _actualPosition(0);
         _T.matrix()(1,3) -= _actualPosition(1);
@@ -348,11 +349,10 @@ void CoM::update_b()
     Eigen::Vector3d variationAngularMomentum_ref = _desiredVariationAngularMomentum +
             _lambdaAngularMomentum*getAngularMomentumError();
 
-
     acceleration_ref = _robot.getMass()*(acceleration_ref-_g);
 
-    _b.setZero(6);
-    _b<<acceleration_ref,
+    __b.setZero(6);
+    __b<<acceleration_ref,
         variationAngularMomentum_ref;
 }
 
@@ -369,24 +369,21 @@ void OpenSoT::tasks::force::CoM::setLambda(double lambda, double lambda2, double
 
     if(lambda >= 0.0 || lambda2 >= 0.0 || lambdaAngularMomentum >= 0.0)
         this->update_b();
-
-
-
 }
 
-Eigen::Vector3d OpenSoT::tasks::force::CoM::getVelocityError()
+const Eigen::Vector3d &OpenSoT::tasks::force::CoM::getVelocityError()
 {
     velocityError = _desiredVelocity - _actualVelocity;
     return velocityError;
 }
 
-Eigen::Vector3d OpenSoT::tasks::force::CoM::getError()
+const Eigen::Vector3d &OpenSoT::tasks::force::CoM::getError()
 {
     positionError =  _desiredPosition - _actualPosition;
     return positionError;
 }
 
-Eigen::Vector3d CoM::getAngularMomentumError()
+const Eigen::Vector3d &CoM::getAngularMomentumError()
 {
     angularMomentumError = _desiredAngularMomentum - _actualAngularMomentum;
     return angularMomentumError;
@@ -394,8 +391,20 @@ Eigen::Vector3d CoM::getAngularMomentumError()
 
 void CoM::_log(XBot::MatLogger::Ptr logger)
 {
-
-    logger->add(getTaskID() + "_error", getError());
-    
+    logger->add(getTaskID() + "_position_error", getError());
+    logger->add(getTaskID() + "_velocity_error", getVelocityError());
+    logger->add(getTaskID() + "_angular_momentum_error", getAngularMomentumError());
+    logger->add(getTaskID() + "_G", G);
 }
 
+bool CoM::reset()
+{
+    _desiredAngularMomentum.setZero();
+    _desiredAcceleration.setZero();
+    _desiredVariationAngularMomentum.setZero();
+    _desiredVelocity.setZero();
+
+    _robot.getCOM(_desiredPosition);
+
+    return true;
+}

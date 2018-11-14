@@ -37,6 +37,7 @@
              *
              * Note: variables are wrenches: w = [f tau]'
              *
+             *
              */
             class CoM : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
                 
@@ -82,6 +83,7 @@
 
                 Eigen::MatrixXd A;
                 Eigen::MatrixXd B;
+                Eigen::MatrixXd G;
 
                 double _lambda2;
 
@@ -95,6 +97,9 @@
                 Eigen::Matrix3d _P;
                 Eigen::Affine3d _T;
                 Eigen::Matrix3d _O;
+
+                Eigen::MatrixXd __A;
+                Eigen::VectorXd __b;
 
             public:
 
@@ -183,17 +188,19 @@
                  * @brief getError returns the position error between actual and reference positions
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
-                Eigen::Vector3d getError();
+                const Eigen::Vector3d& getError();
 
                 /**
                  * @brief getError returns the position error between actual and reference positions
                  * @return a \f$R^{3}\f$ vector describing cartesian error between actual and reference position
                  */
-                Eigen::Vector3d getVelocityError();
+                const Eigen::Vector3d& getVelocityError();
 
-                Eigen::Vector3d getAngularMomentumError();
+                const Eigen::Vector3d& getAngularMomentumError();
 
-                Eigen::MatrixXd computeA(const std::vector<std::string>& links_in_contact);
+                const Eigen::MatrixXd& computeA(const std::vector<std::string>& links_in_contact);
+
+                bool reset();
 
             };
         }
