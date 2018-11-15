@@ -40,8 +40,10 @@ namespace OpenSoT{
                  * @param link_in_contact
                  * @param contact_matrix
                  */
-                Contact(XBot::ModelInterface& robot, const std::string link_in_contact,
-                        const Eigen::MatrixXd contact_matrix = Eigen::MatrixXd::Identity(6,6));
+                Contact(XBot::ModelInterface& robot, 
+                        const std::string& link_in_contact,
+                        const Eigen::MatrixXd& contact_matrix = Eigen::MatrixXd::Identity(6,6), 
+                        const Eigen::Affine3d& desired_contact_pose = Eigen::Affine3d::Identity() );
                 ~Contact();
                 virtual void _update(const Eigen::VectorXd& x);
 
@@ -55,6 +57,7 @@ namespace OpenSoT{
                 Eigen::MatrixXd _Jcontact;
                 Eigen::VectorXd _dqm;
                 Eigen::MatrixXd _contact_matrix;
+                Eigen::Affine3d _w_T_c_des;
             };
         }
     }
