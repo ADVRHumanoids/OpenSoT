@@ -8,7 +8,6 @@
 #include <OpenSoT/constraints/force/FrictionCone.h>
 #include <ros/ros.h>
 #include <qpOASES.hpp>
-#include <OpenSoT/tasks/force/Wrench.h>
 #include <OpenSoT/constraints/force/WrenchLimits.h>
 #include <XBotInterface/ModelInterface.h>
 
@@ -126,19 +125,11 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     force_com_task->getConstraints().push_back(wrench_limits);
     force_com_task->update(contact_wrenches_d);
 
-    OpenSoT::tasks::force::Wrench::Ptr wrench(
-                new OpenSoT::tasks::force::Wrench(contact_wrenches_d));
     Eigen::VectorXd wrench_reference(contact_wrenches_d.size());
     wrench_reference.setZero(contact_wrenches_d.size());
     wrench_reference(2) = 100.;
     wrench_reference(8) = 100.;
     wrench_reference(14) = 100.;
-    wrench->setReference(wrench_reference);
-    wrench->getConstraints().push_back(fc);
-    wrench->getConstraints().push_back(wrench_limits);
-    wrench->update(contact_wrenches_d);
-    std::cout<<"A = [ "<<wrench->getA()<<" ]"<<std::endl;
-    std::cout<<"b = [ "<<wrench->getb()<<" ]"<<std::endl;
 
 
 
@@ -146,7 +137,6 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(force_com_task);
-    stack_of_tasks.push_back(wrench);
 
 
     OpenSoT::solvers::iHQP::Ptr sot(
@@ -156,7 +146,6 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
     force_com_task->update(contact_wrenches_d);
-    wrench->update(contact_wrenches_d);
 
 
 
