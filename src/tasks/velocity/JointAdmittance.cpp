@@ -37,7 +37,9 @@ void JointAdmittance::_update(const Eigen::VectorXd &x)
 
     _tau_filt = _filter.process(_tau);
 
+    ///TODO: better estimation based on residuals?
     _xdot_desired = _C*(_h-_tau_filt);
+
     if(_model.isFloatingBase())
         _xdot_desired.head(6).setZero();
 
@@ -98,6 +100,16 @@ void JointAdmittance::setFilterParams(const double time_step, const double dampi
     setFilterTimeStep(time_step);
     setFilterOmega(omega);
     setFilterDamping(damping);
+}
+
+bool JointAdmittance::isJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::JointAdmittance>(task);
+}
+
+JointAdmittance::Ptr JointAdmittance::asJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::JointAdmittance>(task);
 }
 
 

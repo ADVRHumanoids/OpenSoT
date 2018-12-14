@@ -117,5 +117,15 @@ bool OpenSoT::tasks::velocity::Postural::reset()
     return true;
 }
 
+bool OpenSoT::tasks::velocity::Postural::isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
+}
+
+static OpenSoT::tasks::velocity::Postural::Ptr asPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
+}
+
 
 

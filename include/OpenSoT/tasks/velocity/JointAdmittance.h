@@ -28,6 +28,10 @@ namespace OpenSoT {
            void setFilterDamping(const double damping);
            void setFilterOmega(const double omega);
 
+           static bool isJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+
+           static OpenSoT::tasks::velocity::JointAdmittance::Ptr asJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+
 
         private:
            XBot::ModelInterface& _robot;
