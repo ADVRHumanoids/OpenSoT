@@ -53,11 +53,12 @@ void OpenSoT::tasks::floating_base::Contact::_update(const Eigen::VectorXd &x)
     Eigen::Affine3d w_T_c;
     _robot.getPose(_link_in_contact, w_T_c);
     Eigen::Vector3d pos_err, rot_err;
-    Eigen::Vector6d err;
-    err <<  pos_err, 
-           -rot_err;
+
     
     cartesian_utils::computeCartesianError(w_T_c, _w_T_c_des, pos_err, rot_err);
+    Eigen::Vector6d err;
+    err <<  pos_err,
+           -rot_err;
 
     _A = _Jcontact.leftCols(6);
     _b = -_Jcontact.rightCols(_dqm.size()-6)*_dqm.tail(_dqm.size()-6) + _lambda * err;
