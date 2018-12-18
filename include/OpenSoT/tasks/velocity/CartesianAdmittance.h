@@ -14,7 +14,6 @@ namespace OpenSoT {
             CartesianAdmittance(std::string task_id,
                                 const Eigen::VectorXd& x,
                                 XBot::ModelInterface &robot,
-                                std::string distal_link,
                                 std::string base_link,
                                 XBot::ForceTorqueSensor::ConstPtr ft_sensor);
 
@@ -49,6 +48,9 @@ namespace OpenSoT {
            Eigen::Matrix6d _C;
 
            XBot::ForceTorqueSensor::ConstPtr _ft_sensor;
+
+           Eigen::Affine3d _bl_T_ft;
+
 
        };
 

@@ -5,10 +5,9 @@ using namespace OpenSoT::tasks::velocity;
 CartesianAdmittance::CartesianAdmittance(std::string task_id,
                                          const Eigen::VectorXd &x,
                                          XBot::ModelInterface &robot,
-                                         std::string distal_link,
                                          std::string base_link,
                                          XBot::ForceTorqueSensor::ConstPtr ft_sensor):
-    Cartesian(task_id, x, robot, distal_link, base_link),
+    Cartesian(task_id, x, robot, ft_sensor->getSensorName(), base_link),
     _ft_sensor(ft_sensor)
 {
     _wrench_reference.setZero();
@@ -31,7 +30,9 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
 void CartesianAdmittance::_update(const Eigen::VectorXd &x)
 {
     _ft_sensor->getWrench(_wrench_measured);
-    _wrench_error = _wrench_reference - _wrench_measured;
+    _robot.getPose(_distal_link, _base_link, _bl_T_ft);
+
+    _wrench_error = _wrench_reference - XBot::Utils::GetAdjointFromRotation(_bl_T_ft.linear())*_wrench_measured;
 
     _wrench_filt = _filter.process(_wrench_error);
 
