@@ -18,13 +18,14 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
     _wrench_reference = _wrench_measured;
 
     _C.setIdentity();
-    _C *= 0.00015; //This was found by experiments
+    _C.block(0,0,3,3) *= 1e-6; //This was found by experiments
+    _C.block(3,3,3,3) *= 1e-7; //This was found by experiments
 
     _filter.setTimeStep(0.002); //This was found by experiments
     _filter.setDamping(1.); //This was found by experiments
-    _filter.setOmega(2.*M_PI*8.); //This was found by experiments
+    _filter.setOmega(2.*M_PI*2.); //This was found by experiments
 
-    _lambda = 0.005; //This was found by experiments
+    _lambda = 0.01; //This was found by experiments
 }
 
 void CartesianAdmittance::_update(const Eigen::VectorXd &x)
