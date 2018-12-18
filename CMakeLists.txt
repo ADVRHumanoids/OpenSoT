@@ -130,6 +130,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/acceleration/CoM.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/affine/Cartesian.cpp
+                    src/tasks/velocity/CartesianAdmittance.cpp
                     src/tasks/velocity/PureRolling.cpp
                     src/tasks/velocity/RigidRotation.cpp
                     src/tasks/velocity/Unicycle.cpp
@@ -197,7 +198,6 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/constraints/velocity/Dynamics.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
-#                    src/tasks/velocity/Interaction.cpp
                     ${sot_INCLUDES})
 
 

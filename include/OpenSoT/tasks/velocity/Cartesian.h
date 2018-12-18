@@ -113,7 +113,7 @@
 
                 ~Cartesian();
 
-                void _update(const Eigen::VectorXd& x);
+                virtual void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.
@@ -216,7 +216,7 @@
                  * @brief reset set as actual Cartesian reference the actual pose
                  * @return
                  */
-                bool reset();
+                virtual bool reset();
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
