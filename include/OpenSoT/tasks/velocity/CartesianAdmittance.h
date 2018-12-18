@@ -36,6 +36,8 @@ namespace OpenSoT {
 
            bool reset();
 
+           void _log(XBot::MatLogger::Ptr logger);
+
          private:
            Eigen::Vector6d _wrench_reference;
            Eigen::Vector6d _wrench_measured;

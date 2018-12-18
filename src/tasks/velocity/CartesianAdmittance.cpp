@@ -127,3 +127,13 @@ void CartesianAdmittance::setFilterOmega(const double omega)
     else
         XBot::Logger::warning("omega filter is negative!");
 }
+
+void CartesianAdmittance::_log(XBot::MatLogger::Ptr logger)
+{
+    logger->add(_task_id + "_wrench_error", _wrench_error);
+    logger->add(_task_id + "_wrench_filt", _wrench_filt);
+    logger->add(_task_id + "_wrench_measured", _wrench_measured);
+    logger->add(_task_id + "_wrench_reference", _wrench_reference);
+
+    Cartesian::_log(logger);
+}
