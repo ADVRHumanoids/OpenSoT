@@ -7,7 +7,7 @@ namespace OpenSoT {
    namespace tasks {
        namespace velocity {
        /**
-        * @brief The JointAdmittance class implements a simple admittance controller in velocity at the joint.
+        * @brief The JointAdmittance class implements a simple admittance controller in velocity at the joints.
         * The implemented scheme is the following:
         *
         *  \f$ \boldsymbol{\Delta}\mathbf{q}_r = \mathbf{C}\boldsymbol{\Delta \tau} \f$
