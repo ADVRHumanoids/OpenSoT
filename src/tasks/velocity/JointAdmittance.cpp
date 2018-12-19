@@ -19,6 +19,7 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterfa
 
     _tau.setZero(this->getXSize());
     _tau_filt.setZero(this->getXSize());
+    _tau_error.setZero(this->getXSize());
     _h.setZero(this->getXSize());
 
 
@@ -35,10 +36,12 @@ void JointAdmittance::_update(const Eigen::VectorXd &x)
     _robot.getJointEffort(_tau);
     _robot.computeNonlinearTerm(_h);
 
-    _tau_filt = _filter.process(_tau);
-
     ///TODO: better estimation based on residuals?
-    _xdot_desired = _C*(_h-_tau_filt);
+    _tau_error = _h-_tau;
+
+    _tau_filt = _filter.process(_tau_error);
+
+    _xdot_desired = _C*_tau_filt;
 
     if(_model.isFloatingBase())
         _xdot_desired.head(6).setZero();
