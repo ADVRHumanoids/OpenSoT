@@ -343,27 +343,28 @@ protected:
     }
 };
 
-yarp::sig::Vector getGoodInitialPosition(iDynUtils& _robot) {
-    yarp::sig::Vector q(_robot.iDynTree_model.getNrOfDOFs(), 0.0);
+Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface& _robot) {
+    Eigen::VectorXd q(_robot.getJointNum());
+    q.setZero(q.size());
 
-    q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+    q[_robot.getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[_robot.getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[_robot.getDofIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+    q[_robot.getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[_robot.getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+    q[_robot.getDofIndex("RElbj")] = -80.0*M_PI/180.0;
 
 
-    std::cout << "Q_initial: " << q.toString() << std::endl;
+    std::cout << "Q_initial: " << q << std::endl;
     return q;
 }
 
@@ -393,8 +394,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
 
-    yarp::sig::Vector q = getGoodInitialPosition(idynutils_com);
-    idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+    Eigen::VectorXd q = getGoodInitialPosition(*_model_ptr_com);
+    idynutils_com.updateiDynTreeModel(q, true);
     idynutils_com.switchAnchorAndFloatingBase("l_sole");
 
 #ifdef TRY_ON_SIMULATOR
@@ -406,8 +407,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     // BOUNDS
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(
-                    conversion_utils_YARP::toEigen(q),
+            new OpenSoT::constraints::velocity::JointLimits(q,
                         idynutils_com.getJointBoundMax(),
                         idynutils_com.getJointBoundMin()));
 
@@ -426,8 +426,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::CoM::Ptr com_task(
-                new OpenSoT::tasks::velocity::CoM(
-                    conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get())));
+                new OpenSoT::tasks::velocity::CoM(q, *(_model_ptr_com.get())));
     com_task->setLambda(.6);
 
     yarp::sig::Matrix W(3,3);
@@ -436,8 +435,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
                 new OpenSoT::constraints::velocity::CoMVelocity(
-                    conversion_utils_YARP::toEigen(yarp::sig::Vector(3, 0.05)), 0.004 ,
-                    conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get())));
+                    Eigen::Vector3d(0.05, 0.05, 0.05), 0.004 ,
+                    q, *(_model_ptr_com.get())));
     com_task->getConstraints().push_back(boundsCoMVelocity);
 
     std::list<std::string> _links_in_contact;
@@ -454,13 +453,12 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     OpenSoT::constraints::velocity::ConvexHull::Ptr boundsConvexHull(
                 new OpenSoT::constraints::velocity::ConvexHull(
-                    conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get()),
+                    q, *(_model_ptr_com.get()),
                     _links_in_contact, 0.01));
     com_task->getConstraints().push_back(boundsConvexHull);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr right_foot_task(
-                new OpenSoT::tasks::velocity::Cartesian("world::right_foot",
-                                                        conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get()),
+                new OpenSoT::tasks::velocity::Cartesian("world::right_foot",q , *(_model_ptr_com.get()),
                                                         "r_sole",
                                                         "world"));
     right_foot_task->setLambda(.2);
@@ -468,7 +466,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
+            new OpenSoT::tasks::velocity::Postural(q));
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     if(footStrategy == USE_TASK)
@@ -525,12 +523,12 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     for(i = 0; i < n_iterations; ++i)
     {
-        idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+        idynutils_com.updateiDynTreeModel(q, true);
 
-        right_foot_task->update(conversion_utils_YARP::toEigen(q));
-        com_task->update(conversion_utils_YARP::toEigen(q));
-        postural_task->update(conversion_utils_YARP::toEigen(q));
-        bounds->update(conversion_utils_YARP::toEigen(q));
+        right_foot_task->update(q);
+        com_task->update(q);
+        postural_task->update(q);
+        bounds->update(q);
 
         _log << com_task->getActualPosition()[0] << ","
             << com_task->getActualPosition()[1] <<";";
@@ -546,10 +544,9 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         }
         previous_e = e;
 
-        Eigen::VectorXd _dq(dq.size());
-        _dq.setZero(dq.size());
-        EXPECT_TRUE(sot->solve(_dq));
-        dq = conversion_utils_YARP::toYARP(_dq);
+        Eigen::VectorXd dq(q.size());
+        dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(dq));
         q += dq;
 
         yarp::sig::Matrix right_foot_pose_now = conversion_utils_YARP::toYARP(right_foot_task->getActualPose());
@@ -568,8 +565,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     tmp(2) = com_task->getActualPosition()[2];
     ASSERT_NEAR(norm(T_com_p_ref - tmp),0,1E-9);
 
-    idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
-    boundsConvexHull->update(conversion_utils_YARP::toEigen(q));
+    idynutils_com.updateiDynTreeModel(q, true);
+    boundsConvexHull->update(q);
     std::vector<KDL::Vector> points;
     std::vector<KDL::Vector> points_inner;
     boundsConvexHull->getConvexHull(points);
@@ -583,7 +580,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     std::cout << std::endl << "b_ch: " << std::endl << b_ch << std::endl;
     std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer << std::endl;
     std::cout << std::endl << "b_ch_outer: " << std::endl << b_ch_outer << std::endl;
-    std::cout << std::endl << "@q: " << std::endl << q.toString() << std::endl << std::endl;
+    std::cout << std::endl << "@q: " << std::endl << q << std::endl << std::endl;
     getPointsFromConstraints(A_ch, b_ch, points_inner);
 
 
@@ -618,12 +615,12 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         double oscillation_check_e = 0.0;
         for(i = 0; i < n_iterations; ++i)
         {
-            idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+            idynutils_com.updateiDynTreeModel(q, true);
 
-            right_foot_task->update(conversion_utils_YARP::toEigen(q));
-            com_task->update(conversion_utils_YARP::toEigen(q));
-            postural_task->update(conversion_utils_YARP::toEigen(q));
-            bounds->update(conversion_utils_YARP::toEigen(q));
+            right_foot_task->update(q);
+            com_task->update(q);
+            postural_task->update(q);
+            bounds->update(q);
 
             _log << com_task->getActualPosition()[0] << ","
                 << com_task->getActualPosition()[1] <<";";
@@ -655,10 +652,9 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
 
-            Eigen::VectorXd _dq(dq.size());
-            _dq.setZero(dq.size());
-            EXPECT_TRUE(sot->solve(_dq));
-            dq = conversion_utils_YARP::toYARP(_dq);
+            Eigen::VectorXd dq(q.size());
+            dq.setZero(dq.size());
+            EXPECT_TRUE(sot->solve(dq));
             q += dq;
 
 
@@ -673,10 +669,10 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                                                                                     << " with cartesian error equal to "
                                                                                     << norm(conversion_utils_YARP::toYARP(right_foot_task->getb())) << std::endl;
             EXPECT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getb())),5e-5);
-            EXPECT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getA())*dq),1E-6) << "Error at iteration "
+            EXPECT_LT((right_foot_task->getA()*dq).norm(),1E-6) << "Error at iteration "
                                                              << i
                                                              << " J_foot*dq = "
-                                                             << (right_foot_task->getA()*conversion_utils_YARP::toEigen(dq))
+                                                             << (right_foot_task->getA()*dq)
                                                              << std::endl;
 
 #ifdef TRY_ON_SIMULATOR
