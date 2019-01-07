@@ -38,14 +38,14 @@ std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace {
 
-void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
-                              const yarp::sig::Vector& b_ch,
+void getPointsFromConstraints(const Eigen::MatrixXd &A_ch,
+                              const Eigen::VectorXd& b_ch,
                               std::vector<KDL::Vector>& points) {
     unsigned int nRects = A_ch.rows();
 
     std::cout << "Computing intersection points between " << nRects << " lines" << std::endl;
-    std::cout << "A:" << A_ch.toString() << std::endl;
-    std::cout << "b:" << b_ch.toString() << std::endl;
+    std::cout << "A:" << A_ch << std::endl;
+    std::cout << "b:" << b_ch << std::endl;
     for(unsigned int j = 0; j < nRects; ++j) {
         int i;
 
@@ -72,24 +72,24 @@ void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
     }
 }
 
-bool solveQP(   const yarp::sig::Matrix &J0,
-                const yarp::sig::Vector &e0,
-                const yarp::sig::Matrix &J1,
-                const yarp::sig::Vector &eq,
+bool solveQP(   const Eigen::MatrixXd &J0,
+                const Eigen::VectorXd &e0,
+                const Eigen::MatrixXd &J1,
+                const Eigen::VectorXd &eq,
                 qpOASES::HessianType t1HessianType,
-                const yarp::sig::Vector &l,
-                const yarp::sig::Vector &u,
-                const yarp::sig::Vector &q,
-                yarp::sig::Vector &dq_ref)
+                const Eigen::VectorXd &l,
+                const Eigen::VectorXd &u,
+                const Eigen::VectorXd &q,
+                Eigen::VectorXd &dq_ref)
 {
     int nj = q.size();
 
     static bool initial_guess = false;
 
-    static yarp::sig::Vector dq0(nj, 0.0);
-    static yarp::sig::Vector dq1(nj, 0.0);;
-    static yarp::sig::Vector y0(nj, 0.0);
-    static yarp::sig::Vector y1(nj, 0.0);
+    static Eigen::VectorXd dq0(nj); dq0.setZero(nj);
+    static Eigen::VectorXd dq1(nj); dq1.setZero(nj);
+    static Eigen::VectorXd y0(nj); y0.setZero(nj);
+    static Eigen::VectorXd y1(nj); y1.setZero(nj);
 
     static qpOASES::Bounds bounds0;
     static qpOASES::Bounds bounds1;
@@ -112,11 +112,11 @@ bool solveQP(   const yarp::sig::Matrix &J0,
 
     int njTask0 = J0.rows();
 
-    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
+    Eigen::MatrixXd H0 = J0.transpose()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g0 = -1.0*J0.transpose()*e0;
 
-    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
+    Eigen::MatrixXd H1 = J1.transpose()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g1 = -1.0*J1.transpose()*eq;
 
     USING_NAMESPACE_QPOASES
 
@@ -183,10 +183,10 @@ bool solveQP(   const yarp::sig::Matrix &J0,
     else
     {
         /** Solve first QP. **/
-        yarp::sig::Matrix A1 = J0;
-        yarp::sig::Vector b1 = J0*dq0;
-        yarp::sig::Vector lA1 = b1;
-        yarp::sig::Vector uA1 = b1;
+        Eigen::MatrixXd A1 = J0;
+        Eigen::VectorXd b1 = J0*dq0;
+        Eigen::VectorXd lA1 = b1;
+        Eigen::VectorXd uA1 = b1;
 
         nWSR = 132;
 
@@ -237,28 +237,28 @@ bool solveQP(   const yarp::sig::Matrix &J0,
     return false;
 }
 
-bool solveQPrefactor(   const yarp::sig::Matrix &J0,
-                        const yarp::sig::Vector &e0,
-                        const yarp::sig::Matrix &J1,
-                        const yarp::sig::Vector &eq,
+bool solveQPrefactor(   const Eigen::MatrixXd &J0,
+                        const Eigen::VectorXd &e0,
+                        const Eigen::MatrixXd &J1,
+                        const Eigen::VectorXd &eq,
                         OpenSoT::HessianType t1HessianType,
-                        const yarp::sig::Vector &u,
-                        const yarp::sig::Vector &l,
-                        const yarp::sig::Vector &q,
-                        yarp::sig::Vector &dq_ref)
+                        const Eigen::VectorXd &u,
+                        const Eigen::VectorXd &l,
+                        const Eigen::VectorXd &q,
+                        Eigen::VectorXd &dq_ref)
 {
     int nj = q.size();
 
     int njTask0 = J0.rows();
 
-    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
+    Eigen::MatrixXd H0 = J0.transpose()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g0 = -1.0*J0.transpose()*e0;
 
-    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
+    Eigen::MatrixXd H1 = J1.transpose()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g1 = -1.0*J1.transpose()*eq;
 
-    yarp::sig::Matrix A0(0,nj);
-    yarp::sig::Vector lA0(0), uA0(0);
+    Eigen::MatrixXd A0(0,nj);
+    Eigen::VectorXd lA0(0), uA0(0);
 
     USING_NAMESPACE_QPOASES
 
@@ -267,63 +267,37 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
     static bool result0 = false;
     static bool isQProblemInitialized0 = false;
     if(!isQProblemInitialized0){
-        result0 = qp0.initProblem(
-                    conversion_utils_YARP::toEigen(H0),
-                    conversion_utils_YARP::toEigen(g0),
-                    conversion_utils_YARP::toEigen(A0),
-                    conversion_utils_YARP::toEigen(lA0),
-                    conversion_utils_YARP::toEigen(uA0),
-                    conversion_utils_YARP::toEigen(l),
-                    conversion_utils_YARP::toEigen(u));
+        result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
         isQProblemInitialized0 = true;}
     else
     {
-        qp0.updateProblem(conversion_utils_YARP::toEigen(H0),
-                          conversion_utils_YARP::toEigen(g0),
-                          conversion_utils_YARP::toEigen(A0),
-                          conversion_utils_YARP::toEigen(lA0),
-                          conversion_utils_YARP::toEigen(uA0),
-                          conversion_utils_YARP::toEigen(l),
-                          conversion_utils_YARP::toEigen(u));
+        qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
         result0 = qp0.solve();
     }
 
     if(result0)
     {
-        yarp::sig::Vector dq0 = conversion_utils_YARP::toYARP(qp0.getSolution());
-        yarp::sig::Matrix A1 = J0;
-        yarp::sig::Vector b1 = J0*dq0;
-        yarp::sig::Vector lA1 = b1;
-        yarp::sig::Vector uA1 = b1;
+        Eigen::VectorXd dq0 = qp0.getSolution();
+        Eigen::MatrixXd A1 = J0;
+        Eigen::VectorXd b1 = J0*dq0;
+        Eigen::VectorXd lA1 = b1;
+        Eigen::VectorXd uA1 = b1;
 
         static OpenSoT::solvers::QPOasesBackEnd qp1(nj, njTask0, t1HessianType);
         qp1.setnWSR(127);
         static bool result1 = false;
         static bool isQProblemInitialized1 = false;
         if(!isQProblemInitialized1){
-            result1 = qp1.initProblem(
-                        conversion_utils_YARP::toEigen(H1),
-                        conversion_utils_YARP::toEigen(g1),
-                        conversion_utils_YARP::toEigen(A1),
-                        conversion_utils_YARP::toEigen(lA1),
-                        conversion_utils_YARP::toEigen(uA1),
-                        conversion_utils_YARP::toEigen(l),
-                        conversion_utils_YARP::toEigen(u));
+            result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
             isQProblemInitialized1 = true;}
         else
         {
-            qp1.updateProblem(conversion_utils_YARP::toEigen(H1),
-                              conversion_utils_YARP::toEigen(g1),
-                              conversion_utils_YARP::toEigen(A1),
-                              conversion_utils_YARP::toEigen(lA1),
-                              conversion_utils_YARP::toEigen(uA1),
-                              conversion_utils_YARP::toEigen(l),
-                              conversion_utils_YARP::toEigen(u));
+            qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
             result1 = qp1.solve();
         }
         if(result1)
         {
-            dq_ref = conversion_utils_YARP::toYARP(qp1.getSolution());
+            dq_ref = qp1.getSolution();
             return true;
         }
         else
@@ -610,9 +584,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer << std::endl;
     std::cout << std::endl << "b_ch_outer: " << std::endl << b_ch_outer << std::endl;
     std::cout << std::endl << "@q: " << std::endl << q.toString() << std::endl << std::endl;
-    getPointsFromConstraints(conversion_utils_YARP::toYARP(A_ch),
-                             conversion_utils_YARP::toYARP(b_ch),
-                             points_inner);
+    getPointsFromConstraints(A_ch, b_ch, points_inner);
 
 
     points.push_back(points.front());
