@@ -3,6 +3,8 @@
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 
+using namespace XBot::Utils;
+
 namespace OpenSoT {
    namespace tasks {
        namespace velocity {
@@ -90,10 +92,18 @@ namespace OpenSoT {
            void setFilterDamping(const double damping);
 
            /**
-            * @brief setFilterOmega
+            * @brief setFilterOmega set the same omega to all the filter channels
             * @param omega rembember that: \f$ \omega = \frac{f}{2\pi} \f$ where \f$ f\f$ is the cut-off frequency.
             */
            void setFilterOmega(const double omega);
+
+           /**
+            * @brief setFilterOmega to a certain filter channel
+            * @param omega rembember that: \f$ \omega = \frac{f}{2\pi} \f$ where \f$ f\f$ is the cut-off frequency.
+            * @param channel
+            * @return false if channel does not exists
+            */
+           bool setFilterOmega(const double omega, const int channel);
 
            /**
             * @brief setWrenchReference set the desired wrench at the controlled distal_link
@@ -141,10 +151,13 @@ namespace OpenSoT {
            Eigen::Vector6d _wrench_measured;
            Eigen::Vector6d _wrench_filt;
            Eigen::Vector6d _wrench_error;
+           std::vector<double> _tmp;
 
            void _update(const Eigen::VectorXd& x);
 
-           XBot::Utils::SecondOrderFilter<Eigen::Vector6d> _filter;
+           //XBot::Utils::SecondOrderFilter<Eigen::Vector6d> _filter;
+           XBot::Utils::SecondOrderFilterArray<double> _filter;
+
            Eigen::Matrix6d _C;
 
            XBot::ForceTorqueSensor::ConstPtr _ft_sensor;

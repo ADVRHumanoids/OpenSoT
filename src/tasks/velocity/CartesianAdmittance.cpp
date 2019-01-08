@@ -2,13 +2,16 @@
 
 using namespace OpenSoT::tasks::velocity;
 
+#define CHANNELS 6
+
 CartesianAdmittance::CartesianAdmittance(std::string task_id,
                                          const Eigen::VectorXd &x,
                                          XBot::ModelInterface &robot,
                                          std::string base_link,
                                          XBot::ForceTorqueSensor::ConstPtr ft_sensor):
     Cartesian(task_id, x, robot, ft_sensor->getSensorName(), base_link),
-    _ft_sensor(ft_sensor)
+    _ft_sensor(ft_sensor),
+    _filter(CHANNELS)
 {
     _wrench_reference.setZero();
     _wrench_measured.setZero();
@@ -21,11 +24,16 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
     _C.block(0,0,3,3) *= 1e-6; //This was found by experiments
     _C.block(3,3,3,3) *= 1e-7; //This was found by experiments
 
-    _filter.setTimeStep(0.002); //This was found by experiments
-    _filter.setDamping(1.); //This was found by experiments
-    _filter.setOmega(2.*M_PI*2.); //This was found by experiments
+    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+    {
+        _filter.setTimeStep(0.002, i); //This was found by experiments
+        _filter.setDamping(1., i); //This was found by experiments
+        _filter.setOmega(2.*M_PI*2., i); //This was found by experiments
+    }
 
     _lambda = 0.01; //This was found by experiments
+
+    _tmp.reserve(CHANNELS);
 }
 
 void CartesianAdmittance::_update(const Eigen::VectorXd &x)
@@ -35,7 +43,8 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
 
     _wrench_error = _wrench_reference - XBot::Utils::GetAdjointFromRotation(_bl_T_ft.linear())*_wrench_measured;
 
-    _wrench_filt = _filter.process(_wrench_error);
+    Eigen::Vector6d::Map(&_tmp[0], CHANNELS) = _wrench_error;
+    _wrench_filt = Eigen::Vector6d::Map(_filter.process(_tmp).data(), CHANNELS);
 
     _desiredTwist = _C*_wrench_filt;
 
@@ -107,24 +116,43 @@ void CartesianAdmittance::setFilterParams(const double time_step, const double d
 
 void CartesianAdmittance::setFilterTimeStep(const double time_step)
 {
-    if(time_step > 0)
-        _filter.setTimeStep(time_step);
+    if(time_step > 0.)
+    {
+        for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+            _filter.setTimeStep(time_step, i);
+    }
     else
         XBot::Logger::warning("time_step filter is negative!");
 }
 
 void CartesianAdmittance::setFilterDamping(const double damping)
 {
-    if(damping)
-        _filter.setDamping(damping);
+    if(damping >= 0.)
+    {
+        for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+            _filter.setDamping(damping,i);
+    }
     else
         XBot::Logger::warning("damping filter is negative!");
 }
 
 void CartesianAdmittance::setFilterOmega(const double omega)
 {
-    if(omega)
-        _filter.setOmega(omega);
+    if(omega >= 0.)
+    {
+        for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+            _filter.setOmega(omega, i);
+    }
+    else
+        XBot::Logger::warning("omega filter is negative!");
+}
+
+bool CartesianAdmittance::setFilterOmega(const double omega, const int channel)
+{
+    if(channel >= _filter.getNumberOfChannels())
+        return false;
+    if(omega >= 0.)
+        _filter.setOmega(omega, channel);
     else
         XBot::Logger::warning("omega filter is negative!");
 }
