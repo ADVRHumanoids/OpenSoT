@@ -16,14 +16,11 @@
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
 #include <fstream>
 #include <advr_humanoids_common_utils/conversion_utils_YARP.h>
 #include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
 
 
-using namespace yarp::math;
 
 typedef idynutils2 iDynUtils;
 static void null_deleter(iDynUtils *) {}
