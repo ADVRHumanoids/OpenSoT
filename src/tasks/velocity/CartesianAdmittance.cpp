@@ -20,16 +20,20 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
     _ft_sensor->getWrench(_wrench_measured);
     _wrench_reference = _wrench_measured;
 
-    _C.setIdentity();
-    _C.block(0,0,3,3) *= 1e-6; //This was found by experiments
-    _C.block(3,3,3,3) *= 1e-7; //This was found by experiments
+//    _C.setIdentity();
+//    _C.segment(0,3) *= 1e-6; //This was found by experiments
+//    _C.segment(3,3) *= 1e-7; //This was found by experiments
 
-    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
-    {
-        _filter.setTimeStep(0.002, i); //This was found by experiments
-        _filter.setDamping(1., i); //This was found by experiments
-        _filter.setOmega(2.*M_PI*2., i); //This was found by experiments
-    }
+//    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+//        _filter.setOmega(2.*M_PI*2., i); //This was found by experiments
+
+    _K.setIdentity();
+    _K.segment(0,3) *= 1e4; _K.segment(3,3) *= 1e5;
+    _D.setIdentity();
+    _D.segment(0,3) *= 1e3*0.7958; _D.segment(3,3) *= 1e3*7.9577;
+
+    setFilterTimeStep(0.002);
+    setFilterDamping(1.);
 
     _lambda = 0.01; //This was found by experiments
 
@@ -46,7 +50,7 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
     Eigen::Vector6d::Map(&_tmp[0], CHANNELS) = _wrench_error;
     _wrench_filt = Eigen::Vector6d::Map(_filter.process(_tmp).data(), CHANNELS);
 
-    _desiredTwist = _C*_wrench_filt;
+    _desiredTwist = _C.asDiagonal()*_wrench_filt;
 
     Cartesian::_update(x);
 }
@@ -84,45 +88,34 @@ OpenSoT::tasks::velocity::CartesianAdmittance::Ptr CartesianAdmittance::asCartes
     return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
 }
 
-void CartesianAdmittance::setCartesianCompliance(const Eigen::Matrix6d& C)
-{
-    _C = C;
-}
-
-void CartesianAdmittance::setCartesianCompliance(const double C_linear, const double C_angular)
-{
-    _C.setIdentity();
-
-    _C.block(0,0,3,3) *= C_linear;
-    _C.block(3,3,3,3) *= C_angular;
-}
-
 const Eigen::Matrix6d& CartesianAdmittance::getCartesianCompliance()
 {
-    return _C;
+    _tmp_mat6 = _C.asDiagonal();
+    return _tmp_mat6;
 }
 
-void CartesianAdmittance::getCartesianCompliance(Eigen::MatrixXd& C)
+void CartesianAdmittance::getCartesianCompliance(Eigen::Matrix6d& C)
 {
-    C = _C;
-}
-
-void CartesianAdmittance::setFilterParams(const double time_step, const double damping, const double omega)
-{
-    setFilterTimeStep(time_step);
-    setFilterOmega(omega);
-    setFilterDamping(damping);
+    C = _C.asDiagonal();
 }
 
 void CartesianAdmittance::setFilterTimeStep(const double time_step)
 {
     if(time_step > 0.)
     {
+        _dt = time_step;
         for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
             _filter.setTimeStep(time_step, i);
+        computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
+        setFilterOmega(_w);
     }
     else
         XBot::Logger::warning("time_step filter is negative!");
+}
+
+double CartesianAdmittance::getFilterTimeStep()
+{
+    return _dt;
 }
 
 void CartesianAdmittance::setFilterDamping(const double damping)
@@ -136,27 +129,6 @@ void CartesianAdmittance::setFilterDamping(const double damping)
         XBot::Logger::warning("damping filter is negative!");
 }
 
-void CartesianAdmittance::setFilterOmega(const double omega)
-{
-    if(omega >= 0.)
-    {
-        for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
-            _filter.setOmega(omega, i);
-    }
-    else
-        XBot::Logger::warning("omega filter is negative!");
-}
-
-bool CartesianAdmittance::setFilterOmega(const double omega, const int channel)
-{
-    if(channel >= _filter.getNumberOfChannels())
-        return false;
-    if(omega >= 0.)
-        _filter.setOmega(omega, channel);
-    else
-        XBot::Logger::warning("omega filter is negative!");
-}
-
 void CartesianAdmittance::_log(XBot::MatLogger::Ptr logger)
 {
     logger->add(_task_id + "_wrench_error", _wrench_error);
@@ -164,5 +136,63 @@ void CartesianAdmittance::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id + "_wrench_measured", _wrench_measured);
     logger->add(_task_id + "_wrench_reference", _wrench_reference);
 
+    logger->add(_task_id + "_C", _C);
+    logger->add(_task_id + "_M", _M);
+    logger->add(_task_id + "_D", _D);
+    logger->add(_task_id + "_K", _K);
+    logger->add(_task_id + "_w", _w);
+    logger->add(_task_id + "_dt", _dt);
+
     Cartesian::_log(logger);
+}
+
+const Eigen::Matrix6d& CartesianAdmittance::getStiffness()
+{
+    _tmp_mat6 = _K.asDiagonal();
+    return _tmp_mat6;
+}
+
+void CartesianAdmittance::setStiffness(const Eigen::Vector6d& K)
+{
+    _K = K;
+    computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
+    setFilterOmega(_w);
+}
+
+const Eigen::Matrix6d& CartesianAdmittance::getDamping()
+{
+    _tmp_mat6 = _D.asDiagonal();
+    return _tmp_mat6;
+}
+
+void CartesianAdmittance::setDamping(const Eigen::Vector6d& D)
+{
+    _D = D;
+    computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
+    setFilterOmega(_w);
+}
+
+bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda, const double dt,
+                                            Eigen::Vector6d& C, Eigen::Vector6d& M, Eigen::Vector6d& w)
+{
+    C = lambda * (K.asDiagonal().inverse()).diagonal();
+
+    M = (dt/lambda) * D - ((dt*dt)/lambda) * C;
+
+    _tmp_vec6 = C.array()*M.array();
+    w = dt*(_tmp_vec6.asDiagonal().inverse()).diagonal();
+}
+
+void CartesianAdmittance::setLambda(double lambda)
+{
+    if(lambda >= 0.0)
+        this->_lambda = lambda;
+    computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
+    setFilterOmega(_w);
+}
+
+void CartesianAdmittance::setFilterOmega(const Eigen::Vector6d& w)
+{
+    for(unsigned int i = 0; i < CHANNELS; ++i)
+        _filter.setOmega(w[i], i);
 }

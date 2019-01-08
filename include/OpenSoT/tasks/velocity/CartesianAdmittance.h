@@ -44,20 +44,6 @@ namespace OpenSoT {
                                 std::string base_link,
                                 XBot::ForceTorqueSensor::ConstPtr ft_sensor);
 
-            /**
-            * @brief setCartesianCompliance set the Compliance matrix
-            * @param C a SPD matrix
-            */
-           void setCartesianCompliance(const Eigen::Matrix6d& C);
-
-           /**
-            * @brief setCartesianCompliance set the same compiance to linear and angular the Cartesian direction
-            * respectively
-            * @param C_linear the Compliance in th linear part
-            * @param C_angular the Compliance in th angular part
-            */
-           void setCartesianCompliance(const double C_linear, const double C_angular);
-
            /**
             * @brief getCartesianCompliance
             * @return the actual Compliance matrix
@@ -68,16 +54,7 @@ namespace OpenSoT {
             * @brief getCartesianCompliance
             * @param C the actual Compliance matrix
             */
-           void getCartesianCompliance(Eigen::MatrixXd& C);
-
-           /**
-            * @brief setFilterParams set all the parameters of the internal second order filter used to filter the
-            * \f$ \boldsymbol{\Delta \tau} \f$
-            * @param time_step of the filter
-            * @param damping of the filter
-            * @param omega of the filter
-            */
-           void setFilterParams(const double time_step, const double damping, const double omega);
+           void getCartesianCompliance(Eigen::Matrix6d& C);
 
            /**
             * @brief setFilterTimeStep
@@ -86,24 +63,16 @@ namespace OpenSoT {
            void setFilterTimeStep(const double time_step);
 
            /**
+            * @brief getFilterTimeStep
+            * @return
+            */
+           double getFilterTimeStep();
+
+           /**
             * @brief setFilterDamping
             * @param damping of the filter
             */
            void setFilterDamping(const double damping);
-
-           /**
-            * @brief setFilterOmega set the same omega to all the filter channels
-            * @param omega rembember that: \f$ \omega = \frac{f}{2\pi} \f$ where \f$ f\f$ is the cut-off frequency.
-            */
-           void setFilterOmega(const double omega);
-
-           /**
-            * @brief setFilterOmega to a certain filter channel
-            * @param omega rembember that: \f$ \omega = \frac{f}{2\pi} \f$ where \f$ f\f$ is the cut-off frequency.
-            * @param channel
-            * @return false if channel does not exists
-            */
-           bool setFilterOmega(const double omega, const int channel);
 
            /**
             * @brief setWrenchReference set the desired wrench at the controlled distal_link
@@ -146,6 +115,46 @@ namespace OpenSoT {
 
            void _log(XBot::MatLogger::Ptr logger);
 
+           /**
+            * @brief getStiffness
+            * @return actual Cartesian Stiffness
+            */
+           const Eigen::Matrix6d& getStiffness();
+
+           /**
+            * @brief setStiffness
+            * @param K Cartesian Stiffness
+            */
+           void setStiffness(const Eigen::Vector6d& K);
+
+           /**
+            * @brief getDamping
+            * @return actual Cartesian Damping
+            */
+           const Eigen::Matrix6d& getDamping();
+
+           /**
+            * @brief setDamping
+            * @param D Cartesian Damping
+            */
+           void setDamping(const Eigen::Vector6d& D);
+
+           /**
+            * @brief computeParameters given user's K, D and lambda, computes M and w
+            * @param K user desired Cartesian Stiffness
+            * @param D user desired Cartesian Damping
+            * @param lambda user desired lambda
+            * @param dt filter time step
+            * @param C Cartesian Compliance \f$ \mathbf{C} = \lambda\mathbf{K}^{-1} \f$
+            * @param M Cartesian Mass \f$ \mathbf{M} = \frac{dt}{\lambda}\left( \mathbf{D} - \mathbf{D}dt \right) \f$
+            * @param w filter params \f$ \mathbf{w} = dt\left( \mathbf{CM} \right)^{-1} \f$
+            * @return true
+            */
+           bool computeParameters(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda, const double dt,
+                                  Eigen::Vector6d& C, Eigen::Vector6d& M, Eigen::Vector6d& w);
+
+           void setLambda(double lambda);
+
          private:
            Eigen::Vector6d _wrench_reference;
            Eigen::Vector6d _wrench_measured;
@@ -158,11 +167,46 @@ namespace OpenSoT {
            //XBot::Utils::SecondOrderFilter<Eigen::Vector6d> _filter;
            XBot::Utils::SecondOrderFilterArray<double> _filter;
 
-           Eigen::Matrix6d _C;
+           Eigen::Vector6d _C;
+
+           /**
+            * @brief _K equivalent Cartesian Stiffness (diagonal)
+            * \f$ \mathbf{K} = \lambda\mathbf{C}^{-1} \f$
+            */
+           Eigen::Vector6d _K;
+
+           /**
+            * @brief _M equivalent Cartesian Inertia (diagonal)
+            * \f$ \mathbf{M} = dt\left( \mathbf{Cw} \right)^{-1} \f$
+            * where \f$ \mathbf{w} \f$ is the diagonal matrix of the filter's \f$ w \f$
+            */
+           Eigen::Vector6d _M;
+
+           /**
+            * @brief _D equivalent Cartesian Damping (diagonal)
+            * \f$ \mathbf{D} = \lambda\left( \mathbf{Cw} \right)^{-1} + \mathbf{C}dt = \frac{\lambda}{dt}\mathbf{M} + \mathbf{C}dt  \f$
+            */
+           Eigen::Vector6d _D;
+
+           /**
+            * @brief _w diagonal matrix containing the omega params of the filters
+            */
+           Eigen::Vector6d _w;
+
+           Eigen::Vector6d _tmp_vec6;
+           Eigen::Matrix6d _tmp_mat6;
+
 
            XBot::ForceTorqueSensor::ConstPtr _ft_sensor;
 
            Eigen::Affine3d _bl_T_ft;
+
+           /**
+            * @brief _dt filter tim_stamp
+            */
+           double _dt;
+
+           void setFilterOmega(const Eigen::Vector6d& w);
 
 
        };

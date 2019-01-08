@@ -190,7 +190,7 @@
                 const std::string getBaseLink() const;
                 const bool baseLinkIsWorld() const;
 
-                void setLambda(double lambda);
+                virtual void setLambda(double lambda);
 
                 /**
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
