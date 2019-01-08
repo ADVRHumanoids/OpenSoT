@@ -397,11 +397,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
     // BOUNDS
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr_com->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(q,
-                        idynutils_com.getJointBoundMax(),
-                        idynutils_com.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
 
     OpenSoT::constraints::Aggregated::ConstraintPtr velocityLimits(
             new OpenSoT::constraints::velocity::VelocityLimits(0.3,
@@ -496,7 +496,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     com_task->setReference(T_com_p_ref);
 
-    yarp::sig::Vector dq(q.size(), 0.0);
     Eigen::Vector3d tmp;
     tmp(0) = com_task->getActualPosition()[0];
     tmp(1) = com_task->getActualPosition()[1];
@@ -511,7 +510,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     else if(footStrategy == USE_CONSTRAINT)
         _log << "com_traj_constraint = [";
 
-    yarp::sig::Matrix right_foot_pose = conversion_utils_YARP::toYARP(right_foot_task->getActualPose());
+    Eigen::MatrixXd right_foot_pose = right_foot_task->getActualPose();
 
     for(i = 0; i < n_iterations; ++i)
     {
@@ -541,11 +540,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         EXPECT_TRUE(sot->solve(dq));
         q += dq;
 
-        yarp::sig::Matrix right_foot_pose_now = conversion_utils_YARP::toYARP(right_foot_task->getActualPose());
+        Eigen::MatrixXd right_foot_pose_now = right_foot_task->getActualPose();
         for(unsigned int r = 0; r < 4; ++r)
             for(unsigned int c = 0; c < 4; ++c)
                 ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-6);
-        ASSERT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getb())),1e-8);
+        ASSERT_LT(right_foot_task->getb().norm(),1e-8);
 
     }
 
@@ -598,7 +597,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         tmp(1) = com_task->getActualPosition()[1];
         tmp(2) = com_task->getActualPosition()[2];
 
-        yarp::sig::Vector dq(q.size(), 0.0);
         double e = (T_com_p_ref - tmp).norm();
         double previous_e = 0.0;
         double oscillation_check_e = 0.0;
@@ -647,7 +645,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             q += dq;
 
 
-            yarp::sig::Matrix right_foot_pose_now = conversion_utils_YARP::toYARP(right_foot_task->getActualPose());
+            Eigen::MatrixXd right_foot_pose_now = right_foot_task->getActualPose();
             for(unsigned int r = 0; r < 4; ++r)
                 for(unsigned int c = 0; c < 4; ++c)
                     EXPECT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-3) << "Error at iteration "
@@ -656,8 +654,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                                                                                     << "(" << r
                                                                                     << "," << c << ")"
                                                                                     << " with cartesian error equal to "
-                                                                                    << norm(conversion_utils_YARP::toYARP(right_foot_task->getb())) << std::endl;
-            EXPECT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getb())),5e-5);
+                                                                                    << right_foot_task->getb().norm() << std::endl;
+            EXPECT_LT(right_foot_task->getb().norm(),5e-5);
             EXPECT_LT((right_foot_task->getA()*dq).norm(),1E-6) << "Error at iteration "
                                                              << i
                                                              << " J_foot*dq = "
@@ -678,8 +676,9 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
         Eigen::Vector3d distance = T_com_p_ref - tmp;
         double d = (distance).norm();
-        yarp::sig::Vector exp_distance(2,0.01);
-        double expected_d = norm(exp_distance);
+        Eigen::Vector2d exp_distance;
+        exp_distance<<0.01,0.01;
+        double expected_d = exp_distance.norm();
 
         std::vector<KDL::Vector> points_check;
         boundsConvexHull->getConvexHull(points_check);
