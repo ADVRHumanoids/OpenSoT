@@ -373,10 +373,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     useFootTaskOrConstraint footStrategy = GetParam();
 
-#ifdef TRY_ON_SIMULATOR
-    yarp::os::Network init;
-    ComanUtils robot("tryFollowingBounds");
-#endif
+
 
     iDynUtils idynutils_com("coman",
                             std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
@@ -398,11 +395,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     idynutils_com.updateiDynTreeModel(q, true);
     idynutils_com.switchAnchorAndFloatingBase("l_sole");
 
-#ifdef TRY_ON_SIMULATOR
-    robot.setPositionDirectMode();
-    robot.move(q);
-    yarp::os::Time::delay(3);
-#endif
 
     // BOUNDS
 
@@ -429,9 +421,9 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                 new OpenSoT::tasks::velocity::CoM(q, *(_model_ptr_com.get())));
     com_task->setLambda(.6);
 
-    yarp::sig::Matrix W(3,3);
-    W.eye(); W(2,2) = .1;
-    com_task->setWeight(conversion_utils_YARP::toEigen(W));
+    Eigen::Matrix3d W;
+    W.setIdentity(); W(2,2) = .1;
+    com_task->setWeight(W);
 
     OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
                 new OpenSoT::constraints::velocity::CoMVelocity(
@@ -495,21 +487,21 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     //SET SOME REFERENCES
     yarp::sig::Vector T_com_p_init = idynutils_com.iDynTree_model.getCOM();
-    yarp::sig::Vector T_com_p_ref = T_com_p_init;
+    Eigen::Vector3d T_com_p_ref = conversion_utils_YARP::toEigen(T_com_p_init);
     T_com_p_ref[0] = 0.0;
     T_com_p_ref[1] = 0.0;
 
     std::cout << "Initial CoM position is " << T_com_p_init.toString() << std::endl;
     std::cout << "Moving to (0,0)" << std::endl;
 
-    com_task->setReference(conversion_utils_YARP::toEigen(T_com_p_ref));
+    com_task->setReference(T_com_p_ref);
 
     yarp::sig::Vector dq(q.size(), 0.0);
-    yarp::sig::Vector tmp(3,0.0);
+    Eigen::Vector3d tmp;
     tmp(0) = com_task->getActualPosition()[0];
     tmp(1) = com_task->getActualPosition()[1];
     tmp(2) = com_task->getActualPosition()[2];
-    double e = norm(T_com_p_ref - tmp);
+    double e = (T_com_p_ref - tmp).norm();
     double previous_e = 0.0;
 
     unsigned int i = 0;
@@ -532,14 +524,14 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
         _log << com_task->getActualPosition()[0] << ","
             << com_task->getActualPosition()[1] <<";";
-        yarp::sig::Vector tmp(3,0.0);
+        Eigen::Vector3d tmp;
         tmp(0) = com_task->getActualPosition()[0];
         tmp(1) = com_task->getActualPosition()[1];
         tmp(2) = com_task->getActualPosition()[2];
-        e = norm(T_com_p_ref - tmp);
+        e = (T_com_p_ref - tmp).norm();
 
         if(fabs(previous_e - e) < 1e-13) {
-            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - tmp) << " . Error not decreasing. CONVERGED." << std::endl;
+            std::cout << "i: " << i << " e: " << (T_com_p_ref - tmp).norm() << " . Error not decreasing. CONVERGED." << std::endl;
             break;
         }
         previous_e = e;
@@ -555,15 +547,12 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                 ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-6);
         ASSERT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getb())),1e-8);
 
-#ifdef TRY_ON_SIMULATOR
-        robot.move(q);
-#endif
     }
 
     tmp(0) = com_task->getActualPosition()[0];
     tmp(1) = com_task->getActualPosition()[1];
     tmp(2) = com_task->getActualPosition()[2];
-    ASSERT_NEAR(norm(T_com_p_ref - tmp),0,1E-9);
+    ASSERT_NEAR((T_com_p_ref - tmp).norm(),0,1E-9);
 
     idynutils_com.updateiDynTreeModel(q, true);
     boundsConvexHull->update(q);
@@ -602,15 +591,15 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         T_com_p_ref[0] = point->x();
         T_com_p_ref[1] = point->y();
 
-        com_task->setReference(conversion_utils_YARP::toEigen(T_com_p_ref));
+        com_task->setReference(T_com_p_ref);
 
-        yarp::sig::Vector tmp(3,0.0);
+        Eigen::Vector3d tmp;
         tmp(0) = com_task->getActualPosition()[0];
         tmp(1) = com_task->getActualPosition()[1];
         tmp(2) = com_task->getActualPosition()[2];
 
         yarp::sig::Vector dq(q.size(), 0.0);
-        double e = norm(T_com_p_ref - tmp);
+        double e = (T_com_p_ref - tmp).norm();
         double previous_e = 0.0;
         double oscillation_check_e = 0.0;
         for(i = 0; i < n_iterations; ++i)
@@ -624,11 +613,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
             _log << com_task->getActualPosition()[0] << ","
                 << com_task->getActualPosition()[1] <<";";
-            yarp::sig::Vector tmp(3,0.0);
+            Eigen::Vector3d tmp;
             tmp(0) = com_task->getActualPosition()[0];
             tmp(1) = com_task->getActualPosition()[1];
             tmp(2) = com_task->getActualPosition()[2];
-            e = norm(T_com_p_ref - tmp);
+            e = (T_com_p_ref - tmp).norm();
 
             if(fabs(e - oscillation_check_e) < 1e-9)
             {
@@ -675,9 +664,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                                                              << (right_foot_task->getA()*dq)
                                                              << std::endl;
 
-#ifdef TRY_ON_SIMULATOR
-            robot.move(q);
-#endif
+
         }
 
 
@@ -686,11 +673,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         tmp(2) = com_task->getActualPosition()[2];
 
         if(i == n_iterations)
-            std::cout << "i: " << i << " e: " << norm(T_com_p_ref -
-                                                      tmp) << " -- Error not decreasing. STOPPING." << std::endl;
+            std::cout << "i: " << i << " e: " << (T_com_p_ref -
+                                                      tmp).norm() << " -- Error not decreasing. STOPPING." << std::endl;
 
-        yarp::sig::Vector distance = T_com_p_ref - tmp;
-        double d = norm(distance);
+        Eigen::Vector3d distance = T_com_p_ref - tmp;
+        double d = (distance).norm();
         yarp::sig::Vector exp_distance(2,0.01);
         double expected_d = norm(exp_distance);
 
