@@ -37,7 +37,7 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
 
     _lambda = 0.01; //This was found by experiments
 
-    _tmp.assign(0., CHANNELS);
+    _tmp.assign(CHANNELS, 0.);
 }
 
 void CartesianAdmittance::_update(const Eigen::VectorXd &x)
