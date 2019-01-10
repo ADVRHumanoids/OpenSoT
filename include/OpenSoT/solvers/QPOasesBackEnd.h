@@ -191,9 +191,9 @@ namespace OpenSoT{
 
     protected:
         /**
-         * @brief checkInfeasibility function that print informations when the problem is not feasible
+         * @brief printConstraintsInfo function that print informations when the problem is not feasible
          */
-        void checkInfeasibility();
+        void printConstraintsInfo();
 
         /**
          * @brief checkINFTY if a bound/constraint is set to a value less than -INFTY then the bound/constraint is
