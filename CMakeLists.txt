@@ -67,7 +67,14 @@ FIND_PACKAGE(PkgConfig REQUIRED)
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 option(OPENSOT_VERBOSE "Some additional prints" FALSE)
+option(OPENSOT_DISABLE_VECTORIZATION "Disable Eigen3 vectorization" FALSE)
 
+if(${OPENSOT_DISABLE_VECTORIZATION})
+  add_definitions(-DEIGEN_DONT_VECTORIZE)
+  add_definitions(-DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
+endif()
+ 
+ 
 if(${OPENSOT_VERBOSE})
     add_definitions(-DOPENSOT_VERBOSE)
 endif()
