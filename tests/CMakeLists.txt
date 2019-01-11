@@ -102,6 +102,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testMinimumEffortVelocityTask
                   testPosturalVelocityTask
                   testCartesianVelocityTask
+                  testCartesianAdmittanceVelocityTask
                   testSubTask
                   testAutoStack 
                   testCartesianUtils 
@@ -414,6 +415,11 @@ ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
 TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
 add_dependencies(testCartesianVelocityTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)
+
+ADD_EXECUTABLE(testCartesianAdmittanceVelocityTask tasks/velocity/TestCartesianAdmittance.cpp)
+TARGET_LINK_LIBRARIES(testCartesianAdmittanceVelocityTask ${TestLibs})
+add_dependencies(testCartesianAdmittanceVelocityTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_task_velocity_Cartesian_admittance COMMAND testCartesianAdmittanceVelocityTask)
 
 ADD_EXECUTABLE(testCoMVelocityVelocityConstraint constraints/velocity/TestCoMVelocity.cpp)
 TARGET_LINK_LIBRARIES(testCoMVelocityVelocityConstraint ${TestLibs})
