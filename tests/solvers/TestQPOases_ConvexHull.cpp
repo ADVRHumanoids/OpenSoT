@@ -17,17 +17,10 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <fstream>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
-
-
-
-typedef idynutils2 iDynUtils;
-static void null_deleter(iDynUtils *) {}
-
+#include <OpenSoT/utils/AutoStack.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
 #define GREEN "\033[0;32m"
@@ -372,15 +365,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
 
-    iDynUtils idynutils_com("coman",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr_com;
-    _model_ptr_com = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-            (XBot::ModelInterface::getModel(_path_to_cfg));
-    _model_ptr_com->loadModel(boost::shared_ptr<iDynUtils>(&idynutils_com, &null_deleter));
-
+    XBot::ModelInterface::Ptr _model_ptr_com;
+    _model_ptr_com = XBot::ModelInterface::getModel(_path_to_cfg);
     if(_model_ptr_com)
         std::cout<<"pointer address: "<<_model_ptr_com.get()<<std::endl;
     else
@@ -389,9 +375,18 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
     Eigen::VectorXd q = getGoodInitialPosition(*_model_ptr_com);
-    idynutils_com.updateiDynTreeModel(q, true);
-    idynutils_com.switchAnchorAndFloatingBase("l_sole");
+    _model_ptr_com->setJointPosition(q);
+    _model_ptr_com->update();
 
+    Eigen::Affine3d waist_T_lsole, fb_T_lsole;
+    _model_ptr_com->getPose("Waist", "l_sole", waist_T_lsole);
+    fb_T_lsole.setIdentity();
+    fb_T_lsole.translation()[0] = waist_T_lsole.translation()[0];
+    fb_T_lsole.translation()[2] = waist_T_lsole.translation()[2];
+    std::cout<<"fb_T_lsole: "<<fb_T_lsole.matrix()<<std::endl;
+    _model_ptr_com->setFloatingBasePose(fb_T_lsole);
+    _model_ptr_com->update();
+    _model_ptr_com->getJointPosition(q);
 
     // BOUNDS
     Eigen::VectorXd qmin, qmax;
@@ -400,10 +395,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
             new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
 
+    Eigen::VectorXd qdotmax(q.size()); qdotmax.setOnes(q.size());
+    qdotmax *= 0.3;
+    qdotmax.segment(0,6)<<100.,100.,100.,100.,100.,100.;
     OpenSoT::constraints::Aggregated::ConstraintPtr velocityLimits(
-            new OpenSoT::constraints::velocity::VelocityLimits(0.3,
-                                                               3e-3,
-                                                               q.size()));
+            new OpenSoT::constraints::velocity::VelocityLimits(qdotmax, 3e-3));
 
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
@@ -453,6 +449,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     right_foot_task->setLambda(.2);
     right_foot_task->setOrientationErrorGain(.1);
 
+    OpenSoT::tasks::velocity::Cartesian::Ptr left_foot_task(
+                new OpenSoT::tasks::velocity::Cartesian("world::left_foot",q , *(_model_ptr_com.get()),
+                                                        "l_sole",
+                                                        "r_sole"));
+    left_foot_task->setLambda(.2);
+    left_foot_task->setOrientationErrorGain(.1);
+
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
             new OpenSoT::tasks::velocity::Postural(q));
@@ -464,31 +467,31 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _log.open("testQPOases_ConvexHull.m");
 
         stack_of_tasks.push_back(right_foot_task);
+        stack_of_tasks.push_back(left_foot_task);
     }
     else if (footStrategy == USE_CONSTRAINT)
     {
         using namespace OpenSoT::constraints;
-        TaskToConstraint::Ptr right_foot_constraint(new TaskToConstraint(right_foot_task));
+        TaskToConstraint::Ptr feet_constraint(new TaskToConstraint((right_foot_task + left_foot_task)));
 
-        com_task->getConstraints().push_back(right_foot_constraint);
-        postural_task->getConstraints().push_back(right_foot_constraint);
+        com_task->getConstraints().push_back(feet_constraint);
+        postural_task->getConstraints().push_back(feet_constraint);
 
     }
 
     stack_of_tasks.push_back(com_task);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::iHQP::Ptr sot(
-        new OpenSoT::solvers::iHQP(stack_of_tasks,
-                                          bounds));
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     //SET SOME REFERENCES
-    yarp::sig::Vector T_com_p_init = idynutils_com.iDynTree_model.getCOM();
-    Eigen::Vector3d T_com_p_ref = conversion_utils_YARP::toEigen(T_com_p_init);
+    Eigen::Vector3d T_com_p_init;
+    _model_ptr_com->getCOM(T_com_p_init);
+    Eigen::Vector3d T_com_p_ref = T_com_p_init;
     T_com_p_ref[0] = 0.0;
     T_com_p_ref[1] = 0.0;
 
-    std::cout << "Initial CoM position is " << T_com_p_init.toString() << std::endl;
+    std::cout << "Initial CoM position is " << T_com_p_init << std::endl;
     std::cout << "Moving to (0,0)" << std::endl;
 
     com_task->setReference(T_com_p_ref);
@@ -511,9 +514,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     for(i = 0; i < n_iterations; ++i)
     {
-        idynutils_com.updateiDynTreeModel(q, true);
+        _model_ptr_com->setJointPosition(q);
+        _model_ptr_com->update();
 
         right_foot_task->update(q);
+        std::cout<<"right_foot_task->getb().norm(): "<<right_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
+        left_foot_task->update(q);
+        std::cout<<"left_foot_task->getb().norm(): "<<left_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
         com_task->update(q);
         postural_task->update(q);
         bounds->update(q);
@@ -540,8 +547,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         Eigen::MatrixXd right_foot_pose_now = right_foot_task->getActualPose();
         for(unsigned int r = 0; r < 4; ++r)
             for(unsigned int c = 0; c < 4; ++c)
-                ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-6);
-        ASSERT_LT(right_foot_task->getb().norm(),1e-8);
+                ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-5)<<"iteration "<<i;
+        ASSERT_LT(left_foot_task->getb().norm(),1e-8)<<"iteration "<<i;
 
     }
 
@@ -550,7 +557,9 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     tmp(2) = com_task->getActualPosition()[2];
     ASSERT_NEAR((T_com_p_ref - tmp).norm(),0,1E-9);
 
-    idynutils_com.updateiDynTreeModel(q, true);
+    _model_ptr_com->setJointPosition(q);
+    _model_ptr_com->update();
+
     boundsConvexHull->update(q);
     std::vector<KDL::Vector> points;
     std::vector<KDL::Vector> points_inner;
@@ -599,9 +608,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         double oscillation_check_e = 0.0;
         for(i = 0; i < n_iterations; ++i)
         {
-            idynutils_com.updateiDynTreeModel(q, true);
+            _model_ptr_com->setJointPosition(q);
+            _model_ptr_com->update();
 
             right_foot_task->update(q);
+            left_foot_task->update(q);
             com_task->update(q);
             postural_task->update(q);
             bounds->update(q);
@@ -731,7 +742,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _log << "ctc = plot(com_traj_constraint(:,1), com_traj_constraint(:,2), 'm:');" << std::endl;
         _log << "legend([ref,constr,ct,ctc], 'CoM ref', 'Support Polygon', 'CoM Traj, r\\_sole ctrl as task', 'CoM Traj, r\\_sole ctrl as constraint','Location','best');" << std::endl;
     }
-    _log << "print(ch_figure,'-depsc','testQPOases_ConvexHull_followingBounds');" << std::endl;
 
 }
 
