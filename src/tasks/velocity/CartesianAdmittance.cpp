@@ -27,15 +27,19 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
 //    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
 //        _filter.setOmega(2.*M_PI*2., i); //This was found by experiments
 
-    _K.setIdentity();
+    _K.setOnes();
     _K.segment(0,3) *= 1e4; _K.segment(3,3) *= 1e5;
-    _D.setIdentity();
+    _D.setOnes();
     _D.segment(0,3) *= 1e3*0.7958; _D.segment(3,3) *= 1e3*7.9577;
 
-    setFilterTimeStep(0.002);
+    _dt = 0.002;
+
     setFilterDamping(1.);
 
     _lambda = 0.01; //This was found by experiments
+
+    if(!computeParameters(_K, _D, _lambda, _dt, _C, _M, _w))
+        throw std::runtime_error("Error in computeParameters!");
 
     _tmp.assign(CHANNELS, 0.);
 }
@@ -103,11 +107,13 @@ void CartesianAdmittance::setFilterTimeStep(const double time_step)
 {
     if(time_step > 0.)
     {
-        _dt = time_step;
-        for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
-            _filter.setTimeStep(time_step, i);
-        computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
-        setFilterOmega(_w);
+        if(computeParameters(_K, _D, _lambda, time_step, _C, _M, _w))
+        {
+            _dt = time_step;
+            for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+                _filter.setTimeStep(time_step, i);
+            setFilterOmega(_w);
+        }
     }
     else
         XBot::Logger::warning("time_step filter is negative!");
@@ -154,9 +160,23 @@ const Eigen::Matrix6d& CartesianAdmittance::getStiffness()
 
 void CartesianAdmittance::setStiffness(const Eigen::Vector6d& K)
 {
-    _K = K;
-    computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
-    setFilterOmega(_w);
+    bool ok = true;
+    for(unsigned int i = 0; i < 6; ++i)
+    {
+        if(K[i] <= 0.0)
+        {
+            ok = false;
+            XBot::Logger::error("K[%d] <= 0.0 \n", i);
+        }
+    }
+    if(ok)
+    {
+        if(computeParameters(K, _D, _lambda, _dt, _C, _M, _w))
+        {
+            _K = K;
+            setFilterOmega(_w);
+        }
+    }
 }
 
 const Eigen::Matrix6d& CartesianAdmittance::getDamping()
@@ -167,32 +187,107 @@ const Eigen::Matrix6d& CartesianAdmittance::getDamping()
 
 void CartesianAdmittance::setDamping(const Eigen::Vector6d& D)
 {
-    _D = D;
-    computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
-    setFilterOmega(_w);
+    bool ok = true;
+    for(unsigned int i = 0; i < 6; ++i)
+    {
+        if(D[i] <= 0.0)
+        {
+            ok = false;
+            XBot::Logger::error("D[%d] <= 0.0 \n", i);
+        }
+    }
+    if(ok)
+    {
+        if(computeParameters(_K, D, _lambda, _dt, _C, _M, _w))
+        {
+            _D = D;
+            setFilterOmega(_w);
+        }
+    }
 }
 
 bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda, const double dt,
                                             Eigen::Vector6d& C, Eigen::Vector6d& M, Eigen::Vector6d& w)
 {
+    for(unsigned int i = 0; i < 6; ++i)
+    {
+        if(D[i] <= (lambda*dt)/K[i])
+        {
+            XBot::Logger::error("D[%d] <= (lambda*dt)/K[%d] \n", i, i);
+
+            std::cout<<"D[%d] = "<<D[i]<<std::endl;
+            std::cout<<"(lambda*dt)/K[%d] = "<<(lambda*dt)/K[i]<<std::endl;
+            return false;
+        }
+    }
+
     C = lambda * (K.asDiagonal().inverse()).diagonal();
 
     M = (dt/lambda) * D - ((dt*dt)/lambda) * C;
 
     _tmp_vec6 = C.array()*M.array();
     w = dt*(_tmp_vec6.asDiagonal().inverse()).diagonal();
+
+    return true;
 }
 
 void CartesianAdmittance::setLambda(double lambda)
 {
-    if(lambda >= 0.0)
-        this->_lambda = lambda;
-    computeParameters(_K, _D, _lambda, _dt, _C, _M, _w);
-    setFilterOmega(_w);
+    if(lambda > 0.0 && lambda <= 1.)
+    {
+        if(computeParameters(_K, _D, lambda, _dt, _C, _M, _w))
+        {
+            this->_lambda = lambda;
+            setFilterOmega(_w);
+        }
+    }
+    else
+        XBot::Logger::error("lambda <= 0.0 or lambda > 1.0 \n");
 }
 
 void CartesianAdmittance::setFilterOmega(const Eigen::Vector6d& w)
 {
     for(unsigned int i = 0; i < CHANNELS; ++i)
         _filter.setOmega(w[i], i);
+}
+
+void CartesianAdmittance::setImpedanceParams(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda,
+                                                  const double dt)
+{
+   bool ok = true;
+   for(unsigned int i = 0; i < 6; ++i)
+   {
+       if(D[i] <= 0.0)
+       {
+           ok = false;
+           XBot::Logger::error("D[%d] <= 0.0 \n", i);
+       }
+       if(K[i] <= 0.0)
+       {
+           ok = false;
+           XBot::Logger::error("K[%d] <= 0.0 \n", i);
+       }
+   }
+   if(lambda <= 0.0 && lambda > 1.)
+   {
+       ok = false;
+       XBot::Logger::error("lambda <= 0.0 or lambda > 1.0 \n");
+   }
+   if(dt <= 0.)
+   {
+       ok = false;
+       XBot::Logger::error("time_step filter is negative!");
+   }
+
+   if(ok)
+   {
+        if(computeParameters(K, D, lambda, dt, _C, _M, _w))
+        {
+            this->_lambda = lambda;
+            _D = D;
+            _K = K;
+            _dt = dt;
+            setFilterOmega(_w);
+        }
+   }
 }

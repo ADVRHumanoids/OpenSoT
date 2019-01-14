@@ -139,6 +139,9 @@ namespace OpenSoT {
             */
            void setDamping(const Eigen::Vector6d& D);
 
+           void setImpedanceParams(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda,
+                                   const double dt);
+
            /**
             * @brief computeParameters given user's K, D and lambda, computes M and w
             * @param K user desired Cartesian Stiffness

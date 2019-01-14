@@ -53,16 +53,18 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
                        "left_arm", q, *_model_ptr, "world", ft));
 
     double dt = 0.001;
-    left_arm->setFilterTimeStep(dt);
+    //left_arm->setFilterTimeStep(dt);
 
     double lambda = 0.001;
-    left_arm->setLambda(lambda);
+//    left_arm->setLambda(lambda);
 
     Eigen::Vector6d K; K<<1000., 1000., 1000., 1000., 1000., 1000.;
     Eigen::Vector6d D; D<<10., 10., 10., 10., 10., 10.;
 
-    left_arm->setStiffness(K);
-    left_arm->setDamping(D);
+//    left_arm->setStiffness(K);
+//    left_arm->setDamping(D);
+
+    left_arm->setImpedanceParams(K, D, lambda, dt);
 
     Eigen::Vector6d I; I.setOnes();
 
@@ -81,7 +83,7 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
         _D[i] = left_arm->getDamping()(i,i);
     }
 
-    left_arm->computeParameters(_K, _D, left_arm->getLambda(), left_arm->getFilterTimeStep(), C, M, w);
+    EXPECT_TRUE(left_arm->computeParameters(_K, _D, left_arm->getLambda(), left_arm->getFilterTimeStep(), C, M, w));
 
     std::cout<<"DIRECT PROBLEM"<<std::endl;
     std::cout<<"_C: ["<<_C.transpose()<<"]"<<std::endl;
@@ -128,8 +130,6 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
         EXPECT_NEAR(_C[i], C[i], 1e-3);
         EXPECT_NEAR(_w[i], w[i], 1e-3);
     }
-
-
 
 }
 
