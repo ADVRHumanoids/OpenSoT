@@ -222,21 +222,6 @@
 
                 static OpenSoT::tasks::velocity::Cartesian::Ptr asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
-            public:
-                /**
-                  * this MACRO is necessary because the program terminated on an assertion failure like this one:
-                  *
-                  * my_program: path/to/eigen/Eigen/src/Core/DenseStorage.h:44:
-                  * Eigen::internal::matrix_array<T, Size, MatrixOptions, Align>::internal::matrix_array()
-                  * [with T = double, int Size = 2, int MatrixOptions = 2, bool Align = true]:
-                  * Assertion `(reinterpret_cast<size_t>(array) & (sizemask)) == 0 && "this assertion
-                  * is explained here: http://eigen.tuxfamily.org/dox-devel/group__TopicUnalignedArrayAssert.html
-                  *     READ THIS WEB PAGE !!! ****"' failed.
-                  *
-                  * In particular the solution is suggested in:
-                  *     http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html
-                  **/
-                EIGEN_MAKE_ALIGNED_OPERATOR_NEW
             };
         }
     }
