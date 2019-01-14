@@ -30,11 +30,11 @@ Cartesian::Cartesian(std::string task_id,
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
-    _error()
+    _error(6)
 {
-    _error.setZero();
+    _error.setZero(6);
 
-    _desiredTwist.setZero();
+    _desiredTwist.setZero(6);
 
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
