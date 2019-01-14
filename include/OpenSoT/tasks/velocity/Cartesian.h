@@ -25,6 +25,44 @@
 
  #define WORLD_FRAME_NAME "world"
 
+
+#define OPENSOT_MAKE_ALIGNED_OPERATOR_NEW_NOTHROW(NeedsToAlign) \
+      void* operator new(size_t size, const std::nothrow_t&) EIGEN_NO_THROW { \
+        EIGEN_TRY { return Eigen::internal::conditional_aligned_malloc<NeedsToAlign>(size); } \
+        EIGEN_CATCH (...) { return 0; } \
+      }
+
+#define OPENSOT_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign) \
+      void *operator new(size_t size) { \
+        std::cout<<"DIOOOOOOOOOOOOOOOOOOOOOOOOOOO"<<std::endl; \
+        return Eigen::internal::conditional_aligned_malloc<NeedsToAlign>(size); \
+      } \
+      void *operator new[](size_t size) { \
+        return Eigen::internal::conditional_aligned_malloc<NeedsToAlign>(size); \
+      } \
+      void operator delete(void * ptr) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
+      void operator delete[](void * ptr) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
+      void operator delete(void * ptr, std::size_t /* sz */) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
+      void operator delete[](void * ptr, std::size_t /* sz */) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
+      /* in-place new and delete. since (at least afaik) there is no actual   */ \
+      /* memory allocated we can safely let the default implementation handle */ \
+      /* this particular case. */ \
+      static void *operator new(size_t size, void *ptr) { std::cout<<"DIOOOOOOOOOOOOOOOOOOOOOOOOOOO"<<std::endl; \
+          return ::operator new(size,ptr); } \
+      static void *operator new[](size_t size, void* ptr) { return ::operator new[](size,ptr); } \
+      void operator delete(void * memory, void *ptr) EIGEN_NO_THROW { return ::operator delete(memory,ptr); } \
+      void operator delete[](void * memory, void *ptr) EIGEN_NO_THROW { return ::operator delete[](memory,ptr); } \
+      /* nothrow-new (returns zero instead of std::bad_alloc) */ \
+      OPENSOT_MAKE_ALIGNED_OPERATOR_NEW_NOTHROW(NeedsToAlign) \
+      void operator delete(void *ptr, const std::nothrow_t&) EIGEN_NO_THROW { \
+        Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); \
+      } \
+      typedef void eigen_aligned_operator_new_marker_type;
+
+#define OPENSOT_MAKE_ALIGNED_OPERATOR_NEW OPENSOT_MAKE_ALIGNED_OPERATOR_NEW_IF(true)
+
+
+
 /**
  * @example example_cartesian.cpp
  * The Cartesian class implements a task that tries to impose a pose (position and orientation)
@@ -236,7 +274,7 @@
                   * In particular the solution is suggested in:
                   *     http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html
                   **/
-                EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+                OPENSOT_MAKE_ALIGNED_OPERATOR_NEW
             };
         }
     }
