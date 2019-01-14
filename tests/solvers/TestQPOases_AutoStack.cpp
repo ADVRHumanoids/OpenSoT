@@ -1,23 +1,14 @@
-#include <idynutils/idynutils.h>
-#include <idynutils/tests_utils.h>
-#include <idynutils/comanutils.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/constraints/Aggregated.h>
-#include <OpenSoT/constraints/velocity/all.h>
-#include <OpenSoT/solvers/QPOases.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <OpenSoT/tasks/velocity/all.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/utils/DefaultHumanoidStack.h>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
+#include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <fstream>
 
-
-using namespace yarp::math;
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -47,97 +38,117 @@ protected:
     }
 };
 
-yarp::sig::Vector getGoodInitialPosition(iDynUtils& idynutils) {
-    yarp::sig::Vector q(idynutils.iDyn3_model.getNrOfDOFs(), 0.0);
-    yarp::sig::Vector leg(idynutils.left_leg.getNrOfDOFs(), 0.0);
-    leg[0] = -25.0 * M_PI/180.0;
-    leg[3] =  50.0 * M_PI/180.0;
-    leg[5] = -25.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(leg, q, idynutils.left_leg);
-    idynutils.fromRobotToIDyn(leg, q, idynutils.right_leg);
-    yarp::sig::Vector arm(idynutils.left_arm.getNrOfDOFs(), 0.0);
-    arm[0] = 20.0 * M_PI/180.0;
-    arm[1] = 10.0 * M_PI/180.0;
-    arm[3] = -80.0 * M_PI/180.0;
-    idynutils.fromRobotToIDyn(arm, q, idynutils.left_arm);
-    arm[1] = -arm[1];
-    idynutils.fromRobotToIDyn(arm, q, idynutils.right_arm);
-    return q;
+Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface& _model_ptr) {
+    Eigen::VectorXd _q(_model_ptr.getJointNum());
+    _q[_model_ptr.getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+    _q[_model_ptr.getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+    _q[_model_ptr.getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("LShYaw")] = -10.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+
+    _q[_model_ptr.getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("RShYaw")] = 10.0*M_PI/180.0;
+    _q[_model_ptr.getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+
+    return _q;
 }
+
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
 
 TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
 {
-    iDynUtils model("coman",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-    yarp::sig::Vector q, dq;
-    q = getGoodInitialPosition(model);
-    dq = q; q.zero();
-    model.updateiDyn3Model(q,true);
-    OpenSoT::DefaultHumanoidStack DHS(model, 1e-3, cartesian_utils::toEigen(q));
+    XBot::ModelInterface::Ptr model = XBot::ModelInterface::getModel(_path_to_cfg);
 
-    OpenSoT::AutoStack::Ptr subTaskTest = (DHS.leftArm / DHS.postural)
-                                            << DHS.jointLimits << DHS.velocityLimits;
-    OpenSoT::solvers::QPOases_sot::Ptr solver(
-        new OpenSoT::solvers::QPOases_sot(subTaskTest->getStack(), subTaskTest->getBounds()));
-    yarp::sig::Matrix actualPose = cartesian_utils::fromEigentoYarp(DHS.leftArm->getActualPose());
-    yarp::sig::Matrix desiredPose = actualPose; desiredPose(0,3) = actualPose(0,3)+0.1;
+    Eigen::VectorXd q, dq;
+    q = getGoodInitialPosition(*model);
+    dq = q; dq.setZero(dq.size());
+
+    model->setJointPosition(q);
+    model->update();
+
+    OpenSoT::DefaultHumanoidStack::Ptr DHS;
+    DHS.reset(new OpenSoT::DefaultHumanoidStack(*model,
+          3e-3,
+          "Waist",
+          "LSoftHand", "RSoftHand",
+          "l_sole", "r_sole", 0.3,
+          q));
+
+    OpenSoT::AutoStack::Ptr subTaskTest = (DHS->leftArm / DHS->postural)
+                                            << DHS->jointLimits << DHS->velocityLimits;
+    OpenSoT::solvers::iHQP::Ptr solver(
+        new OpenSoT::solvers::iHQP(subTaskTest->getStack(), subTaskTest->getBounds(),1e6));
+
+
+
+    Eigen::MatrixXd actualPose = DHS->leftArm->getActualPose();
+    Eigen::MatrixXd desiredPose = actualPose;
+    desiredPose(0,3) = actualPose(0,3)+0.1;
 
     unsigned int iterations = 10000;
-    while(sqrt(DHS.leftArm->getb().squaredNorm()) > 1e-4 && iterations > 0)
+    while(sqrt(DHS->leftArm->getb().squaredNorm()) > 1e-4 && iterations > 0)
     {
-        double oldBoundsNorm = sqrt(DHS.jointLimits->getbLowerBound().squaredNorm());
-        model.updateiDyn3Model(q, true);
-        subTaskTest->update(model.getAng());
+        double oldBoundsNorm = sqrt(DHS->jointLimits->getbLowerBound().squaredNorm());
 
-        if(yarp::math::norm(dq) > 1e-3)
-            EXPECT_NE(oldBoundsNorm,sqrt(DHS.jointLimits->getbLowerBound().squaredNorm()));
+        model->setJointPosition(q);
+        model->update();
 
-        Eigen::VectorXd _dq(dq.size()); _dq.setZero(dq.size());
-        ASSERT_TRUE(solver->solve(_dq));
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        subTaskTest->update(q);
+
+        if(dq.norm() > 1e-3)
+            EXPECT_NE(oldBoundsNorm,sqrt(DHS->jointLimits->getbLowerBound().squaredNorm()));
+
+        ASSERT_TRUE(solver->solve(dq));
         q += dq;
     }
 
-    ASSERT_TRUE(sqrt(DHS.leftArm->getb().squaredNorm()) <= 1e-4);
+    ASSERT_TRUE(sqrt(DHS->leftArm->getb().squaredNorm()) <= 1e-4);
 }
 
 TEST_F(testQPOases_AutoStack, testComplexAutoStack)
 {
-    iDynUtils model("coman",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                    std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
-    yarp::sig::Vector q, dq;
-    q = getGoodInitialPosition(model);
-    dq = q; dq.zero();
-    model.updateiDyn3Model(q,true);
+    XBot::ModelInterface::Ptr model = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd q, dq;
+    q = getGoodInitialPosition(*model);
+    dq = q; dq.setZero(dq.size());
+
+    model->setJointPosition(q);
+    model->update();
 
     OpenSoT::tasks::velocity::Cartesian::Ptr r_leg(new OpenSoT::tasks::velocity::Cartesian(
                                                        "6d::r_leg",
-                                                       cartesian_utils::toEigen(q),model,"r_sole", "world"));
+                                                       q,*model,"r_sole", "world"));
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm(new OpenSoT::tasks::velocity::Cartesian(
                                                        "6d::l_arm",
-                                                       cartesian_utils::toEigen(q),model,"LSoftHand", "world"));
-    yarp::sig::Matrix l_arm_ref = cartesian_utils::fromEigentoYarp(l_arm->getActualPose());
+                                                       q,*model,"LSoftHand", "world"));
+    Eigen::MatrixXd l_arm_ref = l_arm->getActualPose();
     l_arm_ref(2,3) += 0.1;
-    l_arm->setReference(cartesian_utils::toEigen(l_arm_ref));
+    l_arm->setReference(l_arm_ref);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr r_arm(new OpenSoT::tasks::velocity::Cartesian(
                                                        "6d::r_arm",
-                                                       cartesian_utils::toEigen(q),model,"RSoftHand", "world"));
-    yarp::sig::Matrix r_arm_ref = cartesian_utils::fromEigentoYarp(r_arm->getActualPose());
+                                                       q,*model,"RSoftHand", "world"));
+    Eigen::MatrixXd r_arm_ref = r_arm->getActualPose();
     r_arm_ref(2,3) += 0.1;
-    r_arm->setReference(cartesian_utils::toEigen(r_arm_ref));
+    r_arm->setReference(r_arm_ref);
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(
-                                                         cartesian_utils::toEigen(q)));
+    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(q));
 
-    Eigen::VectorXd joint_bound_max = model.getJointBoundMax();
-    Eigen::VectorXd joint_bound_min = model.getJointBoundMin();
+    Eigen::VectorXd joint_bound_max, joint_bound_min;
+    model->getJointLimits(joint_bound_min, joint_bound_max);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_bounds(
         new OpenSoT::constraints::velocity::JointLimits(
-                    cartesian_utils::toEigen(q), joint_bound_max, joint_bound_min));
+                    q, joint_bound_max, joint_bound_min));
 
     double sot_speed_limit = 0.5;
     double dT = 0.001;
@@ -147,9 +158,19 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
             dT,
             q.size()));
 
+
+    std::list<std::string> _links_in_contact;
+    _links_in_contact.push_back("l_foot_lower_left_link");
+    _links_in_contact.push_back("l_foot_lower_right_link");
+    _links_in_contact.push_back("l_foot_upper_left_link");
+    _links_in_contact.push_back("l_foot_upper_right_link");
+    _links_in_contact.push_back("r_foot_lower_left_link");
+    _links_in_contact.push_back("r_foot_lower_right_link");
+    _links_in_contact.push_back("r_foot_upper_left_link");
+    _links_in_contact.push_back("r_foot_upper_right_link");
+
     OpenSoT::constraints::velocity::ConvexHull::Ptr convex_hull_constraint(
-                new OpenSoT::constraints::velocity::ConvexHull(
-                    cartesian_utils::toEigen(q), model, 0.02));
+                new OpenSoT::constraints::velocity::ConvexHull(q, *model, _links_in_contact, 0.02));
 
     OpenSoT::AutoStack::Ptr AutoStack = (((r_leg)<<convex_hull_constraint)/
                                          ((l_arm+r_arm)<<convex_hull_constraint)/
@@ -161,10 +182,11 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
        different from that of line #134, the update(q_new) would have been necessary */
     // AutoStack->getBounds()->update(q);
 
-    OpenSoT::solvers::QPOases_sot::Ptr solver(
-        new OpenSoT::solvers::QPOases_sot(AutoStack->getStack(), AutoStack->getBounds()));
+    OpenSoT::solvers::iHQP::Ptr solver(
+        new OpenSoT::solvers::iHQP(AutoStack->getStack(), AutoStack->getBounds(), 1e6));
 
-    typedef OpenSoT::solvers::QPOases_sot::Stack::iterator it_stack;
+
+    typedef OpenSoT::solvers::iHQP::Stack::iterator it_stack;
     for(it_stack i0 = AutoStack->getStack().begin();
         i0 != AutoStack->getStack().end(); ++i0)
     {
@@ -174,12 +196,11 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
     unsigned int iterations = 5000;
     for(unsigned int i = 0; i < iterations; ++i)
     {
-        model.updateiDyn3Model(q, true);
-        AutoStack->update(cartesian_utils::toEigen(q));
+        model->setJointPosition(q);
+        model->update();
+        AutoStack->update(q);
 
-        Eigen::VectorXd _dq(q.size()); _dq.setZero(q.size());
-        ASSERT_TRUE(solver->solve(_dq));
-        dq = cartesian_utils::fromEigentoYarp(_dq);
+        ASSERT_TRUE(solver->solve(dq));
         q += dq;
     }
 
