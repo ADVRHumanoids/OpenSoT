@@ -67,6 +67,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_SubTask
                   testQPOases_FF
                   testQPOases_ConvexHull
+                  testQPOases_AutoStack
                   testConvexHullVelocityConstraint
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
@@ -128,7 +129,7 @@ endif()
                       
                       
                       
-#                      testQPOases_AutoStack
+#
 #                      testQPOases_CartesianPositionConstraint
 
                       
