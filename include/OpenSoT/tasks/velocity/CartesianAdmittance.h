@@ -57,24 +57,6 @@ namespace OpenSoT {
            void getCartesianCompliance(Eigen::Matrix6d& C);
 
            /**
-            * @brief setFilterTimeStep
-            * @param time_step of the filter
-            */
-           void setFilterTimeStep(const double time_step);
-
-           /**
-            * @brief getFilterTimeStep
-            * @return
-            */
-           double getFilterTimeStep();
-
-           /**
-            * @brief setFilterDamping
-            * @param damping of the filter
-            */
-           void setFilterDamping(const double damping);
-
-           /**
             * @brief setWrenchReference set the desired wrench at the controlled distal_link
             * @param wrench
             */
@@ -122,25 +104,51 @@ namespace OpenSoT {
            const Eigen::Matrix6d& getStiffness();
 
            /**
-            * @brief setStiffness
-            * @param K Cartesian Stiffness
-            */
-           void setStiffness(const Eigen::Vector6d& K);
-
-           /**
             * @brief getDamping
             * @return actual Cartesian Damping
             */
            const Eigen::Matrix6d& getDamping();
-
+           
+           void setFilterTimeStep(const double time_step);
+           
+           double getFilterTimeStep();
+           
+           void setFilterDamping(const double damping);
+           
            /**
-            * @brief setDamping
-            * @param D Cartesian Damping
-            */
-           void setDamping(const Eigen::Vector6d& D);
-
-           void setImpedanceParams(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda,
+           * @brief Set impedance parameters to be emulated via admittance control.
+           * Stiffness and lambda MUST BE POSITIVE!
+           * Higher values of lambda will make the robot feel lighter, but 
+           * will also destabilize the system.
+           * 
+           * @param K Stiffness
+           * @param D Damping
+           * @param lambda Lambda
+           * @param dt Control period
+           */
+           void setImpedanceParams(const Eigen::Vector6d& K, 
+                                   const Eigen::Vector6d& D, 
+                                   const double lambda,
                                    const double dt);
+           
+           /**
+           * @brief Set internal controller parameters implemeting
+           * the law: 
+           * 
+           *    dx = lambda*(xd-x)+C*F_filt*dt
+           *    F_filt = 1 / (1 + s/omega) * F
+           * 
+           * @param C compliance 
+           * @param omega filter cutoff
+           * @param lambda position feedback
+           * @param dt control period
+           */
+           bool setRawParams(const Eigen::Vector6d& C, 
+                             const Eigen::Vector6d& omega, 
+                             const double lambda,
+                             const double dt);
+           
+           bool setDeadZone(const Eigen::Vector6d& dead_zone_amplitude);
 
            /**
             * @brief computeParameters given user's K, D and lambda, computes M and w
@@ -153,16 +161,24 @@ namespace OpenSoT {
             * @param w filter params \f$ \mathbf{w} = dt\left( \mathbf{CM} \right)^{-1} \f$
             * @return true
             */
-           bool computeParameters(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda, const double dt,
-                                  Eigen::Vector6d& C, Eigen::Vector6d& M, Eigen::Vector6d& w);
+           bool computeParameters(const Eigen::Vector6d& K, 
+                                  const Eigen::Vector6d& D, 
+                                  const double lambda, 
+                                  const double dt,
+                                  Eigen::Vector6d& C, 
+                                  Eigen::Vector6d& M, 
+                                  Eigen::Vector6d& w);
 
-           void setLambda(double lambda);
 
          private:
+             
+           void apply_deadzone(Eigen::Vector6d& data);
+             
            Eigen::Vector6d _wrench_reference;
            Eigen::Vector6d _wrench_measured;
            Eigen::Vector6d _wrench_filt;
            Eigen::Vector6d _wrench_error;
+           Eigen::Vector6d _deadzone;
            std::vector<double> _tmp;
 
            void _update(const Eigen::VectorXd& x);

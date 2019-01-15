@@ -13,6 +13,8 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
     _ft_sensor(ft_sensor),
     _filter(CHANNELS)
 {
+    _deadzone.setZero();
+    
     _wrench_reference.setZero();
     _wrench_measured.setZero();
     _wrench_filt.setZero();
@@ -53,6 +55,8 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
 
     Eigen::Vector6d::Map(&_tmp[0], CHANNELS) = _wrench_error;
     _wrench_filt = Eigen::Vector6d::Map(_filter.process(_tmp).data(), CHANNELS);
+    
+    apply_deadzone(_wrench_error);
 
     _desiredTwist = _C.asDiagonal()*_wrench_filt;
 
@@ -158,56 +162,21 @@ const Eigen::Matrix6d& CartesianAdmittance::getStiffness()
     return _tmp_mat6;
 }
 
-void CartesianAdmittance::setStiffness(const Eigen::Vector6d& K)
-{
-    bool ok = true;
-    for(unsigned int i = 0; i < 6; ++i)
-    {
-        if(K[i] <= 0.0)
-        {
-            ok = false;
-            XBot::Logger::error("K[%d] <= 0.0 \n", i);
-        }
-    }
-    if(ok)
-    {
-        if(computeParameters(K, _D, _lambda, _dt, _C, _M, _w))
-        {
-            _K = K;
-            setFilterOmega(_w);
-        }
-    }
-}
-
 const Eigen::Matrix6d& CartesianAdmittance::getDamping()
 {
     _tmp_mat6 = _D.asDiagonal();
     return _tmp_mat6;
 }
 
-void CartesianAdmittance::setDamping(const Eigen::Vector6d& D)
-{
-    bool ok = true;
-    for(unsigned int i = 0; i < 6; ++i)
-    {
-        if(D[i] <= 0.0)
-        {
-            ok = false;
-            XBot::Logger::error("D[%d] <= 0.0 \n", i);
-        }
-    }
-    if(ok)
-    {
-        if(computeParameters(_K, D, _lambda, _dt, _C, _M, _w))
-        {
-            _D = D;
-            setFilterOmega(_w);
-        }
-    }
-}
 
-bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda, const double dt,
-                                            Eigen::Vector6d& C, Eigen::Vector6d& M, Eigen::Vector6d& w)
+
+bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K, 
+                                            const Eigen::Vector6d& D, 
+                                            const double lambda, 
+                                            const double dt,
+                                            Eigen::Vector6d& C, 
+                                            Eigen::Vector6d& M, 
+                                            Eigen::Vector6d& w)
 {
     for(unsigned int i = 0; i < 6; ++i)
     {
@@ -231,28 +200,12 @@ bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K, const Eige
     return true;
 }
 
-void CartesianAdmittance::setLambda(double lambda)
-{
-    if(lambda > 0.0 && lambda <= 1.)
-    {
-        if(computeParameters(_K, _D, lambda, _dt, _C, _M, _w))
-        {
-            this->_lambda = lambda;
-            setFilterOmega(_w);
-        }
-    }
-    else
-        XBot::Logger::error("lambda <= 0.0 or lambda > 1.0 \n");
-}
 
-void CartesianAdmittance::setFilterOmega(const Eigen::Vector6d& w)
-{
-    for(unsigned int i = 0; i < CHANNELS; ++i)
-        _filter.setOmega(w[i], i);
-}
 
-void CartesianAdmittance::setImpedanceParams(const Eigen::Vector6d& K, const Eigen::Vector6d& D, const double lambda,
-                                                  const double dt)
+void CartesianAdmittance::setImpedanceParams(const Eigen::Vector6d& K, 
+                                             const Eigen::Vector6d& D, 
+                                             const double lambda,
+                                             const double dt)
 {
    bool ok = true;
    for(unsigned int i = 0; i < 6; ++i)
@@ -291,3 +244,75 @@ void CartesianAdmittance::setImpedanceParams(const Eigen::Vector6d& K, const Eig
         }
    }
 }
+
+bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Vector6d& C, 
+                                                                 const Eigen::Vector6d& omega, 
+                                                                 const double lambda, 
+                                                                 const double dt)
+{
+    if((C.array() < 0).any())
+    {
+        return false;
+    }
+    
+    if((omega.array() < 0).any())
+    {
+        return false;
+    }
+    
+    if(lambda < 0 || lambda > 1)
+    {
+        return false;
+    }
+    
+    if(dt < 0)
+    {
+        return false;
+    }
+    
+    _C = C;
+    setFilterOmega(omega);
+    setFilterTimeStep(dt);
+    _lambda = lambda;
+    
+    
+    return true;
+}
+
+void CartesianAdmittance::setFilterOmega(const Eigen::Vector6d& w)
+{
+    for(unsigned int i = 0; i < CHANNELS; ++i)
+        _filter.setOmega(w[i], i);
+}
+
+void CartesianAdmittance::apply_deadzone(Eigen::Vector6d& data)
+{
+    for(int i = 0; i < 6; i++)
+    {
+        if(data[i] > _deadzone[i])
+        {
+            data[i] -= _deadzone[i];
+        }
+        else if(data[i] < -_deadzone[i])
+        {
+            data[i] += _deadzone[i];
+        }
+        else
+        {
+            data[i] = 0.0;
+        }
+    }
+}
+
+bool OpenSoT::tasks::velocity::CartesianAdmittance::setDeadZone(const Eigen::Vector6d& dead_zone_amplitude)
+{
+    if((dead_zone_amplitude.array() < 0).any())
+    {
+        return false;
+    }
+    
+    _deadzone = dead_zone_amplitude;
+    return true;
+}
+
+
