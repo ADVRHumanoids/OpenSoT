@@ -136,7 +136,7 @@ endif()
                       
 #                      testQPOases_PriorityInversion
 #                      testQPOases_SelfCollisionAvoidance
-#                      testQPOases_Sparse
+
 
 #                      testQPOases_VelocityAllocation
 
@@ -144,12 +144,6 @@ endif()
                       
 #                      testGazeVelocityTask
 
-                      
-                      
-                      
-                      
-                      
-#                      testDefaultHumanoidStack
 #                      testLogger
 
 #                      testVelocityAllocation
@@ -463,10 +457,6 @@ add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 #    add_dependencies(testGazeVelocityTask GTest-ext OpenSoT)
 
 
-#    ADD_EXECUTABLE(testDefaultHumanoidStack utils/TestDefaultHumanoidStack.cpp)
-#    TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
-#    add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
-
 #    ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
 #    TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 #    add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
@@ -489,7 +479,7 @@ add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 
 #    add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 
-#    add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
+
 #    add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 
