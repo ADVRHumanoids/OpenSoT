@@ -16,21 +16,11 @@
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
-#include <yarp/math/Math.h>
-#include <yarp/sig/all.h>
 #include <fstream>
-#include <advr_humanoids_common_utils/conversion_utils_YARP.h>
-#include <ModelInterfaceIDYNUTILS/ModelInterfaceIDYNUTILS.h>
-
-
-using namespace yarp::math;
-
-typedef idynutils2 iDynUtils;
-static void null_deleter(iDynUtils *) {}
-
+#include <OpenSoT/utils/AutoStack.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman.yaml";
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = robotology_root + relative_path;
 
 #define GREEN "\033[0;32m"
@@ -38,14 +28,14 @@ std::string _path_to_cfg = robotology_root + relative_path;
 
 namespace {
 
-void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
-                              const yarp::sig::Vector& b_ch,
+void getPointsFromConstraints(const Eigen::MatrixXd &A_ch,
+                              const Eigen::VectorXd& b_ch,
                               std::vector<KDL::Vector>& points) {
     unsigned int nRects = A_ch.rows();
 
     std::cout << "Computing intersection points between " << nRects << " lines" << std::endl;
-    std::cout << "A:" << A_ch.toString() << std::endl;
-    std::cout << "b:" << b_ch.toString() << std::endl;
+    std::cout << "A:" << A_ch << std::endl;
+    std::cout << "b:" << b_ch << std::endl;
     for(unsigned int j = 0; j < nRects; ++j) {
         int i;
 
@@ -72,24 +62,24 @@ void getPointsFromConstraints(const yarp::sig::Matrix &A_ch,
     }
 }
 
-bool solveQP(   const yarp::sig::Matrix &J0,
-                const yarp::sig::Vector &e0,
-                const yarp::sig::Matrix &J1,
-                const yarp::sig::Vector &eq,
+bool solveQP(   const Eigen::MatrixXd &J0,
+                const Eigen::VectorXd &e0,
+                const Eigen::MatrixXd &J1,
+                const Eigen::VectorXd &eq,
                 qpOASES::HessianType t1HessianType,
-                const yarp::sig::Vector &l,
-                const yarp::sig::Vector &u,
-                const yarp::sig::Vector &q,
-                yarp::sig::Vector &dq_ref)
+                const Eigen::VectorXd &l,
+                const Eigen::VectorXd &u,
+                const Eigen::VectorXd &q,
+                Eigen::VectorXd &dq_ref)
 {
     int nj = q.size();
 
     static bool initial_guess = false;
 
-    static yarp::sig::Vector dq0(nj, 0.0);
-    static yarp::sig::Vector dq1(nj, 0.0);;
-    static yarp::sig::Vector y0(nj, 0.0);
-    static yarp::sig::Vector y1(nj, 0.0);
+    static Eigen::VectorXd dq0(nj); dq0.setZero(nj);
+    static Eigen::VectorXd dq1(nj); dq1.setZero(nj);
+    static Eigen::VectorXd y0(nj); y0.setZero(nj);
+    static Eigen::VectorXd y1(nj); y1.setZero(nj);
 
     static qpOASES::Bounds bounds0;
     static qpOASES::Bounds bounds1;
@@ -112,11 +102,11 @@ bool solveQP(   const yarp::sig::Matrix &J0,
 
     int njTask0 = J0.rows();
 
-    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
+    Eigen::MatrixXd H0 = J0.transpose()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g0 = -1.0*J0.transpose()*e0;
 
-    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
+    Eigen::MatrixXd H1 = J1.transpose()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g1 = -1.0*J1.transpose()*eq;
 
     USING_NAMESPACE_QPOASES
 
@@ -183,10 +173,10 @@ bool solveQP(   const yarp::sig::Matrix &J0,
     else
     {
         /** Solve first QP. **/
-        yarp::sig::Matrix A1 = J0;
-        yarp::sig::Vector b1 = J0*dq0;
-        yarp::sig::Vector lA1 = b1;
-        yarp::sig::Vector uA1 = b1;
+        Eigen::MatrixXd A1 = J0;
+        Eigen::VectorXd b1 = J0*dq0;
+        Eigen::VectorXd lA1 = b1;
+        Eigen::VectorXd uA1 = b1;
 
         nWSR = 132;
 
@@ -237,28 +227,28 @@ bool solveQP(   const yarp::sig::Matrix &J0,
     return false;
 }
 
-bool solveQPrefactor(   const yarp::sig::Matrix &J0,
-                        const yarp::sig::Vector &e0,
-                        const yarp::sig::Matrix &J1,
-                        const yarp::sig::Vector &eq,
+bool solveQPrefactor(   const Eigen::MatrixXd &J0,
+                        const Eigen::VectorXd &e0,
+                        const Eigen::MatrixXd &J1,
+                        const Eigen::VectorXd &eq,
                         OpenSoT::HessianType t1HessianType,
-                        const yarp::sig::Vector &u,
-                        const yarp::sig::Vector &l,
-                        const yarp::sig::Vector &q,
-                        yarp::sig::Vector &dq_ref)
+                        const Eigen::VectorXd &u,
+                        const Eigen::VectorXd &l,
+                        const Eigen::VectorXd &q,
+                        Eigen::VectorXd &dq_ref)
 {
     int nj = q.size();
 
     int njTask0 = J0.rows();
 
-    yarp::sig::Matrix H0 = J0.transposed()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g0 = -1.0*J0.transposed()*e0;
+    Eigen::MatrixXd H0 = J0.transpose()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g0 = -1.0*J0.transpose()*e0;
 
-    yarp::sig::Matrix H1 = J1.transposed()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    yarp::sig::Vector g1 = -1.0*J1.transposed()*eq;
+    Eigen::MatrixXd H1 = J1.transpose()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
+    Eigen::VectorXd g1 = -1.0*J1.transpose()*eq;
 
-    yarp::sig::Matrix A0(0,nj);
-    yarp::sig::Vector lA0(0), uA0(0);
+    Eigen::MatrixXd A0(0,nj);
+    Eigen::VectorXd lA0(0), uA0(0);
 
     USING_NAMESPACE_QPOASES
 
@@ -267,63 +257,37 @@ bool solveQPrefactor(   const yarp::sig::Matrix &J0,
     static bool result0 = false;
     static bool isQProblemInitialized0 = false;
     if(!isQProblemInitialized0){
-        result0 = qp0.initProblem(
-                    conversion_utils_YARP::toEigen(H0),
-                    conversion_utils_YARP::toEigen(g0),
-                    conversion_utils_YARP::toEigen(A0),
-                    conversion_utils_YARP::toEigen(lA0),
-                    conversion_utils_YARP::toEigen(uA0),
-                    conversion_utils_YARP::toEigen(l),
-                    conversion_utils_YARP::toEigen(u));
+        result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
         isQProblemInitialized0 = true;}
     else
     {
-        qp0.updateProblem(conversion_utils_YARP::toEigen(H0),
-                          conversion_utils_YARP::toEigen(g0),
-                          conversion_utils_YARP::toEigen(A0),
-                          conversion_utils_YARP::toEigen(lA0),
-                          conversion_utils_YARP::toEigen(uA0),
-                          conversion_utils_YARP::toEigen(l),
-                          conversion_utils_YARP::toEigen(u));
+        qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
         result0 = qp0.solve();
     }
 
     if(result0)
     {
-        yarp::sig::Vector dq0 = conversion_utils_YARP::toYARP(qp0.getSolution());
-        yarp::sig::Matrix A1 = J0;
-        yarp::sig::Vector b1 = J0*dq0;
-        yarp::sig::Vector lA1 = b1;
-        yarp::sig::Vector uA1 = b1;
+        Eigen::VectorXd dq0 = qp0.getSolution();
+        Eigen::MatrixXd A1 = J0;
+        Eigen::VectorXd b1 = J0*dq0;
+        Eigen::VectorXd lA1 = b1;
+        Eigen::VectorXd uA1 = b1;
 
         static OpenSoT::solvers::QPOasesBackEnd qp1(nj, njTask0, t1HessianType);
         qp1.setnWSR(127);
         static bool result1 = false;
         static bool isQProblemInitialized1 = false;
         if(!isQProblemInitialized1){
-            result1 = qp1.initProblem(
-                        conversion_utils_YARP::toEigen(H1),
-                        conversion_utils_YARP::toEigen(g1),
-                        conversion_utils_YARP::toEigen(A1),
-                        conversion_utils_YARP::toEigen(lA1),
-                        conversion_utils_YARP::toEigen(uA1),
-                        conversion_utils_YARP::toEigen(l),
-                        conversion_utils_YARP::toEigen(u));
+            result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
             isQProblemInitialized1 = true;}
         else
         {
-            qp1.updateProblem(conversion_utils_YARP::toEigen(H1),
-                              conversion_utils_YARP::toEigen(g1),
-                              conversion_utils_YARP::toEigen(A1),
-                              conversion_utils_YARP::toEigen(lA1),
-                              conversion_utils_YARP::toEigen(uA1),
-                              conversion_utils_YARP::toEigen(l),
-                              conversion_utils_YARP::toEigen(u));
+            qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
             result1 = qp1.solve();
         }
         if(result1)
         {
-            dq_ref = conversion_utils_YARP::toYARP(qp1.getSolution());
+            dq_ref = qp1.getSolution();
             return true;
         }
         else
@@ -369,27 +333,28 @@ protected:
     }
 };
 
-yarp::sig::Vector getGoodInitialPosition(iDynUtils& _robot) {
-    yarp::sig::Vector q(_robot.iDynTree_model.getNrOfDOFs(), 0.0);
+Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface& _robot) {
+    Eigen::VectorXd q(_robot.getJointNum());
+    q.setZero(q.size());
 
-    q[_robot.iDynTree_model.getDOFIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    q[_robot.iDynTree_model.getDOFIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    q[_robot.iDynTree_model.getDOFIndex("LShSag")] =  20.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LShLat")] = 10.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("LElbj")] = -80.0*M_PI/180.0;
+    q[_robot.getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[_robot.getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[_robot.getDofIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    q[_robot.iDynTree_model.getDOFIndex("RShSag")] =  20.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RShLat")] = -10.0*M_PI/180.0;
-    q[_robot.iDynTree_model.getDOFIndex("RElbj")] = -80.0*M_PI/180.0;
+    q[_robot.getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[_robot.getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+    q[_robot.getDofIndex("RElbj")] = -80.0*M_PI/180.0;
 
 
-    std::cout << "Q_initial: " << q.toString() << std::endl;
+    std::cout << "Q_initial: " << q << std::endl;
     return q;
 }
 
@@ -398,20 +363,10 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     useFootTaskOrConstraint footStrategy = GetParam();
 
-#ifdef TRY_ON_SIMULATOR
-    yarp::os::Network init;
-    ComanUtils robot("tryFollowingBounds");
-#endif
 
-    iDynUtils idynutils_com("coman",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.urdf",
-                            std::string(OPENSOT_TESTS_ROBOTS_DIR)+"coman/coman.srdf");
 
-    XBot::ModelInterfaceIDYNUTILS::Ptr _model_ptr_com;
-    _model_ptr_com = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
-            (XBot::ModelInterface::getModel(_path_to_cfg));
-    _model_ptr_com->loadModel(boost::shared_ptr<iDynUtils>(&idynutils_com, &null_deleter));
-
+    XBot::ModelInterface::Ptr _model_ptr_com;
+    _model_ptr_com = XBot::ModelInterface::getModel(_path_to_cfg);
     if(_model_ptr_com)
         std::cout<<"pointer address: "<<_model_ptr_com.get()<<std::endl;
     else
@@ -419,28 +374,32 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
 
-    yarp::sig::Vector q = getGoodInitialPosition(idynutils_com);
-    idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
-    idynutils_com.switchAnchorAndFloatingBase("l_sole");
+    Eigen::VectorXd q = getGoodInitialPosition(*_model_ptr_com);
+    _model_ptr_com->setJointPosition(q);
+    _model_ptr_com->update();
 
-#ifdef TRY_ON_SIMULATOR
-    robot.setPositionDirectMode();
-    robot.move(q);
-    yarp::os::Time::delay(3);
-#endif
+    Eigen::Affine3d waist_T_lsole, fb_T_lsole;
+    _model_ptr_com->getPose("Waist", "l_sole", waist_T_lsole);
+    fb_T_lsole.setIdentity();
+    fb_T_lsole.translation()[0] = waist_T_lsole.translation()[0];
+    fb_T_lsole.translation()[2] = waist_T_lsole.translation()[2];
+    std::cout<<"fb_T_lsole: "<<fb_T_lsole.matrix()<<std::endl;
+    _model_ptr_com->setFloatingBasePose(fb_T_lsole);
+    _model_ptr_com->update();
+    _model_ptr_com->getJointPosition(q);
 
     // BOUNDS
+    Eigen::VectorXd qmin, qmax;
+    _model_ptr_com->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(
-                    conversion_utils_YARP::toEigen(q),
-                        idynutils_com.getJointBoundMax(),
-                        idynutils_com.getJointBoundMin()));
+            new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
 
+    Eigen::VectorXd qdotmax(q.size()); qdotmax.setOnes(q.size());
+    qdotmax *= 0.3;
+    qdotmax.segment(0,6)<<100.,100.,100.,100.,100.,100.;
     OpenSoT::constraints::Aggregated::ConstraintPtr velocityLimits(
-            new OpenSoT::constraints::velocity::VelocityLimits(0.3,
-                                                               3e-3,
-                                                               q.size()));
+            new OpenSoT::constraints::velocity::VelocityLimits(qdotmax, 3e-3));
 
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
@@ -452,18 +411,17 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                 new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
 
     OpenSoT::tasks::velocity::CoM::Ptr com_task(
-                new OpenSoT::tasks::velocity::CoM(
-                    conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get())));
+                new OpenSoT::tasks::velocity::CoM(q, *(_model_ptr_com.get())));
     com_task->setLambda(.6);
 
-    yarp::sig::Matrix W(3,3);
-    W.eye(); W(2,2) = .1;
-    com_task->setWeight(conversion_utils_YARP::toEigen(W));
+    Eigen::Matrix3d W;
+    W.setIdentity(); W(2,2) = .1;
+    com_task->setWeight(W);
 
     OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
                 new OpenSoT::constraints::velocity::CoMVelocity(
-                    conversion_utils_YARP::toEigen(yarp::sig::Vector(3, 0.05)), 0.004 ,
-                    conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get())));
+                    Eigen::Vector3d(0.05, 0.05, 0.05), 0.004 ,
+                    q, *(_model_ptr_com.get())));
     com_task->getConstraints().push_back(boundsCoMVelocity);
 
     std::list<std::string> _links_in_contact;
@@ -480,21 +438,27 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     OpenSoT::constraints::velocity::ConvexHull::Ptr boundsConvexHull(
                 new OpenSoT::constraints::velocity::ConvexHull(
-                    conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get()),
+                    q, *(_model_ptr_com.get()),
                     _links_in_contact, 0.01));
     com_task->getConstraints().push_back(boundsConvexHull);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr right_foot_task(
-                new OpenSoT::tasks::velocity::Cartesian("world::right_foot",
-                                                        conversion_utils_YARP::toEigen(q), *(_model_ptr_com.get()),
+                new OpenSoT::tasks::velocity::Cartesian("world::right_foot",q , *(_model_ptr_com.get()),
                                                         "r_sole",
                                                         "world"));
     right_foot_task->setLambda(.2);
     right_foot_task->setOrientationErrorGain(.1);
 
+    OpenSoT::tasks::velocity::Cartesian::Ptr left_foot_task(
+                new OpenSoT::tasks::velocity::Cartesian("world::left_foot",q , *(_model_ptr_com.get()),
+                                                        "l_sole",
+                                                        "r_sole"));
+    left_foot_task->setLambda(.2);
+    left_foot_task->setOrientationErrorGain(.1);
+
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(conversion_utils_YARP::toEigen(q)));
+            new OpenSoT::tasks::velocity::Postural(q));
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     if(footStrategy == USE_TASK)
@@ -503,41 +467,40 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _log.open("testQPOases_ConvexHull.m");
 
         stack_of_tasks.push_back(right_foot_task);
+        stack_of_tasks.push_back(left_foot_task);
     }
     else if (footStrategy == USE_CONSTRAINT)
     {
         using namespace OpenSoT::constraints;
-        TaskToConstraint::Ptr right_foot_constraint(new TaskToConstraint(right_foot_task));
+        TaskToConstraint::Ptr feet_constraint(new TaskToConstraint((right_foot_task + left_foot_task)));
 
-        com_task->getConstraints().push_back(right_foot_constraint);
-        postural_task->getConstraints().push_back(right_foot_constraint);
+        com_task->getConstraints().push_back(feet_constraint);
+        postural_task->getConstraints().push_back(feet_constraint);
 
     }
 
     stack_of_tasks.push_back(com_task);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::iHQP::Ptr sot(
-        new OpenSoT::solvers::iHQP(stack_of_tasks,
-                                          bounds));
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     //SET SOME REFERENCES
-    yarp::sig::Vector T_com_p_init = idynutils_com.iDynTree_model.getCOM();
-    yarp::sig::Vector T_com_p_ref = T_com_p_init;
+    Eigen::Vector3d T_com_p_init;
+    _model_ptr_com->getCOM(T_com_p_init);
+    Eigen::Vector3d T_com_p_ref = T_com_p_init;
     T_com_p_ref[0] = 0.0;
     T_com_p_ref[1] = 0.0;
 
-    std::cout << "Initial CoM position is " << T_com_p_init.toString() << std::endl;
+    std::cout << "Initial CoM position is " << T_com_p_init << std::endl;
     std::cout << "Moving to (0,0)" << std::endl;
 
-    com_task->setReference(conversion_utils_YARP::toEigen(T_com_p_ref));
+    com_task->setReference(T_com_p_ref);
 
-    yarp::sig::Vector dq(q.size(), 0.0);
-    yarp::sig::Vector tmp(3,0.0);
+    Eigen::Vector3d tmp;
     tmp(0) = com_task->getActualPosition()[0];
     tmp(1) = com_task->getActualPosition()[1];
     tmp(2) = com_task->getActualPosition()[2];
-    double e = norm(T_com_p_ref - tmp);
+    double e = (T_com_p_ref - tmp).norm();
     double previous_e = 0.0;
 
     unsigned int i = 0;
@@ -547,55 +510,57 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     else if(footStrategy == USE_CONSTRAINT)
         _log << "com_traj_constraint = [";
 
-    yarp::sig::Matrix right_foot_pose = conversion_utils_YARP::toYARP(right_foot_task->getActualPose());
+    Eigen::MatrixXd right_foot_pose = right_foot_task->getActualPose();
 
     for(i = 0; i < n_iterations; ++i)
     {
-        idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+        _model_ptr_com->setJointPosition(q);
+        _model_ptr_com->update();
 
-        right_foot_task->update(conversion_utils_YARP::toEigen(q));
-        com_task->update(conversion_utils_YARP::toEigen(q));
-        postural_task->update(conversion_utils_YARP::toEigen(q));
-        bounds->update(conversion_utils_YARP::toEigen(q));
+        right_foot_task->update(q);
+        std::cout<<"right_foot_task->getb().norm(): "<<right_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
+        left_foot_task->update(q);
+        std::cout<<"left_foot_task->getb().norm(): "<<left_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
+        com_task->update(q);
+        postural_task->update(q);
+        bounds->update(q);
 
         _log << com_task->getActualPosition()[0] << ","
             << com_task->getActualPosition()[1] <<";";
-        yarp::sig::Vector tmp(3,0.0);
+        Eigen::Vector3d tmp;
         tmp(0) = com_task->getActualPosition()[0];
         tmp(1) = com_task->getActualPosition()[1];
         tmp(2) = com_task->getActualPosition()[2];
-        e = norm(T_com_p_ref - tmp);
+        e = (T_com_p_ref - tmp).norm();
 
         if(fabs(previous_e - e) < 1e-13) {
-            std::cout << "i: " << i << " e: " << norm(T_com_p_ref - tmp) << " . Error not decreasing. CONVERGED." << std::endl;
+            std::cout << "i: " << i << " e: " << (T_com_p_ref - tmp).norm() << " . Error not decreasing. CONVERGED." << std::endl;
             break;
         }
         previous_e = e;
 
-        Eigen::VectorXd _dq(dq.size());
-        _dq.setZero(dq.size());
-        EXPECT_TRUE(sot->solve(_dq));
-        dq = conversion_utils_YARP::toYARP(_dq);
+        Eigen::VectorXd dq(q.size());
+        dq.setZero(dq.size());
+        EXPECT_TRUE(sot->solve(dq));
         q += dq;
 
-        yarp::sig::Matrix right_foot_pose_now = conversion_utils_YARP::toYARP(right_foot_task->getActualPose());
+        Eigen::MatrixXd right_foot_pose_now = right_foot_task->getActualPose();
         for(unsigned int r = 0; r < 4; ++r)
             for(unsigned int c = 0; c < 4; ++c)
-                ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-6);
-        ASSERT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getb())),1e-8);
+                ASSERT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-5)<<"iteration "<<i;
+        ASSERT_LT(left_foot_task->getb().norm(),1e-8)<<"iteration "<<i;
 
-#ifdef TRY_ON_SIMULATOR
-        robot.move(q);
-#endif
     }
 
     tmp(0) = com_task->getActualPosition()[0];
     tmp(1) = com_task->getActualPosition()[1];
     tmp(2) = com_task->getActualPosition()[2];
-    ASSERT_NEAR(norm(T_com_p_ref - tmp),0,1E-9);
+    ASSERT_NEAR((T_com_p_ref - tmp).norm(),0,1E-9);
 
-    idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
-    boundsConvexHull->update(conversion_utils_YARP::toEigen(q));
+    _model_ptr_com->setJointPosition(q);
+    _model_ptr_com->update();
+
+    boundsConvexHull->update(q);
     std::vector<KDL::Vector> points;
     std::vector<KDL::Vector> points_inner;
     boundsConvexHull->getConvexHull(points);
@@ -609,10 +574,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     std::cout << std::endl << "b_ch: " << std::endl << b_ch << std::endl;
     std::cout << std::endl << "A_ch_outer: " << std::endl << A_ch_outer << std::endl;
     std::cout << std::endl << "b_ch_outer: " << std::endl << b_ch_outer << std::endl;
-    std::cout << std::endl << "@q: " << std::endl << q.toString() << std::endl << std::endl;
-    getPointsFromConstraints(conversion_utils_YARP::toYARP(A_ch),
-                             conversion_utils_YARP::toYARP(b_ch),
-                             points_inner);
+    std::cout << std::endl << "@q: " << std::endl << q << std::endl << std::endl;
+    getPointsFromConstraints(A_ch, b_ch, points_inner);
 
 
     points.push_back(points.front());
@@ -633,33 +596,34 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         T_com_p_ref[0] = point->x();
         T_com_p_ref[1] = point->y();
 
-        com_task->setReference(conversion_utils_YARP::toEigen(T_com_p_ref));
+        com_task->setReference(T_com_p_ref);
 
-        yarp::sig::Vector tmp(3,0.0);
+        Eigen::Vector3d tmp;
         tmp(0) = com_task->getActualPosition()[0];
         tmp(1) = com_task->getActualPosition()[1];
         tmp(2) = com_task->getActualPosition()[2];
 
-        yarp::sig::Vector dq(q.size(), 0.0);
-        double e = norm(T_com_p_ref - tmp);
+        double e = (T_com_p_ref - tmp).norm();
         double previous_e = 0.0;
         double oscillation_check_e = 0.0;
         for(i = 0; i < n_iterations; ++i)
         {
-            idynutils_com.updateiDynTreeModel(conversion_utils_YARP::toEigen(q), true);
+            _model_ptr_com->setJointPosition(q);
+            _model_ptr_com->update();
 
-            right_foot_task->update(conversion_utils_YARP::toEigen(q));
-            com_task->update(conversion_utils_YARP::toEigen(q));
-            postural_task->update(conversion_utils_YARP::toEigen(q));
-            bounds->update(conversion_utils_YARP::toEigen(q));
+            right_foot_task->update(q);
+            left_foot_task->update(q);
+            com_task->update(q);
+            postural_task->update(q);
+            bounds->update(q);
 
             _log << com_task->getActualPosition()[0] << ","
                 << com_task->getActualPosition()[1] <<";";
-            yarp::sig::Vector tmp(3,0.0);
+            Eigen::Vector3d tmp;
             tmp(0) = com_task->getActualPosition()[0];
             tmp(1) = com_task->getActualPosition()[1];
             tmp(2) = com_task->getActualPosition()[2];
-            e = norm(T_com_p_ref - tmp);
+            e = (T_com_p_ref - tmp).norm();
 
             if(fabs(e - oscillation_check_e) < 1e-9)
             {
@@ -683,14 +647,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
 
-            Eigen::VectorXd _dq(dq.size());
-            _dq.setZero(dq.size());
-            EXPECT_TRUE(sot->solve(_dq));
-            dq = conversion_utils_YARP::toYARP(_dq);
+            Eigen::VectorXd dq(q.size());
+            dq.setZero(dq.size());
+            EXPECT_TRUE(sot->solve(dq));
             q += dq;
 
 
-            yarp::sig::Matrix right_foot_pose_now = conversion_utils_YARP::toYARP(right_foot_task->getActualPose());
+            Eigen::MatrixXd right_foot_pose_now = right_foot_task->getActualPose();
             for(unsigned int r = 0; r < 4; ++r)
                 for(unsigned int c = 0; c < 4; ++c)
                     EXPECT_NEAR(right_foot_pose(r,c),right_foot_pose_now(r,c),1e-3) << "Error at iteration "
@@ -699,17 +662,15 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
                                                                                     << "(" << r
                                                                                     << "," << c << ")"
                                                                                     << " with cartesian error equal to "
-                                                                                    << norm(conversion_utils_YARP::toYARP(right_foot_task->getb())) << std::endl;
-            EXPECT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getb())),5e-5);
-            EXPECT_LT(norm(conversion_utils_YARP::toYARP(right_foot_task->getA())*dq),1E-6) << "Error at iteration "
+                                                                                    << right_foot_task->getb().norm() << std::endl;
+            EXPECT_LT(right_foot_task->getb().norm(),5e-5);
+            EXPECT_LT((right_foot_task->getA()*dq).norm(),1E-6) << "Error at iteration "
                                                              << i
                                                              << " J_foot*dq = "
-                                                             << (right_foot_task->getA()*conversion_utils_YARP::toEigen(dq))
+                                                             << (right_foot_task->getA()*dq)
                                                              << std::endl;
 
-#ifdef TRY_ON_SIMULATOR
-            robot.move(q);
-#endif
+
         }
 
 
@@ -718,13 +679,14 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         tmp(2) = com_task->getActualPosition()[2];
 
         if(i == n_iterations)
-            std::cout << "i: " << i << " e: " << norm(T_com_p_ref -
-                                                      tmp) << " -- Error not decreasing. STOPPING." << std::endl;
+            std::cout << "i: " << i << " e: " << (T_com_p_ref -
+                                                      tmp).norm() << " -- Error not decreasing. STOPPING." << std::endl;
 
-        yarp::sig::Vector distance = T_com_p_ref - tmp;
-        double d = norm(distance);
-        yarp::sig::Vector exp_distance(2,0.01);
-        double expected_d = norm(exp_distance);
+        Eigen::Vector3d distance = T_com_p_ref - tmp;
+        double d = (distance).norm();
+        Eigen::Vector2d exp_distance;
+        exp_distance<<0.01,0.01;
+        double expected_d = exp_distance.norm();
 
         std::vector<KDL::Vector> points_check;
         boundsConvexHull->getConvexHull(points_check);
@@ -780,7 +742,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _log << "ctc = plot(com_traj_constraint(:,1), com_traj_constraint(:,2), 'm:');" << std::endl;
         _log << "legend([ref,constr,ct,ctc], 'CoM ref', 'Support Polygon', 'CoM Traj, r\\_sole ctrl as task', 'CoM Traj, r\\_sole ctrl as constraint','Location','best');" << std::endl;
     }
-    _log << "print(ch_figure,'-depsc','testQPOases_ConvexHull_followingBounds');" << std::endl;
 
 }
 

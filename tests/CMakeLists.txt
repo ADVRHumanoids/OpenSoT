@@ -4,32 +4,30 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
-
-FIND_PACKAGE(YARP QUIET)
 FIND_PACKAGE(iDynTree QUIET)
 FIND_PACKAGE(conversion_utils_YARP QUIET)
 FIND_PACKAGE(idynutils2 QUIET)
-find_package(test_utils QUIET)
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
-find_package(ModelInterfaceIDYNUTILS QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher)
 
-
-if(${YARP_FOUND})
-    set(TEST_INCLUDES ${TEST_INCLUDES} ${YARP_INCLUDE_DIRS} )
-endif()
-if(${iDynTree_FOUND} AND ${idynutils2_FOUND} AND ${ModelInterfaceIDYNUTILS_FOUND})
+if(${iDynTree_FOUND} AND
+   ${idynutils2_FOUND}
+  )
     set(TEST_INCLUDES ${TEST_INCLUDES}
                       ${iDynTree_INCLUDE_DIRS}
                       ${idynutils2_INCLUDE_DIRS}
-                      ${ModelInterfaceIDYNUTILS_INCLUDE_DIRS})
+    )
 endif()
-if(${conversion_utils_YARP_FOUND} AND ${test_utils_FOUND})
+
+if(${conversion_utils_YARP_FOUND}
+)
     set(TEST_INCLUDES ${TEST_INCLUDES}
                       ${conversion_utils_YARP_INCLUDE_DIRS}
-                      ${test_utils_INCLUDE_DIRS})
+
+)
 endif()
+
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES}
                       ${trajectory_utils_INCLUDE_DIRS}
@@ -38,31 +36,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 
-#TESTS THAT USES GAZEBO
-set(OPENSOT_COMPILE_SIMULATION_TESTS OFF CACHE BOOL "Flag to compile tests that uses Gazebo")
-
-if (OPENSOT_COMPILE_SIMULATION_TESTS)
-    add_definitions( -DOPENSOT_COMPILE_SIMULATION_TESTS=true )
-    #Gazebo
-    find_package(Gazebo   REQUIRED)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
-    message("**************TEST CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-    link_directories(${GAZEBO_LIBRARY_DIRS})
-    include_directories(${GAZEBO_INCLUDE_DIRS})
-
-    set(OPENSOT_SIMULATION_TESTS_VISUALIZATION OFF CACHE BOOL "Flag to show simulation tests")
-    if(OPENSOT_SIMULATION_TESTS_VISUALIZATION)
-        add_definitions( -DOPENSOT_SIMULATION_TESTS_VISUALIZATION=true )
-    else()
-        add_definitions( -DOPENSOT_SIMULATION_TESTS_VISUALIZATION=false )
-    endif()
-else()
-    add_definitions( -DOPENSOT_COMPILE_SIMULATION_TESTS=false )
-endif()
-
 option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
-
-
 
 # compite GTest
 find_package(GTest)
@@ -92,6 +66,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_Options  
                   testQPOases_SubTask
                   testQPOases_FF
+                  testQPOases_ConvexHull
                   testConvexHullVelocityConstraint
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
@@ -145,16 +120,7 @@ if(${trajectory_utils_FOUND})
                   testEigenSVD_StaticWalk_FloatingBase)
 endif()
 
-#THESE TESTS DEPEND ON YARP
-if(${YARP_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                    testQPOases_ConvexHull
 
-    )
-endif()
-
-
-#                      testCartesianPositionVelocityConstraint
 
 
 
@@ -170,7 +136,7 @@ endif()
                       
 #                      testQPOases_PriorityInversion
 #                      testQPOases_SelfCollisionAvoidance
-#                      testQPOases_Sparse
+
 
 #                      testQPOases_VelocityAllocation
 
@@ -178,12 +144,6 @@ endif()
                       
 #                      testGazeVelocityTask
 
-                      
-                      
-                      
-                      
-                      
-#                      testDefaultHumanoidStack
 #                      testLogger
 
 #                      testVelocityAllocation
@@ -205,16 +165,18 @@ SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
 if(${fcl_FOUND})
     SET(TestLibs ${TestLibs} ${fcl_LIBRARIES})
 endif()
-if(${YARP_FOUND} AND ${iDynTree_FOUND} AND ${idynutils2_FOUND} AND ${ModelInterfaceIDYNUTILS_FOUND})
-    SET(TestLibs ${TestLibs} ${YARP_LIBRARIES} ${ModelInterfaceIDYNUTILS_LIBRARIES}
-                 ${idynutils2_LIBRARIES} ${iDynTree_LIBRARIES})
+if(${iDynTree_FOUND} AND
+   ${idynutils2_FOUND}
+  )
+    SET(TestLibs ${TestLibs}
+                 ${idynutils2_LIBRARIES} ${iDynTree_LIBRARIES}
+)
 endif()
+
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
     SET(TestLibs ${TestLibs} ${trajectory_utils_LIBRARIES} ${rviz_visual_tools_LIBRARIES})
 endif()
-if(${test_utils_FOUND})
-    SET(TestLibs ${TestLibs} ${test_utils_LIBRARIES} )
-endif()
+
 
     
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -441,31 +403,34 @@ TARGET_LINK_LIBRARIES(testConvexHullVelocityConstraint ${TestLibs})
 add_dependencies(testConvexHullVelocityConstraint GTest-ext OpenSoT)
 add_test(NAME OpenSoT_constraints_velocity_ConvexHull COMMAND testConvexHullVelocityConstraint)
 
-if(${YARP_FOUND})
-#    ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
-#    TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
-#    add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
+ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
+add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 
+ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
+TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
+add_dependencies(testQPOases_AutoStack GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
+
+ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
+TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
+add_dependencies(testCoMForceTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
+
+#ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
+#TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
+#add_dependencies(testCartesianPositionVelocityConstraint GTest-ext OpenSoT)
+#add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
 
 
 #    ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
 #    TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
 #    add_dependencies(testDynamicsConstraint GTest-ext OpenSoT)
 
-
-#    ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
-#    add_dependencies(testQPOases_AutoStack GTest-ext OpenSoT)
-
 #    ADD_EXECUTABLE(testQPOases_CartesianPositionConstraint solvers/TestQPOases_CartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
 #    add_dependencies(testQPOases_CartesianPositionConstraint GTest-ext OpenSoT)
-
-    ADD_EXECUTABLE(testQPOases_ConvexHull solvers/TestQPOases_ConvexHull.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_ConvexHull ${TestLibs})
-    add_dependencies(testQPOases_ConvexHull GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
-
 
 #    ADD_EXECUTABLE(testQPOases_GlobalConstraints solvers/TestQPOases_GlobalConstraints.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_GlobalConstraints ${TestLibs} ${PCL_LIBRARIES})
@@ -481,67 +446,26 @@ if(${YARP_FOUND})
 #    TARGET_LINK_LIBRARIES(testQPOases_SelfCollisionAvoidance ${TestLibs})
 #    add_dependencies(testQPOases_SelfCollisionAvoidance GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOases_Sparse solvers/TestQPOases_Sparse.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_Sparse ${TestLibs})
-#    add_dependencies(testQPOases_Sparse GTest-ext OpenSoT)
-
-
-
 #    ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
 #    add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
 
 
-    ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
-    TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
-    add_dependencies(testCoMForceTask GTest-ext OpenSoT)
-    add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 
 #    ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
 #    TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
 #    add_dependencies(testGazeVelocityTask GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testInteractionVelocityTask tasks/velocity/TestInteraction.cpp)
-#    TARGET_LINK_LIBRARIES(testInteractionVelocityTask ${TestLibs})
-#    add_dependencies(testInteractionVelocityTask GTest-ext OpenSoT)
-
-
-
-#    ADD_EXECUTABLE(testDefaultHumanoidStack utils/TestDefaultHumanoidStack.cpp)
-#    TARGET_LINK_LIBRARIES(testDefaultHumanoidStack ${TestLibs})
-#    add_dependencies(testDefaultHumanoidStack GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
 #    TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
 #    add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 
 
-endif()
-
-#    if(OPENSOT_COMPILE_EXAMPLES)
-#        include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../examples/KlamptController/include")
-#        ADD_EXECUTABLE(testKlamptController ../examples/KlamptController/tests/testKlamptController.cpp
-#                                            ../examples/KlamptController/src/KlamptController.cpp)
-#        TARGET_LINK_LIBRARIES(testKlamptController ${TestLibs})
-#        add_dependencies(testKlamptController GTest-ext OpenSoT)
-#        add_test(NAME OpenSoT_KlamptController COMMAND testKlamptController)
-#    endif()
-
-
-
-
-#    add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
-
-
-
 #    add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
 
-
-
-#    add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
+#
 #    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
-
-
 
 #    add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
     
@@ -553,21 +477,9 @@ endif()
 #    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
 
 
-
-
-
-
-
-
-
 #    add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
-#    add_test(NAME OpenSoT_task_velocity_Interaction COMMAND testInteractionVelocityTask)
 
 
-
-
-
-#    add_test(NAME OpenSoT_utils_DefaultHumanoidStack COMMAND testDefaultHumanoidStack)
 #    add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 
