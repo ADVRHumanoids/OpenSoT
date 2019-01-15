@@ -452,12 +452,6 @@ add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 #    TARGET_LINK_LIBRARIES(testQPOases_SelfCollisionAvoidance ${TestLibs})
 #    add_dependencies(testQPOases_SelfCollisionAvoidance GTest-ext OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOases_Sparse solvers/TestQPOases_Sparse.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_Sparse ${TestLibs})
-#    add_dependencies(testQPOases_Sparse GTest-ext OpenSoT)
-
-
-
 #    ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
 #    add_dependencies(testQPOases_VelocityAllocation GTest-ext OpenSoT)
