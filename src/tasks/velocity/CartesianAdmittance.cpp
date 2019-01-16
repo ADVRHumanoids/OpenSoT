@@ -49,14 +49,22 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
 void CartesianAdmittance::_update(const Eigen::VectorXd &x)
 {
     _ft_sensor->getWrench(_wrench_measured);
-    _robot.getPose(_distal_link, _base_link, _bl_T_ft);
+    if(_base_link == "world")
+    {
+        _robot.getPose(_distal_link, _bl_T_ft);
+    }
+    else 
+    {
+        _robot.getPose(_distal_link, _base_link, _bl_T_ft);
+    }
+    
 
     _wrench_error = XBot::Utils::GetAdjointFromRotation(_bl_T_ft.linear())*_wrench_measured - _wrench_reference;
 
     Eigen::Vector6d::Map(&_tmp[0], CHANNELS) = _wrench_error;
     _wrench_filt = Eigen::Vector6d::Map(_filter.process(_tmp).data(), CHANNELS);
     
-    apply_deadzone(_wrench_error);
+    apply_deadzone(_wrench_filt);
 
     _desiredTwist = _C.asDiagonal()*_wrench_filt;
 
@@ -272,7 +280,10 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Ve
     
     _C = C;
     setFilterOmega(omega);
-    setFilterTimeStep(dt);
+    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+    {
+        _filter.setTimeStep(dt, i);
+    }
     _lambda = lambda;
     
     
