@@ -20,7 +20,7 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
     _wrench_filt.setZero();
 
     _ft_sensor->getWrench(_wrench_measured);
-    _wrench_reference = _wrench_measured;
+    _wrench_reference.setZero();
 
 //    _C.setIdentity();
 //    _C.segment(0,3) *= 1e-6; //This was found by experiments
@@ -74,7 +74,7 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
 bool CartesianAdmittance::reset()
 {
     _ft_sensor->getWrench(_wrench_measured);
-    _wrench_reference = _wrench_measured;
+    _wrench_reference.setZero();
 
     return Cartesian::reset();
 }
