@@ -20,7 +20,7 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterfa
     _tau.setZero(this->getXSize());
     _tau_filt.setZero(this->getXSize());
     _tau_error.setZero(this->getXSize());
-    _h.setZero(this->getXSize());
+    _tau_ref.setZero(this->getXSize());
 
 
     _model.getJointPosition(_q);
@@ -31,13 +31,16 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterfa
         throw std::runtime_error("There is a mismatch among model joint position and input x!");
 }
 
+void JointAdmittance::setTorqueReference(const Eigen::VectorXd& tau_ref)
+{
+    _tau_ref = tau_ref;
+}
+
 void JointAdmittance::_update(const Eigen::VectorXd &x)
 {
     _robot.getJointEffort(_tau);
-    _robot.computeNonlinearTerm(_h);
 
-    ///TODO: better estimation based on residuals?
-    _tau_error = _h-_tau;
+    _tau_error = _tau_ref-_tau;
 
     _tau_filt = _filter.process(_tau_error);
 

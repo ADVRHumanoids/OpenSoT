@@ -100,6 +100,11 @@ namespace OpenSoT {
             */
            static OpenSoT::tasks::velocity::JointAdmittance::Ptr asJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
+           /**
+            * @brief setTorqueReference
+            * @param tau_ref
+            */
+           void setTorqueReference(const Eigen::VectorXd& tau_ref);
 
         private:
            XBot::ModelInterface& _robot;
@@ -111,7 +116,8 @@ namespace OpenSoT {
 
            Eigen::MatrixXd _C;
 
-           Eigen::VectorXd _tau, _tau_filt, _h, _q, _tau_error;
+           Eigen::VectorXd _tau, _tau_filt, _q, _tau_error;
+           Eigen::VectorXd _tau_ref;
 
        };
 
