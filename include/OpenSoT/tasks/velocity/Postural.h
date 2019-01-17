@@ -109,7 +109,7 @@
                  * @brief reset set as actual joint reference the actual pose
                  * @return
                  */
-                bool reset();
+                virtual bool reset();
 
                 static bool isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

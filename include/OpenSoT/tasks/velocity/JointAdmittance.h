@@ -8,21 +8,6 @@ namespace OpenSoT {
        namespace velocity {
        /**
         * @brief The JointAdmittance class implements a simple admittance controller in velocity at the joints.
-        * The implemented scheme is the following:
-        *
-        *  \f$ \boldsymbol{\Delta}\mathbf{q}_r = \mathbf{C}\boldsymbol{\Delta \tau} \f$
-        *
-        *  where \f$ \mathbf{C} \in \mathbb{R}^{n \times n}\f$ is the Compliance matrix.
-        *  The torque error is computed as:
-        *
-        *  \f$ \boldsymbol{\Delta \tau} = \mathbf{h} - \boldsymbol{\tau}_m \f$
-        *
-        *  with \f$ \mathbf{h} \f$ containing the torques due to gravity and Coriolis/Centrifugal forces, computed from the
-        *  robot feedback.
-        *  The computed joint velocity reference is plugged in the postural task as a feed-forward desired joint velocity:
-        *
-        *  \f$ \boldsymbol{\Delta}\mathbf{q}_d = \boldsymbol{\Delta}\mathbf{q}_r + \lambda \left( \mathbf{q}_d  - \mathbf{q}\right) \\ \f$
-        *
         */
        class JointAdmittance: public Postural {
         public:
@@ -106,6 +91,24 @@ namespace OpenSoT {
             */
            void setTorqueReference(const Eigen::VectorXd& tau_ref);
 
+           /**
+            * @brief getTorqueReference
+            * @return vector of tau_ref
+            */
+           const Eigen::VectorXd& getTorqueReference();
+
+           /**
+            * @brief getTorqueReference
+            * @param tau_ref
+            */
+           void getTorqueReference(Eigen::VectorXd& tau_ref);
+
+           /**
+            * @brief reset
+            * @return true if succeed
+            */
+           bool reset();
+
         private:
            XBot::ModelInterface& _model;
 
@@ -117,6 +120,8 @@ namespace OpenSoT {
 
            Eigen::VectorXd _tau, _tau_filt, _q, _tau_error;
            Eigen::VectorXd _tau_ref;
+
+           Eigen::VectorXd _deadzone;
 
        };
 

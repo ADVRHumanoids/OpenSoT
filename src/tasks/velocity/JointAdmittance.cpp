@@ -6,6 +6,11 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &model, const Eigen::Vecto
     Postural(x, "joint_admittance"),
     _model(model)
 {
+    _deadzone.setZero(this->getXSize());
+
+    _model.getJointEffort(_tau);
+    _tau_ref = _tau;
+
     _C.setIdentity(_W.rows(), _W.cols());
     _C *= 0.00015; //This was found by experiments
 
@@ -29,9 +34,27 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &model, const Eigen::Vecto
         throw std::runtime_error("There is a mismatch among model joint position and input x!");
 }
 
+bool JointAdmittance::reset()
+{
+    _model.getJointEffort(_tau);
+    _tau_ref = _tau;
+
+    return Postural::reset();
+}
+
 void JointAdmittance::setTorqueReference(const Eigen::VectorXd& tau_ref)
 {
     _tau_ref = tau_ref;
+}
+
+const Eigen::VectorXd& JointAdmittance::getTorqueReference()
+{
+    return _tau_ref;
+}
+
+void JointAdmittance::getTorqueReference(Eigen::VectorXd& tau_ref)
+{
+    tau_ref = _tau_ref;
 }
 
 void JointAdmittance::_update(const Eigen::VectorXd &x)
