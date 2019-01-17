@@ -9,7 +9,7 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &model, const Eigen::Vecto
     _deadzone.setZero(this->getXSize());
 
     _model.getJointEffort(_tau);
-    _tau_ref = _tau;
+    _tau_ref.setZero(_tau.size());
 
     _C.setIdentity(_W.rows(), _W.cols());
     _C *= 0.00015; //This was found by experiments
@@ -20,7 +20,6 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &model, const Eigen::Vecto
 
     _lambda = 0.005; //This was found by experiments
 
-    _tau.setZero(this->getXSize());
     _tau_filt.setZero(this->getXSize());
     _tau_error.setZero(this->getXSize());
     _tau_ref.setZero(this->getXSize());
@@ -37,7 +36,7 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &model, const Eigen::Vecto
 bool JointAdmittance::reset()
 {
     _model.getJointEffort(_tau);
-    _tau_ref = _tau;
+    _tau_ref.setZero(_tau_ref.size());
 
     return Postural::reset();
 }
