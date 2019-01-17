@@ -64,6 +64,8 @@ void JointAdmittance::_update(const Eigen::VectorXd &x)
 
     _tau_filt = _filter.process(_tau_error);
 
+    apply_deadzone(_tau_filt);
+
     _xdot_desired = _C*_tau_filt;
 
     if(_model.isFloatingBase())
@@ -136,6 +138,25 @@ bool JointAdmittance::isJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::Ve
 JointAdmittance::Ptr JointAdmittance::asJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::JointAdmittance>(task);
+}
+
+void JointAdmittance::apply_deadzone(Eigen::VectorXd& data)
+{
+    for(int i = 0; i < data.size(); i++)
+    {
+        if(data[i] > _deadzone[i])
+        {
+            data[i] -= _deadzone[i];
+        }
+        else if(data[i] < -_deadzone[i])
+        {
+            data[i] += _deadzone[i];
+        }
+        else
+        {
+            data[i] = 0.0;
+        }
+    }
 }
 
 

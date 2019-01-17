@@ -109,6 +109,8 @@ namespace OpenSoT {
             */
            bool reset();
 
+
+
         private:
            XBot::ModelInterface& _model;
 
@@ -122,6 +124,7 @@ namespace OpenSoT {
            Eigen::VectorXd _tau_ref;
 
            Eigen::VectorXd _deadzone;
+           void apply_deadzone(Eigen::VectorXd& data);
 
        };
 
