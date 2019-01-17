@@ -2,10 +2,8 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterface &model,
-                                 const Eigen::VectorXd& x):
+JointAdmittance::JointAdmittance(XBot::ModelInterface &model, const Eigen::VectorXd& x):
     Postural(x, "joint_admittance"),
-    _robot(robot),
     _model(model)
 {
     _C.setIdentity(_W.rows(), _W.cols());
@@ -38,7 +36,7 @@ void JointAdmittance::setTorqueReference(const Eigen::VectorXd& tau_ref)
 
 void JointAdmittance::_update(const Eigen::VectorXd &x)
 {
-    _robot.getJointEffort(_tau);
+    _model.getJointEffort(_tau);
 
     _tau_error = _tau_ref-_tau;
 

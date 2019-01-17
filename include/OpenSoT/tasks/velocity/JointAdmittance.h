@@ -30,10 +30,10 @@ namespace OpenSoT {
 
            /**
             * @brief JointAdmittance constructor
-            * @param robot is updated with the actual measurements from the robot (used to cpmuted the non-linear terms \f$ \mathbf{h} \f$)
-            * @param model is updated with the integrated state from the robot used to perform open-loop IK
+            * @param model is updated with the integrated state from the robot used to perform open-loop IK and
+            * measured joint torques from the robot
             */
-           JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterface &model, const Eigen::VectorXd& x);
+           JointAdmittance(XBot::ModelInterface &model, const Eigen::VectorXd& x);
 
            /**
             * @brief setJointCompliance set the Compliance matrix
@@ -107,7 +107,6 @@ namespace OpenSoT {
            void setTorqueReference(const Eigen::VectorXd& tau_ref);
 
         private:
-           XBot::ModelInterface& _robot;
            XBot::ModelInterface& _model;
 
            void _update(const Eigen::VectorXd& x);
