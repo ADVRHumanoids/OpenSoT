@@ -261,14 +261,14 @@ if(${osqp_FOUND})
 
 endif()
 
-pkg_check_modules(GLPK QUIET glpk)
-if(${GLPK_FOUND})
+#pkg_check_modules(GLPK QUIET glpk)
+#if(${GLPK_FOUND})
     message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
 
     add_library(OpenSotBackEndGLPK SHARED src/solvers/GLPKBackEnd.cpp)
     target_link_libraries(OpenSotBackEndGLPK OpenSoT -lglpk)
     library_install(OpenSotBackEndGLPK 1 0 0)
-endif()
+#endif()
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
 ########################################################################
