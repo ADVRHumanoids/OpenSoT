@@ -11,8 +11,6 @@ find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher)
 
-pkg_check_modules(GLPK QUIET glpk)
-
 if(${iDynTree_FOUND} AND
    ${idynutils2_FOUND}
   )
@@ -100,9 +98,9 @@ if(${osqp_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testLP)
 endif()
 
-#if(${GLPK_FOUND})
+if(${GLPK_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver)
-#endif()
+endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
@@ -239,12 +237,12 @@ if(${osqp_FOUND})
 
 endif()
 
-#if(${GLPK_FOUND})
+if(${GLPK_FOUND})
     ADD_EXECUTABLE(testGLPKSolver solvers/TestGLPK.cpp)
     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs})
     add_dependencies(testGLPKSolver GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
-#endif()
+endif()
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
 TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
