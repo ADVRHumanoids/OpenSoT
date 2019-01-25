@@ -104,6 +104,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/force/WrenchLimits.cpp
                     src/constraints/force/CoP.cpp
                     src/constraints/GenericConstraint.cpp
+                    src/constraints/acceleration/JointLimits.cpp
                     )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
