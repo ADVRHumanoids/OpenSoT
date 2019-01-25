@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi
- * email:  alessio.rocchi@iit.it
+ * Copyright (C) 2019 Cogimon
+ * Author: Matteo Parigi Polverini
+ * email:  matteo.parigi@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -16,70 +16,89 @@
 */
 
 #include <OpenSoT/constraints/acceleration/JointLimits.h>
+#include <boost/make_shared.hpp>
 
-using namespace OpenSoT::constraints::velocity::affine;
+using namespace OpenSoT::constraints::acceleration;
 
-JointLimits::JointLimits(   const Eigen::VectorXd& q,
-                            XBot::ModelInterface& robot,
+JointLimits::JointLimits(   XBot::ModelInterface& robot,
+                            const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
                             const Eigen::VectorXd &jointAccMax):
-     Constraint("joint_limits", q.size()),
-     _qddot(qddot),
+     Constraint("joint_limits", qddot.getInputSize()),
      _jointLimitsMax(jointBoundMax),
-     _jointLimitsMin(jointBoundMin)
+     _jointLimitsMin(jointBoundMin),
+     _jointAccMax(jointAccMax),
+     _robot(robot)
 {
 
-    if(q.size() != _jointLimitsMax.size())
-        throw std::runtime_error("q.size() != _jointLimitsMax.size()");
-    if(q.size() != _jointLimitsMin.size())
-        throw std::runtime_error("q.size() != _jointLimitsMin.size()");
-    /* calling update to generate bounds */       
 
-    update(q,qdot,jointAccMax);
+    if(qddot.getOutputSize() != _jointLimitsMax.size())
+        throw std::runtime_error("_qddot.getOutputSize() != _jointLimitsMax.size()");
+    if(qddot.getOutputSize() != _jointLimitsMin.size())
+        throw std::runtime_error("_qddot.getOutputSize() != _jointLimitsMin.size()");
+    if(_jointAccMax.size() != _jointLimitsMin.size())
+        throw std::runtime_error("_jointAccMax.size() != _jointAccMax.size()");
+    /* calling update to generate bounds */       
+    
+    
+    _generic_constraint_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+                "internal_generic_constraint", qddot,
+                _jointAccMax,
+                -_jointAccMax,
+                OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
+
+    update(Eigen::VectorXd(1));
 }
 
 
-void JointLimits::update(const Eigen::VectorXd& x, const Eigen::VectorXd& xdot, const Eigen::VectorXd& xddotMax)
+void JointLimits::update(const Eigen::VectorXd& x)
 {
+    _robot.getJointPosition(_q);
+    _robot.getJointVelocity(_qdot);
     
-         
-        _Aineq = _qddot.getM();
-        _bUpperBound =   xddotMax;
-        _bLowerBound = - xddotMax;
+    __upperBound =  _jointAccMax;
+    __lowerBound = -_jointAccMax;
         
-        for(int i = 0; i < x.size(); i++)
-        {            
-             if (xdot(i) == 0)
-             {
-                 _invFunUpperBound(i) =  x(i) - _jointLimitsMax(i);
-                 _invFunLowerBound(i) = -x(i) + _jointLimitsMin(i);
-             }
-             else if (xdot(i) < 0)
-             {
-                 _invFunUpperBound(i) =  x(i) - _jointLimitsMax(i);
-                 _invFunLowerBound(i) = -x(i) + _jointLimitsMin(i) - 1/(2*xddotMax(i))*pow(xdot(i),2);
+    for(int i = 0; i < _q.size(); i++)
+    {            
+        if (_qdot(i) == 0)
+            {
+                _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
+                _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i);
+            }
+            else if (_qdot(i) < 0)
+            {
+                _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
+                _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
              }
              else
              {
-                 _invFunUpperBound(i) =  x(i) - _jointLimitsMax(i) + 1/(2*xddotMax(i))*pow(xdot(i),2);
+                 _invFunUpperBound(i) =  x(i) - _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
                  _invFunLowerBound(i) = -x(i) + _jointLimitsMin(i);
              }
              
              if (_invFunUpperBound(i) >= 0)
              {
-                _bUpperBound(i) = - xddotMax(i);
-                _bLowerBound(i) = - xddotMax(i); 
+                __upperBound(i) = - _jointAccMax(i);
+                __lowerBound(i) = - _jointAccMax(i); 
              }
              
              if (_invFunLowerBound(i) >= 0)
              {
-                _bUpperBound(i) =  xddotMax(i);
-                _bLowerBound(i) =  xddotMax(i); 
+                __upperBound(i) =  _jointAccMax(i);
+                __lowerBound(i) =  _jointAccMax(i); 
              }
                          
-        }
+    }
     
+     _generic_constraint_internal->setBounds(__upperBound, __lowerBound);
+     
+     _generic_constraint_internal->update(x);
+     
+     _Aineq = _generic_constraint_internal->getAineq();
+     _bLowerBound = _generic_constraint_internal->getbLowerBound();
+     _bUpperBound = _generic_constraint_internal->getbUpperBound();   
 }
 
 

@@ -25,8 +25,7 @@
 
  namespace OpenSoT {
     namespace constraints {
-        namespace velocity {
-            namespace affine{
+        namespace acceleration{ 
             /**
              * @brief The JointLimits class implements bounds on joints positions using internally the
              * GenericConstraint and affine variables
@@ -35,10 +34,6 @@
             public:
                 typedef boost::shared_ptr<JointLimits> Ptr;
             private:
-
-                
-                AffineHelper _q;
-                AffineHelper _qddot;
                 
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
@@ -48,8 +43,15 @@
                 
                 Eigen::VectorXd _invFunUpperBound;
                 Eigen::VectorXd _invFunLowerBound;
+                
+                Eigen::VectorXd _jointAccMax;
 
                 XBot::ModelInterface& _robot;
+                
+                Eigen::VectorXd _q, _qdot;
+                
+                GenericConstraint::Ptr _generic_constraint_internal;
+
                 
             public:
                 /**
@@ -59,8 +61,8 @@
                  * @param jointBoundMax upper bounds for joint limits
                  * @param jointBounMin lower bounds for joint limits
                  */
-                JointLimits(const Eigen::VectorXd& q,
-                            XBot::ModelInterface& robot,
+                JointLimits(XBot::ModelInterface& robot,
+                            const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
                             const Eigen::VectorXd &jointAccMax);
@@ -71,7 +73,7 @@
             };
            }
         }
-    }
+    
  }
 
 #endif
