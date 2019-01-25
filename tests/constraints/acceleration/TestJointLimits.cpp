@@ -55,14 +55,15 @@ protected:
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
 
 
-        dT = 0.01;
+        dT = 0.001;
         qdotMax = M_PI;
+        double lambda = 0.7;
         jointVelocityLimits = boost::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
 
         _model_ptr->getJointLimits(qmin, qmax);
         jointLimits = boost::make_shared<OpenSoT::constraints::acceleration::JointLimits>(
-                    *_model_ptr, qddot, qmax, qmin, acc_lims);
+                    *_model_ptr, qddot, qmax, qmin, acc_lims, dT, lambda);
 
         postural = boost::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
         postural->setLambda(1000.);
@@ -113,7 +114,7 @@ protected:
         return _q;
     }
 
-    void checkConstraints(const Eigen::VectorXd& qddot)
+    void checkConstraints(const Eigen::VectorXd& qddot, double EPS)
     {
 
         for(unsigned int i = 0; i < qddot.size(); ++i)
@@ -122,14 +123,17 @@ protected:
             double x_min = jointAccelerationLimits->getLowerBound()[i];
             double x_max = jointAccelerationLimits->getUpperBound()[i];
 
-//             EXPECT_TRUE((x >= x_min) && (x <= x_max));
-//                     std::cout<<"acc violated @i "<<i<<" "<<x_min<<" <= "<<x<<" <= "x_max<<std::endl;
+            EXPECT_TRUE( (x-x_min >= -EPS) && (x-x_max <= EPS) )<<
+            "joint acc violated @i:"<<i<<" "<<x_min<<" <= "<<x<<" <= "<<x_max<<std::endl;
 
-            ASSERT_LE(qdot[i], qdotMax)<<"Upper vel lim violated @i: "<<i<<std::endl; //check upper vel lim
-            ASSERT_GE(qdot[i], -qdotMax)<<"Lower vel lim violated @i: "<<i<<std::endl; //check lower vel lim
+            x_min = -qdotMax;
+            x_max = qdotMax;
+            x = qdot[i];
+            EXPECT_TRUE( (x-x_min >= -EPS) && (x-x_max <= EPS) )<<
+            "joint vel violated @i:"<<i<<" "<<x_min<<" <= "<<x<<" <= "<<x_max<<std::endl;
 
-//             EXPECT_LE(q[i], qmax[i])<<"Upper joint lim violated @i: "<<i<<std::endl;
-//             EXPECT_GE(q[i], qmin[i])<<"Lower joint lim violated @i: "<<i<<std::endl;
+            EXPECT_TRUE( (q[i]-qmin[i] >= -EPS) && (q[i]-qmax[i] <= EPS) )<<
+            "joint limits @i:"<<i<<" "<<qmin[i]<<" <= "<<q[i]<<" <= "<<qmax[i]<<std::endl;
         }
     }
 
@@ -191,7 +195,7 @@ TEST_F(testJointLimits, testBounds) {
         this->logger->add("qmax", qmax);
         this->logger->add("qmin", qmin);
 
-        this->checkConstraints(qddot);
+        this->checkConstraints(qddot, 1e-4);
     }
 
     for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
@@ -224,11 +228,11 @@ TEST_F(testJointLimits, testBounds) {
         this->logger->add("qmax", qmax);
         this->logger->add("qmin", qmin);
 
-        this->checkConstraints(qddot);
+        this->checkConstraints(qddot, 1e-4);
     }
     
-    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
-        EXPECT_NEAR(q[i], this->qmax[i], 1e-3);
+//    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
+//        EXPECT_NEAR(q[i], this->qmax[i], 1e-3);
 
     this->logger->flush();
 }
