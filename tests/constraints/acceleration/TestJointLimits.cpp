@@ -116,11 +116,9 @@ protected:
             double x_min = jointAccelerationLimits->getLowerBound()[i];
             double x_max = jointAccelerationLimits->getUpperBound()[i];
 
-            ASSERT_TRUE((x >= x_min) && (x <= x_max))<<"acc violated @i "<<i<<" "<<x_min<<" <= "<<x<<" <= "x_max;
+            if(EXPECT_TRUE((x >= x_min) && (x <= x_max)))
+                    std::cout<<"acc violated @i "<<i<<" "<<x_min<<" <= "<<x<<" <= "x_max<<std::endl;
 
-
-            ASSERT_LE(, )<<"Upper acc lim violated @i: "<<i<<std::endl; //check upper acc lim
-            ASSERT_GE(qddot[i], )<<"Lower acc lim violated @i: "<<i<<std::endl; //check lower acc lim
 
             ASSERT_LE(qdot[i], qdotMax)<<"Upper vel lim violated @i: "<<i<<std::endl; //check upper vel lim
             ASSERT_GE(qdot[i], -qdotMax)<<"Lower vel lim violated @i: "<<i<<std::endl; //check lower vel lim
