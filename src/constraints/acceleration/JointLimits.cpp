@@ -28,7 +28,7 @@ JointLimits::JointLimits(   XBot::ModelInterface& robot,
      Constraint("joint_limits", qddot.getInputSize()),
      _jointLimitsMax(jointBoundMax),
      _jointLimitsMin(jointBoundMin),
-     _jointAccMax(jointAccMax),
+     _jointAccMax(.7*jointAccMax),
      _robot(robot)
 {
 
@@ -57,6 +57,8 @@ void JointLimits::update(const Eigen::VectorXd& x)
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
     
+    double dt=.01;
+    
     __upperBound =  _jointAccMax;
     __lowerBound = -_jointAccMax;
 
@@ -67,19 +69,22 @@ void JointLimits::update(const Eigen::VectorXd& x)
     {            
         if (_qdot(i) == 0)
         {
-            _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
-            _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i);
+            _invFunUpperBound(i) =  std::max( _q(i) + .01*_qdot(i) + .5*dt*dt*_jointAccMax(i) - _jointLimitsMax(i) ,  _q(i) + .01*_qdot(i) - .5*dt*dt*_jointAccMax(i) - _jointLimitsMax(i));
+            _invFunLowerBound(i) =  std::max(-_q(i) - .01*_qdot(i) - .5*dt*dt*_jointAccMax(i) + _jointLimitsMin(i) , -_q(i) - .01*_qdot(i) + .5*dt*dt*_jointAccMax(i) + _jointLimitsMin(i));
         }
         else if (_qdot(i) < 0)
         {
-            _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
-            _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
+            _invFunUpperBound(i) = std::max( _q(i) + .01*_qdot(i) + .5*dt*dt*_jointAccMax(i)  - _jointLimitsMax(i), _q(i) + .01*_qdot(i)  - .5*dt*dt*_jointAccMax(i) - _jointLimitsMax(i));
+            _invFunLowerBound(i) = std::max(-_q(i) - .01*_qdot(i) - .5*dt*dt*_jointAccMax(i)  + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2),-_q(i) - .01*_qdot(i) + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2));
         }
         else
         {
-             _invFunUpperBound(i) =  x(i) - _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
-             _invFunLowerBound(i) = -x(i) + _jointLimitsMin(i);
+             _invFunUpperBound(i) = std::max( _q(i) + .01*_qdot(i) + .5*dt*dt*_jointAccMax(i)- _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2),_q(i) + .01*_qdot(i) - .5*dt*dt*_jointAccMax(i)- _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2));
+             _invFunLowerBound(i) = std::max(-_q(i) - .01*_qdot(i) - .5*dt*dt*_jointAccMax(i)+ _jointLimitsMin(i),-_q(i) - .01*_qdot(i)+ .5*dt*dt*_jointAccMax(i) + _jointLimitsMin(i));
         }
+        
+//         std::cout<<"_invFunUpperBound(i) "<<_invFunUpperBound(i)<<std::endl;
+//         std::cout<<"_invFunLowerBound(i) "<<_invFunLowerBound(i)<<std::endl;
              
         if (_invFunUpperBound(i) >= 0)
         {
@@ -95,13 +100,17 @@ void JointLimits::update(const Eigen::VectorXd& x)
                          
     }
     
-     _generic_constraint_internal->setBounds(__upperBound, __lowerBound);
+//         std::cout<<"UpperBound "<<__upperBound<<std::endl;
+//         std::cout<<"_LowerBound "<<__lowerBound<<std::endl;
+       
+     _generic_constraint_internal->setBounds(__upperBound/.7, __lowerBound/.7);
      
      _generic_constraint_internal->update(x);
      
      _Aineq = _generic_constraint_internal->getAineq();
      _bLowerBound = _generic_constraint_internal->getbLowerBound();
      _bUpperBound = _generic_constraint_internal->getbUpperBound();   
+     
 }
 
 

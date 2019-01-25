@@ -27,7 +27,7 @@ protected:
         else
             std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-        logger = XBot::MatLogger::getLogger("testJointLimits_acceleration");
+        logger = XBot::MatLogger::getLogger("/tmp/testJointLimits_acceleration");
 
     }
 
@@ -35,14 +35,19 @@ protected:
     {
         qdot.setZero(_model_ptr->getJointNum());
         _model_ptr->setJointVelocity(qdot);
+        this->logger->add("qdot", qdot);
 
+        
+        
         q = getGoodInitialPosition(_model_ptr);
         _model_ptr->setJointPosition(q);
+        this->logger->add("q", q);
 
         _model_ptr->update();
 
         qddot = OpenSoT::AffineHelper::Identity(_model_ptr->getJointNum());
-
+    
+        
         Eigen::VectorXd acc_lims(_model_ptr->getJointNum());
         acc_lims.setOnes(acc_lims.size());
         acc_lims *= 20.;
@@ -50,7 +55,7 @@ protected:
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
 
 
-        dT = 0.001;
+        dT = 0.01;
         qdotMax = M_PI;
         jointVelocityLimits = boost::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
@@ -85,6 +90,7 @@ protected:
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model) {
         Eigen::VectorXd _q(_model->getJointNum());
+        _q.setZero(_q.size());
 
         _q[_model->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
         _q[_model->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
@@ -109,22 +115,21 @@ protected:
 
     void checkConstraints(const Eigen::VectorXd& qddot)
     {
-        ASSERT_GE(-20, -20);
+
         for(unsigned int i = 0; i < qddot.size(); ++i)
         {
             double x = qddot[i];
             double x_min = jointAccelerationLimits->getLowerBound()[i];
             double x_max = jointAccelerationLimits->getUpperBound()[i];
 
-            if(EXPECT_TRUE((x >= x_min) && (x <= x_max)))
-                    std::cout<<"acc violated @i "<<i<<" "<<x_min<<" <= "<<x<<" <= "x_max<<std::endl;
-
+//             EXPECT_TRUE((x >= x_min) && (x <= x_max));
+//                     std::cout<<"acc violated @i "<<i<<" "<<x_min<<" <= "<<x<<" <= "x_max<<std::endl;
 
             ASSERT_LE(qdot[i], qdotMax)<<"Upper vel lim violated @i: "<<i<<std::endl; //check upper vel lim
             ASSERT_GE(qdot[i], -qdotMax)<<"Lower vel lim violated @i: "<<i<<std::endl; //check lower vel lim
 
-            EXPECT_LE(q[i], qmax[i])<<"Upper joint lim violated @i: "<<i<<std::endl;
-            EXPECT_GE(q[i], qmin[i])<<"Lower joint lim violated @i: "<<i<<std::endl;
+//             EXPECT_LE(q[i], qmax[i])<<"Upper joint lim violated @i: "<<i<<std::endl;
+//             EXPECT_GE(q[i], qmin[i])<<"Lower joint lim violated @i: "<<i<<std::endl;
         }
     }
 
@@ -181,12 +186,49 @@ TEST_F(testJointLimits, testBounds) {
         this->qdot += qddot*this->dT;
 
         this->logger->add("qddot", qddot);
+        this->logger->add("qdot", qdot);
+        this->logger->add("q", q);
+        this->logger->add("qmax", qmax);
+        this->logger->add("qmin", qmin);
 
         this->checkConstraints(qddot);
     }
 
     for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
         EXPECT_LE(this->postural->getb()[i], 1e-6);
+    
+    
+    qref.setOnes();
+
+    this->postural->setReference(10*qref);
+
+    for(unsigned int  i = 0; i < T/this->dT; ++i)
+    {
+        this->_model_ptr->setJointVelocity(this->qdot);
+        this->_model_ptr->setJointPosition(this->q);
+        this->_model_ptr->update();
+
+        this->autostack->update(Eigen::VectorXd(0));
+        this->autostack->log(this->logger);
+
+        Eigen::VectorXd qddot;
+        ASSERT_TRUE(this->solver->solve(qddot));
+
+
+        this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+        this->qdot += qddot*this->dT;
+
+        this->logger->add("qddot", qddot);
+        this->logger->add("qdot", qdot);
+        this->logger->add("q", q);
+        this->logger->add("qmax", qmax);
+        this->logger->add("qmin", qmin);
+
+        this->checkConstraints(qddot);
+    }
+    
+    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
+        EXPECT_NEAR(q[i], this->qmax[i], 1e-3);
 
     this->logger->flush();
 }
