@@ -28,7 +28,9 @@
         namespace acceleration{ 
             /**
              * @brief The JointLimits class implements bounds on joints positions using internally the
-             * GenericConstraint and affine variables
+             * GenericConstraint and affine variables. It is based on the paper:
+             *  "Invariance control design for nonlinear control affine systems under hard state constraints", by:
+             *  J. Wolff and M.Buss
              */
             class JointLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
@@ -55,11 +57,12 @@
                 
             public:
                 /**
-                 * @brief JointLimits constructor
-                 * @param q the configuration of the robot when
-                 *          creating the joint limits constraint
-                 * @param jointBoundMax upper bounds for joint limits
-                 * @param jointBounMin lower bounds for joint limits
+                 * @brief JointLimits
+                 * @param robot
+                 * @param qddot
+                 * @param jointBoundMax
+                 * @param jointBoundMin
+                 * @param jointAccMax
                  */
                 JointLimits(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
