@@ -59,36 +59,39 @@ void JointLimits::update(const Eigen::VectorXd& x)
     
     __upperBound =  _jointAccMax;
     __lowerBound = -_jointAccMax;
+
+    _invFunLowerBound.setOnes(_q.size()); _invFunLowerBound *= -1.;
+    _invFunUpperBound.setOnes(_q.size()); _invFunUpperBound *= -1.;
         
     for(int i = 0; i < _q.size(); i++)
     {            
         if (_qdot(i) == 0)
-            {
-                _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
-                _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i);
-            }
-            else if (_qdot(i) < 0)
-            {
-                _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
-                _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
-             }
-             else
-             {
-                 _invFunUpperBound(i) =  x(i) - _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
-                 _invFunLowerBound(i) = -x(i) + _jointLimitsMin(i);
-             }
+        {
+            _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
+            _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i);
+        }
+        else if (_qdot(i) < 0)
+        {
+            _invFunUpperBound(i) =  _q(i) - _jointLimitsMax(i);
+            _invFunLowerBound(i) = -_q(i) + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
+        }
+        else
+        {
+             _invFunUpperBound(i) =  x(i) - _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2);
+             _invFunLowerBound(i) = -x(i) + _jointLimitsMin(i);
+        }
              
-             if (_invFunUpperBound(i) >= 0)
-             {
-                __upperBound(i) = - _jointAccMax(i);
-                __lowerBound(i) = - _jointAccMax(i); 
-             }
+        if (_invFunUpperBound(i) >= 0)
+        {
+            __upperBound(i) = - _jointAccMax(i);
+            __lowerBound(i) = - _jointAccMax(i);
+        }
              
-             if (_invFunLowerBound(i) >= 0)
-             {
-                __upperBound(i) =  _jointAccMax(i);
-                __lowerBound(i) =  _jointAccMax(i); 
-             }
+        if (_invFunLowerBound(i) >= 0)
+        {
+            __upperBound(i) =  _jointAccMax(i);
+            __lowerBound(i) =  _jointAccMax(i);
+        }
                          
     }
     

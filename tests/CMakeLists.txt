@@ -60,7 +60,8 @@ enable_testing()
 #ALL THE FOLLOWING TESTS ARE YARP FREE
 set(OPENSOT_TESTS testBilateralConstraint
                   testJointLimitsVelocityBounds
-                  testVelocityLimitsVelocityBounds 
+                  testJointLimitsAccelerationBounds
+                  testVelocityLimitsVelocityBounds
                   testQPOasesSolver  
                   testQPOases_SetActiveStack 
                   testQPOases_Options  
@@ -333,6 +334,11 @@ ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocit
 TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
 add_dependencies(testVelocityLimitsVelocityBounds GTest-ext OpenSoT)
 add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
+
+ADD_EXECUTABLE(testJointLimitsAccelerationBounds constraints/acceleration/TestJointLimits.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsAccelerationBounds ${TestLibs})
+add_dependencies(testJointLimitsAccelerationBounds GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraints_acceleration_JointLimits COMMAND testJointLimitsAccelerationBounds)
 
 ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
