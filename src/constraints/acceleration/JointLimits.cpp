@@ -86,7 +86,6 @@ void JointLimits::update(const Eigen::VectorXd& x)
         
         if (_delta_sup(i) < 0)
         {
-             std::cout<<"KK"<<std::endl;
             _delta_sup(i) = 0;
         }
         
