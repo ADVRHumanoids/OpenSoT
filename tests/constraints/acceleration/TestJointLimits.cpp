@@ -57,7 +57,7 @@ protected:
 
         dT = 0.001;
         qdotMax = M_PI;
-        double lambda = 0.7;
+        double lambda = 4;
         jointVelocityLimits = boost::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
 
@@ -194,6 +194,7 @@ TEST_F(testJointLimits, testBounds) {
         this->logger->add("q", q);
         this->logger->add("qmax", qmax);
         this->logger->add("qmin", qmin);
+        this->logger->add("qref", qref);
 
         this->checkConstraints(qddot, 1e-4);
     }
@@ -202,12 +203,19 @@ TEST_F(testJointLimits, testBounds) {
         EXPECT_LE(this->postural->getb()[i], 1e-6);
     
     
-    qref.setOnes();
+//     qref.setOnes(qref.size());
+//     qref *= 10;
 
-    this->postural->setReference(10*qref);
+//     this->postural->setReference(qref);
+    
+    T = 10;
 
     for(unsigned int  i = 0; i < T/this->dT; ++i)
     {
+        qref.setOnes(qref.size());
+        qref *= 10*std::sin(i*this->dT);
+        this->postural->setReference(qref);
+        
         this->_model_ptr->setJointVelocity(this->qdot);
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
@@ -227,12 +235,13 @@ TEST_F(testJointLimits, testBounds) {
         this->logger->add("q", q);
         this->logger->add("qmax", qmax);
         this->logger->add("qmin", qmin);
+        this->logger->add("qref", qref);
 
         this->checkConstraints(qddot, 1e-4);
     }
     
 //    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
-//        EXPECT_NEAR(q[i], this->qmax[i], 1e-3);
+//        EXPECT_NEAR(q[i], this->qmax[i], 1e-4);
 
     this->logger->flush();
 }

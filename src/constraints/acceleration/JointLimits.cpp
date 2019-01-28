@@ -31,9 +31,9 @@ JointLimits::JointLimits(   XBot::ModelInterface& robot,
      _jointLimitsMax(jointBoundMax),
      _jointLimitsMin(jointBoundMin),
      _lambda(lambda),
-     _jointAccMax(lambda*jointAccMax),
+     _jointAccMax(jointAccMax),
      _robot(robot),
-     _dt(dt)
+     _dt(lambda*dt)
 {
 
 
@@ -64,49 +64,64 @@ void JointLimits::update(const Eigen::VectorXd& x)
     __upperBound =  _jointAccMax;
     __lowerBound = -_jointAccMax;
 
-    _invFunLowerBound.setOnes(_q.size()); _invFunLowerBound *= -1.;
-    _invFunUpperBound.setOnes(_q.size()); _invFunUpperBound *= -1.;
+    _a.setZero(_q.size()); 
+    _b_sup.setZero(_q.size()); _b_inf.setZero(_q.size());
+    _c_sup.setZero(_q.size()); _c_inf.setZero(_q.size());
+    _delta_sup.setZero(_q.size()); _delta_inf.setZero(_q.size());
+    _ub_sup.setZero(_q.size()); _ub_inf.setZero(_q.size());
+    _lb_sup.setZero(_q.size()); _lb_inf.setZero(_q.size());
+    _ub.setZero(_q.size()); _lb.setZero(_q.size());
+    
         
     for(int i = 0; i < _q.size(); i++)
     {            
-        if (_qdot(i) == 0)
+   
+        _a(i) = .5*_dt*_dt/_jointAccMax(i);
+        
+        // MAX JOINT LIMITS        
+        _b_sup(i) = _dt*_qdot(i)/_jointAccMax(i) + .5*_dt*_dt;
+        _c_sup(i) = _q(i) + _dt*_qdot(i) - _jointLimitsMax(i) + .5*_qdot(i)*_qdot(i)/_jointAccMax(i);
+        
+        _delta_sup(i) = _b_sup(i)*_b_sup(i) - 4*_a(i)*_c_sup(i);
+        
+        if (_delta_sup(i) < 0)
         {
-            _invFunUpperBound(i) =  std::max( _q(i) + _dt*_qdot(i) + .5*_dt*_dt*_jointAccMax(i) - _jointLimitsMax(i) ,  _q(i) + _dt*_qdot(i) - .5*_dt*_dt*_jointAccMax(i) - _jointLimitsMax(i));
-            _invFunLowerBound(i) =  std::max(-_q(i) - _dt*_qdot(i) - .5*_dt*_dt*_jointAccMax(i) + _jointLimitsMin(i) , -_q(i) - _dt*_qdot(i) + .5*_dt*_dt*_jointAccMax(i) + _jointLimitsMin(i));
-        }
-        else if (_qdot(i) < 0)
-        {
-            _invFunUpperBound(i) = std::max( _q(i) + _dt*_qdot(i) + .5*_dt*_dt*_jointAccMax(i)  - _jointLimitsMax(i), _q(i) + _dt*_qdot(i)  - .5*_dt*_dt*_jointAccMax(i) - _jointLimitsMax(i));
-            _invFunLowerBound(i) = std::max(-_q(i) - _dt*_qdot(i) - .5*_dt*_dt*_jointAccMax(i)  + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2),-_q(i) - _dt*_qdot(i) + _jointLimitsMin(i) - 1/(2*_jointAccMax(i))*pow(_qdot(i),2));
-        }
-        else
-        {
-             _invFunUpperBound(i) = std::max( _q(i) + _dt*_qdot(i) + .5*_dt*_dt*_jointAccMax(i)- _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2),_q(i) + _dt*_qdot(i) - .5*_dt*_dt*_jointAccMax(i)- _jointLimitsMax(i) + 1/(2*_jointAccMax(i))*pow(_qdot(i),2));
-             _invFunLowerBound(i) = std::max(-_q(i) - _dt*_qdot(i) - .5*_dt*_dt*_jointAccMax(i)+ _jointLimitsMin(i),-_q(i) - _dt*_qdot(i)+ .5*_dt*_dt*_jointAccMax(i) + _jointLimitsMin(i));
+             std::cout<<"KK"<<std::endl;
+            _delta_sup(i) = 0;
         }
         
-//         std::cout<<"_invFunUpperBound(i) "<<_invFunUpperBound(i)<<std::endl;
-//         std::cout<<"_invFunLowerBound(i) "<<_invFunLowerBound(i)<<std::endl;
-             
-        if (_invFunUpperBound(i) >= 0)
+        _ub_sup(i) = .5/_a(i)*(-_b_sup(i) + std::sqrt(_delta_sup(i)));
+        _lb_sup(i) = .5/_a(i)*(-_b_sup(i) - std::sqrt(_delta_sup(i)));
+        
+        // MIN JOINT LIMITS
+        _b_inf(i) = _dt*_qdot(i)/_jointAccMax(i) - .5*_dt*_dt;
+        _c_inf(i) = -_q(i) - _dt*_qdot(i) + _jointLimitsMin(i) + .5*_qdot(i)*_qdot(i)/_jointAccMax(i);
+        
+        _delta_inf(i) = _b_inf(i)*_b_inf(i) - 4*_a(i)*_c_inf(i);
+       
+        if (_delta_inf(i) < 0)
         {
-            __upperBound(i) = - _jointAccMax(i);
-            __lowerBound(i) = - _jointAccMax(i);
+            _delta_inf(i) = 0;
         }
-             
-        if (_invFunLowerBound(i) >= 0)
+        
+        _ub_inf(i) = .5/_a(i)*(-_b_inf(i) + std::sqrt(_delta_inf(i)));
+        _lb_inf(i) = .5/_a(i)*(-_b_inf(i) - std::sqrt(_delta_inf(i)));
+        
+   
+        _ub(i) = std::min(_ub_sup(i),_ub_inf(i));
+        _lb(i) = std::max(_lb_sup(i),_lb_inf(i));
+        
+        if (_ub(i) < _lb(i))
         {
-            __upperBound(i) =  _jointAccMax(i);
-            __lowerBound(i) =  _jointAccMax(i);
+            _ub(i) = _lb(i);
         }
-                         
+                    
+        __upperBound(i) =  _ub(i);
+        __lowerBound(i) =  _lb(i);
+                     
     }
     
-//         std::cout<<"UpperBound "<<__upperBound<<std::endl;
-//         std::cout<<"_LowerBound "<<__lowerBound<<std::endl;
        
-    __upperBound /= _lambda;
-    __lowerBound /= _lambda;
     _generic_constraint_internal->setBounds(__upperBound, __lowerBound);
      
     _generic_constraint_internal->update(x);

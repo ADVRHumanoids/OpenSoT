@@ -43,8 +43,8 @@
                 Eigen::VectorXd __upperBound;
                 Eigen::VectorXd __lowerBound;
                 
-                Eigen::VectorXd _invFunUpperBound;
-                Eigen::VectorXd _invFunLowerBound;
+                Eigen::VectorXd _a, _b_sup, _c_sup, _b_inf, _c_inf, _delta_sup, _delta_inf;
+                Eigen::VectorXd _ub_sup, _lb_sup,_ub_inf, _lb_inf, _ub, _lb;
                 
                 Eigen::VectorXd _jointAccMax;
 
