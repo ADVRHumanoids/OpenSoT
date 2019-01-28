@@ -156,18 +156,15 @@ void CartesianAdmittance::_log(XBot::MatLogger::Ptr logger)
     Cartesian::_log(logger);
 }
 
-const Eigen::Matrix6d& CartesianAdmittance::getStiffness()
+const Eigen::Matrix6d CartesianAdmittance::getStiffness()
 {
-    _tmp_mat6 = _K.asDiagonal();
-    return _tmp_mat6;
+    return _K.asDiagonal();
 }
 
-const Eigen::Matrix6d& CartesianAdmittance::getDamping()
+const Eigen::Matrix6d CartesianAdmittance::getDamping()
 {
-    _tmp_mat6 = _D.asDiagonal();
-    return _tmp_mat6;
+    return _D.asDiagonal();
 }
-
 
 
 bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K, 
@@ -271,9 +268,18 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Ve
     }
     
     _C = C;
-    setFilterOmega(omega);
-    setFilterTimeStep(dt);
+    
+    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
+    {
+        _filter.setTimeStep(dt, i);
+        _filter.setOmega(omega[i], i);
+    }
+    
     _lambda = lambda;
+    
+    _K = lambda * _C.cwiseInverse();
+    _D = _C * dt + lambda * (_C.cwiseProduct(omega)).cwiseInverse();
+    _M = (dt/lambda) * _D - ((dt*dt)/lambda) * _C;
     
     
     return true;
@@ -313,6 +319,11 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setDeadZone(const Eigen::Vec
     
     _deadzone = dead_zone_amplitude;
     return true;
+}
+
+const Eigen::Matrix6d  OpenSoT::tasks::velocity::CartesianAdmittance::getInertia()
+{
+    return _M.asDiagonal();
 }
 
 

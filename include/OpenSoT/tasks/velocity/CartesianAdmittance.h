@@ -101,13 +101,19 @@ namespace OpenSoT {
             * @brief getStiffness
             * @return actual Cartesian Stiffness
             */
-           const Eigen::Matrix6d& getStiffness();
+           const Eigen::Matrix6d getStiffness();
+           
+           /**
+            * @brief getStiffness
+            * @return actual Cartesian Stiffness
+            */
+           const Eigen::Matrix6d getInertia();
 
            /**
             * @brief getDamping
             * @return actual Cartesian Damping
             */
-           const Eigen::Matrix6d& getDamping();
+           const Eigen::Matrix6d getDamping();
            
            void setFilterTimeStep(const double time_step);
            
