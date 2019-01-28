@@ -91,10 +91,6 @@ void GLPKBackEnd::printErrorOutput(const int out)
 
 bool GLPKBackEnd::solve()
 {
-
-    glp_warm_up(_mip);
-
-
     createsVectorsFromConstraintsMatrix();
     roundBounds();
 
@@ -114,6 +110,7 @@ bool GLPKBackEnd::solve()
         }
     }
 
+
     for(unsigned int i = 0; i < _g[i]; ++i)
         glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
@@ -122,8 +119,6 @@ bool GLPKBackEnd::solve()
     //SETTING CONSTRAINT MATRIX
     glp_load_matrix(_mip, _A.rows()*_A.cols(), _rows.data(), _cols.data(), _a.data());
 
-
-    glp_simplex(_mip, &_param_simplex);//EVENTUALLY WE NEED TO CHECK ALSO THIS OUTPUT!
 
     int out = glp_intopt(_mip, &_param);
     if(out != 0)
@@ -182,13 +177,15 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
 
     glp_init_iocp(&_param);
-    _param.binarize = GLP_ON;
-    _param.presolve = GLP_OFF;
 
 
     glp_init_smcp(&_param_simplex);
 
-    glp_simplex(_mip, &_param_simplex);//EVENTUALLY WE NEED TO CHECK ALSO THIS OUTPUT!
+    glp_simplex(_mip, &_param_simplex);
+
+
+    _param.fp_heur = GLP_ON;
+
 
 
 

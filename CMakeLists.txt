@@ -90,6 +90,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
                     src/constraints/acceleration/DynamicFeasibility.cpp
+                    src/constraints/acceleration/VelocityLimits.cpp
                     src/constraints/velocity/CartesianPositionConstraint.cpp
                     src/constraints/velocity/CapturePoint.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
@@ -145,7 +146,6 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
-                    src/tasks/velocity/affine/Postural.cpp
                     src/tasks/velocity/JointAdmittance.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
@@ -262,7 +262,7 @@ if(${osqp_FOUND})
 
 endif()
 
-pkg_check_modules(GLPK QUIET glpk)
+FIND_PACKAGE(GLPK QUIET)
 if(${GLPK_FOUND})
     message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
 
