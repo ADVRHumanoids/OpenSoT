@@ -63,9 +63,10 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
     Eigen::Vector6d::Map(&_tmp[0], CHANNELS) = _wrench_error;
     _wrench_filt = Eigen::Vector6d::Map(_filter.process(_tmp).data(), CHANNELS);
     
-    apply_deadzone(_wrench_filt);
+    Eigen::Vector6d wrench_dz = _wrench_filt;
+    apply_deadzone(wrench_dz);
 
-    _desiredTwist = _C.asDiagonal()*_wrench_filt;
+    _desiredTwist = _C.asDiagonal()*wrench_dz;
 
     Cartesian::_update(x);
 }
@@ -159,6 +160,8 @@ void CartesianAdmittance::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id + "_K", _K);
     logger->add(_task_id + "_w", _w);
     logger->add(_task_id + "_dt", _dt);
+    
+    logger->add(_task_id + "_deadzone", _deadzone);
 
     Cartesian::_log(logger);
 }
@@ -255,6 +258,12 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Ve
                                                                  const double lambda, 
                                                                  const double dt)
 {
+
+    if(lambda != 0)
+    {
+        throw std::invalid_argument("TBD lambda > 0");
+    }
+
     if((C.array() < 0).any())
     {
         return false;
@@ -285,9 +294,11 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Ve
     
     _lambda = lambda;
     
-    _K = lambda * _C.cwiseInverse();
-    _D = _C * dt + lambda * (_C.cwiseProduct(omega)).cwiseInverse();
-    _M = (dt/lambda) * _D - ((dt*dt)/lambda) * _C;
+    _K.setZero();
+    _D = _C * dt;
+    _M = _C.cwiseProduct(omega).cwiseInverse() * dt;
+    _w = omega;
+    _dt = dt;
     
     
     return true;
