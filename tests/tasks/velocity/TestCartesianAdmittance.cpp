@@ -55,11 +55,11 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
     double dt = 0.001;
     //left_arm->setFilterTimeStep(dt);
 
-    double lambda = 0.001;
+    double lambda = 0.01;
 //    left_arm->setLambda(lambda);
 
     Eigen::Vector6d K; K<<1000., 1000., 1000., 1000., 1000., 1000.;
-    Eigen::Vector6d D; D<<10., 10., 10., 10., 10., 10.;
+    Eigen::Vector6d D; D<<200., 200., 200., 200., 200., 200.;
 
 //    left_arm->setStiffness(K);
 //    left_arm->setDamping(D);
@@ -68,9 +68,9 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
 
     Eigen::Vector6d I; I.setOnes();
 
-    Eigen::Vector6d _C = 1e-6*I; //computed from Matlab
+    Eigen::Vector6d _C = 1e-5*I; //computed from Matlab
     Eigen::Vector6d _M = 10.*I; //computed from Matlab
-    Eigen::Vector6d _w = 100.*I; //computed from Matlab
+    Eigen::Vector6d _w = 10.*I; //computed from Matlab
 
     Eigen::Vector6d C;
     Eigen::Vector6d M;
@@ -103,20 +103,18 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
     }
 
 
-    //Inverse Problem
+//    //Inverse Problem
     _C.segment(0,3) = 1e-6*I.segment(0,3);
     _C.segment(3,3) = 1e-7*I.segment(0,3);
     _w = 4.*M_PI*I;
 
     lambda = 0.01;
-    left_arm->setLambda(lambda);
     dt = 0.002;
-    left_arm->setFilterTimeStep(dt);
 
     K<<1e4, 1e4, 1e4, 1e5, 1e5, 1e5;
-    D<<1e3*0.7958, 1e3*0.7958, 1e3*0.7958, 1e3*7.9577, 1e3*7.9577, 1e3*7.9577;
+    D<<1e4*0.2796, 1e4*0.2796, 1e4*0.2796, 1e4*2.7958, 1e4*2.7958, 1e4*2.7958;
 
-    left_arm->computeParameters(K, D, left_arm->getLambda(), left_arm->getFilterTimeStep(), C, M, w);
+    left_arm->computeParameters(K, D, lambda, dt, C, M, w);
 
     std::cout<<"INVERSE PROBLEM"<<std::endl;
     std::cout<<"_C: ["<<_C.transpose()<<"]"<<std::endl;
@@ -128,7 +126,7 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
     for(unsigned int i = 0; i < 6; ++i)
     {
         EXPECT_NEAR(_C[i], C[i], 1e-3);
-        EXPECT_NEAR(_w[i], w[i], 1e-3);
+        EXPECT_NEAR(_w[i], w[i], 1e-2);
     }
 
 }
