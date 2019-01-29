@@ -118,21 +118,6 @@ void CartesianAdmittance::getCartesianCompliance(Eigen::Matrix6d& C)
     C = _C.asDiagonal();
 }
 
-void CartesianAdmittance::setFilterTimeStep(const double time_step)
-{
-    if(time_step > 0.)
-    {
-        if(computeParameters(_K, _D, _lambda, time_step, _C, _M, _w))
-        {
-            _dt = time_step;
-            for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
-                _filter.setTimeStep(time_step, i);
-            setFilterOmega(_w);
-        }
-    }
-    else
-        XBot::Logger::warning("time_step filter is negative!");
-}
 
 double CartesianAdmittance::getFilterTimeStep()
 {
@@ -195,8 +180,8 @@ bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K,
         {
             XBot::Logger::error("D[%d] <= (K[%d]*dt)/lambda \n", i, i);
 
-            std::cout<<"D[%d] = "<<D[i]<<std::endl;
-            std::cout<<"(K[%d]*dt)/lambda = "<<(K[i]*dt)/lambda<<std::endl;
+            XBot::Logger::error("D[%d] = %f \n",i, D[i]);
+            XBot::Logger::error("(K[%d]*dt)/lambda = %f \n",i, (K[i]*dt)/lambda);
             return false;
         }
     }
