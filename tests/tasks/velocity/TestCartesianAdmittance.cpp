@@ -103,33 +103,31 @@ TEST_F(testCartesianAdmittanceTask, testComputeParameters)
     }
 
 
-////    //Inverse Problem
-//    _C.segment(0,3) = 1e-6*I.segment(0,3);
-//    _C.segment(3,3) = 1e-7*I.segment(0,3);
-//    _w = 4.*M_PI*I;
+//    //Inverse Problem
+    _C.segment(0,3) = 1e-6*I.segment(0,3);
+    _C.segment(3,3) = 1e-7*I.segment(0,3);
+    _w = 4.*M_PI*I;
 
-//    lambda = 0.01;
-//    left_arm->setLambda(lambda);
-//    dt = 0.002;
-//    left_arm->setFilterTimeStep(dt);
+    lambda = 0.01;
+    dt = 0.002;
 
-//    K<<1e4, 1e4, 1e4, 1e5, 1e5, 1e5;
-//    D<<1e3*0.7958, 1e3*0.7958, 1e3*0.7958, 1e3*7.9577, 1e3*7.9577, 1e3*7.9577;
+    K<<1e4, 1e4, 1e4, 1e5, 1e5, 1e5;
+    D<<1e4*0.2796, 1e4*0.2796, 1e4*0.2796, 1e4*2.7958, 1e4*2.7958, 1e4*2.7958;
 
-//    left_arm->computeParameters(K, D, left_arm->getLambda(), left_arm->getFilterTimeStep(), C, M, w);
+    left_arm->computeParameters(K, D, lambda, dt, C, M, w);
 
-//    std::cout<<"INVERSE PROBLEM"<<std::endl;
-//    std::cout<<"_C: ["<<_C.transpose()<<"]"<<std::endl;
-//    std::cout<<"C: ["<<C.transpose()<<"]"<<std::endl;
-//    std::cout<<std::endl;
-//    std::cout<<"_w: ["<<_w.transpose()<<"]"<<std::endl;
-//    std::cout<<"w: ["<<w.transpose()<<"]"<<std::endl;
+    std::cout<<"INVERSE PROBLEM"<<std::endl;
+    std::cout<<"_C: ["<<_C.transpose()<<"]"<<std::endl;
+    std::cout<<"C: ["<<C.transpose()<<"]"<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"_w: ["<<_w.transpose()<<"]"<<std::endl;
+    std::cout<<"w: ["<<w.transpose()<<"]"<<std::endl;
 
-//    for(unsigned int i = 0; i < 6; ++i)
-//    {
-//        EXPECT_NEAR(_C[i], C[i], 1e-3);
-//        EXPECT_NEAR(_w[i], w[i], 1e-3);
-//    }
+    for(unsigned int i = 0; i < 6; ++i)
+    {
+        EXPECT_NEAR(_C[i], C[i], 1e-3);
+        EXPECT_NEAR(_w[i], w[i], 1e-2);
+    }
 
 }
 
