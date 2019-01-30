@@ -109,8 +109,11 @@ endif()
 
 if(${fcl_FOUND} AND ${moveit_core_FOUND})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
+    message("Adding src/constraints/velocity/CollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
-        src/constraints/velocity/SelfCollisionAvoidance.cpp)
+        src/constraints/velocity/SelfCollisionAvoidance.cpp
+        src/constraints/velocity/CollisionAvoidance.cpp
+        )
 endif()
 
 ##TASKS

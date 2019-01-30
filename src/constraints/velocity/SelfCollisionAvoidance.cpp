@@ -153,7 +153,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
 
     Affine3d Waist_frame_world_Eigen;
     robot_col.getPose(base_name, Waist_frame_world_Eigen);
-    Waist_frame_world_Eigen.inverse();
+    Waist_frame_world_Eigen = Waist_frame_world_Eigen.inverse();
 
     Matrix3d Waist_frame_world_Eigen_Ro = Waist_frame_world_Eigen.matrix().block(0,0,3,3);
     MatrixXd temp_trans_matrix(6,6); temp_trans_matrix.setZero(6,6);
