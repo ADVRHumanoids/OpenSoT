@@ -28,16 +28,19 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
 //    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
 //        _filter.setOmega(2.*M_PI*2., i); //This was found by experiments
 
+    _dt = 0.002;
+    _lambda = 0.01;
+
     _K.setOnes();
     _K.segment(0,3) *= 1e4; _K.segment(3,3) *= 1e5;
     _D.setOnes();
-    _D.segment(0,3) *= 1e3*0.7958; _D.segment(3,3) *= 1e3*7.9577;
+    _D = 1.1*_K*_dt/_lambda;
 
-    _dt = 0.002;
+
 
     setFilterDamping(1.);
 
-    _lambda = 0.01; //This was found by experiments
+     //This was found by experiments
 
     if(!computeParameters(_K, _D, _lambda, _dt, _C, _M, _w))
         throw std::runtime_error("Error in computeParameters!");
@@ -117,21 +120,6 @@ void CartesianAdmittance::getCartesianCompliance(Eigen::Matrix6d& C)
     C = _C.asDiagonal();
 }
 
-void CartesianAdmittance::setFilterTimeStep(const double time_step)
-{
-    if(time_step > 0.)
-    {
-        if(computeParameters(_K, _D, _lambda, time_step, _C, _M, _w))
-        {
-            _dt = time_step;
-            for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
-                _filter.setTimeStep(time_step, i);
-            setFilterOmega(_w);
-        }
-    }
-    else
-        XBot::Logger::warning("time_step filter is negative!");
-}
 
 double CartesianAdmittance::getFilterTimeStep()
 {
@@ -190,19 +178,19 @@ bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K,
 {
     for(unsigned int i = 0; i < 6; ++i)
     {
-        if(D[i] <= (lambda*dt)/K[i])
+        if(D[i] <= (K[i]*dt)/lambda)
         {
-            XBot::Logger::error("D[%d] <= (lambda*dt)/K[%d] \n", i, i);
+            XBot::Logger::error("D[%d] <= (K[%d]*dt)/lambda \n", i, i);
 
-            std::cout<<"D[%d] = "<<D[i]<<std::endl;
-            std::cout<<"(lambda*dt)/K[%d] = "<<(lambda*dt)/K[i]<<std::endl;
+            XBot::Logger::error("D[%d] = %f \n",i, D[i]);
+            XBot::Logger::error("(K[%d]*dt)/lambda = %f \n",i, (K[i]*dt)/lambda);
             return false;
         }
     }
 
     C = lambda * (K.asDiagonal().inverse()).diagonal();
 
-    M = (dt/lambda) * D - ((dt*dt)/lambda) * C;
+    M = (dt/lambda) * D - ((dt*dt)/lambda) * (C.asDiagonal().inverse()).diagonal();
 
     _tmp_vec6 = C.array()*M.array();
     w = dt*(_tmp_vec6.asDiagonal().inverse()).diagonal();

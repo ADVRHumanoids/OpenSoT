@@ -115,8 +115,6 @@ namespace OpenSoT {
             */
            const Eigen::Matrix6d getDamping();
            
-           void setFilterTimeStep(const double time_step);
-           
            double getFilterTimeStep();
            
            void setFilterDamping(const double damping);
@@ -174,6 +172,13 @@ namespace OpenSoT {
                                   Eigen::Vector6d& C, 
                                   Eigen::Vector6d& M, 
                                   Eigen::Vector6d& w);
+
+           /**
+            * @brief setLambda do nothing in CartesianAdmittance, use instead the setRawParams() or
+            * the setImpedanceParams()
+            * @param lambda
+            */
+           void setLambda(double lambda){XBot::Logger::warning("setLambda do nothing in CartesianAdmittance, use instead the setRawParams() or the setImpedanceParams()");}
 
 
          private:

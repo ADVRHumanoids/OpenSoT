@@ -36,8 +36,6 @@ private:
     XBot::ModelInterface& _robot;
     GenericConstraint::Ptr _generic_constraint_internal;
 
-    AffineHelper _tmp;
-
     Eigen::VectorXd _qdot;
     Eigen::VectorXd _qdotmin, _qdotmax;
 
