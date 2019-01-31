@@ -57,16 +57,18 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
         _robot.getPose(_distal_link, _base_link, _bl_T_ft);
     }
     
-
-    _wrench_error = XBot::Utils::GetAdjointFromRotation(_bl_T_ft.linear())*_wrench_measured - _wrench_reference;
+    
+    _wrench_error = XBot::Utils::GetAdjointFromRotation(_bl_T_ft.linear())*_wrench_measured;
+    
+    apply_deadzone(_wrench_error);
+    
+    _wrench_error -= _wrench_reference;
 
     Eigen::Vector6d::Map(&_tmp[0], CHANNELS) = _wrench_error;
     _wrench_filt = Eigen::Vector6d::Map(_filter.process(_tmp).data(), CHANNELS);
     
-    Eigen::Vector6d wrench_dz = _wrench_filt;
-    apply_deadzone(wrench_dz);
 
-    _desiredTwist = _C.asDiagonal()*wrench_dz;
+    _desiredTwist = _C.asDiagonal()*_wrench_filt;
 
     Cartesian::_update(x);
 }
