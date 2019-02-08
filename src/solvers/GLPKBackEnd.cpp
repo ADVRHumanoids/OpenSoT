@@ -119,7 +119,6 @@ bool GLPKBackEnd::solve()
     //SETTING CONSTRAINT MATRIX
     glp_load_matrix(_mip, _A.rows()*_A.cols(), _rows.data(), _cols.data(), _a.data());
 
-
     int out = glp_intopt(_mip, &_param);
     if(out != 0)
     {
@@ -145,6 +144,10 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
     createsVectorsFromConstraintsMatrix();
+
+    _opt.ROUND_BOUNDS = 0; //bounds are not rounded (default)
+
+
     roundBounds();
 
 
@@ -201,6 +204,9 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
     for(unsigned int i = 0; i < _solution.size(); ++i)
         _solution[i] = glp_mip_col_val(_mip, i+1);
+
+
+    _opt.param = boost::make_shared<glp_iocp>(_param);
     return true;
 }
 
