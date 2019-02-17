@@ -97,7 +97,6 @@ CollisionAvoidance::CollisionAvoidance ( const Eigen::VectorXd& x,
         XBot::ModelInterface &robot,
         std::string& base_link,
         const std::vector<std::string> &interested_robot_links,
-//         const std::map<std::string, Eigen::Affine3d> &envionment_collision_frames,
         const std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> &envionment_collision_objects,
         const double &detection_threshold,
         const double &linkPair_threshold,
@@ -113,29 +112,6 @@ CollisionAvoidance::CollisionAvoidance ( const Eigen::VectorXd& x,
     base_name ( base_link )
 {
     _J_transform.setZero ( 3,6 );
-
-//     _interested_links = interested_robot_links;
-//     _environment_link = environment_links;
-
-//     std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> envionment_collision_objects;
-// //     std::shared_ptr<fcl::CollisionGeometryd> shape = std::make_shared<fcl::Capsuled> ( 0.5,2 );
-// //     std::shared_ptr<fcl::CollisionGeometryd> shape = std::make_shared<fcl::Boxd> ( 1, 1, 1.4);
-//     std::shared_ptr<fcl::CollisionGeometryd> shape = std::make_shared<fcl::Boxd> ( 0.1, 0.6, 1.4);
-// //     boost::shared_ptr<fcl::CollisionObject> collision_object ( new fcl::CollisionObject ( shape ) );
-// 
-//     for ( auto &it:envionment_collision_frames ) {
-//         boost::shared_ptr<fcl::CollisionObjectd> collision_object ( new fcl::CollisionObjectd ( shape ) );
-//         envionment_collision_objects[it.first] = collision_object;
-//         fcl::Transform3d shape_origin;
-// 	shape_origin.translation() = it.second.translation();
-// 	shape_origin.linear() = it.second.linear();
-// // 	shape_origin.linear() = it.
-// //         Eigen::Affine3d pose = it.second;
-// //         Eigen::Quaterniond quat ( pose.linear() );
-// //         shape_origin.setQuatRotation ( fcl::Quaternion3f ( quat.w(),quat.x(),quat.y(),quat.z() ) );
-// //         shape_origin.setTranslation ( fcl::Vec3f(pose.translation()(0), pose.translation()(1), pose.translation()(2)));
-//         envionment_collision_objects[it.first]->setTransform ( shape_origin );
-//     }
 
     for ( auto &it1:_interested_links ) {
         for ( auto &it2:envionment_collision_objects ) {
