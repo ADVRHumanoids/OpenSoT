@@ -134,8 +134,8 @@
                                        XBot::ModelInterface &robot,
                                        std::string& base_link,
                                        const std::vector<std::string> &interested_robot_links,
-				       const std::map<std::string, Eigen::Affine3d> &envionment_collision_frames,
-//                                        const std::map<std::string, boost::shared_ptr<fcl::CollisionObject>> &envionment_collision_objects,
+// 				       const std::map<std::string, Eigen::Affine3d> &envionment_collision_frames,
+                                       const std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> &envionment_collision_objects,
                                        const double &detection_threshold = std::numeric_limits<double>::infinity(),
                                        const double &linkPair_threshold = 0.0,
                                        const double &boundScaling = 1.0);
