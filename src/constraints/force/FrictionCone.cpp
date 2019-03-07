@@ -28,14 +28,6 @@ namespace OpenSoT {
                _wrenches = _wrenches / w;
            }
 
-           Eigen::Affine3d wTli;
-           for(unsigned int i = 0; i < _n_of_contacts; ++i)
-           {
-               _robot.getPose(_mu[i].first, wTli);
-               _wTl.push_back(wTli);
-           }
-
-
            update(Eigen::VectorXd::Zero(0));
 
        }
@@ -59,13 +51,6 @@ namespace OpenSoT {
                _wrenches = _wrenches / w;
            }
 
-           Eigen::Affine3d wTli;
-           for(unsigned int i = 0; i < _n_of_contacts; ++i)
-           {
-               _robot.getPose(_mu[i].first, wTli);
-               _wTl.push_back(wTli);
-           }
-
            update(Eigen::VectorXd::Zero(0));
 
        }
@@ -81,7 +66,8 @@ namespace OpenSoT {
            for(unsigned int i = 0; i < _n_of_contacts; ++i)
            {
 
-                double __mu = _mu[i].second;
+                double __mu = _mu[i].second.second;
+                _wRl = _mu[i].second.first;
 
                 __mu = std::sqrt(2.*__mu)/2.;
 
@@ -91,7 +77,7 @@ namespace OpenSoT {
                 _Ci(3,0) = 0.; _Ci(3,1) = -1.; _Ci(3,2) = -__mu;
                 _Ci(4,0) = 0.; _Ci(4,1) = 0.; _Ci(4,2) = -1.;
 
-                _Ci = _Ci*_wTl[i].linear().transpose();
+                _Ci = _Ci*_wRl.transpose();
 
                 _A.block<5,3>(5*i, 6*i) = _Ci;
            }
