@@ -17,9 +17,9 @@ namespace OpenSoT {
 
 
            OptvarHelper::VariableVector vars;
-           for(auto fc : mu){
-               vars.emplace_back(fc.first + "_wrench", 6);
-           }
+           for(unsigned int i = 0; i < _n_of_contacts; ++i)
+            vars.emplace_back("wrench_"+i, 6);
+
 
            OptvarHelper opthelper(vars);
            _wrenches.setZero(x.size(), 0);
@@ -66,8 +66,8 @@ namespace OpenSoT {
            for(unsigned int i = 0; i < _n_of_contacts; ++i)
            {
 
-                double __mu = _mu[i].second.second;
-                _wRl = _mu[i].second.first;
+                double __mu = _mu[i].second;
+                _wRl = _mu[i].first;
 
                 __mu = std::sqrt(2.*__mu)/2.;
 
@@ -106,6 +106,15 @@ namespace OpenSoT {
                _Aineq = _friction_cone.getM();
                _bUpperBound = - _friction_cone.getq();
 
+       }
+
+       bool FrictionCone::setContactRotationMatrix(const Eigen::Matrix3d& wRl, const unsigned int i)
+       {
+           if(i >= _n_of_contacts)
+               return false;
+
+           _mu[i].first = wRl;
+           return true;
        }
 
        }

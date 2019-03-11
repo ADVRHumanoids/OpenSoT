@@ -40,7 +40,7 @@
                  * @brief friction_cone is defined by a Rotation matrix (the rotation from world frame to contatc
                  * surface) and friction coefficient
                  */
-                typedef std::pair<std::string, std::pair<Eigen::Matrix3d, double> > friction_cone;
+                typedef std::pair<Eigen::Matrix3d, double> friction_cone;
                 typedef std::vector<friction_cone> friction_cones;
 
         /**
@@ -86,6 +86,14 @@
         void setMu(const friction_cones& mu){ _mu = mu;}
 
         int getNumberOfContacts(){return _n_of_contacts;}
+
+        /**
+         * @brief setContactRotationMatrix set the contact roation matrix for the ith-contact
+         * @param wRl
+         * @param i
+         * @return true if everything went fine
+         */
+        bool setContactRotationMatrix(const Eigen::Matrix3d& wRl, const unsigned int i);
 
     private:
         void computeAineq();
