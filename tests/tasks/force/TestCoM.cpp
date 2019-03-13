@@ -105,9 +105,11 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     OpenSoT::constraints::force::FrictionCone::friction_cones friction_cones;
     OpenSoT::constraints::force::FrictionCone::friction_cone friction_cone;
     double mu = 2.;
+    Eigen::Affine3d T;
     for(unsigned int i = 0; i < links_in_contact.size(); ++i)
     {
-        friction_cone.first = links_in_contact[i];
+        _model_ptr->getPose(links_in_contact[i], T);
+        friction_cone.first = T.linear();
         friction_cone.second = mu;
         friction_cones.push_back(friction_cone);
     }

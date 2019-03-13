@@ -85,7 +85,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testCartesianAccelerationTask
                   testCoMAccelerationTask
                   testContactFloatingBaseTask
-                  #testCoMForceTask
+                  testCoMForceTask
                   testTask
                   testPiler
                   testKinematicEstimationFloatingBase
@@ -423,10 +423,10 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
 endif()
 
-#ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
-#TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
-#add_dependencies(testCoMForceTask GTest-ext OpenSoT)
-#add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
+ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
+TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
+add_dependencies(testCoMForceTask GTest-ext OpenSoT)
+add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 
 #ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
