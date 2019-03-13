@@ -68,7 +68,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_SubTask
                   testQPOases_FF
                   testQPOases_AutoStack
-                  #testFrictionConeForceConstraint
+                  testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
                   testManipulabilityTask
@@ -269,10 +269,10 @@ if(${trajectory_utils_FOUND})
     add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)  
 endif()
 
-#ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
-#TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs} ${catkin_LIBRARIES})
-#add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
-#add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
+ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
+TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs} ${catkin_LIBRARIES})
+add_dependencies(testFrictionConeForceConstraint GTest-ext OpenSoT)
+add_test(NAME OpenSoT_constraint_force_FrictionCones COMMAND testFrictionConeForceConstraint)
 
 ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
 TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${PCL_LIBRARIES})
