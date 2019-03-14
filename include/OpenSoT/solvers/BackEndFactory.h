@@ -10,7 +10,8 @@ namespace OpenSoT{
             qpOASES,
             OSQP,
             CBC,
-            GLPK
+            GLPK,
+            uQuadProg
         };
 
         /**

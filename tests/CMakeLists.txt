@@ -104,6 +104,10 @@ if(${GLPK_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver)
 endif()
 
+if(${uQuadProg_FOUND})
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testuQuadProgSolver)
+endif()
+
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
                                        testAggregatedTask)
@@ -244,6 +248,13 @@ if(${GLPK_FOUND})
     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs})
     add_dependencies(testGLPKSolver GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
+endif()
+
+if(${uQuadProg_FOUND})
+    ADD_EXECUTABLE(testuQuadProgSolver solvers/TestuQuadProg.cpp)
+    TARGET_LINK_LIBRARIES(testuQuadProgSolver ${TestLibs})
+    add_dependencies(testuQuadProgSolver GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_solvers_uquadprog COMMAND testuQuadProgSolver)
 endif()
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
