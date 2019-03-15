@@ -67,24 +67,38 @@ void uQuadProgBackEnd::__generate_data_struct()
         if(_ci0.size() != _ci0Piler.generate_and_get().rows())
             _ci0.resize(_ci0Piler.generate_and_get().rows());
 
+        Eigen::Map<Eigen::VectorXd>(_ci0.data().begin(),_ci0Piler.generate_and_get().size()) =
+                                        _ci0Piler.generate_and_get();
+        /**
+          * Here I use a trick: basically Eigen::Matrix Xd storage is column-major while
+          * boost::numeric::ublas::matrix is row major. So to copy _CIPiler.transpose() data I just
+          * copy _CIPiler data without any transpose.
+          **/
+        Eigen::Map<Eigen::MatrixXd>(_CI.data().begin(),
+                                    _CIPiler.generate_and_get().rows(), _CIPiler.generate_and_get().cols()) =
+                                    _CIPiler.generate_and_get();
+
 
         /** TODO: use eigen maps instead! **/
-        for(unsigned int i = 0; i < _CIPiler.generate_and_get().rows(); ++i)
-        {
-            _ci0(i) = _ci0Piler.generate_and_get()(i,0);
-            for(unsigned int j = 0; j < _CIPiler.generate_and_get().cols(); ++j)
-                _CI(j,i) = _CIPiler.generate_and_get()(i,j);
-        }
+//        for(unsigned int i = 0; i < _CIPiler.generate_and_get().rows(); ++i)
+//        {
+//            _ci0(i) = _ci0Piler.generate_and_get()(i,0);
+////            for(unsigned int j = 0; j < _CIPiler.generate_and_get().cols(); ++j)
+////                _CI(j,i) = _CIPiler.generate_and_get()(i,j);
+//        }
 
+        Eigen::Map<Eigen::VectorXd>(_g0.data().begin(),_g.size()) = _g;
+        /** Here _H is symmetric SDP **/
+        Eigen::Map<Eigen::MatrixXd>(_G.data().begin(), _H.rows(), _H.cols()) = _H;
 
     //Cost Function (here we add manual regularisation)
-        /** TODO: use eigen maps instead! **/
-        for(unsigned int i = 0; i < _H.rows(); ++i)
-        {
-            _g0(i) = _g(i);
-            for(unsigned int j = 0; j < _H.cols(); ++j)
-                _G(i,j) = _H(i,j);
-        }
+//        /** TODO: use eigen maps instead! **/
+//        for(unsigned int i = 0; i < _H.rows(); ++i)
+//        {
+//            _g0(i) = _g(i);
+//            for(unsigned int j = 0; j < _H.cols(); ++j)
+//                _G(i,j) = _H(i,j);
+//        }
 
         for(int i = 0; i < _G.size1(); ++i)
             _G(i,i) += _eps_regularisation*BASE_REGULARISATION; //TO HAVE COMPATIBILITY WITH THE QPOASES ONE!
@@ -99,18 +113,14 @@ bool uQuadProgBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::Vector
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u; //this is needed since updateX should be used just to update and not init (maybe can be done in the base class)
     __generate_data_struct();
 
-
-    bool success = true;
     const double inf = std::numeric_limits<double>::infinity();
 
-
     _f_value = solve_quadprog(_G, _g0, _CE, _ce0, _CI, _ci0, _x);
-    if(_f_value == inf)
+    if(_f_value == inf) ///TODO: It should be that there are other false cases!
         return false;
-
-    for(unsigned int i = 0; i < _x.size(); ++i)
-        _solution(i) = _x(i);
-
+    _solution = Eigen::Map<Eigen::VectorXd>(_x.data().begin(),_x.size());
+//    for(unsigned int i = 0; i < _x.size(); ++i)
+//        _solution(i) = _x(i);
     return true;
 }
 
@@ -118,14 +128,14 @@ bool uQuadProgBackEnd::solve()
 {
     __generate_data_struct();
 
-    bool success = true;
     const double inf = std::numeric_limits<double>::infinity();
 
     _f_value = solve_quadprog(_G, _g0, _CE, _ce0, _CI, _ci0, _x);
-    if(_f_value == inf)
+    if(_f_value == inf) ///TODO: It should be that there are other false cases!
         return false;
-    for(unsigned int i = 0; i < _x.size(); ++i)
-        _solution(i) = _x(i);
+    _solution = Eigen::Map<Eigen::VectorXd>(_x.data().begin(),_x.size());
+//    for(unsigned int i = 0; i < _x.size(); ++i)
+//        _solution(i) = _x(i);
     return true;
 }
 
