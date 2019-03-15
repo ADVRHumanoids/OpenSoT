@@ -4,7 +4,16 @@
 #include <OpenSoT/solvers/BackEnd.h>
 #include <boost/shared_ptr.hpp>
 #include <OpenSoT/utils/Piler.h>
-#include <uquadprog.hpp>
+
+#define EIGQUADPROG
+
+#ifdef UQUADPROG
+    #include <uquadprog.hpp>
+#endif
+
+#ifdef EIGQUADPROG
+    #include <eiquadprog.hpp>
+#endif
 
 #define UQUADPROG_DEFAULT_EPS_REGULARISATION 0
 
@@ -42,6 +51,7 @@ private:
     double _eps_regularisation;
     Eigen::MatrixXd _I;
 
+#ifdef UQUADPROG
     //These are for the cost function: 0.5 * x G x + g0 x
     boost::numeric::ublas::matrix<double> _G;
     boost::numeric::ublas::vector<double> _g0;
@@ -53,14 +63,19 @@ private:
 
     //These are for inequality constraints: CE^T x + ce0 => 0
     boost::numeric::ublas::matrix<double> _CI;
-    MatrixPiler _CIPiler;
     boost::numeric::ublas::vector<double> _ci0;
-    VectorPiler _ci0Piler;
 
     //Solution
     boost::numeric::ublas::vector<double> _x;
+#endif
+
+    MatrixPiler _CIPiler;
+    VectorPiler _ci0Piler;
+
+
 
     void __generate_data_struct();
+
 
     double _f_value;
 

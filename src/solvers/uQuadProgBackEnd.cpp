@@ -22,20 +22,23 @@ uQuadProgBackEnd::uQuadProgBackEnd(const int number_of_variables,
                                    const double eps_regularisation):
     BackEnd(number_of_variables, number_of_constraints),
     _eps_regularisation(eps_regularisation),
+#ifdef UQUADPROG
     /** initialization of uQuadProg matrices and vectors **/
     _G(number_of_variables, number_of_variables,0),
     _g0(number_of_variables,0),
     _CI(number_of_variables, 2*number_of_constraints+2*number_of_variables,0),
     _ci0(2*number_of_constraints+2*number_of_variables,0),
+    /** solution **/
+    _x(number_of_variables),
+#endif
     /** initialization of Pilers **/
     _CIPiler(number_of_variables),
-    _ci0Piler(1),
-    /** solution **/
-    _x(number_of_variables)
+    _ci0Piler(1)
 {
     _I.setIdentity(number_of_variables, number_of_variables);
 
 }
+
 
 void uQuadProgBackEnd::__generate_data_struct()
 {
@@ -61,6 +64,7 @@ void uQuadProgBackEnd::__generate_data_struct()
             _ci0Piler.pile(_uA);
         }
 
+#ifdef UQUADPROG
         /** THESE ARE NOT RT-SAFE BUT SHOULD HAPPEN ONLY ONCE! **/
         if(_CI.size2() != _CIPiler.generate_and_get().rows() || _CI.size1() != _CIPiler.generate_and_get().cols())
             _CI.resize(_CIPiler.generate_and_get().cols(), _CIPiler.generate_and_get().rows());
@@ -103,6 +107,12 @@ void uQuadProgBackEnd::__generate_data_struct()
         for(int i = 0; i < _G.size1(); ++i)
             _G(i,i) += _eps_regularisation*BASE_REGULARISATION; //TO HAVE COMPATIBILITY WITH THE QPOASES ONE!
                                                                 // Not sure if should be _eps_regularisation**2!
+#endif
+
+#ifdef EIGQUADPROG
+        for(int i = 0; i < _H.rows(); ++i)
+            _H(i,i) += _eps_regularisation*BASE_REGULARISATION;
+#endif
 }
 
 bool uQuadProgBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
@@ -115,6 +125,7 @@ bool uQuadProgBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::Vector
 
     const double inf = std::numeric_limits<double>::infinity();
 
+#ifdef UQUADPROG
     _f_value = solve_quadprog(_G, _g0, _CE, _ce0, _CI, _ci0, _x);
     if(_f_value == inf) ///TODO: It should be that there are other false cases!
         return false;
@@ -122,6 +133,18 @@ bool uQuadProgBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::Vector
 //    for(unsigned int i = 0; i < _x.size(); ++i)
 //        _solution(i) = _x(i);
     return true;
+#endif
+
+#ifdef EIGQUADPROG
+    _f_value = solve_quadprog(_H, _g, Eigen::MatrixXd(), Eigen::VectorXd(),
+                              _CIPiler.generate_and_get().transpose(),
+                              _ci0Piler.generate_and_get(),
+                              _solution);
+    if(_f_value == inf) ///TODO: It should be that there are other false cases!
+        return false;
+    return true;
+#endif
+
 }
 
 bool uQuadProgBackEnd::solve()
@@ -130,6 +153,7 @@ bool uQuadProgBackEnd::solve()
 
     const double inf = std::numeric_limits<double>::infinity();
 
+#ifdef UQUADPROG
     _f_value = solve_quadprog(_G, _g0, _CE, _ce0, _CI, _ci0, _x);
     if(_f_value == inf) ///TODO: It should be that there are other false cases!
         return false;
@@ -137,6 +161,17 @@ bool uQuadProgBackEnd::solve()
 //    for(unsigned int i = 0; i < _x.size(); ++i)
 //        _solution(i) = _x(i);
     return true;
+#endif
+
+#ifdef EIGQUADPROG
+    _f_value = solve_quadprog(_H, _g, Eigen::MatrixXd(), Eigen::VectorXd(),
+                              _CIPiler.generate_and_get().transpose(),
+                              _ci0Piler.generate_and_get(),
+                              _solution);
+    if(_f_value == inf) ///TODO: It should be that there are other false cases!
+        return false;
+    return true;
+#endif
 }
 
 double uQuadProgBackEnd::getObjective()
