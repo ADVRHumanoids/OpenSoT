@@ -107,6 +107,8 @@ std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
         return "CBC";
     if(be_solver == solver_back_ends::GLPK)
         return "GLPK";
+    if(be_solver == solver_back_ends::uQuadProg)
+        return "uQuadProg";
     else
         return "????";
 }
