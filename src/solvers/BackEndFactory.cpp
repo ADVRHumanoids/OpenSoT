@@ -78,16 +78,16 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
                                                   number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
 
-    if(be_solver == solver_back_ends::uQuadProg) {
+    if(be_solver == solver_back_ends::eiQuadProg) {
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEnduQuadProg.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndeiQuadProg.so", "LD_LIBRARY_PATH");
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEnduQuadProg.so must be listed inside LD_LIBRARY_PATH");
         }
 
         return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
-                                                  "OpenSotBackEnduQuadProg",
+                                                  "OpenSotBackEndeiQuadProg",
                                                   number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
     
@@ -107,8 +107,8 @@ std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
         return "CBC";
     if(be_solver == solver_back_ends::GLPK)
         return "GLPK";
-    if(be_solver == solver_back_ends::uQuadProg)
-        return "uQuadProg";
+    if(be_solver == solver_back_ends::eiQuadProg)
+        return "eiQuadProg";
     else
         return "????";
 }
