@@ -52,19 +52,6 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
                                                   number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
     
-    if(be_solver == solver_back_ends::CBC) { 
-
-        /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndCBC.so", "LD_LIBRARY_PATH");
-        if (path_to_shared_lib == "") {
-            throw std::runtime_error("libOpenSotBackEndCBC.so must be listed inside LD_LIBRARY_PATH");
-        }
-        
-        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
-                                                  "OpenSotBackEndCBC",
-                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
-    }
-    
     if(be_solver == solver_back_ends::GLPK) { 
 
         /* Obtain full path to shared lib */
@@ -103,8 +90,6 @@ std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
         return "qpOASES";
     if(be_solver == solver_back_ends::OSQP)
         return "OSQP";
-    if(be_solver == solver_back_ends::CBC)
-        return "CBC";
     if(be_solver == solver_back_ends::GLPK)
         return "GLPK";
     if(be_solver == solver_back_ends::eiQuadProg)

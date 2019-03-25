@@ -9,7 +9,6 @@ namespace OpenSoT{
         enum class solver_back_ends{
             qpOASES,
             OSQP,
-            CBC,
             GLPK,
             eiQuadProg
         };
