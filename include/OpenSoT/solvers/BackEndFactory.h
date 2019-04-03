@@ -11,7 +11,7 @@ namespace OpenSoT{
             OSQP,
             CBC,
             GLPK,
-            uQuadProg
+            eiQuadProg
         };
 
         /**

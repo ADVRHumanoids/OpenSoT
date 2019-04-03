@@ -81,7 +81,7 @@ TEST_F(testuQuadProgProblem, testSimpleProblem)
                 OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,0.);
 
     OpenSoT::solvers::BackEnd::Ptr testProblemuQuadProg = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::uQuadProg, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,0.);
+                OpenSoT::solvers::solver_back_ends::eiQuadProg, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,0.);
 
     EXPECT_TRUE(testProblemQPOASES->initProblem(sp.H,
                             sp.g,
@@ -193,7 +193,7 @@ TEST_F(testuQuadProgProblem, testTask)
 
     //OpenSoT::solvers::OSQPBackEnd qp_postural_problem(postural_task.getXSize(), 0);
     OpenSoT::solvers::BackEnd::Ptr qp_postural_problem = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::uQuadProg, postural_task.getXSize(), 0,
+                OpenSoT::solvers::solver_back_ends::eiQuadProg, postural_task.getXSize(), 0,
                 OpenSoT::HST_IDENTITY,0.);
 
     qp_postural_problem->initProblem(H,g,Eigen::MatrixXd(0,0),Eigen::VectorXd(),Eigen::VectorXd(),Eigen::VectorXd(),Eigen::VectorXd());
@@ -247,7 +247,7 @@ TEST_F(testuQuadProgProblem, testProblemWithConstraint)
 
         //OpenSoT::solvers::OSQPBackEnd qp_postural_problem(postural_task->getXSize(), 0);
         OpenSoT::solvers::BackEnd::Ptr qp_postural_problem = OpenSoT::solvers::BackEndFactory(
-                    OpenSoT::solvers::solver_back_ends::uQuadProg, postural_task->getXSize(), 0,
+                    OpenSoT::solvers::solver_back_ends::eiQuadProg, postural_task->getXSize(), 0,
                     OpenSoT::HST_IDENTITY,0.);
 
         std::list< OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraint_list =
@@ -358,7 +358,7 @@ TEST_F(testuQuadProgProblem, testCartesian)
 
     //OpenSoT::solvers::OSQPBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0);
     OpenSoT::solvers::BackEnd::Ptr qp_cartesian_problem = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::uQuadProg, cartesian_task->getXSize(), 0,
+                OpenSoT::solvers::solver_back_ends::eiQuadProg, cartesian_task->getXSize(), 0,
                 OpenSoT::HST_SEMIDEF,1e6);
 
     ASSERT_TRUE(qp_cartesian_problem->initProblem(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb(),
@@ -452,7 +452,7 @@ TEST_F(testuQuadProgProblem, testContructor2Problems)
     std::cout<<"Initial Position Error: "<<cartesian_task->getError().head(3)<<std::endl;
     std::cout<<"Initial Orientation Error: "<<cartesian_task->getError().tail(3)<<std::endl;
 
-    OpenSoT::solvers::iHQP sot(stack_of_tasks, joint_constraints, 1e6, OpenSoT::solvers::solver_back_ends::uQuadProg);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, joint_constraints, 1e6, OpenSoT::solvers::solver_back_ends::eiQuadProg);
 
 
     KDL::Frame T_ref_kdl;
@@ -552,7 +552,7 @@ TEST_F(testiHQP, testContructor1Problem)
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
-    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds, 1e-6, OpenSoT::solvers::solver_back_ends::uQuadProg);
+    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds, 1e-6, OpenSoT::solvers::solver_back_ends::eiQuadProg);
     double obj;
     sot.getObjective(0, obj);
     obj = norm(obj);
