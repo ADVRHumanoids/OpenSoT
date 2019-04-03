@@ -148,6 +148,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
                     src/tasks/velocity/JointAdmittance.cpp
+                    src/tasks/velocity/CentauroAnkleSteering.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/tasks/force/CoM.cpp
