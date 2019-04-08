@@ -21,6 +21,9 @@
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/tasks/MinimizeVariable.h>
+#include <OpenSoT/tasks/Aggregated.h>
+#include <boost/make_shared.hpp>
+#include <OpenSoT/utils/AutoStack.h>
 
 namespace OpenSoT {
    namespace tasks {
@@ -45,6 +48,22 @@ namespace OpenSoT {
 
         };
 
+        class Wrenches : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+        public:
+            typedef boost::shared_ptr<Wrenches> Ptr;
+
+            Wrenches(const std::vector<std::string>& contact_name,
+                     std::vector<AffineHelper> wrenches);
+
+            Wrench::Ptr getWrenchTask(const std::string& contact_name);
+
+        private:
+            std::map<std::string, Wrench::Ptr> wrench_tasks;
+            OpenSoT::tasks::Aggregated::Ptr _aggregated_task;
+            virtual void _update(const Eigen::VectorXd& x);
+
+
+        };
 
        }
    }
