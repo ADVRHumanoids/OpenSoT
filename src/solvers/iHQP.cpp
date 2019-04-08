@@ -268,6 +268,7 @@ bool iHQP::solve(Eigen::VectorXd &solution)
                 return false;
 
             solution = _qp_stack_of_tasks[i]->getSolution();
+            
         }
         else
         {

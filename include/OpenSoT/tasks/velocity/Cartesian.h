@@ -90,6 +90,11 @@
                 Eigen::Vector3d positionError;
                 Eigen::Vector3d orientationError;
 
+                bool _is_body_jacobian;
+
+                Eigen::MatrixXd _tmp_A;
+                Eigen::VectorXd _tmp_b;
+
             public:
                 /*********** TASK PARAMETERS ************/
 
@@ -113,7 +118,7 @@
 
                 ~Cartesian();
 
-                void _update(const Eigen::VectorXd& x);
+                virtual void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.
@@ -190,7 +195,7 @@
                 const std::string getBaseLink() const;
                 const bool baseLinkIsWorld() const;
 
-                void setLambda(double lambda);
+                virtual void setLambda(double lambda);
 
                 /**
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
@@ -216,7 +221,13 @@
                  * @brief reset set as actual Cartesian reference the actual pose
                  * @return
                  */
-                bool reset();
+                virtual bool reset();
+
+                /**
+                 * @brief setIsBodyJacobian
+                 * @param is_body_jacobian if true jacobians are in body (ee reference)
+                 */
+                void setIsBodyJacobian(const bool is_body_jacobian);
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

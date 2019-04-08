@@ -25,15 +25,13 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
                          const int number_of_constraints,
                          const double eps_regularisation):
     BackEnd(number_of_variables, number_of_constraints),
-    _eps_regularisation(eps_regularisation),
-    _I(number_of_variables)
+    _eps_regularisation(eps_regularisation)
 {
     
     #ifdef DLONG
         throw std::runtime_error("DLONG option in OSQP should be set to OFF in CMakeLists!");
     #endif
     
-    _eye.setIdentity(number_of_variables, number_of_variables);
     _P_values.resize(getNumVariables()*(getNumVariables() + 1)/2);
     
     _settings.reset(new OSQPSettings());

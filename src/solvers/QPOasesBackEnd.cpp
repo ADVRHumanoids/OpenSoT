@@ -9,13 +9,7 @@
 #include <XBotInterface/Logger.hpp>
 #include <XBotInterface/SoLib.h>
 
-#define GREEN "\033[0;32m"
-#define YELLOW "\033[0;33m"
-#define RED "\033[0;31m"
-#define DEFAULT "\033[0m"
-
 using namespace OpenSoT::solvers;
-
 
 /* Define factories for dynamic loading */
 extern "C" BackEnd * create_instance(const int number_of_variables,
@@ -44,6 +38,10 @@ QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
     _dual_solution(number_of_variables),
     _opt(new qpOASES::Options())
 {
+#ifdef OPENSOT_VERBOSE
+    XBot::Logger::SetVerbosityLevel(XBot::Logger::Severity::LOW);
+#endif
+
     setDefaultOptions();
 }
 
@@ -124,7 +122,7 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
         _problem->printProperties();
 
         if(val == qpOASES::RET_INIT_FAILED_INFEASIBILITY)
-            checkInfeasibility();
+            printConstraintsInfo();
 
         XBot::Logger::error("ERROR INITIALIZING QP PROBLEM \n");
         XBot::Logger::error("CODE ERROR: %i \n", val);
@@ -161,8 +159,8 @@ bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
         assert(_g.rows() == _H.rows());
         return false;}
     if(!(_H.cols() == H.cols())){
-        std::cout<<RED<<"H cols: "<<H.cols()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"should be: "<<_H.cols()<<DEFAULT<<std::endl;
+        XBot::Logger::error("H cols: %i \n", H.cols());
+        XBot::Logger::error("should be: %i \n", _H.cols());
         return false;}
 
     if(_H.rows() == H.rows())
@@ -195,16 +193,16 @@ bool QPOasesBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& 
                                const Eigen::Ref<const Eigen::VectorXd> &uA)
 {
     if(!(A.cols() == _H.cols())){
-        std::cout<<RED<<"A cols: "<<A.cols()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"should be: "<<_H.cols()<<DEFAULT<<std::endl;
+        XBot::Logger::error("A cols: %i \n", A.cols());
+        XBot::Logger::error("should be: %i \n", _H.cols());
         return false;}
     if(!(lA.rows() == A.rows())){
-        std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"A rows: "<<A.rows()<<DEFAULT<<std::endl;
+        XBot::Logger::error("lA size: %i \n", lA.rows());
+        XBot::Logger::error("A rows: %i \n", A.rows());
         return false;}
     if(!(lA.rows() == uA.rows())){
-        std::cout<<RED<<"lA size: "<<lA.rows()<<DEFAULT<<std::endl;
-        std::cout<<RED<<"uA size: "<<uA.rows()<<DEFAULT<<std::endl;
+        XBot::Logger::error("lA size: %i \n", lA.rows());
+        XBot::Logger::error("uA size: %i \n", uA.rows());
         return false;}
 
     if(A.rows() == _A.rows())
@@ -247,8 +245,8 @@ bool QPOasesBackEnd::solve()
 
     if(val != qpOASES::SUCCESSFUL_RETURN){
 #ifdef OPENSOT_VERBOSE
-        std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN HOTSTART! ERROR "<<val<<DEFAULT<<std::endl;
-        std::cout<<GREEN<<"RETRYING INITING WITH WARMSTART"<<DEFAULT<<std::endl;
+        XBot::Logger::warning("WARNING OPTIMIZING TASK IN HOTSTART! ERROR  %i \n", val);
+        XBot::Logger::success("RETRYING INITING WITH WARMSTART \n");
 #endif
 
         val =_problem->init(_H.data(),_g.data(),
@@ -261,8 +259,8 @@ bool QPOasesBackEnd::solve()
 
         if(val != qpOASES::SUCCESSFUL_RETURN){
 #ifdef OPENSOT_VERBOSE
-            std::cout<<YELLOW<<"WARNING OPTIMIZING TASK IN WARMSTART! ERROR "<<val<<DEFAULT<<std::endl;
-            std::cout<<GREEN<<"RETRYING INITING"<<DEFAULT<<std::endl;
+            XBot::Logger::warning("WARNING OPTIMIZING TASK IN WARMSTART! ERROR  %i \n", val);
+            XBot::Logger::success("RETRYING INITING \n");
 #endif
 
             return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);}
@@ -283,7 +281,7 @@ bool QPOasesBackEnd::solve()
 
     if(qpOASES::getSimpleStatus(success) < 0){
 #ifdef OPENSOT_VERBOSE
-        std::cout<<"ERROR GETTING PRIMAL SOLUTION! ERROR "<<success<<std::endl;
+        XBot::Logger::info("ERROR GETTING PRIMAL SOLUTION! ERROR %i \n", success);
 #endif
         return initProblem(_H, _g, _A, _lA, _uA, _l ,_u);
     }
@@ -295,21 +293,15 @@ OpenSoT::HessianType QPOasesBackEnd::getHessianType() {return (OpenSoT::HessianT
 
 void QPOasesBackEnd::setHessianType(const OpenSoT::HessianType ht){_problem->setHessianType((qpOASES::HessianType)(ht));}
 
-void QPOasesBackEnd::checkInfeasibility()
+void QPOasesBackEnd::printConstraintsInfo()
 {
     qpOASES::Constraints infeasibleConstraints;
     _problem->getConstraints(infeasibleConstraints);
-    std::cout<<RED<<"Constraints:"<<DEFAULT<<std::endl;
     infeasibleConstraints.print();
 
-    std::cout<<"--------------------------------------------"<<std::endl;
-    for(unsigned int i = 0; i < _lA.rows(); ++i)
-        std::cout<<i<<": "<<_lA[i]<<" <= "<<"Adq"<<" <= "<<_uA[i]<<std::endl;
-
-    std::cout<<std::endl;
-    std::cout<<"A = ["<<std::endl;
-    std::cout<<_A<<" ]"<<std::endl;
-    std::cout<<"--------------------------------------------"<<std::endl;
+    qpOASES::Bounds infeasibleBounds;
+    _problem->getBounds(infeasibleBounds);
+    infeasibleBounds.print();
 }
 
 void QPOasesBackEnd::_printProblemInformation()

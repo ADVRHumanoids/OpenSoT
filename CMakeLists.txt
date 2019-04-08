@@ -97,6 +97,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/BilateralConstraint.cpp
                     src/constraints/TaskToConstraint.cpp
                     src/constraints/acceleration/DynamicFeasibility.cpp
+                    src/constraints/acceleration/VelocityLimits.cpp
                     src/constraints/velocity/CartesianPositionConstraint.cpp
                     src/constraints/velocity/CapturePoint.cpp
                     src/constraints/velocity/CartesianVelocity.cpp
@@ -111,6 +112,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/force/WrenchLimits.cpp
                     src/constraints/force/CoP.cpp
                     src/constraints/GenericConstraint.cpp
+                    src/constraints/acceleration/JointLimits.cpp
                     )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -137,6 +139,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/acceleration/CoM.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/affine/Cartesian.cpp
+                    src/tasks/velocity/CartesianAdmittance.cpp
                     src/tasks/velocity/PureRolling.cpp
                     src/tasks/velocity/RigidRotation.cpp
                     src/tasks/velocity/Unicycle.cpp
@@ -151,7 +154,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumEffort.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
-                    src/tasks/velocity/affine/Postural.cpp
+                    src/tasks/velocity/JointAdmittance.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/tasks/force/CoM.cpp
@@ -203,7 +206,6 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/constraints/velocity/Dynamics.cpp
 #                    src/stacks/velocity/ManipulationStack.cpp
 #                    src/stacks/velocity/WalkingStack.cpp
-#                    src/tasks/velocity/Interaction.cpp
                     ${sot_INCLUDES})
 
 
@@ -268,7 +270,7 @@ if(${osqp_FOUND})
 
 endif()
 
-pkg_check_modules(GLPK QUIET glpk)
+FIND_PACKAGE(GLPK QUIET)
 if(${GLPK_FOUND})
     message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
 
@@ -276,6 +278,15 @@ if(${GLPK_FOUND})
     target_link_libraries(OpenSotBackEndGLPK OpenSoT -lglpk)
     library_install(OpenSotBackEndGLPK 1 0 0)
 endif()
+
+
+add_subdirectory(external/eiQuadProg-ext/)
+include_directories(external/eiQuadProg-ext/include)
+message("Adding src/solvers/eiQuadProgBackEnd.cpp to compilation")
+add_library(OpenSotBackEndeiQuadProg SHARED src/solvers/eiQuadProgBackEnd.cpp)
+target_link_libraries(OpenSotBackEndeiQuadProg OpenSoT eiQuadProg)
+library_install(OpenSotBackEndeiQuadProg 1 0 0)
+
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
 ########################################################################
