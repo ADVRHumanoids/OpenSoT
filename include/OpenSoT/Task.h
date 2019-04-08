@@ -470,6 +470,17 @@
         bool checkConsistency()
         {
             bool a = true;
+            //0) Check Weight size is not 0 if b.size > 0!
+            if(_b.size() > 0)
+            {
+                if(_W.rows() == 0){
+                    XBot::Logger::error("%s: _W.rows() == %i ! \n", _W.rows());
+                    a = false;}
+                if(_W.cols() == 0){
+                    XBot::Logger::error("%s: _W.cols() == %i ! \n", _W.cols());
+                    a = false;}
+            }
+
             //1) Check Weight is square
             if(_W.rows() != _W.cols()){
                 XBot::Logger::error("%s: _W.rows() != _W.cols() -> %i != %i! \n", _task_id.c_str(), _W.rows(), _W.cols());
@@ -534,6 +545,9 @@
                         a = false;
                 }
             }
+
+            if(a)
+                XBot::Logger::info("%s is consistent!", _task_id.c_str());
 
             return a;
 
