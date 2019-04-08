@@ -36,7 +36,11 @@
             public:
                 typedef boost::shared_ptr<FrictionCone> Ptr;
 
-                typedef std::pair<std::string, double> friction_cone;
+                /**
+                 * @brief friction_cone is defined by a Rotation matrix (the rotation from world frame to contatc
+                 * surface) and friction coefficient
+                 */
+                typedef std::pair<Eigen::Matrix3d, double> friction_cone;
                 typedef std::vector<friction_cone> friction_cones;
 
         /**
@@ -49,8 +53,6 @@
 
         Eigen::Matrix<double, 5, 3> _Ci;
 
-        std::vector<Eigen::Affine3d> _wTl;
-
         int _n_of_contacts;
 
         Eigen::MatrixXd _A;
@@ -58,6 +60,8 @@
 
         AffineHelper _friction_cone;
         AffineHelper _wrenches;
+
+        Eigen::Matrix3d _wRl;
 
     public:
 
@@ -82,6 +86,14 @@
         void setMu(const friction_cones& mu){ _mu = mu;}
 
         int getNumberOfContacts(){return _n_of_contacts;}
+
+        /**
+         * @brief setContactRotationMatrix set the contact roation matrix for the ith-contact
+         * @param wRl
+         * @param i
+         * @return true if everything went fine
+         */
+        bool setContactRotationMatrix(const Eigen::Matrix3d& wRl, const unsigned int i);
 
     private:
         void computeAineq();

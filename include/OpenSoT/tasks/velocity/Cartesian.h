@@ -90,6 +90,11 @@
                 Eigen::Vector3d positionError;
                 Eigen::Vector3d orientationError;
 
+                bool _is_body_jacobian;
+
+                Eigen::MatrixXd _tmp_A;
+                Eigen::VectorXd _tmp_b;
+
             public:
                 /*********** TASK PARAMETERS ************/
 
@@ -217,6 +222,12 @@
                  * @return
                  */
                 virtual bool reset();
+
+                /**
+                 * @brief setIsBodyJacobian
+                 * @param is_body_jacobian if true jacobians are in body (ee reference)
+                 */
+                void setIsBodyJacobian(const bool is_body_jacobian);
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

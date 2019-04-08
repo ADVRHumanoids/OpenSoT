@@ -235,10 +235,14 @@ TEST_F(testFrictionCones, testFrictionCones_) {
                     SVDcontact_wrenches_d[i], 1e-3);
 
 
-    std::vector<std::pair<std::string, double> > friction__cones;
+    std::vector<std::pair<Eigen::Matrix3d, double> > friction__cones;
     double mu = 0.5;
-    friction__cones.push_back(std::pair<std::string, double>(links_in_contact[0], mu));
-    friction__cones.push_back(std::pair<std::string, double>(links_in_contact[1], mu));
+
+    Eigen::Affine3d T;
+    _model_ptr->getPose(links_in_contact[0],T);
+    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(T.linear(), mu));
+    _model_ptr->getPose(links_in_contact[1],T);
+    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(T.linear(), mu));
 
     friction_cones.reset(new OpenSoT::constraints::force::FrictionCone(QPcontact_wrenches_d,
                             *_model_ptr, friction__cones));

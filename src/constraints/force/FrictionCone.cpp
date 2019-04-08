@@ -17,9 +17,9 @@ namespace OpenSoT {
 
 
            OptvarHelper::VariableVector vars;
-           for(auto fc : mu){
-               vars.emplace_back(fc.first + "_wrench", 6);
-           }
+           for(unsigned int i = 0; i < _n_of_contacts; ++i)
+            vars.emplace_back("wrench_"+i, 6);
+
 
            OptvarHelper opthelper(vars);
            _wrenches.setZero(x.size(), 0);
@@ -27,14 +27,6 @@ namespace OpenSoT {
            for(auto& w : opthelper.getAllVariables()){
                _wrenches = _wrenches / w;
            }
-
-           Eigen::Affine3d wTli;
-           for(unsigned int i = 0; i < _n_of_contacts; ++i)
-           {
-               _robot.getPose(_mu[i].first, wTli);
-               _wTl.push_back(wTli);
-           }
-
 
            update(Eigen::VectorXd::Zero(0));
 
@@ -59,13 +51,6 @@ namespace OpenSoT {
                _wrenches = _wrenches / w;
            }
 
-           Eigen::Affine3d wTli;
-           for(unsigned int i = 0; i < _n_of_contacts; ++i)
-           {
-               _robot.getPose(_mu[i].first, wTli);
-               _wTl.push_back(wTli);
-           }
-
            update(Eigen::VectorXd::Zero(0));
 
        }
@@ -82,6 +67,7 @@ namespace OpenSoT {
            {
 
                 double __mu = _mu[i].second;
+                _wRl = _mu[i].first;
 
                 __mu = std::sqrt(2.*__mu)/2.;
 
@@ -91,7 +77,7 @@ namespace OpenSoT {
                 _Ci(3,0) = 0.; _Ci(3,1) = -1.; _Ci(3,2) = -__mu;
                 _Ci(4,0) = 0.; _Ci(4,1) = 0.; _Ci(4,2) = -1.;
 
-                _Ci = _Ci*_wTl[i].linear().transpose();
+                _Ci = _Ci*_wRl.transpose();
 
                 _A.block<5,3>(5*i, 6*i) = _Ci;
            }
@@ -120,6 +106,15 @@ namespace OpenSoT {
                _Aineq = _friction_cone.getM();
                _bUpperBound = - _friction_cone.getq();
 
+       }
+
+       bool FrictionCone::setContactRotationMatrix(const Eigen::Matrix3d& wRl, const unsigned int i)
+       {
+           if(i >= _n_of_contacts)
+               return false;
+
+           _mu[i].first = wRl;
+           return true;
        }
 
        }

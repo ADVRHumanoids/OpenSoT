@@ -30,7 +30,7 @@ Cartesian::Cartesian(std::string task_id,
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
-    _error(6)
+    _error(6), _is_body_jacobian(false)
 {
     _error.setZero(6);
 
@@ -53,6 +53,9 @@ Cartesian::Cartesian(std::string task_id,
     this->_update(x);
 
     _W.setIdentity(_A.rows(), _A.rows());
+
+    _tmp_A.setZero(_A.rows(), _A.cols());
+    _tmp_b.setZero(_b.size());
 
     _hessianType = HST_SEMIDEF;
 }
@@ -83,6 +86,16 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     }
 
     this->update_b();
+
+    //Here we rotate A and b
+    if(_is_body_jacobian)
+    {
+        _tmp_A = _A;
+        _A = XBot::Utils::GetAdjointFromRotation(_actualPose.linear())*_tmp_A;
+
+        _tmp_b = _b;
+        _b = XBot::Utils::GetAdjointFromRotation(_actualPose.linear())*_tmp_b;
+    }
 
     this->_desiredTwist.setZero(6);
 
@@ -337,4 +350,9 @@ bool Cartesian::reset()
     _update(Eigen::VectorXd(1));
 
     return true;
+}
+
+void Cartesian::setIsBodyJacobian(const bool is_body_jacobian)
+{
+    _is_body_jacobian = is_body_jacobian;
 }

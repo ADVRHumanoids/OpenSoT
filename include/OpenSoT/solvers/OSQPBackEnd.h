@@ -164,13 +164,11 @@ private:
     Eigen::MatrixXd _Adense;
     Eigen::VectorXd _P_values;
 
-    Eigen::MatrixXd _eye;
 
     boost::shared_ptr<csc> _Acsc;
     boost::shared_ptr<csc> _Pcsc;
 
     double _eps_regularisation;
-    Eigen::VectorXd _I;
 
 
 

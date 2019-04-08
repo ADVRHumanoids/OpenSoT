@@ -89,6 +89,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testTask
                   testPiler
                   testKinematicEstimationFloatingBase
+                  testeiQuadProgSolver
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -245,6 +246,11 @@ if(${GLPK_FOUND})
     add_dependencies(testGLPKSolver GTest-ext OpenSoT)
     add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
 endif()
+
+ADD_EXECUTABLE(testeiQuadProgSolver solvers/TesteiQuadProg.cpp)
+TARGET_LINK_LIBRARIES(testeiQuadProgSolver ${TestLibs})
+add_dependencies(testeiQuadProgSolver GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_eiquadprog COMMAND testeiQuadProgSolver)
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
 TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})

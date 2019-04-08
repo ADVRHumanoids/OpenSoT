@@ -271,6 +271,15 @@ if(${GLPK_FOUND})
     target_link_libraries(OpenSotBackEndGLPK OpenSoT -lglpk)
     library_install(OpenSotBackEndGLPK 1 0 0)
 endif()
+
+
+add_subdirectory(external/eiQuadProg-ext/)
+include_directories(external/eiQuadProg-ext/include)
+message("Adding src/solvers/eiQuadProgBackEnd.cpp to compilation")
+add_library(OpenSotBackEndeiQuadProg SHARED src/solvers/eiQuadProgBackEnd.cpp)
+target_link_libraries(OpenSotBackEndeiQuadProg OpenSoT eiQuadProg)
+library_install(OpenSotBackEndeiQuadProg 1 0 0)
+
 ########################################################################
 # use YCM to export OpenSoT so taht it can be found using find_package #
 ########################################################################
