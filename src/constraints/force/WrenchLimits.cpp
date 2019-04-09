@@ -76,7 +76,7 @@ bool WrenchLimits::isReleased()
 WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
                const Eigen::VectorXd& lowerLims,
                const Eigen::VectorXd& upperLims,
-               std::vector<AffineHelper>& wrench):
+               const std::vector<AffineHelper>& wrench):
     Constraint("wrenches_limits", wrench[0].getInputSize())
 {
     std::list<ConstraintPtr> constraint_list;
@@ -95,7 +95,7 @@ WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
 WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
                const std::vector<Eigen::VectorXd>& lowerLims,
                const std::vector<Eigen::VectorXd>& upperLims,
-               std::vector<AffineHelper>& wrench):
+               const std::vector<AffineHelper>& wrench):
     Constraint("wrenches_limits", wrench[0].getInputSize())
 {
     std::list<ConstraintPtr> constraint_list;

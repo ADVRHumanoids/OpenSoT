@@ -106,7 +106,7 @@
                 WrenchesLimits(const std::vector<std::string>& contact_name,
                                const Eigen::VectorXd& lowerLims,
                                const Eigen::VectorXd& upperLims,
-                               std::vector<AffineHelper>& wrench);
+                               const std::vector<AffineHelper>& wrench);
 
                 /**
                  * @brief WrenchesLimits constructor
@@ -118,7 +118,7 @@
                 WrenchesLimits(const std::vector<std::string>& contact_name,
                                const std::vector<Eigen::VectorXd>& lowerLims,
                                const std::vector<Eigen::VectorXd>& upperLims,
-                               std::vector<AffineHelper>& wrench);
+                               const std::vector<AffineHelper>& wrench);
 
                 /**
                  * @brief getWrenchLimits to access to internal wrench limits
