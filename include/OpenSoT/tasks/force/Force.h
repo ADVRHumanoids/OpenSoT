@@ -33,7 +33,7 @@ namespace OpenSoT {
         public:
             typedef boost::shared_ptr<Wrench> Ptr;
 
-            Wrench(const std::string& contact_name, AffineHelper wrench);
+            Wrench(const std::string& contact_name, AffineHelper& wrench);
 
             bool setReference(const Eigen::VectorXd& ref);
             void getReference(Eigen::VectorXd& ref);

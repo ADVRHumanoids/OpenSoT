@@ -2,7 +2,7 @@
 
 using namespace OpenSoT::tasks::force;
 
-Wrench::Wrench(const std::string &contact_name, OpenSoT::AffineHelper wrench):
+Wrench::Wrench(const std::string &contact_name, OpenSoT::AffineHelper &wrench):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(contact_name+"_wrench",wrench.getInputSize()),
     _contact_name(contact_name)
 {
