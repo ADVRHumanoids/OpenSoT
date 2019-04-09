@@ -47,6 +47,8 @@ Wrenches::Wrenches(const std::vector<std::string>& contact_name,
         task_list.push_back(wrench_tasks[contact_name[i]]);}
     _aggregated_task = boost::make_shared<OpenSoT::tasks::Aggregated>
             (task_list, wrenches[0].getInputSize());
+
+    _update(Eigen::VectorXd(0));
 }
 
 Wrench::Ptr Wrenches::getWrenchTask(const std::string& contact_name)
