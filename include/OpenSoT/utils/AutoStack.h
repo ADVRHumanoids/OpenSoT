@@ -104,9 +104,8 @@ namespace OpenSoT {
 /**
  * @brief operator /= takes a Task and return a Stack
  * @param task
- * @return a stack
  */
-AutoStack::Ptr operator/=(OpenSoT::AutoStack::Ptr& stack,
+void operator/=(OpenSoT::AutoStack::Ptr& stack,
                           const OpenSoT::tasks::Aggregated::TaskPtr task);
 
 

@@ -326,6 +326,44 @@ TEST_F(testWrench, testWrench_) {
         EXPECT_DOUBLE_EQ(x[i], 0.0);
 }
 
+TEST_F(testWrench, testWrenchLim)
+{
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench1", 3},
+                                                  {"wrench2", 3},
+                                                  {"qddot", 6}};
+
+    OpenSoT::OptvarHelper opt(vars);
+
+    OpenSoT::AffineHelper wrench1 = opt.getVariable("wrench1");
+
+
+
+    Eigen::Vector3d upperLims;
+    Eigen::Vector3d lowerLims;
+    upperLims.setOnes(); upperLims*=100.;
+    lowerLims = -upperLims;
+    std::cout<<"upperLims: "<<upperLims.transpose()<<std::endl;
+    std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
+    OpenSoT::constraints::force::WrenchLimits::Ptr wrench_lims =
+            boost::make_shared<OpenSoT::constraints::force::WrenchLimits>
+            ("wrench1", lowerLims, upperLims,wrench1);
+    wrench_lims->update(Eigen::VectorXd(0));
+
+    std::vector<OpenSoT::AffineHelper> wrenches;
+    wrenches.push_back(opt.getVariable("wrench1"));
+    wrenches.push_back(opt.getVariable("wrench2"));
+
+    std::vector<std::string> contacts;
+    contacts.push_back("wrench1");
+    contacts.push_back("wrench2");
+    OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
+            boost::make_shared<OpenSoT::constraints::force::WrenchesLimits>
+            (contacts, lowerLims, upperLims,wrenches);
+    wrenches_lims->update(Eigen::VectorXd(0));
+
+
+}
+
 TEST_F(testWrench, testWrenches) {
 
     OpenSoT::OptvarHelper::VariableVector vars = {{"wrench1", 6},
