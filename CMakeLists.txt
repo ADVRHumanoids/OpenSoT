@@ -60,7 +60,17 @@ FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
-FIND_PACKAGE(fcl QUIET)
+
+
+#link_directories("/usr/lib/x86_64-linux-gnu/")
+#include_directories("/usr/include/")
+#set(fcl_LIBRARIES "/usr/lib/x86_64-linux-gnu/libfcl.so")
+#set(fcl_FOUND true)
+FIND_PACKAGE(FCL QUIET)
+message(----------> ${FCL_LIBRARIES})
+
+
+
 FIND_PACKAGE(PkgConfig REQUIRED)
 
 # compilation flags
@@ -122,7 +132,7 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
         src/constraints/velocity/ConvexHull.cpp)
 endif()
 
-if(${fcl_FOUND} AND ${moveit_core_FOUND})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
     message("Adding src/constraints/velocity/CollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
@@ -184,7 +194,7 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/ForceOptimization.cpp
                     src/utils/InverseDynamics.cpp)
 
-if(${fcl_FOUND} AND ${moveit_core_FOUND})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
         message("Adding src/utils/collision_utils.cpp to compilation")
         set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
             src/utils/collision_utils.cpp)
@@ -223,7 +233,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               PRIVATE
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
-                              ${fcl_LIBRARIES}
+                              ${FCL_LIBRARIES}
                               ${moveit_core_LIBRARIES}
                               )
 

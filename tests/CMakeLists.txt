@@ -112,7 +112,7 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
 endif()
 
 #THIS TEST DEPEND ON fcl
-if(${fcl_FOUND})
+if(${FCL_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
                                        testCollisionAvoidanceVelocityConstraint)
 endif()
@@ -167,8 +167,8 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                      ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
-if(${fcl_FOUND})
-    SET(TestLibs ${TestLibs} ${fcl_LIBRARIES})
+if(${FCL_FOUND})
+    SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
 endif()
 if(${iDynTree_FOUND} AND
    ${idynutils2_FOUND}
@@ -311,7 +311,7 @@ TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
 add_dependencies(testSubTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 
-if(${fcl_FOUND})
+if(${FCL_FOUND})
     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
     add_dependencies(testCollisionUtils GTest-ext OpenSoT)
