@@ -1,6 +1,5 @@
 #include <OpenSoT/constraints/force/WrenchLimits.h>
 #include <OpenSoT/utils/Affine.h>
-#include <boost/make_shared.hpp>
 #include <OpenSoT/constraints/GenericConstraint.h>
 
 using namespace OpenSoT::constraints::force;
@@ -73,3 +72,4 @@ bool WrenchLimits::isReleased()
 {
     return _is_released;
 }
+

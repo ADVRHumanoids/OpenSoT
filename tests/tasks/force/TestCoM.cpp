@@ -374,6 +374,72 @@ TEST_F(testWrench, testWrenches) {
 
     for(unsigned int i = 0; i < 6; ++i)
         EXPECT_DOUBLE_EQ(x[i+6], wrench_desired[i]);
+
+
+    Eigen::VectorXd upperLims(6);
+    Eigen::VectorXd lowerLims(6);
+    upperLims<<Eigen::Vector3d::Ones(), Eigen::Vector3d::Zero();
+    lowerLims = -upperLims;
+    std::cout<<"upperLims: "<<upperLims.transpose()<<std::endl;
+    std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
+
+    OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
+            boost::make_shared<OpenSoT::constraints::force::WrenchesLimits>
+            (contacts, lowerLims, upperLims, wrenches);
+    std::cout<<"wrenches_lims->getbLowerBound()"<<wrenches_lims->getbLowerBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getbUpperBound()"<<wrenches_lims->getbUpperBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getAineq() \n"<<wrenches_lims->getAineq()<<std::endl;
+
+    OpenSoT::AutoStack::Ptr autostack;
+    autostack /= wrenches_task;
+    autostack<<wrenches_lims;
+
+    Eigen::VectorXd wrench_desired_1(6); wrench_desired_1.setOnes(6); wrench_desired_1 *= 2;
+    Eigen::VectorXd wrench_desired_2(6); wrench_desired_2.setOnes(6); wrench_desired_2 *= -2;
+
+    wrenches_task->getWrenchTask("wrench1")->setReference(wrench_desired_1);
+    wrenches_task->getWrenchTask("wrench2")->setReference(wrench_desired_2);
+
+    autostack->update(Eigen::VectorXd(0));
+
+
+    OpenSoT::solvers::iHQP::Ptr sot2(new OpenSoT::solvers::iHQP(autostack->getStack(),
+                                                                autostack->getBounds(),1.));
+    EXPECT_TRUE(sot2->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired_1.transpose()<<" "<<wrench_desired_2.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i){
+        EXPECT_NEAR(x[i], upperLims[i], 1e-9);
+        EXPECT_NEAR(x[i+6], lowerLims[i], 1e-9);}
+
+    wrenches_lims->getWrenchLimits("wrench2")->releaseContact(true);
+    autostack->update(Eigen::VectorXd(0));
+
+    std::cout<<"wrenches_lims->getbLowerBound()"<<wrenches_lims->getbLowerBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getbUpperBound()"<<wrenches_lims->getbUpperBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getAineq() \n"<<wrenches_lims->getAineq()<<std::endl;
+
+
+
+    EXPECT_TRUE(sot2->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired_1.transpose()<<" "<<wrench_desired_2.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i){
+        EXPECT_NEAR(x[i], upperLims[i], 1e-9);
+        EXPECT_NEAR(x[i+6], 0.0, 1e-9);}
+
+    wrenches_lims->getWrenchLimits("wrench2")->releaseContact(false);
+    autostack->update(Eigen::VectorXd(0));
+
+    EXPECT_TRUE(sot2->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired_1.transpose()<<" "<<wrench_desired_2.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i){
+        EXPECT_NEAR(x[i], upperLims[i], 1e-9);
+        EXPECT_NEAR(x[i+6], lowerLims[i], 1e-9);}
 }
 
 }
