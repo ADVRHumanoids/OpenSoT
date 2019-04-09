@@ -28,6 +28,9 @@
  namespace OpenSoT {
     namespace constraints {
         namespace force {
+        /**
+             * @brief The WrenchLimits class implements wrench limits
+             */
             class WrenchLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<WrenchLimits> Ptr;
@@ -42,12 +45,30 @@
                 bool _is_released;
 
             public:
+                /**
+                 * @brief WrenchLimits Contructor
+                 * @param contact_name name fo the contact associated to the variable
+                 * @param lowerLims lower limits
+                 * @param upperLims upper limits
+                 * @param wrench variable
+                 */
                 WrenchLimits(const std::string& contact_name,
                              const Eigen::VectorXd& lowerLims,
                              const Eigen::VectorXd& upperLims,
                              AffineHelper wrench);
 
+                /**
+                 * @brief getWrenchLimits to retrieve internal limits
+                 * @param lowerLims
+                 * @param upperLims
+                 */
                 void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims);
+
+                /**
+                 * @brief setWrenchLimits to set internal limits
+                 * @param lowerLims
+                 * @param upperLims
+                 */
                 void setWrenchLimits(const Eigen::VectorXd& lowerLims, const Eigen::VectorXd& upperLims);
 
                 /**
@@ -68,79 +89,50 @@
                 void generateBounds();
             };
 
+            /**
+             * @brief The WrenchesLimits class extend wrench limit to a vector of wrenches
+             */
             class WrenchesLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<WrenchesLimits> Ptr;
 
+                /**
+                 * @brief WrenchesLimits constructor
+                 * @param contact_name vector of names associated to a vector of wrench variables
+                 * @param lowerLims lower limits
+                 * @param upperLims upper limits
+                 * @param wrench
+                 */
                 WrenchesLimits(const std::vector<std::string>& contact_name,
                                const Eigen::VectorXd& lowerLims,
                                const Eigen::VectorXd& upperLims,
-                               std::vector<AffineHelper>& wrench):
-                    Constraint("wrenches_limits", wrench[0].getInputSize())
-                {
-                    std::list<ConstraintPtr> constraint_list;
-                    for(unsigned int i = 0; i < contact_name.size(); ++i){
-                        wrench_lims_constraints[contact_name[i]] = boost::make_shared<WrenchLimits>
-                                (contact_name[i], lowerLims, upperLims, wrench[i]);
-                        constraint_list.push_back(wrench_lims_constraints[contact_name[i]]);
-                    }
+                               std::vector<AffineHelper>& wrench);
 
-                    _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
-                            (constraint_list, wrench[0].getInputSize());
-
-                    generateBounds();
-                }
-
+                /**
+                 * @brief WrenchesLimits constructor
+                 * @param contact_name vector of names associated to a vector of wrench variables
+                 * @param lowerLims vector of lower limits
+                 * @param upperLims vector of upper limits
+                 * @param wrench
+                 */
                 WrenchesLimits(const std::vector<std::string>& contact_name,
                                const std::vector<Eigen::VectorXd>& lowerLims,
                                const std::vector<Eigen::VectorXd>& upperLims,
-                               std::vector<AffineHelper>& wrench):
-                    Constraint("wrenches_limits", wrench[0].getInputSize())
-                {
-                    std::list<ConstraintPtr> constraint_list;
-                    for(unsigned int i = 0; i < contact_name.size(); ++i){
-                        wrench_lims_constraints[contact_name[i]] = boost::make_shared<WrenchLimits>
-                                (contact_name[i], lowerLims[i], upperLims[i], wrench[i]);
-                        constraint_list.push_back(wrench_lims_constraints[contact_name[i]]);
-                    }
+                               std::vector<AffineHelper>& wrench);
 
-                    _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
-                            (constraint_list, wrench[0].getInputSize());
+                /**
+                 * @brief getWrenchLimits to access to internal wrench limits
+                 * @param contact_name of the contact to get the associated wrench limit
+                 * @return a wrench limit constraint
+                 */
+                WrenchLimits::Ptr getWrenchLimits(const std::string& contact_name);
 
-                    generateBounds();
-                }
-
-                WrenchLimits::Ptr getWrenchLimits(const std::string& contact_name)
-                {
-                    if(wrench_lims_constraints.count(contact_name))
-                        return wrench_lims_constraints[contact_name];
-                    else
-                        return NULL;
-                }
-
-                void update(const Eigen::VectorXd &x)
-                {
-                    _aggregated_constraint->update(x);
-                    generateBounds();
-                }
+                void update(const Eigen::VectorXd &x);
 
             private:
                 std::map<std::string, WrenchLimits::Ptr> wrench_lims_constraints;
                 OpenSoT::constraints::Aggregated::Ptr _aggregated_constraint;
-                virtual void generateBounds()
-                {
-                    if(_aggregated_constraint->isInequalityConstraint())
-                    {
-                        _Aineq = _aggregated_constraint->getAineq();
-                        _bUpperBound = _aggregated_constraint->getbUpperBound();
-                        _bLowerBound = _aggregated_constraint->getbLowerBound();
-                    }
-                    else if(_aggregated_constraint->isBound())
-                    {
-                        _upperBound = _aggregated_constraint->getUpperBound();
-                        _lowerBound = _aggregated_constraint->getLowerBound();
-                    }
-                }
+                virtual void generateBounds();
 
             };
         }

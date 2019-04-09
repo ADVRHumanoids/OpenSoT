@@ -73,3 +73,70 @@ bool WrenchLimits::isReleased()
     return _is_released;
 }
 
+WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
+               const Eigen::VectorXd& lowerLims,
+               const Eigen::VectorXd& upperLims,
+               std::vector<AffineHelper>& wrench):
+    Constraint("wrenches_limits", wrench[0].getInputSize())
+{
+    std::list<ConstraintPtr> constraint_list;
+    for(unsigned int i = 0; i < contact_name.size(); ++i){
+        wrench_lims_constraints[contact_name[i]] = boost::make_shared<WrenchLimits>
+                (contact_name[i], lowerLims, upperLims, wrench[i]);
+        constraint_list.push_back(wrench_lims_constraints[contact_name[i]]);
+    }
+
+    _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+            (constraint_list, wrench[0].getInputSize());
+
+    generateBounds();
+}
+
+WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
+               const std::vector<Eigen::VectorXd>& lowerLims,
+               const std::vector<Eigen::VectorXd>& upperLims,
+               std::vector<AffineHelper>& wrench):
+    Constraint("wrenches_limits", wrench[0].getInputSize())
+{
+    std::list<ConstraintPtr> constraint_list;
+    for(unsigned int i = 0; i < contact_name.size(); ++i){
+        wrench_lims_constraints[contact_name[i]] = boost::make_shared<WrenchLimits>
+                (contact_name[i], lowerLims[i], upperLims[i], wrench[i]);
+        constraint_list.push_back(wrench_lims_constraints[contact_name[i]]);
+    }
+
+    _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+            (constraint_list, wrench[0].getInputSize());
+
+    generateBounds();
+}
+
+WrenchLimits::Ptr WrenchesLimits::getWrenchLimits(const std::string& contact_name)
+{
+    if(wrench_lims_constraints.count(contact_name))
+        return wrench_lims_constraints[contact_name];
+    else
+        return NULL;
+}
+
+void WrenchesLimits::update(const Eigen::VectorXd &x)
+{
+    _aggregated_constraint->update(x);
+    generateBounds();
+}
+
+void WrenchesLimits::generateBounds()
+{
+    if(_aggregated_constraint->isInequalityConstraint())
+    {
+        _Aineq = _aggregated_constraint->getAineq();
+        _bUpperBound = _aggregated_constraint->getbUpperBound();
+        _bLowerBound = _aggregated_constraint->getbLowerBound();
+    }
+    else if(_aggregated_constraint->isBound())
+    {
+        _upperBound = _aggregated_constraint->getUpperBound();
+        _lowerBound = _aggregated_constraint->getLowerBound();
+    }
+}
+
