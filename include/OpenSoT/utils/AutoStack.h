@@ -67,6 +67,7 @@ namespace OpenSoT {
             AutoStack(OpenSoT::solvers::iHQP::Stack stack,
                       std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
 
+
             /*AutoStack(OpenSoT::solvers::iHQP::Stack stack,
                       OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
 
@@ -97,7 +98,17 @@ namespace OpenSoT {
 
             OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
             OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& task_id);
-    };    
+    };
+
+
+/**
+ * @brief operator /= takes a Task and return a Stack
+ * @param task
+ * @return a stack
+ */
+AutoStack::Ptr operator/=(OpenSoT::AutoStack::Ptr& stack,
+                          const OpenSoT::tasks::Aggregated::TaskPtr task);
+
 
 /**
  * @brief operator * takes a weight matrix and a task, apply the weight to the task
