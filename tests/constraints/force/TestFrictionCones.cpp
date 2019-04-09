@@ -207,7 +207,19 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     com->update(QPcontact_wrenches_d);
 
 
-    wrench_limits.reset(new OpenSoT::constraints::force::WrenchLimits(300., 6*links_in_contact.size()));
+    Eigen::VectorXd wrench_lims;
+    wrench_lims.setOnes(6*links_in_contact.size()); wrench_lims *= 300.;
+
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench", 6*links_in_contact.size()}};
+
+    OpenSoT::OptvarHelper opt(vars);
+
+    OpenSoT::AffineHelper wrench = opt.getVariable("wrench");
+
+    OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits(
+                new OpenSoT::constraints::force::WrenchLimits("all_contacts",
+                                                              -wrench_lims,
+                                                              wrench_lims,wrench));
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(com);

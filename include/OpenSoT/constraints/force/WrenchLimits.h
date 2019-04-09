@@ -18,7 +18,7 @@
 #ifndef __BOUNDS_FORCE_WRENCHLIMITS_H__
 #define __BOUNDS_FORCE_WRENCHLIMITS_H__
 
- #include <OpenSoT/Constraint.h>
+#include <OpenSoT/constraints/GenericConstraint.h>
 #include <Eigen/Dense>
 
  namespace OpenSoT {
@@ -28,14 +28,36 @@
             public:
                 typedef boost::shared_ptr<WrenchLimits> Ptr;
             private:
-                double _WrenchLimit;
+                Eigen::VectorXd _lowerLims;
+                Eigen::VectorXd _upperLims;
+
+                Eigen::VectorXd _zeros;
+
+                OpenSoT::constraints::GenericConstraint::Ptr _constr_internal;
+
+                bool _is_released;
+
             public:
-                WrenchLimits(const double wrenchLimit,
-                             const unsigned int x_size);
+                WrenchLimits(const std::string& contact_name,
+                             const Eigen::VectorXd& lowerLims,
+                             const Eigen::VectorXd& upperLims,
+                             AffineHelper wrench);
 
-                double getWrenchLimits();
+                void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims);
+                void setWrenchLimits(const Eigen::VectorXd& lowerLims, const Eigen::VectorXd& upperLims);
 
-                void setWrenchLimits(const double wrenchLimit);
+                /**
+                 * @brief releaseContact of true the wrench limits are all set to 0, if false the
+                 * normal limits are used.
+                 * @param released true/false
+                 */
+                void releaseContact(bool released);
+
+                /**
+                 * @brief isReleased
+                 * @return true if the wrench limts are all zeros
+                 */
+                bool isReleased();
 
 
             private:
