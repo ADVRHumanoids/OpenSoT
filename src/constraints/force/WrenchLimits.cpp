@@ -89,7 +89,7 @@ WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
     _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
-    generateBounds();
+    update(Eigen::VectorXd(0));
 }
 
 WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
@@ -108,7 +108,7 @@ WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
     _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
-    generateBounds();
+    update(Eigen::VectorXd(0));
 }
 
 WrenchLimits::Ptr WrenchesLimits::getWrenchLimits(const std::string& contact_name)

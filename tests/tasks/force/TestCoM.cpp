@@ -125,7 +125,7 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     std::cout<<"b = [ "<<b<<" ]"<<std::endl;
 
 
-    OpenSoT::constraints::force::FrictionCone::friction_cones friction_cones;
+    OpenSoT::constraints::force::FrictionCones::friction_cones friction_cones;
     OpenSoT::constraints::force::FrictionCone::friction_cone friction_cone;
     double mu = 2.;
     Eigen::Affine3d T;
@@ -136,9 +136,22 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
         friction_cone.second = mu;
         friction_cones.push_back(friction_cone);
     }
-    OpenSoT::constraints::force::FrictionCone::Ptr fc(
-                new OpenSoT::constraints::force::FrictionCone(contact_wrenches_d, *(_model_ptr.get()),
-                                                              friction_cones));
+
+    OpenSoT::OptvarHelper::VariableVector vv = {
+                                                        {"r_sole", 6},
+                                                        {"l_sole", 6},
+                                                        {"LSoftHand", 6}};
+
+    OpenSoT::OptvarHelper opt_v(vv);
+    std::vector<OpenSoT::AffineHelper> wrenches;
+    wrenches.push_back(opt_v.getVariable("r_sole"));
+    wrenches.push_back(opt_v.getVariable("l_sole"));
+    wrenches.push_back(opt_v.getVariable("LSoftHand"));
+
+
+    OpenSoT::constraints::force::FrictionCones::Ptr fc(
+                new OpenSoT::constraints::force::FrictionCones(
+                    links_in_contact, wrenches, *(_model_ptr.get()), friction_cones));
     std::cout<<"Aineq = ["<<fc->getAineq()<<" ]"<<std::endl;
     std::cout<<"bUpper = ["<<fc->getbUpperBound()<<" "<<std::endl;
     std::cout<<"bLower = ["<<fc->getbLowerBound()<<" "<<std::endl;
