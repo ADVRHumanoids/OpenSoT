@@ -29,9 +29,10 @@ ConvexHull::ConvexHull(const Eigen::VectorXd& x,
     Constraint("convex_hull", x.size()),
     _links_in_contact(links_in_contact),_robot(robot),
     _boundScaling(safetyMargin),
-    _convex_hull(new convex_hull())
+    _convex_hull(new convex_hull()),
+    _JCoM(3, x.size()),
+    _C(links_in_contact.size(), 2)
 {
-
     this->update(x);
 }
 
@@ -39,45 +40,37 @@ void ConvexHull::update(const Eigen::VectorXd &x) {
 
     /************************ COMPUTING BOUNDS ****************************/
 
-    Eigen::MatrixXd JCoM(3,_x_size);
-    _robot.getCOMJacobian(JCoM);
+    _robot.getCOMJacobian(_JCoM);
 
     if(getConvexHull(_ch))
-        this->getConstraints(_ch, _Aineq, _bUpperBound, _boundScaling);
-    else
-    {
-        _Aineq.resize(0, 2);
-        _bUpperBound.resize(0);
-    }
+        this->getConstraints(_ch, _C, _bUpperBound, _boundScaling);
 
 
 
-
-    //assert(JCoM.rows() == _Aineq.cols());
-
-    _Aineq = _Aineq * JCoM.block(0,0,2,_x_size);
+    _Aineq = _C * _JCoM.block(0,0,2,_x_size);
     /**********************************************************************/
 }
 
 bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 {
-    std::list<KDL::Vector> points;
+    _points.clear();
     // get support polygon points w.r.t. COM
-    if(_convex_hull->getSupportPolygonPoints(points,_links_in_contact,_robot,"COM")){
-        if(points.size() > 2)
+    if(_convex_hull->getSupportPolygonPoints(_points,_links_in_contact,_robot,"COM")){
+        if(_points.size() > 2)
         {
-            std::vector<KDL::Vector> tmp_ch;
-            if(_convex_hull->getConvexHull(points, tmp_ch)){
-                ch = tmp_ch;
+            _tmp_ch.clear();
+            if(_convex_hull->getConvexHull(_points, _tmp_ch)){
+                ch = _tmp_ch;
                 return true;}
             else
-                std::cout<<"Problems computing Convex Hull, old Convex Hull will be used"<<std::endl;
+                XBot::Logger::info("Problems computing Convex Hull, old Convex Hull will be used\n");
         }
         else
-            std::cout<<"Too few points for Convex Hull computation!, old Convex Hull will be used"<<std::endl;
+            XBot::Logger::info("Too few points for Convex Hull computation!, old Convex Hull will be used");
     }
     else
-        std::cout<<"Problems getting Points for Convex Hull computation!, old Convex Hull will be used"<<std::endl;
+        XBot::Logger::info("Problems getting Points for Convex Hull computation!, old Convex Hull will be used");
+
     return false;
 }
 
@@ -111,9 +104,9 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
 
 
         double normalizedBoundScaling = boundScaling * sqrt(_a*_a + _b*_b); //boundScaling Normalization
-        if(fabs(_c) <= normalizedBoundScaling)
-            b(z) = 0.0;
-        else
+//        if(fabs(_c) <= normalizedBoundScaling)
+//            b(z) = 0.0;
+//        else
             b(z) -= normalizedBoundScaling;
         z++;
     }
