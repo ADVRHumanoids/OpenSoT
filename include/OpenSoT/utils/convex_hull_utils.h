@@ -70,26 +70,16 @@ private:
     pcl::PointCloud<pcl::PointXYZ>::Ptr _pointCloud;
     pcl::PointCloud<pcl::PointXYZ>::Ptr _projectedPointCloud;
 
-    /**
-     * @brief fromPCLPointXYZ2KDLVector converts a pcl::PointXZY to a KDL::Vector
-     * @param point the source point represented as pcl point
-     * @return a kdl vector representing the input point
-     */
-    static KDL::Vector fromPCLPointXYZ2KDLVector(const pcl::PointXYZ &point);
-    /**
-     * @brief fromKDLVector2PCLPointXYZ converts a KDL::Vector to a pcl::PointXZY
-     * @param point he source point represented as kdl vector
-     * @return a pcl point representing the input vector
-     */
-    static pcl::PointXYZ fromKDLVector2PCLPointXYZ(const KDL::Vector& point);
-
-    /**
-     * @brief fromSTDList2PCLPointCloud converts a list of kdl vectors into a pointcloud
-     * @param points a list of kdl vectors
-     * @param point_cloud the equivalent point cloud
-     */
-    static void fromSTDList2PCLPointCloud(const std::list<KDL::Vector>& points,
-                                          pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud);
+    KDL::Frame world_T_CoM;
+    KDL::Frame world_T_point;
+    KDL::Frame referenceFrame_T_point;
+    KDL::Frame CoM_T_point;
+    pcl::PointXYZ _tmp_pcl;
+    pcl::PointCloud<pcl::PointXYZ> pointsInConvexHull;
+    std::vector<pcl::Vertices> indicesOfVertexes;
+    pcl::ConvexHull<pcl::PointXYZ> huller;
+    KDL::Vector _tmp_vector;
+    pcl::ProjectInliers<pcl::PointXYZ> proj;
 
     /**
      * @brief projectPCL2Plane projects a point cloud on a plane
