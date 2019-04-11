@@ -272,7 +272,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     stack_of_tasks.push_back(postural_task);
 
     OpenSoT::solvers::iHQP::Ptr sot(
-        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e8));
 
 
 
@@ -615,7 +615,7 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
     stack_of_tasks.push_back(postural_task);
 
     OpenSoT::solvers::iHQP::Ptr sot(
-        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e9));
+        new OpenSoT::solvers::iHQP(stack_of_tasks, bounds,1e8));
 
 
 
