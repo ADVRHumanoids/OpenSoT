@@ -49,6 +49,10 @@
                 boost::shared_ptr<convex_hull> _convex_hull;
                 std::vector<KDL::Vector> _ch;
                 std::list<std::string> _links_in_contact;
+                Eigen::MatrixXd _JCoM;
+                Eigen::MatrixXd _C;
+                std::list<KDL::Vector> _points;
+                std::vector<KDL::Vector> _tmp_ch;
 
             public:
                 /**
