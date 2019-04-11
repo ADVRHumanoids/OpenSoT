@@ -83,6 +83,46 @@ namespace OpenSoT {
            _bUpperBound = - _friction_cone.getq();
        }
 
+       FrictionCones::FrictionCones(const std::vector<std::string>& contact_name,
+                    const std::vector<AffineHelper>& wrench,
+                    XBot::ModelInterface &robot,
+                    const friction_cones & mu):
+           Constraint("friction_cones", wrench[0].getInputSize())
+       {
+           std::list<ConstraintPtr> constraint_list;
+           for(unsigned int i = 0; i < contact_name.size(); ++i){
+               _friction_cone_map[contact_name[i]] = boost::make_shared<FrictionCone>
+                       (contact_name[i], wrench[i], robot, mu[i]);
+               constraint_list.push_back(_friction_cone_map[contact_name[i]]);
+           }
+
+           _internal_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+                   (constraint_list, wrench[0].getInputSize());
+
+           update(Eigen::VectorXd(0));
+       }
+
+       FrictionCone::Ptr FrictionCones::getFrictionCone(const std::string& contact_name)
+       {
+           if(_friction_cone_map.count(contact_name))
+               return _friction_cone_map[contact_name];
+           else
+               return NULL;
+       }
+
+       void FrictionCones::update(const Eigen::VectorXd &x)
+       {
+           _internal_constraint->update(x);
+           generateBounds();
+       }
+
+       void FrictionCones::generateBounds()
+       {
+           _Aineq = _internal_constraint->getAineq();
+           _bUpperBound = _internal_constraint->getbUpperBound();
+           _bLowerBound = _internal_constraint->getbLowerBound();
+       }
+
        }
    }
 }

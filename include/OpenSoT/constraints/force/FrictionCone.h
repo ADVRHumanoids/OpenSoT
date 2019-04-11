@@ -95,45 +95,16 @@
                 FrictionCones(const std::vector<std::string>& contact_name,
                              const std::vector<AffineHelper>& wrench,
                              XBot::ModelInterface &robot,
-                             const friction_cones & mu):
-                    Constraint("friction_cones", wrench[0].getInputSize())
-                {
-                    std::list<ConstraintPtr> constraint_list;
-                    for(unsigned int i = 0; i < contact_name.size(); ++i){
-                        _friction_cone_map[contact_name[i]] = boost::make_shared<FrictionCone>
-                                (contact_name[i], wrench[i], robot, mu[i]);
-                        constraint_list.push_back(_friction_cone_map[contact_name[i]]);
-                    }
+                             const friction_cones & mu);
 
-                    _internal_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
-                            (constraint_list, wrench[0].getInputSize());
+                FrictionCone::Ptr getFrictionCone(const std::string& contact_name);
 
-                    update(Eigen::VectorXd(0));
-                }
-
-                FrictionCone::Ptr getFrictionCone(const std::string& contact_name)
-                {
-                    if(_friction_cone_map.count(contact_name))
-                        return _friction_cone_map[contact_name];
-                    else
-                        return NULL;
-                }
-
-                void update(const Eigen::VectorXd &x)
-                {
-                    _internal_constraint->update(x);
-                    generateBounds();
-                }
+                void update(const Eigen::VectorXd &x);
 
             private:
                 std::map<std::string, FrictionCone::Ptr> _friction_cone_map;
                 OpenSoT::constraints::Aggregated::Ptr _internal_constraint;
-                void generateBounds()
-                {
-                    _Aineq = _internal_constraint->getAineq();
-                    _bUpperBound = _internal_constraint->getbUpperBound();
-                    _bLowerBound = _internal_constraint->getbLowerBound();
-                }
+                void generateBounds();
             };
     }
 }
