@@ -161,7 +161,7 @@ public:
   OpenSoT::tasks::force::CoM::Ptr com;
 
   OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits;
-  OpenSoT::constraints::force::FrictionCone::Ptr friction_cones;
+  OpenSoT::constraints::force::FrictionCones::Ptr friction_cones;
   OpenSoT::solvers::iHQP::Ptr QPsolver;
   OpenSoT::solvers::eHQP::Ptr SVDsolver;
 
@@ -207,7 +207,19 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     com->update(QPcontact_wrenches_d);
 
 
-    wrench_limits.reset(new OpenSoT::constraints::force::WrenchLimits(300., 6*links_in_contact.size()));
+    Eigen::VectorXd wrench_lims;
+    wrench_lims.setOnes(6*links_in_contact.size()); wrench_lims *= 300.;
+
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench", 6*links_in_contact.size()}};
+
+    OpenSoT::OptvarHelper opt(vars);
+
+    OpenSoT::AffineHelper wrench = opt.getVariable("wrench");
+
+    OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits(
+                new OpenSoT::constraints::force::WrenchLimits("all_contacts",
+                                                              -wrench_lims,
+                                                              wrench_lims,wrench));
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(com);
@@ -235,16 +247,33 @@ TEST_F(testFrictionCones, testFrictionCones_) {
                     SVDcontact_wrenches_d[i], 1e-3);
 
 
-    std::vector<std::pair<std::string, double> > friction__cones;
+    std::vector<std::pair<Eigen::Matrix3d, double> > friction__cones;
     double mu = 0.5;
-    friction__cones.push_back(std::pair<std::string, double>(links_in_contact[0], mu));
-    friction__cones.push_back(std::pair<std::string, double>(links_in_contact[1], mu));
 
-    friction_cones.reset(new OpenSoT::constraints::force::FrictionCone(QPcontact_wrenches_d,
-                            *_model_ptr, friction__cones));
+    Eigen::Affine3d T;
+    _model_ptr->getPose(links_in_contact[0],T);
+    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(T.linear(), mu));
+    _model_ptr->getPose(links_in_contact[1],T);
+    friction__cones.push_back(std::pair<Eigen::Matrix3d, double>(T.linear(), mu));
+
+
+    OpenSoT::OptvarHelper::VariableVector vv = {
+                                                        {"r_sole", 6},
+                                                        {"l_sole", 6}};
+
+    OpenSoT::OptvarHelper opt_v(vv);
+    std::vector<OpenSoT::AffineHelper> wrenches;
+    wrenches.push_back(opt_v.getVariable("r_sole"));
+    wrenches.push_back(opt_v.getVariable("l_sole"));
+
+
+
+    friction_cones.reset(new OpenSoT::constraints::force::FrictionCones(
+                            links_in_contact, wrenches, *(_model_ptr.get()), friction__cones));
     friction_cones->update(QPcontact_wrenches_d);
 
-    EXPECT_EQ(friction_cones->getNumberOfContacts(), links_in_contact.size());
+
+
 
     EXPECT_EQ(friction_cones->getbUpperBound().rows(), 5*friction__cones.size());
     EXPECT_EQ(friction_cones->getAineq().rows(), 5*friction__cones.size());

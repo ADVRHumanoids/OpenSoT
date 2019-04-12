@@ -71,7 +71,7 @@ public:
     
 private:
     
-        AffineHelper _var, _bound;
+        AffineHelper _var;
         
         Eigen::VectorXd _ub, _lb;
         

@@ -23,6 +23,8 @@
 #include <XBotInterface/ModelInterface.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/Affine.h>
+#include <OpenSoT/constraints/Aggregated.h>
+#include <boost/make_shared.hpp>
 
 #include <Eigen/Dense>
 
@@ -36,61 +38,77 @@
             public:
                 typedef boost::shared_ptr<FrictionCone> Ptr;
 
-                typedef std::pair<std::string, double> friction_cone;
-                typedef std::vector<friction_cone> friction_cones;
+                /**
+                 * @brief friction_cone is defined by a Rotation matrix (the rotation from world frame to contatc
+                 * surface) and friction coefficient
+                 */
+                typedef std::pair<Eigen::Matrix3d, double> friction_cone;
 
-        /**
-         * @brief _mu is a map between contacts and friction cone: The rotation is the one from
-         * world frame to contact frame
-         * NOTE that the rotation has the z-axiz parallel to the normal of the surface
-         */
-        friction_cones _mu; //Friction Coefficient associated to each contact surface
-        XBot::ModelInterface& _robot;
+                /**
+                 * @brief _mu is a map between contacts and friction cone: The rotation is the one from
+                 * world frame to contact frame
+                 * NOTE that the rotation has the z-axiz parallel to the normal of the surface
+                 */
+                friction_cone _mu; //Friction Coefficient associated to each contact surface
+                XBot::ModelInterface& _robot;
 
-        Eigen::Matrix<double, 5, 3> _Ci;
+                Eigen::Matrix<double, 5, 3> _Ci;
 
-        std::vector<Eigen::Affine3d> _wTl;
+                Eigen::MatrixXd _A;
+                Eigen::VectorXd _b;
 
-        int _n_of_contacts;
+                AffineHelper _friction_cone;
+                AffineHelper _wrench;
 
-        Eigen::MatrixXd _A;
-        Eigen::VectorXd _b;
+                Eigen::Matrix3d _wRl;
 
-        AffineHelper _friction_cone;
-        AffineHelper _wrenches;
+            public:
 
-    public:
-
-        /**
-         * @brief FrictionCone
-         * @param x
-         * @param robot
-         * @param mu is a map between links in contact and associated friction coefficient mu
-         * NOTE: that all the friction cones are specified in world frame!
-         */
-        FrictionCone(const Eigen::VectorXd& x,
-                     XBot::ModelInterface &robot,
-                     const friction_cones & mu);
-
-        FrictionCone(const std::vector<AffineHelper>& wrenches,
-                     XBot::ModelInterface &robot,
-                     const friction_cones & mu);
+                FrictionCone(const std::string& contact_name,
+                             const AffineHelper& wrench,
+                             XBot::ModelInterface &robot,
+                             const friction_cone & mu);
 
 
-        void update(const Eigen::VectorXd &x);
+                void update(const Eigen::VectorXd &x);
 
-        void setMu(const friction_cones& mu){ _mu = mu;}
+                void setMu(const friction_cone& mu);
 
-        int getNumberOfContacts(){return _n_of_contacts;}
 
-    private:
-        void computeAineq();
-        void computeUpperBound();
+                /**
+                 * @brief setContactRotationMatrix set the contact roation matrix for the ith-contact
+                 * @param wRl
+                 * @return true if everything went fine
+                 */
+                void setContactRotationMatrix(const Eigen::Matrix3d& wRl);
 
+            private:
+                void computeAineq();
+
+        };
+
+            class FrictionCones: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
+            public:
+                typedef std::vector<FrictionCone::friction_cone> friction_cones;
+                typedef boost::shared_ptr<FrictionCones> Ptr;
+
+                FrictionCones(const std::vector<std::string>& contact_name,
+                             const std::vector<AffineHelper>& wrench,
+                             XBot::ModelInterface &robot,
+                             const friction_cones & mu);
+
+                FrictionCone::Ptr getFrictionCone(const std::string& contact_name);
+
+                void update(const Eigen::VectorXd &x);
+
+            private:
+                std::map<std::string, FrictionCone::Ptr> _friction_cone_map;
+                OpenSoT::constraints::Aggregated::Ptr _internal_constraint;
+                void generateBounds();
             };
-        }
     }
- }
+}
+}
 
 
 #endif // FRICTIONCONE_H

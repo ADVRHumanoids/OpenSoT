@@ -47,11 +47,11 @@
 
             public:
 
-                Postural(const Eigen::VectorXd& x);
+                Postural(const Eigen::VectorXd& x, const std::string& task_id = "Postural");
 
                 ~Postural();
 
-                void _update(const Eigen::VectorXd& x);
+                virtual void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the Postural task.
@@ -79,7 +79,7 @@
                  * @brief getReference returns the Postural task reference
                  * @return the \f$R^{n_x}\f$ Postural task reference
                  */
-                Eigen::VectorXd getReference() const;
+                const Eigen::VectorXd& getReference() const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the Postural task.
@@ -110,6 +110,10 @@
                  * @return
                  */
                 bool reset();
+
+                static bool isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+
+                static OpenSoT::tasks::velocity::Postural::Ptr asPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
             };
         }

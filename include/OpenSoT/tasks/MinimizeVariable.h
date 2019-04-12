@@ -38,6 +38,8 @@ public:
     bool setReference(const Eigen::VectorXd& ref);
     
     virtual void _update(const Eigen::VectorXd& x);
+
+    void getReference(Eigen::VectorXd& ref);
     
     
     

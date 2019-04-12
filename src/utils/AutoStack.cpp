@@ -3,6 +3,15 @@
 
 namespace OpenSoT{
 
+void operator/=(OpenSoT::AutoStack::Ptr& stack, const OpenSoT::tasks::Aggregated::TaskPtr task)
+{
+    if(!stack.get())
+        stack = boost::make_shared<OpenSoT::AutoStack>(task);
+    else
+        stack = stack/task;
+
+}
+
 OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
                                               OpenSoT::tasks::Aggregated::TaskPtr task)
 {

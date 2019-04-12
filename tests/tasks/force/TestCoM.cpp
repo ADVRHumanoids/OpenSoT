@@ -8,9 +8,10 @@
 #include <OpenSoT/constraints/force/FrictionCone.h>
 #include <ros/ros.h>
 #include <qpOASES.hpp>
-#include <OpenSoT/tasks/force/Wrench.h>
 #include <OpenSoT/constraints/force/WrenchLimits.h>
 #include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/tasks/force/Force.h>
+#include <OpenSoT/utils/InverseDynamics.h>
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
@@ -29,6 +30,27 @@ class testForceCoM : public ::testing::Test {
   }
 
   virtual ~testForceCoM() {
+  }
+
+  virtual void SetUp() {
+  }
+
+  virtual void TearDown() {
+  }
+
+
+};
+
+class testWrench : public ::testing::Test {
+
+ protected:
+
+  testWrench()
+  {
+
+  }
+
+  virtual ~testWrench() {
   }
 
   virtual void SetUp() {
@@ -103,42 +125,60 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     std::cout<<"b = [ "<<b<<" ]"<<std::endl;
 
 
-    OpenSoT::constraints::force::FrictionCone::friction_cones friction_cones;
+    OpenSoT::constraints::force::FrictionCones::friction_cones friction_cones;
     OpenSoT::constraints::force::FrictionCone::friction_cone friction_cone;
     double mu = 2.;
+    Eigen::Affine3d T;
     for(unsigned int i = 0; i < links_in_contact.size(); ++i)
     {
-        friction_cone.first = links_in_contact[i];
+        _model_ptr->getPose(links_in_contact[i], T);
+        friction_cone.first = T.linear();
         friction_cone.second = mu;
         friction_cones.push_back(friction_cone);
     }
-    OpenSoT::constraints::force::FrictionCone::Ptr fc(
-                new OpenSoT::constraints::force::FrictionCone(contact_wrenches_d, *(_model_ptr.get()),
-                                                              friction_cones));
+
+    OpenSoT::OptvarHelper::VariableVector vv = {
+                                                        {"r_sole", 6},
+                                                        {"l_sole", 6},
+                                                        {"LSoftHand", 6}};
+
+    OpenSoT::OptvarHelper opt_v(vv);
+    std::vector<OpenSoT::AffineHelper> wrenches;
+    wrenches.push_back(opt_v.getVariable("r_sole"));
+    wrenches.push_back(opt_v.getVariable("l_sole"));
+    wrenches.push_back(opt_v.getVariable("LSoftHand"));
+
+
+    OpenSoT::constraints::force::FrictionCones::Ptr fc(
+                new OpenSoT::constraints::force::FrictionCones(
+                    links_in_contact, wrenches, *(_model_ptr.get()), friction_cones));
     std::cout<<"Aineq = ["<<fc->getAineq()<<" ]"<<std::endl;
     std::cout<<"bUpper = ["<<fc->getbUpperBound()<<" "<<std::endl;
     std::cout<<"bLower = ["<<fc->getbLowerBound()<<" "<<std::endl;
 
+    Eigen::VectorXd wrench_lims;
+    wrench_lims.setOnes(contact_wrenches_d.size()); wrench_lims *= 300.;
+
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench", contact_wrenches_d.size()}};
+
+    OpenSoT::OptvarHelper opt(vars);
+
+    OpenSoT::AffineHelper wrench = opt.getVariable("wrench");
+
     OpenSoT::constraints::force::WrenchLimits::Ptr wrench_limits(
-                new OpenSoT::constraints::force::WrenchLimits(300., contact_wrenches_d.size()));
+                new OpenSoT::constraints::force::WrenchLimits("all_contacts",
+                                                              -wrench_lims,
+                                                              wrench_lims,wrench));
 
     force_com_task->getConstraints().push_back(fc);
     force_com_task->getConstraints().push_back(wrench_limits);
     force_com_task->update(contact_wrenches_d);
 
-    OpenSoT::tasks::force::Wrench::Ptr wrench(
-                new OpenSoT::tasks::force::Wrench(contact_wrenches_d));
     Eigen::VectorXd wrench_reference(contact_wrenches_d.size());
     wrench_reference.setZero(contact_wrenches_d.size());
     wrench_reference(2) = 100.;
     wrench_reference(8) = 100.;
     wrench_reference(14) = 100.;
-    wrench->setReference(wrench_reference);
-    wrench->getConstraints().push_back(fc);
-    wrench->getConstraints().push_back(wrench_limits);
-    wrench->update(contact_wrenches_d);
-    std::cout<<"A = [ "<<wrench->getA()<<" ]"<<std::endl;
-    std::cout<<"b = [ "<<wrench->getb()<<" ]"<<std::endl;
 
 
 
@@ -146,7 +186,6 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(force_com_task);
-    stack_of_tasks.push_back(wrench);
 
 
     OpenSoT::solvers::iHQP::Ptr sot(
@@ -156,7 +195,6 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
     force_com_task->update(contact_wrenches_d);
-    wrench->update(contact_wrenches_d);
 
 
 
@@ -188,6 +226,272 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
                contact_wrenches_d.segment(12, 6)<<" ]"<<std::endl;
 }
 
+TEST_F(testWrench, testWrench_) {
+    Eigen::Vector6d wrench_desired;
+    wrench_desired.setRandom();
+
+    OpenSoT::tasks::force::Wrench::Ptr _wrench_task;
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench", 6}};
+
+    OpenSoT::OptvarHelper opt(vars);
+
+    OpenSoT::AffineHelper wrench = opt.getVariable("wrench");
+
+    std::cout<<"wrench->getM"<<wrench.getM()<<std::endl;
+    std::cout<<"wrench->getq"<<wrench.getq()<<std::endl;
+
+    _wrench_task = boost::make_shared<OpenSoT::tasks::force::Wrench>("l_sole", wrench);
+    _wrench_task->update(Eigen::VectorXd(0));
+
+    Eigen::VectorXd tmp;
+    _wrench_task->getReference(tmp);
+    EXPECT_TRUE(tmp.size() == 6)<<"tmp.size(): "<<tmp.size()<<std::endl;
+    for(unsigned int i = 0; i < 6; ++i)
+        EXPECT_DOUBLE_EQ(tmp[i], 0.0);
+
+    _wrench_task->setReference(wrench_desired);
+    _wrench_task->update(Eigen::VectorXd(0));
+    _wrench_task->getReference(tmp);
+    EXPECT_TRUE(tmp.size() == 6)<<"tmp.size(): "<<tmp.size()<<std::endl;
+    for(unsigned int i = 0; i < 6; ++i){
+        EXPECT_DOUBLE_EQ(tmp[i], wrench_desired[i]);
+        EXPECT_DOUBLE_EQ(_wrench_task->getb()[i], wrench_desired[i]);}
+
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+    stack_of_tasks.push_back(_wrench_task);
+
+
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
+    Eigen::VectorXd x;
+    EXPECT_TRUE(sot->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i)
+        EXPECT_DOUBLE_EQ(x[i], wrench_desired[i]);
+
+    wrench_desired.setRandom();
+    _wrench_task->setReference(wrench_desired);
+    _wrench_task->update(Eigen::VectorXd(0));
+
+    EXPECT_TRUE(sot->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i)
+        EXPECT_DOUBLE_EQ(x[i], wrench_desired[i]);
+
+    Eigen::VectorXd upperLims(6);
+    Eigen::VectorXd lowerLims(6);
+    upperLims<<Eigen::Vector3d::Ones(), Eigen::Vector3d::Zero();
+    lowerLims = -upperLims;
+    std::cout<<"upperLims: "<<upperLims.transpose()<<std::endl;
+    std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
+    OpenSoT::constraints::force::WrenchLimits::Ptr wrench_lims =
+            boost::make_shared<OpenSoT::constraints::force::WrenchLimits>
+            ("l_sole", lowerLims, upperLims,wrench);
+
+    OpenSoT::AutoStack::Ptr autostack = boost::make_shared<OpenSoT::AutoStack>(_wrench_task);
+    autostack<<wrench_lims;
+
+
+    wrench_desired.setRandom();
+    _wrench_task->setReference(wrench_desired);
+
+    autostack->update(Eigen::VectorXd(0));
+
+    OpenSoT::solvers::iHQP::Ptr sot2(new OpenSoT::solvers::iHQP(autostack->getStack(),
+                                                                autostack->getBounds(),1.));
+    EXPECT_TRUE(sot2->solve(x));
+
+    std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_DOUBLE_EQ(x[i], wrench_desired[i]);
+    for(unsigned int i = 3; i < 6; ++i)
+        EXPECT_DOUBLE_EQ(x[i], 0.0);
+
+    wrench_lims->releaseContact(true);
+
+    autostack->update(Eigen::VectorXd(0));
+
+    EXPECT_TRUE(sot2->solve(x));
+
+    std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i)
+        EXPECT_DOUBLE_EQ(x[i], 0.0);
+
+    wrench_lims->releaseContact(false);
+
+    autostack->update(Eigen::VectorXd(0));
+
+    EXPECT_TRUE(sot2->solve(x));
+
+    std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_DOUBLE_EQ(x[i], wrench_desired[i]);
+    for(unsigned int i = 3; i < 6; ++i)
+        EXPECT_DOUBLE_EQ(x[i], 0.0);
+}
+
+TEST_F(testWrench, testWrenchLim)
+{
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench1", 3},
+                                                  {"wrench2", 3},
+                                                  {"qddot", 6}};
+
+    OpenSoT::OptvarHelper opt(vars);
+
+    OpenSoT::AffineHelper wrench1 = opt.getVariable("wrench1");
+
+
+
+    Eigen::Vector3d upperLims;
+    Eigen::Vector3d lowerLims;
+    upperLims.setOnes(); upperLims*=100.;
+    lowerLims = -upperLims;
+    std::cout<<"upperLims: "<<upperLims.transpose()<<std::endl;
+    std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
+    OpenSoT::constraints::force::WrenchLimits::Ptr wrench_lims =
+            boost::make_shared<OpenSoT::constraints::force::WrenchLimits>
+            ("wrench1", lowerLims, upperLims,wrench1);
+    wrench_lims->update(Eigen::VectorXd(0));
+
+    std::vector<OpenSoT::AffineHelper> wrenches;
+    wrenches.push_back(opt.getVariable("wrench1"));
+    wrenches.push_back(opt.getVariable("wrench2"));
+
+    std::vector<std::string> contacts;
+    contacts.push_back("wrench1");
+    contacts.push_back("wrench2");
+    OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
+            boost::make_shared<OpenSoT::constraints::force::WrenchesLimits>
+            (contacts, lowerLims, upperLims,wrenches);
+    wrenches_lims->update(Eigen::VectorXd(0));
+
+
+}
+
+TEST_F(testWrench, testWrenches) {
+
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench1", 6},
+                                                  {"wrench2", 6},
+                                                  {"qddot", 12}};
+    OpenSoT::OptvarHelper opt(vars);
+    OpenSoT::AffineHelper wrench1 = opt.getVariable("wrench1");
+    OpenSoT::AffineHelper wrench2 = opt.getVariable("wrench2");
+    OpenSoT::AffineHelper qddot = opt.getVariable("qddot");
+
+    std::vector<OpenSoT::AffineHelper> wrenches;
+    wrenches.push_back(wrench1);
+    wrenches.push_back(wrench2);
+
+    std::cout<<"wrench1.getInputSize(): "<<wrench1.getInputSize()<<std::endl;
+    std::cout<<"wrench1.getOutputSize(): "<<wrench1.getOutputSize()<<std::endl;
+
+    std::vector<std::string> contacts;
+    contacts.push_back("wrench1");
+    contacts.push_back("wrench2");
+    OpenSoT::tasks::force::Wrenches::Ptr wrenches_task = boost::make_shared<OpenSoT::tasks::force::Wrenches>
+            (contacts, wrenches);
+    wrenches_task->update(Eigen::VectorXd(0));
+
+    std::cout<<"wrenches_task->getA(): \n"<<wrenches_task->getA()<<std::endl;
+    std::cout<<"wrenches_task->getb(): \n"<<wrenches_task->getb().transpose()<<std::endl;
+
+    EXPECT_FALSE(wrenches_task->getWrenchTask("sossio"));
+
+    Eigen::Vector6d wrench_desired;
+    wrench_desired.setRandom();
+
+    wrenches_task->getWrenchTask("wrench2")->setReference(wrench_desired);
+    wrenches_task->update(Eigen::VectorXd(0));
+
+
+    OpenSoT::solvers::iHQP::Stack stack_of_tasks;
+    stack_of_tasks.push_back(wrenches_task);
+
+
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
+    Eigen::VectorXd x;
+    EXPECT_TRUE(sot->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i)
+        EXPECT_DOUBLE_EQ(x[i+6], wrench_desired[i]);
+
+
+    Eigen::VectorXd upperLims(6);
+    Eigen::VectorXd lowerLims(6);
+    upperLims<<Eigen::Vector3d::Ones(), Eigen::Vector3d::Zero();
+    lowerLims = -upperLims;
+    std::cout<<"upperLims: "<<upperLims.transpose()<<std::endl;
+    std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
+
+    OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
+            boost::make_shared<OpenSoT::constraints::force::WrenchesLimits>
+            (contacts, lowerLims, upperLims, wrenches);
+    std::cout<<"wrenches_lims->getbLowerBound()"<<wrenches_lims->getbLowerBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getbUpperBound()"<<wrenches_lims->getbUpperBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getAineq() \n"<<wrenches_lims->getAineq()<<std::endl;
+
+    OpenSoT::AutoStack::Ptr autostack;
+    autostack /= wrenches_task;
+    autostack<<wrenches_lims;
+
+    Eigen::VectorXd wrench_desired_1(6); wrench_desired_1.setOnes(6); wrench_desired_1 *= 2;
+    Eigen::VectorXd wrench_desired_2(6); wrench_desired_2.setOnes(6); wrench_desired_2 *= -2;
+
+    wrenches_task->getWrenchTask("wrench1")->setReference(wrench_desired_1);
+    wrenches_task->getWrenchTask("wrench2")->setReference(wrench_desired_2);
+
+    autostack->update(Eigen::VectorXd(0));
+
+
+    OpenSoT::solvers::iHQP::Ptr sot2(new OpenSoT::solvers::iHQP(autostack->getStack(),
+                                                                autostack->getBounds(),1.));
+    EXPECT_TRUE(sot2->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired_1.transpose()<<" "<<wrench_desired_2.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i){
+        EXPECT_NEAR(x[i], upperLims[i], 1e-9);
+        EXPECT_NEAR(x[i+6], lowerLims[i], 1e-9);}
+
+    wrenches_lims->getWrenchLimits("wrench2")->releaseContact(true);
+    autostack->update(Eigen::VectorXd(0));
+
+    std::cout<<"wrenches_lims->getbLowerBound()"<<wrenches_lims->getbLowerBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getbUpperBound()"<<wrenches_lims->getbUpperBound().transpose()<<std::endl;
+    std::cout<<"wrenches_lims->getAineq() \n"<<wrenches_lims->getAineq()<<std::endl;
+
+
+
+    EXPECT_TRUE(sot2->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired_1.transpose()<<" "<<wrench_desired_2.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i){
+        EXPECT_NEAR(x[i], upperLims[i], 1e-9);
+        EXPECT_NEAR(x[i+6], 0.0, 1e-9);}
+
+    wrenches_lims->getWrenchLimits("wrench2")->releaseContact(false);
+    autostack->update(Eigen::VectorXd(0));
+
+    EXPECT_TRUE(sot2->solve(x));
+    std::cout<<"wrench desired: ["<<wrench_desired_1.transpose()<<" "<<wrench_desired_2.transpose()<<"]"<<std::endl;
+    std::cout<<"x: ["<<x.transpose()<<"]"<<std::endl;
+
+    for(unsigned int i = 0; i < 6; ++i){
+        EXPECT_NEAR(x[i], upperLims[i], 1e-9);
+        EXPECT_NEAR(x[i+6], lowerLims[i], 1e-9);}
+}
 
 }
 

@@ -65,9 +65,9 @@ bool OpenSoT::floating_base_estimation::qp_estimation::setContactState(
 
 bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT)
 {
-    if(_imu){
-        _model->setFloatingBaseState(_imu);
-        _model->update();}
+//    if(_imu){
+//        _model->setFloatingBaseState(_imu);
+//        _model->update();}
 
     _model->getJointPosition(_q);
     _model->getJointVelocity(_qdot);
@@ -80,18 +80,22 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT)
         return false;
     }
 
-    if(!_imu)
-    {
-        _Q += _Qdot*dT;
-        _q.segment(0,6) = _Q;
-        _qdot.segment(0,6) = _Qdot;
-    }
-    else
-    {
-        _Q.segment(0,3) += _Qdot.segment(0,3)*dT;
-        _q.segment(0,3) = _Q.segment(0,3);
-        _qdot.segment(0,3) = _Qdot.segment(0,3);
-    }
+//    if(!_imu)
+//    {
+//        _Q += _Qdot*dT;
+//        _q.segment(0,6) = _Q;
+//        _qdot.segment(0,6) = _Qdot;
+//    }
+//    else
+//    {
+//        _Q.segment(0,3) += _Qdot.segment(0,3)*dT;
+//        _q.segment(0,3) = _Q.segment(0,3);
+//        _qdot.segment(0,3) = _Qdot.segment(0,3);
+//    }
+
+    _Q += _Qdot*dT;
+    _q.segment(0,6) = _Q;
+    _qdot.segment(0,6) = _Qdot;
 
     
 

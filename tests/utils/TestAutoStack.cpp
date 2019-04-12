@@ -385,6 +385,21 @@ TEST_F(testAutoStack, testOperatorTimes)
 
 }
 
+TEST_F(testAutoStack, testOperatorStackEqual)
+{
+    OpenSoT::AutoStack::Ptr autostack;
+    autostack /= DHS->leftArm;
+
+    EXPECT_TRUE(autostack.get());
+    EXPECT_TRUE(autostack->getStack().size()==1);
+
+    autostack/=DHS->rightArm;
+    EXPECT_TRUE(autostack->getStack().size()==2);
+
+    EXPECT_TRUE(autostack->getStack()[0]->getA() == DHS->leftArm->getA());
+    EXPECT_TRUE(autostack->getStack()[1]->getA() == DHS->rightArm->getA());
+}
+
 }
 
 int main(int argc, char **argv) {

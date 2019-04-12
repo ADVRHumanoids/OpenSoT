@@ -23,8 +23,14 @@ bool OpenSoT::tasks::MinimizeVariable::setReference(const Eigen::VectorXd& ref)
         XBot::Logger::error() << "in " << __func__ << ": size not correct" << XBot::Logger::endl();
         return false;
     }
-    
-    _b = ref - _var.getq();
+
+    _ref = ref;
+    _b = _ref - _var.getq();
     return true;
     
+}
+
+void OpenSoT::tasks::MinimizeVariable::getReference(Eigen::VectorXd& ref)
+{
+    ref = _ref;
 }

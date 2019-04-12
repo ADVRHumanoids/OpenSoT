@@ -22,8 +22,8 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-Postural::Postural(   const Eigen::VectorXd& x) :
-    Task("Postural", x.size()), _x(x),
+Postural::Postural(   const Eigen::VectorXd& x, const std::string& task_id) :
+    Task(task_id, x.size()), _x(x),
     _x_desired(x.size()), _xdot_desired(x.size())
 {
     _x_desired.setZero(_x_size);
@@ -75,7 +75,7 @@ void OpenSoT::tasks::velocity::Postural::setReference(const Eigen::VectorXd &x_d
     }
 }
 
-Eigen::VectorXd OpenSoT::tasks::velocity::Postural::getReference() const
+const Eigen::VectorXd& OpenSoT::tasks::velocity::Postural::getReference() const
 {
     return _x_desired;
 }
@@ -115,6 +115,16 @@ bool OpenSoT::tasks::velocity::Postural::reset()
     _update(_x_desired);
 
     return true;
+}
+
+bool OpenSoT::tasks::velocity::Postural::isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
+}
+
+static OpenSoT::tasks::velocity::Postural::Ptr asPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+{
+    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
 }
 
 
