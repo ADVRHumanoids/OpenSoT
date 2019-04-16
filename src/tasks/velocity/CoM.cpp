@@ -27,8 +27,10 @@ using namespace OpenSoT::tasks::velocity;
 #define LAMBDA_THS 1E-12
 
 CoM::CoM(   const Eigen::VectorXd& x,
-            XBot::ModelInterface &robot) :
-    Task("CoM", x.size()), _robot(robot)
+            XBot::ModelInterface &robot,
+            const std::string& id
+        ) :
+    Task(id, x.size()), _robot(robot)
 {
     _desiredPosition.setZero(3);
     _actualPosition.setZero(3);

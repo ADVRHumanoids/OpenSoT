@@ -61,11 +61,13 @@
                  * @param robot the robot model
                  */
                 CoM(const Eigen::VectorXd& x,
-                    XBot::ModelInterface& robot);
+                    XBot::ModelInterface& robot,
+                    const std::string& id = "CoM"
+                   );
 
                 ~CoM();
 
-                void _update(const Eigen::VectorXd& x);
+                virtual void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.
@@ -74,8 +76,8 @@
                  * @param desiredPose the \f$R^{3}\f$ vector describing the desired position for the CoM
                  * in the world coordinate frame
                  */
-                void setReference(const Eigen::Vector3d& desiredPosition);
-                void setReference(const KDL::Vector& desiredPosition);
+                virtual void setReference(const Eigen::Vector3d& desiredPosition);
+                virtual void setReference(const KDL::Vector& desiredPosition);
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.
@@ -88,9 +90,9 @@
                  * instead of m/s. This means that if you have a linear velocity expressed in SI units, you have to call the function as
                  * setReference(desiredPosition, desiredVelocity*dt)
                  */
-                void setReference(const Eigen::Vector3d& desiredPosition,
+                virtual void setReference(const Eigen::Vector3d& desiredPosition,
                                   const Eigen::Vector3d& desiredVelocity);
-                void setReference(const KDL::Vector& desiredPosition,
+                virtual void setReference(const KDL::Vector& desiredPosition,
                                   const KDL::Vector& desiredVelocity);
 
 
@@ -99,7 +101,7 @@
                  * @return the CoM task reference \f$R^3\f$ vector describing the actual
                  * CoM position in the world coordinate frame
                  */
-                Eigen::VectorXd getReference() const;
+                virtual Eigen::VectorXd getReference() const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the CoM task.
@@ -108,7 +110,7 @@
                  * @param desireVelocity is a \f$R^{3}\f$ twist describing the desired trajectory velocity,
                  * and it represents a feed-forward term in the task computation
                  */
-                void getReference(Eigen::Vector3d& desiredPosition,
+                virtual void getReference(Eigen::Vector3d& desiredPosition,
                                   Eigen::Vector3d& desiredVelocity) const;
 
 
