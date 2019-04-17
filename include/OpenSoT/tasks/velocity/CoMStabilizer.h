@@ -53,13 +53,16 @@ namespace OpenSoT {
                 
                 CompliantStabilizer _stabilizer;
                 
-                Eigen::Vector3d _zmp_ref;
+                Eigen::Vector2d _zmp_ref;
                 
                 Eigen::Vector6d _left_wrench;
                 Eigen::Vector6d _right_wrench;
                 
                 Eigen::Vector3d _l_sole_ref;
                 Eigen::Vector3d _r_sole_ref;
+                
+                XBot::ForceTorqueSensor::ConstPtr _ft_sensor_l_sole;
+                XBot::ForceTorqueSensor::ConstPtr _ft_sensor_r_sole;
                 
             public:
 
@@ -72,6 +75,12 @@ namespace OpenSoT {
                  */
                 CoMStabilizer(  const Eigen::VectorXd& x,
                                 XBot::ModelInterface& robot,
+                                
+                                Eigen::Affine3d l_sole,
+                                Eigen::Affine3d r_sole,
+                               
+                                XBot::ForceTorqueSensor::ConstPtr ft_sensor_l_sole,
+                                XBot::ForceTorqueSensor::ConstPtr ft_sensor_r_sole,
                                 
                                 const double sample_time, const double mass,
                                 const double ankle_height,
@@ -99,16 +108,18 @@ namespace OpenSoT {
                 virtual void getReference(Eigen::Vector3d& desiredPosition,
                                   Eigen::Vector3d& desiredVelocity) const;
                                   
-                void setZMP(Eigen::Vector3d zmp);
+                void setZMP(Eigen::Vector2d zmp);
                 
-                void setLeftWrench(Eigen::Vector6d left_wrench);
-                void setRightWrench(Eigen::Vector6d right_wrench);
-                void setLeftSoleRef(Eigen::Vector3d l_sole_ref);
-                void setRightSoleRef(Eigen::Vector3d r_sole_ref);
+//                 void setLeftWrench(Eigen::Vector6d left_wrench);
+//                 void setRightWrench(Eigen::Vector6d right_wrench);
+                void setLeftSoleRef(Eigen::Affine3d l_sole_ref);
+                void setRightSoleRef(Eigen::Affine3d r_sole_ref);
                 
-                void setWrench(Eigen::Vector6d left_wrench, Eigen::Vector6d right_wrench);
-                void setSoleRef(Eigen::Vector3d l_sole_ref, Eigen::Vector3d r_sole_ref);
-               
+//                 void setWrench(Eigen::Vector6d left_wrench, Eigen::Vector6d right_wrench);
+                void setSoleRef(Eigen::Affine3d l_sole_ref, Eigen::Affine3d r_sole_ref);
+
+               virtual void _log(XBot::MatLogger::Ptr logger);
+
 
             };
             

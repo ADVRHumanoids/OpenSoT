@@ -27,6 +27,12 @@ using namespace OpenSoT::tasks::velocity;
 CoMStabilizer::CoMStabilizer(  const Eigen::VectorXd& x,
                                 XBot::ModelInterface& robot,
                                 
+                                Eigen::Affine3d l_sole,
+                                Eigen::Affine3d r_sole,
+                               
+                                XBot::ForceTorqueSensor::ConstPtr ft_sensor_l_sole,
+                                XBot::ForceTorqueSensor::ConstPtr ft_sensor_r_sole,
+                               
                                 const double sample_time, const double mass,
                                 const double ankle_height,
                                 const Eigen::Vector2d& foot_size,
@@ -36,16 +42,29 @@ CoMStabilizer::CoMStabilizer(  const Eigen::VectorXd& x,
                                 const Eigen::Vector3d& MinLims,
                                 const double samples2ODE,
                                 const double freq) : CoM(x, robot, "CoMStabilizer"),
-                                                     _stabilizer(sample_time, mass,
-                                                                ankle_height,
-                                                                foot_size,
-                                                                Fzmin,
-                                                                K, C,
-                                                                MaxLims,
-                                                                MinLims,
-                                                                samples2ODE,
-                                                                freq)
+                                                     _stabilizer(sample_time, mass, ankle_height, foot_size, Fzmin,
+                                                                K, C, MaxLims, MinLims, samples2ODE, freq),
+                                                     _ft_sensor_l_sole(ft_sensor_l_sole),
+                                                     _ft_sensor_r_sole(ft_sensor_r_sole)
 {
+    
+    _desiredPosition = CoM::getReference();
+    
+    _left_wrench.setZero();
+    _right_wrench.setZero();
+    
+    _ft_sensor_l_sole->getWrench(_left_wrench);
+    _ft_sensor_r_sole->getWrench(_right_wrench);
+   
+    _zmp_ref = CoM::getReference().head(2);
+        
+    _l_sole_ref = l_sole.translation();
+    _r_sole_ref = r_sole.translation();
+    
+    _update(Eigen::VectorXd(0));
+    
+    
+    
 }
 
 CoMStabilizer::~CoMStabilizer()
@@ -65,7 +84,10 @@ void CoMStabilizer::_update(const Eigen::VectorXd& x)
     CopPos_R(0) = _zmp_ref[0] - _r_sole_ref[0];
     CopPos_R(1) = _zmp_ref[1] - _r_sole_ref[1];
 // 
-
+    
+    _ft_sensor_l_sole->getWrench(_left_wrench);
+    _ft_sensor_r_sole->getWrench(_right_wrench);
+    
     Eigen::Vector3d delta_com = _stabilizer.update(_left_wrench, _right_wrench,
                                                   CopPos_L, CopPos_R,
                                                   _l_sole_ref, _r_sole_ref);
@@ -74,7 +96,7 @@ void CoMStabilizer::_update(const Eigen::VectorXd& x)
     CoM::setReference(com_updated, _desiredVelocity);
     
     CoM::_update(x);
-    
+
     _desiredVelocity.setZero();
 }
 
@@ -125,49 +147,54 @@ void CoMStabilizer::getReference(Eigen::Vector3d &desiredPosition, Eigen::Vector
 }
 
 
-void CoMStabilizer::setZMP(Eigen::Vector3d zmp_ref)
+void CoMStabilizer::setZMP(Eigen::Vector2d zmp_ref)
 {
     _zmp_ref = zmp_ref;
 }
 
-void CoMStabilizer::setLeftSoleRef(Eigen::Vector3d l_sole_ref)
+void CoMStabilizer::setLeftSoleRef(Eigen::Affine3d l_sole_ref)
 {
-    _l_sole_ref = l_sole_ref;
+    _l_sole_ref = l_sole_ref.translation();
 }
 
-void CoMStabilizer::setRightSoleRef(Eigen::Vector3d r_sole_ref)
+void CoMStabilizer::setRightSoleRef(Eigen::Affine3d r_sole_ref)
 {
-    _r_sole_ref = r_sole_ref;
+    _r_sole_ref = r_sole_ref.translation();
 }
 
-void CoMStabilizer::setLeftWrench(Eigen::Vector6d left_wrench)
-{
-    _left_wrench = left_wrench;
-}
+// void CoMStabilizer::setLeftWrench(Eigen::Vector6d left_wrench)
+// {
+//     _left_wrench = left_wrench;
+// }
+// 
+// void CoMStabilizer::setRightWrench(Eigen::Vector6d right_wrench)
+// {
+//     _right_wrench = right_wrench;
+// }
 
-void CoMStabilizer::setRightWrench(Eigen::Vector6d right_wrench)
-{
-    _right_wrench = right_wrench;
-}
-
-void CoMStabilizer::setSoleRef(Vector3d l_sole_ref, Vector3d r_sole_ref)
+void CoMStabilizer::setSoleRef(Affine3d l_sole_ref, Affine3d r_sole_ref)
 {
     /**
      * @brief set left foot and right foot reference
      */
-    _l_sole_ref = l_sole_ref;
-    _r_sole_ref = r_sole_ref;
+    _l_sole_ref = l_sole_ref.translation();
+    _r_sole_ref = r_sole_ref.translation();
 }
 
-void CoMStabilizer::setWrench(Eigen::Vector6d left_wrench, Eigen::Vector6d right_wrench)
+
+void CoMStabilizer::_log(XBot::MatLogger::Ptr logger)
 {
-    /**
-     * @brief set left foot and right foot wrench
-     */
-    _left_wrench = left_wrench;
-    _right_wrench = right_wrench;
+    OpenSoT::tasks::velocity::CoM::_log(logger);
+    
+    logger->add("com_pos_desired", _desiredPosition);
+    logger->add("com_vel_desired", _desiredVelocity);
+    logger->add("zmp_ref", _zmp_ref);
+    logger->add("left_wrench", _left_wrench);
+    logger->add("right_wrench", _right_wrench);
+    logger->add("l_sole_ref", _l_sole_ref);
+    logger->add("r_sole_ref", _r_sole_ref);
+    
 }
-
 
 
 
