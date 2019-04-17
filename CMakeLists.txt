@@ -35,6 +35,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -std=c++11 -Wmaybe-uninitialized -Wuninitialized" )
 endif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 
+# force RELEASE to be compatible with xenomai
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 # Set a default build type for single-configuration
