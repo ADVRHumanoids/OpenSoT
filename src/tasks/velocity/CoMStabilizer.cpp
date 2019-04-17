@@ -24,6 +24,12 @@
 
 using namespace OpenSoT::tasks::velocity;
 
+/**
+    * @brief CoMStabilizer. It requires, among the others:
+    * l_sole and r_sole references
+    * a ConstPtr for the l_sole and the r_sole force/torque sensors (this will automatically update the wrenches needed by the stabilizer)
+    * */
+
 CoMStabilizer::CoMStabilizer(  const Eigen::VectorXd& x,
                                 XBot::ModelInterface& robot,
                                 
@@ -46,8 +52,7 @@ CoMStabilizer::CoMStabilizer(  const Eigen::VectorXd& x,
                                                                 K, C, MaxLims, MinLims, samples2ODE, freq),
                                                      _ft_sensor_l_sole(ft_sensor_l_sole),
                                                      _ft_sensor_r_sole(ft_sensor_r_sole)
-{
-    
+{   
     _desiredPosition = CoM::getReference();
     
     _left_wrench.setZero();
@@ -161,16 +166,6 @@ void CoMStabilizer::setRightSoleRef(Eigen::Affine3d r_sole_ref)
 {
     _r_sole_ref = r_sole_ref.translation();
 }
-
-// void CoMStabilizer::setLeftWrench(Eigen::Vector6d left_wrench)
-// {
-//     _left_wrench = left_wrench;
-// }
-// 
-// void CoMStabilizer::setRightWrench(Eigen::Vector6d right_wrench)
-// {
-//     _right_wrench = right_wrench;
-// }
 
 void CoMStabilizer::setSoleRef(Affine3d l_sole_ref, Affine3d r_sole_ref)
 {
