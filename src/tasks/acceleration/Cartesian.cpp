@@ -102,7 +102,8 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
         _robot.getRelativeJacobian(_distal_link, _base_link, _J);
         _robot.getPose(_distal_link, _base_link, _pose_current);
         _robot.getVelocityTwist(_distal_link, _base_link, _vel_current);
-        _jdotqdot.setZero(); ///TODO: computeJdotQdot relative!
+        _robot.computeRelativeJdotQdot(_distal_link, _base_link, _jdotqdot);
+        //_jdotqdot.setZero(); ///TODO: computeJdotQdot relative!
     }
     
     XBot::Utils::computeOrientationError(_pose_ref.linear(), _pose_current.linear(), _orientation_error);
