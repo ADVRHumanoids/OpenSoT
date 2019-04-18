@@ -63,6 +63,9 @@ FIND_PACKAGE(XBotInterface REQUIRED)
 FIND_PACKAGE(fcl QUIET)
 FIND_PACKAGE(PkgConfig REQUIRED)
 
+
+FIND_PACKAGE(compliant_stabilizer QUIET)
+
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
@@ -192,6 +195,12 @@ if(${PCL_FOUND})
         src/utils/convex_hull_utils.cpp)
 endif()
 
+if (${compliant_stabilizer_FOUND})
+    message("Adding src/tasks/velocity/CoMStabilizer.cpp to compilation")
+    set(OPENSOT_TASKS_SOURCES ${OPENSOT_TASKS_SOURCES}
+        src/tasks/velocity/CoMStabilizer.cpp)
+endif()
+
 ##VARIABLES
 set(OPENSOT_VARIABLES_SOURCES src/variables/Torque.cpp)
 
@@ -221,6 +230,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${XBotInterface_LIBRARIES}
                               ${fcl_LIBRARIES}
                               ${moveit_core_LIBRARIES}
+                              ${compliant_stabilizer_LIBRARIES}
                               )
 
 
