@@ -40,6 +40,7 @@ protected:
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface& _model_ptr) {
     Eigen::VectorXd _q(_model_ptr.getJointNum());
+    _q.setZero(_q.size());
     _q[_model_ptr.getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
     _q[_model_ptr.getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
     _q[_model_ptr.getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -120,6 +121,9 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
     Eigen::VectorXd q, dq;
     q = getGoodInitialPosition(*model);
     dq = q; dq.setZero(dq.size());
+
+    std::cout<<"q: "<<q.transpose()<<std::endl;
+    std::cout<<"dq: "<<dq.transpose()<<std::endl;
 
     model->setJointPosition(q);
     model->update();
