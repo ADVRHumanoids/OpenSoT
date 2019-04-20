@@ -49,6 +49,9 @@ namespace OpenSoT { namespace utils {
                      Eigen::VectorXd& tau
                     );
         
+        void setContactRotationMatrix(const std::string& contact_link,
+                                      const Eigen::Matrix3d& w_R_c);
+        
         void log(XBot::MatLogger::Ptr logger);
         
         
@@ -58,7 +61,7 @@ namespace OpenSoT { namespace utils {
         std::vector<std::string> _contact_links;
         std::vector< OpenSoT::AffineHelper > _wrenches;
         
-        OpenSoT::constraints::force::FrictionCone::Ptr _friction_cone;
+        OpenSoT::constraints::force::FrictionCones::Ptr _friction_cone;
         OpenSoT::tasks::force::FloatingBase::Ptr _forza_giusta;
         OpenSoT::solvers::iHQP::Ptr _solver;
         OpenSoT::AutoStack::Ptr _autostack;
