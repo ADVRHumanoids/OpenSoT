@@ -111,6 +111,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/force/FrictionCone.cpp
                     src/constraints/force/WrenchLimits.cpp
                     src/constraints/force/CoP.cpp
+                    src/constraints/force/StaticConstraint.cpp
                     src/constraints/GenericConstraint.cpp
                     src/constraints/acceleration/JointLimits.cpp
                     )
