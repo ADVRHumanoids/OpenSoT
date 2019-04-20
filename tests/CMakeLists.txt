@@ -10,6 +10,7 @@ FIND_PACKAGE(idynutils2 QUIET)
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher)
+find_package(osqp QUIET)
 
 if(${iDynTree_FOUND} AND
    ${idynutils2_FOUND}
@@ -96,7 +97,7 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TEST testQPOases_ConvexHull testConvexHullVelocityConstraint testAutoStack)
 endif()
 
-if(${osqp_FOUND})
+if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
     set(OPENSOT_TEST ${OPENSOT_TESTS} testLP)
 endif()
@@ -221,7 +222,7 @@ TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
-if(${osqp_FOUND})
+if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
     TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs})
     add_dependencies(testOSQPSolver GTest-ext OpenSoT)
