@@ -38,6 +38,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         double getDofIndex() const;
         
+        void setOutwardNormal(const Eigen::Vector3d& n);
+        
         const std::string& getWheelName() const { return _wheel_name; }
         
         void log(XBot::MatLogger::Ptr logger);
@@ -49,14 +51,18 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         HysteresisComparator _comp;
         int _steering_id;
-        Eigen::Vector3d _world_steering_axis, _wheel_spinning_axis;
+        Eigen::Vector3d _local_steering_axis, _wheel_spinning_axis;
+        Eigen::Matrix3d _local_R_world;
         XBot::ModelInterface::ConstPtr _model;
         XBot::Joint::ConstPtr _steering_joint;
         std::string _wheel_name;
         std::string _waist_name;
+        std::string _wheel_parent_name;
         Eigen::VectorXd _q;
         
         Eigen::Vector3d _vdes;
+        
+        double _prev_qdes;
         
         
     };
@@ -73,6 +79,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
                               double dt,
                               double max_steering_speed = DEFAULT_MAX_STEERING_SPEED
                              );
+        
+        void setOutwardNormal(const Eigen::Vector3d& n);
         
         void _update(const Eigen::VectorXd& x) override;
         
