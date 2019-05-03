@@ -46,6 +46,7 @@ CoMStabilizer::CoMStabilizer(  const Eigen::VectorXd& x,
                                 const Eigen::Vector3d& K, const Eigen::Vector3d& C,
                                 const Eigen::Vector3d& MaxLims,
                                 const Eigen::Vector3d& MinLims,
+                                const bool invertFTSensors, //TODO take out
                                 const double samples2ODE,
                                 const double freq) : CoM(x, robot, "CoMStabilizer"),
                                                      _stabilizer(sample_time, mass, ankle_height, foot_size, Fzmin,
@@ -60,7 +61,15 @@ CoMStabilizer::CoMStabilizer(  const Eigen::VectorXd& x,
     
     _ft_sensor_l_sole->getWrench(_left_wrench);
     _ft_sensor_r_sole->getWrench(_right_wrench);
-   
+    
+    // =====================================
+    _invertFTSensors = invertFTSensors;
+    if (_invertFTSensors == true)
+    {
+        _left_wrench *= -1;
+        _right_wrench *= -1;
+    }
+    
     _zmp_ref = CoM::getReference().head(2);
         
     _l_sole_ref = l_sole.translation();
@@ -92,6 +101,12 @@ void CoMStabilizer::_update(const Eigen::VectorXd& x)
     
     _ft_sensor_l_sole->getWrench(_left_wrench);
     _ft_sensor_r_sole->getWrench(_right_wrench);
+    
+    if (_invertFTSensors == true)
+    {
+        _left_wrench *= -1;
+        _right_wrench *= -1;
+    }
     
     Eigen::Vector3d delta_com = _stabilizer.update(_left_wrench, _right_wrench,
                                                   CopPos_L, CopPos_R,
@@ -175,7 +190,6 @@ void CoMStabilizer::setSoleRef(Affine3d l_sole_ref, Affine3d r_sole_ref)
     _l_sole_ref = l_sole_ref.translation();
     _r_sole_ref = r_sole_ref.translation();
 }
-
 
 void CoMStabilizer::_log(XBot::MatLogger::Ptr logger)
 {
