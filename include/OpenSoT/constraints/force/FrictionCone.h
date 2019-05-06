@@ -72,7 +72,9 @@
 
                 void update(const Eigen::VectorXd &x);
 
-                void setMu(const friction_cone& mu);
+                void setFrictionCone(const friction_cone& frc);
+
+                void setMu(const double mu);
 
 
                 /**
