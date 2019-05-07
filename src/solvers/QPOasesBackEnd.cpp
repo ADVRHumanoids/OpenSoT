@@ -84,6 +84,11 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+    //couple of checks
+    if(A.rows() != _A.rows()){
+        XBot::Logger::error("A.rows() != _A.rows() --> %f != %f", A.rows(), _A.rows());
+        return false;}
+
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
     checkINFTY();
 

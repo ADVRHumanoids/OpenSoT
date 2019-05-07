@@ -219,16 +219,15 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 TEST_F(testQPOasesProblem, test_update_constraint)
 {
     //OpenSoT::solvers::QPOasesBackEnd qp(3,0);
-    OpenSoT::solvers::BackEnd::Ptr qp = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::qpOASES, 3, 0, OpenSoT::HST_SEMIDEF,1e4);
+
 
     Eigen::MatrixXd H(1,3);
     H<<1,1,1;
     Eigen::VectorXd b(1);
     b<<10;
-    Eigen::MatrixXd A(0,0);
-    Eigen::VectorXd lA;
-    Eigen::VectorXd uA;
+    Eigen::MatrixXd A(1,3); A.setZero(1,3);
+    Eigen::VectorXd lA(1); lA.setZero(1);
+    Eigen::VectorXd uA(1); uA.setZero(1);
     Eigen::VectorXd l(3);
     l<<-10,
        -10,
@@ -237,6 +236,9 @@ TEST_F(testQPOasesProblem, test_update_constraint)
     u<<10,
        10,
        10;
+
+    OpenSoT::solvers::BackEnd::Ptr qp = OpenSoT::solvers::BackEndFactory(
+                OpenSoT::solvers::solver_back_ends::qpOASES, 3, 1, OpenSoT::HST_SEMIDEF,1e4);
     EXPECT_TRUE(qp->initProblem(H.transpose()*H,-1.*H.transpose()*b,A,lA,uA,l,u));
 
     EXPECT_TRUE(qp->solve());

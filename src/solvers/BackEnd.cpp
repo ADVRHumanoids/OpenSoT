@@ -20,6 +20,11 @@ bool BackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
                                 const Eigen::Ref<const Eigen::VectorXd> &lA,
                                 const Eigen::Ref<const Eigen::VectorXd> &uA)
 {
+    if(_A.rows() != A.rows()){
+        XBot::Logger::error("A rows: %i \n", A.rows());
+        XBot::Logger::error("should be: %i \n", _A.rows());
+        return false;
+    }
     if(!(A.cols() == _H.cols())){
         XBot::Logger::error("A cols: %i \n", A.cols());
         XBot::Logger::error("should be: %i \n", _H.cols());

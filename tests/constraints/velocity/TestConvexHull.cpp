@@ -150,14 +150,16 @@ TEST_F(testConvexHull, checkImplementation) {
     std::vector<KDL::Vector> ch;
     convex_hull huller;
     Eigen::MatrixXd A_JCoM;
-    Eigen::MatrixXd A;
-    Eigen::VectorXd b;
+
 
     huller.getSupportPolygonPoints(points,_links_in_contact,*(_model_ptr.get()),"COM");
     huller.getConvexHull(points, ch);
+    Eigen::MatrixXd A(_links_in_contact.size(),2);
+    Eigen::VectorXd b(_links_in_contact.size());
     OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A, b, 0.00);
 
-    EXPECT_EQ(ch.size(),A.rows());
+    //EXPECT_EQ(ch.size(),A.rows());
+    EXPECT_EQ(_links_in_contact.size(),A.rows());
     EXPECT_EQ(b.size(), A.rows());
     EXPECT_EQ(A.cols(), 2);
 
@@ -215,16 +217,16 @@ TEST_F(testConvexHull, checkBoundsScaling) {
     std::vector<KDL::Vector> ch;
     idyn_convex_hull.getConvexHull(chPoints, ch);
 
-    Eigen::MatrixXd A_ch;
-    Eigen::VectorXd b_ch;
-    Eigen::MatrixXd A_ch_1cm_scaling;
-    Eigen::VectorXd b_ch_1cm_scaling;
+    Eigen::MatrixXd A_ch(_links_in_contact.size(),2);
+    Eigen::VectorXd b_ch(_links_in_contact.size());
+    Eigen::MatrixXd A_ch_1cm_scaling(_links_in_contact.size(),2);
+    Eigen::VectorXd b_ch_1cm_scaling(_links_in_contact.size());
     OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A_ch, b_ch, 0.0);
     OpenSoT::constraints::velocity::ConvexHull::getConstraints(ch, A_ch_1cm_scaling, b_ch_1cm_scaling, 0.01);
 
     EXPECT_TRUE(A_ch == A_ch_1cm_scaling);
 
-    for(unsigned int i = 0; i < b_ch.size(); ++i) {
+    for(unsigned int i = 0; i < ch.size(); ++i) {
         double norm_i = sqrt(A_ch(i,0)*A_ch(i,0) + A_ch(i,1)*A_ch(i,1));
         double distance_i = fabs(b_ch_1cm_scaling[i]-b_ch[i])/norm_i;
         EXPECT_NEAR(distance_i,.01,1e-16);
@@ -265,21 +267,21 @@ TEST_F(testConvexHull, sizesAreCorrect) {
                                                                               << _convexHull->getAeq().cols()
                                                                               << " columns instead";
 
-    EXPECT_EQ(0,_convexHull->getbLowerBound().size()) << "beq should have size 3"
+    EXPECT_EQ(_links_in_contact.size(),_convexHull->getbLowerBound().size()) << "beq should have size 3"
                                                       << "but has size"
                                                       << _convexHull->getbLowerBound().size();
 
 
 
 
-    EXPECT_EQ(hullSize,_convexHull->getAineq().rows()) << "Aineq should have size "
-                                                       << hullSize
+    EXPECT_EQ(_links_in_contact.size(),_convexHull->getAineq().rows()) << "Aineq should have size "
+                                                       << _links_in_contact.size()
                                                        << " but has size"
                                                        << _convexHull->getAineq().rows();
 
 
-    EXPECT_EQ(hullSize,_convexHull->getbUpperBound().size()) << "beq should have size "
-                                                             << hullSize
+    EXPECT_EQ(_links_in_contact.size(),_convexHull->getbUpperBound().size()) << "beq should have size "
+                                                             << _links_in_contact.size()
                                                              << " but has size"
                                                              << _convexHull->getbUpperBound().size();
 }
@@ -343,10 +345,10 @@ TEST_F(testConvexHull, NoZeroRowsPreset) {
         _convexHull->update(q);
         std::vector<KDL::Vector> ch;
         _convexHull->getConvexHull(ch);
-        Eigen::MatrixXd A_ch;
-        Eigen::VectorXd b_ch;
+        Eigen::MatrixXd A_ch(_links_in_contact.size(),2);
+        Eigen::VectorXd b_ch(_links_in_contact.size());
         _convexHull->getConstraints(ch,A_ch,b_ch,0.01);
-        for(unsigned int i = 0; i < A_ch.rows(); ++i)
+        for(unsigned int i = 0; i < ch.size(); ++i)
             EXPECT_GT(A_ch.row(i).norm(),1E-5);
     }
 }
