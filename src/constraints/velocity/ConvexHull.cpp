@@ -33,6 +33,9 @@ ConvexHull::ConvexHull(const Eigen::VectorXd& x,
     _JCoM(3, x.size()),
     _C(links_in_contact.size(), 2)
 {
+    _bUpperBound.resize(links_in_contact.size());
+    _bLowerBound.resize(links_in_contact.size());
+    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
     this->update(x);
 }
 
@@ -48,6 +51,7 @@ void ConvexHull::update(const Eigen::VectorXd &x) {
 
 
     _Aineq = _C * _JCoM.block(0,0,2,_x_size);
+    //_bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
     /**********************************************************************/
 }
 
@@ -80,8 +84,10 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
                                 const double boundScaling)
 {
     double _a, _b, _c;
-    A.resize(convex_hull.size(),2);
-    b.resize(convex_hull.size());
+    A.setZero(A.rows(), A.cols());
+    b = 1.0e10*b.setOnes(b.size());
+//    A.resize(convex_hull.size(),2);
+//    b.resize(convex_hull.size());
 
     unsigned int z = 0;
 
