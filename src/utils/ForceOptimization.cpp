@@ -5,7 +5,9 @@
 
 OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr model, 
                                            std::vector< std::string > contact_links,
-                                           bool optimize_torque):
+                                           bool optimize_torque,
+                                           double mu
+                                                    ):
     _model(model),
     _contact_links(contact_links)
 {
@@ -80,7 +82,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
 
     for(auto cl : _contact_links)
     {
-        friction_cones.emplace_back(Eigen::Matrix3d::Identity(), 0.5);
+        friction_cones.emplace_back(Eigen::Matrix3d::Identity(), mu);
     }
     
     _friction_cone = boost::make_shared<OpenSoT::constraints::force::FrictionCones>(_contact_links,

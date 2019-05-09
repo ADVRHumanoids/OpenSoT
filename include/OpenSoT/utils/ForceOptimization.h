@@ -28,8 +28,10 @@ namespace OpenSoT { namespace utils {
         
         typedef boost::shared_ptr<ForceOptimization> Ptr;
         
+        constexpr static double DEFAULT_FRICTION_COEFF = 0.5;
+        
         /**
-         * @brief Contructor
+         * @brief Constructor
          * 
          * @param model ModelInterface object that is kept updated with the robot state
          * @param contact_links List of contact links
@@ -37,7 +39,8 @@ namespace OpenSoT { namespace utils {
          */
         ForceOptimization(XBot::ModelInterface::Ptr model, 
                           std::vector<std::string> contact_links,
-                          bool optimize_torque = true
+                          bool optimize_torque = true,
+                          double friction_coeff = DEFAULT_FRICTION_COEFF
                           );
         
         /**
