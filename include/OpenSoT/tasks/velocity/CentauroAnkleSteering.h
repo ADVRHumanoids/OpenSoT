@@ -46,8 +46,16 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
     private:
         
+        struct LogData
+        {
+            double theta, theta_ref, q;
+            Eigen::Vector3d steering_axis, normal, forward, vdes;
+        };
+        
         static double wrap_angle(double q);
         static double sign(double x);
+        
+        LogData _log_data;
         
         HysteresisComparator _comp;
         int _steering_id;
@@ -83,6 +91,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         void setOutwardNormal(const Eigen::Vector3d& n);
         
         void _update(const Eigen::VectorXd& x) override;
+        
+        void _log(XBot::MatLogger::Ptr logger) override;
         
         
     private:

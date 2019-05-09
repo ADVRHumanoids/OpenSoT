@@ -9,6 +9,8 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
     _comp(0.0025, 0.01),
     _vdes(1., 0, 0)
 {
+    std::memset(&_log_data, 0, sizeof(_log_data));
+    
     _local_R_world.setIdentity();
     
     auto spinning_axis = _model->getUrdf().getLink(wheel_name)->parent_joint->axis;
@@ -90,6 +92,11 @@ namespace
         
         return 0.0;
     }
+    
+    double sign(double x)
+    {
+        return (x > 0) - (x < 0);
+    }
 }
 
 double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
@@ -121,8 +128,18 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     
     vdes_th.x() = dead_zone(vdes_th.x(), 0.01);
     vdes_th.y() = dead_zone(vdes_th.y(), 0.01);
+
+//     std::cout << _wheel_name << ", normal  dir: " << _local_R_world.row(2) << std::endl;
+//     std::cout << _wheel_name << ", forward dir: " << wheel_forward.transpose() << std::endl;
+//     std::cout << _wheel_name << ", theta      : " << theta << std::endl;
+//     std::cout << _wheel_name << ", vdes       : " << vdes_th.transpose() << std::endl;
     
-    
+    _log_data.q = q;
+    _log_data.normal = _local_R_world.transpose().col(2);
+    _log_data.forward = wheel_forward;
+    _log_data.theta = theta;
+    _log_data.vdes = vdes_th;
+
     if(vdes_th.head(2).norm() == 0.0) 
     {
         return _prev_qdes;
@@ -131,7 +148,15 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     double des_theta_1 = std::atan2(vdes_th.y(), vdes_th.x());
     
     Eigen::Vector3d steering_axis = _local_R_world*w_T_wp.linear()*_local_steering_axis;
-    double des_q_1 = q  + (des_theta_1 - theta)*steering_axis.z();
+    
+    
+//     std::cout << _wheel_name << ", theta ref  : " << des_theta_1 << std::endl;
+//     std::cout << _wheel_name << ", steering_ax: " << steering_axis.transpose() << std::endl;
+    
+    _log_data.theta_ref = des_theta_1;
+    _log_data.steering_axis = steering_axis;
+    
+    double des_q_1 = q  + (des_theta_1 - theta) * ::sign(steering_axis.z());
     des_q_1 = wrap_angle(des_q_1);
     
     double des_q_2 = des_q_1 + M_PI;
@@ -161,9 +186,16 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
 
 void SimpleSteering::log(XBot::MatLogger::Ptr logger)
 {
-    logger->add("vdes_"+_wheel_name, _vdes);
-    logger->add("vdes_norm_"+_wheel_name, double(_vdes.head<2>().norm()));
-    logger->add("threshold_"+_wheel_name, _comp.getCurrentThreshold());
+    logger->add(_wheel_name + "_threshold", _comp.getCurrentThreshold());
+    logger->add(_wheel_name + "_forward", _log_data.forward);
+    logger->add(_wheel_name + "_normal", _log_data.normal);
+    logger->add(_wheel_name + "_steering_axis", _log_data.steering_axis);
+    logger->add(_wheel_name + "_theta", _log_data.theta);
+    logger->add(_wheel_name + "_theta_ref", _log_data.theta_ref);
+    logger->add(_wheel_name + "_vdes", _log_data.vdes);
+    logger->add(_wheel_name + "_q_des", _prev_qdes);
+    logger->add(_wheel_name + "_q", _log_data.q);
+
 }
 
 
@@ -252,3 +284,9 @@ void CentauroAnkleSteering::_update(const Eigen::VectorXd& x)
     _b(0) = dq;
     
 }
+
+void OpenSoT::tasks::velocity::CentauroAnkleSteering::_log(XBot::MatLogger::Ptr logger)
+{
+    _steering.log(logger);
+}
+
