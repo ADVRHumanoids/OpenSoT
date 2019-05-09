@@ -205,6 +205,11 @@ void CoMStabilizer::_log(XBot::MatLogger::Ptr logger)
     
 }
 
+const CompliantStabilizer &OpenSoT::tasks::velocity::CoMStabilizer::getStabilizer()
+{
+    return _stabilizer;
+}
+
 
 
 

@@ -143,6 +143,8 @@ namespace OpenSoT {
                 
                virtual void _log(XBot::MatLogger::Ptr logger);
 
+                const CompliantStabilizer& getStabilizer();
+
 
             };
             
