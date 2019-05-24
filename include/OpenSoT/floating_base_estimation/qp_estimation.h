@@ -20,11 +20,11 @@ namespace floating_base_estimation{
     public:
         typedef boost::shared_ptr<qp_estimation> Ptr;
 
-        qp_estimation(XBot::ModelInterface::Ptr model, XBot::ImuSensor::ConstPtr imu,
+        qp_estimation(XBot::ModelInterface::Ptr model,
                       std::vector<std::string> contact_links,
                       const Eigen::MatrixXd& contact_matrix = Eigen::MatrixXd::Identity(6,6));
         ~qp_estimation();
-        bool update(double dT);
+        bool update(double dT, bool do_update = true);
 
         virtual bool setContactState(const std::string& contact_link, const bool state);
 
@@ -32,7 +32,6 @@ namespace floating_base_estimation{
 
     private:
         std::list<OpenSoT::tasks::Aggregated::TaskPtr> _contact_tasks;
-        OpenSoT::tasks::floating_base::IMU::Ptr _imu_task;
         std::map<std::string, unsigned int> _map_tasks;
         tasks::Aggregated::Ptr _aggregated_tasks;
         solvers::iHQP::Ptr _solver;

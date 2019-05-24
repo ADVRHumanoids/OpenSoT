@@ -3,10 +3,9 @@
 
 
 OpenSoT::floating_base_estimation::qp_estimation::qp_estimation(XBot::ModelInterface::Ptr model,
-                                                            XBot::ImuSensor::ConstPtr imu,
                                                             std::vector<string> contact_links,
                                                             const Eigen::MatrixXd &contact_matrix):
-FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
+FloatingBaseEstimation(model, contact_links, contact_matrix)
 {
     for(unsigned int i = 0; i < contact_links.size(); ++i)
     {
@@ -18,11 +17,6 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
 
     _aggregated_tasks.reset(new tasks::Aggregated(_contact_tasks, 6));
 
-    if(imu){
-        _imu_task.reset(new OpenSoT::tasks::floating_base::IMU(*_model, imu));
-        Eigen::MatrixXd W = 500.*Eigen::MatrixXd::Identity(6,6);
-        _imu_task->setWeight(W);}
-
     AffineHelper var = AffineHelper::Identity(6);
     Eigen::VectorXd ub(6);
     ub<<1e6*Eigen::VectorXd::Ones(3),1e6*Eigen::VectorXd::Ones(3);
@@ -30,17 +24,13 @@ FloatingBaseEstimation(model, imu, contact_links, contact_matrix)
     _fb_limits.reset(new constraints::GenericConstraint("fb_limits", var, ub, lb,
         constraints::GenericConstraint::Type::BOUND));
 
-    if(imu)
-        _autostack.reset(new AutoStack(_aggregated_tasks + _imu_task));
-    else
-        _autostack.reset(new AutoStack(_aggregated_tasks));
+    _autostack.reset(new AutoStack(_aggregated_tasks));
     _autostack<<_fb_limits;
 
     _solver.reset(new solvers::iHQP(_autostack->getStack(), _autostack->getBounds()));
     _solver->setSolverID("FloatingBaseEstimation");
 
     _Qdot.setZero(6);
-    _Q.setZero();
     if(!update(0))
         throw std::runtime_error("Update failed!");
 }
@@ -63,16 +53,10 @@ bool OpenSoT::floating_base_estimation::qp_estimation::setContactState(
     return true;
 }
 
-bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT)
+bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT, bool do_update)
 {
-//    if(_imu){
-//        _model->setFloatingBaseState(_imu);
-//        _model->update();}
-
-    _model->getJointPosition(_q);
     _model->getJointVelocity(_qdot);
 
-    _Q = _q.segment(0,6);
     _autostack->update(Eigen::VectorXd::Zero(0));
 
     if(!_solver->solve(_Qdot)){
@@ -80,28 +64,13 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT)
         return false;
     }
 
-//    if(!_imu)
-//    {
-//        _Q += _Qdot*dT;
-//        _q.segment(0,6) = _Q;
-//        _qdot.segment(0,6) = _Qdot;
-//    }
-//    else
-//    {
-//        _Q.segment(0,3) += _Qdot.segment(0,3)*dT;
-//        _q.segment(0,3) = _Q.segment(0,3);
-//        _qdot.segment(0,3) = _Qdot.segment(0,3);
-//    }
+    if(do_update)
+    {
+        _qdot.segment(0,6) = _Qdot;
+        _model->setJointVelocity(_qdot);
+        _model->update();
+    }
 
-    _Q += _Qdot*dT;
-    _q.segment(0,6) = _Q;
-    _qdot.segment(0,6) = _Qdot;
-
-    
-
-    _model->setJointPosition(_q);
-    _model->setJointVelocity(_qdot);
-    _model->update();
     return true;
 }
 
@@ -109,7 +78,6 @@ void OpenSoT::floating_base_estimation::qp_estimation::log(XBot::MatLogger::Ptr 
 {
     _solver->log(logger);
     _autostack->log(logger);
-    logger->add("qp_estimation_Q", _Q);
     logger->add("qp_estimation_Qdot", _Qdot);
 }
 
