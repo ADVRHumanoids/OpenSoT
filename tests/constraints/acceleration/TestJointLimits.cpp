@@ -57,13 +57,12 @@ protected:
 
         dT = 0.001;
         qdotMax = M_PI;
-        double lambda = 4;
         jointVelocityLimits = boost::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
 
         _model_ptr->getJointLimits(qmin, qmax);
         jointLimits = boost::make_shared<OpenSoT::constraints::acceleration::JointLimits>(
-                    *_model_ptr, qddot, qmax, qmin, acc_lims, dT, lambda);
+                    *_model_ptr, qddot, qmax, qmin, acc_lims, dT);
 
         postural = boost::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
         postural->setLambda(1000.);
