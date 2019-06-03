@@ -71,6 +71,20 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void setLambda(double lambda1, double lambda2);
         virtual void setLambda(double lambda);
 
+        /**
+         * @brief getLambda return both position and velocity convergence gains
+         * @param lambda position gain
+         * @param lambda2 velocity gain
+         */
+        void getLambda(double & lambda, double & lambda2);
+        using Task::getLambda;
+
+        /**
+         * @brief getLambda2 return velocity convergence gain
+         * @return lambda2 gain
+         */
+        const double getLambda2() const;
+
         bool reset();
         
         virtual void _log(XBot::MatLogger::Ptr logger);
