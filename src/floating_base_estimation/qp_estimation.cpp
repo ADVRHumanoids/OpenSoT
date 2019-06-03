@@ -31,7 +31,7 @@ FloatingBaseEstimation(model, contact_links, contact_matrix)
     _solver->setSolverID("FloatingBaseEstimation");
 
     _Qdot.setZero(6);
-    if(!update(0))
+    if(!update())
         throw std::runtime_error("Update failed!");
 }
 
@@ -53,7 +53,7 @@ bool OpenSoT::floating_base_estimation::qp_estimation::setContactState(
     return true;
 }
 
-bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT, bool do_update)
+bool OpenSoT::floating_base_estimation::qp_estimation::update(OpenSoT::floating_base_estimation::Update update)
 {
     _model->getJointVelocity(_qdot);
 
@@ -64,9 +64,16 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(double dT, bool do
         return false;
     }
 
-    if(do_update)
+
+    if(update == OpenSoT::floating_base_estimation::Update::All)
+        _qdot.head(6) = _Qdot;
+    else if(update == OpenSoT::floating_base_estimation::Update::Linear)
+        _qdot.segment(0,3) = _Qdot.segment(0,3);
+    else if(update == OpenSoT::floating_base_estimation::Update::Angular)
+        _qdot.segment(3,6) = _Qdot.segment(3,6);
+
+    if(update != OpenSoT::floating_base_estimation::Update::None)
     {
-        _qdot.segment(0,6) = _Qdot;
         _model->setJointVelocity(_qdot);
         _model->update();
     }
