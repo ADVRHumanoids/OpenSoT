@@ -10,19 +10,6 @@
 
 namespace OpenSoT{
 namespace floating_base_estimation{
-
-/**
- * @brief The Update enum define the type of update of the model for the estimation classes
- */
-enum Update
-{
-    None = 0, // NO update is done
-    Linear = 1, //ONLY the linear part is updated
-    Angular = 2, //ONLY the angular part is updated
-    All = 3 //BOTH linear and angular part are updated
-};
-
-
 /**
      * @brief The qp_estimation class uses a QP to estimate the floating base pose and velocities from
      * contact information and IMU (optional).
@@ -37,8 +24,8 @@ enum Update
                       std::vector<std::string> contact_links,
                       const Eigen::MatrixXd& contact_matrix = Eigen::MatrixXd::Identity(6,6));
         ~qp_estimation();
-        bool update(OpenSoT::floating_base_estimation::Update update =
-                        OpenSoT::floating_base_estimation::Update::None);
+        bool update(OpenSoT::FloatingBaseEstimation::Update update =
+                        OpenSoT::FloatingBaseEstimation::Update::None);
 
         virtual bool setContactState(const std::string& contact_link, const bool state);
 

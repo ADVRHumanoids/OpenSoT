@@ -53,7 +53,7 @@ bool OpenSoT::floating_base_estimation::qp_estimation::setContactState(
     return true;
 }
 
-bool OpenSoT::floating_base_estimation::qp_estimation::update(OpenSoT::floating_base_estimation::Update update)
+bool OpenSoT::floating_base_estimation::qp_estimation::update(OpenSoT::FloatingBaseEstimation::Update update)
 {
     _model->getJointVelocity(_qdot);
 
@@ -65,14 +65,14 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(OpenSoT::floating_
     }
 
 
-    if(update == OpenSoT::floating_base_estimation::Update::All)
+    if(update == OpenSoT::FloatingBaseEstimation::Update::All)
         _qdot.head(6) = _Qdot;
-    else if(update == OpenSoT::floating_base_estimation::Update::Linear)
+    else if(update == OpenSoT::FloatingBaseEstimation::Update::Linear)
         _qdot.segment(0,3) = _Qdot.segment(0,3);
-    else if(update == OpenSoT::floating_base_estimation::Update::Angular)
+    else if(update == OpenSoT::FloatingBaseEstimation::Update::Angular)
         _qdot.segment(3,6) = _Qdot.segment(3,6);
 
-    if(update != OpenSoT::floating_base_estimation::Update::None)
+    if(update != OpenSoT::FloatingBaseEstimation::Update::None)
     {
         _model->setJointVelocity(_qdot);
         _model->update();
