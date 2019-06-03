@@ -155,3 +155,14 @@ void OpenSoT::tasks::acceleration::CoM::getPosError(Eigen::Vector3d& error)
 {
     error = _pose_error;
 }
+
+void OpenSoT::tasks::acceleration::CoM::getLambda(double & lambda, double & lambda2)
+{
+    lambda = _lambda;
+    lambda2 = _lambda2;
+}
+
+const double OpenSoT::tasks::acceleration::CoM::getLambda2() const
+{
+    return _lambda2;
+}
