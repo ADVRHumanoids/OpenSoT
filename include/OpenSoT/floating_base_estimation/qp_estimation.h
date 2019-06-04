@@ -24,7 +24,8 @@ namespace floating_base_estimation{
                       std::vector<std::string> contact_links,
                       const Eigen::MatrixXd& contact_matrix = Eigen::MatrixXd::Identity(6,6));
         ~qp_estimation();
-        bool update(double dT, bool do_update = true);
+        bool update(OpenSoT::FloatingBaseEstimation::Update update =
+                        OpenSoT::FloatingBaseEstimation::Update::None);
 
         virtual bool setContactState(const std::string& contact_link, const bool state);
 

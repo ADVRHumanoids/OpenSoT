@@ -25,18 +25,14 @@ JointLimits::JointLimits(   XBot::ModelInterface& robot,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
                             const Eigen::VectorXd &jointAccMax,
-                            const double dt,
-                            const double lambda):
+                            const double dt):
      Constraint("joint_limits", qddot.getInputSize()),
      _jointLimitsMax(jointBoundMax),
      _jointLimitsMin(jointBoundMin),
-     _lambda(lambda),
      _jointAccMax(jointAccMax),
      _robot(robot),
-     _dt(lambda*dt)
+     _dt(dt)
 {
-
-
     if(qddot.getOutputSize() != _jointLimitsMax.size())
         throw std::runtime_error("_qddot.getOutputSize() != _jointLimitsMax.size()");
     if(qddot.getOutputSize() != _jointLimitsMin.size())

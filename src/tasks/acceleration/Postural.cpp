@@ -172,3 +172,14 @@ bool OpenSoT::tasks::acceleration::Postural::reset()
     _robot.getJointPosition(_qref);
     return true;
 }
+
+void OpenSoT::tasks::acceleration::Postural::getLambda(double & lambda, double & lambda2)
+{
+    lambda = _lambda;
+    lambda2 = _lambda2;
+}
+
+const double OpenSoT::tasks::acceleration::Postural::getLambda2() const
+{
+    return _lambda2;
+}

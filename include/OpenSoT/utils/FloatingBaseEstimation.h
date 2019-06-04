@@ -26,6 +26,18 @@ namespace OpenSoT {
      * @brief The FloatingBaseEstimation class interface to a floating base estimator
      */
     class FloatingBaseEstimation{
+
+        /**
+         * @brief The Update enum define the type of update of the model for the estimation classes
+         */
+    public: enum Update
+        {
+            None = 0, // NO update is done
+            Linear = 1, //ONLY the linear part is updated
+            Angular = 2, //ONLY the angular part is updated
+            All = 3 //BOTH linear and angular part are updated
+        };
+
     public:
         typedef boost::shared_ptr<FloatingBaseEstimation> Ptr;
 
@@ -53,7 +65,8 @@ namespace OpenSoT {
 
         }
 
-        virtual bool update(double dT, bool do_update = true) = 0;
+        virtual bool update(OpenSoT::FloatingBaseEstimation::Update update =
+                OpenSoT::FloatingBaseEstimation::Update::None) = 0;
 
         virtual void log(XBot::MatLogger::Ptr logger)
         {

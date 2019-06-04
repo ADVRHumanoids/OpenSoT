@@ -56,8 +56,12 @@
 
                 double _lambda;
 
+                /**
+                 * @brief _dt
+                 **/
                 double _dt;
-                
+
+
             public:
                 /**
                  * @brief JointLimits
@@ -67,15 +71,13 @@
                  * @param jointBoundMin
                  * @param jointAccMax
                  * @param dt
-                 * @param lambda used for early activation
                  */
                 JointLimits(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
                             const Eigen::VectorXd &jointAccMax,
-                            const double dt,
-                            const double lambda = 1.0);
+                            const double dt);
 
 
                 void update(const Eigen::VectorXd& x);

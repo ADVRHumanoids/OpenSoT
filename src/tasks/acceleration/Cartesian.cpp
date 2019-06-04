@@ -362,3 +362,14 @@ const Eigen::Vector6d OpenSoT::tasks::acceleration::Cartesian::getVelocityError(
 {
     return _velocity_error;
 }
+
+void OpenSoT::tasks::acceleration::Cartesian::getLambda(double & lambda, double & lambda2)
+{
+    lambda = _lambda;
+    lambda2 = _lambda2;
+}
+
+const double OpenSoT::tasks::acceleration::Cartesian::getLambda2() const
+{
+    return _lambda2;
+}
