@@ -31,6 +31,16 @@ namespace floating_base_estimation{
 
         virtual void log(XBot::MatLogger::Ptr logger);
 
+        AutoStack::Ptr getStack()
+        {
+            return _autostack;
+        }
+
+        solvers::iHQP::Ptr getSolver()
+        {
+            return _solver;
+        }
+
     private:
         std::list<OpenSoT::tasks::Aggregated::TaskPtr> _contact_tasks;
         std::map<std::string, unsigned int> _map_tasks;
