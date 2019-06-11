@@ -32,10 +32,11 @@ CoM::CoM(   const Eigen::VectorXd& x,
         ) :
     Task(id, x.size()), _robot(robot)
 {
-    _desiredPosition.setZero(3);
-    _actualPosition.setZero(3);
-    _positionError.setZero(3);
-    _desiredVelocity.setZero(3);
+    _desiredPosition.setZero();
+    _actualPosition.setZero();
+    _positionError.setZero();
+    _desiredVelocity.setZero();
+    _desiredVelocityRef = _desiredVelocity;
 
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(x);
@@ -60,6 +61,7 @@ void CoM::_update(const Eigen::VectorXd &x)
 {
 
     /************************* COMPUTING TASK *****************************/
+    _desiredVelocityRef = _desiredVelocity;
 
     _robot.getCOM(_actualPosition);
 
@@ -83,6 +85,7 @@ void CoM::setReference(const KDL::Vector& desiredPosition,
     _desiredVelocity(1) = desiredVelocity.y();
     _desiredVelocity(2) = desiredVelocity.z();
 
+    _desiredVelocityRef = _desiredVelocity;
     this->update_b();
 }
 
@@ -93,6 +96,7 @@ void CoM::setReference(const KDL::Vector& desiredPosition)
     _desiredPosition(2) = desiredPosition.z();
 
     _desiredVelocity.setZero(3);
+    _desiredVelocityRef = _desiredVelocity;
     this->update_b();
 }
 
@@ -100,6 +104,7 @@ void CoM::setReference(const Eigen::Vector3d& desiredPosition)
 {
 	_desiredPosition = desiredPosition;
     _desiredVelocity.setZero(3);
+    _desiredVelocityRef = _desiredVelocity;
     this->update_b();
 }
 
@@ -108,6 +113,7 @@ void OpenSoT::tasks::velocity::CoM::setReference(const Eigen::Vector3d &desiredP
 {
     _desiredPosition = desiredPosition;
     _desiredVelocity = desiredVelocity;
+    _desiredVelocityRef = _desiredVelocity;
     this->update_b();
 }
 
@@ -170,6 +176,9 @@ bool OpenSoT::tasks::velocity::CoM::isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::
 void OpenSoT::tasks::velocity::CoM::_log(XBot::MatLogger::Ptr logger)
 {
     logger->add(getTaskID() + "_position_err", _positionError);
+    logger->add(_task_id + "_pos_ref", _desiredPosition);
+    logger->add(_task_id + "_pos_actual", _actualPosition);
+    logger->add(_task_id + "_desiredVelocityRef", _desiredVelocityRef);
 }
 
 bool OpenSoT::tasks::velocity::CoM::reset()
@@ -179,10 +188,16 @@ bool OpenSoT::tasks::velocity::CoM::reset()
     _robot.getCOMJacobian(_A);
 
     this->_desiredVelocity.setZero(3);
+    _desiredVelocityRef = _desiredVelocity;
 
     _desiredPosition = _actualPosition;
 
     this->update_b();
 
     return true;
+}
+
+const Eigen::Vector3d& OpenSoT::tasks::velocity::CoM::getCachedVelocityReference() const
+{
+    return _desiredVelocityRef;
 }
