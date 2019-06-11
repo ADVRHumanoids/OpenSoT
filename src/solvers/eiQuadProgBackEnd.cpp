@@ -4,7 +4,7 @@
 
 using namespace OpenSoT::solvers;
 
-#define BASE_REGULARISATION 1E-12
+#define BASE_REGULARISATION 1E-12 //should be 2.221e-13...
 
 /* Define factories for dynamic loading */
 extern "C" BackEnd * create_instance(const int number_of_variables,
@@ -23,7 +23,7 @@ eiQuadProgBackEnd::eiQuadProgBackEnd(const int number_of_variables,
                                    const int number_of_constraints,
                                    const double eps_regularisation):
     BackEnd(number_of_variables, number_of_constraints),
-    _eps_regularisation(eps_regularisation),
+    _eps_regularisation(eps_regularisation*BASE_REGULARISATION),
     /** initialization of Pilers **/
     _CIPiler(number_of_variables),
     _ci0Piler(1)
@@ -57,7 +57,7 @@ void eiQuadProgBackEnd::__generate_data_struct()
         }
 
         for(int i = 0; i < _H.rows(); ++i)
-            _H(i,i) += _eps_regularisation*BASE_REGULARISATION;
+            _H(i,i) += _eps_regularisation;
 }
 
 bool eiQuadProgBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
@@ -121,6 +121,19 @@ boost::any eiQuadProgBackEnd::getOptions()
 void eiQuadProgBackEnd::setOptions(const boost::any& options)
 {
     ///DO NOTHING
+}
+
+bool eiQuadProgBackEnd::setEpsRegularisation(const double eps)
+{
+    if(eps < 0.0)
+    {
+        XBot::Logger::error("Negative eps is not allowed!");
+        return false;
+    }
+
+    _eps_regularisation = eps;
+
+    return true;
 }
 
 

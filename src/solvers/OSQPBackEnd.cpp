@@ -4,7 +4,7 @@
 #include <XBotInterface/SoLib.h>
 using namespace OpenSoT::solvers;
 
-#define BASE_REGULARISATION 1E-12
+#define BASE_REGULARISATION 1E-12 //should be 2.221e-13...
 
 
 /* Define factories for dynamic loading */
@@ -25,7 +25,7 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
                          const int number_of_constraints,
                          const double eps_regularisation):
     BackEnd(number_of_variables, number_of_constraints),
-    _eps_regularisation(eps_regularisation)
+    _eps_regularisation(eps_regularisation*BASE_REGULARISATION) //TO HAVE COMPATIBILITY WITH THE QPOASES ONE!
 {
     
     #ifdef DLONG
@@ -130,7 +130,7 @@ bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
     for(int c = 0; c < getNumVariables(); c++)
     {
         _P_values.segment(idx, c+1) = _H.col(c).head(c+1);
-        _P_values.segment(idx, c+1)(c) += _eps_regularisation*BASE_REGULARISATION; //TO HAVE COMPATIBILITY WITH THE QPOASES ONE!
+        _P_values.segment(idx, c+1)(c) += _eps_regularisation;
         idx += c+1;
     }
     
@@ -303,4 +303,17 @@ double OSQPBackEnd::getObjective()
 OSQPBackEnd::~OSQPBackEnd()
 {
 
+}
+
+bool OSQPBackEnd::setEpsRegularisation(const double eps)
+{
+    if(eps < 0.0)
+    {
+        XBot::Logger::error("Negative eps is not allowed!");
+        return false;
+    }
+
+    _eps_regularisation = eps;
+
+    return true;
 }

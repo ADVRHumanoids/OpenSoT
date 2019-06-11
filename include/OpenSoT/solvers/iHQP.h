@@ -150,6 +150,22 @@ namespace OpenSoT{
         std::string getBackEndName(const unsigned int i);
 
         /**
+         * @brief setEpsRegularisation OVERWRITES the actual eps regularisation factor of a specific
+         * level of the stack
+         * @param eps reguralisation factor
+         * @param i stack level
+         * @return false if eps < 0 or i no in the stack
+         */
+        bool setEpsRegularisation(const double eps, const unsigned int i);
+
+        /**
+         * @brief setEpsRegularisation OVERWRITES the actual eps regularisation factor for all the level of the stack
+         * @param eps reguralisation factor
+         * @return false if eps < 0
+         */
+        bool setEpsRegularisation(const double eps);
+
+        /**
          * @brief getBackEnd retrieve the back-end associated to the i-th qp problem
          * @param i priority level
          * @param back_end

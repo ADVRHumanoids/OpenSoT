@@ -64,6 +64,7 @@ void QPOasesBackEnd::setDefaultOptions()
 
     _problem->setOptions(opt);
 
+    _epsRegularisation = opt.epsRegularisation;
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
 
@@ -338,4 +339,20 @@ void QPOasesBackEnd::checkINFTY()
             _l[i] = -qpOASES::INFTY;
         if(_u[i] > qpOASES::INFTY)
             _u[i] = qpOASES::INFTY;}
+}
+
+bool QPOasesBackEnd::setEpsRegularisation(const double eps)
+{
+    if(eps < 0.0)
+    {
+        XBot::Logger::error("Negative eps is not allowed!");
+        return false;
+    }
+
+    _epsRegularisation = eps;
+
+    _opt->epsRegularisation = _epsRegularisation;
+    _problem->setOptions(*_opt);
+
+    return true;
 }
