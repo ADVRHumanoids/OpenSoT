@@ -34,7 +34,8 @@ Cartesian::Cartesian(std::string task_id,
 {
     _error.setZero(6);
 
-    _desiredTwist.setZero(6);
+    _desiredTwist.setZero();
+    _desiredTwistRef = _desiredTwist;
 
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
@@ -67,6 +68,7 @@ Cartesian::~Cartesian()
 void Cartesian::_update(const Eigen::VectorXd &x) {
 
     /************************* COMPUTING TASK *****************************/
+    _desiredTwistRef = _desiredTwist;
 
     if(_base_link_is_world)
         _robot.getJacobian(_distal_link,_A);
@@ -105,6 +107,8 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
 void Cartesian::setReference(const Eigen::Affine3d& desiredPose)
 {
     _desiredPose = desiredPose;
+    _desiredTwist.setZero(6);
+    _desiredTwistRef = _desiredTwist;
     this->update_b();
 }
 
@@ -113,6 +117,7 @@ void Cartesian::setReference(const Eigen::MatrixXd& desiredPose) {
     assert(desiredPose.cols() == 4);
     _desiredPose.matrix() = desiredPose;
     _desiredTwist.setZero(6);
+    _desiredTwistRef = _desiredTwist;
     this->update_b();
 }
 
@@ -126,6 +131,7 @@ void Cartesian::setReference(const KDL::Frame& desiredPose)
     _desiredPose(2,0) = desiredPose.M(2,0); _desiredPose(2,1) = desiredPose.M(2,1); _desiredPose(2,2) = desiredPose.M(2,2);
 
     _desiredTwist.setZero(6);
+    _desiredTwistRef = _desiredTwist;
     this->update_b();
 }
 
@@ -134,6 +140,7 @@ void Cartesian::setReference(const Eigen::Affine3d& desiredPose,
 {
     _desiredPose = desiredPose;
     _desiredTwist = desiredTwist;
+    _desiredTwistRef = _desiredTwist;
     this->update_b();
 }
 
@@ -146,6 +153,7 @@ void Cartesian::setReference(const Eigen::MatrixXd &desiredPose,
 
     _desiredPose.matrix() = desiredPose;
     _desiredTwist = desiredTwist;
+    _desiredTwistRef = _desiredTwist;
     this->update_b();
 }
 
@@ -161,7 +169,7 @@ void Cartesian::setReference(const KDL::Frame& desiredPose,
 
     _desiredTwist(0) = desiredTwist[0]; _desiredTwist(1) = desiredTwist[1]; _desiredTwist(2) = desiredTwist[2];
     _desiredTwist(3) = desiredTwist[3]; _desiredTwist(4) = desiredTwist[4]; _desiredTwist(5) = desiredTwist[5];
-
+    _desiredTwistRef = _desiredTwist;
     this->update_b();
 }
 
@@ -209,6 +217,11 @@ void Cartesian::getReference(KDL::Frame& desiredPose,
 
     desiredTwist[0] = _desiredTwist(0); desiredTwist[1] = _desiredTwist(1); desiredTwist[2] = _desiredTwist(2);
     desiredTwist[3] = _desiredTwist(3); desiredTwist[4] = _desiredTwist(4); desiredTwist[5] = _desiredTwist(5);
+}
+
+const Eigen::Vector6d& Cartesian::getCachedVelocityReference() const
+{
+    return _desiredTwistRef;
 }
 
 const void Cartesian::getActualPose(Eigen::Affine3d& actual_pose) const
@@ -341,7 +354,7 @@ void Cartesian::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id + "_pos_ref", _desiredPose.translation());
     logger->add(_task_id + "_pos_actual", _actualPose.translation());
     logger->add(_task_id + "_pose_ref", _desiredPose.matrix());
-    logger->add(_task_id + "_desiredTwist", _desiredTwist);
+    logger->add(_task_id + "_desiredTwistRef", _desiredTwistRef);
 }
 
 bool Cartesian::reset()
