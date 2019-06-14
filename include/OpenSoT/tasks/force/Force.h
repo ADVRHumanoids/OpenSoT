@@ -29,18 +29,30 @@ namespace OpenSoT {
    namespace tasks {
        namespace force {
 
+       /**
+         * @brief The Wrench class implements a task which minimize the error between a desired force and
+         * optimized force.
+         */
         class Wrench : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
         public:
             typedef boost::shared_ptr<Wrench> Ptr;
 
-            Wrench(const std::string& contact_name, AffineHelper& wrench);
+            /**
+             * @brief Wrench
+             * @param contact_name frame wrt the force is exterted
+             * @param wrench
+             */
+            Wrench(const std::string& id,
+                   const std::string& distal_link, const std::string& base_link,
+                   AffineHelper& wrench);
 
             bool setReference(const Eigen::VectorXd& ref);
             void getReference(Eigen::VectorXd& ref);
 
-            const std::string& getContactName();
+            const std::string& getDistalLink() const;
+            const std::string& getBaseLink() const;
         private:
-            std::string _contact_name;
+            std::string _distal_link, _base_link;
             virtual void _update(const Eigen::VectorXd& x);
             OpenSoT::tasks::MinimizeVariable::Ptr _min_var;
 
@@ -52,10 +64,12 @@ namespace OpenSoT {
         public:
             typedef boost::shared_ptr<Wrenches> Ptr;
 
-            Wrenches(const std::vector<std::string>& contact_name,
+            Wrenches(const std::string& id,
+                     const std::vector<std::string>& distal_links,
+                     const std::vector<std::string>& base_links,
                      std::vector<AffineHelper> wrenches);
 
-            Wrench::Ptr getWrenchTask(const std::string& contact_name);
+            Wrench::Ptr getWrenchTask(const std::string& distal_link);
 
         private:
             std::map<std::string, Wrench::Ptr> wrench_tasks;

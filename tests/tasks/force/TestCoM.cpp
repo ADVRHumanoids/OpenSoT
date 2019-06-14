@@ -240,7 +240,7 @@ TEST_F(testWrench, testWrench_) {
     std::cout<<"wrench->getM"<<wrench.getM()<<std::endl;
     std::cout<<"wrench->getq"<<wrench.getq()<<std::endl;
 
-    _wrench_task = boost::make_shared<OpenSoT::tasks::force::Wrench>("l_sole", wrench);
+    _wrench_task = boost::make_shared<OpenSoT::tasks::force::Wrench>("l_sole_wrench", "l_sole","world", wrench);
     _wrench_task->update(Eigen::VectorXd(0));
 
     Eigen::VectorXd tmp;
@@ -397,8 +397,13 @@ TEST_F(testWrench, testWrenches) {
     std::vector<std::string> contacts;
     contacts.push_back("wrench1");
     contacts.push_back("wrench2");
+
+    std::vector<std::string> base_links;
+    base_links.push_back("world");
+    base_links.push_back("world");
+
     OpenSoT::tasks::force::Wrenches::Ptr wrenches_task = boost::make_shared<OpenSoT::tasks::force::Wrenches>
-            (contacts, wrenches);
+            ("wrenches", contacts, base_links, wrenches);
     wrenches_task->update(Eigen::VectorXd(0));
 
     std::cout<<"wrenches_task->getA(): \n"<<wrenches_task->getA()<<std::endl;
