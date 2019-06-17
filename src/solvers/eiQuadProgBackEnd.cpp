@@ -4,7 +4,7 @@
 
 using namespace OpenSoT::solvers;
 
-#define BASE_REGULARISATION 1E-12 //should be 2.221e-13...
+#define BASE_REGULARISATION 2.22E-13 //previous 1E-12
 
 /* Define factories for dynamic loading */
 extern "C" BackEnd * create_instance(const int number_of_variables,

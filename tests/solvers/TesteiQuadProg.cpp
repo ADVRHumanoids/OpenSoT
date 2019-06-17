@@ -426,7 +426,8 @@ TEST_F(testuQuadProgProblem, testEpsRegularisation)
                 OpenSoT::solvers::solver_back_ends::eiQuadProg, cartesian_task->getXSize(), 0,
                 OpenSoT::HST_SEMIDEF,1e6);
 
-    EXPECT_EQ(qp_cartesian_problem->getEpsRegularisation(), 1e-6);
+    EXPECT_NEAR(qp_cartesian_problem->getEpsRegularisation(), 2.22e-07, 1e-6);
+    std::cout<<"qp_cartesian_problem->getEpsRegularisation(): "<<qp_cartesian_problem->getEpsRegularisation()<<std::endl;
 
     qp_cartesian_problem->setEpsRegularisation(1e-4);
     EXPECT_EQ(qp_cartesian_problem->getEpsRegularisation(), 1e-4);
