@@ -313,6 +313,14 @@ TEST_F(testAutoStack, testOperatorModulo)
     EXPECT_TRUE(sub_task->getb()[0] == DHS->leftArm->getb()[0]);
     EXPECT_TRUE(sub_task->getb()[1] == DHS->leftArm->getb()[2]);
     EXPECT_TRUE(sub_task->getb()[2] == DHS->leftArm->getb()[3]);
+
+
+
+    std::list<unsigned int> indices2;
+    indices.push_back(0);
+    OpenSoT::AutoStack::Ptr autostack = (DHS->leftArm%indices + DHS->rightArm%indices2)/(DHS->com);
+    EXPECT_EQ(autostack->getStack()[0]->getA().rows(), indices.size() + indices2.size());
+    std::cout<<"autostack->getStack()[0]->getA().rows(): "<<autostack->getStack()[0]->getA().rows()<<std::endl;
 }
 
 TEST_F(testAutoStack, testOperatorTimes)
