@@ -40,7 +40,7 @@
                 typedef boost::shared_ptr<Postural> Ptr;
             protected:
                 Eigen::VectorXd _x_desired;
-                Eigen::VectorXd _xdot_desired;
+                Eigen::VectorXd _xdot_desired, _xdot_desired_ref;
                 Eigen::VectorXd _x;
 
                 void update_b();
@@ -65,7 +65,7 @@
                  * @brief setReference sets a new reference for the Postural task.
                  * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
                  * Notice how the setReference(x_desired, xdot_desired) needs to be called before each _update(x)
-                 * of the Postural task, since the _update() resets the feed-forward velocity term for safety reasons.
+                 * of the Postural task, since THE _update() RESETS THE FEED-FORWARD VELOCITY TERM for safety reasons.
                  * @param x_desired the \f$R^{n_x}\f$ vector of desired joint positions.
                  * @param xdot_desired is a \f$R^{n_x}\f$ vector describing the desired joint velocities,
                  * and it represents a feed-forward term in the Postural task computation NOTICE how the velocities are in rad/sample,
@@ -80,6 +80,13 @@
                  * @return the \f$R^{n_x}\f$ Postural task reference
                  */
                 const Eigen::VectorXd& getReference() const;
+
+                /**
+                 * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
+                 * next update()
+                 * @return internal velcity reference
+                 */
+                const Eigen::VectorXd& getCachedVelocityReference() const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the Postural task.
@@ -110,6 +117,8 @@
                  * @return
                  */
                 bool reset();
+
+                virtual void _log(XBot::MatLogger::Ptr logger);
 
                 static bool isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

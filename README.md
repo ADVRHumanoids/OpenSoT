@@ -42,8 +42,15 @@ alt="WALK-MAN Whole-Body, floating-base, walking" width="480" height="360" borde
 Developers:
 -----------
 Enrico Mingo Hoffman  
-Arturo Laurenzi
-Matteo Parigi Polverini
+Arturo Laurenzi  
+Matteo Parigi Polverini  
+Franesco Ruscelli
+
+Previous Developers:
+--------------------
+Alessio Rocchi  
+Cheng Fang
+
 
 How to cite this work:
 ======================

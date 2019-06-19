@@ -64,6 +64,7 @@ void QPOasesBackEnd::setDefaultOptions()
 
     _problem->setOptions(opt);
 
+    _epsRegularisation = opt.epsRegularisation;
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
 
@@ -84,6 +85,11 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+    //couple of checks
+    if(A.rows() != _A.rows()){
+        XBot::Logger::error("A.rows() != _A.rows() --> %f != %f", A.rows(), _A.rows());
+        return false;}
+
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
     checkINFTY();
 
@@ -333,4 +339,20 @@ void QPOasesBackEnd::checkINFTY()
             _l[i] = -qpOASES::INFTY;
         if(_u[i] > qpOASES::INFTY)
             _u[i] = qpOASES::INFTY;}
+}
+
+bool QPOasesBackEnd::setEpsRegularisation(const double eps)
+{
+    if(eps < 0.0)
+    {
+        XBot::Logger::error("Negative eps is not allowed!");
+        return false;
+    }
+
+    _epsRegularisation = eps;
+
+    _opt->epsRegularisation = _epsRegularisation;
+    _problem->setOptions(*_opt);
+
+    return true;
 }

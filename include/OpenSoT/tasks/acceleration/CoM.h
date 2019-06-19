@@ -62,25 +62,18 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         const std::string& getDistalLink() const;
 
         /**
-         * @brief setReference set a position reference for the CoM
-         * @param ref
+         * @brief setReference sets a new reference for the CoM task.
+         * The task error IS NOT recomputed immediately, you need to call the _update(x) function
+         * Notice how the setReference(...) needs to be called before each _update(x) of the Cartesian task,
+         * since THE _update() RESETS THE FEED-FORWARD VELOCITY and ACCELERATION TERMS for safety reasons.
+         * @param pose_ref the \f$R^{3}\f$ desired position
+         * @param vel_ref is a \f$R^{3}\f$ twist describing the desired trajectory velocity
+         * @param acc_ref is a \f$R^{3}\f$ twist describing the desired trajectory acceleration, and it represents
+         * a feed-forward term in the cartesian task computation.
          */
         void setReference(const Eigen::Vector3d& ref);
-
-        /**
-         * @brief setReference position and velocity reference for the CoM
-         * @param pose_ref
-         * @param vel_ref
-         */
         void setReference(const Eigen::Vector3d& pose_ref,
                           const Eigen::Vector3d& vel_ref);
-
-        /**
-         * @brief setReference position, velocity and acceleration references for the CoM
-         * @param pose_ref
-         * @param vel_ref
-         * @param acc_ref
-         */
         void setReference(const Eigen::Vector3d& pose_ref,
                           const Eigen::Vector3d& vel_ref,
                           const Eigen::Vector3d& acc_ref);
@@ -123,6 +116,34 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         virtual void setLambda(double lambda);
 
+        /**
+         * @brief getLambda return both position and velocity convergence gains
+         * @param lambda position gain
+         * @param lambda2 velocity gain
+         */
+        void getLambda(double & lambda, double & lambda2);
+        using Task::getLambda;
+
+        /**
+         * @brief getLambda2 return velocity convergence gain
+         * @return lambda2 gain
+         */
+        const double getLambda2() const;
+
+        /**
+         * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
+         * next update()
+         * @return internal velcity reference
+         */
+        const Eigen::Vector3d& getCachedVelocityReference() const;
+
+        /**
+         * @brief getCachedAccelerationReference can be used to get Velocity reference after update(), it will reset
+         * next update()
+         * @return internal acceleration reference
+         */
+        const Eigen::Vector3d& getCachedAccelerationReference() const;
+
     private:
 
         static const std::string world_name;
@@ -136,7 +157,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Vector3d _jdotqdot;
 
         Eigen::Vector3d _pose_ref, _pose_current;
-        Eigen::Vector3d _pose_error, _vel_ref, _vel_current, _acc_ref;
+        Eigen::Vector3d _pose_error, _vel_ref, _vel_current, _acc_ref, _vel_ref_cached, _acc_ref_cached;
 
         double _lambda2;
 

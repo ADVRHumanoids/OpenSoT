@@ -114,6 +114,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/force/FrictionCone.cpp
                     src/constraints/force/WrenchLimits.cpp
                     src/constraints/force/CoP.cpp
+                    src/constraints/force/StaticConstraint.cpp
                     src/constraints/GenericConstraint.cpp
                     src/constraints/acceleration/JointLimits.cpp
                     )
@@ -158,6 +159,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
                     src/tasks/velocity/JointAdmittance.cpp
+                    src/tasks/velocity/CentauroAnkleSteering.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/tasks/force/CoM.cpp

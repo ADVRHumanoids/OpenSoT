@@ -72,9 +72,20 @@ namespace OpenSoT {
 
        }
 
-       void FrictionCone::setMu(const friction_cone& mu)
+       void FrictionCone::setMu(const double mu)
        {
-           _mu = mu;
+           _mu.second = mu;
+
+           computeAineq();
+
+           _friction_cone = _A * _wrench - _b;
+           _Aineq = _friction_cone.getM();
+           _bUpperBound = - _friction_cone.getq();
+       }
+
+       void FrictionCone::setFrictionCone(const friction_cone& frc)
+       {
+           _mu = frc;
 
            computeAineq();
 
