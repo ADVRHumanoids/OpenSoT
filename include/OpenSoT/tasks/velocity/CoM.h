@@ -45,7 +45,7 @@
 
                 Eigen::Vector3d _actualPosition;
                 Eigen::Vector3d _desiredPosition;
-                Eigen::Vector3d _desiredVelocity;
+                Eigen::Vector3d _desiredVelocity, _desiredVelocityRef;
 
                 Eigen::Vector3d _positionError;
 
@@ -83,7 +83,7 @@
                  * @brief setReference sets a new reference for the CoM task.
                  * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
                  * Notice how the setReference(desiredPosition, desiredVelocity) needs to be called before each _update(x)
-                 * of the CoM task, since the _update() resets the feed-forward velocity term for safety reasons.
+                 * of the CoM task, since THE _update() RESETS THE FEED-FORWARD VELOCITY TERM for safety reasons.
                  * @param desiredPosition the \f$R^{3}\f$ vector describing the desired position of the CoM wrt world.
                  * @param desireVelocity is a \f$R^{3}\f$ linear velocity vector describing the desired trajectory velocity,
                  * and it represents a feed-forward term in the CoM task computation. NOTICE how the velocities are in m/sample,
@@ -112,6 +112,14 @@
                  */
                 virtual void getReference(Eigen::Vector3d& desiredPosition,
                                   Eigen::Vector3d& desiredVelocity) const;
+
+
+                /**
+                 * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
+                 * next update()
+                 * @return internal velcity reference
+                 */
+                const Eigen::Vector3d& getCachedVelocityReference() const;
 
 
                 /**

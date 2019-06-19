@@ -23,7 +23,9 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _hessianType = HST_SEMIDEF;
 
     _vel_ref.setZero();
+    _vel_ref_cached = _vel_ref;
     _acc_ref.setZero();
+    _acc_ref_cached = _acc_ref;
 
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
@@ -55,7 +57,9 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _hessianType = HST_SEMIDEF;
     
     _vel_ref.setZero();
+    _vel_ref_cached = _vel_ref;
     _acc_ref.setZero();
+    _acc_ref_cached = _acc_ref;
     
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
@@ -95,6 +99,9 @@ const double OpenSoT::tasks::acceleration::Cartesian::getOrientationErrorGain() 
 
 void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
 {
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
+
     if(_base_link == world_name){
         _robot.getJacobian(_distal_link, _J);
         _robot.getPose(_distal_link, _pose_current);
@@ -133,6 +140,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setPositionReference(const Eigen::
     _pose_ref.translation() = pos_ref;
     _vel_ref.setZero();
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& ref)
@@ -140,6 +150,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& ref
     tf::transformKDLToEigen(ref, _pose_ref);
     _vel_ref.setZero();
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& ref)
@@ -147,6 +160,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _pose_ref = ref;
     _vel_ref.setZero();
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& pose_ref,
@@ -155,6 +171,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _pose_ref = pose_ref;
     _vel_ref = vel_ref;
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pose_ref,
@@ -163,6 +182,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pos
     tf::transformKDLToEigen(pose_ref, _pose_ref);
     tf::twistKDLToEigen(vel_ref, _vel_ref);
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& pose_ref,
@@ -172,6 +194,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _pose_ref = pose_ref;
     _vel_ref = vel_ref;
     _acc_ref = acc_ref;
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pose_ref,
@@ -181,6 +206,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pos
     tf::transformKDLToEigen(pose_ref, _pose_ref);
     tf::twistKDLToEigen(vel_ref, _vel_ref);
     tf::twistKDLToEigen(acc_ref, _acc_ref);
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda)
@@ -221,6 +249,9 @@ bool OpenSoT::tasks::acceleration::Cartesian::reset()
     _vel_ref.setZero();
     _acc_ref.setZero();
 
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
+
     return true;
 }
 
@@ -230,6 +261,9 @@ void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
     logger->add(getTaskID() + "_pose_error", _pose_error);
     logger->add(getTaskID() + "_velocity_error", _velocity_error);
     logger->add(getTaskID() + "_jdotqdot", _jdotqdot);
+
+    logger->add(getTaskID() + "_velocity_reference", _vel_ref_cached);
+    logger->add(getTaskID() + "_acceleration_reference", _acc_ref_cached);
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& ref)
@@ -375,6 +409,16 @@ void OpenSoT::tasks::acceleration::Cartesian::getLambda(double & lambda, double 
 const double OpenSoT::tasks::acceleration::Cartesian::getLambda2() const
 {
     return _lambda2;
+}
+
+const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getCachedVelocityReference() const
+{
+    return _vel_ref_cached;
+}
+
+const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getCachedAccelerationReference() const
+{
+    return _acc_ref_cached;
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setKp(const Eigen::Matrix6d& Kp)
