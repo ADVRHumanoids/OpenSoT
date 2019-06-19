@@ -400,10 +400,17 @@ TEST_F(TestSubTask, testgetWeight)
         W(i,i) = W_diag(i);
     _postural->setWeight(W);
 
+    std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
+
 
     SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
+
+    Eigen::VectorXd q(10); q.setRandom(10);
+    subTask->update(q);
+
+    std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
 
     //W = conversion_utils_YARP::toYARP(_postural->getWeight()).submatrix(0,2,0,2);
     W = _postural->getWeight().block(0,0,3,3);
