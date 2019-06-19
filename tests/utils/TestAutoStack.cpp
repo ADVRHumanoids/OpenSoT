@@ -375,7 +375,12 @@ TEST_F(testAutoStack, testOperatorTimes)
         }
     }
 
-    OpenSoT::tasks::Aggregated::Ptr TASKS = w*(DHS->leftArm + DHS->rightArm);
+    std::cout<<"WleftArm: \n"<<DHS->leftArm->getWeight()<<std::endl;
+    std::cout<<"WrightArm: \n"<<DHS->rightArm->getWeight()<<std::endl;
+
+    std::cout<<"---------"<<std::endl;
+
+    OpenSoT::tasks::Aggregated::Ptr TASKS = 10*(DHS->leftArm + DHS->rightArm);
     WleftArm = DHS->leftArm->getWeight();
     Eigen::MatrixXd WrightArm = DHS->rightArm->getWeight();
     WTASK = TASK->getWeight();
@@ -388,8 +393,25 @@ TEST_F(testAutoStack, testOperatorTimes)
     std::cout<<"WrightArm: \n"<<WrightArm<<std::endl;
     std::cout<<"WTASKS: \n"<<WTASKS<<std::endl;
 
-    for(unsigned int i = 0; i < TASKS->getA().rows(); ++i)
-        EXPECT_EQ(WTASKS(i,i),10.);
+    for(unsigned int i = 0; i < DHS->leftArm->getWeight().rows(); ++i)
+    {
+        for(unsigned int j = 0; j < DHS->leftArm->getWeight().cols(); ++j)
+        {
+            EXPECT_EQ(WTASKS(i,j),WleftArm(i,j));
+            EXPECT_EQ(WTASKS(i,j),WTASK(i,j));
+        }
+    }
+
+    for(unsigned int i = 0; i < DHS->rightArm->getWeight().rows(); ++i)
+    {
+        for(unsigned int j = 0; j < DHS->rightArm->getWeight().cols(); ++j)
+        {
+            EXPECT_EQ(WTASKS(WleftArm.rows()+i,WleftArm.cols()+j),WrightArm(i,j));
+        }
+    }
+
+//    for(unsigned int i = 0; i < TASKS->getA().rows(); ++i)
+//        EXPECT_EQ(WTASKS(i,i),10.);
 
 }
 

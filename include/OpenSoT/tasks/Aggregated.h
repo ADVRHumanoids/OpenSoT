@@ -61,6 +61,10 @@ using namespace OpenSoT::utils;
 
             void generateAggregatedConstraints();
 
+            void generateWeight();
+
+
+
             /**
              * @brief computeHessianType compute the new Hessian type associated to the Aggregated version of the Tasks.
              *
@@ -190,6 +194,8 @@ using namespace OpenSoT::utils;
              * @param lambda a value for all the tasks in the aggregate
              */
             void setLambda(double lambda);
+
+            virtual void setWeight(const Eigen::MatrixXd& W);
               
             static bool isAggregated(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
         };
