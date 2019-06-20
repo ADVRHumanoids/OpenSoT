@@ -7,6 +7,7 @@
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/SubTask.h>
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
@@ -516,8 +517,46 @@ TEST_F(testAggregatedTask, testWeightsUpdate)
     EXPECT_TRUE(matrixAreEqual(waist->getWeight(), t1->getWeight().block(6,6,6,6)));
     EXPECT_TRUE(matrixAreEqual(lwrist->getWeight(), t1->getWeight().block(0,0,6,6)));
 
+    //2) Multiple aggregates and subtasks
+    OpenSoT::tasks::velocity::Cartesian::Ptr rwrist(
+            new OpenSoT::tasks::velocity::Cartesian("cartesian::r_wrist",
+                                                    q,*(_model_ptr.get()), "r_wrist", "world"));
+    W.setOnes(6,6);
+    rwrist->setWeight(3.*W);
 
-    //2)
+    std::list<unsigned int> id = {1,2};
+    auto s1 = rwrist%id;
+    s1->update(q);
+
+    auto t2 = (t1+s1);
+    t2->update(q);
+
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    std::cout<<"s1->getWeight(): \n"<<s1->getWeight()<<std::endl;
+    std::cout<<"rwrist->getWeight(): \n"<<rwrist->getWeight()<<std::endl;
+    std::cout<<"t2->getWeight(): \n"<<t2->getWeight()<<std::endl;
+
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(0,0,6,6), lwrist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(6,6,6,6), waist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), s1->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), rwrist->getWeight().block(1,1,2,2)));
+
+    Eigen::MatrixXd W3(14,14);
+    W3.setIdentity();
+    t2->setWeight(W3);
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    std::cout<<"s1->getWeight(): \n"<<s1->getWeight()<<std::endl;
+    std::cout<<"rwrist->getWeight(): \n"<<rwrist->getWeight()<<std::endl;
+    std::cout<<"t2->getWeight(): \n"<<t2->getWeight()<<std::endl;
+
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(0,0,6,6), lwrist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(6,6,6,6), waist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), s1->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), rwrist->getWeight().block(1,1,2,2)));
 
 }
 

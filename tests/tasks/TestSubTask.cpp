@@ -516,6 +516,7 @@ TEST_F(TestSubTask, testsetWeight)
     EXPECT_TRUE(matrixAreEqual(_postural->getWeight(),fullW)) << "\n"    << _postural->getWeight()
                                                                            << "\nto\n" << fullW << "\n";
     EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),W));
+
 }
 
 
