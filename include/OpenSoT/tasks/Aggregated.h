@@ -31,12 +31,15 @@ using namespace OpenSoT::utils;
 
         /**
          * @brief The Aggregated class builds a new Task by piling up simpler tasks
-         *        so that \f$A = [W_1*A_1; W_2*A_2]\f$, \f$b=\lambda*[W_1*\lambda_1*b_1;W_2*\lambda_2*b_2]\f$
+         *        so that \f$A = [A_1; A_2]\f$, \f$b=[b_1;b_2]\f$
          * If the tasks are modified (through their methods, or constraints are added to the tasks),
          * the Aggregated gets updated accordingly (after calling the _update() function), and during the update
          * it will automatically call update() on every single task of which is comprised.
+         * Updating an Aggregated calls the update method for the corresponding father
+         * task which it reduces, and recreates the reduced A,b and Weight matrices.
          * It is possible to add constraints to the Aggregated task which are not constraints to the Tasks of which
          * it is comprised. Take a look at getConstraints(), getAggregatedConstraints(), getOwnConstraints() for more infos.
+         * Notice that setLambda will change the lambda of all the internal tasks but if one of these lambda is changed outside this will be not visible in the aggregated
          *
          */
         class Aggregated: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
