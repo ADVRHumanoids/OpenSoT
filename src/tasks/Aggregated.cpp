@@ -255,7 +255,7 @@ void OpenSoT::tasks::Aggregated::_log(XBot::MatLogger::Ptr logger)
 
 void OpenSoT::tasks::Aggregated::generateWeight()
 {
-        this->_W.setZero(_W.rows(), _W.cols());
+        //this->_W.setZero(_W.rows(), _W.cols());
 
         int block = 0;
         std::list< TaskPtr >::iterator t;

@@ -410,9 +410,6 @@ TEST_F(testAutoStack, testOperatorTimes)
         }
     }
 
-//    for(unsigned int i = 0; i < TASKS->getA().rows(); ++i)
-//        EXPECT_EQ(WTASKS(i,i),10.);
-
 }
 
 TEST_F(testAutoStack, testOperatorStackEqual)
