@@ -27,6 +27,9 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
 
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
+
+    _Kp.setIdentity();
+    _Kd.setIdentity();
     
     update(Eigen::VectorXd(1));
 
@@ -115,8 +118,8 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
 
     _cartesian_task = _J*_qddot + _jdotqdot;
     _cartesian_task = _cartesian_task - _acc_ref 
-                                      - _lambda2*_velocity_error
-                                      - _lambda*_pose_error ;
+                                      - _lambda2*_Kd*_velocity_error
+                                      - _lambda*_Kp*_pose_error ;
     
     _A = _cartesian_task.getM();
     _b = -_cartesian_task.getq();
@@ -372,4 +375,36 @@ void OpenSoT::tasks::acceleration::Cartesian::getLambda(double & lambda, double 
 const double OpenSoT::tasks::acceleration::Cartesian::getLambda2() const
 {
     return _lambda2;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setKp(const Eigen::Matrix6d& Kp)
+{
+    _Kp = Kp;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setKd(const Eigen::Matrix6d& Kd)
+{
+    _Kd = Kd;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd)
+{
+    setKp(Kp);
+    setKd(Kd);
+}
+
+const Eigen::Matrix6d& OpenSoT::tasks::acceleration::Cartesian::getKp() const
+{
+    return _Kp;
+}
+
+const Eigen::Matrix6d& OpenSoT::tasks::acceleration::Cartesian::getKd() const
+{
+    return _Kd;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::getGains(Eigen::Matrix6d& Kp, Eigen::Matrix6d& Kd)
+{
+    Kp = _Kp;
+    Kd = _Kd;
 }

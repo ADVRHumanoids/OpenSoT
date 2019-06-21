@@ -188,6 +188,21 @@ namespace OpenSoT{
          */
         virtual double getObjective();
 
+        /**
+         * @brief setEpsRegularisation OVERWRITES the actual eps regularisation factor
+         * @param eps the new regularisation factor
+         * @return false if eps < 0
+         */
+        bool setEpsRegularisation(const double eps);
+
+        /**
+         * @brief getEpsRegularisation return internal solver eps
+         * @return eps value
+         */
+        virtual double getEpsRegularisation()
+        {
+            return _epsRegularisation;
+        }
 
     protected:
         /**

@@ -39,6 +39,8 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
     _W.resize(_A.rows(),_A.rows());
     _W.setIdentity(_A.rows(),_A.rows());
 
+    generateWeight();
+
     _hessianType = this->computeHessianType();
 }
 
@@ -57,6 +59,9 @@ Task(task1->getTaskID()+_TASK_PLUS_+task2->getTaskID(),x_size)
 
     _W.resize(_A.rows(),_A.rows());
     _W.setIdentity(_A.rows(),_A.rows());
+
+    generateWeight();
+
     _hessianType = this->computeHessianType();
 }
 
@@ -69,6 +74,9 @@ Aggregated::Aggregated(const std::list<TaskPtr> tasks,
 
     _W.resize(_A.rows(),_A.rows());
     _W.setIdentity(_A.rows(),_A.rows());
+
+    generateWeight();
+
     _hessianType = this->computeHessianType();
 }
 
@@ -83,6 +91,8 @@ void Aggregated::_update(const Eigen::VectorXd& x) {
         t->update(x);
     }
     this->generateAll();
+
+    generateWeight();
 }
 
 
@@ -103,10 +113,10 @@ void Aggregated::generateAll() {
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
-//        _tmpA.pile(t->getWeight()*t->getA()); //This is potentially not RT safe
-//        _tmpb.pile(t->getWeight()*t->getb());
-        _tmpA.pile(t->getWA());
-        _tmpb.pile(t->getWb());
+//        _tmpA.pile(t->getWA());
+//        _tmpb.pile(t->getWb());
+        _tmpA.pile(t->getA());
+        _tmpb.pile(t->getb());
         _c += t->getc();
     }
 
@@ -241,4 +251,36 @@ void OpenSoT::tasks::Aggregated::_log(XBot::MatLogger::Ptr logger)
 {
     for(auto task : _tasks)
         task->log(logger);
+}
+
+void OpenSoT::tasks::Aggregated::generateWeight()
+{
+        //this->_W.setZero(_W.rows(), _W.cols());
+
+        int block = 0;
+        std::list< TaskPtr >::iterator t;
+        for(t = _tasks.begin(); t != _tasks.end(); t++)
+        {
+            for(unsigned int r = 0; r < (*t)->getWeight().rows(); ++r)
+                for(unsigned int c = 0; c < (*t)->getWeight().cols(); ++c)
+                    this->_W.block(block, block, (*t)->getWeight().rows(), (*t)->getWeight().cols())(r,c) =
+                        (*t)->getWeight()(r,c);
+            block += (*t)->getWeight().rows();
+        }
+}
+
+void OpenSoT::tasks::Aggregated::setWeight(const Eigen::MatrixXd &W)
+{
+    assert(W.rows() == this->getTaskSize());
+    assert(W.cols() == W.rows());
+
+    this->_W = W;
+
+    std::list< TaskPtr >::iterator t;
+    int block = 0;
+    for(t = _tasks.begin(); t != _tasks.end(); t++)
+    {
+        (*t)->setWeight(W.block(block, block, (*t)->getWeight().rows(),(*t)->getWeight().cols()));
+        block += (*t)->getWeight().rows();
+    }
 }

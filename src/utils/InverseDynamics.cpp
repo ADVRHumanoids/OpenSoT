@@ -57,7 +57,7 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
     tau = _tau_val;
     qddot = _qddot_val;
 
-    if(!_links_in_contact.empty())
+    if(_model.isFloatingBase())
     {
         for(unsigned int i = 0; i < 6; ++i)
         {

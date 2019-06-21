@@ -134,6 +134,44 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         bool setBaseLink(const std::string& base_link);
 
+        /**
+         * @brief setKp set position gain
+         * @param Kp a SPD matrix
+         */
+        void setKp(const Eigen::Matrix6d& Kp);
+
+        /**
+         * @brief setKd set velocity gain
+         * @param Kd a SPD matrix
+         */
+        void setKd(const Eigen::Matrix6d& Kd);
+
+        /**
+         * @brief setGains set both position and velocity gains
+         * @param Kp a SPD matrix
+         * @param Kd a SPD matrix
+         */
+        void setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd);
+
+        /**
+         * @brief getKp
+         * @return position gain
+         */
+        const Eigen::Matrix6d& getKp() const;
+
+        /**
+         * @brief getKd
+         * @return  velocity gain
+         */
+        const Eigen::Matrix6d& getKd() const;
+
+        /**
+         * @brief getGains return both position and velocity gains
+         * @param Kp
+         * @param Kd
+         */
+        void getGains(Eigen::Matrix6d& Kp, Eigen::Matrix6d& Kd);
+
         static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
         static OpenSoT::tasks::acceleration::Cartesian::Ptr asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
@@ -163,6 +201,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Vector6d _pose_error, _vel_ref, _vel_current, _acc_ref;
         
         Eigen::Vector3d _orientation_error;
+
+        Eigen::Matrix6d _Kp, _Kd;
         
         double _orientation_gain;
 

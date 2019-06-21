@@ -11,6 +11,7 @@ OpenSoT::SubTask::SubTask(OpenSoT::SubTask::TaskPtr taskPtr, const std::list<uns
     this->_A.resize(rowIndices.size(), _x_size);
     this->_b.resize(rowIndices.size());
     this->_W.resize(rowIndices.size(), rowIndices.size());
+    fullW = _taskPtr->getWeight();
 
     this->generateA();
     this->generateb();
@@ -73,7 +74,7 @@ void OpenSoT::SubTask::setWeight(const Eigen::MatrixXd &W)
     assert(W.cols() == W.rows());
 
     this->_W = W;
-    Eigen::MatrixXd fullW = _taskPtr->getWeight();
+    fullW = _taskPtr->getWeight();
     for(unsigned int r = 0; r < this->getTaskSize(); ++r)
         for(unsigned int c = 0; c < this->getTaskSize(); ++c)
             fullW(this->_subTaskMap.asVector()[r],

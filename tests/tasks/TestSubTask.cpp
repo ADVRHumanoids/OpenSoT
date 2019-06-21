@@ -4,6 +4,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/utils/AutoStack.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
@@ -400,14 +401,68 @@ TEST_F(TestSubTask, testgetWeight)
         W(i,i) = W_diag(i);
     _postural->setWeight(W);
 
+    std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
+
 
     SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
 
-    //W = conversion_utils_YARP::toYARP(_postural->getWeight()).submatrix(0,2,0,2);
-    W = _postural->getWeight().block(0,0,3,3);
-    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),W));
+    Eigen::VectorXd q(10); q.setRandom(10);
+    subTask->update(q);
+
+    std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
+
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),_postural->getWeight().block(0,0,3,3)));
+
+
+    auto tmp = 10.*subTask;
+    std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
+    std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),_postural->getWeight().block(0,0,3,3)));
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),tmp->getWeight()));
+
+    W.setIdentity();
+    _postural->setWeight(W);
+    std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
+
+    subTask->update(q);
+    std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
+
+    tmp->update(q);
+    std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
+
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),_postural->getWeight().block(0,0,3,3)));
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),tmp->getWeight()));
+
+    tmp->setWeight(2*W.block(0,0,3,3));
+    subTask->update(q);
+    tmp->update(q);
+    std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
+    std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
+    std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
+
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),_postural->getWeight().block(0,0,3,3)));
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),tmp->getWeight()));
+
+
+    OpenSoT::Indices id(1);
+    auto tmp2 = 2*(tmp%id);
+
+
+    std::cout<<"tmp2->getWeight(): "<<tmp2->getWeight()<<std::endl;
+
+    EXPECT_EQ(tmp2->getWeight()(0,0), 4);
+    EXPECT_TRUE(matrixAreEqual(tmp2->getWeight(),tmp->getWeight().block(1,1,1,1)));
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight().block(1,1,1,1),tmp2->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(subTask->getWeight().block(1,1,1,1),_postural->getWeight().block(1,1,1,1)));
+
+
+    std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
+    std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
+    std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
+    std::cout<<"tmp2->getWeight(): \n"<<tmp2->getWeight()<<std::endl;
+
 
     subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
                                                  Indices::range(5,6)));
@@ -461,6 +516,7 @@ TEST_F(TestSubTask, testsetWeight)
     EXPECT_TRUE(matrixAreEqual(_postural->getWeight(),fullW)) << "\n"    << _postural->getWeight()
                                                                            << "\nto\n" << fullW << "\n";
     EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),W));
+
 }
 
 

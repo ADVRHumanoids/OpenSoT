@@ -149,6 +149,27 @@ namespace OpenSoT{
          */
         virtual double getObjective() = 0;
 
+        /**
+         * @brief setEpsRegularisation is used to set internal solver eps
+         * @param eps regularisation
+         * @return false by default
+         */
+        virtual bool setEpsRegularisation(const double eps)
+        {
+            XBot::Logger::error("BackEnd does not allow setEpsRegularisation");
+            return false;
+        }
+
+        /**
+         * @brief getEpsRegularisation return internal solver eps
+         * @return eps value
+         */
+        virtual double getEpsRegularisation()
+        {
+            XBot::Logger::error("BackEnd does not allow getEpsRegularisation");
+            return 0;
+        }
+
     protected:
         ///VIRTUAL METHODS
         /**

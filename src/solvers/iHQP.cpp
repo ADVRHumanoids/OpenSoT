@@ -347,3 +347,27 @@ bool iHQP::getBackEnd(const unsigned int i, BackEnd::Ptr& back_end)
     back_end = _qp_stack_of_tasks[i];
     return true;
 }
+
+bool iHQP::setEpsRegularisation(const double eps, const unsigned int i)
+{
+    if(i >= _qp_stack_of_tasks.size())
+    {
+        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n", i);
+        return false;
+    }
+
+    return _qp_stack_of_tasks[i]->setEpsRegularisation(eps);
+}
+
+bool iHQP::setEpsRegularisation(const double eps)
+{
+    for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
+    {
+        if(!_qp_stack_of_tasks[i]->setEpsRegularisation(eps))
+        {
+            XBot::Logger::error("Problem setting eps regularisation in level %i", i);
+            return false;
+        }
+    }
+    return true;
+}

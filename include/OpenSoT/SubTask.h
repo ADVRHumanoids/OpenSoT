@@ -67,6 +67,8 @@
 
         static const std::string _SUBTASK_SEPARATION_;
 
+        Eigen::MatrixXd fullW;
+
     public:
         /**
          * @brief SubTask create a SubTask object by specifying the father Task through a pointer,
