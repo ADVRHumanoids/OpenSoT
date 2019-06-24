@@ -197,3 +197,12 @@ Eigen::MatrixXd cartesian_utils::computeHessian(const Eigen::VectorXd &x,
     return hessian;
 }
 
+void cartesian_utils::skew(const Eigen::Vector3d& p, Eigen::Matrix3d& skew)
+{
+    skew.setZero();
+    skew.row(0)[1] = -p[2]; skew.row(0)[2] =  p[1];
+    skew.row(1)[0] =  p[2]; skew.row(1)[2] = -p[0];
+    skew.row(2)[0] = -p[1]; skew.row(2)[1] =  p[0];
+}
+
+

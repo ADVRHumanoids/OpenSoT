@@ -91,6 +91,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testPiler
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
+                  testInverseDynamics
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -195,6 +196,12 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_dependencies(testAggregatedTask GTest-ext OpenSoT)
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
+
+
+ADD_EXECUTABLE(testInverseDynamics utils/TestInverseDynamics.cpp)
+TARGET_LINK_LIBRARIES(testInverseDynamics ${TestLibs})
+add_dependencies(testInverseDynamics GTest-ext OpenSoT)
+add_test(NAME OpenSoT_inverse_dynamics COMMAND testInverseDynamics)
 
 
 ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)

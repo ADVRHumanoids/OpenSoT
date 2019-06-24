@@ -435,6 +435,20 @@ public:
     static Eigen::MatrixXd computeHessian( const Eigen::VectorXd &x,
                                               GradientVector &vec,
                                               const double &step = 1E-3);
+
+
+    /**
+     * @brief skew compute the skew operator
+     * @param p a 3D vector
+     * @param skew a 3D matrix
+     *
+     *  p = [p0 p1 p2]
+     *
+     *  skew = [ 0  -p2   p1
+     *           p2   0  -p0
+     *          -p1  p0   0 ]
+     */
+    static void skew(const Eigen::Vector3d& p, Eigen::Matrix3d& skew);
 };
 
 
