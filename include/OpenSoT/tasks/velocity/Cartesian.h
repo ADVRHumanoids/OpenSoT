@@ -68,7 +68,7 @@
 
                 Eigen::Affine3d _actualPose;
                 Eigen::Affine3d _desiredPose;
-                Eigen::Vector6d _desiredTwist;
+                Eigen::Vector6d _desiredTwist, _desiredTwistRef;
 
                 bool _base_link_is_world;
 
@@ -136,7 +136,7 @@
                  * @brief setReference sets a new reference for the Cartesian task.
                  * It causes the task error to be recomputed immediately, without the need to call the _update(x) function
                  * Notice how the setReference(desiredPose, desiredTwist) needs to be called before each _update(x) of the Cartesian task,
-                 * since the _update() resets the feed-forward velocity term for safety reasons.
+                 * since THE _update() RESETS THE FEED-FORWARD VELOCITY TERM for safety reasons.
                  * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
@@ -187,6 +187,13 @@
                 [[deprecated]]
                 const Eigen::MatrixXd getActualPose() const;
                 const void getActualPose(KDL::Frame& actual_pose) const;
+
+                /**
+                 * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
+                 * next update()
+                 * @return internal velcity reference
+                 */
+                const Eigen::Vector6d& getCachedVelocityReference() const;
                 
                 void setOrientationErrorGain(const double& orientationErrorGain);
                 const double getOrientationErrorGain() const;

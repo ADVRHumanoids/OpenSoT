@@ -18,6 +18,8 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot, const 
 
     _vel_ref.setZero();
     _acc_ref.setZero();
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
@@ -40,6 +42,8 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface &robot, const 
 
     _vel_ref.setZero();
     _acc_ref.setZero();
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
@@ -61,6 +65,8 @@ const std::string& OpenSoT::tasks::acceleration::CoM::getDistalLink() const
 
 void OpenSoT::tasks::acceleration::CoM::_update(const Eigen::VectorXd& x)
 {
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 
     _robot.getCOMJacobian(_J, _jdotqdot);
     _robot.getCOM(_pose_current);
@@ -86,6 +92,9 @@ void OpenSoT::tasks::acceleration::CoM::setReference(const Eigen::Vector3d& ref)
     _pose_ref = ref;
     _vel_ref.setZero();
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::CoM::setReference(const Eigen::Vector3d& pose_ref,
@@ -94,6 +103,9 @@ void OpenSoT::tasks::acceleration::CoM::setReference(const Eigen::Vector3d& pose
     _pose_ref = pose_ref;
     _vel_ref = vel_ref;
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::CoM::setReference(const Eigen::Vector3d& pose_ref,
@@ -103,6 +115,9 @@ void OpenSoT::tasks::acceleration::CoM::setReference(const Eigen::Vector3d& pose
     _pose_ref = pose_ref;
     _vel_ref = vel_ref;
     _acc_ref = acc_ref;
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::CoM::setLambda(double lambda)
@@ -132,6 +147,9 @@ void OpenSoT::tasks::acceleration::CoM::resetReference()
     _robot.getCOM(_pose_ref);
     _vel_ref.setZero();
     _acc_ref.setZero();
+
+    _vel_ref_cached = _vel_ref;
+    _acc_ref_cached = _acc_ref;
 }
 
 void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger::Ptr logger)
@@ -139,6 +157,9 @@ void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger::Ptr logger)
     logger->add(getTaskID() + "_pose_error", _pose_error);
     logger->add(getTaskID() + "_linear_velocity_error", _vel_ref - _vel_current);
     logger->add(getTaskID() + "_jdotqdot", _jdotqdot);
+
+    logger->add(getTaskID() + "_velocity_reference", _vel_ref_cached);
+    logger->add(getTaskID() + "_acceleration_reference", _acc_ref_cached);
 }
 
 void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref)
@@ -165,4 +186,14 @@ void OpenSoT::tasks::acceleration::CoM::getLambda(double & lambda, double & lamb
 const double OpenSoT::tasks::acceleration::CoM::getLambda2() const
 {
     return _lambda2;
+}
+
+const Eigen::Vector3d& OpenSoT::tasks::acceleration::CoM::getCachedVelocityReference() const
+{
+    return _vel_ref_cached;
+}
+
+const Eigen::Vector3d& OpenSoT::tasks::acceleration::CoM::getCachedAccelerationReference() const
+{
+    return _acc_ref_cached;
 }

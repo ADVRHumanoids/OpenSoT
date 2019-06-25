@@ -28,6 +28,7 @@ Postural::Postural(   const Eigen::VectorXd& x, const std::string& task_id) :
 {
     _x_desired.setZero(_x_size);
     _xdot_desired.setZero(_x_size);
+    _xdot_desired_ref = _xdot_desired;
 
     _W.setIdentity(_x_size, _x_size);
     _A.setIdentity(_x_size, _x_size);
@@ -44,6 +45,7 @@ Postural::~Postural()
 }
 
 void Postural::_update(const Eigen::VectorXd &x) {
+    _xdot_desired_ref = _xdot_desired;
     _x = x;
 
     /************************* COMPUTING TASK *****************************/
@@ -60,6 +62,7 @@ void Postural::setReference(const Eigen::VectorXd& x_desired) {
     {
         _x_desired = x_desired;
         _xdot_desired.setZero(_x_size);
+        _xdot_desired_ref = _xdot_desired;
         this->update_b();
     }
 }
@@ -71,6 +74,7 @@ void OpenSoT::tasks::velocity::Postural::setReference(const Eigen::VectorXd &x_d
     {
         _x_desired = x_desired;
         _xdot_desired = xdot_desired;
+        _xdot_desired_ref = _xdot_desired;
         this->update_b();
     }
 }
@@ -127,5 +131,16 @@ static OpenSoT::tasks::velocity::Postural::Ptr asPostural(OpenSoT::Task<Eigen::M
     return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
 }
 
+const Eigen::VectorXd& OpenSoT::tasks::velocity::Postural::getCachedVelocityReference() const
+{
+    return _xdot_desired_ref;
+}
 
+void OpenSoT::tasks::velocity::Postural::_log(XBot::MatLogger::Ptr logger)
+{
+    logger->add(_task_id + "_position_err", _x_desired - _x);
+    logger->add(_task_id + "_pos_ref", _x_desired);
+    logger->add(_task_id + "_pos_actual", _x);
+    logger->add(_task_id + "_desiredVelocityRef", _xdot_desired_ref);
+}
 

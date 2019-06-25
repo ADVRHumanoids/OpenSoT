@@ -21,6 +21,8 @@ OpenSoT::tasks::acceleration::Postural::Postural(
 
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
+    _qdot_ref_cached = _qdot_ref;
+    _qddot_ref_cached = _qddot_ref;
 
     _update(_q);
 }
@@ -49,6 +51,9 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
 
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
+    _qdot_ref_cached = _qdot_ref;
+    _qddot_ref_cached = _qddot_ref;
+
     
     _update(_q);
 }
@@ -84,6 +89,10 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
     _qref.tail(_na) = qref.tail(_na);
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
+
+    _qdot_ref_cached = _qdot_ref;
+    _qddot_ref_cached = _qddot_ref;
+
 }
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref)
@@ -91,6 +100,10 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
     _qref.tail(_na) = qref.tail(_na);
     _qdot_ref.tail(_na) = dqref.tail(_na);
     _qddot_ref.setZero(_qref.size());
+
+    _qdot_ref_cached = _qdot_ref;
+    _qddot_ref_cached = _qddot_ref;
+
 }
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
@@ -99,11 +112,19 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
     _qref.tail(_na) = qref.tail(_na);
     _qdot_ref.tail(_na) = dqref.tail(_na);
     _qddot_ref.tail(_na) = ddqref.tail(_na);
+
+    _qdot_ref_cached = _qdot_ref;
+    _qddot_ref_cached = _qddot_ref;
+
 }
 
 
 void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
 {
+    _qdot_ref_cached = _qdot_ref;
+    _qddot_ref_cached = _qddot_ref;
+
+
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
     
@@ -125,6 +146,9 @@ void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id + "_position_error", _position_error);
     logger->add(_task_id + "_velocity_error", _velocity_error);
     logger->add(_task_id + "_qref", _qref);
+
+    logger->add(_task_id + "_velocity_reference", _qdot_ref_cached);
+    logger->add(_task_id + "_acceleration_reference", _qddot_ref_cached);
 }
 
 Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getReference() const
@@ -182,4 +206,14 @@ void OpenSoT::tasks::acceleration::Postural::getLambda(double & lambda, double &
 const double OpenSoT::tasks::acceleration::Postural::getLambda2() const
 {
     return _lambda2;
+}
+
+const Eigen::VectorXd& OpenSoT::tasks::acceleration::Postural::getCachedVelocityReference() const
+{
+    return _qdot_ref_cached;
+}
+
+const Eigen::VectorXd& OpenSoT::tasks::acceleration::Postural::getCachedAccelerationReference() const
+{
+    return _qddot_ref_cached;
 }

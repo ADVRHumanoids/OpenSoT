@@ -49,6 +49,17 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         const std::string& getBaseLink() const;
         const std::string& getDistalLink() const;
         
+        /**
+         * @brief setReference sets a new reference for the Cartesian task.
+         * The task error IS NOT recomputed immediately, you need to call the _update(x) function
+         * Notice how the setReference(...) needs to be called before each _update(x) of the Cartesian task,
+         * since THE _update() RESETS THE FEED-FORWARD VELOCITY and ACCELERATION TERMS for safety reasons.
+         * @param pose_ref the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
+         * for the distal_link in the base_link frame of reference.
+         * @param vel_ref is a \f$R^{6}\f$ twist describing the desired trajectory velocity
+         * @param acc_ref is a \f$R^{6}\f$ twist describing the desired trajectory acceleration, and it represents
+         * a feed-forward term in the cartesian task computation.
+         */
         [[deprecated]]
         void setPositionReference(const Eigen::Vector3d& pos_ref);
 
@@ -82,6 +93,20 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void getReference(KDL::Frame& desiredPose,
                           KDL::Twist& desiredTwist,
                           KDL::Twist& desiredAcceleration);
+
+        /**
+         * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
+         * next update()
+         * @return internal velcity reference
+         */
+        const Eigen::Vector6d& getCachedVelocityReference() const;
+
+        /**
+         * @brief getCachedAccelerationReference can be used to get Velocity reference after update(), it will reset
+         * next update()
+         * @return internal acceleration reference
+         */
+        const Eigen::Vector6d& getCachedAccelerationReference() const;
 
 
         void getActualPose(Eigen::Affine3d& actual);
@@ -198,7 +223,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Vector6d _jdotqdot;
         
         Eigen::Affine3d _pose_ref, _pose_current;
-        Eigen::Vector6d _pose_error, _vel_ref, _vel_current, _acc_ref;
+        Eigen::Vector6d _pose_error, _vel_ref, _vel_current, _acc_ref, _vel_ref_cached, _acc_ref_cached;
         
         Eigen::Vector3d _orientation_error;
 
