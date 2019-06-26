@@ -78,6 +78,19 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
                                                   number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
     
+    if(be_solver == solver_back_ends::ODYS) {
+
+        /* Obtain full path to shared lib */
+        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndODYS.so", "LD_LIBRARY_PATH");
+        if (path_to_shared_lib == "") {
+            throw std::runtime_error("libOpenSotBackEndODYS.so must be listed inside LD_LIBRARY_PATH");
+        }
+
+        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                                  "OpenSotBackEndODYS",
+                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+    }
+
     else {
         throw std::runtime_error("Back-end is not available!");
     }
@@ -94,6 +107,8 @@ std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
         return "GLPK";
     if(be_solver == solver_back_ends::eiQuadProg)
         return "eiQuadProg";
+    if(be_solver == solver_back_ends::ODYS)
+        return "ODYS";
     else
         return "????";
 }
