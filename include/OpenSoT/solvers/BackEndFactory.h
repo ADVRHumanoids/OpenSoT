@@ -10,7 +10,8 @@ namespace OpenSoT{
             qpOASES,
             OSQP,
             GLPK,
-            eiQuadProg
+            eiQuadProg,
+            ODYS
         };
 
         /**
