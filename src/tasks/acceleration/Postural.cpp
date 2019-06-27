@@ -16,6 +16,9 @@ OpenSoT::tasks::acceleration::Postural::Postural(
 
     _A.setZero(_na, _qddot.getInputSize());
 
+    _Kp.setIdentity(_qref.size(), _qref.size());
+    _Kd.setIdentity(_qref.size(), _qref.size());
+
     setLambda(10.0);
     setWeight(Eigen::MatrixXd::Identity(_na, _na));
 
@@ -45,6 +48,9 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
     }
     
     _A.setZero(_na, _qddot.getInputSize());
+
+    _Kp.setIdentity(_qref.size(), _qref.size());
+    _Kd.setIdentity(_qref.size(), _qref.size());
     
     setLambda(10.);
     setWeight(Eigen::MatrixXd::Identity(_na, _na));
@@ -131,7 +137,7 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _position_error = _qref - _q;
     _velocity_error = _qdot_ref - _qdot;
 
-    _qddot_d = _qddot_ref + _lambda2*_velocity_error + _lambda*_position_error;
+    _qddot_d = _qddot_ref + _lambda2*_Kd*_velocity_error + _lambda*_Kp*_position_error;
     _postural_task = _Jpostural * (_qddot - _qddot_d);
 
     _A = _postural_task.getM();
@@ -151,7 +157,7 @@ void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger::Ptr logger)
     logger->add(_task_id + "_acceleration_reference", _qddot_ref_cached);
 }
 
-Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getReference() const
+const Eigen::VectorXd &OpenSoT::tasks::acceleration::Postural::getReference() const
 {
     return _qref;
 }
@@ -176,17 +182,17 @@ void OpenSoT::tasks::acceleration::Postural::getReference(Eigen::VectorXd& q_des
     qddot_desired = _qddot_ref;
 }
 
-Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getActualPositions()
+const Eigen::VectorXd& OpenSoT::tasks::acceleration::Postural::getActualPositions() const
 {
     return _q;
 }
 
-Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getError()
+const Eigen::VectorXd& OpenSoT::tasks::acceleration::Postural::getError() const
 {
     return _position_error;
 }
 
-Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getVelocityError()
+const Eigen::VectorXd& OpenSoT::tasks::acceleration::Postural::getVelocityError() const
 {
     return _velocity_error;
 }
@@ -194,6 +200,9 @@ Eigen::VectorXd OpenSoT::tasks::acceleration::Postural::getVelocityError()
 bool OpenSoT::tasks::acceleration::Postural::reset()
 {
     _robot.getJointPosition(_qref);
+
+    _qdot_ref.setZero();
+    _qddot_ref.setZero();
     return true;
 }
 
@@ -217,3 +226,37 @@ const Eigen::VectorXd& OpenSoT::tasks::acceleration::Postural::getCachedAccelera
 {
     return _qddot_ref_cached;
 }
+
+void OpenSoT::tasks::acceleration::Postural::setKp(const Eigen::MatrixXd& Kp)
+{
+    _Kp = Kp;
+}
+
+void OpenSoT::tasks::acceleration::Postural::setKd(const Eigen::MatrixXd& Kd)
+{
+    _Kd = Kd;
+}
+
+void OpenSoT::tasks::acceleration::Postural::setGains(const Eigen::MatrixXd& Kp, const Eigen::MatrixXd& Kd)
+{
+    setKp(Kp);
+    setKd(Kd);
+}
+
+const Eigen::MatrixXd& OpenSoT::tasks::acceleration::Postural::getKp() const
+{
+    return _Kp;
+}
+
+const Eigen::MatrixXd& OpenSoT::tasks::acceleration::Postural::getKd() const
+{
+    return _Kd;
+}
+
+void OpenSoT::tasks::acceleration::Postural::getGains(Eigen::MatrixXd& Kp, Eigen::MatrixXd& Kd)
+{
+    Kp = _Kp;
+    Kd = _Kd;
+}
+
+
