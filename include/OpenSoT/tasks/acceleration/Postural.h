@@ -25,6 +25,11 @@
 
 namespace OpenSoT { namespace tasks { namespace acceleration {
     
+    /**
+     * @brief The Postural class implement a postural task on the ACTUATED joints.
+     * Underactuated joints are not considered.
+     * NOTICE that input vectors and matrices anyway consider the full 6+n state
+     */
     class Postural : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
       
     public:
@@ -39,17 +44,23 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         
         virtual void _update(const Eigen::VectorXd& x);
         
+        /**
+         * @brief setReference only for the actuated part
+         * first 6 joints in input vectors are removed
+         * @param qref a 6+n reference position vector, first 6 joints are removed
+         * @param dqref a 6+n reference velocity vector, first 6 joints are removed
+         * @param ddqref a 6+n reference acceleration vector, first 6 joints are removed
+         */
         void setReference(const Eigen::VectorXd& qref);
         void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref);
         void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
                           const Eigen::VectorXd& ddqref);
 
         /**
-         * @brief getReference
-         * @return joint position desidred
+         * @brief getReference return references (6+n vectors)
+         * @return joint position, velocity and acceleration desired
          */
-        Eigen::VectorXd getReference() const;
-
+        const Eigen::VectorXd& getReference() const;
         void getReference(Eigen::VectorXd& q_desired) const;
         void getReference(Eigen::VectorXd& q_desired,
                           Eigen::VectorXd& qdot_desired) const;
@@ -57,18 +68,31 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                           Eigen::VectorXd& qdot_desired,
                           Eigen::VectorXd& qddot_desired) const;
 
-        Eigen::VectorXd getActualPositions();
+        const Eigen::VectorXd& getActualPositions() const;
 
         /**
          * @brief getError
-         * @return position error
+         * @return position error vector (6+n vector)
          */
-        Eigen::VectorXd getError();
+        const Eigen::VectorXd& getError() const;
 
-        Eigen::VectorXd getVelocityError();
+        /**
+         * @brief getVelocityError
+         * @return velocity error vector (6+n vector)
+         */
+        const Eigen::VectorXd& getVelocityError() const;
 
-
+        /**
+         * @brief setLambda
+         * @param lambda1
+         * @param lambda2
+         */
         void setLambda(double lambda1, double lambda2);
+
+        /**
+         * @brief setLambda
+         * @param lambda
+         */
         virtual void setLambda(double lambda);
 
         /**
@@ -85,9 +109,52 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         const double getLambda2() const;
 
+        /**
+         * @brief reset position reference to actual, velcoity and accelration to 0
+         * @return true
+         */
         bool reset();
         
         virtual void _log(XBot::MatLogger::Ptr logger);
+
+        /**
+         * @brief setKp set position gain
+         * @param Kp a SPD matrix (n+6 x n+6), first 6 elements are not used
+         */
+        void setKp(const Eigen::MatrixXd& Kp);
+
+        /**
+         * @brief setKd set velocity gain
+         * @param Kd a SPD matrix (n+6 x n+6), first 6 elements are not used
+         */
+        void setKd(const Eigen::MatrixXd& Kd);
+
+        /**
+         * @brief setGains set both position and velocity gains
+         * @param Kp a SPD matrix (n+6 x n+6), first 6 elements are not used
+         * @param Kd a SPD matrix (n+6 x n+6), first 6 elements are not used
+         */
+        void setGains(const Eigen::MatrixXd& Kp, const Eigen::MatrixXd& Kd);
+
+        /**
+         * @brief getKp
+         * @return position gain (n+6 x n+6), first 6 elements are not used
+         */
+        const Eigen::MatrixXd& getKp() const;
+
+        /**
+         * @brief getKd
+         * @return  velocity gain (n+6 x n+6), first 6 elements are not used
+         */
+        const Eigen::MatrixXd& getKd() const;
+
+        /**
+         * @brief getGains return both position and velocity gains
+         * @param Kp (n+6 x n+6), first 6 elements are not used
+         * @param Kd (n+6 x n+6), first 6 elements are not used
+         */
+        void getGains(Eigen::MatrixXd& Kp, Eigen::MatrixXd& Kd);
+
 
         
         
@@ -104,6 +171,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::MatrixXd _Jpostural;
 
         double _lambda2;
+
+        Eigen::MatrixXd _Kp, _Kd;
         
         
     };
