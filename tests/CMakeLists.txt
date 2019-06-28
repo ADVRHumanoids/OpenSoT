@@ -4,30 +4,12 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
-FIND_PACKAGE(iDynTree QUIET)
-FIND_PACKAGE(conversion_utils_YARP QUIET)
-FIND_PACKAGE(idynutils2 QUIET)
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher)
 find_package(osqp QUIET)
 
-if(${iDynTree_FOUND} AND
-   ${idynutils2_FOUND}
-  )
-    set(TEST_INCLUDES ${TEST_INCLUDES}
-                      ${iDynTree_INCLUDE_DIRS}
-                      ${idynutils2_INCLUDE_DIRS}
-    )
-endif()
 
-if(${conversion_utils_YARP_FOUND}
-)
-    set(TEST_INCLUDES ${TEST_INCLUDES}
-                      ${conversion_utils_YARP_INCLUDE_DIRS}
-
-)
-endif()
 
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES}
@@ -169,13 +151,6 @@ SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
 if(${FCL_FOUND})
     SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
-endif()
-if(${iDynTree_FOUND} AND
-   ${idynutils2_FOUND}
-  )
-    SET(TestLibs ${TestLibs}
-                 ${idynutils2_LIBRARIES} ${iDynTree_LIBRARIES}
-)
 endif()
 
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
