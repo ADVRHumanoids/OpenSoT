@@ -51,7 +51,7 @@ if (NOT GTEST_FOUND)
     set(GTEST_BOTH_LIBRARIES gtest gtest_main)
 endif()
 
-include_directories(${GTEST_INCLUDE_DIRS})
+include_directories(${GTEST_INCLUDE_DIRS} ${FCL_INCLUDE_DIRS})
 link_directories(${GTEST_LIB_DIRS})
 
 # add local include

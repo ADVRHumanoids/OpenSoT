@@ -62,12 +62,8 @@ FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
 
 
-#link_directories("/usr/lib/x86_64-linux-gnu/")
-#include_directories("/usr/include/")
-#set(fcl_LIBRARIES "/usr/lib/x86_64-linux-gnu/libfcl.so")
-#set(fcl_FOUND true)
-FIND_PACKAGE(FCL QUIET)
-message(----------> ${FCL_LIBRARIES})
+
+FIND_PACKAGE(FCL 0.6 QUIET)
 
 
 

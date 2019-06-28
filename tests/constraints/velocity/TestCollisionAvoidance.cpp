@@ -9,8 +9,8 @@
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/cartesian_utils.h>
+#include <OpenSoT/utils/collision_utils.h>
 #include <chrono>
-
 #define ENABLE_ROS false
 
 #if ENABLE_ROS
@@ -18,6 +18,7 @@
 #include <sensor_msgs/JointState.h>
 #include <robot_state_publisher/robot_state_publisher.h>
 #endif
+
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
@@ -35,14 +36,14 @@ void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
 
-KDL::Frame fcl2KDL(const fcl::Transform3f &in)
+KDL::Frame fcl2KDL(const fcl::Transform3<double> &in)
 {
-    fcl::Quaternion3f q = in.getQuatRotation();
-    fcl::Vec3f t = in.getTranslation();
+    Eigen::Quaterniond q(in.linear());
+    Eigen::Vector3d t = in.translation();
 
     KDL::Frame f;
     f.p = KDL::Vector(t[0],t[1],t[2]);
-    f.M = KDL::Rotation::Quaternion(q.getX(), q.getY(), q.getZ(), q.getW());
+    f.M = KDL::Rotation::Quaternion(q.x(), q.y(), q.z(), q.w());
 
     return f;
 }
@@ -180,7 +181,7 @@ public:
 //        return _computeDistance.shapes_;
 //    }
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > getcollision_objects()
+    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
     {
         return _computeDistance.collision_objects_;
     }
@@ -201,7 +202,7 @@ public:
     }
 
     bool globalToLinkCoordinates(const std::string& linkName,
-                                 const fcl::Transform3f &fcl_w_T_f,
+                                 const fcl::Transform3<double> &fcl_w_T_f,
                                  KDL::Frame &link_T_f)
     {
 
@@ -209,13 +210,13 @@ public:
     }
 
     bool globalToLinkCoordinatesKDL(const std::string& linkName,
-                                    const fcl::Transform3f &fcl_w_T_f,
+                                    const fcl::Transform3<double> &fcl_w_T_f,
                                     KDL::Frame &link_T_f)
     {
 
         KDL::Frame w_T_f = fcl2KDL(fcl_w_T_f);
 
-        fcl::Transform3f fcl_w_T_shape = _computeDistance.collision_objects_[linkName]->getTransform();
+        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.collision_objects_[linkName]->getTransform();
         KDL::Frame w_T_shape = fcl2KDL(fcl_w_T_shape);
 
         KDL::Frame shape_T_f = w_T_shape.Inverse()*w_T_f;
