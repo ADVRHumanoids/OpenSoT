@@ -512,7 +512,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
-    int t = 100;
+    int t = 5;
+
     Eigen::VectorXd qmin, qmax;
     this->_model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
@@ -547,6 +548,11 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
             std::cout<<"error"<<std::endl;
             dq.setZero(dq.size());}
         this->q += dq;
+
+#if ENABLE_ROS
+        this->publishJointStates(this->q);
+        usleep(50000);
+#endif
 
     }
 
@@ -728,7 +734,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
-    int t = 10;
+    int t = 5;
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
@@ -759,7 +765,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
         this->q += dq;
 #if ENABLE_ROS
         this->publishJointStates(this->q);
-        usleep(10000);
+        usleep(50000);
 #endif
     }
 
