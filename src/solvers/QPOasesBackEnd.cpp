@@ -116,8 +116,9 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
      * this typedef is needed since qpOASES wants RoWMajor organization
      * of matrices. Thanks to Arturo Laurenzi for the help finding this issue!
      */
+    _A_rm = _A;
     qpOASES::returnValue val =_problem->init(_H.data(),_g.data(),
-                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                       _A_rm.data(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -243,8 +244,9 @@ bool QPOasesBackEnd::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
+    _A_rm = _A;
     qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
-                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                       _A_rm.data(),
                         _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -256,7 +258,7 @@ bool QPOasesBackEnd::solve()
 #endif
 
         val =_problem->init(_H.data(),_g.data(),
-                           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                           _A_rm.data(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,
