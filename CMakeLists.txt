@@ -147,6 +147,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/acceleration/Cartesian.cpp
                     src/tasks/acceleration/Contact.cpp
                     src/tasks/acceleration/CoM.cpp
+                    src/tasks/acceleration/MinJointVel.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/affine/Cartesian.cpp
                     src/tasks/velocity/CartesianAdmittance.cpp
