@@ -32,6 +32,10 @@ using namespace OpenSoT::utils;
 #define DEFAULT_EPS_REGULARISATION 2E2 //THIS VALUE IS HISTORICALLY USED IN QPOASES
 
 namespace OpenSoT{
+class AutoStack;
+}
+
+namespace OpenSoT{
     namespace solvers{
 
     /**
@@ -42,6 +46,13 @@ namespace OpenSoT{
     public:
     typedef boost::shared_ptr<iHQP> Ptr;
     typedef MatrixPiler VectorPiler;
+
+
+        iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+             const solver_back_ends be_solver = solver_back_ends::qpOASES);
+        iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+             const std::vector<solver_back_ends> be_solver);
+
         /**
          * @brief iHQP constructor of the problem
          * @param stack_of_tasks a vector of tasks

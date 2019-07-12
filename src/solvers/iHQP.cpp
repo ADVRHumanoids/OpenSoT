@@ -1,12 +1,40 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <XBotInterface/Logger.hpp>
+#include <OpenSoT/utils/AutoStack.h>
 
 
 using namespace OpenSoT::solvers;
 
 const std::string iHQP::_IHQP_CONSTRAINTS_PLUS_ = "+";
 const std::string iHQP::_IHQP_CONSTRAINTS_OPTIMALITY_ = "_OPTIMALITY";
+
+iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+     const solver_back_ends be_solver):
+    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
+    _epsRegularisation(eps_regularisation)
+{
+    for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i){
+        _active_stacks.push_back(true);
+        _be_solver.push_back(be_solver);
+    }
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT!");
+}
+
+iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+     const std::vector<solver_back_ends> be_solver):
+    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
+    _epsRegularisation(eps_regularisation),
+    _be_solver(be_solver)
+{
+    for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i)
+        _active_stacks.push_back(true);
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT!");
+}
 
 iHQP::iHQP(Stack &stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks),
