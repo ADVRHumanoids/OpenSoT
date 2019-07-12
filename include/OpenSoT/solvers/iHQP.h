@@ -47,7 +47,15 @@ namespace OpenSoT{
     typedef boost::shared_ptr<iHQP> Ptr;
     typedef MatrixPiler VectorPiler;
 
-
+        /**
+         * @brief iHQP constructor of the problem using the AutoStack this constructor permits to use
+         * user regularisation feature (inserting it inside the AutoStack)
+         * @param stack_of_tasks data structure which will contain tasks, constraints and user defined regularisation
+         * NOTICE that the user defined regularisation will be applied to all the stack levels
+         * @param eps_regularisation regularisation factor used inside the QP solver (BackEnd)
+         * @param be_solver
+         * @throw exception if the stack can not be initialized
+         */
         iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
         iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
@@ -233,6 +241,13 @@ namespace OpenSoT{
 
         Eigen::MatrixXd H;
         Eigen::VectorXd g;
+
+        //USER REGULARISATION
+        Eigen::MatrixXd Hr;
+        Eigen::VectorXd gr;
+
+        OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _regularisation_task;
+        //
 
         MatrixPiler A;
         VectorPiler lA;

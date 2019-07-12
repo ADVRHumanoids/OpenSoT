@@ -12,7 +12,8 @@ const std::string iHQP::_IHQP_CONSTRAINTS_OPTIMALITY_ = "_OPTIMALITY";
 iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
      const solver_back_ends be_solver):
     Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
-    _epsRegularisation(eps_regularisation)
+    _epsRegularisation(eps_regularisation),
+    _regularisation_task(stack_of_tasks.getRegularisationTask())
 {
     for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i){
         _active_stacks.push_back(true);
@@ -27,7 +28,8 @@ iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
      const std::vector<solver_back_ends> be_solver):
     Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
     _epsRegularisation(eps_regularisation),
-    _be_solver(be_solver)
+    _be_solver(be_solver),
+    _regularisation_task(stack_of_tasks.getRegularisationTask())
 {
     for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i)
         _active_stacks.push_back(true);
@@ -169,10 +171,21 @@ void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& prob
 
 bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
 {   
+    if(_regularisation_task)
+    {
+        XBot::Logger::info("User defined regularisation will be added to all levels");
+        computeCostFunction(_regularisation_task, Hr, gr);
+    }
+
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         XBot::Logger::info("#USING BACK-END @LEVEL %i: %s\n", i, getBackEndName(i).c_str());
         computeCostFunction(_tasks[i], H, g);
+        if(_regularisation_task)
+        {
+            H += Hr;
+            g += gr;
+        }
 
         OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
         if(_globalConstraints){
@@ -246,11 +259,20 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
 
 bool iHQP::solve(Eigen::VectorXd &solution)
 {
+    if(_regularisation_task)
+        computeCostFunction(_regularisation_task, Hr, gr);
+
+
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         if(_active_stacks[i])
         {
             computeCostFunction(_tasks[i], H, g);
+            if(_regularisation_task)
+            {
+                H += Hr;
+                g += gr;
+            }
             if(!_qp_stack_of_tasks[i]->updateTask(H, g))
                 return false;
 
