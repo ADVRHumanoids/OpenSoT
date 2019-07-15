@@ -246,7 +246,10 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
                 bounds_string = _bounds->getConstraintID();
             _qp_stack_of_tasks[i]->printProblemInformation(i, _tasks[i]->getTaskID(),
                                                           constraints_str,
-                                                          bounds_string);}
+                                                          bounds_string);
+            if(_regularisation_task)
+                XBot::Logger::info("USER DEFINED REGULARISATION: %s\n", _regularisation_task->getTaskID().c_str());
+        }
         else{
             XBot::Logger::error("ERROR: INITIALIZING STACK %i \n", i);
             return false;}
@@ -373,6 +376,14 @@ void iHQP::activateAllStacks()
 
 void iHQP::_log(XBot::MatLogger::Ptr logger, const std::string& prefix)
 {
+    if(_regularisation_task)
+    {
+        if(Hr.rows() > 0)
+            logger->add("Hr", Hr);
+        if(gr.size() > 0)
+            logger->add("gr", gr);
+    }
+
     for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
         _qp_stack_of_tasks[i]->log(logger,i, prefix);
 }
