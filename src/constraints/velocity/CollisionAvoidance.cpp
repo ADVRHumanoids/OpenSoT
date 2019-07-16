@@ -318,6 +318,8 @@ bool CollisionAvoidance::updateEnvironmentCollisionObjects ( const std::map<std:
         fcl::Transform3d fcl_w_T_shape = ComputeLinksDistance::KDL2fcl ( it.second );
         collision_objects_[it.first]->setTransform ( fcl_w_T_shape );
     }
+
+    return true;
 }
 
 double CollisionAvoidance::getLinkPairThreshold()
