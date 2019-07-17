@@ -224,6 +224,14 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/stacks/velocity/WalkingStack.cpp
                     ${sot_INCLUDES})
 
+set(PRIVATE_TLL ${XBotInterface_LIBRARIES})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
+    set(PRIVATE_TLL ${PRIVATE_TLL} ${FCL_LIBRARIES}
+                              ${moveit_core_LIBRARIES})
+endif()
+if(${PCL_FOUND})
+    set(PRIVATE_TLL ${PRIVATE_TLL} ${PCL_LIBRARIES})
+endif()
 
 
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
@@ -231,11 +239,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${eigen_conversions_LIBRARIES}
 			      
                               PRIVATE
-                              ${PCL_LIBRARIES}
-                              ${XBotInterface_LIBRARIES}
-                              ${FCL_LIBRARIES}
-                              ${moveit_core_LIBRARIES}
-                              )
+                              ${PRIVATE_TLL})
 
 
 ########################################################################
