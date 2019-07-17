@@ -1,12 +1,42 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <XBotInterface/Logger.hpp>
+#include <OpenSoT/utils/AutoStack.h>
 
 
 using namespace OpenSoT::solvers;
 
 const std::string iHQP::_IHQP_CONSTRAINTS_PLUS_ = "+";
 const std::string iHQP::_IHQP_CONSTRAINTS_OPTIMALITY_ = "_OPTIMALITY";
+
+iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+     const solver_back_ends be_solver):
+    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
+    _epsRegularisation(eps_regularisation),
+    _regularisation_task(stack_of_tasks.getRegularisationTask())
+{
+    for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i){
+        _active_stacks.push_back(true);
+        _be_solver.push_back(be_solver);
+    }
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT!");
+}
+
+iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+     const std::vector<solver_back_ends> be_solver):
+    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
+    _epsRegularisation(eps_regularisation),
+    _be_solver(be_solver),
+    _regularisation_task(stack_of_tasks.getRegularisationTask())
+{
+    for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i)
+        _active_stacks.push_back(true);
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT!");
+}
 
 iHQP::iHQP(Stack &stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks),
@@ -141,10 +171,21 @@ void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& prob
 
 bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
 {   
+    if(_regularisation_task)
+    {
+        XBot::Logger::info("User defined regularisation will be added to all levels");
+        computeCostFunction(_regularisation_task, Hr, gr);
+    }
+
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         XBot::Logger::info("#USING BACK-END @LEVEL %i: %s\n", i, getBackEndName(i).c_str());
         computeCostFunction(_tasks[i], H, g);
+        if(_regularisation_task)
+        {
+            H += Hr;
+            g += gr;
+        }
 
         OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
         if(_globalConstraints){
@@ -205,7 +246,10 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
                 bounds_string = _bounds->getConstraintID();
             _qp_stack_of_tasks[i]->printProblemInformation(i, _tasks[i]->getTaskID(),
                                                           constraints_str,
-                                                          bounds_string);}
+                                                          bounds_string);
+            if(_regularisation_task)
+                XBot::Logger::info("USER DEFINED REGULARISATION: %s\n", _regularisation_task->getTaskID().c_str());
+        }
         else{
             XBot::Logger::error("ERROR: INITIALIZING STACK %i \n", i);
             return false;}
@@ -218,11 +262,20 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
 
 bool iHQP::solve(Eigen::VectorXd &solution)
 {
+    if(_regularisation_task)
+        computeCostFunction(_regularisation_task, Hr, gr);
+
+
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         if(_active_stacks[i])
         {
             computeCostFunction(_tasks[i], H, g);
+            if(_regularisation_task)
+            {
+                H += Hr;
+                g += gr;
+            }
             if(!_qp_stack_of_tasks[i]->updateTask(H, g))
                 return false;
 
@@ -323,6 +376,14 @@ void iHQP::activateAllStacks()
 
 void iHQP::_log(XBot::MatLogger::Ptr logger, const std::string& prefix)
 {
+    if(_regularisation_task)
+    {
+        if(Hr.rows() > 0)
+            logger->add("Hr", Hr);
+        if(gr.size() > 0)
+            logger->add("gr", gr);
+    }
+
     for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
         _qp_stack_of_tasks[i]->log(logger,i, prefix);
 }

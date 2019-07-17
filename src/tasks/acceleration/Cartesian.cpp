@@ -63,6 +63,9 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
+
+    _Kp.setIdentity();
+    _Kd.setIdentity();
     
     update(Eigen::VectorXd(1));
     
@@ -452,3 +455,4 @@ void OpenSoT::tasks::acceleration::Cartesian::getGains(Eigen::Matrix6d& Kp, Eige
     Kp = _Kp;
     Kd = _Kd;
 }
+

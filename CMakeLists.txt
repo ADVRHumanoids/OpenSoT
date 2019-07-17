@@ -63,7 +63,13 @@ FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
-FIND_PACKAGE(fcl QUIET)
+
+
+
+FIND_PACKAGE(FCL 0.6 QUIET)
+
+
+
 FIND_PACKAGE(PkgConfig REQUIRED)
 
 # compilation flags
@@ -125,10 +131,13 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
         src/constraints/velocity/ConvexHull.cpp)
 endif()
 
-if(${fcl_FOUND} AND ${moveit_core_FOUND})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
+    message("Adding src/constraints/velocity/CollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
-        src/constraints/velocity/SelfCollisionAvoidance.cpp)
+        src/constraints/velocity/SelfCollisionAvoidance.cpp
+        src/constraints/velocity/CollisionAvoidance.cpp
+        )
 endif()
 
 ##TASKS
@@ -141,6 +150,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/acceleration/Cartesian.cpp
                     src/tasks/acceleration/Contact.cpp
                     src/tasks/acceleration/CoM.cpp
+                    src/tasks/acceleration/MinJointVel.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/affine/Cartesian.cpp
                     src/tasks/velocity/CartesianAdmittance.cpp
@@ -184,7 +194,7 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/ForceOptimization.cpp
                     src/utils/InverseDynamics.cpp)
 
-if(${fcl_FOUND} AND ${moveit_core_FOUND})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
         message("Adding src/utils/collision_utils.cpp to compilation")
         set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
             src/utils/collision_utils.cpp)
@@ -223,7 +233,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               PRIVATE
                               ${PCL_LIBRARIES}
                               ${XBotInterface_LIBRARIES}
-                              ${fcl_LIBRARIES}
+                              ${FCL_LIBRARIES}
                               ${moveit_core_LIBRARIES}
                               )
 
