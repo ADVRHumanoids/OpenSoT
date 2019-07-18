@@ -161,11 +161,11 @@ void iHQP::computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::V
     
 }
 
-void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& problem,
-                                                Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
+void iHQP::computeOptimalityConstraint(  const BackEnd::Ptr& problem,
+                                         const Eigen::MatrixXd& A,
+                                         Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
-    A = task->getA();
-    lA = task->getA()*problem->getSolution();
+    lA = A*problem->getSolution();
     uA = lA;
 }
 
@@ -208,7 +208,18 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
             Eigen::VectorXd _tmp_lA, _tmp_uA;
             for(unsigned int j = 0; j < i; ++j)
             {
-                computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], _tmp_A, _tmp_lA, _tmp_uA);
+                _tmp_A = _tasks[j]->getA();
+
+                if(true) //_enable_priority_constraint_check)
+                {
+                    _svd.push_back(Eigen::JacobiSVD<Eigen::MatrixXd>(
+                       _tmp_A.rows(),_tmp_A.cols(),
+                       Eigen::ComputeThinU | Eigen::ComputeThinV));
+
+                    regularizeOptimialityConstraint(_svd[j], _tmp_A);
+                }
+
+                computeOptimalityConstraint(_qp_stack_of_tasks[j], _tmp_A, _tmp_lA, _tmp_uA);
 
                 if( j == i-1)
                 {
@@ -287,10 +298,21 @@ bool iHQP::solve(Eigen::VectorXd &solution)
             uA.set(constraints_task_i.getbUpperBound());
             if(i > 0)
             {
-                for(unsigned int j = 0; j < i; ++j)
+                for(unsigned int j = 0; j < i; ++j) //maybe here we can optimize starting from i-1
                 {
                     if(_active_stacks[j])
-                        computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
+                    {
+                        tmp_A[j] = _tasks[j]->getA();
+
+                        if(true) //_enable_priority_constraint_check)
+                        {
+
+                            regularizeOptimialityConstraint(_svd[j], tmp_A[j]);
+
+                        }
+
+                        computeOptimalityConstraint(_qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
+                    }
                     else
                     {
                         //Here we consider fake optimality constraints:
@@ -300,6 +322,7 @@ bool iHQP::solve(Eigen::VectorXd &solution)
                         tmp_lA[j].setConstant(_tasks[j]->getA().rows(), -1.0);
                         tmp_uA[j].setConstant(_tasks[j]->getA().rows(), 1.0);
                     }
+
                     A.pile(tmp_A[j]);
                     lA.pile(tmp_lA[j]);
                     uA.pile(tmp_uA[j]);

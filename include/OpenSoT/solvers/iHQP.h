@@ -233,8 +233,8 @@ namespace OpenSoT{
          * @param lA lower bounds
          * @param uA upper bounds
          */
-        void computeOptimalityConstraint(const TaskPtr& task, BackEnd::Ptr& problem,
-                                         Eigen::MatrixXd& A,
+        void computeOptimalityConstraint(const BackEnd::Ptr& problem,
+                                         const Eigen::MatrixXd& A,
                                          Eigen::VectorXd& lA, Eigen::VectorXd& uA);
 
 
@@ -265,6 +265,21 @@ namespace OpenSoT{
 
         static const std::string _IHQP_CONSTRAINTS_PLUS_;
         static const std::string _IHQP_CONSTRAINTS_OPTIMALITY_;
+
+
+        bool _enable_priority_constraint_check;
+        /**
+         * @brief _svd fpr the singular value decomposition of the equality constraints given by the priorities
+         */
+        std::vector<Eigen::JacobiSVD<Eigen::MatrixXd> > _svd;
+        void regularizeOptimialityConstraint(Eigen::JacobiSVD<Eigen::MatrixXd>& svd, Eigen::MatrixXd& A)
+        {
+            svd.compute(A);
+
+            double s1 = svd.singularValues().maxCoeff();
+
+            std::cout<<"normalized singolar value: "<<(svd.singularValues()/s1).transpose()<<std::endl;
+        }
 
 
     };
