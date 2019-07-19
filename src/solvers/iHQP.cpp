@@ -289,6 +289,7 @@ bool iHQP::solve(Eigen::VectorXd &solution)
             {
                 for(unsigned int j = 0; j < i; ++j)
                 {
+                    ///TODO: This can be moved outside and performed only at the i-1 layer!
                     if(_active_stacks[j])
                         computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
                     else
@@ -300,6 +301,7 @@ bool iHQP::solve(Eigen::VectorXd &solution)
                         tmp_lA[j].setConstant(_tasks[j]->getA().rows(), -1.0);
                         tmp_uA[j].setConstant(_tasks[j]->getA().rows(), 1.0);
                     }
+                    ///
                     A.pile(tmp_A[j]);
                     lA.pile(tmp_lA[j]);
                     uA.pile(tmp_uA[j]);
