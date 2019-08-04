@@ -49,6 +49,10 @@ namespace OpenSoT { namespace solvers {
      * Notice how each layer optimizes only over the remaining dofs after higher priority tasks
      * have been optimized. Hence, the size of QP probles decreases along the hierarchy.
      *
+     * Limitations:
+     *  - no support for equality constraints
+     *  - no support for local constraints
+     *
      * TODO: implement equality constraints by considering the nullspace Neq = Null(Aeq).
      * All optimizations will then take place in the null space of equality constraints.
      */

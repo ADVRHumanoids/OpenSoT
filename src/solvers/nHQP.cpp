@@ -24,7 +24,20 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
         // the optimization problem is ill-formed
         if(num_free_vars <= 0)
         {
-            throw std::runtime_error("No free variables left, decrease the number of layers!");
+            throw std::runtime_error("No free variables left at layer #" + std::to_string(i) + ": decrease the number of layers!");
+        }
+
+        // local constraints not supported
+        if(t->getConstraints().size() > 0)
+        {
+            throw std::runtime_error("Local constraints not supported");
+//            throw std::runtime_error("Local constraints not supported");
+        }
+
+        // equality constraints not supported
+        if(bounds->getAeq().rows() > 0)
+        {
+            throw std::runtime_error("Equality constraints not supported");
         }
 
         printf("nHQP: free variables at layer #%d = %d \n", i++, num_free_vars);
