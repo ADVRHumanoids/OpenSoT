@@ -33,7 +33,8 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
     }
 }
 
-bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau, Eigen::VectorXd& qddot)
+bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau,
+                                     Eigen::VectorXd& qddot, std::vector<Eigen::Vector6d>& contact_wrench)
 {
     if(x.size() != _serializer->getSize())
     {
@@ -56,6 +57,7 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
 
     tau = _tau_val;
     qddot = _qddot_val;
+    contact_wrench = _contacts_wrench_val;
 
     if(_model.isFloatingBase())
     {
