@@ -11,36 +11,44 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
 {
     // nx = number of optimization variables
     const int nx = stack_of_tasks.front()->getXSize();
+    _solution.setZero(nx);
 
     // initialize number of free variables to nx
     // this value will decrease when going down the hierarchy
     int num_free_vars = nx;
 
+    // first cumulated nullspace is eye(nx)
+    _cumulated_nullspace.push_back(Eigen::MatrixXd::Identity(nx, nx));
+
     // iterate over hierarchy of tasks
-    int i = 0;
-    for(auto t : stack_of_tasks)
+    const int n_tasks = stack_of_tasks.size();
+    for(int i = 0; i < n_tasks; i++)
     {
+        auto t = stack_of_tasks[i];
+
+        // update task (NB: with x = zeros(nx))
+        t->update(_solution);
+
         // the current layer does not have any dof to move
         // the optimization problem is ill-formed
         if(num_free_vars <= 0)
         {
-            throw std::runtime_error("No free variables left at layer #" + std::to_string(i) + ": decrease the number of layers!");
+            throw std::runtime_error("[nHQP] No free variables left at layer #" + std::to_string(i) + ": decrease the number of layers!");
         }
 
-        // local constraints not supported
+        // local constraints not supported (TODO)
         if(t->getConstraints().size() > 0)
         {
-            throw std::runtime_error("Local constraints not supported");
-//            throw std::runtime_error("Local constraints not supported");
+            throw std::runtime_error("[nHQP] Local constraints not supported");
         }
 
-        // equality constraints not supported
+        // equality constraints not supported (TODO)
         if(bounds->getAeq().rows() > 0)
         {
-            throw std::runtime_error("Equality constraints not supported");
+            throw std::runtime_error("[nHQP] Equality constraints not supported");
         }
 
-        printf("nHQP: free variables at layer #%d = %d \n", i++, num_free_vars);
+        printf("[nHQP] Free variables at layer #%d = %d \n", i, num_free_vars);
 
         // compute number of constraints and bounds (TBD: consider equalities)
         int num_constr = bounds->getAineq().rows();
@@ -71,11 +79,50 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
         // construct task data and push it into a vector
         _data_struct.emplace_back(num_free_vars, t, bounds, backend);
 
-        // compute free variables for next layer
-        num_free_vars -= t->getTaskSize();
+        // if we are processing the last task, skip nullspace dim computation
+        if(i == n_tasks - 1)
+        {
+            continue;
+        }
 
-        // push some value inside vector of cumulated nullspaces
-        _cumulated_nullspace.push_back(Eigen::MatrixXd::Identity(nx, nx));
+        // compute cost without regularization to get nullspace dimension
+        auto& data = _data_struct.back();
+        if(i == 0)
+        {
+            data.compute_cost(nullptr,
+                              _solution,
+                              TaskData::Regularization::Disabled);
+        }
+        else // use nullspace basis computed at the previous step
+        {
+            data.compute_cost(&(_cumulated_nullspace[i]),
+                              _solution,
+                              TaskData::Regularization::Disabled);
+        }
+
+        // nullspace dimension
+        const double SV_THRESH = 1e-6;
+        int ns_dim = data.compute_nullspace_dimension(SV_THRESH);
+        data.set_nullspace_dimension(ns_dim);
+
+        if(ns_dim < num_free_vars - t->getTaskSize())
+        {
+            printf("[nHQP] layer #%d is rank deficient with tol = %.1e! (Rank = %d, Task Size = %d) \n",
+                   i, SV_THRESH, num_free_vars - ns_dim, t->getTaskSize());
+        }
+
+        // compute cumulated nullspace
+        if(!data.compute_nullspace())
+        {
+            throw std::runtime_error("Nullspace basis not available");
+        }
+        _cumulated_nullspace.emplace_back(_cumulated_nullspace[i] * data.get_nullspace());
+
+
+        // compute free variables for next layer
+        num_free_vars = ns_dim;
+
+
     }
 
 }
@@ -147,7 +194,7 @@ void OpenSoT::solvers::nHQP::_log(XBot::MatLogger::Ptr logger, const string & pr
 void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
 {
 
-    Eigen::VectorXd sv = svd.singularValues();
+    Eigen::VectorXd sv = svd.singularValues(); // svd was computed during compute_cost
     b0 = svd.matrixU().transpose()*b0;
 
     const double sv_max = sv(0);
@@ -219,7 +266,7 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
                                            OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr a_constraint,
                                            BackEnd::Ptr a_back_end):
     num_vars(num_free_vars),
-    size(a_task->getTaskSize()),
+    ns_dim(num_free_vars - a_task->getTaskSize()),
     task(a_task),
     constraints(a_constraint),
     Aineq(num_free_vars), lb(1), ub(1),
@@ -228,7 +275,9 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
 
 }
 
-void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N, const Eigen::VectorXd& q0)
+void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
+                                                    const Eigen::VectorXd& q0,
+                                                    Regularization reg)
 {
 
     /* || A(N*x + q0) - b || */
@@ -246,8 +295,11 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N, co
 
     svd.compute(AN, Eigen::ComputeFullU|Eigen::ComputeFullV);
 
-    const double REG_THRESHOLD = 0.05;
-    regularize_A_b(REG_THRESHOLD);
+    if(reg == Regularization::Enabled)
+    {
+        const double REG_THRESHOLD = 0.05;
+        regularize_A_b(REG_THRESHOLD);
+    }
 
     H.noalias() =  AN.transpose() * task->getWeight() * AN;
     g.noalias() = -AN.transpose() * task->getWeight() * b0;
@@ -276,17 +328,26 @@ const Eigen::VectorXd& OpenSoT::solvers::nHQP::TaskData::get_solution() const
 bool OpenSoT::solvers::nHQP::TaskData::compute_nullspace()
 {
 
-    const int ns_dim = num_vars - size;
-
     if(ns_dim <= 0)
     {
         return false;
     }
     else
     {
-        N = svd.matrixV().rightCols(ns_dim); // svd was computed during regularization
+        N = svd.matrixV().rightCols(ns_dim); // svd was computed during compute_cost
         return true;
     }
 
     return true;
+}
+
+int OpenSoT::solvers::nHQP::TaskData::compute_nullspace_dimension(double threshold)
+{
+    int rank = (svd.singularValues().array() >= threshold).count(); // svd was computed during compute_cost
+    return AN.cols() - rank;
+}
+
+void OpenSoT::solvers::nHQP::TaskData::set_nullspace_dimension(int a_ns_dim)
+{
+    ns_dim = a_ns_dim;
 }

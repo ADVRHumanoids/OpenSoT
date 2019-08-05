@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Walkman
- * Author: Enrico Mingo, Alessio Rocchi
- * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it
+ * Author: Arturo Laurenzi
+ * email: arturo.laurenzi@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -52,6 +52,7 @@ namespace OpenSoT { namespace solvers {
      * Limitations:
      *  - no support for equality constraints
      *  - no support for local constraints
+     *  - [!!!] ranks of tasks should not change during runtime (e.g. disabling a task)
      *
      * TODO: implement equality constraints by considering the nullspace Neq = Null(Aeq).
      * All optimizations will then take place in the null space of equality constraints.
@@ -87,13 +88,24 @@ namespace OpenSoT { namespace solvers {
         {
             
         public:
+
+            enum class Regularization
+            {
+                Enabled, Disabled
+            };
             
             TaskData(int num_free_vars,
                      TaskPtr task,
                      ConstraintPtr constraint,
                      BackEnd::Ptr back_end);
+
+            int compute_nullspace_dimension(double threshold);
+
+            void set_nullspace_dimension(int ns_dim);
             
-            void compute_cost(const Eigen::MatrixXd * N, const Eigen::VectorXd& q0);
+            void compute_cost(const Eigen::MatrixXd * N,
+                              const Eigen::VectorXd& q0,
+                              Regularization reg = Regularization::Enabled);
             void compute_contraints(const Eigen::MatrixXd * N, const Eigen::VectorXd& q0);
             bool compute_nullspace();
             
@@ -104,7 +116,9 @@ namespace OpenSoT { namespace solvers {
         private:
             
             const int num_vars;
-            const int size;
+
+            // nullspace dimension
+            int ns_dim;
             
             // this task
             TaskPtr task;
