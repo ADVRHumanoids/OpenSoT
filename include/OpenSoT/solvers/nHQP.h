@@ -154,8 +154,13 @@ namespace OpenSoT { namespace solvers {
             // backend for solving the QP
             BackEnd::Ptr back_end;
 
-            // logger
+            // flag indicating if back end was initialized
+            bool back_end_initialized;
+
+            // logger (can be nullptr)
             XBot::MatLogger::Ptr logger;
+
+            // prefix for logged variables
             std::string log_prefix;
 
             /**

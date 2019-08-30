@@ -61,20 +61,13 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
             num_bounds = 0;
         }
 
-        // construct backend and initialize with dummy problem (always feasible)
+        // construct backend
         auto backend = BackEndFactory(be_solver,
                                       num_free_vars,
                                       num_constr,
                                       HessianType::HST_SEMIDEF,
                                       eps_regularisation);
 
-        backend->initProblem( Eigen::MatrixXd::Identity(num_free_vars, num_free_vars),
-                             Eigen::VectorXd::Zero(num_free_vars),
-                             Eigen::MatrixXd::Zero(num_constr, num_free_vars),
-                             -Eigen::VectorXd::Ones(num_constr),
-                             Eigen::VectorXd::Ones(num_constr),
-                             -Eigen::VectorXd::Ones(num_bounds),
-                             Eigen::VectorXd::Ones(num_bounds));
 
         // construct task data and push it into a vector
         _data_struct.emplace_back(num_free_vars, t, bounds, backend);
@@ -196,6 +189,10 @@ void OpenSoT::solvers::nHQP::_log(XBot::MatLogger::Ptr logger, const string & pr
 
 void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
 {
+    if(logger)
+    {
+        logger->add(log_prefix + "b0", b0);
+    }
 
     Eigen::VectorXd sv = svd.singularValues(); // svd was computed during compute_cost
     b0 = svd.matrixU().transpose()*b0;
@@ -203,8 +200,10 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
     if(logger)
     {
         logger->add(log_prefix + "sv", sv);
-        logger->add(log_prefix + "b0", b0);
+        logger->add(log_prefix + "b0_rot", b0);
+        logger->add(log_prefix + "A", AN);
     }
+
 
     const double sv_max = sv(0);
 
@@ -228,6 +227,7 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
     {
         logger->add(log_prefix + "sv_reg", sv);
         logger->add(log_prefix + "b0_reg", b0);
+        logger->add(log_prefix + "A_reg", AN);
     }
 
 }
@@ -250,8 +250,8 @@ void OpenSoT::solvers::nHQP::TaskData::compute_contraints(const Eigen::MatrixXd*
     {
         Aineq.pile(constraints->getAineq());
 
-        lb_bound = constraints->getLowerBound() - q0;
-        ub_bound = constraints->getUpperBound() - q0;
+        lb_bound = constraints->getLowerBound();
+        ub_bound = constraints->getUpperBound();
 
         ub.pile(constraints->getbUpperBound());
         lb.pile(constraints->getbLowerBound());
@@ -262,10 +262,10 @@ void OpenSoT::solvers::nHQP::TaskData::compute_contraints(const Eigen::MatrixXd*
         Aineq.pile(*N);
 
         lb.pile(constraints->getbLowerBound() - constraints->getAineq()*q0);
-        lb.pile(constraints->getLowerBound());
+        lb.pile(constraints->getLowerBound() - q0);
 
         ub.pile(constraints->getbUpperBound() - constraints->getAineq()*q0);
-        ub.pile(constraints->getUpperBound());
+        ub.pile(constraints->getUpperBound() - q0);
     }
 
 }
@@ -284,7 +284,8 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
     constraints(a_constraint),
     Aineq(num_free_vars), lb(1), ub(1),
     ns_dim(num_free_vars - a_task->getTaskSize()),
-    back_end(a_back_end)
+    back_end(a_back_end),
+    back_end_initialized(false)
 {
 
 }
@@ -324,17 +325,47 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
 bool OpenSoT::solvers::nHQP::TaskData::update_and_solve()
 {
-    back_end->updateTask(H, g);
+    bool success = false;
+
+    // solver is not initialized
+    if(!back_end_initialized)
+    {
+        success = back_end->initProblem(H, g,
+                                        Aineq.generate_and_get(),
+                                        lb.generate_and_get(),
+                                        ub.generate_and_get(),
+                                        lb_bound,
+                                        ub_bound
+                                        );
+
+        if(success)
+        {
+            back_end_initialized = true;
+        }
+    }
+    else // solver was initialized already
+    {
+
+        back_end->updateTask(H, g);
 
 
-    back_end->updateConstraints(Aineq.generate_and_get(),
-                                lb.generate_and_get(),
-                                ub.generate_and_get());
+        back_end->updateConstraints(Aineq.generate_and_get(),
+                                    lb.generate_and_get(),
+                                    ub.generate_and_get());
 
-    back_end->updateBounds(lb_bound, ub_bound);
+        back_end->updateBounds(lb_bound, ub_bound);
 
 
-    return back_end->solve();
+        success = back_end->solve();
+
+    }
+
+    if(logger)
+    {
+        logger->add(log_prefix + "solution", back_end->getSolution());
+    }
+
+    return success;
 }
 
 const Eigen::VectorXd& OpenSoT::solvers::nHQP::TaskData::get_solution() const
