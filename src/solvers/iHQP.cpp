@@ -287,19 +287,45 @@ bool iHQP::solve(Eigen::VectorXd &solution)
             uA.set(constraints_task_i.getbUpperBound());
             if(i > 0)
             {
-                for(unsigned int j = 0; j < i; ++j)
+
+                ///TODO: new implementation, this permits to save some multiplications since
+                /// we do not recompute always all the optimality (priority) constraints but only the one
+                /// at the previous level. The problem arise if a level is not active so all the previous
+                /// not active levels are set to zero up to the last active level which is computed
+                //Here I compute the optimality (priority) constraint only for the previous active level
+                for(unsigned int l = i-1; l >= 0; --l)
                 {
-                    if(_active_stacks[j])
-                        computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
+                    if(_active_stacks[l]){
+                        computeOptimalityConstraint(_tasks[l], _qp_stack_of_tasks[l], tmp_A[l], tmp_lA[l], tmp_uA[l]);
+                        break;}
                     else
                     {
                         //Here we consider fake optimality constraints:
                         //
                         //    -1 <= 0x <= 1
-                        tmp_A[j].setZero(_tasks[j]->getA().rows(), _tasks[j]->getA().cols());
-                        tmp_lA[j].setConstant(_tasks[j]->getA().rows(), -1.0);
-                        tmp_uA[j].setConstant(_tasks[j]->getA().rows(), 1.0);
+                        tmp_A[l].setZero(_tasks[l]->getA().rows(), _tasks[l]->getA().cols());
+                        tmp_lA[l].setConstant(_tasks[l]->getA().rows(), -1.0);
+                        tmp_uA[l].setConstant(_tasks[l]->getA().rows(), 1.0);
                     }
+                }
+                ///
+
+
+                for(unsigned int j = 0; j < i; ++j)
+                {
+                    ///TODO: old implementation keep it to check against the new implementation
+//                    if(_active_stacks[j])
+//                        computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
+//                    else
+//                    {
+//                        //Here we consider fake optimality constraints:
+//                        //
+//                        //    -1 <= 0x <= 1
+//                        tmp_A[j].setZero(_tasks[j]->getA().rows(), _tasks[j]->getA().cols());
+//                        tmp_lA[j].setConstant(_tasks[j]->getA().rows(), -1.0);
+//                        tmp_uA[j].setConstant(_tasks[j]->getA().rows(), 1.0);
+//                    }
+                    ///
                     A.pile(tmp_A[j]);
                     lA.pile(tmp_lA[j]);
                     uA.pile(tmp_uA[j]);

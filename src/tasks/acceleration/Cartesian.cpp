@@ -27,6 +27,11 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _acc_ref.setZero();
     _acc_ref_cached = _acc_ref;
 
+    _virtual_force_ref.setZero();
+    _virtual_force_ref_cached = _virtual_force_ref;
+    _tmpMatrixXd.resize(6,robot.getJointNum());
+    _Bi.resize(robot.getJointNum(),robot.getJointNum());
+
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
 
@@ -60,6 +65,11 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _vel_ref_cached = _vel_ref;
     _acc_ref.setZero();
     _acc_ref_cached = _acc_ref;
+
+    _virtual_force_ref.setZero();
+    _virtual_force_ref_cached = _virtual_force_ref;
+    _tmpMatrixXd.resize(6,robot.getJointNum());
+    _Bi.resize(robot.getJointNum(),robot.getJointNum());
     
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
@@ -104,6 +114,7 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
 {
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
+    _virtual_force_ref_cached = _virtual_force_ref;
 
     if(_base_link == world_name){
         _robot.getJacobian(_distal_link, _J);
@@ -127,15 +138,23 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     _velocity_error = _vel_ref - _vel_current; ///Maybe here we should multiply the _orientation_gain as well?
 
     _cartesian_task = _J*_qddot + _jdotqdot;
-    _cartesian_task = _cartesian_task - _acc_ref 
+    if(_virtual_force_ref.isZero())
+        _cartesian_task = _cartesian_task - _acc_ref
                                       - _lambda2*_Kd*_velocity_error
-                                      - _lambda*_Kp*_pose_error ;
+                                      - _lambda*_Kp*_pose_error;
+    else{
+        compute_cartesian_inertia_inverse();
+        _cartesian_task = _cartesian_task - _acc_ref
+                                      - _lambda2*_Kd*_velocity_error
+                                      - _lambda*_Kp*_pose_error
+                                      - _Mi*_virtual_force_ref;}
     
     _A = _cartesian_task.getM();
     _b = -_cartesian_task.getq();
     
     _vel_ref.setZero();
     _acc_ref.setZero();
+    _virtual_force_ref.setZero();
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::setPositionReference(const Eigen::Vector3d& pos_ref)
@@ -214,6 +233,11 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pos
     _acc_ref_cached = _acc_ref;
 }
 
+void OpenSoT::tasks::acceleration::Cartesian::setVirtualForce(const Eigen::Vector6d& virtual_force_ref)
+{
+    _virtual_force_ref = virtual_force_ref;
+}
+
 void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda)
 {
     if(lambda < 0){
@@ -251,7 +275,9 @@ bool OpenSoT::tasks::acceleration::Cartesian::reset()
     resetReference();
     _vel_ref.setZero();
     _acc_ref.setZero();
+    _virtual_force_ref.setZero();
 
+    _virtual_force_ref_cached = _virtual_force_ref;
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
 
@@ -267,6 +293,7 @@ void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
 
     logger->add(getTaskID() + "_velocity_reference", _vel_ref_cached);
     logger->add(getTaskID() + "_acceleration_reference", _acc_ref_cached);
+    logger->add(getTaskID() +  "_virtual_force_reference", _virtual_force_ref_cached);
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& ref)
@@ -424,6 +451,11 @@ const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getCachedAcceler
     return _acc_ref_cached;
 }
 
+const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getCachedVirtualForceReference() const
+{
+    return _virtual_force_ref_cached;
+}
+
 void OpenSoT::tasks::acceleration::Cartesian::setKp(const Eigen::Matrix6d& Kp)
 {
     _Kp = Kp;
@@ -454,5 +486,14 @@ void OpenSoT::tasks::acceleration::Cartesian::getGains(Eigen::Matrix6d& Kp, Eige
 {
     Kp = _Kp;
     Kd = _Kd;
+}
+
+void OpenSoT::tasks::acceleration::Cartesian::compute_cartesian_inertia_inverse()
+{
+    _robot.getInertiaInverse(_Bi);
+
+    _tmpMatrixXd.noalias() = _J*_Bi;
+
+    _Mi.noalias() = _tmpMatrixXd*_J.transpose();
 }
 
