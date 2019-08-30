@@ -89,11 +89,6 @@ namespace OpenSoT { namespace solvers {
             
         public:
 
-            enum class Regularization
-            {
-                Enabled, Disabled
-            };
-            
             TaskData(int num_free_vars,
                      TaskPtr task,
                      ConstraintPtr constraint,
@@ -104,21 +99,23 @@ namespace OpenSoT { namespace solvers {
             void set_nullspace_dimension(int ns_dim);
             
             void compute_cost(const Eigen::MatrixXd * N,
-                              const Eigen::VectorXd& q0,
-                              Regularization reg = Regularization::Enabled);
-            void compute_contraints(const Eigen::MatrixXd * N, const Eigen::VectorXd& q0);
+                              const Eigen::VectorXd& q0);
+
+            void compute_contraints(const Eigen::MatrixXd * N,
+                                    const Eigen::VectorXd& q0);
+
+            bool update_and_solve();
+
             bool compute_nullspace();
             
             const Eigen::MatrixXd& get_nullspace() const;
-            bool update_and_solve();
+
             const Eigen::VectorXd& get_solution() const;
+
+            bool enable_logger(XBot::MatLogger::Ptr logger, std::string log_prefix);
             
         private:
-            
-            const int num_vars;
 
-            // nullspace dimension
-            int ns_dim;
             
             // this task
             TaskPtr task;
@@ -151,8 +148,15 @@ namespace OpenSoT { namespace solvers {
             // svd computation class
             Eigen::BDCSVD<Eigen::MatrixXd> svd;
 
+            // nullspace dimension (for next task)
+            int ns_dim;
+
             // backend for solving the QP
             BackEnd::Ptr back_end;
+
+            // logger
+            XBot::MatLogger::Ptr logger;
+            std::string log_prefix;
 
             /**
              * @brief Perform SVD-based regularization of AN and b0 as follows:

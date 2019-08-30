@@ -90,14 +90,12 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
         if(i == 0)
         {
             data.compute_cost(nullptr,
-                              _solution,
-                              TaskData::Regularization::Disabled);
+                              _solution);
         }
         else // use nullspace basis computed at the previous step
         {
             data.compute_cost(&(_cumulated_nullspace[i]),
-                              _solution,
-                              TaskData::Regularization::Disabled);
+                              _solution);
         }
 
         // nullspace dimension
@@ -105,6 +103,7 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
         int ns_dim = data.compute_nullspace_dimension(SV_THRESH);
         data.set_nullspace_dimension(ns_dim);
 
+        // warn on rank deficient task
         if(ns_dim < num_free_vars - t->getTaskSize())
         {
             printf("[nHQP] layer #%d is rank deficient with tol = %.1e! (Rank = %d, Task Size = %d) \n",
@@ -185,7 +184,11 @@ bool OpenSoT::solvers::nHQP::solve(Eigen::VectorXd& solution)
 
 void OpenSoT::solvers::nHQP::_log(XBot::MatLogger::Ptr logger, const string & prefix)
 {
-
+    int i = 0;
+    for(auto& t : _data_struct)
+    {
+        t.enable_logger(logger, prefix + "_layer_" + std::to_string(i++) + "_");
+    }
 }
 
 
@@ -196,6 +199,12 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
 
     Eigen::VectorXd sv = svd.singularValues(); // svd was computed during compute_cost
     b0 = svd.matrixU().transpose()*b0;
+
+    if(logger)
+    {
+        logger->add(log_prefix + "sv", sv);
+        logger->add(log_prefix + "b0", b0);
+    }
 
     const double sv_max = sv(0);
 
@@ -214,6 +223,12 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
 
     b0 = svd.matrixU()*b0;
     AN = svd.matrixU().leftCols(sv.size())*sv.asDiagonal()*svd.matrixV().transpose().topRows(sv.size());
+
+    if(logger)
+    {
+        logger->add(log_prefix + "sv_reg", sv);
+        logger->add(log_prefix + "b0_reg", b0);
+    }
 
 }
 
@@ -265,19 +280,17 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
                                            OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr a_task,
                                            OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr a_constraint,
                                            BackEnd::Ptr a_back_end):
-    num_vars(num_free_vars),
-    ns_dim(num_free_vars - a_task->getTaskSize()),
     task(a_task),
     constraints(a_constraint),
     Aineq(num_free_vars), lb(1), ub(1),
+    ns_dim(num_free_vars - a_task->getTaskSize()),
     back_end(a_back_end)
 {
 
 }
 
 void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
-                                                    const Eigen::VectorXd& q0,
-                                                    Regularization reg)
+                                                    const Eigen::VectorXd& q0)
 {
 
     /* || A(N*x + q0) - b || */
@@ -295,11 +308,15 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
     svd.compute(AN, Eigen::ComputeFullU|Eigen::ComputeFullV);
 
-    if(reg == Regularization::Enabled)
-    {
-        const double REG_THRESHOLD = 0.05;
-        regularize_A_b(REG_THRESHOLD);
-    }
+//    int ns_dim_new = compute_nullspace_dimension(1e-9);
+//    if(ns_dim > 0 && ns_dim_new != ns_dim)
+//    {
+//        printf("Nullspace dimension changed (new: %d, old: %d) \n", ns_dim_new, ns_dim);
+//    }
+
+    const double REG_THRESHOLD = 0.05;
+    regularize_A_b(REG_THRESHOLD);
+
 
     H.noalias() =  AN.transpose() * task->getWeight() * AN;
     g.noalias() = -AN.transpose() * task->getWeight() * b0;
@@ -323,6 +340,18 @@ bool OpenSoT::solvers::nHQP::TaskData::update_and_solve()
 const Eigen::VectorXd& OpenSoT::solvers::nHQP::TaskData::get_solution() const
 {
     return back_end->getSolution();
+}
+
+bool OpenSoT::solvers::nHQP::TaskData::enable_logger(XBot::MatLogger::Ptr a_logger, std::string a_log_prefix)
+{
+    if(!logger)
+    {
+        logger = a_logger;
+        log_prefix = a_log_prefix;
+        return true;
+    }
+
+    return false;
 }
 
 bool OpenSoT::solvers::nHQP::TaskData::compute_nullspace()

@@ -78,6 +78,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         virtual void _update(const Eigen::VectorXd& x);
 
+        virtual void _log(XBot::MatLogger::Ptr logger);
+
 
     private:
         
