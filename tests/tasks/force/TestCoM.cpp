@@ -189,7 +189,7 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
 
     OpenSoT::solvers::iHQP::Ptr sot(
-                new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
+                new OpenSoT::solvers::iHQP(stack_of_tasks,0.));
     std::cout<<"Solver started"<<std::endl;
 
     _model_ptr->setJointPosition(q);
@@ -261,7 +261,7 @@ TEST_F(testWrench, testWrench_) {
     stack_of_tasks.push_back(_wrench_task);
 
 
-    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks,0.));
     Eigen::VectorXd x;
     EXPECT_TRUE(sot->solve(x));
     std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
@@ -301,7 +301,7 @@ TEST_F(testWrench, testWrench_) {
     autostack->update(Eigen::VectorXd(0));
 
     OpenSoT::solvers::iHQP::Ptr sot2(new OpenSoT::solvers::iHQP(autostack->getStack(),
-                                                                autostack->getBounds(),1.));
+                                                                autostack->getBounds(),0));
     EXPECT_TRUE(sot2->solve(x));
 
     std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
@@ -422,7 +422,7 @@ TEST_F(testWrench, testWrenches) {
     stack_of_tasks.push_back(wrenches_task);
 
 
-    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks,0.));
     Eigen::VectorXd x;
     EXPECT_TRUE(sot->solve(x));
     std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
