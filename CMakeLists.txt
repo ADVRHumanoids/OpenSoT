@@ -182,6 +182,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
 set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
                             src/solvers/BackEndFactory.cpp
                             src/solvers/iHQP.cpp
+                            src/solvers/nHQP.cpp
                             src/solvers/eHQP.cpp)
 
 ##UTILS

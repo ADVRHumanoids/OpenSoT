@@ -53,7 +53,7 @@ void QPOasesBackEnd::setDefaultOptions()
     qpOASES::Options opt;
     opt.setToMPC();
     opt.printLevel = qpOASES::PL_NONE;
-    opt.enableRegularisation = qpOASES::BT_TRUE;
+    opt.enableRegularisation = qpOASES::BT_FALSE;
     opt.epsRegularisation *= _epsRegularisation;
     opt.numRegularisationSteps = 0;
     opt.numRefinementSteps = 1;
@@ -91,6 +91,11 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
         return false;}
 
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
+
+
+    for(unsigned int i = 0; i < _H.rows();++i)
+        _H(i,i) += _epsRegularisation;
+
     checkINFTY();
 
 
@@ -243,6 +248,9 @@ bool QPOasesBackEnd::solve()
 {
     int nWSR = _nWSR;
     checkINFTY();
+
+    for(unsigned int i = 0; i < _H.rows();++i)
+        _H(i,i) += _epsRegularisation;
 
     _A_rm = _A;
     qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),

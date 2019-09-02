@@ -115,7 +115,7 @@ double eiQuadProgBackEnd::getObjective()
 
 boost::any eiQuadProgBackEnd::getOptions()
 {
-    ///DO NOTHING
+    return boost::any();
 }
 
 void eiQuadProgBackEnd::setOptions(const boost::any& options)

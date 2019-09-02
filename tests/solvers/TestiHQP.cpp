@@ -13,7 +13,7 @@ public:
     typedef boost::shared_ptr<testiHQP> Ptr;
 
     testiHQP(OpenSoT::AutoStack& stack_of_tasks,
-             const double eps_regularisation = 1e6,
+             const double eps_regularisation = 0.,
              const OpenSoT::solvers::solver_back_ends be_solver = OpenSoT::solvers::solver_back_ends::qpOASES):
         OpenSoT::solvers::iHQP(stack_of_tasks, eps_regularisation, be_solver)
     {
@@ -95,7 +95,9 @@ TEST_F(testClass, testUserRegularisation)
     std::cout<<"(qd-q): "<<(qd-q).transpose()<<std::endl;
     std::cout<<"ddq: "<<ddq.transpose()<<std::endl;
 
-    EXPECT_TRUE(_postural->getb() == ddq);
+    for(unsigned int i = 0; i < _postural->getb().size(); ++i)
+        EXPECT_NEAR(_postural->getb()[i], ddq[i], 1e-12);
+//    EXPECT_TRUE(_postural->getb() == ddq);
 
     Eigen::MatrixXd H(7,7);
     Eigen::VectorXd g(7);
@@ -134,7 +136,10 @@ TEST_F(testClass, testUserRegularisation)
     Eigen::VectorXd sol = -H.inverse()*g;
     std::cout<<"sol: "<<sol.transpose()<<std::endl;
 
-    EXPECT_TRUE(ddq == sol);
+    for(unsigned int i = 0; i < ddq.size(); ++i)
+        EXPECT_NEAR(ddq[i], sol[i], 1e-12);
+
+//    EXPECT_TRUE(ddq == sol);
 }
 
 }

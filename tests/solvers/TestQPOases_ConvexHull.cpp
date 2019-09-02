@@ -259,7 +259,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     stack_of_tasks.push_back(com_task);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks, bounds, 1));
 
     //SET SOME REFERENCES
     Eigen::Vector3d T_com_p_init;

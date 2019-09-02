@@ -185,7 +185,7 @@ TEST_F(testLProblem, testQuadraticLPProblem)
     EXPECT_NEAR(solution[3], 1.875, 1e-4);
 
 
-    OpenSoT::solvers::iHQP sot(autostack->getStack(), autostack->getBounds(),0.0, OpenSoT::solvers::solver_back_ends::qpOASES);
+    OpenSoT::solvers::iHQP sot(autostack->getStack(), autostack->getBounds(),1, OpenSoT::solvers::solver_back_ends::qpOASES);
     EXPECT_TRUE(sot.solve(solution));
     std::cout<<"qpOASES Solution: "<<solution.head(4).transpose()<<std::endl;
 
