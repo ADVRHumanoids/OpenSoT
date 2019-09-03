@@ -309,18 +309,16 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
     svd.compute(AN, Eigen::ComputeFullU|Eigen::ComputeFullV);
 
-//    int ns_dim_new = compute_nullspace_dimension(1e-9);
-//    if(ns_dim > 0 && ns_dim_new != ns_dim)
-//    {
-//        printf("Nullspace dimension changed (new: %d, old: %d) \n", ns_dim_new, ns_dim);
-//    }
-
-    const double REG_THRESHOLD = 0.05;
-    regularize_A_b(REG_THRESHOLD);
-
+    regularize_A_b(min_sv_ratio);
 
     H.noalias() =  AN.transpose() * task->getWeight() * AN;
     g.noalias() = -AN.transpose() * task->getWeight() * b0;
+
+    if(compute_nullspace()) // if there is some nullspace left..
+    {
+        const double sv_max = svd.singularValues()[0];
+        H.noalias() += sv_max * get_nullspace() * get_nullspace().transpose(); // add selective nullspace regularization
+    }
 }
 
 bool OpenSoT::solvers::nHQP::TaskData::update_and_solve()
