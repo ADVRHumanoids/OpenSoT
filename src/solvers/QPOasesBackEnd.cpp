@@ -93,7 +93,8 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
 
 
-    for(unsigned int i = 0; i < _H.rows();++i)
+    unsigned int _H_rows = _H.rows();
+    for(unsigned int i = 0; i < _H_rows; ++i)
         _H(i,i) += _epsRegularisation;
 
     checkINFTY();
@@ -249,7 +250,8 @@ bool QPOasesBackEnd::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
-    for(unsigned int i = 0; i < _H.rows();++i)
+    unsigned int _H_rows = _H.rows();
+    for(unsigned int i = 0; i < _H_rows; ++i)
         _H(i,i) += _epsRegularisation;
 
     _A_rm = _A;
