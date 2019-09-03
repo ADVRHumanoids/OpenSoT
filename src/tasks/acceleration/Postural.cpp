@@ -1,7 +1,7 @@
 #include <OpenSoT/tasks/acceleration/Postural.h>
 
 OpenSoT::tasks::acceleration::Postural::Postural(
-         const XBot::ModelInterface& robot,const int x_size, std::string task_id):
+         const XBot::ModelInterface& robot,const int x_size, const std::string task_id):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
     _robot(robot)
 {
@@ -31,7 +31,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(
 }
 
 OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& robot,
-                                                 OpenSoT::AffineHelper qddot, std::string task_id):
+                                                 OpenSoT::AffineHelper qddot, const std::string task_id):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, qddot.getInputSize()),
     _robot(robot),
     _qddot(qddot)
