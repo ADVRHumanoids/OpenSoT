@@ -175,6 +175,24 @@ bool OpenSoT::solvers::nHQP::solve(Eigen::VectorXd& solution)
     return true;
 }
 
+void OpenSoT::solvers::nHQP::setMinSingularValueRatio(double sv_min)
+{
+    setMinSingularValueRatio(std::vector<double>(_data_struct.size(), sv_min));
+}
+
+void OpenSoT::solvers::nHQP::setMinSingularValueRatio(std::vector<double> sv_min)
+{
+    if(sv_min.size() != _data_struct.size())
+    {
+        throw std::invalid_argument("[nHQP::setMinSingularValueRatio] sv_min.size() != # layers");
+    }
+
+    for(int i = 0; i < sv_min.size(); i++)
+    {
+        _data_struct[i].set_min_sv_ratio(sv_min[i]);
+    }
+}
+
 void OpenSoT::solvers::nHQP::_log(XBot::MatLogger::Ptr logger, const string & prefix)
 {
     int i = 0;
@@ -272,7 +290,7 @@ void OpenSoT::solvers::nHQP::TaskData::compute_contraints(const Eigen::MatrixXd*
 
 const Eigen::MatrixXd & OpenSoT::solvers::nHQP::TaskData::get_nullspace() const
 {
-    return N;
+    return AN_nullspace;
 }
 
 
@@ -282,12 +300,28 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
                                            BackEnd::Ptr a_back_end):
     task(a_task),
     constraints(a_constraint),
+    min_sv_ratio(nHQP::DEFAULT_MIN_SV_RATIO),
     Aineq(num_free_vars), lb(1), ub(1),
     ns_dim(num_free_vars - a_task->getTaskSize()),
     back_end(a_back_end),
     back_end_initialized(false)
 {
 
+}
+
+void OpenSoT::solvers::nHQP::TaskData::set_min_sv_ratio(double sv)
+{
+    if(sv < 0.0)
+    {
+        throw std::invalid_argument("[nHQP::TaskData::set_min_sv_ratio] Minimum singular value threshold should respect 0 < s < 1");
+    }
+
+    if(sv > 1.0)
+    {
+        throw std::invalid_argument("[nHQP::TaskData::set_min_sv_ratio] Minimum singular value threshold should respect 0 < s < 1");
+    }
+
+    min_sv_ratio = sv;
 }
 
 void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
@@ -392,7 +426,7 @@ bool OpenSoT::solvers::nHQP::TaskData::compute_nullspace()
     }
     else
     {
-        N = svd.matrixV().rightCols(ns_dim); // svd was computed during compute_cost
+        AN_nullspace = svd.matrixV().rightCols(ns_dim); // svd was computed during compute_cost
         return true;
     }
 

@@ -61,6 +61,8 @@ namespace OpenSoT { namespace solvers {
     {
         
     public:
+
+        static constexpr double DEFAULT_MIN_SV_RATIO = 0.05;
         
         // Shared pointer typedef
         typedef boost::shared_ptr<nHQP> Ptr;
@@ -76,6 +78,12 @@ namespace OpenSoT { namespace solvers {
 
         // Solve implementation
         virtual bool solve(Eigen::VectorXd& solution) override;
+
+        // Setter for minimum singular value ratio
+        void setMinSingularValueRatio(double sv_min);
+
+        // Setter for minimum singular value ratio (layer wise)
+        void setMinSingularValueRatio(std::vector<double> sv_min);
 
 
     private:
@@ -94,14 +102,16 @@ namespace OpenSoT { namespace solvers {
                      ConstraintPtr constraint,
                      BackEnd::Ptr back_end);
 
+            void set_min_sv_ratio(double sv);
+
             int compute_nullspace_dimension(double threshold);
 
             void set_nullspace_dimension(int ns_dim);
             
-            void compute_cost(const Eigen::MatrixXd * N,
+            void compute_cost(const Eigen::MatrixXd * AN_nullspace,
                               const Eigen::VectorXd& q0);
 
-            void compute_contraints(const Eigen::MatrixXd * N,
+            void compute_contraints(const Eigen::MatrixXd * AN_nullspace,
                                     const Eigen::VectorXd& q0);
 
             bool update_and_solve();
@@ -124,13 +134,16 @@ namespace OpenSoT { namespace solvers {
             ConstraintPtr constraints;
             
             // nullspace of AN (used by next task)
-            Eigen::MatrixXd N;
+            Eigen::MatrixXd AN_nullspace;
 
             // A matrix of this task (A projected onto previous tasks nullspace)
             Eigen::MatrixXd AN;
 
             // b vector for this task
             Eigen::VectorXd b0;
+
+            // min singular value ratio
+            double min_sv_ratio;
             
             // quadratic cost matrices
             Eigen::MatrixXd H;
