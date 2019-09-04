@@ -329,6 +329,20 @@
         }
 
         /**
+         * @brief setWeight sets the task diagonal weight.
+         * Note the Weight needs to be positive definite.
+         * If your original intent was to get a subtask
+         * (i.e., reduce the number of rows of the task Jacobian),
+         * please use the class SubTask
+         * @param w scalar diagonal weight
+         */
+        virtual void setWeight(const double& w) {
+            assert(w>=0.0);
+            _W.setIdentity();
+            _W = _W * w;
+        }
+
+        /**
          * @brief getLambda
          * @return the lambda weight of the task
          */
