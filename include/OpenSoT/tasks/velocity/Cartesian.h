@@ -127,10 +127,10 @@
                  * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                void setReference(const Eigen::Affine3d& desiredPose);
+                virtual void setReference(const Eigen::Affine3d& desiredPose);
                 [[deprecated]]
-                void setReference(const Eigen::MatrixXd& desiredPose);
-                void setReference(const KDL::Frame& desiredPose);
+                virtual void setReference(const Eigen::MatrixXd& desiredPose);
+                virtual void setReference(const KDL::Frame& desiredPose);
 
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.
@@ -144,12 +144,12 @@
                  * instead of units/s. This means that if you have a twist expressed in SI units, you have to call the function as
                  * setReference(desiredPose, desiredTwist*dt)
                  */
-                void setReference(const Eigen::Affine3d& desiredPose,
+                virtual void setReference(const Eigen::Affine3d& desiredPose,
                                   const Eigen::Vector6d& desiredTwist);
                 [[deprecated]]
-                void setReference(const Eigen::MatrixXd& desiredPose,
+                virtual void setReference(const Eigen::MatrixXd& desiredPose,
                                   const Eigen::VectorXd& desiredTwist);
-                void setReference(const KDL::Frame& desiredPose,
+                virtual void setReference(const KDL::Frame& desiredPose,
                                   const KDL::Twist& desiredTwist);
 
                 /**
@@ -157,10 +157,10 @@
                  * @return the Cartesian task reference \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                const void getReference(Eigen::Affine3d& desiredPose) const;
+                virtual const void getReference(Eigen::Affine3d& desiredPose) const;
                 [[deprecated]]
-                const Eigen::MatrixXd getReference() const;
-                const void getReference(KDL::Frame& desiredPose) const;
+                virtual const Eigen::MatrixXd getReference() const;
+                virtual const void getReference(KDL::Frame& desiredPose) const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the Cartesian task.
@@ -169,12 +169,12 @@
                  * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
                  * a feed-forward term in the cartesian task computation
                  */
-                void getReference(Eigen::Affine3d& desiredPose,
+                virtual void getReference(Eigen::Affine3d& desiredPose,
                                   Eigen::Vector6d& desiredTwist) const;
                 [[deprecated]]
-                void getReference(Eigen::MatrixXd& desiredPose,
+                virtual void getReference(Eigen::MatrixXd& desiredPose,
                                   Eigen::VectorXd& desiredTwist) const;
-                void getReference(KDL::Frame& desiredPose,
+                virtual void getReference(KDL::Frame& desiredPose,
                                   KDL::Vector& desiredTwist) const;
 
 
