@@ -40,6 +40,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         virtual void _update(const Eigen::VectorXd& x);
         
+        void setOutwardNormal(const Eigen::Vector3d& n);
+        
         virtual void _log(XBot::MatLogger::Ptr logger);
         
     private:
@@ -57,7 +59,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         Eigen::VectorXd _qdot;
         
         Eigen::Affine3d _world_T_wheel;
-    Eigen::Matrix3d _world_R_wheel;
+        Eigen::Matrix3d _world_R_wheel;
+        Eigen::Matrix3d _local_R_world;
         
     };
 
@@ -71,10 +74,15 @@ namespace OpenSoT { namespace tasks { namespace velocity {
                     const XBot::ModelInterface& model,
                     const bool control_z = false);
 
+        void setOutwardNormal(const Eigen::Vector3d& n);
+        
         virtual void _update(const Eigen::VectorXd& x);
+
+        virtual void _log(XBot::MatLogger::Ptr logger);
 
 
     private:
+        
         PureRolling::Ptr _pure_rolling;
         OpenSoT::SubTask::Ptr _subtask;
         std::list<unsigned int> _position_indices;

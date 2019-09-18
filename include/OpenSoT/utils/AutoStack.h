@@ -51,6 +51,8 @@ namespace OpenSoT {
         private:
         OpenSoT::solvers::iHQP::Stack _stack;
 
+       OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
+
         OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
 
         std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
@@ -80,6 +82,21 @@ namespace OpenSoT {
             OpenSoT::solvers::iHQP::Stack& getStack();
 
             std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& getBoundsList();
+
+            /**
+             * @brief setRegularisationTask permits to add a task which is considered as a regularisation into all the
+             * priority levels and will NOT be considered in the priority optimality constraints
+             * @param regularisation_task
+             */
+            void setRegularisationTask(OpenSoT::tasks::Aggregated::TaskPtr regularisation_task)
+            {
+                _regularisation_task = regularisation_task;
+            }
+
+            OpenSoT::tasks::Aggregated::TaskPtr getRegularisationTask()
+            {
+                return _regularisation_task;
+            }
 
             /**
              * @brief setBoundsAggregationPolicy changes the aggregation policy of the bounds as

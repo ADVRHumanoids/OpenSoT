@@ -1,11 +1,13 @@
 #include <OpenSoT/utils/ForceOptimization.h>
-
+#include <OpenSoT/constraints/force/StaticConstraint.h>
 
 
 
 OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr model, 
                                            std::vector< std::string > contact_links,
-                                           bool optimize_torque):
+                                           bool optimize_torque,
+                                           double mu
+                                                    ):
     _model(model),
     _contact_links(contact_links)
 {
@@ -18,6 +20,8 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
     for(auto cl : _contact_links){
         vars.emplace_back(cl, optimize_contact_torque ? 6 : 3); // put 6 for full wrench
     }
+    
+    vars.emplace_back("tau", _model->getActuatedJointNum());
 
     OpenSoT::OptvarHelper opt(vars);
     
@@ -52,16 +56,39 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
         
     }
     
+    /* Minimum effort task */
+    auto min_tau = boost::make_shared<OpenSoT::tasks::MinimizeVariable>("MIN_TORQUE", 
+            opt.getVariable("tau")
+        );
+    
+    Eigen::MatrixXd min_tau_weight;
+    min_tau_weight.setIdentity(min_tau->getTaskSize(), min_tau->getTaskSize());
+    
+    Eigen::VectorXd tau_max;
+    _model->getEffortLimits(tau_max);
+    min_tau_weight.diagonal() = tau_max.tail(_model->getActuatedJointNum());
+    
+    min_tau_weight = min_tau_weight * min_tau_weight;
+    
+    /* Static constraint */
+    auto static_constr = boost::make_shared<OpenSoT::constraints::force::StaticConstraint>
+                        (*_model,
+                         _contact_links,
+                         _wrenches,
+                         opt.getVariable("tau"));
+    
     /* Define friction cones */
-//     OpenSoT::constraints::force::FrictionCone::friction_cones friction_cones;
-// 
-//     for(auto cl : _contact_links)
-//     {
-//         friction_cones.emplace_back(cl, 0.3);
-//     }
+    OpenSoT::constraints::force::FrictionCones::friction_cones friction_cones;
+
+    for(auto cl : _contact_links)
+    {
+        friction_cones.emplace_back(Eigen::Matrix3d::Identity(), mu);
+    }
     
-//     auto friction_constraint = boost::make_shared<OpenSoT::constraints::force::FrictionCone>(_wrenches, *_model, friction_cones);
-    
+    _friction_cone = boost::make_shared<OpenSoT::constraints::force::FrictionCones>(_contact_links,
+                                                                                    _wrenches, 
+                                                                                    *_model, 
+                                                                                    friction_cones);
     
     
     /* Construct forza giusta task */
@@ -74,22 +101,14 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
         throw std::runtime_error("porcodio");
     }
     
-    std::cout << _forza_giusta->getWeight() << std::endl;
-    
     /* Min wrench aggregated */
     auto min_force_aggr = boost::make_shared<OpenSoT::tasks::Aggregated>(min_wrench_tasks, opt.getSize());
 
-//     Eigen::Vector2d X_LIMS; X_LIMS.setZero(); X_LIMS[0] = -0.08; X_LIMS[1] = 0.08;
-//     Eigen::Vector2d Y_LIMS; Y_LIMS.setZero(); Y_LIMS[0] = -0.05; Y_LIMS[1] = 0.05;
-//     auto CoP = boost::make_shared<OpenSoT::constraints::force::CoP>(*_model, _wrenches, _contact_links,
-//                                                                     X_LIMS, Y_LIMS);
-    
     /* Define optimization problem */
-//    _autostack = boost::make_shared<OpenSoT::AutoStack>(min_force_aggr);
-//    _autostack << boost::make_shared<OpenSoT::constraints::TaskToConstraint>(_forza_giusta);
-    _autostack = boost::make_shared<OpenSoT::AutoStack>(_forza_giusta);
-    //_autostack<<CoP;
-    _autostack<<wrench_bounds[0]<<wrench_bounds[1];
+    _autostack = _forza_giusta /
+                    (min_tau_weight*min_tau);
+                    
+    _autostack << _friction_cone << static_constr;
     
     _solver = boost::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), 
                                                          _autostack->getBounds(),
@@ -100,6 +119,20 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
     /* Initialize solution */
     _x_value.setZero(opt.getSize());
     
+}
+
+void OpenSoT::utils::ForceOptimization::setContactRotationMatrix(const std::string& contact_link, 
+                                                                 const Eigen::Matrix3d& w_R_c)
+{
+    auto fc = _friction_cone->getFrictionCone(contact_link);
+    
+    if(!fc)
+    {
+        throw std::out_of_range("Contact link '" + contact_link + "' is undefined");
+    }
+        
+    
+    fc->setContactRotationMatrix(w_R_c);
 }
 
 

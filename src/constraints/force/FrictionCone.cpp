@@ -40,7 +40,7 @@ namespace OpenSoT {
            double __mu = _mu.second;
            _wRl = _mu.first;
 
-           __mu = std::sqrt(2.*__mu)/2.;
+           __mu = __mu/std::sqrt(2.);
 
            _Ci(0,0) = 1.;  _Ci(0,1) = 0.;  _Ci(0,2) = -__mu;
            _Ci(1,0) = -1.; _Ci(1,1) = 0.;  _Ci(1,2) = -__mu;
@@ -72,9 +72,20 @@ namespace OpenSoT {
 
        }
 
-       void FrictionCone::setMu(const friction_cone& mu)
+       void FrictionCone::setMu(const double mu)
        {
-           _mu = mu;
+           _mu.second = mu;
+
+           computeAineq();
+
+           _friction_cone = _A * _wrench - _b;
+           _Aineq = _friction_cone.getM();
+           _bUpperBound = - _friction_cone.getq();
+       }
+
+       void FrictionCone::setFrictionCone(const friction_cone& frc)
+       {
+           _mu = frc;
 
            computeAineq();
 

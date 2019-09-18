@@ -1,12 +1,42 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <XBotInterface/Logger.hpp>
+#include <OpenSoT/utils/AutoStack.h>
 
 
 using namespace OpenSoT::solvers;
 
 const std::string iHQP::_IHQP_CONSTRAINTS_PLUS_ = "+";
 const std::string iHQP::_IHQP_CONSTRAINTS_OPTIMALITY_ = "_OPTIMALITY";
+
+iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+     const solver_back_ends be_solver):
+    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
+    _epsRegularisation(eps_regularisation),
+    _regularisation_task(stack_of_tasks.getRegularisationTask())
+{
+    for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i){
+        _active_stacks.push_back(true);
+        _be_solver.push_back(be_solver);
+    }
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT!");
+}
+
+iHQP::iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+     const std::vector<solver_back_ends> be_solver):
+    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
+    _epsRegularisation(eps_regularisation),
+    _be_solver(be_solver),
+    _regularisation_task(stack_of_tasks.getRegularisationTask())
+{
+    for(unsigned int i = 0; i < stack_of_tasks.getStack().size(); ++i)
+        _active_stacks.push_back(true);
+
+    if(!prepareSoT(_be_solver))
+        throw std::runtime_error("Can Not initizalize SoT!");
+}
 
 iHQP::iHQP(Stack &stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks),
@@ -141,10 +171,21 @@ void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& prob
 
 bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
 {   
+    if(_regularisation_task)
+    {
+        XBot::Logger::info("User defined regularisation will be added to all levels");
+        computeCostFunction(_regularisation_task, Hr, gr);
+    }
+
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         XBot::Logger::info("#USING BACK-END @LEVEL %i: %s\n", i, getBackEndName(i).c_str());
         computeCostFunction(_tasks[i], H, g);
+        if(_regularisation_task)
+        {
+            H += Hr;
+            g += gr;
+        }
 
         OpenSoT::constraints::Aggregated constraints_task_i(_tasks[i]->getConstraints(), _tasks[i]->getXSize());
         if(_globalConstraints){
@@ -205,7 +246,10 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
                 bounds_string = _bounds->getConstraintID();
             _qp_stack_of_tasks[i]->printProblemInformation(i, _tasks[i]->getTaskID(),
                                                           constraints_str,
-                                                          bounds_string);}
+                                                          bounds_string);
+            if(_regularisation_task)
+                XBot::Logger::info("USER DEFINED REGULARISATION: %s\n", _regularisation_task->getTaskID().c_str());
+        }
         else{
             XBot::Logger::error("ERROR: INITIALIZING STACK %i \n", i);
             return false;}
@@ -218,11 +262,20 @@ bool iHQP::prepareSoT(const std::vector<solver_back_ends> be_solver)
 
 bool iHQP::solve(Eigen::VectorXd &solution)
 {
+    if(_regularisation_task)
+        computeCostFunction(_regularisation_task, Hr, gr);
+
+
     for(unsigned int i = 0; i < _tasks.size(); ++i)
     {
         if(_active_stacks[i])
         {
             computeCostFunction(_tasks[i], H, g);
+            if(_regularisation_task)
+            {
+                H += Hr;
+                g += gr;
+            }
             if(!_qp_stack_of_tasks[i]->updateTask(H, g))
                 return false;
 
@@ -234,19 +287,45 @@ bool iHQP::solve(Eigen::VectorXd &solution)
             uA.set(constraints_task_i.getbUpperBound());
             if(i > 0)
             {
-                for(unsigned int j = 0; j < i; ++j)
+
+                ///TODO: new implementation, this permits to save some multiplications since
+                /// we do not recompute always all the optimality (priority) constraints but only the one
+                /// at the previous level. The problem arise if a level is not active so all the previous
+                /// not active levels are set to zero up to the last active level which is computed
+                //Here I compute the optimality (priority) constraint only for the previous active level
+                for(unsigned int l = i-1; l >= 0; --l)
                 {
-                    if(_active_stacks[j])
-                        computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
+                    if(_active_stacks[l]){
+                        computeOptimalityConstraint(_tasks[l], _qp_stack_of_tasks[l], tmp_A[l], tmp_lA[l], tmp_uA[l]);
+                        break;}
                     else
                     {
                         //Here we consider fake optimality constraints:
                         //
                         //    -1 <= 0x <= 1
-                        tmp_A[j].setZero(_tasks[j]->getA().rows(), _tasks[j]->getA().cols());
-                        tmp_lA[j].setConstant(_tasks[j]->getA().rows(), -1.0);
-                        tmp_uA[j].setConstant(_tasks[j]->getA().rows(), 1.0);
+                        tmp_A[l].setZero(_tasks[l]->getA().rows(), _tasks[l]->getA().cols());
+                        tmp_lA[l].setConstant(_tasks[l]->getA().rows(), -1.0);
+                        tmp_uA[l].setConstant(_tasks[l]->getA().rows(), 1.0);
                     }
+                }
+                ///
+
+
+                for(unsigned int j = 0; j < i; ++j)
+                {
+                    ///TODO: old implementation keep it to check against the new implementation
+//                    if(_active_stacks[j])
+//                        computeOptimalityConstraint(_tasks[j], _qp_stack_of_tasks[j], tmp_A[j], tmp_lA[j], tmp_uA[j]);
+//                    else
+//                    {
+//                        //Here we consider fake optimality constraints:
+//                        //
+//                        //    -1 <= 0x <= 1
+//                        tmp_A[j].setZero(_tasks[j]->getA().rows(), _tasks[j]->getA().cols());
+//                        tmp_lA[j].setConstant(_tasks[j]->getA().rows(), -1.0);
+//                        tmp_uA[j].setConstant(_tasks[j]->getA().rows(), 1.0);
+//                    }
+                    ///
                     A.pile(tmp_A[j]);
                     lA.pile(tmp_lA[j]);
                     uA.pile(tmp_uA[j]);
@@ -323,6 +402,14 @@ void iHQP::activateAllStacks()
 
 void iHQP::_log(XBot::MatLogger::Ptr logger, const std::string& prefix)
 {
+    if(_regularisation_task)
+    {
+        if(Hr.rows() > 0)
+            logger->add("Hr", Hr);
+        if(gr.size() > 0)
+            logger->add("gr", gr);
+    }
+
     for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
         _qp_stack_of_tasks[i]->log(logger,i, prefix);
 }
@@ -345,5 +432,29 @@ bool iHQP::getBackEnd(const unsigned int i, BackEnd::Ptr& back_end)
         return false;
     }
     back_end = _qp_stack_of_tasks[i];
+    return true;
+}
+
+bool iHQP::setEpsRegularisation(const double eps, const unsigned int i)
+{
+    if(i >= _qp_stack_of_tasks.size())
+    {
+        XBot::Logger::error("Requested level %i BackEnd which does not exists!\n", i);
+        return false;
+    }
+
+    return _qp_stack_of_tasks[i]->setEpsRegularisation(eps);
+}
+
+bool iHQP::setEpsRegularisation(const double eps)
+{
+    for(unsigned int i = 0; i < _qp_stack_of_tasks.size(); ++i)
+    {
+        if(!_qp_stack_of_tasks[i]->setEpsRegularisation(eps))
+        {
+            XBot::Logger::error("Problem setting eps regularisation in level %i", i);
+            return false;
+        }
+    }
     return true;
 }

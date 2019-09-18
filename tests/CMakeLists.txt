@@ -4,29 +4,12 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
-FIND_PACKAGE(iDynTree QUIET)
-FIND_PACKAGE(conversion_utils_YARP QUIET)
-FIND_PACKAGE(idynutils2 QUIET)
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher)
+find_package(osqp QUIET)
 
-if(${iDynTree_FOUND} AND
-   ${idynutils2_FOUND}
-  )
-    set(TEST_INCLUDES ${TEST_INCLUDES}
-                      ${iDynTree_INCLUDE_DIRS}
-                      ${idynutils2_INCLUDE_DIRS}
-    )
-endif()
 
-if(${conversion_utils_YARP_FOUND}
-)
-    set(TEST_INCLUDES ${TEST_INCLUDES}
-                      ${conversion_utils_YARP_INCLUDE_DIRS}
-
-)
-endif()
 
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES}
@@ -50,7 +33,7 @@ if (NOT GTEST_FOUND)
     set(GTEST_BOTH_LIBRARIES gtest gtest_main)
 endif()
 
-include_directories(${GTEST_INCLUDE_DIRS})
+include_directories(${GTEST_INCLUDE_DIRS} ${FCL_INCLUDE_DIRS})
 link_directories(${GTEST_LIB_DIRS})
 
 # add local include
@@ -68,6 +51,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_SubTask
                   testQPOases_FF
                   testQPOases_AutoStack
+                  testiHQP
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
@@ -96,7 +80,7 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TEST testQPOases_ConvexHull testConvexHullVelocityConstraint testAutoStack)
 endif()
 
-if(${osqp_FOUND})
+if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
     set(OPENSOT_TEST ${OPENSOT_TESTS} testLP)
 endif()
@@ -111,9 +95,10 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
 endif()
 
 #THIS TEST DEPEND ON fcl
-if(${fcl_FOUND})
+if(${FCL_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
-                                       testCollisionAvoidanceVelocityConstraint)
+                                       testCollisionAvoidanceVelocityConstraint
+                                       testCollisionAvoidanceEnvironmentVelocityConstraint)
 endif()
 
 #THESE TESTS DEPEND ON trajectory_utils
@@ -166,15 +151,8 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                      ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
-if(${fcl_FOUND})
-    SET(TestLibs ${TestLibs} ${fcl_LIBRARIES})
-endif()
-if(${iDynTree_FOUND} AND
-   ${idynutils2_FOUND}
-  )
-    SET(TestLibs ${TestLibs}
-                 ${idynutils2_LIBRARIES} ${iDynTree_LIBRARIES}
-)
+if(${FCL_FOUND})
+    SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
 endif()
 
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
@@ -216,12 +194,17 @@ TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
 add_dependencies(testJointLimitsVelocityBounds GTest-ext OpenSoT)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
 
+ADD_EXECUTABLE(testiHQP solvers/TestiHQP.cpp)
+TARGET_LINK_LIBRARIES(testiHQP ${TestLibs})
+add_dependencies(testiHQP GTest-ext OpenSoT)
+add_test(NAME OpenSoT_front_ends_ihqp COMMAND testiHQP)
+
 ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
-if(${osqp_FOUND})
+if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
     TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs})
     add_dependencies(testOSQPSolver GTest-ext OpenSoT)
@@ -310,7 +293,7 @@ TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
 add_dependencies(testSubTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 
-if(${fcl_FOUND})
+if(${FCL_FOUND})
     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
     add_dependencies(testCollisionUtils GTest-ext OpenSoT)
@@ -320,6 +303,11 @@ if(${fcl_FOUND})
     TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
     add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
+
+    ADD_EXECUTABLE(testCollisionAvoidanceEnvironmentVelocityConstraint constraints/velocity/TestCollisionAvoidanceEnvironment.cpp)
+    TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs})
+    add_dependencies(testCollisionAvoidanceEnvironmentVelocityConstraint GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidanceEnvironment COMMAND testCollisionAvoidanceEnvironmentVelocityConstraint)
 endif()
 
 ADD_EXECUTABLE(testCartesianUtils utils/cartesian_utils_test.cpp)

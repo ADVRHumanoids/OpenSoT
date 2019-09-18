@@ -33,7 +33,8 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
     }
 }
 
-bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau, Eigen::VectorXd& qddot)
+bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau,
+                                     Eigen::VectorXd& qddot, std::vector<Eigen::Vector6d>& contact_wrench)
 {
     if(x.size() != _serializer->getSize())
     {
@@ -56,12 +57,16 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
 
     tau = _tau_val;
     qddot = _qddot_val;
+    contact_wrench = _contacts_wrench_val;
 
-    for(unsigned int i = 0; i < 6; ++i)
+    if(_model.isFloatingBase())
     {
-        if(fabs(tau[i]) > 10e-3){
-            XBot::Logger::error("Floating Base Wrench is not 0!");
-            return false;}
+        for(unsigned int i = 0; i < 6; ++i)
+        {
+            if(fabs(tau[i]) > 10e-3){
+                XBot::Logger::error("Floating Base Wrench is not 0!");
+                return false;}
+        }
     }
 
     return true;

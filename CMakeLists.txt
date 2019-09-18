@@ -35,6 +35,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -std=c++11 -Wmaybe-uninitialized -Wuninitialized" )
 endif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 
+# force RELEASE to be compatible with xenomai
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 # Set a default build type for single-configuration
@@ -60,7 +63,13 @@ FIND_PACKAGE(PCL 1.7 QUIET COMPONENTS    common
 FIND_PACKAGE(catkin REQUIRED)
 FIND_PACKAGE(eigen_conversions REQUIRED)
 FIND_PACKAGE(XBotInterface REQUIRED)
-FIND_PACKAGE(fcl QUIET)
+
+
+
+FIND_PACKAGE(FCL 0.6 QUIET)
+
+
+
 FIND_PACKAGE(PkgConfig REQUIRED)
 
 # compilation flags
@@ -111,6 +120,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
                     src/constraints/force/FrictionCone.cpp
                     src/constraints/force/WrenchLimits.cpp
                     src/constraints/force/CoP.cpp
+                    src/constraints/force/StaticConstraint.cpp
                     src/constraints/GenericConstraint.cpp
                     src/constraints/acceleration/JointLimits.cpp
                     )
@@ -121,10 +131,13 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
         src/constraints/velocity/ConvexHull.cpp)
 endif()
 
-if(${fcl_FOUND} AND ${moveit_core_FOUND})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
+    message("Adding src/constraints/velocity/CollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
-        src/constraints/velocity/SelfCollisionAvoidance.cpp)
+        src/constraints/velocity/SelfCollisionAvoidance.cpp
+        src/constraints/velocity/CollisionAvoidance.cpp
+        )
 endif()
 
 ##TASKS
@@ -137,6 +150,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/acceleration/Cartesian.cpp
                     src/tasks/acceleration/Contact.cpp
                     src/tasks/acceleration/CoM.cpp
+                    src/tasks/acceleration/MinJointVel.cpp
                     src/tasks/velocity/Cartesian.cpp
                     src/tasks/velocity/affine/Cartesian.cpp
                     src/tasks/velocity/CartesianAdmittance.cpp
@@ -155,6 +169,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/velocity/MinimumVelocity.cpp
                     src/tasks/velocity/Postural.cpp
                     src/tasks/velocity/JointAdmittance.cpp
+                    src/tasks/velocity/CentauroAnkleSteering.cpp
                     src/tasks/torque/JointImpedanceCtrl.cpp
                     src/tasks/torque/CartesianImpedanceCtrl.cpp
                     src/tasks/force/CoM.cpp
@@ -167,6 +182,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
 set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
                             src/solvers/BackEndFactory.cpp
                             src/solvers/iHQP.cpp
+                            src/solvers/nHQP.cpp
                             src/solvers/eHQP.cpp)
 
 ##UTILS
@@ -179,7 +195,7 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
                     src/utils/ForceOptimization.cpp
                     src/utils/InverseDynamics.cpp)
 
-if(${fcl_FOUND} AND ${moveit_core_FOUND})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
         message("Adding src/utils/collision_utils.cpp to compilation")
         set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
             src/utils/collision_utils.cpp)
@@ -209,6 +225,14 @@ ADD_LIBRARY(OpenSoT SHARED
 #                    src/stacks/velocity/WalkingStack.cpp
                     ${sot_INCLUDES})
 
+set(PRIVATE_TLL ${XBotInterface_LIBRARIES})
+if(${FCL_FOUND} AND ${moveit_core_FOUND})
+    set(PRIVATE_TLL ${PRIVATE_TLL} ${FCL_LIBRARIES}
+                              ${moveit_core_LIBRARIES})
+endif()
+if(${PCL_FOUND})
+    set(PRIVATE_TLL ${PRIVATE_TLL} ${PCL_LIBRARIES})
+endif()
 
 
 TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
@@ -216,11 +240,7 @@ TARGET_LINK_LIBRARIES(OpenSoT PUBLIC
                               ${eigen_conversions_LIBRARIES}
 			      
                               PRIVATE
-                              ${PCL_LIBRARIES}
-                              ${XBotInterface_LIBRARIES}
-                              ${fcl_LIBRARIES}
-                              ${moveit_core_LIBRARIES}
-                              )
+                              ${PRIVATE_TLL})
 
 
 ########################################################################

@@ -13,6 +13,38 @@ OpenSoT::tasks::velocity::PureRolling::PureRolling(std::string wheel_link_name,
     Eigen::VectorXd q;
     model.getJointPosition(q);
     _update(q);
+    
+    setOutwardNormal(_world_contact_plane_normal);
+}
+
+void OpenSoT::tasks::velocity::PureRolling::setOutwardNormal(const Eigen::Vector3d& n)
+{
+    _world_contact_plane_normal = n;
+    _world_contact_plane_normal.normalize();
+    
+    Eigen::Vector3d e1(1., 0., 0.);
+    Eigen::Vector3d e2(0., 1., 0.);
+    Eigen::Vector3d e3(0., 0., 1.);
+    
+    Eigen::Vector3d uz = _world_contact_plane_normal;
+    
+    /* Find ux as the most perpendicular direction to n */
+    Eigen::Vector3d ux = e1;
+    
+    if(std::fabs(uz.dot(e2)) < std::fabs(uz.dot(ux)))
+    {
+        ux = e2;
+    }
+    
+    if(std::fabs(uz.dot(e3)) < std::fabs(uz.dot(ux)))
+    {
+        ux = e3;
+    }
+    
+    Eigen::Vector3d uy = uz.cross(ux);
+    
+    _local_R_world << ux, uy, uz;
+    _local_R_world.transposeInPlace();
 }
 
 
@@ -34,6 +66,7 @@ void OpenSoT::tasks::velocity::PureRolling::_update(const Eigen::VectorXd& x)
     _wheel_forward_axis /= _wheel_forward_axis.norm();
     
     _S.setIdentity(4,6);
+    _S.block<3,3>(0,0) = _local_R_world.transpose();
     _S.row(3) << 0, 0, 0, _wheel_forward_axis.transpose();
     
     _A = _S * _Jc;
@@ -77,13 +110,24 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
     _update(q);
 }
 
+void OpenSoT::tasks::velocity::PureRollingPosition::setOutwardNormal(const Eigen::Vector3d& n)
+{
+    _pure_rolling->setOutwardNormal(n);
+}
+
+
 void OpenSoT::tasks::velocity::PureRollingPosition::_update(const Eigen::VectorXd &x)
 {
     _subtask->update(x);
 
     _A = _subtask->getA();
     _b = _subtask->getb();
-	_W = _subtask->getWeight();
+    _W = _subtask->getWeight();
+}
+
+void OpenSoT::tasks::velocity::PureRollingPosition::_log(XBot::MatLogger::Ptr logger)
+{
+    _pure_rolling->log(logger);
 }
 
 OpenSoT::tasks::velocity::PureRollingOrientation::PureRollingOrientation(std::string wheel_link_name,

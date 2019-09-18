@@ -53,7 +53,7 @@ void QPOasesBackEnd::setDefaultOptions()
     qpOASES::Options opt;
     opt.setToMPC();
     opt.printLevel = qpOASES::PL_NONE;
-    opt.enableRegularisation = qpOASES::BT_TRUE;
+    opt.enableRegularisation = qpOASES::BT_FALSE;
     opt.epsRegularisation *= _epsRegularisation;
     opt.numRegularisationSteps = 0;
     opt.numRefinementSteps = 1;
@@ -64,6 +64,7 @@ void QPOasesBackEnd::setDefaultOptions()
 
     _problem->setOptions(opt);
 
+    _epsRegularisation = opt.epsRegularisation;
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
 
@@ -84,7 +85,18 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+    //couple of checks
+    if(A.rows() != _A.rows()){
+        XBot::Logger::error("A.rows() != _A.rows() --> %f != %f", A.rows(), _A.rows());
+        return false;}
+
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u;
+
+
+    unsigned int _H_rows = _H.rows();
+    for(unsigned int i = 0; i < _H_rows; ++i)
+        _H(i,i) += _epsRegularisation;
+
     checkINFTY();
 
 
@@ -110,8 +122,9 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
      * this typedef is needed since qpOASES wants RoWMajor organization
      * of matrices. Thanks to Arturo Laurenzi for the help finding this issue!
      */
+    _A_rm = _A;
     qpOASES::returnValue val =_problem->init(_H.data(),_g.data(),
-                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                       _A_rm.data(),
                        _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -237,8 +250,13 @@ bool QPOasesBackEnd::solve()
     int nWSR = _nWSR;
     checkINFTY();
 
+    unsigned int _H_rows = _H.rows();
+    for(unsigned int i = 0; i < _H_rows; ++i)
+        _H(i,i) += _epsRegularisation;
+
+    _A_rm = _A;
     qpOASES::returnValue val =_problem->hotstart(_H.data(),_g.data(),
-                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                       _A_rm.data(),
                         _l.data(), _u.data(),
                        _lA.data(),_uA.data(),
                        nWSR,0);
@@ -250,7 +268,7 @@ bool QPOasesBackEnd::solve()
 #endif
 
         val =_problem->init(_H.data(),_g.data(),
-                           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(_A).data(),
+                           _A_rm.data(),
                            _l.data(), _u.data(),
                            _lA.data(),_uA.data(),
                            nWSR,0,
@@ -333,4 +351,20 @@ void QPOasesBackEnd::checkINFTY()
             _l[i] = -qpOASES::INFTY;
         if(_u[i] > qpOASES::INFTY)
             _u[i] = qpOASES::INFTY;}
+}
+
+bool QPOasesBackEnd::setEpsRegularisation(const double eps)
+{
+    if(eps < 0.0)
+    {
+        XBot::Logger::error("Negative eps is not allowed!");
+        return false;
+    }
+
+    _epsRegularisation = eps;
+
+    _opt->epsRegularisation = _epsRegularisation;
+    _problem->setOptions(*_opt);
+
+    return true;
 }

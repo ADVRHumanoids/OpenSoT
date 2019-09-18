@@ -28,8 +28,10 @@ namespace OpenSoT { namespace utils {
         
         typedef boost::shared_ptr<ForceOptimization> Ptr;
         
+        constexpr static double DEFAULT_FRICTION_COEFF = 0.5;
+        
         /**
-         * @brief Contructor
+         * @brief Constructor
          * 
          * @param model ModelInterface object that is kept updated with the robot state
          * @param contact_links List of contact links
@@ -37,7 +39,8 @@ namespace OpenSoT { namespace utils {
          */
         ForceOptimization(XBot::ModelInterface::Ptr model, 
                           std::vector<std::string> contact_links,
-                          bool optimize_torque = true
+                          bool optimize_torque = true,
+                          double friction_coeff = DEFAULT_FRICTION_COEFF
                           );
         
         /**
@@ -49,6 +52,9 @@ namespace OpenSoT { namespace utils {
                      Eigen::VectorXd& tau
                     );
         
+        void setContactRotationMatrix(const std::string& contact_link,
+                                      const Eigen::Matrix3d& w_R_c);
+        
         void log(XBot::MatLogger::Ptr logger);
         
         
@@ -58,7 +64,7 @@ namespace OpenSoT { namespace utils {
         std::vector<std::string> _contact_links;
         std::vector< OpenSoT::AffineHelper > _wrenches;
         
-        OpenSoT::constraints::force::FrictionCone::Ptr _friction_cone;
+        OpenSoT::constraints::force::FrictionCones::Ptr _friction_cone;
         OpenSoT::tasks::force::FloatingBase::Ptr _forza_giusta;
         OpenSoT::solvers::iHQP::Ptr _solver;
         OpenSoT::AutoStack::Ptr _autostack;

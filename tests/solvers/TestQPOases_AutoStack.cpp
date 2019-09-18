@@ -40,6 +40,7 @@ protected:
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface& _model_ptr) {
     Eigen::VectorXd _q(_model_ptr.getJointNum());
+    _q.setZero();
     _q[_model_ptr.getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
     _q[_model_ptr.getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
     _q[_model_ptr.getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -184,6 +185,105 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
 
     OpenSoT::solvers::iHQP::Ptr solver(
         new OpenSoT::solvers::iHQP(AutoStack->getStack(), AutoStack->getBounds(), 1e6));
+
+
+    typedef OpenSoT::solvers::iHQP::Stack::iterator it_stack;
+    for(it_stack i0 = AutoStack->getStack().begin();
+        i0 != AutoStack->getStack().end(); ++i0)
+    {
+        ASSERT_EQ((*i0)->getConstraints().size(),1);
+    }
+
+    unsigned int iterations = 5000;
+    for(unsigned int i = 0; i < iterations; ++i)
+    {
+        model->setJointPosition(q);
+        model->update();
+        AutoStack->update(q);
+
+        ASSERT_TRUE(solver->solve(dq));
+        q += dq;
+    }
+
+    EXPECT_TRUE(sqrt(l_arm->getb().squaredNorm()) <= 1e-4);
+    std::cout<<"l_arm getb norm "<<sqrt(l_arm->getb().squaredNorm())<<std::endl;
+    EXPECT_TRUE(sqrt(r_arm->getb().squaredNorm()) <= 1e-4);
+    std::cout<<"r_arm getb norm "<<sqrt(r_arm->getb().squaredNorm())<<std::endl;
+    EXPECT_TRUE(sqrt(r_leg->getb().squaredNorm()) <= 1e-4);
+
+}
+
+TEST_F(testQPOases_AutoStack, testAutoStackConstructor)
+{
+    XBot::ModelInterface::Ptr model = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd q, dq;
+    q = getGoodInitialPosition(*model);
+    dq = q; dq.setZero(dq.size());
+
+    model->setJointPosition(q);
+    model->update();
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_leg(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::r_leg",
+                                                       q,*model,"r_sole", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::l_arm",
+                                                       q,*model,"LSoftHand", "world"));
+    Eigen::MatrixXd l_arm_ref = l_arm->getActualPose();
+    l_arm_ref(2,3) += 0.1;
+    l_arm->setReference(l_arm_ref);
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_arm(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::r_arm",
+                                                       q,*model,"RSoftHand", "world"));
+    Eigen::MatrixXd r_arm_ref = r_arm->getActualPose();
+    r_arm_ref(2,3) += 0.1;
+    r_arm->setReference(r_arm_ref);
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(q));
+
+    Eigen::VectorXd joint_bound_max, joint_bound_min;
+    model->getJointLimits(joint_bound_min, joint_bound_max);
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_bounds(
+        new OpenSoT::constraints::velocity::JointLimits(
+                    q, joint_bound_max, joint_bound_min));
+
+    double sot_speed_limit = 0.5;
+    double dT = 0.001;
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr velocity_bounds(
+        new OpenSoT::constraints::velocity::VelocityLimits(
+            sot_speed_limit,
+            dT,
+            q.size()));
+
+
+    std::list<std::string> _links_in_contact;
+    _links_in_contact.push_back("l_foot_lower_left_link");
+    _links_in_contact.push_back("l_foot_lower_right_link");
+    _links_in_contact.push_back("l_foot_upper_left_link");
+    _links_in_contact.push_back("l_foot_upper_right_link");
+    _links_in_contact.push_back("r_foot_lower_left_link");
+    _links_in_contact.push_back("r_foot_lower_right_link");
+    _links_in_contact.push_back("r_foot_upper_left_link");
+    _links_in_contact.push_back("r_foot_upper_right_link");
+
+    OpenSoT::constraints::velocity::ConvexHull::Ptr convex_hull_constraint(
+                new OpenSoT::constraints::velocity::ConvexHull(q, *model, _links_in_contact, 0.02));
+
+    OpenSoT::AutoStack::Ptr AutoStack = (((r_leg)<<convex_hull_constraint)/
+                                         ((l_arm+r_arm)<<convex_hull_constraint)/
+                                         ((postural)<<convex_hull_constraint));
+    AutoStack->getBoundsList().push_back(joint_bounds);
+    AutoStack->getBoundsList().push_back(velocity_bounds);
+    /* the following is not needed, as getBounds() from line #156 will compute generateAll()
+       and correctly recompute the bounds. Notice that, if the q from line #155 was instead
+       different from that of line #134, the update(q_new) would have been necessary */
+    // AutoStack->getBounds()->update(q);
+
+    OpenSoT::solvers::iHQP::Ptr solver(
+        new OpenSoT::solvers::iHQP(*AutoStack, 1e6));
 
 
     typedef OpenSoT::solvers::iHQP::Stack::iterator it_stack;

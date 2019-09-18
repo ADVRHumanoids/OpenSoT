@@ -4,7 +4,7 @@
 
 using namespace OpenSoT::solvers;
 
-#define BASE_REGULARISATION 1E-12
+#define BASE_REGULARISATION 2.22E-13 //previous 1E-12
 
 /* Define factories for dynamic loading */
 extern "C" BackEnd * create_instance(const int number_of_variables,
@@ -23,7 +23,7 @@ eiQuadProgBackEnd::eiQuadProgBackEnd(const int number_of_variables,
                                    const int number_of_constraints,
                                    const double eps_regularisation):
     BackEnd(number_of_variables, number_of_constraints),
-    _eps_regularisation(eps_regularisation),
+    _eps_regularisation(eps_regularisation*BASE_REGULARISATION),
     /** initialization of Pilers **/
     _CIPiler(number_of_variables),
     _ci0Piler(1)
@@ -57,7 +57,7 @@ void eiQuadProgBackEnd::__generate_data_struct()
         }
 
         for(int i = 0; i < _H.rows(); ++i)
-            _H(i,i) += _eps_regularisation*BASE_REGULARISATION;
+            _H(i,i) += _eps_regularisation;
 }
 
 bool eiQuadProgBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
@@ -65,6 +65,11 @@ bool eiQuadProgBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::Vecto
                          const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                          const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+    //couple of checks
+    if(A.rows() != _A.rows()){
+        XBot::Logger::error("A.rows() != _A.rows() --> %f != %f", A.rows(), _A.rows());
+        return false;}
+
     _H = H; _g = g; _A = A; _lA = lA; _uA = uA; _l = l; _u = u; //this is needed since updateX should be used just to update and not init (maybe can be done in the base class)
     __generate_data_struct();
 
@@ -110,12 +115,25 @@ double eiQuadProgBackEnd::getObjective()
 
 boost::any eiQuadProgBackEnd::getOptions()
 {
-    ///DO NOTHING
+    return boost::any();
 }
 
 void eiQuadProgBackEnd::setOptions(const boost::any& options)
 {
     ///DO NOTHING
+}
+
+bool eiQuadProgBackEnd::setEpsRegularisation(const double eps)
+{
+    if(eps < 0.0)
+    {
+        XBot::Logger::error("Negative eps is not allowed!");
+        return false;
+    }
+
+    _eps_regularisation = eps;
+
+    return true;
 }
 
 

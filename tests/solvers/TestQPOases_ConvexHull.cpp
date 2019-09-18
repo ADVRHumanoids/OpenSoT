@@ -29,7 +29,15 @@ namespace {
 void getPointsFromConstraints(const Eigen::MatrixXd &A_ch,
                               const Eigen::VectorXd& b_ch,
                               std::vector<KDL::Vector>& points) {
-    unsigned int nRects = A_ch.rows();
+    unsigned int nRects = 0;
+    for(unsigned int i = 0; i < A_ch.rows(); ++i)
+    {
+        double a_i = A_ch(i,0);
+        double b_i = A_ch(i,1);
+        if(fabs(a_i) < 1e-9 && fabs(b_i) < 1e-9)
+            break;
+        nRects++;
+    }
 
     std::cout << "Computing intersection points between " << nRects << " lines" << std::endl;
     std::cout << "A:" << A_ch << std::endl;
@@ -37,9 +45,11 @@ void getPointsFromConstraints(const Eigen::MatrixXd &A_ch,
     for(unsigned int j = 0; j < nRects; ++j) {
         int i;
 
+
         // intersection from line i to line j
         if(j == 0) i = nRects-1;
         else       i = (j-1);
+
 
         std::cout << "Computing intersection between line " << i << " and line " << j << ": ";
         // get coefficients for i-th line
@@ -56,248 +66,9 @@ void getPointsFromConstraints(const Eigen::MatrixXd &A_ch,
         double x = (c_i*b_j-b_i*c_j)/(a_i*b_j-b_i*a_j);
         double y = (a_i*c_j-c_i*a_j)/(a_i*b_j-b_i*a_j);
         std::cout << "(" << x << "," << y << ")" << std::endl;
-        points.push_back(KDL::Vector(x,y,0.0));
-    }
-}
+        if(!isnan(x) && !isnan(y))
+            points.push_back(KDL::Vector(x,y,0.0));
 
-bool solveQP(   const Eigen::MatrixXd &J0,
-                const Eigen::VectorXd &e0,
-                const Eigen::MatrixXd &J1,
-                const Eigen::VectorXd &eq,
-                qpOASES::HessianType t1HessianType,
-                const Eigen::VectorXd &l,
-                const Eigen::VectorXd &u,
-                const Eigen::VectorXd &q,
-                Eigen::VectorXd &dq_ref)
-{
-    int nj = q.size();
-
-    static bool initial_guess = false;
-
-    static Eigen::VectorXd dq0(nj); dq0.setZero(nj);
-    static Eigen::VectorXd dq1(nj); dq1.setZero(nj);
-    static Eigen::VectorXd y0(nj); y0.setZero(nj);
-    static Eigen::VectorXd y1(nj); y1.setZero(nj);
-
-    static qpOASES::Bounds bounds0;
-    static qpOASES::Bounds bounds1;
-    static qpOASES::Constraints constraints0;
-    static qpOASES::Constraints constraints1;
-
-
-    /**
-      We solve a single QP where the priority between
-      different tasks is set by using a weight matrix Q
-
-      min         (Ax - b)'Q(Ax - b)
-      subj to     l <=   x <=  u
-
-      QPOASES::Quadratic_program solves by default a quadratic problem in the form
-      min         x'Hx + x'g
-      subj to  Alb <= Ax <= Aub
-                 l <=  x <= u
-     **/
-
-    int njTask0 = J0.rows();
-
-    Eigen::MatrixXd H0 = J0.transpose()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    Eigen::VectorXd g0 = -1.0*J0.transpose()*e0;
-
-    Eigen::MatrixXd H1 = J1.transpose()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    Eigen::VectorXd g1 = -1.0*J1.transpose()*eq;
-
-    USING_NAMESPACE_QPOASES
-
-    /** Setting up QProblem object. **/
-    Options qpOasesOptionsqp0;
-    qpOasesOptionsqp0.printLevel = PL_NONE;
-    qpOasesOptionsqp0.setToReliable();
-    qpOasesOptionsqp0.enableRegularisation = BT_TRUE;
-    qpOasesOptionsqp0.epsRegularisation *= 2E2;
-    QProblem qp0( nj, 0, HST_SEMIDEF);
-    qp0.setOptions( qpOasesOptionsqp0 );
-
-    Options qpOasesOptionsqp1;
-    qpOasesOptionsqp1.printLevel = PL_NONE;
-    qpOasesOptionsqp1.setToReliable();
-    qpOasesOptionsqp1.enableRegularisation = BT_TRUE;
-    qpOasesOptionsqp1.epsRegularisation *= 2E2;
-    QProblem qp1( nj, njTask0, t1HessianType);
-    qp1.setOptions( qpOasesOptionsqp1 );
-
-    /** Solve zero QP. **/
-    int nWSR = 132;
-    if(initial_guess==true)
-        qp0.init( H0.data(),g0.data(),
-                  NULL,
-                  l.data(), u.data(),
-                  NULL, NULL,
-                  nWSR,0,
-                  dq0.data(), y0.data(),
-                  &bounds0, &constraints0);
-    else {
-        qp0.init( H0.data(),g0.data(),
-                  NULL,
-                  l.data(), u.data(),
-                  NULL, NULL,
-                  nWSR,0);
-        std::cout << GREEN << "Not using initial guess" << DEFAULT;
-    }
-
-    if(dq0.size() != qp0.getNV()) {
-        dq0.resize(qp0.getNV());
-        initial_guess = false;
-    }
-    if(y0.size() != qp0.getNV() + qp0.getNC()) {
-        y0.resize(qp0.getNV()+ qp0.getNC());
-        initial_guess = false;
-    }
-
-    int success0 = qp0.getPrimalSolution( dq0.data() );
-    qp0.getDualSolution(y0.data());
-    qp0.getBounds(bounds0);
-    qp0.getConstraints(constraints0);
-
-    if(success0== RET_QP_NOT_SOLVED ||
-      (success0 != RET_QP_SOLVED && success0 != SUCCESSFUL_RETURN))
-    {
-        std::cout << GREEN <<
-                     "ERROR OPTIMIZING ZERO TASK! ERROR #" <<
-                     success0 <<
-                     "Not using initial guess" << DEFAULT;
-
-        initial_guess = false;
-    }
-    else
-    {
-        /** Solve first QP. **/
-        Eigen::MatrixXd A1 = J0;
-        Eigen::VectorXd b1 = J0*dq0;
-        Eigen::VectorXd lA1 = b1;
-        Eigen::VectorXd uA1 = b1;
-
-        nWSR = 132;
-
-        if(initial_guess == true)
-            qp1.init( H1.data(),g1.data(),
-                      A1.data(),
-                      l.data(), u.data(),
-                      lA1.data(), uA1.data(),
-                      nWSR, 0,
-                      dq1.data(), y1.data(),
-                      &bounds1, &constraints1);
-        else
-            qp1.init( H1.data(),g1.data(),
-                      A1.data(),
-                      l.data(), u.data(),
-                      lA1.data(), uA1.data(),
-                      nWSR, 0);
-
-        if(dq1.size() != qp1.getNV()) {
-            dq1.resize(qp1.getNV());
-            initial_guess = false;
-        }
-        if(y1.size() != qp1.getNV() + qp1.getNC()) {
-            y1.resize(qp1.getNV() + qp1.getNC());
-            initial_guess = false;
-        }
-
-        int success1 = qp1.getPrimalSolution( dq1.data() );
-        qp1.getDualSolution(y1.data());
-        qp1.getBounds(bounds1);
-        qp1.getConstraints(constraints1);
-
-        if(success1 == RET_QP_NOT_SOLVED ||
-          (success1 != RET_QP_SOLVED && success1 != SUCCESSFUL_RETURN))
-        {
-            std::cout << GREEN <<
-                         "ERROR OPTIMIZING POSTURE TASK! ERROR #" <<
-                         success1 << DEFAULT;
-            initial_guess = false;
-        }
-        else
-        {
-            dq_ref = dq1;
-            initial_guess = true;
-            return true;
-       }
-    }
-    return false;
-}
-
-bool solveQPrefactor(   const Eigen::MatrixXd &J0,
-                        const Eigen::VectorXd &e0,
-                        const Eigen::MatrixXd &J1,
-                        const Eigen::VectorXd &eq,
-                        OpenSoT::HessianType t1HessianType,
-                        const Eigen::VectorXd &u,
-                        const Eigen::VectorXd &l,
-                        const Eigen::VectorXd &q,
-                        Eigen::VectorXd &dq_ref)
-{
-    int nj = q.size();
-
-    int njTask0 = J0.rows();
-
-    Eigen::MatrixXd H0 = J0.transpose()*J0; // size of problem is bigger than the size of task because we need the extra slack variables
-    Eigen::VectorXd g0 = -1.0*J0.transpose()*e0;
-
-    Eigen::MatrixXd H1 = J1.transpose()*J1; // size of problem is bigger than the size of task because we need the extra slack variables
-    Eigen::VectorXd g1 = -1.0*J1.transpose()*eq;
-
-    Eigen::MatrixXd A0(0,nj);
-    Eigen::VectorXd lA0(0), uA0(0);
-
-    USING_NAMESPACE_QPOASES
-
-    static OpenSoT::solvers::QPOasesBackEnd qp0(nj, 0, OpenSoT::HST_SEMIDEF);
-    qp0.setnWSR(127);
-    static bool result0 = false;
-    static bool isQProblemInitialized0 = false;
-    if(!isQProblemInitialized0){
-        result0 = qp0.initProblem(H0, g0, A0, lA0, uA0, l, u);
-        isQProblemInitialized0 = true;}
-    else
-    {
-        qp0.updateProblem(H0, g0, A0, lA0, uA0, l, u);
-        result0 = qp0.solve();
-    }
-
-    if(result0)
-    {
-        Eigen::VectorXd dq0 = qp0.getSolution();
-        Eigen::MatrixXd A1 = J0;
-        Eigen::VectorXd b1 = J0*dq0;
-        Eigen::VectorXd lA1 = b1;
-        Eigen::VectorXd uA1 = b1;
-
-        static OpenSoT::solvers::QPOasesBackEnd qp1(nj, njTask0, t1HessianType);
-        qp1.setnWSR(127);
-        static bool result1 = false;
-        static bool isQProblemInitialized1 = false;
-        if(!isQProblemInitialized1){
-            result1 = qp1.initProblem(H1, g1, A1, lA1, uA1, l, u);
-            isQProblemInitialized1 = true;}
-        else
-        {
-            qp1.updateProblem(H1, g1, A1, lA1, uA1, l, u);
-            result1 = qp1.solve();
-        }
-        if(result1)
-        {
-            dq_ref = qp1.getSolution();
-            return true;
-        }
-        else
-        {
-            std::cout << GREEN << "ERROR OPTIMIZING POSTURE TASK" << DEFAULT;
-            return false;
-        }
-    }
-    else
-    {
-        std::cout << GREEN << "ERROR OPTIMIZING CARTESIAN TASK" << DEFAULT;
-        return false;
     }
 }
 
@@ -359,7 +130,15 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface& _robot) {
 //#define TRY_ON_SIMULATOR
 TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
+
+
     useFootTaskOrConstraint footStrategy = GetParam();
+
+    XBot::MatLogger::Ptr logger;
+    if(footStrategy == USE_TASK)
+        logger = XBot::MatLogger::getLogger("convex_hull_in_com");
+    if(footStrategy == USE_CONSTRAINT)
+        logger = XBot::MatLogger::getLogger("convex_hull_constr");
 
 
 
@@ -480,7 +259,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     stack_of_tasks.push_back(com_task);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
+    OpenSoT::solvers::iHQP::Ptr sot(new OpenSoT::solvers::iHQP(stack_of_tasks, bounds, 1));
 
     //SET SOME REFERENCES
     Eigen::Vector3d T_com_p_init;
@@ -520,6 +299,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         left_foot_task->update(q);
         std::cout<<"left_foot_task->getb().norm(): "<<left_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
         com_task->update(q);
+        boundsConvexHull->log(logger);
         postural_task->update(q);
         bounds->update(q);
 
@@ -559,13 +339,14 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     _model_ptr_com->update();
 
     boundsConvexHull->update(q);
+    boundsConvexHull->log(logger);
     std::vector<KDL::Vector> points;
     std::vector<KDL::Vector> points_inner;
     boundsConvexHull->getConvexHull(points);
 
     KDL::Vector point_old;
-    Eigen::MatrixXd A_ch, A_ch_outer;
-    Eigen::VectorXd b_ch, b_ch_outer;
+    Eigen::MatrixXd A_ch(_links_in_contact.size(),2), A_ch_outer(_links_in_contact.size(),2);
+    Eigen::VectorXd b_ch(_links_in_contact.size()), b_ch_outer(_links_in_contact.size());
     boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
     boundsConvexHull->getConstraints(points, A_ch_outer, b_ch_outer, 0.0);
     std::cout << std::endl << "A_ch: " << std::endl << A_ch << std::endl;
@@ -612,6 +393,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             right_foot_task->update(q);
             left_foot_task->update(q);
             com_task->update(q);
+            boundsConvexHull->log(logger);
             postural_task->update(q);
             bounds->update(q);
 
@@ -688,8 +470,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
         std::vector<KDL::Vector> points_check;
         boundsConvexHull->getConvexHull(points_check);
-        Eigen::MatrixXd A_ch_check;
-        Eigen::VectorXd b_ch_check;
+        Eigen::MatrixXd A_ch_check(_links_in_contact.size(), 2);
+        Eigen::VectorXd b_ch_check(_links_in_contact.size());
         boundsConvexHull->getConstraints(points_check, A_ch_check, b_ch_check, 0.01);
 
 
@@ -740,6 +522,8 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _log << "ctc = plot(com_traj_constraint(:,1), com_traj_constraint(:,2), 'm:');" << std::endl;
         _log << "legend([ref,constr,ct,ctc], 'CoM ref', 'Support Polygon', 'CoM Traj, r\\_sole ctrl as task', 'CoM Traj, r\\_sole ctrl as constraint','Location','best');" << std::endl;
     }
+
+    logger->flush();
 
 }
 

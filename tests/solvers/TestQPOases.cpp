@@ -219,16 +219,15 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 TEST_F(testQPOasesProblem, test_update_constraint)
 {
     //OpenSoT::solvers::QPOasesBackEnd qp(3,0);
-    OpenSoT::solvers::BackEnd::Ptr qp = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::qpOASES, 3, 0, OpenSoT::HST_SEMIDEF,1e4);
+
 
     Eigen::MatrixXd H(1,3);
     H<<1,1,1;
     Eigen::VectorXd b(1);
     b<<10;
-    Eigen::MatrixXd A(0,0);
-    Eigen::VectorXd lA;
-    Eigen::VectorXd uA;
+    Eigen::MatrixXd A(1,3); A.setZero(1,3);
+    Eigen::VectorXd lA(1); lA.setZero(1);
+    Eigen::VectorXd uA(1); uA.setZero(1);
     Eigen::VectorXd l(3);
     l<<-10,
        -10,
@@ -237,6 +236,9 @@ TEST_F(testQPOasesProblem, test_update_constraint)
     u<<10,
        10,
        10;
+
+    OpenSoT::solvers::BackEnd::Ptr qp = OpenSoT::solvers::BackEndFactory(
+                OpenSoT::solvers::solver_back_ends::qpOASES, 3, 1, OpenSoT::HST_SEMIDEF,1e4);
     EXPECT_TRUE(qp->initProblem(H.transpose()*H,-1.*H.transpose()*b,A,lA,uA,l,u));
 
     EXPECT_TRUE(qp->solve());
@@ -359,7 +361,7 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
 
     //OpenSoT::solvers::QPOasesBackEnd testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
     OpenSoT::solvers::BackEnd::Ptr testProblem = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1.);
+                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1e-9);
 
     testProblem->initProblem(sp.H,
                             sp.g,
@@ -371,16 +373,16 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
 
     EXPECT_TRUE(testProblem->solve());
     Eigen::VectorXd s = testProblem->getSolution();
-    EXPECT_EQ(-sp.g[0], s[0]);
-    EXPECT_EQ(-sp.g[1], s[1]);
+    EXPECT_NEAR(-sp.g[0], s[0],1e-14)<<"-sp.g[0]: "<<-sp.g[0]<<"  VS  s[0]: "<<s[0]<<std::endl;
+    EXPECT_NEAR(-sp.g[1], s[1],1e-14)<<"-sp.g[1]: "<<-sp.g[1]<<"  VS  s[1]: "<<s[1]<<std::endl;
 
-    for(unsigned int i = 0; i < 10; ++i)
+    for(unsigned int i = 0; i < 1000; ++i)
     {
         EXPECT_TRUE(testProblem->solve());
 
         Eigen::VectorXd s = testProblem->getSolution();
-        EXPECT_EQ(-sp.g[0], s[0]);
-        EXPECT_EQ(-sp.g[1], s[1]);
+        EXPECT_NEAR(-sp.g[0], s[0],1e-14);
+        EXPECT_NEAR(-sp.g[1], s[1],1e-14);
     }
 
 }
@@ -395,7 +397,7 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
 
     //OpenSoT::solvers::QPOasesBackEnd testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
     OpenSoT::solvers::BackEnd::Ptr testProblem = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1.);
+                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1e-9);
 
     testProblem->initProblem(sp.H,
                             sp.g,
@@ -407,8 +409,8 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
 
     EXPECT_TRUE(testProblem->solve());
     Eigen::VectorXd s = testProblem->getSolution();
-    EXPECT_EQ(-sp.g[0], s[0]);
-    EXPECT_EQ(-sp.g[1], s[1]);
+    EXPECT_NEAR(-sp.g[0], s[0],1e-11);
+    EXPECT_NEAR(-sp.g[1], s[1],1e-11);
 
     sp.g[0] = -1.0; sp.g[1] = 1.0;
     testProblem->updateTask(sp.H,
@@ -416,8 +418,8 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     EXPECT_TRUE(testProblem->solve());
 
     s = testProblem->getSolution();
-    EXPECT_EQ(-sp.g[0], s[0]);
-    EXPECT_EQ(-sp.g[1], s[1]);
+    EXPECT_NEAR(-sp.g[0], s[0],1e-14);
+    EXPECT_NEAR(-sp.g[1], s[1],1e-14);
 }
 
 void initializeIfNeeded()
@@ -844,6 +846,79 @@ TEST_F(testQPOasesTask, testCartesian)
                 EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
 }
 
+TEST_F(testQPOasesTask, testEpsRegularisation)
+{
+    XBot::ModelInterface::Ptr _model_ptr;
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    Eigen::Affine3d T;
+    _model_ptr->getPose("l_wrist", "Waist", T);
+
+
+    //2 Tasks: Cartesian & Postural
+    OpenSoT::tasks::velocity::Cartesian::Ptr cartesian_task(
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", q, *_model_ptr,
+                "l_wrist", "Waist"));
+
+    cartesian_task->update(q);
+
+    Eigen::MatrixXd T_actual = cartesian_task->getActualPose();
+    std::cout<<"T_actual: \n"<<T_actual<<std::endl;
+
+
+    Eigen::MatrixXd T_ref = T.matrix();
+    T_ref(0,3) = T_ref(0,3) + 0.02;
+    std::cout<<"T_ref: \n"<<T_ref<<std::endl;
+
+    cartesian_task->setReference(T_ref);
+    cartesian_task->update(q);
+
+//    OpenSoT::solvers::QPOasesBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
+    OpenSoT::solvers::BackEnd::Ptr qp_cartesian_problem = OpenSoT::solvers::BackEndFactory(
+                OpenSoT::solvers::solver_back_ends::qpOASES, cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype(),1.);
+
+
+    EXPECT_EQ(qp_cartesian_problem->getEpsRegularisation(), 2.221e-13);
+
+    qp_cartesian_problem->setEpsRegularisation(1e-4);
+    EXPECT_EQ(qp_cartesian_problem->getEpsRegularisation(), 1e-4);
+
+
+    ASSERT_TRUE(qp_cartesian_problem->initProblem(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb(),
+                                                Eigen::MatrixXd(0,0), Eigen::VectorXd(), Eigen::VectorXd(),
+                                                -0.003*Eigen::VectorXd::Ones(q.size()), 0.003*Eigen::VectorXd::Ones(q.size())));
+
+    for(unsigned int i = 0; i < 10000; ++i)
+    {
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+
+        cartesian_task->update(q);
+        qp_cartesian_problem->updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
+        ASSERT_TRUE(qp_cartesian_problem->solve());
+        Eigen::VectorXd dq = qp_cartesian_problem->getSolution();
+        q += dq;
+    }
+
+    _model_ptr->getPose("l_wrist", "Waist", T);
+
+    std::cout<<"T: \n"<<T.matrix()<<std::endl;
+    std::cout<<"T_ref: \n"<<T_ref<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(T(i,3), T_ref(i,3), 1E-4);
+        for(unsigned int i = 0; i < 3; ++i)
+            for(unsigned int j = 0; j < 3; ++j)
+                EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
+
+    qp_cartesian_problem->printProblemInformation(0, "problem_id", "constraints_id", "bounds_id");
+}
+
 TEST_F(testiHQP, testContructor2Problems)
 {
     XBot::ModelInterface::Ptr _model_ptr;
@@ -951,7 +1026,9 @@ TEST_F(testiHQP, testContructor2Problems)
 
     EXPECT_TRUE(sot.getBackEnd(1, back_end_i));
 
-    EXPECT_TRUE(back_end_i->getH() == postural_task->getA().transpose()*postural_task->getA());
+    EXPECT_TRUE(back_end_i->getH() ==
+                postural_task->getA().transpose()*postural_task->getA()+back_end_i->getEpsRegularisation()*
+                Eigen::MatrixXd::Identity(postural_task->getA().rows(),postural_task->getA().cols())); //<--because we added manual regularisation in qpoases
 }
 
 TEST_F(testiHQP, testContructor1ProblemAggregated)
