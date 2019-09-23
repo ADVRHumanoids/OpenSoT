@@ -94,7 +94,7 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
                                        testAggregatedTask)
 endif()
 
-#THIS TEST DEPEND ON fcl
+#THESE TESTS DEPEND ON fcl
 if(${FCL_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
                                        testCollisionAvoidanceVelocityConstraint
