@@ -1,7 +1,9 @@
 #include <OpenSoT/solvers/OSQPBackEnd.h>
 #include <osqp/glob_opts.h>
+#include <osqp/error.h>
 #include <exception>
 #include <XBotInterface/SoLib.h>
+#include <boost/make_shared.hpp>
 using namespace OpenSoT::solvers;
 
 #define BASE_REGULARISATION 2.22E-13 //previous 1E-12
@@ -37,7 +39,10 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
     _settings.reset(new OSQPSettings());
      osqp_set_default_settings(_settings.get());
     _settings->verbose = 0;
-    
+    _settings->eps_abs = 1e-5;
+    _settings->eps_rel = 1e-5;
+
+
    
     
     _data.reset(new OSQPData());
@@ -196,20 +201,20 @@ bool OSQPBackEnd::updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& 
 
 bool OSQPBackEnd::solve()
 {
-    osqp_update_lin_cost(_workspace.get(), _g.data());
-    c_int update_bound_flag = osqp_update_bounds(_workspace.get(), _lb_piled.data(), _ub_piled.data());
+    osqp_update_lin_cost(_workspace, _g.data());
+    c_int update_bound_flag = osqp_update_bounds(_workspace, _lb_piled.data(), _ub_piled.data());
     if(update_bound_flag != 0)
         return false;
-    c_int update_A_flag = osqp_update_A(_workspace.get(), _Adense.data(), nullptr, _Adense.size());
+    c_int update_A_flag = osqp_update_A(_workspace, _Adense.data(), nullptr, _Adense.size());
     if(update_A_flag != 0)
         return false;
-    c_int update_P_flag = osqp_update_P(_workspace.get(), _P_values.data(), nullptr, _P_values.size());
+    c_int update_P_flag = osqp_update_P(_workspace, _P_values.data(), nullptr, _P_values.size());
     if(update_P_flag != 0)
         return false;
     
     
     
-    c_int exitflag = osqp_solve(_workspace.get());
+    c_int exitflag = osqp_solve(_workspace);
     if(exitflag != 0)
         return false;
     
@@ -262,14 +267,26 @@ bool OSQPBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
         return false;
     }
     
-    _workspace.reset( osqp_setup(_data.get(), _settings.get()) );
+
+    //_workspace.reset( osqp_setup(_data.get(), _settings.get()) );
     
+    c_int setup_return = 0;
+    if(_data && _settings)
+        setup_return = osqp_setup(&_workspace, _data.get(), _settings.get());
+    else
+    {
+        XBot::Logger::error("OSQP: data or settings not created before setup\n");
+        return false;
+    }
+
+
     if(!_workspace)
     {
         XBot::Logger::error("OSQP: unable to setup workspace\n");
         return false;
     }
-    
+
+
     success = solve() && success;
     
     return success;
@@ -303,7 +320,7 @@ double OSQPBackEnd::getObjective()
 
 OSQPBackEnd::~OSQPBackEnd()
 {
-
+    osqp_cleanup(_workspace);
 }
 
 bool OSQPBackEnd::setEpsRegularisation(const double eps)

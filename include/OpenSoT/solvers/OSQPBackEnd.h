@@ -160,7 +160,7 @@ private:
     /**
     * @brief _problem is the internal OSQPWorkspace
     */
-    boost::shared_ptr<OSQPWorkspace> _workspace;
+    OSQPWorkspace* _workspace;
 
     /**
     * @brief _data internal OSQPData
@@ -191,6 +191,7 @@ private:
 //        void print_csc_matrix_raw(csc* a, const std::string& name);
 
     void setCSCMatrix(csc* a, SparseMatrix& A);
+
 
 };
 }
