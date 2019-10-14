@@ -164,6 +164,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
                     src/tasks/force/CoM.cpp
                     src/tasks/force/FloatingBase.cpp
                     src/tasks/force/Force.cpp
+                    src/tasks/force/Cartesian.cpp
                     src/tasks/floating_base/Contact.cpp
                     src/tasks/floating_base/IMU.cpp
                     )
