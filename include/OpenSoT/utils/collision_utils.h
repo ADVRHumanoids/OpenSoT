@@ -216,6 +216,11 @@ private:
     srdf_advr::Model robot_srdf;
 
     /**
+     * @brief robot urdf
+     */
+    urdf::Model robot_urdf;
+
+    /**
      * @brief shapes_ is a map of collision geometries
      */
     std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_;
@@ -268,12 +273,9 @@ private:
        moveit equivalents to parseCollisionObjects and updateCollisionObjects*/
     /**
      * @brief parseCollisionObjects
-     * @param robot_urdf_path a string representing the robot urdf with collision information
-     * @param robot_srdf_path a string representing the robot srdf with collision information (i.e. ACM)
      * @return true on success
      */
-    bool parseCollisionObjects(const std::string& robot_urdf_path,
-                               const std::string &robot_srdf_path);
+    bool parseCollisionObjects();
 
     /**
      * @brief updateCollisionObjects updates all collision objects with correct transforms (link_T_shape)

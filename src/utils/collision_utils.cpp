@@ -34,15 +34,8 @@ bool ComputeLinksDistance::shapeToLinkCoordinates ( const std::string& linkName,
     return true;
 }
 
-bool ComputeLinksDistance::parseCollisionObjects ( const std::string &robot_urdf_path,
-        const std::string &robot_srdf_path )
+bool ComputeLinksDistance::parseCollisionObjects ()
 {
-    urdf::Model robot_urdf;
-
-    robot_urdf.initFile ( robot_urdf_path );
-    robot_srdf.initFile ( robot_urdf, robot_srdf_path );
-
-
     std::vector<boost::shared_ptr<urdf::Link> > links;
     robot_urdf.getLinks ( links );
     typedef std::vector<boost::shared_ptr<urdf::Link> >::iterator it_type;
@@ -310,11 +303,24 @@ ComputeLinksDistance::ComputeLinksDistance ( XBot::ModelInterface &model ) : mod
         srdf_to_load = original_srdf.c_str();
     }
 
+    if(!urdf_to_load.empty())
+      {
+        std::cout<<"urdf_to_load: "<<urdf_to_load<<std::endl;
+        robot_urdf.initFile ( urdf_to_load );
+      }
+      else
+        robot_urdf.initString(model.getUrdfString());
 
-    std::cout<<"srdf_to_load: "<<srdf_to_load<<std::endl;
-    std::cout<<"urdf_to_load: "<<urdf_to_load<<std::endl;
+       if(!srdf_to_load.empty())
+      {
+        std::cout<<"srdf_to_load: "<<srdf_to_load<<std::endl;
+        robot_srdf.initFile ( robot_urdf, srdf_to_load );
+      }
+      else
+        robot_srdf.initString(robot_urdf, model.getSrdfString());
 
-    this->parseCollisionObjects ( urdf_to_load, srdf_to_load );
+
+    this->parseCollisionObjects ();
 
     this->setCollisionBlackList ( std::list<LinkPairDistance::LinksPair>() );
 }
