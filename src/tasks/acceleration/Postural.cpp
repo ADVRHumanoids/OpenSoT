@@ -1,8 +1,8 @@
 #include <OpenSoT/tasks/acceleration/Postural.h>
 
 OpenSoT::tasks::acceleration::Postural::Postural(
-         const XBot::ModelInterface& robot,const int x_size):
-    Task< Eigen::MatrixXd, Eigen::VectorXd >("Postural", x_size),
+         const XBot::ModelInterface& robot,const int x_size, const std::string task_id):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
     _robot(robot)
 {
     _na = _robot.getActuatedJointNum();
@@ -31,8 +31,8 @@ OpenSoT::tasks::acceleration::Postural::Postural(
 }
 
 OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& robot,
-                                                 OpenSoT::AffineHelper qddot): 
-    Task< Eigen::MatrixXd, Eigen::VectorXd >("Postural", qddot.getInputSize()),
+                                                 OpenSoT::AffineHelper qddot, const std::string task_id):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, qddot.getInputSize()),
     _robot(robot),
     _qddot(qddot)
 {
