@@ -52,6 +52,7 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
         _contacts_wrench[i].getValue(x, _contacts_wrench_val[i]);
 
         _model.getJacobian(_links_in_contact[i], _Jc[i]);
+        _Jc[i].leftCols(6).rightCols(3).setZero();
 
         _tau_val -= _Jc[i].transpose()*_contacts_wrench_val[i];
     }
@@ -62,7 +63,7 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
 
     if(_model.isFloatingBase())
     {
-        for(unsigned int i = 0; i < 6; ++i)
+        for(unsigned int i = 0; i < 3; ++i) //The second three coould not be 0
         {
             if(fabs(tau[i]) > 10e-3){
                 XBot::Logger::error("Floating Base Wrench is not 0!");
