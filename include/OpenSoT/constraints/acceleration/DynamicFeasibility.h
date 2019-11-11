@@ -56,7 +56,7 @@ private:
         
         Eigen::VectorXd _h, _hu;
         Eigen::MatrixXd _B, _Bu, _Jtmp;
-        Eigen::Matrix6d _Jf;
+        Eigen::MatrixXd _Jf;
     
 };
     
