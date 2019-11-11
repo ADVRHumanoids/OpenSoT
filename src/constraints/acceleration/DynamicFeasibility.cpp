@@ -21,8 +21,13 @@ OpenSoT::constraints::acceleration::DynamicFeasibility::DynamicFeasibility(const
 
 void OpenSoT::constraints::acceleration::DynamicFeasibility::update(const Eigen::VectorXd& x)
 {
-    _robot.getInertiaMatrix(_B);
-    _robot.computeNonlinearTerm(_h);
+//    _robot.getInertiaMatrix(_B);
+//    _robot.computeNonlinearTerm(_h);
+
+    _B.setZero(_B.rows(), _B.cols());
+    _robot.computeGravityCompensation(_h);
+
+
     _Bu = _B.topRows(6);
     _hu = _h.topRows(6);
     
