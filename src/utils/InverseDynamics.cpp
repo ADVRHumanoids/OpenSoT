@@ -45,7 +45,8 @@ bool InverseDynamics::computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& 
     _qddot.getValue(x, _qddot_val);
     _model.setJointAcceleration(_qddot_val);
     _model.update();
-    _model.computeInverseDynamics(_tau_val);
+    //_model.computeInverseDynamics(_tau_val);
+    computeInverseDynamics(_tau_val);
 
     for(unsigned int i = 0; i < _links_in_contact.size(); ++i){
         _contacts_wrench[i].getValue(x, _contacts_wrench_val[i]);

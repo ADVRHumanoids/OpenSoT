@@ -62,6 +62,22 @@ public:
      */
     void log(XBot::MatLogger::Ptr& logger);
 
+    /**
+     * @brief computeInverseDynamics computes a static version of the inverse dynamics not considering Inertia coupling
+     * and Coriolis/centrifugal terms
+     * @param tau output torques
+     */
+    void computeInverseDynamics(Eigen::VectorXd& tau)
+    {
+        _model.getInertiaMatrix(_M);
+        _M.leftCols(6).setZero();
+        _M.topRows(6).setZero();
+
+        _model.computeGravityCompensation(_G);
+
+        tau = _M*_qddot_val + _G;
+    }
+
 private:
     AffineHelper    _qddot;
     std::vector<AffineHelper> _contacts_wrench;
@@ -73,6 +89,9 @@ private:
     std::vector<Eigen::Vector6d> _contacts_wrench_val;
     std::vector<Eigen::MatrixXd> _Jc;
     Eigen::VectorXd _tau_val;
+
+    Eigen::MatrixXd _M;
+    Eigen::VectorXd _G;
 
 };
 
