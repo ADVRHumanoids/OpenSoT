@@ -73,9 +73,9 @@ public:
         _M.leftCols(6).setZero();
         _M.topRows(6).setZero();
 
-        _model.computeGravityCompensation(_G);
+        _model.computeNonlinearTerm(_H);
 
-        tau = _M*_qddot_val + _G;
+        tau = _M*_qddot_val + _H;
     }
 
 private:
@@ -91,7 +91,7 @@ private:
     Eigen::VectorXd _tau_val;
 
     Eigen::MatrixXd _M;
-    Eigen::VectorXd _G;
+    Eigen::VectorXd _H;
 
 };
 
