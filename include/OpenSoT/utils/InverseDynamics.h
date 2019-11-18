@@ -70,7 +70,7 @@ public:
     void computeInverseDynamics(Eigen::VectorXd& tau)
     {
         _model.getInertiaMatrix(_M);
-        _M.leftCols(6).setZero();
+        //_M.leftCols(6).setZero();
         _M.topRows(6).setZero();
 
         _model.computeNonlinearTerm(_H);

@@ -24,11 +24,12 @@ void OpenSoT::constraints::acceleration::DynamicFeasibility::update(const Eigen:
     _robot.getInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);
 
-    _B.setZero();
+    //_B.setZero();
 
 
-    _Bu = _B.topRows(3);
-    _hu = _h.topRows(3);
+    _Bu = _B.topRows(6);
+    _Bu.rightCols(_Bu.cols()-6).setZero();
+    _hu = _h.topRows(6);
 
     _dyn_constraint = _Bu*_qddot + _hu;
     
@@ -39,7 +40,7 @@ void OpenSoT::constraints::acceleration::DynamicFeasibility::update(const Eigen:
         }
         else {
             _robot.getJacobian(_contact_links[i], _Jtmp);
-            _Jf = _Jtmp.block<6,3>(0,0).transpose();
+            _Jf = _Jtmp.block<6,6>(0,0).transpose();
             _dyn_constraint = _dyn_constraint + (-_Jf) * _wrenches[i];
         }
     }
