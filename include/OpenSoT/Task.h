@@ -294,9 +294,9 @@
          */
         const Vector_type& getWb() const {
             if(_weight_is_diagonal)
-                _Wb = _W.diagonal().asDiagonal()*_b;
+                _Wb.noalias() = _W.diagonal().asDiagonal()*_b;
             else
-                _Wb = _W*_b;
+                _Wb.noalias() = _W*_b;
             return _Wb;
         }
 

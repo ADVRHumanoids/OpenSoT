@@ -165,7 +165,7 @@ void iHQP::computeOptimalityConstraint(  const TaskPtr& task, BackEnd::Ptr& prob
                                                 Eigen::MatrixXd& A, Eigen::VectorXd& lA, Eigen::VectorXd& uA)
 {
     A = task->getA();
-    lA = task->getA()*problem->getSolution();
+    lA.noalias() = task->getA()*problem->getSolution();
     uA = lA;
 }
 
