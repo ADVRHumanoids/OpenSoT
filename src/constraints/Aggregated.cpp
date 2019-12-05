@@ -99,21 +99,45 @@ void Aggregated::generateAll() {
         _number_of_bounds = _bounds.size();
         _constraint_id = concatenateConstraintsIds(getConstraintsList());}
 
+    if(_number_of_bounds != _boundUpperBounds.size())
+        initSupportVectorsAndMatrices(_number_of_bounds);
+
     /* iterating on all bounds.. */
-    for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
-        i != _bounds.end(); i++) {
+    unsigned int j = 0;
+    for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin(); i != _bounds.end(); i++) {
 
         ConstraintPtr &b = *i;
 
-        Eigen::VectorXd boundUpperBound = b->getUpperBound();
-        Eigen::VectorXd boundLowerBound = b->getLowerBound();
+        _boundUpperBounds[j] = b->getUpperBound();
+        _boundLowerBounds[j] = b->getLowerBound();
 
-        Eigen::MatrixXd boundAeq = b->getAeq();
-        Eigen::VectorXd boundbeq = b->getbeq();
+        _boundAeqs[j] = b->getAeq();
+        _boundbeqs[j] = b->getbeq();
 
-        Eigen::MatrixXd boundAineq = b->getAineq();
-        Eigen::VectorXd boundbUpperBound = b->getbUpperBound();
-        Eigen::VectorXd boundbLowerBound = b->getbLowerBound();
+        _boundAineqs[j] = b->getAineq();
+        _boundbUpperBounds[j] = b->getbUpperBound();
+        _boundbLowerBounds[j] = b->getbLowerBound();
+
+        Eigen::VectorXd& boundUpperBound = _boundUpperBounds[j];
+        Eigen::VectorXd& boundLowerBound = _boundLowerBounds[j];
+
+        Eigen::MatrixXd& boundAeq = _boundAeqs[j];
+        Eigen::VectorXd& boundbeq = _boundbeqs[j];
+
+        Eigen::MatrixXd& boundAineq = _boundAineqs[j];
+        Eigen::VectorXd& boundbUpperBound = _boundbUpperBounds[j];
+        Eigen::VectorXd& boundbLowerBound = _boundbLowerBounds[j];
+
+
+//        Eigen::VectorXd boundUpperBound = b->getUpperBound();
+//        Eigen::VectorXd boundLowerBound = b->getLowerBound();
+
+//        Eigen::MatrixXd boundAeq = b->getAeq();
+//        Eigen::VectorXd boundbeq = b->getbeq();
+
+//        Eigen::MatrixXd boundAineq = b->getAineq();
+//        Eigen::VectorXd boundbUpperBound = b->getbUpperBound();
+//        Eigen::VectorXd boundbLowerBound = b->getbLowerBound();
 
         /* copying lowerBound, upperBound */
         if(boundUpperBound.rows() != 0 ||
@@ -215,6 +239,7 @@ void Aggregated::generateAll() {
             if(_aggregationPolicy & UNILATERAL_TO_BILATERAL)
                 _tmpbLowerBound.pile( boundbLowerBound);
         }
+        j += 1;
     }
 
     /* checking everything went fine */
