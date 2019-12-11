@@ -294,9 +294,9 @@
          */
         const Vector_type& getWb() const {
             if(_weight_is_diagonal)
-                _Wb = _W.diagonal().asDiagonal()*_b;
+                _Wb.noalias() = _W.diagonal().asDiagonal()*_b;
             else
-                _Wb = _W*_b;
+                _Wb.noalias() = _W*_b;
             return _Wb;
         }
 
@@ -326,6 +326,20 @@
             assert(W.rows() == this->getTaskSize());
             assert(W.cols() == W.rows());
             _W = W;
+        }
+
+        /**
+         * @brief setWeight sets the task diagonal weight.
+         * Note the Weight needs to be positive definite.
+         * If your original intent was to get a subtask
+         * (i.e., reduce the number of rows of the task Jacobian),
+         * please use the class SubTask
+         * @param w scalar diagonal weight
+         */
+        virtual void setWeight(const double& w) {
+            assert(w>=0.0);
+            _W.setIdentity();
+            _W = _W * w;
         }
 
         /**

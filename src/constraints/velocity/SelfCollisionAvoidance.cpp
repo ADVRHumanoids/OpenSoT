@@ -141,8 +141,6 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
     KDL::Frame Link1_T_CP,Link2_T_CP;
     std::string Link1_name, Link2_name;
 
-    int Link1_index, Link2_index;
-
     KDL::Frame Waist_T_Link1, Waist_T_Link2, Waist_T_Link1_CP, Waist_T_Link2_CP;
     KDL::Vector Link1_origin_kdl, Link2_origin_kdl, Link1_CP_kdl, Link2_CP_kdl;
     Eigen::Matrix<double, 3, 1> Link1_origin, Link2_origin, Link1_CP, Link2_CP;
@@ -153,7 +151,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
 
     Affine3d Waist_frame_world_Eigen;
     robot_col.getPose(base_name, Waist_frame_world_Eigen);
-    Waist_frame_world_Eigen.inverse();
+    Waist_frame_world_Eigen = Waist_frame_world_Eigen.inverse();
 
     Matrix3d Waist_frame_world_Eigen_Ro = Waist_frame_world_Eigen.matrix().block(0,0,3,3);
     MatrixXd temp_trans_matrix(6,6); temp_trans_matrix.setZero(6,6);

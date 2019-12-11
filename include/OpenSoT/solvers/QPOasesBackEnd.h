@@ -252,6 +252,8 @@ namespace OpenSoT{
          * Solution of the QP problem
          */
         Eigen::VectorXd _dual_solution;
+        
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> _A_rm;
 
     };
     }

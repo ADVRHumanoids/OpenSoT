@@ -6,6 +6,8 @@
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/eHQP.h>
+#include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/SubTask.h>
 
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
@@ -457,6 +459,105 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
                                                 uA1_comvel))    << "uA0_comvel and uA1_comvel "
                                                                 << "are not equal";
     }
+}
+
+TEST_F(testAggregatedTask, testWeightsUpdate)
+{
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd qmin(_model_ptr->getJointNum()), qmax(_model_ptr->getJointNum());
+    _model_ptr->getJointLimits(qmin, qmax);
+    q = getRandomAngles(qmin, qmax, qmin.size());
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(q));
+    OpenSoT::tasks::velocity::Cartesian::Ptr waist(
+            new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",
+                                                    q,*(_model_ptr.get()), "Waist", "world"));
+    OpenSoT::tasks::velocity::Cartesian::Ptr lwrist(
+            new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist",
+                                                    q,*(_model_ptr.get()), "l_wrist", "world"));
+
+    //1) Test that aggregated weights work
+    Eigen::MatrixXd W(6,6); W.setIdentity(); W *=3.;
+    W*waist;
+    EXPECT_TRUE(matrixAreEqual(W, waist->getWeight()));
+    std::cout<<"W: \n"<<W<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    auto t1 = (lwrist + waist);
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    EXPECT_TRUE(matrixAreEqual(waist->getWeight(), t1->getWeight().block(6,6,6,6)));
+    EXPECT_TRUE(matrixAreEqual(lwrist->getWeight(), t1->getWeight().block(0,0,6,6)));
+    W = Eigen::MatrixXd::Identity(W.rows(), W.cols());
+    waist->setWeight(10*W);
+    lwrist->setWeight(20*W);
+    t1->update(q);
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    EXPECT_TRUE(matrixAreEqual(waist->getWeight(), t1->getWeight().block(6,6,6,6)));
+    EXPECT_TRUE(matrixAreEqual(lwrist->getWeight(), t1->getWeight().block(0,0,6,6)));
+    Eigen::MatrixXd W2(12,12); W2.setOnes();
+    t1->setWeight(W2);
+    t1->update(q);
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    EXPECT_TRUE(matrixAreEqual(waist->getWeight(), t1->getWeight().block(6,6,6,6)));
+    EXPECT_TRUE(matrixAreEqual(lwrist->getWeight(), t1->getWeight().block(0,0,6,6)));
+    waist->setWeight(10*W);
+    lwrist->setWeight(20*W);
+    t1->update(q);
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    EXPECT_TRUE(matrixAreEqual(waist->getWeight(), t1->getWeight().block(6,6,6,6)));
+    EXPECT_TRUE(matrixAreEqual(lwrist->getWeight(), t1->getWeight().block(0,0,6,6)));
+
+    //2) Multiple aggregates and subtasks
+    OpenSoT::tasks::velocity::Cartesian::Ptr rwrist(
+            new OpenSoT::tasks::velocity::Cartesian("cartesian::r_wrist",
+                                                    q,*(_model_ptr.get()), "r_wrist", "world"));
+    W.setOnes(6,6);
+    rwrist->setWeight(3.*W);
+
+    std::list<unsigned int> id = {1,2};
+    auto s1 = rwrist%id;
+    s1->update(q);
+
+    auto t2 = (t1+s1);
+    t2->update(q);
+
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    std::cout<<"s1->getWeight(): \n"<<s1->getWeight()<<std::endl;
+    std::cout<<"rwrist->getWeight(): \n"<<rwrist->getWeight()<<std::endl;
+    std::cout<<"t2->getWeight(): \n"<<t2->getWeight()<<std::endl;
+
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(0,0,6,6), lwrist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(6,6,6,6), waist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), s1->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), rwrist->getWeight().block(1,1,2,2)));
+
+    Eigen::MatrixXd W3(14,14);
+    W3.setIdentity();
+    t2->setWeight(W3);
+    std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
+    std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
+    std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
+    std::cout<<"s1->getWeight(): \n"<<s1->getWeight()<<std::endl;
+    std::cout<<"rwrist->getWeight(): \n"<<rwrist->getWeight()<<std::endl;
+    std::cout<<"t2->getWeight(): \n"<<t2->getWeight()<<std::endl;
+
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(0,0,6,6), lwrist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(6,6,6,6), waist->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), s1->getWeight()));
+    EXPECT_TRUE(matrixAreEqual(t2->getWeight().block(12,12,2,2), rwrist->getWeight().block(1,1,2,2)));
+
 }
 
 }

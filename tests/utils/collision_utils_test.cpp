@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/collision_utils.h>
 #include <cmath>
-#include <fcl/distance.h>
-#include <fcl/shape/geometric_shapes.h>
+
 #include <XBotInterface/ModelInterface.h>
 #include <chrono>
+
 
 #define  s                1.0
 #define  dT               0.001* s
@@ -12,14 +12,14 @@
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
 
-KDL::Frame fcl2KDL(const fcl::Transform3f &in)
+KDL::Frame fcl2KDL(const fcl::Transform3<double> &in)
 {
-    fcl::Quaternion3f q = in.getQuatRotation();
-    fcl::Vec3f t = in.getTranslation();
+    Eigen::Quaterniond q(in.linear());
+    Eigen::Vector3d t = in.translation();
 
     KDL::Frame f;
     f.p = KDL::Vector(t[0],t[1],t[2]);
-    f.M = KDL::Rotation::Quaternion(q.getX(), q.getY(), q.getZ(), q.getW());
+    f.M = KDL::Rotation::Quaternion(q.x(), q.y(), q.z(), q.w());
 
     return f;
 }
@@ -156,12 +156,12 @@ public:
 
     }
 
-    std::map<std::string,shared_ptr<fcl::CollisionGeometry> > getShapes()
+    std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > getShapes()
     {
         return _computeDistance.shapes_;
     }
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > getcollision_objects()
+    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
     {
         return _computeDistance.collision_objects_;
     }
@@ -182,7 +182,7 @@ public:
     }
 
     bool globalToLinkCoordinates(const std::string& linkName,
-                                 const fcl::Transform3f &fcl_w_T_f,
+                                 const fcl::Transform3<double> &fcl_w_T_f,
                                  KDL::Frame &link_T_f)
     {
 
@@ -190,13 +190,13 @@ public:
     }
 
     bool globalToLinkCoordinatesKDL(const std::string& linkName,
-                                    const fcl::Transform3f &fcl_w_T_f,
+                                    const fcl::Transform3<double> &fcl_w_T_f,
                                     KDL::Frame &link_T_f)
     {
 
         KDL::Frame w_T_f = fcl2KDL(fcl_w_T_f);
 
-        fcl::Transform3f fcl_w_T_shape = _computeDistance.collision_objects_[linkName]->getTransform();
+        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.collision_objects_[linkName]->getTransform();
         KDL::Frame w_T_shape = fcl2KDL(fcl_w_T_shape);
 
         KDL::Frame shape_T_f = w_T_shape.Inverse()*w_T_f;
@@ -296,16 +296,16 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     ASSERT_EQ(result.getLinkNames().second, linkB);
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
-    std::map<std::string,shared_ptr<fcl::CollisionGeometry> > shapes_test;
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > collision_objects_test;
+    std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_test;
+    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
     shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 
-    boost::shared_ptr<fcl::CollisionObject> collision_geometry_l = collision_objects_test[linkA];
-    boost::shared_ptr<fcl::CollisionObject> collision_geometry_r = collision_objects_test[linkB];
+    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
+    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
 
 
@@ -331,17 +331,17 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
               result.getLink_T_closestPoint().second ).p
         ).Norm();
 
-    fcl::DistanceRequest distance_request;
+    fcl::DistanceRequest<double> distance_request;
 #if FCL_MINOR_VERSION > 2
     distance_request.gjk_solver_type = fcl::GST_INDEP;
 #endif
     distance_request.enable_nearest_points = true;
 
-    fcl::DistanceResult distance_result;
+    fcl::DistanceResult<double> distance_result;
 
-    fcl::CollisionObject* left_hand_collision_object =
+    fcl::CollisionObject<double>* left_hand_collision_object =
         collision_geometry_l.get();
-    fcl::CollisionObject* right_hand_collision_object =
+    fcl::CollisionObject<double>* right_hand_collision_object =
         collision_geometry_r.get();
 
     fcl::distance(left_hand_collision_object, right_hand_collision_object,
@@ -419,16 +419,16 @@ TEST_F(testCollisionUtils, checkTimings)
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
-    std::map<std::string,shared_ptr<fcl::CollisionGeometry> > shapes_test;
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > collision_objects_test;
+    std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_test;
+    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
     shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 
-    boost::shared_ptr<fcl::CollisionObject> collision_geometry_l = collision_objects_test[linkA];
-    boost::shared_ptr<fcl::CollisionObject> collision_geometry_r = collision_objects_test[linkB];
+    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
+    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
     int left_hand_index = _model_ptr->getLinkID(linkA);
     if(left_hand_index == -1)
@@ -458,17 +458,17 @@ TEST_F(testCollisionUtils, checkTimings)
 
     {
         tic = std::chrono::high_resolution_clock::now();
-        fcl::DistanceRequest distance_request;
+        fcl::DistanceRequest<double> distance_request;
 #if FCL_MINOR_VERSION > 2
         distance_request.gjk_solver_type = fcl::GST_INDEP;
 #endif
         distance_request.enable_nearest_points = true;
 
-        fcl::DistanceResult distance_result;
+        fcl::DistanceResult<double> distance_result;
 
-        fcl::CollisionObject* left_hand_collision_object =
+        fcl::CollisionObject<double>* left_hand_collision_object =
             collision_geometry_l.get();
-        fcl::CollisionObject* right_hand_collision_object =
+        fcl::CollisionObject<double>* right_hand_collision_object =
             collision_geometry_r.get();
 
         fcl::distance(left_hand_collision_object, right_hand_collision_object,
@@ -481,22 +481,23 @@ TEST_F(testCollisionUtils, checkTimings)
 
     {
         tic = std::chrono::high_resolution_clock::now();
-        fcl::DistanceRequest distance_request;
+        fcl::DistanceRequest<double> distance_request;
 #if FCL_MINOR_VERSION > 2
         distance_request.gjk_solver_type = fcl::GST_INDEP;
 #endif
         distance_request.enable_nearest_points = false;
 
-        fcl::DistanceResult distance_result;
+        fcl::DistanceResult<double> distance_result;
 
-        fcl::CollisionObject* left_hand_collision_object =
+        fcl::CollisionObject<double>* left_hand_collision_object =
             collision_geometry_l.get();
-        fcl::CollisionObject* right_hand_collision_object =
+        fcl::CollisionObject<double>* right_hand_collision_object =
             collision_geometry_r.get();
 
         fcl::distance(left_hand_collision_object, right_hand_collision_object,
                       distance_request,
                       distance_result);
+
         toc = std::chrono::high_resolution_clock::now();
         elapsed = toc - tic;
         std::cout << "fcl capsule-capsule without closest-point query t: " << elapsed.count() << std::endl;
@@ -540,37 +541,79 @@ TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > collision_objects_test =
-        compute_distance_observer.getcollision_objects();
-    boost::shared_ptr<fcl::CollisionObject> collision_geometry_l = collision_objects_test[linkA];
-    boost::shared_ptr<fcl::CollisionObject> collision_geometry_r = collision_objects_test[linkB];
 
-    fcl::DistanceRequest distance_request;
+    std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_test;
+    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
+    std::map<std::string,KDL::Frame> link_T_shape_test;
+
+    shapes_test = compute_distance_observer.getShapes();
+    collision_objects_test = compute_distance_observer.getcollision_objects();
+    link_T_shape_test = compute_distance_observer.getlink_T_shape();
+
+    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
+    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
+
+    int left_hand_index = _model_ptr->getLinkID(linkA);
+    if(left_hand_index == -1)
+        std::cout << "Failed to get lefthand_index" << std::endl;
+
+    int right_hand_index = _model_ptr->getLinkID(linkB);
+    if(right_hand_index == -1)
+        std::cout << "Failed to get righthand_index" << std::endl;
+
+    auto tic = std::chrono::high_resolution_clock::now();
+    compute_distance_observer.updateCollisionObjects();
+    auto toc = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = toc - tic;
+    std::cout << "updateCollisionObjects t: " << elapsed.count() << std::endl;
+
+    tic = std::chrono::high_resolution_clock::now();
+    compute_distance->getLinkDistances();
+    toc = std::chrono::high_resolution_clock::now();
+    elapsed = toc - tic;
+    std::cout << "getLinkDistances() t: " << elapsed.count() << std::endl;
+
+    tic = std::chrono::high_resolution_clock::now();
+    compute_distance->getLinkDistances(0.05);
+    toc = std::chrono::high_resolution_clock::now();
+    elapsed = toc - tic;
+    std::cout << "getLinkDistances(0.05) t: " << elapsed.count() << std::endl;
+
+
+        tic = std::chrono::high_resolution_clock::now();
+        fcl::DistanceRequest<double> distance_request;
 #if FCL_MINOR_VERSION > 2
-    distance_request.gjk_solver_type = fcl::GST_INDEP;
+        distance_request.gjk_solver_type = fcl::GST_INDEP;
 #endif
-    distance_request.enable_nearest_points = true;
+        distance_request.enable_nearest_points = true;
 
-    fcl::DistanceResult distance_result;
+        fcl::DistanceResult<double> distance_result;
 
-    fcl::CollisionObject* left_hand_collision_object =
-        collision_geometry_l.get();
-    fcl::CollisionObject* right_hand_collision_object =
-        collision_geometry_r.get();
+        fcl::CollisionObject<double>* left_hand_collision_object =
+            collision_geometry_l.get();
+        fcl::CollisionObject<double>* right_hand_collision_object =
+            collision_geometry_r.get();
 
-    fcl::distance(left_hand_collision_object, right_hand_collision_object,
-                  distance_request,
-                  distance_result);
+        fcl::distance(left_hand_collision_object, right_hand_collision_object,
+                      distance_request,
+                      distance_result);
+        toc = std::chrono::high_resolution_clock::now();
+        elapsed = toc - tic;
+        std::cout << "fcl capsule-capsule t: " << elapsed.count() << std::endl;
+
 
     KDL::Frame lA_T_pA_KDL;
     KDL::Frame lA_T_pA;
-    compute_distance_observer.globalToLinkCoordinatesKDL(linkA,distance_result.nearest_points[0],lA_T_pA_KDL);
-    compute_distance_observer.globalToLinkCoordinates(linkA,distance_result.nearest_points[0],lA_T_pA);
+
+    fcl::Transform3<double> T; T.setIdentity();
+    T.translation() = distance_result.nearest_points[0];
+
+    compute_distance_observer.globalToLinkCoordinatesKDL(linkA,T,lA_T_pA_KDL);
+    compute_distance_observer.globalToLinkCoordinates(linkA,T,lA_T_pA);
 
     EXPECT_EQ(lA_T_pA_KDL, lA_T_pA);
 }

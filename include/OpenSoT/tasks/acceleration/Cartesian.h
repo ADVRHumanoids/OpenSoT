@@ -78,6 +78,24 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                           const KDL::Twist& vel_ref,
                           const KDL::Twist& acc_ref);
 
+        /**
+         * @brief setVirtualForce this version permits to set a virtual force which is transformed into an acceleration
+         * using:
+         *
+         *      xddot = (JB^1J')F
+         *
+         * where F is the virtual force, J is the task Jacobian and B is the inertia matrix.
+         * NOTICE:
+         * if the SubTask is used, due to the coupling given by the inertia matrix, the provided reference F
+         * have to contain 0 in the non controlled directions.
+         * For example:
+         *
+         *  T%{0,2,4} : F = [fx, 0, fz, 0, fp, 0]'
+         *
+         * @param virtual_force_ref
+         */
+        void setVirtualForce(const Eigen::Vector6d& virtual_force_ref);
+
 
         void getReference(Eigen::Affine3d& ref);
         void getReference(KDL::Frame& ref);
@@ -107,6 +125,13 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          * @return internal acceleration reference
          */
         const Eigen::Vector6d& getCachedAccelerationReference() const;
+
+        /**
+         * @brief getCachedVirtualForceReference can be used to get virtual force reference after update(), it will reset
+         * next update()
+         * @return internal virtual force reference
+         */
+        const Eigen::Vector6d& getCachedVirtualForceReference() const;
 
 
         void getActualPose(Eigen::Affine3d& actual);
@@ -239,7 +264,19 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Affine3d _base_T_distal;
 
         Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
-        
+
+        void compute_cartesian_inertia_inverse();
+
+
+        //
+        Eigen::Vector6d _virtual_force_ref, _virtual_force_ref_cached;
+        /**
+         * @brief _Mi inverse of Cartesian Inertia matrix
+         */
+        Eigen::Matrix6d _Mi;
+
+        Eigen::MatrixXd _tmpMatrixXd;
+        Eigen::MatrixXd _Bi;
     };
     
 } } }

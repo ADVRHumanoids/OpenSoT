@@ -47,8 +47,12 @@ public:
      * to send to the robot
      * @param x optimized variables
      * @param tau computed torques
+     * @param qddot computed accelerations from solution x
+     * @param contact_wrench computed wrenches from solution x
+     * @return true if the model is fixed base, false if the base wrench is not 0 (for floating base models)
      */
-    bool computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau, Eigen::VectorXd& qddot);
+    bool computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau,
+                        Eigen::VectorXd& qddot, std::vector<Eigen::Vector6d>& contact_wrench);
     
     
 

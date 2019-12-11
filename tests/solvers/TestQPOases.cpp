@@ -361,7 +361,7 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
 
     //OpenSoT::solvers::QPOasesBackEnd testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
     OpenSoT::solvers::BackEnd::Ptr testProblem = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1.);
+                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1e-9);
 
     testProblem->initProblem(sp.H,
                             sp.g,
@@ -373,16 +373,16 @@ TEST_F(testQPOasesProblem, testSimpleProblem)
 
     EXPECT_TRUE(testProblem->solve());
     Eigen::VectorXd s = testProblem->getSolution();
-    EXPECT_EQ(-sp.g[0], s[0]);
-    EXPECT_EQ(-sp.g[1], s[1]);
+    EXPECT_NEAR(-sp.g[0], s[0],1e-14)<<"-sp.g[0]: "<<-sp.g[0]<<"  VS  s[0]: "<<s[0]<<std::endl;
+    EXPECT_NEAR(-sp.g[1], s[1],1e-14)<<"-sp.g[1]: "<<-sp.g[1]<<"  VS  s[1]: "<<s[1]<<std::endl;
 
-    for(unsigned int i = 0; i < 10; ++i)
+    for(unsigned int i = 0; i < 1000; ++i)
     {
         EXPECT_TRUE(testProblem->solve());
 
         Eigen::VectorXd s = testProblem->getSolution();
-        EXPECT_EQ(-sp.g[0], s[0]);
-        EXPECT_EQ(-sp.g[1], s[1]);
+        EXPECT_NEAR(-sp.g[0], s[0],1e-14);
+        EXPECT_NEAR(-sp.g[1], s[1],1e-14);
     }
 
 }
@@ -397,7 +397,7 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
 
     //OpenSoT::solvers::QPOasesBackEnd testProblem(x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht);
     OpenSoT::solvers::BackEnd::Ptr testProblem = OpenSoT::solvers::BackEndFactory(
-                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1.);
+                OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,1e-9);
 
     testProblem->initProblem(sp.H,
                             sp.g,
@@ -409,8 +409,8 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
 
     EXPECT_TRUE(testProblem->solve());
     Eigen::VectorXd s = testProblem->getSolution();
-    EXPECT_EQ(-sp.g[0], s[0]);
-    EXPECT_EQ(-sp.g[1], s[1]);
+    EXPECT_NEAR(-sp.g[0], s[0],1e-11);
+    EXPECT_NEAR(-sp.g[1], s[1],1e-11);
 
     sp.g[0] = -1.0; sp.g[1] = 1.0;
     testProblem->updateTask(sp.H,
@@ -418,8 +418,8 @@ TEST_F(testQPOasesProblem, testUpdatedProblem)
     EXPECT_TRUE(testProblem->solve());
 
     s = testProblem->getSolution();
-    EXPECT_EQ(-sp.g[0], s[0]);
-    EXPECT_EQ(-sp.g[1], s[1]);
+    EXPECT_NEAR(-sp.g[0], s[0],1e-14);
+    EXPECT_NEAR(-sp.g[1], s[1],1e-14);
 }
 
 void initializeIfNeeded()
@@ -1026,7 +1026,9 @@ TEST_F(testiHQP, testContructor2Problems)
 
     EXPECT_TRUE(sot.getBackEnd(1, back_end_i));
 
-    EXPECT_TRUE(back_end_i->getH() == postural_task->getA().transpose()*postural_task->getA());
+    EXPECT_TRUE(back_end_i->getH() ==
+                postural_task->getA().transpose()*postural_task->getA()+back_end_i->getEpsRegularisation()*
+                Eigen::MatrixXd::Identity(postural_task->getA().rows(),postural_task->getA().cols())); //<--because we added manual regularisation in qpoases
 }
 
 TEST_F(testiHQP, testContructor1ProblemAggregated)

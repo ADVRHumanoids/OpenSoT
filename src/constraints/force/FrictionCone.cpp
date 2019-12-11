@@ -40,7 +40,7 @@ namespace OpenSoT {
            double __mu = _mu.second;
            _wRl = _mu.first;
 
-           __mu = std::sqrt(2.*__mu)/2.;
+           __mu = __mu/std::sqrt(2.);
 
            _Ci(0,0) = 1.;  _Ci(0,1) = 0.;  _Ci(0,2) = -__mu;
            _Ci(1,0) = -1.; _Ci(1,1) = 0.;  _Ci(1,2) = -__mu;
