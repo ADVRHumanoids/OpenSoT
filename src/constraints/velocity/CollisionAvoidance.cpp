@@ -175,9 +175,9 @@ bool CollisionAvoidance::parseCollisionObjects()
     robot_urdf.initFile ( urdf_to_load );
     robot_srdf.initFile ( robot_urdf, srdf_to_load );
 
-    std::vector<boost::shared_ptr<urdf::Link> > links;
+    std::vector<std::shared_ptr<urdf::Link> > links;
     for ( auto &it:_interested_links ) {
-        boost::shared_ptr<urdf::Link> link;
+        std::shared_ptr<urdf::Link> link;
         robot_urdf.getLink ( it, link );
         links.push_back ( link );
     }
@@ -203,8 +203,8 @@ bool CollisionAvoidance::parseCollisionObjects()
                 if ( link->collision->geometry->type == urdf::Geometry::CYLINDER ) {
                     std::cout << "adding capsule for " << link->name << std::endl;
 
-                    boost::shared_ptr<urdf::Cylinder> collisionGeometry =
-                        boost::dynamic_pointer_cast<urdf::Cylinder> (
+                    std::shared_ptr<urdf::Cylinder> collisionGeometry =
+                        std::dynamic_pointer_cast<urdf::Cylinder> (
                             link->collision->geometry );
 
                     shape.reset ( new fcl::Capsuled ( collisionGeometry->radius,
@@ -216,8 +216,8 @@ bool CollisionAvoidance::parseCollisionObjects()
                 } else if ( link->collision->geometry->type == urdf::Geometry::SPHERE ) {
                     std::cout << "adding sphere for " << link->name << std::endl;
 
-                    boost::shared_ptr<urdf::Sphere> collisionGeometry =
-                        boost::dynamic_pointer_cast<urdf::Sphere> (
+                    std::shared_ptr<urdf::Sphere> collisionGeometry =
+                        std::dynamic_pointer_cast<urdf::Sphere> (
                             link->collision->geometry );
 
                     shape.reset ( new fcl::Sphered ( collisionGeometry->radius ) );
@@ -225,8 +225,8 @@ bool CollisionAvoidance::parseCollisionObjects()
                 } else if ( link->collision->geometry->type == urdf::Geometry::BOX ) {
                     std::cout << "adding box for " << link->name << std::endl;
 
-                    boost::shared_ptr<urdf::Box> collisionGeometry =
-                        boost::dynamic_pointer_cast<urdf::Box> (
+                    std::shared_ptr<urdf::Box> collisionGeometry =
+                        std::dynamic_pointer_cast<urdf::Box> (
                             link->collision->geometry );
 
                     shape.reset ( new fcl::Boxd ( collisionGeometry->dim.x,
@@ -239,7 +239,7 @@ bool CollisionAvoidance::parseCollisionObjects()
                 } else if ( link->collision->geometry->type == urdf::Geometry::MESH ) {
                     std::cout << "adding mesh for " << link->name << std::endl;
 
-                    boost::shared_ptr< ::urdf::Mesh> collisionGeometry = boost::dynamic_pointer_cast< ::urdf::Mesh> ( link->collision->geometry );
+                    std::shared_ptr< ::urdf::Mesh> collisionGeometry = std::dynamic_pointer_cast< ::urdf::Mesh> ( link->collision->geometry );
 
                     shapes::Mesh *mesh = shapes::createMeshFromResource ( collisionGeometry->filename );
                     if ( mesh == NULL ) {

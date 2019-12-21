@@ -175,10 +175,10 @@ public:
     public:
         std::string linkA;
         std::string linkB;
-        boost::shared_ptr<fcl::CollisionObject<double>> collisionObjectA;
-        boost::shared_ptr<fcl::CollisionObject<double>> collisionObjectB;
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA;
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB;
+        std::shared_ptr<fcl::CollisionObject<double>> collisionObjectA;
+        std::shared_ptr<fcl::CollisionObject<double>> collisionObjectB;
+        std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA;
+        std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB;
 
         LinksPair(ComputeLinksDistance* const father, std::string linkA, std::string linkB) :
             linkA(linkA), linkB(linkB)
@@ -228,12 +228,12 @@ private:
     /**
      * @brief custom_capsules_ is a map of custom capsules specified as endpoints + radius
      */
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > custom_capsules_;
+    std::map<std::string,std::shared_ptr<ComputeLinksDistance::Capsule> > custom_capsules_;
 
     /**
      * @brief collision_objects_ a map of collision objects
      */
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_;
+    std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > collision_objects_;
 
     /**
      * @brief link_T_shape a map of transforms from link frame to shape frame.

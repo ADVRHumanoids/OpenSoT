@@ -36,14 +36,14 @@ bool ComputeLinksDistance::shapeToLinkCoordinates ( const std::string& linkName,
 
 bool ComputeLinksDistance::parseCollisionObjects ()
 {
-    std::vector<boost::shared_ptr<urdf::Link> > links;
+    std::vector<std::shared_ptr<urdf::Link> > links;
     robot_urdf.getLinks ( links );
-    typedef std::vector<boost::shared_ptr<urdf::Link> >::iterator it_type;
+    typedef std::vector<std::shared_ptr<urdf::Link> >::iterator it_type;
 
     for ( it_type iterator = links.begin();
             iterator != links.end(); iterator++ ) {
 
-        boost::shared_ptr<urdf::Link> link = *iterator;
+        std::shared_ptr<urdf::Link> link = *iterator;
 
         if ( link->collision ) {
             if ( link->collision->geometry->type == urdf::Geometry::CYLINDER ||
@@ -58,8 +58,8 @@ bool ComputeLinksDistance::parseCollisionObjects ()
                 if ( link->collision->geometry->type == urdf::Geometry::CYLINDER ) {
                     std::cout << "adding capsule for " << link->name << std::endl;
 
-                    boost::shared_ptr<urdf::Cylinder> collisionGeometry =
-                        boost::dynamic_pointer_cast<urdf::Cylinder> (
+                    std::shared_ptr<urdf::Cylinder> collisionGeometry =
+                        std::dynamic_pointer_cast<urdf::Cylinder> (
                             link->collision->geometry );
 
                     shape.reset ( new fcl::Capsule<double> ( collisionGeometry->radius,
@@ -69,15 +69,15 @@ bool ComputeLinksDistance::parseCollisionObjects ()
                     shape_origin.p -= collisionGeometry->length/2.0 * shape_origin.M.UnitZ();
 
                     custom_capsules_[link->name] =
-                        boost::shared_ptr<ComputeLinksDistance::Capsule> (
+                        std::shared_ptr<ComputeLinksDistance::Capsule> (
                             new ComputeLinksDistance::Capsule ( shape_origin,
                                     collisionGeometry->radius,
                                     collisionGeometry->length ) );
                 } else if ( link->collision->geometry->type == urdf::Geometry::SPHERE ) {
                     std::cout << "adding sphere for " << link->name << std::endl;
 
-                    boost::shared_ptr<urdf::Sphere> collisionGeometry =
-                        boost::dynamic_pointer_cast<urdf::Sphere> (
+                    std::shared_ptr<urdf::Sphere> collisionGeometry =
+                        std::dynamic_pointer_cast<urdf::Sphere> (
                             link->collision->geometry );
 
                     shape.reset ( new fcl::Sphere<double> ( collisionGeometry->radius ) );
@@ -85,8 +85,8 @@ bool ComputeLinksDistance::parseCollisionObjects ()
                 } else if ( link->collision->geometry->type == urdf::Geometry::BOX ) {
                     std::cout << "adding box for " << link->name << std::endl;
 
-                    boost::shared_ptr<urdf::Box> collisionGeometry =
-                        boost::dynamic_pointer_cast<urdf::Box> (
+                    std::shared_ptr<urdf::Box> collisionGeometry =
+                        std::dynamic_pointer_cast<urdf::Box> (
                             link->collision->geometry );
 
                     shape.reset ( new fcl::Box<double> ( collisionGeometry->dim.x,
@@ -99,7 +99,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
                 } else if ( link->collision->geometry->type == urdf::Geometry::MESH ) {
                     std::cout << "adding mesh for " << link->name << std::endl;
 
-                    boost::shared_ptr< ::urdf::Mesh> collisionGeometry = boost::dynamic_pointer_cast< ::urdf::Mesh> ( link->collision->geometry );
+                    std::shared_ptr< ::urdf::Mesh> collisionGeometry = std::dynamic_pointer_cast< ::urdf::Mesh> ( link->collision->geometry );
 
                     shapes::Mesh *mesh = shapes::createMeshFromResource ( collisionGeometry->filename );
                     if ( mesh == NULL ) {
@@ -135,7 +135,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
                     shape_origin = toKdl ( link->collision->origin );
                 }
 
-                boost::shared_ptr<fcl::CollisionObject<double>> collision_object (
+                std::shared_ptr<fcl::CollisionObject<double>> collision_object (
                             new fcl::CollisionObject<double> ( shape ) );
 
 
@@ -158,7 +158,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
 bool ComputeLinksDistance::updateCollisionObjects()
 {
     typedef std::set<std::string>::iterator it_links;
-    typedef std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> >::iterator it_co;
+    typedef std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> >::iterator it_co;
 
 //    for(it_type it = collision_objects_.begin();
 //        it != collision_objects_.end(); ++it)
@@ -269,12 +269,12 @@ void ComputeLinksDistance::generatePairsToCheck()
 
 ComputeLinksDistance::ComputeLinksDistance ( XBot::ModelInterface &model ) : model ( model )
 {
-    boost::shared_ptr<urdf::Model> urdf_model_ptr =
-        boost::shared_ptr<urdf::Model> ( new urdf::Model() );
+    std::shared_ptr<urdf::Model> urdf_model_ptr =
+        std::shared_ptr<urdf::Model> ( new urdf::Model() );
     urdf_model_ptr->initString ( model.getUrdfString() );
 
-    boost::shared_ptr<srdf::Model> srdf_model_ptr =
-        boost::shared_ptr<srdf::Model> ( new srdf::Model() );
+    std::shared_ptr<srdf::Model> srdf_model_ptr =
+        std::shared_ptr<srdf::Model> ( new srdf::Model() );
     srdf_model_ptr->initString ( *urdf_model_ptr, model.getSrdfString() );
 
     moveit_robot_model.reset ( new robot_model::RobotModel ( urdf_model_ptr, srdf_model_ptr ) );
@@ -435,7 +435,7 @@ bool ComputeLinksDistance::setCollisionBlackList ( std::list<LinkPairDistance::L
 
     std::vector<std::string> linksWithCollisionObjects;
 
-    typedef std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> >::iterator iter_collision;
+    typedef std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> >::iterator iter_collision;
     for ( iter_collision it = collision_objects_.begin(); it != collision_objects_.end(); ++it ) {
         linksWithCollisionObjects.push_back ( it->first );
     }
