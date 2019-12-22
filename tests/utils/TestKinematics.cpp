@@ -153,7 +153,7 @@ TEST_F(testKinematics, testRelativeJacobian)
 
     Eigen::Matrix6d Adj2; Adj2.setZero();
     Adj2.block(0,0,3,3) = wTb.linear().transpose();
-    Adj2.block(0,3,3,3) = wTb.linear().transpose()*skew(-p);
+    Adj2.block(0,3,3,3) = -wTb.linear().transpose()*skew(p);
     Adj2.block(3,3,3,3) = wTb.linear().transpose();
     //std::cout<<"Adj2: "<<std::endl<<Adj2<<std::endl;
     Eigen::MatrixXd J2 = Adj2*Jbase; //Jacobian of base_link expressed in base_link computed at distal_link
