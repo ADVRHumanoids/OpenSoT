@@ -116,53 +116,56 @@ int getRandomInt(const int min, const int max)
 
 TEST_F(testKinematics, testRelativeJacobian)
 {
-    Eigen::VectorXd qmin, qmax;
-    _model_ptr->getJointLimits(qmin, qmax);
+    for(unsigned int k = 0; k < 100; ++k)
+    {
+        Eigen::VectorXd qmin, qmax;
+        _model_ptr->getJointLimits(qmin, qmax);
 
-    std::cout<<"# Joints: "<<_model_ptr->getJointNum()<<std::endl;
+        std::cout<<"# Joints: "<<_model_ptr->getJointNum()<<std::endl;
 
-    _model_ptr->setJointPosition(getRandomAngles(qmin, qmax, qmin.size()));
-    _model_ptr->update();
+        _model_ptr->setJointPosition(getRandomAngles(qmin, qmax, qmin.size()));
+        _model_ptr->update();
 
-    urdf::ModelInterface urdf_model = _model_ptr->getUrdf();
-    std::vector<urdf::LinkSharedPtr> links;
-    urdf_model.getLinks(links);
+        urdf::ModelInterface urdf_model = _model_ptr->getUrdf();
+        std::vector<urdf::LinkSharedPtr> links;
+        urdf_model.getLinks(links);
 
-    std::string base_link =   links[getRandomInt(0, links.size()-1)]->name; //"LSoftHand";
-    std::string distal_link = links[getRandomInt(0, links.size()-1)]->name; //"RSoftHand";
-    std::cout<<"base_link = "<<base_link<<"     distal_link = "<<distal_link<<std::endl;
+        std::string base_link =   links[getRandomInt(0, links.size()-1)]->name; //"LSoftHand";
+        std::string distal_link = links[getRandomInt(0, links.size()-1)]->name; //"RSoftHand";
+        std::cout<<"base_link = "<<base_link<<"     distal_link = "<<distal_link<<std::endl;
 
-    Eigen::MatrixXd J; _model_ptr->getRelativeJacobian(distal_link, base_link, J); //Jacobian of distal_link in base_link expressed in base_link
+        Eigen::MatrixXd J; _model_ptr->getRelativeJacobian(distal_link, base_link, J); //Jacobian of distal_link in base_link expressed in base_link
 
-    std::cout<<"Jacobian of "<<distal_link<<" wrt "<<base_link<<" expressed in "<<base_link<<": "<<std::endl<<J<<std::endl;
+        std::cout<<"Jacobian of "<<distal_link<<" wrt "<<base_link<<" expressed in "<<base_link<<": "<<std::endl<<J<<std::endl;
 
 
-    Eigen::Affine3d wTb; _model_ptr->getPose(base_link, wTb); //Pose of base_link in world
-    Eigen::Affine3d wTd; _model_ptr->getPose(distal_link, wTd); //Pose of distal_link in world
+        Eigen::Affine3d wTb; _model_ptr->getPose(base_link, wTb); //Pose of base_link in world
+        Eigen::Affine3d wTd; _model_ptr->getPose(distal_link, wTd); //Pose of distal_link in world
 
-    Eigen::MatrixXd Jdistal; _model_ptr->getJacobian(distal_link, Jdistal); //Jacobian of distal_link expressed in world
-    Eigen::MatrixXd Jbase; _model_ptr->getJacobian(base_link, Jbase); //Jacobian of base_link expressed in world
+        Eigen::MatrixXd Jdistal; _model_ptr->getJacobian(distal_link, Jdistal); //Jacobian of distal_link expressed in world
+        Eigen::MatrixXd Jbase; _model_ptr->getJacobian(base_link, Jbase); //Jacobian of base_link expressed in world
 
-    Eigen::Matrix6d Adj1; Adj1.setZero();
-    Adj1.block(0,0,3,3) = wTb.linear().transpose();
-    Adj1.block(3,3,3,3) = wTb.linear().transpose();
-    Eigen::MatrixXd J1 = Adj1*Jdistal; //Jacobian of distal_link expressed in base_link
-    //std::cout<<"J1: "<<std::endl<<J1<<std::endl;
+        Eigen::Matrix6d Adj1; Adj1.setZero();
+        Adj1.block(0,0,3,3) = wTb.linear().transpose();
+        Adj1.block(3,3,3,3) = wTb.linear().transpose();
+        Eigen::MatrixXd J1 = Adj1*Jdistal; //Jacobian of distal_link expressed in base_link
+        //std::cout<<"J1: "<<std::endl<<J1<<std::endl;
 
-    Eigen::Vector3d p = wTd.translation() - wTb.translation(); //relative position between distal_link and base_link expressed in world
+        Eigen::Vector3d p = wTd.translation() - wTb.translation(); //relative position between distal_link and base_link expressed in world
 
-    Eigen::Matrix6d Adj2; Adj2.setZero();
-    Adj2.block(0,0,3,3) = wTb.linear().transpose();
-    Adj2.block(0,3,3,3) = -wTb.linear().transpose()*skew(p);
-    Adj2.block(3,3,3,3) = wTb.linear().transpose();
-    //std::cout<<"Adj2: "<<std::endl<<Adj2<<std::endl;
-    Eigen::MatrixXd J2 = Adj2*Jbase; //Jacobian of base_link expressed in base_link computed at distal_link
-    //std::cout<<"J2: "<<std::endl<<J2<<std::endl;
+        Eigen::Matrix6d Adj2; Adj2.setZero();
+        Adj2.block(0,0,3,3) = wTb.linear().transpose();
+        Adj2.block(0,3,3,3) = -wTb.linear().transpose()*skew(p);
+        Adj2.block(3,3,3,3) = wTb.linear().transpose();
+        //std::cout<<"Adj2: "<<std::endl<<Adj2<<std::endl;
+        Eigen::MatrixXd J2 = Adj2*Jbase; //Jacobian of base_link expressed in base_link computed at distal_link
+        //std::cout<<"J2: "<<std::endl<<J2<<std::endl;
 
-    Eigen::MatrixXd JR = J1 - J2;
-    std::cout<<"Computed Jacobian of "<<distal_link<<" wrt "<<base_link<<" expressed in "<<base_link<<": "<<std::endl<<JR<<std::endl;
+        Eigen::MatrixXd JR = J1 - J2;
+        std::cout<<"Computed Jacobian of "<<distal_link<<" wrt "<<base_link<<" expressed in "<<base_link<<": "<<std::endl<<JR<<std::endl;
 
-    EXPECT_MATRIX_NEAR(J, JR, 1e-9);
+        EXPECT_MATRIX_NEAR(J, JR, 1e-9);
+    }
 }
 
 }
