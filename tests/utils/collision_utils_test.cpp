@@ -161,7 +161,7 @@ public:
         return _computeDistance.shapes_;
     }
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
+    std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
     {
         return _computeDistance.collision_objects_;
     }
@@ -171,7 +171,7 @@ public:
         return _computeDistance.link_T_shape;
     }
 
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
+    std::map<std::string,std::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
     {
         return _computeDistance.custom_capsules_;
     }
@@ -244,7 +244,7 @@ protected:
   }
 
   Eigen::VectorXd q;
-  boost::shared_ptr<ComputeLinksDistance> compute_distance;
+  std::shared_ptr<ComputeLinksDistance> compute_distance;
   XBot::ModelInterface::Ptr _model_ptr;
   std::string _path_to_cfg;
 
@@ -297,15 +297,15 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
     std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_test;
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
+    std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
     shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 
-    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
-    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
+    std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
+    std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
 
 
@@ -358,8 +358,8 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
                 righthand_capsule_ep1, righthand_capsule_ep2;
 
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[linkA];
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[linkB];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[linkA];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[linkB];
     capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
     capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
     lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
@@ -420,15 +420,15 @@ TEST_F(testCollisionUtils, checkTimings)
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
     std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_test;
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
+    std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
     shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 
-    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
-    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
+    std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
+    std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
     int left_hand_index = _model_ptr->getLinkID(linkA);
     if(left_hand_index == -1)
@@ -507,8 +507,8 @@ TEST_F(testCollisionUtils, checkTimings)
     KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
                 righthand_capsule_ep1, righthand_capsule_ep2;
 
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[linkA];
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[linkB];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[linkA];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[linkB];
 
     capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
     capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
@@ -547,15 +547,15 @@ TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
     std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_test;
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
+    std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
     shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 
-    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
-    boost::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
+    std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
+    std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
     int left_hand_index = _model_ptr->getLinkID(linkA);
     if(left_hand_index == -1)

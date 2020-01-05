@@ -181,7 +181,7 @@ public:
 //        return _computeDistance.shapes_;
 //    }
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
+    std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
     {
         return _computeDistance.collision_objects_;
     }
@@ -191,7 +191,7 @@ public:
         return _computeDistance.link_T_shape;
     }
 
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
+    std::map<std::string,std::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
     {
         return _computeDistance.custom_capsules_;
     }
@@ -321,15 +321,15 @@ void publishJointStates(const Eigen::VectorXd& q)
   XBot::ModelInterface::Ptr _model_ptr;
   std::string _path_to_cfg;
   Eigen::VectorXd q;
-  boost::shared_ptr<ComputeLinksDistance> compute_distance;
+  std::shared_ptr<ComputeLinksDistance> compute_distance;
   OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sc_constraint;
 
 #if ENABLE_ROS
   ///ROS
-  boost::shared_ptr<ros::NodeHandle> n;
+  std::shared_ptr<ros::NodeHandle> n;
   ros::Publisher pub;
   sensor_msgs::JointState joint_state;
-  boost::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
+  std::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
 #endif
 
 };
@@ -583,8 +583,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
             righthand_capsule_ep1, righthand_capsule_ep2;
 
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[linkA];
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[linkB];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[linkA];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[linkB];
     capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
     capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
@@ -830,8 +830,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
         KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
                 righthand_capsule_ep1, righthand_capsule_ep2;
 
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
+        std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
+        std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
         capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
         capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
@@ -1078,8 +1078,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
         KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
                 righthand_capsule_ep1, righthand_capsule_ep2;
 
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
+        std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
+        std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
         capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
         capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 
@@ -1204,8 +1204,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
             righthand_capsule_ep1, righthand_capsule_ep2;
 
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
+    std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
     capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
     capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 

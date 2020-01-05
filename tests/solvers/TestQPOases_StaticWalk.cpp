@@ -461,7 +461,7 @@ namespace{
                 _com.pose.orientation.z = z;
                 _com.pose.orientation.w = w;
 
-                Eigen::Affine3d _l_foot;
+                Eigen::Isometry3d _l_foot;
                 _l_foot(0,3) = l_foot.p.x()+0.02;
                 _l_foot(1,3) = l_foot.p.y();
                 _l_foot(2,3) = l_foot.p.z();
@@ -470,7 +470,7 @@ namespace{
                         _l_foot(i,j) = l_foot.M(i,j);
 
 
-                Eigen::Affine3d _r_foot;
+                Eigen::Isometry3d _r_foot;
                 _r_foot(0,3) = r_foot.p.x()+0.02;
                 _r_foot(1,3) = r_foot.p.y();
                 _r_foot(2,3) = r_foot.p.z();
@@ -490,7 +490,7 @@ namespace{
                 visual_tools->publishWireframeRectangle(_r_foot, 0.05, 0.1);
 
 
-                Eigen::Affine3d text_pose; text_pose.Identity();
+                Eigen::Isometry3d text_pose; text_pose.Identity();
                 text_pose(1,3) = -0.4;
                 std::string text = "Anchor: "+anchor+"\n";
                 text += "Robot Anchor: "+ _fb->getAnchor()+"\n";

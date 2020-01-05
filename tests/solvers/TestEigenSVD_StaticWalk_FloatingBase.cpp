@@ -474,7 +474,7 @@ public:
             _com.pose.orientation.z = z;
             _com.pose.orientation.w = w;
 
-            Eigen::Affine3d _l_foot;
+            Eigen::Isometry3d _l_foot;
             _l_foot(0,3) = l_foot.p.x()+0.02;
             _l_foot(1,3) = l_foot.p.y();
             _l_foot(2,3) = l_foot.p.z();
@@ -483,7 +483,7 @@ public:
                     _l_foot(i,j) = l_foot.M(i,j);
 
 
-            Eigen::Affine3d _r_foot;
+            Eigen::Isometry3d _r_foot;
             _r_foot(0,3) = r_foot.p.x()+0.02;
             _r_foot(1,3) = r_foot.p.y();
             _r_foot(2,3) = r_foot.p.z();
@@ -560,22 +560,22 @@ public:
     }
 
 
-    boost::shared_ptr<manipulation_trajectories> manip_trj;
-    boost::shared_ptr<walking_pattern_generator> walk_trj;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> r_wrist_trj_pub;
+    std::shared_ptr<manipulation_trajectories> manip_trj;
+    std::shared_ptr<walking_pattern_generator> walk_trj;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> r_wrist_trj_pub;
 
     ros::Publisher joint_state_pub;
-    boost::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
+    std::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
 
     rviz_visual_tools::RvizVisualToolsPtr visual_tools;
 
     XBot::ModelInterface::Ptr _model_ptr;
     Eigen::VectorXd _q;
 
-    boost::shared_ptr<ros::NodeHandle> _n;
+    std::shared_ptr<ros::NodeHandle> _n;
 
     void setGoodInitialPosition() {
         _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;

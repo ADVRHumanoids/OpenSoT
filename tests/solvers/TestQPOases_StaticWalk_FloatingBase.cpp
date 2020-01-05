@@ -503,7 +503,7 @@ public:
             _com.pose.orientation.z = z;
             _com.pose.orientation.w = w;
 
-            Eigen::Affine3d _l_foot;
+            Eigen::Isometry3d _l_foot;
             _l_foot(0,3) = l_foot.p.x()+0.02;
             _l_foot(1,3) = l_foot.p.y();
             _l_foot(2,3) = l_foot.p.z();
@@ -512,7 +512,7 @@ public:
                     _l_foot(i,j) = l_foot.M(i,j);
 
 
-            Eigen::Affine3d _r_foot;
+            Eigen::Isometry3d _r_foot;
             _r_foot(0,3) = r_foot.p.x()+0.02;
             _r_foot(1,3) = r_foot.p.y();
             _r_foot(2,3) = r_foot.p.z();
