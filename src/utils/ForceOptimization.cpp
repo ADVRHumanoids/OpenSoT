@@ -115,6 +115,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
                                                          1.0, 
                                                          OpenSoT::solvers::solver_back_ends::OSQP
                                                         );
+
     
     /* Initialize solution */
     _x_value.setZero(opt.getSize());
@@ -171,4 +172,9 @@ bool OpenSoT::utils::ForceOptimization::compute(const Eigen::VectorXd& fixed_bas
 void OpenSoT::utils::ForceOptimization::log(XBot::MatLogger::Ptr logger)
 {
     _autostack->log(logger);
+}
+
+double OpenSoT::utils::ForceOptimization::getObjective()
+{
+    return (_forza_giusta->getA()*_x_value - _forza_giusta->getb()).squaredNorm();
 }
