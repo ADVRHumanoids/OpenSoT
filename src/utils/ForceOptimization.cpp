@@ -104,16 +104,44 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
     /* Min wrench aggregated */
     auto min_force_aggr = boost::make_shared<OpenSoT::tasks::Aggregated>(min_wrench_tasks, opt.getSize());
 
+    /* Torque Lims */
+    Eigen::VectorXd tau_lims;
+    _model->getEffortLimits(tau_lims);
+    OpenSoT::constraints::GenericConstraint::Ptr torq_lims =
+            boost::make_shared<OpenSoT::constraints::GenericConstraint>("torque_limits", opt.getVariable("tau"),
+                                                                        tau_lims.segment(6,tau_lims.size()-6),
+                                                                        -tau_lims.segment(6,tau_lims.size()-6),
+                                                                        OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
+
+    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> wrench_lims_list;
+    for(auto wrench : _wrenches)
+    {
+        Eigen::Vector6d lims;
+        lims.setZero(); lims[0] = lims[1] = lims[2] = 1000.;
+        lims[3] = 15.;
+        lims[4] = 35;
+        lims[5] = 100.;
+
+        OpenSoT::constraints::GenericConstraint::Ptr wrench_lim =
+                boost::make_shared<OpenSoT::constraints::GenericConstraint>("wrench_limit", wrench,
+                                                                            lims,
+                                                                            -lims,
+                                                                            OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
+        wrench_lims_list.push_back(wrench_lim);
+    }
+    auto wrench_lims = boost::make_shared<OpenSoT::constraints::Aggregated>(wrench_lims_list, opt.getSize());
+
+
     /* Define optimization problem */
     _autostack = _forza_giusta /
-                    (min_tau_weight*min_tau);
+                    (min_tau_weight*min_tau + min_force_aggr);
                     
-    _autostack << _friction_cone << static_constr;
+    _autostack << _friction_cone << static_constr<<torq_lims<<wrench_lims;
     
     _solver = boost::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), 
                                                          _autostack->getBounds(),
                                                          1.0, 
-                                                         OpenSoT::solvers::solver_back_ends::OSQP
+                                                         OpenSoT::solvers::solver_back_ends::qpOASES
                                                         );
 
     
@@ -176,5 +204,7 @@ void OpenSoT::utils::ForceOptimization::log(XBot::MatLogger::Ptr logger)
 
 double OpenSoT::utils::ForceOptimization::getObjective()
 {
+    std::cout<<"_forza_giusta->getA()*_x_value: "<<std::endl<<(_forza_giusta->getA()*_x_value).transpose()<<std::endl;
+    std::cout<<"_forza_giusta->getb(): "<<std::endl<<_forza_giusta->getb().transpose()<<std::endl;
     return (_forza_giusta->getA()*_x_value - _forza_giusta->getb()).squaredNorm();
 }
