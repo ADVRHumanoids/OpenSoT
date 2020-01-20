@@ -33,7 +33,7 @@ namespace OpenSoT {
          };
 
      public:
-        typedef boost::shared_ptr<WalkingStack> Ptr;
+        typedef std::shared_ptr<WalkingStack> Ptr;
 
          /**
           * @brief WalkingStack creates and tunes a stack for walking

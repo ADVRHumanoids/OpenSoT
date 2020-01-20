@@ -39,7 +39,7 @@ namespace OpenSoT {
         };
 
     public:
-        typedef boost::shared_ptr<FloatingBaseEstimation> Ptr;
+        typedef std::shared_ptr<FloatingBaseEstimation> Ptr;
 
         FloatingBaseEstimation(XBot::ModelInterface::Ptr model,
                                std::vector<std::string> contact_links,

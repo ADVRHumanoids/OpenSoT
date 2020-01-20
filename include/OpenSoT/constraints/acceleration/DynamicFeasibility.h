@@ -29,7 +29,7 @@ class DynamicFeasibility : public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
   
 public:
     
-    typedef boost::shared_ptr<DynamicFeasibility> Ptr;
+    typedef std::shared_ptr<DynamicFeasibility> Ptr;
     
     DynamicFeasibility(const std::string constraint_id, 
                        const XBot::ModelInterface& robot,

@@ -40,7 +40,7 @@
              */
             class CollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<CollisionAvoidance> Ptr;
+                typedef std::shared_ptr<CollisionAvoidance> Ptr;
             protected:
                 double _boundScaling;
                 /**
@@ -70,7 +70,7 @@
                 /**
                  * @brief collision_objects_ a map of collision objects
                  */
-                std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd> > collision_objects_;
+                std::map<std::string, std::shared_ptr<fcl::CollisionObjectd> > collision_objects_;
                 
                 /**
                  * @brief shapes_ is a map of collision geometries
@@ -134,7 +134,7 @@
                                        XBot::ModelInterface &robot,
                                        std::string& base_link,
                                        const std::vector<std::string> &interested_robot_links,
-                                       const std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> &envionment_collision_objects,
+                                       const std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> &envionment_collision_objects,
                                        const double &detection_threshold = std::numeric_limits<double>::infinity(),
                                        const double &linkPair_threshold = 0.0,
                                        const double &boundScaling = 1.0);

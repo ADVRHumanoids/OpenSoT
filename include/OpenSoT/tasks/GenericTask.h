@@ -15,7 +15,7 @@ namespace OpenSoT { namespace tasks  {
  */
 class GenericTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
   public:
-    typedef boost::shared_ptr<GenericTask> Ptr;
+    typedef std::shared_ptr<GenericTask> Ptr;
 
     /**
      * @brief GenericTask constructor

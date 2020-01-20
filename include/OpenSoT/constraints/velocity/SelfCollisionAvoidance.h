@@ -42,7 +42,7 @@
              */
             class SelfCollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
+                typedef std::shared_ptr<SelfCollisionAvoidance> Ptr;
             protected:
                 double _boundScaling;
                 /**

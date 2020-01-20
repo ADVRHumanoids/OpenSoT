@@ -43,7 +43,7 @@
                 
             public:
                 
-                typedef boost::shared_ptr<CoM> Ptr;
+                typedef std::shared_ptr<CoM> Ptr;
                 
             private:
                 

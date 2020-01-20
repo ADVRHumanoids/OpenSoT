@@ -52,7 +52,7 @@
                 
             public:
                 
-                typedef boost::shared_ptr<Cartesian> Ptr;
+                typedef std::shared_ptr<Cartesian> Ptr;
                 
             protected:
                 

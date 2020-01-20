@@ -10,7 +10,7 @@ namespace name {
 class testiHQP: public OpenSoT::solvers::iHQP
 {
 public:
-    typedef boost::shared_ptr<testiHQP> Ptr;
+    typedef std::shared_ptr<testiHQP> Ptr;
 
     testiHQP(OpenSoT::AutoStack& stack_of_tasks,
              const double eps_regularisation = 0.,
@@ -79,7 +79,7 @@ TEST_F(testClass, testUserRegularisation)
     q.setZero();
     qd.setOnes();
 
-    _postural = boost::make_shared<OpenSoT::tasks::GenericTask>(
+    _postural = std::make_shared<OpenSoT::tasks::GenericTask>(
                 "_postural", I, (qd-q));
 
     _postural->update(Eigen::VectorXd(1));
@@ -87,7 +87,7 @@ TEST_F(testClass, testUserRegularisation)
     OpenSoT::AutoStack::Ptr stack;
     stack /= _postural;
 
-    _solver = boost::make_shared<testiHQP>(*stack);
+    _solver = std::make_shared<testiHQP>(*stack);
 
     Eigen::VectorXd ddq;
     EXPECT_TRUE(_solver->solve(ddq));
@@ -113,13 +113,13 @@ TEST_F(testClass, testUserRegularisation)
     std::cout<<"qdot: "<<qdot.transpose()<<std::endl;
     double dt = 0.001;
 
-    _minvel = boost::make_shared<OpenSoT::tasks::GenericTask>(
+    _minvel = std::make_shared<OpenSoT::tasks::GenericTask>(
                 "minvel", I, -(1./dt)*qdot);
     _minvel->update(Eigen::VectorXd(1));
 
     stack->setRegularisationTask(_minvel);
 
-    _solver = boost::make_shared<testiHQP>(*stack);
+    _solver = std::make_shared<testiHQP>(*stack);
 
     EXPECT_TRUE(_solver->solve(ddq));
 

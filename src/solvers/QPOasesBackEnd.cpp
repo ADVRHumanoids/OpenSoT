@@ -192,7 +192,7 @@ bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
+        _problem = std::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));
@@ -235,7 +235,7 @@ bool QPOasesBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
+        _problem = std::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
                                                               number_of_variables,
                                                               number_of_constraints,
                                                               hessian_type));

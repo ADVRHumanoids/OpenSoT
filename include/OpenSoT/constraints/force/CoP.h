@@ -35,7 +35,7 @@ namespace OpenSoT {
         */
        class CoP: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
        public:
-        typedef boost::shared_ptr<CoP> Ptr;
+        typedef std::shared_ptr<CoP> Ptr;
 
            /**
          * @brief CoP constructor of the CoP constraint

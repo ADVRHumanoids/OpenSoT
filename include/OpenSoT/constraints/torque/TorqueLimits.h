@@ -28,7 +28,7 @@
 
             class TorqueLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<TorqueLimits> Ptr;
+                typedef std::shared_ptr<TorqueLimits> Ptr;
             private:
 
             public:

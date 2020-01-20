@@ -34,7 +34,7 @@
     class Constraint {
     public:
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
-        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
+        typedef std::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
 
         /**

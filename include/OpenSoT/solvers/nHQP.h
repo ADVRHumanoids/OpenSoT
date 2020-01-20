@@ -65,7 +65,7 @@ namespace OpenSoT { namespace solvers {
         static constexpr double DEFAULT_MIN_SV_RATIO = 0.05;
         
         // Shared pointer typedef
-        typedef boost::shared_ptr<nHQP> Ptr;
+        typedef std::shared_ptr<nHQP> Ptr;
         
         // Constructor
         nHQP(Stack& stack_of_tasks,

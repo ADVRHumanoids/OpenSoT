@@ -21,7 +21,7 @@ protected:
         A.setRandom(1,2);
         b.resize(1);
         b.setRandom(1);
-        _generic_task = boost::make_shared<OpenSoT::tasks::GenericTask>(
+        _generic_task = std::make_shared<OpenSoT::tasks::GenericTask>(
                     OpenSoT::tasks::GenericTask("test_task",A,b));
     }
 
@@ -52,7 +52,7 @@ protected:
     {
         c.resize(10);
         c.setRandom(10);
-        _generic_lp_task = boost::make_shared<OpenSoT::tasks::GenericLPTask>(
+        _generic_lp_task = std::make_shared<OpenSoT::tasks::GenericLPTask>(
                     OpenSoT::tasks::GenericLPTask("test_lp_task",c));
     }
 
@@ -178,16 +178,16 @@ TEST_F(testGenericTask, testGenericTaskWithQPOASES)
     A<<1.,1.;
     Eigen::VectorXd b(1);
     b<<1.;
-    OpenSoT::tasks::GenericTask::Ptr generic_task = boost::make_shared<OpenSoT::tasks::GenericTask>(
+    OpenSoT::tasks::GenericTask::Ptr generic_task = std::make_shared<OpenSoT::tasks::GenericTask>(
                 OpenSoT::tasks::GenericTask("test_task",A,b));
 
     OpenSoT::AffineHelper var(2,2);
     Eigen::VectorXd u(2);
     u<<5.,5.;
-    OpenSoT::constraints::GenericConstraint::Ptr bounds = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    OpenSoT::constraints::GenericConstraint::Ptr bounds = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 OpenSoT::constraints::GenericConstraint("bounds",var,u,-u,OpenSoT::constraints::GenericConstraint::Type::BOUND));
 
-    OpenSoT::AutoStack::Ptr autostack = boost::make_shared<OpenSoT::AutoStack>(
+    OpenSoT::AutoStack::Ptr autostack = std::make_shared<OpenSoT::AutoStack>(
                 OpenSoT::AutoStack(generic_task));
     autostack<<bounds;
 
@@ -208,16 +208,16 @@ TEST_F(testGenericTask, testGenericTaskWithOSQP)
     A<<1.,1.;
     Eigen::VectorXd b(1);
     b<<1.;
-    OpenSoT::tasks::GenericTask::Ptr generic_task = boost::make_shared<OpenSoT::tasks::GenericTask>(
+    OpenSoT::tasks::GenericTask::Ptr generic_task = std::make_shared<OpenSoT::tasks::GenericTask>(
                 OpenSoT::tasks::GenericTask("test_task",A,b));
 
     OpenSoT::AffineHelper var(2,2);
     Eigen::VectorXd u(2);
     u<<5.,5.;
-    OpenSoT::constraints::GenericConstraint::Ptr bounds = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    OpenSoT::constraints::GenericConstraint::Ptr bounds = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 OpenSoT::constraints::GenericConstraint("bounds",var,u,-u,OpenSoT::constraints::GenericConstraint::Type::BOUND));
 
-    OpenSoT::AutoStack::Ptr autostack = boost::make_shared<OpenSoT::AutoStack>(
+    OpenSoT::AutoStack::Ptr autostack = std::make_shared<OpenSoT::AutoStack>(
                 OpenSoT::AutoStack(generic_task));
     autostack<<bounds;
 

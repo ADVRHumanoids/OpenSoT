@@ -44,7 +44,7 @@ namespace OpenSoT{
     class iHQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-    typedef boost::shared_ptr<iHQP> Ptr;
+    typedef std::shared_ptr<iHQP> Ptr;
     typedef MatrixPiler VectorPiler;
 
         /**

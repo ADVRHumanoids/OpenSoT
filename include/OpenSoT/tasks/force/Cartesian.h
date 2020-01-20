@@ -18,7 +18,7 @@ namespace OpenSoT { namespace tasks { namespace force {
   
   public:
   
-    typedef boost::shared_ptr<Cartesian> Ptr;
+    typedef std::shared_ptr<Cartesian> Ptr;
     
       /**
      * @brief Cartesian

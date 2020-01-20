@@ -7,7 +7,7 @@ namespace {
 class fooTask: public OpenSoT::Task <Eigen::MatrixXd, Eigen::VectorXd>
 {
 public:
-    typedef boost::shared_ptr<fooTask> Ptr;
+    typedef std::shared_ptr<fooTask> Ptr;
 
     fooTask(const Eigen::MatrixXd& A, const Eigen::VectorXd& b):Task("foo", 20)
     {

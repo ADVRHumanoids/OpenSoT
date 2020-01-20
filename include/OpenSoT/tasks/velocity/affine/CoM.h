@@ -41,7 +41,7 @@
              */
             class CoM : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<CoM> Ptr;
+                typedef std::shared_ptr<CoM> Ptr;
             private:
                 XBot::ModelInterface& _robot;
 

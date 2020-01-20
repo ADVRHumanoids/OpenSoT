@@ -97,7 +97,7 @@ CollisionAvoidance::CollisionAvoidance ( const Eigen::VectorXd& x,
         XBot::ModelInterface &robot,
         std::string& base_link,
         const std::vector<std::string> &interested_robot_links,
-        const std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> &envionment_collision_objects,
+        const std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> &envionment_collision_objects,
         const double &detection_threshold,
         const double &linkPair_threshold,
         const double &boundScaling ) :
@@ -132,12 +132,12 @@ CollisionAvoidance::CollisionAvoidance ( const Eigen::VectorXd& x,
 
 bool CollisionAvoidance::parseCollisionObjects()
 {
-    boost::shared_ptr<urdf::Model> urdf_model_ptr =
-        boost::shared_ptr<urdf::Model> ( new urdf::Model() );
+    std::shared_ptr<urdf::Model> urdf_model_ptr =
+        std::shared_ptr<urdf::Model> ( new urdf::Model() );
     urdf_model_ptr->initString ( robot_col.getUrdfString() );
 
-    boost::shared_ptr<srdf::Model> srdf_model_ptr =
-        boost::shared_ptr<srdf::Model> ( new srdf::Model() );
+    std::shared_ptr<srdf::Model> srdf_model_ptr =
+        std::shared_ptr<srdf::Model> ( new srdf::Model() );
     srdf_model_ptr->initString ( *urdf_model_ptr, robot_col.getSrdfString() );
 
 //     moveit_robot_model.reset(new robot_model::RobotModel(urdf_model_ptr, srdf_model_ptr));
@@ -183,9 +183,9 @@ bool CollisionAvoidance::parseCollisionObjects()
     }
 
 //     linksToUpdate.clear();
-//     std::vector<boost::shared_ptr<urdf::Link> > links;
+//     std::vector<std::shared_ptr<urdf::Link> > links;
 //     for ( auto &it:_interested_link_pairs ) {
-//         boost::shared_ptr<urdf::Link> link;
+//         std::shared_ptr<urdf::Link> link;
 //         linksToUpdate.insert ( it.first );
 //         robot_urdf.getLink ( it.first, link );
 //         links.push_back ( link );
@@ -275,7 +275,7 @@ bool CollisionAvoidance::parseCollisionObjects()
                     shape_origin = toKdl ( link->collision->origin );
                 }
 
-                boost::shared_ptr<fcl::CollisionObjectd> collision_object (
+                std::shared_ptr<fcl::CollisionObjectd> collision_object (
                             new fcl::CollisionObjectd ( shape ) );
 
 

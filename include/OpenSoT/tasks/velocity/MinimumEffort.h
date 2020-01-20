@@ -44,7 +44,7 @@
              */
             class MinimumEffort : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<MinimumEffort> Ptr;
+                typedef std::shared_ptr<MinimumEffort> Ptr;
             protected:
                 Eigen::VectorXd _x;
 

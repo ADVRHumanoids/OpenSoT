@@ -100,31 +100,31 @@ TEST_F(testVelocityAllocation, testConstructorStack)
             ++task)
         {
             ASSERT_EQ((*task)->getConstraints().size(),1);
-            EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+            EXPECT_DOUBLE_EQ(std::dynamic_pointer_cast<
                 OpenSoT::constraints::velocity::VelocityLimits>(
                     (*task)->getConstraints().front()
                             )->getVelocityLimits(),
                 minimum_velocity+i*(maximum_velocity - minimum_velocity)/(autoStack->getStack().size()-1));
             if(i == 0)
-                EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+                EXPECT_DOUBLE_EQ(std::dynamic_pointer_cast<
                                     OpenSoT::constraints::velocity::VelocityLimits>(
                                         (*task)->getConstraints().front()
                                                 )->getVelocityLimits(),
                                  0.1);
             else if(i == 1)
-                EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+                EXPECT_DOUBLE_EQ(std::dynamic_pointer_cast<
                                     OpenSoT::constraints::velocity::VelocityLimits>(
                                         (*task)->getConstraints().front()
                                                 )->getVelocityLimits(),
                                  0.16666666666666666);
             else if(i == 2)
-                EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+                EXPECT_DOUBLE_EQ(std::dynamic_pointer_cast<
                                     OpenSoT::constraints::velocity::VelocityLimits>(
                                         (*task)->getConstraints().front()
                                                 )->getVelocityLimits(),
                                  0.23333333333333334);
             else if(i == 3)
-                EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+                EXPECT_DOUBLE_EQ(std::dynamic_pointer_cast<
                                     OpenSoT::constraints::velocity::VelocityLimits>(
                                         (*task)->getConstraints().front()
                                                 )->getVelocityLimits(),
@@ -153,10 +153,10 @@ TEST_F(testVelocityAllocation, testConstructorStack)
 
         OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack = autoStack->getStack();
         ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
-        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
+        ASSERT_TRUE((bool)std::dynamic_pointer_cast<
                         OpenSoT::constraints::velocity::VelocityLimits>(
                             autoStack->getStack()[3]->getConstraints().front()));
-        ASSERT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+        ASSERT_DOUBLE_EQ(std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),high_velocity);
 
@@ -169,10 +169,10 @@ TEST_F(testVelocityAllocation, testConstructorStack)
                                     maximum_velocity);
 
         ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
-        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
+        ASSERT_TRUE((bool)std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         autoStack->getStack()[3]->getConstraints().front()));
-        ASSERT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+        ASSERT_DOUBLE_EQ(std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),maximum_velocity);
 
@@ -217,7 +217,7 @@ TEST_F(testVelocityAllocation, testConstructorAutoStack)
             ASSERT_EQ((*task)->getConstraints().size(),1) << "Task "
                                                        << (*task)->getTaskID()
                                                        << " should have 1 constraint";
-            EXPECT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+            EXPECT_DOUBLE_EQ(std::dynamic_pointer_cast<
                 OpenSoT::constraints::velocity::VelocityLimits>(
                     (*task)->getConstraints().front()
                         )->getVelocityLimits(),
@@ -248,10 +248,10 @@ TEST_F(testVelocityAllocation, testConstructorAutoStack)
 
         OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack = autoStack->getStack();
         ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
-        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
+        ASSERT_TRUE((bool)std::dynamic_pointer_cast<
                         OpenSoT::constraints::velocity::VelocityLimits>(
                             autoStack->getStack()[3]->getConstraints().front()));
-        ASSERT_EQ(boost::dynamic_pointer_cast<
+        ASSERT_EQ(std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),high_velocity);
 
@@ -264,10 +264,10 @@ TEST_F(testVelocityAllocation, testConstructorAutoStack)
                                     maximum_velocity);
 
         ASSERT_EQ(autoStack->getStack()[3]->getConstraints().size(),1);
-        ASSERT_TRUE((bool)boost::dynamic_pointer_cast<
+        ASSERT_TRUE((bool)std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         autoStack->getStack()[3]->getConstraints().front()));
-        ASSERT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+        ASSERT_DOUBLE_EQ(std::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 autoStack->getStack()[3]->getConstraints().front())->getVelocityLimits(),
                         maximum_velocity);
@@ -302,7 +302,7 @@ TEST_F(testVelocityAllocation, testConstructorAutoStack)
                                     maximum_velocity);
 
         ASSERT_EQ(autoStack->getBoundsList().size(),1);
-        ASSERT_DOUBLE_EQ(boost::dynamic_pointer_cast<
+        ASSERT_DOUBLE_EQ(std::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 autoStack->getBoundsList().front())->getVelocityLimits(),
                          maximum_velocity);

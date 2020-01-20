@@ -206,7 +206,7 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
         _solution[i] = glp_mip_col_val(_mip, i+1);
 
 
-    _opt.param = boost::make_shared<glp_iocp>(_param);
+    _opt.param = std::make_shared<glp_iocp>(_param);
     return true;
 }
 

@@ -31,7 +31,7 @@ namespace OpenSoT{
          */
         class IMU: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>{
             public:
-                typedef boost::shared_ptr<IMU> Ptr;
+                typedef std::shared_ptr<IMU> Ptr;
             /**
                  * @brief IMU accept a robot model and an imu, throws an error if the imu is
                  * not attached to the floating_base

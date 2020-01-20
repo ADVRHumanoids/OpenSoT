@@ -28,7 +28,7 @@ namespace OpenSoT {
         */
        class CartesianAdmittance: public Cartesian {
          public:
-            typedef boost::shared_ptr<CartesianAdmittance> Ptr;
+            typedef std::shared_ptr<CartesianAdmittance> Ptr;
 
            /**
              * @brief CartesianAdmittance constructor

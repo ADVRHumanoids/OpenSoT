@@ -10,10 +10,10 @@ namespace {
     }
 
     template<typename T>
-    typename boost::shared_ptr<T> to_boost(typename std::shared_ptr<T> const& p)
+    typename std::shared_ptr<T> to_boost(typename std::shared_ptr<T> const& p)
     {
         return
-            boost::shared_ptr<T>(
+            std::shared_ptr<T>(
                     p.get(),
                     boost::bind(&do_release<T>, p, _1));
 

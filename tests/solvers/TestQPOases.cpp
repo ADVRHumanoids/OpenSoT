@@ -1220,7 +1220,7 @@ TEST_F(testQPOasesProblem, testNullHessian)
 
 //TEST_F(testQPOasesProblem, testResetSolverPrint)
 //{
-//    boost::shared_ptr<OpenSoT::solvers::QPOasesBackEnd> qp;
+//    std::shared_ptr<OpenSoT::solvers::QPOasesBackEnd> qp;
 //    std::cout<<"-------------FIRST RESET----------------"<<std::endl;
 //    qp->reset(new OpenSoT::solvers::QPOasesBackEnd(30, 0, OpenSoT::HessianType::HST_IDENTITY, 1e10));
 

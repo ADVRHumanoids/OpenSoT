@@ -30,7 +30,7 @@
              */
             class Dynamics: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<Dynamics> Ptr;
+                typedef std::shared_ptr<Dynamics> Ptr;
             private:
                 Eigen::VectorXd _jointTorquesMin;
                 Eigen::VectorXd _jointTorquesMax;

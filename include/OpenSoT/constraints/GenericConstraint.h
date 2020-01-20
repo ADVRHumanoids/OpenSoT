@@ -40,7 +40,7 @@ public:
         CONSTRAINT
     };
     
-    typedef boost::shared_ptr<GenericConstraint> Ptr;
+    typedef std::shared_ptr<GenericConstraint> Ptr;
 
     /**
      * @brief GenericConstraint specific constructor for BOUND type

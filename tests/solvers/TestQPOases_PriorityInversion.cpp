@@ -169,7 +169,7 @@ yarp::sig::Vector getShakingPosition(iDynUtils& model, yarp::sig::Matrix& l_arm_
 }
 
 void setupIK(OpenSoT::AutoStack::Ptr& stack,
-             boost::shared_ptr<OpenSoT::DefaultHumanoidStack>& DHS,
+             std::shared_ptr<OpenSoT::DefaultHumanoidStack>& DHS,
              OpenSoT::solvers::QPOases_sot::Ptr& solver,
              iDynUtils &model,
              double eps,
@@ -242,10 +242,10 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
     OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>::TaskPtr lastTask = stack->getStack()[stack->getStack().size()-1];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
-        if( boost::dynamic_pointer_cast<
+        if( std::dynamic_pointer_cast<
                 OpenSoT::constraints::velocity::VelocityLimits>(
                     *i_c))
-            boost::dynamic_pointer_cast<
+            std::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 *i_c)->setVelocityLimits(.9);
     }
@@ -333,8 +333,8 @@ TEST_P(testQPOases_PI, tryPISmoothing) {
     std::vector<OpenSoT::solvers::QPOases_sot::Ptr> sot_vec(N_COM_PARAMS);
     std::vector<OpenSoT::solvers::QPOases_sot::Ptr> sotns_vec(N_COM_PARAMS);
 
-    std::vector< boost::shared_ptr<OpenSoT::DefaultHumanoidStack> > DHS_vec(N_COM_PARAMS);
-    std::vector< boost::shared_ptr<OpenSoT::DefaultHumanoidStack> > DHSns_vec(N_COM_PARAMS);
+    std::vector< std::shared_ptr<OpenSoT::DefaultHumanoidStack> > DHS_vec(N_COM_PARAMS);
+    std::vector< std::shared_ptr<OpenSoT::DefaultHumanoidStack> > DHSns_vec(N_COM_PARAMS);
     for(unsigned int i=0; i < N_COM_PARAMS; ++i)
     {
         DHS_vec[i].reset(new OpenSoT::DefaultHumanoidStack(model, dT,

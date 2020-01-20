@@ -32,7 +32,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
     public:
         
-        typedef boost::shared_ptr<PureRolling> Ptr;
+        typedef std::shared_ptr<PureRolling> Ptr;
         
         PureRolling(std::string wheel_link_name, 
                     double radius,
@@ -67,7 +67,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
     class PureRollingPosition : public Task<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-        typedef boost::shared_ptr<PureRollingPosition> Ptr;
+        typedef std::shared_ptr<PureRollingPosition> Ptr;
 
         PureRollingPosition(std::string wheel_link_name,
                     double radius,
@@ -92,7 +92,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
     class PureRollingOrientation : public Task<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-        typedef boost::shared_ptr<PureRollingOrientation> Ptr;
+        typedef std::shared_ptr<PureRollingOrientation> Ptr;
 
         PureRollingOrientation(std::string wheel_link_name,
                     double radius,

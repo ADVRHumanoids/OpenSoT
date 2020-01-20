@@ -38,10 +38,10 @@ typedef std::pair<KDL::Path::IdentifierType,bool> testType;
 class testQPOases_TestFF: public ::testing::Test
 {
 protected:
-    typedef boost::shared_ptr<KDL::Trajectory> TrajPtr;
-    typedef boost::shared_ptr<KDL::Path> PathPtr;
-    typedef boost::shared_ptr<KDL::VelocityProfile> VelProfPtr;
-    typedef boost::shared_ptr<KDL::RotationalInterpolation> RotIntPtr;
+    typedef std::shared_ptr<KDL::Trajectory> TrajPtr;
+    typedef std::shared_ptr<KDL::Path> PathPtr;
+    typedef std::shared_ptr<KDL::VelocityProfile> VelProfPtr;
+    typedef std::shared_ptr<KDL::RotationalInterpolation> RotIntPtr;
     std::ofstream _log;
 
     RotIntPtr rotationInterpolationMethod;

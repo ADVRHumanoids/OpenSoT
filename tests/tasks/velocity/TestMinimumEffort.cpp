@@ -57,7 +57,7 @@ protected:
 
 TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 {
-    boost::shared_ptr<ros::NodeHandle> _n;
+    std::shared_ptr<ros::NodeHandle> _n;
     ros::Publisher joint_state_pub;
     if(IS_ROSCORE_RUNNING){
         _n.reset(new ros::NodeHandle());

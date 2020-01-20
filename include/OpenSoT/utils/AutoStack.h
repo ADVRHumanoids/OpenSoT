@@ -47,7 +47,7 @@ namespace OpenSoT {
     class AutoStack 
     {
         public:
-        typedef boost::shared_ptr<OpenSoT::AutoStack> Ptr;
+        typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
         private:
         OpenSoT::solvers::iHQP::Stack _stack;
 

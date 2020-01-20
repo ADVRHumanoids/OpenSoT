@@ -31,7 +31,7 @@ namespace OpenSoT{
              */
             class Contact: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>{
             public:
-                typedef boost::shared_ptr<Contact> Ptr;
+                typedef std::shared_ptr<Contact> Ptr;
 
                 /**
                  * @brief Contact constructor which accept a robot model, a link name which represent

@@ -60,7 +60,7 @@ namespace OpenSoT{
          * @brief getProblem return the internal QP problem
          * @return reference to internal QP problem
          */
-        const boost::shared_ptr<qpOASES::SQProblem>& getProblem(){return _problem;}
+        const std::shared_ptr<qpOASES::SQProblem>& getProblem(){return _problem;}
 
         /**
          * @brief getOptions return the options of the QP problem
@@ -220,17 +220,17 @@ namespace OpenSoT{
         /**
          * @brief _problem is the internal SQProblem
          */
-        boost::shared_ptr<qpOASES::SQProblem> _problem;
+        std::shared_ptr<qpOASES::SQProblem> _problem;
 
         /**
          * @brief _bounds are the active bounds of the SQProblem
          */
-        boost::shared_ptr<qpOASES::Bounds> _bounds;
+        std::shared_ptr<qpOASES::Bounds> _bounds;
 
         /**
          * @brief _constraints are the active constraints of the SQProblem
          */
-        boost::shared_ptr<qpOASES::Constraints> _constraints;
+        std::shared_ptr<qpOASES::Constraints> _constraints;
 
         /**
          * @brief _nWSR is the maximum number of working set recalculations
@@ -246,7 +246,7 @@ namespace OpenSoT{
         /**
          * @brief _opt solver options
          */
-        boost::shared_ptr<qpOASES::Options> _opt;
+        std::shared_ptr<qpOASES::Options> _opt;
 
         /**
          * Solution of the QP problem

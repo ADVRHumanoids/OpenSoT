@@ -240,7 +240,7 @@ TEST_F(testWrench, testWrench_) {
     std::cout<<"wrench->getM"<<wrench.getM()<<std::endl;
     std::cout<<"wrench->getq"<<wrench.getq()<<std::endl;
 
-    _wrench_task = boost::make_shared<OpenSoT::tasks::force::Wrench>("l_sole_wrench", "l_sole","world", wrench);
+    _wrench_task = std::make_shared<OpenSoT::tasks::force::Wrench>("l_sole_wrench", "l_sole","world", wrench);
     _wrench_task->update(Eigen::VectorXd(0));
 
     Eigen::VectorXd tmp;
@@ -288,10 +288,10 @@ TEST_F(testWrench, testWrench_) {
     std::cout<<"upperLims: "<<upperLims.transpose()<<std::endl;
     std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
     OpenSoT::constraints::force::WrenchLimits::Ptr wrench_lims =
-            boost::make_shared<OpenSoT::constraints::force::WrenchLimits>
+            std::make_shared<OpenSoT::constraints::force::WrenchLimits>
             ("l_sole", lowerLims, upperLims,wrench);
 
-    OpenSoT::AutoStack::Ptr autostack = boost::make_shared<OpenSoT::AutoStack>(_wrench_task);
+    OpenSoT::AutoStack::Ptr autostack = std::make_shared<OpenSoT::AutoStack>(_wrench_task);
     autostack<<wrench_lims;
 
 
@@ -358,7 +358,7 @@ TEST_F(testWrench, testWrenchLim)
     std::cout<<"upperLims: "<<upperLims.transpose()<<std::endl;
     std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
     OpenSoT::constraints::force::WrenchLimits::Ptr wrench_lims =
-            boost::make_shared<OpenSoT::constraints::force::WrenchLimits>
+            std::make_shared<OpenSoT::constraints::force::WrenchLimits>
             ("wrench1", lowerLims, upperLims,wrench1);
     wrench_lims->update(Eigen::VectorXd(0));
 
@@ -370,7 +370,7 @@ TEST_F(testWrench, testWrenchLim)
     contacts.push_back("wrench1");
     contacts.push_back("wrench2");
     OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
-            boost::make_shared<OpenSoT::constraints::force::WrenchesLimits>
+            std::make_shared<OpenSoT::constraints::force::WrenchesLimits>
             (contacts, lowerLims, upperLims,wrenches);
     wrenches_lims->update(Eigen::VectorXd(0));
 
@@ -402,7 +402,7 @@ TEST_F(testWrench, testWrenches) {
     base_links.push_back("world");
     base_links.push_back("world");
 
-    OpenSoT::tasks::force::Wrenches::Ptr wrenches_task = boost::make_shared<OpenSoT::tasks::force::Wrenches>
+    OpenSoT::tasks::force::Wrenches::Ptr wrenches_task = std::make_shared<OpenSoT::tasks::force::Wrenches>
             ("wrenches", contacts, base_links, wrenches);
     wrenches_task->update(Eigen::VectorXd(0));
 
@@ -440,7 +440,7 @@ TEST_F(testWrench, testWrenches) {
     std::cout<<"lowerLims: "<<lowerLims.transpose()<<std::endl;
 
     OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
-            boost::make_shared<OpenSoT::constraints::force::WrenchesLimits>
+            std::make_shared<OpenSoT::constraints::force::WrenchesLimits>
             (contacts, lowerLims, upperLims, wrenches);
     std::cout<<"wrenches_lims->getbLowerBound()"<<wrenches_lims->getbLowerBound().transpose()<<std::endl;
     std::cout<<"wrenches_lims->getbUpperBound()"<<wrenches_lims->getbUpperBound().transpose()<<std::endl;

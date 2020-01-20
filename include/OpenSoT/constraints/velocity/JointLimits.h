@@ -30,7 +30,7 @@
              */
             class JointLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<JointLimits> Ptr;
+                typedef std::shared_ptr<JointLimits> Ptr;
             private:
                 double _boundScaling;
                 Eigen::VectorXd _jointLimitsMin;

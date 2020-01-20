@@ -173,9 +173,9 @@ public:
   Eigen::VectorXd bUpperBoud;
   Eigen::VectorXd Aineqx;
 
-  boost::shared_ptr<ros::NodeHandle> _n;
+  std::shared_ptr<ros::NodeHandle> _n;
   ros::Publisher joint_state_pub;
-  boost::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
+  std::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
 };
 
 

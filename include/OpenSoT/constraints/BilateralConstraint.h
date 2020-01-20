@@ -34,7 +34,7 @@
         class BilateralConstraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             static int _constr_count;
         public:
-            typedef boost::shared_ptr<BilateralConstraint> Ptr;
+            typedef std::shared_ptr<BilateralConstraint> Ptr;
 
             /**
              * @brief BilateralConstraint a bilateral constraint

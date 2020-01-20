@@ -60,7 +60,7 @@ public:
       KDL::Tree my_tree;
       if (!kdl_parser::treeFromFile(urdf_path, my_tree)){
         ROS_ERROR("Failed to construct kdl tree");}
-      rsp = boost::make_shared<robot_state_publisher::RobotStatePublisher>(my_tree);
+      rsp = std::make_shared<robot_state_publisher::RobotStatePublisher>(my_tree);
       n->setParam("/robot_description", ss.str());
 
       for(unsigned int i = 0; i < this->_model_ptr->getEnabledJointNames().size(); ++i){
@@ -108,10 +108,10 @@ public:
 
 #if ENABLE_ROS
   ///ROS
-  boost::shared_ptr<ros::NodeHandle> n;
+  std::shared_ptr<ros::NodeHandle> n;
   ros::Publisher pub;
   sensor_msgs::JointState joint_state;
-  boost::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
+  std::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
 #endif
 
 };
@@ -158,7 +158,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 
     string base_link = "torso";
     string left_arm_link = "LSoftHandLink";
-    auto left_arm_task = boost::make_shared<OpenSoT::tasks::velocity::Cartesian>
+    auto left_arm_task = std::make_shared<OpenSoT::tasks::velocity::Cartesian>
                              ( base_link + "_TO_" + left_arm_link,
                                q,
                                *_model_ptr,
@@ -170,7 +170,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     std::cout<<"left_arm_initial_pose: "<<left_arm_initial_pose.matrix()<<std::endl;
 
     string right_arm_link = "RSoftHandLink";
-    auto right_arm_task = boost::make_shared<OpenSoT::tasks::velocity::Cartesian>
+    auto right_arm_task = std::make_shared<OpenSoT::tasks::velocity::Cartesian>
                              ( base_link + "_TO_" + right_arm_link,
                                q,
                                *_model_ptr,
@@ -183,30 +183,30 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 
     Eigen::VectorXd q_min, q_max;
     _model_ptr->getJointLimits ( q_min, q_max );
-    auto joint_limit_constraint = boost::make_shared<OpenSoT::constraints::velocity::JointLimits> ( q, q_max, q_min );
+    auto joint_limit_constraint = std::make_shared<OpenSoT::constraints::velocity::JointLimits> ( q, q_max, q_min );
 
 
     std::vector<std::string> interested_links = {"LShp","LShr","LShy","LElb","LForearm","LSoftHandLink"};
-    std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> envionment_collision_objects;
+    std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> envionment_collision_objects;
     std::shared_ptr<fcl::CollisionGeometryd> shape = std::make_shared<fcl::Boxd> ( 0.1, 0.6, 1.4 );
-    boost::shared_ptr<fcl::CollisionObjectd> collision_object ( new fcl::CollisionObjectd ( shape ) );
+    std::shared_ptr<fcl::CollisionObjectd> collision_object ( new fcl::CollisionObjectd ( shape ) );
     fcl::Transform3d shape_origin;
     shape_origin.translation() << 0.75, 0, 0.; // in world frame
     shape_origin.linear() = Eigen::Matrix3d::Identity();
     collision_object->setTransform ( shape_origin );
     envionment_collision_objects["env"] = collision_object;
-    auto environment_collsion_constraint = boost::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance> (
+    auto environment_collsion_constraint = std::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance> (
                 q, *_model_ptr, base_link, interested_links, envionment_collision_objects, 1., 0.00001, 1 );
 
 
-    auto autostack_ = boost::make_shared<OpenSoT::AutoStack> ( left_arm_task + right_arm_task); // + 0.2*postural_task%indices
+    auto autostack_ = std::make_shared<OpenSoT::AutoStack> ( left_arm_task + right_arm_task); // + 0.2*postural_task%indices
     autostack_ << joint_limit_constraint;
     autostack_ << environment_collsion_constraint;
 
     /* Create solver */
    double eps_regularization = 1e6;
    OpenSoT::solvers::solver_back_ends solver_backend = OpenSoT::solvers::solver_back_ends::qpOASES;
-    auto solver = boost::make_shared<OpenSoT::solvers::iHQP> ( autostack_->getStack(),
+    auto solver = std::make_shared<OpenSoT::solvers::iHQP> ( autostack_->getStack(),
                      autostack_->getBounds(),
                      eps_regularization,
                      solver_backend );

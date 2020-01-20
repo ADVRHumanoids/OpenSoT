@@ -18,7 +18,7 @@ namespace floating_base_estimation{
     class qp_estimation: public OpenSoT::FloatingBaseEstimation
     {
     public:
-        typedef boost::shared_ptr<qp_estimation> Ptr;
+        typedef std::shared_ptr<qp_estimation> Ptr;
 
         qp_estimation(XBot::ModelInterface::Ptr model,
                       std::vector<std::string> contact_links,
@@ -54,7 +54,7 @@ namespace floating_base_estimation{
     class kinematic_estimation
     {
     public:
-        typedef boost::shared_ptr<kinematic_estimation> Ptr;
+        typedef std::shared_ptr<kinematic_estimation> Ptr;
 
         /**
          * @brief kinematic_estimation, at the moment only the pose of the floating base is computed

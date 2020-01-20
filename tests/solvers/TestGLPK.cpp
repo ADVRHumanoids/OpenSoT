@@ -122,10 +122,10 @@ protected:
     XBot::ModelInterface::Ptr _model_ptr;
 
 #if ENABLE_ROS
-  boost::shared_ptr<ros::NodeHandle> n;
+  std::shared_ptr<ros::NodeHandle> n;
   ros::Publisher pub;
   sensor_msgs::JointState joint_state;
-  boost::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
+  std::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
 #endif
 
 };
@@ -190,7 +190,7 @@ TEST_F(testGLPKProblem, testIKMILP)
                                          / (postural<<vel_lims_p)
                                          )<<joint_lims;
 
-    OpenSoT::solvers::iHQP::Ptr solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6,
+    OpenSoT::solvers::iHQP::Ptr solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6,
                                                                                     OpenSoT::solvers::solver_back_ends::qpOASES);
 
 
@@ -367,7 +367,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
     std::vector<OpenSoT::solvers::solver_back_ends> solver_vector = {solver_1, solver_2, solver_3};
 
-    OpenSoT::solvers::iHQP::Ptr solver2 = boost::make_shared<OpenSoT::solvers::iHQP>(autostack2->getStack(), autostack2->getBounds(), 1e6,
+    OpenSoT::solvers::iHQP::Ptr solver2 = std::make_shared<OpenSoT::solvers::iHQP>(autostack2->getStack(), autostack2->getBounds(), 1e6,
                                                                                     solver_vector);
 
     OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions optGLPK;

@@ -31,7 +31,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
     public:
         
-        typedef boost::shared_ptr<RigidRotation> Ptr;
+        typedef std::shared_ptr<RigidRotation> Ptr;
         
         RigidRotation(std::string wheel_link_name, 
                       std::string waist_link_name,

@@ -71,7 +71,7 @@ void Dynamics::crawlLinks(const std::vector<std::string>& ft_links_list,
     std::vector<std::string> recursive_ft_links = ft_links_list;
     std::vector<std::string> ft_final_links;
 
-    boost::shared_ptr<const urdf::ModelInterface> _urdf = robot.moveit_robot_model->getURDF();
+    std::shared_ptr<const urdf::ModelInterface> _urdf = robot.moveit_robot_model->getURDF();
     for(unsigned int ii = 0; ii < ft_links_list.size(); ++ii)
     {
         recursive_ft_links.clear();
@@ -79,12 +79,12 @@ void Dynamics::crawlLinks(const std::vector<std::string>& ft_links_list,
 
         for(unsigned int i = 0; i < recursive_ft_links.size(); ++i)
         {
-            boost::shared_ptr<const urdf::Link> l = _urdf->getLink(recursive_ft_links[i]);
+            std::shared_ptr<const urdf::Link> l = _urdf->getLink(recursive_ft_links[i]);
             if(l->child_links.size() != 0)
             {
                 for(unsigned int j = 0; j < l->child_links.size(); ++j)
                 {
-                    boost::shared_ptr<urdf::Link> l_child = l->child_links[j];
+                    std::shared_ptr<urdf::Link> l_child = l->child_links[j];
                     if(!(std::find(ft_links_list.begin(), ft_links_list.end(), l_child->name) != ft_links_list.end()))
                         recursive_ft_links.push_back(l_child->name);
                 }

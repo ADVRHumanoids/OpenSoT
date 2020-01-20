@@ -26,7 +26,7 @@ namespace OpenSoT {
         */
        class JointAdmittance: public Postural {
         public:
-           typedef boost::shared_ptr<JointAdmittance> Ptr;
+           typedef std::shared_ptr<JointAdmittance> Ptr;
 
            /**
             * @brief JointAdmittance constructor

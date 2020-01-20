@@ -44,7 +44,7 @@ using namespace OpenSoT::utils;
          */
         class Aggregated: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
-	    typedef boost::shared_ptr<Aggregated> Ptr;
+	    typedef std::shared_ptr<Aggregated> Ptr;
         typedef MatrixPiler VectorPiler;
 
             enum AggregationPolicy {

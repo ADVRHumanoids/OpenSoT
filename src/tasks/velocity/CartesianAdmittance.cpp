@@ -101,12 +101,12 @@ void CartesianAdmittance::getWrenchReference(Eigen::Vector6d& wrench_reference)
 
 bool CartesianAdmittance::isCartesianAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
 }
 
 OpenSoT::tasks::velocity::CartesianAdmittance::Ptr CartesianAdmittance::asCartesianAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
+    return std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
 }
 
 const Eigen::Matrix6d& CartesianAdmittance::getCartesianCompliance()

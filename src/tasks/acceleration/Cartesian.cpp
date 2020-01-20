@@ -366,12 +366,12 @@ const bool OpenSoT::tasks::acceleration::Cartesian::baseLinkIsWorld() const
 
 bool OpenSoT::tasks::acceleration::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
 }
 
 OpenSoT::tasks::acceleration::Cartesian::Ptr OpenSoT::tasks::acceleration::Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
+    return std::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
 }
 
 bool OpenSoT::tasks::acceleration::Cartesian::setDistalLink(const std::string& distal_link)

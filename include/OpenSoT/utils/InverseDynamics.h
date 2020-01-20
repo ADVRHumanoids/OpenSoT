@@ -14,7 +14,7 @@ namespace utils{
 class InverseDynamics{
 
 public:
-    typedef boost::shared_ptr<InverseDynamics> Ptr;
+    typedef std::shared_ptr<InverseDynamics> Ptr;
 
     /**
      * @brief InverseDynamics constructor
@@ -40,7 +40,7 @@ public:
      * @brief getSerializer return a pointer to the object which contains all the variables of the Inverse Dynamics
      * @return
      */
-    const boost::shared_ptr<OpenSoT::OptvarHelper> getSerializer() const;
+    const std::shared_ptr<OpenSoT::OptvarHelper> getSerializer() const;
 
     /**
      * @brief computedTorque given the solution from the solver which contains all the optimization variables, returns the torque
@@ -67,7 +67,7 @@ private:
     std::vector<AffineHelper> _contacts_wrench;
     std::vector<std::string> _links_in_contact;
     XBot::ModelInterface& _model;
-    boost::shared_ptr<OpenSoT::OptvarHelper> _serializer;
+    std::shared_ptr<OpenSoT::OptvarHelper> _serializer;
 
     Eigen::VectorXd _qddot_val;
     std::vector<Eigen::Vector6d> _contacts_wrench_val;

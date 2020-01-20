@@ -35,7 +35,7 @@
              */
             class JointImpedanceCtrl : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<JointImpedanceCtrl> Ptr;
+                typedef std::shared_ptr<JointImpedanceCtrl> Ptr;
             protected:
                 Eigen::VectorXd _x_desired;
                 Eigen::VectorXd _xdot_desired;

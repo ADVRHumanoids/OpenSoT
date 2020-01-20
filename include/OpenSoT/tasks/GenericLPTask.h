@@ -16,7 +16,7 @@ namespace OpenSoT { namespace tasks  {
  */
 class GenericLPTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
   public:
-    typedef boost::shared_ptr<GenericLPTask> Ptr;
+    typedef std::shared_ptr<GenericLPTask> Ptr;
 
     /**
      * @brief GenericLPTask constructor

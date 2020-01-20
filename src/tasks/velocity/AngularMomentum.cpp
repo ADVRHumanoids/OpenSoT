@@ -83,11 +83,11 @@ std::string AngularMomentum::getDistalLink()
 
 AngularMomentum::Ptr AngularMomentum::asAngularMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<AngularMomentum>(task);
+    return std::dynamic_pointer_cast<AngularMomentum>(task);
 }
 
 
 bool AngularMomentum::isAngularMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<AngularMomentum>(task);
+    return (bool)std::dynamic_pointer_cast<AngularMomentum>(task);
 }

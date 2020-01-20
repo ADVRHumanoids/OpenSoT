@@ -45,7 +45,7 @@
 
     public:
 
-        typedef boost::shared_ptr<OpenSoT::SubTask> Ptr;
+        typedef std::shared_ptr<OpenSoT::SubTask> Ptr;
 
     protected:
         TaskPtr _taskPtr;

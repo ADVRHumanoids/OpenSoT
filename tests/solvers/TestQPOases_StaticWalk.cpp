@@ -544,15 +544,15 @@ namespace{
         }
 
 
-        boost::shared_ptr<manipulation_trajectories> manip_trj;
-        boost::shared_ptr<walking_pattern_generator> walk_trj;
-        boost::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
-        boost::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
-        boost::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
-        boost::shared_ptr<trajectory_utils::trajectory_publisher> r_wrist_trj_pub;
+        std::shared_ptr<manipulation_trajectories> manip_trj;
+        std::shared_ptr<walking_pattern_generator> walk_trj;
+        std::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
+        std::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
+        std::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
+        std::shared_ptr<trajectory_utils::trajectory_publisher> r_wrist_trj_pub;
 
         ros::Publisher joint_state_pub;
-        boost::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
+        std::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
 
         rviz_visual_tools::RvizVisualToolsPtr visual_tools;
 
@@ -560,7 +560,7 @@ namespace{
         XBot::ModelInterface::Ptr _model_ptr;
         Eigen::VectorXd _q;
 
-        boost::shared_ptr<ros::NodeHandle> _n;
+        std::shared_ptr<ros::NodeHandle> _n;
 
         void setGoodInitialPosition() {
             _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;

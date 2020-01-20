@@ -373,12 +373,12 @@ void CartesianImpedanceCtrl::update_b() {
 
 bool CartesianImpedanceCtrl::isCartesianImpedanceCtrl(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<CartesianImpedanceCtrl>(task);
+    return (bool)std::dynamic_pointer_cast<CartesianImpedanceCtrl>(task);
 }
 
 CartesianImpedanceCtrl::Ptr CartesianImpedanceCtrl::asCartesianImpedanceCtrl(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<CartesianImpedanceCtrl>(task);
+    return std::dynamic_pointer_cast<CartesianImpedanceCtrl>(task);
 }
 
 void CartesianImpedanceCtrl::useInertiaMatrix(const bool use)

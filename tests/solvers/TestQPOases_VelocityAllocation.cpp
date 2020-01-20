@@ -182,11 +182,11 @@ TEST_P(testQPOases_VelocityAllocation, tryMovingWhileKeepinTorsoStill) {
 
     OpenSoT::VelocityAllocation(stack, 3e-3, 0.15, 0.3);
     if(useMinimumVelocity)
-        ASSERT_DOUBLE_EQ((boost::dynamic_pointer_cast<
+        ASSERT_DOUBLE_EQ((std::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 minimumVelocity->getConstraints().front()))->getVelocityLimits(), 0.3);
     else
-        ASSERT_DOUBLE_EQ((boost::dynamic_pointer_cast<
+        ASSERT_DOUBLE_EQ((std::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 postural->getConstraints().front()))->getVelocityLimits(), 0.3);
     DHSnva.velocityLimits->setVelocityLimits(0.3);

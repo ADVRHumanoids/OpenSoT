@@ -42,7 +42,7 @@
              */
             class CartesianImpedanceCtrl : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<CartesianImpedanceCtrl> Ptr;
+                typedef std::shared_ptr<CartesianImpedanceCtrl> Ptr;
             protected:
                 XBot::ModelInterface& _robot;
 

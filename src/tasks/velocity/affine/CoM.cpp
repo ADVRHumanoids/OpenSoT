@@ -195,13 +195,13 @@ Eigen::Vector3d CoM::getError()
 
 CoM::Ptr CoM::asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<CoM>(task);
+    return std::dynamic_pointer_cast<CoM>(task);
 }
 
 
 bool CoM::isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<CoM>(task);
+    return (bool)std::dynamic_pointer_cast<CoM>(task);
 }
 
 void CoM::_log(XBot::MatLogger::Ptr logger)

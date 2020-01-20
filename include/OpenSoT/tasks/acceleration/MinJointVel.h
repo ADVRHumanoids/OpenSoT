@@ -12,7 +12,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
     class MinJointVel : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
 
     public:
-        typedef boost::shared_ptr<MinJointVel> Ptr;
+        typedef std::shared_ptr<MinJointVel> Ptr;
 
         /**
          * @brief MinJointVel

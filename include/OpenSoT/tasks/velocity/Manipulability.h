@@ -39,7 +39,7 @@ namespace OpenSoT {
              */
             class Manipulability : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<Manipulability> Ptr;
+                typedef std::shared_ptr<Manipulability> Ptr;
 
                 Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const Cartesian::Ptr CartesianTask);
                 Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const CoM::Ptr CartesianTask);

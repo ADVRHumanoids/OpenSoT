@@ -35,7 +35,7 @@ namespace OpenSoT {
          */
         class Wrench : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
         public:
-            typedef boost::shared_ptr<Wrench> Ptr;
+            typedef std::shared_ptr<Wrench> Ptr;
 
             /**
              * @brief Wrench
@@ -67,7 +67,7 @@ namespace OpenSoT {
 
         class Wrenches : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
         public:
-            typedef boost::shared_ptr<Wrenches> Ptr;
+            typedef std::shared_ptr<Wrenches> Ptr;
 
             Wrenches(const std::string& id,
                      const std::vector<std::string>& distal_links,

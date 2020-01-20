@@ -29,7 +29,7 @@
              */
             class VelocityLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<VelocityLimits> Ptr;
+                typedef std::shared_ptr<VelocityLimits> Ptr;
             private:
                 double _qDotLimit;
                 double _dT;

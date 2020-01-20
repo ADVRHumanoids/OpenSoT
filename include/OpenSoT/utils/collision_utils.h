@@ -42,7 +42,7 @@
 
 #if FCL_MINOR_VERSION <= 3
     template <typename T>
-    using shared_ptr =  boost::shared_ptr<T>;
+    using shared_ptr =  std::shared_ptr<T>;
 #else
     template <typename T>
     using shared_ptr =  std::shared_ptr<T>;
