@@ -150,8 +150,9 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          * @brief setGains set both position and velocity gains
          * @param Kp a SPD matrix (n+6 x n+6), first 6 elements are not used
          * @param Kd a SPD matrix (n+6 x n+6), first 6 elements are not used
+         * @param impedance_gains if true Kp and Kd are defined as impedance gains
          */
-        void setGains(const Eigen::MatrixXd& Kp, const Eigen::MatrixXd& Kd);
+        void setGains(const Eigen::MatrixXd& Kp, const Eigen::MatrixXd& Kd, bool impedance_gains=false);
 
         /**
          * @brief getKp
@@ -188,6 +189,15 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         double _lambda2;
 
         Eigen::MatrixXd _Kp, _Kd;
+
+        void compute_joints_inertia_inverse();
+
+        /**
+         * @brief _Mi inverse of Joints Inertia matrix
+         */
+        Eigen::MatrixXd _M;
+        Eigen::MatrixXd _Mi;
+
         
         
     };

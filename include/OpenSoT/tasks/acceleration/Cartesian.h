@@ -200,8 +200,9 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          * @brief setGains set both position and velocity gains
          * @param Kp a SPD matrix
          * @param Kd a SPD matrix
+         * @param impedance_gains if true Kp and Kd are defined as impedance gains
          */
-        void setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd);
+        void setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd, bool impedance_gains=false);
 
         /**
          * @brief getKp

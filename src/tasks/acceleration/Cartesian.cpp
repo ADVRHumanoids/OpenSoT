@@ -466,10 +466,19 @@ void OpenSoT::tasks::acceleration::Cartesian::setKd(const Eigen::Matrix6d& Kd)
     _Kd = Kd;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd)
+void OpenSoT::tasks::acceleration::Cartesian::setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd, bool impedance_gains)
 {
-    setKp(Kp);
-    setKd(Kd);
+    if(!impedance_gains)
+    {
+        setKp(Kp);
+        setKd(Kd);
+    }
+    else
+    {
+        compute_cartesian_inertia_inverse();
+        _Kp.noalias() = _Mi.block(0,0,6,6) * Kp;
+        _Kd.noalias() = _Mi.block(0,0,6,6) * Kd;
+    }
 }
 
 const Eigen::Matrix6d& OpenSoT::tasks::acceleration::Cartesian::getKp() const

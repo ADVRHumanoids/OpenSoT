@@ -19,6 +19,9 @@ OpenSoT::tasks::acceleration::Postural::Postural(
     _Kp.setIdentity(_qref.size(), _qref.size());
     _Kd.setIdentity(_qref.size(), _qref.size());
 
+    _Mi.resize(_qref.size(),_qref.size());
+    _M.resize(_qref.size(),_qref.size());
+
     setLambda(10.0);
     setWeight(Eigen::MatrixXd::Identity(_na, _na));
 
@@ -51,6 +54,9 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
 
     _Kp.setIdentity(_qref.size(), _qref.size());
     _Kd.setIdentity(_qref.size(), _qref.size());
+
+    _Mi.resize(_qref.size(),_qref.size());
+    _M.resize(_qref.size(),_qref.size());
     
     setLambda(10.);
     setWeight(Eigen::MatrixXd::Identity(_na, _na));
@@ -237,10 +243,19 @@ void OpenSoT::tasks::acceleration::Postural::setKd(const Eigen::MatrixXd& Kd)
     _Kd = Kd;
 }
 
-void OpenSoT::tasks::acceleration::Postural::setGains(const Eigen::MatrixXd& Kp, const Eigen::MatrixXd& Kd)
+void OpenSoT::tasks::acceleration::Postural::setGains(const Eigen::MatrixXd& Kp, const Eigen::MatrixXd& Kd, bool impedance_gains)
 {
-    setKp(Kp);
-    setKd(Kd);
+    if(!impedance_gains)
+    {
+        setKp(Kp);
+        setKd(Kd);
+    }
+    else
+    {
+        compute_joints_inertia_inverse();
+        _Kp.noalias() = _Mi * Kp;
+        _Kd.noalias() = _Mi * Kd;
+    }
 }
 
 const Eigen::MatrixXd& OpenSoT::tasks::acceleration::Postural::getKp() const
@@ -257,6 +272,12 @@ void OpenSoT::tasks::acceleration::Postural::getGains(Eigen::MatrixXd& Kp, Eigen
 {
     Kp = _Kp;
     Kd = _Kd;
+}
+
+void OpenSoT::tasks::acceleration::Postural::compute_joints_inertia_inverse()
+{
+     _robot.getInertiaMatrix(_M);
+     _Mi.block(6,6,_Mi.rows()-6,_Mi.cols()-6) = _M.block(6,6,_M.rows()-6,_M.cols()-6).inverse();
 }
 
 
