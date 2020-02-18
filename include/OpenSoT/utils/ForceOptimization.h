@@ -56,6 +56,12 @@ namespace OpenSoT { namespace utils {
                                       const Eigen::Matrix3d& w_R_c);
         
         void log(XBot::MatLogger::Ptr logger);
+
+        /**
+         * @brief getObjective
+         * @return the value of the cost function at first priority level
+         */
+        double getObjective();
         
         
     private:

@@ -74,6 +74,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testPiler
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
+                  testKinematics
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -421,6 +422,11 @@ ADD_EXECUTABLE(testCoMForceTask tasks/force/TestCoM.cpp)
 TARGET_LINK_LIBRARIES(testCoMForceTask ${TestLibs})
 add_dependencies(testCoMForceTask GTest-ext OpenSoT)
 add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
+
+ADD_EXECUTABLE(testKinematics utils/TestKinematics.cpp)
+TARGET_LINK_LIBRARIES(testKinematics ${TestLibs})
+add_dependencies(testKinematics GTest-ext OpenSoT)
+add_test(NAME OpenSoT_utils_test_kinematics COMMAND testKinematics)
 
 #ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})

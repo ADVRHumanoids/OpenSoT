@@ -39,8 +39,13 @@ namespace OpenSoT {
 
             /**
              * @brief Wrench
-             * @param contact_name frame wrt the force is exterted
+             * @param id
+             * @param distal_link where the force is applied
+             * @param base_link wrt the force is expressed (not used)
              * @param wrench
+             *
+             * NOTE: base_link is not used but is only needed to retrieve information for other computations
+             * such as Inverse Dynamics (J'F)
              */
             Wrench(const std::string& id,
                    const std::string& distal_link, const std::string& base_link,
