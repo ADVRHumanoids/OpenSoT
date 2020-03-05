@@ -5,13 +5,22 @@
 
 OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack & stack_of_tasks,
                              OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr bounds,
+                             TaskPtr reg_task,
                              const double eps_regularisation,
                              const OpenSoT::solvers::solver_back_ends be_solver):
     Solver(stack_of_tasks, bounds)
 {
+
     // nx = number of optimization variables
     const int nx = stack_of_tasks.front()->getXSize();
     _solution.setZero(nx);
+
+    // validate regularization task
+    if(reg_task && reg_task->getTaskSize() != nx)
+    {
+        printf("[nHQP] ignoring regularization task with task size != nx \n");
+        reg_task.reset();
+    }
 
     // initialize number of free variables to nx
     // this value will decrease when going down the hierarchy
@@ -52,7 +61,7 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
 
         // compute number of constraints and bounds (TBD: consider equalities)
         int num_constr = bounds->getAineq().rows();
-        int num_bounds = nx;
+        int num_bounds = bounds->hasBounds() ? nx : 0;
 
         // for all layers except the first, bounds must be turned into constraints
         if(num_free_vars != nx)
@@ -70,7 +79,7 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
 
 
         // construct task data and push it into a vector
-        _data_struct.emplace_back(num_free_vars, t, bounds, backend);
+        _data_struct.emplace_back(num_free_vars, t, reg_task, bounds, backend);
 
         // if we are processing the last task, skip nullspace dim computation
         if(i == n_tasks - 1)
@@ -193,6 +202,14 @@ void OpenSoT::solvers::nHQP::setMinSingularValueRatio(std::vector<double> sv_min
     }
 }
 
+void OpenSoT::solvers::nHQP::setMinTaskScalingFactor(double ts_min)
+{
+    for(int i = 0; i < _data_struct.size(); i++)
+    {
+        _data_struct[i].set_min_ts_factor(ts_min);
+    }
+}
+
 void OpenSoT::solvers::nHQP::_log(XBot::MatLogger::Ptr logger, const string & prefix)
 {
     int i = 0;
@@ -205,7 +222,8 @@ void OpenSoT::solvers::nHQP::_log(XBot::MatLogger::Ptr logger, const string & pr
 
 
 
-void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
+void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(const Eigen::MatrixXd * N,
+                                                      const Eigen::VectorXd& q0)
 {
     if(logger)
     {
@@ -223,7 +241,8 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
     }
 
 
-    const double sv_max = sv(0);
+    double sv_max = b0.size() > 1 ? sv(0) : 2.0; // fixme: abs thres
+    const double threshold = min_sv_ratio;
 
     for(int i = 0; i < b0.size(); i++)
     {
@@ -233,9 +252,35 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(double threshold)
         }
         else if(sv(i) < threshold*sv_max)
         {
-            b0(i) *= sv(i)/(threshold*sv_max);
-            sv(i) = std::pow(threshold*sv_max, 2u)/(sv(i)+threshold/100.0);
+            b0(i) *= std::max(min_ts_factor,
+                              sv(i)/(threshold*sv_max));
+
+            if(reg_task && N)
+            {
+                const auto& nullspace = *N;
+                b0(i) += std::min(1000.,
+                                  std::max(-1000., (reg_task->getb() - q0).dot(nullspace*svd.matrixV().col(i)) *
+                                                   (threshold*sv_max - sv(i))
+                                           )
+                                  ); // fixme clamp
+            }
+            else if(reg_task)
+            {
+                b0(i) += std::min(1000.,
+                                  std::max(-1000., (reg_task->getb()).dot(svd.matrixV().col(i)) *
+                                                   (threshold*sv_max - sv(i))
+                                           )
+                                  ); // fixme clamp
+            }
+
+
+            sv(i) = threshold*sv_max;
         }
+    }
+
+    if(logger)
+    {
+        logger->add(log_prefix + "b0_rot_reg", b0);
     }
 
     b0 = svd.matrixU()*b0;
@@ -276,14 +321,21 @@ void OpenSoT::solvers::nHQP::TaskData::compute_contraints(const Eigen::MatrixXd*
     }
     else
     {
-        Aineq.pile(constraints->getAineq() * (*N));
-        Aineq.pile(*N);
+        if(constraints->getAineq().rows() > 0)
+        {
+            Aineq.pile(constraints->getAineq() * (*N));
+            lb.pile(constraints->getbLowerBound() - constraints->getAineq()*q0);
+            ub.pile(constraints->getbUpperBound() - constraints->getAineq()*q0);
+        }
 
-        lb.pile(constraints->getbLowerBound() - constraints->getAineq()*q0);
-        lb.pile(constraints->getLowerBound() - q0);
+        if(constraints->getLowerBound().size() > 0 &&
+                constraints->getUpperBound().size() > 0)
+        {
+            Aineq.pile(*N);
+            lb.pile(constraints->getLowerBound() - q0);
+            ub.pile(constraints->getUpperBound() - q0);
+        }
 
-        ub.pile(constraints->getbUpperBound() - constraints->getAineq()*q0);
-        ub.pile(constraints->getUpperBound() - q0);
     }
 
 }
@@ -295,16 +347,19 @@ const Eigen::MatrixXd & OpenSoT::solvers::nHQP::TaskData::get_nullspace() const
 
 
 OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
-                                           OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr a_task,
-                                           OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr a_constraint,
+                                           TaskPtr a_task,
+                                           TaskPtr a_reg_task,
+                                           ConstraintPtr a_constraint,
                                            BackEnd::Ptr a_back_end):
     task(a_task),
     constraints(a_constraint),
     min_sv_ratio(nHQP::DEFAULT_MIN_SV_RATIO),
+    min_ts_factor(nHQP::DEFAULT_MIN_TASK_SCALING),
     Aineq(num_free_vars), lb(1), ub(1),
     ns_dim(num_free_vars - a_task->getTaskSize()),
     back_end(a_back_end),
-    back_end_initialized(false)
+    back_end_initialized(false),
+    reg_task(a_reg_task)
 {
 
 }
@@ -322,6 +377,16 @@ void OpenSoT::solvers::nHQP::TaskData::set_min_sv_ratio(double sv)
     }
 
     min_sv_ratio = sv;
+}
+
+void OpenSoT::solvers::nHQP::TaskData::set_min_ts_factor(double ts_factor)
+{
+    if(ts_factor < 0)
+    {
+        throw std::invalid_argument("ts_factor must be > 0");
+    }
+
+    this->min_ts_factor = ts_factor;
 }
 
 void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
@@ -343,17 +408,39 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
     svd.compute(AN, Eigen::ComputeFullU|Eigen::ComputeFullV);
 
-    regularize_A_b(min_sv_ratio);
+    regularize_A_b(N, q0);
 
     H.noalias() =  AN.transpose() * task->getWeight() * AN;
     g.noalias() = -AN.transpose() * task->getWeight() * b0;
 
-    if(compute_nullspace()) // if there is some nullspace left..
+    if(compute_nullspace() && AN.cols() > AN.rows()) // if there is some nullspace left..
     {
         const double sv_max = svd.singularValues()[0];
-        H.noalias() += sv_max * get_nullspace() * get_nullspace().transpose(); // add selective nullspace regularization
+        const int redundancy = AN.cols() - AN.rows();
+
+        // add selective nullspace regularization
+        H.noalias() += sv_max * svd.matrixV().rightCols(redundancy)*svd.matrixV().rightCols(redundancy).transpose();
+
+        if(reg_task && !N) // fix bug
+        {
+            g.noalias() -= sv_max *
+                    svd.matrixV().rightCols(redundancy)*svd.matrixV().rightCols(redundancy).transpose() *
+                    reg_task->getb();
+        }
+
+        if(reg_task && N) // fix bug
+        {
+            const auto& ns = *N;
+
+            g.noalias() -= sv_max *
+                    svd.matrixV().rightCols(redundancy)*svd.matrixV().rightCols(redundancy).transpose() *
+                    ns.transpose() *
+                    (reg_task->getb() - q0);
+        }
     }
+
 }
+
 
 bool OpenSoT::solvers::nHQP::TaskData::update_and_solve()
 {
@@ -395,6 +482,8 @@ bool OpenSoT::solvers::nHQP::TaskData::update_and_solve()
     if(logger)
     {
         logger->add(log_prefix + "solution", back_end->getSolution());
+        logger->add(log_prefix + "H", H);
+        logger->add(log_prefix + "g", g);
     }
 
     return success;

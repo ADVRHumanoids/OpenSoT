@@ -63,6 +63,7 @@ namespace OpenSoT { namespace solvers {
     public:
 
         static constexpr double DEFAULT_MIN_SV_RATIO = 0.05;
+        static constexpr double DEFAULT_MIN_TASK_SCALING = 0.0;
         
         // Shared pointer typedef
         typedef boost::shared_ptr<nHQP> Ptr;
@@ -70,6 +71,7 @@ namespace OpenSoT { namespace solvers {
         // Constructor
         nHQP(Stack& stack_of_tasks,
              ConstraintPtr bounds,
+             TaskPtr reg_task,
              const double eps_regularisation,
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
 
@@ -85,6 +87,9 @@ namespace OpenSoT { namespace solvers {
         // Setter for minimum singular value ratio (layer wise)
         void setMinSingularValueRatio(std::vector<double> sv_min);
 
+        // Setter for the minimum task value scaling
+        void setMinTaskScalingFactor(double ts_min);
+
 
     private:
         
@@ -99,10 +104,12 @@ namespace OpenSoT { namespace solvers {
 
             TaskData(int num_free_vars,
                      TaskPtr task,
+                     TaskPtr reg_task,
                      ConstraintPtr constraint,
                      BackEnd::Ptr back_end);
 
             void set_min_sv_ratio(double sv);
+            void set_min_ts_factor(double ts_factor);
 
             int compute_nullspace_dimension(double threshold);
 
@@ -126,6 +133,8 @@ namespace OpenSoT { namespace solvers {
             
         private:
 
+            // reg task
+            TaskPtr reg_task;
             
             // this task
             TaskPtr task;
@@ -144,6 +153,7 @@ namespace OpenSoT { namespace solvers {
 
             // min singular value ratio
             double min_sv_ratio;
+            double min_ts_factor;
             
             // quadratic cost matrices
             Eigen::MatrixXd H;
@@ -183,7 +193,8 @@ namespace OpenSoT { namespace solvers {
              *
              * @param threshold
              */
-            void regularize_A_b(double threshold);
+            void regularize_A_b(const Eigen::MatrixXd * AN_nullspace,
+                                const Eigen::VectorXd& q0);
 
         };
 
