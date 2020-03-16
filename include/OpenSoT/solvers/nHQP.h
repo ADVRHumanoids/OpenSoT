@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2014 Walkman
  * Author: Arturo Laurenzi
  * email: arturo.laurenzi@iit.it
@@ -90,6 +90,12 @@ namespace OpenSoT { namespace solvers {
         // Setter for the minimum task value scaling
         void setMinTaskScalingFactor(double ts_min);
 
+        void enableRegularizeA(bool enable);
+        void enableRegularizeb(bool enable);
+
+        // Task scaling weight
+        void setTaskScalingWeight(const Eigen::MatrixXd& W);
+
 
     private:
         
@@ -110,6 +116,9 @@ namespace OpenSoT { namespace solvers {
 
             void set_min_sv_ratio(double sv);
             void set_min_ts_factor(double ts_factor);
+            void set_task_scaling_weight(const Eigen::MatrixXd& W);
+            void enable_regularize_A(bool enable);
+            void enable_regularize_b(bool enable);
 
             int compute_nullspace_dimension(double threshold);
 
@@ -149,11 +158,13 @@ namespace OpenSoT { namespace solvers {
             Eigen::MatrixXd AN;
 
             // b vector for this task
-            Eigen::VectorXd b0;
+            Eigen::VectorXd b0, b1;
+            Eigen::MatrixXd W;
 
             // min singular value ratio
             double min_sv_ratio;
             double min_ts_factor;
+            bool regularize_A, regularize_b;
             
             // quadratic cost matrices
             Eigen::MatrixXd H;
@@ -170,6 +181,8 @@ namespace OpenSoT { namespace solvers {
             
             // svd computation class
             Eigen::BDCSVD<Eigen::MatrixXd> svd;
+            Eigen::VectorXd sv_reg;
+            Eigen::VectorXd solution;
 
             // nullspace dimension (for next task)
             int ns_dim;
@@ -212,6 +225,7 @@ namespace OpenSoT { namespace solvers {
 
 
     };
+
 
     
 } }
