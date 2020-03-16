@@ -137,17 +137,22 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     
     _velocity_error = _vel_ref - _vel_current; ///Maybe here we should multiply the _orientation_gain as well?
 
-    _cartesian_task = _J*_qddot + _jdotqdot;
-    if(_virtual_force_ref.isZero())
+    _cartesian_task = _J*_qddot; // + _jdotqdot;
+    if(_virtual_force_ref.isZero() && _Kp.isZero() && _Kd.isZero())
+    {
         _cartesian_task = _cartesian_task - _acc_ref
-                                      - _lambda2*_Kd*_velocity_error
-                                      - _lambda*_Kp*_pose_error;
-    else{
-        compute_cartesian_inertia_inverse();
+                                      - _lambda2*_velocity_error
+                                      - _lambda*_pose_error;
+    }
+    else
+    {
+//        compute_cartesian_inertia_inverse();
+        _Mi.setIdentity();
         _cartesian_task = _cartesian_task - _acc_ref
-                                      - _lambda2*_Kd*_velocity_error
-                                      - _lambda*_Kp*_pose_error
-                                      - _Mi*_virtual_force_ref;}
+                                      - _lambda2*_velocity_error
+                                      - _lambda*_pose_error
+                                      - _Mi*(_Kd*_velocity_error + _Kp*_pose_error + _virtual_force_ref);
+    }
     
     _A = _cartesian_task.getM();
     _b = -_cartesian_task.getq();
@@ -294,6 +299,8 @@ void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
     logger->add(getTaskID() + "_velocity_reference", _vel_ref_cached);
     logger->add(getTaskID() + "_acceleration_reference", _acc_ref_cached);
     logger->add(getTaskID() +  "_virtual_force_reference", _virtual_force_ref_cached);
+
+    logger->add(getTaskID() +  "_inv_inertia", _Mi);
 }
 
 void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& ref)
