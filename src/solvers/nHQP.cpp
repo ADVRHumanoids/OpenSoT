@@ -210,11 +210,19 @@ void OpenSoT::solvers::nHQP::setMinTaskScalingFactor(double ts_min)
     }
 }
 
-void OpenSoT::solvers::nHQP::setTaskScalingWeight(const Eigen::MatrixXd& W)
+void OpenSoT::solvers::nHQP::setInertiaMatrixInverse(const Eigen::MatrixXd& W)
 {
     for(int i = 0; i < _data_struct.size(); i++)
     {
-        _data_struct[i].set_task_scaling_weight(W);
+        _data_struct[i].set_inertia_inverse(W);
+    }
+}
+
+void OpenSoT::solvers::nHQP::setUnconstrained(bool value)
+{
+    for(auto& td : _data_struct)
+    {
+        td.set_unconstrained(value);
     }
 }
 
@@ -226,11 +234,11 @@ void OpenSoT::solvers::nHQP::enableRegularizeA(bool enable)
     }
 }
 
-void OpenSoT::solvers::nHQP::enableRegularizeb(bool enable)
+void OpenSoT::solvers::nHQP::enableRegularizeb(bool enable, double lambda_max)
 {
     for(auto& td : _data_struct)
     {
-        td.enable_regularize_b(enable);
+        td.enable_regularize_b(enable, lambda_max);
     }
 }
 
@@ -267,8 +275,9 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(const Eigen::MatrixXd * N,
     }
 
 
-    double sv_max = sv.size() > 1 ? sv(0) : 2.0; // fixme: abs thres
+    double sv_max = sv.size() > 1 ? sv(0) : 1.0; // fixme: abs thres
     const double threshold = min_sv_ratio;
+    b_damp.setZero(b0.size());
 
     for(int i = 0; i < b0.size(); i++)
     {
@@ -278,27 +287,30 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(const Eigen::MatrixXd * N,
         }
         else if(sv(i) < threshold*sv_max)
         {
-            if(regularize_b)
-            {
-                b0(i) *= sv(i)/(threshold*sv_max) * sv(i)/(threshold*sv_max);
-            }
+
+            const double sv_raw = sv(i);
 
             if(regularize_A)
             {
                 sv(i) = threshold*sv_max;
             }
 
+            if(regularize_b)
+            {
+                b0(i) *= std::pow(sv_raw/threshold*sv_max, 2);
+            }
+
             if(regularize_b && reg_task && N)
             {
                 const auto& nullspace = *N;
-                b0(i) += (reg_task->getb() - q0).dot(nullspace*svd.matrixV().col(i)) *
-                                                    (threshold*sv_max - sv(i)) *
+                b_damp(i) = (reg_task->getb() - q0).dot(nullspace*svd.matrixV().col(i)) *
+                        (threshold*sv_max - sv_raw) *
                         sv(i)/(threshold*sv_max);
             }
             else if(regularize_b && reg_task)
             {
-                b0(i) += (reg_task->getb()).dot(svd.matrixV().col(i)) *
-                                               (threshold*sv_max - sv(i)) *
+                b_damp(i) = (reg_task->getb()).dot(svd.matrixV().col(i)) *
+                        (threshold*sv_max - sv_raw) *
                         sv(i)/(threshold*sv_max);
             }
 
@@ -309,10 +321,16 @@ void OpenSoT::solvers::nHQP::TaskData::regularize_A_b(const Eigen::MatrixXd * N,
     if(logger)
     {
         logger->add(log_prefix + "b0_rot_reg", b0);
+        logger->add(log_prefix + "b0_damp", b_damp);
+    }
+
+    if(logger && reg_task)
+    {
+        logger->add(log_prefix + "reg_task_value", reg_task->getb());
     }
 
     sv_reg = sv;
-    b0 = svd.matrixU()*b0;
+    b0 = svd.matrixU()*(b_damp + b0);
     AN = svd.matrixU().leftCols(sv.size())*sv.asDiagonal()*svd.matrixV().transpose().topRows(sv.size());
 
     if(logger)
@@ -391,7 +409,9 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
     ns_dim(num_free_vars - a_task->getTaskSize()),
     back_end(a_back_end),
     back_end_initialized(false),
-    reg_task(a_reg_task)
+    reg_task(a_reg_task),
+    solve_unconstrained(false),
+    lambda_max(1.0)
 {
 
 }
@@ -421,9 +441,9 @@ void OpenSoT::solvers::nHQP::TaskData::set_min_ts_factor(double ts_factor)
     this->min_ts_factor = ts_factor;
 }
 
-void OpenSoT::solvers::nHQP::TaskData::set_task_scaling_weight(const Eigen::MatrixXd& _W)
+void OpenSoT::solvers::nHQP::TaskData::set_inertia_inverse(const Eigen::MatrixXd& _W)
 {
-    W = _W;
+    Binv = _W;
 }
 
 void OpenSoT::solvers::nHQP::TaskData::enable_regularize_A(bool enable)
@@ -431,9 +451,15 @@ void OpenSoT::solvers::nHQP::TaskData::enable_regularize_A(bool enable)
     regularize_A = enable;
 }
 
-void OpenSoT::solvers::nHQP::TaskData::enable_regularize_b(bool enable)
+void OpenSoT::solvers::nHQP::TaskData::enable_regularize_b(bool enable, double lam_max)
 {
+    lambda_max = lam_max;
     regularize_b = enable;
+}
+
+void OpenSoT::solvers::nHQP::TaskData::set_unconstrained(bool value)
+{
+    solve_unconstrained = value;
 }
 
 void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
@@ -442,34 +468,39 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
     /* || A(N*x + q0) - b || */
 
-    if(!N && W.size() == 0)
+    if(!N && Binv.size() == 0)
     {
         AN = task->getA();
         b0 = task->getb();
         b1.setZero(b0.size());
     }
-    else if(W.size() == 0)
+    else if(Binv.size() == 0)
     {
         AN.noalias() = task->getA() * (*N);
         b0.noalias() = task->getb() - task->getA() * q0;
         b1.setZero(b0.size());
     }
-    else if(!N && W.size() > 0)
+    else if(!N && Binv.size() > 0)
     {
         AN = task->getA();
-        b1 = task->getA()*W*task->getA().transpose()*task->getb();
+        b1 = task->getA()*Binv*task->getA().transpose()*task->getb();
         b0.setZero(b1.size());
     }
-    else if(W.size() > 0)
+    else if(Binv.size() > 0)
     {
         AN.noalias() = task->getA() * (*N);
-        b1.noalias() = AN*(*N).transpose()*W*(*N)*AN.transpose()*task->getb();
+        b1.noalias() = AN*(*N).transpose()*Binv*(*N)*AN.transpose()*task->getb();
         b0.noalias() = - task->getA() * q0;
     }
 
     svd.compute(AN, Eigen::ComputeFullU|Eigen::ComputeFullV);
 
     regularize_A_b(N, q0);
+
+    if(solve_unconstrained)
+    {
+        return; // skip unnecessary qp terms computation
+    }
 
     H.noalias() =  AN.transpose() * task->getWeight() * AN;
     g.noalias() = -AN.transpose() * task->getWeight() * (b0 + b1);
@@ -505,17 +536,20 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
 bool OpenSoT::solvers::nHQP::TaskData::update_and_solve()
 {
-    solution = svd.matrixV().leftCols(sv_reg.size())*
-            sv_reg.cwiseInverse().cwiseProduct(svd.matrixU().leftCols(sv_reg.size()).transpose()*
-                                               (b0 + b1));
-
-    if(logger)
+    if(solve_unconstrained)
     {
-        logger->add(log_prefix + "solution", solution);
+        solution = svd.matrixV().leftCols(sv_reg.size())*
+                sv_reg.cwiseInverse().cwiseProduct(svd.matrixU().leftCols(sv_reg.size()).transpose()*
+                                                   (b0 + b1));
+
+        if(logger)
+        {
+            logger->add(log_prefix + "solution", solution);
+        }
+
+        return true;
+
     }
-
-    return true;
-
 
     bool success = false;
 

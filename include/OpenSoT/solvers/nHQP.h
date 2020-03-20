@@ -90,11 +90,16 @@ namespace OpenSoT { namespace solvers {
         // Setter for the minimum task value scaling
         void setMinTaskScalingFactor(double ts_min);
 
+        // enable/disable regularization on A and b
         void enableRegularizeA(bool enable);
-        void enableRegularizeb(bool enable);
+        void enableRegularizeb(bool enable, double lambda_max = 1.0);
 
-        // Task scaling weight
-        void setTaskScalingWeight(const Eigen::MatrixXd& W);
+        // Setter for inverse solution-space inertia matrix. Calling this function
+        // makes the solver interpret task b vector as a*force* reference
+        void setInertiaMatrixInverse(const Eigen::MatrixXd& Binv);
+
+        // enables/disables unconstrained pinv-based solution
+        void setUnconstrained(bool value);
 
 
     private:
@@ -116,9 +121,10 @@ namespace OpenSoT { namespace solvers {
 
             void set_min_sv_ratio(double sv);
             void set_min_ts_factor(double ts_factor);
-            void set_task_scaling_weight(const Eigen::MatrixXd& W);
+            void set_inertia_inverse(const Eigen::MatrixXd& Binv);
             void enable_regularize_A(bool enable);
-            void enable_regularize_b(bool enable);
+            void enable_regularize_b(bool enable, double lambda_max);
+            void set_unconstrained(bool value);
 
             int compute_nullspace_dimension(double threshold);
 
@@ -158,13 +164,21 @@ namespace OpenSoT { namespace solvers {
             Eigen::MatrixXd AN;
 
             // b vector for this task
-            Eigen::VectorXd b0, b1;
-            Eigen::MatrixXd W;
+            // decomposed as
+            // b0 = term subject to regularization
+            // b1 = term which is left unaltered
+            // b_damp = term to enforce nullspace damping
+            Eigen::VectorXd b0, b1, b_damp;
+
+            // inverse inertia (if empty, not used)
+            Eigen::MatrixXd Binv;
 
             // min singular value ratio
             double min_sv_ratio;
             double min_ts_factor;
+            double lambda_max;
             bool regularize_A, regularize_b;
+            bool solve_unconstrained;
             
             // quadratic cost matrices
             Eigen::MatrixXd H;
