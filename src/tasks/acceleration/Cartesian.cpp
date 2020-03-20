@@ -137,15 +137,16 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     
     _velocity_error = _vel_ref - _vel_current; ///Maybe here we should multiply the _orientation_gain as well?
 
-    _cartesian_task = _J*_qddot; // + _jdotqdot;
     if(_virtual_force_ref.isZero() && _Kp.isZero() && _Kd.isZero())
     {
+        _cartesian_task = _J*_qddot + _jdotqdot;
         _cartesian_task = _cartesian_task - _acc_ref
                                       - _lambda2*_velocity_error
                                       - _lambda*_pose_error;
     }
     else
     {
+        _cartesian_task = _J*_qddot; // + _jdotqdot;
 //        compute_cartesian_inertia_inverse();
         _Mi.setIdentity();
         _cartesian_task = _cartesian_task - _acc_ref
