@@ -38,11 +38,12 @@ execute_process(
     OUTPUT_VARIABLE LINUX_DISTRO_NAME
 )
 
-string(REPLACE "\n" " " LINUX_DISTRO_NAME ${LINUX_DISTRO_NAME})
+string(REPLACE "\n" "" LINUX_DISTRO_NAME ${LINUX_DISTRO_NAME})
 
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${GIT_SHA1_SHORT}-${CPACK_PACKAGE_ARCHITECTURE}-${LINUX_DISTRO_NAME})
 
-message(STATUS "Will generate package '${CPACK_PACKAGE_FILE_NAME}'.deb")
+message(STATUS "Will generate package '${CPACK_PACKAGE_FILE_NAME}.deb'")
+
 include(CPack)
 
 add_custom_target(release_deb
