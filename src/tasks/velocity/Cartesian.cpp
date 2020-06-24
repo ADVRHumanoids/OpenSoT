@@ -254,12 +254,12 @@ const double OpenSoT::tasks::velocity::Cartesian::getOrientationErrorGain() cons
     return _orientationErrorGain;
 }
 
-const std::string OpenSoT::tasks::velocity::Cartesian::getDistalLink() const
+const std::string& OpenSoT::tasks::velocity::Cartesian::getDistalLink() const
 {
     return _distal_link;
 }
 
-const std::string OpenSoT::tasks::velocity::Cartesian::getBaseLink() const
+const std::string& OpenSoT::tasks::velocity::Cartesian::getBaseLink() const
 {
     return _base_link;
 }
