@@ -73,7 +73,7 @@ void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda)
     
     
     _lambda = lambda;
-    _lambda2 = 4*std::sqrt(lambda);
+    _lambda2 = 2.*std::sqrt(lambda);
 }
 
 void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda1, double lambda2)
