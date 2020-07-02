@@ -9,6 +9,7 @@
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <XBotInterface/Logger.hpp>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
