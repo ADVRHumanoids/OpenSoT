@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
 include(ExternalProject)
-
-set(PROJECTNAME tests)
-project(${PROJECTNAME})
 
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
