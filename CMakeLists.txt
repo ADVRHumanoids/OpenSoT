@@ -274,7 +274,7 @@ if(${osqp_FOUND})
     message("Adding src/solvers/OSQPBackEnd.cpp to compilation")
 
     add_library(OpenSotBackEndOSQP SHARED src/solvers/OSQPBackEnd.cpp)
-    target_link_libraries(OpenSotBackEndOSQP OpenSoT osqp::osqp)
+    target_link_libraries(OpenSotBackEndOSQP OpenSoT osqp::osqpstatic)
     library_install(OpenSotBackEndOSQP 1 0 0)
 
 endif()
