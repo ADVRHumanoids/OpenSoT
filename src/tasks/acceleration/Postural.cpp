@@ -73,7 +73,7 @@ void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda)
     
     
     _lambda = lambda;
-    _lambda2 = 4*std::sqrt(lambda);
+    _lambda2 = 2*std::sqrt(lambda);
 }
 
 void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda1, double lambda2)
@@ -92,7 +92,7 @@ void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda1, double la
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref)
 {
-    _qref.tail(_na) = qref.tail(_na);
+    _qref = qref;
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
 
@@ -103,8 +103,8 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref)
 {
-    _qref.tail(_na) = qref.tail(_na);
-    _qdot_ref.tail(_na) = dqref.tail(_na);
+    _qref = qref;
+    _qdot_ref = dqref;
     _qddot_ref.setZero(_qref.size());
 
     _qdot_ref_cached = _qdot_ref;
@@ -115,9 +115,9 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
                   const Eigen::VectorXd& ddqref)
 {
-    _qref.tail(_na) = qref.tail(_na);
-    _qdot_ref.tail(_na) = dqref.tail(_na);
-    _qddot_ref.tail(_na) = ddqref.tail(_na);
+    _qref = qref;
+    _qdot_ref = dqref;
+    _qddot_ref = ddqref;
 
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
@@ -138,7 +138,7 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _velocity_error = _qdot_ref - _qdot;
 
     _qddot_d = _qddot_ref + _lambda2*_Kd*_velocity_error + _lambda*_Kp*_position_error;
-    _postural_task = _Jpostural * (_qddot - _qddot_d);
+    _postural_task = (_qddot - _qddot_d);
 
     _A = _postural_task.getM();
     _b = - _postural_task.getq();
