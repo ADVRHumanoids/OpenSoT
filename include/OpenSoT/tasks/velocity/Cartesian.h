@@ -198,8 +198,8 @@
                 void setOrientationErrorGain(const double& orientationErrorGain);
                 const double getOrientationErrorGain() const;
 
-                const std::string getDistalLink() const;
-                const std::string getBaseLink() const;
+                const std::string& getDistalLink() const;
+                const std::string& getBaseLink() const;
                 const bool baseLinkIsWorld() const;
 
                 virtual void setLambda(double lambda);
