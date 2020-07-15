@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
 include(ExternalProject)
-
-set(PROJECTNAME tests)
-project(${PROJECTNAME})
 
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
@@ -138,14 +134,14 @@ endif()
 
 #                      testVelocityAllocation
                        
-if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
-    add_custom_command(TARGET OpenSoT POST_BUILD
-                      COMMAND ${CMAKE_CTEST_COMMAND}
-                      MAIN_DEPENDENCY OpenSoT
-                      DEPENDS
-                        ${OPENSOT_TESTS}
-    )
-endif()
+#if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
+#    add_custom_command(TARGET OpenSoT POST_BUILD
+#                      COMMAND ${CMAKE_CTEST_COMMAND}
+#                      MAIN_DEPENDENCY OpenSoT
+#                      DEPENDS
+#                        ${OPENSOT_TESTS}
+#    )
+#endif()
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
