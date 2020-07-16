@@ -263,9 +263,8 @@ endif()
 find_package(GLPK QUIET)
 if(${GLPK_FOUND})
     message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
-
     add_library(OpenSotBackEndGLPK SHARED src/solvers/GLPKBackEnd.cpp)
-    target_link_libraries(OpenSotBackEndGLPK OpenSoT -lglpk)
+    target_link_libraries(OpenSotBackEndGLPK OpenSoT ${GLPK_LIBRARY})
     library_install(OpenSotBackEndGLPK 1 0 0)
 endif()
 
