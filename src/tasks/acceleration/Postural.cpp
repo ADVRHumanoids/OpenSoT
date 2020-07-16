@@ -5,16 +5,16 @@ OpenSoT::tasks::acceleration::Postural::Postural(
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
     _robot(robot)
 {
-    _na = _robot.getActuatedJointNum();
+    _na = x_size;
 
     _hessianType = HST_SEMIDEF;
 
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
 
-    _qddot = AffineHelper::Identity(robot.getJointNum());
+    _qddot = AffineHelper::Identity(_na);
 
-    _A.setZero(_na, _qddot.getInputSize());
+    _A.setZero(_na, _na);
 
     _Kp.setIdentity(_qref.size(), _qref.size());
     _Kd.setIdentity(_qref.size(), _qref.size());
@@ -36,7 +36,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
     _robot(robot),
     _qddot(qddot)
 {
-    _na = _robot.getActuatedJointNum();
+    _na =  qddot.getInputSize();
     
     _hessianType = HST_SEMIDEF;
     
@@ -44,10 +44,10 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
     robot.getPosturalJacobian(_Jpostural);
     
     if(_qddot.getInputSize() == 0){
-        _qddot = AffineHelper::Identity(robot.getJointNum());
+        _qddot = AffineHelper::Identity(_na);
     }
     
-    _A.setZero(_na, _qddot.getInputSize());
+    _A.setZero(_na, _na);
 
     _Kp.setIdentity(_qref.size(), _qref.size());
     _Kd.setIdentity(_qref.size(), _qref.size());
