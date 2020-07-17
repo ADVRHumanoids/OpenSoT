@@ -93,10 +93,10 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     if(_is_body_jacobian)
     {
         _tmp_A = _A;
-        _A = XBot::Utils::GetAdjointFromRotation(_actualPose.linear())*_tmp_A;
+        _A = XBot::Utils::GetAdjointFromRotation(_actualPose.linear().transpose())*_tmp_A;
 
         _tmp_b = _b;
-        _b = XBot::Utils::GetAdjointFromRotation(_actualPose.linear())*_tmp_b;
+        _b = XBot::Utils::GetAdjointFromRotation(_actualPose.linear().transpose())*_tmp_b;
     }
 
     this->_desiredTwist.setZero(6);
