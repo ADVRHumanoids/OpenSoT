@@ -110,7 +110,6 @@ endif()
 
 
 
-#                      testDynamicsConstraint
                       
                       
                       
@@ -430,9 +429,6 @@ add_test(NAME OpenSoT_utils_test_kinematics COMMAND testKinematics)
 #add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
 
 
-#    ADD_EXECUTABLE(testDynamicsConstraint constraints/velocity/TestDynamics.cpp)
-#    TARGET_LINK_LIBRARIES(testDynamicsConstraint ${TestLibs})
-#    add_dependencies(testDynamicsConstraint GTest-ext OpenSoT)
 
 #    ADD_EXECUTABLE(testQPOases_CartesianPositionConstraint solvers/TestQPOases_CartesianPositionConstraint.cpp)
 #    TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
@@ -468,7 +464,6 @@ add_test(NAME OpenSoT_utils_test_kinematics COMMAND testKinematics)
 #    add_dependencies(testVelocityAllocation GTest-ext OpenSoT)
 
 
-#    add_test(NAME OpenSoT_constraints_velocity_Dynamics COMMAND testDynamicsConstraint)
 
 #
 #    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
