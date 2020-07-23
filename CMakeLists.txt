@@ -165,6 +165,7 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/Indices.cpp
     src/utils/VelocityAllocation.cpp
     src/utils/cartesian_utils.cpp
+    src/utils/ForceOptimization.cpp
     src/utils/InverseDynamics.cpp)
 
 if(${FCL_FOUND} AND ${moveit_core_FOUND})
