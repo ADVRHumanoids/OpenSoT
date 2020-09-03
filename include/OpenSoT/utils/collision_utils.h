@@ -42,10 +42,10 @@
 
 #if FCL_MINOR_VERSION <= 3
     template <typename T>
-    using shared_ptr =  boost::shared_ptr<T>;
+    using shared_ptr_type =  boost::shared_ptr<T>;
 #else
     template <typename T>
-    using shared_ptr =  std::shared_ptr<T>;
+    using shared_ptr_type =  std::shared_ptr<T>;
 #endif
     
 // construct vector
@@ -223,7 +223,7 @@ private:
     /**
      * @brief shapes_ is a map of collision geometries
      */
-    std::map<std::string,shared_ptr<fcl::CollisionGeometry<double>> > shapes_;
+    std::map<std::string,shared_ptr_type<fcl::CollisionGeometry<double>> > shapes_;
 
     /**
      * @brief custom_capsules_ is a map of custom capsules specified as endpoints + radius

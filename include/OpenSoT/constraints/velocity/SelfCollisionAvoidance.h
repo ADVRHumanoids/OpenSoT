@@ -22,11 +22,11 @@
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
  #include <XBotInterface/ModelInterface.h>
- #include <OpenSoT/utils/collision_utils.h>
  #include <kdl/frames.hpp>
 
 #include <Eigen/Dense>
 
+class ComputeLinksDistance;
 
  namespace OpenSoT {
     namespace constraints {
@@ -36,13 +36,14 @@
              * @brief The SelfCollisionAvoidance class implements a constraint of full-body Self-Collision Avoidance for Walkman
              *  This constraint is implemented by inequality: Aineq * x <= bUpperBound
              *  where the dimension of Aineq is n * m, n is the number of Link pairs to be constrained, and m is total DOFs of the robot to be controlled;
-             *  the x is infinitesimal increament of the joint variable vector which is the optimization variable, and its dimension is m * 1; 
+             *  the x is infinitesimal increament of the joint variable vector which is the optimization variable, and its dimension is m * 1;
              *  the bUpperBound is the minimum distance vector of all the Link pairs, the dimension of which is n * 1.
              *  the element in bUpperBound is the minimum distance between the corresponding Link pair with taking the Link pair threshold into account.
              */
             class SelfCollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
+                typedef std::pair<std::string, std::string> LinksPair;
             protected:
                 double _boundScaling;
                 /**
@@ -54,7 +55,7 @@
                  */
                 double _detection_threshold;
                 XBot::ModelInterface& robot_col;
-                ComputeLinksDistance computeLinksDistance;
+                std::unique_ptr<ComputeLinksDistance> computeLinksDistance;
 
                 /**
                  * @brief _x_cache is a copy of last q vector used to update the constraints.
@@ -71,7 +72,7 @@
                 std::string base_name;
 
                 Eigen::MatrixXd _J_transform;
-            public:               
+            public:
                 /**
                  * @brief Skew_symmetric_operator is used to get the transformation matrix which is used to transform
                  * the base Jacobian to goal Jacobian
@@ -151,7 +152,7 @@
                  * @param whiteList a list of links pairs for which to not check collision detection
                  * @return true on success
                  */
-                bool setCollisionWhiteList(std::list< LinkPairDistance::LinksPair > whiteList);
+                bool setCollisionWhiteList(std::list< LinksPair > whiteList);
 
                 /**
                  * @brief setCollisionBlackList resets the allowed collision matrix by setting all collision pairs
@@ -161,7 +162,7 @@
                  * @param blackList a list of links pairs for which to not check collision detection
                  * @return true on success
                  */
-                bool setCollisionBlackList(std::list< LinkPairDistance::LinksPair > blackList);
+                bool setCollisionBlackList(std::list< LinksPair > blackList);
 
                 /**
                  * @brief setBoundScaling sets bound scaling for the capsule constraint
@@ -170,6 +171,8 @@
                  *         collision with the capsule by slowing down)
                  */
                 void setBoundScaling(const double boundScaling);
+
+                ~SelfCollisionAvoidance();
             };
         }
     }

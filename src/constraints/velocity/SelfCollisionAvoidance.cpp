@@ -16,6 +16,7 @@
 */
 
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
+#include <OpenSoT/utils/collision_utils.h>
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
@@ -41,12 +42,12 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
     Constraint("self_collision_avoidance", x.size()),
     _detection_threshold(detection_threshold),
     _linkPair_threshold(linkPair_threshold),
-    computeLinksDistance(robot),
     robot_col(robot),
     _x_cache(x),
     _boundScaling(boundScaling),
     base_name(base_link)
 {
+    computeLinksDistance = std::make_unique<ComputeLinksDistance>(robot);
 
     _J_transform.setZero(3,6);
 
@@ -95,7 +96,7 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
-    bool ok = computeLinksDistance.setCollisionWhiteList(whiteList);
+    bool ok = computeLinksDistance->setCollisionWhiteList(whiteList);
     this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
     _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
     return ok;
@@ -103,7 +104,7 @@ bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteLi
 
 bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
-    bool ok = computeLinksDistance.setCollisionBlackList(blackList);
+    bool ok = computeLinksDistance->setCollisionBlackList(blackList);
     this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
     _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
     return ok;
@@ -130,7 +131,7 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
 
     std::list<LinkPairDistance> interested_LinkPairs;
     std::list<LinkPairDistance>::iterator j;
-    interested_LinkPairs = computeLinksDistance.getLinkDistances(_detection_threshold);
+    interested_LinkPairs = computeLinksDistance->getLinkDistances(_detection_threshold);
 
     /*//////////////////////////////////////////////////////////*/
 
@@ -218,5 +219,10 @@ void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc
 void SelfCollisionAvoidance::setBoundScaling(const double boundScaling)
 {
     _boundScaling = boundScaling;
+}
+
+SelfCollisionAvoidance::~SelfCollisionAvoidance()
+{
+
 }
 

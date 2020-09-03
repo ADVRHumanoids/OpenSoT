@@ -52,7 +52,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
                     link->collision->geometry->type == urdf::Geometry::MESH ) {
 
 
-                shared_ptr<fcl::CollisionGeometry<double>> shape;
+                shared_ptr_type<fcl::CollisionGeometry<double>> shape;
                 KDL::Frame shape_origin;
 
                 if ( link->collision->geometry->type == urdf::Geometry::CYLINDER ) {
