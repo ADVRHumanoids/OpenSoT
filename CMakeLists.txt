@@ -37,18 +37,18 @@ find_package(orocos_kdl REQUIRED)
 find_package(urdf REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
-find_package(PCL 1.7 QUIET COMPONENTS    common
-    filters
-    surface
-    search
-    io)
+find_package(PCL 1.7 QUIET COMPONENTS   common
+                                        filters
+                                        surface
+                                        search
+                                        io)
 find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
 find_package(FCL 0.6 QUIET)
 find_package(PkgConfig REQUIRED)
 
 # compilation flags
-option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" TRUE)
+option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 option(OPENSOT_VERBOSE "Some additional prints" FALSE)
 option(OPENSOT_DISABLE_VECTORIZATION "Disable Eigen3 vectorization" FALSE)
@@ -299,11 +299,15 @@ include(GenerateDeb)
 
 
 #######################
-# Add Testing target  #
+# Add Testing and Examples target  #
 #######################
 if(OPENSOT_COMPILE_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(OPENSOT_COMPILE_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
