@@ -135,9 +135,7 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     /**********************************************************************/
 }
 
-void Cartesian::setReference(const Eigen::MatrixXd& desiredPose) {
-    assert(desiredPose.rows() == 4);
-    assert(desiredPose.cols() == 4);
+void Cartesian::setReference(const Eigen::Matrix4d& desiredPose) {
     _desiredPose.matrix() = desiredPose;
     _desiredTwist.setZero(6);
     this->update_b();
@@ -156,13 +154,9 @@ void Cartesian::setReference(const KDL::Frame& desiredPose)
     this->update_b();
 }
 
-void Cartesian::setReference(const Eigen::MatrixXd &desiredPose,
-                             const Eigen::VectorXd &desiredTwist)
+void Cartesian::setReference(const Eigen::Matrix4d &desiredPose,
+                             const Eigen::Vector6d &desiredTwist)
 {
-    assert(desiredTwist.rows() == 6);
-    assert(desiredPose.rows() == 4);
-    assert(desiredPose.cols() == 4);
-
     _desiredPose.matrix() = desiredPose;
     _desiredTwist = desiredTwist;
     this->update_b();
@@ -184,11 +178,11 @@ void Cartesian::setReference(const KDL::Frame& desiredPose,
     this->update_b();
 }
 
-const Eigen::MatrixXd Cartesian::getReference() const {
+const Eigen::Matrix4d& Cartesian::getReference() const {
     return _desiredPose.matrix();
 }
 
-const void Cartesian::getReference(KDL::Frame& desiredPose) const {
+void Cartesian::getReference(KDL::Frame& desiredPose) const {
     desiredPose.p.x(_desiredPose(0,3));
     desiredPose.p.y(_desiredPose(1,3));
     desiredPose.p.z(_desiredPose(2,3));
@@ -197,8 +191,8 @@ const void Cartesian::getReference(KDL::Frame& desiredPose) const {
     desiredPose.M(2,0) = _desiredPose(2,0); desiredPose.M(2,1) = _desiredPose(2,1); desiredPose.M(2,2) = _desiredPose(2,2);
 }
 
-void Cartesian::getReference(Eigen::MatrixXd &desiredPose,
-                                                       Eigen::VectorXd &desiredTwist) const
+void Cartesian::getReference(Eigen::Matrix4d &desiredPose,
+                             Eigen::Vector6d &desiredTwist) const
 {
     desiredPose = _desiredPose.matrix();
     desiredTwist = _desiredTwist;
@@ -218,12 +212,12 @@ void Cartesian::getReference(KDL::Frame& desiredPose,
     desiredTwist[3] = _desiredTwist(3); desiredTwist[4] = _desiredTwist(4); desiredTwist[5] = _desiredTwist(5);
 }
 
-const Eigen::MatrixXd Cartesian::getActualPose() const
+const Eigen::Matrix4d& Cartesian::getActualPose() const
 {
     return _actualPose.matrix();
 }
 
-const void Cartesian::getActualPose(KDL::Frame& actual_pose) const
+void Cartesian::getActualPose(KDL::Frame& actual_pose) const
 {
     actual_pose.p.x(_actualPose(0,3));
     actual_pose.p.y(_actualPose(1,3));
@@ -266,7 +260,7 @@ void Cartesian::setLambda(double lambda)
     }
 }
 
-const Eigen::VectorXd Cartesian::getError() const
+const Eigen::Vector6d& Cartesian::getError() const
 {
     return _error;
 }
