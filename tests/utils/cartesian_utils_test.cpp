@@ -158,10 +158,10 @@ TEST_F(testQuaternion, testQuaternionError)
 
 TEST_F(testCartesianUtils, testComputeCartesianError)
 {
-    Eigen::VectorXd position_error(3);
-    position_error.setZero(3);
-    Eigen::VectorXd orientation_error(3);
-    orientation_error.setZero(3);
+    Eigen::Vector3d position_error;
+    position_error.setZero();
+    Eigen::Vector3d orientation_error;
+    orientation_error.setZero();
 
     KDL::Rotation rot;
     rot.DoRotZ(M_PI);

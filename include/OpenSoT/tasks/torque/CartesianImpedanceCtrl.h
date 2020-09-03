@@ -113,8 +113,8 @@
 
             public:
 
-                Eigen::VectorXd positionError;
-                Eigen::VectorXd orientationError;
+                Eigen::Vector3d positionError;
+                Eigen::Vector3d orientationError;
                 Eigen::VectorXd linearVelocityError;
                 Eigen::VectorXd orientationVelocityError;
 

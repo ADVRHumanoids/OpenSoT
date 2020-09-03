@@ -372,11 +372,10 @@ public:
      * @param position_error position error [3x1]
      * @param orientation_error orientation error [3x1]
      */
-    [[deprecated]]
-    static void computeCartesianError(const Eigen::MatrixXd &T,
-                                      const Eigen::MatrixXd &Td,
-                                      Eigen::VectorXd& position_error,
-                                      Eigen::VectorXd& orientation_error);
+    static void computeCartesianError(const Eigen::Matrix4d &T,
+                                      const Eigen::Matrix4d &Td,
+                                      Eigen::Vector3d& position_error,
+                                      Eigen::Vector3d& orientation_error);
     /**
      * @brief computeCartesianError orientation and position error
      * @param T actual pose

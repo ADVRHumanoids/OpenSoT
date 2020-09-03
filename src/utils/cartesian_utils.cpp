@@ -76,10 +76,10 @@ void  cartesian_utils::computePanTiltMatrix(const Eigen::VectorXd &gaze, KDL::Fr
     pan_tilt_matrix.M.DoRotY(-tilt);
 }
 
-void cartesian_utils::computeCartesianError(const Eigen::MatrixXd &T,
-                                  const Eigen::MatrixXd &Td,
-                                  Eigen::VectorXd& position_error,
-                                  Eigen::VectorXd& orientation_error)
+void cartesian_utils::computeCartesianError(const Eigen::Matrix4d &T,
+                                  const Eigen::Matrix4d &Td,
+                                  Eigen::Vector3d& position_error,
+                                  Eigen::Vector3d& orientation_error)
 {
     position_error.setZero(3);
     orientation_error.setZero(3);

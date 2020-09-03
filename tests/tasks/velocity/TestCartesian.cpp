@@ -144,7 +144,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 
@@ -236,7 +236,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 
@@ -340,7 +340,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 
@@ -435,7 +435,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 
