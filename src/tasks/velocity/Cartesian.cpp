@@ -112,9 +112,7 @@ void Cartesian::setReference(const Eigen::Affine3d& desiredPose)
     this->update_b();
 }
 
-void Cartesian::setReference(const Eigen::MatrixXd& desiredPose) {
-    assert(desiredPose.rows() == 4);
-    assert(desiredPose.cols() == 4);
+void Cartesian::setReference(const Eigen::Matrix4d& desiredPose) {
     _desiredPose.matrix() = desiredPose;
     _desiredTwist.setZero(6);
     _desiredTwistRef = _desiredTwist;
@@ -144,13 +142,9 @@ void Cartesian::setReference(const Eigen::Affine3d& desiredPose,
     this->update_b();
 }
 
-void Cartesian::setReference(const Eigen::MatrixXd &desiredPose,
-                             const Eigen::VectorXd &desiredTwist)
+void Cartesian::setReference(const Eigen::Matrix4d &desiredPose,
+                             const Eigen::Vector6d &desiredTwist)
 {
-    assert(desiredTwist.rows() == 6);
-    assert(desiredPose.rows() == 4);
-    assert(desiredPose.cols() == 4);
-
     _desiredPose.matrix() = desiredPose;
     _desiredTwist = desiredTwist;
     _desiredTwistRef = _desiredTwist;
@@ -173,16 +167,16 @@ void Cartesian::setReference(const KDL::Frame& desiredPose,
     this->update_b();
 }
 
-const void Cartesian::getReference(Eigen::Affine3d& desiredPose) const
+void Cartesian::getReference(Eigen::Affine3d& desiredPose) const
 {
     desiredPose = _desiredPose;
 }
 
-const Eigen::MatrixXd Cartesian::getReference() const {
+const Eigen::Matrix4d& Cartesian::getReference() const {
     return _desiredPose.matrix();
 }
 
-const void Cartesian::getReference(KDL::Frame& desiredPose) const {
+void Cartesian::getReference(KDL::Frame& desiredPose) const {
     desiredPose.p.x(_desiredPose(0,3));
     desiredPose.p.y(_desiredPose(1,3));
     desiredPose.p.z(_desiredPose(2,3));
@@ -198,8 +192,8 @@ void Cartesian::getReference(Eigen::Affine3d& desiredPose,
     desiredTwist = _desiredTwist;
 }
 
-void OpenSoT::tasks::velocity::Cartesian::getReference(Eigen::MatrixXd &desiredPose,
-                                                       Eigen::VectorXd &desiredTwist) const
+void OpenSoT::tasks::velocity::Cartesian::getReference(Eigen::Matrix4d &desiredPose,
+                                                       Eigen::Vector6d &desiredTwist) const
 {
     desiredPose = _desiredPose.matrix();
     desiredTwist = _desiredTwist;
@@ -224,17 +218,17 @@ const Eigen::Vector6d& Cartesian::getCachedVelocityReference() const
     return _desiredTwistRef;
 }
 
-const void Cartesian::getActualPose(Eigen::Affine3d& actual_pose) const
+void Cartesian::getActualPose(Eigen::Affine3d& actual_pose) const
 {
     actual_pose = _actualPose;
 }
 
-const Eigen::MatrixXd Cartesian::getActualPose() const
+const Eigen::Matrix4d& Cartesian::getActualPose() const
 {
     return _actualPose.matrix();
 }
 
-const void Cartesian::getActualPose(KDL::Frame& actual_pose) const
+void Cartesian::getActualPose(KDL::Frame& actual_pose) const
 {
     actual_pose.p.x(_actualPose(0,3));
     actual_pose.p.y(_actualPose(1,3));
@@ -277,7 +271,7 @@ void OpenSoT::tasks::velocity::Cartesian::setLambda(double lambda)
     }
 }
 
-const Eigen::Vector6d OpenSoT::tasks::velocity::Cartesian::getError() const
+const Eigen::Vector6d& OpenSoT::tasks::velocity::Cartesian::getError() const
 {
     return _error;
 }
