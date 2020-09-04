@@ -30,7 +30,7 @@ CoM::CoM(   const Eigen::VectorXd& x,
             XBot::ModelInterface &robot,
             const std::string& id
         ) :
-    Task(id, x.size()), _robot(robot)
+    Task(id, x.size()), _robot(robot), _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
 {
     _desiredPosition.setZero();
     _actualPosition.setZero();
@@ -117,7 +117,7 @@ void OpenSoT::tasks::velocity::CoM::setReference(const Eigen::Vector3d &desiredP
     this->update_b();
 }
 
-Eigen::VectorXd CoM::getReference() const
+const Eigen::Vector3d& CoM::getReference() const
 {
     return _desiredPosition;
 }
@@ -128,19 +128,19 @@ void OpenSoT::tasks::velocity::CoM::getReference(Eigen::Vector3d &desiredPositio
     desiredVelocity = _desiredVelocity;
 }
 
-Eigen::Vector3d CoM::getActualPosition() const
+const Eigen::Vector3d& CoM::getActualPosition() const
 {
     return _actualPosition;
 }
 
-std::string OpenSoT::tasks::velocity::CoM::getBaseLink()
+const std::string& OpenSoT::tasks::velocity::CoM::getBaseLink() const
 {
-    return BASE_LINK_COM;
+    return _base_link;
 }
 
-std::string OpenSoT::tasks::velocity::CoM::getDistalLink()
+const std::string& OpenSoT::tasks::velocity::CoM::getDistalLink() const
 {
-    return DISTAL_LINK_COM;
+    return _distal_link;
 }
 
 void CoM::update_b()
@@ -157,7 +157,7 @@ void OpenSoT::tasks::velocity::CoM::setLambda(double lambda)
     }
 }
 
-Eigen::Vector3d OpenSoT::tasks::velocity::CoM::getError()
+const Eigen::Vector3d& OpenSoT::tasks::velocity::CoM::getError() const
 {
     return _positionError;
 }
