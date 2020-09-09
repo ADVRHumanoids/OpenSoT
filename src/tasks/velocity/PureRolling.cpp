@@ -122,7 +122,6 @@ void OpenSoT::tasks::velocity::PureRollingPosition::_update(const Eigen::VectorX
 
     _A = _subtask->getA();
     _b = _subtask->getb();
-    _W = _subtask->getWeight();
 }
 
 void OpenSoT::tasks::velocity::PureRollingPosition::_log(XBot::MatLogger::Ptr logger)
