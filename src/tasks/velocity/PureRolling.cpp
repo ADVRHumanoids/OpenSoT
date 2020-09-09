@@ -103,7 +103,7 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
 
     _subtask.reset(new OpenSoT::SubTask(_pure_rolling, _position_indices));
 	
-	
+    _W.setIdentity(_position_indices.size(), _position_indices.size());
 
     Eigen::VectorXd q;
     model.getJointPosition(q);
