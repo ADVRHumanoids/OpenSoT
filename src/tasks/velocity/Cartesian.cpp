@@ -346,6 +346,7 @@ void Cartesian::_log(XBot::MatLogger::Ptr logger)
 {
     logger->add(_task_id + "_error", _error);
     logger->add(_task_id + "_pos_ref", _desiredPose.translation());
+    logger->add(_task_id + "_ori_actual", _actualPose.linear());
     logger->add(_task_id + "_pos_actual", _actualPose.translation());
     logger->add(_task_id + "_pose_ref", _desiredPose.matrix());
     logger->add(_task_id + "_desiredTwistRef", _desiredTwistRef);
