@@ -14,6 +14,7 @@ Available Solvers:
 ------------------
 - iHQP/LP: implemented using [qpOASES](https://projects.coin-or.org/qpOASES), [OSQP](http://osqp.readthedocs.io/en/latest/), [eiQuadProg](https://www.cs.cmu.edu/~bstephe1/eiquadprog.hpp), [GLPK](https://www.gnu.org/software/glpk/) 
 - eHQP: implemented using Eigen-based Damped Pseudo Inverse
+- nHQP: Null-Space Hierarchical QP, implemented using Eigen SVD
 
 The default iHQP solver is based on qpOASES and eiQuadProg. 
 
@@ -38,6 +39,11 @@ alt="Self Collision Avoidance" width="480" height="360" border="10" /><br>Self C
 <a href="https://www.youtube.com/watch?v=-n3jxAZaK5Q
 " target="_blank"><img src="http://img.youtube.com/vi/-n3jxAZaK5Q/0.jpg" 
 alt="WALK-MAN Whole-Body, floating-base, walking" width="480" height="360" border="10" /><br>WALK-MAN Whole-Body, floating-base, walking</a>
+
+Add-ons
+------------
+- [CartesI/O](https://github.com/ADVRHumanoids/CartesianInterface)
+- [Visual Servoing](https://github.com/EnricoMingo/opensot_visual_servoing), developed in collaboration with IDSIA - USI/SUPSI (Antonio Paolillo)
 
 Developers:
 -----------
