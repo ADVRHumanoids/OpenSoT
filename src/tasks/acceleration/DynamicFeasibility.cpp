@@ -14,6 +14,7 @@ OpenSoT::tasks::acceleration::DynamicFeasibility::DynamicFeasibility(const std::
     _contact_links(contact_links)
 {
     _enabled_contacts.assign(_contact_links.size(), true);
+    setWeight(Eigen::MatrixXd::Identity(6,6));
     update(_h);
 }
 
