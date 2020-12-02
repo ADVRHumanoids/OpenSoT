@@ -45,6 +45,21 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                   const std::string& base_link,
                   const AffineHelper& qddot
                  );
+
+        /**
+         * @brief The GainType enum is used to select the
+         * feedback type between force (Kp, Kd have the meaning
+         * of stiffness and damping) and acceleration (Kp, Kd
+         * are treated as a matrix-valued lambda1, lambda2)
+         */
+        enum GainType
+        {
+            Force,
+            Acceleration
+        };
+
+        void setGainType(GainType type);
+        GainType getGainType() const;
         
         const std::string& getBaseLink() const;
         const std::string& getDistalLink() const;
@@ -234,6 +249,9 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         const Eigen::Vector6d getVelocityError() const;
 
     private:
+
+        GainType _gain_type;
+
         Eigen::Vector6d _velocity_error;
 
 

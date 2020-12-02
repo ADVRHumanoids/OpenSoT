@@ -138,16 +138,26 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     _velocity_error = _vel_ref - _vel_current; ///Maybe here we should multiply the _orientation_gain as well?
 
     _cartesian_task = _J*_qddot + _jdotqdot;
-    if(_virtual_force_ref.isZero())
+    if(_gain_type == Acceleration)
+    {
         _cartesian_task = _cartesian_task - _acc_ref
-                                      - _lambda2*_Kd*_velocity_error
-                                      - _lambda*_Kp*_pose_error;
-    else{
+                          - _lambda2*_Kd*_velocity_error
+                          - _lambda*_Kp*_pose_error;
+    }
+    else if(_gain_type == Force)
+    {
         compute_cartesian_inertia_inverse();
+
         _cartesian_task = _cartesian_task - _acc_ref
-                                      - _lambda2*_Kd*_velocity_error
-                                      - _lambda*_Kp*_pose_error
-                                      - _Mi*_virtual_force_ref;}
+                          - _lambda2*_Mi*_Kd*_velocity_error
+                          - _lambda*_Mi*_Kp*_pose_error
+                          - _Mi*_virtual_force_ref;
+    }
+    else
+    {
+        // we should never get here
+        throw std::runtime_error("unsupported GainType value");
+    }
     
     _A = _cartesian_task.getM();
     _b = -_cartesian_task.getq();
