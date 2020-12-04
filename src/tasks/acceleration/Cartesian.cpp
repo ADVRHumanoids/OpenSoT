@@ -14,7 +14,8 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _robot(robot),
     _distal_link(distal_link),
     _base_link(base_link),
-    _orientation_gain(1.0)
+    _orientation_gain(1.0),
+    _gain_type(GainType::Acceleration)
 {
     _qddot = AffineHelper::Identity(x.size());
 
@@ -55,7 +56,8 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     _distal_link(distal_link),
     _base_link(base_link),
     _qddot(qddot),
-    _orientation_gain(1.0)
+    _orientation_gain(1.0),
+    _gain_type(GainType::Acceleration)
 {
     resetReference();
 
@@ -430,12 +432,12 @@ bool OpenSoT::tasks::acceleration::Cartesian::setBaseLink(const std::string& bas
     return true;
 }
 
-const Eigen::Vector6d OpenSoT::tasks::acceleration::Cartesian::getError() const
+const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getError() const
 {
     return _pose_error;
 }
 
-const Eigen::Vector6d OpenSoT::tasks::acceleration::Cartesian::getVelocityError() const
+const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getVelocityError() const
 {
     return _velocity_error;
 }
