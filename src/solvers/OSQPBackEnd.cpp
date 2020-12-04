@@ -205,10 +205,10 @@ bool OSQPBackEnd::solve()
     c_int update_bound_flag = osqp_update_bounds(_workspace, _lb_piled.data(), _ub_piled.data());
     if(update_bound_flag != 0)
         return false;
-    c_int update_A_flag = osqp_update_A(_workspace, _Adense.data(), nullptr, _Adense.size());
+    c_int update_A_flag = osqp_update_A(_workspace, _Adense.data(), OSQP_NULL, _Adense.size());
     if(update_A_flag != 0)
         return false;
-    c_int update_P_flag = osqp_update_P(_workspace, _P_values.data(), nullptr, _P_values.size());
+    c_int update_P_flag = osqp_update_P(_workspace, _P_values.data(), OSQP_NULL, _P_values.size());
     if(update_P_flag != 0)
         return false;
     
