@@ -15,7 +15,8 @@ Cartesian::Cartesian(const std::string task_id,
     _robot(robot),
     _distal_link(distal_link),
     _base_link(base_link),
-    _orientation_gain(1.0)
+    _orientation_gain(1.0),
+    _gain_type(GainType::Acceleration)
 {
     _qddot = AffineHelper::Identity(x.size());
 
@@ -56,7 +57,8 @@ Cartesian::Cartesian(const std::string task_id,
     _distal_link(distal_link),
     _base_link(base_link),
     _qddot(qddot),
-    _orientation_gain(1.0)
+    _orientation_gain(1.0),
+    _gain_type(GainType::Acceleration)
 {
     resetReference();
 
@@ -441,12 +443,12 @@ bool Cartesian::setBaseLink(const std::string& base_link)
     return true;
 }
 
-const Eigen::Vector6d Cartesian::getError() const
+const Eigen::Vector6d& Cartesian::getError() const
 {
     return _pose_error;
 }
 
-const Eigen::Vector6d Cartesian::getVelocityError() const
+const Eigen::Vector6d& Cartesian::getVelocityError() const
 {
     return _velocity_error;
 }
