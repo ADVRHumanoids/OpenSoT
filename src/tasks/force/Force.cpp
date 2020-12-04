@@ -13,6 +13,7 @@ Wrench::Wrench(const std::string& id,
     _W = _min_var->getWeight();
     Eigen::VectorXd zeros; zeros.setZero(wrench.getOutputSize());
     _min_var->setReference(zeros);
+    _hessianType = OpenSoT::HessianType::HST_SEMIDEF;
     _update(Eigen::VectorXd(0));
 }
 

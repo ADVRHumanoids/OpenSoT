@@ -15,6 +15,7 @@ OpenSoT::tasks::acceleration::DynamicFeasibility::DynamicFeasibility(const std::
 {
     _enabled_contacts.assign(_contact_links.size(), true);
     setWeight(Eigen::MatrixXd::Identity(6,6));
+    _hessianType = OpenSoT::HessianType::HST_SEMIDEF;
     update(_h);
 }
 
