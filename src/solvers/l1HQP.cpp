@@ -12,7 +12,7 @@ l1HQP::l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation
 {
     creates_problem_variables();
     creates_tasks();
-
+    //creates_constraints();
     creates_internal_problem();
 }
 
@@ -31,9 +31,9 @@ void l1HQP::creates_internal_problem()
     for(std::map<std::string, task_to_constraint_helper::Ptr>::iterator it = _constraints.begin(); it != _constraints.end();
         it++)
         constraint_list.push_back(it->second);
-    if(_stack_of_tasks.getBounds())
-        constraint_list.push_back(_stack_of_tasks.getBounds());
 
+
+    //TODO: take into account constraints
 
 
     _internal_stack = boost::make_shared<OpenSoT::AutoStack>(aggregated, constraint_list);
