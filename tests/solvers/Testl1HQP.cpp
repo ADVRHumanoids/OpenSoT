@@ -1,0 +1,111 @@
+#include <gtest/gtest.h>
+#include <OpenSoT/solvers/QPOasesBackEnd.h>
+#include <OpenSoT/solvers/l1HQP.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
+#include <OpenSoT/tasks/velocity/Postural.h>
+#include <OpenSoT/tasks/GenericTask.h>
+#include <OpenSoT/utils/AutoStack.h>
+
+std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = robotology_root + relative_path;
+
+namespace {
+class testl1HQP: public ::testing::Test
+{
+protected:
+
+    testl1HQP()
+    {
+
+    }
+
+    virtual ~testl1HQP() {
+
+    }
+
+    virtual void SetUp() {
+
+    }
+
+    virtual void TearDown() {
+
+    }
+
+    Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
+        Eigen::VectorXd _q(_model_ptr->getJointNum());
+        _q.setZero(_q.size());
+        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+
+        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+
+        _model_ptr->setJointPosition(_q);
+        _model_ptr->update();
+
+        return _q;
+    }
+
+};
+
+TEST_F(testl1HQP, testContructor)
+{
+    XBot::ModelInterface::Ptr model_ptr;
+    model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd q = this->getGoodInitialPosition(model_ptr);
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_sole =
+            boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_sole", q, *model_ptr, "l_sole", "world");
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_sole =
+            boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("r_sole", q, *model_ptr, "r_sole", "world");
+    OpenSoT::tasks::velocity::CoM::Ptr CoM =
+            boost::make_shared<OpenSoT::tasks::velocity::CoM>(q, *model_ptr);
+
+    OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM);
+    stack->update(q);
+
+    OpenSoT::solvers::l1HQP::Ptr l1_solver =
+            boost::make_shared<OpenSoT::solvers::l1HQP>(*stack);
+
+    std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr> linear_tasks = l1_solver->getTasks();
+    EXPECT_EQ(linear_tasks.size(), stack->getStack().size());
+    std::cout<<"linear_tasks.size(): "<<linear_tasks.size()<<std::endl;
+    for(std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr>::iterator it = linear_tasks.begin();
+        it != linear_tasks.end(); it++)
+    {
+        std::cout<<it->first<<" gain: "<<it->second->getc().transpose()<<std::endl;
+    }
+
+    OpenSoT::AutoStack::Ptr internal_problem = l1_solver->getInternalProblem();
+    std::cout<<"internal_problem->getStack()[0].size(): "<<internal_problem->getStack().size()<<std::endl;
+    EXPECT_EQ(internal_problem->getStack().size(), 1);
+    std::cout<<"internal_problem->getStack()[0]->getA(): "<<internal_problem->getStack()[0]->getA()<<std::endl;
+    EXPECT_EQ(internal_problem->getStack()[0]->getA().rows(), 0);
+    std::cout<<"internal_problem->getStack()[0]->getb(): "<<internal_problem->getStack()[0]->getb()<<std::endl;
+    EXPECT_EQ(internal_problem->getStack()[0]->getb().size(), 0);
+    std::cout<<"internal_problem->getStack()[0]->getc(): "<<internal_problem->getStack()[0]->getc().transpose()<<std::endl;
+    EXPECT_EQ(internal_problem->getStack()[0]->getc().size(), linear_tasks.begin()->second->getc().size());
+    std::cout<<"Hessian Type: "<<internal_problem->getStack()[0]->getHessianAtype()<<std::endl;
+    EXPECT_EQ(internal_problem->getStack()[0]->getHessianAtype(), OpenSoT::HST_ZERO);
+
+}
+}
+
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

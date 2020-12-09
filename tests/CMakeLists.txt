@@ -71,6 +71,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
                   testKinematics
+                  testl1HQP
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -169,6 +170,11 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
 
+
+ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)
+TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
+add_dependencies(testl1HQP GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
 
 ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
 TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})
