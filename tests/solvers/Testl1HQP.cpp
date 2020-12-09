@@ -60,6 +60,7 @@ protected:
 
 };
 
+//THIS TEST DOES NOT HAVE CONSTRAINTS IN THE STACK!
 TEST_F(testl1HQP, testContructor)
 {
     XBot::ModelInterface::Ptr model_ptr;
@@ -89,7 +90,41 @@ TEST_F(testl1HQP, testContructor)
         std::cout<<it->first<<" gain: "<<it->second->getc().transpose()<<std::endl;
     }
 
+    std::map<std::string, OpenSoT::solvers::task_to_constraint_helper::Ptr> constraints = l1_solver->getConstraints();
+    std::cout<<"constraints.size(): "<<constraints.size()<<std::endl;
+    EXPECT_EQ(constraints.size(), stack->getStack().size());
+    std::map<std::string, OpenSoT::solvers::task_to_constraint_helper::Ptr>::iterator it2;
+    unsigned int i = 0;
+    OpenSoT::utils::MatrixPiler b_lower(1);
+    OpenSoT::utils::MatrixPiler b_upper(1);
+    OpenSoT::utils::MatrixPiler A_ineq(l1_solver->getVariableSize());
+    for(it2 = constraints.begin(); it2 != constraints.end(); it2++)
+    {
+        OpenSoT::solvers::task_to_constraint_helper::Ptr constraint = it2->second;
+
+        // These checks are done considering that the task_to_constraint_heper is implemented
+        // such that:
+        //          -t <= Ax -b <= t
+        //           t >= 0
+
+        std::cout<<"constraint->getbLowerBound(): "<<constraint->getbLowerBound().transpose()<<std::endl;
+        EXPECT_EQ(constraint->getbLowerBound().size(), stack->getStack()[i]->getb().size()*3);
+
+        std::cout<<"constraint->getbUpperBound(): "<<constraint->getbUpperBound().transpose()<<std::endl;
+        EXPECT_EQ(constraint->getbUpperBound().size(), stack->getStack()[i]->getb().size()*3);
+
+        //std::cout<<"constraint->getAineq()"<<constraint->getAineq()<<std::endl;
+        EXPECT_EQ(constraint->getAineq().rows(), stack->getStack()[i]->getA().rows()*3);
+        EXPECT_EQ(constraint->getAineq().cols(), l1_solver->getVariableSize());
+
+        i += 1;
+        b_lower.pile(constraint->getbLowerBound());
+        b_upper.pile(constraint->getbUpperBound());
+        A_ineq.pile(constraint->getAineq());
+    }
+
     OpenSoT::AutoStack::Ptr internal_problem = l1_solver->getInternalProblem();
+
     std::cout<<"internal_problem->getStack()[0].size(): "<<internal_problem->getStack().size()<<std::endl;
     EXPECT_EQ(internal_problem->getStack().size(), 1);
     std::cout<<"internal_problem->getStack()[0]->getA(): "<<internal_problem->getStack()[0]->getA()<<std::endl;
@@ -100,6 +135,10 @@ TEST_F(testl1HQP, testContructor)
     EXPECT_EQ(internal_problem->getStack()[0]->getc().size(), linear_tasks.begin()->second->getc().size());
     std::cout<<"Hessian Type: "<<internal_problem->getStack()[0]->getHessianAtype()<<std::endl;
     EXPECT_EQ(internal_problem->getStack()[0]->getHessianAtype(), OpenSoT::HST_ZERO);
+
+    EXPECT_TRUE(internal_problem->getBounds()->getbLowerBound() == b_lower.generate_and_get());
+    EXPECT_TRUE(internal_problem->getBounds()->getbUpperBound() == b_upper.generate_and_get());
+    EXPECT_TRUE(internal_problem->getBounds()->getAineq() == A_ineq.generate_and_get());
 
 }
 }

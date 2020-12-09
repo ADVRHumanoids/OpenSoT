@@ -1,6 +1,5 @@
 #include <OpenSoT/solvers/l1HQP.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <OpenSoT/tasks/Aggregated.h>
 #include <string>
 
 
@@ -19,27 +18,51 @@ l1HQP::l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation
 
 void l1HQP::creates_internal_problem()
 {
-    OpenSoT::tasks::Aggregated::Ptr aggregated_task;
     std::list<OpenSoT::tasks::Aggregated::TaskPtr> task_list;
-    for(std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr>::iterator it = _lp_tasks.begin(); it != _lp_tasks.end(); it++)
+    for(std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr>::iterator it = _lp_tasks.begin(); it != _lp_tasks.end();
+        it++)
         task_list.push_back(it->second);
-    aggregated_task = boost::make_shared<OpenSoT::tasks::Aggregated>(task_list, _opt->getSize());
-    _internal_stack = boost::make_shared<OpenSoT::AutoStack>(aggregated_task);
+    OpenSoT::tasks::Aggregated::Ptr aggregated =
+            boost::make_shared<OpenSoT::tasks::Aggregated>(task_list, _opt->getSize());
+
+
+
+    std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> constraint_list;
+    for(std::map<std::string, task_to_constraint_helper::Ptr>::iterator it = _constraints.begin(); it != _constraints.end();
+        it++)
+        constraint_list.push_back(it->second);
+    if(_stack_of_tasks.getBounds())
+        constraint_list.push_back(_stack_of_tasks.getBounds());
+
+
+
+    _internal_stack = boost::make_shared<OpenSoT::AutoStack>(aggregated, constraint_list);
+
+
     _internal_stack->update(Eigen::VectorXd(0));
 }
 
 void l1HQP::creates_tasks()
 {
-    //1) here we creates the lp tasks
     std::map<std::string, Eigen::VectorXd>::iterator it;
+
+    //1) here we creates the lp tasks
     for(it = _linear_gains.begin(); it != _linear_gains.end(); it++){
         std::string task_id = it->first + "_task";
         _lp_tasks[it->first] = boost::make_shared<OpenSoT::tasks::GenericLPTask>(task_id, _linear_gains[it->first],
                 _opt->getVariable(it->first));
     }
 
-    //2) here we creates the other tasks which will became constraints
-
+    //2) here we creates constraints from the given tasks
+    unsigned int i = 0;
+    for(it = _linear_gains.begin(); it != _linear_gains.end(); it++){
+        std::string task_id = it->first + "_constraint";
+        _constraints[it->first] = boost::make_shared<task_to_constraint_helper>(task_id,
+                _stack_of_tasks.getStack()[i],
+                _opt->getVariable("x"),
+                _opt->getVariable(it->first));
+        i += 1;
+    }
 }
 
 void l1HQP::creates_problem_variables()
@@ -68,5 +91,46 @@ void l1HQP::creates_problem_variables()
 
 bool l1HQP::solve(Eigen::VectorXd& solution)
 {
+    _internal_stack->update(Eigen::VectorXd(0));
+
     return false;
+}
+
+task_to_constraint_helper::task_to_constraint_helper(std::string id, OpenSoT::tasks::Aggregated::TaskPtr& task,
+           const AffineHelper& x, const AffineHelper& t):
+    OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd >(id, x.getInputSize()),
+    _task(task), _x(x), _t(t), _II(task->getA().rows()), _AA(_task->getA().cols()), _bb(1)
+{
+    Eigen::MatrixXd I;
+    I.setIdentity(task->getA().rows(),task->getA().rows());
+    _II.pile(-I);
+    _II.pile(-I);
+    _II.pile(-I);
+
+    _bLowerBound.resize(3*task->getA().rows());
+    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bLowerBound.size());
+
+    o.setZero(_task->getb().size());
+    O.setZero(task->getA().rows(),task->getA().cols());
+
+    update(Eigen::VectorXd(0));
+}
+
+void task_to_constraint_helper::update(const Eigen::VectorXd& x)
+{
+    _AA.pile(_task->getA());
+    _AA.pile(-_task->getA());
+    _AA.pile(O);
+
+    _bb.pile(_task->getb());
+    _bb.pile(-_task->getb());
+    _bb.pile(o);
+
+    _constraint = _AA.generate_and_get()*_x + _II.generate_and_get()*_t -_bb.generate_and_get();
+
+    _Aineq = _constraint.getM();
+    _bUpperBound = - _constraint.getq();
+
+    _AA.reset();
+    _bb.reset();
 }

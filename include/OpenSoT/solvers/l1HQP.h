@@ -6,6 +6,8 @@
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
+#include <OpenSoT/tasks/Aggregated.h>
+#include <OpenSoT/utils/Piler.h>
 
 #define DEFAULT_EPS_REGULARISATION 2E2 //THIS VALUE IS HISTORICALLY USED IN QPOASES
 
@@ -15,6 +17,27 @@ class AutoStack;
 
 namespace OpenSoT {
 namespace solvers {
+    class task_to_constraint_helper: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
+    {
+    public:
+        typedef boost::shared_ptr<task_to_constraint_helper> Ptr;
+        task_to_constraint_helper(std::string id, OpenSoT::tasks::Aggregated::TaskPtr& task,
+                   const AffineHelper& x, const AffineHelper& t);
+
+        void update(const Eigen::VectorXd& x);
+    private:
+        OpenSoT::tasks::Aggregated::TaskPtr& _task;
+        AffineHelper _constraint;
+        AffineHelper _x;
+        AffineHelper _t;
+
+        OpenSoT::utils::MatrixPiler _II;
+        OpenSoT::utils::MatrixPiler _AA;
+        OpenSoT::utils::MatrixPiler _bb;
+
+        Eigen::VectorXd o;
+        Eigen::MatrixXd O;
+    };
 
     class l1HQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
@@ -33,10 +56,14 @@ namespace solvers {
             std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr>& getTasks(){ return _lp_tasks; }
 
             /**
-             * @brief getInternalProblem just for debugging
+             * @brief getInternalProblem() and getConstraints() are just for debugging
              * @return
              */
             const boost::shared_ptr<AutoStack>& getInternalProblem(){ return _internal_stack;}
+            const std::map<std::string, task_to_constraint_helper::Ptr>& getConstraints(){ return _constraints; }
+
+            unsigned int getVariableSize(){ return _opt->getSize();}
+
 
         private:
             double _epsRegularisation;
@@ -48,8 +75,9 @@ namespace solvers {
              */
             std::map<std::string, Eigen::VectorXd> _linear_gains;
 
-            OpenSoT::constraints::GenericConstraint::Ptr _constraint;
             std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr> _lp_tasks;
+
+            std::map<std::string, task_to_constraint_helper::Ptr> _constraints;
 
 
             boost::shared_ptr<AutoStack> _internal_stack;
