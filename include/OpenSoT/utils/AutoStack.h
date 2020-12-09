@@ -64,6 +64,9 @@ namespace OpenSoT {
         public:
             AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
 
+            AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
+                      std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
+
             AutoStack(OpenSoT::solvers::iHQP::Stack stack);
 
             AutoStack(OpenSoT::solvers::iHQP::Stack stack,

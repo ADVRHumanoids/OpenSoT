@@ -303,6 +303,16 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack) :
 
 }
 
+OpenSoT::AutoStack::AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
+          std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds):
+    _boundsAggregated(
+        new OpenSoT::constraints::Aggregated(
+            bounds,
+            bounds.front()->getXSize()))
+{
+    _stack.push_back(task);
+}
+
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack,
                               std::list<OpenSoT::solvers::iHQP::ConstraintPtr> bounds) :
     _stack(stack),
