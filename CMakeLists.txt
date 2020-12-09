@@ -156,7 +156,8 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/BackEndFactory.cpp
     src/solvers/iHQP.cpp
     src/solvers/nHQP.cpp
-    src/solvers/eHQP.cpp)
+    src/solvers/eHQP.cpp
+    src/solvers/l1HQP.cpp)
 
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
