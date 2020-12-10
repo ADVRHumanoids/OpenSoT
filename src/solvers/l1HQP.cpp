@@ -12,7 +12,7 @@ l1HQP::l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation
 {
     creates_problem_variables();
     creates_tasks();
-    //creates_constraints();
+    creates_constraints();
     creates_internal_problem();
 }
 
@@ -33,13 +33,20 @@ void l1HQP::creates_internal_problem()
         constraint_list.push_back(it->second);
 
 
-    //TODO: take into account constraints
-
+    if(_constraints2)
+        constraint_list.push_back(_constraints2);
 
     _internal_stack = boost::make_shared<OpenSoT::AutoStack>(aggregated, constraint_list);
 
 
     _internal_stack->update(Eigen::VectorXd(0));
+}
+
+void l1HQP::creates_constraints()
+{
+    if(_stack_of_tasks.getBounds())
+        _constraints2 = boost::make_shared<constraint_helper>("internal_constraints", _stack_of_tasks.getBounds(),
+                                                              _opt->getVariable("x"));
 }
 
 void l1HQP::creates_tasks()
@@ -133,4 +140,53 @@ void task_to_constraint_helper::update(const Eigen::VectorXd& x)
 
     _AA.reset();
     _bb.reset();
+}
+
+constraint_helper::constraint_helper(std::string id, OpenSoT::constraints::Aggregated::ConstraintPtr constraints,
+                                     const AffineHelper& x):
+    OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd >(id, x.getInputSize()),
+    _constraints(constraints), _x(x), _A(x.getInputSize()), _b_lower(1), _b_upper(1)
+{
+    if(_constraints->getLowerBound().size() > 0)
+        I.setIdentity(_constraints->getLowerBound().size(), _constraints->getLowerBound().size());
+
+    update(Eigen::VectorXd(0));
+}
+
+void constraint_helper::update(const Eigen::VectorXd& x)
+{
+
+
+    if(_constraints->getAineq().rows() > 0)
+    {
+        _constraint = _constraints->getAineq()*_x - _constraints->getbLowerBound();
+        _A.pile(_constraint.getM());
+        _b_lower.pile(- _constraint.getq());
+
+        _constraint = _constraints->getAineq()*_x - _constraints->getbUpperBound();
+        _b_upper.pile(- _constraint.getq());
+    }
+
+    if(_constraints->getAeq().rows() > 0 ) //TODO: equality constraints
+    {
+
+    }
+
+    if(_constraints->getLowerBound().size() > 0) //bounds
+    {
+        _constraint = I*_x - _constraints->getLowerBound();
+        _A.pile(_constraint.getM());
+        _b_lower.pile(- _constraint.getq());
+
+        _constraint = I*_x - _constraints->getUpperBound();
+        _b_upper.pile(- _constraint.getq());
+    }
+
+    _Aineq = _A.generate_and_get();
+    _bLowerBound = _b_lower.generate_and_get();
+    _bUpperBound = _b_upper.generate_and_get();
+
+    _A.reset();
+    _b_lower.reset();
+    _b_upper.reset();
 }

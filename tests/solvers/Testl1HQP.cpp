@@ -6,6 +6,7 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/GenericTask.h>
 #include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
@@ -60,7 +61,7 @@ protected:
 
 };
 
-//THIS TEST DOES NOT HAVE CONSTRAINTS IN THE STACK!
+
 TEST_F(testl1HQP, testContructor)
 {
     XBot::ModelInterface::Ptr model_ptr;
@@ -75,7 +76,12 @@ TEST_F(testl1HQP, testContructor)
     OpenSoT::tasks::velocity::CoM::Ptr CoM =
             boost::make_shared<OpenSoT::tasks::velocity::CoM>(q, *model_ptr);
 
-    OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM);
+    Eigen::VectorXd qmin, qmax;
+    model_ptr->getJointLimits(qmin, qmax);
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits =
+            boost::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
+
+    OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM)<<joint_limits;
     stack->update(q);
 
     OpenSoT::solvers::l1HQP::Ptr l1_solver =
@@ -122,6 +128,16 @@ TEST_F(testl1HQP, testContructor)
         b_upper.pile(constraint->getbUpperBound());
         A_ineq.pile(constraint->getAineq());
     }
+
+    OpenSoT::solvers::constraint_helper::Ptr hard_constraints = l1_solver->getHardConstraints();
+    EXPECT_TRUE(hard_constraints->getbLowerBound() == joint_limits->getLowerBound());
+    EXPECT_TRUE(hard_constraints->getbUpperBound() == joint_limits->getUpperBound());
+
+    b_lower.pile(hard_constraints->getbLowerBound());
+    b_upper.pile(hard_constraints->getbUpperBound());
+    A_ineq.pile(hard_constraints->getAineq());
+
+
 
     OpenSoT::AutoStack::Ptr internal_problem = l1_solver->getInternalProblem();
 
