@@ -9,6 +9,7 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/Piler.h>
 #include <OpenSoT/constraints/Aggregated.h>
+#include <OpenSoT/solvers/BackEnd.h>
 
 #define DEFAULT_EPS_REGULARISATION 2E2 //THIS VALUE IS HISTORICALLY USED IN QPOASES
 
@@ -98,6 +99,16 @@ namespace solvers {
             unsigned int getVariableSize(){ return _opt->getSize();}
 
 
+            /**
+             * @brief getInternalVariable
+             * @param var names are "t1", "t2", ...
+             * @param value vector of values
+             * @return false if asked internal variable does not exists
+             */
+            bool getInternalVariable(const std::string& var, Eigen::VectorXd& value);
+
+
+
         private:
             double _epsRegularisation;
 
@@ -132,6 +143,11 @@ namespace solvers {
             void creates_tasks();
             void creates_internal_problem();
             void creates_constraints();
+            bool creates_solver(const solver_back_ends);
+
+            OpenSoT::solvers::BackEnd::Ptr _solver;
+
+            Eigen::VectorXd _internal_solution;
 
 
     };

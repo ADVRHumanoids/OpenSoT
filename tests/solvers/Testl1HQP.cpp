@@ -156,6 +156,10 @@ TEST_F(testl1HQP, testContructor)
     EXPECT_TRUE(internal_problem->getBounds()->getbUpperBound() == b_upper.generate_and_get());
     EXPECT_TRUE(internal_problem->getBounds()->getAineq() == A_ineq.generate_and_get());
 
+    Eigen::VectorXd solution;
+    EXPECT_TRUE(l1_solver->solve(solution));
+    std::cout<<"solution: "<<solution.transpose()<<std::endl;
+
 }
 }
 

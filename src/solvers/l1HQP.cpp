@@ -1,5 +1,6 @@
 #include <OpenSoT/solvers/l1HQP.h>
 #include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/solvers/BackEndFactory.h>
 #include <string>
 
 
@@ -14,6 +15,26 @@ l1HQP::l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation
     creates_tasks();
     creates_constraints();
     creates_internal_problem();
+    if(!creates_solver(be_solver))
+        throw std::runtime_error("Can not initialize internal solver!");
+}
+
+bool l1HQP::creates_solver(const solver_back_ends solver_back_end)
+{
+    _solver = BackEndFactory(solver_back_end,
+                   _internal_stack->getStack()[0]->getXSize(),
+                   _internal_stack->getBounds()->getAineq().rows(),
+                   (OpenSoT::HessianType)(_internal_stack->getStack()[0]->getHessianAtype()),
+                    _epsRegularisation);
+    bool success =  _solver->initProblem(Eigen::MatrixXd(0,_internal_stack->getBounds()->getAineq().cols()), _internal_stack->getStack()[0]->getc().transpose(),
+                _internal_stack->getBounds()->getAineq(),
+                _internal_stack->getBounds()->getbLowerBound(), _internal_stack->getBounds()->getbUpperBound(),
+                Eigen::VectorXd(0), Eigen::VectorXd(0));
+
+    if(success)
+        _internal_solution = _solver->getSolution();
+
+    return success;
 }
 
 void l1HQP::creates_internal_problem()
@@ -100,7 +121,36 @@ bool l1HQP::solve(Eigen::VectorXd& solution)
 {
     _internal_stack->update(Eigen::VectorXd(0));
 
-    return false;
+    if(!_solver->updateProblem(Eigen::MatrixXd(0,_internal_stack->getBounds()->getAineq().cols()), _internal_stack->getStack()[0]->getc().transpose(),
+            _internal_stack->getBounds()->getAineq(),
+            _internal_stack->getBounds()->getbLowerBound(), _internal_stack->getBounds()->getbUpperBound(),
+            Eigen::VectorXd(0), Eigen::VectorXd(0)))
+        return false;
+
+    if(!_solver->solve())
+        return false;
+
+    _internal_solution = _solver->getSolution();
+
+    _opt->getVariable("x").getValue(_internal_solution, solution);
+
+    return true;
+}
+
+bool l1HQP::getInternalVariable(const std::string& var, Eigen::VectorXd& value)
+{
+    try{
+        _opt->getVariable(var);
+    } catch (const std::invalid_argument& e) {
+        return false;
+    }
+
+    if(_internal_solution.size() > 0)
+        _opt->getVariable(var).getValue(_internal_solution, value);
+    else
+        return false;
+
+    return true;
 }
 
 task_to_constraint_helper::task_to_constraint_helper(std::string id, OpenSoT::tasks::Aggregated::TaskPtr& task,
