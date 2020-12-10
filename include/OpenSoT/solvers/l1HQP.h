@@ -148,7 +148,8 @@ namespace solvers {
             OpenSoT::solvers::BackEnd::Ptr _solver;
 
             Eigen::VectorXd _internal_solution;
-
+            Eigen::MatrixXd _H;
+            OpenSoT::HessianType _hessian_type;
 
     };
 

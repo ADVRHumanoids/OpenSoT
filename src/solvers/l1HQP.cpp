@@ -2,6 +2,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
 #include <string>
+#include <math.h>
 
 
 using namespace OpenSoT::solvers;
@@ -10,8 +11,17 @@ l1HQP::l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation
     Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
     _epsRegularisation(eps_regularisation),
     _stack_of_tasks(stack_of_tasks)
-{
+{    
+    if(std::fpclassify(eps_regularisation) == FP_ZERO) //No L2-regularisation
+        _hessian_type = HessianType::HST_ZERO;
+    else
+    {
+        _hessian_type = HessianType::HST_IDENTITY;
+        XBot::Logger::info("Adding L2 regularisation \n");
+    }
+
     creates_problem_variables();
+    _H.setZero(_opt->getSize(), _opt->getSize());
     creates_tasks();
     creates_constraints();
     creates_internal_problem();
@@ -24,12 +34,13 @@ bool l1HQP::creates_solver(const solver_back_ends solver_back_end)
     _solver = BackEndFactory(solver_back_end,
                    _internal_stack->getStack()[0]->getXSize(),
                    _internal_stack->getBounds()->getAineq().rows(),
-                   (OpenSoT::HessianType)(_internal_stack->getStack()[0]->getHessianAtype()),
-                    _epsRegularisation);
-    bool success =  _solver->initProblem(Eigen::MatrixXd(0,_internal_stack->getBounds()->getAineq().cols()), _internal_stack->getStack()[0]->getc().transpose(),
-                _internal_stack->getBounds()->getAineq(),
-                _internal_stack->getBounds()->getbLowerBound(), _internal_stack->getBounds()->getbUpperBound(),
-                Eigen::VectorXd(0), Eigen::VectorXd(0));
+                   _hessian_type, _epsRegularisation);
+
+    bool success = _solver->initProblem(_H,
+                   _internal_stack->getStack()[0]->getc().transpose(),
+                   _internal_stack->getBounds()->getAineq(),
+                   _internal_stack->getBounds()->getbLowerBound(), _internal_stack->getBounds()->getbUpperBound(),
+                   Eigen::VectorXd(0), Eigen::VectorXd(0));
 
     if(success)
         _internal_solution = _solver->getSolution();
@@ -110,7 +121,7 @@ void l1HQP::creates_problem_variables()
         XBot::Logger::info("Level %i task has %i rows\n", i, task_rows);
         std::string var_name = "t" + std::to_string(i);
         vars.emplace_back(var_name, task_rows);
-        _linear_gains[var_name] = 10.*(levels_of_priority - i)*Eigen::VectorXd::Constant(task_rows, 1.);
+        _linear_gains[var_name] = std::pow(10., levels_of_priority - i)*(levels_of_priority - i)*Eigen::VectorXd::Constant(task_rows, 1.);
         XBot::Logger::info("Created variable %s with size %i\n", var_name.c_str(), task_rows);
     }
 
@@ -118,13 +129,13 @@ void l1HQP::creates_problem_variables()
 }
 
 bool l1HQP::solve(Eigen::VectorXd& solution)
-{
+{   
     _internal_stack->update(Eigen::VectorXd(0));
 
-    if(!_solver->updateProblem(Eigen::MatrixXd(0,_internal_stack->getBounds()->getAineq().cols()), _internal_stack->getStack()[0]->getc().transpose(),
-            _internal_stack->getBounds()->getAineq(),
-            _internal_stack->getBounds()->getbLowerBound(), _internal_stack->getBounds()->getbUpperBound(),
-            Eigen::VectorXd(0), Eigen::VectorXd(0)))
+    if(!_solver->updateProblem(Eigen::MatrixXd(0, _opt->getSize()), _internal_stack->getStack()[0]->getc().transpose(),
+        _internal_stack->getBounds()->getAineq(),
+        _internal_stack->getBounds()->getbLowerBound(), _internal_stack->getBounds()->getbUpperBound(),
+        Eigen::VectorXd(0), Eigen::VectorXd(0)))
         return false;
 
     if(!_solver->solve())
@@ -175,12 +186,12 @@ task_to_constraint_helper::task_to_constraint_helper(std::string id, OpenSoT::ta
 
 void task_to_constraint_helper::update(const Eigen::VectorXd& x)
 {
-    _AA.pile(_task->getA());
-    _AA.pile(-_task->getA());
+    _AA.pile(_task->getWA());
+    _AA.pile(-_task->getWA());
     _AA.pile(O);
 
-    _bb.pile(_task->getb());
-    _bb.pile(-_task->getb());
+    _bb.pile(_task->getWb());
+    _bb.pile(-_task->getWb());
     _bb.pile(o);
 
     _constraint = _AA.generate_and_get()*_x + _II.generate_and_get()*_t -_bb.generate_and_get();
