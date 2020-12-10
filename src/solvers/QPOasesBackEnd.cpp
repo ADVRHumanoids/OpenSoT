@@ -166,10 +166,9 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
 
 bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
-    if(!(_g.rows() == _H.rows())){
-        XBot::Logger::error("g size: %i \n", _g.rows());
-        XBot::Logger::error("H size: %i \n", _H.rows());
-        assert(_g.rows() == _H.rows());
+    if(!(_g.size() == g.size())){
+        XBot::Logger::error("g size: %i \n", g.size());
+        XBot::Logger::error("should be: %i \n", _g.size());
         return false;}
     if(!(_H.cols() == H.cols())){
         XBot::Logger::error("H cols: %i \n", H.cols());
