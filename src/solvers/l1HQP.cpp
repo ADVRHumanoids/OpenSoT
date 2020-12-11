@@ -109,7 +109,7 @@ void l1HQP::creates_problem_variables()
     OptvarHelper::VariableVector vars;
     int problem_variables = _stack_of_tasks.getStack()[0]->getA().cols();
     XBot::Logger::info("Problem has %i variables\n", problem_variables);
-    vars.emplace_back("x", problem_variables);
+    vars.emplace_back("x", problem_variables); //these are the variables of the original problem
     XBot::Logger::info("Created x variable with size %i\n", problem_variables);
 
     int levels_of_priority = _stack_of_tasks.getStack().size();
@@ -120,8 +120,9 @@ void l1HQP::creates_problem_variables()
         int task_rows = _stack_of_tasks.getStack()[i]->getA().rows();
         XBot::Logger::info("Level %i task has %i rows\n", i, task_rows);
         std::string var_name = "t" + std::to_string(i);
-        vars.emplace_back(var_name, task_rows);
-        _linear_gains[var_name] = std::pow(10., levels_of_priority - i)*(levels_of_priority - i)*Eigen::VectorXd::Constant(task_rows, 1.);
+        vars.emplace_back(var_name, task_rows); //Slack variables associated to tasks
+        int alpha = 2 * (levels_of_priority - i);
+        _linear_gains[var_name] = std::pow(10., alpha)*alpha*Eigen::VectorXd::Constant(task_rows, 1.);
         XBot::Logger::info("Created variable %s with size %i\n", var_name.c_str(), task_rows);
     }
 
@@ -132,7 +133,7 @@ bool l1HQP::solve(Eigen::VectorXd& solution)
 {   
     _internal_stack->update(Eigen::VectorXd(0));
 
-    if(!_solver->updateProblem(Eigen::MatrixXd(0, _opt->getSize()), _internal_stack->getStack()[0]->getc().transpose(),
+    if(!_solver->updateProblem(_H, _internal_stack->getStack()[0]->getc().transpose(),
         _internal_stack->getBounds()->getAineq(),
         _internal_stack->getBounds()->getbLowerBound(), _internal_stack->getBounds()->getbUpperBound(),
         Eigen::VectorXd(0), Eigen::VectorXd(0)))
@@ -220,12 +221,10 @@ void constraint_helper::update(const Eigen::VectorXd& x)
 
     if(_constraints->getAineq().rows() > 0)
     {
-        _constraint = _constraints->getAineq()*_x - _constraints->getbLowerBound();
+        _constraint = _constraints->getAineq()*_x;
         _A.pile(_constraint.getM());
-        _b_lower.pile(- _constraint.getq());
-
-        _constraint = _constraints->getAineq()*_x - _constraints->getbUpperBound();
-        _b_upper.pile(- _constraint.getq());
+        _b_lower.pile(_constraints->getbLowerBound());
+        _b_upper.pile(_constraints->getbUpperBound());
     }
 
     if(_constraints->getAeq().rows() > 0 ) //TODO: equality constraints
@@ -235,12 +234,10 @@ void constraint_helper::update(const Eigen::VectorXd& x)
 
     if(_constraints->getLowerBound().size() > 0) //bounds
     {
-        _constraint = I*_x - _constraints->getLowerBound();
+        _constraint = I*_x;
         _A.pile(_constraint.getM());
-        _b_lower.pile(- _constraint.getq());
-
-        _constraint = I*_x - _constraints->getUpperBound();
-        _b_upper.pile(- _constraint.getq());
+        _b_lower.pile(_constraints->getLowerBound());
+        _b_upper.pile(_constraints->getUpperBound());
     }
 
     _Aineq = _A.generate_and_get();

@@ -77,6 +77,12 @@ namespace solvers {
         public:
             typedef boost::shared_ptr<l1HQP> Ptr;
 
+            /**
+             * @brief l1HQP oncstructor
+             * @param stack_of_tasks stack
+             * @param eps_regularisation refers to the L2 regularisation
+             * @param be_solver internal qp solver
+             */
             l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
 
