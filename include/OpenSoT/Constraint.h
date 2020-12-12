@@ -176,7 +176,7 @@
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
             @param x variable state at the current step (input) */
-        virtual void update(const Vector_type& x = Vector_type(0)) {}
+        virtual void update(const Vector_type& x) {}
 
         /**
          * @brief log logs common Constraint internal variables
