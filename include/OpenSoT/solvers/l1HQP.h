@@ -19,6 +19,26 @@ class AutoStack;
 
 namespace OpenSoT {
 namespace solvers {
+     /**
+     * @brief The priority_constraint class implements the priority constraint:
+     *
+     *          c1't1 >= c2't2
+     */
+    class priority_constraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
+    {
+    public:
+        typedef boost::shared_ptr<priority_constraint> Ptr;
+        priority_constraint(const std::string& id,
+                            const OpenSoT::tasks::GenericLPTask::Ptr high_priority_task,
+                            const OpenSoT::tasks::GenericLPTask::Ptr low_priority_task);
+        void update(const Eigen::VectorXd& x);
+    private:
+        boost::weak_ptr<OpenSoT::tasks::GenericLPTask> _high_task;
+        boost::weak_ptr<OpenSoT::tasks::GenericLPTask> _low_task;
+
+        Eigen::MatrixXd _ones;
+    };
+
     class constraint_helper: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
@@ -89,18 +109,16 @@ namespace solvers {
             bool solve(Eigen::VectorXd& solution);
 
             /**
-             * @brief getPriorityGains this could be used to change on the fly priorities!
-             * @return map<level, LPTask>, level names are "t0", "t1", ...
-             */
-            std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr>& getTasks(){ return _lp_tasks; }
-
-            /**
-             * @brief getInternalProblem(), getConstraints() and getHardConstraints() are just for debugging
+             * @brief getInternalProblem(), getConstraints(), getHardConstraints(), getTasks() and
+             * getPriorityConstraints() are ONLY for debugging
              * @return
              */
             const boost::shared_ptr<AutoStack>& getInternalProblem(){ return _internal_stack;}
             const std::map<std::string, task_to_constraint_helper::Ptr>& getConstraints(){ return _constraints; }
             const constraint_helper::Ptr& getHardConstraints(){return _constraints2; }
+            const std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr>& getTasks(){ return _lp_tasks; }
+            const std::vector<priority_constraint::Ptr>& getPriorityConstraints(){ return _priority_constraints; }
+
 
             unsigned int getVariableSize(){ return _opt->getSize();}
 
@@ -114,17 +132,20 @@ namespace solvers {
             bool getInternalVariable(const std::string& var, Eigen::VectorXd& value);
 
 
-
         private:
             double _epsRegularisation;
 
             OpenSoT::AutoStack& _stack_of_tasks;
             boost::shared_ptr<OptvarHelper> _opt;
             /**
-             * @brief _linear_gains vector of gains to keep priorities from the highest [0] to the lowest [l]
+             * @brief _linear_gains vector of gains
              */
             std::map<std::string, Eigen::VectorXd> _linear_gains;
 
+            /**
+             * @brief _task_id_priority_order vector to keep priorities order from the highest [0] to the lowest [l]
+             */
+            std::vector<std::string> _task_id_priority_order;
             std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr> _lp_tasks;
 
             /**
@@ -156,6 +177,16 @@ namespace solvers {
             Eigen::VectorXd _internal_solution;
             Eigen::MatrixXd _H;
             OpenSoT::HessianType _hessian_type;
+
+            /**
+             * @brief _priority_constraints implements constraints in the form:
+             *
+             *          c1't1 <= c2't2
+             *
+             * with c1't1 task with higher priority wrt c2't2
+             */
+            std::vector<priority_constraint::Ptr> _priority_constraints;
+
 
     };
 

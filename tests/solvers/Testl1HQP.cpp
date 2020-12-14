@@ -138,6 +138,24 @@ TEST_F(testl1HQP, testContructor)
     A_ineq.pile(hard_constraints->getAineq());
 
 
+    std::vector<OpenSoT::solvers::priority_constraint::Ptr> priority_constraints = l1_solver->getPriorityConstraints();
+    if(priority_constraints.size() > 0)
+    {
+        priority_constraints[0]->update(Eigen::VectorXd(0));
+        EXPECT_TRUE(priority_constraints.size() == stack->getStack().size()-1);
+        EXPECT_EQ(priority_constraints[0]->getAineq().rows(), 1);
+        EXPECT_EQ(priority_constraints[0]->getAineq().cols(), linear_tasks["t0"]->getc().size());
+
+
+
+        std::cout<<"priority_constraints[0]->getAineq(): "<<priority_constraints[0]->getAineq()<<std::endl;
+        std::cout<<"linear_tasks[""t0""]->getc()-linear_tasks[""t1""]->getc(): "<<(linear_tasks["t0"]->getc()-linear_tasks["t1"]->getc()).transpose()<<std::endl;
+
+        b_lower.pile(priority_constraints[0]->getbLowerBound());
+        b_upper.pile(priority_constraints[0]->getbUpperBound());
+        A_ineq.pile(priority_constraints[0]->getAineq());
+    }
+
 
     OpenSoT::AutoStack::Ptr internal_problem = l1_solver->getInternalProblem();
 

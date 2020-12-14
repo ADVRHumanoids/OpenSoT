@@ -4,6 +4,7 @@
 #include <string>
 #include <math.h>
 
+#define ENABLE_PRIORITY_CONSTRAINT true
 
 using namespace OpenSoT::solvers;
 
@@ -68,6 +69,11 @@ void l1HQP::creates_internal_problem()
     if(_constraints2)
         constraint_list.push_back(_constraints2);
 
+#if ENABLE_PRIORITY_CONSTRAINT
+    for(unsigned int i = 0; i < _priority_constraints.size(); ++i)
+        constraint_list.push_back(_priority_constraints[i]);
+#endif
+
     _internal_stack = boost::make_shared<OpenSoT::AutoStack>(aggregated, constraint_list);
 
 
@@ -76,6 +82,28 @@ void l1HQP::creates_internal_problem()
 
 void l1HQP::creates_constraints()
 {
+#if ENABLE_PRIORITY_CONSTRAINT
+    //1. Adding constraints to enforce priorities if present
+    if(_task_id_priority_order.size() > 1)
+    {
+        std::string high_priority_task = "";
+        std::string low_priority_task = "";
+        std::string id = "";
+        for(unsigned int i = 0; i < _task_id_priority_order.size()-1; ++i)
+        {
+            high_priority_task = _task_id_priority_order[i];
+            low_priority_task = _task_id_priority_order[i+1];
+
+            id = "t"+std::to_string(i)+"_"+"t"+std::to_string(i+1)+"_constr";
+            _priority_constraints.push_back(boost::make_shared<priority_constraint>(id,
+                                        _lp_tasks[high_priority_task],
+                                        _lp_tasks[low_priority_task]));
+        }
+    }
+#endif
+
+
+    //2. Constraints coming from the original problem are kept
     if(_stack_of_tasks.getBounds())
         _constraints2 = boost::make_shared<constraint_helper>("internal_constraints", _stack_of_tasks.getBounds(),
                                                               _opt->getVariable("x"));
@@ -86,8 +114,9 @@ void l1HQP::creates_tasks()
     std::map<std::string, Eigen::VectorXd>::iterator it;
 
     //1) here we creates the lp tasks
+    std::string task_id = "";
     for(it = _linear_gains.begin(); it != _linear_gains.end(); it++){
-        std::string task_id = it->first + "_task";
+        task_id = it->first + "_task";
         _lp_tasks[it->first] = boost::make_shared<OpenSoT::tasks::GenericLPTask>(task_id, _linear_gains[it->first],
                 _opt->getVariable(it->first));
     }
@@ -95,7 +124,7 @@ void l1HQP::creates_tasks()
     //2) here we creates constraints from the given tasks
     unsigned int i = 0;
     for(it = _linear_gains.begin(); it != _linear_gains.end(); it++){
-        std::string task_id = it->first + "_constraint";
+        task_id = it->first + "_constraint";
         _constraints[it->first] = boost::make_shared<task_to_constraint_helper>(task_id,
                 _stack_of_tasks.getStack()[i],
                 _opt->getVariable("x"),
@@ -115,15 +144,17 @@ void l1HQP::creates_problem_variables()
     int levels_of_priority = _stack_of_tasks.getStack().size();
     XBot::Logger::info("Problem has %i levels of priority\n", levels_of_priority);
 
+    std::string var_name = "";
     for(unsigned int i = 0; i < levels_of_priority; ++i)
     {
         int task_rows = _stack_of_tasks.getStack()[i]->getA().rows();
         XBot::Logger::info("Level %i task has %i rows\n", i, task_rows);
-        std::string var_name = "t" + std::to_string(i);
+        var_name = "t" + std::to_string(i);
         vars.emplace_back(var_name, task_rows); //Slack variables associated to tasks
-        int alpha = 2 * (levels_of_priority - i);
+        int alpha = (levels_of_priority - i);
         _linear_gains[var_name] = std::pow(10., alpha)*alpha*Eigen::VectorXd::Constant(task_rows, 1.);
         XBot::Logger::info("Created variable %s with size %i\n", var_name.c_str(), task_rows);
+        _task_id_priority_order.push_back(var_name);
     }
 
     _opt = boost::make_shared<OptvarHelper>(vars);
@@ -247,4 +278,25 @@ void constraint_helper::update(const Eigen::VectorXd& x)
     _A.reset();
     _b_lower.reset();
     _b_upper.reset();
+}
+
+priority_constraint::priority_constraint(const std::string& id,
+                                         const OpenSoT::tasks::GenericLPTask::Ptr high_priority_task,
+                                         const OpenSoT::tasks::GenericLPTask::Ptr low_priority_task):
+    OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd >(id, high_priority_task->getXSize()),
+    _high_task(high_priority_task),
+    _low_task(low_priority_task)
+{
+    _bLowerBound.setConstant(1, -1.0e20);
+    _bUpperBound.setConstant(1, 0.);
+
+    _Aineq.resize(1, _high_task.lock()->getc().size());
+    _ones = (_high_task.lock()->getc().array() != 0).matrix().cast<double>() - (_low_task.lock()->getc().array() != 0).matrix().cast<double>();
+
+    _Aineq = _ones.transpose();
+}
+
+void priority_constraint::update(const Eigen::VectorXd &x)
+{
+
 }
