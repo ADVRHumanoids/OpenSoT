@@ -170,7 +170,7 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     //SETTING BOUNDS & COST FUNCTION
     for(unsigned int i = 0; i < _l.rows(); ++i)
         glp_set_col_bnds(_mip, i+1, checkConstrType(_u[i], _l[i]), _l[i], _u[i]);
-    for(unsigned int i = 0; i < _g[i]; ++i)
+    for(unsigned int i = 0; i < _g.rows(); ++i)
         glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
     for(unsigned int i = 0; i < _A.rows(); ++i)
