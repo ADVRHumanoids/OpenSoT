@@ -338,23 +338,19 @@ double QPOasesBackEnd::getObjective()
 void QPOasesBackEnd::checkINFTY()
 {
     unsigned int constraints_size = _lA.size();
-    if(constraints_size > 0)
-    {
-        for(unsigned int i = 0; i < constraints_size; ++i){
-            if(_lA[i] < -qpOASES::INFTY)
-                _lA[i] = -qpOASES::INFTY;
-            if(_uA[i] > qpOASES::INFTY)
-                _uA[i] = qpOASES::INFTY;}
+    for(unsigned int i = 0; i < constraints_size; ++i){
+        if(_lA[i] < -qpOASES::INFTY)
+            _lA[i] = -qpOASES::INFTY;
+        if(_uA[i] > qpOASES::INFTY)
+            _uA[i] = qpOASES::INFTY;
     }
 
     unsigned int bounds_size = _l.size();
-    if(bounds_size > 0)
-    {
-        for(unsigned int i = 0; i < bounds_size; ++i){
-            if(_l[i] < -qpOASES::INFTY)
-                _l[i] = -qpOASES::INFTY;
-            if(_u[i] > qpOASES::INFTY)
-                _u[i] = qpOASES::INFTY;}
+    for(unsigned int i = 0; i < bounds_size; ++i){
+        if(_l[i] < -qpOASES::INFTY)
+            _l[i] = -qpOASES::INFTY;
+        if(_u[i] > qpOASES::INFTY)
+            _u[i] = qpOASES::INFTY;
     }
 }
 
