@@ -11,7 +11,8 @@ using namespace OpenSoT::solvers;
 l1HQP::l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,const solver_back_ends be_solver):
     Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
     _epsRegularisation(eps_regularisation),
-    _stack_of_tasks(stack_of_tasks)
+    _stack_of_tasks(stack_of_tasks),
+    _first_slack_index(-1)
 {    
     if(std::fpclassify(eps_regularisation) == FP_ZERO) //No L2-regularisation
         _hessian_type = HessianType::HST_ZERO;
@@ -28,6 +29,11 @@ l1HQP::l1HQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation
     creates_internal_problem();
     if(!creates_solver(be_solver))
         throw std::runtime_error("Can not initialize internal solver!");
+}
+
+void l1HQP::getBackEnd(BackEnd::Ptr& back_end)
+{
+    back_end = _solver;
 }
 
 bool l1HQP::creates_solver(const solver_back_ends solver_back_end)
@@ -137,6 +143,7 @@ void l1HQP::creates_problem_variables()
 {
     OptvarHelper::VariableVector vars;
     int problem_variables = _stack_of_tasks.getStack()[0]->getA().cols();
+    _first_slack_index = problem_variables;
     XBot::Logger::info("Problem has %i variables\n", problem_variables);
     vars.emplace_back("x", problem_variables); //these are the variables of the original problem
     XBot::Logger::info("Created x variable with size %i\n", problem_variables);

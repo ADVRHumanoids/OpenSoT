@@ -91,7 +91,7 @@ namespace solvers {
 
         Eigen::VectorXd o, inf, ones;
         Eigen::MatrixXd O;
-        double M = 10; //This is for the Big-M constraint
+        double M = 10.; //This is for the Big-M constraint
     };
 
     class l1HQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
@@ -109,6 +109,14 @@ namespace solvers {
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
 
             bool solve(Eigen::VectorXd& solution);
+
+            /**
+             * @brief getFirstSlackIndex
+             * @return index to first (internal) slack variable, -1 if slack variables are not present
+             */
+            unsigned int getFirstSlackIndex(){ return _first_slack_index;}
+
+            void getBackEnd(BackEnd::Ptr& back_end);
 
             /**
              * @brief getInternalProblem(), getConstraints(), getHardConstraints(), getTasks() and
@@ -188,6 +196,8 @@ namespace solvers {
              * with c1't1 task with higher priority wrt c2't2
              */
             std::vector<priority_constraint::Ptr> _priority_constraints;
+
+            unsigned int _first_slack_index;
 
 
     };
