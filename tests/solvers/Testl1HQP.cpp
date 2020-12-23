@@ -110,8 +110,8 @@ TEST_F(testl1HQP, testContructor)
 
         // These checks are done considering that the task_to_constraint_heper is implemented
         // such that:
-        //          -t <= Ax -b <= t
-        //           t >= 0
+        //          -Mt <= Ax -b <= Mt
+        //           0 <= t <= 1
 
         std::cout<<"constraint->getbLowerBound(): "<<constraint->getbLowerBound().transpose()<<std::endl;
         EXPECT_EQ(constraint->getbLowerBound().size(), stack->getStack()[i]->getb().size()*3);
@@ -119,7 +119,7 @@ TEST_F(testl1HQP, testContructor)
         std::cout<<"constraint->getbUpperBound(): "<<constraint->getbUpperBound().transpose()<<std::endl;
         EXPECT_EQ(constraint->getbUpperBound().size(), stack->getStack()[i]->getb().size()*3);
 
-        //std::cout<<"constraint->getAineq()"<<constraint->getAineq()<<std::endl;
+        std::cout<<"constraint->getAineq()\n"<<constraint->getAineq()<<std::endl;
         EXPECT_EQ(constraint->getAineq().rows(), stack->getStack()[i]->getA().rows()*3);
         EXPECT_EQ(constraint->getAineq().cols(), l1_solver->getVariableSize());
 

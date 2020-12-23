@@ -203,15 +203,19 @@ task_to_constraint_helper::task_to_constraint_helper(std::string id, OpenSoT::ta
 {
     Eigen::MatrixXd I;
     I.setIdentity(task->getA().rows(),task->getA().rows());
-    _II.pile(-I);
-    _II.pile(-I);
-    _II.pile(-I);
-
-    _bLowerBound.resize(3*task->getA().rows());
-    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bLowerBound.size());
+    _II.pile(-M*I);
+    _II.pile(-M*I);
+    _II.pile(I);
 
     o.setZero(_task->getb().size());
     O.setZero(task->getA().rows(),task->getA().cols());
+
+    inf = Eigen::VectorXd::Constant(task->getA().rows(), 1.0e20);
+
+    ones = Eigen::VectorXd::Constant(task->getA().rows(), 1.);
+
+    _bLowerBound.resize(3*task->getA().rows());
+    _bLowerBound << -inf, -inf, o;
 
     update(Eigen::VectorXd(0));
 }
@@ -224,7 +228,7 @@ void task_to_constraint_helper::update(const Eigen::VectorXd& x)
 
     _bb.pile(_task->getWb());
     _bb.pile(-_task->getWb());
-    _bb.pile(o);
+    _bb.pile(ones);
 
     _constraint = _AA.generate_and_get()*_x + _II.generate_and_get()*_t -_bb.generate_and_get();
 

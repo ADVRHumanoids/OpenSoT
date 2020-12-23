@@ -68,7 +68,8 @@ namespace solvers {
          * @brief task_to_constraint_helper is an helper class to transform tasks from the form:
          *              Ax - b = 0
          * to:
-         *              -t <= Ax - b <= t
+         *              -Mt <= Ax - b <= Mt
+         *                0 <= t <= 1
          * @param id internal name of the task
          * @param task a Task pointer
          * @param x task variable
@@ -88,8 +89,9 @@ namespace solvers {
         OpenSoT::utils::MatrixPiler _AA;
         OpenSoT::utils::MatrixPiler _bb;
 
-        Eigen::VectorXd o;
+        Eigen::VectorXd o, inf, ones;
         Eigen::MatrixXd O;
+        double M = 10; //This is for the Big-M constraint
     };
 
     class l1HQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
