@@ -14,7 +14,7 @@
 
 #define VEL_LIMS M_PI_2/2.
 #define VEL_LIMS2 M_PI_2/2.
-#define LAMBDA 0.02
+#define LAMBDA 0.03
 #define OR_GAIN 0.1
 #define dT 0.003
 
@@ -203,7 +203,7 @@ TEST_F(testGLPKProblem, testIKMILP)
     RFoot->getReference(foot_ref);
 
 
-    int t = 10000;
+    int t = 5000;
     Eigen::VectorXd dq(q.size());
     dq.setZero(dq.size());
     Eigen::VectorXd solve_time(t);
@@ -387,7 +387,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
     OpenSoT::AffineHelper deltaVar = opt2.getVariable("delta");
     Eigen::VectorXd solve_time2(t);
     for(unsigned int i = 0; i < t; ++i)
-    {        
+    {
         this->_model_ptr->setJointPosition(q);
         this->_model_ptr->update();
 
@@ -405,6 +405,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
 
         solver2->log(log2);
+
 
 
         if(a)
