@@ -1134,14 +1134,15 @@ TEST_F(testiHQP, testSingleTask)
     autostack->update(q0);
 
     OpenSoT::solvers::iHQP::Ptr solver;
-    solver.reset(new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(), 1e8));
+    solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e8);
 
     Eigen::VectorXd x(q0.size());
     EXPECT_TRUE(solver->solve(x));
 
     autostack->update(q0);
 
-    solver.reset(new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(), 1e8));
+    solver.reset();
+    solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e8);
     EXPECT_TRUE(solver->solve(x));
 }
 
