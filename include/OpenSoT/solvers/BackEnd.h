@@ -12,7 +12,7 @@ namespace OpenSoT{
     class BackEnd{
     public:
         BackEnd(const int number_of_variables, const int number_of_constraints);
-        ~BackEnd();
+        virtual ~BackEnd();
 
         typedef boost::shared_ptr<BackEnd> Ptr;
 
