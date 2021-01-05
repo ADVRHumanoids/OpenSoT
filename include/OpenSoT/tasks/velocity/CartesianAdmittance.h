@@ -95,7 +95,7 @@ namespace OpenSoT {
             */
            bool reset();
 
-           void _log(XBot::MatLogger::Ptr logger);
+           void _log(XBot::MatLogger2::Ptr logger);
 
            /**
             * @brief getStiffness

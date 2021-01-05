@@ -179,7 +179,7 @@ void JointImpedanceCtrl::useInertiaMatrix(const bool use)
     _use_inertia_matrix = use;
 }
 
-void JointImpedanceCtrl::_log(XBot::MatLogger::Ptr logger)
+void JointImpedanceCtrl::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id+"_x_desired", _x_desired);
     logger->add(_task_id+"_xdot_desired", _xdot_desired);

@@ -57,7 +57,7 @@ namespace OpenSoT {
 
             private:
             virtual void _update(const Eigen::VectorXd& x);
-            virtual void _log(XBot::MatLogger::Ptr logger);
+            virtual void _log(XBot::MatLogger2::Ptr logger);
 
             std::vector<std::string> _contact_links;
             XBot::ModelInterface& _model;

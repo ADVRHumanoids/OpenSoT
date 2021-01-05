@@ -193,7 +193,7 @@ namespace OpenSoT{
         bool getBackEnd(const unsigned int i, BackEnd::Ptr& back_end);
 
     protected:
-        virtual void _log(XBot::MatLogger::Ptr logger, const std::string& prefix);
+        virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix);
 
         vector <OpenSoT::constraints::Aggregated> constraints_task;
         

@@ -8,6 +8,7 @@
 #include <XBotInterface/Logger.hpp>
 #include <cmath>
 #include <OpenSoT/solvers/iHQP.h>
+#include <matlogger2/matlogger2.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
@@ -27,7 +28,8 @@ protected:
         else
             std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-        logger = XBot::MatLogger::getLogger("/tmp/testJointLimits_acceleration");
+        logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimits_acceleration");
+        logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
 
     }
 
@@ -153,7 +155,7 @@ protected:
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
 
-    XBot::MatLogger::Ptr logger;
+    XBot::MatLogger2::Ptr logger;
 
     OpenSoT::solvers::iHQP::Ptr solver;
 
@@ -242,7 +244,7 @@ TEST_F(testJointLimits, testBounds) {
 //    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
 //        EXPECT_NEAR(q[i], this->qmax[i], 1e-4);
 
-    this->logger->flush();
+
 }
 
 }

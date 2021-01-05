@@ -204,7 +204,7 @@ bool CoM::isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
     return (bool)boost::dynamic_pointer_cast<CoM>(task);
 }
 
-void CoM::_log(XBot::MatLogger::Ptr logger)
+void CoM::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(getTaskID() + "_position_err", _positionError);
 }

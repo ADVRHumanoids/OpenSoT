@@ -708,7 +708,7 @@ TEST_F(testiHQP, testContructor1Problem)
 ////    sot2.setSolverID("sot2");
 
 
-////    XBot::MatLogger::Ptr logger = XBot::MatLogger::getLogger("testMultipleSolversLogs");
+////    XBot::MatLogger2::Ptr logger = XBot::MatLogger::getLogger("testMultipleSolversLogs");
 
 ////    sot.log(logger);
 ////    sot2.log(logger);

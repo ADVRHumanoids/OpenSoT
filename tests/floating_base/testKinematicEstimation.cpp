@@ -7,8 +7,17 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/solvers/iHQP.h>
+#include <matlogger2/matlogger2.h>
 
 namespace {
+
+XBot::MatLogger2::Ptr getLogger(const std::string& name)
+{
+    XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger(name); // date-time automatically appended
+    logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+    return logger;
+}
+
 
 class testKinematicEstimation: public ::testing::Test
 {
@@ -16,7 +25,7 @@ public:
     XBot::ModelInterface::Ptr _model_ptr;
     XBot::ModelInterface::Ptr _model_ptr_kinematic_estimation;
     std::string _path_to_cfg;
-    XBot::MatLogger::Ptr _logger;
+    XBot::MatLogger2::Ptr _logger;
 
     testKinematicEstimation()
     {
@@ -28,7 +37,7 @@ public:
         _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
         _model_ptr_kinematic_estimation = XBot::ModelInterface::getModel(_path_to_cfg);
 
-        _logger = XBot::MatLogger::getLogger("/tmp/testKinematicEstimation");
+        _logger = getLogger("/tmp/testKinematicEstimation");
     }
 
     virtual ~testKinematicEstimation() {
@@ -256,7 +265,7 @@ TEST_F(testKinematicEstimation, kinematic_floating_base_estimation)
     std::cout<<"actual_pose: \n"<<actual_pose.matrix()<<std::endl;
     std::cout<<"actual_pose_kinematic_estimation: \n"<<actual_pose_kinematic_estimation.matrix()<<std::endl;
 
-    _logger->flush();
+
 }
 
 TEST_F(testKinematicEstimation, control_with_estimation)

@@ -161,7 +161,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         virtual void _update(const Eigen::VectorXd& x);
         
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger2::Ptr logger);
 
         void setLambda(double lambda1, double lambda2);
         virtual void setLambda(double lambda);

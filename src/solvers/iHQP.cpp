@@ -400,7 +400,7 @@ void iHQP::activateAllStacks()
 }
 
 
-void iHQP::_log(XBot::MatLogger::Ptr logger, const std::string& prefix)
+void iHQP::_log(XBot::MatLogger2::Ptr logger, const std::string& prefix)
 {
     if(_regularisation_task)
     {

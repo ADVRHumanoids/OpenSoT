@@ -50,7 +50,7 @@ void FloatingBase::setEnabledContacts(const std::vector<bool> &enabled_contacts)
         _enabled_contacts = enabled_contacts;
 }
 
-void FloatingBase::_log(XBot::MatLogger::Ptr logger)
+void FloatingBase::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id + "_floating_base_torque", _floating_base_torque);
 }

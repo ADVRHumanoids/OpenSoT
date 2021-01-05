@@ -78,7 +78,7 @@ namespace OpenSoT {
 
             void update(const Eigen::VectorXd & state);
 
-            void log(XBot::MatLogger::Ptr logger);
+            void log(XBot::MatLogger2::Ptr logger);
 
             bool checkConsistency();
 

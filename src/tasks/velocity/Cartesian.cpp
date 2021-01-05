@@ -342,7 +342,7 @@ OpenSoT::tasks::velocity::Cartesian::Ptr OpenSoT::tasks::velocity::Cartesian::as
     return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
 }
 
-void Cartesian::_log(XBot::MatLogger::Ptr logger)
+void Cartesian::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id + "_error", _error);
     logger->add(_task_id + "_pos_ref", _desiredPose.translation());

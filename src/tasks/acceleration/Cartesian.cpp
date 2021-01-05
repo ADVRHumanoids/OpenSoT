@@ -308,7 +308,7 @@ bool Cartesian::reset()
 }
 
 
-void Cartesian::_log(XBot::MatLogger::Ptr logger)
+void Cartesian::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(getTaskID() + "_pose_error", _pose_error);
     logger->add(getTaskID() + "_velocity_error", _velocity_error);

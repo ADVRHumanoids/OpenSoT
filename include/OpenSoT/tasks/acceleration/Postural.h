@@ -118,7 +118,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         bool reset();
         
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger2::Ptr logger);
 
         /**
          * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset

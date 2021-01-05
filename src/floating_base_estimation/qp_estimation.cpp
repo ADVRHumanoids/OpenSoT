@@ -84,7 +84,7 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(OpenSoT::FloatingB
     return true;
 }
 
-void OpenSoT::floating_base_estimation::qp_estimation::log(XBot::MatLogger::Ptr logger)
+void OpenSoT::floating_base_estimation::qp_estimation::log(XBot::MatLogger2::Ptr logger)
 {
     _solver->log(logger);
     _autostack->log(logger);

@@ -42,7 +42,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         const std::string& getWheelName() const { return _wheel_name; }
         
-        void log(XBot::MatLogger::Ptr logger);
+        void log(XBot::MatLogger2::Ptr logger);
         
     private:
         
@@ -92,7 +92,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         void _update(const Eigen::VectorXd& x) override;
         
-        void _log(XBot::MatLogger::Ptr logger) override;
+        void _log(XBot::MatLogger2::Ptr logger) override;
         
         
     private:

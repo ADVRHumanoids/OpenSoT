@@ -88,7 +88,7 @@ const boost::shared_ptr<OpenSoT::OptvarHelper> InverseDynamics::getSerializer() 
     return _serializer;
 }
 
-void InverseDynamics::log(XBot::MatLogger::Ptr& logger)
+void InverseDynamics::log(XBot::MatLogger2::Ptr& logger)
 {
     logger->add("qddot", _qddot_val);
 

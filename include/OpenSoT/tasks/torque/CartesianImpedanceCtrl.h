@@ -83,7 +83,7 @@
                 Eigen::VectorXd _tmp_vec;
                 Eigen::MatrixXd _tmpA;
 
-                virtual void _log(XBot::MatLogger::Ptr logger);
+                virtual void _log(XBot::MatLogger2::Ptr logger);
 
                 Indices _rows_indices;
 
