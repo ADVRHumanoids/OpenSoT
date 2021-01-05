@@ -50,7 +50,7 @@
                 #define BASE_LINK_COM "world"
                 #define DISTAL_LINK_COM "CoM"
                 
-                virtual void _log(XBot::MatLogger::Ptr logger);
+                virtual void _log(XBot::MatLogger2::Ptr logger);
                 
                 AffineHelper _wrenches;
                 AffineHelper _com_task;

@@ -143,7 +143,7 @@
          * @brief _log can be used to log internal Task variables
          * @param logger a shared pointer to a MatLogger
          */
-        virtual void _log(XBot::MatLogger::Ptr logger)
+        virtual void _log(XBot::MatLogger2::Ptr logger)
         {
 
         }
@@ -459,7 +459,7 @@
          * @brief log logs common Task internal variables
          * @param logger a shared pointer to a MathLogger
          */
-        virtual void log(XBot::MatLogger::Ptr logger)
+        virtual void log(XBot::MatLogger2::Ptr logger)
         {
             if(_A.rows() > 0)
                 logger->add(_task_id + "_A", _A);

@@ -54,7 +54,7 @@
 
                 void update_b();
 
-                virtual void _log(XBot::MatLogger::Ptr logger);
+                virtual void _log(XBot::MatLogger2::Ptr logger);
 
                 /**
                  * @brief _update

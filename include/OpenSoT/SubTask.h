@@ -51,7 +51,7 @@
         TaskPtr _taskPtr;
         Indices _subTaskMap;
 
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger2::Ptr logger);
 
         void generateA();
 

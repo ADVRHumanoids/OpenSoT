@@ -55,7 +55,7 @@ namespace OpenSoT { namespace utils {
         void setContactRotationMatrix(const std::string& contact_link,
                                       const Eigen::Matrix3d& w_R_c);
         
-        void log(XBot::MatLogger::Ptr logger);
+        void log(XBot::MatLogger2::Ptr logger);
 
         /**
          * @brief getObjective

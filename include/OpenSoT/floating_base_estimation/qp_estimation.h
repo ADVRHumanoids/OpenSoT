@@ -29,7 +29,7 @@ namespace floating_base_estimation{
 
         virtual bool setContactState(const std::string& contact_link, const bool state);
 
-        virtual void log(XBot::MatLogger::Ptr logger);
+        virtual void log(XBot::MatLogger2::Ptr logger);
 
         AutoStack::Ptr getStack()
         {

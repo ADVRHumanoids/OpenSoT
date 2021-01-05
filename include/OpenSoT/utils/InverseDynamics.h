@@ -60,7 +60,7 @@ public:
      * @brief log internal variables: wrenches, tau and qddot
      * @param logger
      */
-    void log(XBot::MatLogger::Ptr& logger);
+    void log(XBot::MatLogger2::Ptr& logger);
 
 private:
     AffineHelper    _qddot;

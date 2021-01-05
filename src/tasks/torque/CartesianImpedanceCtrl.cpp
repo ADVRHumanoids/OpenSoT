@@ -386,7 +386,7 @@ void CartesianImpedanceCtrl::useInertiaMatrix(const bool use)
     _use_inertia_matrix = use;
 }
 
-void CartesianImpedanceCtrl::_log(XBot::MatLogger::Ptr logger)
+void CartesianImpedanceCtrl::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id+"_actualPose", _actualPose);
     logger->add(_task_id+"_desiredPose", _desiredPose);

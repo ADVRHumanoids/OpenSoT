@@ -122,7 +122,7 @@ namespace OpenSoT { namespace solvers {
 
             const Eigen::VectorXd& get_solution() const;
 
-            bool enable_logger(XBot::MatLogger::Ptr logger, std::string log_prefix);
+            bool enable_logger(XBot::MatLogger2::Ptr logger, std::string log_prefix);
             
         private:
 
@@ -171,7 +171,7 @@ namespace OpenSoT { namespace solvers {
             bool back_end_initialized;
 
             // logger (can be nullptr)
-            XBot::MatLogger::Ptr logger;
+            XBot::MatLogger2::Ptr logger;
 
             // prefix for logged variables
             std::string log_prefix;
@@ -188,7 +188,7 @@ namespace OpenSoT { namespace solvers {
         };
 
         
-        virtual void _log(XBot::MatLogger::Ptr logger, const std::string& prefix) override;
+        virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix) override;
 
         // vector of previous task nullspaces (first elem is nx-by-nx identity)
         std::vector<Eigen::MatrixXd> _cumulated_nullspace;

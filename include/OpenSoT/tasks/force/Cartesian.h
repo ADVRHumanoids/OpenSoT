@@ -95,7 +95,7 @@ namespace OpenSoT { namespace tasks { namespace force {
     static const std::string world_name;
     
     virtual void _update(const Eigen::VectorXd& x);
-    virtual void _log(XBot::MatLogger::Ptr logger);
+    virtual void _log(XBot::MatLogger2::Ptr logger);
     
     const XBot::ModelInterface& _robot;
     std::string _base_link, _distal_link;

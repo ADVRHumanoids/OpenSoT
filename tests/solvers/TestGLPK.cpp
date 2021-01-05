@@ -11,6 +11,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
+#include <matlogger2/matlogger2.h>
 
 #define VEL_LIMS M_PI_2/2.
 #define VEL_LIMS2 M_PI_2/2.
@@ -130,13 +131,20 @@ protected:
 
 };
 
+XBot::MatLogger2::Ptr getLogger(const std::string& name)
+{
+    XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger(name); // date-time automatically appended
+    logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+    return logger;
+}
+
 
 TEST_F(testGLPKProblem, testIKMILP)
 {
     std::cout<<"        FIRST RUN"<<std::endl;
 /////////////////////////////////QP-QP-QP
 
-    XBot::MatLogger::Ptr log1 = XBot::MatLogger::getLogger("testIKMILP1");
+    XBot::MatLogger2::Ptr log1 = getLogger("testIKMILP1");
 
     Eigen::VectorXd q(_model_ptr->getJointNum());
     setGoodInitialPosition(q);
@@ -263,12 +271,9 @@ TEST_F(testGLPKProblem, testIKMILP)
 
 
 
-
-    log1->flush();
-
 /////////////////////////////////QP-QP-MILP
 
-    XBot::MatLogger::Ptr log2 = XBot::MatLogger::getLogger("testIKMILP2");
+    XBot::MatLogger2::Ptr log2 = getLogger("testIKMILP2");
 
 std::cout<<"        SECOND RUN"<<std::endl;
     q.resize(_model_ptr->getJointNum());
@@ -445,7 +450,6 @@ std::cout<<"        SECOND RUN"<<std::endl;
     EXPECT_TRUE(RFoot_pose.M == foot_ref.M);
 
 
-    log2->flush();
 
     double media_solve_time = solve_time.sum()/solve_time.size();
     double media_solve_time2 = solve_time2.sum()/solve_time2.size();

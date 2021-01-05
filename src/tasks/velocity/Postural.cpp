@@ -136,7 +136,7 @@ const Eigen::VectorXd& OpenSoT::tasks::velocity::Postural::getCachedVelocityRefe
     return _xdot_desired_ref;
 }
 
-void OpenSoT::tasks::velocity::Postural::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::velocity::Postural::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id + "_position_err", _x_desired - _x);
     logger->add(_task_id + "_pos_ref", _x_desired);

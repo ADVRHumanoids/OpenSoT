@@ -20,6 +20,7 @@
 #include <OpenSoT/solvers/eHQP.h>
 
 #include <XBotInterface/Logger.hpp>
+#include <matlogger2/matlogger2.h>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
@@ -27,7 +28,7 @@ std::string _path_to_cfg = robotology_root + relative_path;
 
 bool IS_ROSCORE_RUNNING;
 
-XBot::MatLogger::Ptr logger;
+XBot::MatLogger2::Ptr logger;
 
 #define CHECK_JOINT_LIMITS false
 #define CHECK_CARTESIAN_ERROR true
@@ -969,16 +970,23 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         std::cout<<"Medium time per solve: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
     }
 
-    logger->flush();
+
 
 }
 
+}
+
+XBot::MatLogger2::Ptr getLogger(const std::string& name)
+{
+    XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger(name); // date-time automatically appended
+    logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+    return logger;
 }
 
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "testStaticWalkFloatingBaseFloatingBase_node");
-  logger = XBot::MatLogger::getLogger("qpOASES_StaticWalk_FloatingBase");
+  logger = getLogger("qpOASES_StaticWalk_FloatingBase");
   IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -56,7 +56,7 @@
                 
             protected:
                 
-                virtual void _log(XBot::MatLogger::Ptr logger);
+                virtual void _log(XBot::MatLogger2::Ptr logger);
                 
                 XBot::ModelInterface& _robot;
 

@@ -184,7 +184,7 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     return _prev_qdes;
 }
 
-void SimpleSteering::log(XBot::MatLogger::Ptr logger)
+void SimpleSteering::log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_wheel_name + "_threshold", _comp.getCurrentThreshold());
     logger->add(_wheel_name + "_forward", _log_data.forward);
@@ -285,7 +285,7 @@ void CentauroAnkleSteering::_update(const Eigen::VectorXd& x)
     
 }
 
-void OpenSoT::tasks::velocity::CentauroAnkleSteering::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::velocity::CentauroAnkleSteering::_log(XBot::MatLogger2::Ptr logger)
 {
     _steering.log(logger);
 }

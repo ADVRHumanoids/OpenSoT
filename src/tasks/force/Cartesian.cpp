@@ -92,7 +92,7 @@ void Cartesian::getCartesianStiffness(Eigen::Matrix6d& Kp)
   Kp = _Kp;
 }
 
-void Cartesian::_log(XBot::MatLogger::Ptr logger)
+void Cartesian::_log(XBot::MatLogger2::Ptr logger)
 { 
   logger->add(getTaskID() + "_pose_current", _pose_current.matrix());
   logger->add(getTaskID() + "_pose_ref", _pose_ref.matrix());

@@ -432,7 +432,7 @@ OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
     return OpenSoT::solvers::iHQP::TaskPtr();
 }
 
-void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)
+void OpenSoT::AutoStack::log(XBot::MatLogger2::Ptr logger)
 {
     for(auto task : _stack)
         task->log(logger);

@@ -19,7 +19,7 @@ void OpenSoT::tasks::acceleration::Contact::_update(const Eigen::VectorXd& x)
 }
 
 
-void OpenSoT::tasks::acceleration::Contact::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::acceleration::Contact::_log(XBot::MatLogger2::Ptr logger)
 {
 }
 

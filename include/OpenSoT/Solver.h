@@ -47,7 +47,7 @@ using namespace std;
          * @param logger a pointer to a MatLogger
          * @param prefix used to log variables
          */
-        virtual void _log(XBot::MatLogger::Ptr logger, const std::string& prefix)
+        virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix)
         {
 
         }
@@ -106,7 +106,7 @@ using namespace std;
          * @param logger a pointer to a MatLogger
          * @param prefix used to log variables
          */
-        virtual void log(XBot::MatLogger::Ptr logger)
+        virtual void log(XBot::MatLogger2::Ptr logger)
         {
             if(_solver_id.empty())
                 _log(logger, _solver_id);

@@ -46,6 +46,7 @@ find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
 find_package(FCL 0.6 QUIET)
 find_package(PkgConfig REQUIRED)
+find_package(matlogger2 REQUIRED)
 
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
@@ -208,6 +209,7 @@ endif()
 TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC
     XBotInterface::XBotInterface
+    matlogger2::matlogger2
     PRIVATE
     ${PRIVATE_TLL})
 

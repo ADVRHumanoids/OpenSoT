@@ -137,7 +137,7 @@ void CartesianAdmittance::setFilterDamping(const double damping)
         XBot::Logger::warning("damping filter is negative!");
 }
 
-void CartesianAdmittance::_log(XBot::MatLogger::Ptr logger)
+void CartesianAdmittance::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id + "_wrench_error", _wrench_error);
     logger->add(_task_id + "_wrench_filt", _wrench_filt);

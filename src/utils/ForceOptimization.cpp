@@ -169,7 +169,7 @@ bool OpenSoT::utils::ForceOptimization::compute(const Eigen::VectorXd& fixed_bas
     
 }
 
-void OpenSoT::utils::ForceOptimization::log(XBot::MatLogger::Ptr logger)
+void OpenSoT::utils::ForceOptimization::log(XBot::MatLogger2::Ptr logger)
 {
     _autostack->log(logger);
 }

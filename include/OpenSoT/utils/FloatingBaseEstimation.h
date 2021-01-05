@@ -20,6 +20,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <XBotInterface/ModelInterface.h>
+#include <matlogger2/matlogger2.h>
 
 namespace OpenSoT {
     /**
@@ -68,7 +69,7 @@ namespace OpenSoT {
         virtual bool update(OpenSoT::FloatingBaseEstimation::Update update =
                 OpenSoT::FloatingBaseEstimation::Update::None) = 0;
 
-        virtual void log(XBot::MatLogger::Ptr logger)
+        virtual void log(XBot::MatLogger2::Ptr logger)
         {
 
         }
