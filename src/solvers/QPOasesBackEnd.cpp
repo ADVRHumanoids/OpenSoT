@@ -35,9 +35,9 @@ QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
     _constraints(new qpOASES::Constraints()),
     _nWSR(13200),
     _epsRegularisation(eps_regularisation),
-    _dual_solution(number_of_variables),
-    _opt(new qpOASES::Options())
+    _dual_solution(number_of_variables)
 {
+    _opt = boost::make_shared<qpOASES::Options>();
 #ifdef OPENSOT_VERBOSE
     XBot::Logger::SetVerbosityLevel(XBot::Logger::Severity::LOW);
 #endif
@@ -69,12 +69,12 @@ void QPOasesBackEnd::setDefaultOptions()
     opt.print();
 
     _opt.reset();
-    _opt.reset(new qpOASES::Options(opt));
+    _opt = boost::make_shared<qpOASES::Options>(opt);
 }
 
 void QPOasesBackEnd::setOptions(const boost::any &options){
     _opt.reset();
-    _opt.reset(new qpOASES::Options(boost::any_cast<qpOASES::Options>(options)));
+    _opt = boost::make_shared<qpOASES::Options>(boost::any_cast<qpOASES::Options>(options));
     _problem->setOptions(boost::any_cast<qpOASES::Options>(options));}
 
 boost::any QPOasesBackEnd::getOptions(){
