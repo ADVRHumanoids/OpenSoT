@@ -36,20 +36,17 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
     
     _P_values.resize(getNumVariables()*(getNumVariables() + 1)/2);
     
-    _settings.reset(new OSQPSettings());
+    _settings = boost::make_shared<OSQPSettings>();
      osqp_set_default_settings(_settings.get());
     _settings->verbose = 0;
     _settings->eps_abs = 1e-5;
     _settings->eps_rel = 1e-5;
 
 
-   
-    
-    _data.reset(new OSQPData());
-    _Pcsc.reset(new csc());
-    _Acsc.reset(new csc());
-       
-    
+    _data = boost::make_shared<OSQPData>();
+    _Pcsc = boost::make_shared<csc>();
+    _Acsc = boost::make_shared<csc>();
+        
 }
 
 void OSQPBackEnd::__generate_data_struct(const int number_of_variables, 
@@ -236,7 +233,8 @@ boost::any OSQPBackEnd::getOptions()
 
 void OSQPBackEnd::setOptions(const boost::any &options)
 {
-    _settings.reset(new OSQPSettings(boost::any_cast<OSQPSettings>(options)));
+    _settings.reset();
+    _settings = boost::make_shared<OSQPSettings>(boost::any_cast<OSQPSettings>(options));
     if(_workspace)
         _workspace->settings = _settings.get();
 }
