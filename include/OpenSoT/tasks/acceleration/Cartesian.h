@@ -155,8 +155,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void getActualTwist(Eigen::Vector6d& actual);
         void getActualTwist(KDL::Twist& actual);
         
-        [[deprecated]]
-        void resetReference();
         bool reset();
 
         virtual void _update(const Eigen::VectorXd& x);
@@ -284,6 +282,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
 
         void compute_cartesian_inertia_inverse();
+        void resetReference();
 
 
         //
