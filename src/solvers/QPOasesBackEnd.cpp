@@ -28,16 +28,17 @@ QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
                                const int number_of_constraints,
                                OpenSoT::HessianType hessian_type, const double eps_regularisation):
     BackEnd(number_of_variables, number_of_constraints),
-    _problem(new qpOASES::SQProblem(number_of_variables,
-                                    number_of_constraints,
-                                    (qpOASES::HessianType)(hessian_type))),
     _nWSR(13200),
     _epsRegularisation(eps_regularisation),
     _dual_solution(number_of_variables)
 {
+    _problem = boost::make_shared<qpOASES::SQProblem>(number_of_variables,
+                                                      number_of_constraints,
+                                                      (qpOASES::HessianType)(hessian_type));
     _bounds = boost::make_shared<qpOASES::Bounds>();
     _constraints = boost::make_shared<qpOASES::Constraints>();
     _opt = boost::make_shared<qpOASES::Options>();
+
 #ifdef OPENSOT_VERBOSE
     XBot::Logger::SetVerbosityLevel(XBot::Logger::Severity::LOW);
 #endif
@@ -191,10 +192,9 @@ bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
+        _problem = boost::make_shared<qpOASES::SQProblem>(number_of_variables,
+                                                          number_of_constraints,
+                                                          hessian_type);
         _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
@@ -234,10 +234,9 @@ bool QPOasesBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
+        _problem = boost::make_shared<qpOASES::SQProblem>(number_of_variables,
+                                                          number_of_constraints,
+                                                          hessian_type);
         _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
