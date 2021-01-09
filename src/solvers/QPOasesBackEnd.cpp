@@ -31,12 +31,12 @@ QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
     _problem(new qpOASES::SQProblem(number_of_variables,
                                     number_of_constraints,
                                     (qpOASES::HessianType)(hessian_type))),
-    _bounds(new qpOASES::Bounds()),
-    _constraints(new qpOASES::Constraints()),
     _nWSR(13200),
     _epsRegularisation(eps_regularisation),
     _dual_solution(number_of_variables)
 {
+    _bounds = boost::make_shared<qpOASES::Bounds>();
+    _constraints = boost::make_shared<qpOASES::Constraints>();
     _opt = boost::make_shared<qpOASES::Options>();
 #ifdef OPENSOT_VERBOSE
     XBot::Logger::SetVerbosityLevel(XBot::Logger::Severity::LOW);
