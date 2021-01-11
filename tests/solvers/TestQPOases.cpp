@@ -1219,32 +1219,41 @@ TEST_F(testQPOasesProblem, testNullHessian)
 
 }
 
-//TEST_F(testQPOasesProblem, testResetSolverPrint)
-//{
-//    boost::shared_ptr<OpenSoT::solvers::QPOasesBackEnd> qp;
-//    std::cout<<"-------------FIRST RESET----------------"<<std::endl;
-//    qp->reset(new OpenSoT::solvers::QPOasesBackEnd(30, 0, OpenSoT::HessianType::HST_IDENTITY, 1e10));
+TEST_F(testQPOasesProblem, testResetSolverPrint)
+{
+    OpenSoT::solvers::QPOasesBackEnd::Ptr qp;
+    std::cout<<"-------------FIRST RESET----------------"<<std::endl;
+    qp.reset();
+    qp = OpenSoT::solvers::BackEndFactory(
+                OpenSoT::solvers::solver_back_ends::qpOASES, 30, 0,
+                OpenSoT::HessianType::HST_IDENTITY,1e10);
+    std::cout<<"qp ADDRESS: "<<qp<<std::endl;
 
-//    Eigen::MatrixXd H(30,30); H.setIdentity(30,30);
-//    Eigen::VectorXd g(30); g.setRandom(30);
+    Eigen::MatrixXd H(30,30); H.setIdentity(30,30);
+    Eigen::VectorXd g(30); g.setRandom(30);
 
-//    ASSERT_TRUE(qp->initProblem(H, g,
-//                   Eigen::MatrixXd(), Eigen::VectorXd(), Eigen::VectorXd(),
-//                   Eigen::VectorXd(), Eigen::VectorXd()));
-//    std::cout<<"-------------START FIRST LOOP----------------"<<std::endl;
-//    for(unsigned int i = 0; i < 3; ++i)
-//        EXPECT_TRUE(qp->solve());
+    ASSERT_TRUE(qp->initProblem(H, g,
+                   Eigen::MatrixXd(), Eigen::VectorXd(), Eigen::VectorXd(),
+                   Eigen::VectorXd(), Eigen::VectorXd()));
+    std::cout<<"-------------START FIRST LOOP----------------"<<std::endl;
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_TRUE(qp->solve());
 
-//    qp->reset();
-//    std::cout<<"-------------SECOND RESET----------------"<<std::endl;
-//    qp->reset(new OpenSoT::solvers::QPOasesBackEnd(30, 0, OpenSoT::HessianType::HST_IDENTITY, 1e10));
-//    ASSERT_TRUE(qp->initProblem(H, g,
-//                   Eigen::MatrixXd(), Eigen::VectorXd(), Eigen::VectorXd(),
-//                   Eigen::VectorXd(), Eigen::VectorXd()));
-//    std::cout<<"-------------START SECOND LOOP----------------"<<std::endl;
-//    for(unsigned int i = 0; i < 3; ++i)
-//        EXPECT_TRUE(qp->solve());
-//}
+    qp.reset();
+    std::cout<<"-------------SECOND RESET----------------"<<std::endl;
+    auto tmp = OpenSoT::solvers::BackEndFactory(
+                OpenSoT::solvers::solver_back_ends::qpOASES, 30, 0,
+                OpenSoT::HessianType::HST_IDENTITY,1e10);
+    std::cout<<"tmp ADDRESS: "<<tmp<<std::endl;
+    qp = tmp;
+    std::cout<<"qp ADDRESS: "<<qp<<std::endl;
+    ASSERT_TRUE(qp->initProblem(H, g,
+                   Eigen::MatrixXd(), Eigen::VectorXd(), Eigen::VectorXd(),
+                   Eigen::VectorXd(), Eigen::VectorXd()));
+    std::cout<<"-------------START SECOND LOOP----------------"<<std::endl;
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_TRUE(qp->solve());
+}
 
 }
 
