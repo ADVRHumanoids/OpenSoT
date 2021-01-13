@@ -232,7 +232,7 @@
          */
         void setActive(const bool active_flag){
             
-            if(!_is_active && active_flag){
+            if(!_is_active && active_flag && _A_last_active.rows() > 0){
                 _A = _A_last_active;
             }
             
