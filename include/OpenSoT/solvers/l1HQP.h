@@ -10,6 +10,7 @@
 #include <OpenSoT/utils/Piler.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/solvers/BackEnd.h>
+#include <boost/weak_ptr.hpp>
 
 #define DEFAULT_EPS_REGULARISATION 2E2 //THIS VALUE IS HISTORICALLY USED IN QPOASES
 
