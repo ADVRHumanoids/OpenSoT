@@ -312,6 +312,64 @@ TEST_F(testQPOases_AutoStack, testAutoStackConstructor)
 
 }
 
+TEST_F(testQPOases_AutoStack, testAutoStacks)
+{
+    XBot::ModelInterface::Ptr model = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd q, dq;
+    q = getGoodInitialPosition(*model);
+    dq = q; dq.setZero(dq.size());
+
+    model->setJointPosition(q);
+    model->update();
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_leg(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::r_leg",
+                                                       q,*model,"r_sole", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_leg(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::l_leg",
+                                                       q,*model,"l_sole", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_arm(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::l_arm",
+                                                       q,*model,"LSoftHand", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_arm(new OpenSoT::tasks::velocity::Cartesian(
+                                                       "6d::r_arm",
+                                                       q,*model,"RSoftHand", "world"));
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(q));
+
+    Eigen::VectorXd joint_bound_max, joint_bound_min;
+    model->getJointLimits(joint_bound_min, joint_bound_max);
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_bounds(
+        new OpenSoT::constraints::velocity::JointLimits(
+                    q, joint_bound_max, joint_bound_min));
+
+    double sot_speed_limit = 0.5;
+    double dT = 0.001;
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr velocity_bounds(
+        new OpenSoT::constraints::velocity::VelocityLimits(
+            sot_speed_limit,
+            dT,
+            q.size()));
+
+
+    OpenSoT::AutoStack::Ptr AutoStackA = ((l_leg + r_leg)/(l_arm + r_arm))<<joint_bounds;
+
+    OpenSoT::AutoStack::Ptr AutoStackB = AutoStackA;
+    AutoStackB /= postural;
+    AutoStackB<<velocity_bounds;
+
+    EXPECT_EQ(AutoStackA->getStack().size(), 2);
+    EXPECT_EQ(AutoStackB->getStack().size(), 3);
+
+    EXPECT_EQ(AutoStackA->getBoundsList().size(), 1);
+    EXPECT_EQ(AutoStackB->getBoundsList().size(), 2);
+
+
+}
 }
 
 int main(int argc, char **argv) {

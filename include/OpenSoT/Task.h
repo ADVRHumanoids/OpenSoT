@@ -561,7 +561,7 @@
             }
 
             if(a)
-                XBot::Logger::info("%s is consistent!", _task_id.c_str());
+                XBot::Logger::info("%s is consistent!\n", _task_id.c_str());
 
             return a;
 

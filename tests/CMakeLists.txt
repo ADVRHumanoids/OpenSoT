@@ -71,6 +71,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
                   testKinematics
+                  testl1HQP
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -169,6 +170,11 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
 
+
+ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)
+TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
+add_dependencies(testl1HQP GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
 
 ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
 TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})
@@ -291,17 +297,17 @@ add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 
 if(${FCL_FOUND})
     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
-    TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs})
+    TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd)
     add_dependencies(testCollisionUtils GTest-ext OpenSoT)
     add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
 
     ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
-    TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs})
+    TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd)
     add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 
     ADD_EXECUTABLE(testCollisionAvoidanceEnvironmentVelocityConstraint constraints/velocity/TestCollisionAvoidanceEnvironment.cpp)
-    TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs})
+    TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs} -lccd)
     add_dependencies(testCollisionAvoidanceEnvironmentVelocityConstraint GTest-ext OpenSoT)
     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidanceEnvironment COMMAND testCollisionAvoidanceEnvironmentVelocityConstraint)
 endif()
