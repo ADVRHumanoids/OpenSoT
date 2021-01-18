@@ -22,6 +22,7 @@
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
 #include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/tasks/acceleration/GainType.h>
 
 namespace OpenSoT { namespace tasks { namespace acceleration {
     
@@ -41,6 +42,9 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         Postural(const XBot::ModelInterface& robot,
                  const int x_size, const std::string task_id = "Postural");
+
+        void setGainType(GainType type);
+        GainType getGainType() const;
         
         virtual void _update(const Eigen::VectorXd& x);
         
@@ -174,6 +178,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         
     private:
+        GainType _gain_type;
+
         Eigen::VectorXd _position_error, _velocity_error;
         
         const XBot::ModelInterface& _robot;
@@ -188,6 +194,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         double _lambda2;
 
         Eigen::MatrixXd _Kp, _Kd;
+
+        Eigen::MatrixXd _Mi;
         
         
     };

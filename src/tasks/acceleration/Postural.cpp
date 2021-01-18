@@ -3,7 +3,8 @@
 OpenSoT::tasks::acceleration::Postural::Postural(
          const XBot::ModelInterface& robot,const int x_size, const std::string task_id):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
-    _robot(robot)
+    _robot(robot),
+    _gain_type(OpenSoT::tasks::acceleration::GainType::Acceleration)
 {
     _na = x_size;
 
@@ -27,6 +28,8 @@ OpenSoT::tasks::acceleration::Postural::Postural(
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
 
+    _Mi.setIdentity(_qref.size(), _qref.size());
+
     _update(_q);
 }
 
@@ -34,7 +37,8 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
                                                  OpenSoT::AffineHelper qddot, const std::string task_id):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, qddot.getInputSize()),
     _robot(robot),
-    _qddot(qddot)
+    _qddot(qddot),
+    _gain_type(OpenSoT::tasks::acceleration::GainType::Acceleration)
 {
     _na =  qddot.getInputSize();
     
@@ -62,6 +66,16 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
 
     
     _update(_q);
+}
+
+void OpenSoT::tasks::acceleration::Postural::setGainType(GainType type)
+{
+    _gain_type = type;
+}
+
+OpenSoT::tasks::acceleration::GainType OpenSoT::tasks::acceleration::Postural::getGainType() const
+{
+    return _gain_type;
 }
 
 void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda)
@@ -137,7 +151,18 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _position_error = _qref - _q;
     _velocity_error = _qdot_ref - _qdot;
 
-    _qddot_d = _qddot_ref + _lambda2*_Kd*_velocity_error + _lambda*_Kp*_position_error;
+    if(_gain_type == Acceleration)
+    {
+        _qddot_d = _qddot_ref + _lambda2*_Kd*_velocity_error + _lambda*_Kp*_position_error;
+    }
+    else if(_gain_type == Force)
+    {
+        _robot.getInertiaInverse(_Mi);
+
+        _qddot_d = _qddot_ref + _Mi*_lambda2*_Kd*_velocity_error + _Mi*_lambda*_Kp*_position_error;
+    }
+
+
     _postural_task = (_qddot - _qddot_d);
 
     _A = _postural_task.getM();
