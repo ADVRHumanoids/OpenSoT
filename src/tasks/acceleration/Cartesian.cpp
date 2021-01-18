@@ -91,7 +91,7 @@ void Cartesian::setGainType(GainType type)
     _gain_type = type;
 }
 
-Cartesian::GainType Cartesian::getGainType() const
+OpenSoT::tasks::acceleration::GainType Cartesian::getGainType() const
 {
     return _gain_type;
 }

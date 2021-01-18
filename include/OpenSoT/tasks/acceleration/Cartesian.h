@@ -22,6 +22,7 @@
 #include <OpenSoT/utils/Affine.h>
 #include <XBotInterface/ModelInterface.h>
 #include <XBotInterface/Utils.h>
+#include <OpenSoT/tasks/acceleration/GainType.h>
 
 
 namespace OpenSoT { namespace tasks { namespace acceleration {
@@ -45,18 +46,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                   const std::string& base_link,
                   const AffineHelper& qddot
                  );
-
-        /**
-         * @brief The GainType enum is used to select the
-         * feedback type between force (Kp, Kd have the meaning
-         * of stiffness and damping) and acceleration (Kp, Kd
-         * are treated as a matrix-valued lambda1, lambda2)
-         */
-        enum GainType
-        {
-            Force,
-            Acceleration
-        };
 
         void setGainType(GainType type);
         GainType getGainType() const;
