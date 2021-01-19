@@ -180,6 +180,8 @@ void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger2::Ptr logger)
 
     logger->add(_task_id + "_velocity_reference", _qdot_ref_cached);
     logger->add(_task_id + "_acceleration_reference", _qddot_ref_cached);
+
+    logger->add(_task_id + "_lambda2", _lambda2);
 }
 
 const Eigen::VectorXd &OpenSoT::tasks::acceleration::Postural::getReference() const

@@ -160,6 +160,8 @@ void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger2::Ptr logger)
 
     logger->add(getTaskID() + "_velocity_reference", _vel_ref_cached);
     logger->add(getTaskID() + "_acceleration_reference", _acc_ref_cached);
+
+    logger->add(getTaskID() + "_lambda2", _lambda2);
 }
 
 void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref)
