@@ -1,5 +1,5 @@
-#ifndef _L1_HQP_
-#define _L1HQP_
+#ifndef _OPENSOT_L1_HQP_
+#define _OPENSOT_L1_HQP_
 
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
