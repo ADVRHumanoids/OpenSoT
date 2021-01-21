@@ -74,3 +74,8 @@ const std::vector<bool>& TorqueLimits::getEnabledContacts() const
     return _enabled_contacts;
 }
 
+void TorqueLimits::setTorqueLimits(const Eigen::VectorXd& torque_limits)
+{
+    _torque_limits = torque_limits;
+}
+
