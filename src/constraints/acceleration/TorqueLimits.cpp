@@ -40,7 +40,7 @@ void TorqueLimits::update(const Eigen::VectorXd &x)
         }
     }
 
-    _Aeq = _dyn_constraint.getM();
+    _Aineq = _dyn_constraint.getM();
     _bLowerBound = -_torque_limits - _h;
     _bUpperBound = _torque_limits - _h;
 }
