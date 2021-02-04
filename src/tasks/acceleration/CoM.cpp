@@ -152,6 +152,12 @@ void OpenSoT::tasks::acceleration::CoM::resetReference()
     _acc_ref_cached = _acc_ref;
 }
 
+bool OpenSoT::tasks::acceleration::CoM::reset()
+{
+    resetReference();
+    return true;
+}
+
 void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(getTaskID() + "_pose_error", _pose_error);

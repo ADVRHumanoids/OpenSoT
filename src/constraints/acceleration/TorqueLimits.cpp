@@ -40,7 +40,7 @@ void TorqueLimits::update(const Eigen::VectorXd &x)
         }
     }
 
-    _Aeq = _dyn_constraint.getM();
+    _Aineq = _dyn_constraint.getM();
     _bLowerBound = -_torque_limits - _h;
     _bUpperBound = _torque_limits - _h;
 }
@@ -72,5 +72,10 @@ bool TorqueLimits::disableContact(const std::string& contact_link)
 const std::vector<bool>& TorqueLimits::getEnabledContacts() const
 {
     return _enabled_contacts;
+}
+
+void TorqueLimits::setTorqueLimits(const Eigen::VectorXd& torque_limits)
+{
+    _torque_limits = torque_limits;
 }
 

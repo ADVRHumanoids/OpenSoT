@@ -92,11 +92,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         void getPosError(Eigen::Vector3d& error);
 
-        /**
-         * @brief resetReference ste the actual position as the postion reference, set to zero
-         * velocity and acceleration references
-         */
-        void resetReference();
+        bool reset() override;
 
         virtual void _update(const Eigen::VectorXd& x);
 
@@ -160,6 +156,13 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Vector3d _pose_error, _vel_ref, _vel_current, _acc_ref, _vel_ref_cached, _acc_ref_cached;
 
         double _lambda2;
+
+        /**
+         * @brief resetReference ste the actual position as the postion reference, set to zero
+         * velocity and acceleration references
+         */
+        void resetReference();
+
 
     };
 
