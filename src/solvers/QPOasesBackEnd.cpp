@@ -66,8 +66,11 @@ void QPOasesBackEnd::setDefaultOptions()
     _problem->setOptions(opt);
 
     _epsRegularisation = opt.epsRegularisation;
+    
+    #ifdef OPENSOT_VERBOSE
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
+    #endif
 
     _opt.reset();
     _opt = boost::make_shared<qpOASES::Options>(opt);
