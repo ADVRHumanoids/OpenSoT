@@ -5,7 +5,7 @@ using namespace OpenSoT::constraints::acceleration;
 TorqueLimits::TorqueLimits(const XBot::ModelInterface &robot,
                            const AffineHelper &qddot,
                            const std::vector<AffineHelper> &wrenches,
-                           const std::vector<std::__cxx11::string> &contact_links,
+                           const std::vector<std::string> &contact_links,
                            const Eigen::VectorXd &torque_limits):
     Constraint< Eigen::MatrixXd, Eigen::VectorXd >("torque_limits", qddot.getInputSize()),
     _robot(robot),
