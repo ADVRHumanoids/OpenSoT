@@ -79,7 +79,7 @@ void GLPKBackEnd::printErrorOutput(const int out)
 
     boost::posix_time::ptime time = boost::posix_time::second_clock::local_time();
     std::stringstream ss;
-    ss<<"mip_priblem_"+time.date().year();
+    ss<<"mip_problem_"+time.date().year();
     ss<<"_"+time.date().month();
     ss<<"_"+time.date().day();
     ss<<"_"+time.time_of_day().hours();
@@ -210,6 +210,11 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
 
     //glp_write_lp(_mip, NULL, "test_cplex_lp");
     return true;
+}
+
+int GLPKBackEnd::writeLP()
+{
+    return glp_write_lp(_mip, NULL, "lp_problem");
 }
 
 //IN EIGEN COLUMN MAJOIR!
