@@ -111,6 +111,7 @@ using namespace OpenSoT::utils;
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
             }
 
+
             virtual void _log(XBot::MatLogger2::Ptr logger);
 
         public:
@@ -154,6 +155,8 @@ using namespace OpenSoT::utils;
                             UNILATERAL_TO_BILATERAL);
 
             void update(const Eigen::VectorXd &x);
+
+            void log(XBot::MatLogger2::Ptr logger) override;
 
             std::list< ConstraintPtr >& getConstraintsList() { return _bounds; }
 

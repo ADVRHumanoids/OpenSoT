@@ -107,7 +107,7 @@ using namespace OpenSoT::utils;
 
             static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
 
-            virtual void _log(XBot::MatLogger2::Ptr logger);
+            virtual void log(XBot::MatLogger2::Ptr logger);
 
             static const std::string _TASK_PLUS_;
             static std::string concatenatedId;

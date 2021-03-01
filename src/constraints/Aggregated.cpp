@@ -294,6 +294,16 @@ const std::string Aggregated::concatenateConstraintsIds(const std::list<Constrai
     return concatenatedId;
 }
 
+void Aggregated::log(XBot::MatLogger2::Ptr logger)
+{
+#ifdef OPENSOT_VERBOSE_MATLOG
+    Constraint::log(logger);
+#else
+    for(auto bound : _bounds)
+        bound->log(logger);
+#endif
+}
+
 void Aggregated::_log(XBot::MatLogger2::Ptr logger)
 {
     for(auto bound : _bounds)

@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 include(ExternalProject)
-project(open_sot VERSION 3.0.0)
+project(open_sot VERSION 3.1.0)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++14" COMPILER_SUPPORTS_CXX14)
@@ -54,6 +54,7 @@ find_package(matlogger2 REQUIRED)
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 option(OPENSOT_VERBOSE "Some additional prints" FALSE)
+option(OPENSOT_VERBOSE_MATLOG "Log all aggregated tasks/constraints to MAT-file" FALSE)
 option(OPENSOT_DISABLE_VECTORIZATION "Disable Eigen3 vectorization" FALSE)
 
 if(${OPENSOT_DISABLE_VECTORIZATION})
@@ -61,6 +62,9 @@ if(${OPENSOT_DISABLE_VECTORIZATION})
     add_definitions(-DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
 endif()
 
+if(${OPENSOT_VERBOSE_MATLOG})
+    add_definitions(-DOPENSOT_VERBOSE_MATLOG)
+endif()
 
 if(${OPENSOT_VERBOSE})
     add_definitions(-DOPENSOT_VERBOSE)
