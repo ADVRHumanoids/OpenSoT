@@ -38,7 +38,7 @@ find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(urdf REQUIRED)
 find_package(kdl_parser REQUIRED)
-find_package(moveit_core QUIET)
+find_package(moveit_core REQUIRED)
 find_package(PCL 1.7 QUIET COMPONENTS   common
                                         filters
                                         surface
@@ -46,7 +46,10 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         io)
 find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
-find_package(FCL 0.6 QUIET)
+find_package(fcl 0.6 REQUIRED)
+if(DEFINED FCL_VERSION)
+    set(FCL_FOUND 1)
+endif()
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
 
@@ -115,7 +118,7 @@ if(${FCL_FOUND} AND ${moveit_core_FOUND})
     message("Adding src/constraints/velocity/CollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/SelfCollisionAvoidance.cpp
-        src/constraints/velocity/CollisionAvoidance.cpp
+        # src/constraints/velocity/CollisionAvoidance.cpp
         )
 endif()
 
@@ -206,7 +209,7 @@ ADD_LIBRARY(OpenSoT SHARED
 
 set(PRIVATE_TLL ${eigen_conversions_LIBRARIES})
 if(${FCL_FOUND} AND ${moveit_core_FOUND})
-    set(PRIVATE_TLL ${PRIVATE_TLL} ${FCL_LIBRARIES}
+    set(PRIVATE_TLL ${PRIVATE_TLL} fcl
         ${moveit_core_LIBRARIES})
 endif()
 if(${PCL_FOUND})

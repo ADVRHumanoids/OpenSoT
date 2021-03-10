@@ -52,9 +52,6 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
     _J_transform.setZero(3,6);
 
     update(x);
-
-
-
 }
 
 double SelfCollisionAvoidance::getLinkPairThreshold()
