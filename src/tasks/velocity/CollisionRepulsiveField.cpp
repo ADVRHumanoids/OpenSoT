@@ -22,7 +22,7 @@ CollisionRepulsiveField::CollisionRepulsiveField(const Eigen::VectorXd &x,
     _max_pairs(max_pairs)
 {
     // construct link distance computation util
-    _dist = std::make_unique<ComputeLinksDistance>(const_cast<ModelInterface&>(model));
+    _dist = std::make_unique<ComputeLinksDistance>(model);
 
     // initialize structures and set weight
     _A.setZero(_max_pairs, getXSize());
@@ -55,8 +55,8 @@ void CollisionRepulsiveField::_update(const Eigen::VectorXd &x)
     _A.setZero(_max_pairs, getXSize());
     _b.setZero(_max_pairs);
 
-    double d_hi = 0.01;
-    double d_lo = 0.001;
+    double d_hi = _d_th;
+    double d_lo = d_hi * 0.1;
 
     auto distance_list = _dist->getLinkDistances(d_hi);
 
@@ -64,47 +64,42 @@ void CollisionRepulsiveField::_update(const Eigen::VectorXd &x)
 
     for(const auto& data : distance_list)
     {
-        // we filled the task, skip the rest of colliding pairs
-        if(row_idx >= _max_pairs)
-        {
-            break;
-        }
-
         // closest point on first link
-        Eigen::Vector3d p1 = k2e(data.getLink_T_closestPoint().first.p);
+        Eigen::Vector3d p1_local = k2e(data.getLink_T_closestPoint().first.p);
 
         // closest point on second link
-        Eigen::Vector3d p2 = k2e(data.getLink_T_closestPoint().second.p);
+        Eigen::Vector3d p2_local = k2e(data.getLink_T_closestPoint().second.p);
+
+        // global closest points
+        Eigen::Affine3d w_T_l1;
+        _model.getPose(data.getLinkNames().first, w_T_l1);
+        Eigen::Vector3d p1_world = w_T_l1*p1_local;
+
+        Eigen::Affine3d w_T_l2;
+        _model.getPose(data.getLinkNames().second, w_T_l2);
+        Eigen::Vector3d p2_world = w_T_l2*p2_local;
 
         // minimum distance direction
-        Eigen::Vector3d p12 = p2 - p1;
+        Eigen::Vector3d p12 = p2_world - p1_world;
 
         // minimum distance regularized
         double d12 = p12.norm() + 1e-6;
 
         // jacobian of p1
         _model.getJacobian(data.getLinkNames().first,
-                           p1,
+                           p1_local,
                            _Jtmp);
 
-        _A.row(row_idx) = -p12.transpose() * _Jtmp / d12;
+        _A.row(row_idx) = -p12.transpose() * _Jtmp.topRows<3>() / d12;
 
         // jacobian of p2
         _model.getJacobian(data.getLinkNames().second,
-                           p2,
+                           p2_local,
                            _Jtmp);
 
-        _A.row(row_idx) += p12.transpose() * _Jtmp / d12;
+        _A.row(row_idx) += p12.transpose() * _Jtmp.topRows<3>() / d12;
 
-        // task objective
-        if(d12 >= d_lo)
-        {
-            _b(row_idx) = 0;
-        }
-        else
-        {
-            _b(row_idx) = getLambda()*(d_hi - d12);
-        }
+        _b(row_idx) = getLambda()*(d_hi - d12);
 
         ++row_idx;
     }
