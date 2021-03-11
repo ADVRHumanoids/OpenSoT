@@ -58,7 +58,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
             continue;
         }
 
-        SHARED_PTR<fcl::CollisionGeometry<double>> shape;
+        std::shared_ptr<fcl::CollisionGeometry<double>> shape;
         KDL::Frame shape_origin;
 
         if(link->collision->geometry->type == urdf::Geometry::CYLINDER)
@@ -68,7 +68,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Cylinder>(link->collision->geometry);
 
-            shape = MAKE_SHARED<fcl::Capsule<double>>(collisionGeometry->radius,
+            shape = std::make_shared<fcl::Capsule<double>>(collisionGeometry->radius,
                                                       collisionGeometry->length);
 
             shape_origin = toKdl(link->collision->origin);
@@ -90,7 +90,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Sphere>(link->collision->geometry);
 
-            shape = MAKE_SHARED<fcl::Sphere<double>>(collisionGeometry->radius);
+            shape = std::make_shared<fcl::Sphere<double>>(collisionGeometry->radius);
             shape_origin = toKdl ( link->collision->origin );
         }
         else if ( link->collision->geometry->type == urdf::Geometry::BOX )
@@ -100,7 +100,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Box>(link->collision->geometry);
 
-            shape = MAKE_SHARED<fcl::Box<double>>(collisionGeometry->dim.x,
+            shape = std::make_shared<fcl::Box<double>>(collisionGeometry->dim.x,
                                                   collisionGeometry->dim.y,
                                                   collisionGeometry->dim.z);
 
@@ -148,7 +148,7 @@ bool ComputeLinksDistance::parseCollisionObjects ()
             }
 
             // add the mesh data into the BVHModel structure
-            auto bvhModel = MAKE_SHARED<fcl::BVHModel<fcl::OBBRSS<double>>>();
+            auto bvhModel = std::make_shared<fcl::BVHModel<fcl::OBBRSS<double>>>();
             shape = bvhModel;
             bvhModel->beginModel();
             bvhModel->addSubModel(vertices, triangles);
@@ -160,7 +160,6 @@ bool ComputeLinksDistance::parseCollisionObjects ()
         auto collision_object = boost::make_shared<fcl::CollisionObject<double>>(shape);
 
         collision_objects_[link->name] = collision_object;
-        shapes_[link->name] = shape;
 
         /* Store the transformation of the CollisionShape from URDF
          * that is, we store link_T_shape for the actual link */
@@ -277,7 +276,7 @@ ComputeLinksDistance::ComputeLinksDistance(XBot::ModelInterface& _model):
     auto srdf_model_ptr = MAKE_SHARED<srdf::Model>();
     srdf_model_ptr->initString(*urdf_model_ptr, model.getSrdfString());
 
-    moveit_robot_model = MAKE_SHARED<robot_model::RobotModel>(urdf_model_ptr, srdf_model_ptr);
+    moveit_robot_model = std::make_shared<robot_model::RobotModel>(urdf_model_ptr, srdf_model_ptr);
 
     // check if _capsules urdf files exist
     boost::filesystem::path original_urdf(model.getUrdfPath());
@@ -391,7 +390,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 
 bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
-    allowed_collision_matrix = MAKE_SHARED<collision_detection::AllowedCollisionMatrix>(
+    allowed_collision_matrix = std::make_shared<collision_detection::AllowedCollisionMatrix>(
                     moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
 
     // iterate over whit list
@@ -445,7 +444,7 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
 
 bool ComputeLinksDistance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
-    allowed_collision_matrix = MAKE_SHARED<collision_detection::AllowedCollisionMatrix>(
+    allowed_collision_matrix = std::make_shared<collision_detection::AllowedCollisionMatrix>(
                     moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
 
     std::vector<std::string> linksWithCollisionObjects;
