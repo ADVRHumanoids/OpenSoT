@@ -160,7 +160,6 @@ bool ComputeLinksDistance::parseCollisionObjects ()
         auto collision_object = boost::make_shared<fcl::CollisionObject<double>>(shape);
 
         collision_objects_[link->name] = collision_object;
-        shapes_[link->name] = shape;
 
         /* Store the transformation of the CollisionShape from URDF
          * that is, we store link_T_shape for the actual link */
@@ -267,7 +266,7 @@ void ComputeLinksDistance::generatePairsToCheck()
     std::cout << "Checking " << pairsToCheck.size() << " pairs for collision" << std::endl;
 }
 
-ComputeLinksDistance::ComputeLinksDistance(XBot::ModelInterface& _model):
+ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model):
     model(_model)
 {
     // construct moveit's robot model

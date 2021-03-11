@@ -47,7 +47,7 @@
     template <typename T>
     using shared_ptr_type =  std::shared_ptr<T>;
 #endif
-    
+
 // construct vector
 inline KDL::Vector toKdl(urdf::Vector3 v)
 {
@@ -203,7 +203,7 @@ private:
      * @brief model a reference to the robot model. We expect it to be updated
      *        before calling getLinkDistances
      */
-    XBot::ModelInterface& model;
+    const XBot::ModelInterface& model;
 
     /**
      * @brief moveit_robot_model
@@ -219,11 +219,6 @@ private:
      * @brief robot urdf
      */
     urdf::Model robot_urdf;
-
-    /**
-     * @brief shapes_ is a map of collision geometries
-     */
-    std::map<std::string,shared_ptr_type<fcl::CollisionGeometry<double>> > shapes_;
 
     /**
      * @brief custom_capsules_ is a map of custom capsules specified as endpoints + radius
@@ -252,7 +247,7 @@ private:
     bool globalToLinkCoordinates(const std::string& linkName,
                                  const fcl::Transform3<double>& w_T_f,
                                  KDL::Frame& link_T_f);
-    
+
     /**
      * @brief shapeToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
      * @param linkName the link name representing a link reference frame
@@ -317,7 +312,7 @@ private:
 public:
     /* NOTICE THAT BY USING MOVEIT WE CAN PASS JUST THE MOVEIT_COLLISION_ROBOT TO THE CONSTRUCTOR. At that point
        we must make sure that the collision robot has an updated state before calling getLinkDistances */
-    ComputeLinksDistance(XBot::ModelInterface& model);
+    ComputeLinksDistance(const XBot::ModelInterface& model);
 
     /**
      * @brief getLinkDistances returns a list of distances between all link pairs which are enabled for checking.
@@ -346,7 +341,7 @@ public:
      * @return
      */
     bool setCollisionBlackList(std::list< LinkPairDistance::LinksPair > blackList);
-    
+
     /**
      * @brief KDL2fcl ceonverts a kdl transform into a fcl transform
      * @param in a KDL::Frame
