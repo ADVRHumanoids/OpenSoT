@@ -402,6 +402,7 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
               collision_objects_.count(it->second) > 0 )
         {
             // set collision pair to 'not allowed', i.e. it will always be checked
+            std::cout << "will check collision " << it->first << " - " << it->second << std::endl;
             allowed_collision_matrix->setEntry(it->first, it->second, false);
         }
         else // print error
@@ -434,7 +435,7 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
         }
     }
 
-    loadDisabledCollisionsFromSRDF ( this->robot_srdf, allowed_collision_matrix );
+    loadDisabledCollisionsFromSRDF(robot_srdf, allowed_collision_matrix);
 
     generateLinksToUpdate();
     generatePairsToCheck();
