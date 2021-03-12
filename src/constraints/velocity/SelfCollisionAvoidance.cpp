@@ -29,22 +29,24 @@ Eigen::Vector3d k2e(const KDL::Vector &k)
 }
 }
 
-SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
-                                               const XBot::ModelInterface& robot,
-                                               double detection_threshold,
-                                               double distance_threshold,
-                                               double bound_scaling,
-                                               int max_pairs):
+SelfCollisionAvoidance::SelfCollisionAvoidance(
+        const Eigen::VectorXd& x,
+        const XBot::ModelInterface& robot,
+        int max_pairs,
+        urdf::ModelConstSharedPtr collision_urdf,
+        srdf::ModelConstSharedPtr collision_srdf):
     Constraint("self_collision_avoidance", x.size()),
-    _detection_threshold(detection_threshold),
-    _distance_threshold(distance_threshold),
+    _detection_threshold(std::numeric_limits<double>::max()),
+    _distance_threshold(0.001),
     _robot(robot),
     _x_cache(x),
-    _bound_scaling(bound_scaling),
+    _bound_scaling(1.0),
     _max_pairs(max_pairs)
 {
     // construct link distance computation util
-    _dist_calc = std::make_unique<ComputeLinksDistance>(robot);
+    _dist_calc = std::make_unique<ComputeLinksDistance>(robot,
+                                                        collision_urdf,
+                                                        collision_srdf);
 
     // if max pairs not specified, set it as number of total
     // link pairs
@@ -53,11 +55,6 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
         // note: threshold = inf
         _max_pairs = _dist_calc->getLinkDistances().size();
     }
-
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
-    std::cout << _detection_threshold << std::endl;
-    std::cout << _distance_threshold << std::endl;
-    std::cout << _bound_scaling << std::endl;
 
     // initialize matrices
     _Aineq.setZero(_max_pairs, getXSize());
@@ -141,6 +138,7 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
         _bUpperBound(row_idx) = _bound_scaling*(d12 - _distance_threshold);
 
         ++row_idx;
+
     }
 }
 

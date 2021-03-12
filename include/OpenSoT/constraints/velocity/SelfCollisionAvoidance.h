@@ -21,8 +21,8 @@
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <XBotInterface/ModelInterface.h>
-#include <kdl/frames.hpp>
 
+#include <srdfdom/model.h>
 #include <Eigen/Dense>
 
 class ComputeLinksDistance;
@@ -56,10 +56,9 @@ public:
      */
     SelfCollisionAvoidance(const Eigen::VectorXd& x,
                            const XBot::ModelInterface& robot,
-                           double detection_threshold = std::numeric_limits<double>::infinity(),
-                           double distance_threshold = 0.0,
-                           double bound_scaling = 1.0,
-                           int max_pairs = -1);
+                           int max_pairs = -1,
+                           urdf::ModelConstSharedPtr collision_urdf = nullptr,
+                           srdf::ModelConstSharedPtr collision_srdf = nullptr);
 
     /**
      * @brief getLinkPairThreshold
