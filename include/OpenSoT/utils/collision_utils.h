@@ -213,12 +213,12 @@ private:
     /**
      * @brief robot_srdf is used to load the ACM every time a whiteList or blackList is generated
      */
-    srdf_advr::Model robot_srdf;
+    srdf::ModelSharedPtr robot_srdf;
 
     /**
      * @brief robot urdf
      */
-    urdf::Model robot_urdf;
+    urdf::ModelSharedPtr robot_urdf;
 
     /**
      * @brief custom_capsules_ is a map of custom capsules specified as endpoints + radius
@@ -306,13 +306,21 @@ private:
      * @param acm the allowed collision matrix to modify according to the srdf info
      * @TODO we should move this in collision_utils together with checkSelfCollision and checkSelfCollisionAt
      */
-    void loadDisabledCollisionsFromSRDF(const srdf_advr::Model& srdf,
+    void loadDisabledCollisionsFromSRDF(const srdf::Model& srdf,
                                         collision_detection::AllowedCollisionMatrixPtr acm);
 
 public:
-    /* NOTICE THAT BY USING MOVEIT WE CAN PASS JUST THE MOVEIT_COLLISION_ROBOT TO THE CONSTRUCTOR. At that point
-       we must make sure that the collision robot has an updated state before calling getLinkDistances */
-    ComputeLinksDistance(const XBot::ModelInterface& model);
+
+    /**
+     * @brief ComputeLinksDistance is an utility class to retrieve distances between
+     * robot link collisions
+     * @param model to retrieve kinematic information (link poses)
+     * @param collision_urdf if passed, overrides the collision information of model
+     * @param collision_srdf if passed, overrides the model's allowed collisions
+     */
+    ComputeLinksDistance(const XBot::ModelInterface& model,
+                         urdf::ModelConstSharedPtr collision_urdf = nullptr,
+                         srdf::ModelConstSharedPtr collision_srdf = nullptr);
 
     /**
      * @brief getLinkDistances returns a list of distances between all link pairs which are enabled for checking.

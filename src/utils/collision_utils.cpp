@@ -36,51 +36,96 @@ bool ComputeLinksDistance::shapeToLinkCoordinates(const std::string& linkName,
     return true;
 }
 
-bool ComputeLinksDistance::parseCollisionObjects ()
+namespace
 {
-    std::vector<urdf::LinkSharedPtr> links;
-    robot_urdf.getLinks(links);
+/**
+ * @brief capsule_from_collision checks if the link collision is
+ * formed by a cylinder and two spheres, and it returns the cylinder
+ * collision shared pointer if that is true (nullptr otherwise)
+ */
+urdf::CollisionConstSharedPtr capsule_from_collision(urdf::Link& l)
+{
+    if(l.collision_array.size() != 3)
+    {
+        return nullptr;
+    }
 
+    int num_spheres = 0;
+    urdf::CollisionConstSharedPtr cylinder;
+
+    for(auto c : l.collision_array)
+    {
+        if(c->geometry->type == urdf::Geometry::CYLINDER)
+        {
+            cylinder = c;
+        }
+        else if(c->geometry->type == urdf::Geometry::SPHERE)
+        {
+            num_spheres++;
+        }
+    }
+
+    if(cylinder && num_spheres == 2)
+    {
+        return cylinder;
+    }
+
+    return nullptr;
+}
+}
+
+bool ComputeLinksDistance::parseCollisionObjects()
+{
+    // get urdf links
+    std::vector<urdf::LinkSharedPtr> links;
+    robot_urdf->getLinks(links);
+
+    // loop over links
     for(auto link : links)
     {
+        // no collision defined, skip
         if(!link->collision)
         {
             std::cout << "Collision not defined for link " << link->name << std::endl;
             continue;
         }
 
-        if(link->collision->geometry->type != urdf::Geometry::CYLINDER &&
-                link->collision->geometry->type != urdf::Geometry::SPHERE &&
-                link->collision->geometry->type != urdf::Geometry::BOX &&
-                link->collision->geometry->type != urdf::Geometry::MESH )
-        {
-            std::cout << "Collision type unknown for link " << link->name << std::endl;
-            continue;
-        }
-
+        // convert urdf collision to fcl shape
         SHARED_PTR<fcl::CollisionGeometry<double>> shape;
         KDL::Frame shape_origin;
 
-        if(link->collision->geometry->type == urdf::Geometry::CYLINDER)
+        if(auto cylinder = capsule_from_collision(*link))
         {
             std::cout << "adding capsule for " << link->name << std::endl;
 
             auto collisionGeometry =
-                    DYNAMIC_POINTER_CAST<urdf::Cylinder>(link->collision->geometry);
+                    DYNAMIC_POINTER_CAST<urdf::Cylinder>(cylinder->geometry);
 
             shape = MAKE_SHARED<fcl::Capsule<double>>(collisionGeometry->radius,
                                                       collisionGeometry->length);
 
-            shape_origin = toKdl(link->collision->origin);
+            shape_origin = toKdl(cylinder->origin);
 
             shape_origin.p -= collisionGeometry->length/2.0 * shape_origin.M.UnitZ();
 
             custom_capsules_[link->name] =
-                    boost::make_shared<ComputeLinksDistance::Capsule>(
-                        shape_origin,
-                        collisionGeometry->radius,
-                        collisionGeometry->length
-                        );
+                               boost::make_shared<ComputeLinksDistance::Capsule>(
+                                   shape_origin,
+                                   collisionGeometry->radius,
+                                   collisionGeometry->length
+                                   );
+        }
+        else if(link->collision->geometry->type == urdf::Geometry::CYLINDER)
+        {
+            std::cout << "adding cylinder for " << link->name << std::endl;
+
+            auto collisionGeometry =
+                    DYNAMIC_POINTER_CAST<urdf::Cylinder>(link->collision->geometry);
+
+            shape = MAKE_SHARED<fcl::Cylinder<double>>(collisionGeometry->radius,
+                                                       collisionGeometry->length);
+
+            shape_origin = toKdl(link->collision->origin);
 
         }
         else if(link->collision->geometry->type == urdf::Geometry::SPHERE)
@@ -154,7 +199,14 @@ bool ComputeLinksDistance::parseCollisionObjects ()
             bvhModel->addSubModel(vertices, triangles);
             bvhModel->endModel();
 
-            shape_origin = toKdl ( link->collision->origin );
+            shape_origin = toKdl(link->collision->origin);
+        }
+
+
+        if(!shape)
+        {
+            std::cout << "Collision type unknown for link " << link->name << std::endl;
+            continue;
         }
 
         auto collision_object = boost::make_shared<fcl::CollisionObject<double>>(shape);
@@ -233,7 +285,7 @@ void ComputeLinksDistance::generateLinksToUpdate()
 
             // check if collision of this AB pair is never supposed to happpen
             if(allowed_collision_matrix->getAllowedCollision(*it_A, *it_B, collisionType) &&
-                 collisionType == collision_detection::AllowedCollision::NEVER)
+                    collisionType == collision_detection::AllowedCollision::NEVER)
             {
                 linksToUpdate.insert(*it_A);
                 linksToUpdate.insert(*it_B);
@@ -256,7 +308,7 @@ void ComputeLinksDistance::generatePairsToCheck()
             collision_detection::AllowedCollision::Type collisionType;
 
             if(allowed_collision_matrix->getAllowedCollision(*it_A, *it_B, collisionType ) &&
-                 collisionType == collision_detection::AllowedCollision::NEVER)
+                    collisionType == collision_detection::AllowedCollision::NEVER)
             {
                 pairsToCheck.emplace_back(this, *it_A, *it_B);
             }
@@ -266,71 +318,33 @@ void ComputeLinksDistance::generatePairsToCheck()
     std::cout << "Checking " << pairsToCheck.size() << " pairs for collision" << std::endl;
 }
 
-ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model):
+ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
+                                           urdf::ModelConstSharedPtr collision_urdf,
+                                           srdf::ModelConstSharedPtr collision_srdf):
     model(_model)
 {
-    // construct moveit's robot model
-    auto urdf_model_ptr = MAKE_SHARED<urdf::Model>();
-    urdf_model_ptr->initString(model.getUrdfString());
-
-    auto srdf_model_ptr = MAKE_SHARED<srdf::Model>();
-    srdf_model_ptr->initString(*urdf_model_ptr, model.getSrdfString());
-
-    moveit_robot_model = MAKE_SHARED<robot_model::RobotModel>(urdf_model_ptr, srdf_model_ptr);
-
-    // check if _capsules urdf files exist
-    boost::filesystem::path original_urdf(model.getUrdfPath());
-    std::string capsule_model_urdf_filename = original_urdf.stem().c_str() +
-                                              std::string("_capsules.urdf");
-    boost::filesystem::path capsule_urdf(original_urdf.parent_path() /
-                                         capsule_model_urdf_filename );
-
-    boost::filesystem::path original_srdf(model.getSrdfPath());
-    std::string capsule_model_srdf_filename = original_srdf.stem().c_str() +
-                                              std::string("_capsules.srdf");
-    boost::filesystem::path capsule_srdf(original_srdf.parent_path() /
-                                         capsule_model_srdf_filename );
-
-    // load the proper files
-    std::string urdf_to_load, srdf_to_load;
-
-    if(boost::filesystem::exists(capsule_urdf))
+    if(collision_urdf)
     {
-        urdf_to_load = capsule_urdf.c_str();
+        robot_urdf = MAKE_SHARED<urdf::Model>(*collision_urdf);
     }
     else
     {
-        urdf_to_load = original_urdf.c_str();
+        robot_urdf = MAKE_SHARED<urdf::Model>();
+        robot_urdf->initString(model.getUrdfString());
     }
 
-    if(boost::filesystem::exists(capsule_srdf))
+    if(collision_srdf)
     {
-        srdf_to_load = capsule_srdf.c_str();
+        robot_srdf = MAKE_SHARED<srdf::Model>(*collision_srdf);
     }
     else
     {
-        srdf_to_load = original_srdf.c_str();
+        robot_srdf = MAKE_SHARED<srdf::Model>();
+        robot_srdf->initString(*robot_urdf, model.getSrdfString());
     }
 
-    if(!urdf_to_load.empty())
-    {
-        std::cout << "urdf_to_load: " << urdf_to_load << std::endl;
-        robot_urdf.initFile(urdf_to_load);
-    }
-    else
-    {
-        robot_urdf.initString(model.getUrdfString());
-    }
-
-    if(!srdf_to_load.empty())
-    {
-        std::cout << "srdf_to_load: " << srdf_to_load << std::endl;
-        robot_srdf.initFile(robot_urdf, srdf_to_load);
-    }
-    else
-    {
-        robot_srdf.initString(robot_urdf, model.getSrdfString());
-    }
+    moveit_robot_model = std::make_shared<robot_model::RobotModel>(robot_urdf,
+                                                                   robot_srdf);
 
     parseCollisionObjects();
 
@@ -391,14 +405,14 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
     allowed_collision_matrix = MAKE_SHARED<collision_detection::AllowedCollisionMatrix>(
-                    moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
+                                   moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
 
     // iterate over whit list
     for(auto it = whiteList.begin(); it != whiteList.end(); ++it)
     {
         // check pair exists and has collision info associated with it
         if(collision_objects_.count(it->first) > 0 &&
-              collision_objects_.count(it->second) > 0 )
+                collision_objects_.count(it->second) > 0 )
         {
             // set collision pair to 'not allowed', i.e. it will always be checked
             std::cout << "will check collision " << it->first << " - " << it->second << std::endl;
@@ -434,7 +448,7 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
         }
     }
 
-    loadDisabledCollisionsFromSRDF(robot_srdf, allowed_collision_matrix);
+    loadDisabledCollisionsFromSRDF(*robot_srdf, allowed_collision_matrix);
 
     generateLinksToUpdate();
     generatePairsToCheck();
@@ -446,7 +460,7 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
 bool ComputeLinksDistance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
     allowed_collision_matrix = MAKE_SHARED<collision_detection::AllowedCollisionMatrix>(
-                    moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
+                                   moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
 
     std::vector<std::string> linksWithCollisionObjects;
 
@@ -465,7 +479,7 @@ bool ComputeLinksDistance::setCollisionBlackList(std::list<LinkPairDistance::Lin
     }
 
     // don't check disabled pairs from srdf
-    loadDisabledCollisionsFromSRDF(model.getSrdf(), allowed_collision_matrix);
+    loadDisabledCollisionsFromSRDF(*robot_srdf, allowed_collision_matrix);
 
     generateLinksToUpdate();
     generatePairsToCheck();
@@ -473,7 +487,7 @@ bool ComputeLinksDistance::setCollisionBlackList(std::list<LinkPairDistance::Lin
     return true;
 }
 
-void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf_advr::Model& srdf,
+void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf::Model& srdf,
                                                           collision_detection::AllowedCollisionMatrixPtr acm )
 {
     for(const auto& dc : srdf.getDisabledCollisionPairs())
@@ -485,9 +499,9 @@ void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf_advr::Model
 
 
 LinkPairDistance::LinkPairDistance(const std::string &link1, const std::string &link2,
-                                     const KDL::Frame &link1_T_closestPoint1,
-                                     const KDL::Frame &link2_T_closestPoint2,
-                                     const double &distance ) :
+                                   const KDL::Frame &link1_T_closestPoint1,
+                                   const KDL::Frame &link2_T_closestPoint2,
+                                   const double &distance ) :
     linksPair(link1, link2),
     link_T_closestPoint(link1_T_closestPoint1, link2_T_closestPoint2),
     distance(distance)
