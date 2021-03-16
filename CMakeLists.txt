@@ -46,7 +46,7 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         io)
 find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
-find_package(FCL 0.6 QUIET)
+find_package(FCL 0.6.1 QUIET)
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
 
