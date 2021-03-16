@@ -5,6 +5,13 @@
 #include <XBotInterface/ModelInterface.h>
 #include <chrono>
 
+#define USE_ROS false
+
+#if USE_ROS
+    #include <ros/ros.h>
+    #include <sensor_msgs/JointState.h>
+#endif
+
 
 #define  _s                1.0
 #define  dT               0.001* _s
@@ -356,11 +363,43 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
 TEST_F(testCollisionUtils, testCapsuleDistance) {
 
     getGoodInitialPosition(q,_model_ptr);
+
+    q[_model_ptr->getDofIndex("LHipLat")] = -1.4*M_PI/180.;
+    q[_model_ptr->getDofIndex("RHipLat")] = 1.4*M_PI/180.;
+
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    std::string linkA = "LSoftHandLink";
-    std::string linkB = "RSoftHandLink";
+
+
+#if USE_ROS
+    int argc;
+    char *argv[] = {""};
+    ros::init(argc, argv, "testCapsuleDistance");
+
+    ros::NodeHandle n;
+
+    sensor_msgs::JointState msg;
+    msg.header.stamp = ros::Time::now();
+
+    msg.name = _model_ptr->getEnabledJointNames();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        msg.position.push_back(q[i]);
+
+    ros::Publisher pub = n.advertise<sensor_msgs::JointState>("joint_states", 1, true);
+    ros::Rate rate = 10;
+    for(unsigned int i = 0; i <= 100; ++i)
+    {
+        pub.publish(msg);
+        ros::spinOnce();
+        rate.sleep();
+    }
+#endif
+
+
+
+    std::string linkA = "LLowLeg";
+    std::string linkB = "RLowLeg";
 
     std::list<std::pair<std::string,std::string> > whiteList;
     whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
@@ -479,7 +518,7 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     EXPECT_NEAR(actual_distance, actual_distance_check, 1E-8);
     EXPECT_NEAR(actual_distance_check, actual_distance_check_original, 1E-8);
     EXPECT_NEAR(reference_distance, reference_distance_check, 1E-8);
-    EXPECT_NEAR(actual_distance, reference_distance, 1E-4) << "estimate was " << hand_computed_distance_estimate;
+    EXPECT_NEAR(actual_distance, reference_distance, 1E-3) << "estimate was " << hand_computed_distance_estimate;
 
     std::cout<<"actual_distance: "<<actual_distance<<std::endl;
     std::cout<<"actual_distance_check: "<<actual_distance_check<<std::endl;
