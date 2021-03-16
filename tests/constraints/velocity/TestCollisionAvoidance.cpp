@@ -798,42 +798,15 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
         //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
 
-        KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
-                righthand_capsule_ep1, righthand_capsule_ep2;
-
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
-        capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
-        capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
-
-        KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
-        _model_ptr->getPose(_linkA, w_T_link_left_hand);
-        _model_ptr->getPose(_linkB, w_T_link_right_hand);
-
-        lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
-        lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
-        righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
-        righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
-
-        Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
-                righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
-
-        Eigen::Vector3d lefthand_CP, righthand_CP;
+        boost::shared_ptr<ComputeLinksDistance> compute_distance =
+                boost::make_shared<ComputeLinksDistance>(*_model_ptr);
+        std::list<std::pair<std::string,std::string> > whiteList_;
+        whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
+        compute_distance->setCollisionWhiteList(whiteList_);
+        std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
+        LinkPairDistance result = results.front();
         double reference_distance;
-
-        vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-        vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-        vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-        vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
-
-        reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
-                                                        lefthand_capsule_ep2_eigen,
-                                                        righthand_capsule_ep1_eigen,
-                                                        righthand_capsule_ep2_eigen,
-                                                        lefthand_CP,
-                                                        righthand_CP);
-
-        reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
+        reference_distance = result.getDistance();
 
         if (i == 0)
         {
