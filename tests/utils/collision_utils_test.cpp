@@ -1,13 +1,20 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/collision_utils.h>
 #include <cmath>
-
+#include <fcl/narrowphase/detail/primitive_shape_algorithm/capsule_capsule-inl.h>
 #include <XBotInterface/ModelInterface.h>
 #include <chrono>
 
+#define USE_ROS false
 
-#define  s                1.0
-#define  dT               0.001* s
+#if USE_ROS
+    #include <ros/ros.h>
+    #include <sensor_msgs/JointState.h>
+#endif
+
+
+#define  _s                1.0
+#define  dT               0.001* _s
 #define  m_s              1.0
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
@@ -53,94 +60,172 @@ void getGoodInitialPosition(Eigen::VectorXd& q, const XBot::ModelInterface::Ptr 
 
 }
 
-double dist3D_Segment_to_Segment (const Eigen::Vector3d & segment_A_endpoint_1,
-                                  const Eigen::Vector3d & segment_A_endpoint_2,
-                                  const Eigen::Vector3d & segment_B_endpoint_1,
-                                  const Eigen::Vector3d & segment_B_endpoint_2,
-                                  Eigen::Vector3d & closest_point_on_segment_A,
-                                  Eigen::Vector3d & closest_point_on_segment_B)
+/**
+ * @brief dist3D_Segment_to_Segment is directly taken from the closestPtSegmentSegment() function
+ * in https://github.com/flexible-collision-library/fcl/commit/fa91d492b978022602087f915ed7d1b4d258446f
+ */
+double dist3D_Segment_to_Segment(const Eigen::Vector3d& p_FP1, const Eigen::Vector3d& p_FQ1,
+                               const Eigen::Vector3d& p_FP2, const Eigen::Vector3d& p_FQ2,
+                               Eigen::Vector3d& p_FC1, Eigen::Vector3d& p_FC2)
 {
+  // TODO(SeanCurtis-TRI): Document the match underlying this function -- the
+  //  variables: a, b, c, e, and f are otherwise overly inscrutable.
+  const auto kEps = SMALL_NUM;
+  const auto kEpsSquared = kEps * kEps;
 
-    using namespace Eigen;
+  Eigen::Vector3d p_P1Q1 = p_FQ1 - p_FP1;  // Segment 1's displacement vector: D1.
+  Eigen::Vector3d p_P2Q2 = p_FQ2 - p_FP2;  // Segment 2's displacement vector: D2.
+  Eigen::Vector3d p_P2P1 = p_FP1 - p_FP2;
 
-    Vector3d   u = segment_A_endpoint_2 - segment_A_endpoint_1;
-    Vector3d   v = segment_B_endpoint_2 - segment_B_endpoint_1;
-    Vector3d   w = segment_A_endpoint_1 - segment_B_endpoint_1;
-    double    a = u.dot(u);         // always >= 0
-    double    b = u.dot(v);
-    double    c = v.dot(v);         // always >= 0
-    double    d = u.dot(w);
-    double    e = v.dot(w);
-    double    D = a*c - b*b;        // always >= 0
-    double    sc, sN, sD = D;       // sc = sN / sD, default sD = D >= 0
-    double    tc, tN, tD = D;       // tc = tN / tD, default tD = D >= 0
+  double a = p_P1Q1.dot(p_P1Q1); // Squared length of segment S1, always nonnegative.
+  double e = p_P2Q2.dot(p_P2Q2); // Squared length of segment S2, always nonnegative.
+  double f = p_P2Q2.dot(p_P2P1);
 
-    // compute the line parameters of the two closest points
-    if (D < SMALL_NUM) { // the lines are almost parallel
-        sN = 0.0;         // force using point P0 on segment S1
-        sD = 1.0;         // to prevent possible division by 0.0 later
-        tN = e;
-        tD = c;
+  double s, t;
+  // Check if either or both segments degenerate into points.
+  if (a <= kEpsSquared && e <= kEpsSquared) {
+    // Both segments degenerate into points.
+    s = t = 0.0;
+    p_FC1 = p_FP1;
+    p_FC2 = p_FP2;
+    return (p_FC1 - p_FC2).squaredNorm();
+  }
+  if (a <= kEpsSquared) {
+    // First segment degenerates into a point.
+    s = 0.0;
+    // t = (b * s + f) / e, s = 0 --> t = f / e.
+    t = fcl::detail::clamp(f / e, (double)0.0, (double)1.0);
+  } else {
+    const double c = p_P1Q1.dot(p_P2P1);
+    if (e <= kEpsSquared) {
+      // Second segment degenerates into a point.
+      t = 0.0;
+      // s = (b*t - c) / a, t = 0 --> s = -c / a.
+      s = fcl::detail::clamp(-c / a, (double)0.0, (double)1.0);
+    } else {
+      // The general non-degenerate case starts here.
+      const double b = p_P1Q1.dot(p_P2Q2);
+      // Mathematically, ae - b² ≥ 0, but we need to protect ourselves from
+      // possible rounding error near zero that _might_ produce -epsilon.
+      using std::max;
+      const double denom = max(double(0), a*e-b*b);
+
+      // If segments are not parallel, compute closest point on L1 to L2 and
+      // clamp to segment S1. Else pick arbitrary s (here 0).
+      if (denom > kEpsSquared) {
+        s = fcl::detail::clamp((b*f - c*e) / denom, (double)0.0, (double)1.0);
+      } else {
+        s = 0.0;
+      }
+      // Compute point on L2 closest to S1(s) using
+      // t = Dot((P1 + D1*s) - P2, D2) / Dot(D2,D2) = (b*s + f) / e
+      t = (b*s + f) / e;
+
+      // If t in [0,1] done. Else clamp t, recompute s for the new value
+      // of t using s = Dot((P2 + D2*t) - P1, D1) / Dot(D1,D1) = (t*b - c) / a
+      // and clamp s to [0, 1].
+      if(t < 0.0) {
+        t = 0.0;
+        s = fcl::detail::clamp(-c / a, (double)0.0, (double)1.0);
+      } else if (t > 1.0) {
+        t = 1.0;
+        s = fcl::detail::clamp((b - c) / a, (double)0.0, (double)1.0);
+      }
     }
-    else {                 // get the closest points on the infinite lines
-        sN = (b*e - c*d);
-        tN = (a*e - b*d);
-        if (sN < 0.0) {        // sc < 0 => the s=0 edge is visible
-            sN = 0.0;
-            tN = e;
-            tD = c;
-        }
-        else if (sN > sD) {  // sc > 1  => the s=1 edge is visible
-            sN = sD;
-            tN = e + b;
-            tD = c;
-        }
-    }
-
-    if (tN < 0.0) {            // tc < 0 => the t=0 edge is visible
-        tN = 0.0;
-        // recompute sc for this edge
-        if (-d < 0.0)
-            sN = 0.0;
-        else if (-d > a)
-            sN = sD;
-        else {
-            sN = -d;
-            sD = a;
-        }
-    }
-    else if (tN > tD) {      // tc > 1  => the t=1 edge is visible
-        tN = tD;
-        // recompute sc for this edge
-        if ((-d + b) < 0.0)
-            sN = 0;
-        else if ((-d + b) > a)
-            sN = sD;
-        else {
-            sN = (-d + b);
-            sD = a;
-        }
-    }
-    // finally do the division to get sc and tc
-    sc = (std::fabs(sN) < SMALL_NUM ? 0.0 : sN / sD);
-    tc = (std::fabs(tN) < SMALL_NUM ? 0.0 : tN / tD);
-
-    closest_point_on_segment_A = segment_A_endpoint_1 + sc * u;
-    closest_point_on_segment_B = segment_B_endpoint_1 + tc * v;
-
-//    std::cout << "CP1: " << std::endl << CP1 << std::endl;
-//    std::cout << "CP2: " << std::endl << CP2 << std::endl;
-
-    // get the difference of the two closest points
-    Vector3d   dP = closest_point_on_segment_A - closest_point_on_segment_B;  // =  S1(sc) - S2(tc)
-
-    double Dm = dP.norm();   // return the closest distance
-
-    // I leave the line here for observing the minimum distance between the inner line segments of the corresponding capsule pair
-    //std::cout << "Dm: " << std::endl << Dm << std::endl;
-
-    return Dm;
+  }
+  p_FC1 = p_FP1 + p_P1Q1 *s;
+  p_FC2 = p_FP2 + p_P2Q2 *t;
+  return (p_FC1 - p_FC2).norm();
 }
+
+//double dist3D_Segment_to_Segment (const Eigen::Vector3d & segment_A_endpoint_1,
+//                                  const Eigen::Vector3d & segment_A_endpoint_2,
+//                                  const Eigen::Vector3d & segment_B_endpoint_1,
+//                                  const Eigen::Vector3d & segment_B_endpoint_2,
+//                                  Eigen::Vector3d & closest_point_on_segment_A,
+//                                  Eigen::Vector3d & closest_point_on_segment_B)
+//{
+
+//    using namespace Eigen;
+
+//    Vector3d   u = segment_A_endpoint_2 - segment_A_endpoint_1;
+//    Vector3d   v = segment_B_endpoint_2 - segment_B_endpoint_1;
+//    Vector3d   w = segment_A_endpoint_1 - segment_B_endpoint_1;
+//    double    a = u.dot(u);         // always >= 0
+//    double    b = u.dot(v);
+//    double    c = v.dot(v);         // always >= 0
+//    double    d = u.dot(w);
+//    double    e = v.dot(w);
+//    double    D = a*c - b*b;        // always >= 0
+//    double    sc, sN, sD = D;       // sc = sN / sD, default sD = D >= 0
+//    double    tc, tN, tD = D;       // tc = tN / tD, default tD = D >= 0
+
+//    // compute the line parameters of the two closest points
+//    if (D < SMALL_NUM) { // the lines are almost parallel
+//        sN = 0.0;         // force using point P0 on segment S1
+//        sD = 1.0;         // to prevent possible division by 0.0 later
+//        tN = e;
+//        tD = c;
+//    }
+//    else {                 // get the closest points on the infinite lines
+//        sN = (b*e - c*d);
+//        tN = (a*e - b*d);
+//        if (sN < 0.0) {        // sc < 0 => the s=0 edge is visible
+//            sN = 0.0;
+//            tN = e;
+//            tD = c;
+//        }
+//        else if (sN > sD) {  // sc > 1  => the s=1 edge is visible
+//            sN = sD;
+//            tN = e + b;
+//            tD = c;
+//        }
+//    }
+
+//    if (tN < 0.0) {            // tc < 0 => the t=0 edge is visible
+//        tN = 0.0;
+//        // recompute sc for this edge
+//        if (-d < 0.0)
+//            sN = 0.0;
+//        else if (-d > a)
+//            sN = sD;
+//        else {
+//            sN = -d;
+//            sD = a;
+//        }
+//    }
+//    else if (tN > tD) {      // tc > 1  => the t=1 edge is visible
+//        tN = tD;
+//        // recompute sc for this edge
+//        if ((-d + b) < 0.0)
+//            sN = 0;
+//        else if ((-d + b) > a)
+//            sN = sD;
+//        else {
+//            sN = (-d + b);
+//            sD = a;
+//        }
+//    }
+//    // finally do the division to get sc and tc
+//    sc = (std::fabs(sN) < SMALL_NUM ? 0.0 : sN / sD);
+//    tc = (std::fabs(tN) < SMALL_NUM ? 0.0 : tN / tD);
+
+//    closest_point_on_segment_A = segment_A_endpoint_1 + sc * u;
+//    closest_point_on_segment_B = segment_B_endpoint_1 + tc * v;
+
+////    std::cout << "CP1: " << std::endl << CP1 << std::endl;
+////    std::cout << "CP2: " << std::endl << CP2 << std::endl;
+
+//    // get the difference of the two closest points
+//    Vector3d   dP = closest_point_on_segment_A - closest_point_on_segment_B;  // =  S1(sc) - S2(tc)
+
+//    double Dm = dP.norm();   // return the closest distance
+
+//    // I leave the line here for observing the minimum distance between the inner line segments of the corresponding capsule pair
+//    //std::cout << "Dm: " << std::endl << Dm << std::endl;
+
+//    return Dm;
+//}
 
 class TestCapsuleLinksDistance
 {
@@ -278,11 +363,43 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
 TEST_F(testCollisionUtils, testCapsuleDistance) {
 
     getGoodInitialPosition(q,_model_ptr);
+
+    q[_model_ptr->getDofIndex("LHipLat")] = -1.4*M_PI/180.;
+    q[_model_ptr->getDofIndex("RHipLat")] = 1.4*M_PI/180.;
+
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    std::string linkA = "LSoftHandLink";
-    std::string linkB = "RSoftHandLink";
+
+
+#if USE_ROS
+    int argc;
+    char *argv[] = {""};
+    ros::init(argc, argv, "testCapsuleDistance");
+
+    ros::NodeHandle n;
+
+    sensor_msgs::JointState msg;
+    msg.header.stamp = ros::Time::now();
+
+    msg.name = _model_ptr->getEnabledJointNames();
+    for(unsigned int i = 0; i < q.size(); ++i)
+        msg.position.push_back(q[i]);
+
+    ros::Publisher pub = n.advertise<sensor_msgs::JointState>("joint_states", 1, true);
+    ros::Rate rate = 10;
+    for(unsigned int i = 0; i <= 100; ++i)
+    {
+        pub.publish(msg);
+        ros::spinOnce();
+        rate.sleep();
+    }
+#endif
+
+
+
+    std::string linkA = "LLowLeg";
+    std::string linkB = "RLowLeg";
 
     std::list<std::pair<std::string,std::string> > whiteList;
     whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
@@ -401,8 +518,13 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     EXPECT_NEAR(actual_distance, actual_distance_check, 1E-8);
     EXPECT_NEAR(actual_distance_check, actual_distance_check_original, 1E-8);
     EXPECT_NEAR(reference_distance, reference_distance_check, 1E-8);
-    EXPECT_NEAR(actual_distance, reference_distance, 1E-4) << "estimate was " << hand_computed_distance_estimate;
+    EXPECT_NEAR(actual_distance, reference_distance, 1E-3) << "estimate was " << hand_computed_distance_estimate;
 
+    std::cout<<"actual_distance: "<<actual_distance<<std::endl;
+    std::cout<<"actual_distance_check: "<<actual_distance_check<<std::endl;
+    std::cout<<"actual_distance_check_original: "<<actual_distance_check_original<<std::endl;
+    std::cout<<"reference_distance: "<<reference_distance<<std::endl;
+    std::cout<<"reference_distance_check: "<<reference_distance_check<<std::endl;
 }
 
 
