@@ -309,7 +309,7 @@ void publishJointStates(const Eigen::VectorXd& q)
                -1,
                urdf,
                srdf);
-      sc_constraint->setBoundScaling(0.05);
+      sc_constraint->setLinkPairThreshold(0.005);
 
 #if ENABLE_ROS
       for(unsigned int i = 0; i < this->_model_ptr->getEnabledJointNames().size(); ++i){
