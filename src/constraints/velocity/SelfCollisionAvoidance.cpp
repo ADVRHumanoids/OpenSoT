@@ -18,45 +18,54 @@
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 #include <OpenSoT/utils/collision_utils.h>
 
-// local version of vectorKDLToEigen since oldest versions are bogous.
-// To use instead of:
-// #include <eigen_conversions/eigen_kdl.h>
-// tf::vectorKDLToEigen
-void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
+using namespace OpenSoT::constraints::velocity;
+using namespace XBot;
+
+namespace
 {
-  for(int i = 0; i < 3; ++i)
-    e[i] = k[i];
+Eigen::Vector3d k2e(const KDL::Vector &k)
+{
+    return Eigen::Vector3d(k[0], k[1], k[2]);
+}
 }
 
-using namespace OpenSoT::constraints::velocity;
-
-using namespace Eigen;
-
-
-SelfCollisionAvoidance::SelfCollisionAvoidance(const Eigen::VectorXd& x,
-                                               XBot::ModelInterface &robot,
-                                               std::string& base_link,
-                                               double detection_threshold,
-                                               double linkPair_threshold,
-                                               const double boundScaling):
+SelfCollisionAvoidance::SelfCollisionAvoidance(
+        const Eigen::VectorXd& x,
+        const XBot::ModelInterface& robot,
+        int max_pairs,
+        urdf::ModelConstSharedPtr collision_urdf,
+        srdf::ModelConstSharedPtr collision_srdf):
     Constraint("self_collision_avoidance", x.size()),
-    _detection_threshold(detection_threshold),
-    _linkPair_threshold(linkPair_threshold),
-    robot_col(robot),
+    _detection_threshold(std::numeric_limits<double>::max()),
+    _distance_threshold(0.001),
+    _robot(robot),
     _x_cache(x),
-    _boundScaling(boundScaling),
-    base_name(base_link)
+    _bound_scaling(1.0),
+    _max_pairs(max_pairs)
 {
-    computeLinksDistance = std::make_unique<ComputeLinksDistance>(robot);
+    // construct link distance computation util
+    _dist_calc = std::make_unique<ComputeLinksDistance>(robot,
+                                                        collision_urdf,
+                                                        collision_srdf);
 
-    _J_transform.setZero(3,6);
+    // if max pairs not specified, set it as number of total
+    // link pairs
+    if(_max_pairs < 0)
+    {
+        // note: threshold = inf
+        _max_pairs = _dist_calc->getLinkDistances().size();
+    }
 
-    update(x);
+    // initialize matrices
+    _Aineq.setZero(_max_pairs, getXSize());
+    _bUpperBound.setZero(_max_pairs);
+    _bLowerBound.setConstant(_max_pairs, std::numeric_limits<double>::lowest());
+
 }
 
 double SelfCollisionAvoidance::getLinkPairThreshold()
 {
-    return _linkPair_threshold;
+    return _distance_threshold;
 }
 
 double SelfCollisionAvoidance::getDetectionThreshold()
@@ -64,162 +73,89 @@ double SelfCollisionAvoidance::getDetectionThreshold()
     return _detection_threshold;
 }
 
-
 void SelfCollisionAvoidance::setLinkPairThreshold(const double linkPair_threshold)
 {
-    _linkPair_threshold = std::fabs(linkPair_threshold);
-    //this->update();
+    _distance_threshold = std::fabs(linkPair_threshold);
 }
 
 void SelfCollisionAvoidance::setDetectionThreshold(const double detection_threshold)
 {
     _detection_threshold = std::fabs(detection_threshold);
-    //this->update();
 }
-
 
 void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 {
-    // we update _Aineq and _bupperBound only if x has changed
-    //if(!(x == _x_cache)) {
-        _x_cache = x;
-        calculate_Aineq_bUpperB (_Aineq, _bUpperBound );
-        _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
+    _Aineq.setZero(_max_pairs, getXSize());
+    _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
 
-    //}
-//    std::cout << "_Aineq" << _Aineq.toString() << std::endl << std::endl;
-    //    std::cout << "_bUpperBound" << _bUpperBound.toString() << std::endl << std::endl;
-}
+    auto distance_list = _dist_calc->getLinkDistances(_detection_threshold);
 
-bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
-{
-    bool ok = computeLinksDistance->setCollisionWhiteList(whiteList);
-    this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
-    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
-    return ok;
-}
+    int row_idx = 0;
 
-bool OpenSoT::constraints::velocity::SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
-{
-    bool ok = computeLinksDistance->setCollisionBlackList(blackList);
-    this->calculate_Aineq_bUpperB(_Aineq, _bUpperBound);
-    _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
-    return ok;
-}
-
-void SelfCollisionAvoidance::skewSymmetricOperator (const Eigen::Vector3d & r_cp, Eigen::MatrixXd& J_transform)
-{
-    if(J_transform.rows() != 3 || J_transform.cols() != 6)
-        J_transform.setZero(3,6);
-
-    J_transform.block(0,0,3,3) = Eigen::Matrix3d::Identity();
-    J_transform.block(0,3,3,3) <<       0,  r_cp(2), -r_cp(1),
-                                 -r_cp(2),        0,  r_cp(0),
-                                  r_cp(1), -r_cp(0),        0;
-}
-
-
-
-void SelfCollisionAvoidance::calculate_Aineq_bUpperB (Eigen::MatrixXd & Aineq_fc,
-                                                      Eigen::VectorXd & bUpperB_fc )
-{
-
-//    robot_col.updateiDyn3Model(x, false);
-
-    std::list<LinkPairDistance> interested_LinkPairs;
-    std::list<LinkPairDistance>::iterator j;
-    interested_LinkPairs = computeLinksDistance->getLinkDistances(_detection_threshold);
-
-    /*//////////////////////////////////////////////////////////*/
-
-    MatrixXd Aineq_fc_Eigen(interested_LinkPairs.size(), robot_col.getJointNum());
-    VectorXd bUpperB_fc_Eigen(interested_LinkPairs.size());
-
-    double Dm_LinkPair;
-    KDL::Frame Link1_T_CP,Link2_T_CP;
-    std::string Link1_name, Link2_name;
-
-    KDL::Frame Waist_T_Link1, Waist_T_Link2, Waist_T_Link1_CP, Waist_T_Link2_CP;
-    KDL::Vector Link1_origin_kdl, Link2_origin_kdl, Link1_CP_kdl, Link2_CP_kdl;
-    Eigen::Matrix<double, 3, 1> Link1_origin, Link2_origin, Link1_CP, Link2_CP;
-
-    Vector3d closepoint_dir;
-
-    MatrixXd Link1_CP_Jaco, Link2_CP_Jaco;
-
-    Affine3d Waist_frame_world_Eigen;
-    robot_col.getPose(base_name, Waist_frame_world_Eigen);
-    Waist_frame_world_Eigen = Waist_frame_world_Eigen.inverse();
-
-    Matrix3d Waist_frame_world_Eigen_Ro = Waist_frame_world_Eigen.matrix().block(0,0,3,3);
-    MatrixXd temp_trans_matrix(6,6); temp_trans_matrix.setZero(6,6);
-    temp_trans_matrix.block(0,0,3,3) = Waist_frame_world_Eigen_Ro;
-    temp_trans_matrix.block(3,3,3,3) = Waist_frame_world_Eigen_Ro;
-
-    int linkPairIndex = 0;
-    for (j = interested_LinkPairs.begin(); j != interested_LinkPairs.end(); ++j)
+    for(const auto& data : distance_list)
     {
+        // we filled the task, skip the rest of colliding pairs
+        if(row_idx >= _max_pairs)
+        {
+            break;
+        }
 
-        LinkPairDistance& linkPair(*j);
+        // closest point on first link
+        Eigen::Vector3d p1_local = k2e(data.getLink_T_closestPoint().first.p);
 
-        Dm_LinkPair = linkPair.getDistance();
-        Link1_T_CP = linkPair.getLink_T_closestPoint().first;
-        Link2_T_CP = linkPair.getLink_T_closestPoint().second;
-        Link1_name = linkPair.getLinkNames().first;
-        Link2_name = linkPair.getLinkNames().second;
+        // closest point on second link
+        Eigen::Vector3d p2_local = k2e(data.getLink_T_closestPoint().second.p);
 
+        // global closest points
+        Eigen::Affine3d w_T_l1;
+        _robot.getPose(data.getLinkNames().first, w_T_l1);
+        Eigen::Vector3d p1_world = w_T_l1*p1_local;
 
-        robot_col.getPose(Link1_name, base_name, Waist_T_Link1);
-        robot_col.getPose(Link2_name, base_name, Waist_T_Link2);
+        Eigen::Affine3d w_T_l2;
+        _robot.getPose(data.getLinkNames().second, w_T_l2);
+        Eigen::Vector3d p2_world = w_T_l2*p2_local;
 
-        Waist_T_Link1_CP = Waist_T_Link1 * Link1_T_CP;
-        Waist_T_Link2_CP = Waist_T_Link2 * Link2_T_CP;
-        Link1_origin_kdl = Waist_T_Link1.p;
-        Link2_origin_kdl = Waist_T_Link2.p;
-        Link1_CP_kdl = Waist_T_Link1_CP.p;
-        Link2_CP_kdl = Waist_T_Link2_CP.p;
+        // minimum distance direction
+        Eigen::Vector3d p12 = p2_world - p1_world;
 
-        vectorKDLToEigen(Link1_origin_kdl, Link1_origin);
-        vectorKDLToEigen(Link2_origin_kdl, Link2_origin);
-        vectorKDLToEigen(Link1_CP_kdl, Link1_CP);
-        vectorKDLToEigen(Link2_CP_kdl, Link2_CP);
+        // minimum distance regularized
+        double d12 = p12.norm() + 1e-6;
 
+        // jacobian of p1
+        _robot.getJacobian(data.getLinkNames().first,
+                           p1_local,
+                           _Jtmp);
 
-        closepoint_dir = Link2_CP - Link1_CP;
-        closepoint_dir = closepoint_dir / Dm_LinkPair;
+        _Aineq.row(row_idx) = p12.transpose() * _Jtmp.topRows<3>() / d12;
 
-        robot_col.getRelativeJacobian(Link1_name, base_name,Link1_CP_Jaco);
+        // jacobian of p2
+        _robot.getJacobian(data.getLinkNames().second,
+                           p2_local,
+                           _Jtmp);
 
-        Link1_CP_Jaco = temp_trans_matrix * Link1_CP_Jaco;
-        skewSymmetricOperator(Link1_CP - Link1_origin,_J_transform);
-        Link1_CP_Jaco = _J_transform * Link1_CP_Jaco;
+        _Aineq.row(row_idx) -= p12.transpose() * _Jtmp.topRows<3>() / d12;
 
-        robot_col.getRelativeJacobian(Link2_name, base_name, Link2_CP_Jaco);
+        _bUpperBound(row_idx) = _bound_scaling*(d12 - _distance_threshold);
 
-        Link2_CP_Jaco = temp_trans_matrix * Link2_CP_Jaco;
-        skewSymmetricOperator(Link2_CP - Link2_origin,_J_transform);
-        Link2_CP_Jaco = _J_transform * Link2_CP_Jaco;
-
-
-        Aineq_fc_Eigen.row(linkPairIndex) = closepoint_dir.transpose() * ( Link1_CP_Jaco - Link2_CP_Jaco );
-        bUpperB_fc_Eigen(linkPairIndex) = (Dm_LinkPair - _linkPair_threshold) * _boundScaling;
-
-        ++linkPairIndex;
+        ++row_idx;
 
     }
+}
 
-    Aineq_fc = Aineq_fc_Eigen;
-    bUpperB_fc = bUpperB_fc_Eigen;
+bool SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
+{
+    return _dist_calc->setCollisionWhiteList(whiteList);
+}
 
+bool SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
+{
+    return _dist_calc->setCollisionBlackList(blackList);
 }
 
 void SelfCollisionAvoidance::setBoundScaling(const double boundScaling)
 {
-    _boundScaling = boundScaling;
+    _bound_scaling = boundScaling;
 }
 
-SelfCollisionAvoidance::~SelfCollisionAvoidance()
-{
-
-}
+SelfCollisionAvoidance::~SelfCollisionAvoidance() = default;
 
