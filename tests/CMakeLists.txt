@@ -2,7 +2,7 @@ include(ExternalProject)
 
 find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
-find_package(catkin REQUIRED tf roscpp robot_state_publisher)
+find_package(catkin REQUIRED tf roscpp robot_state_publisher urdf srdfdom)
 find_package(osqp QUIET)
 
 
