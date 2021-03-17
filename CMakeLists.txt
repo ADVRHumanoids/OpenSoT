@@ -46,7 +46,7 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         io)
 find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
-find_package(fcl 0.6.1 REQUIRED)
+find_package(fcl 0.6.1 QUIET)
 if(DEFINED FCL_VERSION)
     set(FCL_FOUND 1)
 endif()
