@@ -358,22 +358,40 @@ ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
 
 std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detectionThreshold)
 {
+    // return value
     std::list<LinkPairDistance> results;
 
     // set transforms to all shapes given model state
     updateCollisionObjects();
 
+    // loop over pairs to check
     for(auto pair : pairsToCheck)
     {
+        // link names
         std::string linkA = pair.linkA;
         std::string linkB = pair.linkB;
 
-        fcl::CollisionObject<double>* collObj_shapeA = pair.collisionObjectA.get();
-        fcl::CollisionObject<double>* collObj_shapeB = pair.collisionObjectB.get();
+        // fcl collisions
+        auto coll_A = pair.collisionObjectA.get();
+        auto coll_B = pair.collisionObjectB.get();
 
+        // if distance between bounding spheres (easy to compute)
+        // is too large, skip
+        auto c_A = coll_A->getTranslation();
+        auto c_B = coll_B->getTranslation();
+        double r_A = coll_A->collisionGeometry()->aabb_radius;
+        double r_B = coll_B->collisionGeometry()->aabb_radius;
+        double bounding_sphere_dist = (c_A - c_B).norm() - r_A - r_B;
+
+        if(bounding_sphere_dist > detectionThreshold)
+        {
+            continue;
+        }
+
+        // set request for distance computation
         fcl::DistanceRequest<double> request;
 #if FCL_MINOR_VERSION > 2
-        request.gjk_solver_type = fcl::GST_INDEP;
+        request.gjk_solver_type = fcl::GST_INDEP; // fcl::GST_LIBCCD;
 #endif
         request.enable_nearest_points = true;
 
@@ -381,7 +399,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         fcl::DistanceResult<double> result;
 
         // perform distance test
-        fcl::distance(collObj_shapeA, collObj_shapeB, request, result);
+        fcl::distance(coll_A, coll_B, request, result);
 
         // nearest points must be transformed to world frame
         KDL::Frame linkA_pA, linkB_pB;
