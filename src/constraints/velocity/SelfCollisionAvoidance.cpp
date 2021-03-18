@@ -137,6 +137,13 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 
         _bUpperBound(row_idx) = _bound_scaling*(d12 - _distance_threshold);
 
+        // to avoid infeasibilities, cap upper bound to zero
+        // (i.e. don't change current distance if in collision)
+        if(_bUpperBound(row_idx) < 0.0)
+        {
+            _bUpperBound(row_idx) = 0.0;
+        }
+
         ++row_idx;
 
     }
