@@ -1,4 +1,6 @@
 #include <OpenSoT/utils/collision_utils.h>
+#include <octomap_msgs/conversions.h>
+#include <eigen_conversions/eigen_msg.h>
 
 #if ROS_VERSION_MINOR <= 12
 #define STATIC_POINTER_CAST boost::static_pointer_cast
@@ -17,11 +19,11 @@ bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
                                                    KDL::Frame &link_T_f )
 {
 
-    fcl::Transform3<double> fcl_w_T_shape = collision_objects_[linkName]->getTransform();
+    fcl::Transform3<double> fcl_w_T_shape = _collision_obj[linkName]->getTransform();
 
     fcl::Transform3<double> fcl_shape_T_f = fcl_w_T_shape.inverse() *fcl_w_T_f;
 
-    link_T_f = link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
+    link_T_f = _link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
 
     return true;
 }
@@ -31,7 +33,7 @@ bool ComputeLinksDistance::shapeToLinkCoordinates(const std::string& linkName,
                                                   KDL::Frame &link_T_f )
 {
 
-    link_T_f = link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
+    link_T_f = _link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
 
     return true;
 }
@@ -78,7 +80,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
 {
     // get urdf links
     std::vector<urdf::LinkSharedPtr> links;
-    robot_urdf->getLinks(links);
+    _urdf->getLinks(links);
 
     // loop over links
     for(auto link : links)
@@ -102,19 +104,13 @@ bool ComputeLinksDistance::parseCollisionObjects()
                     DYNAMIC_POINTER_CAST<urdf::Cylinder>(cylinder->geometry);
 
             shape = std::make_shared<fcl::Capsule<double>>(collisionGeometry->radius,
-                                                      collisionGeometry->length);
+                                                           collisionGeometry->length);
 
             shape_origin = toKdl(cylinder->origin);
 
             // note: why this? it looks wrong from simulations..
             // shape_origin.p -= collisionGeometry->length/2.0 * shape_origin.M.UnitZ();
 
-            custom_capsules_[link->name] =
-                               boost::make_shared<ComputeLinksDistance::Capsule>(
-                                   shape_origin,
-                                   collisionGeometry->radius,
-                                   collisionGeometry->length
-                                   );
         }
         else if(link->collision->geometry->type == urdf::Geometry::CYLINDER)
         {
@@ -124,7 +120,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
                     DYNAMIC_POINTER_CAST<urdf::Cylinder>(link->collision->geometry);
 
             shape = std::make_shared<fcl::Cylinder<double>>(collisionGeometry->radius,
-                                                       collisionGeometry->length);
+                                                            collisionGeometry->length);
 
             shape_origin = toKdl(link->collision->origin);
 
@@ -151,14 +147,10 @@ bool ComputeLinksDistance::parseCollisionObjects()
                     DYNAMIC_POINTER_CAST<urdf::Box>(link->collision->geometry);
 
             shape = std::make_shared<fcl::Box<double>>(collisionGeometry->dim.x,
-                                                  collisionGeometry->dim.y,
-                                                  collisionGeometry->dim.z);
+                                                       collisionGeometry->dim.y,
+                                                       collisionGeometry->dim.z);
 
             shape_origin = toKdl(link->collision->origin);
-
-            std::cout << "Box has size " << collisionGeometry->dim.x <<
-                         ", " << collisionGeometry->dim.y <<
-                         ", " << collisionGeometry->dim.z << std::endl;
 
         }
         else if(link->collision->geometry->type == urdf::Geometry::MESH)
@@ -216,11 +208,11 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
         auto collision_object = boost::make_shared<fcl::CollisionObject<double>>(shape);
 
-        collision_objects_[link->name] = collision_object;
+        _collision_obj[link->name] = collision_object;
 
         /* Store the transformation of the CollisionShape from URDF
          * that is, we store link_T_shape for the actual link */
-        link_T_shape[link->name] = shape_origin;
+        _link_T_shape[link->name] = shape_origin;
 
     }
 
@@ -229,18 +221,18 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
 bool ComputeLinksDistance::updateCollisionObjects()
 {
-    for(auto link_name : linksToUpdate)
+    for(auto link_name : _links_to_update)
     {
         // link pose
         KDL::Frame w_T_link, w_T_shape;
-        model.getPose(link_name, w_T_link);
+        _model.getPose(link_name, w_T_link);
 
         // shape pose
-        w_T_shape = w_T_link * link_T_shape[link_name];
+        w_T_shape = w_T_link * _link_T_shape.at(link_name);
 
         // set pose to fcl shape
         fcl::Transform3<double> fcl_w_T_shape = KDL2fcl(w_T_shape);
-        fcl::CollisionObject<double>* collObj_shape = collision_objects_[link_name].get();
+        fcl::CollisionObject<double>* collObj_shape = _collision_obj[link_name].get();
         collObj_shape->setTransform(fcl_w_T_shape);
     }
 
@@ -276,9 +268,9 @@ void ComputeLinksDistance::generateLinksToUpdate()
 {
     // get all link pairs that can possibly collide
     std::vector<std::string> entries;
-    allowed_collision_matrix->getAllEntryNames(entries);
+    _acm->getAllEntryNames(entries);
 
-    linksToUpdate.clear();
+    _links_to_update.clear();
 
     // take all link pairs that (i) can possibly collide, (ii) are not supposed
     // to collide
@@ -289,11 +281,13 @@ void ComputeLinksDistance::generateLinksToUpdate()
             collision_detection::AllowedCollision::Type collisionType;
 
             // check if collision of this AB pair is never supposed to happpen
-            if(allowed_collision_matrix->getAllowedCollision(*it_A, *it_B, collisionType) &&
+            if(_acm->getAllowedCollision(*it_A,
+                                         *it_B,
+                                         collisionType) &&
                     collisionType == collision_detection::AllowedCollision::NEVER)
             {
-                linksToUpdate.insert(*it_A);
-                linksToUpdate.insert(*it_B);
+                _links_to_update.insert(*it_A);
+                _links_to_update.insert(*it_B);
             }
         }
     }
@@ -301,55 +295,79 @@ void ComputeLinksDistance::generateLinksToUpdate()
 
 void ComputeLinksDistance::generatePairsToCheck()
 {
-    pairsToCheck.clear();
+    _pairs_to_check.clear();
 
+    // get all link pairs that can possibly collide
     std::vector<std::string> entries;
-    allowed_collision_matrix->getAllEntryNames(entries);
+    _acm->getAllEntryNames(entries);
 
+    // take all link pairs that (i) can possibly collide, (ii) are not supposed
+    // to collide
     for(auto it_A = entries.begin(); it_A != entries.end(); ++it_A)
     {
         for(auto it_B = it_A + 1; it_B != entries.end(); ++it_B)
         {
             collision_detection::AllowedCollision::Type collisionType;
 
-            if(allowed_collision_matrix->getAllowedCollision(*it_A, *it_B, collisionType ) &&
+            if(_acm->getAllowedCollision(*it_A,
+                                         *it_B,
+                                         collisionType) &&
                     collisionType == collision_detection::AllowedCollision::NEVER)
             {
-                pairsToCheck.emplace_back(this, *it_A, *it_B);
+                _pairs_to_check.emplace_back(this, *it_A, *it_B);
             }
         }
     }
 
-    std::cout << "Checking " << pairsToCheck.size() << " pairs for collision" << std::endl;
+    // get urdf links
+    std::vector<urdf::LinkSharedPtr> links;
+    _urdf->getLinks(links);
+
+    // now, add all link-environment pairs
+    for(auto envobj : _env_obj_names)
+    {
+        for(auto urdf_link: links)
+        {
+            auto linkobj = urdf_link->name;
+
+            // note: env always as second entry!
+            _pairs_to_check.emplace_back(this, linkobj, envobj);
+
+        }
+    }
+
+    std::cout << "Checking " << _pairs_to_check.size() << " pairs for collision" << std::endl;
 }
 
 ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
                                            urdf::ModelConstSharedPtr collision_urdf,
                                            srdf::ModelConstSharedPtr collision_srdf):
-    model(_model)
+    _model(_model)
 {
+    // user-provided urdf to override collision information
     if(collision_urdf)
     {
-        robot_urdf = MAKE_SHARED<urdf::Model>(*collision_urdf);
+        _urdf = MAKE_SHARED<urdf::Model>(*collision_urdf);
     }
-    else
+    else  // none was given, use default from model ifc
     {
-        robot_urdf = MAKE_SHARED<urdf::Model>();
-        robot_urdf->initString(model.getUrdfString());
+        _urdf = MAKE_SHARED<urdf::Model>();
+        _urdf->initString(_model.getUrdfString());
     }
 
+    // user-provided srdf to override acm information
     if(collision_srdf)
     {
-        robot_srdf = MAKE_SHARED<srdf::Model>(*collision_srdf);
+        _srdf = MAKE_SHARED<srdf::Model>(*collision_srdf);
     }
-    else
+    else  // none was given, use default from model ifc
     {
-        robot_srdf = MAKE_SHARED<srdf::Model>();
-        robot_srdf->initString(*robot_urdf, model.getSrdfString());
+        _srdf = MAKE_SHARED<srdf::Model>();
+        _srdf->initString(*_urdf, _model.getSrdfString());
     }
 
-    moveit_robot_model = std::make_shared<robot_model::RobotModel>(robot_urdf,
-                                                                   robot_srdf);
+    _moveit_model = std::make_shared<robot_model::RobotModel>(_urdf,
+                                                              _srdf);
 
     parseCollisionObjects();
 
@@ -365,9 +383,10 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
     updateCollisionObjects();
 
     // loop over pairs to check
-    for(auto pair : pairsToCheck)
+    for(auto pair : _pairs_to_check)
     {
-        // link names
+        // object names
+        // note: could be either link names or world objects
         std::string linkA = pair.linkA;
         std::string linkB = pair.linkB;
 
@@ -401,22 +420,21 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         // perform distance test
         fcl::distance(coll_A, coll_B, request, result);
 
-        // nearest points must be transformed to world frame
-        KDL::Frame linkA_pA, linkB_pB;
-
-        fcl::Transform3<double> world_pA, world_pB;
+        // we return nearest points
+        fcl::Transform3<double> world_pA;
         world_pA.linear().setIdentity();
         world_pA.translation() = result.nearest_points[0];
+
+        fcl::Transform3<double> world_pB;
         world_pB.linear().setIdentity();
         world_pB.translation() = result.nearest_points[1];
-
-        globalToLinkCoordinates(linkA, world_pA, linkA_pA);
-        globalToLinkCoordinates(linkB, world_pB, linkB_pB);
 
         // if distance is below the threshold, add to result
         if(result.min_distance < detectionThreshold)
         {
-            results.emplace_back(linkA, linkB, linkA_pA, linkB_pB, result.min_distance);
+            results.emplace_back(linkA, linkB,
+                                 fcl2KDL(world_pA), fcl2KDL(world_pB),
+                                 result.min_distance);
         }
     }
 
@@ -427,26 +445,26 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 
 bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
-    allowed_collision_matrix = std::make_shared<collision_detection::AllowedCollisionMatrix>(
-                                   moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
+    _acm = std::make_shared<collision_detection::AllowedCollisionMatrix>(
+               _moveit_model->getLinkModelNamesWithCollisionGeometry(), true);
 
-    // iterate over whit list
+    // iterate over white list
     for(auto it = whiteList.begin(); it != whiteList.end(); ++it)
     {
         // check pair exists and has collision info associated with it
-        if(collision_objects_.count(it->first) > 0 &&
-                collision_objects_.count(it->second) > 0 )
+        if(_collision_obj.count(it->first) > 0 &&
+                _collision_obj.count(it->second) > 0 )
         {
             // set collision pair to 'not allowed', i.e. it will always be checked
             std::cout << "will check collision " << it->first << " - " << it->second << std::endl;
-            allowed_collision_matrix->setEntry(it->first, it->second, false);
+            _acm->setEntry(it->first, it->second, false);
         }
         else // print error
         {
 
             std::string link_not_found;
 
-            if(collision_objects_.count(it->first) == 0)
+            if(_collision_obj.count(it->first) == 0)
             {
                 link_not_found = it->first;
             }
@@ -454,7 +472,7 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
             std::cout << "Error: could not find link " << it->first << " specified in whitelist, "
                       << "or link does not have collision geometry information" << std::endl;
 
-            if(collision_objects_.count(it->second) == 0)
+            if(_collision_obj.count(it->second) == 0)
             {
                 if(link_not_found == "")
                 {
@@ -471,43 +489,190 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
         }
     }
 
-    loadDisabledCollisionsFromSRDF(*robot_srdf, allowed_collision_matrix);
+    loadDisabledCollisionsFromSRDF(*_srdf, _acm);
 
     generateLinksToUpdate();
     generatePairsToCheck();
 
-    //allowed_collision_matrix->print(std::cout);
     return true;
 }
 
 bool ComputeLinksDistance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
-    allowed_collision_matrix = std::make_shared<collision_detection::AllowedCollisionMatrix>(
-                                   moveit_robot_model->getLinkModelNamesWithCollisionGeometry(), true);
+    _acm = std::make_shared<collision_detection::AllowedCollisionMatrix>(
+               _moveit_model->getLinkModelNamesWithCollisionGeometry(), true);
 
     std::vector<std::string> linksWithCollisionObjects;
 
-    for(auto pair : collision_objects_)
+    for(auto pair : _collision_obj)
     {
         linksWithCollisionObjects.push_back(pair.first);
     }
 
     // set all pairs to not allowed (all are checked)
-    allowed_collision_matrix->setEntry(linksWithCollisionObjects, linksWithCollisionObjects, false);
+    _acm->setEntry(linksWithCollisionObjects, linksWithCollisionObjects, false);
 
     // don't check pairs from black list
     for(auto pair : blackList)
     {
-        allowed_collision_matrix->setEntry(pair.first, pair.second, true);
+        _acm->setEntry(pair.first, pair.second, true);
     }
 
     // don't check disabled pairs from srdf
-    loadDisabledCollisionsFromSRDF(*robot_srdf, allowed_collision_matrix);
+    loadDisabledCollisionsFromSRDF(*_srdf, _acm);
 
     generateLinksToUpdate();
     generatePairsToCheck();
 
     return true;
+}
+
+namespace
+{
+
+boost::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
+        const shape_msgs::SolidPrimitive& shape,
+        const geometry_msgs::Pose& pose)
+{
+    std::shared_ptr<fcl::CollisionGeometryd> fcl_shape;
+
+    // parse shapes
+    if(shape.type == shape.BOX)
+    {
+        fcl_shape = std::make_shared<fcl::Boxd>(shape.dimensions[0],
+                shape.dimensions[1],
+                shape.dimensions[2]);
+
+    }
+    else if(shape.type == shape.SPHERE)
+    {
+        fcl_shape = std::make_shared<fcl::Sphered>(shape.dimensions[0]);
+    }
+    else
+    {
+        fprintf(stderr, "unsupported shape type \n");
+        return nullptr;
+    }
+
+    // create collision object
+    auto co = boost::make_shared<fcl::CollisionObjectd>(fcl_shape);
+
+    // set transform
+    fcl::Transform3d w_T_octo;
+    tf::poseMsgToEigen(pose, w_T_octo);
+    co->setTransform(w_T_octo);
+
+    return co;
+}
+
+}
+
+bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc)
+{
+    bool ret = true;
+
+    for(const auto& co : wc.collision_objects)
+    {
+        // collision name
+        auto coll_name = "world/" + co.id;
+
+        // handle remove action
+        if(co.operation == co.REMOVE)
+        {
+            // find id to remove
+            auto it = _collision_obj.find(coll_name);
+
+            // does not exist, continue
+            if(it == _collision_obj.end())
+            {
+                ret = false;
+                continue;
+            }
+
+            // exists, delete it
+            _collision_obj.erase(it);
+            _env_obj_names.erase(coll_name);
+        }
+
+        // only support collisions specified w.r.t. world
+        if(!co.header.frame_id.empty() &&
+                co.header.frame_id != "world")
+        {
+            ret = false;
+            continue;
+        }
+
+        // for now, don't support array of primitives
+        if(co.primitives.size() > 1)
+        {
+            ret = false;
+            continue;
+        }
+
+        // primitive case
+        if(!co.primitives.empty())
+        {
+            // generate fcl collision
+            auto fcl_collision = fcl_from_primitive(co.primitives[0],
+                    co.primitive_poses[0]);
+
+            if(!fcl_collision)
+            {
+                ret = false;
+                continue;
+            }
+
+            _collision_obj[coll_name] = fcl_collision;
+            _env_obj_names.insert(coll_name);
+
+        }
+
+    }
+
+    // octree unavailable
+    if(wc.octomap.octomap.data.empty())
+    {
+        return ret;
+    }
+
+    // abstract octree pointer
+    auto abs_octree = std::shared_ptr<octomap::AbstractOcTree>(
+                          octomap_msgs::msgToMap(wc.octomap.octomap));
+
+    if(!abs_octree)
+    {
+        return false;
+    }
+
+    // we need it to be of type OcTree to construct the fcl class
+    auto octree = std::dynamic_pointer_cast<octomap::OcTree>(abs_octree);
+
+    if(!octree)
+    {
+        return false;
+    }
+
+    // fcl geometry
+    auto fcl_octree = std::make_shared<fcl::OcTreed>(octree);
+
+    // fcl collision object
+    auto coll_obj = boost::make_shared<fcl::CollisionObjectd>(fcl_octree);
+
+    // set transform
+    fcl::Transform3d w_T_octo;
+    tf::poseMsgToEigen(wc.octomap.origin, w_T_octo);
+    coll_obj->setTransform(w_T_octo);
+
+    // save collision object
+    _collision_obj["world/octomap"] = coll_obj;
+    _env_obj_names.insert("world/octomap");
+
+    // re-generate pairs to check
+    generatePairsToCheck();
+
+    return ret;
+
+
 }
 
 void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf::Model& srdf,
@@ -521,15 +686,25 @@ void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf::Model& srd
 
 
 
-LinkPairDistance::LinkPairDistance(const std::string &link1, const std::string &link2,
-                                   const KDL::Frame &link1_T_closestPoint1,
-                                   const KDL::Frame &link2_T_closestPoint2,
-                                   const double &distance ) :
-    linksPair(link1, link2),
-    link_T_closestPoint(link1_T_closestPoint1, link2_T_closestPoint2),
+LinkPairDistance::LinkPairDistance(const std::string& link1,
+                                   const std::string& link2,
+                                   const KDL::Frame& w_T_closestPoint1,
+                                   const KDL::Frame& w_T_closestPoint2,
+                                   const double& distance ) :
+    _link_pair(link1, link2),
+    _closest_points(w_T_closestPoint1, w_T_closestPoint2),
     distance(distance)
 {
 
+}
+
+bool LinkPairDistance::isLink2WorldObject() const
+{
+    // true if starts with 'world/'
+    const auto prefix = "world/";
+    const auto prefix_len = strlen(prefix);
+    return _link_pair.second.length() > prefix_len &&
+            _link_pair.second.substr(0, prefix_len) == prefix;
 }
 
 const double &LinkPairDistance::getDistance() const
@@ -537,14 +712,14 @@ const double &LinkPairDistance::getDistance() const
     return distance;
 }
 
-const std::pair<KDL::Frame, KDL::Frame> &LinkPairDistance::getLink_T_closestPoint() const
+const std::pair<KDL::Frame, KDL::Frame> &LinkPairDistance::getClosestPoints() const
 {
-    return link_T_closestPoint;
+    return _closest_points;
 }
 
 const std::pair<std::string, std::string> &LinkPairDistance::getLinkNames() const
 {
-    return linksPair;
+    return _link_pair;
 }
 
 bool LinkPairDistance::operator<(const LinkPairDistance& second) const
@@ -555,6 +730,6 @@ bool LinkPairDistance::operator<(const LinkPairDistance& second) const
     }
     else
     {
-        return linksPair.first < second.linksPair.first;
+        return _link_pair.first < second._link_pair.first;
     }
 }

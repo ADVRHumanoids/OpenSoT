@@ -101,25 +101,25 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
         }
 
         // closest point on first link
-        Eigen::Vector3d p1_local = k2e(data.getLink_T_closestPoint().first.p);
+        Eigen::Vector3d p1_world = k2e(data.getClosestPoints().first.p);
 
         // closest point on second link
-        Eigen::Vector3d p2_local = k2e(data.getLink_T_closestPoint().second.p);
+        Eigen::Vector3d p2_world = k2e(data.getClosestPoints().second.p);
 
-        // global closest points
+        // local closest points
         Eigen::Affine3d w_T_l1;
         _robot.getPose(data.getLinkNames().first, w_T_l1);
-        Eigen::Vector3d p1_world = w_T_l1*p1_local;
+        Eigen::Vector3d p1_local = w_T_l1.inverse()*p1_world;
 
         Eigen::Affine3d w_T_l2;
         _robot.getPose(data.getLinkNames().second, w_T_l2);
-        Eigen::Vector3d p2_world = w_T_l2*p2_local;
+        Eigen::Vector3d p2_local = w_T_l2.inverse()*p2_world;
 
         // minimum distance direction
         Eigen::Vector3d p12 = p2_world - p1_world;
 
-        // minimum distance regularized
-        double d12 = p12.norm() + 1e-6;
+        // minimum distance
+        double d12 = data.getDistance();
 
         // jacobian of p1
         _robot.getJacobian(data.getLinkNames().first,
@@ -128,12 +128,16 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 
         _Aineq.row(row_idx) = p12.transpose() * _Jtmp.topRows<3>() / d12;
 
-        // jacobian of p2
-        _robot.getJacobian(data.getLinkNames().second,
-                           p2_local,
-                           _Jtmp);
+        // jacobian of p2 only if link2 is a robot link
+        // (it could be part of the environment)
+        if(!data.isLink2WorldObject())
+        {
+            _robot.getJacobian(data.getLinkNames().second,
+                               p2_local,
+                               _Jtmp);
 
-        _Aineq.row(row_idx) -= p12.transpose() * _Jtmp.topRows<3>() / d12;
+            _Aineq.row(row_idx) -= p12.transpose() * _Jtmp.topRows<3>() / d12;
+        }
 
         _bUpperBound(row_idx) = _bound_scaling*(d12 - _distance_threshold);
 
