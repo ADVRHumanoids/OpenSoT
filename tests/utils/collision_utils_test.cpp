@@ -5,9 +5,9 @@
 #include <XBotInterface/ModelInterface.h>
 #include <chrono>
 
-#define USE_ROS false
+#define ENABLE_ROS false
 
-#if USE_ROS
+#if ENABLE_ROS
     #include <ros/ros.h>
     #include <sensor_msgs/JointState.h>
 #endif
@@ -380,7 +380,7 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
 
 
-#if USE_ROS
+#if ENABLE_ROS
     int argc;
     char *argv[] = {""};
     ros::init(argc, argv, "testCapsuleDistance");

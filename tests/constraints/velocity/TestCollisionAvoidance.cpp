@@ -11,7 +11,7 @@
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <OpenSoT/utils/collision_utils.h>
 #include <chrono>
-#define ENABLE_ROS true
+#define ENABLE_ROS false
 
 #if ENABLE_ROS
 #include <ros/ros.h>
@@ -812,7 +812,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
         //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
 
         boost::shared_ptr<ComputeLinksDistance> compute_distance =
-                boost::make_shared<ComputeLinksDistance>(*_model_ptr);
+                boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
         std::list<std::pair<std::string,std::string> > whiteList_;
         whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
         compute_distance->setCollisionWhiteList(whiteList_);
@@ -1034,7 +1034,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
         // check the actual distance between the hand capsule pair
         boost::shared_ptr<ComputeLinksDistance> compute_distance =
-                boost::make_shared<ComputeLinksDistance>(*_model_ptr);
+                boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
         std::list<std::pair<std::string,std::string> > whiteList_;
         whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
         compute_distance->setCollisionWhiteList(whiteList_);
