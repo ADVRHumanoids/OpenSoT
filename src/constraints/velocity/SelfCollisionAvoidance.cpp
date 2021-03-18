@@ -106,14 +106,10 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
         // closest point on second link
         Eigen::Vector3d p2_world = k2e(data.getClosestPoints().second.p);
 
-        // local closest points
+        // local closest points on link 1
         Eigen::Affine3d w_T_l1;
         _robot.getPose(data.getLinkNames().first, w_T_l1);
         Eigen::Vector3d p1_local = w_T_l1.inverse()*p1_world;
-
-        Eigen::Affine3d w_T_l2;
-        _robot.getPose(data.getLinkNames().second, w_T_l2);
-        Eigen::Vector3d p2_local = w_T_l2.inverse()*p2_world;
 
         // minimum distance direction
         Eigen::Vector3d p12 = p2_world - p1_world;
@@ -132,6 +128,12 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
         // (it could be part of the environment)
         if(!data.isLink2WorldObject())
         {
+            // local closest points on link 2
+            Eigen::Affine3d w_T_l2;
+            _robot.getPose(data.getLinkNames().second, w_T_l2);
+            Eigen::Vector3d p2_local = w_T_l2.inverse()*p2_world;
+
+            // jacobian of p2
             _robot.getJacobian(data.getLinkNames().second,
                                p2_local,
                                _Jtmp);
