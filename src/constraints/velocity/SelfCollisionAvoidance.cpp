@@ -163,6 +163,28 @@ bool SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::L
     return _dist_calc->setCollisionBlackList(blackList);
 }
 
+bool SelfCollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
+{
+    return _dist_calc->setWorldCollisions(wc);
+}
+
+bool SelfCollisionAvoidance::addWorldCollision(const std::string &id,
+                                               boost::shared_ptr<fcl::CollisionObjectd> fcl_obj)
+{
+    return _dist_calc->addWorldCollision(id, fcl_obj);
+}
+
+bool SelfCollisionAvoidance::removeWorldCollision(const std::string &id)
+{
+    return _dist_calc->removeWorldCollision(id);
+}
+
+bool SelfCollisionAvoidance::moveWorldCollision(const std::string &id,
+                                                KDL::Frame new_pose)
+{
+    return _dist_calc->moveWorldCollision(id, new_pose);
+}
+
 void SelfCollisionAvoidance::setBoundScaling(const double boundScaling)
 {
     _bound_scaling = boundScaling;

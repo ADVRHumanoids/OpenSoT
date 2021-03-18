@@ -25,7 +25,18 @@
 #include <srdfdom/model.h>
 #include <Eigen/Dense>
 
+#include <moveit_msgs/PlanningSceneWorld.h>
+
 class ComputeLinksDistance;
+
+// forward declare fcl collision object
+namespace fcl
+{
+    template <typename Scalar>
+    class CollisionObject;
+
+    using CollisionObjectd = CollisionObject<double>;
+}
 
 namespace OpenSoT { namespace constraints { namespace velocity {
 
@@ -118,6 +129,35 @@ public:
      * @return true on success
      */
     bool setCollisionBlackList(std::list< LinksPair > blackList);
+
+    /**
+     * @brief add/remove world collision objects according to the given planning
+     * scene world
+     * @return true if all requests (additions, deletions) could be performs
+     * succesfully, false on (partial) insuccess
+     */
+    bool setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc);
+
+    /**
+     * @brief add single collision to the world
+     * @param id is the unique collision id
+     * @param fcl_obj is the fcl collision object (geometry + transform)
+     * @return true if input is valid
+     */
+    bool addWorldCollision(const std::string& id,
+                           boost::shared_ptr<fcl::CollisionObjectd> fcl_obj);
+
+    /**
+     * @brief remove world collision with given id
+     */
+    bool removeWorldCollision(const std::string& id);
+
+    /**
+     * @brief change the transform w.r.t. the world for the given
+     * world collision
+     */
+    bool moveWorldCollision(const std::string& id,
+                            KDL::Frame new_pose);
 
     /**
      * @brief setBoundScaling sets bound scaling for the capsule constraint

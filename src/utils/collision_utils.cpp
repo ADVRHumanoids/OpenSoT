@@ -93,7 +93,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
         }
 
         // convert urdf collision to fcl shape
-        std::shared_ptr<fcl::CollisionGeometry<double>> shape;
+        std::shared_ptr<fcl::CollisionGeometryd> shape;
         KDL::Frame shape_origin;
 
         if(auto cylinder = capsule_from_collision(*link))
@@ -103,8 +103,8 @@ bool ComputeLinksDistance::parseCollisionObjects()
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Cylinder>(cylinder->geometry);
 
-            shape = std::make_shared<fcl::Capsule<double>>(collisionGeometry->radius,
-                                                           collisionGeometry->length);
+            shape = std::make_shared<fcl::Capsuled>(collisionGeometry->radius,
+                                                    collisionGeometry->length);
 
             shape_origin = toKdl(cylinder->origin);
 
@@ -119,8 +119,8 @@ bool ComputeLinksDistance::parseCollisionObjects()
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Cylinder>(link->collision->geometry);
 
-            shape = std::make_shared<fcl::Cylinder<double>>(collisionGeometry->radius,
-                                                            collisionGeometry->length);
+            shape = std::make_shared<fcl::Cylinderd>(collisionGeometry->radius,
+                                                     collisionGeometry->length);
 
             shape_origin = toKdl(link->collision->origin);
 
@@ -136,8 +136,8 @@ bool ComputeLinksDistance::parseCollisionObjects()
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Sphere>(link->collision->geometry);
 
-            shape = std::make_shared<fcl::Sphere<double>>(collisionGeometry->radius);
-            shape_origin = toKdl ( link->collision->origin );
+            shape = std::make_shared<fcl::Sphered>(collisionGeometry->radius);
+            shape_origin = toKdl(link->collision->origin);
         }
         else if ( link->collision->geometry->type == urdf::Geometry::BOX )
         {
@@ -146,9 +146,9 @@ bool ComputeLinksDistance::parseCollisionObjects()
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Box>(link->collision->geometry);
 
-            shape = std::make_shared<fcl::Box<double>>(collisionGeometry->dim.x,
-                                                       collisionGeometry->dim.y,
-                                                       collisionGeometry->dim.z);
+            shape = std::make_shared<fcl::Boxd>(collisionGeometry->dim.x,
+                                                collisionGeometry->dim.y,
+                                                collisionGeometry->dim.z);
 
             shape_origin = toKdl(link->collision->origin);
 
@@ -168,12 +168,12 @@ bool ComputeLinksDistance::parseCollisionObjects()
                 continue;
             }
 
-            std::vector<fcl::Vector3<double>> vertices;
+            std::vector<fcl::Vector3d> vertices;
             std::vector<fcl::Triangle> triangles;
 
             for(unsigned int i = 0; i < mesh->vertex_count; ++i)
             {
-                fcl::Vector3<double> v(mesh->vertices[3*i]*collisionGeometry->scale.x,
+                fcl::Vector3d v(mesh->vertices[3*i]*collisionGeometry->scale.x,
                         mesh->vertices[3*i + 1]*collisionGeometry->scale.y,
                         mesh->vertices[3*i + 2]*collisionGeometry->scale.z);
 
@@ -190,7 +190,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
             }
 
             // add the mesh data into the BVHModel structure
-            auto bvhModel = std::make_shared<fcl::BVHModel<fcl::OBBRSS<double>>>();
+            auto bvhModel = std::make_shared<fcl::BVHModel<fcl::OBBRSSd>>();
             shape = bvhModel;
             bvhModel->beginModel();
             bvhModel->addSubModel(vertices, triangles);
@@ -206,7 +206,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
             continue;
         }
 
-        auto collision_object = boost::make_shared<fcl::CollisionObject<double>>(shape);
+        auto collision_object = boost::make_shared<fcl::CollisionObjectd>(shape);
 
         _collision_obj[link->name] = collision_object;
 
@@ -319,17 +319,11 @@ void ComputeLinksDistance::generatePairsToCheck()
         }
     }
 
-    // get urdf links
-    std::vector<urdf::LinkSharedPtr> links;
-    _urdf->getLinks(links);
-
     // now, add all link-environment pairs
     for(auto envobj : _env_obj_names)
     {
-        for(auto urdf_link: links)
+        for(auto linkobj: _links_to_update)
         {
-            auto linkobj = urdf_link->name;
-
             // note: env always as second entry!
             _pairs_to_check.emplace_back(this, linkobj, envobj);
 
@@ -569,35 +563,25 @@ boost::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
 
 bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc)
 {
+
     bool ret = true;
 
     for(const auto& co : wc.collision_objects)
     {
-        // collision name
-        auto coll_name = "world/" + co.id;
 
         // handle remove action
         if(co.operation == co.REMOVE)
         {
-            // find id to remove
-            auto it = _collision_obj.find(coll_name);
-
-            // does not exist, continue
-            if(it == _collision_obj.end())
-            {
-                ret = false;
-                continue;
-            }
-
-            // exists, delete it
-            _collision_obj.erase(it);
-            _env_obj_names.erase(coll_name);
+            ret = removeWorldCollision(co.id) && ret;
+            continue;
         }
 
         // only support collisions specified w.r.t. world
         if(!co.header.frame_id.empty() &&
                 co.header.frame_id != "world")
         {
+            fprintf(stderr, "invalid frame id '%s' \n",
+                    co.header.frame_id.c_str());
             ret = false;
             continue;
         }
@@ -605,6 +589,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
         // for now, don't support array of primitives
         if(co.primitives.size() > 1)
         {
+            fprintf(stderr, "no support for primitive arrays \n");
             ret = false;
             continue;
         }
@@ -618,16 +603,23 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
             if(!fcl_collision)
             {
+                fprintf(stderr, "could parse primitive for '%s' \n",
+                        co.id.c_str());
                 ret = false;
                 continue;
             }
 
-            _collision_obj[coll_name] = fcl_collision;
-            _env_obj_names.insert(coll_name);
+            printf("adding collision '%s' to world \n",
+                   co.id.c_str());
+
+            addWorldCollision(co.id, fcl_collision);
 
         }
 
     }
+
+    // re-generate pairs to check
+    generatePairsToCheck();
 
     // octree unavailable
     if(wc.octomap.octomap.data.empty())
@@ -664,8 +656,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
     coll_obj->setTransform(w_T_octo);
 
     // save collision object
-    _collision_obj["world/octomap"] = coll_obj;
-    _env_obj_names.insert("world/octomap");
+    addWorldCollision("octomap", coll_obj);
 
     // re-generate pairs to check
     generatePairsToCheck();
@@ -673,6 +664,72 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
     return ret;
 
 
+}
+
+namespace
+{
+    std::string world_obj_name(std::string name)
+    {
+        return "world/" + name;
+    }
+}
+
+bool ComputeLinksDistance::addWorldCollision(const std::string &id,
+                                             boost::shared_ptr<fcl::CollisionObjectd> fcl_obj)
+{
+    // empty name invalid
+    if(id.empty())
+    {
+        fprintf(stderr, "invalid world collision '%s' \n",
+                id.c_str());
+
+        return false;
+    }
+
+    // collision name (to remove ambiguity with link names)
+    auto coll_name = world_obj_name(id);
+
+    // add to data structs
+    _collision_obj[coll_name] = fcl_obj;
+    _env_obj_names.insert(coll_name);
+
+    // note: should it return false if object already exists?
+    return true;
+}
+
+bool ComputeLinksDistance::removeWorldCollision(const std::string &id)
+{
+    auto coll_name = world_obj_name(id);
+
+    // find id to remove
+    auto it = _collision_obj.find(coll_name);
+
+    // does not exist
+    if(it == _collision_obj.end())
+    {
+        return false;
+    }
+
+    // exists, delete it
+    _collision_obj.erase(it);
+    _env_obj_names.erase(coll_name);
+
+    return true;
+}
+
+bool ComputeLinksDistance::moveWorldCollision(const std::string &id,
+                                              KDL::Frame new_pose)
+{
+    auto it = _collision_obj.find(world_obj_name(id));
+
+    if(it == _collision_obj.end())
+    {
+        return false;
+    }
+
+    it->second->setTransform(KDL2fcl(new_pose));
+
+    return true;
 }
 
 void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf::Model& srdf,
