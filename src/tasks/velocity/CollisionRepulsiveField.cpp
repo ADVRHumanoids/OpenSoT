@@ -65,10 +65,10 @@ void CollisionRepulsiveField::_update(const Eigen::VectorXd &x)
     for(const auto& data : distance_list)
     {
         // closest point on first link
-        Eigen::Vector3d p1_local = k2e(data.getLink_T_closestPoint().first.p);
+        Eigen::Vector3d p1_local = k2e(data.getClosestPoints().first.p);
 
         // closest point on second link
-        Eigen::Vector3d p2_local = k2e(data.getLink_T_closestPoint().second.p);
+        Eigen::Vector3d p2_local = k2e(data.getClosestPoints().second.p);
 
         // global closest points
         Eigen::Affine3d w_T_l1;
