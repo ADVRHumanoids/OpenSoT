@@ -5,9 +5,9 @@
 #include <XBotInterface/ModelInterface.h>
 #include <chrono>
 
-#define USE_ROS false
+#define ENABLE_ROS false
 
-#if USE_ROS
+#if ENABLE_ROS
     #include <ros/ros.h>
     #include <sensor_msgs/JointState.h>
 #endif
@@ -241,10 +241,6 @@ public:
 
     }
 
-    std::map<std::string,shared_ptr_type<fcl::CollisionGeometry<double>> > getShapes()
-    {
-        return _computeDistance.shapes_;
-    }
 
     std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
     {
@@ -316,7 +312,19 @@ protected:
 
       q.setZero(_model_ptr->getJointNum());
 
-      compute_distance.reset(new ComputeLinksDistance(*_model_ptr));
+
+      std::string urdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz";
+      std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
+
+
+      urdf::ModelSharedPtr urdf = boost::make_shared<urdf::Model>();
+      urdf->initFile(urdf_capsule_path);
+
+      srdf::ModelSharedPtr srdf = boost::make_shared<srdf::Model>();
+      srdf->initFile(*urdf, srdf_capsule_path);
+
+
+      compute_distance.reset(new ComputeLinksDistance(*_model_ptr, urdf, srdf));
   }
 
   virtual ~testCollisionUtils() {
@@ -372,7 +380,7 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
 
 
-#if USE_ROS
+#if ENABLE_ROS
     int argc;
     char *argv[] = {""};
     ros::init(argc, argv, "testCapsuleDistance");
@@ -413,11 +421,9 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     ASSERT_EQ(result.getLinkNames().second, linkB);
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
-    std::map<std::string,shared_ptr_type<fcl::CollisionGeometry<double>> > shapes_test;
     std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
-    shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 
@@ -541,11 +547,9 @@ TEST_F(testCollisionUtils, checkTimings)
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
-    std::map<std::string,shared_ptr_type<fcl::CollisionGeometry<double>> > shapes_test;
     std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
-    shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 
@@ -668,11 +672,9 @@ TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
-    std::map<std::string,shared_ptr_type<fcl::CollisionGeometry<double>> > shapes_test;
     std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
     std::map<std::string,KDL::Frame> link_T_shape_test;
 
-    shapes_test = compute_distance_observer.getShapes();
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
 

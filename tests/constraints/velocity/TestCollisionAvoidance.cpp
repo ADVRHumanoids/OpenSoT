@@ -269,6 +269,7 @@ void publishJointStates(const Eigen::VectorXd& q)
       std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
       std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman.yaml";
       std::string urdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz";
+      std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
       std::ifstream f(urdf_capsule_path);
       std::stringstream ss;
       ss << f.rdbuf();
@@ -293,12 +294,22 @@ void publishJointStates(const Eigen::VectorXd& q)
       q.resize(_model_ptr->getJointNum());
       q.setZero(q.size());
 
-      compute_distance.reset(new ComputeLinksDistance(*(_model_ptr.get())));
+      urdf = boost::make_shared<urdf::Model>();
+      urdf->initFile(urdf_capsule_path);
 
-      double padding = 0.005;//0.005;
-      std::string base_link = "Waist";
-      sc_constraint.reset(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(q, *(_model_ptr.get()),base_link,
-                              std::numeric_limits<double>::infinity(), padding));
+      srdf = boost::make_shared<srdf::Model>();
+      srdf->initFile(*urdf, srdf_capsule_path);
+
+
+      compute_distance = boost::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
+
+      sc_constraint = boost::make_shared<OpenSoT::constraints::velocity::SelfCollisionAvoidance>
+              (q,
+               *_model_ptr,
+               -1,
+               urdf,
+               srdf);
+      sc_constraint->setLinkPairThreshold(0.005);
 
 #if ENABLE_ROS
       for(unsigned int i = 0; i < this->_model_ptr->getEnabledJointNames().size(); ++i){
@@ -323,6 +334,8 @@ void publishJointStates(const Eigen::VectorXd& q)
   Eigen::VectorXd q;
   boost::shared_ptr<ComputeLinksDistance> compute_distance;
   OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sc_constraint;
+  urdf::ModelSharedPtr urdf;
+  srdf::ModelSharedPtr srdf;
 
 #if ENABLE_ROS
   ///ROS
@@ -513,7 +526,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
-    int t = 5;
+    int t = 100;
 
     Eigen::VectorXd qmin, qmax;
     this->_model_ptr->getJointLimits(qmin, qmax);
@@ -530,7 +543,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
                 new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     Eigen::VectorXd dq(this->q.size()); dq.setZero(dq.size());
-    for(unsigned int i = 0; i < 50*t; ++i)
+    for(unsigned int i = 0; i < 10*t; ++i)
     {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
@@ -552,7 +565,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
 #if ENABLE_ROS
         this->publishJointStates(this->q);
-        usleep(50000);
+        usleep(100000);
 #endif
 
 
@@ -580,7 +593,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
     // check the actual distance between the hand capsule pair
     boost::shared_ptr<ComputeLinksDistance> compute_distance =
-            boost::make_shared<ComputeLinksDistance>(*_model_ptr);
+            boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
     compute_distance->setCollisionWhiteList(whiteList);
     std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
     LinkPairDistance result = results.front();
@@ -799,7 +812,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
         //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
 
         boost::shared_ptr<ComputeLinksDistance> compute_distance =
-                boost::make_shared<ComputeLinksDistance>(*_model_ptr);
+                boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
         std::list<std::pair<std::string,std::string> > whiteList_;
         whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
         compute_distance->setCollisionWhiteList(whiteList_);
@@ -1021,7 +1034,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
         // check the actual distance between the hand capsule pair
         boost::shared_ptr<ComputeLinksDistance> compute_distance =
-                boost::make_shared<ComputeLinksDistance>(*_model_ptr);
+                boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
         std::list<std::pair<std::string,std::string> > whiteList_;
         whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
         compute_distance->setCollisionWhiteList(whiteList_);
@@ -1118,8 +1131,18 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     // start rechecking the distances of the capsules
 
     // check the actual distance between the hand capsule pair
+    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
+    std::string urdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz";
+    std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
+
+
+    urdf::ModelSharedPtr urdf = boost::make_shared<urdf::Model>();
+    urdf->initFile(urdf_capsule_path);
+
+    srdf::ModelSharedPtr srdf = boost::make_shared<srdf::Model>();
+    srdf->initFile(*urdf, srdf_capsule_path);
     boost::shared_ptr<ComputeLinksDistance> compute_distance =
-            boost::make_shared<ComputeLinksDistance>(*_model_ptr);
+            boost::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
     compute_distance->setCollisionWhiteList(whiteList);
     std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
     LinkPairDistance result = results.front();

@@ -47,12 +47,12 @@ public:
 
     /**
      * @brief SelfCollisionAvoidance
-     * @param x
-     * @param robot
-     * @param detection_threshold
-     * @param distance_threshold
-     * @param boundScaling
-     * @param max_pairs
+     * @param x status
+     * @param robot model
+     * @param max_pairs maximum number of link pairs checked for SCA (-1 for all)
+     * @param collision_urdf urdf used for collision model
+     * @param collision_srdf srdf used for collision model
+     * NOTE: if urdf and srdf are not specified, the one inside the robot model will be used
      */
     SelfCollisionAvoidance(const Eigen::VectorXd& x,
                            const XBot::ModelInterface& robot,
@@ -61,26 +61,26 @@ public:
                            srdf::ModelConstSharedPtr collision_srdf = nullptr);
 
     /**
-     * @brief getLinkPairThreshold
-     * @return _LinkPair_threshold
+     * @brief getLinkPairThreshold distance offset between two link pairs
+     * @return _LinkPair_threshold distance offset between two link pairs
      */
     double getLinkPairThreshold();
 
     /**
      * @brief getDetectionThreshold
-     * @return _Detection_threshold
+     * @return _Detection_threshold the maximum distance which we use to look for link pairs
      */
     double getDetectionThreshold();
 
     /**
-     * @brief setLinkPairThreshold set _LinkPair_threshold
-     * @param linkPair_threshold (always positive)
+     * @brief setLinkPairThreshold set _LinkPair_threshold distance offset between two link pairs
+     * @param linkPair_threshold (always positive) distance offset between two link pairs
      */
     void setLinkPairThreshold(const double linkPair_threshold);
 
     /**
      * @brief setDetectionThreshold set _Detection_threshold
-     * @param detection_threshold (always positive)
+     * @param detection_threshold (always positive), the maximum distance which we use to look for link pairs
      */
     void setDetectionThreshold(const double detection_threshold);
 
