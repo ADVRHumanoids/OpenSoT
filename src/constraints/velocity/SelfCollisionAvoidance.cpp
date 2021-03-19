@@ -116,6 +116,7 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 
         // minimum distance
         double d12 = data.getDistance();
+        std::cout<<"distance "<<data.getLinkNames().first<<" - "<<data.getLinkNames().second<<": "<<d12<<std::endl;
 
         // jacobian of p1
         _robot.getJacobian(data.getLinkNames().first,
@@ -168,6 +169,11 @@ bool SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::L
 bool SelfCollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
 {
     return _dist_calc->setWorldCollisions(wc);
+}
+
+void SelfCollisionAvoidance::setLinksVsEnvironment(const std::vector<std::string>& links)
+{
+    _dist_calc->setLinksVsEnvironment(links);
 }
 
 bool SelfCollisionAvoidance::addWorldCollision(const std::string &id,

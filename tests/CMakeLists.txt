@@ -96,7 +96,7 @@ endif()
 if(${FCL_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
                                        testCollisionAvoidanceVelocityConstraint
-                                       #testCollisionAvoidanceEnvironmentVelocityConstraint
+                                       testCollisionAvoidanceEnvironmentVelocityConstraint
 )
 endif()
 
@@ -307,10 +307,10 @@ if(${FCL_FOUND})
     add_dependencies(testCollisionAvoidanceVelocityConstraint GTest-ext OpenSoT)
     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 
-    #ADD_EXECUTABLE(testCollisionAvoidanceEnvironmentVelocityConstraint constraints/velocity/TestCollisionAvoidanceEnvironment.cpp)
-    #TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs} -lccd)
-    #add_dependencies(testCollisionAvoidanceEnvironmentVelocityConstraint GTest-ext OpenSoT)
-    #add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidanceEnvironment COMMAND testCollisionAvoidanceEnvironmentVelocityConstraint)
+    ADD_EXECUTABLE(testCollisionAvoidanceEnvironmentVelocityConstraint constraints/velocity/TestCollisionAvoidanceEnvironment.cpp)
+    TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs} -lccd)
+    add_dependencies(testCollisionAvoidanceEnvironmentVelocityConstraint GTest-ext OpenSoT)
+    add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidanceEnvironment COMMAND testCollisionAvoidanceEnvironmentVelocityConstraint)
 endif()
 
 ADD_EXECUTABLE(testCartesianUtils utils/cartesian_utils_test.cpp)

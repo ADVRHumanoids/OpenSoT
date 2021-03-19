@@ -221,6 +221,9 @@ bool ComputeLinksDistance::parseCollisionObjects()
          * that is, we store link_T_shape for the actual link */
         _link_T_shape[link->name] = shape_origin;
 
+        // add link name to list of links colliding with environment
+        _links_vs_environment.insert(link->name);
+
     }
 
     return true;
@@ -228,7 +231,12 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
 bool ComputeLinksDistance::updateCollisionObjects()
 {
-    for(auto link_name : _links_to_update)
+    _tmp_links_list.clear();
+
+    _tmp_links_list.insert(_links_to_update.begin(), _links_to_update.end());
+    _tmp_links_list.insert(_links_vs_environment.begin(), _links_vs_environment.end());
+
+    for(auto link_name : _tmp_links_list)
     {
         // link pose
         KDL::Frame w_T_link, w_T_shape;
@@ -329,7 +337,7 @@ void ComputeLinksDistance::generatePairsToCheck()
     // now, add all link-environment pairs
     for(auto envobj : _env_obj_names)
     {
-        for(auto linkobj: _links_to_update)
+        for(auto linkobj: _links_vs_environment)
         {
             // note: env always as second entry!
             _pairs_to_check.emplace_back(this, linkobj, envobj);

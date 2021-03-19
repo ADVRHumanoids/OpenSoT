@@ -167,6 +167,8 @@ public:
      */
     void setBoundScaling(const double boundScaling);
 
+    void setLinksVsEnvironment(const std::vector<std::string>& links);
+
 
     ~SelfCollisionAvoidance();
 

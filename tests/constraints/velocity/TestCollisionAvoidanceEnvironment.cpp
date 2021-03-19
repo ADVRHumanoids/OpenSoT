@@ -2,7 +2,6 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/CartesianPositionConstraint.h>
-#include <OpenSoT/constraints/velocity/CollisionAvoidance.h>
 #include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
@@ -14,7 +13,7 @@
 #include <chrono>
 #include <OpenSoT/utils/AutoStack.h>
 #include <eigen_conversions/eigen_msg.h>
-#define ENABLE_ROS false
+#define ENABLE_ROS true
 
 #if ENABLE_ROS
 #include <ros/ros.h>
@@ -37,6 +36,14 @@ public:
       std::ifstream f(urdf_path);
       std::stringstream ss;
       ss << f.rdbuf();
+
+      urdf = boost::make_shared<urdf::Model>();
+      urdf->initFile(urdf_path);
+
+      std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
+      srdf = boost::make_shared<srdf::Model>();
+      srdf->initFile(*urdf, srdf_capsule_path);
+
 
       _path_to_cfg = robotology_root + relative_path;
 
@@ -105,6 +112,9 @@ public:
   XBot::ModelInterface::Ptr _model_ptr;
   std::string _path_to_cfg;
   Eigen::VectorXd q;
+
+  urdf::ModelSharedPtr urdf;
+  srdf::ModelSharedPtr srdf;
 
 #if ENABLE_ROS
   ///ROS
@@ -195,8 +205,25 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     shape_origin.linear() = Eigen::Matrix3d::Identity();
     collision_object->setTransform ( shape_origin );
     envionment_collision_objects["env"] = collision_object;
-    auto environment_collsion_constraint = boost::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance> (
-                q, *_model_ptr, base_link, interested_links, envionment_collision_objects, 1., 0.00001, 1 );
+
+    OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr environment_collsion_constraint =
+            boost::make_shared<OpenSoT::constraints::velocity::SelfCollisionAvoidance> (
+                q, *_model_ptr, -1, this->urdf, this->srdf);
+
+    environment_collsion_constraint->setDetectionThreshold(1.);
+    environment_collsion_constraint->setLinkPairThreshold(0.1);
+    environment_collsion_constraint->setBoundScaling(1.);
+
+
+
+
+    for(auto pair : envionment_collision_objects)
+        EXPECT_TRUE(environment_collsion_constraint->addWorldCollision(pair.first, pair.second));
+
+
+    // we consider only environment collision avoidance
+    environment_collsion_constraint->setCollisionWhiteList(std::list<LinkPairDistance::LinksPair>());
+    environment_collsion_constraint->setLinksVsEnvironment(interested_links);
 
 
     auto autostack_ = boost::make_shared<OpenSoT::AutoStack> ( left_arm_task + right_arm_task); // + 0.2*postural_task%indices
@@ -262,9 +289,6 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
         desired_pose.translation() = right_arm_initial_pose.translation() + Eigen::Vector3d ( 1,0,1 ) *0.3*length* ( 1-std::cos ( 2*3.1415/period*t ) );
         right_arm_task->setReference ( desired_pose.matrix() );
 
-        std::map<std::string, KDL::Frame> kdl_frames;
-        tf::transformEigenToKDL ( collision_pose, kdl_frames["env"] );
-        environment_collsion_constraint->updateEnvironmentCollisionObjects ( kdl_frames );
 
         EXPECT_LE(left_arm_task->getActualPose()(0,3), 0.243);
 

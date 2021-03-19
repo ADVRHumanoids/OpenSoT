@@ -322,6 +322,15 @@ public:
 
     std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getCustomCapsules(){ return _custom_capsules;}
 
+    void setLinksVsEnvironment(const std::vector<std::string>& links)
+    {
+        _links_vs_environment.clear();
+        for(auto link : links)
+            _links_vs_environment.insert(link);
+
+        generatePairsToCheck();
+    }
+
 private:
 
     /**
@@ -405,6 +414,13 @@ private:
      * @brief linksToUpdate a list of links to update
      */
     std::set<std::string> _links_to_update;
+
+    /**
+     * @brief _links_vs_environment list of links to check against environment
+     */
+    std::set<std::string> _links_vs_environment;
+
+    std::set<std::string> _tmp_links_list;
 
     /**
      * @brief generatePairsToCheck generates a list of pairs to check for distance
