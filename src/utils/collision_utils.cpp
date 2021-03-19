@@ -625,9 +625,6 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
     }
 
-    // re-generate pairs to check
-    generatePairsToCheck();
-
     // octree unavailable
     if(wc.octomap.octomap.data.empty())
     {
@@ -665,11 +662,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
     // save collision object
     addWorldCollision("octomap", coll_obj);
 
-    // re-generate pairs to check
-    generatePairsToCheck();
-
     return ret;
-
 
 }
 
@@ -700,6 +693,9 @@ bool ComputeLinksDistance::addWorldCollision(const std::string &id,
     _collision_obj[coll_name] = fcl_obj;
     _env_obj_names.insert(coll_name);
 
+    // re-generate pairs to check
+    generatePairsToCheck();
+
     // note: should it return false if object already exists?
     return true;
 }
@@ -720,6 +716,9 @@ bool ComputeLinksDistance::removeWorldCollision(const std::string &id)
     // exists, delete it
     _collision_obj.erase(it);
     _env_obj_names.erase(coll_name);
+
+    // re-generate pairs to check
+    generatePairsToCheck();
 
     return true;
 }
