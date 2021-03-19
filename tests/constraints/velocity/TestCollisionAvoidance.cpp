@@ -176,30 +176,6 @@ public:
 
     }
 
-//    std::map<std::string,shared_ptr<fcl::CollisionGeometry> > getShapes()
-//    {
-//        return _computeDistance.shapes_;
-//    }
-
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
-    {
-        return _computeDistance.collision_objects_;
-    }
-
-    std::map<std::string,KDL::Frame> getlink_T_shape()
-    {
-        return _computeDistance.link_T_shape;
-    }
-
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
-    {
-        return _computeDistance.custom_capsules_;
-    }
-
-    bool updateCollisionObjects()
-    {
-        return _computeDistance.updateCollisionObjects();
-    }
 
     bool globalToLinkCoordinates(const std::string& linkName,
                                  const fcl::Transform3<double> &fcl_w_T_f,
@@ -216,12 +192,12 @@ public:
 
         KDL::Frame w_T_f = fcl2KDL(fcl_w_T_f);
 
-        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.collision_objects_[linkName]->getTransform();
+        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.getCollisionObjects()[linkName]->getTransform();
         KDL::Frame w_T_shape = fcl2KDL(fcl_w_T_shape);
 
         KDL::Frame shape_T_f = w_T_shape.Inverse()*w_T_f;
 
-        link_T_f = _computeDistance.link_T_shape[linkName] * shape_T_f;
+        link_T_f = _computeDistance.getLinkToShapeTransforms()[linkName] * shape_T_f;
 
         return true;
     }
@@ -602,7 +578,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     std::cout<<"reference_distance: "<<reference_distance<<std::endl;
 
 
-    EXPECT_NEAR(0.005, reference_distance, 1e-4);
+    EXPECT_NEAR(0.005, reference_distance, 1e-3);
 
 
 }

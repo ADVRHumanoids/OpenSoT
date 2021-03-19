@@ -244,17 +244,17 @@ public:
 
     std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
     {
-        return _computeDistance.collision_objects_;
+        return _computeDistance.getCollisionObjects();
     }
 
     std::map<std::string,KDL::Frame> getlink_T_shape()
     {
-        return _computeDistance.link_T_shape;
+        return _computeDistance.getLinkToShapeTransforms();
     }
 
     std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
     {
-        return _computeDistance.custom_capsules_;
+        return _computeDistance.getCustomCapsules();
     }
 
     bool updateCollisionObjects()
@@ -277,12 +277,12 @@ public:
 
         KDL::Frame w_T_f = fcl2KDL(fcl_w_T_f);
 
-        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.collision_objects_[linkName]->getTransform();
+        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.getCollisionObjects()[linkName]->getTransform();
         KDL::Frame w_T_shape = fcl2KDL(fcl_w_T_shape);
 
         KDL::Frame shape_T_f = w_T_shape.Inverse()*w_T_f;
 
-        link_T_f = _computeDistance.link_T_shape[linkName] * shape_T_f;
+        link_T_f = _computeDistance.getLinkToShapeTransforms()[linkName] * shape_T_f;
 
         return true;
     }
@@ -364,7 +364,7 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
       LinkPairDistance result2 = results.front();
       ASSERT_EQ(result1.getDistance(), result2.getDistance());
       ASSERT_EQ(result1.getLinkNames(), result2.getLinkNames());
-      ASSERT_EQ(result1.getLink_T_closestPoint(), result2.getLink_T_closestPoint());
+      ASSERT_EQ(result1.getClosestPoints(), result2.getClosestPoints());
 
 }
 
@@ -448,10 +448,8 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     _model_ptr->getPose(linkB, w_T_link_right_hand);
 
     double actual_distance_check =
-        (   ( w_T_link_left_hand *
-              result.getLink_T_closestPoint().first ).p -
-            ( w_T_link_right_hand *
-              result.getLink_T_closestPoint().second ).p
+        (   ( result.getClosestPoints().first ).p -
+            ( result.getClosestPoints().second ).p
         ).Norm();
 
     fcl::DistanceRequest<double> distance_request;

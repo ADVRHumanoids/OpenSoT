@@ -239,7 +239,6 @@ public:
      */
     static KDL::Frame fcl2KDL(const fcl::Transform3d& in);
 
-    friend class TestCapsuleLinksDistance;
 
     /**
      * @brief The Capsule class represents a capsule shape expressed in an
@@ -247,11 +246,13 @@ public:
      */
     class Capsule
     {
+    private:
         KDL::Vector ep1;
         KDL::Vector ep2;
         double radius;
         double length;
 
+    public:
         /**
          * @brief Capsule constructs a capsule object
          * @param origin the frame located in the end-point number 1, with z-axis aligned with the capsule axis
@@ -298,6 +299,29 @@ public:
 
     friend class ComputeLinksDistance::LinksPair;
 
+    std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> getCollisionObjects(){ return _collision_obj;}
+
+    /**
+     * @brief globalToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
+     * @param linkName the link name representing a link reference frame
+     * @param w_T_f fcl::Transform3f representing a frame in a global reference frame
+     * @param link_T_f a KDL::Frame representing a frame in link reference frame
+     * @return true on success
+     */
+    bool globalToLinkCoordinates(const std::string& linkName,
+                                 const fcl::Transform3<double>& w_T_f,
+                                 KDL::Frame& link_T_f);
+
+    /**
+     * @brief updateCollisionObjects updates all collision objects with correct transforms (link_T_shape)
+     * @return true on success
+     */
+    bool updateCollisionObjects();
+
+    std::map<std::string,KDL::Frame> getLinkToShapeTransforms() {return _link_T_shape;}
+
+    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getCustomCapsules(){ return _custom_capsules;}
+
 private:
 
     /**
@@ -332,6 +356,11 @@ private:
     std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> _collision_obj;
 
     /**
+    * @brief _custom_capsules is a map of custom capsules specified as endpoints + radius
+    */
+    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > _custom_capsules;
+
+    /**
      * @brief _env_obj_names is the set of the names of all objects
      * that make up the environment collision model; the corresponding
      * fcl collision is found inside the collision_objects_ member
@@ -345,16 +374,7 @@ private:
      */
     std::map<std::string,KDL::Frame> _link_T_shape;
 
-    /**
-     * @brief globalToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
-     * @param linkName the link name representing a link reference frame
-     * @param w_T_f fcl::Transform3f representing a frame in a global reference frame
-     * @param link_T_f a KDL::Frame representing a frame in link reference frame
-     * @return true on success
-     */
-    bool globalToLinkCoordinates(const std::string& linkName,
-                                 const fcl::Transform3<double>& w_T_f,
-                                 KDL::Frame& link_T_f);
+
 
     /**
      * @brief shapeToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
@@ -374,11 +394,7 @@ private:
      */
     bool parseCollisionObjects();
 
-    /**
-     * @brief updateCollisionObjects updates all collision objects with correct transforms (link_T_shape)
-     * @return true on success
-     */
-    bool updateCollisionObjects();
+
 
     /**
      * @brief generateLinksToUpdate generates a list of links for which we query w_T_link
