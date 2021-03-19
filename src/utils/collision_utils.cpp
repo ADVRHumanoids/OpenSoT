@@ -610,7 +610,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
             if(!fcl_collision)
             {
-                fprintf(stderr, "could parse primitive for '%s' \n",
+                fprintf(stderr, "could not parse primitive for '%s' \n",
                         co.id.c_str());
                 ret = false;
                 continue;
@@ -710,6 +710,9 @@ bool ComputeLinksDistance::removeWorldCollision(const std::string &id)
     // does not exist
     if(it == _collision_obj.end())
     {
+        fprintf(stderr, "invalid world collision '%s' \n",
+                id.c_str());
+
         return false;
     }
 
