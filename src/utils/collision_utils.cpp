@@ -108,6 +108,11 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
             shape_origin = toKdl(cylinder->origin);
 
+            // note: why this? it looks wrong from simulations..
+            //shape_origin.p -= collisionGeometry->length/2.0 * shape_origin.M.UnitZ();
+            //shape_origin.p += collisionGeometry->length/2.0 * shape_origin.M.UnitZ();
+            //shape_origin.p += (collisionGeometry->length/2.0+collisionGeometry->radius) * shape_origin.M.UnitZ();
+
             _custom_capsules[link->name] =
                                            boost::make_shared<ComputeLinksDistance::Capsule>(
                                                shape_origin,
@@ -115,8 +120,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
                                                collisionGeometry->length
                                                );
 
-            // note: why this? it looks wrong from simulations..
-            // shape_origin.p -= collisionGeometry->length/2.0 * shape_origin.M.UnitZ();
+
 
         }
         else if(link->collision->geometry->type == urdf::Geometry::CYLINDER)
