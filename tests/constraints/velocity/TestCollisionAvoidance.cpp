@@ -11,7 +11,7 @@
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <OpenSoT/utils/collision_utils.h>
 #include <chrono>
-#define ENABLE_ROS false
+#define ENABLE_ROS true
 
 #if ENABLE_ROS
 #include <ros/ros.h>

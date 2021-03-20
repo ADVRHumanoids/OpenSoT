@@ -211,7 +211,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
                 q, *_model_ptr, -1, this->urdf, this->srdf);
 
     environment_collsion_constraint->setDetectionThreshold(1.);
-    environment_collsion_constraint->setLinkPairThreshold(0.1);
+    environment_collsion_constraint->setLinkPairThreshold(0.0001); //0.1
     environment_collsion_constraint->setBoundScaling(1.);
 
 
