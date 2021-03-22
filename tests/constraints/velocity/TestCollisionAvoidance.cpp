@@ -527,7 +527,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
         this->_model_ptr->update();
 
         auto tic = std::chrono::steady_clock::now();
-        //this->sc_constraint->update(this->q);
+        this->sc_constraint->update(this->q);
         auto toc = std::chrono::steady_clock::now();
         auto time_for_update = std::chrono::duration_cast<std::chrono::microseconds>(toc-tic).count();
         std::cout<<"SCA Update time: "<<time_for_update/1000.<<" [ms]"<<std::endl;
