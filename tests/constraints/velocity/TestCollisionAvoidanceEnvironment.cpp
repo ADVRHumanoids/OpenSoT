@@ -21,31 +21,44 @@
 #include <robot_state_publisher/robot_state_publisher.h>
 #endif
 
+#if ROS_VERSION_MINOR <= 12
+#define STATIC_POINTER_CAST boost::static_pointer_cast
+#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
+#define SHARED_PTR boost::shared_ptr
+#define MAKE_SHARED boost::make_shared
+#else
+#define STATIC_POINTER_CAST std::static_pointer_cast
+#define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
+#define SHARED_PTR std::shared_ptr
+#define MAKE_SHARED std::make_shared
+#endif
+
 namespace {
 
-class testCollisionAvoidanceConstraint : public ::testing::Test{
+class testCollisionAvoidanceConstraint : public ::testing::Test
+{
+
 public:
 
  protected:
 
   testCollisionAvoidanceConstraint()
   {
-      std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-      std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman.yaml";
-      std::string urdf_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz";
+      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman.yaml";
+      std::string urdf_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
       std::ifstream f(urdf_path);
       std::stringstream ss;
       ss << f.rdbuf();
 
-      urdf = boost::make_shared<urdf::Model>();
+      urdf = MAKE_SHARED<urdf::Model>();
       urdf->initFile(urdf_path);
 
-      std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
-      srdf = boost::make_shared<srdf::Model>();
+      std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
+      srdf = MAKE_SHARED<srdf::Model>();
       srdf->initFile(*urdf, srdf_capsule_path);
 
 
-      _path_to_cfg = robotology_root + relative_path;
+      _path_to_cfg = relative_path;
 
       _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 

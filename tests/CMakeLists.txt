@@ -5,7 +5,8 @@ find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher urdf srdfdom)
 find_package(osqp QUIET)
 
-
+add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
+message(STATUS "DOPENSOT_TEST_PATH is ${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES}

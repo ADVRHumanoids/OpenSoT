@@ -20,6 +20,18 @@
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
 
+#if ROS_VERSION_MINOR <= 12
+#define STATIC_POINTER_CAST boost::static_pointer_cast
+#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
+#define SHARED_PTR boost::shared_ptr
+#define MAKE_SHARED boost::make_shared
+#else
+#define STATIC_POINTER_CAST std::static_pointer_cast
+#define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
+#define SHARED_PTR std::shared_ptr
+#define MAKE_SHARED std::make_shared
+#endif
+
 KDL::Frame fcl2KDL(const fcl::Transform3<double> &in)
 {
     Eigen::Quaterniond q(in.linear());
@@ -318,10 +330,10 @@ protected:
       std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
 
 
-      urdf::ModelSharedPtr urdf = boost::make_shared<urdf::Model>();
+      urdf::ModelSharedPtr urdf = MAKE_SHARED<urdf::Model>();
       urdf->initFile(urdf_capsule_path);
 
-      srdf::ModelSharedPtr srdf = boost::make_shared<srdf::Model>();
+      srdf::ModelSharedPtr srdf = MAKE_SHARED<srdf::Model>();
       srdf->initFile(*urdf, srdf_capsule_path);
 
 
