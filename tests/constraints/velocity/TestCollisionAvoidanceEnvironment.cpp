@@ -196,7 +196,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     auto joint_limit_constraint = boost::make_shared<OpenSoT::constraints::velocity::JointLimits> ( q, q_max, q_min );
 
 
-    std::vector<std::string> interested_links = {"LShp","LShr","LShy","LElb","LForearm","LSoftHandLink"};
+    std::list<std::string> interested_links = {"LShp","LShr","LShy","LElb","LForearm","LSoftHandLink"};
     std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> envionment_collision_objects;
     std::shared_ptr<fcl::CollisionGeometryd> shape = std::make_shared<fcl::Boxd> ( 0.1, 0.6, 1.4 );
     boost::shared_ptr<fcl::CollisionObjectd> collision_object ( new fcl::CollisionObjectd ( shape ) );
@@ -261,7 +261,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
         cube.color.a = 0.5;
 
         tf::poseEigenToMsg ( collision_pose, cube.pose );
-        cube.pose.position.x -= 0.05;
+        //cube.pose.position.x -= 0.05;
 #endif
 
 
