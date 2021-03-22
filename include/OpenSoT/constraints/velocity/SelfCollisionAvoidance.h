@@ -118,7 +118,7 @@ public:
      * @param whiteList a list of links pairs for which to not check collision detection
      * @return true on success
      */
-    bool setCollisionWhiteList(std::list< LinksPair > whiteList);
+    bool setCollisionWhiteList(std::list<LinksPair> whiteList);
 
     /**
      * @brief setCollisionBlackList resets the allowed collision matrix by setting all collision pairs
@@ -128,7 +128,7 @@ public:
      * @param blackList a list of links pairs for which to not check collision detection
      * @return true on success
      */
-    bool setCollisionBlackList(std::list< LinksPair > blackList);
+    bool setCollisionBlackList(std::list<LinksPair> blackList);
 
     /**
      * @brief add/remove world collision objects according to the given planning
@@ -167,7 +167,11 @@ public:
      */
     void setBoundScaling(const double boundScaling);
 
-    void setLinksVsEnvironment(const std::vector<std::string>& links);
+    /**
+     * @brief setLinksVsEnvironment
+     * @param links
+     */
+    void setLinksVsEnvironment(const std::list<std::string>& links);
 
 
     ~SelfCollisionAvoidance();

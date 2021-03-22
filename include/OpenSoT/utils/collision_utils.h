@@ -43,19 +43,19 @@
 // construct vector
 inline KDL::Vector toKdl(urdf::Vector3 v)
 {
-  return KDL::Vector(v.x, v.y, v.z);
+    return KDL::Vector(v.x, v.y, v.z);
 }
 
 // construct rotation
 inline KDL::Rotation toKdl(urdf::Rotation r)
 {
-  return KDL::Rotation::Quaternion(r.x, r.y, r.z, r.w);
+    return KDL::Rotation::Quaternion(r.x, r.y, r.z, r.w);
 }
 
 // construct pose
 inline KDL::Frame toKdl(urdf::Pose p)
 {
-  return KDL::Frame(toKdl(p.rotation), toKdl(p.position));
+    return KDL::Frame(toKdl(p.rotation), toKdl(p.position));
 }
 
 /**
@@ -288,12 +288,7 @@ public:
 
         LinksPair(ComputeLinksDistance* const father,
                   std::string linkA,
-                  std::string linkB):
-            linkA(linkA), linkB(linkB)
-        {
-            collisionObjectA = father->_collision_obj.at(linkA);
-            collisionObjectB = father->_collision_obj.at(linkB);
-        }
+                  std::string linkB);
 
     };
 
@@ -318,18 +313,11 @@ public:
      */
     bool updateCollisionObjects();
 
-    std::map<std::string,KDL::Frame> getLinkToShapeTransforms() {return _link_T_shape;}
+    std::map<std::string,KDL::Frame> getLinkToShapeTransforms();
 
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getCustomCapsules(){ return _custom_capsules;}
+    std::map<std::string, boost::shared_ptr<ComputeLinksDistance::Capsule>> getCustomCapsules(){ return _custom_capsules;}
 
-    void setLinksVsEnvironment(const std::vector<std::string>& links)
-    {
-        _links_vs_environment.clear();
-        for(auto link : links)
-            _links_vs_environment.insert(link);
-
-        generatePairsToCheck();
-    }
+    void setLinksVsEnvironment(const std::list<std::string>& links);
 
 private:
 
@@ -411,7 +399,8 @@ private:
     void generateLinksToUpdate();
 
     /**
-     * @brief linksToUpdate a list of links to update
+     * @brief _links_to_update contains all robot links that can participate
+     * in a collision (either with the environment or with other links)
      */
     std::set<std::string> _links_to_update;
 
@@ -419,8 +408,6 @@ private:
      * @brief _links_vs_environment list of links to check against environment
      */
     std::set<std::string> _links_vs_environment;
-
-    std::set<std::string> _tmp_links_list;
 
     /**
      * @brief generatePairsToCheck generates a list of pairs to check for distance
@@ -434,8 +421,8 @@ private:
 
     /**
      * @brief loadDisabledCollisionsFromSRDF disabled collisions between links as specified in the robot srdf.
-     *        Notice this function will not reset the acm, rather just disable collisions that are flagged as
-     *        "disabled" in the robot srdf
+     * Notice this function will not reset the acm, rather just disable collisions that are flagged as
+     * "disabled" in the robot srdf
      * @param srdf the srdf file to use to load the ACM
      * @param acm the allowed collision matrix to modify according to the srdf info
      * @TODO we should move this in collision_utils together with checkSelfCollision and checkSelfCollisionAt

@@ -15,13 +15,13 @@
 #endif
 
 bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
-                                                   const fcl::Transform3<double> &fcl_w_T_f,
+                                                   const fcl::Transform3d &fcl_w_T_f,
                                                    KDL::Frame &link_T_f )
 {
 
-    fcl::Transform3<double> fcl_w_T_shape = _collision_obj[linkName]->getTransform();
+    fcl::Transform3d fcl_w_T_shape = _collision_obj[linkName]->getTransform();
 
-    fcl::Transform3<double> fcl_shape_T_f = fcl_w_T_shape.inverse() *fcl_w_T_f;
+    fcl::Transform3d fcl_shape_T_f = fcl_w_T_shape.inverse() *fcl_w_T_f;
 
     link_T_f = _link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
 
@@ -29,7 +29,7 @@ bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
 }
 
 bool ComputeLinksDistance::shapeToLinkCoordinates(const std::string& linkName,
-                                                  const fcl::Transform3<double> &fcl_shape_T_f,
+                                                  const fcl::Transform3d &fcl_shape_T_f,
                                                   KDL::Frame &link_T_f )
 {
 
@@ -235,12 +235,8 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
 bool ComputeLinksDistance::updateCollisionObjects()
 {
-    _tmp_links_list.clear();
 
-    _tmp_links_list.insert(_links_to_update.begin(), _links_to_update.end());
-    _tmp_links_list.insert(_links_vs_environment.begin(), _links_vs_environment.end());
-
-    for(auto link_name : _tmp_links_list)
+    for(auto link_name : _links_to_update)
     {
         // link pose
         KDL::Frame w_T_link, w_T_shape;
@@ -250,31 +246,45 @@ bool ComputeLinksDistance::updateCollisionObjects()
         w_T_shape = w_T_link * _link_T_shape.at(link_name);
 
         // set pose to fcl shape
-        fcl::Transform3<double> fcl_w_T_shape = KDL2fcl(w_T_shape);
-        fcl::CollisionObject<double>* collObj_shape = _collision_obj[link_name].get();
+        fcl::Transform3d fcl_w_T_shape = KDL2fcl(w_T_shape);
+        fcl::CollisionObjectd* collObj_shape = _collision_obj.at(link_name).get();
         collObj_shape->setTransform(fcl_w_T_shape);
     }
 
     return true;
 }
 
-
-fcl::Transform3<double> ComputeLinksDistance::KDL2fcl(const KDL::Frame& in)
+std::map<std::string, KDL::Frame> ComputeLinksDistance::getLinkToShapeTransforms()
 {
-    fcl::Transform3<double> out;
+    return _link_T_shape;
+}
+
+void ComputeLinksDistance::setLinksVsEnvironment(const std::list<std::string>& links)
+{
+    _links_vs_environment.clear();
+    _links_vs_environment.insert(links.begin(), links.end());
+
+    generateLinksToUpdate();
+    generatePairsToCheck();
+}
+
+
+fcl::Transform3d ComputeLinksDistance::KDL2fcl(const KDL::Frame& in)
+{
+    fcl::Transform3d out;
     double x, y, z, w;
     in.M.GetQuaternion(x, y, z, w);
-    fcl::Quaternion<double> q(w, x, y, z);
+    fcl::Quaterniond q(w, x, y, z);
     out.translation() << in.p[0], in.p[1], in.p[2];
     out.linear() = q.toRotationMatrix();
     return out;
 }
 
-KDL::Frame ComputeLinksDistance::fcl2KDL(const fcl::Transform3<double>& in)
+KDL::Frame ComputeLinksDistance::fcl2KDL(const fcl::Transform3d& in)
 {
 
-    fcl::Quaternion<double> q (in.linear());
-    fcl::Vector3<double> t = in.translation();
+    fcl::Quaterniond q (in.linear());
+    fcl::Vector3d t = in.translation();
 
     KDL::Frame f;
     f.p = KDL::Vector (t[0], t[1], t[2]);
@@ -289,6 +299,7 @@ void ComputeLinksDistance::generateLinksToUpdate()
     std::vector<std::string> entries;
     _acm->getAllEntryNames(entries);
 
+    // start by clearing the set
     _links_to_update.clear();
 
     // take all link pairs that (i) can possibly collide, (ii) are not supposed
@@ -310,10 +321,15 @@ void ComputeLinksDistance::generateLinksToUpdate()
             }
         }
     }
+
+    // add links that can can collide with the environment
+    _links_to_update.insert(_links_vs_environment.begin(),
+                            _links_vs_environment.end());
 }
 
 void ComputeLinksDistance::generatePairsToCheck()
 {
+    // start by clearing the set
     _pairs_to_check.clear();
 
     // get all link pairs that can possibly collide
@@ -396,7 +412,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
     updateCollisionObjects();
 
     // loop over pairs to check
-    for(auto pair : _pairs_to_check)
+    for(auto& pair : _pairs_to_check)
     {
         // object names
         // note: could be either link names or world objects
@@ -421,24 +437,22 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         }
 
         // set request for distance computation
-        fcl::DistanceRequest<double> request;
-#if FCL_MINOR_VERSION > 2
+        fcl::DistanceRequestd request;
         request.gjk_solver_type = fcl::GST_INDEP; // fcl::GST_LIBCCD;
-#endif
         request.enable_nearest_points = true;
 
         // result will be returned via the collision result structure
-        fcl::DistanceResult<double> result;
+        fcl::DistanceResultd result;
 
         // perform distance test
         fcl::distance(coll_A, coll_B, request, result);
 
         // we return nearest points
-        fcl::Transform3<double> world_pA;
+        fcl::Transform3d world_pA;
         world_pA.linear().setIdentity();
         world_pA.translation() = result.nearest_points[0];
 
-        fcl::Transform3<double> world_pB;
+        fcl::Transform3d world_pB;
         world_pB.linear().setIdentity();
         world_pB.translation() = result.nearest_points[1];
 
@@ -810,4 +824,11 @@ bool LinkPairDistance::operator<(const LinkPairDistance& second) const
     {
         return _link_pair.first < second._link_pair.first;
     }
+}
+
+ComputeLinksDistance::LinksPair::LinksPair(ComputeLinksDistance * const father, std::string linkA, std::string linkB):
+    linkA(linkA), linkB(linkB)
+{
+    collisionObjectA = father->_collision_obj.at(linkA);
+    collisionObjectB = father->_collision_obj.at(linkB);
 }

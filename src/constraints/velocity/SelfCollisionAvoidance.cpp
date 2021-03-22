@@ -171,7 +171,7 @@ bool SelfCollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningScene
     return _dist_calc->setWorldCollisions(wc);
 }
 
-void SelfCollisionAvoidance::setLinksVsEnvironment(const std::vector<std::string>& links)
+void SelfCollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
 {
     _dist_calc->setLinksVsEnvironment(links);
 }
