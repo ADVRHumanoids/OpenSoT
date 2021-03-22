@@ -28,6 +28,7 @@
 #include <moveit_msgs/PlanningSceneWorld.h>
 
 class ComputeLinksDistance;
+class LinkPairDistance;
 
 // forward declare fcl collision object
 namespace fcl
@@ -174,6 +175,12 @@ public:
     void setLinksVsEnvironment(const std::list<std::string>& links);
 
 
+    /**
+     * @brief getLinkPairDistances
+     * @return list of LinkPairDistance which will be used in the task
+     */
+    const std::list<LinkPairDistance>& getLinkPairDistances(){ return _distance_list;}
+
     ~SelfCollisionAvoidance();
 
 protected:
@@ -220,6 +227,8 @@ protected:
      * @brief _Jtmp
      */
     Eigen::MatrixXd _Jtmp;
+
+    std::list<LinkPairDistance> _distance_list;
 
 };
 

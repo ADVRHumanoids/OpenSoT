@@ -88,11 +88,11 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
 
-    auto distance_list = _dist_calc->getLinkDistances(_detection_threshold);
+    _distance_list = _dist_calc->getLinkDistances(_detection_threshold);
 
     int row_idx = 0;
 
-    for(const auto& data : distance_list)
+    for(const auto& data : _distance_list)
     {
         // we filled the task, skip the rest of colliding pairs
         if(row_idx >= _max_pairs)
