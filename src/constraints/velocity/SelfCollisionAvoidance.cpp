@@ -116,7 +116,6 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
 
         // minimum distance
         double d12 = data.getDistance();
-        std::cout<<"distance "<<data.getLinkNames().first<<" - "<<data.getLinkNames().second<<": "<<d12<<std::endl;
 
         // jacobian of p1
         _robot.getJacobian(data.getLinkNames().first,
