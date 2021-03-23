@@ -219,8 +219,8 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     collision_object->setTransform ( shape_origin );
     envionment_collision_objects["env"] = collision_object;
 
-    OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr environment_collsion_constraint =
-            boost::make_shared<OpenSoT::constraints::velocity::SelfCollisionAvoidance> (
+    OpenSoT::constraints::velocity::CollisionAvoidance::Ptr environment_collsion_constraint =
+            boost::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance> (
                 q, *_model_ptr, -1, this->urdf, this->srdf);
 
     environment_collsion_constraint->setDetectionThreshold(1.);

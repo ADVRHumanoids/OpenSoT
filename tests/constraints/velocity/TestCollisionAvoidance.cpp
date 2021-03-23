@@ -298,7 +298,7 @@ void publishJointStates(const Eigen::VectorXd& q)
 
       compute_distance = boost::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
 
-      sc_constraint = boost::make_shared<OpenSoT::constraints::velocity::SelfCollisionAvoidance>
+      sc_constraint = boost::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance>
               (q,
                *_model_ptr,
                -1,
@@ -328,7 +328,7 @@ void publishJointStates(const Eigen::VectorXd& q)
   std::string _path_to_cfg;
   Eigen::VectorXd q;
   boost::shared_ptr<ComputeLinksDistance> compute_distance;
-  OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sc_constraint;
+  OpenSoT::constraints::velocity::CollisionAvoidance::Ptr sc_constraint;
   urdf::ModelSharedPtr urdf;
   srdf::ModelSharedPtr srdf;
 

@@ -15,8 +15,8 @@
  * Public License for more details
 */
 
-#ifndef SELFCOLLISIONAVOIDANCE_H
-#define SELFCOLLISIONAVOIDANCE_H
+#ifndef COLLISIONAVOIDANCE_H
+#define COLLISIONAVOIDANCE_H
 
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
@@ -49,12 +49,12 @@ namespace OpenSoT { namespace constraints { namespace velocity {
  *  the bUpperBound is the minimum distance vector of all the Link pairs, the dimension of which is n * 1.
  *  the element in bUpperBound is the minimum distance between the corresponding Link pair with taking the Link pair threshold into account.
  */
-class SelfCollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
+class CollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
 {
 
 public:
 
-    typedef boost::shared_ptr<SelfCollisionAvoidance> Ptr;
+    typedef boost::shared_ptr<CollisionAvoidance> Ptr;
     typedef std::pair<std::string, std::string> LinksPair;
 
     /**
@@ -66,7 +66,7 @@ public:
      * @param collision_srdf srdf used for collision model
      * NOTE: if urdf and srdf are not specified, the one inside the robot model will be used
      */
-    SelfCollisionAvoidance(const Eigen::VectorXd& x,
+    CollisionAvoidance(const Eigen::VectorXd& x,
                            const XBot::ModelInterface& robot,
                            int max_pairs = -1,
                            urdf::ModelConstSharedPtr collision_urdf = nullptr,
@@ -181,7 +181,7 @@ public:
      */
     const std::list<LinkPairDistance>& getLinkPairDistances(){ return _distance_list;}
 
-    ~SelfCollisionAvoidance();
+    ~CollisionAvoidance();
 
 protected:
 
@@ -235,5 +235,5 @@ protected:
 } } }
 
 
-#endif // SELFCOLLISIONAVOIDANCE_H
+#endif // COLLISIONAVOIDANCE_H
 

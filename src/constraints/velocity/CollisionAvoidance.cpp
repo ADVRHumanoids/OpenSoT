@@ -29,7 +29,7 @@ Eigen::Vector3d k2e(const KDL::Vector &k)
 }
 }
 
-SelfCollisionAvoidance::SelfCollisionAvoidance(
+CollisionAvoidance::CollisionAvoidance(
         const Eigen::VectorXd& x,
         const XBot::ModelInterface& robot,
         int max_pairs,
@@ -63,27 +63,27 @@ SelfCollisionAvoidance::SelfCollisionAvoidance(
 
 }
 
-double SelfCollisionAvoidance::getLinkPairThreshold()
+double CollisionAvoidance::getLinkPairThreshold()
 {
     return _distance_threshold;
 }
 
-double SelfCollisionAvoidance::getDetectionThreshold()
+double CollisionAvoidance::getDetectionThreshold()
 {
     return _detection_threshold;
 }
 
-void SelfCollisionAvoidance::setLinkPairThreshold(const double linkPair_threshold)
+void CollisionAvoidance::setLinkPairThreshold(const double linkPair_threshold)
 {
     _distance_threshold = std::fabs(linkPair_threshold);
 }
 
-void SelfCollisionAvoidance::setDetectionThreshold(const double detection_threshold)
+void CollisionAvoidance::setDetectionThreshold(const double detection_threshold)
 {
     _detection_threshold = std::fabs(detection_threshold);
 }
 
-void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
+void CollisionAvoidance::update(const Eigen::VectorXd &x)
 {
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
@@ -155,47 +155,47 @@ void SelfCollisionAvoidance::update(const Eigen::VectorXd &x)
     }
 }
 
-bool SelfCollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
+bool CollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
     return _dist_calc->setCollisionWhiteList(whiteList);
 }
 
-bool SelfCollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
+bool CollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
     return _dist_calc->setCollisionBlackList(blackList);
 }
 
-bool SelfCollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
+bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
 {
     return _dist_calc->setWorldCollisions(wc);
 }
 
-void SelfCollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
+void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
 {
     _dist_calc->setLinksVsEnvironment(links);
 }
 
-bool SelfCollisionAvoidance::addWorldCollision(const std::string &id,
+bool CollisionAvoidance::addWorldCollision(const std::string &id,
                                                boost::shared_ptr<fcl::CollisionObjectd> fcl_obj)
 {
     return _dist_calc->addWorldCollision(id, fcl_obj);
 }
 
-bool SelfCollisionAvoidance::removeWorldCollision(const std::string &id)
+bool CollisionAvoidance::removeWorldCollision(const std::string &id)
 {
     return _dist_calc->removeWorldCollision(id);
 }
 
-bool SelfCollisionAvoidance::moveWorldCollision(const std::string &id,
+bool CollisionAvoidance::moveWorldCollision(const std::string &id,
                                                 KDL::Frame new_pose)
 {
     return _dist_calc->moveWorldCollision(id, new_pose);
 }
 
-void SelfCollisionAvoidance::setBoundScaling(const double boundScaling)
+void CollisionAvoidance::setBoundScaling(const double boundScaling)
 {
     _bound_scaling = boundScaling;
 }
 
-SelfCollisionAvoidance::~SelfCollisionAvoidance() = default;
+CollisionAvoidance::~CollisionAvoidance() = default;
 
