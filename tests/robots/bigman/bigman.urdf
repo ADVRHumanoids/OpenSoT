@@ -1711,5 +1711,13 @@ and to define the end effectors of the robot-->
     <child link="imu_link2"/>
     <origin rpy="0 0 0" xyz="0 0 0.01"/>
   </joint>
+
+
+<link name="world"/>
+<joint name="reference" type="fixed">
+  <parent link="world"/>
+  <child link="base_link"/>
+  <origin rpy="0 0 0" xyz="0 0 0"/>
+</joint>
 </robot>
 

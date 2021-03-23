@@ -46,11 +46,9 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         io)
 find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
-find_package(fcl 0.6.1 QUIET)
+find_package(fcl 0.6 REQUIRED)
 if(DEFINED FCL_VERSION)
     set(FCL_FOUND 1)
-else()
-    set(FCL_FOUND 0)
 endif()
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
@@ -117,10 +115,10 @@ endif()
 
 if(${FCL_FOUND} AND ${moveit_core_FOUND})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
-    message("Adding src/constraints/velocity/CollisionAvoidance.cpp to compilation")
+    message("Adding src/tasks/velocity/CollisionRepulsiveField.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
-        src/constraints/velocity/SelfCollisionAvoidance.cpp
         src/constraints/velocity/CollisionAvoidance.cpp
+        src/tasks/velocity/CollisionRepulsiveField.cpp
         )
 endif()
 

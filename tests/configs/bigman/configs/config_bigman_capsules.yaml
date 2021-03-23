@@ -1,6 +1,6 @@
 # BIGMAN config
 XBotInterface:
-  urdf_path: "$PWD/../../../robots/bigman/bigman.urdf"
+  urdf_path: "$PWD/../../../robots/bigman/bigman_capsules.rviz"
   srdf_path: "$PWD/../../../robots/bigman/bigman.srdf"
   joint_map_path: "$PWD/../../../configs/bigman/joint_map/bigman_ecat_joint_map.yaml"
 
