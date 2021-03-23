@@ -2,7 +2,7 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/CartesianPositionConstraint.h>
-#include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
+#include <OpenSoT/constraints/velocity/CollisionAvoidance.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/solvers/iHQP.h>

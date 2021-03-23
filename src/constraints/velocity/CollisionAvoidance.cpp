@@ -15,7 +15,7 @@
  * Public License for more details
 */
 
-#include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
+#include <OpenSoT/constraints/velocity/CollisionAvoidance.h>
 #include <OpenSoT/utils/collision_utils.h>
 
 using namespace OpenSoT::constraints::velocity;
