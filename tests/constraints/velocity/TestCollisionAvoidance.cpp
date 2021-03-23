@@ -255,7 +255,7 @@ void publishJointStates(const Eigen::VectorXd& q)
       pub2 = n->advertise<visualization_msgs::Marker>("link_distances", 1, true);
 #endif
 
-      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman.yaml";
+      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman_capsules.yaml";
       std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
       std::ifstream f(urdf_capsule_path);
       std::stringstream ss;

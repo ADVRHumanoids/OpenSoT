@@ -44,7 +44,7 @@ public:
 
   testCollisionAvoidanceConstraint()
   {
-      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman.yaml";
+      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman_capsules.yaml";
       std::string urdf_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
       std::ifstream f(urdf_path);
       std::stringstream ss;
@@ -214,7 +214,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     std::shared_ptr<fcl::CollisionGeometryd> shape = std::make_shared<fcl::Boxd> ( 0.1, 0.6, 1.4 );
     boost::shared_ptr<fcl::CollisionObjectd> collision_object ( new fcl::CollisionObjectd ( shape ) );
     fcl::Transform3d shape_origin;
-    shape_origin.translation() << 0.75, 0, 0.; // in world frame
+    shape_origin.translation() << 0.7, 0, 0.; // in world frame
     shape_origin.linear() = Eigen::Matrix3d::Identity();
     collision_object->setTransform ( shape_origin );
     envionment_collision_objects["env"] = collision_object;
@@ -224,7 +224,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
                 q, *_model_ptr, -1, this->urdf, this->srdf);
 
     environment_collsion_constraint->setDetectionThreshold(1.);
-    environment_collsion_constraint->setLinkPairThreshold(0.0001); //0.1
+    environment_collsion_constraint->setLinkPairThreshold(0.0001);
     environment_collsion_constraint->setBoundScaling(1.);
 
 
@@ -274,7 +274,6 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
         cube.color.a = 0.5;
 
         tf::poseEigenToMsg ( collision_pose, cube.pose );
-        //cube.pose.position.x -= 0.05;
 #endif
 
 
@@ -303,7 +302,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
         right_arm_task->setReference ( desired_pose.matrix() );
 
 
-        EXPECT_LE(left_arm_task->getActualPose()(0,3), 0.243);
+        EXPECT_LE(left_arm_task->getActualPose()(0,3), 0.406); //checked empirically...
 
         autostack_->update ( q );
         EXPECT_TRUE(solver->solve ( dq ));
