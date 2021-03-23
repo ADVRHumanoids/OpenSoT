@@ -13,7 +13,7 @@
 #include <chrono>
 #include <OpenSoT/utils/AutoStack.h>
 #include <eigen_conversions/eigen_msg.h>
-#define ENABLE_ROS true
+#define ENABLE_ROS false
 
 #if ENABLE_ROS
 #include <ros/ros.h>

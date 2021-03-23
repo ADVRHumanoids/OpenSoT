@@ -239,43 +239,6 @@ public:
      */
     static KDL::Frame fcl2KDL(const fcl::Transform3d& in);
 
-
-    /**
-     * @brief The Capsule class represents a capsule shape expressed in an
-     *  arbitrary frame
-     */
-    class Capsule
-    {
-    private:
-        KDL::Vector ep1;
-        KDL::Vector ep2;
-        double radius;
-        double length;
-
-    public:
-        /**
-         * @brief Capsule constructs a capsule object
-         * @param origin the frame located in the end-point number 1, with z-axis aligned with the capsule axis
-         * @param radius the capsule radius
-         * @param length the capsule length
-         */
-        Capsule(const KDL::Frame& origin, const double radius, const double length) :
-            radius(radius), length(length)
-        {
-            ep1 = origin.p;
-            ep2 = origin.p + length * origin.M.UnitZ();
-        }
-
-        double getLength() { return this->length; }
-
-        double getRadius() { return this->radius; }
-
-        void getEndPoints(KDL::Vector& ep1, KDL::Vector& ep2)
-        {
-            ep1 = this->ep1; ep2 = this->ep2;
-        }
-    };
-
     class LinksPair
     {
 
@@ -315,8 +278,6 @@ public:
 
     std::map<std::string,KDL::Frame> getLinkToShapeTransforms();
 
-    std::map<std::string, boost::shared_ptr<ComputeLinksDistance::Capsule>> getCustomCapsules(){ return _custom_capsules;}
-
     void setLinksVsEnvironment(const std::list<std::string>& links);
 
 private:
@@ -351,11 +312,6 @@ private:
      * @brief _collision_obj a map of collision objects
      */
     std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> _collision_obj;
-
-    /**
-    * @brief _custom_capsules is a map of custom capsules specified as endpoints + radius
-    */
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > _custom_capsules;
 
     /**
      * @brief _env_obj_names is the set of the names of all objects

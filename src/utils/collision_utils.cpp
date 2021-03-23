@@ -108,15 +108,6 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
             shape_origin = toKdl(cylinder->origin);
 
-            _custom_capsules[link->name] =
-                                           boost::make_shared<ComputeLinksDistance::Capsule>(
-                                               shape_origin,
-                                               collisionGeometry->radius,
-                                               collisionGeometry->length
-                                               );
-
-
-
         }
         else if(link->collision->geometry->type == urdf::Geometry::CYLINDER)
         {
