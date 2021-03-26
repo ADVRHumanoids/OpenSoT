@@ -4,7 +4,8 @@
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/solvers/BackEndFactory.h> 
 #include <chrono>
-#include <OpenSoT/tasks/velocity/affine/Cartesian.h>
+#include <OpenSoT/utils/AffineUtils.h>
+#include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/affine/JointLimits.h>
 #include <OpenSoT/constraints/velocity/affine/VelocityLimits.h>
@@ -168,13 +169,13 @@ TEST_F(testGLPKProblem, testIKMILP)
 
     OpenSoT::OptvarHelper opt(vars);
 
-    OpenSoT::tasks::velocity::affine::Cartesian::Ptr RFoot;
-    RFoot.reset(new OpenSoT::tasks::velocity::affine::Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt.getVariable("dq")));
+    OpenSoT::tasks::velocity::Cartesian::Ptr RFoot =
+        boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("base_Rfoot", q, *_model_ptr, "l_sole", "r_sole");
     RFoot->setLambda(LAMBDA);
     RFoot->setOrientationErrorGain(OR_GAIN);
 
-    OpenSoT::tasks::velocity::affine::Cartesian::Ptr LArm;
-    LArm.reset(new OpenSoT::tasks::velocity::affine::Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt.getVariable("dq")));
+    OpenSoT::tasks::velocity::Cartesian::Ptr LArm =
+        boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("eeL", q, *_model_ptr, "LWrMot3", "l_sole");
     LArm->setLambda(LAMBDA);
     LArm->setOrientationErrorGain(OR_GAIN);
 
@@ -193,8 +194,8 @@ TEST_F(testGLPKProblem, testIKMILP)
     OpenSoT::constraints::velocity::affine::VelocityLimits::Ptr vel_lims_p;
     vel_lims_p.reset(new OpenSoT::constraints::velocity::affine::VelocityLimits(VEL_LIMS2, dT, opt.getVariable("dq")));
 
-    OpenSoT::AutoStack::Ptr autostack = ((RFoot<<vel_lims)
-                                         / (LArm<<vel_lims)
+    OpenSoT::AutoStack::Ptr autostack = ((OpenSoT::AffineUtils::AffineTask::toAffine(RFoot, opt.getVariable("dq"))<<vel_lims)
+                                         / (OpenSoT::AffineUtils::AffineTask::toAffine(LArm, opt.getVariable("dq"))<<vel_lims)
                                          / (postural<<vel_lims_p)
                                          )<<joint_lims;
 
@@ -297,15 +298,15 @@ std::cout<<"        SECOND RUN"<<std::endl;
 
     OpenSoT::OptvarHelper opt2(vars2);
 
-    OpenSoT::tasks::velocity::affine::Cartesian::Ptr RFoot2;
-    RFoot2.reset(new OpenSoT::tasks::velocity::affine::Cartesian("base_Rfoot", *_model_ptr, "l_sole", "r_sole", opt2.getVariable("dq")));
+    OpenSoT::tasks::velocity::Cartesian::Ptr RFoot2 =
+        boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("base_Rfoot", q, *_model_ptr, "l_sole", "r_sole");
     RFoot2->getReference(foot_ref);
     RFoot2->setLambda(LAMBDA);
     RFoot2->setOrientationErrorGain(OR_GAIN);
 
 
-    OpenSoT::tasks::velocity::affine::Cartesian::Ptr LArm2;
-    LArm2.reset(new OpenSoT::tasks::velocity::affine::Cartesian("eeL", *_model_ptr, "LWrMot3", "l_sole", opt2.getVariable("dq")));
+    OpenSoT::tasks::velocity::Cartesian::Ptr LArm2 =
+        boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("eeL", q, *_model_ptr, "LWrMot3", "l_sole");
     LArm2->getReference(ref);
     ref.M.DoRotZ(-M_PI_2);
     LArm2->setReference(ref);
@@ -360,9 +361,8 @@ std::cout<<"        SECOND RUN"<<std::endl;
                           "milp_bounds", U, L, 2*q.size()));
 
 
-
-    OpenSoT::AutoStack::Ptr autostack2 = ((RFoot2<<vel_lims2)
-                                          / (LArm2<<vel_lims2)
+    OpenSoT::AutoStack::Ptr autostack2 = ((OpenSoT::AffineUtils::AffineTask::toAffine(RFoot2, opt2.getVariable("dq"))<<vel_lims2)
+                                          / (OpenSoT::AffineUtils::AffineTask::toAffine(LArm2, opt2.getVariable("dq"))<<vel_lims2)
                                           / (milp_task<<milp_bounds<<milp_condition)
                                           )<<joint_lims2;
 
@@ -427,6 +427,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
         usleep(100);
 #endif
     }
+
 
     LArm2->getActualPose(LArm_pose);
 
