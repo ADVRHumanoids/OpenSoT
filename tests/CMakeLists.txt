@@ -68,7 +68,9 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testContactFloatingBaseTask
                   testCoMForceTask
                   testTask
+                  testAffineHelper
                   testPiler
+                  testAffineUtils
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
                   testKinematics
@@ -238,6 +240,11 @@ ADD_EXECUTABLE(testeiQuadProgSolver solvers/TesteiQuadProg.cpp)
 TARGET_LINK_LIBRARIES(testeiQuadProgSolver ${TestLibs})
 add_dependencies(testeiQuadProgSolver GTest-ext OpenSoT)
 add_test(NAME OpenSoT_solvers_eiquadprog COMMAND testeiQuadProgSolver)
+
+ADD_EXECUTABLE(testAffineUtils utils/TestAffineUtils.cpp)
+TARGET_LINK_LIBRARIES(testAffineUtils ${TestLibs})
+add_dependencies(testAffineUtils GTest-ext OpenSoT)
+add_test(NAME OpenSoT_affine_utils COMMAND testAffineUtils)
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
 TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})

@@ -173,6 +173,7 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/DefaultHumanoidStack.cpp
     src/utils/Affine.cpp
+    src/utils/AffineUtils.cpp
     src/utils/Indices.cpp
     src/utils/VelocityAllocation.cpp
     src/utils/cartesian_utils.cpp
