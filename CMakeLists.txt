@@ -134,7 +134,6 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/acceleration/DynamicFeasibility.cpp
     src/tasks/acceleration/MinJointVel.cpp
     src/tasks/velocity/Cartesian.cpp
-    src/tasks/velocity/affine/Cartesian.cpp
     src/tasks/velocity/CartesianAdmittance.cpp
     src/tasks/velocity/PureRolling.cpp
     src/tasks/velocity/RigidRotation.cpp
@@ -142,7 +141,6 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/Gaze.cpp
     src/tasks/velocity/Contact.cpp
     src/tasks/velocity/CoM.cpp
-    src/tasks/velocity/affine/CoM.cpp
     src/tasks/velocity/AngularMomentum.cpp
     src/tasks/velocity/LinearMomentum.cpp
     src/tasks/velocity/Manipulability.cpp
