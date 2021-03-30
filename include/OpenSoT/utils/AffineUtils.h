@@ -25,6 +25,8 @@ public:
     static AffineTask::Ptr toAffine(const OpenSoT::tasks::Aggregated::TaskPtr& task,
                                     const AffineHelper& var);
 
+    OpenSoT::tasks::Aggregated::TaskPtr& getTask(){ return _internal_task; }
+
 private:
     OpenSoT::tasks::GenericTask::Ptr _internal_generic_task;
     OpenSoT::tasks::Aggregated::TaskPtr _internal_task;
