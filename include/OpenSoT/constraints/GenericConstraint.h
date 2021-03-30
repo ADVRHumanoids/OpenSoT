@@ -59,6 +59,10 @@ public:
                       const Eigen::VectorXd& lower_bound,
                       const Type constraint_type
                       );
+
+    bool setConstraint(const AffineHelper& var,
+                       const Eigen::VectorXd& upper_bound,
+                       const Eigen::VectorXd& lower_bound);
     
     bool setBounds(const Eigen::VectorXd& upper_bound,
                    const Eigen::VectorXd& lower_bound);
