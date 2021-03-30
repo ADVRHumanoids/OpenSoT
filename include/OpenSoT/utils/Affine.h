@@ -68,6 +68,25 @@ public:
     AffineHelperBase(const DerivedM& M, const DerivedQ& q): _M(M), _q(q) {
         check_consistency();
     }
+
+    void setM(const DerivedM& M)
+    {
+        _M.noalias() = M;
+        check_consistency();
+    }
+
+    void setq(const DerivedQ& q)
+    {
+        _q.noalias() = q;
+        check_consistency();
+    }
+
+    void set(const DerivedM& M, const DerivedQ& q)
+    {
+        _M.noalias() = M;
+        _q.noalias() = q;
+        check_consistency();
+    }
     
     template <typename OtherM, typename OtherQ>
     AffineHelperBase(const AffineHelperBase<OtherM, OtherQ>& other)
