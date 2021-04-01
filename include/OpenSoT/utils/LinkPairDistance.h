@@ -93,5 +93,5 @@ private:
 
 };
 
-#endif OPENSOT_LINKPAIRDISTANCE_H_
+#endif // OPENSOT_LINKPAIRDISTANCE_H_
 
