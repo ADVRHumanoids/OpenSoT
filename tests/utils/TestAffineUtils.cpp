@@ -2,6 +2,8 @@
 #include <OpenSoT/utils/AffineUtils.h>
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <OpenSoT/constraints/velocity/CoMVelocity.h>
 #include <boost/make_shared.hpp>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
@@ -49,6 +51,88 @@ protected:
     Eigen::VectorXd q;
 
 };
+
+TEST_F(testAffineUtils, testConstraintsToAffine)
+{
+    //1. Creates a CoM Limits constraint
+    Eigen::Vector3d com_vel_lims;
+    com_vel_lims<<0.1, 0.1, 0.1;
+    OpenSoT::constraints::velocity::CoMVelocity::Ptr constraint =
+            boost::make_shared<OpenSoT::constraints::velocity::CoMVelocity>(
+                com_vel_lims, 0.01, this->q, *(this->model_ptr));
+
+    //2. Creates variables
+    std::vector<std::pair<std::string, int>> name_size_pairs;
+
+    name_size_pairs.emplace_back("dq", this->q.size());
+    int slack_size = 6;
+    name_size_pairs.emplace_back("slack", slack_size);
+    OpenSoT::OptvarHelper opt_helper(name_size_pairs);
+
+    //3. Creates Affine Constraint
+    OpenSoT::AffineUtils::AffineConstraint::Ptr affine_constraint =
+            OpenSoT::AffineUtils::AffineConstraint::toAffine(constraint, opt_helper.getVariable("dq"));
+
+    EXPECT_EQ(affine_constraint->getAineq().rows(), constraint->getAineq().rows());
+    EXPECT_EQ(affine_constraint->getAineq().cols(), constraint->getAineq().cols() + slack_size);
+    EXPECT_EQ(affine_constraint->getbLowerBound(), constraint->getbLowerBound());
+    EXPECT_EQ(affine_constraint->getbUpperBound(), constraint->getbUpperBound());
+    EXPECT_EQ(affine_constraint->getAineq().block(0,0,constraint->getAineq().rows(),constraint->getAineq().cols()),
+              constraint->getAineq());
+
+    //4. Update q and model
+    this->q[model_ptr->getDofIndex("RHipSag")] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("LHipSag")] = -15.0*M_PI/180.0;
+    this->model_ptr->setJointPosition(this->q);
+    this->model_ptr->update();
+
+    affine_constraint->update(this->q);
+    EXPECT_EQ(affine_constraint->getAineq().rows(), constraint->getAineq().rows());
+    EXPECT_EQ(affine_constraint->getAineq().cols(), constraint->getAineq().cols() + slack_size);
+    EXPECT_EQ(affine_constraint->getbLowerBound(), constraint->getbLowerBound());
+    EXPECT_EQ(affine_constraint->getbUpperBound(), constraint->getbUpperBound());
+    EXPECT_EQ(affine_constraint->getAineq().block(0,0,constraint->getAineq().rows(),constraint->getAineq().cols()),
+              constraint->getAineq());
+
+}
+
+TEST_F(testAffineUtils, testBoundsToAffine)
+{
+    //1. Creates a Velocity Limits constraint
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr bound =
+            boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(
+                M_PI, 0.01, this->model_ptr->getJointNum());
+
+    //2. Creates variables
+    std::vector<std::pair<std::string, int>> name_size_pairs;
+
+    name_size_pairs.emplace_back("dq", this->q.size());
+    int slack_size = 6;
+    name_size_pairs.emplace_back("slack", slack_size);
+    OpenSoT::OptvarHelper opt_helper(name_size_pairs);
+
+    //3. Creates Affine Constraint
+    OpenSoT::AffineUtils::AffineConstraint::Ptr affine_bound =
+            OpenSoT::AffineUtils::AffineConstraint::toAffine(bound, opt_helper.getVariable("dq"));
+
+    EXPECT_EQ(affine_bound->getAineq().rows(), bound->getLowerBound().rows());
+    EXPECT_EQ(affine_bound->getAineq().cols(), bound->getLowerBound().rows() + slack_size);
+    EXPECT_EQ(affine_bound->getbLowerBound(), bound->getLowerBound());
+    EXPECT_EQ(affine_bound->getbUpperBound(), bound->getUpperBound());
+
+    //4. Update bound
+    bound->setVelocityLimits(M_PI/4.);
+    bound->update(this->q);
+    affine_bound->update(this->q);
+
+    EXPECT_EQ(affine_bound->getAineq().rows(), bound->getLowerBound().rows());
+    EXPECT_EQ(affine_bound->getAineq().cols(), bound->getLowerBound().rows() + slack_size);
+    EXPECT_EQ(affine_bound->getbLowerBound(), bound->getLowerBound());
+    EXPECT_EQ(affine_bound->getbUpperBound(), bound->getUpperBound());
+
+    std::cout<<"affine_bound->getbLowerBound(): "<<affine_bound->getbLowerBound().transpose()<<std::endl;
+    std::cout<<"bound->getLowerBound(): "<<bound->getLowerBound().transpose()<<std::endl;
+}
 
 TEST_F(testAffineUtils, testCartesianTaskToAffine)
 {
