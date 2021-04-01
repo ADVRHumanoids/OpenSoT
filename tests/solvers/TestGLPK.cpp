@@ -7,8 +7,8 @@
 #include <OpenSoT/utils/AffineUtils.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
-#include <OpenSoT/constraints/velocity/affine/JointLimits.h>
-#include <OpenSoT/constraints/velocity/affine/VelocityLimits.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
+#include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/GenericLPTask.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
@@ -180,24 +180,25 @@ TEST_F(testGLPKProblem, testIKMILP)
     LArm->setOrientationErrorGain(OR_GAIN);
 
     OpenSoT::tasks::velocity::Postural::Ptr postural;
-    postural.reset(new OpenSoT::tasks::velocity::Postural(q));
+    postural = boost::make_shared<OpenSoT::tasks::velocity::Postural>(q);
     postural->setLambda(0.0);
 
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
-    OpenSoT::constraints::velocity::affine::JointLimits::Ptr joint_lims;
-    joint_lims.reset(new OpenSoT::constraints::velocity::affine::JointLimits(q,qmax, qmin,opt.getVariable("dq")));
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_lims;
+    joint_lims = boost::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax, qmin);
 
-    OpenSoT::constraints::velocity::affine::VelocityLimits::Ptr vel_lims;
-    vel_lims.reset(new OpenSoT::constraints::velocity::affine::VelocityLimits(VEL_LIMS, dT, opt.getVariable("dq")));
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_lims;
+    vel_lims = boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(VEL_LIMS, dT, _model_ptr->getJointNum());
 
-    OpenSoT::constraints::velocity::affine::VelocityLimits::Ptr vel_lims_p;
-    vel_lims_p.reset(new OpenSoT::constraints::velocity::affine::VelocityLimits(VEL_LIMS2, dT, opt.getVariable("dq")));
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_lims_p;
+    vel_lims_p = boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(VEL_LIMS2, dT, _model_ptr->getJointNum());
 
-    OpenSoT::AutoStack::Ptr autostack = ((OpenSoT::AffineUtils::AffineTask::toAffine(RFoot, opt.getVariable("dq"))<<vel_lims)
-                                         / (OpenSoT::AffineUtils::AffineTask::toAffine(LArm, opt.getVariable("dq"))<<vel_lims)
-                                         / (postural<<vel_lims_p)
-                                         )<<joint_lims;
+    using namespace OpenSoT::AffineUtils;
+    OpenSoT::AutoStack::Ptr autostack = ((AffineTask::toAffine(RFoot, opt.getVariable("dq"))<<AffineConstraint::toAffine(vel_lims,opt.getVariable("dq")))
+                                         / (AffineTask::toAffine(LArm, opt.getVariable("dq"))<<AffineConstraint::toAffine(vel_lims,opt.getVariable("dq")))
+                                         / (postural<<AffineConstraint::toAffine(vel_lims_p,opt.getVariable("dq")))
+                                         )<<AffineConstraint::toAffine(joint_lims,opt.getVariable("dq"));
 
     OpenSoT::solvers::iHQP::Ptr solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6,
                                                                                     OpenSoT::solvers::solver_back_ends::qpOASES);
@@ -313,18 +314,18 @@ std::cout<<"        SECOND RUN"<<std::endl;
     LArm2->setLambda(LAMBDA);
     LArm2->setOrientationErrorGain(OR_GAIN);
 
-    OpenSoT::constraints::velocity::affine::JointLimits::Ptr joint_lims2;
-    joint_lims2.reset(new OpenSoT::constraints::velocity::affine::JointLimits(q,qmax, qmin,opt2.getVariable("dq")));
+    OpenSoT::constraints::velocity::JointLimits::Ptr joint_lims2;
+    joint_lims2 = boost::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax, qmin);
 
 
-    OpenSoT::constraints::velocity::affine::VelocityLimits::Ptr vel_lims2;
-    vel_lims2.reset(new OpenSoT::constraints::velocity::affine::VelocityLimits(VEL_LIMS, dT, opt2.getVariable("dq")));
+    OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_lims2;
+    vel_lims2 = boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(VEL_LIMS, dT, _model_ptr->getJointNum());
 
 
     OpenSoT::tasks::GenericLPTask::Ptr milp_task;
     Eigen::VectorXd c(q.size());
     c.setOnes(c.size());
-    milp_task.reset(new OpenSoT::tasks::GenericLPTask("milp_task",c, opt2.getVariable("delta")));
+    milp_task = boost::make_shared<OpenSoT::tasks::GenericLPTask>("milp_task",c, opt2.getVariable("delta"));
 
     OpenSoT::constraints::GenericConstraint::Ptr milp_condition;
     double M =  VEL_LIMS2*dT + 1.*dT;
@@ -361,10 +362,10 @@ std::cout<<"        SECOND RUN"<<std::endl;
                           "milp_bounds", U, L, 2*q.size()));
 
 
-    OpenSoT::AutoStack::Ptr autostack2 = ((OpenSoT::AffineUtils::AffineTask::toAffine(RFoot2, opt2.getVariable("dq"))<<vel_lims2)
-                                          / (OpenSoT::AffineUtils::AffineTask::toAffine(LArm2, opt2.getVariable("dq"))<<vel_lims2)
+    OpenSoT::AutoStack::Ptr autostack2 = ((AffineTask::toAffine(RFoot2, opt2.getVariable("dq"))<<AffineConstraint::toAffine(vel_lims2,opt2.getVariable("dq")))
+                                          / (AffineTask::toAffine(LArm2, opt2.getVariable("dq"))<<AffineConstraint::toAffine(vel_lims2,opt2.getVariable("dq")))
                                           / (milp_task<<milp_bounds<<milp_condition)
-                                          )<<joint_lims2;
+                                          )<<AffineConstraint::toAffine(joint_lims2,opt2.getVariable("dq"));
 
     OpenSoT::solvers::solver_back_ends solver_1 = OpenSoT::solvers::solver_back_ends::qpOASES;
     OpenSoT::solvers::solver_back_ends solver_2 = OpenSoT::solvers::solver_back_ends::qpOASES;
