@@ -85,6 +85,7 @@ void CollisionAvoidance::setDetectionThreshold(const double detection_threshold)
 
 void CollisionAvoidance::update(const Eigen::VectorXd &x)
 {
+
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
 
@@ -94,6 +95,7 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
 
     for(const auto& data : _distance_list)
     {
+
         // we filled the task, skip the rest of colliding pairs
         if(row_idx >= _max_pairs)
         {

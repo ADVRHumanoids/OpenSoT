@@ -433,6 +433,19 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         // perform distance test
         fcl::distance(coll_A, coll_B, request, result);
 
+        // save if collision b is an octree
+        // we need it to reverse the closest points pair
+        // see issue: https://github.com/flexible-collision-library/fcl/issues/504
+        bool is_octree(std::dynamic_pointer_cast<const fcl::OcTreed>(
+                           coll_B->collisionGeometry())
+                       );
+
+        if(is_octree)
+        {
+            std::swap(result.nearest_points[0],
+                      result.nearest_points[1]);
+        }
+
         // we return nearest points
         fcl::Transform3d world_pA;
         world_pA.linear().setIdentity();
