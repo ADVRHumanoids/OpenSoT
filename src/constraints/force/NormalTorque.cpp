@@ -11,6 +11,7 @@ NormalTorque::NormalTorque(const std::string &contact_link,
     _contact_link(contact_link),
     _model(model),
     _X(X), _Y(Y),
+    _wrench(wrench),
     _mu(mu)
 {
     _A.setZero(8, 6);
