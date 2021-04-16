@@ -60,4 +60,52 @@ void NormalTorque::setMu(const double mu)
     _updateA();
 }
 
+///////
+
+NormalTorques::NormalTorques(const std::vector<std::string>& contact_name,
+                             const std::vector<AffineHelper>& wrench,
+                             XBot::ModelInterface &robot,
+                             const std::vector<double> & Xs,
+                             const std::vector<double> & Ys,
+                             const std::vector<double> & mu):
+    Constraint("NormalTorques", wrench[0].getInputSize())
+{
+    std::list<ConstraintPtr> constraint_list;
+    for(unsigned int i = 0; i < contact_name.size(); ++i){
+        auto nt = ::boost::make_shared<NormalTorque>(
+                    contact_name[i],
+                    wrench[i],
+                    robot,
+                    Xs[i], Ys[i],
+                    mu[i]);
+        constraint_list.push_back(nt);
+    }
+
+    _internal_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+            (constraint_list, wrench[0].getInputSize());
+
+    update(Eigen::VectorXd(0));
+}
+
+NormalTorque::Ptr NormalTorques::getNormalTorque(const std::string& contact_name)
+{
+    if(_normal_torque_map.count(contact_name))
+        return _normal_torque_map[contact_name];
+    else
+        return NULL;
+}
+
+void NormalTorques::update(const Eigen::VectorXd &x)
+{
+    _internal_constraint->update(x);
+    generateBounds();
+}
+
+void NormalTorques::generateBounds()
+{
+    _Aineq = _internal_constraint->getAineq();
+    _bUpperBound = _internal_constraint->getbUpperBound();
+    _bLowerBound = _internal_constraint->getbLowerBound();
+}
+
 

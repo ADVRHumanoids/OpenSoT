@@ -57,6 +57,11 @@ public:
                  const double& mu);
 
     void update(const Eigen::VectorXd &x);
+
+    /**
+     * @brief setMu update friction coefficient
+     * @param mu
+     */
     void setMu(const double mu);
 
 private:
@@ -84,7 +89,26 @@ private:
 
 };
 
+class NormalTorques: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
+public:
+    typedef boost::shared_ptr<NormalTorques> Ptr;
 
+    NormalTorques(const std::vector<std::string>& contact_name,
+                  const std::vector<AffineHelper>& wrench,
+                  XBot::ModelInterface &robot,
+                  const std::vector<double> & Xs,
+                  const std::vector<double> & Ys,
+                  const std::vector<double> & mu);
+
+    NormalTorque::Ptr getNormalTorque(const std::string& contact_name);
+
+    void update(const Eigen::VectorXd &x);
+
+private:
+    std::map<std::string, NormalTorque::Ptr> _normal_torque_map;
+    OpenSoT::constraints::Aggregated::Ptr _internal_constraint;
+    void generateBounds();
+};
 
        }
    }
