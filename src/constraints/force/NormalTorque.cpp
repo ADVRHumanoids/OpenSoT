@@ -5,12 +5,12 @@ using namespace OpenSoT::constraints::force;
 NormalTorque::NormalTorque(const std::string &contact_link,
                            const AffineHelper &wrench,
                            XBot::ModelInterface &model,
-                           const double &X, const double &Y,
+                           const Eigen::Vector2d& X_Lims,
+                           const Eigen::Vector2d& Y_Lims,
                            const double &mu):
     Constraint(contact_link+"_NormalTorque", wrench.getInputSize()),
     _contact_link(contact_link),
     _model(model),
-    _X(X), _Y(Y),
     _wrench(wrench),
     _mu(mu)
 {
@@ -19,6 +19,16 @@ NormalTorque::NormalTorque(const std::string &contact_link,
     _updateA();
 
     _Ad.resize(6,6); _Ad.setZero(6,6);
+    _Ad2.resize(6,6); _Ad2.setIdentity(6,6);
+    double px = (X_Lims[1] + X_Lims[0])/2.;
+    double py = (Y_Lims[1] + Y_Lims[0])/2.;
+    _Ad2(3,2) = py;
+    _Ad2(4,2) = -px;
+    _Ad2(5,0) = -py; _Ad2(5,1) = px;
+
+
+    _X = (std::fabs(X_Lims[0]) + std::fabs(X_Lims[1]))/2.;
+    _Y = (std::fabs(Y_Lims[0]) + std::fabs(Y_Lims[1]))/2.;
 
     _bUpperBound.setZero(_A.rows());
     _bLowerBound = -1.0e20*Eigen::VectorXd::Ones(_A.rows());
@@ -53,6 +63,9 @@ void NormalTorque::_updateA()
     _A.row(5) <<  _Y, -_X, K, -_mu,  _mu, -1;
     _A.row(6) << -_Y,  _X, K,  _mu, -_mu, -1;
     _A.row(7) << -_Y, -_X, K,  _mu,  _mu, -1;
+
+    Eigen::MatrixXd tmpA = _A;
+    _A = tmpA*_Ad2;
 }
 
 void NormalTorque::setMu(const double mu)
@@ -66,8 +79,8 @@ void NormalTorque::setMu(const double mu)
 NormalTorques::NormalTorques(const std::vector<std::string>& contact_name,
                              const std::vector<AffineHelper>& wrench,
                              XBot::ModelInterface &robot,
-                             const std::vector<double> & Xs,
-                             const std::vector<double> & Ys,
+                             const std::vector<Eigen::Vector2d> & Xs,
+                             const std::vector<Eigen::Vector2d> & Ys,
                              const std::vector<double> & mu):
     Constraint("NormalTorques", wrench[0].getInputSize())
 {

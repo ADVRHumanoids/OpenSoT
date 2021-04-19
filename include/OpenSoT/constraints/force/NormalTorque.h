@@ -45,15 +45,15 @@ public:
      * @param contact_link
      * @param wrench
      * @param model
-     * @param X half lenght of the foot
-     * @param Y half width of the foot
+     * @param X_Lims [xl, xu] limits w.r.t. contact frame
+     * @param Y_Lims [yl, yu] limits w.r.t. contact frame
      * @param mu friction coeff
      */
     NormalTorque(const std::string& contact_link,
                  const AffineHelper& wrench,
                  XBot::ModelInterface& model,
-                 const double& X,
-                 const double& Y,
+                 const Eigen::Vector2d& X_Lims,
+                 const Eigen::Vector2d& Y_Lims,
                  const double& mu);
 
     void update(const Eigen::VectorXd &x);
@@ -83,7 +83,15 @@ private:
 
     Eigen::Affine3d _T;
     Eigen::Affine3d _Ti;
+
+    /**
+     * @brief _Ad rotates wrench from world to local contact_link frame
+     */
     Eigen::MatrixXd _Ad;
+    /**
+     * @brief _Ad2 moves wrench application from contact_link frame to center of the contact
+     */
+    Eigen::MatrixXd _Ad2;
 
     Eigen::MatrixXd _AAd;
 
@@ -96,8 +104,8 @@ public:
     NormalTorques(const std::vector<std::string>& contact_name,
                   const std::vector<AffineHelper>& wrench,
                   XBot::ModelInterface &robot,
-                  const std::vector<double> & Xs,
-                  const std::vector<double> & Ys,
+                  const std::vector<Eigen::Vector2d> & Xs,
+                  const std::vector<Eigen::Vector2d> & Ys,
                   const std::vector<double> & mu);
 
     NormalTorque::Ptr getNormalTorque(const std::string& contact_name);
