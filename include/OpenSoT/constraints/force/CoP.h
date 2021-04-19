@@ -40,7 +40,7 @@ namespace OpenSoT {
          * @param model of the robot
          * @param wrenche affine helper
          * @param contact_link frame in contact with the environment
-         * @param X_Lims [xl, xu] limits
+         * @param X_Lims [xl, xu] limits w.r.t. contact frame
          * @param Y_Lims [yl, yu] limits
          */
             CoP(const std::string& contact_link,
