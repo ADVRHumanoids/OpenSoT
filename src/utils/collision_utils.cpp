@@ -2,6 +2,19 @@
 #include <octomap_msgs/conversions.h>
 #include <eigen_conversions/eigen_msg.h>
 
+#if ROS_VERSION_MINOR <= 12
+#define STATIC_POINTER_CAST boost::static_pointer_cast
+#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
+#define SHARED_PTR boost::shared_ptr
+#define MAKE_SHARED boost::make_shared
+#else
+#define STATIC_POINTER_CAST std::static_pointer_cast
+#define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
+#define SHARED_PTR std::shared_ptr
+#define MAKE_SHARED std::make_shared
+#endif
+
+
 bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
                                                    const fcl::Transform3d &fcl_w_T_f,
                                                    KDL::Frame &link_T_f )

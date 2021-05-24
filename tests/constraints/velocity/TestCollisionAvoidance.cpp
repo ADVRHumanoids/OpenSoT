@@ -19,6 +19,18 @@
 #include <robot_state_publisher/robot_state_publisher.h>
 #endif
 
+#if ROS_VERSION_MINOR <= 12
+#define STATIC_POINTER_CAST boost::static_pointer_cast
+#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
+#define SHARED_PTR boost::shared_ptr
+#define MAKE_SHARED boost::make_shared
+#else
+#define STATIC_POINTER_CAST std::static_pointer_cast
+#define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
+#define SHARED_PTR std::shared_ptr
+#define MAKE_SHARED std::make_shared
+#endif
+
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
 // #include <eigen_conversions/eigen_kdl.h>

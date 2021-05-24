@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <std/random/uniform_real.hpp>
-#include <std/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 namespace {
 
@@ -125,7 +125,7 @@ TEST_F(testQuaternion, testQuaternionError)
     double dot_product = quaternion::dot(quaternion(this->x, this->y, this->z, this->w), q2);
     EXPECT_DOUBLE_EQ(dot_product, w*this->w);
 
-    std::uniform_real<double> unif;
+    boost::uniform_real<double> unif;
     std::mt19937 re;
 
     double a = unif(re);
