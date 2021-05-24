@@ -19,12 +19,12 @@ VelocityAllocation::VelocityAllocation(OpenSoT::AutoStack::Ptr autoStack,
         constraint != autoStack->getBoundsList().end();
         ++constraint)
     {
-        if(boost::dynamic_pointer_cast<
+        if(std::dynamic_pointer_cast<
             OpenSoT::constraints::velocity::VelocityLimits>(
                 *constraint))
         {
             OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits =
-                boost::dynamic_pointer_cast<
+                std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         *constraint);
             assert(_dT == velocityLimits->getDT());
@@ -50,12 +50,12 @@ VelocityAllocation::VelocityAllocation(OpenSoT::AutoStack::Ptr autoStack,
         constraint != autoStack->getBoundsList().end();
         ++constraint)
     {
-        if(boost::dynamic_pointer_cast<
+        if(std::dynamic_pointer_cast<
             OpenSoT::constraints::velocity::VelocityLimits>(
                 *constraint))
         {
             OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits =
-                boost::dynamic_pointer_cast<
+                std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         *constraint);
             assert(_dT == velocityLimits->getDT());
@@ -83,12 +83,12 @@ VelocityAllocation::VelocityAllocation(OpenSoT::AutoStack::Ptr autoStack,
         constraint != autoStack->getBoundsList().end();
         ++constraint)
     {
-        if(boost::dynamic_pointer_cast<
+        if(std::dynamic_pointer_cast<
             OpenSoT::constraints::velocity::VelocityLimits>(
                 *constraint))
         {
             OpenSoT::constraints::velocity::VelocityLimits::Ptr velocityLimits =
-                boost::dynamic_pointer_cast<
+                std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         *constraint);
             assert(_dT == velocityLimits->getDT());
@@ -152,11 +152,11 @@ void VelocityAllocation::processStack(OpenSoT::Solver<Eigen::MatrixXd, Eigen::Ve
         for(it_c constraint = task->getConstraints().begin();
             constraint != task->getConstraints().end();
             ++constraint)
-            if(boost::dynamic_pointer_cast<
+            if(std::dynamic_pointer_cast<
                     OpenSoT::constraints::velocity::VelocityLimits>(
                         *constraint))
             {
-                velocityLimits = boost::dynamic_pointer_cast<
+                velocityLimits = std::dynamic_pointer_cast<
                         OpenSoT::constraints::velocity::VelocityLimits>(
                             *constraint);
                 assert(_dT == velocityLimits->getDT());

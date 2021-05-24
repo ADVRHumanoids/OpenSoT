@@ -62,7 +62,7 @@ void l1HQP::creates_internal_problem()
         it++)
         task_list.push_back(it->second);
     OpenSoT::tasks::Aggregated::Ptr aggregated =
-            boost::make_shared<OpenSoT::tasks::Aggregated>(task_list, _opt->getSize());
+            std::make_shared<OpenSoT::tasks::Aggregated>(task_list, _opt->getSize());
 
 
 
@@ -80,7 +80,7 @@ void l1HQP::creates_internal_problem()
         constraint_list.push_back(_priority_constraints[i]);
 #endif
 
-    _internal_stack = boost::make_shared<OpenSoT::AutoStack>(aggregated, constraint_list);
+    _internal_stack = std::make_shared<OpenSoT::AutoStack>(aggregated, constraint_list);
 
 
     _internal_stack->update(Eigen::VectorXd(0));
@@ -101,7 +101,7 @@ void l1HQP::creates_constraints()
             low_priority_task = _task_id_priority_order[i+1];
 
             id = "t"+std::to_string(i)+"_"+"t"+std::to_string(i+1)+"_constr";
-            _priority_constraints.push_back(boost::make_shared<priority_constraint>(id,
+            _priority_constraints.push_back(std::make_shared<priority_constraint>(id,
                                         _lp_tasks[high_priority_task],
                                         _lp_tasks[low_priority_task]));
         }
@@ -111,7 +111,7 @@ void l1HQP::creates_constraints()
 
     //2. Constraints coming from the original problem are kept
     if(_stack_of_tasks.getBounds())
-        _constraints2 = boost::make_shared<constraint_helper>("internal_constraints", _stack_of_tasks.getBounds(),
+        _constraints2 = std::make_shared<constraint_helper>("internal_constraints", _stack_of_tasks.getBounds(),
                                                               _opt->getVariable("x"));
 }
 
@@ -123,7 +123,7 @@ void l1HQP::creates_tasks()
     std::string task_id = "";
     for(it = _linear_gains.begin(); it != _linear_gains.end(); it++){
         task_id = it->first + "_task";
-        _lp_tasks[it->first] = boost::make_shared<OpenSoT::tasks::GenericLPTask>(task_id, _linear_gains[it->first],
+        _lp_tasks[it->first] = std::make_shared<OpenSoT::tasks::GenericLPTask>(task_id, _linear_gains[it->first],
                 _opt->getVariable(it->first));
     }
 
@@ -131,7 +131,7 @@ void l1HQP::creates_tasks()
     unsigned int i = 0;
     for(it = _linear_gains.begin(); it != _linear_gains.end(); it++){
         task_id = it->first + "_constraint";
-        _constraints[it->first] = boost::make_shared<task_to_constraint_helper>(task_id,
+        _constraints[it->first] = std::make_shared<task_to_constraint_helper>(task_id,
                 _stack_of_tasks.getStack()[i],
                 _opt->getVariable("x"),
                 _opt->getVariable(it->first));
@@ -164,7 +164,7 @@ void l1HQP::creates_problem_variables()
         _task_id_priority_order.push_back(var_name);
     }
 
-    _opt = boost::make_shared<OptvarHelper>(vars);
+    _opt = std::make_shared<OptvarHelper>(vars);
 }
 
 bool l1HQP::solve(Eigen::VectorXd& solution)

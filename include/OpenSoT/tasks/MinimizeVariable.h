@@ -29,7 +29,7 @@ class MinimizeVariable : public Task<Eigen::MatrixXd, Eigen::VectorXd> {
   
 public:
     
-    typedef boost::shared_ptr<MinimizeVariable> Ptr;
+    typedef std::shared_ptr<MinimizeVariable> Ptr;
     
     MinimizeVariable(std::string task_id, 
                       const AffineHelper& variable

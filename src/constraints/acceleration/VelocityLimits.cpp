@@ -1,5 +1,5 @@
 #include <OpenSoT/constraints/acceleration/VelocityLimits.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelInterface& robot,
                                                    const AffineHelper& qddot,
@@ -16,7 +16,7 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
 
     _qdot.setZero(_qdotmax.size());
 
-    _generic_constraint_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 "internal_generic_constraint", qddot,
                 ( _qdotmax - _qdot)/_dT,
                 ( _qdotmin - _qdot)/_dT,
@@ -37,7 +37,7 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
 
     _qdot.setZero(_qdotmax.size());
 
-    _generic_constraint_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 "internal_generic_constraint", qddot,
                 ( _qdotmax - _qdot)/_dT,
                 ( _qdotmin - _qdot)/_dT,

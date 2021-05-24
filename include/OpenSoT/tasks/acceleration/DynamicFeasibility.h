@@ -22,7 +22,7 @@ namespace OpenSoT {
 
         public:
 
-            typedef boost::shared_ptr<DynamicFeasibility> Ptr;
+            typedef std::shared_ptr<DynamicFeasibility> Ptr;
 
             /**
              * @brief DynamicFeasibility constructor

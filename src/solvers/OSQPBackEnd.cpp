@@ -3,7 +3,7 @@
 #include <osqp/error.h>
 #include <exception>
 #include <XBotInterface/SoLib.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 using namespace OpenSoT::solvers;
 
 #define BASE_REGULARISATION 2.22E-13 //previous 1E-12
@@ -36,16 +36,16 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
     
     _P_values.resize(getNumVariables()*(getNumVariables() + 1)/2);
     
-    _settings = boost::make_shared<OSQPSettings>();
+    _settings = std::make_shared<OSQPSettings>();
      osqp_set_default_settings(_settings.get());
     _settings->verbose = 0;
     _settings->eps_abs = 1e-5;
     _settings->eps_rel = 1e-5;
 
 
-    _data = boost::make_shared<OSQPData>();
-    _Pcsc = boost::make_shared<csc>();
-    _Acsc = boost::make_shared<csc>();
+    _data = std::make_shared<OSQPData>();
+    _Pcsc = std::make_shared<csc>();
+    _Acsc = std::make_shared<csc>();
         
 }
 
@@ -234,7 +234,7 @@ boost::any OSQPBackEnd::getOptions()
 void OSQPBackEnd::setOptions(const boost::any &options)
 {
     _settings.reset();
-    _settings = boost::make_shared<OSQPSettings>(boost::any_cast<OSQPSettings>(options));
+    _settings = std::make_shared<OSQPSettings>(boost::any_cast<OSQPSettings>(options));
     if(_workspace)
         _workspace->settings = _settings.get();
 }

@@ -18,7 +18,7 @@
 */
 
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <eigen_conversions/eigen_kdl.h>
 
 #define toDeg(X) (X*180.0/M_PI)

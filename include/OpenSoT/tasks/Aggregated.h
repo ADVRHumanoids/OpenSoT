@@ -20,7 +20,7 @@
 
 #include <OpenSoT/Task.h>
 #include <Eigen/Dense>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <list>
 #include <OpenSoT/utils/Piler.h>
 
@@ -44,7 +44,7 @@ using namespace OpenSoT::utils;
          */
         class Aggregated: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
-            typedef boost::shared_ptr<Aggregated> Ptr;
+            typedef std::shared_ptr<Aggregated> Ptr;
             typedef MatrixPiler VectorPiler;
         protected:
 

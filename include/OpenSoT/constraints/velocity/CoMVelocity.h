@@ -27,7 +27,7 @@
         namespace velocity {
             class CoMVelocity: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<CoMVelocity> Ptr;
+                typedef std::shared_ptr<CoMVelocity> Ptr;
             private:
                 XBot::ModelInterface& _robot;
                 Eigen::VectorXd _velocityLimits;

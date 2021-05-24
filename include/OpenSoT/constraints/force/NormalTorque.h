@@ -38,7 +38,7 @@ for Rectangular Support Areas", by S. Caron, Q.-C. Pham and Y. Nakamura
 */
 class NormalTorque: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
 public:
-    typedef boost::shared_ptr<NormalTorque> Ptr;
+    typedef std::shared_ptr<NormalTorque> Ptr;
 
     /**
      * @brief NormalTorque
@@ -99,7 +99,7 @@ private:
 
 class NormalTorques: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
 public:
-    typedef boost::shared_ptr<NormalTorques> Ptr;
+    typedef std::shared_ptr<NormalTorques> Ptr;
 
     NormalTorques(const std::vector<std::string>& contact_name,
                   const std::vector<AffineHelper>& wrench,

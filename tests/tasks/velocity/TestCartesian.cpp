@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <XBotInterface/ModelInterface.h>
 

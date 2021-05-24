@@ -31,7 +31,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         
     public:
         
-        typedef boost::shared_ptr<Cartesian> Ptr;
+        typedef std::shared_ptr<Cartesian> Ptr;
 
         Cartesian(const std::string task_id,
                   const Eigen::VectorXd& x,

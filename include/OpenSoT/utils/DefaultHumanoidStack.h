@@ -34,7 +34,7 @@
      class DefaultHumanoidStack
      {
         public:
-         typedef boost::shared_ptr<DefaultHumanoidStack> Ptr;
+         typedef std::shared_ptr<DefaultHumanoidStack> Ptr;
 
          /**
           * @brief DefaultHumanoidStack creates a default set of stacks for a humanoid robot

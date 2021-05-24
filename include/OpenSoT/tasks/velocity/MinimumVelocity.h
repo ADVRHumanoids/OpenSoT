@@ -39,7 +39,7 @@
              */
             class MinimumVelocity : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<MinimumVelocity> Ptr;
+                typedef std::shared_ptr<MinimumVelocity> Ptr;
             protected:
 
             public:

@@ -13,7 +13,7 @@ WrenchLimits::WrenchLimits(const std::string& contact_name,
     _upperLims(upperLims),
     _is_released(false)
 {
-    _constr_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>
+    _constr_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>
             (contact_name + "_wrench_limits_internal",
              wrench,
              upperLims,
@@ -81,12 +81,12 @@ WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
 {
     std::list<ConstraintPtr> constraint_list;
     for(unsigned int i = 0; i < contact_name.size(); ++i){
-        wrench_lims_constraints[contact_name[i]] = boost::make_shared<WrenchLimits>
+        wrench_lims_constraints[contact_name[i]] = std::make_shared<WrenchLimits>
                 (contact_name[i], lowerLims, upperLims, wrench[i]);
         constraint_list.push_back(wrench_lims_constraints[contact_name[i]]);
     }
 
-    _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+    _aggregated_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
     update(Eigen::VectorXd(0));
@@ -100,12 +100,12 @@ WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
 {
     std::list<ConstraintPtr> constraint_list;
     for(unsigned int i = 0; i < contact_name.size(); ++i){
-        wrench_lims_constraints[contact_name[i]] = boost::make_shared<WrenchLimits>
+        wrench_lims_constraints[contact_name[i]] = std::make_shared<WrenchLimits>
                 (contact_name[i], lowerLims[i], upperLims[i], wrench[i]);
         constraint_list.push_back(wrench_lims_constraints[contact_name[i]]);
     }
 
-    _aggregated_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+    _aggregated_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
     update(Eigen::VectorXd(0));

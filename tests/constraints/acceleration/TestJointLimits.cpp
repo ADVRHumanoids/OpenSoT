@@ -53,27 +53,27 @@ protected:
         Eigen::VectorXd acc_lims(_model_ptr->getJointNum());
         acc_lims.setOnes(acc_lims.size());
         acc_lims *= 20.;
-        jointAccelerationLimits = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+        jointAccelerationLimits = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
 
 
         dT = 0.001;
         qdotMax = M_PI;
-        jointVelocityLimits = boost::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
+        jointVelocityLimits = std::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
 
         _model_ptr->getJointLimits(qmin, qmax);
-        jointLimits = boost::make_shared<OpenSoT::constraints::acceleration::JointLimits>(
+        jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimits>(
                     *_model_ptr, qddot, qmax, qmin, acc_lims, dT);
 
-        postural = boost::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
+        postural = std::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
         postural->setLambda(1000.);
 
 
-        autostack = boost::make_shared<OpenSoT::AutoStack>(postural);
+        autostack = std::make_shared<OpenSoT::AutoStack>(postural);
         autostack<<jointLimits<<jointVelocityLimits<<jointAccelerationLimits;
 
-        solver = boost::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
+        solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
 
     }
 

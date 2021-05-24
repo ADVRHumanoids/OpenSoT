@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/acceleration/MinJointVel.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace OpenSoT::tasks::acceleration;
 
@@ -8,7 +8,7 @@ MinJointVel::MinJointVel(const XBot::ModelInterface &robot, double dT, AffineHel
     _robot(robot),
     _dT(dT)
 {
-    _postural = boost::make_shared<OpenSoT::tasks::acceleration::Postural>(robot, qddot);
+    _postural = std::make_shared<OpenSoT::tasks::acceleration::Postural>(robot, qddot);
 
     _postural->setLambda(0.0, 1./_dT);
 

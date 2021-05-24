@@ -10,26 +10,26 @@ FloatingBaseEstimation(model, contact_links, contact_matrix)
     for(unsigned int i = 0; i < contact_links.size(); ++i)
     {
         OpenSoT::tasks::floating_base::Contact::Ptr tmp =
-            boost::make_shared<OpenSoT::tasks::floating_base::Contact>
+            std::make_shared<OpenSoT::tasks::floating_base::Contact>
                 (*_model, contact_links[i], _contact_matrix);
         _contact_tasks.push_back(tmp);
         _map_tasks[contact_links[i]] = i;
     }
 
-    _aggregated_tasks = boost::make_shared<tasks::Aggregated>(_contact_tasks, 6);
+    _aggregated_tasks = std::make_shared<tasks::Aggregated>(_contact_tasks, 6);
 
     AffineHelper var = AffineHelper::Identity(6);
     Eigen::VectorXd ub(6);
     ub<<1e9*Eigen::Vector3d::Ones(),1e9*Eigen::Vector3d::Ones();
     Eigen::VectorXd lb = -ub;
-    _fb_limits = boost::make_shared<constraints::GenericConstraint>
+    _fb_limits = std::make_shared<constraints::GenericConstraint>
             ("fb_limits", var, ub, lb,
              constraints::GenericConstraint::Type::BOUND);
 
-    _autostack = boost::make_shared<AutoStack>(_aggregated_tasks);
+    _autostack = std::make_shared<AutoStack>(_aggregated_tasks);
     _autostack<<_fb_limits;
 
-    _solver = boost::make_shared<solvers::iHQP>(_autostack->getStack(),
+    _solver = std::make_shared<solvers::iHQP>(_autostack->getStack(),
                           _autostack->getBounds(),1e6);
     _solver->setSolverID("FloatingBaseEstimation");
 

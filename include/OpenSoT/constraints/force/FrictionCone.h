@@ -24,7 +24,7 @@
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/constraints/Aggregated.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <Eigen/Dense>
 
@@ -36,7 +36,7 @@
 
             class FrictionCone: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<FrictionCone> Ptr;
+                typedef std::shared_ptr<FrictionCone> Ptr;
 
                 /**
                  * @brief friction_cone is defined by a Rotation matrix (the rotation from world frame to contatc
@@ -92,7 +92,7 @@
             class FrictionCones: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef std::vector<FrictionCone::friction_cone> friction_cones;
-                typedef boost::shared_ptr<FrictionCones> Ptr;
+                typedef std::shared_ptr<FrictionCones> Ptr;
 
                 FrictionCones(const std::vector<std::string>& contact_name,
                              const std::vector<AffineHelper>& wrench,

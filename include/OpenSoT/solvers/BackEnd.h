@@ -14,7 +14,7 @@ namespace OpenSoT{
         BackEnd(const int number_of_variables, const int number_of_constraints);
         virtual ~BackEnd();
 
-        typedef boost::shared_ptr<BackEnd> Ptr;
+        typedef std::shared_ptr<BackEnd> Ptr;
 
         /**
          * @brief getSolution return the actual solution of the QP problem

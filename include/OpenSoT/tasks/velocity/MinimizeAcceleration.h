@@ -29,7 +29,7 @@
              */
             class MinimizeAcceleration : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<MinimizeAcceleration> Ptr;
+                typedef std::shared_ptr<MinimizeAcceleration> Ptr;
             protected:
                 Eigen::VectorXd _x_before;
 

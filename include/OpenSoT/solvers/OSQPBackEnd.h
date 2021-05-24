@@ -2,7 +2,7 @@
 #define _WB_SOT_SOLVERS_OSQP_BE_H_
 
 #include <OpenSoT/solvers/BackEnd.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OpenSoT/Task.h>
 #include <osqp/osqp.h>
 #include <OpenSoT/utils/Piler.h>
@@ -165,12 +165,12 @@ private:
     /**
     * @brief _data internal OSQPData
     */
-    boost::shared_ptr<OSQPData> _data;
+    std::shared_ptr<OSQPData> _data;
 
     /**
     * @brief _settings internal OSQPSettings
     */
-    boost::shared_ptr<OSQPSettings> _settings;
+    std::shared_ptr<OSQPSettings> _settings;
 
     Eigen::VectorXd _lb_piled, _ub_piled;
 
@@ -181,8 +181,8 @@ private:
     Eigen::VectorXd _P_values;
 
 
-    boost::shared_ptr<csc> _Acsc;
-    boost::shared_ptr<csc> _Pcsc;
+    std::shared_ptr<csc> _Acsc;
+    std::shared_ptr<csc> _Pcsc;
 
     double _eps_regularisation;
 

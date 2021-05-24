@@ -3,7 +3,7 @@
 #include <ctime>
 #include <qpOASES/Utils.hpp>
 #include <fstream>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <iostream>
 #include <qpOASES/Matrices.hpp>
 #include <XBotInterface/Logger.hpp>
@@ -32,12 +32,12 @@ QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
     _epsRegularisation(eps_regularisation),
     _dual_solution(number_of_variables)
 {
-    _problem = boost::make_shared<qpOASES::SQProblem>(number_of_variables,
+    _problem = std::make_shared<qpOASES::SQProblem>(number_of_variables,
                                                       number_of_constraints,
                                                       (qpOASES::HessianType)(hessian_type));
-    _bounds = boost::make_shared<qpOASES::Bounds>();
-    _constraints = boost::make_shared<qpOASES::Constraints>();
-    _opt = boost::make_shared<qpOASES::Options>();
+    _bounds = std::make_shared<qpOASES::Bounds>();
+    _constraints = std::make_shared<qpOASES::Constraints>();
+    _opt = std::make_shared<qpOASES::Options>();
 
 #ifdef OPENSOT_VERBOSE
     XBot::Logger::SetVerbosityLevel(XBot::Logger::Severity::LOW);
@@ -73,12 +73,12 @@ void QPOasesBackEnd::setDefaultOptions()
     #endif
 
     _opt.reset();
-    _opt = boost::make_shared<qpOASES::Options>(opt);
+    _opt = std::make_shared<qpOASES::Options>(opt);
 }
 
 void QPOasesBackEnd::setOptions(const boost::any &options){
     _opt.reset();
-    _opt = boost::make_shared<qpOASES::Options>(boost::any_cast<qpOASES::Options>(options));
+    _opt = std::make_shared<qpOASES::Options>(boost::any_cast<qpOASES::Options>(options));
     _problem->setOptions(boost::any_cast<qpOASES::Options>(options));}
 
 boost::any QPOasesBackEnd::getOptions(){
@@ -195,7 +195,7 @@ bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::make_shared<qpOASES::SQProblem>(number_of_variables,
+        _problem = std::make_shared<qpOASES::SQProblem>(number_of_variables,
                                                           number_of_constraints,
                                                           hessian_type);
         _problem->setOptions(*_opt.get());
@@ -237,7 +237,7 @@ bool QPOasesBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::make_shared<qpOASES::SQProblem>(number_of_variables,
+        _problem = std::make_shared<qpOASES::SQProblem>(number_of_variables,
                                                           number_of_constraints,
                                                           hessian_type);
         _problem->setOptions(*_opt.get());

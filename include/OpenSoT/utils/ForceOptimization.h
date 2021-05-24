@@ -26,7 +26,7 @@ namespace OpenSoT { namespace utils {
       
     public:
         
-        typedef boost::shared_ptr<ForceOptimization> Ptr;
+        typedef std::shared_ptr<ForceOptimization> Ptr;
         
         constexpr static double DEFAULT_FRICTION_COEFF = 0.5;
         

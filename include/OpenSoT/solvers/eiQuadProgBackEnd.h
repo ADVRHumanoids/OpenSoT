@@ -2,7 +2,7 @@
 #define _WB_SOT_SOLVERS_UQUADPROG_BE_H_
 
 #include <OpenSoT/solvers/BackEnd.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OpenSoT/utils/Piler.h>
 #include <eiquadprog.hpp>
 
