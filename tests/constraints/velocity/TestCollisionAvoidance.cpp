@@ -19,19 +19,6 @@
 #include <robot_state_publisher/robot_state_publisher.h>
 #endif
 
-#if ROS_VERSION_MINOR <= 12
-#define STATIC_POINTER_CAST boost::static_pointer_cast
-#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
-#define SHARED_PTR boost::shared_ptr
-#define MAKE_SHARED boost::make_shared
-#else
-#define STATIC_POINTER_CAST std::static_pointer_cast
-#define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
-#define SHARED_PTR std::shared_ptr
-#define MAKE_SHARED std::make_shared
-#endif
-
-
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
 // #include <eigen_conversions/eigen_kdl.h>
@@ -296,9 +283,9 @@ void publishJointStates(const Eigen::VectorXd& q)
       srdf->initFile(*urdf, srdf_capsule_path);
 
 
-      compute_distance = boost::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
+      compute_distance = std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
 
-      sc_constraint = boost::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance>
+      sc_constraint = std::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance>
               (q,
                *_model_ptr,
                -1,
@@ -327,18 +314,18 @@ void publishJointStates(const Eigen::VectorXd& q)
   XBot::ModelInterface::Ptr _model_ptr;
   std::string _path_to_cfg;
   Eigen::VectorXd q;
-  boost::shared_ptr<ComputeLinksDistance> compute_distance;
+  std::shared_ptr<ComputeLinksDistance> compute_distance;
   OpenSoT::constraints::velocity::CollisionAvoidance::Ptr sc_constraint;
   urdf::ModelSharedPtr urdf;
   srdf::ModelSharedPtr srdf;
 
 #if ENABLE_ROS
   ///ROS
-  boost::shared_ptr<ros::NodeHandle> n;
+  std::shared_ptr<ros::NodeHandle> n;
   ros::Publisher pub;
   ros::Publisher pub2;
   sensor_msgs::JointState joint_state;
-  boost::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
+  std::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
 #endif
 
 };
@@ -627,8 +614,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     std::cout<<std::endl;
 
     // check the actual distance between the hand capsule pair
-    boost::shared_ptr<ComputeLinksDistance> compute_distance =
-            boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
+    std::shared_ptr<ComputeLinksDistance> compute_distance =
+            std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
     compute_distance->setCollisionWhiteList(whiteList);
     std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
     LinkPairDistance result = results.front();
@@ -846,8 +833,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
         //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
 
-        boost::shared_ptr<ComputeLinksDistance> compute_distance =
-                boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
+        std::shared_ptr<ComputeLinksDistance> compute_distance =
+                std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
         std::list<std::pair<std::string,std::string> > whiteList_;
         whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
         compute_distance->setCollisionWhiteList(whiteList_);
@@ -1068,8 +1055,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
         //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
 
         // check the actual distance between the hand capsule pair
-        boost::shared_ptr<ComputeLinksDistance> compute_distance =
-                boost::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
+        std::shared_ptr<ComputeLinksDistance> compute_distance =
+                std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
         std::list<std::pair<std::string,std::string> > whiteList_;
         whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
         compute_distance->setCollisionWhiteList(whiteList_);
@@ -1176,8 +1163,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
     srdf::ModelSharedPtr srdf = MAKE_SHARED<srdf::Model>();
     srdf->initFile(*urdf, srdf_capsule_path);
-    boost::shared_ptr<ComputeLinksDistance> compute_distance =
-            boost::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
+    std::shared_ptr<ComputeLinksDistance> compute_distance =
+            std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
     compute_distance->setCollisionWhiteList(whiteList);
     std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
     LinkPairDistance result = results.front();

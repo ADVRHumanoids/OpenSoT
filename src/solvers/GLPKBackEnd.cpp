@@ -1,7 +1,7 @@
 #include <OpenSoT/solvers/GLPKBackEnd.h>
 #include <XBotInterface/SoLib.h>
-#include <boost/make_shared.hpp>
-#include <boost/date_time.hpp>
+#include <memory>
+#include <std/date_time.hpp>
 
 
 using namespace OpenSoT::solvers;
@@ -77,7 +77,7 @@ void GLPKBackEnd::printErrorOutput(const int out)
                             "is used.) \n");
 
 
-    boost::posix_time::ptime time = boost::posix_time::second_clock::local_time();
+    std::posix_time::ptime time = std::posix_time::second_clock::local_time();
     std::stringstream ss;
     ss<<"mip_problem_"+time.date().year();
     ss<<"_"+time.date().month();
@@ -206,7 +206,7 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
         _solution[i] = glp_mip_col_val(_mip, i+1);
 
 
-    _opt.param = boost::make_shared<glp_iocp>(_param);
+    _opt.param = std::make_shared<glp_iocp>(_param);
 
     //glp_write_lp(_mip, NULL, "test_cplex_lp");
     return true;
