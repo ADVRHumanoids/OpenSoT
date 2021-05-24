@@ -1,7 +1,7 @@
 #include <OpenSoT/solvers/GLPKBackEnd.h>
 #include <XBotInterface/SoLib.h>
 #include <memory>
-#include <std/date_time.hpp>
+#include <boost/date_time.hpp>
 
 
 using namespace OpenSoT::solvers;
@@ -77,7 +77,7 @@ void GLPKBackEnd::printErrorOutput(const int out)
                             "is used.) \n");
 
 
-    std::posix_time::ptime time = std::posix_time::second_clock::local_time();
+    boost::posix_time::ptime time = boost::posix_time::second_clock::local_time();
     std::stringstream ss;
     ss<<"mip_problem_"+time.date().year();
     ss<<"_"+time.date().month();
