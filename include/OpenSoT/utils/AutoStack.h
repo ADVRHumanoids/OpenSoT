@@ -314,5 +314,27 @@ OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task
  */
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
                                     const OpenSoT::constraints::Aggregated::ConstraintPtr bound);
+
+
+
+
+
+OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
+                                                const OpenSoT::tasks::Aggregated::TaskPtr constraint);
+
+OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
+                                                const OpenSoT::tasks::Aggregated::Ptr constraint);
+
+OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
+                                            const OpenSoT::tasks::Aggregated::TaskPtr constraint);
+
+OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
+                                            const OpenSoT::tasks::Aggregated::Ptr constraint);
+
+OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
+                                    const OpenSoT::tasks::Aggregated::TaskPtr constraint);
+
+OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
+                                    const OpenSoT::tasks::Aggregated::Ptr constraint);
 }
 #endif
