@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 include(ExternalProject)
-project(open_sot VERSION 3.1.0)
+project(open_sot VERSION 3.2.0)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++14" COMPILER_SUPPORTS_CXX14)
@@ -324,3 +324,8 @@ if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
     add_custom_target(copy_robot_model_files ALL
         ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()
+
+configure_file(version.h.in include/OpenSoT/version.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
+        DESTINATION include/OpenSoT)
