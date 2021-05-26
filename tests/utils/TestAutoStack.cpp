@@ -427,6 +427,11 @@ TEST_F(testAutoStack, testOperatorStackEqual)
     EXPECT_TRUE(autostack->getStack()[1]->getA() == DHS->rightArm->getA());
 }
 
+TEST_F(testAutoStack, testOperatorTaskToConstraint_)
+{
+    auto Task = DHS->leftArm << DHS->rightArm;
+}
+
 }
 
 int main(int argc, char **argv) {
