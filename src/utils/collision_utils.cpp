@@ -14,6 +14,7 @@
 #define MAKE_SHARED std::make_shared
 #endif
 
+
 bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
                                                    const fcl::Transform3d &fcl_w_T_f,
                                                    KDL::Frame &link_T_f )
@@ -203,7 +204,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
             continue;
         }
 
-        auto collision_object = boost::make_shared<fcl::CollisionObjectd>(shape);
+        auto collision_object = std::make_shared<fcl::CollisionObjectd>(shape);
 
         _collision_obj[link->name] = collision_object;
 
@@ -556,7 +557,7 @@ bool ComputeLinksDistance::setCollisionBlackList(std::list<LinkPairDistance::Lin
 namespace
 {
 
-boost::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
+std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
         const shape_msgs::SolidPrimitive& shape,
         const geometry_msgs::Pose& pose)
 {
@@ -581,7 +582,7 @@ boost::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
     }
 
     // create collision object
-    auto co = boost::make_shared<fcl::CollisionObjectd>(fcl_shape);
+    auto co = std::make_shared<fcl::CollisionObjectd>(fcl_shape);
 
     // set transform
     fcl::Transform3d w_T_octo;
@@ -677,7 +678,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
     auto fcl_octree = std::make_shared<fcl::OcTreed>(octree);
 
     // fcl collision object
-    auto coll_obj = boost::make_shared<fcl::CollisionObjectd>(fcl_octree);
+    auto coll_obj = std::make_shared<fcl::CollisionObjectd>(fcl_octree);
 
     // set transform
     fcl::Transform3d w_T_octo;
@@ -700,7 +701,7 @@ namespace
 }
 
 bool ComputeLinksDistance::addWorldCollision(const std::string &id,
-                                             boost::shared_ptr<fcl::CollisionObjectd> fcl_obj)
+                                             std::shared_ptr<fcl::CollisionObjectd> fcl_obj)
 {
     // empty name invalid
     if(id.empty())

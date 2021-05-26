@@ -25,7 +25,7 @@
  #include <vector>
  #include <string>
  #include <cassert>
- #include <boost/shared_ptr.hpp>
+ #include <memory>
  #include <iterator>
 
  namespace OpenSoT {
@@ -45,7 +45,7 @@
 
     public:
 
-        typedef boost::shared_ptr<OpenSoT::SubTask> Ptr;
+        typedef std::shared_ptr<OpenSoT::SubTask> Ptr;
 
     protected:
         TaskPtr _taskPtr;

@@ -102,12 +102,12 @@ namespace OpenSoT {
        {
            std::list<ConstraintPtr> constraint_list;
            for(unsigned int i = 0; i < contact_name.size(); ++i){
-               _friction_cone_map[contact_name[i]] = boost::make_shared<FrictionCone>
+               _friction_cone_map[contact_name[i]] = std::make_shared<FrictionCone>
                        (contact_name[i], wrench[i], robot, mu[i]);
                constraint_list.push_back(_friction_cone_map[contact_name[i]]);
            }
 
-           _internal_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+           _internal_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
                    (constraint_list, wrench[0].getInputSize());
 
            update(Eigen::VectorXd(0));

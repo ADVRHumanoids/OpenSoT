@@ -22,7 +22,7 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 
  namespace OpenSoT {
@@ -33,7 +33,7 @@
              */
             class WrenchLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<WrenchLimits> Ptr;
+                typedef std::shared_ptr<WrenchLimits> Ptr;
             private:
                 Eigen::VectorXd _lowerLims;
                 Eigen::VectorXd _upperLims;
@@ -94,7 +94,7 @@
              */
             class WrenchesLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<WrenchesLimits> Ptr;
+                typedef std::shared_ptr<WrenchesLimits> Ptr;
 
                 /**
                  * @brief WrenchesLimits constructor

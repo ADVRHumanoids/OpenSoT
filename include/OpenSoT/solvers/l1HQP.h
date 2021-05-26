@@ -10,7 +10,7 @@
 #include <OpenSoT/utils/Piler.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/solvers/BackEnd.h>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #define DEFAULT_EPS_REGULARISATION 2E2 //THIS VALUE IS HISTORICALLY USED IN QPOASES
 
@@ -28,14 +28,14 @@ namespace solvers {
     class priority_constraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-        typedef boost::shared_ptr<priority_constraint> Ptr;
+        typedef std::shared_ptr<priority_constraint> Ptr;
         priority_constraint(const std::string& id,
                             const OpenSoT::tasks::GenericLPTask::Ptr high_priority_task,
                             const OpenSoT::tasks::GenericLPTask::Ptr low_priority_task);
         void update(const Eigen::VectorXd& x);
     private:
-        boost::weak_ptr<OpenSoT::tasks::GenericLPTask> _high_task;
-        boost::weak_ptr<OpenSoT::tasks::GenericLPTask> _low_task;
+        std::weak_ptr<OpenSoT::tasks::GenericLPTask> _high_task;
+        std::weak_ptr<OpenSoT::tasks::GenericLPTask> _low_task;
 
         Eigen::MatrixXd _ones;
     };
@@ -43,7 +43,7 @@ namespace solvers {
     class constraint_helper: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-        typedef boost::shared_ptr<constraint_helper> Ptr;
+        typedef std::shared_ptr<constraint_helper> Ptr;
 
         constraint_helper(std::string id, OpenSoT::constraints::Aggregated::ConstraintPtr constraints,
                           const AffineHelper& x);
@@ -64,7 +64,7 @@ namespace solvers {
     class task_to_constraint_helper: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-        typedef boost::shared_ptr<task_to_constraint_helper> Ptr;
+        typedef std::shared_ptr<task_to_constraint_helper> Ptr;
         /**
          * @brief task_to_constraint_helper is an helper class to transform tasks from the form:
          *              Ax - b = 0
@@ -98,7 +98,7 @@ namespace solvers {
     class l1HQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
         public:
-            typedef boost::shared_ptr<l1HQP> Ptr;
+            typedef std::shared_ptr<l1HQP> Ptr;
 
             /**
              * @brief l1HQP oncstructor
@@ -124,7 +124,7 @@ namespace solvers {
              * getPriorityConstraints() are ONLY for debugging
              * @return
              */
-            const boost::shared_ptr<AutoStack>& getInternalProblem(){ return _internal_stack;}
+            const std::shared_ptr<AutoStack>& getInternalProblem(){ return _internal_stack;}
             const std::map<std::string, task_to_constraint_helper::Ptr>& getConstraints(){ return _constraints; }
             const constraint_helper::Ptr& getHardConstraints(){return _constraints2; }
             const std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr>& getTasks(){ return _lp_tasks; }
@@ -147,7 +147,7 @@ namespace solvers {
             double _epsRegularisation;
 
             OpenSoT::AutoStack& _stack_of_tasks;
-            boost::shared_ptr<OptvarHelper> _opt;
+            std::shared_ptr<OptvarHelper> _opt;
             /**
              * @brief _linear_gains vector of gains
              */
@@ -167,7 +167,7 @@ namespace solvers {
             std::map<std::string, task_to_constraint_helper::Ptr> _constraints;
 
 
-            boost::shared_ptr<AutoStack> _internal_stack;
+            std::shared_ptr<AutoStack> _internal_stack;
 
             /**
              * @brief _constraints2 contains all the constraints coming from the problem which remains in the form:

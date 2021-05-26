@@ -39,7 +39,7 @@ namespace OpenSoT {
         */
        class AngularMomentum : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
        public:
-           typedef boost::shared_ptr<AngularMomentum> Ptr;
+           typedef std::shared_ptr<AngularMomentum> Ptr;
 
        private:
            XBot::ModelInterface& _robot;

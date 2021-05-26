@@ -334,12 +334,12 @@ bool OpenSoT::tasks::velocity::Cartesian::setDistalLink(const std::string& dista
 
 bool OpenSoT::tasks::velocity::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
 }
 
 OpenSoT::tasks::velocity::Cartesian::Ptr OpenSoT::tasks::velocity::Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
+    return std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task);
 }
 
 void Cartesian::_log(XBot::MatLogger2::Ptr logger)

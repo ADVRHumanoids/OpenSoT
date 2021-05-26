@@ -43,7 +43,7 @@
              */
             class CartesianPositionConstraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<CartesianPositionConstraint> Ptr;
+                typedef std::shared_ptr<CartesianPositionConstraint> Ptr;
             private:
                 OpenSoT::tasks::velocity::Cartesian::Ptr _cartesianTask;
                 OpenSoT::tasks::velocity::CoM::Ptr _comTask;

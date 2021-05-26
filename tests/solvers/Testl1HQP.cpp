@@ -70,22 +70,22 @@ TEST_F(testl1HQP, testContructor)
     Eigen::VectorXd q = this->getGoodInitialPosition(model_ptr);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_sole =
-            boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_sole", q, *model_ptr, "l_sole", "world");
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_sole", q, *model_ptr, "l_sole", "world");
     OpenSoT::tasks::velocity::Cartesian::Ptr r_sole =
-            boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("r_sole", q, *model_ptr, "r_sole", "world");
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("r_sole", q, *model_ptr, "r_sole", "world");
     OpenSoT::tasks::velocity::CoM::Ptr CoM =
-            boost::make_shared<OpenSoT::tasks::velocity::CoM>(q, *model_ptr);
+            std::make_shared<OpenSoT::tasks::velocity::CoM>(q, *model_ptr);
 
     Eigen::VectorXd qmin, qmax;
     model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits =
-            boost::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
 
     OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM)<<joint_limits;
     stack->update(q);
 
     OpenSoT::solvers::l1HQP::Ptr l1_solver =
-            boost::make_shared<OpenSoT::solvers::l1HQP>(*stack);
+            std::make_shared<OpenSoT::solvers::l1HQP>(*stack);
 
     std::map<std::string, OpenSoT::tasks::GenericLPTask::Ptr> linear_tasks = l1_solver->getTasks();
     EXPECT_EQ(linear_tasks.size(), stack->getStack().size());

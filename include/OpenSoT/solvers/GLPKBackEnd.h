@@ -24,7 +24,7 @@ public:
         int ROUND_BOUNDS = 0;
 
         std::vector<var_id_kind> var_id_kind_;
-        boost::shared_ptr<glp_iocp> param;
+        std::shared_ptr<glp_iocp> param;
 
     };
 

@@ -37,7 +37,7 @@
              */
             class Postural : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<Postural> Ptr;
+                typedef std::shared_ptr<Postural> Ptr;
             protected:
                 Eigen::VectorXd _x_desired;
                 Eigen::VectorXd _xdot_desired, _xdot_desired_ref;

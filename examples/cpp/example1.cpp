@@ -1,4 +1,4 @@
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <OpenSoT/tasks/GenericTask.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
@@ -29,8 +29,8 @@ int main()
     /**
      * @brief Creates 2 generic OpenSoT tasks using the same A and b functions
      */
-    auto mytask1  = boost::make_shared<OpenSoT::tasks::GenericTask>("mytask1", A, b);
-    auto mytask2 = boost::make_shared<OpenSoT::tasks::GenericTask>("mytask2", A, b);
+    auto mytask1  = std::make_shared<OpenSoT::tasks::GenericTask>("mytask1", A, b);
+    auto mytask2 = std::make_shared<OpenSoT::tasks::GenericTask>("mytask2", A, b);
 
     /**
      * @brief Creates a constraint:
@@ -51,13 +51,13 @@ int main()
      * @brief Creates a generic OpenSoT constraint
      */
     OpenSoT::AffineHelper y(G, c);
-    auto constraint   = boost::make_shared<OpenSoT::constraints::GenericConstraint>("mytask",y, ub, lb,
+    auto constraint   = std::make_shared<OpenSoT::constraints::GenericConstraint>("mytask",y, ub, lb,
                     OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
 
     /**
      * @brief Creates a OpenSoT stack putting toghether tasks and constraints
      */
-    OpenSoT::AutoStack::Ptr stack = boost::make_shared<OpenSoT::AutoStack>(mytask1 + mytask2); // The cost function is the sum of two tasks
+    OpenSoT::AutoStack::Ptr stack = std::make_shared<OpenSoT::AutoStack>(mytask1 + mytask2); // The cost function is the sum of two tasks
     stack << constraint; // Constraints are added to the stack
     stack->update(Eigen::VectorXd(0)); // Stack update should be called every time tasks or constraints changes
 

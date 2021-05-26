@@ -62,7 +62,7 @@
              */
             class Unicycle : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<Unicycle> Ptr;
+                typedef std::shared_ptr<Unicycle> Ptr;
             protected:
                 XBot::ModelInterface& _robot;
 

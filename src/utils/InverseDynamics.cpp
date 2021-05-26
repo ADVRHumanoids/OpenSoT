@@ -1,5 +1,5 @@
 #include <OpenSoT/utils/InverseDynamics.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace OpenSoT::utils;
 
@@ -15,7 +15,7 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
     for(unsigned int i = 0; i < _links_in_contact.size(); ++i)
         variable_name_dims.emplace_back(_links_in_contact[i], 6);
 
-    _serializer = boost::make_shared<OpenSoT::OptvarHelper>(variable_name_dims);
+    _serializer = std::make_shared<OpenSoT::OptvarHelper>(variable_name_dims);
 
     _qddot = _serializer->getVariable("qddot");
     _qddot_val.setZero(_model.getJointNum());
@@ -83,7 +83,7 @@ const std::vector<OpenSoT::AffineHelper>& InverseDynamics::getContactsWrenchAffi
     return _contacts_wrench;
 }
 
-const boost::shared_ptr<OpenSoT::OptvarHelper> InverseDynamics::getSerializer() const
+const std::shared_ptr<OpenSoT::OptvarHelper> InverseDynamics::getSerializer() const
 {
     return _serializer;
 }

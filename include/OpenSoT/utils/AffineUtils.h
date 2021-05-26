@@ -16,7 +16,7 @@ namespace AffineUtils
 class AffineTask: public Task<Eigen::MatrixXd, Eigen::VectorXd>
 {
 public:
-    typedef boost::shared_ptr<AffineTask> Ptr;
+    typedef std::shared_ptr<AffineTask> Ptr;
 
     AffineTask(const OpenSoT::tasks::Aggregated::TaskPtr& task,
                const AffineHelper& var);
@@ -38,7 +38,7 @@ private:
 class AffineConstraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
 {
 public:
-    typedef boost::shared_ptr<AffineConstraint> Ptr;
+    typedef std::shared_ptr<AffineConstraint> Ptr;
 
     AffineConstraint(const OpenSoT::constraints::Aggregated::ConstraintPtr& constraint,
                const AffineHelper& var);

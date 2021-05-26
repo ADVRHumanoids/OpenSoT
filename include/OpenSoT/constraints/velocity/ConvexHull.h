@@ -42,11 +42,11 @@
             */
             class ConvexHull: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<ConvexHull> Ptr;
+                typedef std::shared_ptr<ConvexHull> Ptr;
             private:
                 XBot::ModelInterface &_robot;
                 double _boundScaling;
-                boost::shared_ptr<convex_hull> _convex_hull;
+                std::shared_ptr<convex_hull> _convex_hull;
                 std::vector<KDL::Vector> _ch;
                 std::list<std::string> _links_in_contact;
                 Eigen::MatrixXd _JCoM;

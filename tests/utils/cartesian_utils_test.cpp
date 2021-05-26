@@ -1,12 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <boost/version.hpp>
-#if BOOST_VERSION / 100 % 1000 > 46
-    #include <boost/random/uniform_real_distribution.hpp>
-#else
-    #include <boost/random/uniform_real.hpp>
-#endif
-#include <boost/random/mersenne_twister.hpp>
+#include <random>
 
 namespace {
 
@@ -130,13 +124,8 @@ TEST_F(testQuaternion, testQuaternionError)
     double dot_product = quaternion::dot(quaternion(this->x, this->y, this->z, this->w), q2);
     EXPECT_DOUBLE_EQ(dot_product, w*this->w);
 
-#if BOOST_VERSION / 100 % 1000 > 46
-    boost::random::uniform_real_distribution<double> unif;
-    boost::random::mt19937 re;
-#else
-    boost::uniform_real<double> unif;
-    boost::mt19937 re;
-#endif
+    std::uniform_real_distribution<double> unif;
+    std::mt19937 re;
 
     double a = unif(re);
     EXPECT_DOUBLE_EQ(a*q2.x, a*x);

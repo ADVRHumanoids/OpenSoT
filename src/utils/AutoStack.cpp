@@ -7,7 +7,7 @@ namespace OpenSoT{
 void operator/=(OpenSoT::AutoStack::Ptr& stack, const OpenSoT::tasks::Aggregated::TaskPtr task)
 {
     if(!stack.get())
-        stack = boost::make_shared<OpenSoT::AutoStack>(task);
+        stack = std::make_shared<OpenSoT::AutoStack>(task);
     else
         stack = stack/task;
 
@@ -412,8 +412,8 @@ std::vector<OpenSoT::solvers::iHQP::TaskPtr> OpenSoT::AutoStack::flattenTask(
         task_vector.push_back(task);
     else
     {
-        boost::shared_ptr<OpenSoT::tasks::Aggregated> aggregated =
-                boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
+        std::shared_ptr<OpenSoT::tasks::Aggregated> aggregated =
+                std::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
         std::list<OpenSoT::solvers::iHQP::TaskPtr> tasks_list = aggregated->getTaskList();
 
         std::list<OpenSoT::solvers::iHQP::TaskPtr>::iterator it;
@@ -443,8 +443,8 @@ OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
 
     for(unsigned int i = 0; i < task_vector.size(); ++i)
     {
-        boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> task_Cartesian =
-                boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task_vector[i]);
+        std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> task_Cartesian =
+                std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task_vector[i]);
         if(task_Cartesian)
         {
             std::string _base_link = task_Cartesian->getBaseLink();
@@ -453,8 +453,8 @@ OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
                 return task_vector[i];
         }
 
-        boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-                boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task_vector[i]);
+        std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+                std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task_vector[i]);
         if(task_CoM)
         {
             std::string _base_link = task_CoM->getBaseLink();

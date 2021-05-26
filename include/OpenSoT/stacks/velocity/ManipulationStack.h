@@ -26,7 +26,7 @@ namespace OpenSoT {
      class ManipulationStack : public OpenSoT::AutoStack
      {
      public:
-        typedef boost::shared_ptr<ManipulationStack> Ptr;
+        typedef std::shared_ptr<ManipulationStack> Ptr;
 
          /**
           * @brief MainpulationStack creates and tunes a stack for manipulation

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <ros/master.h>
@@ -57,7 +57,7 @@ protected:
 
 TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 {
-    boost::shared_ptr<ros::NodeHandle> _n;
+    std::shared_ptr<ros::NodeHandle> _n;
     ros::Publisher joint_state_pub;
     if(IS_ROSCORE_RUNNING){
         _n.reset(new ros::NodeHandle());

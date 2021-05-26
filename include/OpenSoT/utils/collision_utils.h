@@ -36,7 +36,7 @@
 #include <urdf/model.h>
 #include <geometric_shapes/shapes.h>
 #include <geometric_shapes/shape_operations.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <kdl_parser/kdl_parser.hpp>
 #include <moveit_msgs/PlanningSceneWorld.h>
 
@@ -123,7 +123,7 @@ public:
      * @return true if input is valid
      */
     bool addWorldCollision(const std::string& id,
-                           boost::shared_ptr<fcl::CollisionObjectd> fcl_obj);
+                           std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
 
     /**
      * @brief remove world collision with given id
@@ -158,8 +158,8 @@ public:
 
         std::string linkA;
         std::string linkB;
-        boost::shared_ptr<fcl::CollisionObjectd> collisionObjectA;
-        boost::shared_ptr<fcl::CollisionObjectd> collisionObjectB;
+        std::shared_ptr<fcl::CollisionObjectd> collisionObjectA;
+        std::shared_ptr<fcl::CollisionObjectd> collisionObjectB;
 
         LinksPair(ComputeLinksDistance* const father,
                   std::string linkA,
@@ -169,7 +169,7 @@ public:
 
     friend class ComputeLinksDistance::LinksPair;
 
-    std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> getCollisionObjects(){ return _collision_obj;}
+    std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> getCollisionObjects(){ return _collision_obj;}
 
     /**
      * @brief globalToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
@@ -223,7 +223,7 @@ private:
     /**
      * @brief _collision_obj a map of collision objects
      */
-    std::map<std::string, boost::shared_ptr<fcl::CollisionObjectd>> _collision_obj;
+    std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> _collision_obj;
 
     /**
      * @brief _env_obj_names is the set of the names of all objects

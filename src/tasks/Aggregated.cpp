@@ -244,7 +244,7 @@ void Aggregated::setLambda(double lambda)
 
 bool OpenSoT::tasks::Aggregated::isAggregated(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
 }
 
 void OpenSoT::tasks::Aggregated::log(XBot::MatLogger2::Ptr logger)

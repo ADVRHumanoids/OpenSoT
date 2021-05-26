@@ -86,7 +86,7 @@ NormalTorques::NormalTorques(const std::vector<std::string>& contact_name,
 {
     std::list<ConstraintPtr> constraint_list;
     for(unsigned int i = 0; i < contact_name.size(); ++i){
-        auto nt = ::boost::make_shared<NormalTorque>(
+        auto nt = ::std::make_shared<NormalTorque>(
                     contact_name[i],
                     wrench[i],
                     robot,
@@ -95,7 +95,7 @@ NormalTorques::NormalTorques(const std::vector<std::string>& contact_name,
         constraint_list.push_back(nt);
     }
 
-    _internal_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+    _internal_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
     update(Eigen::VectorXd(0));

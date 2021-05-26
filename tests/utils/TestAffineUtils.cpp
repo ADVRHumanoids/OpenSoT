@@ -4,7 +4,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
 std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
@@ -58,7 +58,7 @@ TEST_F(testAffineUtils, testConstraintsToAffine)
     Eigen::Vector3d com_vel_lims;
     com_vel_lims<<0.1, 0.1, 0.1;
     OpenSoT::constraints::velocity::CoMVelocity::Ptr constraint =
-            boost::make_shared<OpenSoT::constraints::velocity::CoMVelocity>(
+            std::make_shared<OpenSoT::constraints::velocity::CoMVelocity>(
                 com_vel_lims, 0.01, this->q, *(this->model_ptr));
 
     //2. Creates variables
@@ -100,7 +100,7 @@ TEST_F(testAffineUtils, testBoundsToAffine)
 {
     //1. Creates a Velocity Limits constraint
     OpenSoT::constraints::velocity::VelocityLimits::Ptr bound =
-            boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(
                 M_PI, 0.01, this->model_ptr->getJointNum());
 
     //2. Creates variables
@@ -138,7 +138,7 @@ TEST_F(testAffineUtils, testCartesianTaskToAffine)
 {
     //1. Creates a Cartesian velocity Task
     OpenSoT::tasks::velocity::Cartesian::Ptr task =
-            boost::make_shared<OpenSoT::tasks::velocity::Cartesian>(
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>(
                 "LSOLE", this->q, *(this->model_ptr), "l_sole", "world");
 
     //2. Creates variables

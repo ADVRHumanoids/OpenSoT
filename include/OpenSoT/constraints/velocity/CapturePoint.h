@@ -51,7 +51,7 @@ namespace OpenSoT {
          */
         class CapturePointConstraint: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
-            typedef boost::shared_ptr<CapturePointConstraint> Ptr;
+            typedef std::shared_ptr<CapturePointConstraint> Ptr;
         private:
             CartesianPositionConstraint::Ptr _cartesian_position_cstr;
             double w;

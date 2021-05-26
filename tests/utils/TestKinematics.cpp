@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <XBotInterface/ModelInterface.h>
 
 

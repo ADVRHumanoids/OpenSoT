@@ -31,7 +31,7 @@ class Contact : public Task <Eigen::MatrixXd, Eigen::VectorXd> {
 
 public:
 
-    typedef boost::shared_ptr<Contact> Ptr;
+    typedef std::shared_ptr<Contact> Ptr;
 
     Contact(std::string task_id,
             const XBot::ModelInterface& model,

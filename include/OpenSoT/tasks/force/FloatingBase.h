@@ -30,7 +30,7 @@ namespace OpenSoT {
          */
         class FloatingBase : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-            typedef boost::shared_ptr<FloatingBase> Ptr;
+            typedef std::shared_ptr<FloatingBase> Ptr;
 
             /**
              * @brief FloatingBase constructor

@@ -41,14 +41,14 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
                               );
         
         
-        wrench_bounds.push_back( boost::make_shared<OpenSoT::constraints::GenericConstraint>(cl+"_bound",
+        wrench_bounds.push_back( std::make_shared<OpenSoT::constraints::GenericConstraint>(cl+"_bound",
                                                                                              _wrenches.back(),
                                                                                              wrench_ub,
                                                                                              wrench_lb,
                                                                                              OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT)
                                );
         
-        auto min_wrench = boost::make_shared<OpenSoT::tasks::MinimizeVariable>("MIN_" + cl + "_WRENCH", 
+        auto min_wrench = std::make_shared<OpenSoT::tasks::MinimizeVariable>("MIN_" + cl + "_WRENCH", 
             _wrenches.back()
         );
 //         
@@ -57,7 +57,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
     }
     
     /* Minimum effort task */
-    auto min_tau = boost::make_shared<OpenSoT::tasks::MinimizeVariable>("MIN_TORQUE", 
+    auto min_tau = std::make_shared<OpenSoT::tasks::MinimizeVariable>("MIN_TORQUE", 
             opt.getVariable("tau")
         );
     
@@ -71,7 +71,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
     min_tau_weight = min_tau_weight * min_tau_weight;
     
     /* Static constraint */
-    auto static_constr = boost::make_shared<OpenSoT::constraints::force::StaticConstraint>
+    auto static_constr = std::make_shared<OpenSoT::constraints::force::StaticConstraint>
                         (*_model,
                          _contact_links,
                          _wrenches,
@@ -85,14 +85,14 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
         friction_cones.emplace_back(Eigen::Matrix3d::Identity(), mu);
     }
     
-    _friction_cone = boost::make_shared<OpenSoT::constraints::force::FrictionCones>(_contact_links,
+    _friction_cone = std::make_shared<OpenSoT::constraints::force::FrictionCones>(_contact_links,
                                                                                     _wrenches, 
                                                                                     *_model, 
                                                                                     friction_cones);
     
     
     /* Construct forza giusta task */
-    _forza_giusta = boost::make_shared<OpenSoT::tasks::force::FloatingBase>(*_model, 
+    _forza_giusta = std::make_shared<OpenSoT::tasks::force::FloatingBase>(*_model, 
                                                                             _wrenches, 
                                                                             _contact_links);
     
@@ -102,7 +102,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
     }
     
     /* Min wrench aggregated */
-    auto min_force_aggr = boost::make_shared<OpenSoT::tasks::Aggregated>(min_wrench_tasks, opt.getSize());
+    auto min_force_aggr = std::make_shared<OpenSoT::tasks::Aggregated>(min_wrench_tasks, opt.getSize());
 
     /* Define optimization problem */
     _autostack = _forza_giusta /
@@ -110,7 +110,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
                     
     _autostack << _friction_cone << static_constr;
     
-    _solver = boost::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), 
+    _solver = std::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), 
                                                          _autostack->getBounds(),
                                                          1.0, 
                                                          OpenSoT::solvers::solver_back_ends::OSQP

@@ -1,5 +1,5 @@
 #include <OpenSoT/utils/AffineUtils.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 
 using namespace OpenSoT::AffineUtils;
@@ -9,14 +9,14 @@ using namespace OpenSoT::AffineUtils;
 AffineTask::Ptr AffineTask::toAffine(const OpenSoT::tasks::Aggregated::TaskPtr& task,
                          const OpenSoT::AffineHelper& var)
 {
-    return boost::make_shared<AffineTask>(task , var);
+    return std::make_shared<AffineTask>(task , var);
 }
 
 AffineTask::AffineTask(const OpenSoT::tasks::Aggregated::TaskPtr &task, const AffineHelper &var):
     Task("Affine"+task->getTaskID(), var.getInputSize()),
     _internal_task(task)
 {
-    _internal_generic_task = boost::make_shared<OpenSoT::tasks::GenericTask>(
+    _internal_generic_task = std::make_shared<OpenSoT::tasks::GenericTask>(
                 "foo", task->getA(), task->getb(), var);
     _lambda = 1.;
     _internal_generic_task->setWeight(task->getWeight());
@@ -52,7 +52,7 @@ void AffineTask::_update(const Eigen::VectorXd &x)
 AffineConstraint::Ptr AffineConstraint::toAffine(const OpenSoT::constraints::Aggregated::ConstraintPtr& constraint,
                                           const AffineHelper& var)
 {
-    return boost::make_shared<AffineConstraint>(constraint , var);
+    return std::make_shared<AffineConstraint>(constraint , var);
 }
 
 AffineConstraint::AffineConstraint(const OpenSoT::constraints::Aggregated::ConstraintPtr& constraint,
@@ -63,7 +63,7 @@ AffineConstraint::AffineConstraint(const OpenSoT::constraints::Aggregated::Const
 {
     if(constraint->isBound())
     {
-        _internal_generic_constraint = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+        _internal_generic_constraint = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                     "foo",
                     var,
                     constraint->getUpperBound(),
@@ -75,7 +75,7 @@ AffineConstraint::AffineConstraint(const OpenSoT::constraints::Aggregated::Const
         if(constraint->isEqualityConstraint())
         {
            _constraint_affine = constraint->getAeq()*var;
-           _internal_generic_constraint = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+           _internal_generic_constraint = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                        "foo",
                        _constraint_affine,
                        constraint->getbeq(),
@@ -85,7 +85,7 @@ AffineConstraint::AffineConstraint(const OpenSoT::constraints::Aggregated::Const
         else
         {
            _constraint_affine = constraint->getAineq()*var;
-           _internal_generic_constraint = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+           _internal_generic_constraint = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                        "foo",
                        _constraint_affine,
                        constraint->getbUpperBound(),

@@ -33,7 +33,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
     public:
 
-        typedef boost::shared_ptr<CoM> Ptr;
+        typedef std::shared_ptr<CoM> Ptr;
 
         /**
          * @brief CoM

@@ -20,7 +20,7 @@
 
 #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OpenSoT/utils/Piler.h>
 #include <list>
 
@@ -44,7 +44,7 @@ using namespace OpenSoT::utils;
          */
         class Aggregated: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
-	    typedef boost::shared_ptr<Aggregated> Ptr;
+	    typedef std::shared_ptr<Aggregated> Ptr;
         typedef MatrixPiler VectorPiler;
 
             enum AggregationPolicy {

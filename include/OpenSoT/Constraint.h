@@ -18,7 +18,7 @@
 #ifndef __CONSTRAINT_H__
 #define __CONSTRAINT_H__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <matlogger2/matlogger2.h>
 #include <XBotInterface/Logger.hpp>
@@ -35,7 +35,7 @@
     class Constraint {
     public:
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
-        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
+        typedef std::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
 
         /**

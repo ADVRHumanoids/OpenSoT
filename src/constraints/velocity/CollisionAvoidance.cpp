@@ -178,7 +178,7 @@ void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& lin
 }
 
 bool CollisionAvoidance::addWorldCollision(const std::string &id,
-                                               boost::shared_ptr<fcl::CollisionObjectd> fcl_obj)
+                                               std::shared_ptr<fcl::CollisionObjectd> fcl_obj)
 {
     return _dist_calc->addWorldCollision(id, fcl_obj);
 }

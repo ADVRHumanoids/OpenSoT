@@ -54,7 +54,7 @@ class CollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
 
 public:
 
-    typedef boost::shared_ptr<CollisionAvoidance> Ptr;
+    typedef std::shared_ptr<CollisionAvoidance> Ptr;
     typedef std::pair<std::string, std::string> LinksPair;
 
     /**
@@ -146,7 +146,7 @@ public:
      * @return true if input is valid
      */
     bool addWorldCollision(const std::string& id,
-                           boost::shared_ptr<fcl::CollisionObjectd> fcl_obj);
+                           std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
 
     /**
      * @brief remove world collision with given id

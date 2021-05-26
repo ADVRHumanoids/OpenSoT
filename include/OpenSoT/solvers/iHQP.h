@@ -20,7 +20,7 @@
 
 #include <vector>
 #include <iostream>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OpenSoT/Task.h>
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
@@ -44,7 +44,7 @@ namespace OpenSoT{
     class iHQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
     public:
-    typedef boost::shared_ptr<iHQP> Ptr;
+    typedef std::shared_ptr<iHQP> Ptr;
     typedef MatrixPiler VectorPiler;
 
         /**

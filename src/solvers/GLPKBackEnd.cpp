@@ -1,6 +1,6 @@
 #include <OpenSoT/solvers/GLPKBackEnd.h>
 #include <XBotInterface/SoLib.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/date_time.hpp>
 
 
@@ -206,7 +206,7 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
         _solution[i] = glp_mip_col_val(_mip, i+1);
 
 
-    _opt.param = boost::make_shared<glp_iocp>(_param);
+    _opt.param = std::make_shared<glp_iocp>(_param);
 
     //glp_write_lp(_mip, NULL, "test_cplex_lp");
     return true;

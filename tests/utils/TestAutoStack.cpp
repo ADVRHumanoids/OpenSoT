@@ -59,8 +59,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
 
     OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(com_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
     EXPECT_TRUE(task_CoM != NULL);
     EXPECT_TRUE(task_CoM->getTaskID().compare(task_id) == 0);
 
@@ -71,16 +71,16 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     task_id = "cartesian::l_wrist";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(Cartesian_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
     EXPECT_TRUE(left_arm != NULL);
     EXPECT_TRUE(left_arm->getTaskID().compare(task_id) == 0);
 
     task_id = "cartesian:r2l_sole";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(Cartesian_task2 != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
     EXPECT_TRUE(right_left_leg != NULL);
     EXPECT_TRUE(right_left_leg->getTaskID().compare(task_id) == 0);
 }
@@ -98,8 +98,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
 
     OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(com_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
     EXPECT_TRUE(task_CoM != NULL);
     EXPECT_TRUE(task_CoM->getBaseLink().compare(base_link) == 0);
     EXPECT_TRUE(task_CoM->getDistalLink().compare(distal_link) == 0);
@@ -112,8 +112,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
     distal_link = "LSoftHand";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(Cartesian_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
     EXPECT_TRUE(left_arm != NULL);
     EXPECT_TRUE(left_arm->getBaseLink().compare(base_link) == 0);
     EXPECT_TRUE(left_arm->getDistalLink().compare(distal_link) == 0);
@@ -122,8 +122,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
     distal_link = "r_sole";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(Cartesian_task2 != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
     EXPECT_TRUE(right_left_leg != NULL);
     EXPECT_TRUE(right_left_leg->getBaseLink().compare(base_link) == 0);
     EXPECT_TRUE(right_left_leg->getDistalLink().compare(distal_link) == 0);
@@ -266,11 +266,11 @@ TEST_F(testAutoStack, testOperatorRedirection)
         / (DHS->rightLeg + DHS->leftLeg) << DHS->jointLimits << DHS->velocityLimits;
     EXPECT_TRUE(auto2->getBoundsList().size() == 2);
     EXPECT_TRUE(auto2->getStack().size() == 2);
-    EXPECT_TRUE(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().size() == 2);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().front()->getConstraints().size(), 2);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().back()->getConstraints().size(), 1);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().size(), 2);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().front()->getConstraints().size(), 0);
+    EXPECT_TRUE(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().size() == 2);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().front()->getConstraints().size(), 2);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().back()->getConstraints().size(), 1);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().size(), 2);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().front()->getConstraints().size(), 0);
 }
 
 TEST_F(testAutoStack, testTaskConstructor)

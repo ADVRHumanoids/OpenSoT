@@ -16,7 +16,7 @@
 */
 
 #include <OpenSoT/constraints/force/CoP.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace OpenSoT::constraints::force;
 
@@ -78,11 +78,11 @@ CoPs::CoPs(const std::vector<AffineHelper>& wrench,
 {
     std::list<ConstraintPtr> constraint_list;
     for(unsigned int i = 0; i < contact_name.size(); ++i){
-        auto cop = ::boost::make_shared<CoP>(contact_name[i], wrench[i], robot, X_Lims[i], Y_Lims[i]);
+        auto cop = ::std::make_shared<CoP>(contact_name[i], wrench[i], robot, X_Lims[i], Y_Lims[i]);
         constraint_list.push_back(cop);
     }
 
-    _internal_constraint = boost::make_shared<OpenSoT::constraints::Aggregated>
+    _internal_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
     update(Eigen::VectorXd(0));

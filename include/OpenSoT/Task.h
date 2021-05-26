@@ -23,7 +23,7 @@
  #include <vector>
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
- #include <boost/shared_ptr.hpp>
+ #include <memory>
  #include <XBotInterface/Logger.hpp>
  #include <XBotInterface/ModelInterface.h>
 
@@ -49,9 +49,9 @@
 
     public:
         typedef Task< Matrix_type, Vector_type > TaskType;
-        typedef boost::shared_ptr<TaskType> TaskPtr;
+        typedef std::shared_ptr<TaskType> TaskPtr;
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
-        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
+        typedef std::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
 
         /**

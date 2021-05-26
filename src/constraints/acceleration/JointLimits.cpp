@@ -16,7 +16,7 @@
 */
 
 #include <OpenSoT/constraints/acceleration/JointLimits.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace OpenSoT::constraints::acceleration;
 
@@ -42,7 +42,7 @@ JointLimits::JointLimits(   XBot::ModelInterface& robot,
     /* calling update to generate bounds */       
     
     
-    _generic_constraint_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 "internal_generic_constraint", qddot,
                 _jointAccMax,
                 -_jointAccMax,

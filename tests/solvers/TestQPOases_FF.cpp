@@ -38,10 +38,10 @@ typedef std::pair<KDL::Path::IdentifierType,bool> testType;
 class testQPOases_TestFF: public ::testing::Test
 {
 protected:
-    typedef boost::shared_ptr<KDL::Trajectory> TrajPtr;
-    typedef boost::shared_ptr<KDL::Path> PathPtr;
-    typedef boost::shared_ptr<KDL::VelocityProfile> VelProfPtr;
-    typedef boost::shared_ptr<KDL::RotationalInterpolation> RotIntPtr;
+    typedef std::shared_ptr<KDL::Trajectory> TrajPtr;
+    typedef std::shared_ptr<KDL::Path> PathPtr;
+    typedef std::shared_ptr<KDL::VelocityProfile> VelProfPtr;
+    typedef std::shared_ptr<KDL::RotationalInterpolation> RotIntPtr;
     std::ofstream _log;
 
     RotIntPtr rotationInterpolationMethod;
@@ -245,26 +245,26 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     _model_ptr->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits =
-            boost::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax,qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax,qmin);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits =
-            boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 0.6,3e-3,q.size());
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 0.6,3e-3,q.size());
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
     bounds_list.push_back(boundsJointLimits);
     bounds_list.push_back(boundsVelocityLimits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds =
-            boost::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
+            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm_task =
-            boost::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_arm",q, *(_model_ptr.get()),
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_arm",q, *(_model_ptr.get()),
                                                         "l_wrist",
                                                         "world");
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task =
-            boost::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
@@ -272,7 +272,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     stack_of_tasks.push_back(postural_task);
 
     OpenSoT::solvers::iHQP::Ptr sot =
-            boost::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e8);
+            std::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e8);
 
 
 
@@ -590,31 +590,31 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits =
-            boost::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits =
-            boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 0.9,3e-3,q.size());
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 0.9,3e-3,q.size());
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
     bounds_list.push_back(boundsJointLimits);
     bounds_list.push_back(boundsVelocityLimits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds =
-            boost::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
+            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
 
     OpenSoT::tasks::velocity::CoM::Ptr com =
-            boost::make_shared<OpenSoT::tasks::velocity::CoM>(q, *(_model_ptr));
+            std::make_shared<OpenSoT::tasks::velocity::CoM>(q, *(_model_ptr));
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task =
-            boost::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(com);
     stack_of_tasks.push_back(postural_task);
 
-    OpenSoT::solvers::iHQP::Ptr sot = boost::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e8);
+    OpenSoT::solvers::iHQP::Ptr sot = std::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e8);
 
 
 
@@ -860,28 +860,28 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     _model_ptr->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits =
-            boost::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax,qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax,qmin);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits =
-            boost::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 1.5,3e-3,q.size());
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 1.5,3e-3,q.size());
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
     bounds_list.push_back(boundsJointLimits);
     bounds_list.push_back(boundsVelocityLimits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds =
-            boost::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
+            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task =
-            boost::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(postural_task);
 
     OpenSoT::solvers::iHQP::Ptr sot =
-            boost::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e9);
+            std::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e9);
 
 
     Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
