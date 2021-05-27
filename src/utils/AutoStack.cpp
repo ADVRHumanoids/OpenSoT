@@ -281,39 +281,11 @@ OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::Task
     return task;
 }
 
-OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
-                                                const OpenSoT::tasks::Aggregated::Ptr constraint)
-{
-    task->getConstraints().push_back(std::make_shared<OpenSoT::constraints::TaskToConstraint>(constraint));
-    return task;
-}
-
-OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
-                                            const OpenSoT::tasks::Aggregated::TaskPtr constraint)
-{
-    task->getConstraints().push_back(std::make_shared<OpenSoT::constraints::TaskToConstraint>(constraint));
-    return task;
-}
-
-OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
-                                            const OpenSoT::tasks::Aggregated::Ptr constraint)
-{
-    task->getConstraints().push_back(std::make_shared<OpenSoT::constraints::TaskToConstraint>(constraint));
-    return task;
-}
-
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
                                     const OpenSoT::tasks::Aggregated::TaskPtr constraint)
 {
     return autoStack << std::make_shared<OpenSoT::constraints::TaskToConstraint>(constraint);
 }
-
-OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
-                                    const OpenSoT::tasks::Aggregated::Ptr constraint)
-{
-    return autoStack << std::make_shared<OpenSoT::constraints::TaskToConstraint>(constraint);
-}
-
 
 } // OpenSoT namespace
 

@@ -316,32 +316,26 @@ OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
                                     const OpenSoT::constraints::Aggregated::ConstraintPtr bound);
 
 /**
- * @brief operator << adds a new constraint to the task specified
+ * @brief operator << adds a new tasks as a constraint to the task specified
  * @param task a pointer to the task
  * @param constraint a pointer to the constraint defined as a task
  * @return a pointer to the same input task, with a constraint added
  * (NOTICE the task is NOT a copy, it's the input task to which we
  * added a new constraint)
  */
-///@{
 OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
                                                 const OpenSoT::tasks::Aggregated::TaskPtr constraint);
 
-OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
-                                                const OpenSoT::tasks::Aggregated::Ptr constraint);
-
-OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
-                                            const OpenSoT::tasks::Aggregated::TaskPtr constraint);
-
-OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
-                                            const OpenSoT::tasks::Aggregated::Ptr constraint);
-
-OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
+/**
+ * @brief operator << adds a new tasks as a constraint to the stack specified
+ * @param stack a pointer to the stack
+ * @param constraint a pointer to the constraint defined as a task
+ * @return a pointer to the same input task, with a constraint added
+ * (NOTICE the task is NOT a copy, it's the input task to which we
+ * added a new constraint)
+ */
+OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack,
                                     const OpenSoT::tasks::Aggregated::TaskPtr constraint);
-
-OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
-                                    const OpenSoT::tasks::Aggregated::Ptr constraint);
-///@}
 
 }
 #endif

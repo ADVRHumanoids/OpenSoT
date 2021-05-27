@@ -427,9 +427,77 @@ TEST_F(testAutoStack, testOperatorStackEqual)
     EXPECT_TRUE(autostack->getStack()[1]->getA() == DHS->rightArm->getA());
 }
 
-TEST_F(testAutoStack, testOperatorTaskToConstraint_)
+TEST_F(testAutoStack, testOperatorTaskToConstraint)
 {
-    auto Task = DHS->leftArm << DHS->rightArm;
+    //1) "TaskPtr << TaskPtr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task = DHS->leftArm << DHS->rightArm;
+    auto constraints = Task->getConstraints();
+    EXPECT_EQ(constraints.size(), 1);
+    auto constraint = *(constraints.begin());
+    EXPECT_TRUE(constraint->getAineq() == DHS->rightArm->getA());
+    EXPECT_TRUE(constraint->getbUpperBound() == DHS->rightArm->getb());
+    EXPECT_TRUE(constraint->getbLowerBound() == DHS->rightArm->getb());
+
+    //NOTE: DHS->leftArm now has one internal constraint!
+    std::cout<<"DHS->leftArm->getConstraints().size(): "<< DHS->leftArm->getConstraints().size()<<std::endl;
+    DHS->leftArm->getConstraints().pop_back();
+    std::cout<<"pop constraint from DHS->leftArm"<<std::endl;
+    std::cout<<"DHS->leftArm->getConstraints().size(): "<< DHS->leftArm->getConstraints().size()<<std::endl;
+    std::cout<<"Task->getConstraints().size(): "<< Task->getConstraints().size()<<std::endl;
+
+
+    //2) "TaskPtr << Aggregated::Ptr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task2 = DHS->leftLeg << (DHS->leftArm + DHS->rightArm);
+    auto constraints2 = Task2->getConstraints();
+    EXPECT_EQ(constraints2.size(), 1);
+    auto constraint2 = *(constraints2.begin());
+    EXPECT_TRUE(constraint2->getAineq() == (DHS->leftArm + DHS->rightArm)->getA());
+    EXPECT_TRUE(constraint2->getbUpperBound() == (DHS->leftArm + DHS->rightArm)->getb());
+    EXPECT_TRUE(constraint2->getbLowerBound() == (DHS->leftArm + DHS->rightArm)->getb());
+
+    //NOTE: DHS->leftLeg now has one internal constraint!
+    std::cout<<"DHS->leftLeg->getConstraints().size(): "<< DHS->leftLeg->getConstraints().size()<<std::endl;
+    DHS->leftLeg->getConstraints().pop_back();
+    std::cout<<"pop constraint from DHS->leftLeg"<<std::endl;
+    std::cout<<"DHS->leftLeg->getConstraints().size(): "<< DHS->leftLeg->getConstraints().size()<<std::endl;
+    std::cout<<"Task2->getConstraints().size(): "<< Task2->getConstraints().size()<<std::endl;
+
+    //3) "Aggregated::Ptr << TaskPtr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task3 =  (DHS->leftArm + DHS->rightArm) << DHS->leftLeg;
+    auto constraints3 = Task3->getConstraints();
+    EXPECT_EQ(constraints3.size(), 1);
+    auto constraint3 = *(constraints3.begin());
+    EXPECT_TRUE(constraint3->getAineq() == DHS->leftLeg->getA());
+    EXPECT_TRUE(constraint3->getbUpperBound() == DHS->leftLeg->getb());
+    EXPECT_TRUE(constraint3->getbLowerBound() == DHS->leftLeg->getb());
+
+    //4) "Aggregated::Ptr << Aggregated::Ptr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task4 =  (DHS->leftArm + DHS->rightArm) << (DHS->leftLeg + DHS->rightLeg);
+    auto constraints4 = Task4->getConstraints();
+    EXPECT_EQ(constraints4.size(), 1);
+    auto constraint4 = *(constraints4.begin());
+    EXPECT_TRUE(constraint4->getAineq() == (DHS->leftLeg + DHS->rightLeg)->getA());
+    EXPECT_TRUE(constraint4->getbUpperBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+    EXPECT_TRUE(constraint4->getbLowerBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+
+    //5) "Stack << TaskPtr"
+    OpenSoT::AutoStack::Ptr stack = (DHS->leftArm / DHS->rightArm) << DHS->leftLeg;
+    auto constraints5 = stack->getBoundsList();
+    EXPECT_EQ(constraints5.size(), 1);
+    auto constraint5 = *(constraints5.begin());
+    EXPECT_TRUE(constraint5->getAineq() == DHS->leftLeg->getA());
+    EXPECT_TRUE(constraint5->getbUpperBound() == DHS->leftLeg->getb());
+    EXPECT_TRUE(constraint5->getbLowerBound() == DHS->leftLeg->getb());
+
+    //6) "Stack << Aggregated::Ptr"
+    OpenSoT::AutoStack::Ptr stack2 = (DHS->leftArm / DHS->rightArm) << (DHS->leftLeg + DHS->rightLeg);
+    auto constraints6 = stack2->getBoundsList();
+    EXPECT_EQ(constraints6.size(), 1);
+    auto constraint6 = *(constraints6.begin());
+    EXPECT_TRUE(constraint6->getAineq() == (DHS->leftLeg + DHS->rightLeg)->getA());
+    EXPECT_TRUE(constraint6->getbUpperBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+    EXPECT_TRUE(constraint6->getbLowerBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+
 }
 
 }
