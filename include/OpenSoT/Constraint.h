@@ -23,6 +23,8 @@
 #include <matlogger2/matlogger2.h>
 #include <XBotInterface/Logger.hpp>
 
+#include <OpenSoT/version.h>
+
  namespace OpenSoT {
 
  /**
