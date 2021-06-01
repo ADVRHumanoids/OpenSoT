@@ -24,6 +24,7 @@ option(SET_SSE4_FLAG "set -msse4 flag to gcc" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+
 # Set a default build type for single-configuration
 # CMake generators if no build type is set.
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
@@ -39,11 +40,13 @@ find_package(orocos_kdl REQUIRED)
 find_package(urdf REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
+find_package(Qhull REQUIRED)
 find_package(PCL 1.7 QUIET COMPONENTS   common
                                         filters
-                                        surface
-                                        search
-                                        io)
+                                        surface)
+                                        #search
+                                        #io)
+                                                                                
 find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
 find_package(fcl 0.6.1 QUIET)
@@ -210,7 +213,7 @@ if(${FCL_FOUND} AND ${moveit_core_FOUND})
         ${moveit_core_LIBRARIES})
 endif()
 if(${PCL_FOUND})
-    set(PRIVATE_TLL ${PRIVATE_TLL} ${PCL_LIBRARIES})
+    set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
 endif()
 
 
@@ -308,6 +311,11 @@ add_subdirectory(doc)
 include(GenerateDeb)
 
 
+configure_file(version.h.in include/OpenSoT/version.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
+        DESTINATION include/OpenSoT)
+
 #######################
 # Add Testing and Examples target  #
 #######################
@@ -325,7 +333,3 @@ if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
         ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()
 
-configure_file(version.h.in include/OpenSoT/version.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
-install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
-        DESTINATION include/OpenSoT)
