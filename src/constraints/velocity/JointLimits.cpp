@@ -39,11 +39,16 @@ void JointLimits::update(const Eigen::VectorXd& x)
 
 /************************ COMPUTING BOUNDS ****************************/
 
-    _upperBound = ( _jointLimitsMax - x)*_boundScaling;
-    _lowerBound = ( _jointLimitsMin - x)*_boundScaling;
-    
-    _upperBound = _upperBound.cwiseMax(0.0);
-    _lowerBound = _lowerBound.cwiseMin(0.0);
+    if(x.size() == _jointLimitsMax.size())
+    {
+        _upperBound = ( _jointLimitsMax - x)*_boundScaling;
+        _lowerBound = ( _jointLimitsMin - x)*_boundScaling;
+
+        _upperBound = _upperBound.cwiseMax(0.0);
+        _lowerBound = _lowerBound.cwiseMin(0.0);
+    }
+    else
+        XBot::Logger::warning("Wrong input x size, joint limits will not be upated!\n");
 
 /**********************************************************************/
 
