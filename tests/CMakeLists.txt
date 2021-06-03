@@ -162,7 +162,7 @@ if(${FCL_FOUND})
 endif()
 
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
-    SET(TestLibs ${TestLibs} ${trajectory_utils_LIBRARIES} ${rviz_visual_tools_LIBRARIES})
+    SET(TestLibs ${TestLibs} ${rviz_visual_tools_LIBRARIES} ${trajectory_utils_LIBRARIES}) 
 endif()
 
 

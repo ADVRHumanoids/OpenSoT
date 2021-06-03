@@ -486,11 +486,16 @@ namespace{
                 scale.x = .02; scale.y = .02; scale.z = .02;
                 visual_tools->publishSphere(_com,rviz_visual_tools::colors::GREEN, scale);
 
-                visual_tools->publishWireframeRectangle(_l_foot, 0.05, 0.1);
-                visual_tools->publishWireframeRectangle(_r_foot, 0.05, 0.1);
+                Eigen::Isometry3d tmp, tmp2;
+                tmp.translation() = _l_foot.translation();
+                tmp.linear() = _l_foot.rotation();
+                tmp2.translation() = _r_foot.translation();
+                tmp2.linear() = _r_foot.rotation();
+                visual_tools->publishWireframeRectangle(tmp, 0.05, 0.1);
+                visual_tools->publishWireframeRectangle(tmp2, 0.05, 0.1);
 
 
-                Eigen::Affine3d text_pose; text_pose.Identity();
+                Eigen::Isometry3d text_pose; text_pose.Identity();
                 text_pose(1,3) = -0.4;
                 std::string text = "Anchor: "+anchor+"\n";
                 text += "Robot Anchor: "+ _fb->getAnchor()+"\n";
