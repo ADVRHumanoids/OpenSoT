@@ -40,6 +40,8 @@ public:
         _solver.activeSearch(solution);
     }
 
+
+
     soth::HCOD& solver(){return _solver;}
 
 private:
@@ -189,6 +191,63 @@ TEST_F(testSOTH, hierarchicalLinearSystem)
 
     auto bsol2 = J[1]*solution;
     std::cout<<"level 2: J*solution: "<<bsol2<<std::endl;
+}
+
+TEST_F(testSOTH, constrainedVariableLinearSystem)
+{
+    std::srand(std::time(nullptr));
+
+    std::vector<Eigen::MatrixXd> J(2);
+    std::vector<soth::VectorBound> b(2);
+
+    J[0].resize(3, 3);
+    b[0].resize(3);
+    J[0].setIdentity();
+    b[0].fill(soth::Bound(-0.5, 0.5));
+
+    J[1].setIdentity(3,3);
+    b[1].resize(3);
+    b[1][0] = 1.;
+    b[1][1] = 1.;
+    b[1][2] = 1.;
+
+    hcod solver(J, b, 3);
+
+    Eigen::VectorXd solution(3);
+    solver.solve(solution);
+
+    std::cout<<"SOLVER SHOW:"<<std::endl;
+    std::stringstream stream;
+    solver.solver().show(stream);
+    solver.solver().showActiveSet(stream);
+    std::cout<<stream.str()<<std::endl;
+
+    std::cout<<"solution: "<<solution.transpose()<<std::endl;
+
+    auto bsol = J[0]*solution;
+    std::cout<<"J*solution: "<<bsol<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(bsol(i,0), 0.5, 1e-6);
+
+
+    b[0].fill(soth::Bound(-1., 1.));
+    solver.solver().stages[0]->set(J[0], b[0]);
+
+    solver.solve(solution);
+    std::stringstream stream2;
+    solver.solver().show(stream2);
+    std::cout<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<stream2.str()<<std::endl;
+    std::cout<<"solution: "<<solution.transpose()<<std::endl;
+
+
+    auto bsol2 = J[0]*solution;
+    std::cout<<"J*solution: "<<bsol2<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(bsol2(i,0), 1., 1e-6);
 }
 
 }
