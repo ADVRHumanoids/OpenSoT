@@ -55,6 +55,7 @@ endif()
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
 
+
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
