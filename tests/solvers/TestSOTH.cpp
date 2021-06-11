@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include <XBotInterface/ModelInterface.h>
-#include <soth/HCOD.hpp>
 #include <soth/debug.hpp>
+#include <OpenSoT/solvers/HCOD.h>
+#include <OpenSoT/tasks/GenericTask.h>
+#include <OpenSoT/constraints/GenericConstraint.h>
 
 class NotificationToCout {
 public:
@@ -86,10 +88,12 @@ TEST_F(testSOTH, linearSystem)
 //    b[0].fill(soth::Bound(0, soth::Bound::BOUND_INF));
 
     J[0] = Eigen::MatrixXd::Random(3,3);
+    Eigen::VectorXd bb(3);
+    bb << 1., 1., 1.;
     b[0].resize(3);
-    b[0][0] = 1.;
-    b[0][1] = 1.;
-    b[0][2] = 1.;
+    b[0][0] = bb[0];
+    b[0][1] = bb[1];
+    b[0][2] = bb[2];
 
     hcod solver(J, b, 3);
 
@@ -108,7 +112,19 @@ TEST_F(testSOTH, linearSystem)
     std::cout<<"J*solution: "<<bsol<<std::endl;
 
     for(unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(bsol(i,0), 1., 1e-6);
+        EXPECT_NEAR(bsol(i,0), bb[i], 1e-6);
+
+    /// OPENSOT
+    OpenSoT::AutoStack stack(std::make_shared<OpenSoT::tasks::GenericTask>("0", J[0], bb));
+
+    OpenSoT::solvers::HCOD hcod(stack, 0.);
+    Eigen::VectorXd solution2;
+    hcod.solve(solution2);
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(solution[i], solution2[i], 1e-6);
+
+    std::cout<<"solution2: "<<solution2.transpose()<<std::endl;
 }
 
 
@@ -124,12 +140,16 @@ TEST_F(testSOTH, constrainedLinearSystem)
     b[0].resize(3);
     J[0].setIdentity();
     b[0].fill(soth::Bound(-0.5, 0.5));
+    Eigen::VectorXd lb(3); lb << -0.5,-0.5,-0.5;
+    Eigen::VectorXd ub(3); ub << 0.5,0.5,0.5;
 
     J[1].setIdentity(3,3);
+    Eigen::VectorXd bb(3);
+    bb << 1., 1., 1.;
     b[1].resize(3);
-    b[1][0] = 1.;
-    b[1][1] = 1.;
-    b[1][2] = 1.;
+    b[1][0] = bb[0];
+    b[1][1] = bb[1];
+    b[1][2] = bb[2];
 
     hcod solver(J, b, 3);
 
@@ -149,6 +169,25 @@ TEST_F(testSOTH, constrainedLinearSystem)
 
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(bsol(i,0), 0.5, 1e-6);
+
+    /// OPENSOT
+    auto constr = std::make_shared<OpenSoT::constraints::GenericConstraint>(
+                    "constr", ub, lb, 3);
+
+    OpenSoT::AutoStack::Ptr stack = std::make_shared<OpenSoT::AutoStack>
+            (std::make_shared<OpenSoT::tasks::GenericTask>("0", J[1], bb));
+    stack<<constr;
+
+
+
+    OpenSoT::solvers::HCOD hcod(*stack, 0.);
+    Eigen::VectorXd solution2;
+    hcod.solve(solution2);
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(solution[i], solution2[i], 1e-6);
+
+    std::cout<<"solution2: "<<solution2.transpose()<<std::endl;
 }
 
 TEST_F(testSOTH, hierarchicalLinearSystem)

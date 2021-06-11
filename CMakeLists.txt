@@ -165,7 +165,8 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/iHQP.cpp
     src/solvers/nHQP.cpp
     src/solvers/eHQP.cpp
-    src/solvers/l1HQP.cpp)
+    src/solvers/l1HQP.cpp
+    src/solvers/HCOD.cpp)
 
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
@@ -215,10 +216,16 @@ if(${PCL_FOUND})
 endif()
 
 
+configure_file(version.h.in include/OpenSoT/version.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
+        DESTINATION include/OpenSoT)
+
 TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC
     XBotInterface::XBotInterface
     matlogger2::matlogger2
+    "/home/enrico/advr-superbuild/build/install/lib/libsoth.so"
     PRIVATE
     ${PRIVATE_TLL})
 
@@ -326,7 +333,3 @@ if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
         ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()
 
-configure_file(version.h.in include/OpenSoT/version.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
-install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
-        DESTINATION include/OpenSoT)
