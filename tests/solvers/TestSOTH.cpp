@@ -230,6 +230,23 @@ TEST_F(testSOTH, hierarchicalLinearSystem)
 
     auto bsol2 = J[1]*solution;
     std::cout<<"level 2: J*solution: "<<bsol2<<std::endl;
+
+    /// OPENSOT
+    auto task0 = std::make_shared<OpenSoT::tasks::GenericTask>("0", J[0], v0);
+    auto task1 = std::make_shared<OpenSoT::tasks::GenericTask>("1", J[1], v1);
+
+    OpenSoT::AutoStack::Ptr stack = (task0/task1);
+
+
+
+    OpenSoT::solvers::HCOD hcod(*stack, 0.);
+    Eigen::VectorXd solution2;
+    hcod.solve(solution2);
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(solution[i], solution2[i], 1e-6);
+
+    std::cout<<"solution2: "<<solution2.transpose()<<std::endl;
 }
 
 TEST_F(testSOTH, constrainedVariableLinearSystem)
