@@ -306,6 +306,62 @@ TEST_F(testSOTH, constrainedVariableLinearSystem)
         EXPECT_NEAR(bsol2(i,0), 1., 1e-6);
 }
 
+TEST_F(testSOTH, constrainedVariableLinearSystemOpenSoT)
+{
+    std::srand(std::time(nullptr));
+
+    Eigen::VectorXd lb(3); lb << -0.5,-0.5,-0.5;
+    Eigen::VectorXd ub(3); ub << 0.5,0.5,0.5;
+
+    Eigen::MatrixXd J(3,3);
+    J.setIdentity(3,3);
+    Eigen::VectorXd b(3);
+    b[0] = 1.;
+    b[1] = 1.;
+    b[2] = 1.;
+
+    OpenSoT::constraints::GenericConstraint::Ptr constr = std::make_shared<OpenSoT::constraints::GenericConstraint>(
+                    "constr", ub, lb, 3);
+
+    OpenSoT::AutoStack::Ptr stack = std::make_shared<OpenSoT::AutoStack>
+            (std::make_shared<OpenSoT::tasks::GenericTask>("0", J, b));
+    stack<<constr;
+
+
+
+    OpenSoT::solvers::HCOD hcod(*stack, 0.);
+
+    Eigen::VectorXd solution(3);
+    hcod.solve(solution);
+
+    std::cout<<"solution: "<<solution.transpose()<<std::endl;
+
+    auto bsol = J*solution;
+    std::cout<<"J*solution: "<<bsol<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(bsol(i,0), 0.5, 1e-6);
+
+
+    lb[0] = -1.; lb[1] = -1.; lb[2] = -1.;
+    ub[0] = 1.; ub[1] = 1.; ub[2] = 1.;
+
+    constr->setBounds(ub, lb);
+    stack->update(Eigen::VectorXd(1));
+
+
+    hcod.solve(solution);
+    std::cout<<"solution: "<<solution.transpose()<<std::endl;
+
+
+    auto bsol2 = J*solution;
+    std::cout<<"J*solution: "<<bsol2<<std::endl;
+
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(bsol2(i,0), 1., 1e-6);
+}
+
+
 }
 
 int main(int argc, char **argv) {
