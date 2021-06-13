@@ -5,13 +5,30 @@ using namespace OpenSoT::solvers;
 HCOD::HCOD(OpenSoT::AutoStack &stack_of_tasks, const double damping):
     Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds())
 {
+    init(damping);
+}
+
+HCOD::HCOD(Stack& stack_of_tasks, ConstraintPtr bounds, const double damping):
+    Solver(stack_of_tasks, bounds)
+{
+    init(damping);
+}
+
+void HCOD::init(const double damping)
+{
+    _VARS = _tasks[0]->getA().cols();
+
+    _A.set(Eigen::MatrixXd(0, _VARS));
+    _lA.set(Eigen::MatrixXd(0,1));
+    _uA.set(Eigen::MatrixXd(0,1));
+
+
     // Level of priorities is given by Constraints + Tasks Levels
     _CL = 0;
-    if(stack_of_tasks.getBounds())
+    if(_bounds)
         _CL = 1;
 
     int TL = _tasks.size();
-    _VARS = _tasks[0]->getA().cols();
     _I.setIdentity(_VARS, _VARS);
 
     // here we create the hcod solver
@@ -34,7 +51,6 @@ HCOD::HCOD(OpenSoT::AutoStack &stack_of_tasks, const double damping):
     // Set damping to all levels and initial active set
     _hcod->setDamping(damping);
     _hcod->setInitialActiveSet();
-
 }
 
 bool HCOD::solve(Eigen::VectorXd &solution)
@@ -71,11 +87,15 @@ void HCOD::copy_tasks()
 
 void HCOD::copy_bounds()
 {
+    _A.reset();
+    _lA.reset();
+    _uA.reset();
+
     if(_bounds->getLowerBound().size() > 0)
     {
-        _A.set(_I);
-        _lA.set(_bounds->getLowerBound());
-        _uA.set(_bounds->getUpperBound());
+        _A.pile(_I);
+        _lA.pile(_bounds->getLowerBound());
+        _uA.pile(_bounds->getUpperBound());
     }
 
     if(_bounds->getAineq().rows() > 0)
