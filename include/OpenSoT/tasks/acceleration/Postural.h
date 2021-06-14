@@ -186,8 +186,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         AffineHelper _qddot;
         AffineHelper _postural_task;
         
-        int _na;
-        
         Eigen::VectorXd _qddot_d, _qddot_ref, _qref, _qdot, _q, _qdot_ref, _qdot_ref_cached, _qddot_ref_cached;
         Eigen::MatrixXd _Jpostural;
 
