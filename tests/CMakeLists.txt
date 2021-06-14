@@ -80,6 +80,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testeiQuadProgSolver
                   testKinematics
                   testl1HQP
+                  testSOTH
 )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
@@ -156,7 +157,7 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
+                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES} soth)
 if(${FCL_FOUND})
     SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
 endif()
@@ -184,6 +185,11 @@ ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)
 TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
 add_dependencies(testl1HQP   OpenSoT)
 add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
+
+ADD_EXECUTABLE(testSOTH     solvers/TestSOTH.cpp)
+TARGET_LINK_LIBRARIES(testSOTH ${TestLibs})
+add_dependencies(testSOTH GTest-ext OpenSoT)
+add_test(NAME OpenSoT_solvers_soth COMMAND testSOTH)
 
 ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
 TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})

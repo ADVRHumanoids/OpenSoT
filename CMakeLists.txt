@@ -58,6 +58,7 @@ endif()
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
 
+
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
 option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
@@ -169,6 +170,17 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/eHQP.cpp
     src/solvers/l1HQP.cpp)
 
+option(OPENSOT_SOTH_FRONT_END "Add to compilation soth and HCOD front-end" TRUE)
+if(${OPENSOT_SOTH_FRONT_END})
+    message("Internal soth will be used!")
+    add_subdirectory(external/soth-ext/)
+    include_directories(external/soth-ext/include)
+    message("Adding src/solvers/HCOD.cpp to compilation")
+    set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)
+    set(PRIVATE_TLL soth)
+endif()
+
+
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/DefaultHumanoidStack.cpp
@@ -207,7 +219,7 @@ ADD_LIBRARY(OpenSoT SHARED
     ${OPENSOT_FLOATING_BASE_ESTIMATION_SOURCES}
     ${sot_INCLUDES})
 
-set(PRIVATE_TLL ${eigen_conversions_LIBRARIES})
+set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
 if(${FCL_FOUND} AND ${moveit_core_FOUND})
     set(PRIVATE_TLL ${PRIVATE_TLL} fcl
         ${moveit_core_LIBRARIES})
@@ -216,6 +228,11 @@ if(${PCL_FOUND})
     set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
 endif()
 
+
+configure_file(version.h.in include/OpenSoT/version.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
+        DESTINATION include/OpenSoT)
 
 TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC
@@ -288,6 +305,8 @@ message("Adding src/solvers/eiQuadProgBackEnd.cpp to compilation")
 add_library(OpenSotBackEndeiQuadProg SHARED src/solvers/eiQuadProgBackEnd.cpp)
 target_link_libraries(OpenSotBackEndeiQuadProg OpenSoT eiQuadProg)
 library_install(OpenSotBackEndeiQuadProg 1 0 0)
+
+
 
 #############################################################
 # Export OpenSoT so that it can be found using find_package #
