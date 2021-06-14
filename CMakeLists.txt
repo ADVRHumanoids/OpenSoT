@@ -165,8 +165,17 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/iHQP.cpp
     src/solvers/nHQP.cpp
     src/solvers/eHQP.cpp
-    src/solvers/l1HQP.cpp
-    src/solvers/HCOD.cpp)
+    src/solvers/l1HQP.cpp)
+
+option(OPENSOT_SOTH_FRONT_END "Add to compilation soth and HCOD front-end" TRUE)
+if(${OPENSOT_SOTH_FRONT_END})
+    add_subdirectory(external/soth-ext/)
+    include_directories(external/soth-ext/include)
+    message("Adding src/solvers/HCOD.cpp to compilation")
+    set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)
+    set(PRIVATE_TLL soth)
+endif()
+
 
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
@@ -206,7 +215,7 @@ ADD_LIBRARY(OpenSoT SHARED
     ${OPENSOT_FLOATING_BASE_ESTIMATION_SOURCES}
     ${sot_INCLUDES})
 
-set(PRIVATE_TLL ${eigen_conversions_LIBRARIES})
+set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
 if(${FCL_FOUND} AND ${moveit_core_FOUND})
     set(PRIVATE_TLL ${PRIVATE_TLL} fcl
         ${moveit_core_LIBRARIES})
@@ -225,7 +234,6 @@ TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC
     XBotInterface::XBotInterface
     matlogger2::matlogger2
-    "/home/enrico/advr-superbuild/build/install/lib/libsoth.so"
     PRIVATE
     ${PRIVATE_TLL})
 
@@ -293,6 +301,8 @@ message("Adding src/solvers/eiQuadProgBackEnd.cpp to compilation")
 add_library(OpenSotBackEndeiQuadProg SHARED src/solvers/eiQuadProgBackEnd.cpp)
 target_link_libraries(OpenSotBackEndeiQuadProg OpenSoT eiQuadProg)
 library_install(OpenSotBackEndeiQuadProg 1 0 0)
+
+
 
 #############################################################
 # Export OpenSoT so that it can be found using find_package #
