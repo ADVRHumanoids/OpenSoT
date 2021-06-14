@@ -2,7 +2,7 @@
 #define SOTH_DEBUG_MODE 45
 #include "../include/soth/debug.hpp"
 
-#include <Eigen/LU>
+#include "../external/Eigen/LU"
 #include "../include/soth/BaseY.hpp"
 #include "../include/soth/DestructiveColPivQR.hpp"
 #include "../include/soth/Stage.hpp"

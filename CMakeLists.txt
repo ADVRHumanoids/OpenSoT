@@ -170,12 +170,7 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
 option(OPENSOT_SOTH_FRONT_END "Add to compilation soth and HCOD front-end" TRUE)
 if(${OPENSOT_SOTH_FRONT_END})
     message("Internal soth will be used!")
-    set(soth_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/soth-ext/")
-    ExternalProject_Add(soth-ext SOURCE_DIR "${soth_SOURCE_DIR}"
-        PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external"
-        INSTALL_COMMAND ""
-        CMAKE_ARGS -DCMAKE_CXX_FLAGS:STRING="-fPIC" -DCMAKE_BUILD_TYPE=${${CMAKE_PROJECT_NAME}_CMAKE_BUILD_TYPE})
-    #add_subdirectory(external/soth-ext/)
+    add_subdirectory(external/soth-ext/)
     include_directories(external/soth-ext/include)
     message("Adding src/solvers/HCOD.cpp to compilation")
     set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)

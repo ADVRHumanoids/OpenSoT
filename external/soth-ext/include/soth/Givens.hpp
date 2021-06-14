@@ -1,8 +1,8 @@
 #ifndef __SOTH_GIVENS__
 #define __SOTH_GIVENS__
 
-#include <Eigen/Core>
-#include <Eigen/Jacobi>
+#include "../../external/Eigen/Core"
+#include "../../external/Eigen/Jacobi"
 #include "Algebra.hpp"
 #include "SubMatrix.hpp"
 #include "api.hpp"

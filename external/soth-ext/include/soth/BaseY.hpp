@@ -1,7 +1,7 @@
 #ifndef __SOTH_BASEY__
 #define __SOTH_BASEY__
 
-#include <Eigen/Householder>
+#include "../../external/Eigen/Householder"
 #include "Algebra.hpp"
 #include "Givens.hpp"
 #include "api.hpp"

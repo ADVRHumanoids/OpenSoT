@@ -9,7 +9,7 @@
 #ifndef __SOTH_COD__
 #define __SOTH_COD__
 
-#include <Eigen/SVD>
+#include "../external/Eigen/SVD"
 #include "../include/soth/Algebra.hpp"
 #include "../include/soth/Givens.hpp"
 #include "../include/soth/debug.hpp"

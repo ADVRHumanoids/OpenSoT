@@ -1,7 +1,7 @@
 #ifndef __SOTH_BOUND__
 #define __SOTH_BOUND__
 
-#include <Eigen/Core>
+#include "../../external/Eigen/Core"
 #include <iostream>
 #include <vector>
 

@@ -1,7 +1,7 @@
 #ifndef __SOTH_SOLVERS__
 #define __SOTH_SOLVERS__
 
-#include <Eigen/Core>
+#include "../../external/Eigen/Core"
 
 namespace soth {
 using namespace Eigen;

@@ -5,7 +5,7 @@
 #include <list>
 #include "api.hpp"
 
-#include <Eigen/Core>
+#include "../../external/Eigen/Core"
 
 namespace soth {
 class SOTH_EXPORT AllocatorML {

@@ -1,7 +1,7 @@
 #ifndef __SOTH_STAGE__
 #define __SOTH_STAGE__
 
-#include <Eigen/Core>
+#include "../../external/Eigen/Core"
 #include <list>
 #include <string>
 

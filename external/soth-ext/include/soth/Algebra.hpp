@@ -1,7 +1,7 @@
 #ifndef __SOTH_ALGEBRA__
 #define __SOTH_ALGEBRA__
 
-#include <Eigen/Core>
+#include "../../external/Eigen/Core"
 #include <iostream>
 #include "api.hpp"
 
