@@ -4,11 +4,12 @@
 #include "../../external/Eigen/Core"
 #include <iostream>
 #include <vector>
+#include "visibility.h"
 
 #include "api.hpp"
 
 namespace soth {
-class SOTH_EXPORT Bound {
+class SOTH_API Bound {
  public:
   enum bound_t {
     BOUND_NONE,

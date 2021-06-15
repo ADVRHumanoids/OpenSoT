@@ -177,7 +177,7 @@ if(${OPENSOT_SOTH_FRONT_END})
     include_directories(external/soth-ext/include)
     message("Adding src/solvers/HCOD.cpp to compilation")
     set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)
-    set(PRIVATE_TLL soth)
+    set(PRIVATE_TLL hcod_wrapper soth)
 endif()
 
 
@@ -233,6 +233,8 @@ configure_file(version.h.in include/OpenSoT/version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
         DESTINATION include/OpenSoT)
+
+
 
 TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC

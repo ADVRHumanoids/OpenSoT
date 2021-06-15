@@ -5,9 +5,10 @@
 #include "BaseY.hpp"
 #include "Stage.hpp"
 #include "api.hpp"
+#include "visibility.h"
 
 namespace soth {
-class SOTH_EXPORT HCOD {
+class SOTH_API HCOD {
  protected:
   typedef boost::shared_ptr<soth::Stage> stage_ptr_t;
   typedef std::vector<stage_ptr_t> stage_sequence_t;

@@ -16,7 +16,7 @@ namespace soth {
 class BaseY;
 
 /* --- STAGE -------------------------------------------------------------- */
-class SOTH_EXPORT BasicStage : boost::noncopyable {
+class SOTH_API BasicStage : boost::noncopyable {
  private:
   VectorBound boundsInternal;
 

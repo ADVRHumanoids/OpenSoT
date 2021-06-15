@@ -5,7 +5,13 @@
 #include <Eigen/Dense>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <soth/HCOD.hpp>
+
+namespace soth{
+    class Bound;
+    typedef Eigen::Matrix<Bound, Eigen::Dynamic, 1> VectorBound;
+    class HCOD_wrapper;
+    class HCOD;
+}
 
 namespace OpenSoT{
     namespace solvers{
@@ -37,7 +43,7 @@ namespace OpenSoT{
                 /**
                   * brief ~HCOD destructor
                   */
-                ~HCOD(){}
+                ~HCOD();
 
                 /**
                  * @brief solve a stack of tasks
@@ -50,13 +56,13 @@ namespace OpenSoT{
                  * @brief getInternalSolver
                  * @return pointer to internal hcod solver
                  */
-                std::shared_ptr<soth::HCOD> getInternalSolver() {return _hcod;}
+                std::shared_ptr<soth::HCOD> getInternalSolver();
 
             private:
                 /**
                  * @brief _hcod internal solver
                  */
-                std::shared_ptr<soth::HCOD> _hcod;
+                std::shared_ptr<soth::HCOD_wrapper> _hcod;
 
                 /**
                  * @brief _vector_bounds internal vector to store constraints

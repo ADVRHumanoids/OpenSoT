@@ -1,4 +1,6 @@
 #include <OpenSoT/solvers/HCOD.h>
+#include <soth/HCOD_wrapper.h>
+#include <soth/Bound.hpp>
 
 using namespace OpenSoT::solvers;
 
@@ -32,7 +34,7 @@ void HCOD::init(const double damping)
     _I.setIdentity(_VARS, _VARS);
 
     // here we create the hcod solver
-    _hcod = std::make_shared<soth::HCOD>(_VARS, _CL+TL);
+    _hcod = std::make_shared<soth::HCOD_wrapper>(_VARS, _CL+TL);
     _vector_bounds.resize(_CL+TL);
     _vector_J.resize(_CL+TL);
 
@@ -44,7 +46,7 @@ void HCOD::init(const double damping)
     // Pushback stages
     for (unsigned int i = 0; i < _vector_J.size(); ++i)
     {
-        _hcod->pushBackStage(_vector_J[i], _vector_bounds[i]);
+        _hcod->pushBackStage(_vector_J[i].rows(), _vector_J[i].data(), _vector_bounds[i].data());
         _hcod->setNameByOrder("level_");
     }
 
@@ -60,7 +62,8 @@ bool HCOD::solve(Eigen::VectorXd &solution)
 
     copy_tasks();
 
-    _hcod->activeSearch(solution);
+    solution.setZero(_VARS);
+    _hcod->activeSearch(solution.data());
     return true; ///TODO: HOW TO CHECK IF EVERYTHING WENT FINE???
 }
 
@@ -121,4 +124,10 @@ void HCOD::copy_bounds()
 
     for(unsigned int i = 0; i < s; ++i)
         _vector_bounds[0][i] = soth::Bound(_lA.generate_and_get()(i,0), _uA.generate_and_get()(i,0));
+}
+
+
+HCOD::~HCOD()
+{
+
 }
