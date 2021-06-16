@@ -67,6 +67,12 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
                                 const std::list<unsigned int>& rowIndices)
 {
+    if(rowIndices.size() > static_cast<unsigned int>(task->getA().rows()))
+        throw std::runtime_error("rowIndices.size() > task->getA.rows()");
+    auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+    if(*max >= task->getA().rows())
+        throw std::runtime_error("max(rowIndices) >= task->getA.rows()");
+
     OpenSoT::SubTask::Ptr sub_task;
     sub_task.reset(new OpenSoT::SubTask(task, rowIndices));
     return sub_task;
