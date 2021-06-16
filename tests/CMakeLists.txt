@@ -80,8 +80,11 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testeiQuadProgSolver
                   testKinematics
                   testl1HQP
-                  testSOTH
 )
+
+if(${OPENSOT_SOTH_FRONT_END})
+    set(${OPENSOT_TESTS} testSOTH)
+endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TEST testQPOases_ConvexHull testConvexHullVelocityConstraint testAutoStack)
@@ -186,10 +189,12 @@ TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
 add_dependencies(testl1HQP   OpenSoT)
 add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
 
-ADD_EXECUTABLE(testSOTH     solvers/TestSOTH.cpp)
-TARGET_LINK_LIBRARIES(testSOTH ${TestLibs})
-add_dependencies(testSOTH OpenSoT)
-add_test(NAME OpenSoT_solvers_soth COMMAND testSOTH)
+if(${OPENSOT_SOTH_FRONT_END})
+    ADD_EXECUTABLE(testSOTH     solvers/TestSOTH.cpp)
+    TARGET_LINK_LIBRARIES(testSOTH ${TestLibs})
+    add_dependencies(testSOTH OpenSoT)
+    add_test(NAME OpenSoT_solvers_soth COMMAND testSOTH)
+endif()
 
 ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
 TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})
