@@ -58,6 +58,18 @@ namespace OpenSoT{
                  */
                 std::shared_ptr<soth::HCOD> getInternalSolver();
 
+                /**
+                 * @brief setDisableWeightsComputation
+                 * @param disable if true the tasks weights are not taken into account (faster solver), dafault is false
+                 */
+                void setDisableWeightsComputation(const bool disable);
+
+                /**
+                 * @brief setDisableWeightsComputation
+                 * @return internal disable_weights_computation
+                 */
+                bool setDisableWeightsComputation();
+
             private:
                 /**
                  * @brief _hcod internal solver
@@ -121,6 +133,31 @@ namespace OpenSoT{
                  * @brief _I Identity to be used for bounds
                  */
                 Eigen::MatrixXd _I;
+
+                // TASKS WEIGHTS ARE HANDLED WITH THE FOLLOWING OBJECTS.
+                // NOTE THAT: FOR DIAGONAL MATRICES (WHEN THE WEIGHT IS DIAGONAL FLAG IS TRUE) THE
+                // WEIGHT FOR THE TASK IS THE SIMPLE SQRT OF THE ELEMENTS ON THE DIAGONAL.
+                //
+                // TO DISABLE COMPUTATIONS OF WEIGHTS PLEASE SET THE FLAG: disable_weights_computation (default false, weights are computed).
+                /**
+                 * @brief disable_weights_computation, if true weights are not computed (faster solver), default false
+                 */
+                bool _disable_weights_computation;
+
+                /**
+                 * @brief _W vector to handle task weights
+                 */
+                std::vector<Eigen::MatrixXd> _W;
+
+                /**
+                 * @brief _sqrt is used to compute sqrt of positive-definite symmetric weight matrices
+                 */
+                std::vector<Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> >_sqrt;
+
+                /**
+                 * @brief _Wb vector to store the product Wb
+                 */
+                std::vector<Eigen::VectorXd> _Wb;
         };
     }
 }

@@ -4,14 +4,24 @@
 
 using namespace OpenSoT::solvers;
 
+#define DEFAULT_DISABLE_WEIGHTS_COMPUTATION false
+
 HCOD::HCOD(OpenSoT::AutoStack &stack_of_tasks, const double damping):
-    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds())
+    Solver(stack_of_tasks.getStack(), stack_of_tasks.getBounds()),
+    _W(stack_of_tasks.getStack().size()),
+    _sqrt(stack_of_tasks.getStack().size()),
+    _Wb(stack_of_tasks.getStack().size()),
+    _disable_weights_computation(DEFAULT_DISABLE_WEIGHTS_COMPUTATION)
 {
     init(damping);
 }
 
 HCOD::HCOD(Stack& stack_of_tasks, ConstraintPtr bounds, const double damping):
-    Solver(stack_of_tasks, bounds)
+    Solver(stack_of_tasks, bounds),
+    _W(stack_of_tasks.size()),
+    _sqrt(stack_of_tasks.size()),
+    _Wb(stack_of_tasks.size()),
+    _disable_weights_computation(DEFAULT_DISABLE_WEIGHTS_COMPUTATION)
 {
     init(damping);
 }
@@ -76,14 +86,42 @@ void HCOD::copy_tasks()
 
     for(unsigned int i = 0; i < s; ++i)
     {
-        _vector_J[c] = _tasks[i]->getA();
+        if(_disable_weights_computation)
+        {
+            _vector_J[c] = _tasks[i]->getA();
 
-        int ss = _tasks[i]->getb().size();
-        if(_vector_bounds[c].size() != ss)
-            _vector_bounds[c].resize(ss);
+            int ss = _tasks[i]->getb().size();
+            if(_vector_bounds[c].size() != ss)
+                _vector_bounds[c].resize(ss);
 
-        for(unsigned int j = 0; j < ss; ++j)
-            _vector_bounds[c][j] = _tasks[i]->getb()[j];
+            for(unsigned int j = 0; j < ss; ++j)
+                _vector_bounds[c][j] = _tasks[i]->getb()[j];
+        }
+        else
+        {
+            _W[i] = _tasks[i]->getWeight();
+            if(_tasks[i]->getWeightIsDiagonalFlag()) //weight matrix is diagonal
+            {
+                for(unsigned int j = 0; i < _W[j].rows(); ++j)
+                    _W[i](j,j) = std::sqrt(_tasks[i]->getWeight()(j,j));
+            }
+            else //if not diagonal we assume weight matrix positive-definite symmetric
+            {
+                _sqrt[i].compute(_tasks[i]->getWeight());
+                _W[i] = _sqrt[i].operatorSqrt();
+            }
+
+            _vector_J[c] = _W[i]*_tasks[i]->getA();
+
+            int ss = _tasks[i]->getb().size();
+            if(_vector_bounds[c].size() != ss)
+                _vector_bounds[c].resize(ss);
+
+            _Wb[i] = _W[i]*_tasks[i]->getb();
+            for(unsigned int j = 0; j < ss; ++j)
+                _vector_bounds[c][j] = _Wb[i][j];
+        }
+
         c+=1;
     }
 }
@@ -125,6 +163,17 @@ void HCOD::copy_bounds()
     for(unsigned int i = 0; i < s; ++i)
         _vector_bounds[0][i] = soth::Bound(_lA.generate_and_get()(i,0), _uA.generate_and_get()(i,0));
 }
+
+void HCOD::setDisableWeightsComputation(const bool disable)
+{
+    _disable_weights_computation = disable;
+}
+
+bool HCOD::setDisableWeightsComputation()
+{
+    return _disable_weights_computation;
+}
+
 
 
 HCOD::~HCOD()
