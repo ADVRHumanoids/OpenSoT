@@ -139,6 +139,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/acceleration/CoM.cpp
     src/tasks/acceleration/DynamicFeasibility.cpp
     src/tasks/acceleration/MinJointVel.cpp
+    src/tasks/acceleration/AngularMomentum.cpp
     src/tasks/velocity/Cartesian.cpp
     src/tasks/velocity/CartesianAdmittance.cpp
     src/tasks/velocity/PureRolling.cpp
