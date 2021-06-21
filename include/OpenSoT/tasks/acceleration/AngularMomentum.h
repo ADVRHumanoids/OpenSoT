@@ -31,6 +31,16 @@ namespace OpenSoT {
     #define BASE_LINK_COM "world"
     #define DISTAL_LINK_COM "CoM"
 
+       /**
+        * @brief The AngularMomentum class implements the tracking of desired angular momentum variation:
+        *
+        *           \f$\dot{L}_{r} = A\ddot{q} + \dot{A}\dot{q}\f$
+        *
+        * with:
+        *
+        *           \f$\dot{L}_{r} =  \dot{L}_{d} + \lambda K \left( L_{d} - L \right)\f$
+        *
+        */
        class AngularMomentum : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
        public:
            typedef std::shared_ptr<AngularMomentum> Ptr;
@@ -57,21 +67,33 @@ namespace OpenSoT {
         public:
            /**
             * @brief AngularMomentum constructor
-            * @param x joint states
-            * @param robot reference to a model
+            * @param robot model
+            * @param qddot variable
             */
-           AngularMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot, const AffineHelper& qddot);
+           AngularMomentum(XBot::ModelInterface& robot, const AffineHelper& qddot);
 
+           /**
+             * @brief ~AngularMomentum destructor
+             */
            ~AngularMomentum();
 
            /**
             * @brief setReference set a desired angular momentum at CoM
             * @param desiredAngularMomentum vector 3x1
-            * NOTE: the input desired angular momentum has to be multiplied by \f$ \text{dT} \f$!
             */
            void setReference(const Eigen::Vector3d& desiredAngularMomentum);
+
+           /**
+            * @brief setReference set a desired angular momentum and variation of angular momentum at CoM
+            * @param desiredAngularMomentum
+            * @param desiredAngularMomentumVariation
+            */
            void setReference(const Eigen::Vector3d& desiredAngularMomentum, const Eigen::Vector3d& desiredAngularMomentumVariation);
 
+           /**
+            * @brief setMomentumGain set gain for momentum feedback law
+            * @param K matrix 3x3
+            */
            void setMomentumGain(const Eigen::Matrix3d& K);
 
            /**
@@ -79,6 +101,12 @@ namespace OpenSoT {
             * @param desiredAngularMomentum vector 3x1
             */
            void getReference(Eigen::Vector3d& desiredAngularMomentum) const;
+
+           /**
+            * @brief getReference get the desired angular momentum and variation of angular momentum at CoM
+            * @param desiredAngularMomentum vector 3x1
+            * @param desiredAngularMomentumVariation vector 3x1
+            */
            void getReference(Eigen::Vector3d& desiredAngularMomentum, Eigen::Vector3d& desiredAngularMomentumVariation) const;
 
            /**
