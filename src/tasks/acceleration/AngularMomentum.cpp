@@ -45,7 +45,7 @@ void AngularMomentum::_update(const Eigen::VectorXd &x)
     _Ldot_ref = _Ldot_d + _lambda*_K*(_L_d - _L.tail(3));
 
     //4. write task
-     _momentum_task = _Mom*_qddot + _Momdot;
+     _momentum_task = _Mom.block(3,0,3,_qddot.getInputSize())*_qddot + _Momdot.tail(3);
      _momentum_task = _momentum_task - _Ldot_ref;
 
      _A = _momentum_task.getM();
