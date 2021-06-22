@@ -45,15 +45,15 @@ void AngularMomentum::_update(const Eigen::VectorXd &x)
     _Ldot_ref = _Ldot_d + _lambda*_K*(_L_d - _L.tail(3));
 
     //4. write task
-     _momentum_task = _Mom.block(3,0,3,_qddot.getInputSize())*_qddot + _Momdot.tail(3);
-     _momentum_task = _momentum_task - _Ldot_ref;
+    _momentum_task = _Mom.bottomRows(3)*_qddot + _Momdot.tail(3);
+    _momentum_task = _momentum_task - _Ldot_ref;
 
-     _A = _momentum_task.getM();
-     _b = -_momentum_task.getq();
+    _A = _momentum_task.getM();
+    _b = -_momentum_task.getq();
 
-     //5. reset references for safety reasons
-     _L_d.setZero(3);
-     _Ldot_d.setZero(3);
+    //5. reset references for safety reasons
+    _L_d.setZero(3);
+    _Ldot_d.setZero(3);
 }
 
 void AngularMomentum::setMomentumGain(const Eigen::Matrix3d& K)
