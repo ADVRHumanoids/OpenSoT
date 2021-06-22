@@ -2,7 +2,7 @@
 
 using namespace OpenSoT::tasks::acceleration;
 
-AngularMomentum::AngularMomentum(const Eigen::VectorXd &x, XBot::ModelInterface &robot, const AffineHelper &qddot):
+AngularMomentum::AngularMomentum(XBot::ModelInterface &robot, const AffineHelper &qddot):
     Task< Eigen::MatrixXd, Eigen::VectorXd >("angular_momentum", qddot.getInputSize()),
     _robot(robot),
     _qddot(qddot),
