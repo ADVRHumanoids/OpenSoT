@@ -61,6 +61,11 @@ void AngularMomentum::setMomentumGain(const Eigen::Matrix3d& K)
     _K = K;
 }
 
+const Eigen::Matrix3d& AngularMomentum::getMomentumGain() const
+{
+    return _K;
+}
+
 void AngularMomentum::setReference(const Eigen::Vector3d& desiredAngularMomentum)
 {
     _L_d = desiredAngularMomentum;

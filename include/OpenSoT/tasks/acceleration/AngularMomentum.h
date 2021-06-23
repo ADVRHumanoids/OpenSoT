@@ -97,6 +97,12 @@ namespace OpenSoT {
            void setMomentumGain(const Eigen::Matrix3d& K);
 
            /**
+            * @brief getMomentumGain retrieve internal momentum gain
+            * @return 3x3 momentum gain matrix
+            */
+           const Eigen::Matrix3d& getMomentumGain() const;
+
+           /**
             * @brief getReference get the desired angular momentum at CoM
             * @param desiredAngularMomentum vector 3x1
             */
