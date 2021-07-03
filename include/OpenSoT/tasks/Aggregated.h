@@ -135,6 +135,15 @@ using namespace OpenSoT::utils;
 
             /**
              * @brief Aggregated
+             * @param task a pointer to the Task to aggregate
+             * @param x_size the size of the input vector. Notice this constructor will NOT call
+             *               update() on the base tasks
+             */
+            Aggregated(TaskPtr task,
+                       const unsigned int x_size);
+
+            /**
+             * @brief Aggregated
              * @param bounds a std::list of Tasks
              * @param q the vector of q at which to create the Aggregated task
              *          Notice that by specifying q, the Aggregated will automatically call
