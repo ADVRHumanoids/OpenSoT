@@ -560,6 +560,29 @@ TEST_F(testAggregatedTask, testWeightsUpdate)
 
 }
 
+TEST_F(testAggregatedTask, testSingleTask)
+{
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd qmin(_model_ptr->getJointNum()), qmax(_model_ptr->getJointNum());
+    _model_ptr->getJointLimits(qmin, qmax);
+    q = getRandomAngles(qmin, qmax, qmin.size());
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr waist(
+            new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",
+                                                    q,*(_model_ptr.get()), "Waist", "world"));
+
+    OpenSoT::tasks::Aggregated::Ptr aggr = std::make_shared<OpenSoT::tasks::Aggregated>(waist, q.size());
+
+    aggr->update(q);
+
+    EXPECT_TRUE(aggr->getA() == waist->getA());
+    EXPECT_TRUE(aggr->getb() == waist->getb());
+    EXPECT_TRUE(aggr->getWeight() == waist->getWeight());
+}
+
 }
 
 int main(int argc, char **argv) {
