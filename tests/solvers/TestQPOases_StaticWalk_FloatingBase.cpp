@@ -996,5 +996,7 @@ int main(int argc, char **argv) {
   logger = getLogger("qpOASES_StaticWalk_FloatingBase");
   IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  auto ret = RUN_ALL_TESTS();
+  logger.reset();
+  return ret;
 }
