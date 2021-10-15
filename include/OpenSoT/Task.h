@@ -188,6 +188,9 @@
          */
         Matrix_type _A_last_active;
 
+        Vector_type _error_, _tmp_, _residual_;
+
+
     public:
         /**
          * @brief Task define a task in terms of Ax = b
@@ -477,8 +480,6 @@
 
         }
 
-    private: Vector_type _error_, _tmp_, _residual_;
-    public:
         /**
          * @brief computeCost computes the residual of the task:
          *
