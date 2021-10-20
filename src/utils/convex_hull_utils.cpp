@@ -21,11 +21,10 @@
 #include <pcl/surface/convex_hull.h>
 
 convex_hull::convex_hull():
-    _ransac_distance_thr(0.001),
-    _pointCloud(new pcl::PointCloud<pcl::PointXYZ>()),
-    _projectedPointCloud(new pcl::PointCloud<pcl::PointXYZ>())
+    _ransac_distance_thr(0.001)
 {
-
+	_pointCloud = boost::make_shared< pcl::PointCloud<pcl::PointXYZ> >();
+	_projectedPointCloud = boost::make_shared< pcl::PointCloud<pcl::PointXYZ> >();
 }
 
 convex_hull::~convex_hull()
@@ -84,7 +83,7 @@ bool convex_hull::getConvexHull(const std::list<KDL::Vector>& points,
 void convex_hull::projectPCL2Plane(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud, const double ransac_distance_thr,
                                    pcl::PointCloud<pcl::PointXYZ>::Ptr projected_point_cloud)
 {
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::ModelCoefficients::Ptr coefficients = boost::make_shared<pcl::ModelCoefficients>();
 
     //We projects ALL the points in the plane (0 0 1)
     coefficients->values.clear();
@@ -105,6 +104,7 @@ void convex_hull::projectPCL2Plane(const pcl::PointCloud<pcl::PointXYZ>::ConstPt
 //    seg.setDistanceThreshold (ransac_distance_thr);
 //    seg.setInputCloud (cloud);
 //    seg.segment (*inliers, *coefficients);
+
 
 
     proj.setModelType (pcl::SACMODEL_PLANE);

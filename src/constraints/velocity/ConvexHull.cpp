@@ -29,10 +29,10 @@ ConvexHull::ConvexHull(const Eigen::VectorXd& x,
     Constraint("convex_hull", x.size()),
     _links_in_contact(links_in_contact),_robot(robot),
     _boundScaling(safetyMargin),
-    _convex_hull(new convex_hull()),
     _JCoM(3, x.size()),
     _C(links_in_contact.size(), 2)
 {
+    _convex_hull = std::make_shared<convex_hull>();
     _bUpperBound.resize(links_in_contact.size());
     _bLowerBound.resize(links_in_contact.size());
     _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());

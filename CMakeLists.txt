@@ -27,6 +27,7 @@ option(SET_SSE4_FLAG "set -msse4 flag to gcc" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+
 # Set a default build type for single-configuration
 # CMake generators if no build type is set.
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
@@ -42,11 +43,13 @@ find_package(orocos_kdl REQUIRED)
 find_package(urdf REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
+find_package(Qhull REQUIRED)
 find_package(PCL 1.7 QUIET COMPONENTS   common
                                         filters
-                                        surface
-                                        search
-                                        io)
+                                        surface)
+                                        #search
+                                        #io)
+                                                                                
 find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
 find_package(fcl 0.6.1 QUIET)
@@ -57,6 +60,7 @@ else()
 endif()
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
+
 
 # compilation flags
 option(OPENSOT_COMPILE_EXAMPLES "Compile OpenSoT examples" FALSE)
@@ -135,6 +139,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/acceleration/CoM.cpp
     src/tasks/acceleration/DynamicFeasibility.cpp
     src/tasks/acceleration/MinJointVel.cpp
+    src/tasks/acceleration/AngularMomentum.cpp
     src/tasks/velocity/Cartesian.cpp
     src/tasks/velocity/CartesianAdmittance.cpp
     src/tasks/velocity/PureRolling.cpp
@@ -168,6 +173,17 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/nHQP.cpp
     src/solvers/eHQP.cpp
     src/solvers/l1HQP.cpp)
+
+option(OPENSOT_SOTH_FRONT_END "Add to compilation soth and HCOD front-end" TRUE)
+if(${OPENSOT_SOTH_FRONT_END})
+    message("Internal soth will be used!")
+    add_subdirectory(external/soth-ext/)
+    include_directories(external/soth-ext/include)
+    message("Adding src/solvers/HCOD.cpp to compilation")
+    set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)
+    set(PRIVATE_TLL hcod_wrapper soth)
+endif()
+
 
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
@@ -207,14 +223,21 @@ ADD_LIBRARY(OpenSoT SHARED
     ${OPENSOT_FLOATING_BASE_ESTIMATION_SOURCES}
     ${sot_INCLUDES})
 
-set(PRIVATE_TLL ${eigen_conversions_LIBRARIES})
+set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
 if(${FCL_FOUND} AND ${moveit_core_FOUND})
     set(PRIVATE_TLL ${PRIVATE_TLL} fcl
         ${moveit_core_LIBRARIES})
 endif()
 if(${PCL_FOUND})
-    set(PRIVATE_TLL ${PRIVATE_TLL} ${PCL_LIBRARIES})
+    set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
 endif()
+
+
+configure_file(version.h.in include/OpenSoT/version.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
+        DESTINATION include/OpenSoT)
+
 
 
 TARGET_LINK_LIBRARIES(OpenSoT
@@ -289,6 +312,8 @@ add_library(OpenSotBackEndeiQuadProg SHARED src/solvers/eiQuadProgBackEnd.cpp)
 target_link_libraries(OpenSotBackEndeiQuadProg OpenSoT eiQuadProg)
 library_install(OpenSotBackEndeiQuadProg 1 0 0)
 
+
+
 #############################################################
 # Export OpenSoT so that it can be found using find_package #
 #############################################################
@@ -311,6 +336,11 @@ add_subdirectory(doc)
 include(GenerateDeb)
 
 
+configure_file(version.h.in include/OpenSoT/version.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
+        DESTINATION include/OpenSoT)
+
 #######################
 # Add Testing and Examples target  #
 #######################
@@ -328,7 +358,3 @@ if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
         ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests/robots" "${CMAKE_CURRENT_BINARY_DIR}/tests/robots")
 endif()
 
-configure_file(version.h.in include/OpenSoT/version.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
-install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
-        DESTINATION include/OpenSoT)

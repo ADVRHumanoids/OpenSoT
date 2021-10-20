@@ -1,8 +1,8 @@
 # BIGMAN config
 XBotInterface:
-  urdf_path: "$PWD/../../../robots/bigman/bigman_capsules.rviz"
-  srdf_path: "$PWD/../../../robots/bigman/bigman.srdf"
-  joint_map_path: "$PWD/../../../configs/bigman/joint_map/bigman_ecat_joint_map.yaml"
+  urdf_path: "$XBOT_ROOT/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz"
+  srdf_path: "$XBOT_ROOT/external/OpenSoT/tests/robots/bigman/bigman.srdf"
+  joint_map_path: "$XBOT_ROOT/external/OpenSoT/tests/configs/bigman/joint_map/bigman_ecat_joint_map.yaml"
 
 RobotInterface:
   framework_name: "YARP"

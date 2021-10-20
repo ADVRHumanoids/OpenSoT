@@ -46,6 +46,8 @@ void AngularMomentum::_update(const Eigen::VectorXd& x)
     _robot.getCentroidalMomentumMatrix(_Momentum);
     _A = _Momentum.block(3,0,3,_x_size);
     _b = _desiredAngularMomentum;
+    //Reset for safety reasons!
+    _desiredAngularMomentum.setZero(3);
 }
 
 void AngularMomentum::setReference(const Eigen::Vector3d& desiredAngularMomentum)
