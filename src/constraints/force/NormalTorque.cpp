@@ -14,6 +14,9 @@ NormalTorque::NormalTorque(const std::string &contact_link,
     _wrench(wrench),
     _mu(mu)
 {
+    if(wrench.getOutputSize() != 6)
+        throw std::runtime_error("Expected 6D wrench in NormalTorque constraint!");
+
     _A.setZero(8, 6);
     _AAd = _A;
     _updateA();
