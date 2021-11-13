@@ -33,6 +33,9 @@ CoP::CoP(const std::string& contact_link,
     _contact_link(contact_link),
     _wrench(wrench)
 {
+    if(wrench.getOutputSize() != 6)
+        throw std::runtime_error("Expected 6D wrench in CoP constraint!");
+
     _Ai.resize(4,6); _Ai.setZero(4,6);
     _Ai(0,2) =  _xl;  _Ai(0,4) =  1.;
     _Ai(1,2) = -_xu;  _Ai(1,4) = -1.;
