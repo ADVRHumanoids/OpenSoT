@@ -22,7 +22,7 @@ public:
      * @brief TorqueLimits
      * @param robot
      * @param qddot
-     * @param wrenches
+     * @param wrenches a 6D (flat-contact) wrench or a 3D (point-contact) Force
      * @param contact_links
      * @param torque_limits
      */

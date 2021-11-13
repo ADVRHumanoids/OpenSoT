@@ -36,7 +36,10 @@ void TorqueLimits::update(const Eigen::VectorXd &x)
         }
         else {
             _robot.getJacobian(_contact_links[i], _Jtmp);
-            _dyn_constraint = _dyn_constraint + (-_Jtmp.transpose()) * _wrenches[i];
+            if(_wrenches[i].getOutputSize() == 3) //we assume point contact
+                _dyn_constraint = _dyn_constraint + (-_Jtmp.topRows(3).transpose()) * _wrenches[i];
+            else //we assume flat contact
+                _dyn_constraint = _dyn_constraint + (-_Jtmp.transpose()) * _wrenches[i];
         }
     }
 
