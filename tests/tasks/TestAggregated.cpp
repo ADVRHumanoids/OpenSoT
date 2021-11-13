@@ -272,6 +272,49 @@ bool vectorAreEqual(const Eigen::VectorXd& v0,
     return areEqual;
 }
 
+TEST_F(testAggregatedTask, testAggregatedCost)
+{
+    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+    Eigen::VectorXd q(_model_ptr->getJointNum());
+    q.setZero(q.size());
+
+    Eigen::VectorXd qmin(q.size()), qmax(q.size());
+    _model_ptr->getJointLimits(qmin, qmax);
+
+    q = getRandomAngles(qmin, qmax, q.size());
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr Cartesian1(
+            new OpenSoT::tasks::velocity::Cartesian("cartesian::r_sole",
+                                                    q,*_model_ptr.get(), "r_sole", "world"));
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr Cartesian2(
+            new OpenSoT::tasks::velocity::Cartesian("cartesian::l_sole",
+                                                    q,*_model_ptr.get(), "l_sole", "world"));
+
+    auto ACartesian = Cartesian1 + Cartesian2;
+
+
+    Eigen::VectorXd qref = q;
+    qref = getRandomAngles(qmin, qmax, q.size());
+
+    Cartesian1->update(qref);
+    Cartesian2->update(qref);
+
+    double Cartesian1_cost = Cartesian1->computeCost(qref);
+    double Cartesian2_cost = Cartesian2->computeCost(qref);
+    double ACartesian_cost = ACartesian->computeCost(qref);
+
+    std::cout<<"Cartesian1 cost: "<<Cartesian1_cost<<std::endl;
+    std::cout<<"Cartesian2 cost: "<<Cartesian2_cost<<std::endl;
+    std::cout<<"ACartesian cost: "<<ACartesian_cost<<std::endl;
+
+    EXPECT_DOUBLE_EQ(ACartesian_cost, Cartesian1_cost + Cartesian2_cost);
+
+}
+
 TEST_F(testAggregatedTask, testConstraintsUpdate)
 {
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
