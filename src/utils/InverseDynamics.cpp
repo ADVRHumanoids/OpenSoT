@@ -4,7 +4,7 @@
 using namespace OpenSoT::utils;
 
 InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact,
-                                 XBot::ModelInterface& model):
+                                 XBot::ModelInterface& model, const CONTACT_MODEL& contact_model):
     _links_in_contact(links_in_contact),
     _model(model)
 {
@@ -12,8 +12,18 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
     OpenSoT::OptvarHelper::VariableVector variable_name_dims;
     variable_name_dims.emplace_back("qddot", _model.getJointNum());
 
-    for(unsigned int i = 0; i < _links_in_contact.size(); ++i)
-        variable_name_dims.emplace_back(_links_in_contact[i], 6);
+    if(contact_model == CONTACT_MODEL::SURFACE_CONTACT)
+    {
+        for(unsigned int i = 0; i < _links_in_contact.size(); ++i)
+            variable_name_dims.emplace_back(_links_in_contact[i], 6); //here we create a wrench variable
+    }
+    else if(contact_model == CONTACT_MODEL::POINT_CONTACT)
+    {
+        for(unsigned int i = 0; i < _links_in_contact.size(); ++i)
+            variable_name_dims.emplace_back(_links_in_contact[i], 3); //here we create a force variable
+    }
+    else
+        throw std::runtime_error("Unsupported  contact model");
 
     _serializer = std::make_shared<OpenSoT::OptvarHelper>(variable_name_dims);
 
@@ -22,14 +32,25 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
     _tau_val = _qddot_val;
 
     Eigen::MatrixXd J;
-    Eigen::Vector6d w; w.setZero();
     for(unsigned int i = 0; i < _links_in_contact.size(); ++i){
-        _contacts_wrench.push_back(_serializer->getVariable(_links_in_contact[i]));
+        if(contact_model == CONTACT_MODEL::SURFACE_CONTACT) //in this case we can directly use the serializer
+            _contacts_wrench.push_back(_serializer->getVariable(_links_in_contact[i]));
+        else if(contact_model == CONTACT_MODEL::POINT_CONTACT)//we create a wrench variable from the force variable
+        {
+            Eigen::MatrixXd M(6,3);
+            M.setZero();
+            M.block(0,0,3,3) = Eigen::Matrix3d::Identity();
+            Eigen::VectorXd q(6);
+            q.setZero();
+
+            OpenSoT::AffineHelper wrench = M*_serializer->getVariable(_links_in_contact[i]) + q;
+            _contacts_wrench.push_back(wrench);
+        }
 
         _model.getJacobian(_links_in_contact[i], J);
         _Jc.push_back(J);
 
-        _contacts_wrench_val.push_back(w);
+        _contacts_wrench_val.push_back(Eigen::Vector6d::Zero());
     }
 }
 
