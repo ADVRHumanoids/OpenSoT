@@ -1,0 +1,96 @@
+os: linux
+language: cpp
+compiler: g++
+
+jobs:
+  include:
+    - os: linux
+      dist: focal
+    - os: linux
+      dist: bionic
+
+branches:
+  only:
+    - refactor
+
+notifications:
+  email:
+    recipients:
+      - luca.muratore89@gmail.com
+      - arturo.laurenzi@iit.it
+    on_success: never
+    on_failure: never
+
+before_script:
+
+# forest magic
+- sudo pip3 install hhcm-forest==0.0.25
+- SRC_FOLDER=$PWD
+- cd .. && mkdir forest_ws && cd forest_ws && forest --init  # create forest ws for building
+- ln -s $SRC_FOLDER src/$(basename $SRC_FOLDER)  # symlink original source folder
+- forest -a git@github.com:advrhumanoids/multidof_recipes.git master -u  # get recipes
+- source setup.bash  # source forest ws
+
+# apt update and core packages installation
+- sudo apt-get update
+- sudo apt-get install git libgtest-dev cmake doxygen curl libboost-system-dev libmatio-dev 
+
+# ROS source.list and keys
+- sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+- curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+
+# config git
+- git config --global user.name "liesrock"
+- git config --global user.email "luca.muratore@iit.it"
+
+- >
+  if [[ `lsb_release -cs` == "focal" ]]; then 
+      
+      # ROS and Gazebo install
+      sudo apt update && sudo apt install -y \
+      ros-noetic-ros-base \
+      libgazebo11-dev liborocos-kdl-dev
+
+      . /opt/ros/noetic/setup.bash
+ 
+
+
+  fi;
+
+  if [[ `lsb_release -cs` == "bionic" ]]; then
+  
+      sudo apt update && sudo apt install -y \
+      ros-melodic-ros-base ros-melodic-orocos-kdl\
+      libgazebo9-dev
+      
+      . /opt/ros/melodic/setup.bash
+
+
+  fi;
+
+
+
+- sudo apt install ros-$ROS_DISTRO-urdf ros-$ROS_DISTRO-kdl-parser ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-rosmon
+- sudo apt install ros-$ROS_DISTRO-eigen-conversions ros-$ROS_DISTRO-robot-state-publisher ros-$ROS_DISTRO-moveit-core 
+- sudo apt install ros-$ROS_DISTRO-rviz ros-$ROS_DISTRO-interactive-markers ros-$ROS_DISTRO-tf-conversions ros-$ROS_DISTRO-tf2-eigen 
+- sudo apt install qttools5-dev libqt5charts5-dev qtdeclarative5-dev python3-pip python3-setuptools
+- sudo apt install ros-$ROS_DISTRO-gazebo-ros-pkgs  
+- sudo pip3 install rospkg
+
+# xbot2 framework install 
+- sudo sh -c 'echo "deb http://xbot.cloud/xbot2/ubuntu/$(lsb_release -sc) /" > /etc/apt/sources.list.d/xbot-latest.list'
+- wget -q -O - http://xbot.cloud/xbot2/ubuntu/KEY.gpg | sudo apt-key add -  
+- sudo apt update
+- sudo apt install xbot2_desktop_full
+
+# source xbot2 framework
+- . /opt/xbot/setup.sh
+
+
+script: 
+
+
+- forest OpenSoT -m test  # compile opensot + dependencies
+- cd build/OpenSoT && make test  # run tests
+
+
