@@ -24,7 +24,7 @@ notifications:
 before_script:
 
 # forest magic
-- sudo pip3 install hhcm-forest==0.0.25
+- sudo pip3 install hhcm-forest==0.0.26
 - SRC_FOLDER=$PWD
 - cd .. && mkdir forest_ws && cd forest_ws && forest --init  # create forest ws for building
 - ln -s $SRC_FOLDER src/$(basename $SRC_FOLDER)  # symlink original source folder
