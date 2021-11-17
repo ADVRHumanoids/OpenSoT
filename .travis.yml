@@ -92,7 +92,7 @@ before_script:
 script: 
 
 
-- forest OpenSoT -m test  # compile opensot + dependencies
+- forest OpenSoT -m test --clone-protocol https  # compile opensot + dependencies
 - cd build/OpenSoT && make test  # run tests
 
 
