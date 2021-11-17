@@ -90,9 +90,7 @@ before_script:
 
 
 script: 
-
-
-- forest OpenSoT -m test --clone-protocol https  # compile opensot + dependencies
+- forest OpenSoT -m test --clone-protocol https --verbose  # compile opensot + dependencies
 - cd build/OpenSoT && make test  # run tests
 
 
