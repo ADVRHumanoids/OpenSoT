@@ -11,7 +11,7 @@ jobs:
 
 branches:
   only:
-    - refactor
+    - devel
 
 notifications:
   email:
