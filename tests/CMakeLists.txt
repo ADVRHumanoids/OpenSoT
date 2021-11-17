@@ -231,7 +231,7 @@ add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
 if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
-    TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs})
+    TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs} osqp::osqpstatic)
     add_dependencies(testOSQPSolver   OpenSoT)
     add_test(NAME OpenSoT_solvers_osqp COMMAND testOSQPSolver)
 
@@ -242,7 +242,7 @@ if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
 
 
     ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
-    TARGET_LINK_LIBRARIES(testLP ${TestLibs})
+    TARGET_LINK_LIBRARIES(testLP ${TestLibs} osqp::osqpstatic)
     add_dependencies(testLP   OpenSoT)
     add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
 
