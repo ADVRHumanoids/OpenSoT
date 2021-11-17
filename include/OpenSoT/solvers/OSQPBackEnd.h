@@ -4,7 +4,7 @@
 #include <OpenSoT/solvers/BackEnd.h>
 #include <memory>
 #include <OpenSoT/Task.h>
-#include <osqp/osqp.h>
+#include <osqp.h>
 #include <OpenSoT/utils/Piler.h>
 #include <Eigen/Sparse>
 

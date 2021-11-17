@@ -1,6 +1,6 @@
 #include <OpenSoT/solvers/OSQPBackEnd.h>
-#include <osqp/glob_opts.h>
-#include <osqp/error.h>
+#include <glob_opts.h>  // this is from osqp!
+#include <error.h>  // this is from osqp!
 #include <exception>
 #include <XBotInterface/SoLib.h>
 #include <memory>
