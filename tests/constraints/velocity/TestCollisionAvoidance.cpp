@@ -1165,9 +1165,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     // start rechecking the distances of the capsules
 
     // check the actual distance between the hand capsule pair
-    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-    std::string urdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz";
-    std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
+    std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
+    std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
 
 
     urdf::ModelSharedPtr urdf = MAKE_SHARED<urdf::Model>();

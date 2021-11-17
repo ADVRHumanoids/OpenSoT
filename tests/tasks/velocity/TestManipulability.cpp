@@ -48,10 +48,9 @@ double computeManipIndex(const Eigen::MatrixXd& A)
 TEST_F(testManipolability, testManipolabilityTask)
 {
     XBot::ModelInterface::Ptr _model_ptr;
-    std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-    std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+    std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
-    std::string _path_to_cfg = robotology_root + relative_path;
+    std::string _path_to_cfg = relative_path;
 
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
     if(_model_ptr)

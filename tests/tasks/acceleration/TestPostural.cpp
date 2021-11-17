@@ -50,9 +50,8 @@ double getRandomAngle()
     return drand48()*2.0*M_PI-M_PI;
 }
 
-std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = robotology_root + relative_path;
+std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
+std::string _path_to_cfg = relative_path;
 
 TEST_F(testPosturalTask, testPosturalTask_subtask)
 {

@@ -92,6 +92,6 @@ before_script:
 script: 
 - forest OpenSoT -m test --clone-protocol https --verbose  # compile opensot + dependencies
 - cd build/OpenSoT  # run tests
-- make test || true
+-  ctest --output-on-failure || true
 
 

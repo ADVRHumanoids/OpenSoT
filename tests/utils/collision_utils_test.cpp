@@ -139,10 +139,9 @@ protected:
 
   testCollisionUtils()
   {
-      std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-      std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman_RBDL.yaml";
+      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman_RBDL.yaml";
 
-      _path_to_cfg = robotology_root + relative_path;
+      _path_to_cfg = relative_path;
 
       _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
@@ -154,8 +153,8 @@ protected:
       q.setZero(_model_ptr->getJointNum());
 
 
-      std::string urdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz";
-      std::string srdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman.srdf";
+      std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
+      std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
 
 
       urdf::ModelSharedPtr urdf = MAKE_SHARED<urdf::Model>();

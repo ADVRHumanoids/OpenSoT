@@ -29,10 +29,9 @@ public:
 
     testKinematicEstimation()
     {
-        std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-        std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
+        std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
 
-        _path_to_cfg = robotology_root + relative_path;
+        _path_to_cfg = relative_path;
 
         _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
         _model_ptr_kinematic_estimation = XBot::ModelInterface::getModel(_path_to_cfg);
