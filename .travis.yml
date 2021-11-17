@@ -24,6 +24,8 @@ notifications:
 before_script:
 
 # forest magic
+- sudo apt update
+- sudo apt install python3-pip python3-setuptools
 - sudo pip3 install hhcm-forest==0.0.26
 - SRC_FOLDER=$PWD
 - cd .. && mkdir forest_ws && cd forest_ws && forest --init  # create forest ws for building
@@ -73,7 +75,7 @@ before_script:
 - sudo apt install ros-$ROS_DISTRO-urdf ros-$ROS_DISTRO-kdl-parser ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-rosmon
 - sudo apt install ros-$ROS_DISTRO-eigen-conversions ros-$ROS_DISTRO-robot-state-publisher ros-$ROS_DISTRO-moveit-core 
 - sudo apt install ros-$ROS_DISTRO-rviz ros-$ROS_DISTRO-interactive-markers ros-$ROS_DISTRO-tf-conversions ros-$ROS_DISTRO-tf2-eigen 
-- sudo apt install qttools5-dev libqt5charts5-dev qtdeclarative5-dev python3-pip python3-setuptools
+- sudo apt install qttools5-dev libqt5charts5-dev qtdeclarative5-dev
 - sudo apt install ros-$ROS_DISTRO-gazebo-ros-pkgs  
 - sudo pip3 install rospkg
 
