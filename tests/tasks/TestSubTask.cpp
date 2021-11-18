@@ -696,6 +696,59 @@ TEST_F(TestSubTask, testWithCartesian)
 
 }
 
+TEST_F(TestSubTask, testSubTaskCost)
+{
+    using namespace OpenSoT::tasks::velocity;
+
+    // setting initial position with bent legs
+    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
+    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
+    q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
+
+    Cartesian::Ptr left_leg(new Cartesian("lleg", q_whole, *_model_ptr,
+                                          "l_sole", "Waist"));
+    Eigen::MatrixXd ref(4,4); ref.setRandom(4,4);
+    Eigen::VectorXd vref(6); vref.setRandom(6);
+    left_leg->setReference(ref, vref);
+
+    Eigen::Matrix6d W = 200. * Eigen::Matrix6d::Identity();
+    left_leg->setWeight(W);
+
+
+    std::list<unsigned int> position_indices;
+    position_indices.push_back(0);
+    position_indices.push_back(1);
+    position_indices.push_back(2);
+    OpenSoT::SubTask::Ptr position(new OpenSoT::SubTask(left_leg, position_indices));
+
+    std::list<unsigned int> orientation_indices;
+    orientation_indices.push_back(3);
+    orientation_indices.push_back(4);
+    orientation_indices.push_back(5);
+    OpenSoT::SubTask::Ptr orientation(new OpenSoT::SubTask(left_leg, orientation_indices));
+
+    left_leg->update(q_whole);
+
+
+    double left_leg_cost = left_leg->computeCost(q_whole);
+    double position_cost = position->computeCost(q_whole);
+    double orientation_cost = orientation->computeCost(q_whole);
+
+    std::cout<<"left_leg cost: "<<left_leg->computeCost(q_whole)<<std::endl;
+    std::cout<<"left_leg position cost: "<<position->computeCost(q_whole)<<std::endl;
+    std::cout<<"left_leg orientation cost: "<<orientation->computeCost(q_whole)<<std::endl;
+
+    EXPECT_DOUBLE_EQ(left_leg_cost, position_cost + orientation_cost);
+}
+
 TEST_F(TestSubTask, testWithPostural)
 {
     Eigen::VectorXd q(_model_ptr->getJointNum());

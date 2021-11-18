@@ -16,13 +16,19 @@ class InverseDynamics{
 public:
     typedef std::shared_ptr<InverseDynamics> Ptr;
 
+    enum CONTACT_MODEL{
+        POINT_CONTACT, // only Forces (3 dofs)
+        SURFACE_CONTACT //Forces and Moments (6 dofs)
+    };
+
     /**
      * @brief InverseDynamics constructor
      * @param links_in_contact a vector of string each one representing a contact
      * @param model
+     * @param contact_model the type of contact model defines the number of contact force variables, default is surface: 6dofs
      */
     InverseDynamics(const std::vector<std::string> links_in_contact,
-                    XBot::ModelInterface& model);
+                    XBot::ModelInterface& model, const CONTACT_MODEL& contact_model = CONTACT_MODEL::SURFACE_CONTACT);
 
     /**
      * @brief getJointsAccelerationAffine return the Affine related to the joint accelerations
