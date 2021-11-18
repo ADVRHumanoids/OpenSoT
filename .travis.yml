@@ -31,7 +31,6 @@ before_script:
 - cd .. && mkdir forest_ws && cd forest_ws && forest --init  # create forest ws for building
 - ln -s $SRC_FOLDER src/$(basename $SRC_FOLDER)  # symlink original source folder
 - forest -a git@github.com:advrhumanoids/multidof_recipes.git master -u --clone-protocol https  # get recipes
-- source setup.bash  # source forest ws
 
 # apt update and core packages installation
 - sudo apt-get update
@@ -90,8 +89,11 @@ before_script:
 
 
 script: 
-- forest OpenSoT -m test --clone-protocol https --verbose  # compile opensot + dependencies
+- source setup.bash  # source forest ws
+- FOREST_ARGS="-m test --clone-protocol https --verbose -j2"
+- forest fcl $FOREST_ARGS  # note, first build fcl so we are sure to use our own
+- forest OpenSoT $FOREST_ARGS  # compile opensot + dependencies
 - cd build/OpenSoT  # run tests
--  ctest --output-on-failure || true
+- ctest --output-on-failure
 
 
