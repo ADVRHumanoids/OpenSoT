@@ -1,4 +1,4 @@
-OpenSoT MultiDoF (v3.0)
+OpenSoT MultiDoF (v3.0)  ![Travis badge](https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&branch=devel)
 ============
 An Open Source Task Solving library with Constraints
 
