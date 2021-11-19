@@ -46,6 +46,48 @@ protected:
 
 };
 
+TEST_F(testAutoStack, test_complexAutostack)
+{
+    using namespace OpenSoT;
+
+    std::list<unsigned int> xyz = {0, 1, 2};
+    auto feet = DHS->leftLeg%xyz + DHS->rightLeg%xyz;
+
+    AutoStack::Ptr auto_stack;
+    auto_stack /= (DHS->leftArm + DHS->rightArm);
+    auto_stack = auto_stack<< DHS->jointLimits << feet;
+
+    Eigen::VectorXd q(_robot->getJointNum());
+    q.setRandom();
+
+    auto_stack->update(q);
+
+    std::cout<<"# of constraints: "<<auto_stack->getBounds()->getAineq().rows()<<std::endl;
+    std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
+    std::cout<<std::endl;
+    EXPECT_EQ(auto_stack->getBounds()->getAineq().rows(), xyz.size() + xyz.size());
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == DHS->leftLeg->getA().topRows(3));
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == DHS->rightLeg->getA().topRows(3));
+
+    DHS->leftLeg->setActive(false);
+
+    auto_stack->update(q);
+
+    std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == 0.*DHS->leftLeg->getA().topRows(3));
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == DHS->rightLeg->getA().topRows(3));
+
+    DHS->leftLeg->setActive(true);
+    DHS->rightLeg->setActive(false);
+
+    auto_stack->update(q);
+
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == DHS->leftLeg->getA().topRows(3));
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == 0*DHS->rightLeg->getA().topRows(3));
+
+
+}
+
 TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
 {
     using namespace OpenSoT;
