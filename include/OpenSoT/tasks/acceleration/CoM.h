@@ -140,6 +140,13 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         const Eigen::Vector3d& getCachedAccelerationReference() const;
 
+        const Eigen::Matrix3d& getKp() const;
+        const Eigen::Matrix3d& getKd() const;
+        void setKp(const Eigen::Matrix3d& Kp);
+        void setKd(const Eigen::Matrix3d& Kd);
+        void setGains(const Eigen::Matrix3d& Kp, const Eigen::Matrix3d& Kd);
+        void getGains(Eigen::Matrix3d& Kp, Eigen::Matrix3d& Kd);
+
     private:
 
         static const std::string world_name;
@@ -151,6 +158,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         Eigen::MatrixXd _J;
         Eigen::Vector3d _jdotqdot;
+
+        Eigen::Matrix3d _Kp, _Kd;
 
         Eigen::Vector3d _pose_ref, _pose_current;
         Eigen::Vector3d _pose_error, _vel_ref, _vel_current, _acc_ref, _vel_ref_cached, _acc_ref_cached;
