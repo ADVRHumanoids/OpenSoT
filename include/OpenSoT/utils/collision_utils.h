@@ -42,6 +42,8 @@
 
 #include <OpenSoT/utils/LinkPairDistance.h>
 
+#include <map>
+
 
 // construct vector
 inline KDL::Vector toKdl(urdf::Vector3 v)
@@ -129,6 +131,11 @@ public:
      * @brief remove world collision with given id
      */
     bool removeWorldCollision(const std::string& id);
+
+    /**
+     * @brief remove all world collisions
+     */
+    void removeAllWorldCollision();
 
     /**
      * @brief change the transform w.r.t. the world for the given

@@ -752,6 +752,20 @@ bool ComputeLinksDistance::removeWorldCollision(const std::string &id)
     return true;
 }
 
+void ComputeLinksDistance::removeAllWorldCollision()
+{
+    for (auto it = _collision_obj.begin(); it != _collision_obj.end(); )
+    {
+        if (it->first.substr(0,6) == "world/")
+        {
+            it = _collision_obj.erase(it);
+        }
+        else
+            it++;
+    }
+    _env_obj_names.clear();
+}
+
 bool ComputeLinksDistance::moveWorldCollision(const std::string &id,
                                               KDL::Frame new_pose)
 {
