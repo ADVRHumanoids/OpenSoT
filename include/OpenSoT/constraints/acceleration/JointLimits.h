@@ -82,6 +82,8 @@
 
                 void update(const Eigen::VectorXd& x);
 
+                void setJointAccMax(const Eigen::VectorXd& jointAccMax);
+
             };
            }
         }
