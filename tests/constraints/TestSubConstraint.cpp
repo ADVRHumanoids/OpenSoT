@@ -78,7 +78,7 @@ TEST_F(TestSubConstraint, testSubBounds)
     for(unsigned int i = 6; i < this->_model_ptr->getJointNum(); ++i)
         indices.push_back(i);
 
-    OpenSoT::SubConstraint::Ptr sub_postural = std::make_shared<OpenSoT::SubConstraint>(this->_joint_limits, indices);
+    OpenSoT::SubConstraint::Ptr sub_postural = this->_joint_limits%indices;
 
     sub_postural->update(this->q);
 
@@ -111,11 +111,9 @@ TEST_F(TestSubConstraint, testSubBounds)
 
 TEST_F(TestSubConstraint, testSubInequalityConstraint)
 {
-    std::list<unsigned int> indices;
-    indices.push_back(0);
-    indices.push_back(1);
+    std::list<unsigned int> indices = {0,1};
 
-    OpenSoT::SubConstraint::Ptr sub_vcom = std::make_shared<OpenSoT::SubConstraint>(this->_vcom_constraint, indices);
+    OpenSoT::SubConstraint::Ptr sub_vcom = this->_vcom_constraint%indices;
 
     sub_vcom->update(this->q);
 
