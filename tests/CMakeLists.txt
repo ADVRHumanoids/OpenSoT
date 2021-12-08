@@ -327,7 +327,7 @@ add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
 ADD_EXECUTABLE(testSubConstraint constraints/TestSubConstraint.cpp)
 TARGET_LINK_LIBRARIES(testSubConstraint ${TestLibs})
 add_dependencies(testSubConstraint   OpenSoT)
-add_test(NAME OpenSoT_task_SubConstraint COMMAND testSubConstraint)
+add_test(NAME OpenSoT_constraint_SubConstraint COMMAND testSubConstraint)
 
 if(${FCL_FOUND})
     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)

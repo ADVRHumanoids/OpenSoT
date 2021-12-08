@@ -54,6 +54,7 @@ protected:
     static const std::string _SUBCONSTRAINT_SEPARATION_;
 
     void generateBound(const Eigen::VectorXd& bound, Eigen::VectorXd& sub_bound);
+    void generateConstraint(const Eigen::MatrixXd& A, Eigen::MatrixXd& sub_A);
 
 
 };

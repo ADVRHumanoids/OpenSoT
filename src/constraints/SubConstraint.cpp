@@ -22,11 +22,18 @@ SubConstraint::SubConstraint(ConstraintPtr constrPtr, const std::list<unsigned i
         this->_bLowerBound.resize(rowIndices.size());
         this->_bUpperBound.resize(rowIndices.size());
         this->_Aineq.resize(rowIndices.size(), _x_size);
+
+        generateBound(this->_constraintPtr->getbLowerBound(), this->_bLowerBound);
+        generateBound(this->_constraintPtr->getbUpperBound(), this->_bUpperBound);
+        generateConstraint(this->_constraintPtr->getAineq(), this->_Aineq);
     }
     else //if(constrPtr->isEqualityConstraint()) //3. is equality constraint (NOT USED)
     {
         this->_Aeq.resize(rowIndices.size(), _x_size);
         this->_beq.resize(rowIndices.size());
+
+        generateBound(this->_constraintPtr->getbeq(), this->_beq);
+        generateConstraint(this->_constraintPtr->getAeq(), this->_Aeq);
     }
 }
 
@@ -38,9 +45,29 @@ void SubConstraint::update(const Eigen::VectorXd& x)
         generateBound(this->_constraintPtr->getLowerBound(), this->_lowerBound);
         generateBound(this->_constraintPtr->getUpperBound(), this->_upperBound);
     }
+    else if(_constraintPtr->isInequalityConstraint()) //2. constraint ptr is inequality
+    {
+        generateBound(this->_constraintPtr->getbLowerBound(), this->_bLowerBound);
+        generateBound(this->_constraintPtr->getbUpperBound(), this->_bUpperBound);
+        generateConstraint(this->_constraintPtr->getAineq(), this->_Aineq);
+    }
+    else //if(constrPtr->isEqualityConstraint()) //3. is equality constraint (NOT USED)
+    {
+        generateBound(this->_constraintPtr->getbeq(), this->_beq);
+        generateConstraint(this->_constraintPtr->getAeq(), this->_Aeq);
+    }
+}
 
-//    else if(constrPtr->isInequalityConstraint()) //2. constraint ptr is inequality
-//    else //if(constrPtr->isEqualityConstraint()) //3. is equality constraint (NOT USED)
+void SubConstraint::generateConstraint(const Eigen::MatrixXd& A, Eigen::MatrixXd& sub_A)
+{
+    unsigned int chunk_size = 0;
+    unsigned int j = 0;
+    for(Indices::ChunkList::const_iterator i = _subConstraintMap.getChunks().begin(); i != _subConstraintMap.getChunks().end(); ++i)
+    {
+        chunk_size = i->size();
+        sub_A.block(j,0,chunk_size,_x_size) = A.block(i->front(),0,i->back()-i->front()+1, _x_size);
+        j+=chunk_size;
+    }
 }
 
 void SubConstraint::generateBound(const Eigen::VectorXd& bound, Eigen::VectorXd& sub_bound)
