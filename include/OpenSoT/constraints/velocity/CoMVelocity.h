@@ -30,7 +30,7 @@
                 typedef std::shared_ptr<CoMVelocity> Ptr;
             private:
                 XBot::ModelInterface& _robot;
-                Eigen::VectorXd _velocityLimits;
+                Eigen::Vector3d _velocityLimits;
                 double _dT;
 
                 void generatebBounds();
@@ -43,15 +43,15 @@
                  * @param x initial configuration of the robot when creating the constraint
                  * @param robot the robot model, with floating base link set on the support foot
                  */
-                CoMVelocity(const Eigen::VectorXd velocityLimits,
+                CoMVelocity(const Eigen::Vector3d velocityLimits,
                             const double dT,
                             const Eigen::VectorXd& x,
                             XBot::ModelInterface& robot);
 
                 virtual void update(const Eigen::VectorXd &x);
 
-                Eigen::VectorXd getVelocityLimits();
-                void setVelocityLimits(const Eigen::VectorXd velocityLimits);
+                Eigen::Vector3d getVelocityLimits();
+                void setVelocityLimits(const Eigen::Vector3d velocityLimits);
             };
         }
     }
