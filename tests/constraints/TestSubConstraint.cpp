@@ -70,6 +70,21 @@ TEST_F(TestSubConstraint, testSubBounds)
     EXPECT_EQ(sub_postural->getUpperBound().size(), indices.size());
     EXPECT_EQ(sub_postural->getLowerBound(), this->_joint_limits->getLowerBound().segment(6, indices.size()));
     EXPECT_EQ(sub_postural->getUpperBound(), this->_joint_limits->getUpperBound().segment(6, indices.size()));
+
+    this->q.setRandom();
+
+    sub_postural->update(this->q);
+    std::cout<<"update q..."<<std::endl;
+
+    std::cout<<"lower bound[:]: "<<this->_joint_limits->getLowerBound().transpose()<<std::endl;
+    std::cout<<"lower bound[6:end]: "<<sub_postural->getLowerBound().transpose()<<std::endl;
+
+    std::cout<<"upper bound[:]: "<<this->_joint_limits->getUpperBound().transpose()<<std::endl;
+    std::cout<<"upper bound[6:end]: "<<sub_postural->getUpperBound().transpose()<<std::endl;
+
+    EXPECT_EQ(sub_postural->getLowerBound(), this->_joint_limits->getLowerBound().segment(6, indices.size()));
+    EXPECT_EQ(sub_postural->getUpperBound(), this->_joint_limits->getUpperBound().segment(6, indices.size()));
+
 }
 
 }
