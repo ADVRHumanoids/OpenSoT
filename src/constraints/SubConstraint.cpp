@@ -14,7 +14,8 @@ SubConstraint::SubConstraint(ConstraintPtr constrPtr, const std::list<unsigned i
         this->_lowerBound.resize(rowIndices.size());
         this->_upperBound.resize(rowIndices.size());
 
-        generateBounds();
+        generateBound(this->_constraintPtr->getLowerBound(), this->_lowerBound);
+        generateBound(this->_constraintPtr->getUpperBound(), this->_upperBound);
     }
     else if(constrPtr->isInequalityConstraint()) //2. constraint ptr is inequality
     {
@@ -33,12 +34,16 @@ void SubConstraint::update(const Eigen::VectorXd& x)
 {
     _constraintPtr->update(x);
     if(_constraintPtr->isBound()) //1. constraint ptr is a bound
-        generateBounds();
+    {
+        generateBound(this->_constraintPtr->getLowerBound(), this->_lowerBound);
+        generateBound(this->_constraintPtr->getUpperBound(), this->_upperBound);
+    }
+
 //    else if(constrPtr->isInequalityConstraint()) //2. constraint ptr is inequality
 //    else //if(constrPtr->isEqualityConstraint()) //3. is equality constraint (NOT USED)
 }
 
-void SubConstraint::generateBounds()
+void SubConstraint::generateBound(const Eigen::VectorXd& bound, Eigen::VectorXd& sub_bound)
 {
     unsigned int chunk_size = 0;
     unsigned int j = 0;
@@ -46,8 +51,7 @@ void SubConstraint::generateBounds()
     {
         chunk_size = i->size();
 
-        this->_lowerBound.segment(j, chunk_size) = _constraintPtr->getLowerBound().segment(i->front(),i->back()-i->front()+1);
-        this->_upperBound.segment(j, chunk_size) = _constraintPtr->getUpperBound().segment(i->front(),i->back()-i->front()+1);
+        sub_bound.segment(j, chunk_size) = bound.segment(i->front(),i->back()-i->front()+1);
 
         j+=chunk_size;
     }
