@@ -477,6 +477,26 @@
 
         }
 
+    private: Vector_type _error_, _tmp_, _residual_;
+    public:
+        /**
+         * @brief computeCost computes the residual of the task:
+         *
+         *  residual = (Ax - b)^T * W * (Ax - b)
+         *
+         * @param x solution
+         * NOTE: the solution should be the one where the task was evaluated to compute the internal A matrix and b vector!
+         * NOTE: computation can be improved as done in the solver...
+         * @return the cost of the task for given solution
+         */
+        double computeCost(const Eigen::VectorXd& x)
+        {
+            _error_.noalias() = _A*x - _b;
+            _tmp_.noalias() = _error_.transpose()*_W;
+            _residual_.noalias() = _tmp_.transpose()*_error_;
+            return _residual_[0];
+        }
+
         /**
          * @brief checkConsistency checks if all internal matrices and vectors are correctly instantiated and the right size
          * @return true if everything is ok
