@@ -113,8 +113,8 @@
                 Cartesian(std::string task_id,
                           const Eigen::VectorXd& x,
                           XBot::ModelInterface &robot,
-                          std::string distal_link,
-                          std::string base_link);
+                          const std::string& distal_link,
+                          const std::string& base_link);
 
                 ~Cartesian();
 
