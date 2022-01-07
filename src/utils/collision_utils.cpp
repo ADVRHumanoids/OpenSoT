@@ -99,7 +99,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
         if(auto cylinder = capsule_from_collision(*link))
         {
-            std::cout << "adding capsule for " << link->name << std::endl;
+//            std::cout << "adding capsule for " << link->name << std::endl;
 
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Cylinder>(cylinder->geometry);
@@ -227,7 +227,7 @@ bool ComputeLinksDistance::updateCollisionObjects()
     {
         // link pose
         KDL::Frame w_T_link, w_T_shape;
-        _model.getPose(link_name, w_T_link);
+        _model.getPose(link_name, _base_link, w_T_link);
 
         // shape pose
         w_T_shape = w_T_link * _link_T_shape.at(link_name);
@@ -341,7 +341,7 @@ void ComputeLinksDistance::generatePairsToCheck()
         }
     }
 
-    // now, add all link-environment pairs
+    // now, add all link-environment pairs. Eventually, first remove link to be checked with environment!
     for(auto envobj : _env_obj_names)
     {
         for(auto linkobj: _links_vs_environment)
@@ -352,13 +352,14 @@ void ComputeLinksDistance::generatePairsToCheck()
         }
     }
 
-    std::cout << "Checking " << _pairs_to_check.size() << " pairs for collision" << std::endl;
+//    std::cout << "Checking " << _pairs_to_check.size() << " pairs for collision" << std::endl;
 }
 
 ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
                                            urdf::ModelConstSharedPtr collision_urdf,
                                            srdf::ModelConstSharedPtr collision_srdf):
-    _model(_model)
+    _model(_model),
+    _base_link("world")
 {
     // user-provided urdf to override collision information
     if(collision_urdf)
@@ -384,7 +385,6 @@ ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
 
     _moveit_model = std::make_shared<robot_model::RobotModel>(_urdf,
                                                               _srdf);
-
     parseCollisionObjects();
 
     setCollisionBlackList({});
@@ -610,14 +610,14 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
         }
 
         // only support collisions specified w.r.t. world
-        if(!co.header.frame_id.empty() &&
-                co.header.frame_id != "world")
-        {
-            fprintf(stderr, "invalid frame id '%s' \n",
-                    co.header.frame_id.c_str());
-            ret = false;
-            continue;
-        }
+//        if(!co.header.frame_id.empty() &&
+//                co.header.frame_id != "world")
+//        {
+//            fprintf(stderr, "invalid frame id '%s' \n",
+//                    co.header.frame_id.c_str());
+//            ret = false;
+//            continue;
+//        }
 
         // for now, don't support array of primitives
         if(co.primitives.size() > 1)
@@ -642,8 +642,8 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
                 continue;
             }
 
-            printf("adding collision '%s' to world \n",
-                   co.id.c_str());
+//            printf("adding collision '%s' to world \n",
+//                   co.id.c_str());
 
             addWorldCollision(co.id, fcl_collision);
 
@@ -690,6 +690,12 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
     return ret;
 
+}
+
+void ComputeLinksDistance::setBaseLink(const std::string base_link)
+{
+    std::cout << "setting " << base_link << " as base link" << std::endl;
+    _base_link = base_link;
 }
 
 namespace
