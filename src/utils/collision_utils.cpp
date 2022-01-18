@@ -99,7 +99,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
         if(auto cylinder = capsule_from_collision(*link))
         {
-//            std::cout << "adding capsule for " << link->name << std::endl;
+            std::cout << "adding capsule for " << link->name << std::endl;
 
             auto collisionGeometry =
                     DYNAMIC_POINTER_CAST<urdf::Cylinder>(cylinder->geometry);
@@ -227,7 +227,7 @@ bool ComputeLinksDistance::updateCollisionObjects()
     {
         // link pose
         KDL::Frame w_T_link, w_T_shape;
-        _model.getPose(link_name, _base_link, w_T_link);
+        _model.getPose(link_name, w_T_link);
 
         // shape pose
         w_T_shape = w_T_link * _link_T_shape.at(link_name);
@@ -358,8 +358,7 @@ void ComputeLinksDistance::generatePairsToCheck()
 ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
                                            urdf::ModelConstSharedPtr collision_urdf,
                                            srdf::ModelConstSharedPtr collision_srdf):
-    _model(_model),
-    _base_link("world")
+    _model(_model)
 {
     // user-provided urdf to override collision information
     if(collision_urdf)
@@ -427,6 +426,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         fcl::DistanceRequestd request;
         request.gjk_solver_type = fcl::GST_INDEP; // fcl::GST_LIBCCD;
         request.enable_nearest_points = true;
+        request.enable_signed_distance = true;
 
         // result will be returned via the collision result structure
         fcl::DistanceResultd result;
@@ -690,12 +690,6 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
     return ret;
 
-}
-
-void ComputeLinksDistance::setBaseLink(const std::string base_link)
-{
-    std::cout << "setting " << base_link << " as base link" << std::endl;
-    _base_link = base_link;
 }
 
 namespace

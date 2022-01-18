@@ -158,8 +158,6 @@ public:
      */
     static KDL::Frame fcl2KDL(const fcl::Transform3d& in);
 
-    void setBaseLink(const std::string base_link);
-
     class LinksPair
     {
 
@@ -247,13 +245,6 @@ private:
      * except for the capsule, where it lies on one endpoint
      */
     std::map<std::string,KDL::Frame> _link_T_shape;
-
-    /**
-     * @brief _base_link is the base link w.r.t. whom the distances are computed
-     * world by default
-     */
-    std::string _base_link;
-
 
     /**
      * @brief shapeToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
