@@ -99,7 +99,7 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
         for(unsigned int j = 0; j < A.rows(); ++j)
         {
             for(unsigned int k = 0; k < A.cols(); ++k)
-                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-6);
+                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-5);
         }
     }
 }
