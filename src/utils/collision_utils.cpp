@@ -610,14 +610,14 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
         }
 
         // only support collisions specified w.r.t. world
-//        if(!co.header.frame_id.empty() &&
-//                co.header.frame_id != "world")
-//        {
-//            fprintf(stderr, "invalid frame id '%s' \n",
-//                    co.header.frame_id.c_str());
-//            ret = false;
+        if(!co.header.frame_id.empty() &&
+                co.header.frame_id != "world")
+        {
+            fprintf(stderr, "invalid frame id '%s' \n",
+                    co.header.frame_id.c_str());
+            ret = false;
 //            continue;
-//        }
+        }
 
         // for now, don't support array of primitives
         if(co.primitives.size() > 1)
