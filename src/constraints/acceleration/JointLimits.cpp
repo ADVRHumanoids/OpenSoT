@@ -124,7 +124,12 @@ void JointLimits::update(const Eigen::VectorXd& x)
     _Aineq = _generic_constraint_internal->getAineq();
     _bLowerBound = _generic_constraint_internal->getbLowerBound();
     _bUpperBound = _generic_constraint_internal->getbUpperBound();
-     
+
+}
+
+void JointLimits::setJointAccMax(const Eigen::VectorXd &jointAccMax)
+{
+    _jointAccMax = jointAccMax;
 }
 
 

@@ -341,7 +341,7 @@ void ComputeLinksDistance::generatePairsToCheck()
         }
     }
 
-    // now, add all link-environment pairs
+    // now, add all link-environment pairs. Eventually, first remove link to be checked with environment!
     for(auto envobj : _env_obj_names)
     {
         for(auto linkobj: _links_vs_environment)
@@ -352,7 +352,7 @@ void ComputeLinksDistance::generatePairsToCheck()
         }
     }
 
-    std::cout << "Checking " << _pairs_to_check.size() << " pairs for collision" << std::endl;
+//    std::cout << "Checking " << _pairs_to_check.size() << " pairs for collision" << std::endl;
 }
 
 ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
@@ -384,7 +384,6 @@ ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
 
     _moveit_model = std::make_shared<robot_model::RobotModel>(_urdf,
                                                               _srdf);
-
     parseCollisionObjects();
 
     setCollisionBlackList({});
@@ -427,6 +426,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         fcl::DistanceRequestd request;
         request.gjk_solver_type = fcl::GST_INDEP; // fcl::GST_LIBCCD;
         request.enable_nearest_points = true;
+        request.enable_signed_distance = true;
 
         // result will be returned via the collision result structure
         fcl::DistanceResultd result;
@@ -616,7 +616,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
             fprintf(stderr, "invalid frame id '%s' \n",
                     co.header.frame_id.c_str());
             ret = false;
-            continue;
+//            continue;
         }
 
         // for now, don't support array of primitives
@@ -642,8 +642,8 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
                 continue;
             }
 
-            printf("adding collision '%s' to world \n",
-                   co.id.c_str());
+//            printf("adding collision '%s' to world \n",
+//                   co.id.c_str());
 
             addWorldCollision(co.id, fcl_collision);
 
@@ -750,6 +750,20 @@ bool ComputeLinksDistance::removeWorldCollision(const std::string &id)
     generatePairsToCheck();
 
     return true;
+}
+
+void ComputeLinksDistance::removeAllWorldCollision()
+{
+    for (auto it = _collision_obj.begin(); it != _collision_obj.end(); )
+    {
+        if (it->first.substr(0,6) == "world/")
+        {
+            it = _collision_obj.erase(it);
+        }
+        else
+            it++;
+    }
+    _env_obj_names.clear();
 }
 
 bool ComputeLinksDistance::moveWorldCollision(const std::string &id,
