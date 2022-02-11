@@ -276,7 +276,9 @@ public:
      * @param verty Arrays containing the y-coordinates of the polygon's vertices
      * @param testx X-coordinate of the test point
      * @param testy Y-coordinate of the test point
-     * @return 0 if false
+     * @return        -1 IF THE POINT IS OUTSIDE OF THE POLYGON,
+     *                 0 IF THE POINT IS ON AN EDGE OR AT A VERTEX,
+     *                 1 IF THE POINT IS INSIDE OF THE POLYGON.
      */
     static int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
     {
