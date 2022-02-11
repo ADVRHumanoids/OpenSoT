@@ -9,13 +9,22 @@ SubConstraint::SubConstraint(ConstraintPtr constrPtr, const std::list<unsigned i
     _subConstraintMap(rowIndices),
     _constraintPtr(constrPtr)
 {
-    if(constrPtr->isBound()) //1. constraint ptr is a bound
+    if(constrPtr->isBound()) //1. constraint ptr is a bound, we transform it into a constraint with less rows
     {
-        this->_lowerBound.resize(rowIndices.size());
-        this->_upperBound.resize(rowIndices.size());
+        this->_Aineq.resize(rowIndices.size(), _x_size);
+        this->_Aineq.setZero();
+        unsigned int i = 0;
+        for(auto id : rowIndices){
+            this->_Aineq(i, id) = 1.;
+            i++;
+        }
 
-        generateBound(this->_constraintPtr->getLowerBound(), this->_lowerBound);
-        generateBound(this->_constraintPtr->getUpperBound(), this->_upperBound);
+
+        this->_bLowerBound.resize(rowIndices.size());
+        this->_bUpperBound.resize(rowIndices.size());
+
+        generateBound(this->_constraintPtr->getLowerBound(), this->_bLowerBound);
+        generateBound(this->_constraintPtr->getUpperBound(), this->_bUpperBound);
     }
     else if(constrPtr->isInequalityConstraint()) //2. constraint ptr is inequality
     {
@@ -40,10 +49,10 @@ SubConstraint::SubConstraint(ConstraintPtr constrPtr, const std::list<unsigned i
 void SubConstraint::update(const Eigen::VectorXd& x)
 {
     _constraintPtr->update(x);
-    if(_constraintPtr->isBound()) //1. constraint ptr is a bound
+    if(_constraintPtr->isBound()) //1. constraint ptr is a bound, we transform it into a constraint with less rows
     {
-        generateBound(this->_constraintPtr->getLowerBound(), this->_lowerBound);
-        generateBound(this->_constraintPtr->getUpperBound(), this->_upperBound);
+        generateBound(this->_constraintPtr->getLowerBound(), this->_bLowerBound);
+        generateBound(this->_constraintPtr->getUpperBound(), this->_bUpperBound);
     }
     else if(_constraintPtr->isInequalityConstraint()) //2. constraint ptr is inequality
     {
