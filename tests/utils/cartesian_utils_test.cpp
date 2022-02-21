@@ -60,11 +60,11 @@ protected:
 TEST_F(testCartesianUtils, testPseudoInverse1)
 {
     Eigen::MatrixXd A(32,32);
-    A.setZero(A.rows(), A.cols());
+    A.setZero();
     Eigen::MatrixXd Ainv(32,32);
-    Ainv.setZero(Ainv.rows(), Ainv.cols());
+    Ainv.setZero();
     Eigen::MatrixXd Apinv(32,32);
-    Ainv.setZero(Apinv.rows(), Apinv.cols());
+    Apinv.setZero();
 
     SVDPseudoInverse<Eigen::MatrixXd> pinv(A);
 
@@ -72,7 +72,7 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
     for(unsigned int i = 0; i < 1000; ++i)
     {
         srand((unsigned int) time(0));
-        A.setRandom(32,32);
+        A.setRandom();
 
         Ainv = A.inverse();
         pinv.compute(A, Apinv);
@@ -85,12 +85,12 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
     }
 
     srand((unsigned int) time(0));
-    A.setRandom(32,32);
+    A.setRandom();
     LDLTInverse<Eigen::MatrixXd> LDLTinv(A);
     for(unsigned int i = 0; i < 1000; ++i)
     {
         srand((unsigned int) time(0));
-        A.setRandom(32,32);
+        A.setRandom();
         A = (A*A.transpose()).eval();
 
         Ainv = A.inverse();
@@ -99,7 +99,7 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
         for(unsigned int j = 0; j < A.rows(); ++j)
         {
             for(unsigned int k = 0; k < A.cols(); ++k)
-                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-6);
+                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-5);
         }
     }
 }
@@ -112,9 +112,10 @@ TEST_F(testQuaternion, testQuaternionError)
     EXPECT_DOUBLE_EQ(this->w, 1.0);
 
     KDL::Rotation rot_desired;
+    rot_desired.Identity();
     rot_desired.DoRotZ(M_PI_2);
     double x, y, z, w;
-    rot_desired.GetQuaternion(x, y, z, w);;
+    rot_desired.GetQuaternion(x, y, z, w);
     quaternion q2(x, y, z, w);
     EXPECT_DOUBLE_EQ(q2.x, x);
     EXPECT_DOUBLE_EQ(q2.y, y);
@@ -153,6 +154,7 @@ TEST_F(testCartesianUtils, testComputeCartesianError)
     orientation_error.setZero();
 
     KDL::Rotation rot;
+    rot.Identity();
     rot.DoRotZ(M_PI);
 
     double x = 1.0;
@@ -162,6 +164,7 @@ TEST_F(testCartesianUtils, testComputeCartesianError)
     double qx, qy, qz, qw;
     rot.GetQuaternion(qx, qy, qz, qw);
     Eigen::MatrixXd Td(4,4);
+    Td.setZero();
     KDL::Frame tmp(KDL::Rotation::Quaternion(qx, qy, qz, qw), KDL::Vector(x, y, z));
     for(unsigned int i = 0; i < 3; ++i)
     {
@@ -189,12 +192,12 @@ TEST_F(testCartesianUtils, testComputeGradient)
     int n_of_iterations = 100;
     double dT = 1.0 / ((double)n_of_iterations);
 
-    for(unsigned int i = 0; i < 100; ++i)
+    for(unsigned int i = 0; i < n_of_iterations; ++i)
     {
         double df = cos(i * dT);
 
         Eigen::VectorXd x(1);
-        x.setZero(1);
+        x.setZero();
         x[0] = i*dT;
         Eigen::VectorXd df_numerical = cartesian_utils::computeGradient(x, this->sin_function, 1E-6);
 

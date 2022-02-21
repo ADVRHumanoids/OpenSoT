@@ -25,6 +25,7 @@
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <XBotInterface/Logger.hpp>
 #include <OpenSoT/SubTask.h>
+#include <OpenSoT/SubConstraint.h>
 
 /**
  * @example example_autostack.cpp
@@ -172,6 +173,17 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
  */
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
                                 const std::list<unsigned int>& rowIndices);
+
+/**
+ * @brief operator % takes a constraint and a list of indices, generates a subconstraint
+ * @param constraint a constraint pointer
+ * @param rowIndices list of indices
+ * @return a pointer to a SubConstraint generated from task with the given indices
+ * TODO: this will not work with tasks under the folder torque, in that case another solution
+ * should be found
+ */
+OpenSoT::SubConstraint::Ptr operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr constraint,
+                                      const std::list<unsigned int>& rowIndices);
 
 /**
  * @brief operator + takes two tasks, generates a new Aggregated task

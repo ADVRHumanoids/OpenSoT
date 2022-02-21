@@ -21,19 +21,17 @@
 
 using namespace OpenSoT::constraints::velocity;
 
-CoMVelocity::CoMVelocity(const Eigen::VectorXd velocityLimits,
+CoMVelocity::CoMVelocity(const Eigen::Vector3d velocityLimits,
                          const double dT,
                          const Eigen::VectorXd& x,
                          XBot::ModelInterface &robot) :
 Constraint("CoMVelocity", x.size()), _dT(dT), _velocityLimits(velocityLimits),
 _robot(robot) {
 
-    if(_velocityLimits.size() < 3 )
-        throw "Error: velocityLimits for CoM should be a vector of 3 elements";
 
     _Aineq.resize(3, x.size());
-    _bLowerBound.resize(x.size());
-    _bUpperBound.resize(x.size());
+    _bLowerBound.resize(3);
+    _bUpperBound.resize(3);
 
     this->generatebBounds();
 
@@ -46,15 +44,13 @@ void CoMVelocity::update(const Eigen::VectorXd &x) {
     this->generatebBounds();
 }
 
-Eigen::VectorXd OpenSoT::constraints::velocity::CoMVelocity::getVelocityLimits()
+Eigen::Vector3d OpenSoT::constraints::velocity::CoMVelocity::getVelocityLimits()
 {
     return _velocityLimits;
 }
 
-void OpenSoT::constraints::velocity::CoMVelocity::setVelocityLimits(const Eigen::VectorXd velocityLimits)
+void OpenSoT::constraints::velocity::CoMVelocity::setVelocityLimits(const Eigen::Vector3d velocityLimits)
 {
-    if(_velocityLimits.size() < 3 )
-        throw "Error: velocityLimits for CoM should be a vector of 3 elements";
     _velocityLimits = velocityLimits;
 }
 

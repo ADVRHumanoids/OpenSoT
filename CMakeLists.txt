@@ -95,6 +95,7 @@ file(GLOB_RECURSE sot_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 
 ##CONSTRAINTS
 set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
+    src/constraints/SubConstraint.cpp
     src/constraints/BilateralConstraint.cpp
     src/constraints/TaskToConstraint.cpp
     src/constraints/acceleration/VelocityLimits.cpp

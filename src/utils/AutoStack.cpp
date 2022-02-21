@@ -78,6 +78,43 @@ OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
     return sub_task;
 }
 
+OpenSoT::SubConstraint::Ptr operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr constraint,
+                                      const std::list<unsigned int>& rowIndices)
+{
+    if(constraint->isBound())
+    {
+        if(rowIndices.size() > static_cast<unsigned int>(constraint->getUpperBound().size()))
+            throw std::runtime_error("rowIndices.size() > constraint->getUpperBound().size()");
+
+        auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+        if(*max >= constraint->getUpperBound().size())
+            throw std::runtime_error("max(rowIndices) >= constraint->getUpperBound().size()");
+    }
+    else if(constraint->isInequalityConstraint())
+    {
+        if(rowIndices.size() > static_cast<unsigned int>(constraint->getbUpperBound().size()))
+            throw std::runtime_error("rowIndices.size() > constraint->getbUpperBound().size()");
+
+        auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+        if(*max >= constraint->getbUpperBound().size())
+            throw std::runtime_error("max(rowIndices) >= constraint->getbUpperBound().size()");
+    }
+    else
+    {
+        if(rowIndices.size() > static_cast<unsigned int>(constraint->getbeq().size()))
+            throw std::runtime_error("rowIndices.size() > constraint->getbeq().size()");
+
+        auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+        if(*max >= constraint->getbeq().size())
+            throw std::runtime_error("max(rowIndices) >= constraint->getbeq().size()");
+    }
+
+    OpenSoT::SubConstraint::Ptr sub_constraint;
+    sub_constraint = std::make_shared<OpenSoT::SubConstraint>(constraint, rowIndices);
+    return sub_constraint;
+
+}
+
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
                                             const OpenSoT::tasks::Aggregated::TaskPtr task2)
 {

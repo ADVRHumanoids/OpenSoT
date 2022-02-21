@@ -55,7 +55,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testQPOases_Options  
                   testQPOases_SubTask
                   testQPOases_FF
-                  testQPOases_AutoStack
+                  testQPOases_AutoStack #10
                   testiHQP
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
@@ -65,16 +65,17 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testMinimumVelocityTask
                   testMinimumEffortVelocityTask
                   testPosturalVelocityTask
-                  testCartesianVelocityTask
+                  testCartesianVelocityTask #20
                   testCartesianAdmittanceVelocityTask
                   testSubTask
+                  testSubConstraint
                   testCartesianUtils 
                   testBasicAlgebra 
                   testPosturalAccelerationTask
                   testCartesianAccelerationTask
                   testCoMAccelerationTask
                   testContactFloatingBaseTask
-                  testCoMForceTask
+                  testCoMForceTask #30
                   testTask
                   testAffineHelper
                   testPiler
@@ -82,36 +83,39 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
                   testKinematics
-                  testl1HQP
+                  testl1HQP #38
 )
 
 if(${OPENSOT_SOTH_FRONT_END})
-    set(${OPENSOT_TESTS} testSOTH)
+    set(${OPENSOT_TESTS} testSOTH) #39
 endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
-    set(OPENSOT_TEST testQPOases_ConvexHull testConvexHullVelocityConstraint testAutoStack)
+    set(OPENSOT_TEST testQPOases_ConvexHull 
+    		      testConvexHullVelocityConstraint 
+    		      testAutoStack) #42
 endif()
 
 if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver testGenericTask)
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testLP)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver 
+    				       testGenericTask)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testLP) #45
 endif()
 
 if(${GLPK_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver)
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver) #46
 endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
-                                       testAggregatedTask)
+                                       testAggregatedTask) #48
 endif()
 
 #THESE TESTS DEPEND ON fcl
 if(${FCL_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
                                        testCollisionAvoidanceVelocityConstraint
-                                       testCollisionAvoidanceEnvironmentVelocityConstraint
+                                       testCollisionAvoidanceEnvironmentVelocityConstraint #51
 )
 endif()
 
@@ -120,7 +124,7 @@ if(${trajectory_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
                   testQPOases_StaticWalk_FloatingBase
                   testQPOases_StaticWalk
-                  testEigenSVD_StaticWalk_FloatingBase)
+                  testEigenSVD_StaticWalk_FloatingBase) #54
 endif()
 
 
@@ -322,6 +326,11 @@ ADD_EXECUTABLE(testSubTask tasks/TestSubTask.cpp)
 TARGET_LINK_LIBRARIES(testSubTask ${TestLibs})
 add_dependencies(testSubTask   OpenSoT)
 add_test(NAME OpenSoT_task_SubTask COMMAND testSubTask)
+
+ADD_EXECUTABLE(testSubConstraint constraints/TestSubConstraint.cpp)
+TARGET_LINK_LIBRARIES(testSubConstraint ${TestLibs})
+add_dependencies(testSubConstraint   OpenSoT)
+add_test(NAME OpenSoT_constraint_SubConstraint COMMAND testSubConstraint)
 
 if(${FCL_FOUND})
     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)

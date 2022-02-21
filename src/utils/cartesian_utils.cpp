@@ -149,9 +149,9 @@ Eigen::VectorXd cartesian_utils::computeGradient(const Eigen::VectorXd &x,
                                                     const std::vector<bool>& jointMask,
                                                     const double& step) {
     Eigen::VectorXd gradient(x.rows());
-    gradient.setZero(x.rows());
+    gradient.setZero();
     Eigen::VectorXd deltas(x.rows());
-    deltas.setZero(x.rows());
+    deltas.setZero();
     assert(jointMask.size() == x.size() &&
            "jointMask must have the same size as x");
     const double h = step;

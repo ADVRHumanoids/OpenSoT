@@ -25,8 +25,8 @@ using namespace OpenSoT::tasks::velocity;
 Cartesian::Cartesian(std::string task_id,
                      const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
-                     std::string distal_link,
-                     std::string base_link) :
+                     const std::string& distal_link,
+                     const std::string& base_link) :
     Task(task_id, x.size()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
