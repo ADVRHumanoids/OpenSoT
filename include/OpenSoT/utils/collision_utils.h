@@ -39,6 +39,7 @@
 #include <memory>
 #include <kdl_parser/kdl_parser.hpp>
 #include <moveit_msgs/PlanningSceneWorld.h>
+#include <moveit_msgs/AttachedCollisionObject.h>
 
 #include <OpenSoT/utils/LinkPairDistance.h>
 
@@ -62,6 +63,19 @@ inline KDL::Frame toKdl(urdf::Pose p)
 {
     return KDL::Frame(toKdl(p.rotation), toKdl(p.position));
 }
+
+
+class AttachedObject
+{
+
+public:
+
+    std::string parent_link;
+    KDL::Frame link_T_shape;
+    std::shared_ptr<fcl::CollisionObjectd> collision;
+    std::vector<std::string> touch_links;
+
+};
 
 
 class ComputeLinksDistance
@@ -126,6 +140,16 @@ public:
      */
     bool addWorldCollision(const std::string& id,
                            std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
+
+    /**
+     * @brief add/remove attached collision objects according to the given planning
+     * scene world
+     * @return true if all requests (additions, deletions) could be performs
+     * succesfully, false on (partial) insuccess
+     */
+    bool setAttachedCollisionObjects(std::vector<moveit_msgs::AttachedCollisionObject> ps_acos);
+
+    bool addAttachedObjectCollision(const std::string &id, std::shared_ptr<AttachedObject> ao);
 
     /**
      * @brief remove world collision with given id
@@ -291,6 +315,13 @@ private:
      * @brief pairsToCheck a list of pairs to check for collision detection
      */
     std::list<ComputeLinksDistance::LinksPair> _pairs_to_check;
+
+    /**
+     * @brief _attached_objects is a map of attached (e.g., grasped) objects, where
+     * the key is a unique identifier, and the value stores parent link, shape,
+     * and offset
+     */
+    std::map<std::string, std::shared_ptr<AttachedObject>> _attached_objects;
 
     /**
      * @brief loadDisabledCollisionsFromSRDF disabled collisions between links as specified in the robot srdf.

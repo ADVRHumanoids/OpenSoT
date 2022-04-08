@@ -15,6 +15,8 @@
 #endif
 
 
+
+
 bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
                                                    const fcl::Transform3d &fcl_w_T_f,
                                                    KDL::Frame &link_T_f )
@@ -222,7 +224,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
 bool ComputeLinksDistance::updateCollisionObjects()
 {
-
+    // update poses of all robot collision objects
     for(auto link_name : _links_to_update)
     {
         // link pose
@@ -235,6 +237,22 @@ bool ComputeLinksDistance::updateCollisionObjects()
         // set pose to fcl shape
         fcl::Transform3d fcl_w_T_shape = KDL2fcl(w_T_shape);
         fcl::CollisionObjectd* collObj_shape = _collision_obj.at(link_name).get();
+        collObj_shape->setTransform(fcl_w_T_shape);
+    }
+
+    // do the same for attached objects
+    for(auto& item : _attached_objects)
+    {
+        // link pose
+        KDL::Frame w_T_link, w_T_shape;
+        _model.getPose(item.second->parent_link, w_T_link);
+
+        // shape pose
+        w_T_shape = w_T_link * item.second->link_T_shape;
+
+        // set pose to fcl shape
+        fcl::Transform3d fcl_w_T_shape = KDL2fcl(w_T_shape);
+        fcl::CollisionObjectd* collObj_shape = item.second->collision.get();
         collObj_shape->setTransform(fcl_w_T_shape);
     }
 
@@ -352,7 +370,7 @@ void ComputeLinksDistance::generatePairsToCheck()
         }
     }
 
-//    std::cout << "Checking " << _pairs_to_check.size() << " pairs for collision" << std::endl;
+    //    std::cout << "Checking " << _pairs_to_check.size() << " pairs for collision" << std::endl;
 }
 
 ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
@@ -394,11 +412,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
     // return value
     std::list<LinkPairDistance> results;
 
-    // set transforms to all shapes given model state
-    updateCollisionObjects();
-
-    // loop over pairs to check
-    for(auto& pair : _pairs_to_check)
+    auto handle_pair = [&results, detectionThreshold, this](LinksPair& pair)
     {
         // object names
         // note: could be either link names or world objects
@@ -419,7 +433,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 
         if(bounding_sphere_dist > detectionThreshold)
         {
-            continue;
+            return;
         }
 
         // set request for distance computation
@@ -444,7 +458,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         if(is_octree)
         {
             std::swap(result.nearest_points[0],
-                      result.nearest_points[1]);
+                    result.nearest_points[1]);
         }
 
         // we return nearest points
@@ -463,6 +477,44 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
                                  fcl2KDL(world_pA), fcl2KDL(world_pB),
                                  result.min_distance);
         }
+    };
+
+    // set transforms to all shapes given model state
+    updateCollisionObjects();
+
+    // loop over pairs to check
+    // this includes self collisions, and environment
+    for(auto& pair : _pairs_to_check)
+    {
+        handle_pair(pair);
+    }
+
+    // handle attached objects
+    for(auto a_item : _attached_objects)
+    {
+        // the attached object
+        auto& ao = a_item.second;
+
+        for(auto r_item : _collision_obj)
+        {
+            // skip if robot link inside touch_links
+            if(std::find(ao->touch_links.begin(),
+                         ao->touch_links.end(),
+                         r_item.first) != ao->touch_links.end())
+            {
+                continue;
+            }
+
+            // create and handle pair
+            LinksPair pair = LinksPair(this, ao->parent_link, r_item.first);
+//            LinksPair pair;
+//            pair.linkA = ao->parent_link;
+//            pair.collisionObjectA = ao->collision;
+//            pair.linkB = r_item.first;
+//            pair.collisionObjectB = r_item.second;
+
+            handle_pair(pair);
+        }
     }
 
     results.sort();
@@ -473,7 +525,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
     _acm = std::make_shared<collision_detection::AllowedCollisionMatrix>(
-               _moveit_model->getLinkModelNamesWithCollisionGeometry(), true);
+                _moveit_model->getLinkModelNamesWithCollisionGeometry(), true);
 
     // iterate over white list
     for(auto it = whiteList.begin(); it != whiteList.end(); ++it)
@@ -527,7 +579,7 @@ bool ComputeLinksDistance::setCollisionWhiteList(std::list<LinkPairDistance::Lin
 bool ComputeLinksDistance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
 {
     _acm = std::make_shared<collision_detection::AllowedCollisionMatrix>(
-               _moveit_model->getLinkModelNamesWithCollisionGeometry(), true);
+                _moveit_model->getLinkModelNamesWithCollisionGeometry(), true);
 
     std::vector<std::string> linksWithCollisionObjects;
 
@@ -594,6 +646,91 @@ std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
 
 }
 
+bool ComputeLinksDistance::setAttachedCollisionObjects(std::vector<moveit_msgs::AttachedCollisionObject> ps_acos)
+{
+//    const std::string &id,
+//                                                          const std::string &link_name,
+//                                                          std::shared_ptr<fcl::CollisionObjectd> fcl_obj,
+//                                                          KDL::Frame link_T_shape;
+
+    bool ret = true;
+
+    for(const auto& aco : ps_acos)
+    {
+
+        // handle remove action
+        if(aco.object.operation == aco.object.REMOVE)
+        {
+//            ret = removeWorldCollision(aco.object.id) && ret;
+            continue;
+        }
+
+//        // only support collisions specified w.r.t. link the obj is attached to
+//        if(!aco.header.frame_id.empty() &&
+//                aco.header.frame_id != aco.link_name)
+//        {
+//            fprintf(stderr, "invalid frame id '%s' \n",
+//                    co.header.frame_id.c_str());
+//            ret = false;
+//            //            continue;
+//        }
+
+        // for now, don't support array of primitives
+        if(aco.object.primitives.size() > 1)
+        {
+            fprintf(stderr, "no support for primitive arrays \n");
+            ret = false;
+            continue;
+        }
+
+        // primitive case
+        if(!aco.object.primitives.empty())
+        {
+            // link pose
+            KDL::Frame w_T_link, w_T_shape, link_T_shape;
+            _model.getPose(aco.link_name, w_T_link);
+
+            // shape pose
+            geometry_msgs::Pose link_T_shape_msg = aco.object.primitive_poses[0];
+            fcl::Transform3d link_T_shape_eigen;
+            tf::poseMsgToEigen(link_T_shape_msg, link_T_shape_eigen);
+            link_T_shape = ComputeLinksDistance::fcl2KDL(link_T_shape_eigen);
+            w_T_shape = w_T_link * link_T_shape;
+            fcl::Transform3d w_T_shape_eigen = ComputeLinksDistance::KDL2fcl(w_T_shape);
+            geometry_msgs::Pose w_T_shape_msg;
+            tf::poseEigenToMsg(w_T_shape_eigen, w_T_shape_msg);
+
+            // generate fcl collision
+            auto fcl_collision = fcl_from_primitive(aco.object.primitives[0],
+                    w_T_shape_msg);
+
+            if(!fcl_collision)
+            {
+                fprintf(stderr, "could not parse primitive for '%s' \n",
+                        aco.object.id.c_str());
+                ret = false;
+                continue;
+            }
+
+            //            printf("adding collision '%s' to world \n",
+            //                   co.id.c_str());
+
+            std::shared_ptr<AttachedObject> attached_object;
+            attached_object->parent_link = aco.link_name;
+            attached_object->collision = fcl_collision;
+            attached_object->link_T_shape = link_T_shape;
+            attached_object->touch_links = aco.touch_links;
+
+            ComputeLinksDistance:addAttachedObjectCollision(aco.object.id, attached_object);
+
+        }
+
+    }
+
+    return ret;
+
+}
+
 bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc)
 {
 
@@ -616,7 +753,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
             fprintf(stderr, "invalid frame id '%s' \n",
                     co.header.frame_id.c_str());
             ret = false;
-//            continue;
+            //            continue;
         }
 
         // for now, don't support array of primitives
@@ -642,8 +779,8 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
                 continue;
             }
 
-//            printf("adding collision '%s' to world \n",
-//                   co.id.c_str());
+            //            printf("adding collision '%s' to world \n",
+            //                   co.id.c_str());
 
             addWorldCollision(co.id, fcl_collision);
 
@@ -659,7 +796,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
     // abstract octree pointer
     auto abs_octree = std::shared_ptr<octomap::AbstractOcTree>(
-                          octomap_msgs::msgToMap(wc.octomap.octomap));
+                octomap_msgs::msgToMap(wc.octomap.octomap));
 
     if(!abs_octree)
     {
@@ -694,10 +831,33 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
 namespace
 {
-    std::string world_obj_name(std::string name)
+std::string world_obj_name(std::string name)
+{
+    return "world/" + name;
+}
+}
+
+bool ComputeLinksDistance::addAttachedObjectCollision(const std::string &id,
+                                                      std::shared_ptr<AttachedObject> ao)
+{
+    // empty name invalid
+    if(id.empty())
     {
-        return "world/" + name;
+        fprintf(stderr, "invalid world collision '%s' \n",
+                id.c_str());
+
+        return false;
     }
+
+//    // collision name (to remove ambiguity with link names)
+//    auto coll_name = world_obj_name(id);
+
+    // add to data structs
+    _attached_objects[id] = ao;
+
+    // note: should it return false if object already exists?
+    return true;
+
 }
 
 bool ComputeLinksDistance::addWorldCollision(const std::string &id,

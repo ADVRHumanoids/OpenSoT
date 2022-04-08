@@ -172,6 +172,11 @@ bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorl
     return _dist_calc->setWorldCollisions(wc);
 }
 
+bool CollisionAvoidance::setAttachedCollisionObjects(std::vector<moveit_msgs::AttachedCollisionObject> ps_acos)
+{
+    return _dist_calc->setAttachedCollisionObjects(ps_acos);
+}
+
 void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
 {
     _dist_calc->setLinksVsEnvironment(links);

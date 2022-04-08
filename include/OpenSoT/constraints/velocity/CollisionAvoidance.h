@@ -26,6 +26,7 @@
 #include <Eigen/Dense>
 
 #include <moveit_msgs/PlanningSceneWorld.h>
+#include <moveit_msgs/AttachedCollisionObject.h>
 
 class ComputeLinksDistance;
 class LinkPairDistance;
@@ -147,6 +148,8 @@ public:
      */
     bool addWorldCollision(const std::string& id,
                            std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
+
+    bool setAttachedCollisionObjects(std::vector<moveit_msgs::AttachedCollisionObject> ps_acos);
 
     /**
      * @brief remove world collision with given id
