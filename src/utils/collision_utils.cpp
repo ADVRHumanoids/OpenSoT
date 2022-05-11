@@ -492,21 +492,27 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
     // handle attached objects
     for(auto a_item : _attached_objects)
     {
+        // the attached object id
+        auto& att_obj_id = a_item.first;
+
         // the attached object
-        auto& ao = a_item.second;
+        auto& att_obj = a_item.second;
 
         for(auto r_item : _collision_obj)
         {
             // skip if robot link inside touch_links
-            if(std::find(ao->touch_links.begin(),
-                         ao->touch_links.end(),
-                         r_item.first) != ao->touch_links.end())
+            if(std::find(att_obj->touch_links.begin(),
+                         att_obj->touch_links.end(),
+                         r_item.first) != att_obj->touch_links.end())
             {
                 continue;
             }
 
             // create and handle pair
-            LinksPair pair = LinksPair(this, ao->parent_link, r_item.first);
+            LinksPair pair = LinksPair(this, r_item.first, att_obj_id, att_obj);
+
+//            LinksPair pair = LinksPair(this, ao->parent_link, r_item.first);
+
 //            LinksPair pair;
 //            pair.linkA = ao->parent_link;
 //            pair.collisionObjectA = ao->collision;
@@ -666,14 +672,14 @@ bool ComputeLinksDistance::setAttachedCollisionObjects(std::vector<moveit_msgs::
         }
 
 //        // only support collisions specified w.r.t. link the obj is attached to
-//        if(!aco.header.frame_id.empty() &&
-//                aco.header.frame_id != aco.link_name)
-//        {
-//            fprintf(stderr, "invalid frame id '%s' \n",
-//                    co.header.frame_id.c_str());
-//            ret = false;
-//            //            continue;
-//        }
+        if(!aco.object.header.frame_id.empty() &&
+                aco.object.header.frame_id != aco.link_name)
+        {
+            fprintf(stderr, "invalid frame id '%s' \n provide a TF wrt the link the obj is attached to",
+                    aco.object.header.frame_id.c_str());
+            ret = false;
+            //            continue;
+        }
 
         // for now, don't support array of primitives
         if(aco.object.primitives.size() > 1)
@@ -843,7 +849,7 @@ bool ComputeLinksDistance::addAttachedObjectCollision(const std::string &id,
     // empty name invalid
     if(id.empty())
     {
-        fprintf(stderr, "invalid world collision '%s' \n",
+        fprintf(stderr, "invalid attached object collision '%s' \n",
                 id.c_str());
 
         return false;
@@ -1005,4 +1011,11 @@ ComputeLinksDistance::LinksPair::LinksPair(ComputeLinksDistance * const father, 
 {
     collisionObjectA = father->_collision_obj.at(linkA);
     collisionObjectB = father->_collision_obj.at(linkB);
+}
+
+ComputeLinksDistance::LinksPair::LinksPair(ComputeLinksDistance * const father, std::string link, std::string attached_object_id, std::shared_ptr<AttachedObject> attached_object):
+    linkA(link), linkB(attached_object_id)
+{
+    collisionObjectA = father->_collision_obj.at(linkA);
+    collisionObjectB = attached_object->collision;  // father->_attached_objects.at(linkB).collision;
 }

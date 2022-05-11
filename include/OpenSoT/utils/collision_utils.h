@@ -196,6 +196,11 @@ public:
                   std::string linkA,
                   std::string linkB);
 
+        LinksPair(ComputeLinksDistance * const father,
+                  std::string link,
+                  std::string attached_object_id,
+                  std::shared_ptr<AttachedObject> attached_object);
+
     };
 
     friend class ComputeLinksDistance::LinksPair;
