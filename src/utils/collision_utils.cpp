@@ -498,6 +498,14 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         // the attached object
         auto& att_obj = a_item.second;
 
+        // HACK: disable collisions between touch_links and parent link
+        std::list< LinkPairDistance::LinksPair > list_of_pairs_to_disable;
+        for(auto& allowed_link : att_obj->touch_links)
+        {
+            list_of_pairs_to_disable.push_back(LinkPairDistance::LinksPair(allowed_link, att_obj->parent_link));
+        }
+        setCollisionBlackList(list_of_pairs_to_disable);
+
         for(auto r_item : _collision_obj)
         {
             // skip if robot link inside touch_links
