@@ -151,6 +151,8 @@ public:
 
     bool addAttachedObjectCollision(const std::string &id, std::shared_ptr<AttachedObject> ao);
 
+    bool removeAttachedObjectCollision(const std::string &att_obj_id);
+
     /**
      * @brief remove world collision with given id
      */

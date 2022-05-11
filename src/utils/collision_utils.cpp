@@ -667,18 +667,18 @@ bool ComputeLinksDistance::setAttachedCollisionObjects(std::vector<moveit_msgs::
         // handle remove action
         if(aco.object.operation == aco.object.REMOVE)
         {
-//            ret = removeWorldCollision(aco.object.id) && ret;
+            ret = removeAttachedObjectCollision(aco.object.id) && ret;
             continue;
         }
 
-//        // only support collisions specified w.r.t. link the obj is attached to
+        // only support collisions specified w.r.t. link the obj is attached to
         if(!aco.object.header.frame_id.empty() &&
                 aco.object.header.frame_id != aco.link_name)
         {
             fprintf(stderr, "invalid frame id '%s' \n provide a TF wrt the link the obj is attached to",
                     aco.object.header.frame_id.c_str());
             ret = false;
-            //            continue;
+//                        continue;
         }
 
         // for now, don't support array of primitives
@@ -864,6 +864,31 @@ bool ComputeLinksDistance::addAttachedObjectCollision(const std::string &id,
     // note: should it return false if object already exists?
     return true;
 
+}
+
+bool ComputeLinksDistance::removeAttachedObjectCollision(const std::string &att_obj_id)
+{
+    auto coll_name = att_obj_id;
+
+    // find id to remove
+    auto it = _attached_objects.find(coll_name);
+
+    // does not exist
+    if(it == _attached_objects.end())
+    {
+        fprintf(stderr, "invalid attached object collision '%s' \n",
+                coll_name.c_str());
+
+        return false;
+    }
+
+    // exists, delete it
+    _attached_objects.erase(it);
+
+    // re-generate pairs to check
+//    generatePairsToCheck();
+
+    return true;
 }
 
 bool ComputeLinksDistance::addWorldCollision(const std::string &id,
