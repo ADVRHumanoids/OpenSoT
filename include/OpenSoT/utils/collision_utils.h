@@ -75,6 +75,11 @@ public:
     std::shared_ptr<fcl::CollisionObjectd> collision;
     std::vector<std::string> touch_links;
 
+    AttachedObject(std::string parent_link,
+                   KDL::Frame link_T_shape,
+                   std::shared_ptr<fcl::CollisionObjectd> collision,
+                   std::vector<std::string> touch_links);
+
 };
 
 

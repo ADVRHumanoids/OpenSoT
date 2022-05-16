@@ -660,6 +660,15 @@ std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
 
 }
 
+AttachedObject::AttachedObject(std::string parent_link,
+                               KDL::Frame link_T_shape,
+                               std::shared_ptr<fcl::CollisionObjectd> collision,
+                               std::vector<std::string> touch_links):
+                               parent_link(parent_link), link_T_shape(link_T_shape), collision(collision), touch_links(touch_links)
+{
+
+}
+
 bool ComputeLinksDistance::setAttachedCollisionObjects(std::vector<moveit_msgs::AttachedCollisionObject> ps_acos)
 {
 //    const std::string &id,
@@ -729,11 +738,11 @@ bool ComputeLinksDistance::setAttachedCollisionObjects(std::vector<moveit_msgs::
             //            printf("adding collision '%s' to world \n",
             //                   co.id.c_str());
 
-            std::shared_ptr<AttachedObject> attached_object;
-            attached_object->parent_link = aco.link_name;
-            attached_object->collision = fcl_collision;
-            attached_object->link_T_shape = link_T_shape;
-            attached_object->touch_links = aco.touch_links;
+            std::shared_ptr<AttachedObject> attached_object = std::make_shared<AttachedObject>(aco.link_name, link_T_shape, fcl_collision,  aco.touch_links);
+//             attached_object->parent_link = aco.link_name;
+//             attached_object->collision = fcl_collision;
+//             attached_object->link_T_shape = link_T_shape;
+//             attached_object->touch_links = aco.touch_links;
 
             ComputeLinksDistance:addAttachedObjectCollision(aco.object.id, attached_object);
 
