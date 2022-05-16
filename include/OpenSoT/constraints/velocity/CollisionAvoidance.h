@@ -27,6 +27,7 @@
 
 #include <moveit_msgs/PlanningSceneWorld.h>
 #include <moveit_msgs/AttachedCollisionObject.h>
+#include <moveit_msgs/AllowedCollisionMatrix.h>
 
 class ComputeLinksDistance;
 class LinkPairDistance;
@@ -112,6 +113,7 @@ public:
      */
     void update(const Eigen::VectorXd &x);
 
+    void getCurrentACM_msg(moveit_msgs::AllowedCollisionMatrix& msg) const;
 
     /**
      * @brief setCollisionWhiteList resets the allowed collision matrix by setting all collision pairs as disabled.

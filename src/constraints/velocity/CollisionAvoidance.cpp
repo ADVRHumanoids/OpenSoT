@@ -157,6 +157,13 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
     }
 }
 
+void CollisionAvoidance::getCurrentACM_msg(moveit_msgs::AllowedCollisionMatrix& msg) const
+{
+    collision_detection::AllowedCollisionMatrixPtr acm;
+    _dist_calc->getCurrentACM(acm);
+    acm->getMessage(msg);
+}
+
 bool CollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
 {
     return _dist_calc->setCollisionWhiteList(whiteList);

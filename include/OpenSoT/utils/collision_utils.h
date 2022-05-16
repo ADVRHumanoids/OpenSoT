@@ -189,6 +189,8 @@ public:
      */
     static KDL::Frame fcl2KDL(const fcl::Transform3d& in);
 
+    void getCurrentACM(collision_detection::AllowedCollisionMatrixPtr acm) const;
+
     class LinksPair
     {
 
