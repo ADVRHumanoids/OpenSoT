@@ -517,15 +517,15 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
             }
 
             // create and handle pair
-            LinksPair pair = LinksPair(this, r_item.first, att_obj_id, att_obj);
+//            LinksPair pair = LinksPair(this, r_item.first, att_obj_id, att_obj);
 
 //            LinksPair pair = LinksPair(this, ao->parent_link, r_item.first);
 
-//            LinksPair pair;
-//            pair.linkA = ao->parent_link;
-//            pair.collisionObjectA = ao->collision;
-//            pair.linkB = r_item.first;
-//            pair.collisionObjectB = r_item.second;
+            LinksPair pair;
+            pair.linkA = att_obj->parent_link;
+            pair.collisionObjectA = att_obj->collision;
+            pair.linkB = r_item.first;
+            pair.collisionObjectB = r_item.second;
 
             handle_pair(pair);
         }
