@@ -641,6 +641,11 @@ std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
     {
         fcl_shape = std::make_shared<fcl::Sphered>(shape.dimensions[0]);
     }
+    else if(shape.type == shape.CYLINDER)
+    {
+        fcl_shape = std::make_shared<fcl::Cylinderd>(shape.dimensions[1],
+                                                     shape.dimensions[0]);
+    }
     else
     {
         fprintf(stderr, "unsupported shape type \n");
