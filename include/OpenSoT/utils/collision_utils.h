@@ -208,6 +208,11 @@ public:
                   std::string attached_object_id,
                   std::shared_ptr<AttachedObject> attached_object);
 
+        LinksPair(std::string attached_object_id_A,
+                  std::shared_ptr<AttachedObject> attached_object_A,
+                  std::string attached_object_id_B,
+                  std::shared_ptr<AttachedObject> attached_object_B);
+
     };
 
     friend class ComputeLinksDistance::LinksPair;

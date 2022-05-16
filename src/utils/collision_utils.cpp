@@ -521,13 +521,26 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 
 //            LinksPair pair = LinksPair(this, ao->parent_link, r_item.first);
 
-            LinksPair pair;
-            pair.linkA = att_obj->parent_link;
-            pair.collisionObjectA = att_obj->collision;
-            pair.linkB = r_item.first;
-            pair.collisionObjectB = r_item.second;
+            LinksPair pair = LinksPair(this, r_item.first, att_obj->parent_link, att_obj);
+//             pair.linkA = att_obj->parent_link;
+//             pair.collisionObjectA = att_obj->collision;
+//             pair.linkB = r_item.first;
+//             pair.collisionObjectB = r_item.second;
 
             handle_pair(pair);
+        }
+
+        for(auto r_item : _attached_objects)
+        {
+            if (r_item.first == att_obj_id)
+            {
+                continue;
+
+            }
+
+            LinksPair pair = LinksPair(r_item.second->parent_link,  r_item.second, att_obj->parent_link, att_obj);
+            handle_pair(pair);
+
         }
     }
 
@@ -1065,4 +1078,11 @@ ComputeLinksDistance::LinksPair::LinksPair(ComputeLinksDistance * const father, 
 {
     collisionObjectA = father->_collision_obj.at(linkA);
     collisionObjectB = attached_object->collision;  // father->_attached_objects.at(linkB).collision;
+}
+
+ComputeLinksDistance::LinksPair::LinksPair(std::string attached_object_id_A,  std::shared_ptr<AttachedObject> attached_object_A, std::string attached_object_id_B, std::shared_ptr<AttachedObject> attached_object_B):
+                  linkA(attached_object_id_A), linkB(attached_object_id_B)
+{
+    collisionObjectA = attached_object_A->collision;
+    collisionObjectB = attached_object_B->collision;
 }
