@@ -438,7 +438,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 
         if(bounding_sphere_dist > detectionThreshold)
         {
-            return;
+            //return;
         }
 
         // set request for distance computation
