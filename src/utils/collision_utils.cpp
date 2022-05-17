@@ -298,7 +298,7 @@ KDL::Frame ComputeLinksDistance::fcl2KDL(const fcl::Transform3d& in)
     return f;
 }
 
-void ComputeLinksDistance::getCurrentACM(collision_detection::AllowedCollisionMatrixPtr acm) const
+void ComputeLinksDistance::getCurrentACM(collision_detection::AllowedCollisionMatrixPtr& acm) const
 {
     acm = _acm;
 }
