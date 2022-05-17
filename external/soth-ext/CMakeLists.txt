@@ -17,6 +17,7 @@ INCLUDE(cmake/boost.cmake)
 
 # Disable -Werror on Unix for now.
 SET(CXX_DISABLE_WERROR True)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-attribute")
 SET(CMAKE_VERBOSE_MAKEFILE true)
 
 SET(DOXYGEN_USE_MATHJAX YES)
