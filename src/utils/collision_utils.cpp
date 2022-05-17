@@ -206,12 +206,17 @@ bool ComputeLinksDistance::parseCollisionObjects()
             continue;
         }
 
+        // create collision object from shape
         auto collision_object = std::make_shared<fcl::CollisionObjectd>(shape);
 
+        // generate aabb (used to discard distant collisions)
+        collision_object->computeAABB();
+
+        // save collision object for each link
         _collision_obj[link->name] = collision_object;
 
-        /* Store the transformation of the CollisionShape from URDF
-         * that is, we store link_T_shape for the actual link */
+        // store the transformation of the CollisionShape from URDF
+        // that is, we store link_T_shape for the actual link
         _link_T_shape[link->name] = shape_origin;
 
         // add link name to list of links colliding with environment
@@ -430,10 +435,18 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
 
         // if distance between bounding spheres (easy to compute)
         // is too large, skip
-        auto c_A = coll_A->getTranslation();
-        auto c_B = coll_B->getTranslation();
+        auto T_A = coll_A->getTransform();
+        auto T_B = coll_B->getTransform();
+
+        // aabb centers in global frame
+        Eigen::Vector3d c_A = T_A * coll_A->collisionGeometry()->aabb_center;
+        Eigen::Vector3d c_B = T_B * coll_B->collisionGeometry()->aabb_center;
+
+        // aabb radii
         double r_A = coll_A->collisionGeometry()->aabb_radius;
         double r_B = coll_B->collisionGeometry()->aabb_radius;
+
+        // distance lower bound
         double bounding_sphere_dist = (c_A - c_B).norm() - r_A - r_B;
 
         if(bounding_sphere_dist > detectionThreshold)
