@@ -161,12 +161,12 @@ bool qpSWIFTBackEnd::solve()
 
 boost::any qpSWIFTBackEnd::getOptions()
 {
-    ///TODO
+    return _qp->options;
 }
 
 void qpSWIFTBackEnd::setOptions(const boost::any& options)
 {
-    ///TODO
+    _qp->options = boost::any_cast<settings*>(options);
 }
 
 bool qpSWIFTBackEnd::updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g)

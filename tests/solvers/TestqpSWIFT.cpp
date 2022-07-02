@@ -71,6 +71,59 @@ protected:
 
 };
 
+TEST_F(testqpSWIFTProblem, testOptions)
+{
+
+
+    Eigen::VectorXd x(2);
+    simpleProblem sp;
+
+    OpenSoT::solvers::BackEnd::Ptr testProblemqpSWIFT = OpenSoT::solvers::BackEndFactory(
+                OpenSoT::solvers::solver_back_ends::qpSWIFT, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,0.);
+
+    EXPECT_TRUE(testProblemqpSWIFT->initProblem(sp.H,
+                            sp.g,
+                            sp.A,
+                            sp.lA,
+                            sp.uA,
+                            sp.l,
+                            sp.u));
+
+
+    auto plr = boost::any_cast<settings*>(testProblemqpSWIFT->getOptions());
+    std::cout<<"plr->maxit: "<<plr->maxit<<std::endl;
+    std::cout<<"plr->reltol: "<<plr->reltol<<std::endl;
+    std::cout<<"plr->abstol: "<<plr->abstol<<std::endl;
+    std::cout<<"plr->sigma: "<<plr->sigma<<std::endl;
+    std::cout<<"plr->verbose: "<<plr->verbose<<std::endl;
+
+
+
+    std::shared_ptr<settings> opt = std::make_shared<settings>();
+    opt->maxit = 10;
+    opt->reltol = 1.;
+    opt->abstol = 2.;
+    opt->sigma = 3.;
+    opt->verbose = 2;
+
+    testProblemqpSWIFT->setOptions(opt.get());
+
+    auto tlr = boost::any_cast<settings*>(testProblemqpSWIFT->getOptions());
+
+    std::cout<<"tlr->maxit: "<<tlr->maxit<<std::endl;
+    std::cout<<"tlr->reltol: "<<tlr->reltol<<std::endl;
+    std::cout<<"tlr->abstol: "<<tlr->abstol<<std::endl;
+    std::cout<<"tlr->sigma: "<<tlr->sigma<<std::endl;
+    std::cout<<"tlr->verbose: "<<tlr->verbose<<std::endl;
+
+    EXPECT_EQ(tlr->maxit, opt->maxit);
+    EXPECT_EQ(tlr->reltol, opt->reltol);
+    EXPECT_EQ(tlr->abstol, opt->abstol);
+    EXPECT_EQ(tlr->sigma, opt->sigma);
+    EXPECT_EQ(tlr->verbose, opt->verbose);
+
+}
+
 
 TEST_F(testqpSWIFTProblem, testSimpleProblem)
 {

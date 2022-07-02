@@ -68,6 +68,7 @@ private:
 
     std::shared_ptr<QP> _qp; //qpSWIFT data structure
 
+
     double _eps_regularisation;
 
     MatrixPiler _AA;
