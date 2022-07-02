@@ -18,7 +18,13 @@ extern "C" void destroy_instance( BackEnd * instance )
     delete instance;
 }
 
-
+/**
+ * @brief qpSWIFTBackEnd::qpSWIFTBackEnd
+ * @param number_of_variables
+ * @param number_of_constraints
+ * @param eps_regularisation
+ * @note the solver can not handle constraint matrices with rows of zeros
+ */
 qpSWIFTBackEnd::qpSWIFTBackEnd(const int number_of_variables,
                                const int number_of_constraints,
                                const double eps_regularisation):
@@ -31,6 +37,11 @@ qpSWIFTBackEnd::qpSWIFTBackEnd(const int number_of_variables,
 {
     _I.resize(number_of_variables, number_of_variables);
     _I.setIdentity();
+}
+
+qpSWIFTBackEnd::~qpSWIFTBackEnd()
+{
+
 }
 
 bool qpSWIFTBackEnd::initProblem(const Eigen::MatrixXd &H,
@@ -91,7 +102,7 @@ bool qpSWIFTBackEnd::initProblem(const Eigen::MatrixXd &H,
                              NULL, COLUMN_MAJOR_ORDERING));
 
     if(_qp)
-        return true;
+        return solve();
     return false;
 }
 
@@ -143,7 +154,7 @@ bool qpSWIFTBackEnd::solve()
     for(unsigned int i = 0; i < this->_number_of_variables; ++i)
         _solution[i] = _qp->x[i];
 
-    QP_CLEANUP_dense(_qp.get());
+    //QP_CLEANUP_dense(_qp.get());
 
     return true;
 }

@@ -21,12 +21,13 @@ find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher urdf srdfdom)
 find_package(osqp QUIET)
+find_package(qpSWIFT QUIET)
 
 add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
 message(STATUS "DOPENSOT_TEST_PATH is ${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
-    set(TEST_INCLUDES ${TEST_INCLUDES}
+    set(TEST_INCLUDES ${TEST_INCLUDES} ${GTEST_INCLUDE_DIRS}
                       ${trajectory_utils_INCLUDE_DIRS}
                       ${rviz_visual_tools_INCLUDE_DIRS})
 endif()
@@ -92,13 +93,13 @@ endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TEST testQPOases_ConvexHull 
-    		      testConvexHullVelocityConstraint 
-    		      testAutoStack) #42
+                     testConvexHullVelocityConstraint
+                     testAutoStack) #42
 endif()
 
 if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver 
-    				       testGenericTask)
+                                      testGenericTask)
     set(OPENSOT_TEST ${OPENSOT_TESTS} testLP) #45
 endif()
 
@@ -125,6 +126,10 @@ if(${trajectory_utils_FOUND})
                   testQPOases_StaticWalk_FloatingBase
                   testQPOases_StaticWalk
                   testEigenSVD_StaticWalk_FloatingBase) #54
+endif()
+
+if(${qpSWIFT_FIUND})
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testqpSWIFTSolver) #55
 endif()
 
 
@@ -465,6 +470,13 @@ ADD_EXECUTABLE(testKinematics utils/TestKinematics.cpp)
 TARGET_LINK_LIBRARIES(testKinematics ${TestLibs})
 add_dependencies(testKinematics   OpenSoT)
 add_test(NAME OpenSoT_utils_test_kinematics COMMAND testKinematics)
+
+if(${qpSWIFT_FOUND})
+    ADD_EXECUTABLE(testqpSWIFTSolver solvers/TestqpSWIFT.cpp)
+    TARGET_LINK_LIBRARIES(testqpSWIFTSolver ${TestLibs} qpSWIFT::qpSWIFT-static)
+    add_dependencies(testqpSWIFTSolver OpenSoT)
+    add_test(NAME OpenSoT_solvers_qpswift COMMAND testqpSWIFTSolver)
+endif()
 
 #ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
 #TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
