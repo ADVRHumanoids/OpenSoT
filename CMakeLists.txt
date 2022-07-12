@@ -298,7 +298,7 @@ if(${osqp_FOUND})
 endif()
 
 find_package(qpSWIFT QUIET)
-if(${osqp_FOUND})
+if(${qpSWIFT_FOUND})
     message("Adding src/solvers/qpSWIFTBackEnd.cpp to compilation")
 
     add_library(OpenSotBackEndqpSWIFT SHARED src/solvers/qpSWIFTBackEnd.cpp)
