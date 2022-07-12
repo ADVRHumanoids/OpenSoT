@@ -128,7 +128,7 @@ if(${trajectory_utils_FOUND})
                   testEigenSVD_StaticWalk_FloatingBase) #54
 endif()
 
-if(${qpSWIFT_FIUND})
+if(${qpSWIFT_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testqpSWIFTSolver) #55
 endif()
 
