@@ -84,7 +84,7 @@ endif()
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
-    ${PCL_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS} ${XBotInterface_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
     )
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
@@ -294,6 +294,16 @@ if(${osqp_FOUND})
     add_library(OpenSotBackEndOSQP SHARED src/solvers/OSQPBackEnd.cpp)
     target_link_libraries(OpenSotBackEndOSQP OpenSoT osqp::osqpstatic)
     library_install(OpenSotBackEndOSQP 1 0 0)
+
+endif()
+
+find_package(qpSWIFT QUIET)
+if(${qpSWIFT_FOUND})
+    message("Adding src/solvers/qpSWIFTBackEnd.cpp to compilation")
+
+    add_library(OpenSotBackEndqpSWIFT SHARED src/solvers/qpSWIFTBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndqpSWIFT OpenSoT qpSWIFT::qpSWIFT-static)
+    library_install(OpenSotBackEndqpSWIFT 1 0 0)
 
 endif()
 
