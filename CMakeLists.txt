@@ -307,6 +307,15 @@ if(${qpSWIFT_FOUND})
 
 endif()
 
+find_package(proxsuite QUIET)
+if(${proxsuite_FOUND})
+    message("Adding src/solvers/proxQPBackEnd.cpp to compilation")
+
+    add_library(OpenSotBackEndproxQP SHARED src/solvers/proxQPBackEnd.cpp)
+    target_link_libraries(OpenSotBackEndproxQP OpenSoT proxsuite::proxsuite)
+    library_install(OpenSotBackEndproxQP 1 0 0)
+endif()
+
 find_package(GLPK QUIET)
 if(${GLPK_FOUND})
     message("Adding src/solvers/GLPKBackEnd.cpp to compilation")

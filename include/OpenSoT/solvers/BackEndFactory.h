@@ -12,7 +12,8 @@ namespace OpenSoT{
             GLPK,
             eiQuadProg,
             ODYS,
-            qpSWIFT
+            qpSWIFT,
+            proxQP
         };
 
         /**
