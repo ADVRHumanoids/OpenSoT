@@ -39,43 +39,62 @@ proxQPBackEnd::~proxQPBackEnd()
 
 }
 
+void proxQPBackEnd::create_data_structure(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                                          const Eigen::VectorXd &l, const Eigen::VectorXd &u)
+{
+    for(unsigned int i = 0; i < lA.size(); ++i)
+    {
+        if(std::fabs(lA[i]-uA[i]) <= std::numeric_limits<double>::epsilon())
+            _equality_constraint_indices.push_back(i);
+        else
+            _inequality_constraint_indices.push_back(i);
+    }
+
+    for(unsigned int i = 0; i < l.size(); ++i)
+    {
+        if(std::fabs(l[i]-u[i]) <= std::numeric_limits<double>::epsilon())
+            _equality_bounds_indices.push_back(i);
+        else
+            _inequality_bounds_indices.push_back(i);
+    }
+
+    for(const auto& i : _equality_constraint_indices)
+    {
+        _AA.pile(_A.row(i));
+        _b.pile(_lA.segment(i, 1));
+    }
+    for(const auto& i : _equality_bounds_indices)
+    {
+        _AA.pile(_I.row(i));
+        _b.pile(l.segment(i, 1));
+    }
+
+    for(const auto& i : _inequality_constraint_indices)
+    {
+        _G.pile(_A.row(i));
+        _uu.pile(_uA.segment(i, 1));
+        _ll.pile(_lA.segment(i, 1));
+    }
+    for(const auto& i : _inequality_bounds_indices)
+    {
+        _G.pile(_I.row(i));
+        _uu.pile(_u.segment(i, 1));
+        _ll.pile(_l.segment(i, 1));
+    }
+}
+
 bool proxQPBackEnd::initProblem(const Eigen::MatrixXd &H,
                                  const Eigen::VectorXd &g, const Eigen::MatrixXd &A,
                                  const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
                                  const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
-    //1) Creates equality and inequality indices
-    ///TODO: what if we have equality bounds???
-    for(unsigned int i = 0; i < lA.size(); ++i)
-    {
-        if(std::fabs(lA[i]-uA[i]) <= std::numeric_limits<double>::epsilon())
-            _equality_indices.push_back(i);
-        else
-            _inequality_indices.push_back(i);
-    }
-
-    //2) Creates equality and inequality matrices
     _A = A;
     _lA = lA;
     _uA = uA;
     _l = l;
     _u = u;
 
-    for(const auto& i : _equality_indices)
-    {
-        _AA.pile(_A.row(i));
-        _b.pile(_lA.segment(i, 1));
-    }
-
-    for(const auto& i : _inequality_indices)
-    {
-        _G.pile(_A.row(i));
-        _uu.pile(_uA.segment(i, 1));
-        _ll.pile(_lA.segment(i, 1));
-    }
-    _G.pile(_I);
-    _uu.pile(_u);
-    _ll.pile(_l);
+    create_data_structure(A, lA, uA, l, u);
 
     //3) popolate qp structure
     _g = g;
@@ -97,27 +116,18 @@ bool proxQPBackEnd::initProblem(const Eigen::MatrixXd &H,
 
 bool proxQPBackEnd::solve()
 {
+    _equality_constraint_indices.clear();
+    _equality_bounds_indices.clear();
+    _inequality_constraint_indices.clear();
+    _inequality_bounds_indices.clear();
+
     _AA.reset();
     _b.reset();
     _ll.reset();
     _uu.reset();
     _G.reset();
 
-    for(const auto& i : _equality_indices)
-    {
-        _AA.pile(_A.row(i));
-        _b.pile(_lA.segment(i, 1));
-    }
-
-    for(const auto& i : _inequality_indices)
-    {
-        _G.pile(_A.row(i));
-        _uu.pile(_uA.segment(i, 1));
-        _ll.pile(_lA.segment(i, 1));
-    }
-    _G.pile(_I);
-    _uu.pile(_u);
-    _ll.pile(_l);
+    create_data_structure(_A, _lA, _uA, _l, _u);
 
     _QP->update(_H, _g, _AA.generate_and_get(), _b.generate_and_get(), _G.generate_and_get(), _uu.generate_and_get(), _ll.generate_and_get());
     _QP->solve();

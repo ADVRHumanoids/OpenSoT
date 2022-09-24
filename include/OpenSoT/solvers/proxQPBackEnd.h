@@ -59,17 +59,22 @@ public:
     }
 
 private:
+    void create_data_structure(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                               const Eigen::VectorXd &l, const Eigen::VectorXd &u);
+
     typedef MatrixPiler VectorPiler;
 
     std::shared_ptr<dense::QP<double>> _QP;
 
     MatrixPiler _AA; //equality constr
     VectorPiler _b;
-    std::vector<unsigned int> _equality_indices;
+    std::vector<unsigned int> _equality_constraint_indices;
+    std::vector<unsigned int> _equality_bounds_indices;
 
     MatrixPiler _G; //inequality constr
     VectorPiler _ll, _uu;
-    std::vector<unsigned int> _inequality_indices;
+    std::vector<unsigned int> _inequality_constraint_indices;
+    std::vector<unsigned int> _inequality_bounds_indices;
 
     Eigen::MatrixXd _I;
 

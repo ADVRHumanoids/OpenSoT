@@ -115,6 +115,10 @@ std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
         return "eiQuadProg";
     if(be_solver == solver_back_ends::ODYS)
         return "ODYS";
+    if(be_solver == solver_back_ends::proxQP)
+        return "proxQP";
+    if(be_solver == solver_back_ends::qpSWIFT)
+        return "qpSWIFT";
     else
         return "????";
 }
