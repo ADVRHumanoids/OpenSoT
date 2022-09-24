@@ -64,6 +64,9 @@ public:
         return _eps_regularisation;
     }
 private:
+    void createDataStructure(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                             const Eigen::VectorXd &l, const Eigen::VectorXd &u);
+
     typedef MatrixPiler VectorPiler;
 
     std::shared_ptr<QP> _qp; //qpSWIFT data structure
@@ -73,11 +76,14 @@ private:
 
     MatrixPiler _AA;
     VectorPiler _b;
-    std::vector<unsigned int> _equality_indices;
+    std::vector<unsigned int> _equality_constraint_indices;
+    std::vector<unsigned int> _equality_bounds_indices;
 
     MatrixPiler _G;
     VectorPiler _h;
-    std::vector<unsigned int> _inequality_indices;
+    std::vector<unsigned int> _inequality_constraint_indices;
+    std::vector<unsigned int> _inequality_bounds_indices;
+
 
     Eigen::MatrixXd _I;
 

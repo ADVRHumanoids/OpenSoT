@@ -44,34 +44,44 @@ qpSWIFTBackEnd::~qpSWIFTBackEnd()
 
 }
 
-bool qpSWIFTBackEnd::initProblem(const Eigen::MatrixXd &H,
-                                 const Eigen::VectorXd &g, const Eigen::MatrixXd &A,
-                                 const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
-                                 const Eigen::VectorXd &l, const Eigen::VectorXd &u)
+void qpSWIFTBackEnd::createDataStructure(const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                                         const Eigen::VectorXd &l, const Eigen::VectorXd &u)
 {
+    _equality_constraint_indices.clear();
+    _equality_bounds_indices.clear();
+    _inequality_constraint_indices.clear();
+    _inequality_bounds_indices.clear();
+
     //1) Creates equality and inequality indices
     for(unsigned int i = 0; i < lA.size(); ++i)
     {
         if(std::fabs(lA[i]-uA[i]) <= std::numeric_limits<double>::epsilon())
-            _equality_indices.push_back(i);
+            _equality_constraint_indices.push_back(i);
         else
-            _inequality_indices.push_back(i);
+            _inequality_constraint_indices.push_back(i);
     }
 
-    _A = A;
-    _lA = lA;
-    _uA = uA;
-    _l = l;
-    _u = u;
+    for(unsigned int i = 0; i < l.size(); ++i)
+    {
+        if(std::fabs(l[i]-u[i]) <= std::numeric_limits<double>::epsilon())
+            _equality_bounds_indices.push_back(i);
+        else
+            _inequality_bounds_indices.push_back(i);
+    }
 
     //2) Creates equality and inequality matrices
-    for(const auto& i : _equality_indices)
+    for(const auto& i : _equality_constraint_indices)
     {
         _AA.pile(A.row(i));
         _b.pile(lA.segment(i, 1));
     }
+    for(const auto& i : _equality_bounds_indices)
+    {
+        _AA.pile(_I.row(i));
+        _b.pile(_l.segment(i, 1));
+    }
 
-    for(const auto& i : _inequality_indices)
+    for(const auto& i : _inequality_constraint_indices)
     {
         _G.pile(A.row(i));
         _h.pile(uA.segment(i, 1));
@@ -79,18 +89,34 @@ bool qpSWIFTBackEnd::initProblem(const Eigen::MatrixXd &H,
         _G.pile(-A.row(i));
         _h.pile(-lA.segment(i, 1));
     }
-    _G.pile(_I);
-    _h.pile(u);
-    _G.pile(-_I);
-    _h.pile(-l);
+    for(const auto& i : _inequality_bounds_indices)
+    {
+        _G.pile(_I.row(i));
+        _h.pile(u.segment(i, 1));
 
+        _G.pile(-_I.row(i));
+        _h.pile(-l.segment(i, 1));
 
-    //3) popolate qp structure
+    }
+}
+
+bool qpSWIFTBackEnd::initProblem(const Eigen::MatrixXd &H,
+                                 const Eigen::VectorXd &g, const Eigen::MatrixXd &A,
+                                 const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                                 const Eigen::VectorXd &l, const Eigen::VectorXd &u)
+{
+    _A = A;
+    _lA = lA;
+    _uA = uA;
+    _l = l;
+    _u = u;
     _g = g;
     _H = H;
 
     for(unsigned int i = 0; i < H.cols(); ++i)
         _H(i, i) += _eps_regularisation;
+
+    createDataStructure(_A, _lA, _uA, _l, _u);
 
     _qp.reset(QP_SETUP_dense(_H.cols(), _h.rows(), _b.rows(),
                              _H.data(),
@@ -114,25 +140,7 @@ bool qpSWIFTBackEnd::solve()
     _h.reset();
     _G.reset();
 
-    for(const auto& i : _equality_indices)
-    {
-        _AA.pile(_A.row(i));
-        _b.pile(_lA.segment(i, 1));
-    }
-
-    for(const auto& i : _inequality_indices)
-    {
-        _G.pile(_A.row(i));
-        _h.pile(_uA.segment(i, 1));
-
-        _G.pile(-_A.row(i));
-        _h.pile(-_lA.segment(i, 1));
-    }
-    _G.pile(_I);
-    _h.pile(_u);
-    _G.pile(-_I);
-    _h.pile(-_l);
-
+    createDataStructure(_A, _lA, _uA, _l, _u);
 
     _qp.reset(QP_SETUP_dense(_H.cols(), _h.rows(), _b.rows(),
                              _H.data(),
