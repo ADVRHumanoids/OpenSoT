@@ -13,23 +13,76 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
     
     _local_R_world.setIdentity();
     
+    // locate wheel spinning axis
     auto spinning_axis = _model->getUrdf().getLink(wheel_name)->parent_joint->axis;
     _wheel_spinning_axis << spinning_axis.x, spinning_axis.y, spinning_axis.z;
-    
+
+    // wheel parent link
     _wheel_parent_name = _model->getUrdf().getLink(wheel_name)->parent_joint->parent_link_name;
-    auto steering_axis = _model->getUrdf().getLink(_wheel_parent_name)->parent_joint->axis;
+    
+    // go up the tree until the steering axis is found
+    urdf::JointConstSharedPtr steering_joint;
+    auto link = _model->getUrdf().getLink(_wheel_parent_name);
+    while(!steering_joint && link)
+    {
+        auto jnt = link->parent_joint;
+
+        if(jnt->type == urdf::Joint::REVOLUTE ||
+                jnt->type == urdf::Joint::CONTINUOUS)
+        {
+            steering_joint = jnt;
+            break;
+        }
+
+        link = _model->getUrdf().getLink(jnt->parent_link_name);
+    }
+
+    // steering joint not found
+    if(!steering_joint)
+    {
+        throw std::runtime_error("steering joint not found for wheel " + wheel_name);
+    }
+
+//    std::cout << "found steering joint " << steering_joint->name << "\n";
+
+    // re-define wheel parent
+    _wheel_parent_name = steering_joint->parent_link_name;
+
+    // tf from parent frame to joint origin
+    Eigen::Affine3d wp_T_jo;
+    wp_T_jo.translation() << steering_joint->parent_to_joint_origin_transform.position.x,
+            steering_joint->parent_to_joint_origin_transform.position.y,
+            steering_joint->parent_to_joint_origin_transform.position.z;
+    Eigen::Quaterniond qp_q_jo(
+                steering_joint->parent_to_joint_origin_transform.rotation.w,
+                steering_joint->parent_to_joint_origin_transform.rotation.x,
+                steering_joint->parent_to_joint_origin_transform.rotation.y,
+                steering_joint->parent_to_joint_origin_transform.rotation.z
+                );
+    wp_T_jo.linear() = qp_q_jo.toRotationMatrix();
+
+
+//    std::cout << "found wheel parent link " << _wheel_parent_name << "\n";
+
+    // get steering axis in joint frame
+    auto steering_axis = steering_joint->axis;
     _local_steering_axis << steering_axis.x, steering_axis.y, steering_axis.z;
-    Eigen::Matrix3d w_R_wp;
-    _model->getOrientation(_wheel_parent_name, w_R_wp);
+
+    // rotate to parent frame
+    _local_steering_axis = wp_T_jo.linear() * _local_steering_axis;
+
+//    std::cout << "local steering axis " << _local_steering_axis.transpose() << "\n";
+
+    // save steering index and joint
+    _steering_id = _model->getDofIndex(steering_joint->name);
+    _steering_joint = _model->getJointByName(steering_joint->name);
     
-    
-    _steering_id = _model->getDofIndex(_model->getUrdf().getLink(_wheel_parent_name)->parent_joint->name);
-    _steering_joint = _model->getJointByName(_model->getUrdf().getLink(_wheel_parent_name)->parent_joint->name);
-    
+    // initialize previous steering angle
     Eigen::VectorXd q;
     _model->getJointPosition(q);
     _prev_qdes = q[_steering_id];
     
+    // why do we need the base link name?
     _model->getFloatingBaseLink(_waist_name);
 }
 
@@ -116,23 +169,23 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     _model->getJointPosition(_q);
     double q = _q(_steering_id);
     
-    /* Current angle */
+    /* Current angle between forward wheel direction and global x-axis */
     Eigen::Vector3d world_normal = _local_R_world.row(2).transpose();
     Eigen::Vector3d wheel_forward = (w_T_wheel.linear()*_wheel_spinning_axis).cross(world_normal);
     wheel_forward.normalize(); 
     wheel_forward = _local_R_world * wheel_forward; // convert to local frame
     double theta = std::atan2(wheel_forward.y(), wheel_forward.x());
     
-    /* Apply deadzone */
+    /* Apply deadzone to wheel velocity */
     Eigen::Vector3d vdes_th = _local_R_world * wheel_vel;
     
     vdes_th.x() = dead_zone(vdes_th.x(), 0.01);
     vdes_th.y() = dead_zone(vdes_th.y(), 0.01);
 
-//     std::cout << _wheel_name << ", normal  dir: " << _local_R_world.row(2) << std::endl;
-//     std::cout << _wheel_name << ", forward dir: " << wheel_forward.transpose() << std::endl;
-//     std::cout << _wheel_name << ", theta      : " << theta << std::endl;
-//     std::cout << _wheel_name << ", vdes       : " << vdes_th.transpose() << std::endl;
+//    std::cout << _wheel_name << ", normal  dir =  " << _local_R_world.row(2) << std::endl;
+//    std::cout << _wheel_name << ", forward dir =  " << wheel_forward.transpose() << std::endl;
+//    std::cout << _wheel_name << ", theta       =  " << theta << std::endl;
+//    std::cout << _wheel_name << ", vdes        =  " << vdes_th.transpose() << std::endl;
     
     _log_data.q = q;
     _log_data.normal = _local_R_world.transpose().col(2);
@@ -145,13 +198,13 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
         return _prev_qdes;
     }
     
+    // desired angle based on time-delayed velocity
     double des_theta_1 = std::atan2(vdes_th.y(), vdes_th.x());
     
     Eigen::Vector3d steering_axis = _local_R_world*w_T_wp.linear()*_local_steering_axis;
     
-    
-//     std::cout << _wheel_name << ", theta ref  : " << des_theta_1 << std::endl;
-//     std::cout << _wheel_name << ", steering_ax: " << steering_axis.transpose() << std::endl;
+//    std::cout << _wheel_name << ", theta ref   = " << des_theta_1 << std::endl;
+//    std::cout << _wheel_name << ", steering_ax = " << steering_axis.transpose() << std::endl;
     
     _log_data.theta_ref = des_theta_1;
     _log_data.steering_axis = steering_axis;
@@ -244,14 +297,40 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
     _b.setZero(1);
     _W.setIdentity(1,1);
     
-    std::string wheel_parent_name = _model->getUrdf().getLink(wheel_name)->parent_joint->parent_link_name;
-    std::string steering_joint_name = _model->getUrdf().getLink(wheel_parent_name)->parent_joint->name;
-    
-    _steering_joint = _model->getJointByName(steering_joint_name);
+    // wheel parent link
+    auto wheel_parent_name = _model->getUrdf().getLink(wheel_name)->parent_joint->parent_link_name;
+
+    // go up the tree until the steering axis is found
+    urdf::JointConstSharedPtr steering_joint;
+    auto link = _model->getUrdf().getLink(wheel_parent_name);
+    while(!steering_joint && link)
+    {
+        auto jnt = link->parent_joint;
+
+        if(jnt->type == urdf::Joint::REVOLUTE ||
+                jnt->type == urdf::Joint::CONTINUOUS)
+        {
+            steering_joint = jnt;
+            break;
+        }
+
+        link = _model->getUrdf().getLink(jnt->parent_link_name);
+    }
+
+    // steering joint not found
+    if(!steering_joint)
+    {
+        throw std::runtime_error("steering joint not found for wheel " + wheel_name);
+    }
+
+    std::cout << "found steering joint " << steering_joint->name << "\n";
+
+    // re-define wheel parent
+    _steering_joint = _model->getJointByName(steering_joint->name);
     
     _model->getJointPosition(_q);
     
-    _steering_dof_idx = _model->getDofIndex(steering_joint_name);
+    _steering_dof_idx = _model->getDofIndex(steering_joint->name);
     
     _A(0, _steering_dof_idx) = 1.0;
 }
@@ -266,15 +345,11 @@ void CentauroAnkleSteering::_update(const Eigen::VectorXd& x)
 {
     // get robot state
     _model->getJointPosition(_q);
-    
+
     // compute wheel desired velocity
-    std::string ankle_name = ::get_parent(_steering.getWheelName(), _model);
     Eigen::Vector6d wheel_vel;
     _model->getVelocityTwist(_steering.getWheelName(), wheel_vel);
-//     Eigen::Matrix3d w_R_ankle;
-//     _model->getOrientation(ankle_name, w_R_ankle);
-//     wheel_vel.head<3>() += wheel_vel.tail<3>().cross(w_R_ankle * Eigen::Vector3d(0.0, 0.0, 0.30));
-    
+
     double q_steering = _steering.computeSteeringAngle(wheel_vel.head<3>());
     double q_current = _q(_steering_dof_idx);
     
