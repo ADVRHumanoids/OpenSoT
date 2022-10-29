@@ -186,18 +186,18 @@ bool proxQPBackEnd::updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd
 
 void proxQPBackEnd::setOptions(const boost::any& options)
 {
-    ///TODO
+    _QP->settings = boost::any_cast<proxsuite::proxqp::Settings<double>>(options);
 }
 
 boost::any proxQPBackEnd::getOptions()
 {
-    return NULL;
+    return _QP->settings;
 }
 
 double proxQPBackEnd::getObjective()
 {
-    ///TODO
-    return 0.;
+
+    return _QP->results.info.objValue;
 }
 
 
