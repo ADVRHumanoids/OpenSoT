@@ -3,14 +3,23 @@
 using namespace OpenSoT::tasks::velocity;
 
 SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model, 
-                               std::string wheel_name):
+                               std::string wheel_name,
+                               std::vector<double> hyst_comp,
+                               std::vector<double> dz_th):
     _model(model),
     _wheel_name(wheel_name),
-    _comp(0.0025, 0.01),
-    _vdes(1., 0, 0)
+    _comp(HysteresisComparator::MakeHysteresisComparator()),
+    _vdes(1., 0, 0),
+    _dz_th(dz_th)
 {
     std::memset(&_log_data, 0, sizeof(_log_data));
-    
+
+    if (!hyst_comp.empty())
+        _comp = HysteresisComparator::MakeHysteresisComparator(hyst_comp[0], hyst_comp[1]);
+
+    std::cout << "hyst_lo: " << _comp._th_lo << "   hyst_hi: " << _comp._th_hi << std::endl;
+    std::cout << "deadzone: " << "[" << _dz_th[0] << ", " << _dz_th[1] << "]" << std::endl;
+
     _local_R_world.setIdentity();
     
     auto spinning_axis = _model->getUrdf().getLink(wheel_name)->parent_joint->axis;
@@ -21,7 +30,6 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
     _local_steering_axis << steering_axis.x, steering_axis.y, steering_axis.z;
     Eigen::Matrix3d w_R_wp;
     _model->getOrientation(_wheel_parent_name, w_R_wp);
-    
     
     _steering_id = _model->getDofIndex(_model->getUrdf().getLink(_wheel_parent_name)->parent_joint->name);
     _steering_joint = _model->getJointByName(_model->getUrdf().getLink(_wheel_parent_name)->parent_joint->name);
@@ -60,6 +68,11 @@ void OpenSoT::tasks::velocity::SimpleSteering::setOutwardNormal(const Eigen::Vec
     _local_R_world.transposeInPlace();
     
     
+}
+
+void OpenSoT::tasks::velocity::SimpleSteering::setHysteresisComparisonThreshold(double th_lo, double th_hi)
+{
+
 }
 
 
@@ -126,8 +139,8 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     /* Apply deadzone */
     Eigen::Vector3d vdes_th = _local_R_world * wheel_vel;
     
-    vdes_th.x() = dead_zone(vdes_th.x(), 0.01);
-    vdes_th.y() = dead_zone(vdes_th.y(), 0.01);
+    vdes_th.x() = dead_zone(vdes_th.x(), _dz_th[0]);
+    vdes_th.y() = dead_zone(vdes_th.y(), _dz_th[1]);
 
 //     std::cout << _wheel_name << ", normal  dir: " << _local_R_world.row(2) << std::endl;
 //     std::cout << _wheel_name << ", forward dir: " << wheel_forward.transpose() << std::endl;
@@ -181,6 +194,8 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
         throw std::runtime_error("Unable to find steering angle");
     }
 
+    std::cout << _wheel_name << "  " << _prev_qdes << "   "  << vdes_th.transpose() << std::endl;
+
     return _prev_qdes;
 }
 
@@ -211,6 +226,12 @@ HysteresisComparator::HysteresisComparator(double th_lo, double th_hi, bool init
     }
 }
 
+HysteresisComparator HysteresisComparator::MakeHysteresisComparator(double th_lo, double th_hi, bool init_lo)
+{
+    HysteresisComparator comp(th_lo, th_hi, init_lo);
+    return comp;
+}
+
 bool HysteresisComparator::compare(double value)
 {
     bool ret = value > _th_curr;
@@ -234,9 +255,11 @@ namespace
 CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
                                              XBot::ModelInterface::ConstPtr model, 
                                              double dt,
-                                             double max_steering_speed):
+                                             double max_steering_speed,
+                                             std::vector<double> hyst_comp,
+                                             std::vector<double> dz_th):
     Task("centauro_steering_" + wheel_name, model->getJointNum()),
-    _steering(model, wheel_name),
+    _steering(model, wheel_name, hyst_comp, dz_th),
     _max_steering_dq(max_steering_speed*dt),
     _model(model)
 {
@@ -268,13 +291,9 @@ void CentauroAnkleSteering::_update(const Eigen::VectorXd& x)
     _model->getJointPosition(_q);
     
     // compute wheel desired velocity
-    std::string ankle_name = ::get_parent(_steering.getWheelName(), _model);
     Eigen::Vector6d wheel_vel;
     _model->getVelocityTwist(_steering.getWheelName(), wheel_vel);
-//     Eigen::Matrix3d w_R_ankle;
-//     _model->getOrientation(ankle_name, w_R_ankle);
-//     wheel_vel.head<3>() += wheel_vel.tail<3>().cross(w_R_ankle * Eigen::Vector3d(0.0, 0.0, 0.30));
-    
+
     double q_steering = _steering.computeSteeringAngle(wheel_vel.head<3>());
     double q_current = _q(_steering_dof_idx);
     
