@@ -31,11 +31,11 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         double getCurrentThreshold() const;
         
-
+     private:
 
         double _th_lo, _th_hi;
         double _th_curr;
-        private:
+
     };
 
     
@@ -47,7 +47,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         SimpleSteering(XBot::ModelInterface::ConstPtr model, 
                        std::string wheel_name,
                        std::vector<double> hyst_comp,
-                       std::vector<double> dz_th);
+                       double dz_th);
         
         double computeSteeringAngle(const Eigen::Vector3d& wheel_vel);
         
@@ -87,7 +87,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
         Eigen::Vector3d _vdes;
 
-        std::vector<double> _dz_th;
+        double _dz_th;
         
         double _prev_qdes;
         
@@ -104,9 +104,9 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         CentauroAnkleSteering(std::string wheel_name, 
                               XBot::ModelInterface::ConstPtr model,
                               double dt,
+                              double dz_th,
                               double max_steering_speed = DEFAULT_MAX_STEERING_SPEED,
-                              std::vector<double> hyst_comp = {},
-                              std::vector<double> dz_th = {0.001, 0.001}
+                              std::vector<double> hyst_comp = {}
                              );
         
         void setOutwardNormal(const Eigen::Vector3d& n);

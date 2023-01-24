@@ -5,7 +5,7 @@ using namespace OpenSoT::tasks::velocity;
 SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model, 
                                std::string wheel_name,
                                std::vector<double> hyst_comp,
-                               std::vector<double> dz_th):
+                               double dz_th):
     _model(model),
     _wheel_name(wheel_name),
     _comp(HysteresisComparator::MakeHysteresisComparator()),
@@ -16,9 +16,6 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
 
     if (!hyst_comp.empty())
         _comp = HysteresisComparator::MakeHysteresisComparator(hyst_comp[0], hyst_comp[1]);
-
-    std::cout << "hyst_lo: " << _comp._th_lo << "   hyst_hi: " << _comp._th_hi << std::endl;
-    std::cout << "deadzone: " << "[" << _dz_th[0] << ", " << _dz_th[1] << "]" << std::endl;
 
     _local_R_world.setIdentity();
     
@@ -91,6 +88,17 @@ double SimpleSteering::getDofIndex() const
 
 namespace 
 {
+    Eigen::Vector3d dead_zone_norm(Eigen::Vector3d v, double th)
+    {
+        Eigen::Vector2d v_xy = Eigen::Vector2d(v(0), v(1));
+        if(v_xy.norm() > th)
+        {
+            return Eigen::Vector3d((v_xy - v_xy.normalized()*th)(0), (v_xy - v_xy.normalized()*th)(1), 0);
+        }
+
+        return Eigen::Vector3d::Zero();
+
+    }
     double dead_zone(double x, double th)
     {
         if(x > th)
@@ -139,8 +147,10 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     /* Apply deadzone */
     Eigen::Vector3d vdes_th = _local_R_world * wheel_vel;
     
-    vdes_th.x() = dead_zone(vdes_th.x(), _dz_th[0]);
-    vdes_th.y() = dead_zone(vdes_th.y(), _dz_th[1]);
+//    vdes_th.x() = dead_zone(vdes_th.x(), _dz_th[0]);
+//    vdes_th.y() = dead_zone(vdes_th.y(), _dz_th[1]);
+
+    vdes_th = dead_zone_norm(vdes_th, _dz_th);
 
 //     std::cout << _wheel_name << ", normal  dir: " << _local_R_world.row(2) << std::endl;
 //     std::cout << _wheel_name << ", forward dir: " << wheel_forward.transpose() << std::endl;
@@ -193,8 +203,6 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     else{
         throw std::runtime_error("Unable to find steering angle");
     }
-
-    std::cout << _wheel_name << "  " << _prev_qdes << "   "  << vdes_th.transpose() << std::endl;
 
     return _prev_qdes;
 }
@@ -255,9 +263,9 @@ namespace
 CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
                                              XBot::ModelInterface::ConstPtr model, 
                                              double dt,
+                                             double dz_th,
                                              double max_steering_speed,
-                                             std::vector<double> hyst_comp,
-                                             std::vector<double> dz_th):
+                                             std::vector<double> hyst_comp):
     Task("centauro_steering_" + wheel_name, model->getJointNum()),
     _steering(model, wheel_name, hyst_comp, dz_th),
     _max_steering_dq(max_steering_speed*dt),
