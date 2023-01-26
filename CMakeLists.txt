@@ -175,7 +175,7 @@ set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/eHQP.cpp
     src/solvers/l1HQP.cpp)
 
-option(OPENSOT_SOTH_FRONT_END "Add to compilation soth and HCOD front-end" TRUE)
+option(OPENSOT_SOTH_FRONT_END "Add to compilation soth and HCOD front-end" OFF)
 if(${OPENSOT_SOTH_FRONT_END})
     message("Internal soth will be used!")
     add_subdirectory(external/soth-ext/)
@@ -183,6 +183,9 @@ if(${OPENSOT_SOTH_FRONT_END})
     message("Adding src/solvers/HCOD.cpp to compilation")
     set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)
     set(PRIVATE_TLL hcod_wrapper soth)
+    target_compile_definitions(OpenSoT
+        PUBLIC
+        -DOPENSOT_HAS_SOTH_FRONT_END)
 endif()
 
 
