@@ -10,19 +10,32 @@ namespace OpenSoT { namespace tasks { namespace velocity {
       
     public:
         
-        HysteresisComparator(double th_lo = -1., 
-                             double th_hi =  1., 
-                             bool init_lo = true);
+        HysteresisComparator(double th_lo,
+                             double th_hi,
+                             bool init_lo);
+
+        HysteresisComparator& operator=(HysteresisComparator other)
+        {
+            _th_lo = other._th_lo;
+            _th_hi = other._th_hi;
+            _th_curr = other._th_curr;
+
+            return *this;
+        }
+
+        static HysteresisComparator MakeHysteresisComparator(double th_lo = 0.0025,
+                                                             double th_hi =  0.01,
+                                                             bool init_lo = true);
         
         bool compare(double value);
         
         double getCurrentThreshold() const;
         
-    private:
-        
-        const double _th_lo, _th_hi;
+     private:
+
+        double _th_lo, _th_hi;
         double _th_curr;
-        
+
     };
 
     
@@ -32,13 +45,17 @@ namespace OpenSoT { namespace tasks { namespace velocity {
     public:
         
         SimpleSteering(XBot::ModelInterface::ConstPtr model, 
-                       std::string wheel_name);
+                       std::string wheel_name,
+                       std::vector<double> hyst_comp,
+                       double dz_th);
         
         double computeSteeringAngle(const Eigen::Vector3d& wheel_vel);
         
         double getDofIndex() const;
         
         void setOutwardNormal(const Eigen::Vector3d& n);
+
+        void setHysteresisComparisonThreshold(double th_lo, double th_hi);
         
         const std::string& getWheelName() const { return _wheel_name; }
         
@@ -69,6 +86,8 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         Eigen::VectorXd _q;
         
         Eigen::Vector3d _vdes;
+
+        double _dz_th;
         
         double _prev_qdes;
         
@@ -85,7 +104,9 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         CentauroAnkleSteering(std::string wheel_name, 
                               XBot::ModelInterface::ConstPtr model,
                               double dt,
-                              double max_steering_speed = DEFAULT_MAX_STEERING_SPEED
+                              double dz_th,
+                              double max_steering_speed = DEFAULT_MAX_STEERING_SPEED,
+                              std::vector<double> hyst_comp = {}
                              );
         
         void setOutwardNormal(const Eigen::Vector3d& n);

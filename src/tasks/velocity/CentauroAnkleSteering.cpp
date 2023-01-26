@@ -3,14 +3,20 @@
 using namespace OpenSoT::tasks::velocity;
 
 SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model, 
-                               std::string wheel_name):
+                               std::string wheel_name,
+                               std::vector<double> hyst_comp,
+                               double dz_th):
     _model(model),
     _wheel_name(wheel_name),
-    _comp(0.0025, 0.01),
-    _vdes(1., 0, 0)
+    _comp(HysteresisComparator::MakeHysteresisComparator()),
+    _vdes(1., 0, 0),
+    _dz_th(dz_th)
 {
     std::memset(&_log_data, 0, sizeof(_log_data));
-    
+
+    if (!hyst_comp.empty())
+        _comp = HysteresisComparator::MakeHysteresisComparator(hyst_comp[0], hyst_comp[1]);
+
     _local_R_world.setIdentity();
     
     // locate wheel spinning axis
@@ -131,6 +137,17 @@ double SimpleSteering::getDofIndex() const
 
 namespace 
 {
+    Eigen::Vector3d dead_zone_norm(Eigen::Vector3d v, double th)
+    {
+        Eigen::Vector2d v_xy = Eigen::Vector2d(v(0), v(1));
+        if(v_xy.norm() > th)
+        {
+            return Eigen::Vector3d((v_xy - v_xy.normalized()*th)(0), (v_xy - v_xy.normalized()*th)(1), 0);
+        }
+
+        return Eigen::Vector3d::Zero();
+
+    }
     double dead_zone(double x, double th)
     {
         if(x > th)
@@ -179,8 +196,10 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     /* Apply deadzone to wheel velocity */
     Eigen::Vector3d vdes_th = _local_R_world * wheel_vel;
     
-    vdes_th.x() = dead_zone(vdes_th.x(), 0.01);
-    vdes_th.y() = dead_zone(vdes_th.y(), 0.01);
+//    vdes_th.x() = dead_zone(vdes_th.x(), _dz_th[0]);
+//    vdes_th.y() = dead_zone(vdes_th.y(), _dz_th[1]);
+
+    vdes_th = dead_zone_norm(vdes_th, _dz_th);
 
 //    std::cout << _wheel_name << ", normal  dir =  " << _local_R_world.row(2) << std::endl;
 //    std::cout << _wheel_name << ", forward dir =  " << wheel_forward.transpose() << std::endl;
@@ -264,6 +283,12 @@ HysteresisComparator::HysteresisComparator(double th_lo, double th_hi, bool init
     }
 }
 
+HysteresisComparator HysteresisComparator::MakeHysteresisComparator(double th_lo, double th_hi, bool init_lo)
+{
+    HysteresisComparator comp(th_lo, th_hi, init_lo);
+    return comp;
+}
+
 bool HysteresisComparator::compare(double value)
 {
     bool ret = value > _th_curr;
@@ -287,9 +312,11 @@ namespace
 CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
                                              XBot::ModelInterface::ConstPtr model, 
                                              double dt,
-                                             double max_steering_speed):
+                                             double dz_th,
+                                             double max_steering_speed,
+                                             std::vector<double> hyst_comp):
     Task("centauro_steering_" + wheel_name, model->getJointNum()),
-    _steering(model, wheel_name),
+    _steering(model, wheel_name, hyst_comp, dz_th),
     _max_steering_dq(max_steering_speed*dt),
     _model(model)
 {
