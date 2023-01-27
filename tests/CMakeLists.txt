@@ -172,7 +172,7 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES} hcod_wrapper soth)
+                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
 if(${FCL_FOUND})
     SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
 endif()
@@ -181,6 +181,9 @@ if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
     SET(TestLibs ${TestLibs} ${rviz_visual_tools_LIBRARIES} ${trajectory_utils_LIBRARIES}) 
 endif()
 
+if(${OPENSOT_SOTH_FRONT_END})
+    SET(TestLibs ${TestLibs} hcod_wrapper soth)
+endif()
 
     
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
