@@ -183,9 +183,6 @@ if(${OPENSOT_SOTH_FRONT_END})
     message("Adding src/solvers/HCOD.cpp to compilation")
     set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)
     set(PRIVATE_TLL hcod_wrapper soth)
-    target_compile_definitions(OpenSoT
-        PUBLIC
-        -DOPENSOT_HAS_SOTH_FRONT_END)
 endif()
 
 
@@ -250,6 +247,12 @@ TARGET_LINK_LIBRARIES(OpenSoT
     matlogger2::matlogger2
     PRIVATE
     ${PRIVATE_TLL})
+    
+if(${OPENSOT_SOTH_FRONT_END})
+	target_compile_definitions(OpenSoT
+        	PUBLIC
+        	-DOPENSOT_HAS_SOTH_FRONT_END)
+endif()
 
 
 ########################################################################
