@@ -23,7 +23,7 @@ notifications:
     on_failure: always
 
 before_script:
-
+- rm -rf /opt/pyenv
 # forest magic
 - sudo apt update
 - sudo apt install python3-pip python3-setuptools
