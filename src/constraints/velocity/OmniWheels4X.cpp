@@ -29,10 +29,6 @@ OmniWheels4X::OmniWheels4X(const double l1, const double l2, const double r,
     _J.resize(3, x.size());
     _J.setZero();
 
-    std::cout<<"l1: "<<l1<<std::endl;
-    std::cout<<"l2: "<<l2<<std::endl;
-    std::cout<<"r: "<<r<<std::endl;
-
     //select xdot, ydot, and wz
     _J(0,0) = 1.;
     _J(1,1) = 1.;
