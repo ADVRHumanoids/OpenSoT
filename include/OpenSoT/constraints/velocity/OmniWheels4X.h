@@ -24,6 +24,12 @@
 namespace OpenSoT {
    namespace constraints {
        namespace velocity {
+       /**
+        * @brief The OmniWheels4X class implements a constraint to map base velocities into (omni-)wheels for a 4 drive case.
+        * The kinematic model is based on: "An admittance-controlled wheeled mobile manipulator for mobility assistance:
+        * Human–robot interaction estimation and redundancy resolution for enhanced force exertion ability" by Hongjun Xing et al.,
+        * Mechatronics, April 2021
+        */
        class OmniWheels4X: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
        public:
            typedef std::shared_ptr<OmniWheels4X> Ptr;
@@ -31,16 +37,22 @@ namespace OpenSoT {
            /**
             * @brief OmniWheel4X maps base velocities (XY-YAW) into wheels velocities
             *
-            *                 l1
-            *               ----
-            *           O------O |
-            *           |      | | l2
-            *           |      | |
-            *           |      |
-            *           |      |
-            *           O------O      ^ x
-            *                         |
-            *                    y <--|
+            *                                 | x
+            *                                 |
+            *                            y____|
+            *
+            *                     l1
+            *                   ------
+            *            __          __
+            *           |fl|________|fr|
+            *           |__|        |__| |
+            *              |        |    | l2
+            *              |        |    |
+            *              |        |
+            *            __|        |__
+            *           |hl|________|hr|
+            *           |__|        |__|
+            *
             *
             * @note we suppose the base_link at the center of the mobile base
             * @note we assume a floating base robot
@@ -58,7 +70,10 @@ namespace OpenSoT {
                        const std::string base_link,
                        const Eigen::VectorXd& x,
                        XBot::ModelInterface& robot);
-
+           /**
+            * @brief update the constraint
+            * @param x state vector
+            */
            virtual void update(const Eigen::VectorXd &x);
 
 
