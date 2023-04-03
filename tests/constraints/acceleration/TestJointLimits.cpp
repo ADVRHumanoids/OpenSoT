@@ -49,8 +49,7 @@ protected:
         qddot = OpenSoT::AffineHelper::Identity(_model_ptr->getJointNum());
     
         
-        Eigen::VectorXd acc_lims(_model_ptr->getJointNum());
-        acc_lims.setOnes(acc_lims.size());
+        acc_lims.setOnes(_model_ptr->getJointNum());
         acc_lims *= 20.;
         jointAccelerationLimits = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
@@ -161,6 +160,10 @@ protected:
     double qdotMax;
 
     Eigen::VectorXd qmin, qmax;
+    Eigen::VectorXd acc_lims;
+
+
+
 
 };
 
@@ -194,6 +197,10 @@ TEST_F(testJointLimits, testBounds) {
         this->logger->add("q", q);
         this->logger->add("qmax", qmax);
         this->logger->add("qmin", qmin);
+        this->logger->add("qdotmax", this->qdotMax);
+        this->logger->add("qdotmin", -this->qdotMax);
+        this->logger->add("qddotmax", this->acc_lims);
+        this->logger->add("qddotmin", -this->acc_lims);
         this->logger->add("qref", qref);
 
         this->checkConstraints(qddot, 1e-4);
@@ -235,6 +242,10 @@ TEST_F(testJointLimits, testBounds) {
         this->logger->add("q", q);
         this->logger->add("qmax", qmax);
         this->logger->add("qmin", qmin);
+        this->logger->add("qdotmax", this->qdotMax);
+        this->logger->add("qdotmin", -this->qdotMax);
+        this->logger->add("qddotmax", this->acc_lims);
+        this->logger->add("qddotmin", -this->acc_lims);
         this->logger->add("qref", qref);
 
         this->checkConstraints(qddot, 1e-4);
