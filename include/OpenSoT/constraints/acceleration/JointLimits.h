@@ -1,6 +1,7 @@
 /*
- * Copyright (C) Centauro
+ * Copyright (C) 2019 Cogimon
  * Author: Matteo Parigi Polverini
+ * email:  matteo.parigi@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
