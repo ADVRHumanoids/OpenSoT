@@ -38,7 +38,7 @@ JointLimits::JointLimits(   XBot::ModelInterface& robot,
     if(qddot.getOutputSize() != _jointLimitsMin.size())
         throw std::runtime_error("_qddot.getOutputSize() != _jointLimitsMin.size()");
     if(_jointAccMax.size() != _jointLimitsMin.size())
-        throw std::runtime_error("_jointAccMax.size() != _jointAccMax.size()");
+        throw std::runtime_error("_jointAccMax.size() != _jointLimitsMin.size()");
     /* calling update to generate bounds */       
     
     
