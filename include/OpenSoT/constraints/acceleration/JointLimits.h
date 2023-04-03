@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi
- * email:  alessio.rocchi@iit.it
+ * Copyright (C) Centauro
+ * Author: Matteo Parigi Polverini
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -15,8 +14,8 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_VELOCITY_JOINTLIMITS_AFFINE_H__
-#define __BOUNDS_VELOCITY_JOINTLIMITS_AFFINE_H__
+#ifndef __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__
+#define __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__
 
 #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
