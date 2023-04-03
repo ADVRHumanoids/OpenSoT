@@ -106,6 +106,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/velocity/CoMVelocity.cpp
     src/constraints/velocity/JointLimits.cpp
     src/constraints/velocity/VelocityLimits.cpp
+    src/constraints/velocity/OmniWheels4X.cpp
     src/constraints/torque/JointLimits.cpp
     src/constraints/force/FrictionCone.cpp
     src/constraints/force/WrenchLimits.cpp
@@ -157,7 +158,6 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/MinimumVelocity.cpp
     src/tasks/velocity/Postural.cpp
     src/tasks/velocity/JointAdmittance.cpp
-    src/tasks/velocity/CentauroAnkleSteering.cpp
     src/tasks/torque/JointImpedanceCtrl.cpp
     src/tasks/torque/CartesianImpedanceCtrl.cpp
     src/tasks/force/CoM.cpp
@@ -183,9 +183,6 @@ if(${OPENSOT_SOTH_FRONT_END})
     message("Adding src/solvers/HCOD.cpp to compilation")
     set(OPENSOT_SOLVERS_SOURCES ${OPENSOT_SOLVERS_SOURCES} src/solvers/HCOD.cpp)
     set(PRIVATE_TLL hcod_wrapper soth)
-    target_compile_definitions(OpenSoT
-        PUBLIC
-        -DOPENSOT_HAS_SOTH_FRONT_END)
 endif()
 
 
@@ -250,6 +247,12 @@ TARGET_LINK_LIBRARIES(OpenSoT
     matlogger2::matlogger2
     PRIVATE
     ${PRIVATE_TLL})
+    
+if(${OPENSOT_SOTH_FRONT_END})
+	target_compile_definitions(OpenSoT
+        	PUBLIC
+        	-DOPENSOT_HAS_SOTH_FRONT_END)
+endif()
 
 
 ########################################################################

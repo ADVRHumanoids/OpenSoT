@@ -41,7 +41,7 @@
                  * @param velocityLimits a vector of 3 elements describing the maximum velocity along x,y,z of the CoM.
                  * @param dT the time constant at which we are performing velocity control [s]
                  * @param x initial configuration of the robot when creating the constraint
-                 * @param robot the robot model, with floating base link set on the support foot
+                 * @param robot the robot model
                  */
                 CoMVelocity(const Eigen::Vector3d velocityLimits,
                             const double dT,
