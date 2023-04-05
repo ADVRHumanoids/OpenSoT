@@ -66,7 +66,7 @@ protected:
 
 
         autostack = std::make_shared<OpenSoT::AutoStack>(postural);
-        //autostack<<jointLimits;
+        autostack<<jointLimits;
 
         solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
 

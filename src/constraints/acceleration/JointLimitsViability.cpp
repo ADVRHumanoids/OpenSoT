@@ -140,7 +140,7 @@ void JointLimitsViability::accBoundsFromPosLimits()
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
-        if(_qdot[it] > 0)
+        if(_qdot[it] > 0.)
         {
             _ddq_LB_pos[it] = _ddq_m3[it];
             if(_ddq_M3[it] > _ddq_M1[it])
@@ -180,7 +180,7 @@ void JointLimitsViability::accBoundsFromViability()
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
-        if(_delta_1[it] >= 0)
+        if(_delta_1[it] >= 0.)
         {
             _ddq_UB_via[it] = std::max(_ddq_1[it], ( -_b_1[it] + std::sqrt(_delta_1[it]) )/(2.0*_a) );
         }
@@ -198,7 +198,7 @@ void JointLimitsViability::accBoundsFromViability()
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
-        if(_delta_2[it] >= 0)
+        if(_delta_2[it] >= 0.)
         {
             _ddq_LB_via[it] = std::min(_ddq_1[it], ( -_b_2[it] - std::sqrt(_delta_2[it]) )/(2.0*_a) );
         }
