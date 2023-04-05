@@ -115,6 +115,7 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/force/NormalTorque.cpp
     src/constraints/GenericConstraint.cpp
     src/constraints/acceleration/JointLimits.cpp
+    src/constraints/acceleration/JointLimitsViability.cpp
     )
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})

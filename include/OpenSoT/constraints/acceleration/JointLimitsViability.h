@@ -66,6 +66,8 @@
                 Eigen::VectorXd _ddq_LB_vel, _ddq_UB_vel, _ddq_UBLB_vel, _ddq_UBLB;
                 void computeJointAccBounds();
 
+                void _log(XBot::MatLogger2::Ptr logger);
+
 
 
 
