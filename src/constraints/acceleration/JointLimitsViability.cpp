@@ -50,12 +50,10 @@ JointLimitsViability::JointLimitsViability(XBot::ModelInterface& robot,
     _ddq_UB_via.setZero(jointBoundMax.size());
     _ddq_LB_vel.setZero(jointBoundMax.size());
     _ddq_UB_vel.setZero(jointBoundMax.size());
-    _ddq_UBLB_pos.setZero(2 * jointBoundMax.size());
-    _ddq_UBLB_via.setZero(2 * jointBoundMax.size());
-    _ddq_UBLB_vel.setZero(2 * jointBoundMax.size());
-    _ddq_UBLB.setZero(2 * jointBoundMax.size());
     _a = _dt*_dt;
 
+    __upperBound =  _jointAccMax;
+    __lowerBound = -_jointAccMax;
 
     _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 "internal_generic_constraint", qddot,
@@ -74,6 +72,8 @@ void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
     logger->add("_ddq_UB_vel", _ddq_UB_vel);
     logger->add("_ddq_LB_via", _ddq_LB_via);
     logger->add("_ddq_UB_via", _ddq_UB_via);
+    logger->add("__upperBound", __upperBound);
+    logger->add("__lowerBound", __lowerBound);
 }
 
 void JointLimitsViability::update(const Eigen::VectorXd &x)
@@ -81,17 +81,9 @@ void JointLimitsViability::update(const Eigen::VectorXd &x)
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
 
-    __upperBound =  _jointAccMax;
-    __lowerBound = -_jointAccMax;
-
     accBoundsFromPosLimits();
     accBoundsFromViability();
     computeJointAccBounds();
-
-
-    __upperBound = _ddq_UBLB.segment(0, _jointLimitsMax.size());
-    __lowerBound = _ddq_UBLB.segment(_jointLimitsMax.size(), _jointLimitsMax.size());
-
 
     _generic_constraint_internal->setBounds(__upperBound, __lowerBound);
 
@@ -107,25 +99,28 @@ void JointLimitsViability::computeJointAccBounds()
     _ddq_UB_vel = (_jointVelMax - _qdot)/_dt;
     _ddq_LB_vel = (-_jointVelMax - _qdot)/_dt;
 
-    _ddq_UBLB_vel.segment(0, _ddq_UB_vel.size()) = _ddq_UB_vel;
-    _ddq_UBLB_vel.segment(_ddq_UB_vel.size(), _ddq_LB_vel.size()) = _ddq_LB_vel;
-
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
-        _ddq_UBLB[it] = std::min(std::min(std::min(_ddq_UBLB_pos[it], _ddq_UBLB_vel[it]), _ddq_UBLB_via[it]), _jointAccMax[it]);
-        if(_ddq_UBLB[it] < -_jointAccMax[it])
-        {
-            _ddq_UBLB[it] = -_jointAccMax[it];
-        }
-    }
+        __upperBound[it] = std::min(std::min(std::min(_ddq_UB_pos[it], _ddq_UB_vel[it]), _ddq_UB_via[it]), _jointAccMax[it]);
+        __lowerBound[it] = std::max(std::max(std::max(_ddq_LB_pos[it], _ddq_LB_vel[it]), _ddq_LB_via[it]), -_jointAccMax[it]);
 
-    for(unsigned int it = _jointLimitsMax.size(); it < 2*_jointLimitsMax.size(); ++it)
-    {
-        _ddq_UBLB[it] = std::max(std::max(std::max(_ddq_UBLB_pos[it], _ddq_UBLB_vel[it]), _ddq_UBLB_via[it]), -_jointAccMax[it-_jointLimitsMax.size()]);
-        if(_ddq_UBLB[it] > _jointLimitsMax[it-_jointLimitsMax.size()])
+        if(__upperBound[it] < __lowerBound[it])
         {
-            _ddq_UBLB[it] = _jointLimitsMax[it-_jointLimitsMax.size()];
-         }
+            double ub = __upperBound[it];
+            __upperBound[it] = __lowerBound[it];
+            __lowerBound[it] = ub;
+        }
+
+        if(__lowerBound[it] < -_jointAccMax[it])
+        {
+            __lowerBound[it] = -_jointAccMax[it];
+        }
+
+        if(__upperBound[it] > _jointAccMax[it])
+        {
+            __upperBound[it] = _jointAccMax[it];
+        }
+
     }
 }
 
@@ -140,7 +135,7 @@ void JointLimitsViability::accBoundsFromPosLimits()
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
-        if(_qdot[it] > 0.)
+        if(_qdot[it] >= 0.)
         {
             _ddq_LB_pos[it] = _ddq_m3[it];
             if(_ddq_M3[it] > _ddq_M1[it])
@@ -165,9 +160,6 @@ void JointLimitsViability::accBoundsFromPosLimits()
             }
         }
     }
-
-    _ddq_UBLB_pos.segment(0, _ddq_UB_pos.size()) = _ddq_UB_pos;
-    _ddq_UBLB_pos.segment(_ddq_UB_pos.size(), _ddq_LB_pos.size()) = _ddq_LB_pos;
 }
 
 void JointLimitsViability::accBoundsFromViability()
@@ -207,9 +199,6 @@ void JointLimitsViability::accBoundsFromViability()
             _ddq_LB_via[it] = _ddq_1[it];
         }
     }
-
-    _ddq_UBLB_via.segment(0, _ddq_UB_via.size()) = _ddq_UB_via;
-    _ddq_UBLB_via.segment(_ddq_UB_via.size(), _ddq_LB_via.size()) = _ddq_LB_via;
 }
 
 void JointLimitsViability::setJointAccMax(const Eigen::VectorXd &jointAccMax)

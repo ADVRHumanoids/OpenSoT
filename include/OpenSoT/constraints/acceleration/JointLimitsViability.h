@@ -56,14 +56,14 @@
                  **/
                 double _dt;
 
-                Eigen::VectorXd _ddq_LB_pos, _ddq_UB_pos, _ddq_UBLB_pos;
+                Eigen::VectorXd _ddq_LB_pos, _ddq_UB_pos;
                 Eigen::VectorXd _ddq_M1, _ddq_M2, _ddq_M3, _ddq_m2, _ddq_m3;
                 void accBoundsFromPosLimits();
                 double _a;
-                Eigen::VectorXd _ddq_LB_via, _ddq_UB_via, _ddq_UBLB_via;
+                Eigen::VectorXd _ddq_LB_via, _ddq_UB_via;
                 Eigen::VectorXd _b_1, _c_1, _ddq_1, _delta_1, _b_2, _c_2, _delta_2;
                 void accBoundsFromViability();
-                Eigen::VectorXd _ddq_LB_vel, _ddq_UB_vel, _ddq_UBLB_vel, _ddq_UBLB;
+                Eigen::VectorXd _ddq_LB_vel, _ddq_UB_vel;
                 void computeJointAccBounds();
 
                 void _log(XBot::MatLogger2::Ptr logger);

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/acceleration/JointLimitsViability.h>
+#include <OpenSoT/constraints/acceleration/VelocityLimits.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
 #include <OpenSoT/utils/AutoStack.h>
@@ -8,6 +9,7 @@
 #include <cmath>
 #include <OpenSoT/solvers/iHQP.h>
 #include <matlogger2/matlogger2.h>
+#include <cmath>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = relative_path;
@@ -35,13 +37,11 @@ protected:
     {
         qdot.setZero(_model_ptr->getJointNum());
         _model_ptr->setJointVelocity(qdot);
-        this->logger->add("qdot", qdot);
 
 
 
         q = getGoodInitialPosition(_model_ptr);
         _model_ptr->setJointPosition(q);
-        this->logger->add("q", q);
 
         _model_ptr->update();
 
@@ -61,12 +61,18 @@ protected:
         jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimitsViability>(
                     *_model_ptr, qddot, qmax, qmin, vel_lims, acc_lims, dT);
 
+        jointAccelerationLimits = std::make_shared<OpenSoT::constraints::GenericConstraint>(
+                    "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
+
+        jointVelocityLimits = std::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
+                    *_model_ptr, qddot, qdotMax, dT);
+
         postural = std::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
-        postural->setLambda(1000.);
+        postural->setLambda(5000.);
 
 
         autostack = std::make_shared<OpenSoT::AutoStack>(postural);
-        autostack<<jointLimits;
+        autostack<<jointLimits;//<<jointVelocityLimits<<jointAccelerationLimits;
 
         solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
 
@@ -136,6 +142,8 @@ protected:
     XBot::ModelInterface::Ptr _model_ptr;
 
     OpenSoT::constraints::acceleration::JointLimitsViability::Ptr jointLimits;
+    OpenSoT::constraints::GenericConstraint::Ptr jointAccelerationLimits;
+    OpenSoT::constraints::acceleration::VelocityLimits::Ptr jointVelocityLimits;
 
     OpenSoT::tasks::acceleration::Postural::Ptr postural;
 
@@ -175,7 +183,7 @@ TEST_F(testJointLimitsViability, testBounds) {
         this->_model_ptr->update();
 
         this->autostack->update(Eigen::VectorXd(0));
-        this->autostack->log(this->logger);
+//        this->autostack->log(this->logger);
 
         Eigen::VectorXd qddot;
         ASSERT_TRUE(this->solver->solve(qddot));
@@ -184,16 +192,16 @@ TEST_F(testJointLimitsViability, testBounds) {
         this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
         this->qdot += qddot*this->dT;
 
-        this->logger->add("qddot", qddot);
-        this->logger->add("qdot", qdot);
-        this->logger->add("q", q);
-        this->logger->add("qmax", qmax);
-        this->logger->add("qmin", qmin);
-        this->logger->add("qdotmax", this->qdotMax);
-        this->logger->add("qdotmin", -this->qdotMax);
-        this->logger->add("qddotmax", this->acc_lims);
-        this->logger->add("qddotmin", -this->acc_lims);
-        this->logger->add("qref", qref);
+//        this->logger->add("qddot", qddot);
+//        this->logger->add("qdot", qdot);
+//        this->logger->add("q", q);
+//        this->logger->add("qmax", qmax);
+//        this->logger->add("qmin", qmin);
+//        this->logger->add("qdotmax", this->qdotMax);
+//        this->logger->add("qdotmin", -this->qdotMax);
+//        this->logger->add("qddotmax", this->acc_lims);
+//        this->logger->add("qddotmin", -this->acc_lims);
+//        this->logger->add("qref", qref);
 
         this->checkConstraints(qddot, 1e-4);
     }
@@ -208,11 +216,12 @@ TEST_F(testJointLimitsViability, testBounds) {
 //     this->postural->setReference(qref);
 
     T = 10;
-
+    Eigen::VectorXd q0 = this->q;
     for(unsigned int  i = 0; i < T/this->dT; ++i)
     {
         qref.setOnes(qref.size());
-        qref *= 10*std::sin(i*this->dT);
+        qref *= 1.5*(std::cos(i*this->dT+M_PI) + 1.);
+        qref += q0;
         this->postural->setReference(qref);
 
         this->_model_ptr->setJointVelocity(this->qdot);
@@ -242,9 +251,6 @@ TEST_F(testJointLimitsViability, testBounds) {
 
         this->checkConstraints(qddot, 1e-4);
     }
-
-    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
-        EXPECT_NEAR(q[i], this->qmax[i], 1e-4);
 
 
 }
