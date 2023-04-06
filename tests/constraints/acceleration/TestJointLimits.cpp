@@ -250,10 +250,6 @@ TEST_F(testJointLimits, testBounds) {
 
         this->checkConstraints(qddot, 1e-4);
     }
-    
-//    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
-//        EXPECT_NEAR(q[i], this->qmax[i], 1e-4);
-
 
 }
 
