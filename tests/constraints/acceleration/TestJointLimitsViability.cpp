@@ -9,7 +9,6 @@
 #include <cmath>
 #include <OpenSoT/solvers/iHQP.h>
 #include <matlogger2/matlogger2.h>
-#include <cmath>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = relative_path;

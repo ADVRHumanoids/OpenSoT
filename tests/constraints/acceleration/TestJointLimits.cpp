@@ -36,13 +36,11 @@ protected:
     {
         qdot.setZero(_model_ptr->getJointNum());
         _model_ptr->setJointVelocity(qdot);
-        this->logger->add("qdot", qdot);
 
         
         
         q = getGoodInitialPosition(_model_ptr);
         _model_ptr->setJointPosition(q);
-        this->logger->add("q", q);
 
         _model_ptr->update();
 
@@ -65,7 +63,7 @@ protected:
                     *_model_ptr, qddot, qmax, qmin, acc_lims, dT);
 
         postural = std::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
-        postural->setLambda(1000.);
+        postural->setLambda(5000.);
 
 
         autostack = std::make_shared<OpenSoT::AutoStack>(postural);
@@ -183,7 +181,7 @@ TEST_F(testJointLimits, testBounds) {
         this->_model_ptr->update();
 
         this->autostack->update(Eigen::VectorXd(0));
-        this->autostack->log(this->logger);
+        //this->autostack->log(this->logger);
 
         Eigen::VectorXd qddot;
         ASSERT_TRUE(this->solver->solve(qddot));
@@ -192,16 +190,16 @@ TEST_F(testJointLimits, testBounds) {
         this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
         this->qdot += qddot*this->dT;
 
-        this->logger->add("qddot", qddot);
-        this->logger->add("qdot", qdot);
-        this->logger->add("q", q);
-        this->logger->add("qmax", qmax);
-        this->logger->add("qmin", qmin);
-        this->logger->add("qdotmax", this->qdotMax);
-        this->logger->add("qdotmin", -this->qdotMax);
-        this->logger->add("qddotmax", this->acc_lims);
-        this->logger->add("qddotmin", -this->acc_lims);
-        this->logger->add("qref", qref);
+//        this->logger->add("qddot", qddot);
+//        this->logger->add("qdot", qdot);
+//        this->logger->add("q", q);
+//        this->logger->add("qmax", qmax);
+//        this->logger->add("qmin", qmin);
+//        this->logger->add("qdotmax", this->qdotMax);
+//        this->logger->add("qdotmin", -this->qdotMax);
+//        this->logger->add("qddotmax", this->acc_lims);
+//        this->logger->add("qddotmin", -this->acc_lims);
+//        this->logger->add("qref", qref);
 
         this->checkConstraints(qddot, 1e-4);
     }
@@ -216,11 +214,12 @@ TEST_F(testJointLimits, testBounds) {
 //     this->postural->setReference(qref);
     
     T = 10;
-
+    Eigen::VectorXd q0 = this->q;
     for(unsigned int  i = 0; i < T/this->dT; ++i)
     {
         qref.setOnes(qref.size());
-        qref *= 10*std::sin(i*this->dT);
+        qref *= 1.5*(std::cos(i*this->dT+M_PI) + 1.);
+        qref += q0;
         this->postural->setReference(qref);
         
         this->_model_ptr->setJointVelocity(this->qdot);
