@@ -72,8 +72,6 @@ void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
     logger->add("_ddq_UB_vel", _ddq_UB_vel);
     logger->add("_ddq_LB_via", _ddq_LB_via);
     logger->add("_ddq_UB_via", _ddq_UB_via);
-    logger->add("__upperBound", __upperBound);
-    logger->add("__lowerBound", __lowerBound);
 }
 
 void JointLimitsViability::update(const Eigen::VectorXd &x)
