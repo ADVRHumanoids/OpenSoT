@@ -219,7 +219,7 @@ TEST_F(testJointLimitsViability, testBounds) {
     for(unsigned int  i = 0; i < T/this->dT; ++i)
     {
         qref.setOnes(qref.size());
-        qref *= 1.5*(std::cos(i*this->dT+M_PI) + 1.);
+        qref *= 3.* std::sin(i*this->dT);
         qref += q0;
         this->postural->setReference(qref);
 
