@@ -1,6 +1,6 @@
 /*
  * Copyright (C) Unmanned Systems and Robotics Lab
- * Author: Andrea Testa
+ * Author: Andrea Testa, Enrico Mingo Hoffman
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
