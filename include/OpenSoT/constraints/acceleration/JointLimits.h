@@ -54,7 +54,6 @@
                 
                 GenericConstraint::Ptr _generic_constraint_internal;
 
-                double _lambda;
 
                 /**
                  * @brief _dt
