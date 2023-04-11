@@ -47,17 +47,18 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} )
 enable_testing()
 
 #ALL THE FOLLOWING TESTS ARE YARP FREE
-set(OPENSOT_TESTS testBilateralConstraint
+set(OPENSOT_TESTS testBilateralConstraint #1
                   testJointLimitsVelocityBounds
                   testJointLimitsAccelerationBounds
                   testJointLimitsAccelerationViabilityBounds
+                  testJointLimitsAccelerationPSAPBounds
                   testVelocityLimitsVelocityBounds
                   testQPOasesSolver  
                   testQPOases_SetActiveStack 
                   testQPOases_Options  
-                  testQPOases_SubTask
+                  testQPOases_SubTask #10
                   testQPOases_FF
-                  testQPOases_AutoStack #10
+                  testQPOases_AutoStack
                   testiHQP
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
@@ -65,9 +66,9 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testManipulabilityTask
                   testMinimizeAccelerationTask
                   testMinimumVelocityTask
-                  testMinimumEffortVelocityTask
+                  testMinimumEffortVelocityTask #20
                   testPosturalVelocityTask
-                  testCartesianVelocityTask #20
+                  testCartesianVelocityTask
                   testCartesianAdmittanceVelocityTask
                   testSubTask
                   testSubConstraint
@@ -75,9 +76,9 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testBasicAlgebra 
                   testPosturalAccelerationTask
                   testCartesianAccelerationTask
-                  testCoMAccelerationTask
+                  testCoMAccelerationTask #30
                   testContactFloatingBaseTask
-                  testCoMForceTask #30
+                  testCoMForceTask
                   testTask
                   testAffineHelper
                   testPiler
@@ -85,7 +86,7 @@ set(OPENSOT_TESTS testBilateralConstraint
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
                   testKinematics
-                  testl1HQP #38
+                  testl1HQP #40
 )
 
 if(${OPENSOT_SOTH_FRONT_END})
@@ -387,6 +388,12 @@ ADD_EXECUTABLE(testJointLimitsAccelerationViabilityBounds constraints/accelerati
 TARGET_LINK_LIBRARIES(testJointLimitsAccelerationViabilityBounds ${TestLibs})
 add_dependencies(testJointLimitsAccelerationViabilityBounds   OpenSoT)
 add_test(NAME OpenSoT_constraints_acceleration_viability_JointLimits COMMAND testJointLimitsAccelerationViabilityBounds)
+
+
+ADD_EXECUTABLE(testJointLimitsAccelerationPSAPBounds constraints/acceleration/TestJointLimitsPSAP.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsAccelerationPSAPBounds ${TestLibs})
+add_dependencies(testJointLimitsAccelerationPSAPBounds   OpenSoT)
+add_test(NAME OpenSoT_constraints_acceleration_psap_JointLimits COMMAND testJointLimitsAccelerationPSAPBounds)
 
 ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
