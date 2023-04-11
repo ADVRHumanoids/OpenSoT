@@ -165,7 +165,7 @@ protected:
 
 };
 
-TEST_F(testJointLimits, testBounds) {
+TEST_F(testJointLimits, testBoundsWithTrajectory) {
     this->createStack();
 
     Eigen::VectorXd qref(this->q.size());
@@ -250,6 +250,88 @@ TEST_F(testJointLimits, testBounds) {
         this->checkConstraints(qddot, 1e-4);
     }
 
+}
+
+TEST_F(testJointLimits, testBoundsWithRegulation) {
+    this->createStack();
+
+    Eigen::VectorXd qref(this->q.size());
+    qref.setZero();
+
+    this->postural->setReference(qref);
+
+    double T = 3;
+    for(unsigned int  i = 0; i < T/this->dT; ++i)
+    {
+        this->_model_ptr->setJointVelocity(this->qdot);
+        this->_model_ptr->setJointPosition(this->q);
+        this->_model_ptr->update();
+
+        this->autostack->update(Eigen::VectorXd(0));
+
+        Eigen::VectorXd qddot;
+        ASSERT_TRUE(this->solver->solve(qddot));
+
+
+        this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+        this->qdot += qddot*this->dT;
+
+        this->checkConstraints(qddot, 1e-4);
+    }
+
+    for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
+        EXPECT_LE(this->postural->getb()[i], 1e-6);
+
+    auto logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimits_acceleration_regulation");
+    logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+
+    T = 7;
+    for(unsigned int  i = 0; i < T/this->dT; ++i)
+    {
+        qref.setOnes();
+
+        if(i >= 0. && i < 2./this->dT)
+            qref *= 3.;
+        else if(i >= 2./this->dT && i < 3./this->dT)
+            qref *= -3.;
+        else if(i >= 3./this->dT && i < 4./this->dT)
+            qref *= 3.;
+        else if(i >= 4./this->dT && i < 5./this->dT)
+            qref *= -3.;
+        else if(i >= 5./this->dT && i < 6./this->dT)
+            qref *= 3.;
+        else
+            qref *= -3.;
+
+        this->postural->setReference(qref);
+
+        this->_model_ptr->setJointVelocity(this->qdot);
+        this->_model_ptr->setJointPosition(this->q);
+        this->_model_ptr->update();
+
+        this->autostack->update(Eigen::VectorXd(0));
+        this->autostack->log(this->logger);
+
+        Eigen::VectorXd qddot;
+        ASSERT_TRUE(this->solver->solve(qddot));
+
+
+        this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+        this->qdot += qddot*this->dT;
+
+        logger->add("qddot", qddot);
+        logger->add("qdot", qdot);
+        logger->add("q", q);
+        logger->add("qmax", qmax);
+        logger->add("qmin", qmin);
+        logger->add("qdotmax", this->qdotMax);
+        logger->add("qdotmin", -this->qdotMax);
+        logger->add("qddotmax", this->acc_lims);
+        logger->add("qddotmin", -this->acc_lims);
+        logger->add("qref", qref);
+
+        this->checkConstraints(qddot, 1e-4);
+    }
 }
 
 }
