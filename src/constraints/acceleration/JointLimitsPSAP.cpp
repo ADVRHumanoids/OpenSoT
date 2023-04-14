@@ -36,18 +36,19 @@ void JointLimitsPSAP::update(const Eigen::VectorXd &x)
     _robot.getJointVelocity(_qdot);
 
     //Position:
-    // qnext = q + qdot*p*dt + qddot*p*dt*p*dt
-    // qmin <= qnext <= qmax --> (qmin -q -qdot*p*dt)/(p*dt*p*dt) <= qddot <= (qmax -q -qdot*p*dt)/(p*dt*p*dt)
+    // qnext = q + qdot*p*dt + 0.5*qddot*p*dt*p*dt
+    // qmin <= qnext <= qmax --> (qmin -q -qdot*p*dt)/(0.5*p*dt*p*dt) <= qddot <= (qmax -q -qdot*p*dt)/(0.5*p*dt*p*dt)
+    double dt = _p*_dt;
 
-    _pmax = (_jointLimitsMax -_q -_qdot*_p*_dt)/(_p*_dt*_p*_dt);
-    _pmin = (_jointLimitsMin -_q -_qdot*_p*_dt)/(_p*_dt*_p*_dt);
+    _pmax = (_jointLimitsMax -_q -_qdot*dt)/(0.5*dt*dt);
+    _pmin = (_jointLimitsMin -_q -_qdot*dt)/(0.5*dt*dt);
 
     //Velocity
     // qdotnext = qdot + qddot*p*dt
     // qdotmin <= qdotnext <= qdotmax --> (qdotmin -qdot)/(p*dt) <= qddot <= (qdotmax -qdot)/(p*dt)
 
-    _vmax = (_jointVelMax -_qdot)/(_p*_dt);
-    _vmin = (-_jointVelMax -_qdot)/(_p*_dt);
+    _vmax = (_jointVelMax -_qdot)/(dt);
+    _vmin = (-_jointVelMax -_qdot)/(dt);
 
     for(unsigned int i = 0; i < _jointAccMax.size(); ++i)
     {
