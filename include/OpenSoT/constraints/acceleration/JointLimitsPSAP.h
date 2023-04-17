@@ -26,6 +26,11 @@
 namespace OpenSoT {
    namespace constraints {
        namespace acceleration{
+            /**
+             * @brief The JointLimitsPSAP class implements Joint Limits using the P-Step Ahead Predictor (PSAP) method
+             * as in the paper "The Enhanced Compact QP Method for Redundant Manipulators Using Practical Inequality Constraints",
+             * by Ki Cheol Park, Pyung Hun Chang, and Seung Ho Kim
+             */
             class JointLimitsPSAP: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef std::shared_ptr<JointLimitsPSAP> Ptr;
