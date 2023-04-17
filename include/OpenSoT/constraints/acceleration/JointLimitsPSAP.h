@@ -44,7 +44,7 @@ namespace OpenSoT {
 
                 XBot::ModelInterface& _robot;
 
-                Eigen::VectorXd _q, _qdot, _qnext;
+                Eigen::VectorXd _q, _qdot;
 
                 GenericConstraint::Ptr _generic_constraint_internal;
 
