@@ -56,9 +56,10 @@ namespace OpenSoT {
 
             const std::string& getDistalLink() const;
             const std::string& getBaseLink() const;
+        protected:
+            virtual void _update(const Eigen::VectorXd& x);    
         private:
             std::string _distal_link, _base_link;
-            virtual void _update(const Eigen::VectorXd& x);
             OpenSoT::tasks::MinimizeVariable::Ptr _min_var;
 
             Eigen::VectorXd _tmp;
