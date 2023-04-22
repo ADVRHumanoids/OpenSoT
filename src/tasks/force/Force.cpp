@@ -4,7 +4,7 @@ using namespace OpenSoT::tasks::force;
 
 Wrench::Wrench(const std::string& id,
                const std::string& distal_link, const std::string& base_link,
-               AffineHelper& wrench):
+               const AffineHelper& wrench):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(id,wrench.getInputSize()),
     _distal_link(distal_link),
     _base_link(base_link)
@@ -51,7 +51,7 @@ const std::string& Wrench::getBaseLink() const
 Wrenches::Wrenches(const std::string& id,
                    const std::vector<std::string>& distal_links,
                    const std::vector<std::string>& base_links,
-                   std::vector<AffineHelper> wrenches):
+                   const std::vector<AffineHelper>& wrenches):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(id, wrenches[0].getInputSize())
 {
     if(distal_links.size() != base_links.size())
