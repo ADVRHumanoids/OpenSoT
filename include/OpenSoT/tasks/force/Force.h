@@ -49,7 +49,7 @@ namespace OpenSoT {
              */
             Wrench(const std::string& id,
                    const std::string& distal_link, const std::string& base_link,
-                   AffineHelper& wrench);
+                   const AffineHelper& wrench);
 
             bool setReference(const Eigen::VectorXd& ref);
             void getReference(Eigen::VectorXd& ref);
@@ -73,7 +73,7 @@ namespace OpenSoT {
             Wrenches(const std::string& id,
                      const std::vector<std::string>& distal_links,
                      const std::vector<std::string>& base_links,
-                     std::vector<AffineHelper> wrenches);
+                     const std::vector<AffineHelper>& wrenches);
 
             Wrench::Ptr getWrenchTask(const std::string& distal_link);
 
