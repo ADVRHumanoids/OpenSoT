@@ -57,6 +57,7 @@ protected:
         qdotMax = M_PI;
         jointVelocityLimits = std::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
+        jointVelocityLimits->setPStepAheadPredictor(2.);
 
         _model_ptr->getJointLimits(qmin, qmax);
         jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimits>(
