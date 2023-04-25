@@ -61,6 +61,7 @@ protected:
         _model_ptr->getJointLimits(qmin, qmax);
         jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimits>(
                     *_model_ptr, qddot, qmax, qmin, acc_lims, dT);
+        jointLimits->setPStepAheadPredictor(2.);
 
         postural = std::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
         postural->setLambda(5000.);

@@ -59,7 +59,7 @@
                  * @brief _dt
                  **/
                 double _dt;
-
+                double _p;
 
             public:
                 /**
@@ -82,6 +82,13 @@
                 void update(const Eigen::VectorXd& x);
 
                 void setJointAccMax(const Eigen::VectorXd& jointAccMax);
+
+                /**
+                 * @brief setPStepAheadPredictor
+                 * @param p step predictor coefficient >= 1
+                 * @return false if p <1
+                 */
+                bool setPStepAheadPredictor(const double p);
 
             };
            }
