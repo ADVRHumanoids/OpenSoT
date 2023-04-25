@@ -79,6 +79,9 @@ before_script:
 - sudo apt install ros-$ROS_DISTRO-gazebo-ros-pkgs  
 - sudo pip3 install rospkg
 
+# re-source ros in case we got bash env hooks
+- . /opt/ros/$ROS_DISTRO/setup.bash
+
 # xbot2 framework install 
 - sudo sh -c 'echo "deb http://xbot.cloud/xbot2/ubuntu/$(lsb_release -sc) /" > /etc/apt/sources.list.d/xbot-latest.list'
 - wget -q -O - http://xbot.cloud/xbot2/ubuntu/KEY.gpg | sudo apt-key add -  
