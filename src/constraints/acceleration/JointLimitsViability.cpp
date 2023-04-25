@@ -32,7 +32,8 @@ JointLimitsViability::JointLimitsViability(XBot::ModelInterface& robot,
      _jointVelMax(jointVelMax),
      _jointAccMax(jointAccMax),
      _robot(robot),
-     _dt(dt)
+     _dt(dt),
+     _p(1.)
 {
     if(qddot.getOutputSize() != _jointLimitsMax.size())
         throw std::runtime_error("_qddot.getOutputSize() != _jointLimitsMax.size()");
@@ -50,7 +51,6 @@ JointLimitsViability::JointLimitsViability(XBot::ModelInterface& robot,
     _ddq_UB_via.setZero(jointBoundMax.size());
     _ddq_LB_vel.setZero(jointBoundMax.size());
     _ddq_UB_vel.setZero(jointBoundMax.size());
-    _a = _dt*_dt;
 
     __upperBound =  _jointAccMax;
     __lowerBound = -_jointAccMax;
@@ -94,8 +94,11 @@ void JointLimitsViability::update(const Eigen::VectorXd &x)
 
 void JointLimitsViability::computeJointAccBounds()
 {
-    _ddq_UB_vel = (_jointVelMax - _qdot)/_dt;
-    _ddq_LB_vel = (-_jointVelMax - _qdot)/_dt;
+    double dt = _p * _dt;
+    double a = dt * dt;
+
+    _ddq_UB_vel = (_jointVelMax - _qdot)/dt;
+    _ddq_LB_vel = (-_jointVelMax - _qdot)/dt;
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
@@ -119,11 +122,14 @@ void JointLimitsViability::computeJointAccBounds()
 
 void JointLimitsViability::accBoundsFromPosLimits()
 {
-    _ddq_M1 = -_qdot/_dt;
+    double dt = _p * _dt;
+    double a = dt * dt;
+
+    _ddq_M1 = -_qdot/dt;
     _ddq_M2 = -(_qdot.array() * _qdot.array()) / (2.0*(_jointLimitsMax.array() - _q.array()));
-    _ddq_M3 = 2.0*(_jointLimitsMax - _q - _dt*_qdot)/_a;
+    _ddq_M3 = 2.0*(_jointLimitsMax - _q - dt*_qdot)/a;
     _ddq_m2 = (_qdot.array()*_qdot.array())/(2.0*(_q.array() - _jointLimitsMin.array()));
-    _ddq_m3 = 2.0*(_jointLimitsMin - _q - _dt*_qdot)/_a;
+    _ddq_m3 = 2.0*(_jointLimitsMin - _q - dt*_qdot)/a;
 
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
@@ -149,30 +155,33 @@ void JointLimitsViability::accBoundsFromPosLimits()
 
 void JointLimitsViability::accBoundsFromViability()
 {
-    _b_1 = _dt*(2.0*_qdot + _jointAccMax*_dt);
-    _c_1 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_jointLimitsMax.array() - _q.array() - _dt*_qdot.array());
-    _ddq_1 = -_qdot/_dt;
-    _delta_1 = _b_1.array()*_b_1.array() - 4.0*_a*_c_1.array();
+    double dt = _p * _dt;
+    double a = dt * dt;
+
+    _b_1 = dt*(2.0*_qdot + _jointAccMax*dt);
+    _c_1 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_jointLimitsMax.array() - _q.array() - dt*_qdot.array());
+    _ddq_1 = -_qdot/dt;
+    _delta_1 = _b_1.array()*_b_1.array() - 4.0*a*_c_1.array();
 
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
         if(_delta_1[it] >= 0.)
-            _ddq_UB_via[it] = std::max(_ddq_1[it], ( -_b_1[it] + std::sqrt(_delta_1[it]) )/(2.0*_a) );
+            _ddq_UB_via[it] = std::max(_ddq_1[it], ( -_b_1[it] + std::sqrt(_delta_1[it]) )/(2.0*a) );
         else
             _ddq_UB_via[it] = _ddq_1[it];
     }
 
 
-    _b_2 = _dt*(2.0*_qdot - _jointAccMax*_dt);
-    _c_2 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_q.array() + _dt*_qdot.array() - _jointLimitsMin.array());
-    _delta_2 = _b_2.array()*_b_2.array() - 4.0*_a*_c_2.array();
+    _b_2 = dt*(2.0*_qdot - _jointAccMax*dt);
+    _c_2 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_q.array() + dt*_qdot.array() - _jointLimitsMin.array());
+    _delta_2 = _b_2.array()*_b_2.array() - 4.0*a*_c_2.array();
 
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
     {
         if(_delta_2[it] >= 0.)
-            _ddq_LB_via[it] = std::min(_ddq_1[it], ( -_b_2[it] - std::sqrt(_delta_2[it]) )/(2.0*_a) );
+            _ddq_LB_via[it] = std::min(_ddq_1[it], ( -_b_2[it] - std::sqrt(_delta_2[it]) )/(2.0*a) );
         else
             _ddq_LB_via[it] = _ddq_1[it];
     }
@@ -186,4 +195,12 @@ void JointLimitsViability::setJointAccMax(const Eigen::VectorXd &jointAccMax)
 void JointLimitsViability::setJointVelMax(const Eigen::VectorXd& jointVelMax)
 {
     _jointVelMax = jointVelMax;
+}
+
+bool JointLimitsViability::setPStepAheadPredictor(const double p)
+{
+    if(p < 1.)
+        return false;
+    _p = p;
+    return true;
 }

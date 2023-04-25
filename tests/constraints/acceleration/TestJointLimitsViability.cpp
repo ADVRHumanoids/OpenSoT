@@ -59,6 +59,7 @@ protected:
         _model_ptr->getJointLimits(qmin, qmax);
         jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimitsViability>(
                     *_model_ptr, qddot, qmax, qmin, vel_lims, acc_lims, dT);
+        jointLimits->setPStepAheadPredictor(10.);
 
         jointAccelerationLimits = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());

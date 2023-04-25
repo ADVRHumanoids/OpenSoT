@@ -55,11 +55,11 @@
                  * @brief _dt
                  **/
                 double _dt;
+                double _p;
 
                 Eigen::VectorXd _ddq_LB_pos, _ddq_UB_pos;
                 Eigen::VectorXd _ddq_M1, _ddq_M2, _ddq_M3, _ddq_m2, _ddq_m3;
                 void accBoundsFromPosLimits();
-                double _a;
                 Eigen::VectorXd _ddq_LB_via, _ddq_UB_via;
                 Eigen::VectorXd _b_1, _c_1, _ddq_1, _delta_1, _b_2, _c_2, _delta_2;
                 void accBoundsFromViability();
@@ -95,7 +95,12 @@
                 void setJointAccMax(const Eigen::VectorXd& jointAccMax);
                 void setJointVelMax(const Eigen::VectorXd& jointVelMax);
 
-
+                /**
+                 * @brief setPStepAheadPredictor
+                 * @param p step predictor coefficient >= 1
+                 * @return false if p <1
+                 */
+                bool setPStepAheadPredictor(const double p);
 
             };
            }
