@@ -30,8 +30,8 @@ void JointLimitsECBF::update(const Eigen::VectorXd &x)
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
 
-    __upperBound = -(_a1 + _a2).array() * _qdot.array() -(_a1.array() * _a2.array())*(_q.array() - _jointLimitsMin.array());
-    __lowerBound = -(_a1 + _a2).array() * _qdot.array() +(_a1.array() * _a2.array())*(_jointLimitsMax.array() - _q.array());
+    __lowerBound = -(_a1 + _a2).array() * _qdot.array() -(_a1.array() * _a2.array())*(_q.array() - _jointLimitsMin.array());
+    __upperBound = -(_a1 + _a2).array() * _qdot.array() +(_a1.array() * _a2.array())*(_jointLimitsMax.array() - _q.array());
 
 
     for(unsigned int i = 0; i < _jointLimitsMax.size(); ++i)
