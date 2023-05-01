@@ -66,7 +66,7 @@ protected:
 
         _model_ptr->getJointLimits(qmin, qmax);
         jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimitsECBF>(
-                    *_model_ptr, qddot, qmax, qmin);
+                    *_model_ptr, qddot, qmax, qmin, acc_lims);
         jointLimits->setAlpha1(15.);
         jointLimits->setAlpha2(15.);
 
@@ -75,7 +75,7 @@ protected:
 
 
         autostack = std::make_shared<OpenSoT::AutoStack>(postural);
-        autostack<<jointLimits<<jointVelocityLimits<<jointAccelerationLimits;
+        autostack<<jointLimits<<jointVelocityLimits;//<<jointAccelerationLimits;
 
         solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
 

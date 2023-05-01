@@ -38,9 +38,10 @@ namespace OpenSoT {
 
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
+                Eigen::VectorXd _jointAccMax;
 
-                Eigen::VectorXd __upperBound;
-                Eigen::VectorXd __lowerBound;
+                Eigen::VectorXd __upperBound, _upper_ecbf;
+                Eigen::VectorXd __lowerBound, _lower_ecbf;
                 Eigen::VectorXd _ll, _uu;
 
                 XBot::ModelInterface& _robot;
@@ -57,7 +58,8 @@ namespace OpenSoT {
                 JointLimitsECBF(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
-                            const Eigen::VectorXd &jointBoundMin);
+                            const Eigen::VectorXd &jointBoundMin,
+                            const Eigen::VectorXd &jointAccMax);
 
                 void update(const Eigen::VectorXd& x);
 

@@ -5,10 +5,12 @@ using namespace OpenSoT::constraints::acceleration;
 JointLimitsECBF::JointLimitsECBF(XBot::ModelInterface &robot,
                                  const AffineHelper &qddot,
                                  const Eigen::VectorXd &jointBoundMax,
-                                 const Eigen::VectorXd &jointBoundMin):
+                                 const Eigen::VectorXd &jointBoundMin,
+                                 const Eigen::VectorXd &jointAccMax):
     Constraint("joint_limits_ecbf", qddot.getInputSize()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
+    _jointAccMax(jointAccMax),
     _robot(robot)
 {
     _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
@@ -22,6 +24,9 @@ JointLimitsECBF::JointLimitsECBF(XBot::ModelInterface &robot,
     _a2.setOnes(_jointLimitsMax.size());
     _ones.setOnes(_jointLimitsMax.size());
 
+    __lowerBound = -jointAccMax;
+    __upperBound = jointAccMax;
+
     update(Eigen::VectorXd(1));
 }
 
@@ -30,12 +35,14 @@ void JointLimitsECBF::update(const Eigen::VectorXd &x)
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
 
-    __lowerBound = -(_a1 + _a2).array() * _qdot.array() -(_a1.array() * _a2.array())*(_q.array() - _jointLimitsMin.array());
-    __upperBound = -(_a1 + _a2).array() * _qdot.array() +(_a1.array() * _a2.array())*(_jointLimitsMax.array() - _q.array());
-
+    _lower_ecbf = -(_a1 + _a2).array() * _qdot.array() -(_a1.array() * _a2.array())*(_q.array() - _jointLimitsMin.array());
+    _upper_ecbf = -(_a1 + _a2).array() * _qdot.array() +(_a1.array() * _a2.array())*(_jointLimitsMax.array() - _q.array());
 
     for(unsigned int i = 0; i < _jointLimitsMax.size(); ++i)
     {
+        __upperBound[i] = std::min(_upper_ecbf[i], _jointAccMax[i]);
+        __lowerBound[i] = std::max(_lower_ecbf[i], -_jointAccMax[i]);
+
         if(__upperBound[i] < __lowerBound[i])
         {
             double ub = __upperBound[i];
