@@ -6,10 +6,12 @@ JointLimitsECBF::JointLimitsECBF(XBot::ModelInterface &robot,
                                  const AffineHelper &qddot,
                                  const Eigen::VectorXd &jointBoundMax,
                                  const Eigen::VectorXd &jointBoundMin,
+                                 const Eigen::VectorXd &jointVelMax,
                                  const Eigen::VectorXd &jointAccMax):
     Constraint("joint_limits_ecbf", qddot.getInputSize()),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
+    _jointVelMax(jointVelMax),
     _jointAccMax(jointAccMax),
     _robot(robot)
 {
@@ -22,6 +24,7 @@ JointLimitsECBF::JointLimitsECBF(XBot::ModelInterface &robot,
 
     _a1.setOnes(_jointLimitsMax.size());
     _a2.setOnes(_jointLimitsMax.size());
+    _a3.setOnes(_jointLimitsMax.size());
     _ones.setOnes(_jointLimitsMax.size());
 
     __lowerBound = -jointAccMax;
@@ -35,13 +38,13 @@ void JointLimitsECBF::update(const Eigen::VectorXd &x)
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
 
-    _lower_ecbf = -(_a1 + _a2).array() * _qdot.array() -(_a1.array() * _a2.array())*(_q.array() - _jointLimitsMin.array());
+    _lower_ecbf = -(_a1 + _a2).array() * _qdot.array() +(_a1.array() * _a2.array())*(_jointLimitsMin.array() - _q.array());
     _upper_ecbf = -(_a1 + _a2).array() * _qdot.array() +(_a1.array() * _a2.array())*(_jointLimitsMax.array() - _q.array());
 
     for(unsigned int i = 0; i < _jointLimitsMax.size(); ++i)
     {
-        __upperBound[i] = std::min(_upper_ecbf[i], _jointAccMax[i]);
-        __lowerBound[i] = std::max(_lower_ecbf[i], -_jointAccMax[i]);
+        __upperBound[i] = std::min(std::min(_upper_ecbf[i], _a3[i] * (_jointVelMax[i] - _qdot[i])), _jointAccMax[i]);
+        __lowerBound[i] = std::max(std::max(_lower_ecbf[i], _a3[i] * (-_jointVelMax[i] - _qdot[i])), -_jointAccMax[i]);
 
         if(__upperBound[i] < __lowerBound[i])
         {
@@ -49,6 +52,12 @@ void JointLimitsECBF::update(const Eigen::VectorXd &x)
             __upperBound[i] = __lowerBound[i];
             __lowerBound[i] = ub;
         }
+
+        if(__lowerBound[i] < -_jointAccMax[i])
+            __lowerBound[i] = -_jointAccMax[i];
+
+        if(__upperBound[i] > _jointAccMax[i])
+            __upperBound[i] = _jointAccMax[i];
     }
 
 
@@ -81,4 +90,13 @@ void JointLimitsECBF::setAlpha2(const double a2)
     _a2 = a2 * _ones;
 }
 
+void JointLimitsECBF::setAlpha3(const Eigen::VectorXd &a3)
+{
+    _a3 = a3;
+}
+
+void JointLimitsECBF::setAlpha3(const double a3)
+{
+    _a3 = a3 * _ones;
+}
 

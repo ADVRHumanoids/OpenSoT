@@ -13,8 +13,6 @@
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = relative_path;
 
-#define P 100.
-
 namespace {
 
 class testJointLimits : public ::testing::Test {
@@ -66,16 +64,18 @@ protected:
 
         _model_ptr->getJointLimits(qmin, qmax);
         jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimitsECBF>(
-                    *_model_ptr, qddot, qmax, qmin, acc_lims);
+                    *_model_ptr, qddot, qmax, qmin, vel_lims, acc_lims);
+
         jointLimits->setAlpha1(15.);
         jointLimits->setAlpha2(15.);
+        jointLimits->setAlpha3(15.);
 
         postural = std::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
         postural->setLambda(5000.);
 
 
         autostack = std::make_shared<OpenSoT::AutoStack>(postural);
-        autostack<<jointLimits<<jointVelocityLimits;//<<jointAccelerationLimits;
+        autostack<<jointLimits;//<<jointVelocityLimits;//<<jointAccelerationLimits;
 
         solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
 

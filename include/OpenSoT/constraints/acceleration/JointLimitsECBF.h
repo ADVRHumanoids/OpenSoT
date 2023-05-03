@@ -38,6 +38,7 @@ namespace OpenSoT {
 
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
+                Eigen::VectorXd _jointVelMax;
                 Eigen::VectorXd _jointAccMax;
 
                 Eigen::VectorXd __upperBound, _upper_ecbf;
@@ -50,7 +51,7 @@ namespace OpenSoT {
 
                 GenericConstraint::Ptr _generic_constraint_internal;
 
-                Eigen::VectorXd _a1, _a2;
+                Eigen::VectorXd _a1, _a2, _a3;
 
                 Eigen::VectorXd _ones;
 
@@ -59,14 +60,31 @@ namespace OpenSoT {
                             const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
+                            const Eigen::VectorXd &jointVelMax,
                             const Eigen::VectorXd &jointAccMax);
 
                 void update(const Eigen::VectorXd& x);
 
+                /**
+                 * @brief setAlpha1 gain applied to joint position limits
+                 * @param a1
+                 */
                 void setAlpha1(const Eigen::VectorXd& a1);
                 void setAlpha1(const double a1);
+
+                /**
+                 * @brief setAlpha2 gain applied to joint position limits
+                 * @param a2
+                 */
                 void setAlpha2(const Eigen::VectorXd& a2);
                 void setAlpha2(const double a2);
+
+                /**
+                 * @brief setAlpha3 gain applied to joint velocity limits
+                 * @param a3
+                 */
+                void setAlpha3(const Eigen::VectorXd& a3);
+                void setAlpha3(const double a3);
 
 
             };
