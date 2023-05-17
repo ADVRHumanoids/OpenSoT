@@ -208,7 +208,7 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
 //        this->logger->add("qddotmin", -this->acc_lims);
 //        this->logger->add("qref", qref);
 
-        this->checkConstraints(qddot, 1e-1);
+        this->checkConstraints(qddot, 3e-2);
 
     }
 
@@ -255,7 +255,7 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         this->logger->add("qddotmin", -this->acc_lims);
         this->logger->add("qref", qref);
 
-        this->checkConstraints(qddot, 1e-1);
+        this->checkConstraints(qddot, 3e-2);
     }
 
 }
@@ -284,7 +284,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
         this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
         this->qdot += qddot*this->dT;
 
-        this->checkConstraints(qddot, 1e-1);
+        this->checkConstraints(qddot, 3e-2);
     }
 
     for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
@@ -338,7 +338,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
         logger->add("qddotmin", -this->acc_lims);
         logger->add("qref", qref);
 
-        this->checkConstraints(qddot, 1e-1);
+        this->checkConstraints(qddot, 3e-2);
     }
 }
 
