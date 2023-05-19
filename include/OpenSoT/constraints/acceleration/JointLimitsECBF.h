@@ -56,6 +56,15 @@ namespace OpenSoT {
                 Eigen::VectorXd _ones;
 
             public:
+                /**
+                 * @brief JointLimitsECBF constructor
+                 * @param robot
+                 * @param qddot
+                 * @param jointBoundMax max joint limits
+                 * @param jointBoundMin min joint limits
+                 * @param jointVelMax max joint velocity limits
+                 * @param jointAccMax max joint acceleration limits
+                 */
                 JointLimitsECBF(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
