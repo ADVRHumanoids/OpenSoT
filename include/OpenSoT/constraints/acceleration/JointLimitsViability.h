@@ -76,10 +76,11 @@
                  * @brief JointLimitsViability
                  * @param robot
                  * @param qddot
-                 * @param jointBoundMax
-                 * @param jointBoundMin
-                 * @param jointAccMax
-                 * @param dt
+                 * @param jointBoundMax max joint limits
+                 * @param jointBoundMin min joint limits
+                 * @param jointVelMax max joint velocity limits
+                 * @param jointAccMax max joint acceleration limits
+                 * @param dt discretization time
                  */
                 JointLimitsViability(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
@@ -92,7 +93,16 @@
 
                 void update(const Eigen::VectorXd& x);
 
+                /**
+                 * @brief setJointAccMax update maximum accelerations
+                 * @param jointAccMax
+                 */
                 void setJointAccMax(const Eigen::VectorXd& jointAccMax);
+
+                /**
+                 * @brief setJointVelMax update maximum velocities
+                 * @param jointVelMax
+                 */
                 void setJointVelMax(const Eigen::VectorXd& jointVelMax);
 
                 /**
