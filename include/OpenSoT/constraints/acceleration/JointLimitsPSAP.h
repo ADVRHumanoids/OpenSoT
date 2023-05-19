@@ -61,6 +61,16 @@ namespace OpenSoT {
                 double _p;
 
             public:
+                /**
+                 * @brief JointLimitsPSAP constructor
+                 * @param robot
+                 * @param qddot
+                 * @param jointBoundMax max joint limits
+                 * @param jointBoundMin min joint limits
+                 * @param jointVelMax max joint velocity limits
+                 * @param jointAccMax max joint acceleration limits
+                 * @param dt discretization time
+                 */
                 JointLimitsPSAP(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
