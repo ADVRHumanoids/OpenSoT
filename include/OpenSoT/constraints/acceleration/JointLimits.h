@@ -63,13 +63,13 @@
 
             public:
                 /**
-                 * @brief JointLimits
+                 * @brief JointLimits constructor
                  * @param robot
                  * @param qddot
-                 * @param jointBoundMax
-                 * @param jointBoundMin
-                 * @param jointAccMax
-                 * @param dt
+                 * @param jointBoundMax max joint limits
+                 * @param jointBoundMin min joint limits
+                 * @param jointAccMax max joint acceleration
+                 * @param dt discretization time
                  */
                 JointLimits(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
@@ -81,6 +81,10 @@
 
                 void update(const Eigen::VectorXd& x);
 
+                /**
+                 * @brief setJointAccMax updates joint acceleration limits
+                 * @param jointAccMax
+                 */
                 void setJointAccMax(const Eigen::VectorXd& jointAccMax);
 
                 /**
