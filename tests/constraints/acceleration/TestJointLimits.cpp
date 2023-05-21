@@ -17,7 +17,9 @@ namespace {
 
 class testJointLimits : public ::testing::Test {
 protected:
-    testJointLimits()
+    testJointLimits():
+        p_test(0.001, M_PI, 20.),
+        p_dp(0.01, 2., 12.)
     {
 
         _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -29,7 +31,6 @@ protected:
 
         logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimits_acceleration");
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
-
     }
 
     void createStack()
@@ -48,13 +49,13 @@ protected:
     
         
         acc_lims.setOnes(_model_ptr->getJointNum());
-        acc_lims *= 20.;
+        acc_lims *= p_test._qddot_max; //p_dp._qddot_max; //20.;
         jointAccelerationLimits = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
 
 
-        dT = 0.001;
-        qdotMax = M_PI;
+        dT = p_test._dt; //p_dp._dt;  //0.001;
+        qdotMax = p_test._qdot_max; //p_dp._qdot_max; //M_PI;
         jointVelocityLimits = std::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
         jointVelocityLimits->setPStepAheadPredictor(2.);
@@ -162,6 +163,22 @@ protected:
     Eigen::VectorXd qmin, qmax;
     Eigen::VectorXd acc_lims;
 
+    struct params
+    {
+        params(const double dt, const double qdot_max, const double qddot_max):
+            _dt(dt),
+            _qdot_max(qdot_max),
+            _qddot_max(qddot_max)
+        {}
+
+
+        double _dt;
+        double _qdot_max;
+        double _qddot_max;
+    };
+
+    params p_test;
+    params p_dp;
 
 
 

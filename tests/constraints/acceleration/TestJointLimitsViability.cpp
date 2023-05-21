@@ -17,7 +17,9 @@ namespace {
 
 class testJointLimitsViability : public ::testing::Test {
 protected:
-    testJointLimitsViability()
+    testJointLimitsViability():
+        p_test(0.001, M_PI, 20.),
+        p_dp(0.01, 2., 12.)
     {
 
         _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -48,10 +50,10 @@ protected:
 
 
         acc_lims.setOnes(_model_ptr->getJointNum());
-        acc_lims *= 20.;
+        acc_lims *= p_test._qddot_max; //p_dp._qddot_max; //20.;
 
-        dT = 0.001;
-        qdotMax = M_PI;
+        dT = p_test._dt; //p_dp._dt;  //0.001;
+        qdotMax = p_test._qdot_max; //p_dp._qdot_max; //M_PI;
         Eigen::VectorXd vel_lims;
         vel_lims.setOnes(_model_ptr->getJointNum());
         vel_lims *= qdotMax;
@@ -164,6 +166,24 @@ protected:
 
     Eigen::VectorXd qmin, qmax;
     Eigen::VectorXd acc_lims;
+
+    struct params
+    {
+        params(const double dt, const double qdot_max, const double qddot_max):
+            _dt(dt),
+            _qdot_max(qdot_max),
+            _qddot_max(qddot_max)
+        {}
+
+
+        double _dt;
+        double _qdot_max;
+        double _qddot_max;
+    };
+
+    params p_test;
+    params p_dp;
+
 
 };
 
