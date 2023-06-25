@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/constraints/acceleration/JointLimits.h>
+#include <OpenSoT/constraints/acceleration/JointLimitsECBF.h>
 #include <OpenSoT/constraints/acceleration/VelocityLimits.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
@@ -17,9 +17,7 @@ namespace {
 
 class testJointLimits : public ::testing::Test {
 protected:
-    testJointLimits():
-        p_test(0.001, M_PI, 20.),
-        p_dp(0.01, 2., 12.)
+    testJointLimits()
     {
 
         _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -29,8 +27,9 @@ protected:
         else
             std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-        logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimits_acceleration");
+        logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimitsECBF_acceleration");
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+
     }
 
     void createStack()
@@ -38,39 +37,45 @@ protected:
         qdot.setZero(_model_ptr->getJointNum());
         _model_ptr->setJointVelocity(qdot);
 
-        
-        
+
+
         q = getGoodInitialPosition(_model_ptr);
         _model_ptr->setJointPosition(q);
 
         _model_ptr->update();
 
         qddot = OpenSoT::AffineHelper::Identity(_model_ptr->getJointNum());
-    
-        
+
+
         acc_lims.setOnes(_model_ptr->getJointNum());
-        acc_lims *= p_test._qddot_max; //p_dp._qddot_max; //20.;
+        acc_lims *= 20.;
         jointAccelerationLimits = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
 
 
-        dT = p_test._dt; //p_dp._dt;  //0.001;
-        qdotMax = p_test._qdot_max; //p_dp._qdot_max; //M_PI;
+        dT = 0.001;
+        qdotMax = M_PI;
+        Eigen::VectorXd vel_lims;
+        vel_lims.setOnes(_model_ptr->getJointNum());
+        vel_lims *= qdotMax;
+
         jointVelocityLimits = std::make_shared<OpenSoT::constraints::acceleration::VelocityLimits>(
                     *_model_ptr, qddot, qdotMax, dT);
-        jointVelocityLimits->setPStepAheadPredictor(2.);
 
         _model_ptr->getJointLimits(qmin, qmax);
-        jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimits>(
-                    *_model_ptr, qddot, qmax, qmin, acc_lims, dT);
-        jointLimits->setPStepAheadPredictor(2.);
+        jointLimits = std::make_shared<OpenSoT::constraints::acceleration::JointLimitsECBF>(
+                    *_model_ptr, qddot, qmax, qmin, vel_lims, acc_lims);
+
+        jointLimits->setAlpha1(15.);
+        jointLimits->setAlpha2(15.);
+        jointLimits->setAlpha3(15.);
 
         postural = std::make_shared<OpenSoT::tasks::acceleration::Postural>(*_model_ptr, qddot);
         postural->setLambda(5000.);
 
 
         autostack = std::make_shared<OpenSoT::AutoStack>(postural);
-        autostack<<jointLimits<<jointVelocityLimits<<jointAccelerationLimits;
+        autostack<<jointLimits;//<<jointVelocityLimits;//<<jointAccelerationLimits;
 
         solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
 
@@ -139,7 +144,7 @@ protected:
 
     XBot::ModelInterface::Ptr _model_ptr;
 
-    OpenSoT::constraints::acceleration::JointLimits::Ptr jointLimits;
+    OpenSoT::constraints::acceleration::JointLimitsECBF::Ptr jointLimits;
     OpenSoT::constraints::acceleration::VelocityLimits::Ptr jointVelocityLimits;
     OpenSoT::constraints::GenericConstraint::Ptr jointAccelerationLimits;
 
@@ -163,22 +168,6 @@ protected:
     Eigen::VectorXd qmin, qmax;
     Eigen::VectorXd acc_lims;
 
-    struct params
-    {
-        params(const double dt, const double qdot_max, const double qddot_max):
-            _dt(dt),
-            _qdot_max(qdot_max),
-            _qddot_max(qddot_max)
-        {}
-
-
-        double _dt;
-        double _qdot_max;
-        double _qddot_max;
-    };
-
-    params p_test;
-    params p_dp;
 
 
 
@@ -205,9 +194,9 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         Eigen::VectorXd qddot;
         ASSERT_TRUE(this->solver->solve(qddot));
 
-
         this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
         this->qdot += qddot*this->dT;
+
 
 //        this->logger->add("qddot", qddot);
 //        this->logger->add("qdot", qdot);
@@ -221,17 +210,18 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
 //        this->logger->add("qref", qref);
 
         this->checkConstraints(qddot, 1e-4);
+
     }
 
     for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
         EXPECT_LE(this->postural->getb()[i], 1e-6);
-    
-    
+
+
 //     qref.setOnes(qref.size());
 //     qref *= 10;
 
 //     this->postural->setReference(qref);
-    
+
     T = 10;
     Eigen::VectorXd q0 = this->q;
     for(unsigned int  i = 0; i < T/this->dT; ++i)
@@ -240,7 +230,7 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         qref *= 3.* std::sin(i*this->dT);
         qref += q0;
         this->postural->setReference(qref);
-        
+
         this->_model_ptr->setJointVelocity(this->qdot);
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
@@ -301,7 +291,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
     for(unsigned int i = 0; i < this->postural->getb().size(); ++i)
         EXPECT_LE(this->postural->getb()[i], 1e-6);
 
-    auto logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimits_acceleration_regulation");
+    auto logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimitsECBF_acceleration_regulation");
     logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
 
     T = 7;

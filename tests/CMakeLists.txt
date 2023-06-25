@@ -47,76 +47,79 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} )
 enable_testing()
 
 #ALL THE FOLLOWING TESTS ARE YARP FREE
-set(OPENSOT_TESTS testBilateralConstraint
+set(OPENSOT_TESTS testBilateralConstraint #1
                   testJointLimitsVelocityBounds
                   testJointLimitsAccelerationBounds
+                  testJointLimitsAccelerationViabilityBounds
+                  testJointLimitsAccelerationPSAPBounds
+                  testJointLimitsAccelerationECBFounds
                   testVelocityLimitsVelocityBounds
                   testQPOasesSolver  
                   testQPOases_SetActiveStack 
-                  testQPOases_Options  
+                  testQPOases_Options #10
                   testQPOases_SubTask
                   testQPOases_FF
-                  testQPOases_AutoStack #10
+                  testQPOases_AutoStack
                   testiHQP
                   testFrictionConeForceConstraint
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
                   testManipulabilityTask
                   testMinimizeAccelerationTask
-                  testMinimumVelocityTask
+                  testMinimumVelocityTask #20
                   testMinimumEffortVelocityTask
                   testPosturalVelocityTask
-                  testCartesianVelocityTask #20
+                  testCartesianVelocityTask
                   testCartesianAdmittanceVelocityTask
                   testSubTask
                   testSubConstraint
                   testCartesianUtils 
                   testBasicAlgebra 
                   testPosturalAccelerationTask
-                  testCartesianAccelerationTask
+                  testCartesianAccelerationTask #30
                   testCoMAccelerationTask
                   testContactFloatingBaseTask
-                  testCoMForceTask #30
+                  testCoMForceTask
                   testTask
                   testAffineHelper
                   testPiler
                   testAffineUtils
                   testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
-                  testKinematics
-                  testl1HQP #38
+                  testKinematics #40
+                  testl1HQP
 )
 
 if(${OPENSOT_SOTH_FRONT_END})
-    set(${OPENSOT_TESTS} testSOTH) #39
+    set(${OPENSOT_TESTS} testSOTH) #42
 endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TEST testQPOases_ConvexHull 
                      testConvexHullVelocityConstraint
-                     testAutoStack) #42
+                     testAutoStack) #45
 endif()
 
 if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver 
                                       testGenericTask)
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testLP) #45
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testLP) #48
 endif()
 
 if(${GLPK_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver) #46
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver) #49
 endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
-                                       testAggregatedTask) #48
+                                       testAggregatedTask) #51
 endif()
 
 #THESE TESTS DEPEND ON fcl
 if(${FCL_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
                                        testCollisionAvoidanceVelocityConstraint
-                                       testCollisionAvoidanceEnvironmentVelocityConstraint #51
+                                       testCollisionAvoidanceEnvironmentVelocityConstraint #54
 )
 endif()
 
@@ -125,11 +128,11 @@ if(${trajectory_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
                   testQPOases_StaticWalk_FloatingBase
                   testQPOases_StaticWalk
-                  testEigenSVD_StaticWalk_FloatingBase) #54
+                  testEigenSVD_StaticWalk_FloatingBase) #57
 endif()
 
 if(${qpSWIFT_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testqpSWIFTSolver) #55
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testqpSWIFTSolver) #58
 endif()
 
 
@@ -381,6 +384,21 @@ ADD_EXECUTABLE(testJointLimitsAccelerationBounds constraints/acceleration/TestJo
 TARGET_LINK_LIBRARIES(testJointLimitsAccelerationBounds ${TestLibs})
 add_dependencies(testJointLimitsAccelerationBounds   OpenSoT)
 add_test(NAME OpenSoT_constraints_acceleration_JointLimits COMMAND testJointLimitsAccelerationBounds)
+
+ADD_EXECUTABLE(testJointLimitsAccelerationViabilityBounds constraints/acceleration/TestJointLimitsViability.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsAccelerationViabilityBounds ${TestLibs})
+add_dependencies(testJointLimitsAccelerationViabilityBounds   OpenSoT)
+add_test(NAME OpenSoT_constraints_acceleration_viability_JointLimits COMMAND testJointLimitsAccelerationViabilityBounds)
+
+ADD_EXECUTABLE(testJointLimitsAccelerationPSAPBounds constraints/acceleration/TestJointLimitsPSAP.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsAccelerationPSAPBounds ${TestLibs})
+add_dependencies(testJointLimitsAccelerationPSAPBounds   OpenSoT)
+add_test(NAME OpenSoT_constraints_acceleration_psap_JointLimits COMMAND testJointLimitsAccelerationPSAPBounds)
+
+ADD_EXECUTABLE(testJointLimitsAccelerationECBFBounds constraints/acceleration/TestJointLimitsECBF.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsAccelerationECBFBounds ${TestLibs})
+add_dependencies(testJointLimitsAccelerationECBFBounds   OpenSoT)
+add_test(NAME OpenSoT_constraints_acceleration_ecbf_JointLimits COMMAND testJointLimitsAccelerationECBFBounds)
 
 ADD_EXECUTABLE(testQPOases_Options solvers/TestQPOases_Options.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})

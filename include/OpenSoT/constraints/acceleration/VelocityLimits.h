@@ -29,7 +29,12 @@ public:
     void setVelocityLimits(const double qDotLimit);
     void setVelocityLimits(const Eigen::VectorXd& qDotLimit);
 
-
+    /**
+     * @brief setPStepAheadPredictor
+     * @param p step predictor coefficient >= 1
+     * @return false if p <1
+     */
+    bool setPStepAheadPredictor(const double p);
 
 private:
 
@@ -40,6 +45,7 @@ private:
     Eigen::VectorXd _qdotmin, _qdotmax;
 
     double _dT;
+    double _p;
 
 };
 

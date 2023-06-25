@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019 Cogimon
- * Author: Matteo Parigi Polverini
- * email:  matteo.parigi@iit.it
+ * Copyright (C) 2023 Unmanned Systems and Robotics Lab
+ * Author: Enrico Mingo Hoffman
+ * email:  enricomingo@gmail.com
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -15,77 +15,71 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__
-#define __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__
+#ifndef __BOUNDS_ACCELERATION_JOINTLIMITS_PSAP_H__
+#define __BOUNDS_ACCELERATION_JOINTLIMITS_PSAP_H__
 
 #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 
- namespace OpenSoT {
-    namespace constraints {
-        namespace acceleration{ 
+namespace OpenSoT {
+   namespace constraints {
+       namespace acceleration{
             /**
-             * @brief The JointLimits class implements bounds on joints positions using internally the
-             * GenericConstraint and affine variables. It is a variation of the joint limits presented in the paper:
-             *  "Invariance control design for nonlinear control affine systems under hard state constraints", by:
-             *  J. Wolff and M.Buss
+             * @brief The JointLimitsPSAP class implements Joint Limits using the P-Step Ahead Predictor (PSAP) method
+             * as in the paper "The Enhanced Compact QP Method for Redundant Manipulators Using Practical Inequality Constraints",
+             * by Ki Cheol Park, Pyung Hun Chang, and Seung Ho Kim
              */
-            class JointLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
+            class JointLimitsPSAP: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef std::shared_ptr<JointLimits> Ptr;
+                typedef std::shared_ptr<JointLimitsPSAP> Ptr;
             private:
-                
+
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
+                Eigen::VectorXd _jointVelMax;
+                Eigen::VectorXd _jointAccMax;
+
+                Eigen::VectorXd _pmin, _pmax;
+                Eigen::VectorXd _vmin, _vmax;
 
                 Eigen::VectorXd __upperBound;
                 Eigen::VectorXd __lowerBound;
-                
-                Eigen::VectorXd _a, _b_sup, _c_sup, _b_inf, _c_inf, _delta_sup, _delta_inf;
-                Eigen::VectorXd _ub_sup, _lb_sup,_ub_inf, _lb_inf, _ub, _lb;
-                
-                Eigen::VectorXd _jointAccMax;
 
                 XBot::ModelInterface& _robot;
-                
-                Eigen::VectorXd _q, _qdot;
-                
-                GenericConstraint::Ptr _generic_constraint_internal;
 
+                Eigen::VectorXd _q, _qdot;
+
+                GenericConstraint::Ptr _generic_constraint_internal;
 
                 /**
                  * @brief _dt
                  **/
                 double _dt;
+
                 double _p;
 
             public:
                 /**
-                 * @brief JointLimits constructor
+                 * @brief JointLimitsPSAP constructor
                  * @param robot
                  * @param qddot
                  * @param jointBoundMax max joint limits
                  * @param jointBoundMin min joint limits
-                 * @param jointAccMax max joint acceleration
+                 * @param jointVelMax max joint velocity limits
+                 * @param jointAccMax max joint acceleration limits
                  * @param dt discretization time
                  */
-                JointLimits(XBot::ModelInterface& robot,
+                JointLimitsPSAP(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
+                            const Eigen::VectorXd &jointVelMax,
                             const Eigen::VectorXd &jointAccMax,
                             const double dt);
 
-
                 void update(const Eigen::VectorXd& x);
-
-                /**
-                 * @brief setJointAccMax updates joint acceleration limits
-                 * @param jointAccMax
-                 */
-                void setJointAccMax(const Eigen::VectorXd& jointAccMax);
 
                 /**
                  * @brief setPStepAheadPredictor
@@ -94,10 +88,9 @@
                  */
                 bool setPStepAheadPredictor(const double p);
 
-            };
-           }
-        }
-    
- }
 
+            };
+       }
+   }
+}
 #endif
