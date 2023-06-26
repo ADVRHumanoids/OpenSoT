@@ -5,7 +5,6 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/solvers/iHQP.h>
-#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <OpenSoT/tasks/velocity/Manipulability.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>

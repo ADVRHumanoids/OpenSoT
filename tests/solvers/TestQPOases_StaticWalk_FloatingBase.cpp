@@ -10,7 +10,6 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
-#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <ros/master.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <qpOASES/Options.hpp>
@@ -281,9 +280,6 @@ public:
 
         vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2.*M_PI, 0.01, q.size()));
 
-        minAcc.reset(new OpenSoT::tasks::velocity::MinimizeAcceleration(q));
-        Eigen::MatrixXd W = minAcc->getWeight();
-        minAcc->setWeight(2.*W);
 
 
 
@@ -291,7 +287,7 @@ public:
 #if USE_COM_AS_CONSTR
         auto_stack = (l_sole + r_sole)/
                 (l_wrist + r_wrist + gaze)/
-                (postural + minAcc)<<joint_limits<<vel_limits;
+                (postural)<<joint_limits<<vel_limits;
 #else
             auto_stack = (l_sole + r_sole)/
                     (com)/
@@ -358,7 +354,6 @@ public:
     OpenSoT::tasks::velocity::CoM::Ptr    com;
     OpenSoT::tasks::velocity::Gaze::Ptr gaze;
     OpenSoT::tasks::velocity::Postural::Ptr postural;
-    OpenSoT::tasks::velocity::MinimizeAcceleration::Ptr minAcc;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
     OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
     OpenSoT::constraints::TaskToConstraint::Ptr com_constr;
