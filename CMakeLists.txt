@@ -101,7 +101,6 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/acceleration/VelocityLimits.cpp
     src/constraints/acceleration/TorqueLimits.cpp
     src/constraints/velocity/CartesianPositionConstraint.cpp
-    src/constraints/velocity/CapturePoint.cpp
     src/constraints/velocity/CartesianVelocity.cpp
     src/constraints/velocity/CoMVelocity.cpp
     src/constraints/velocity/JointLimits.cpp
