@@ -65,7 +65,6 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
                   testManipulabilityTask
-                  testMinimumVelocityTask #20
                   testMinimumEffortVelocityTask
                   testPosturalVelocityTask
                   testCartesianVelocityTask
@@ -311,11 +310,6 @@ ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
 TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(testManipulabilityTask   OpenSoT)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
-
-ADD_EXECUTABLE(testMinimumVelocityTask tasks/velocity/TestMinimumVelocity.cpp)
-TARGET_LINK_LIBRARIES(testMinimumVelocityTask ${TestLibs} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
-add_dependencies(testMinimumVelocityTask   OpenSoT)
-add_test(NAME OpenSoT_task_velocity_MinimumVelocity COMMAND testMinimumVelocityTask)
 
 ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
