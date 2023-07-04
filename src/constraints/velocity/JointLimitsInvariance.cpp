@@ -47,18 +47,29 @@ void JointLimitsInvariance::update(const Eigen::VectorXd &x)
 
     for(unsigned int i = 0; i < _upperBound.size(); ++i)
     {
-        double d = 2. * _jointAccMax[i] * std::pow(dt, 2.) * (_jointLimitsMax[i] - x[i]);
+        double d = 2. * _jointAccMax[i] * dt * dt * (_jointLimitsMax[i] - x[i]);
         if(d < 0.)
-            d = 0.;
-        _upperBound[i] = std::min(sqrt(d), std::pow(dt, 2.) * _jointAccMax[i] + dt*_qdot_prev[i]);
+            _upperBound[i] = std::min(-sqrt(fabs(d)), dt * dt * _jointAccMax[i] + dt*_qdot_prev[i]);
+        else
+            _upperBound[i] = std::min(sqrt(d), dt * dt * _jointAccMax[i] + dt*_qdot_prev[i]);
 
 
-        d = 2. * _jointAccMax[i] * std::pow(dt, 2.) * (-_jointLimitsMin[i] + x[i]);
+        d = 2. * _jointAccMax[i] * dt * dt * (-_jointLimitsMin[i] + x[i]);
         if(d < 0.)
-            d = 0.;
-        _lowerBound[i] = std::max(-sqrt(d), std::pow(dt, 2.) * -_jointAccMax[i] + dt*_qdot_prev[i]);
+            _lowerBound[i] = std::max(sqrt(fabs(d)), dt * dt * -_jointAccMax[i] + dt*_qdot_prev[i]);
+        else
+            _lowerBound[i] = std::max(-sqrt(d), dt * dt * -_jointAccMax[i] + dt*_qdot_prev[i]);
+
+        if(_lowerBound[i] > _upperBound[i])
+        {
+            double tmp = _lowerBound[i];
+            _lowerBound[i] = _upperBound[i];
+            _upperBound[i] = tmp;
+        }
 
     }
+
+
 
 
 
@@ -71,7 +82,7 @@ void JointLimitsInvariance::setJointAccMax(const Eigen::VectorXd& jointAccMax)
 
 bool JointLimitsInvariance::setPStepAheadPredictor(const double p)
 {
-    if(p > 1)
+    if(p > 1.)
     {
         _p = p;
         return true;
