@@ -5,7 +5,7 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <OpenSoT/utils/DefaultHumanoidStack.h>
+#include "DefaultHumanoidStack.h"
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <fstream>
 

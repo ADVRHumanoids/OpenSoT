@@ -1,4 +1,4 @@
-#include <OpenSoT/utils/DefaultHumanoidStack.h>
+#include "DefaultHumanoidStack.h"
 
 
 using namespace OpenSoT;

@@ -6,7 +6,7 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <OpenSoT/utils/DefaultHumanoidStack.h>
+#include "DefaultHumanoidStack.h"
 #include <fstream>
 #include <XBotInterface/ModelInterface.h>
 

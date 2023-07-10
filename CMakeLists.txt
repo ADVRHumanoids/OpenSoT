@@ -188,7 +188,6 @@ endif()
 
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
-    src/utils/DefaultHumanoidStack.cpp
     src/utils/Affine.cpp
     src/utils/AffineUtils.cpp
     src/utils/Indices.cpp

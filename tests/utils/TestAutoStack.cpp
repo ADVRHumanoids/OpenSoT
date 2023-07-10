@@ -1,6 +1,6 @@
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <OpenSoT/utils/DefaultHumanoidStack.h>
+#include "DefaultHumanoidStack.h"
 #include <gtest/gtest.h>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
