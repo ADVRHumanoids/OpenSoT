@@ -30,35 +30,22 @@ namespace OpenSoT {
              * @brief The JointLimitsPSAP class implements Joint Limits using the P-Step Ahead Predictor (PSAP) method
              * as in the paper "The Enhanced Compact QP Method for Redundant Manipulators Using Practical Inequality Constraints",
              * by Ki Cheol Park, Pyung Hun Chang, and Seung Ho Kim
+             * @note Constraints are implemented inheriting from Constraint base class
              */
             class JointLimitsPSAP: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef std::shared_ptr<JointLimitsPSAP> Ptr;
             private:
-
-                Eigen::VectorXd _jointLimitsMin;
-                Eigen::VectorXd _jointLimitsMax;
+                Eigen::VectorXd _jointLimitsMin, _jointLimitsMax;
                 Eigen::VectorXd _jointVelMax;
                 Eigen::VectorXd _jointAccMax;
-
                 Eigen::VectorXd _pmin, _pmax;
                 Eigen::VectorXd _vmin, _vmax;
-
-                Eigen::VectorXd __upperBound;
-                Eigen::VectorXd __lowerBound;
-
+                Eigen::VectorXd __upperBound, __lowerBound;
                 XBot::ModelInterface& _robot;
-
                 Eigen::VectorXd _q, _qdot;
-
                 GenericConstraint::Ptr _generic_constraint_internal;
-
-                /**
-                 * @brief _dt
-                 **/
-                double _dt;
-
-                double _p;
+                double _dt, _p;
 
             public:
                 /**
@@ -79,6 +66,10 @@ namespace OpenSoT {
                             const Eigen::VectorXd &jointAccMax,
                             const double dt);
 
+                /**
+                 * @brief update method from coonstraint base class to be implemented
+                 * @param x
+                 */
                 void update(const Eigen::VectorXd& x);
 
                 /**

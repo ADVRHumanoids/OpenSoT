@@ -51,7 +51,6 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testJointLimitsVelocityBounds
                   testJointLimitsAccelerationBounds
                   testJointLimitsAccelerationViabilityBounds
-                  testJointLimitsAccelerationPSAPBounds
                   testJointLimitsAccelerationECBFounds
                   testVelocityLimitsVelocityBounds
                   testQPOasesSolver  
@@ -377,11 +376,6 @@ ADD_EXECUTABLE(testJointLimitsAccelerationViabilityBounds constraints/accelerati
 TARGET_LINK_LIBRARIES(testJointLimitsAccelerationViabilityBounds ${TestLibs})
 add_dependencies(testJointLimitsAccelerationViabilityBounds   OpenSoT)
 add_test(NAME OpenSoT_constraints_acceleration_viability_JointLimits COMMAND testJointLimitsAccelerationViabilityBounds)
-
-ADD_EXECUTABLE(testJointLimitsAccelerationPSAPBounds constraints/acceleration/TestJointLimitsPSAP.cpp)
-TARGET_LINK_LIBRARIES(testJointLimitsAccelerationPSAPBounds ${TestLibs})
-add_dependencies(testJointLimitsAccelerationPSAPBounds   OpenSoT)
-add_test(NAME OpenSoT_constraints_acceleration_psap_JointLimits COMMAND testJointLimitsAccelerationPSAPBounds)
 
 ADD_EXECUTABLE(testJointLimitsAccelerationECBFBounds constraints/acceleration/TestJointLimitsECBF.cpp)
 TARGET_LINK_LIBRARIES(testJointLimitsAccelerationECBFBounds ${TestLibs})
