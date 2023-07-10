@@ -192,7 +192,6 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/Affine.cpp
     src/utils/AffineUtils.cpp
     src/utils/Indices.cpp
-    src/utils/VelocityAllocation.cpp
     src/utils/cartesian_utils.cpp
     src/utils/ForceOptimization.cpp
     src/utils/InverseDynamics.cpp)
