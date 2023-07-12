@@ -185,9 +185,12 @@ TEST_F(testJointLimits, test_bounds)
 
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->setJointVelocity(qdot_prev);
+        this->_model_ptr->update();
 
         autostack->update(q);
         EXPECT_TRUE(solver->solve(dq));
+
+        autostack->log(this->logger);
 
 
         this->q += dq;
@@ -209,6 +212,7 @@ TEST_F(testJointLimits, test_bounds)
 
     }
 
+
     qref = -4. * Eigen::VectorXd::Ones(this->q.size());
     postural->setReference(qref);
 
@@ -227,15 +231,15 @@ TEST_F(testJointLimits, test_bounds)
 
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->setJointVelocity(qdot_prev);
+        this->_model_ptr->update();
 
         autostack->update(q);
         EXPECT_TRUE(solver->solve(dq));
 
+        autostack->log(this->logger);
+
         this->q += dq;
         qdot = dq/this->dt;
-
-        this->_model_ptr->setJointPosition(this->q);
-        this->_model_ptr->setJointVelocity(qdot);
 
         qddot = (qdot - qdot_prev)/this->dt;
         qdot_prev = qdot;
