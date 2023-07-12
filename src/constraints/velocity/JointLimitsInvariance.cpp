@@ -26,7 +26,6 @@ JointLimitsInvariance::JointLimitsInvariance(const Eigen::VectorXd &q,
                                              XBot::ModelInterface& robot,
                                              const double dt):
     Constraint("joint_limits_invariance", q.size()),
-    _p(1.),
     _dt(dt),
     _jointLimitsMin(jointBoundMin),
     _jointLimitsMax(jointBoundMax),
@@ -43,22 +42,21 @@ void JointLimitsInvariance::update(const Eigen::VectorXd &x)
 {
     _robot.getJointVelocity(_qdot_prev);
 
-    double dt = _p*_dt;
-
     for(unsigned int i = 0; i < _upperBound.size(); ++i)
     {
-        double d = 2. * _jointAccMax[i] * dt * dt * (_jointLimitsMax[i] - x[i]);
+        double d = 2. * _jointAccMax[i] * _dt * _dt * (_jointLimitsMax[i] - x[i]);
         if(d < 0.)
-            _upperBound[i] = std::min(-sqrt(fabs(d)), dt * dt * _jointAccMax[i] + dt*_qdot_prev[i]);
+            _upperBound[i] = std::min(-sqrt(fabs(d)), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
         else
-            _upperBound[i] = std::min(sqrt(d), dt * dt * _jointAccMax[i] + dt*_qdot_prev[i]);
+            _upperBound[i] = std::min(sqrt(d), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
 
 
-        d = 2. * _jointAccMax[i] * dt * dt * (-_jointLimitsMin[i] + x[i]);
+        d = 2. * -_jointAccMax[i] * _dt * _dt * (_jointLimitsMin[i] - x[i]);
         if(d < 0.)
-            _lowerBound[i] = std::max(sqrt(fabs(d)), dt * dt * -_jointAccMax[i] + dt*_qdot_prev[i]);
+            _lowerBound[i] = std::max(sqrt(fabs(d)), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
         else
-            _lowerBound[i] = std::max(-sqrt(d), dt * dt * -_jointAccMax[i] + dt*_qdot_prev[i]);
+            _lowerBound[i] = std::max(-sqrt(d), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+
 
         if(_lowerBound[i] > _upperBound[i])
         {
@@ -80,12 +78,4 @@ void JointLimitsInvariance::setJointAccMax(const Eigen::VectorXd& jointAccMax)
     _jointAccMax = jointAccMax;
 }
 
-bool JointLimitsInvariance::setPStepAheadPredictor(const double p)
-{
-    if(p > 1.)
-    {
-        _p = p;
-        return true;
-    }
-    return false;
-}
+
