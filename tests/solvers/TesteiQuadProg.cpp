@@ -1,4 +1,3 @@
-//#include <OpenSoT/solvers/uQuadProgBackEnd.h>
 #include <OpenSoT/solvers/QPOasesBackEnd.h>
 #include <qpOASES.hpp>
 #include <gtest/gtest.h>
@@ -48,16 +47,16 @@ public:
     qpOASES::HessianType ht;
 };
 
-class testuQuadProgProblem: public ::testing::Test
+class testeiQuadProgProblem: public ::testing::Test
 {
 protected:
 
-    testuQuadProgProblem()
+    testeiQuadProgProblem()
     {
 
     }
 
-    virtual ~testuQuadProgProblem() {
+    virtual ~testeiQuadProgProblem() {
 
     }
 
@@ -71,7 +70,7 @@ protected:
 
 };
 
-TEST_F(testuQuadProgProblem, testSimpleProblem)
+TEST_F(testeiQuadProgProblem, testSimpleProblem)
 {
     Eigen::VectorXd x(2);
     simpleProblem sp;
@@ -79,7 +78,7 @@ TEST_F(testuQuadProgProblem, testSimpleProblem)
     OpenSoT::solvers::BackEnd::Ptr testProblemQPOASES = OpenSoT::solvers::BackEndFactory(
                 OpenSoT::solvers::solver_back_ends::qpOASES, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,0.);
 
-    OpenSoT::solvers::BackEnd::Ptr testProblemuQuadProg = OpenSoT::solvers::BackEndFactory(
+    OpenSoT::solvers::BackEnd::Ptr testProblemeiQuadProg = OpenSoT::solvers::BackEndFactory(
                 OpenSoT::solvers::solver_back_ends::eiQuadProg, x.size(), sp.A.rows(), (OpenSoT::HessianType)sp.ht,0.);
 
     EXPECT_TRUE(testProblemQPOASES->initProblem(sp.H,
@@ -90,7 +89,7 @@ TEST_F(testuQuadProgProblem, testSimpleProblem)
                             sp.l,
                             sp.u));
 
-    EXPECT_TRUE(testProblemuQuadProg->initProblem(sp.H,
+    EXPECT_TRUE(testProblemeiQuadProg->initProblem(sp.H,
                             sp.g,
                             sp.A,
                             sp.lA,
@@ -99,36 +98,36 @@ TEST_F(testuQuadProgProblem, testSimpleProblem)
                             sp.u));
 
     Eigen::VectorXd s_qpoases = testProblemQPOASES->getSolution();
-    Eigen::VectorXd s_uQuadProg = testProblemuQuadProg->getSolution();
+    Eigen::VectorXd s_eiQuadProg = testProblemeiQuadProg->getSolution();
 
     std::cout<<"solution QPOASES: "<<s_qpoases.transpose()<<std::endl;
-    std::cout<<"solution uQuadProg: "<<s_uQuadProg.transpose()<<std::endl;
+    std::cout<<"solution eiQuadProg: "<<s_eiQuadProg.transpose()<<std::endl;
 
     std::cout<<"QPOASES: 0.5*x'Hx + gx: "<<0.5*s_qpoases.transpose()*sp.H*s_qpoases + sp.g.transpose()*s_qpoases<<std::endl;
-    std::cout<<"uQuadProg: 0.5*x'Hx + gx: "<<0.5*s_uQuadProg.transpose()*sp.H*s_uQuadProg + sp.g.transpose()*s_uQuadProg<<std::endl;
+    std::cout<<"eiQuadProg: 0.5*x'Hx + gx: "<<0.5*s_eiQuadProg.transpose()*sp.H*s_eiQuadProg + sp.g.transpose()*s_eiQuadProg<<std::endl;
 
-    EXPECT_NEAR((s_qpoases - s_uQuadProg).norm(),0.0, 1e-12);
+    EXPECT_NEAR((s_qpoases - s_eiQuadProg).norm(),0.0, 1e-12);
 
     EXPECT_TRUE(testProblemQPOASES->solve());
-    EXPECT_TRUE(testProblemuQuadProg->solve());
+    EXPECT_TRUE(testProblemeiQuadProg->solve());
     s_qpoases = testProblemQPOASES->getSolution();
-    s_uQuadProg = testProblemuQuadProg->getSolution();
-    EXPECT_EQ(-sp.g[0], s_uQuadProg[0]);
-    EXPECT_EQ(-sp.g[1], s_uQuadProg[1]);
-    EXPECT_NEAR((s_qpoases - s_uQuadProg).norm(),0.0, 1e-12);
+    s_eiQuadProg = testProblemeiQuadProg->getSolution();
+    EXPECT_EQ(-sp.g[0], s_eiQuadProg[0]);
+    EXPECT_EQ(-sp.g[1], s_eiQuadProg[1]);
+    EXPECT_NEAR((s_qpoases - s_eiQuadProg).norm(),0.0, 1e-12);
     std::cout<<"solution QPOASES: "<<s_qpoases.transpose()<<std::endl;
-    std::cout<<"solution uQuadProg: "<<s_uQuadProg.transpose()<<std::endl;
+    std::cout<<"solution aiQuadProg: "<<s_eiQuadProg.transpose()<<std::endl;
 
     for(unsigned int i = 0; i < 10; ++i)
     {
-        EXPECT_TRUE(testProblemuQuadProg->solve());
+        EXPECT_TRUE(testProblemeiQuadProg->solve());
         EXPECT_TRUE(testProblemQPOASES->solve());
 
-        Eigen::VectorXd s_uQuadProg = testProblemuQuadProg->getSolution();
+        Eigen::VectorXd s_eiQuadProg = testProblemeiQuadProg->getSolution();
         Eigen::VectorXd s_qpoases = testProblemQPOASES->getSolution();
-        EXPECT_NEAR(-sp.g[0], s_uQuadProg[0], 1e-12);
-        EXPECT_NEAR(-sp.g[1], s_uQuadProg[1], 1e-12);
-        EXPECT_NEAR((s_qpoases - s_uQuadProg).norm(),0.0, 1e-12);
+        EXPECT_NEAR(-sp.g[0], s_eiQuadProg[0], 1e-12);
+        EXPECT_NEAR(-sp.g[1], s_eiQuadProg[1], 1e-12);
+        EXPECT_NEAR((s_qpoases - s_eiQuadProg).norm(),0.0, 1e-12);
     }
 
 }
@@ -176,7 +175,7 @@ Eigen::VectorXd getRandomAngles(const Eigen::VectorXd &min,
     return q;
 }
 
-TEST_F(testuQuadProgProblem, testTask)
+TEST_F(testeiQuadProgProblem, testTask)
 {
     Eigen::VectorXd q_ref(10); q_ref.setZero(q_ref.size());
     Eigen::VectorXd q(q_ref.size()); q.setZero(q_ref.size());
@@ -221,7 +220,7 @@ TEST_F(testuQuadProgProblem, testTask)
 }
 
 using namespace OpenSoT::constraints::velocity;
-TEST_F(testuQuadProgProblem, testProblemWithConstraint)
+TEST_F(testeiQuadProgProblem, testProblemWithConstraint)
 {
         XBot::ModelInterface::Ptr _model_ptr;
         _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -324,7 +323,7 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
     return _q;
 }
 
-TEST_F(testuQuadProgProblem, testCartesian)
+TEST_F(testeiQuadProgProblem, testCartesian)
 {
     XBot::ModelInterface::Ptr _model_ptr;
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -389,7 +388,7 @@ TEST_F(testuQuadProgProblem, testCartesian)
                 EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
 }
 
-TEST_F(testuQuadProgProblem, testEpsRegularisation)
+TEST_F(testeiQuadProgProblem, testEpsRegularisation)
 {
     XBot::ModelInterface::Ptr _model_ptr;
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
@@ -460,7 +459,7 @@ TEST_F(testuQuadProgProblem, testEpsRegularisation)
                 EXPECT_NEAR(T(i,j), T_ref(i,j), 1E-4);
 }
 
-TEST_F(testuQuadProgProblem, testContructor2Problems)
+TEST_F(testeiQuadProgProblem, testContructor2Problems)
 {
     XBot::ModelInterface::Ptr _model_ptr;
     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);

@@ -1,6 +1,4 @@
 #include <gtest/gtest.h>
-#include <kdl/frames.hpp>
-#include <kdl/frames_io.hpp>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/solvers/iHQP.h>
