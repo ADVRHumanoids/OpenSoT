@@ -123,7 +123,6 @@ endif()
 #THESE TESTS DEPEND ON trajectory_utils
 if(${trajectory_utils_FOUND})
     set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                  testQPOases_StaticWalk_FloatingBase
                   testQPOases_StaticWalk
                   testEigenSVD_StaticWalk_FloatingBase) #57
 endif()
@@ -284,11 +283,6 @@ add_test(NAME OpenSoT_utils_affineHelper COMMAND testAffineHelper)
 
 
 if(${trajectory_utils_FOUND})
-    ADD_EXECUTABLE(testQPOases_StaticWalk_FloatingBase solvers/TestQPOases_StaticWalk_FloatingBase.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
-    add_dependencies(testQPOases_StaticWalk_FloatingBase   OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
-
     ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
     TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
     add_dependencies(testQPOases_StaticWalk   OpenSoT)
