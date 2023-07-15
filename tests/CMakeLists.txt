@@ -17,7 +17,6 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 nor C++14 support. Please use a different C++ compiler.")
 endif()
 
-find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher urdf srdfdom)
 find_package(osqp QUIET)
@@ -26,9 +25,8 @@ find_package(qpSWIFT QUIET)
 add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
 message(STATUS "DOPENSOT_TEST_PATH is ${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
+if(${rviz_visual_tools_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES} ${GTEST_INCLUDE_DIRS}
-                      ${trajectory_utils_INCLUDE_DIRS}
                       ${rviz_visual_tools_INCLUDE_DIRS})
 endif()
 
@@ -120,11 +118,9 @@ if(${FCL_FOUND})
 )
 endif()
 
-#THESE TESTS DEPEND ON trajectory_utils
-if(${trajectory_utils_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                  testQPOases_StaticWalk
-                  testEigenSVD_StaticWalk_FloatingBase) #57
+if(${rviz_visual_tools_FOUND})
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testQPOases_StaticWalk
+                                       testEigenSVD_StaticWalk_FloatingBase) #57
 endif()
 
 if(${qpSWIFT_FOUND})
@@ -176,8 +172,8 @@ if(${FCL_FOUND})
     SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
 endif()
 
-if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
-    SET(TestLibs ${TestLibs} ${rviz_visual_tools_LIBRARIES} ${trajectory_utils_LIBRARIES}) 
+if(${rviz_visual_tools_FOUND})
+    SET(TestLibs ${TestLibs} ${rviz_visual_tools_LIBRARIES})
 endif()
 
 if(${OPENSOT_SOTH_FRONT_END})
@@ -281,17 +277,16 @@ TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
 add_dependencies(testAffineHelper   OpenSoT)
 add_test(NAME OpenSoT_utils_affineHelper COMMAND testAffineHelper)
 
-
-if(${trajectory_utils_FOUND})
-    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
+if(${rviz_visual_tools_FOUND})
+    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
     TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
     add_dependencies(testQPOases_StaticWalk   OpenSoT)
     add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
 
-    ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
+    ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testEigenSVD_StaticWalk_FloatingBase   OpenSoT)
-    add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)  
+    add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
 endif()
 
 ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)

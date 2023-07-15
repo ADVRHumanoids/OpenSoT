@@ -1,6 +1,6 @@
-#include <trajectory_utils/trajectory_utils.h>
+#include "trajectory_utils.h"
 #include <gtest/gtest.h>
-#include <trajectory_utils/utils/ros_trj_publisher.h>
+#include "ros_trj_publisher.h"
 #include <tf/transform_broadcaster.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
