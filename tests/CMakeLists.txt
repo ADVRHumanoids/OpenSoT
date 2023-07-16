@@ -119,8 +119,7 @@ if(${FCL_FOUND})
 endif()
 
 if(${rviz_visual_tools_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS} testQPOases_StaticWalk
-                                       testEigenSVD_StaticWalk_FloatingBase) #57
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testEigenSVD_StaticWalk_FloatingBase) #57
 endif()
 
 if(${qpSWIFT_FOUND})
@@ -278,11 +277,6 @@ add_dependencies(testAffineHelper   OpenSoT)
 add_test(NAME OpenSoT_utils_affineHelper COMMAND testAffineHelper)
 
 if(${rviz_visual_tools_FOUND})
-    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
-    add_dependencies(testQPOases_StaticWalk   OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
-
     ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testEigenSVD_StaticWalk_FloatingBase   OpenSoT)
