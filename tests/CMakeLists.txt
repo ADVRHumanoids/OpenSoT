@@ -79,7 +79,6 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testAffineHelper
                   testPiler
                   testAffineUtils
-                  testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
                   testKinematics #40
                   testl1HQP
@@ -204,11 +203,6 @@ if(${OPENSOT_SOTH_FRONT_END})
     add_dependencies(testSOTH OpenSoT)
     add_test(NAME OpenSoT_solvers_soth COMMAND testSOTH)
 endif()
-
-ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
-TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})
-add_dependencies(testKinematicEstimationFloatingBase   OpenSoT)
-add_test(NAME OpenSoT_floating_base_KinematicEstimation COMMAND testKinematicEstimationFloatingBase)
 
 ADD_EXECUTABLE(testTask     tasks/TestTask.cpp)
 TARGET_LINK_LIBRARIES(testTask ${TestLibs})

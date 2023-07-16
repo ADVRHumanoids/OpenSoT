@@ -14,7 +14,7 @@
 #include <ros/master.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <qpOASES/Options.hpp>
-#include <OpenSoT/floating_base_estimation/qp_estimation.h>
+#include "qp_estimation.h"
 #include <sensor_msgs/JointState.h>
 
 std::string _path_to_cfg = OPENSOT_EXAMPLE_PATH "configs/coman/configs/config_coman_floating_base.yaml";

@@ -11,7 +11,7 @@ target_link_libraries(example2 OpenSoT)
 
 find_package(catkin QUIET COMPONENTS roscpp rviz_visual_tools tf)
 if(${catkin_FOUND})
-    add_executable(example3 example3.cpp
+    add_executable(example3 example3.cpp qp_estimation.cpp
                             ${OPENSOT_EXAMPLE_PATH}trajectory_utils.cpp
                             ${OPENSOT_EXAMPLE_PATH}path_circle_fix.cpp
                             ${OPENSOT_EXAMPLE_PATH}ros_trj_publisher.cpp)
