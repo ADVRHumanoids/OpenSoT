@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/JointLimitsInvariace.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
@@ -11,6 +12,82 @@
 std::string _path_to_cfg = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
 namespace {
+
+class testJointLimitsNaive : public ::testing::Test {
+ protected:
+
+  testJointLimitsNaive()
+  {
+
+      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
+      if(_model_ptr)
+          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
+      else
+          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+    // You can do set-up work for each test here.
+
+      _model_ptr->getJointLimits(qLowerBounds, qUpperBounds);
+      zeros.setZero(_model_ptr->getJointNum());
+      q.setZero(_model_ptr->getJointNum());
+
+
+      vel_max.setOnes(_model_ptr->getJointNum());
+      vel_max *= M_PI;
+
+      dt = 0.001;
+
+      jointLimits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(zeros, qUpperBounds, qLowerBounds);
+
+      jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(vel_max, dt);
+
+
+      logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimitsNaive_velocity");
+      logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+
+  }
+
+  virtual ~testJointLimitsNaive() {
+
+  }
+
+  // If the constructor and destructor are not enough for setting up
+  // and cleaning up each test, you can define the following methods:
+
+  virtual void SetUp() {
+    // Code here will be called immediately after the constructor (right
+    // before each test).
+      _model_ptr->setJointPosition(zeros);
+      _model_ptr->update();
+      jointLimits->update(zeros);
+  }
+
+  virtual void TearDown() {
+    // Code here will be called immediately after each test (right
+    // before the destructor).
+  }
+
+  // Objects declared here can be used by all tests in the test case for JointLimits.
+public:
+
+  OpenSoT::constraints::velocity::JointLimits::Ptr jointLimits;
+  OpenSoT::constraints::velocity::VelocityLimits::Ptr jointVelocityLimits;
+
+  Eigen::VectorXd qLowerBounds;
+  Eigen::VectorXd qUpperBounds;
+  Eigen::VectorXd zeros;
+  Eigen::VectorXd vel_max;
+  double dt;
+
+
+  Eigen::VectorXd q;
+  XBot::ModelInterface::Ptr _model_ptr;
+  XBot::MatLogger2::Ptr logger;
+
+};
+
+
+
 
 // The fixture for testing class JointLimits.
 class testJointLimits : public ::testing::Test {
@@ -255,6 +332,120 @@ TEST_F(testJointLimits, test_bounds)
 
     }
 }
+
+
+TEST_F(testJointLimitsNaive, test_bounds)
+{
+    this->q.setZero();
+
+    this->_model_ptr->setJointPosition(this->q);
+
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural = std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+
+    Eigen::VectorXd qref = 4. * Eigen::VectorXd::Ones(this->q.size());
+    postural->setReference(qref);
+
+
+    auto autostack = std::make_shared<OpenSoT::AutoStack>(postural);
+    autostack<<this->jointLimits<<this->jointVelocityLimits;
+
+    auto solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e6);
+
+    Eigen::VectorXd dq;
+    Eigen::VectorXd qdot_prev;
+    Eigen::VectorXd qdot, qddot;
+    dq.setZero(this->q.size());
+    qdot_prev.setZero(this->q.size());
+    qdot.setZero(this->q.size());
+    qddot.setZero(this->q.size());
+    this->_model_ptr->setJointVelocity(qdot_prev);
+
+    for(unsigned int i = 0; i < 3000; ++i)
+    {
+        this->logger->add("q", q);
+        this->logger->add("qdot", qdot);
+        this->logger->add("qddot", qddot);
+        this->logger->add("qdot_prev", qdot_prev);
+        this->logger->add("dq", dq);
+        this->logger->add("qdot_lim", this->vel_max);
+        this->logger->add("qmin", this->qLowerBounds);
+        this->logger->add("qmax", this->qUpperBounds);
+
+
+
+        this->_model_ptr->setJointPosition(this->q);
+        this->_model_ptr->setJointVelocity(qdot_prev);
+        this->_model_ptr->update();
+
+        autostack->update(q);
+        EXPECT_TRUE(solver->solve(dq));
+
+        autostack->log(this->logger);
+
+
+        this->q += dq;
+        qdot = dq/this->dt;
+
+
+
+        qddot = (qdot - qdot_prev)/this->dt;
+        qdot_prev = qdot;
+
+//        for(unsigned int j = 0; j < this->qUpperBounds.size(); ++j)
+//        {
+//            if(this->q[j] >= this->qUpperBounds[j])
+//                EXPECT_NEAR(this->q[j] - this->qUpperBounds[j], 0.0, 1e-5)<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+
+//            EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]);
+//        }
+
+
+    }
+
+
+    qref = -4. * Eigen::VectorXd::Ones(this->q.size());
+    postural->setReference(qref);
+
+    for(unsigned int i = 0; i < 2000; ++i)
+    {
+
+        this->logger->add("q", q);
+        this->logger->add("qdot", qdot);
+        this->logger->add("qddot", qddot);
+        this->logger->add("qdot_prev", qdot_prev);
+        this->logger->add("dq", dq);
+        this->logger->add("qdot_lim", this->vel_max);
+        this->logger->add("qmin", this->qLowerBounds);
+        this->logger->add("qmax", this->qUpperBounds);
+
+        this->_model_ptr->setJointPosition(this->q);
+        this->_model_ptr->setJointVelocity(qdot_prev);
+        this->_model_ptr->update();
+
+        autostack->update(q);
+        EXPECT_TRUE(solver->solve(dq));
+
+        autostack->log(this->logger);
+
+        this->q += dq;
+        qdot = dq/this->dt;
+
+        qddot = (qdot - qdot_prev)/this->dt;
+        qdot_prev = qdot;
+
+//        for(unsigned int j = 0; j < this->qUpperBounds.size(); ++j)
+//        {
+
+//            if(this->q[j] <= this->qLowerBounds[j])
+//                EXPECT_NEAR(this->qLowerBounds[j] - this->q[j], 0.0, 1e-5)<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+
+//            EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]);
+//        }
+
+    }
+}
+
 
 
 }  // namespace
