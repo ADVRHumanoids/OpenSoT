@@ -44,18 +44,27 @@ void JointLimitsInvariance::update(const Eigen::VectorXd &x)
 
     for(unsigned int i = 0; i < _upperBound.size(); ++i)
     {
-        double d = 2. * _jointAccMax[i] * _dt * _dt * (_jointLimitsMax[i] - x[i]);
-        if(d < 0.)
-            _upperBound[i] = std::min(-sqrt(fabs(d)), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
+        if(_qdot_prev[i] <= 0.)
+            _upperBound[i] = std::min(_jointLimitsMax[i] - x[i], _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
         else
-            _upperBound[i] = std::min(sqrt(d), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
+        {
+            double d = 2. * _jointAccMax[i] * _dt * _dt * (_jointLimitsMax[i] - x[i]);
+            if(d < 0.)
+                _upperBound[i] = std::min(-sqrt(fabs(d)), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
+            else
+                _upperBound[i] = std::min(sqrt(d), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
+        }
 
-
-        d = 2. * -_jointAccMax[i] * _dt * _dt * (_jointLimitsMin[i] - x[i]);
-        if(d < 0.)
-            _lowerBound[i] = std::max(sqrt(fabs(d)), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+        if(_qdot_prev[i] >= 0.)
+            _lowerBound[i] = std::max(_jointLimitsMin[i] - x[i], _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
         else
-            _lowerBound[i] = std::max(-sqrt(d), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+        {
+            double d = 2. * -_jointAccMax[i] * _dt * _dt * (_jointLimitsMin[i] - x[i]);
+            if(d < 0.)
+                _lowerBound[i] = std::max(sqrt(fabs(d)), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+            else
+                _lowerBound[i] = std::max(-sqrt(d), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+        }
 
 
         if(_lowerBound[i] > _upperBound[i])
