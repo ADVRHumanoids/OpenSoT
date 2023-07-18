@@ -282,7 +282,7 @@ TEST_F(testJointLimits, test_bounds)
         {
           //  if(this->q[j] >= this->qUpperBounds[j])
           //      EXPECT_NEAR(this->q[j] - this->qUpperBounds[j], 0.0, 1e-4)<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
-
+            EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+1e-6)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+1e-6)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
 
@@ -326,7 +326,7 @@ TEST_F(testJointLimits, test_bounds)
 
             //if(this->q[j] <= this->qLowerBounds[j])
             //    EXPECT_NEAR(this->qLowerBounds[j] - this->q[j], 0.0, 1e-4)<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
-
+            EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+1e-6)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+1e-6)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
 
