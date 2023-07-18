@@ -30,10 +30,13 @@ JointLimitsInvariance::JointLimitsInvariance(const Eigen::VectorXd &q,
     _jointLimitsMin(jointBoundMin),
     _jointLimitsMax(jointBoundMax),
     _jointAccMax(jointAccMax),
-    _robot(robot)
+    _robot(robot),
+    _lb(.0), _ub(0.), _acc_lim(0.), _pos_lim(0.), _via_lim(0.), _d(0.), _ac_lb(0), _ac_ub(0)
 {
     _upperBound.setZero(q.size());
     _lowerBound.setZero(q.size());
+    _active_constraint_lb.setZero(q.size());
+    _active_constraint_ub.setZero(q.size());
 
     update(q);
 }
@@ -44,34 +47,83 @@ void JointLimitsInvariance::update(const Eigen::VectorXd &x)
 
     for(unsigned int i = 0; i < _upperBound.size(); ++i)
     {
+        _acc_lim = _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i];
+        _pos_lim = _jointLimitsMax[i] - x[i];
         if(_qdot_prev[i] <= 0.)
-            _upperBound[i] = std::min(_jointLimitsMax[i] - x[i], _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
+        {
+            if(_pos_lim < _acc_lim)
+            {
+                _ub = _pos_lim;
+                _ac_ub = active_constraint::pos_lim;
+            }
+            else
+            {
+                _ub = _acc_lim;
+                _ac_ub = active_constraint::acc_lim;
+            }
+        }
         else
         {
-            double d = 2. * _jointAccMax[i] * _dt * _dt * (_jointLimitsMax[i] - x[i]);
-            if(d < 0.)
-                _upperBound[i] = std::min(-sqrt(fabs(d)), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
+            _d = 2. * _jointAccMax[i] * _dt * _dt * _pos_lim;
+            _via_lim = (_d < 0.) ? -sqrt(fabs(_d)) : sqrt(_d);
+            if(_via_lim < _acc_lim)
+            {
+                _ub = _via_lim;
+                _ac_ub = active_constraint::via_lim;
+            }
             else
-                _upperBound[i] = std::min(sqrt(d), _dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i]);
+            {
+                _ub = _acc_lim;
+                _ac_ub = active_constraint::pos_lim;
+            }
+
         }
 
+        _acc_lim = -_dt * _dt * _jointAccMax[i] + _dt*_qdot_prev[i];
+        _pos_lim = _jointLimitsMin[i] - x[i];
         if(_qdot_prev[i] >= 0.)
-            _lowerBound[i] = std::max(_jointLimitsMin[i] - x[i], _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+        {
+            if(_pos_lim > _acc_lim)
+            {
+                _lb = _pos_lim;
+                _ac_lb = active_constraint::pos_lim;
+            }
+            else
+            {
+                _lb = _acc_lim;
+                _ac_lb = active_constraint::acc_lim;
+            }
+        }
         else
         {
-            double d = 2. * -_jointAccMax[i] * _dt * _dt * (_jointLimitsMin[i] - x[i]);
-            if(d < 0.)
-                _lowerBound[i] = std::max(sqrt(fabs(d)), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+            _d = 2. * -_jointAccMax[i] * _dt * _dt * _pos_lim;
+            _via_lim = (_d < 0.) ? sqrt(fabs(_d)) : -sqrt(_d);
+            if(_via_lim > _acc_lim)
+            {
+                _lb = _via_lim;
+                _ac_lb = active_constraint::via_lim;
+            }
             else
-                _lowerBound[i] = std::max(-sqrt(d), _dt * _dt * -_jointAccMax[i] + _dt*_qdot_prev[i]);
+            {
+                _lb = _acc_lim;
+                _ac_lb = active_constraint::via_lim;
+            }
         }
 
 
-        if(_lowerBound[i] > _upperBound[i])
+        if(_lb > _ub)
         {
-            double tmp = _lowerBound[i];
-            _lowerBound[i] = _upperBound[i];
-            _upperBound[i] = tmp;
+            _lowerBound[i] = _ub;
+            _upperBound[i] = _lb;
+            _active_constraint_lb[i] = _ac_ub;
+            _active_constraint_ub[i] = _ac_lb;
+        }
+        else
+        {
+            _lowerBound[i] = _lb;
+            _upperBound[i] = _ub;
+            _active_constraint_lb[i] = _ac_lb;
+            _active_constraint_ub[i] = _ac_ub;
         }
 
     }

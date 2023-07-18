@@ -45,9 +45,22 @@
 
                 const XBot::ModelInterface& _robot;
 
-                Eigen::VectorXd _ub_sup, _ub_inf;
-                Eigen::VectorXd _lb_sup, _lb_inf;
+                double _lb, _ub, _acc_lim, _pos_lim, _via_lim, _d;
+                int _ac_lb, _ac_ub;
 
+                Eigen::VectorXd _active_constraint_lb, _active_constraint_ub;
+
+                enum active_constraint {
+                    pos_lim = 1,
+                    via_lim = 2,
+                    acc_lim = 3
+                };
+
+                void _log(XBot::MatLogger2::Ptr logger)
+                {
+                    logger->add("_active_constraint_lb", _active_constraint_lb);
+                    logger->add("_active_constraint_ub", _active_constraint_ub);
+                }
 
 
                 double _dt;
