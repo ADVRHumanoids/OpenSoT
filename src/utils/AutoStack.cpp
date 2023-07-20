@@ -1,4 +1,5 @@
 #include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/constraints/TaskToConstraint.h>
 #include <algorithm>
 
 namespace OpenSoT{
@@ -6,7 +7,7 @@ namespace OpenSoT{
 void operator/=(OpenSoT::AutoStack::Ptr& stack, const OpenSoT::tasks::Aggregated::TaskPtr task)
 {
     if(!stack.get())
-        stack = boost::make_shared<OpenSoT::AutoStack>(task);
+        stack = std::make_shared<OpenSoT::AutoStack>(task);
     else
         stack = stack/task;
 
@@ -66,9 +67,52 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
                                 const std::list<unsigned int>& rowIndices)
 {
+    if(rowIndices.size() > static_cast<unsigned int>(task->getA().rows()))
+        throw std::runtime_error("rowIndices.size() > task->getA.rows()");
+    auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+    if(*max >= task->getA().rows())
+        throw std::runtime_error("max(rowIndices) >= task->getA.rows()");
+
     OpenSoT::SubTask::Ptr sub_task;
     sub_task.reset(new OpenSoT::SubTask(task, rowIndices));
     return sub_task;
+}
+
+OpenSoT::SubConstraint::Ptr operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr constraint,
+                                      const std::list<unsigned int>& rowIndices)
+{
+    if(constraint->isBound())
+    {
+        if(rowIndices.size() > static_cast<unsigned int>(constraint->getUpperBound().size()))
+            throw std::runtime_error("rowIndices.size() > constraint->getUpperBound().size()");
+
+        auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+        if(*max >= constraint->getUpperBound().size())
+            throw std::runtime_error("max(rowIndices) >= constraint->getUpperBound().size()");
+    }
+    else if(constraint->isInequalityConstraint())
+    {
+        if(rowIndices.size() > static_cast<unsigned int>(constraint->getbUpperBound().size()))
+            throw std::runtime_error("rowIndices.size() > constraint->getbUpperBound().size()");
+
+        auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+        if(*max >= constraint->getbUpperBound().size())
+            throw std::runtime_error("max(rowIndices) >= constraint->getbUpperBound().size()");
+    }
+    else
+    {
+        if(rowIndices.size() > static_cast<unsigned int>(constraint->getbeq().size()))
+            throw std::runtime_error("rowIndices.size() > constraint->getbeq().size()");
+
+        auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
+        if(*max >= constraint->getbeq().size())
+            throw std::runtime_error("max(rowIndices) >= constraint->getbeq().size()");
+    }
+
+    OpenSoT::SubConstraint::Ptr sub_constraint;
+    sub_constraint = std::make_shared<OpenSoT::SubConstraint>(constraint, rowIndices);
+    return sub_constraint;
+
 }
 
 OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
@@ -272,7 +316,21 @@ OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
 
     return autoStack;
 }
+
+OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
+                                                const OpenSoT::tasks::Aggregated::TaskPtr constraint)
+{
+    task->getConstraints().push_back(std::make_shared<OpenSoT::constraints::TaskToConstraint>(constraint));
+    return task;
 }
+
+OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
+                                    const OpenSoT::tasks::Aggregated::TaskPtr constraint)
+{
+    return autoStack << std::make_shared<OpenSoT::constraints::TaskToConstraint>(constraint);
+}
+
+} // OpenSoT namespace
 
 OpenSoT::AutoStack::AutoStack(const double x_size) :
     _stack(),
@@ -301,6 +359,16 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack) :
             stack.front()->getXSize()))
 {
 
+}
+
+OpenSoT::AutoStack::AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
+          std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds):
+    _boundsAggregated(
+        new OpenSoT::constraints::Aggregated(
+            bounds,
+            bounds.front()->getXSize()))
+{
+    _stack.push_back(task);
 }
 
 OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack,
@@ -359,8 +427,8 @@ std::vector<OpenSoT::solvers::iHQP::TaskPtr> OpenSoT::AutoStack::flattenTask(
         task_vector.push_back(task);
     else
     {
-        boost::shared_ptr<OpenSoT::tasks::Aggregated> aggregated =
-                boost::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
+        std::shared_ptr<OpenSoT::tasks::Aggregated> aggregated =
+                std::dynamic_pointer_cast<OpenSoT::tasks::Aggregated>(task);
         std::list<OpenSoT::solvers::iHQP::TaskPtr> tasks_list = aggregated->getTaskList();
 
         std::list<OpenSoT::solvers::iHQP::TaskPtr>::iterator it;
@@ -390,8 +458,8 @@ OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
 
     for(unsigned int i = 0; i < task_vector.size(); ++i)
     {
-        boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> task_Cartesian =
-                boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task_vector[i]);
+        std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> task_Cartesian =
+                std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task_vector[i]);
         if(task_Cartesian)
         {
             std::string _base_link = task_Cartesian->getBaseLink();
@@ -400,8 +468,8 @@ OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
                 return task_vector[i];
         }
 
-        boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-                boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task_vector[i]);
+        std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+                std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task_vector[i]);
         if(task_CoM)
         {
             std::string _base_link = task_CoM->getBaseLink();
@@ -432,7 +500,7 @@ OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
     return OpenSoT::solvers::iHQP::TaskPtr();
 }
 
-void OpenSoT::AutoStack::log(XBot::MatLogger::Ptr logger)
+void OpenSoT::AutoStack::log(XBot::MatLogger2::Ptr logger)
 {
     for(auto task : _stack)
         task->log(logger);
@@ -456,5 +524,3 @@ bool OpenSoT::AutoStack::checkConsistency()
 
     return a;
 }
-
-

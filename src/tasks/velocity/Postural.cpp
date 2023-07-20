@@ -123,12 +123,12 @@ bool OpenSoT::tasks::velocity::Postural::reset()
 
 bool OpenSoT::tasks::velocity::Postural::isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
 }
 
 static OpenSoT::tasks::velocity::Postural::Ptr asPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
+    return std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Postural>(task);
 }
 
 const Eigen::VectorXd& OpenSoT::tasks::velocity::Postural::getCachedVelocityReference() const
@@ -136,7 +136,7 @@ const Eigen::VectorXd& OpenSoT::tasks::velocity::Postural::getCachedVelocityRefe
     return _xdot_desired_ref;
 }
 
-void OpenSoT::tasks::velocity::Postural::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::velocity::Postural::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id + "_position_err", _x_desired - _x);
     logger->add(_task_id + "_pos_ref", _x_desired);

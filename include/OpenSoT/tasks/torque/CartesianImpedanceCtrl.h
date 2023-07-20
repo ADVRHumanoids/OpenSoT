@@ -42,7 +42,7 @@
              */
             class CartesianImpedanceCtrl : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<CartesianImpedanceCtrl> Ptr;
+                typedef std::shared_ptr<CartesianImpedanceCtrl> Ptr;
             protected:
                 XBot::ModelInterface& _robot;
 
@@ -83,7 +83,7 @@
                 Eigen::VectorXd _tmp_vec;
                 Eigen::MatrixXd _tmpA;
 
-                virtual void _log(XBot::MatLogger::Ptr logger);
+                virtual void _log(XBot::MatLogger2::Ptr logger);
 
                 Indices _rows_indices;
 
@@ -113,8 +113,8 @@
 
             public:
 
-                Eigen::VectorXd positionError;
-                Eigen::VectorXd orientationError;
+                Eigen::Vector3d positionError;
+                Eigen::Vector3d orientationError;
                 Eigen::VectorXd linearVelocityError;
                 Eigen::VectorXd orientationVelocityError;
 

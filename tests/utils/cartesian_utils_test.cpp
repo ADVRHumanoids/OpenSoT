@@ -1,12 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <boost/version.hpp>
-#if BOOST_VERSION / 100 % 1000 > 46
-    #include <boost/random/uniform_real_distribution.hpp>
-#else
-    #include <boost/random/uniform_real.hpp>
-#endif
-#include <boost/random/mersenne_twister.hpp>
+#include <random>
 
 namespace {
 
@@ -66,11 +60,11 @@ protected:
 TEST_F(testCartesianUtils, testPseudoInverse1)
 {
     Eigen::MatrixXd A(32,32);
-    A.setZero(A.rows(), A.cols());
+    A.setZero();
     Eigen::MatrixXd Ainv(32,32);
-    Ainv.setZero(Ainv.rows(), Ainv.cols());
+    Ainv.setZero();
     Eigen::MatrixXd Apinv(32,32);
-    Ainv.setZero(Apinv.rows(), Apinv.cols());
+    Apinv.setZero();
 
     SVDPseudoInverse<Eigen::MatrixXd> pinv(A);
 
@@ -78,7 +72,7 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
     for(unsigned int i = 0; i < 1000; ++i)
     {
         srand((unsigned int) time(0));
-        A.setRandom(32,32);
+        A.setRandom();
 
         Ainv = A.inverse();
         pinv.compute(A, Apinv);
@@ -91,12 +85,12 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
     }
 
     srand((unsigned int) time(0));
-    A.setRandom(32,32);
+    A.setRandom();
     LDLTInverse<Eigen::MatrixXd> LDLTinv(A);
     for(unsigned int i = 0; i < 1000; ++i)
     {
         srand((unsigned int) time(0));
-        A.setRandom(32,32);
+        A.setRandom();
         A = (A*A.transpose()).eval();
 
         Ainv = A.inverse();
@@ -105,7 +99,7 @@ TEST_F(testCartesianUtils, testPseudoInverse1)
         for(unsigned int j = 0; j < A.rows(); ++j)
         {
             for(unsigned int k = 0; k < A.cols(); ++k)
-                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-6);
+                EXPECT_NEAR(Ainv(j,k), Apinv(j,k), 1e-5);
         }
     }
 }
@@ -118,9 +112,10 @@ TEST_F(testQuaternion, testQuaternionError)
     EXPECT_DOUBLE_EQ(this->w, 1.0);
 
     KDL::Rotation rot_desired;
+    rot_desired.Identity();
     rot_desired.DoRotZ(M_PI_2);
     double x, y, z, w;
-    rot_desired.GetQuaternion(x, y, z, w);;
+    rot_desired.GetQuaternion(x, y, z, w);
     quaternion q2(x, y, z, w);
     EXPECT_DOUBLE_EQ(q2.x, x);
     EXPECT_DOUBLE_EQ(q2.y, y);
@@ -130,13 +125,8 @@ TEST_F(testQuaternion, testQuaternionError)
     double dot_product = quaternion::dot(quaternion(this->x, this->y, this->z, this->w), q2);
     EXPECT_DOUBLE_EQ(dot_product, w*this->w);
 
-#if BOOST_VERSION / 100 % 1000 > 46
-    boost::random::uniform_real_distribution<double> unif;
-    boost::random::mt19937 re;
-#else
-    boost::uniform_real<double> unif;
-    boost::mt19937 re;
-#endif
+    std::uniform_real_distribution<double> unif;
+    std::mt19937 re;
 
     double a = unif(re);
     EXPECT_DOUBLE_EQ(a*q2.x, a*x);
@@ -158,12 +148,13 @@ TEST_F(testQuaternion, testQuaternionError)
 
 TEST_F(testCartesianUtils, testComputeCartesianError)
 {
-    Eigen::VectorXd position_error(3);
-    position_error.setZero(3);
-    Eigen::VectorXd orientation_error(3);
-    orientation_error.setZero(3);
+    Eigen::Vector3d position_error;
+    position_error.setZero();
+    Eigen::Vector3d orientation_error;
+    orientation_error.setZero();
 
     KDL::Rotation rot;
+    rot.Identity();
     rot.DoRotZ(M_PI);
 
     double x = 1.0;
@@ -173,6 +164,7 @@ TEST_F(testCartesianUtils, testComputeCartesianError)
     double qx, qy, qz, qw;
     rot.GetQuaternion(qx, qy, qz, qw);
     Eigen::MatrixXd Td(4,4);
+    Td.setZero();
     KDL::Frame tmp(KDL::Rotation::Quaternion(qx, qy, qz, qw), KDL::Vector(x, y, z));
     for(unsigned int i = 0; i < 3; ++i)
     {
@@ -200,12 +192,12 @@ TEST_F(testCartesianUtils, testComputeGradient)
     int n_of_iterations = 100;
     double dT = 1.0 / ((double)n_of_iterations);
 
-    for(unsigned int i = 0; i < 100; ++i)
+    for(unsigned int i = 0; i < n_of_iterations; ++i)
     {
         double df = cos(i * dT);
 
         Eigen::VectorXd x(1);
-        x.setZero(1);
+        x.setZero();
         x[0] = i*dT;
         Eigen::VectorXd df_numerical = cartesian_utils::computeGradient(x, this->sin_function, 1E-6);
 

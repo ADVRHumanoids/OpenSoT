@@ -18,9 +18,12 @@
 #ifndef __CONSTRAINT_H__
 #define __CONSTRAINT_H__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
+#include <matlogger2/matlogger2.h>
 #include <XBotInterface/Logger.hpp>
+
+#include <OpenSoT/version.h>
 
  namespace OpenSoT {
 
@@ -34,7 +37,7 @@
     class Constraint {
     public:
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
-        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
+        typedef std::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
 
         /**
@@ -100,7 +103,7 @@
          * @brief _log can be used to log internal Constraint variables
          * @param logger a shared pointer to a MatLogger
          */
-        virtual void _log(XBot::MatLogger::Ptr logger)
+        virtual void _log(XBot::MatLogger2::Ptr logger)
         {
 
         }
@@ -182,7 +185,7 @@
          * @brief log logs common Constraint internal variables
          * @param logger a shared pointer to a MathLogger
          */
-        virtual void log(XBot::MatLogger::Ptr logger)
+        virtual void log(XBot::MatLogger2::Ptr logger)
         {
             if(_Aeq.rows() > 0 && _Aeq.cols() > 0)
                 logger->add(_constraint_id + "_Aeq", _Aeq);

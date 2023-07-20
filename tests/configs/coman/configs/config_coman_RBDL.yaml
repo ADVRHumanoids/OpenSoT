@@ -1,8 +1,8 @@
 # COMAN config
 XBotInterface:
-  urdf_path: "external/OpenSoT/tests/robots/coman/coman.urdf"
-  srdf_path: "external/OpenSoT/tests/robots/coman/coman.srdf"
-  joint_map_path: "external/OpenSoT/tests/configs/coman/joint_map/coman_ecat_joint_map.yaml"
+  urdf_path: "$PWD/../../../robots/coman/coman.urdf"
+  srdf_path: "$PWD/../../../robots/coman/coman.srdf"
+
 
 RobotInterface:
   framework_name: "YARP"

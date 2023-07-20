@@ -40,7 +40,7 @@ public:
         CONSTRAINT
     };
     
-    typedef boost::shared_ptr<GenericConstraint> Ptr;
+    typedef std::shared_ptr<GenericConstraint> Ptr;
 
     /**
      * @brief GenericConstraint specific constructor for BOUND type
@@ -59,6 +59,10 @@ public:
                       const Eigen::VectorXd& lower_bound,
                       const Type constraint_type
                       );
+
+    bool setConstraint(const AffineHelper& var,
+                       const Eigen::VectorXd& upper_bound,
+                       const Eigen::VectorXd& lower_bound);
     
     bool setBounds(const Eigen::VectorXd& upper_bound,
                    const Eigen::VectorXd& lower_bound);

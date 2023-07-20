@@ -25,6 +25,7 @@
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <XBotInterface/Logger.hpp>
 #include <OpenSoT/SubTask.h>
+#include <OpenSoT/SubConstraint.h>
 
 /**
  * @example example_autostack.cpp
@@ -47,7 +48,7 @@ namespace OpenSoT {
     class AutoStack 
     {
         public:
-        typedef boost::shared_ptr<OpenSoT::AutoStack> Ptr;
+        typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
         private:
         OpenSoT::solvers::iHQP::Stack _stack;
 
@@ -64,6 +65,9 @@ namespace OpenSoT {
         public:
             AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
 
+            AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
+                      std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
+
             AutoStack(OpenSoT::solvers::iHQP::Stack stack);
 
             AutoStack(OpenSoT::solvers::iHQP::Stack stack,
@@ -75,7 +79,7 @@ namespace OpenSoT {
 
             void update(const Eigen::VectorXd & state);
 
-            void log(XBot::MatLogger::Ptr logger);
+            void log(XBot::MatLogger2::Ptr logger);
 
             bool checkConsistency();
 
@@ -169,6 +173,17 @@ OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
  */
 OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
                                 const std::list<unsigned int>& rowIndices);
+
+/**
+ * @brief operator % takes a constraint and a list of indices, generates a subconstraint
+ * @param constraint a constraint pointer
+ * @param rowIndices list of indices
+ * @return a pointer to a SubConstraint generated from task with the given indices
+ * TODO: this will not work with tasks under the folder torque, in that case another solution
+ * should be found
+ */
+OpenSoT::SubConstraint::Ptr operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr constraint,
+                                      const std::list<unsigned int>& rowIndices);
 
 /**
  * @brief operator + takes two tasks, generates a new Aggregated task
@@ -311,5 +326,28 @@ OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task
  */
 OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
                                     const OpenSoT::constraints::Aggregated::ConstraintPtr bound);
+
+/**
+ * @brief operator << adds a new tasks as a constraint to the task specified
+ * @param task a pointer to the task
+ * @param constraint a pointer to the constraint defined as a task
+ * @return a pointer to the same input task, with a constraint added
+ * (NOTICE the task is NOT a copy, it's the input task to which we
+ * added a new constraint)
+ */
+OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
+                                                const OpenSoT::tasks::Aggregated::TaskPtr constraint);
+
+/**
+ * @brief operator << adds a new tasks as a constraint to the stack specified
+ * @param stack a pointer to the stack
+ * @param constraint a pointer to the constraint defined as a task
+ * @return a pointer to the same input task, with a constraint added
+ * (NOTICE the task is NOT a copy, it's the input task to which we
+ * added a new constraint)
+ */
+OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack,
+                                    const OpenSoT::tasks::Aggregated::TaskPtr constraint);
+
 }
 #endif

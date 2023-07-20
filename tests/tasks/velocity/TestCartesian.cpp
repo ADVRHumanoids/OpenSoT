@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <XBotInterface/ModelInterface.h>
 
@@ -15,10 +15,9 @@ protected:
 
     testCartesianTask()
     {
-        std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-        std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
+        std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
-        _path_to_cfg = robotology_root + relative_path;
+        _path_to_cfg = relative_path;
 
         _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
@@ -144,7 +143,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 
@@ -236,7 +235,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 
@@ -340,7 +339,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 
@@ -435,7 +434,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
 
     cartesian.setReference(x_ref.matrix());
     cartesian.update(q_whole);
-    Eigen::VectorXd positionError, orientationError;
+    Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
 

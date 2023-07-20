@@ -1,0 +1,21 @@
+#
+#  Copyright
+#
+
+Installation instructions for library dg-tutorial
+----------------------------------------------
+
+It is recommended to create a specific directory to install this package.
+mkdir build
+cd build
+cmake [Options] ..
+make 
+make install
+
+Options:
+
+-DCMAKE_INSTALL_PREFIX=...
+  specifies the directory where to install the package.
+
+-DCMAKE_BUILD_TYPE=[none|debug|release|relwithdebinfo|MinSizeRel]
+  specifies to type of compilation (release, debug, ...)

@@ -1,11 +1,10 @@
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <OpenSoT/utils/DefaultHumanoidStack.h>
+#include "DefaultHumanoidStack.h"
 #include <gtest/gtest.h>
 
-std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = robotology_root + relative_path;
+std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = relative_path;
 
 namespace {
 
@@ -47,6 +46,48 @@ protected:
 
 };
 
+TEST_F(testAutoStack, test_complexAutostack)
+{
+    using namespace OpenSoT;
+
+    std::list<unsigned int> xyz = {0, 1, 2};
+    auto feet = DHS->leftLeg%xyz + DHS->rightLeg%xyz;
+
+    AutoStack::Ptr auto_stack;
+    auto_stack /= (DHS->leftArm + DHS->rightArm);
+    auto_stack = auto_stack<< DHS->jointLimits << feet;
+
+    Eigen::VectorXd q(_robot->getJointNum());
+    q.setRandom();
+
+    auto_stack->update(q);
+
+    std::cout<<"# of constraints: "<<auto_stack->getBounds()->getAineq().rows()<<std::endl;
+    std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
+    std::cout<<std::endl;
+    EXPECT_EQ(auto_stack->getBounds()->getAineq().rows(), xyz.size() + xyz.size());
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == DHS->leftLeg->getA().topRows(3));
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == DHS->rightLeg->getA().topRows(3));
+
+    DHS->leftLeg->setActive(false);
+
+    auto_stack->update(q);
+
+    std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == 0.*DHS->leftLeg->getA().topRows(3));
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == DHS->rightLeg->getA().topRows(3));
+
+    DHS->leftLeg->setActive(true);
+    DHS->rightLeg->setActive(false);
+
+    auto_stack->update(q);
+
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == DHS->leftLeg->getA().topRows(3));
+    EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == 0*DHS->rightLeg->getA().topRows(3));
+
+
+}
+
 TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
 {
     using namespace OpenSoT;
@@ -59,8 +100,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
 
     OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(com_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
     EXPECT_TRUE(task_CoM != NULL);
     EXPECT_TRUE(task_CoM->getTaskID().compare(task_id) == 0);
 
@@ -71,16 +112,16 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     task_id = "cartesian::l_wrist";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(Cartesian_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
     EXPECT_TRUE(left_arm != NULL);
     EXPECT_TRUE(left_arm->getTaskID().compare(task_id) == 0);
 
     task_id = "cartesian:r2l_sole";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(task_id);
     EXPECT_TRUE(Cartesian_task2 != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
     EXPECT_TRUE(right_left_leg != NULL);
     EXPECT_TRUE(right_left_leg->getTaskID().compare(task_id) == 0);
 }
@@ -98,8 +139,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
 
     OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(com_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
     EXPECT_TRUE(task_CoM != NULL);
     EXPECT_TRUE(task_CoM->getBaseLink().compare(base_link) == 0);
     EXPECT_TRUE(task_CoM->getDistalLink().compare(distal_link) == 0);
@@ -112,8 +153,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
     distal_link = "LSoftHand";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(Cartesian_task != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
     EXPECT_TRUE(left_arm != NULL);
     EXPECT_TRUE(left_arm->getBaseLink().compare(base_link) == 0);
     EXPECT_TRUE(left_arm->getDistalLink().compare(distal_link) == 0);
@@ -122,8 +163,8 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
     distal_link = "r_sole";
     OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(base_link, distal_link);
     EXPECT_TRUE(Cartesian_task2 != NULL);
-    boost::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
-            boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
+    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
+            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
     EXPECT_TRUE(right_left_leg != NULL);
     EXPECT_TRUE(right_left_leg->getBaseLink().compare(base_link) == 0);
     EXPECT_TRUE(right_left_leg->getDistalLink().compare(distal_link) == 0);
@@ -266,11 +307,11 @@ TEST_F(testAutoStack, testOperatorRedirection)
         / (DHS->rightLeg + DHS->leftLeg) << DHS->jointLimits << DHS->velocityLimits;
     EXPECT_TRUE(auto2->getBoundsList().size() == 2);
     EXPECT_TRUE(auto2->getStack().size() == 2);
-    EXPECT_TRUE(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().size() == 2);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().front()->getConstraints().size(), 2);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().back()->getConstraints().size(), 1);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().size(), 2);
-    EXPECT_EQ(boost::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().front()->getConstraints().size(), 0);
+    EXPECT_TRUE(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().size() == 2);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().front()->getConstraints().size(), 2);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[0])->getTaskList().back()->getConstraints().size(), 1);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().size(), 2);
+    EXPECT_EQ(std::dynamic_pointer_cast<tasks::Aggregated>(auto2->getStack()[1])->getTaskList().front()->getConstraints().size(), 0);
 }
 
 TEST_F(testAutoStack, testTaskConstructor)
@@ -425,6 +466,79 @@ TEST_F(testAutoStack, testOperatorStackEqual)
 
     EXPECT_TRUE(autostack->getStack()[0]->getA() == DHS->leftArm->getA());
     EXPECT_TRUE(autostack->getStack()[1]->getA() == DHS->rightArm->getA());
+}
+
+TEST_F(testAutoStack, testOperatorTaskToConstraint)
+{
+    //1) "TaskPtr << TaskPtr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task = DHS->leftArm << DHS->rightArm;
+    auto constraints = Task->getConstraints();
+    EXPECT_EQ(constraints.size(), 1);
+    auto constraint = *(constraints.begin());
+    EXPECT_TRUE(constraint->getAineq() == DHS->rightArm->getA());
+    EXPECT_TRUE(constraint->getbUpperBound() == DHS->rightArm->getb());
+    EXPECT_TRUE(constraint->getbLowerBound() == DHS->rightArm->getb());
+
+    //NOTE: DHS->leftArm now has one internal constraint!
+    std::cout<<"DHS->leftArm->getConstraints().size(): "<< DHS->leftArm->getConstraints().size()<<std::endl;
+    DHS->leftArm->getConstraints().pop_back();
+    std::cout<<"pop constraint from DHS->leftArm"<<std::endl;
+    std::cout<<"DHS->leftArm->getConstraints().size(): "<< DHS->leftArm->getConstraints().size()<<std::endl;
+    std::cout<<"Task->getConstraints().size(): "<< Task->getConstraints().size()<<std::endl;
+
+
+    //2) "TaskPtr << Aggregated::Ptr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task2 = DHS->leftLeg << (DHS->leftArm + DHS->rightArm);
+    auto constraints2 = Task2->getConstraints();
+    EXPECT_EQ(constraints2.size(), 1);
+    auto constraint2 = *(constraints2.begin());
+    EXPECT_TRUE(constraint2->getAineq() == (DHS->leftArm + DHS->rightArm)->getA());
+    EXPECT_TRUE(constraint2->getbUpperBound() == (DHS->leftArm + DHS->rightArm)->getb());
+    EXPECT_TRUE(constraint2->getbLowerBound() == (DHS->leftArm + DHS->rightArm)->getb());
+
+    //NOTE: DHS->leftLeg now has one internal constraint!
+    std::cout<<"DHS->leftLeg->getConstraints().size(): "<< DHS->leftLeg->getConstraints().size()<<std::endl;
+    DHS->leftLeg->getConstraints().pop_back();
+    std::cout<<"pop constraint from DHS->leftLeg"<<std::endl;
+    std::cout<<"DHS->leftLeg->getConstraints().size(): "<< DHS->leftLeg->getConstraints().size()<<std::endl;
+    std::cout<<"Task2->getConstraints().size(): "<< Task2->getConstraints().size()<<std::endl;
+
+    //3) "Aggregated::Ptr << TaskPtr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task3 =  (DHS->leftArm + DHS->rightArm) << DHS->leftLeg;
+    auto constraints3 = Task3->getConstraints();
+    EXPECT_EQ(constraints3.size(), 1);
+    auto constraint3 = *(constraints3.begin());
+    EXPECT_TRUE(constraint3->getAineq() == DHS->leftLeg->getA());
+    EXPECT_TRUE(constraint3->getbUpperBound() == DHS->leftLeg->getb());
+    EXPECT_TRUE(constraint3->getbLowerBound() == DHS->leftLeg->getb());
+
+    //4) "Aggregated::Ptr << Aggregated::Ptr"
+    OpenSoT::tasks::Aggregated::TaskPtr Task4 =  (DHS->leftArm + DHS->rightArm) << (DHS->leftLeg + DHS->rightLeg);
+    auto constraints4 = Task4->getConstraints();
+    EXPECT_EQ(constraints4.size(), 1);
+    auto constraint4 = *(constraints4.begin());
+    EXPECT_TRUE(constraint4->getAineq() == (DHS->leftLeg + DHS->rightLeg)->getA());
+    EXPECT_TRUE(constraint4->getbUpperBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+    EXPECT_TRUE(constraint4->getbLowerBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+
+    //5) "Stack << TaskPtr"
+    OpenSoT::AutoStack::Ptr stack = (DHS->leftArm / DHS->rightArm) << DHS->leftLeg;
+    auto constraints5 = stack->getBoundsList();
+    EXPECT_EQ(constraints5.size(), 1);
+    auto constraint5 = *(constraints5.begin());
+    EXPECT_TRUE(constraint5->getAineq() == DHS->leftLeg->getA());
+    EXPECT_TRUE(constraint5->getbUpperBound() == DHS->leftLeg->getb());
+    EXPECT_TRUE(constraint5->getbLowerBound() == DHS->leftLeg->getb());
+
+    //6) "Stack << Aggregated::Ptr"
+    OpenSoT::AutoStack::Ptr stack2 = (DHS->leftArm / DHS->rightArm) << (DHS->leftLeg + DHS->rightLeg);
+    auto constraints6 = stack2->getBoundsList();
+    EXPECT_EQ(constraints6.size(), 1);
+    auto constraint6 = *(constraints6.begin());
+    EXPECT_TRUE(constraint6->getAineq() == (DHS->leftLeg + DHS->rightLeg)->getA());
+    EXPECT_TRUE(constraint6->getbUpperBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+    EXPECT_TRUE(constraint6->getbLowerBound() == (DHS->leftLeg + DHS->rightLeg)->getb());
+
 }
 
 }

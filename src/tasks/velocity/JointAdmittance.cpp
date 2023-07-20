@@ -107,12 +107,12 @@ void JointAdmittance::setFilterParams(const double time_step, const double dampi
 
 bool JointAdmittance::isJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::JointAdmittance>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::velocity::JointAdmittance>(task);
 }
 
 JointAdmittance::Ptr JointAdmittance::asJointAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::JointAdmittance>(task);
+    return std::dynamic_pointer_cast<OpenSoT::tasks::velocity::JointAdmittance>(task);
 }
 
 

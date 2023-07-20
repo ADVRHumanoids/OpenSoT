@@ -1,6 +1,6 @@
 #include <OpenSoT/solvers/GLPKBackEnd.h>
 #include <XBotInterface/SoLib.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/date_time.hpp>
 
 
@@ -79,7 +79,7 @@ void GLPKBackEnd::printErrorOutput(const int out)
 
     boost::posix_time::ptime time = boost::posix_time::second_clock::local_time();
     std::stringstream ss;
-    ss<<"mip_priblem_"+time.date().year();
+    ss<<"mip_problem_"+time.date().year();
     ss<<"_"+time.date().month();
     ss<<"_"+time.date().day();
     ss<<"_"+time.time_of_day().hours();
@@ -111,7 +111,7 @@ bool GLPKBackEnd::solve()
     }
 
 
-    for(unsigned int i = 0; i < _g[i]; ++i)
+    for(unsigned int i = 0; i < _g.size(); ++i)
         glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
     for(unsigned int i = 0; i < _A.rows(); ++i)
@@ -170,7 +170,7 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     //SETTING BOUNDS & COST FUNCTION
     for(unsigned int i = 0; i < _l.rows(); ++i)
         glp_set_col_bnds(_mip, i+1, checkConstrType(_u[i], _l[i]), _l[i], _u[i]);
-    for(unsigned int i = 0; i < _g[i]; ++i)
+    for(unsigned int i = 0; i < _g.size(); ++i)
         glp_set_obj_coef(_mip, i+1, _g[i]);
     //SETTING CONSTRAINTS
     for(unsigned int i = 0; i < _A.rows(); ++i)
@@ -187,7 +187,7 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
     glp_simplex(_mip, &_param_simplex);
 
 
-    _param.fp_heur = GLP_ON;
+    _param.fp_heur = GLP_OFF;
 
 
 
@@ -206,8 +206,15 @@ bool GLPKBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g
         _solution[i] = glp_mip_col_val(_mip, i+1);
 
 
-    _opt.param = boost::make_shared<glp_iocp>(_param);
+    _opt.param = std::make_shared<glp_iocp>(_param);
+
+    //glp_write_lp(_mip, NULL, "test_cplex_lp");
     return true;
+}
+
+int GLPKBackEnd::writeLP()
+{
+    return glp_write_lp(_mip, NULL, "lp_problem");
 }
 
 //IN EIGEN COLUMN MAJOIR!

@@ -101,12 +101,12 @@ void CartesianAdmittance::getWrenchReference(Eigen::Vector6d& wrench_reference)
 
 bool CartesianAdmittance::isCartesianAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
 }
 
 OpenSoT::tasks::velocity::CartesianAdmittance::Ptr CartesianAdmittance::asCartesianAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
+    return std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
 }
 
 const Eigen::Matrix6d& CartesianAdmittance::getCartesianCompliance()
@@ -137,7 +137,7 @@ void CartesianAdmittance::setFilterDamping(const double damping)
         XBot::Logger::warning("damping filter is negative!");
 }
 
-void CartesianAdmittance::_log(XBot::MatLogger::Ptr logger)
+void CartesianAdmittance::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id + "_wrench_error", _wrench_error);
     logger->add(_task_id + "_wrench_filt", _wrench_filt);

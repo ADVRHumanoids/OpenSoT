@@ -1,20 +1,22 @@
 #include <OpenSoT/tasks/acceleration/Cartesian.h>
 #include <XBotInterface/RtLog.hpp>
 using XBot::Logger;
+using namespace OpenSoT::tasks::acceleration;
 
-const std::string OpenSoT::tasks::acceleration::Cartesian::world_name = "world";
+const std::string Cartesian::world_name = "world";
 
-OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
-          const Eigen::VectorXd& x,
-          const XBot::ModelInterface& robot,
-          const std::string& distal_link,
-          const std::string& base_link
-         ):
+Cartesian::Cartesian(const std::string task_id,
+                     const Eigen::VectorXd& x,
+                     const XBot::ModelInterface& robot,
+                     const std::string& distal_link,
+                     const std::string& base_link
+                     ):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x.size()),
     _robot(robot),
     _distal_link(distal_link),
     _base_link(base_link),
-    _orientation_gain(1.0)
+    _orientation_gain(1.0),
+    _gain_type(GainType::Acceleration)
 {
     _qddot = AffineHelper::Identity(x.size());
 
@@ -45,17 +47,18 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     
 }
 
-OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
-                                                   const XBot::ModelInterface& robot, 
-                                                   const std::string& distal_link, 
-                                                   const std::string& base_link, 
-                                                   const OpenSoT::AffineHelper& qddot): 
+Cartesian::Cartesian(const std::string task_id,
+                     const XBot::ModelInterface& robot,
+                     const std::string& distal_link,
+                     const std::string& base_link,
+                     const OpenSoT::AffineHelper& qddot):
     Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, qddot.getInputSize()),
     _robot(robot),
     _distal_link(distal_link),
     _base_link(base_link),
     _qddot(qddot),
-    _orientation_gain(1.0)
+    _orientation_gain(1.0),
+    _gain_type(GainType::Acceleration)
 {
     resetReference();
 
@@ -83,17 +86,27 @@ OpenSoT::tasks::acceleration::Cartesian::Cartesian(const std::string task_id,
     
 }
 
-const std::string& OpenSoT::tasks::acceleration::Cartesian::getBaseLink() const
+void Cartesian::setGainType(GainType type)
+{
+    _gain_type = type;
+}
+
+OpenSoT::tasks::acceleration::GainType Cartesian::getGainType() const
+{
+    return _gain_type;
+}
+
+const std::string& Cartesian::getBaseLink() const
 {
     return _base_link;
 }
 
-const std::string& OpenSoT::tasks::acceleration::Cartesian::getDistalLink() const
+const std::string& Cartesian::getDistalLink() const
 {
     return _distal_link;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setOrientationGain(double orientation_gain)
+void Cartesian::setOrientationGain(double orientation_gain)
 {
     if(orientation_gain < 0)
     {
@@ -104,13 +117,13 @@ void OpenSoT::tasks::acceleration::Cartesian::setOrientationGain(double orientat
     _orientation_gain = orientation_gain;
 }
 
-const double OpenSoT::tasks::acceleration::Cartesian::getOrientationErrorGain() const
+const double Cartesian::getOrientationErrorGain() const
 {
     return _orientation_gain;
 }
 
 
-void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
+void Cartesian::_update(const Eigen::VectorXd& x)
 {
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
@@ -138,16 +151,26 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     _velocity_error = _vel_ref - _vel_current; ///Maybe here we should multiply the _orientation_gain as well?
 
     _cartesian_task = _J*_qddot + _jdotqdot;
-    if(_virtual_force_ref.isZero())
+    if(_gain_type == Acceleration)
+    {
         _cartesian_task = _cartesian_task - _acc_ref
-                                      - _lambda2*_Kd*_velocity_error
-                                      - _lambda*_Kp*_pose_error;
-    else{
+                          - _lambda2*_Kd*_velocity_error
+                          - _lambda*_Kp*_pose_error;
+    }
+    else if(_gain_type == Force)
+    {
         compute_cartesian_inertia_inverse();
+
         _cartesian_task = _cartesian_task - _acc_ref
-                                      - _lambda2*_Kd*_velocity_error
-                                      - _lambda*_Kp*_pose_error
-                                      - _Mi*_virtual_force_ref;}
+                          - _lambda2*_Mi*_Kd*_velocity_error
+                          - _lambda*_Mi*_Kp*_pose_error
+                          - _Mi*_virtual_force_ref;
+    }
+    else
+    {
+        // we should never get here
+        throw std::runtime_error("unsupported GainType value");
+    }
     
     _A = _cartesian_task.getM();
     _b = -_cartesian_task.getq();
@@ -157,7 +180,7 @@ void OpenSoT::tasks::acceleration::Cartesian::_update(const Eigen::VectorXd& x)
     _virtual_force_ref.setZero();
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setPositionReference(const Eigen::Vector3d& pos_ref)
+void Cartesian::setPositionReference(const Eigen::Vector3d& pos_ref)
 {
     _pose_ref.translation() = pos_ref;
     _vel_ref.setZero();
@@ -167,7 +190,7 @@ void OpenSoT::tasks::acceleration::Cartesian::setPositionReference(const Eigen::
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& ref)
+void Cartesian::setReference(const KDL::Frame& ref)
 {
     tf::transformKDLToEigen(ref, _pose_ref);
     _vel_ref.setZero();
@@ -177,7 +200,7 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& ref
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& ref)
+void Cartesian::setReference(const Eigen::Affine3d& ref)
 {
     _pose_ref = ref;
     _vel_ref.setZero();
@@ -187,8 +210,8 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& pose_ref,
-                                                           const Eigen::Vector6d& vel_ref)
+void Cartesian::setReference(const Eigen::Affine3d& pose_ref,
+                             const Eigen::Vector6d& vel_ref)
 {
     _pose_ref = pose_ref;
     _vel_ref = vel_ref;
@@ -198,8 +221,8 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pose_ref,
-                                                            const KDL::Twist& vel_ref)
+void Cartesian::setReference(const KDL::Frame& pose_ref,
+                             const KDL::Twist& vel_ref)
 {
     tf::transformKDLToEigen(pose_ref, _pose_ref);
     tf::twistKDLToEigen(vel_ref, _vel_ref);
@@ -209,9 +232,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pos
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d& pose_ref,
-                                                           const Eigen::Vector6d& vel_ref,
-                                                           const Eigen::Vector6d& acc_ref)
+void Cartesian::setReference(const Eigen::Affine3d& pose_ref,
+                             const Eigen::Vector6d& vel_ref,
+                             const Eigen::Vector6d& acc_ref)
 {
     _pose_ref = pose_ref;
     _vel_ref = vel_ref;
@@ -221,9 +244,9 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const Eigen::Affine3d
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pose_ref,
-                  const KDL::Twist& vel_ref,
-                  const KDL::Twist& acc_ref)
+void Cartesian::setReference(const KDL::Frame& pose_ref,
+                             const KDL::Twist& vel_ref,
+                             const KDL::Twist& acc_ref)
 {
     tf::transformKDLToEigen(pose_ref, _pose_ref);
     tf::twistKDLToEigen(vel_ref, _vel_ref);
@@ -233,12 +256,12 @@ void OpenSoT::tasks::acceleration::Cartesian::setReference(const KDL::Frame& pos
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setVirtualForce(const Eigen::Vector6d& virtual_force_ref)
+void Cartesian::setVirtualForce(const Eigen::Vector6d& virtual_force_ref)
 {
     _virtual_force_ref = virtual_force_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda)
+void Cartesian::setLambda(double lambda)
 {
     if(lambda < 0){
         XBot::Logger::error("in %s: illegal lambda (%f < 0) \n", __func__, lambda);
@@ -248,7 +271,7 @@ void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda)
     _lambda2 = 2*std::sqrt(lambda);
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda1, double lambda2)
+void Cartesian::setLambda(double lambda1, double lambda2)
 {
     if( lambda1 < 0 || lambda2 < 0 )
     {
@@ -260,7 +283,7 @@ void OpenSoT::tasks::acceleration::Cartesian::setLambda(double lambda1, double l
     _lambda2 = lambda2;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::resetReference()
+void Cartesian::resetReference()
 {
     if(_base_link == world_name){
         _robot.getPose(_distal_link, _pose_ref);
@@ -270,7 +293,7 @@ void OpenSoT::tasks::acceleration::Cartesian::resetReference()
     }
 }
 
-bool OpenSoT::tasks::acceleration::Cartesian::reset()
+bool Cartesian::reset()
 {
     resetReference();
     _vel_ref.setZero();
@@ -285,7 +308,7 @@ bool OpenSoT::tasks::acceleration::Cartesian::reset()
 }
 
 
-void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
+void Cartesian::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(getTaskID() + "_pose_error", _pose_error);
     logger->add(getTaskID() + "_velocity_error", _velocity_error);
@@ -294,44 +317,46 @@ void OpenSoT::tasks::acceleration::Cartesian::_log(XBot::MatLogger::Ptr logger)
     logger->add(getTaskID() + "_velocity_reference", _vel_ref_cached);
     logger->add(getTaskID() + "_acceleration_reference", _acc_ref_cached);
     logger->add(getTaskID() +  "_virtual_force_reference", _virtual_force_ref_cached);
+
+    logger->add(getTaskID() + "_lambda2", _lambda2);
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& ref)
+void Cartesian::getReference(Eigen::Affine3d& ref)
 {
     ref = _pose_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getReference(KDL::Frame& ref)
+void Cartesian::getReference(KDL::Frame& ref)
 {
     tf::transformEigenToKDL(_pose_ref, ref);
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& desiredPose,
-                  Eigen::Vector6d& desiredTwist)
+void Cartesian::getReference(Eigen::Affine3d& desiredPose,
+                             Eigen::Vector6d& desiredTwist)
 {
     desiredPose = _pose_ref;
     desiredTwist = _vel_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getReference(KDL::Frame& desiredPose,
-                  KDL::Twist& desiredTwist)
+void Cartesian::getReference(KDL::Frame& desiredPose,
+                             KDL::Twist& desiredTwist)
 {
     tf::transformEigenToKDL(_pose_ref, desiredPose);
     tf::twistEigenToKDL(_vel_ref, desiredTwist);
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getReference(Eigen::Affine3d& desiredPose,
-                  Eigen::Vector6d& desiredTwist,
-                  Eigen::Vector6d& desiredAcceleration)
+void Cartesian::getReference(Eigen::Affine3d& desiredPose,
+                             Eigen::Vector6d& desiredTwist,
+                             Eigen::Vector6d& desiredAcceleration)
 {
     desiredPose = _pose_ref;
     desiredTwist = _vel_ref;
     desiredAcceleration = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getReference(KDL::Frame& desiredPose,
-                  KDL::Twist& desiredTwist,
-                  KDL::Twist& desiredAcceleration)
+void Cartesian::getReference(KDL::Frame& desiredPose,
+                             KDL::Twist& desiredTwist,
+                             KDL::Twist& desiredAcceleration)
 {
     tf::transformEigenToKDL(_pose_ref, desiredPose);
     tf::twistEigenToKDL(_vel_ref, desiredTwist);
@@ -339,42 +364,42 @@ void OpenSoT::tasks::acceleration::Cartesian::getReference(KDL::Frame& desiredPo
 }
 
 
-void OpenSoT::tasks::acceleration::Cartesian::getActualPose(Eigen::Affine3d& actual)
+void Cartesian::getActualPose(Eigen::Affine3d& actual)
 {
     actual = _pose_current;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getActualPose(KDL::Frame& actual)
+void Cartesian::getActualPose(KDL::Frame& actual)
 {
     tf::transformEigenToKDL(_pose_current, actual);
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getActualTwist(Eigen::Vector6d& actual)
+void Cartesian::getActualTwist(Eigen::Vector6d& actual)
 {
     actual = _vel_current;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getActualTwist(KDL::Twist& actual)
+void Cartesian::getActualTwist(KDL::Twist& actual)
 {
     tf::twistEigenToKDL(_vel_current, actual);
 }
 
-const bool OpenSoT::tasks::acceleration::Cartesian::baseLinkIsWorld() const
+const bool Cartesian::baseLinkIsWorld() const
 {
     return _base_link == world_name;
 }
 
-bool OpenSoT::tasks::acceleration::Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+bool Cartesian::isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
+    return (bool)std::dynamic_pointer_cast<Cartesian>(task);
 }
 
-OpenSoT::tasks::acceleration::Cartesian::Ptr OpenSoT::tasks::acceleration::Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
+Cartesian::Ptr Cartesian::asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::acceleration::Cartesian>(task);
+    return std::dynamic_pointer_cast<Cartesian>(task);
 }
 
-bool OpenSoT::tasks::acceleration::Cartesian::setDistalLink(const std::string& distal_link)
+bool Cartesian::setDistalLink(const std::string& distal_link)
 {
     if(distal_link.compare(_distal_link) == 0){
         return true;
@@ -397,7 +422,7 @@ bool OpenSoT::tasks::acceleration::Cartesian::setDistalLink(const std::string& d
     return true;
 }
 
-bool OpenSoT::tasks::acceleration::Cartesian::setBaseLink(const std::string& base_link)
+bool Cartesian::setBaseLink(const std::string& base_link)
 {
     if(base_link.compare(_base_link) == 0)
         return true;
@@ -420,75 +445,75 @@ bool OpenSoT::tasks::acceleration::Cartesian::setBaseLink(const std::string& bas
     return true;
 }
 
-const Eigen::Vector6d OpenSoT::tasks::acceleration::Cartesian::getError() const
+const Eigen::Vector6d& Cartesian::getError() const
 {
     return _pose_error;
 }
 
-const Eigen::Vector6d OpenSoT::tasks::acceleration::Cartesian::getVelocityError() const
+const Eigen::Vector6d& Cartesian::getVelocityError() const
 {
     return _velocity_error;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getLambda(double & lambda, double & lambda2)
+void Cartesian::getLambda(double & lambda, double & lambda2)
 {
     lambda = _lambda;
     lambda2 = _lambda2;
 }
 
-const double OpenSoT::tasks::acceleration::Cartesian::getLambda2() const
+const double Cartesian::getLambda2() const
 {
     return _lambda2;
 }
 
-const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getCachedVelocityReference() const
+const Eigen::Vector6d& Cartesian::getCachedVelocityReference() const
 {
     return _vel_ref_cached;
 }
 
-const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getCachedAccelerationReference() const
+const Eigen::Vector6d& Cartesian::getCachedAccelerationReference() const
 {
     return _acc_ref_cached;
 }
 
-const Eigen::Vector6d& OpenSoT::tasks::acceleration::Cartesian::getCachedVirtualForceReference() const
+const Eigen::Vector6d& Cartesian::getCachedVirtualForceReference() const
 {
     return _virtual_force_ref_cached;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setKp(const Eigen::Matrix6d& Kp)
+void Cartesian::setKp(const Eigen::Matrix6d& Kp)
 {
     _Kp = Kp;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setKd(const Eigen::Matrix6d& Kd)
+void Cartesian::setKd(const Eigen::Matrix6d& Kd)
 {
     _Kd = Kd;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd)
+void Cartesian::setGains(const Eigen::Matrix6d& Kp, const Eigen::Matrix6d& Kd)
 {
     setKp(Kp);
     setKd(Kd);
 }
 
-const Eigen::Matrix6d& OpenSoT::tasks::acceleration::Cartesian::getKp() const
+const Eigen::Matrix6d& Cartesian::getKp() const
 {
     return _Kp;
 }
 
-const Eigen::Matrix6d& OpenSoT::tasks::acceleration::Cartesian::getKd() const
+const Eigen::Matrix6d& Cartesian::getKd() const
 {
     return _Kd;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::getGains(Eigen::Matrix6d& Kp, Eigen::Matrix6d& Kd)
+void Cartesian::getGains(Eigen::Matrix6d& Kp, Eigen::Matrix6d& Kd)
 {
     Kp = _Kp;
     Kd = _Kd;
 }
 
-void OpenSoT::tasks::acceleration::Cartesian::compute_cartesian_inertia_inverse()
+void Cartesian::compute_cartesian_inertia_inverse()
 {
     _robot.getInertiaInverse(_Bi);
 

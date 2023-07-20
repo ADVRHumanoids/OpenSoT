@@ -23,59 +23,124 @@
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/utils/Piler.h>
+#include <OpenSoT/constraints/Aggregated.h>
+
 
 #include <Eigen/Dense>
 
 namespace OpenSoT {
    namespace constraints {
        namespace force {
-       /**
-        * @brief The CoP class implements a constraint which constraints the contact wrenches to create a CoP which lies inside the
-        * contact foot/hand
-        */
        class CoP: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
        public:
-        typedef boost::shared_ptr<CoP> Ptr;
+           typedef std::shared_ptr<CoP> Ptr;
 
-           /**
+        /**
          * @brief CoP constructor of the CoP constraint
          * @param model of the robot
-         * @param wrenches affine helper
-         * @param contact_links vector of robot links which considered in contact with the environment
-         * @param X_Lims [xl, xu] limits (we assume same limits for all the contacts)
-         * @param Y_Lims [yl, yu] limits (we assume same limits for all the contacts)
+         * @param wrenche affine helper
+         * @param contact_link frame in contact with the environment
+         * @param X_Lims [xl, xu] limits w.r.t. contact frame
+         * @param Y_Lims [yl, yu] limits
          */
-        CoP(XBot::ModelInterface& model,
-            const std::vector<OpenSoT::AffineHelper>& wrenches,
-            const std::vector<std::string>& contact_links,
-            const Eigen::Vector2d& X_Lims, const Eigen::Vector2d& Y_Lims);
+            CoP(const std::string& contact_link,
+                const AffineHelper& wrench,
+                XBot::ModelInterface& model,
+                const Eigen::Vector2d& X_Lims,
+                const Eigen::Vector2d& Y_Lims);
 
+       private:
+
+            virtual void update(const Eigen::VectorXd& x);
+
+            std::string _contact_link;
+
+            XBot::ModelInterface& _model;
+
+            double _xl, _xu;
+            double _yl, _yu;
+
+            Eigen::MatrixXd _Ai;
+            Eigen::MatrixXd _tmp;
+
+            Eigen::MatrixXd __A;
+
+            Eigen::Affine3d _T;
+            Eigen::Affine3d _Ti;
+            Eigen::MatrixXd _Ad;
+
+            OpenSoT::AffineHelper _wrench;
+            OpenSoT::AffineHelper _CoP;
+       };
+
+       class CoPs: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
+       public:
+           typedef std::shared_ptr<CoPs> Ptr;
+
+           CoPs(const std::vector<AffineHelper>& wrench,
+                const std::vector<std::string>& contact_name,
+                XBot::ModelInterface &robot,
+                const std::vector<Eigen::Vector2d>& X_Lims,
+                const std::vector<Eigen::Vector2d>& Y_Lims);
+
+           CoP::Ptr getCoP(const std::string& contact_name);
+
+           void update(const Eigen::VectorXd &x);
 
 
        private:
-        virtual void update(const Eigen::VectorXd& x);
-        virtual void _log(XBot::MatLogger::Ptr logger);
-        std::vector<std::string> _contact_links;
-
-        std::vector<bool> _enabled_contacts;
-        XBot::ModelInterface& _model;
-
-        double _xl, _xu;
-        double _yl, _yu;
-
-        Eigen::MatrixXd _Ai;
-        Eigen::MatrixXd _tmp;
-
-        Eigen::MatrixXd __A;
-
-        Eigen::Affine3d _T;
-        Eigen::Affine3d _Ti;
-        Eigen::MatrixXd _Ad;
-
-        OpenSoT::AffineHelper _wrenches;
-        OpenSoT::AffineHelper _CoP;
+           OpenSoT::constraints::Aggregated::Ptr _internal_constraint;
+           void generateBounds();
 
        };
+
+/** OLD API **
+//       /**
+//        * @brief The CoP class implements a constraint which constraints the contact wrenches to create a CoP which lies inside the
+//        * contact foot/hand
+//        */
+//       class CoP: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
+//       public:
+//        typedef std::shared_ptr<CoP> Ptr;
+
+//           /**
+//         * @brief CoP constructor of the CoP constraint
+//         * @param model of the robot
+//         * @param wrenches affine helper
+//         * @param contact_links vector of robot links which considered in contact with the environment
+//         * @param X_Lims [xl, xu] limits (we assume same limits for all the contacts)
+//         * @param Y_Lims [yl, yu] limits (we assume same limits for all the contacts)
+//         */
+//        CoP(XBot::ModelInterface& model,
+//            const std::vector<OpenSoT::AffineHelper>& wrenches,
+//            const std::vector<std::string>& contact_links,
+//            const Eigen::Vector2d& X_Lims, const Eigen::Vector2d& Y_Lims);
+
+
+
+//       private:
+//        virtual void update(const Eigen::VectorXd& x);
+//        std::vector<std::string> _contact_links;
+
+//        std::vector<bool> _enabled_contacts;
+//        XBot::ModelInterface& _model;
+
+//        double _xl, _xu;
+//        double _yl, _yu;
+
+//        Eigen::MatrixXd _Ai;
+//        Eigen::MatrixXd _tmp;
+
+//        Eigen::MatrixXd __A;
+
+//        Eigen::Affine3d _T;
+//        Eigen::Affine3d _Ti;
+//        Eigen::MatrixXd _Ad;
+
+//        OpenSoT::AffineHelper _wrenches;
+//        OpenSoT::AffineHelper _CoP;
+
+//       };
        }
    }
 }

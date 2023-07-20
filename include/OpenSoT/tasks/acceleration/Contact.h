@@ -30,7 +30,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         
     public:
         
-        typedef boost::shared_ptr<Contact> Ptr;
+        typedef std::shared_ptr<Contact> Ptr;
 
         Contact(const std::string& task_id,
                 const XBot::ModelInterface& robot,
@@ -49,7 +49,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         virtual void _update(const Eigen::VectorXd& x);
         
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger2::Ptr logger);
         
     private:
         

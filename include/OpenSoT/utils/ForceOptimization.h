@@ -26,7 +26,7 @@ namespace OpenSoT { namespace utils {
       
     public:
         
-        typedef boost::shared_ptr<ForceOptimization> Ptr;
+        typedef std::shared_ptr<ForceOptimization> Ptr;
         
         constexpr static double DEFAULT_FRICTION_COEFF = 0.5;
         
@@ -55,7 +55,13 @@ namespace OpenSoT { namespace utils {
         void setContactRotationMatrix(const std::string& contact_link,
                                       const Eigen::Matrix3d& w_R_c);
         
-        void log(XBot::MatLogger::Ptr logger);
+        void log(XBot::MatLogger2::Ptr logger);
+
+        /**
+         * @brief getObjective
+         * @return the value of the cost function at first priority level
+         */
+        double getObjective();
         
         
     private:

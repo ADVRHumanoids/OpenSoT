@@ -1,6 +1,4 @@
 #include <gtest/gtest.h>
-#include <kdl/frames.hpp>
-#include <kdl/frames_io.hpp>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <OpenSoT/tasks/Aggregated.h>
@@ -16,10 +14,10 @@
 #include <qpOASES.hpp>
 #include <fstream>
 #include <OpenSoT/utils/AutoStack.h>
+#include <matlogger2/matlogger2.h>
 
-std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = robotology_root + relative_path;
+std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
+std::string _path_to_cfg = relative_path;
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -134,11 +132,15 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     useFootTaskOrConstraint footStrategy = GetParam();
 
-    XBot::MatLogger::Ptr logger;
-    if(footStrategy == USE_TASK)
-        logger = XBot::MatLogger::getLogger("convex_hull_in_com");
-    if(footStrategy == USE_CONSTRAINT)
-        logger = XBot::MatLogger::getLogger("convex_hull_constr");
+    XBot::MatLogger2::Ptr logger;
+    if(footStrategy == USE_TASK){
+        logger = XBot::MatLogger2::MakeLogger("convex_hull_in_com"); // date-time automatically appended
+        logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+    }
+    if(footStrategy == USE_CONSTRAINT){
+        logger = XBot::MatLogger2::MakeLogger("convex_hull_constr");
+        logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+    }
 
 
 
@@ -523,7 +525,6 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _log << "legend([ref,constr,ct,ctc], 'CoM ref', 'Support Polygon', 'CoM Traj, r\\_sole ctrl as task', 'CoM Traj, r\\_sole ctrl as constraint','Location','best');" << std::endl;
     }
 
-    logger->flush();
 
 }
 

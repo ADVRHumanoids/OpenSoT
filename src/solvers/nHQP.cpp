@@ -193,7 +193,7 @@ void OpenSoT::solvers::nHQP::setMinSingularValueRatio(std::vector<double> sv_min
     }
 }
 
-void OpenSoT::solvers::nHQP::_log(XBot::MatLogger::Ptr logger, const string & prefix)
+void OpenSoT::solvers::nHQP::_log(XBot::MatLogger2::Ptr logger, const string & prefix)
 {
     int i = 0;
     for(auto& t : _data_struct)
@@ -405,7 +405,7 @@ const Eigen::VectorXd& OpenSoT::solvers::nHQP::TaskData::get_solution() const
     return back_end->getSolution();
 }
 
-bool OpenSoT::solvers::nHQP::TaskData::enable_logger(XBot::MatLogger::Ptr a_logger, std::string a_log_prefix)
+bool OpenSoT::solvers::nHQP::TaskData::enable_logger(XBot::MatLogger2::Ptr a_logger, std::string a_log_prefix)
 {
     if(!logger)
     {

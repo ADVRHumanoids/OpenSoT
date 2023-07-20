@@ -24,7 +24,8 @@ public:
         int ROUND_BOUNDS = 0;
 
         std::vector<var_id_kind> var_id_kind_;
-        boost::shared_ptr<glp_iocp> param;
+        std::shared_ptr<glp_iocp> param;
+
     };
 
     GLPKBackEnd(const int number_of_variables,
@@ -55,6 +56,12 @@ public:
     Eigen::VectorXd getGLPKUpperConstraints();
     Eigen::VectorXd getGLPKLowerConstraints();
     Eigen::MatrixXd getGLPKConstraintMatrix();
+
+    /**
+     * @brief writeLP call glp_write_lp to have text file of the problem
+     * @return check glpk.h
+     */
+    int writeLP();
 
 private:
     glp_prob* _mip;

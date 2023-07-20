@@ -18,8 +18,9 @@
 #ifndef _OPENSOT_FLOATING_BASE_ESTIMATION_H_
 #define _OPENSOT_FLOATING_BASE_ESTIMATION_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <XBotInterface/ModelInterface.h>
+#include <matlogger2/matlogger2.h>
 
 namespace OpenSoT {
     /**
@@ -39,7 +40,7 @@ namespace OpenSoT {
         };
 
     public:
-        typedef boost::shared_ptr<FloatingBaseEstimation> Ptr;
+        typedef std::shared_ptr<FloatingBaseEstimation> Ptr;
 
         FloatingBaseEstimation(XBot::ModelInterface::Ptr model,
                                std::vector<std::string> contact_links,
@@ -68,7 +69,7 @@ namespace OpenSoT {
         virtual bool update(OpenSoT::FloatingBaseEstimation::Update update =
                 OpenSoT::FloatingBaseEstimation::Update::None) = 0;
 
-        virtual void log(XBot::MatLogger::Ptr logger)
+        virtual void log(XBot::MatLogger2::Ptr logger)
         {
 
         }

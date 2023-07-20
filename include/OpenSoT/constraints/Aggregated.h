@@ -20,7 +20,7 @@
 
 #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OpenSoT/utils/Piler.h>
 #include <list>
 
@@ -44,7 +44,7 @@ using namespace OpenSoT::utils;
          */
         class Aggregated: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
-	    typedef boost::shared_ptr<Aggregated> Ptr;
+	    typedef std::shared_ptr<Aggregated> Ptr;
         typedef MatrixPiler VectorPiler;
 
             enum AggregationPolicy {
@@ -59,6 +59,23 @@ using namespace OpenSoT::utils;
             };
 
         protected:
+            std::vector<Eigen::VectorXd> _boundUpperBounds, _boundLowerBounds, _boundbeqs, _boundbUpperBounds, _boundbLowerBounds;
+            std::vector<Eigen::MatrixXd> _boundAeqs, _boundAineqs;
+            void initSupportVectorsAndMatrices(const int bound_size)
+            {
+                for(unsigned int i = 0; i < bound_size; ++i)
+                {
+                    _boundUpperBounds.push_back(Eigen::VectorXd(0));
+                    _boundLowerBounds.push_back(Eigen::VectorXd(0));
+                    _boundbeqs.push_back(Eigen::VectorXd(0));
+                    _boundbUpperBounds.push_back(Eigen::VectorXd(0));
+                    _boundbLowerBounds.push_back(Eigen::VectorXd(0));
+
+                    _boundAeqs.push_back(Eigen::MatrixXd(0,0));
+                    _boundAineqs.push_back(Eigen::MatrixXd(0,0));
+                }
+            }
+
             VectorPiler _tmpupperBound;
             VectorPiler _tmplowerBound;
 
@@ -94,7 +111,8 @@ using namespace OpenSoT::utils;
                 a.segment(a.rows()-b.rows(),b.rows())<<b;
             }
 
-            virtual void _log(XBot::MatLogger::Ptr logger);
+
+            virtual void _log(XBot::MatLogger2::Ptr logger);
 
         public:
             /**
@@ -137,6 +155,8 @@ using namespace OpenSoT::utils;
                             UNILATERAL_TO_BILATERAL);
 
             void update(const Eigen::VectorXd &x);
+
+            void log(XBot::MatLogger2::Ptr logger) override;
 
             std::list< ConstraintPtr >& getConstraintsList() { return _bounds; }
 

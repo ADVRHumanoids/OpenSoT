@@ -1,59 +1,57 @@
 #include <OpenSoT/tasks/acceleration/Postural.h>
 
 OpenSoT::tasks::acceleration::Postural::Postural(
-         const XBot::ModelInterface& robot,const int x_size):
-    Task< Eigen::MatrixXd, Eigen::VectorXd >("Postural", x_size),
-    _robot(robot)
+         const XBot::ModelInterface& robot,const int x_size, const std::string task_id):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
+    _robot(robot),
+    _gain_type(OpenSoT::tasks::acceleration::GainType::Acceleration)
 {
-    _na = _robot.getActuatedJointNum();
 
     _hessianType = HST_SEMIDEF;
 
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
 
-    _qddot = AffineHelper::Identity(robot.getJointNum());
+    _qddot = AffineHelper::Identity(x_size);
 
-    _A.setZero(_na, _qddot.getInputSize());
+    _A.setZero(x_size, x_size);
 
     _Kp.setIdentity(_qref.size(), _qref.size());
     _Kd.setIdentity(_qref.size(), _qref.size());
 
     setLambda(10.0);
-    setWeight(Eigen::MatrixXd::Identity(_na, _na));
+    setWeight(Eigen::MatrixXd::Identity(x_size, x_size));
 
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
+
+    _Mi.setIdentity(_qref.size(), _qref.size());
 
     _update(_q);
 }
 
 OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& robot,
-                                                 OpenSoT::AffineHelper qddot): 
-    Task< Eigen::MatrixXd, Eigen::VectorXd >("Postural", qddot.getInputSize()),
+                                                 OpenSoT::AffineHelper qddot, const std::string task_id):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, qddot.getInputSize()),
     _robot(robot),
-    _qddot(qddot)
+    _qddot(qddot),
+    _gain_type(OpenSoT::tasks::acceleration::GainType::Acceleration)
 {
-    _na = _robot.getActuatedJointNum();
-    
+
     _hessianType = HST_SEMIDEF;
     
     robot.getJointPosition(_qref);
     robot.getPosturalJacobian(_Jpostural);
     
-    if(_qddot.getInputSize() == 0){
-        _qddot = AffineHelper::Identity(robot.getJointNum());
-    }
-    
-    _A.setZero(_na, _qddot.getInputSize());
+    _A.setZero(qddot.getOutputSize(), qddot.getInputSize());
 
     _Kp.setIdentity(_qref.size(), _qref.size());
     _Kd.setIdentity(_qref.size(), _qref.size());
     
     setLambda(10.);
-    setWeight(Eigen::MatrixXd::Identity(_na, _na));
+    setWeight(Eigen::MatrixXd::Identity(qddot.getOutputSize(), qddot.getOutputSize()));
 
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
@@ -62,6 +60,16 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
 
     
     _update(_q);
+}
+
+void OpenSoT::tasks::acceleration::Postural::setGainType(GainType type)
+{
+    _gain_type = type;
+}
+
+OpenSoT::tasks::acceleration::GainType OpenSoT::tasks::acceleration::Postural::getGainType() const
+{
+    return _gain_type;
 }
 
 void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda)
@@ -73,7 +81,7 @@ void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda)
     
     
     _lambda = lambda;
-    _lambda2 = 4*std::sqrt(lambda);
+    _lambda2 = 2*std::sqrt(lambda);
 }
 
 void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda1, double lambda2)
@@ -92,7 +100,7 @@ void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda1, double la
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref)
 {
-    _qref.tail(_na) = qref.tail(_na);
+    _qref = qref;
     _qdot_ref.setZero(_qref.size());
     _qddot_ref.setZero(_qref.size());
 
@@ -103,8 +111,8 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
 
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref)
 {
-    _qref.tail(_na) = qref.tail(_na);
-    _qdot_ref.tail(_na) = dqref.tail(_na);
+    _qref = qref;
+    _qdot_ref = dqref;
     _qddot_ref.setZero(_qref.size());
 
     _qdot_ref_cached = _qdot_ref;
@@ -115,9 +123,9 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
                   const Eigen::VectorXd& ddqref)
 {
-    _qref.tail(_na) = qref.tail(_na);
-    _qdot_ref.tail(_na) = dqref.tail(_na);
-    _qddot_ref.tail(_na) = ddqref.tail(_na);
+    _qref = qref;
+    _qdot_ref = dqref;
+    _qddot_ref = ddqref;
 
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
@@ -137,8 +145,19 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _position_error = _qref - _q;
     _velocity_error = _qdot_ref - _qdot;
 
-    _qddot_d = _qddot_ref + _lambda2*_Kd*_velocity_error + _lambda*_Kp*_position_error;
-    _postural_task = _Jpostural * (_qddot - _qddot_d);
+    if(_gain_type == Acceleration)
+    {
+        _qddot_d = _qddot_ref + _lambda2*_Kd*_velocity_error + _lambda*_Kp*_position_error;
+    }
+    else if(_gain_type == Force)
+    {
+        _robot.getInertiaInverse(_Mi);
+
+        _qddot_d = _qddot_ref + _Mi*_lambda2*_Kd*_velocity_error + _Mi*_lambda*_Kp*_position_error;
+    }
+
+
+    _postural_task = (_qddot - _qddot_d);
 
     _A = _postural_task.getM();
     _b = - _postural_task.getq();
@@ -147,7 +166,7 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _qddot_ref.setZero(_qref.size());
 }
 
-void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(_task_id + "_position_error", _position_error);
     logger->add(_task_id + "_velocity_error", _velocity_error);
@@ -155,6 +174,8 @@ void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger::Ptr logger)
 
     logger->add(_task_id + "_velocity_reference", _qdot_ref_cached);
     logger->add(_task_id + "_acceleration_reference", _qddot_ref_cached);
+
+    logger->add(_task_id + "_lambda2", _lambda2);
 }
 
 const Eigen::VectorXd &OpenSoT::tasks::acceleration::Postural::getReference() const

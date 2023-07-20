@@ -22,6 +22,7 @@
 #include <OpenSoT/utils/Affine.h>
 #include <XBotInterface/ModelInterface.h>
 #include <XBotInterface/Utils.h>
+#include <OpenSoT/tasks/acceleration/GainType.h>
 
 
 namespace OpenSoT { namespace tasks { namespace acceleration {
@@ -30,7 +31,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         
     public:
         
-        typedef boost::shared_ptr<Cartesian> Ptr;
+        typedef std::shared_ptr<Cartesian> Ptr;
 
         Cartesian(const std::string task_id,
                   const Eigen::VectorXd& x,
@@ -45,6 +46,9 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                   const std::string& base_link,
                   const AffineHelper& qddot
                  );
+
+        void setGainType(GainType type);
+        GainType getGainType() const;
         
         const std::string& getBaseLink() const;
         const std::string& getDistalLink() const;
@@ -140,13 +144,11 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void getActualTwist(Eigen::Vector6d& actual);
         void getActualTwist(KDL::Twist& actual);
         
-        [[deprecated]]
-        void resetReference();
         bool reset();
 
         virtual void _update(const Eigen::VectorXd& x);
         
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger2::Ptr logger);
 
         void setLambda(double lambda1, double lambda2);
         virtual void setLambda(double lambda);
@@ -230,10 +232,13 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
          * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
          */
-        const Eigen::Vector6d getError() const;
-        const Eigen::Vector6d getVelocityError() const;
+        const Eigen::Vector6d& getError() const;
+        const Eigen::Vector6d& getVelocityError() const;
 
     private:
+
+        GainType _gain_type;
+
         Eigen::Vector6d _velocity_error;
 
 
@@ -266,6 +271,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
 
         void compute_cartesian_inertia_inverse();
+        void resetReference();
 
 
         //

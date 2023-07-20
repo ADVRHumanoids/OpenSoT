@@ -3,7 +3,7 @@
 #include <ctime>
 #include <qpOASES/Utils.hpp>
 #include <fstream>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <iostream>
 #include <qpOASES/Matrices.hpp>
 #include <XBotInterface/Logger.hpp>
@@ -28,16 +28,17 @@ QPOasesBackEnd::QPOasesBackEnd(const int number_of_variables,
                                const int number_of_constraints,
                                OpenSoT::HessianType hessian_type, const double eps_regularisation):
     BackEnd(number_of_variables, number_of_constraints),
-    _problem(new qpOASES::SQProblem(number_of_variables,
-                                    number_of_constraints,
-                                    (qpOASES::HessianType)(hessian_type))),
-    _bounds(new qpOASES::Bounds()),
-    _constraints(new qpOASES::Constraints()),
     _nWSR(13200),
     _epsRegularisation(eps_regularisation),
-    _dual_solution(number_of_variables),
-    _opt(new qpOASES::Options())
+    _dual_solution(number_of_variables)
 {
+    _problem = std::make_shared<qpOASES::SQProblem>(number_of_variables,
+                                                      number_of_constraints,
+                                                      (qpOASES::HessianType)(hessian_type));
+    _bounds = std::make_shared<qpOASES::Bounds>();
+    _constraints = std::make_shared<qpOASES::Constraints>();
+    _opt = std::make_shared<qpOASES::Options>();
+
 #ifdef OPENSOT_VERBOSE
     XBot::Logger::SetVerbosityLevel(XBot::Logger::Severity::LOW);
 #endif
@@ -65,16 +66,19 @@ void QPOasesBackEnd::setDefaultOptions()
     _problem->setOptions(opt);
 
     _epsRegularisation = opt.epsRegularisation;
+    
+    #ifdef OPENSOT_VERBOSE
     XBot::Logger::info("Solver Default Options: \n");
     opt.print();
+    #endif
 
     _opt.reset();
-    _opt.reset(new qpOASES::Options(opt));
+    _opt = std::make_shared<qpOASES::Options>(opt);
 }
 
 void QPOasesBackEnd::setOptions(const boost::any &options){
     _opt.reset();
-    _opt.reset(new qpOASES::Options(boost::any_cast<qpOASES::Options>(options)));
+    _opt = std::make_shared<qpOASES::Options>(boost::any_cast<qpOASES::Options>(options));
     _problem->setOptions(boost::any_cast<qpOASES::Options>(options));}
 
 boost::any QPOasesBackEnd::getOptions(){
@@ -166,10 +170,9 @@ bool QPOasesBackEnd::initProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd
 
 bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
 {
-    if(!(_g.rows() == _H.rows())){
-        XBot::Logger::error("g size: %i \n", _g.rows());
-        XBot::Logger::error("H size: %i \n", _H.rows());
-        assert(_g.rows() == _H.rows());
+    if(!(_g.size() == g.size())){
+        XBot::Logger::error("g size: %i \n", g.size());
+        XBot::Logger::error("should be: %i \n", _g.size());
         return false;}
     if(!(_H.cols() == H.cols())){
         XBot::Logger::error("H cols: %i \n", H.cols());
@@ -192,10 +195,9 @@ bool QPOasesBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
+        _problem = std::make_shared<qpOASES::SQProblem>(number_of_variables,
+                                                          number_of_constraints,
+                                                          hessian_type);
         _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
@@ -235,10 +237,9 @@ bool QPOasesBackEnd::updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& 
         int number_of_variables = _H.cols();
         int number_of_constraints = _A.rows();
         _problem.reset();
-        _problem = boost::shared_ptr<qpOASES::SQProblem> (new qpOASES::SQProblem(
-                                                              number_of_variables,
-                                                              number_of_constraints,
-                                                              hessian_type));
+        _problem = std::make_shared<qpOASES::SQProblem>(number_of_variables,
+                                                          number_of_constraints,
+                                                          hessian_type);
         _problem->setOptions(*_opt.get());
         return initProblem(_H, _g, _A, _lA, _uA, _l, _u);
     }
@@ -338,19 +339,21 @@ double QPOasesBackEnd::getObjective()
 
 void QPOasesBackEnd::checkINFTY()
 {
-    unsigned int constraints_size = _lA.rows();
+    unsigned int constraints_size = _lA.size();
     for(unsigned int i = 0; i < constraints_size; ++i){
         if(_lA[i] < -qpOASES::INFTY)
             _lA[i] = -qpOASES::INFTY;
         if(_uA[i] > qpOASES::INFTY)
-            _uA[i] = qpOASES::INFTY;}
+            _uA[i] = qpOASES::INFTY;
+    }
 
-    unsigned int bounds_size = _l.rows();
+    unsigned int bounds_size = _l.size();
     for(unsigned int i = 0; i < bounds_size; ++i){
         if(_l[i] < -qpOASES::INFTY)
             _l[i] = -qpOASES::INFTY;
         if(_u[i] > qpOASES::INFTY)
-            _u[i] = qpOASES::INFTY;}
+            _u[i] = qpOASES::INFTY;
+    }
 }
 
 bool QPOasesBackEnd::setEpsRegularisation(const double eps)

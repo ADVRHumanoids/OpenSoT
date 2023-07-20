@@ -46,7 +46,7 @@ public:
 
       _model_ptr = std::dynamic_pointer_cast<XBot::ModelInterfaceIDYNUTILS>
               (XBot::ModelInterface::getModel(_path_to_cfg));
-      _model_ptr->loadModel(boost::shared_ptr<iDynUtils>(&coman, &null_deleter));
+      _model_ptr->loadModel(std::shared_ptr<iDynUtils>(&coman, &null_deleter));
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;

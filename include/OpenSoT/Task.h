@@ -23,7 +23,7 @@
  #include <vector>
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
- #include <boost/shared_ptr.hpp>
+ #include <memory>
  #include <XBotInterface/Logger.hpp>
  #include <XBotInterface/ModelInterface.h>
 
@@ -49,9 +49,9 @@
 
     public:
         typedef Task< Matrix_type, Vector_type > TaskType;
-        typedef boost::shared_ptr<TaskType> TaskPtr;
+        typedef std::shared_ptr<TaskType> TaskPtr;
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
-        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
+        typedef std::shared_ptr<ConstraintType> ConstraintPtr;
     protected:
 
         /**
@@ -143,7 +143,7 @@
          * @brief _log can be used to log internal Task variables
          * @param logger a shared pointer to a MatLogger
          */
-        virtual void _log(XBot::MatLogger::Ptr logger)
+        virtual void _log(XBot::MatLogger2::Ptr logger)
         {
 
         }
@@ -232,7 +232,7 @@
          */
         void setActive(const bool active_flag){
             
-            if(!_is_active && active_flag){
+            if(!_is_active && active_flag && _A_last_active.rows() > 0){
                 _A = _A_last_active;
             }
             
@@ -294,9 +294,9 @@
          */
         const Vector_type& getWb() const {
             if(_weight_is_diagonal)
-                _Wb = _W.diagonal().asDiagonal()*_b;
+                _Wb.noalias() = _W.diagonal().asDiagonal()*_b;
             else
-                _Wb = _W*_b;
+                _Wb.noalias() = _W*_b;
             return _Wb;
         }
 
@@ -326,6 +326,20 @@
             assert(W.rows() == this->getTaskSize());
             assert(W.cols() == W.rows());
             _W = W;
+        }
+
+        /**
+         * @brief setWeight sets the task diagonal weight.
+         * Note the Weight needs to be positive definite.
+         * If your original intent was to get a subtask
+         * (i.e., reduce the number of rows of the task Jacobian),
+         * please use the class SubTask
+         * @param w scalar diagonal weight
+         */
+        virtual void setWeight(const double& w) {
+            assert(w>=0.0);
+            _W.setIdentity();
+            _W = _W * w;
         }
 
         /**
@@ -445,7 +459,7 @@
          * @brief log logs common Task internal variables
          * @param logger a shared pointer to a MathLogger
          */
-        virtual void log(XBot::MatLogger::Ptr logger)
+        virtual void log(XBot::MatLogger2::Ptr logger)
         {
             if(_A.rows() > 0)
                 logger->add(_task_id + "_A", _A);
@@ -461,6 +475,26 @@
             for(auto constraint : _constraints)
                 constraint->log(logger);
 
+        }
+
+    private: Vector_type _error_, _tmp_, _residual_;
+    public:
+        /**
+         * @brief computeCost computes the residual of the task:
+         *
+         *  residual = (Ax - b)^T * W * (Ax - b)
+         *
+         * @param x solution
+         * NOTE: the solution should be the one where the task was evaluated to compute the internal A matrix and b vector!
+         * NOTE: computation can be improved as done in the solver...
+         * @return the cost of the task for given solution
+         */
+        double computeCost(const Eigen::VectorXd& x)
+        {
+            _error_.noalias() = _A*x - _b;
+            _tmp_.noalias() = _error_.transpose()*_W;
+            _residual_.noalias() = _tmp_.transpose()*_error_;
+            return _residual_[0];
         }
 
         /**
@@ -547,7 +581,7 @@
             }
 
             if(a)
-                XBot::Logger::info("%s is consistent!", _task_id.c_str());
+                XBot::Logger::info("%s is consistent!\n", _task_id.c_str());
 
             return a;
 

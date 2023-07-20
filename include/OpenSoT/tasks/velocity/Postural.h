@@ -37,7 +37,7 @@
              */
             class Postural : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-                typedef boost::shared_ptr<Postural> Ptr;
+                typedef std::shared_ptr<Postural> Ptr;
             protected:
                 Eigen::VectorXd _x_desired;
                 Eigen::VectorXd _xdot_desired, _xdot_desired_ref;
@@ -118,7 +118,7 @@
                  */
                 bool reset();
 
-                virtual void _log(XBot::MatLogger::Ptr logger);
+                virtual void _log(XBot::MatLogger2::Ptr logger);
 
                 static bool isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

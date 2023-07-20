@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2014 Walkman
- * Author: Alessio Rocchi
- * email:  alessio.rocchi@iit.it
+ * Copyright (C) 2019 Cogimon
+ * Author: Matteo Parigi Polverini
+ * email:  matteo.parigi@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU Lesser General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -15,8 +15,8 @@
  * Public License for more details
 */
 
-#ifndef __BOUNDS_VELOCITY_JOINTLIMITS_AFFINE_H__
-#define __BOUNDS_VELOCITY_JOINTLIMITS_AFFINE_H__
+#ifndef __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__
+#define __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__
 
 #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
@@ -34,7 +34,7 @@
              */
             class JointLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<JointLimits> Ptr;
+                typedef std::shared_ptr<JointLimits> Ptr;
             private:
                 
                 Eigen::VectorXd _jointLimitsMin;
@@ -54,23 +54,22 @@
                 
                 GenericConstraint::Ptr _generic_constraint_internal;
 
-                double _lambda;
 
                 /**
                  * @brief _dt
                  **/
                 double _dt;
-
+                double _p;
 
             public:
                 /**
-                 * @brief JointLimits
+                 * @brief JointLimits constructor
                  * @param robot
                  * @param qddot
-                 * @param jointBoundMax
-                 * @param jointBoundMin
-                 * @param jointAccMax
-                 * @param dt
+                 * @param jointBoundMax max joint limits
+                 * @param jointBoundMin min joint limits
+                 * @param jointAccMax max joint acceleration
+                 * @param dt discretization time
                  */
                 JointLimits(XBot::ModelInterface& robot,
                             const AffineHelper& qddot,
@@ -81,6 +80,19 @@
 
 
                 void update(const Eigen::VectorXd& x);
+
+                /**
+                 * @brief setJointAccMax updates joint acceleration limits
+                 * @param jointAccMax
+                 */
+                void setJointAccMax(const Eigen::VectorXd& jointAccMax);
+
+                /**
+                 * @brief setPStepAheadPredictor
+                 * @param p step predictor coefficient >= 1
+                 * @return false if p <1
+                 */
+                bool setPStepAheadPredictor(const double p);
 
             };
            }

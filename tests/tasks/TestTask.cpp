@@ -7,7 +7,7 @@ namespace {
 class fooTask: public OpenSoT::Task <Eigen::MatrixXd, Eigen::VectorXd>
 {
 public:
-    typedef boost::shared_ptr<fooTask> Ptr;
+    typedef std::shared_ptr<fooTask> Ptr;
 
     fooTask(const Eigen::MatrixXd& A, const Eigen::VectorXd& b):Task("foo", 20)
     {
@@ -105,6 +105,30 @@ TEST_F(testTask, testCheckConsistency)
     fooA.setIdentity(13,20);
     footask->setA(fooA);
     EXPECT_TRUE(footask->checkConsistency());
+}
+
+TEST_F(testTask, testComputeCost)
+{
+    Eigen::VectorXd q(30);
+    q = 10*q.setOnes();
+
+    OpenSoT::tasks::velocity::Postural::Ptr postural =
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+
+    postural->setWeight(10.);
+    postural->setLambda(1.);
+
+    postural->update(q);
+
+    Eigen::VectorXd x(30);
+    x.setRandom();
+
+    double cost = (postural->getA()*x - postural->getb()).transpose()*postural->getWeight()*(postural->getA()*x - postural->getb());
+    std::cout<<"cost: "<<cost<<std::endl;
+    std::cout<<"task cost: "<<postural->computeCost(x)<<std::endl;
+
+    EXPECT_DOUBLE_EQ(cost, postural->computeCost(x));
+
 }
 
 TEST_F(testTask, testDiagonalWeight)

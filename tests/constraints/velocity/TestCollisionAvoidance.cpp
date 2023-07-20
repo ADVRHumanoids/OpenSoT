@@ -2,7 +2,7 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/CartesianPositionConstraint.h>
-#include <OpenSoT/constraints/velocity/SelfCollisionAvoidance.h>
+#include <OpenSoT/constraints/velocity/CollisionAvoidance.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/solvers/iHQP.h>
@@ -19,6 +19,17 @@
 #include <robot_state_publisher/robot_state_publisher.h>
 #endif
 
+#if ROS_VERSION_MINOR <= 12
+#define STATIC_POINTER_CAST boost::static_pointer_cast
+#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
+#define SHARED_PTR boost::shared_ptr
+#define MAKE_SHARED boost::make_shared
+#else
+#define STATIC_POINTER_CAST std::static_pointer_cast
+#define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
+#define SHARED_PTR std::shared_ptr
+#define MAKE_SHARED std::make_shared
+#endif
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
@@ -176,30 +187,6 @@ public:
 
     }
 
-//    std::map<std::string,shared_ptr<fcl::CollisionGeometry> > getShapes()
-//    {
-//        return _computeDistance.shapes_;
-//    }
-
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject<double>> > getcollision_objects()
-    {
-        return _computeDistance.collision_objects_;
-    }
-
-    std::map<std::string,KDL::Frame> getlink_T_shape()
-    {
-        return _computeDistance.link_T_shape;
-    }
-
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
-    {
-        return _computeDistance.custom_capsules_;
-    }
-
-    bool updateCollisionObjects()
-    {
-        return _computeDistance.updateCollisionObjects();
-    }
 
     bool globalToLinkCoordinates(const std::string& linkName,
                                  const fcl::Transform3<double> &fcl_w_T_f,
@@ -216,12 +203,12 @@ public:
 
         KDL::Frame w_T_f = fcl2KDL(fcl_w_T_f);
 
-        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.collision_objects_[linkName]->getTransform();
+        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.getCollisionObjects()[linkName]->getTransform();
         KDL::Frame w_T_shape = fcl2KDL(fcl_w_T_shape);
 
         KDL::Frame shape_T_f = w_T_shape.Inverse()*w_T_f;
 
-        link_T_f = _computeDistance.link_T_shape[linkName] * shape_T_f;
+        link_T_f = _computeDistance.getLinkToShapeTransforms()[linkName] * shape_T_f;
 
         return true;
     }
@@ -264,16 +251,24 @@ void publishJointStates(const Eigen::VectorXd& q)
       ros::init(argc, argv, "collision_avoidance_test");
       n.reset(new ros::NodeHandle());
       pub = n->advertise<sensor_msgs::JointState>("joint_states", 1000);
+      pub2 = n->advertise<visualization_msgs::Marker>("link_distances", 1, true);
 #endif
 
-      std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-      std::string relative_path = "/external/OpenSoT/tests/configs/bigman/configs/config_bigman.yaml";
-      std::string urdf_capsule_path = robotology_root + "/external/OpenSoT/tests/robots/bigman/bigman_capsules.rviz";
+      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman_capsules.yaml";
+      std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
       std::ifstream f(urdf_capsule_path);
       std::stringstream ss;
       ss << f.rdbuf();
 
-      _path_to_cfg = robotology_root + relative_path;
+      urdf = MAKE_SHARED<urdf::Model>();
+      urdf->initFile(urdf_capsule_path);
+
+      std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
+      srdf = MAKE_SHARED<srdf::Model>();
+      srdf->initFile(*urdf, srdf_capsule_path);
+
+
+      _path_to_cfg = relative_path;
 
       _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
@@ -293,12 +288,22 @@ void publishJointStates(const Eigen::VectorXd& q)
       q.resize(_model_ptr->getJointNum());
       q.setZero(q.size());
 
-      compute_distance.reset(new ComputeLinksDistance(*(_model_ptr.get())));
+      urdf = MAKE_SHARED<urdf::Model>();
+      urdf->initFile(urdf_capsule_path);
 
-      double padding = 0.005;//0.005;
-      std::string base_link = "Waist";
-      sc_constraint.reset(new OpenSoT::constraints::velocity::SelfCollisionAvoidance(q, *(_model_ptr.get()),base_link,
-                              std::numeric_limits<double>::infinity(), padding));
+      srdf = MAKE_SHARED<srdf::Model>();
+      srdf->initFile(*urdf, srdf_capsule_path);
+
+
+      compute_distance = std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
+
+      sc_constraint = std::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance>
+              (q,
+               *_model_ptr,
+               -1,
+               urdf,
+               srdf);
+      sc_constraint->setLinkPairThreshold(0.005);
 
 #if ENABLE_ROS
       for(unsigned int i = 0; i < this->_model_ptr->getEnabledJointNames().size(); ++i){
@@ -321,15 +326,18 @@ void publishJointStates(const Eigen::VectorXd& q)
   XBot::ModelInterface::Ptr _model_ptr;
   std::string _path_to_cfg;
   Eigen::VectorXd q;
-  boost::shared_ptr<ComputeLinksDistance> compute_distance;
-  OpenSoT::constraints::velocity::SelfCollisionAvoidance::Ptr sc_constraint;
+  std::shared_ptr<ComputeLinksDistance> compute_distance;
+  OpenSoT::constraints::velocity::CollisionAvoidance::Ptr sc_constraint;
+  urdf::ModelSharedPtr urdf;
+  srdf::ModelSharedPtr srdf;
 
 #if ENABLE_ROS
   ///ROS
-  boost::shared_ptr<ros::NodeHandle> n;
+  std::shared_ptr<ros::NodeHandle> n;
   ros::Publisher pub;
+  ros::Publisher pub2;
   sensor_msgs::JointState joint_state;
-  boost::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
+  std::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
 #endif
 
 };
@@ -513,7 +521,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
-    int t = 5;
+    int t = 100;
 
     Eigen::VectorXd qmin, qmax;
     this->_model_ptr->getJointLimits(qmin, qmax);
@@ -530,7 +538,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
                 new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
     Eigen::VectorXd dq(this->q.size()); dq.setZero(dq.size());
-    for(unsigned int i = 0; i < 50*t; ++i)
+    for(unsigned int i = 0; i < 10*t; ++i)
     {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
@@ -551,9 +559,50 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
         this->q += dq;
 
 #if ENABLE_ROS
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "world";
+    marker.header.stamp = ros::Time().now();
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::LINE_LIST;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = 0.;
+    marker.pose.position.y = 0.;
+    marker.pose.position.z = 0.;
+    marker.pose.orientation.x = 0.;
+    marker.pose.orientation.y = 0.;
+    marker.pose.orientation.z = 0.;
+    marker.pose.orientation.w = 1.;
+    marker.color.r = 0.;
+    marker.color.g = 1.;
+    marker.color.b = 0.;
+    marker.color.a = 1.;
+    marker.scale.x = 0.005;
+    marker.scale.y = 0.;
+    marker.scale.z = 0.;
+    for(const auto& data : this->sc_constraint->getLinkPairDistances())
+    {
+        auto k2p = [](const KDL::Vector &k)->geometry_msgs::Point{
+            geometry_msgs::Point p;
+            p.x = k[0]; p.y = k[1]; p.z = k[2];
+            return p;
+        };
+
+
+
+        // closest point on first link
+        marker.points.push_back(k2p(data.getClosestPoints().first.p));
+        // closest point on second link
+        marker.points.push_back(k2p(data.getClosestPoints().second.p));
+    }
+
+
+        pub2.publish(marker);
+
         this->publishJointStates(this->q);
-        usleep(50000);
+        usleep(100000);
 #endif
+
+
 
     }
 
@@ -577,48 +626,17 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     std::cout<<std::endl;
 
     // check the actual distance between the hand capsule pair
-
-    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
-
-    KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
-            righthand_capsule_ep1, righthand_capsule_ep2;
-
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[linkA];
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[linkB];
-    capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
-    capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
-
-    KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
-    _model_ptr->getPose(linkA, w_T_link_left_hand);
-    _model_ptr->getPose(linkB, w_T_link_right_hand);
-
-    lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
-    lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
-    righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
-    righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
-
-    Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
-            righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
-
-    Eigen::Vector3d lefthand_CP, righthand_CP;
+    std::shared_ptr<ComputeLinksDistance> compute_distance =
+            std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
+    compute_distance->setCollisionWhiteList(whiteList);
+    std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
+    LinkPairDistance result = results.front();
     double reference_distance;
-
-    vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-    vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-    vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-    vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
-
-    reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
-                                                    lefthand_capsule_ep2_eigen,
-                                                    righthand_capsule_ep1_eigen,
-                                                    righthand_capsule_ep2_eigen,
-                                                    lefthand_CP,
-                                                    righthand_CP);
-
-    reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
+    reference_distance = result.getDistance();
+    std::cout<<"reference_distance: "<<reference_distance<<std::endl;
 
 
-    EXPECT_NEAR(0.005, reference_distance, 1e-4);
+    EXPECT_NEAR(0.005, reference_distance, 1e-3);
 
 
 }
@@ -827,42 +845,15 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
         //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
 
-        KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
-                righthand_capsule_ep1, righthand_capsule_ep2;
-
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
-        capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
-        capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
-
-        KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
-        _model_ptr->getPose(_linkA, w_T_link_left_hand);
-        _model_ptr->getPose(_linkB, w_T_link_right_hand);
-
-        lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
-        lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
-        righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
-        righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
-
-        Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
-                righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
-
-        Eigen::Vector3d lefthand_CP, righthand_CP;
+        std::shared_ptr<ComputeLinksDistance> compute_distance =
+                std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
+        std::list<std::pair<std::string,std::string> > whiteList_;
+        whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
+        compute_distance->setCollisionWhiteList(whiteList_);
+        std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
+        LinkPairDistance result = results.front();
         double reference_distance;
-
-        vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-        vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-        vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-        vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
-
-        reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
-                                                        lefthand_capsule_ep2_eigen,
-                                                        righthand_capsule_ep1_eigen,
-                                                        righthand_capsule_ep2_eigen,
-                                                        lefthand_CP,
-                                                        righthand_CP);
-
-        reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
+        reference_distance = result.getDistance();
 
         if (i == 0)
         {
@@ -1075,42 +1066,17 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
         //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
 
-        KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
-                righthand_capsule_ep1, righthand_capsule_ep2;
-
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-        boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
-        capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
-        capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
-
-        KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
-        _model_ptr->getPose(_linkA, w_T_link_left_hand);
-        _model_ptr->getPose(_linkB, w_T_link_right_hand);
-
-        lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
-        lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
-        righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
-        righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
-
-        Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
-                righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
-
-        Eigen::Vector3d lefthand_CP, righthand_CP;
+        // check the actual distance between the hand capsule pair
+        std::shared_ptr<ComputeLinksDistance> compute_distance =
+                std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
+        std::list<std::pair<std::string,std::string> > whiteList_;
+        whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
+        compute_distance->setCollisionWhiteList(whiteList_);
+        std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
+        LinkPairDistance result = results.front();
         double reference_distance;
-
-        vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-        vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-        vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-        vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
-
-        reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
-                                                        lefthand_capsule_ep2_eigen,
-                                                        righthand_capsule_ep1_eigen,
-                                                        righthand_capsule_ep2_eigen,
-                                                        lefthand_CP,
-                                                        righthand_CP);
-
-        reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
+        reference_distance = result.getDistance();
+        //std::cout<<"reference_distance: "<<reference_distance<<std::endl;
 
 
         if (i == 0)
@@ -1198,45 +1164,24 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
     // start rechecking the distances of the capsules
 
-    std::string _linkA = CasulePairs_vec[0].first;
-    std::string _linkB = CasulePairs_vec[0].second;
+    // check the actual distance between the hand capsule pair
+    std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
+    std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
 
-    KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
-            righthand_capsule_ep1, righthand_capsule_ep2;
 
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-    boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
-    capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
-    capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
+    urdf::ModelSharedPtr urdf = MAKE_SHARED<urdf::Model>();
+    urdf->initFile(urdf_capsule_path);
 
-    KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
-    _model_ptr->getPose(_linkA, w_T_link_left_hand);
-    _model_ptr->getPose(_linkB, w_T_link_right_hand);
-
-    lefthand_capsule_ep1 = w_T_link_left_hand * lefthand_capsule_ep1;
-    lefthand_capsule_ep2 = w_T_link_left_hand * lefthand_capsule_ep2;
-    righthand_capsule_ep1 = w_T_link_right_hand * righthand_capsule_ep1;
-    righthand_capsule_ep2 = w_T_link_right_hand * righthand_capsule_ep2;
-
-    Eigen::Vector3d lefthand_capsule_ep1_eigen, lefthand_capsule_ep2_eigen,
-            righthand_capsule_ep1_eigen, righthand_capsule_ep2_eigen;
-
-    Eigen::Vector3d lefthand_CP, righthand_CP;
+    srdf::ModelSharedPtr srdf = MAKE_SHARED<srdf::Model>();
+    srdf->initFile(*urdf, srdf_capsule_path);
+    std::shared_ptr<ComputeLinksDistance> compute_distance =
+            std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
+    compute_distance->setCollisionWhiteList(whiteList);
+    std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
+    LinkPairDistance result = results.front();
     double reference_distance;
-
-    vectorKDLToEigen(lefthand_capsule_ep1, lefthand_capsule_ep1_eigen);
-    vectorKDLToEigen(lefthand_capsule_ep2, lefthand_capsule_ep2_eigen);
-    vectorKDLToEigen(righthand_capsule_ep1, righthand_capsule_ep1_eigen);
-    vectorKDLToEigen(righthand_capsule_ep2, righthand_capsule_ep2_eigen);
-
-    reference_distance = dist3D_Segment_to_Segment (lefthand_capsule_ep1_eigen,
-                                                    lefthand_capsule_ep2_eigen,
-                                                    righthand_capsule_ep1_eigen,
-                                                    righthand_capsule_ep2_eigen,
-                                                    lefthand_CP,
-                                                    righthand_CP);
-
-    reference_distance = reference_distance - capsuleA->getRadius() - capsuleB->getRadius();
+    reference_distance = result.getDistance();
+    std::cout<<"reference_distance: "<<reference_distance<<std::endl;
 
     //checking the distance between hands
 

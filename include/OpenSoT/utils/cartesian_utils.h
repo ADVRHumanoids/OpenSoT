@@ -276,7 +276,22 @@ public:
      * @param verty Arrays containing the y-coordinates of the polygon's vertices
      * @param testx X-coordinate of the test point
      * @param testy Y-coordinate of the test point
-     * @return 0 if false
+     * @return
+     *          -1 if the point is outside of the
+     *           0 if the point is on an edge or at a vertes
+     *           1 if the point is inside of the polygon
+     *
+     * REMARKS:
+     *      The vertices may be listed clockwise or anticlockwise.
+     *      The first may optionally be repeated, if so nvert may optionally be increased by 1.
+     *      The input polygon may be a compound polygon constisting of several separate
+     *      subpolygons. If so, the first vertex of each subpolygon must be repeated, and when calculating
+     *      nvert, these first vertices must be counted twice.
+     *      Written by Randolph Franklin, University of Ottawa, 7/70.
+     *
+     * METHOD:
+     *      A vertical line is drawn thru the point in question. If it crosses the polygon an odd number
+     *      of times, then the point is inside of the polygon.
      */
     static int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
     {
@@ -372,11 +387,10 @@ public:
      * @param position_error position error [3x1]
      * @param orientation_error orientation error [3x1]
      */
-    [[deprecated]]
-    static void computeCartesianError(const Eigen::MatrixXd &T,
-                                      const Eigen::MatrixXd &Td,
-                                      Eigen::VectorXd& position_error,
-                                      Eigen::VectorXd& orientation_error);
+    static void computeCartesianError(const Eigen::Matrix4d &T,
+                                      const Eigen::Matrix4d &Td,
+                                      Eigen::Vector3d& position_error,
+                                      Eigen::Vector3d& orientation_error);
     /**
      * @brief computeCartesianError orientation and position error
      * @param T actual pose

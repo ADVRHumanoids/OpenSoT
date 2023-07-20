@@ -2,9 +2,9 @@
 #define _WB_SOT_SOLVERS_OSQP_BE_H_
 
 #include <OpenSoT/solvers/BackEnd.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OpenSoT/Task.h>
-#include <osqp/osqp.h>
+#include <osqp.h>
 #include <OpenSoT/utils/Piler.h>
 #include <Eigen/Sparse>
 
@@ -160,17 +160,17 @@ private:
     /**
     * @brief _problem is the internal OSQPWorkspace
     */
-    boost::shared_ptr<OSQPWorkspace> _workspace;
+    OSQPWorkspace* _workspace;
 
     /**
     * @brief _data internal OSQPData
     */
-    boost::shared_ptr<OSQPData> _data;
+    std::shared_ptr<OSQPData> _data;
 
     /**
     * @brief _settings internal OSQPSettings
     */
-    boost::shared_ptr<OSQPSettings> _settings;
+    std::shared_ptr<OSQPSettings> _settings;
 
     Eigen::VectorXd _lb_piled, _ub_piled;
 
@@ -181,8 +181,8 @@ private:
     Eigen::VectorXd _P_values;
 
 
-    boost::shared_ptr<csc> _Acsc;
-    boost::shared_ptr<csc> _Pcsc;
+    std::shared_ptr<csc> _Acsc;
+    std::shared_ptr<csc> _Pcsc;
 
     double _eps_regularisation;
 
@@ -191,6 +191,7 @@ private:
 //        void print_csc_matrix_raw(csc* a, const std::string& name);
 
     void setCSCMatrix(csc* a, SparseMatrix& A);
+
 
 };
 }

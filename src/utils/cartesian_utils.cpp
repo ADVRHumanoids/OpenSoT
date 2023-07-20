@@ -18,7 +18,7 @@
 */
 
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <eigen_conversions/eigen_kdl.h>
 
 #define toDeg(X) (X*180.0/M_PI)
@@ -76,10 +76,10 @@ void  cartesian_utils::computePanTiltMatrix(const Eigen::VectorXd &gaze, KDL::Fr
     pan_tilt_matrix.M.DoRotY(-tilt);
 }
 
-void cartesian_utils::computeCartesianError(const Eigen::MatrixXd &T,
-                                  const Eigen::MatrixXd &Td,
-                                  Eigen::VectorXd& position_error,
-                                  Eigen::VectorXd& orientation_error)
+void cartesian_utils::computeCartesianError(const Eigen::Matrix4d &T,
+                                  const Eigen::Matrix4d &Td,
+                                  Eigen::Vector3d& position_error,
+                                  Eigen::Vector3d& orientation_error)
 {
     position_error.setZero(3);
     orientation_error.setZero(3);
@@ -149,9 +149,9 @@ Eigen::VectorXd cartesian_utils::computeGradient(const Eigen::VectorXd &x,
                                                     const std::vector<bool>& jointMask,
                                                     const double& step) {
     Eigen::VectorXd gradient(x.rows());
-    gradient.setZero(x.rows());
+    gradient.setZero();
     Eigen::VectorXd deltas(x.rows());
-    deltas.setZero(x.rows());
+    deltas.setZero();
     assert(jointMask.size() == x.size() &&
            "jointMask must have the same size as x");
     const double h = step;

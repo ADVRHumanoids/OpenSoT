@@ -68,6 +68,14 @@ bool OpenSoT::constraints::GenericConstraint::setBounds(const Eigen::VectorXd& u
     return true;
 }
 
+bool OpenSoT::constraints::GenericConstraint::setConstraint(const AffineHelper& var,
+                   const Eigen::VectorXd& upper_bound,
+                   const Eigen::VectorXd& lower_bound)
+{
+    _var = var;
+    return setBounds(upper_bound, lower_bound);
+}
+
 
 void OpenSoT::constraints::GenericConstraint::update(const Eigen::VectorXd& x)
 {

@@ -20,7 +20,8 @@
 using namespace OpenSoT::tasks::velocity;
 
 AngularMomentum::AngularMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot):
-    Task("AngularMomentum", x.size()), _robot(robot)
+    Task("AngularMomentum", x.size()), _robot(robot),
+    _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
 {
     _desiredAngularMomentum.setZero();
     this->_update(x);
@@ -45,6 +46,8 @@ void AngularMomentum::_update(const Eigen::VectorXd& x)
     _robot.getCentroidalMomentumMatrix(_Momentum);
     _A = _Momentum.block(3,0,3,_x_size);
     _b = _desiredAngularMomentum;
+    //Reset for safety reasons!
+    _desiredAngularMomentum.setZero(3);
 }
 
 void AngularMomentum::setReference(const Eigen::Vector3d& desiredAngularMomentum)
@@ -71,23 +74,23 @@ void AngularMomentum::getReference(KDL::Vector& desiredAngularMomentum) const
     desiredAngularMomentum[2] = _desiredAngularMomentum[2];
 }
 
-std::string AngularMomentum::getBaseLink()
+const std::string& AngularMomentum::getBaseLink() const
 {
-    return BASE_LINK_COM;
+    return _base_link;
 }
 
-std::string AngularMomentum::getDistalLink()
+const std::string& AngularMomentum::getDistalLink() const
 {
-    return DISTAL_LINK_COM;
+    return _distal_link;
 }
 
 AngularMomentum::Ptr AngularMomentum::asAngularMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<AngularMomentum>(task);
+    return std::dynamic_pointer_cast<AngularMomentum>(task);
 }
 
 
 bool AngularMomentum::isAngularMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<AngularMomentum>(task);
+    return (bool)std::dynamic_pointer_cast<AngularMomentum>(task);
 }

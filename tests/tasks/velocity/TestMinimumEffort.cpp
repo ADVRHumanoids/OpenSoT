@@ -1,15 +1,14 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <ros/master.h>
 #include <sensor_msgs/JointState.h>
 
 
-std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = robotology_root + relative_path;
+std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
+std::string _path_to_cfg = relative_path;
 
 bool IS_ROSCORE_RUNNING;
 
@@ -57,7 +56,7 @@ protected:
 
 TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 {
-    boost::shared_ptr<ros::NodeHandle> _n;
+    std::shared_ptr<ros::NodeHandle> _n;
     ros::Publisher joint_state_pub;
     if(IS_ROSCORE_RUNNING){
         _n.reset(new ros::NodeHandle());

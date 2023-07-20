@@ -24,6 +24,10 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot, const 
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
 
+    _Kp.setIdentity();
+    _Kd.setIdentity();
+
+
     update(Eigen::VectorXd(1));
 
     setWeight(Eigen::MatrixXd::Identity(3,3));
@@ -47,6 +51,10 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface &robot, const 
 
     _lambda = 100.;
     _lambda2 = 2.*sqrt(_lambda);
+
+    _Kp.setIdentity();
+    _Kd.setIdentity();
+
 
     update(Eigen::VectorXd(1));
 
@@ -77,8 +85,8 @@ void OpenSoT::tasks::acceleration::CoM::_update(const Eigen::VectorXd& x)
 
     _cartesian_task = _J*_qddot + _jdotqdot;
     _cartesian_task = _cartesian_task - _acc_ref
-                                      - _lambda2*(_vel_ref - _vel_current)
-                                      - _lambda*_pose_error ;
+                                      - _lambda2*_Kd*(_vel_ref - _vel_current)
+                                      - _lambda*_Kp*_pose_error ;
 
     _A = _cartesian_task.getM();
     _b = -_cartesian_task.getq();
@@ -152,7 +160,13 @@ void OpenSoT::tasks::acceleration::CoM::resetReference()
     _acc_ref_cached = _acc_ref;
 }
 
-void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger::Ptr logger)
+bool OpenSoT::tasks::acceleration::CoM::reset()
+{
+    resetReference();
+    return true;
+}
+
+void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(getTaskID() + "_pose_error", _pose_error);
     logger->add(getTaskID() + "_linear_velocity_error", _vel_ref - _vel_current);
@@ -160,6 +174,8 @@ void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger::Ptr logger)
 
     logger->add(getTaskID() + "_velocity_reference", _vel_ref_cached);
     logger->add(getTaskID() + "_acceleration_reference", _acc_ref_cached);
+
+    logger->add(getTaskID() + "_lambda2", _lambda2);
 }
 
 void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref)
@@ -197,3 +213,37 @@ const Eigen::Vector3d& OpenSoT::tasks::acceleration::CoM::getCachedAccelerationR
 {
     return _acc_ref_cached;
 }
+
+const Eigen::Matrix3d& OpenSoT::tasks::acceleration::CoM::getKp() const
+{
+    return _Kp;
+}
+
+const Eigen::Matrix3d& OpenSoT::tasks::acceleration::CoM::getKd() const
+{
+    return _Kd;
+}
+
+void OpenSoT::tasks::acceleration::CoM::setKp(const Eigen::Matrix3d& Kp)
+{
+    _Kp = Kp;
+}
+
+void OpenSoT::tasks::acceleration::CoM::setKd(const Eigen::Matrix3d& Kd)
+{
+    _Kd = Kd;
+}
+
+void OpenSoT::tasks::acceleration::CoM::setGains(const Eigen::Matrix3d& Kp, const Eigen::Matrix3d& Kd)
+{
+    setKp(Kp);
+    setKd(Kd);
+}
+
+void OpenSoT::tasks::acceleration::CoM::getGains(Eigen::Matrix3d& Kp, Eigen::Matrix3d& Kd)
+{
+    Kp = getKp();
+    Kd = getKd();
+}
+
+

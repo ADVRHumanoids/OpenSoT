@@ -22,6 +22,7 @@
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
 #include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/tasks/acceleration/GainType.h>
 
 namespace OpenSoT { namespace tasks { namespace acceleration {
     
@@ -34,13 +35,16 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
       
     public:
         
-        typedef boost::shared_ptr<Postural> Ptr;
+        typedef std::shared_ptr<Postural> Ptr;
         
         Postural(const XBot::ModelInterface& robot,
-                 AffineHelper qddot = AffineHelper());
+                 AffineHelper qddot = AffineHelper(), const std::string task_id = "Postural");
 
         Postural(const XBot::ModelInterface& robot,
-                 const int x_size);
+                 const int x_size, const std::string task_id = "Postural");
+
+        void setGainType(GainType type);
+        GainType getGainType() const;
         
         virtual void _update(const Eigen::VectorXd& x);
         
@@ -118,7 +122,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         bool reset();
         
-        virtual void _log(XBot::MatLogger::Ptr logger);
+        virtual void _log(XBot::MatLogger2::Ptr logger);
 
         /**
          * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
@@ -174,13 +178,13 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         
     private:
+        GainType _gain_type;
+
         Eigen::VectorXd _position_error, _velocity_error;
         
         const XBot::ModelInterface& _robot;
         AffineHelper _qddot;
         AffineHelper _postural_task;
-        
-        int _na;
         
         Eigen::VectorXd _qddot_d, _qddot_ref, _qref, _qdot, _q, _qdot_ref, _qdot_ref_cached, _qddot_ref_cached;
         Eigen::MatrixXd _Jpostural;
@@ -188,6 +192,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         double _lambda2;
 
         Eigen::MatrixXd _Kp, _Kd;
+
+        Eigen::MatrixXd _Mi;
         
         
     };

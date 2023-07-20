@@ -30,7 +30,7 @@ namespace OpenSoT {
          */
         class FloatingBase : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
             public:
-            typedef boost::shared_ptr<FloatingBase> Ptr;
+            typedef std::shared_ptr<FloatingBase> Ptr;
 
             /**
              * @brief FloatingBase constructor
@@ -57,7 +57,7 @@ namespace OpenSoT {
 
             private:
             virtual void _update(const Eigen::VectorXd& x);
-            virtual void _log(XBot::MatLogger::Ptr logger);
+            virtual void _log(XBot::MatLogger2::Ptr logger);
 
             std::vector<std::string> _contact_links;
             XBot::ModelInterface& _model;

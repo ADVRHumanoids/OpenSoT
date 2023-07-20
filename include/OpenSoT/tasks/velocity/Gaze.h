@@ -39,7 +39,7 @@ namespace velocity {
 class Gaze: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>
 {
 public:
-    typedef boost::shared_ptr<Gaze> Ptr;
+    typedef std::shared_ptr<Gaze> Ptr;
 
     Gaze(std::string task_id,
          const Eigen::VectorXd &x,

@@ -1,25 +1,5 @@
 #include <OpenSoT/solvers/BackEndFactory.h>
 #include <XBotInterface/SoLib.h>
-#include <boost/bind.hpp>
-
-/* Utility to convert from std to boost shared pointer */
-namespace {
-    template<typename T>
-    void do_release(typename std::shared_ptr<T> const&, T*)
-    {
-    }
-
-    template<typename T>
-    typename boost::shared_ptr<T> to_boost(typename std::shared_ptr<T> const& p)
-    {
-        return
-            boost::shared_ptr<T>(
-                    p.get(),
-                    boost::bind(&do_release<T>, p, _1));
-
-    }
-}
-
 
 OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_back_ends be_solver, const int number_of_variables,
                        const int number_of_constraints,
@@ -34,9 +14,9 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
             throw std::runtime_error("libOpenSotBackEndQPOases.so must be listed inside LD_LIBRARY_PATH");
         }
         
-        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib, 
-                                                  "OpenSotBackEndQPOases", 
-                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+        return std::shared_ptr<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                          "OpenSotBackEndQPOases",
+                                          number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
     
     if(be_solver == solver_back_ends::OSQP) { 
@@ -47,9 +27,9 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
             throw std::runtime_error("libOpenSotBackEndOSQP.so must be listed inside LD_LIBRARY_PATH");
         }
         
-        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib, 
-                                                  "OpenSotBackEndOSQP", 
-                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+        return std::shared_ptr<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                          "OpenSotBackEndOSQP",
+                                          number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
     
     if(be_solver == solver_back_ends::GLPK) { 
@@ -60,9 +40,9 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
             throw std::runtime_error("libOpenSotBackEndGLPK.so must be listed inside LD_LIBRARY_PATH");
         }
         
-        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
-                                                  "OpenSotBackEndGLPK",
-                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+        return std::shared_ptr<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                          "OpenSotBackEndGLPK",
+                                          number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
 
     if(be_solver == solver_back_ends::eiQuadProg) {
@@ -73,9 +53,9 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
             throw std::runtime_error("libOpenSotBackEnduQuadProg.so must be listed inside LD_LIBRARY_PATH");
         }
 
-        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
-                                                  "OpenSotBackEndeiQuadProg",
-                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+        return std::shared_ptr<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                          "OpenSotBackEndeiQuadProg",
+                                          number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
     
     if(be_solver == solver_back_ends::ODYS) {
@@ -86,9 +66,35 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
             throw std::runtime_error("libOpenSotBackEndODYS.so must be listed inside LD_LIBRARY_PATH");
         }
 
-        return to_boost<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
-                                                  "OpenSotBackEndODYS",
-                                                  number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+        return std::shared_ptr<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                          "OpenSotBackEndODYS",
+                                          number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+    }
+
+    if(be_solver == solver_back_ends::qpSWIFT) {
+
+        /* Obtain full path to shared lib */
+        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndqpSWIFT.so", "LD_LIBRARY_PATH");
+        if (path_to_shared_lib == "") {
+            throw std::runtime_error("libOpenSotBackEndqpSWIFT.so must be listed inside LD_LIBRARY_PATH");
+        }
+
+        return std::shared_ptr<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                          "libOpenSotBackEndqpSWIFT",
+                                          number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
+    }
+
+    if(be_solver == solver_back_ends::proxQP) {
+
+        /* Obtain full path to shared lib */
+        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndproxQP.so", "LD_LIBRARY_PATH");
+        if (path_to_shared_lib == "") {
+            throw std::runtime_error("libOpenSotBackEndproxQP.so must be listed inside LD_LIBRARY_PATH");
+        }
+
+        return std::shared_ptr<BackEnd>(SoLib::getFactoryWithArgs<BackEnd>(path_to_shared_lib,
+                                          "libOpenSotBackEndproxQP",
+                                          number_of_variables, number_of_constraints, hessian_type, eps_regularisation));
     }
 
     else {
@@ -109,6 +115,10 @@ std::string OpenSoT::solvers::whichBackEnd(const solver_back_ends be_solver)
         return "eiQuadProg";
     if(be_solver == solver_back_ends::ODYS)
         return "ODYS";
+    if(be_solver == solver_back_ends::proxQP)
+        return "proxQP";
+    if(be_solver == solver_back_ends::qpSWIFT)
+        return "qpSWIFT";
     else
         return "????";
 }

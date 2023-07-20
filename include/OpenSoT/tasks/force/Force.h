@@ -22,7 +22,7 @@
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/tasks/MinimizeVariable.h>
 #include <OpenSoT/tasks/Aggregated.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <OpenSoT/utils/AutoStack.h>
 
 namespace OpenSoT {
@@ -35,25 +35,31 @@ namespace OpenSoT {
          */
         class Wrench : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
         public:
-            typedef boost::shared_ptr<Wrench> Ptr;
+            typedef std::shared_ptr<Wrench> Ptr;
 
             /**
              * @brief Wrench
-             * @param contact_name frame wrt the force is exterted
+             * @param id
+             * @param distal_link where the force is applied
+             * @param base_link wrt the force is expressed (not used)
              * @param wrench
+             *
+             * NOTE: base_link is not used but is only needed to retrieve information for other computations
+             * such as Inverse Dynamics (J'F)
              */
             Wrench(const std::string& id,
                    const std::string& distal_link, const std::string& base_link,
-                   AffineHelper& wrench);
+                   const AffineHelper& wrench);
 
             bool setReference(const Eigen::VectorXd& ref);
             void getReference(Eigen::VectorXd& ref);
 
             const std::string& getDistalLink() const;
             const std::string& getBaseLink() const;
+        protected:
+            virtual void _update(const Eigen::VectorXd& x);    
         private:
             std::string _distal_link, _base_link;
-            virtual void _update(const Eigen::VectorXd& x);
             OpenSoT::tasks::MinimizeVariable::Ptr _min_var;
 
             Eigen::VectorXd _tmp;
@@ -62,12 +68,12 @@ namespace OpenSoT {
 
         class Wrenches : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
         public:
-            typedef boost::shared_ptr<Wrenches> Ptr;
+            typedef std::shared_ptr<Wrenches> Ptr;
 
             Wrenches(const std::string& id,
                      const std::vector<std::string>& distal_links,
                      const std::vector<std::string>& base_links,
-                     std::vector<AffineHelper> wrenches);
+                     const std::vector<AffineHelper>& wrenches);
 
             Wrench::Ptr getWrenchTask(const std::string& distal_link);
 

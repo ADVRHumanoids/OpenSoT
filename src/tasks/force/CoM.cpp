@@ -389,7 +389,7 @@ const Eigen::Vector3d &CoM::getAngularMomentumError()
     return angularMomentumError;
 }
 
-void CoM::_log(XBot::MatLogger::Ptr logger)
+void CoM::_log(XBot::MatLogger2::Ptr logger)
 {
     logger->add(getTaskID() + "_position_error", getError());
     logger->add(getTaskID() + "_velocity_error", getVelocityError());

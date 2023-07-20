@@ -4,7 +4,7 @@
 #include <yarp/sig/all.h>
 #include <yarp/sig/Vector.h>
 #include <yarp/sig/Matrix.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OpenSoT/Task.h>
 #include <yarp/math/Math.h>
 #include <qpOASES.hpp>
@@ -167,12 +167,12 @@ public:
 
     }
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionGeometry> > getShapes()
+    std::map<std::string,std::shared_ptr<fcl::CollisionGeometry> > getShapes()
     {
         return _computeDistance.shapes_;
     }
 
-    std::map<std::string,boost::shared_ptr<fcl::CollisionObject> > getcollision_objects()
+    std::map<std::string,std::shared_ptr<fcl::CollisionObject> > getcollision_objects()
     {
         return _computeDistance.collision_objects_;
     }
@@ -182,7 +182,7 @@ public:
         return _computeDistance.link_T_shape;
     }
 
-    std::map<std::string,boost::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
+    std::map<std::string,std::shared_ptr<ComputeLinksDistance::Capsule> > getcustom_capsules()
     {
         return _computeDistance.custom_capsules_;
     }
@@ -386,7 +386,7 @@ namespace
                                                             new VelocityLimits(0.1, mSecToSec(dT), state.size())));
 
 
-                boost::shared_ptr<ik_problem> problem(new ik_problem());
+                std::shared_ptr<ik_problem> problem(new ik_problem());
 
 
                 /** Create Augmented (aggregated) tasks  and stack of tasks**/
@@ -440,7 +440,7 @@ namespace
                 /** Set damped leas squares fator **/
                 problem->damped_least_square_eps = 2E2;
 
-                boost::shared_ptr<OpenSoT::solvers::QPOases_sot> qp_solver_sparse;
+                std::shared_ptr<OpenSoT::solvers::QPOases_sot> qp_solver_sparse;
 
                 int step = 3000;
                     std::cout<<GREEN<<"SPARSE SOLVER"<<DEFAULT<<std::endl;
@@ -708,8 +708,8 @@ namespace
             KDL::Vector lefthand_capsule_ep1, lefthand_capsule_ep2,
                     righthand_capsule_ep1, righthand_capsule_ep2;
 
-            boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
-            boost::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
+            std::shared_ptr<ComputeLinksDistance::Capsule> capsuleA = compute_distance_observer.getcustom_capsules()[_linkA];
+            std::shared_ptr<ComputeLinksDistance::Capsule> capsuleB = compute_distance_observer.getcustom_capsules()[_linkB];
             capsuleA->getEndPoints(lefthand_capsule_ep1, lefthand_capsule_ep2);
             capsuleB->getEndPoints(righthand_capsule_ep1, righthand_capsule_ep2);
 

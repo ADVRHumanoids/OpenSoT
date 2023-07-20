@@ -36,8 +36,8 @@
          */
         class TaskToConstraint: public BilateralConstraint {
         public:
-            typedef boost::shared_ptr< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> > TaskPtr;
-            typedef boost::shared_ptr< OpenSoT::constraints::TaskToConstraint> Ptr;
+            typedef std::shared_ptr< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> > TaskPtr;
+            typedef std::shared_ptr< OpenSoT::constraints::TaskToConstraint> Ptr;
 
         private:
             
@@ -72,6 +72,15 @@
         protected:
 
             void generateAll();
+
+            /**
+             * @brief _log can be used to log internal Constraint variables
+             * @param logger a shared pointer to a MatLogger
+             */
+            virtual void _log(XBot::MatLogger2::Ptr logger)
+            {
+                _task->log(logger);
+            }
         };
     }
  }

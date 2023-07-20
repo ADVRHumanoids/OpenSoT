@@ -41,7 +41,7 @@ namespace OpenSoT {
         */
        class LinearMomentum : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
        public:
-           typedef boost::shared_ptr<LinearMomentum> Ptr;
+           typedef std::shared_ptr<LinearMomentum> Ptr;
 
        private:
            XBot::ModelInterface& _robot;

@@ -68,6 +68,25 @@ public:
     AffineHelperBase(const DerivedM& M, const DerivedQ& q): _M(M), _q(q) {
         check_consistency();
     }
+
+    void setM(const DerivedM& M)
+    {
+        _M.noalias() = M;
+        check_consistency();
+    }
+
+    void setq(const DerivedQ& q)
+    {
+        _q.noalias() = q;
+        check_consistency();
+    }
+
+    void set(const DerivedM& M, const DerivedQ& q)
+    {
+        _M.noalias() = M;
+        _q.noalias() = q;
+        check_consistency();
+    }
     
     template <typename OtherM, typename OtherQ>
     AffineHelperBase(const AffineHelperBase<OtherM, OtherQ>& other)
@@ -300,60 +319,11 @@ inline AffineHelper operator/(const AffineHelperBase<DerivedM1, DerivedQ1>& lhs,
     
 }
 
-
-
-
 inline std::ostream& operator<<(std::ostream& os, const AffineHelper& affine)
 {
     os << "M:\n" << affine.getM() << "\n\nq:\n" << affine.getq();
     return os;
 }
 
-
-
-
-
-
-
-
-
 }
-
-// // tau = S*(B*qddot + h - J*F)
-// 
-// int main(){
-//     
-//     XBot::ModelInterface::Ptr model = XBot::ModelInterface::getModel(XBot::Utils::getXBotConfig());
-//     
-//     std::vector<std::string> contact_links = { "r_sole", "l_sole" };
-//     
-//     OpenSoT::OptvarHelper optvarhelper;
-//     optvarhelper.add("qddot", 50);
-//     optvarhelper.add("f1", 6);
-//     optvarhelper.add("f2", 6);
-//     optvarhelper.add("slack_1", 1);
-//     
-//     OpenSoT::AffineHelper qddot = optvarhelper.getVar("qddot");
-//     std::vector<OpenSoT::AffineHelper> forces = { optvarhelper.getVar("f1"), optvarhelper.getVar("f2") };
-//     
-//     OpenSoT::Torque tau(model, contact_links, qddot, forces, optvarhelper);
-//     
-//     
-//     
-//     // A*tau - b
-//     
-//     Eigen::MatrixXd A(3, tau.getOutputSize());
-//     Eigen::VectorXd b(3);
-//     
-//     OpenSoT::AffineHelper task;
-//     task = A*tau - b;
-//     
-//     Eigen::MatrixXd _A = task.getM();
-//     Eigen::VectorXd _b = b - task.getq();
-//     
-// 
-// }
-
-
-
 #endif

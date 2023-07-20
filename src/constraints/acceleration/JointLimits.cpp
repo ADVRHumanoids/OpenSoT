@@ -16,7 +16,7 @@
 */
 
 #include <OpenSoT/constraints/acceleration/JointLimits.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace OpenSoT::constraints::acceleration;
 
@@ -31,18 +31,19 @@ JointLimits::JointLimits(   XBot::ModelInterface& robot,
      _jointLimitsMin(jointBoundMin),
      _jointAccMax(jointAccMax),
      _robot(robot),
-     _dt(dt)
+     _dt(dt),
+     _p(1.0)
 {
     if(qddot.getOutputSize() != _jointLimitsMax.size())
         throw std::runtime_error("_qddot.getOutputSize() != _jointLimitsMax.size()");
     if(qddot.getOutputSize() != _jointLimitsMin.size())
         throw std::runtime_error("_qddot.getOutputSize() != _jointLimitsMin.size()");
     if(_jointAccMax.size() != _jointLimitsMin.size())
-        throw std::runtime_error("_jointAccMax.size() != _jointAccMax.size()");
+        throw std::runtime_error("_jointAccMax.size() != _jointLimitsMin.size()");
     /* calling update to generate bounds */       
     
     
-    _generic_constraint_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 "internal_generic_constraint", qddot,
                 _jointAccMax,
                 -_jointAccMax,
@@ -68,15 +69,16 @@ void JointLimits::update(const Eigen::VectorXd& x)
     _lb_sup.setZero(_q.size()); _lb_inf.setZero(_q.size());
     _ub.setZero(_q.size()); _lb.setZero(_q.size());
     
+    double dt = _dt * _p;
         
     for(int i = 0; i < _q.size(); i++)
     {            
    
-        _a(i) = .5*_dt*_dt/_jointAccMax(i);
+        _a(i) = .5*dt*dt/_jointAccMax(i);
         
         // MAX JOINT LIMITS        
-        _b_sup(i) = _dt*_qdot(i)/_jointAccMax(i) + .5*_dt*_dt;
-        _c_sup(i) = _q(i) + _dt*_qdot(i) - _jointLimitsMax(i) + .5*_qdot(i)*_qdot(i)/_jointAccMax(i);
+        _b_sup(i) = dt*_qdot(i)/_jointAccMax(i) + .5*dt*dt;
+        _c_sup(i) = _q(i) + dt*_qdot(i) - _jointLimitsMax(i) + .5*_qdot(i)*_qdot(i)/_jointAccMax(i);
         
         _delta_sup(i) = _b_sup(i)*_b_sup(i) - 4*_a(i)*_c_sup(i);
         
@@ -89,8 +91,8 @@ void JointLimits::update(const Eigen::VectorXd& x)
         _lb_sup(i) = .5/_a(i)*(-_b_sup(i) - std::sqrt(_delta_sup(i)));
         
         // MIN JOINT LIMITS
-        _b_inf(i) = _dt*_qdot(i)/_jointAccMax(i) - .5*_dt*_dt;
-        _c_inf(i) = -_q(i) - _dt*_qdot(i) + _jointLimitsMin(i) + .5*_qdot(i)*_qdot(i)/_jointAccMax(i);
+        _b_inf(i) = dt*_qdot(i)/_jointAccMax(i) - .5*dt*dt;
+        _c_inf(i) = -_q(i) - dt*_qdot(i) + _jointLimitsMin(i) + .5*_qdot(i)*_qdot(i)/_jointAccMax(i);
         
         _delta_inf(i) = _b_inf(i)*_b_inf(i) - 4*_a(i)*_c_inf(i);
        
@@ -124,7 +126,19 @@ void JointLimits::update(const Eigen::VectorXd& x)
     _Aineq = _generic_constraint_internal->getAineq();
     _bLowerBound = _generic_constraint_internal->getbLowerBound();
     _bUpperBound = _generic_constraint_internal->getbUpperBound();
-     
+
 }
 
+void JointLimits::setJointAccMax(const Eigen::VectorXd &jointAccMax)
+{
+    _jointAccMax = jointAccMax;
+}
+
+bool JointLimits::setPStepAheadPredictor(const double p)
+{
+    if(p < 1.)
+        return false;
+    _p = p;
+    return true;
+}
 

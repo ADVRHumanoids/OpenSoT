@@ -1,5 +1,5 @@
 #include <OpenSoT/constraints/acceleration/VelocityLimits.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelInterface& robot,
                                                    const AffineHelper& qddot,
@@ -7,7 +7,8 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
                                                    const double dT):
     Constraint< Eigen::MatrixXd, Eigen::VectorXd >("velocity_limits", qddot.getInputSize()),
     _robot(robot),
-    _dT(dT)
+    _dT(dT),
+    _p(1.)
 {
     _qdotmin.setOnes(qddot.getOutputSize());
     _qdotmin *= -qDotLimit;
@@ -16,10 +17,10 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
 
     _qdot.setZero(_qdotmax.size());
 
-    _generic_constraint_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 "internal_generic_constraint", qddot,
-                ( _qdotmax - _qdot)/_dT,
-                ( _qdotmin - _qdot)/_dT,
+                ( _qdotmax - _qdot)/(_dT*_p),
+                ( _qdotmin - _qdot)/(_dT*_p),
                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
     update(Eigen::VectorXd(0));
 }
@@ -30,17 +31,18 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
                const double dT):
     Constraint< Eigen::MatrixXd, Eigen::VectorXd >("velocity_limits", qddot.getInputSize()),
     _robot(robot),
-    _dT(dT)
+    _dT(dT),
+    _p(1.)
 {
     _qdotmin = -qDotLimit;
     _qdotmax = qDotLimit;
 
     _qdot.setZero(_qdotmax.size());
 
-    _generic_constraint_internal = boost::make_shared<OpenSoT::constraints::GenericConstraint>(
+    _generic_constraint_internal = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                 "internal_generic_constraint", qddot,
-                ( _qdotmax - _qdot)/_dT,
-                ( _qdotmin - _qdot)/_dT,
+                ( _qdotmax - _qdot)/(_dT*_p),
+                ( _qdotmin - _qdot)/(_dT*_p),
                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
     update(Eigen::VectorXd(0));
 }
@@ -50,8 +52,8 @@ void OpenSoT::constraints::acceleration::VelocityLimits::update(const Eigen::Vec
     _robot.getJointVelocity(_qdot);
 
     _generic_constraint_internal->setBounds(
-                ( _qdotmax - _qdot)/_dT,
-                ( _qdotmin - _qdot)/_dT
+                ( _qdotmax - _qdot)/(_dT*_p),
+                ( _qdotmin - _qdot)/(_dT*_p)
                 );
 
     _generic_constraint_internal->update(x);
@@ -74,4 +76,12 @@ void OpenSoT::constraints::acceleration::VelocityLimits::setVelocityLimits(const
 {
     _qdotmin = -qDotLimit;
     _qdotmax = qDotLimit;
+}
+
+bool OpenSoT::constraints::acceleration::VelocityLimits::setPStepAheadPredictor(const double p)
+{
+    if(p < 1.)
+        return false;
+    _p = p;
+    return true;
 }

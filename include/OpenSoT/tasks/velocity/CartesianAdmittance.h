@@ -28,7 +28,7 @@ namespace OpenSoT {
         */
        class CartesianAdmittance: public Cartesian {
          public:
-            typedef boost::shared_ptr<CartesianAdmittance> Ptr;
+            typedef std::shared_ptr<CartesianAdmittance> Ptr;
 
            /**
              * @brief CartesianAdmittance constructor
@@ -95,7 +95,7 @@ namespace OpenSoT {
             */
            bool reset();
 
-           void _log(XBot::MatLogger::Ptr logger);
+           void _log(XBot::MatLogger2::Ptr logger);
 
            /**
             * @brief getStiffness

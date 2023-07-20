@@ -80,7 +80,7 @@ namespace OpenSoT{
                                      const std::string& constraints_id, const std::string& bounds_id);
 
     public:
-        typedef boost::shared_ptr<eHQP> Ptr;
+        typedef std::shared_ptr<eHQP> Ptr;
         /**
          * @brief creates a pseudoinverse solver for the current Stack
          */

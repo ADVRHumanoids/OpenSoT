@@ -12,9 +12,9 @@ namespace OpenSoT{
     class BackEnd{
     public:
         BackEnd(const int number_of_variables, const int number_of_constraints);
-        ~BackEnd();
+        virtual ~BackEnd();
 
-        typedef boost::shared_ptr<BackEnd> Ptr;
+        typedef std::shared_ptr<BackEnd> Ptr;
 
         /**
          * @brief getSolution return the actual solution of the QP problem
@@ -42,7 +42,7 @@ namespace OpenSoT{
          * @param i an index related to the particular index of the problem
          * @param prefix a prefix before the logged matrices
          */
-        void log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix);
+        void log(XBot::MatLogger2::Ptr logger, int i, const std::string& prefix);
 
         /**
          * @brief updateProblem update the whole problem see updateTask(), updateConstraints() and updateBounds()
@@ -178,7 +178,7 @@ namespace OpenSoT{
          * @param i an index related to the particular index of the problem
          * @param prefix a prefix before the logged matrices
          */
-        virtual void _log(XBot::MatLogger::Ptr logger, int i, const std::string& prefix){}
+        virtual void _log(XBot::MatLogger2::Ptr logger, int i, const std::string& prefix){}
 
         /**
          * @brief _printProblemInformation can be used to print extra information

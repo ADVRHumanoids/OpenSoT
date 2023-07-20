@@ -1,7 +1,6 @@
 #include <OpenSoT/tasks/acceleration/Cartesian.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
 #include <OpenSoT/tasks/acceleration/CoM.h>
-#include <OpenSoT/tasks/acceleration/CoM.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/iHQP.h>
@@ -9,10 +8,10 @@
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <XBotInterface/Logger.hpp>
 
-std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = robotology_root + relative_path;
+std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
+std::string _path_to_cfg = relative_path;
 
 namespace{
 

@@ -77,7 +77,7 @@ void OpenSoT::tasks::velocity::PureRolling::_update(const Eigen::VectorXd& x)
     
 }
 
-void OpenSoT::tasks::velocity::PureRolling::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::velocity::PureRolling::_log(XBot::MatLogger2::Ptr logger)
 {
     _model.getJointVelocity(_qdot);
     
@@ -103,7 +103,7 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
 
     _subtask.reset(new OpenSoT::SubTask(_pure_rolling, _position_indices));
 	
-	
+    _W.setIdentity(_position_indices.size(), _position_indices.size());
 
     Eigen::VectorXd q;
     model.getJointPosition(q);
@@ -122,10 +122,9 @@ void OpenSoT::tasks::velocity::PureRollingPosition::_update(const Eigen::VectorX
 
     _A = _subtask->getA();
     _b = _subtask->getb();
-    _W = _subtask->getWeight();
 }
 
-void OpenSoT::tasks::velocity::PureRollingPosition::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::velocity::PureRollingPosition::_log(XBot::MatLogger2::Ptr logger)
 {
     _pure_rolling->log(logger);
 }

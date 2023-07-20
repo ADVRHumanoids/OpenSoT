@@ -20,7 +20,7 @@
 
 #include <OpenSoT/Task.h>
 #include <Eigen/Dense>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <list>
 #include <OpenSoT/utils/Piler.h>
 
@@ -44,7 +44,7 @@ using namespace OpenSoT::utils;
          */
         class Aggregated: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
         public:
-            typedef boost::shared_ptr<Aggregated> Ptr;
+            typedef std::shared_ptr<Aggregated> Ptr;
             typedef MatrixPiler VectorPiler;
         protected:
 
@@ -107,7 +107,7 @@ using namespace OpenSoT::utils;
 
             static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
 
-            virtual void _log(XBot::MatLogger::Ptr logger);
+            virtual void log(XBot::MatLogger2::Ptr logger);
 
             static const std::string _TASK_PLUS_;
             static std::string concatenatedId;
@@ -131,6 +131,15 @@ using namespace OpenSoT::utils;
              */
             Aggregated(TaskPtr task1,
                        TaskPtr task2,
+                       const unsigned int x_size);
+
+            /**
+             * @brief Aggregated
+             * @param task a pointer to the Task to aggregate
+             * @param x_size the size of the input vector. Notice this constructor will NOT call
+             *               update() on the base tasks
+             */
+            Aggregated(TaskPtr task,
                        const unsigned int x_size);
 
             /**

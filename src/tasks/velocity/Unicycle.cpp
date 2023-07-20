@@ -160,10 +160,10 @@ bool Unicycle::setBaseLink(const std::string& base_link)
 
 bool OpenSoT::tasks::velocity::Unicycle::isUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return (bool)boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Unicycle>(task);
+    return (bool)std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Unicycle>(task);
 }
 
 OpenSoT::tasks::velocity::Unicycle::Ptr OpenSoT::tasks::velocity::Unicycle::asUnicycle(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
-    return boost::dynamic_pointer_cast<OpenSoT::tasks::velocity::Unicycle>(task);
+    return std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Unicycle>(task);
 }

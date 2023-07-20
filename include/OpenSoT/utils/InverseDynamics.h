@@ -14,15 +14,21 @@ namespace utils{
 class InverseDynamics{
 
 public:
-    typedef boost::shared_ptr<InverseDynamics> Ptr;
+    typedef std::shared_ptr<InverseDynamics> Ptr;
+
+    enum CONTACT_MODEL{
+        POINT_CONTACT, // only Forces (3 dofs)
+        SURFACE_CONTACT //Forces and Moments (6 dofs)
+    };
 
     /**
      * @brief InverseDynamics constructor
      * @param links_in_contact a vector of string each one representing a contact
      * @param model
+     * @param contact_model the type of contact model defines the number of contact force variables, default is surface: 6dofs
      */
     InverseDynamics(const std::vector<std::string> links_in_contact,
-                    XBot::ModelInterface& model);
+                    XBot::ModelInterface& model, const CONTACT_MODEL& contact_model = CONTACT_MODEL::SURFACE_CONTACT);
 
     /**
      * @brief getJointsAccelerationAffine return the Affine related to the joint accelerations
@@ -40,7 +46,7 @@ public:
      * @brief getSerializer return a pointer to the object which contains all the variables of the Inverse Dynamics
      * @return
      */
-    const boost::shared_ptr<OpenSoT::OptvarHelper> getSerializer() const;
+    const std::shared_ptr<OpenSoT::OptvarHelper> getSerializer() const;
 
     /**
      * @brief computedTorque given the solution from the solver which contains all the optimization variables, returns the torque
@@ -60,14 +66,14 @@ public:
      * @brief log internal variables: wrenches, tau and qddot
      * @param logger
      */
-    void log(XBot::MatLogger::Ptr& logger);
+    void log(XBot::MatLogger2::Ptr& logger);
 
 private:
     AffineHelper    _qddot;
     std::vector<AffineHelper> _contacts_wrench;
     std::vector<std::string> _links_in_contact;
     XBot::ModelInterface& _model;
-    boost::shared_ptr<OpenSoT::OptvarHelper> _serializer;
+    std::shared_ptr<OpenSoT::OptvarHelper> _serializer;
 
     Eigen::VectorXd _qddot_val;
     std::vector<Eigen::Vector6d> _contacts_wrench_val;

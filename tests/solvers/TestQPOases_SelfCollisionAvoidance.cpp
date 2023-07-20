@@ -245,10 +245,10 @@ void setupIK(OpenSoT::AutoStack::Ptr& stack,
     OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>::TaskPtr lastTask = stack->getStack()[stack->getStack().size()-1];
     for(it_constraint i_c = lastTask->getConstraints().begin() ;
         i_c != lastTask->getConstraints().end() ; ++i_c) {
-        if( boost::dynamic_pointer_cast<
+        if( std::dynamic_pointer_cast<
                 OpenSoT::constraints::velocity::VelocityLimits>(
                     *i_c))
-            boost::dynamic_pointer_cast<
+            std::dynamic_pointer_cast<
                             OpenSoT::constraints::velocity::VelocityLimits>(
                                 *i_c)->setVelocityLimits(.9);
     }

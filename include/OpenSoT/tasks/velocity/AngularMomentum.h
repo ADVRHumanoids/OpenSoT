@@ -39,7 +39,7 @@ namespace OpenSoT {
         */
        class AngularMomentum : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
        public:
-           typedef boost::shared_ptr<AngularMomentum> Ptr;
+           typedef std::shared_ptr<AngularMomentum> Ptr;
 
        private:
            XBot::ModelInterface& _robot;
@@ -49,6 +49,9 @@ namespace OpenSoT {
            Eigen::MatrixXd _Momentum;
 
            void _update(const Eigen::VectorXd& x);
+
+           std::string _base_link;
+           std::string _distal_link;
 
         public:
            /**
@@ -78,13 +81,13 @@ namespace OpenSoT {
             * @brief getBaseLink
             * @return "world"
             */
-           std::string getBaseLink();
+           const std::string& getBaseLink() const;
 
            /**
             * @brief getDistalLink
             * @return "CoM"
             */
-           std::string getDistalLink();
+           const std::string& getDistalLink() const;
 
            /**
             * @brief isAngularMomentum

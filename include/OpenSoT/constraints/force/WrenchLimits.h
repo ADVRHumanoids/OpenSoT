@@ -22,7 +22,7 @@
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 
  namespace OpenSoT {
@@ -33,7 +33,7 @@
              */
             class WrenchLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<WrenchLimits> Ptr;
+                typedef std::shared_ptr<WrenchLimits> Ptr;
             private:
                 Eigen::VectorXd _lowerLims;
                 Eigen::VectorXd _upperLims;
@@ -94,7 +94,7 @@
              */
             class WrenchesLimits: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<WrenchesLimits> Ptr;
+                typedef std::shared_ptr<WrenchesLimits> Ptr;
 
                 /**
                  * @brief WrenchesLimits constructor
@@ -121,6 +121,14 @@
                                const std::vector<AffineHelper>& wrench);
 
                 /**
+                 * @brief WrenchesLimits constructor
+                 * @param wrench_lims_constraints map with names and wrench limits
+                 * @param wrench
+                 */
+                WrenchesLimits(const std::map<std::string, WrenchLimits::Ptr>& wrench_lims_constraints,
+                               const std::vector<AffineHelper>& wrench);
+
+                /**
                  * @brief getWrenchLimits to access to internal wrench limits
                  * @param contact_name of the contact to get the associated wrench limit
                  * @return a wrench limit constraint
@@ -130,7 +138,7 @@
                 void update(const Eigen::VectorXd &x);
 
             private:
-                std::map<std::string, WrenchLimits::Ptr> wrench_lims_constraints;
+                std::map<std::string, WrenchLimits::Ptr> _wrench_lims_constraints;
                 OpenSoT::constraints::Aggregated::Ptr _aggregated_constraint;
                 virtual void generateBounds();
 

@@ -1,6 +1,6 @@
-#include <trajectory_utils/trajectory_utils.h>
+#include "trajectory_utils.h"
 #include <gtest/gtest.h>
-#include <trajectory_utils/utils/ros_trj_publisher.h>
+#include "ros_trj_publisher.h"
 #include <tf/transform_broadcaster.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
@@ -10,7 +10,6 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
-#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
 #include <ros/master.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <qpOASES/Options.hpp>
@@ -20,14 +19,14 @@
 #include <OpenSoT/solvers/eHQP.h>
 
 #include <XBotInterface/Logger.hpp>
+#include <matlogger2/matlogger2.h>
 
-std::string robotology_root = std::getenv("ROBOTOLOGY_ROOT");
-std::string relative_path = "/external/OpenSoT/tests/configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = robotology_root + relative_path;
+std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
+std::string _path_to_cfg = relative_path;
 
 bool IS_ROSCORE_RUNNING;
 
-XBot::MatLogger::Ptr logger;
+XBot::MatLogger2::Ptr logger;
 
 #define CHECK_JOINT_LIMITS false
 #define CHECK_CARTESIAN_ERROR true
@@ -280,9 +279,6 @@ public:
 
         vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2.*M_PI, 0.01, q.size()));
 
-        minAcc.reset(new OpenSoT::tasks::velocity::MinimizeAcceleration(q));
-        Eigen::MatrixXd W = minAcc->getWeight();
-        minAcc->setWeight(2.*W);
 
 
 
@@ -330,7 +326,6 @@ public:
     OpenSoT::tasks::velocity::CoM::Ptr    com;
     OpenSoT::tasks::velocity::Gaze::Ptr gaze;
     OpenSoT::tasks::velocity::Postural::Ptr postural;
-    OpenSoT::tasks::velocity::MinimizeAcceleration::Ptr minAcc;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
     OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
 
@@ -499,8 +494,15 @@ public:
             scale.x = .02; scale.y = .02; scale.z = .02;
             visual_tools->publishSphere(_com,rviz_visual_tools::colors::GREEN, scale);
 
-            visual_tools->publishWireframeRectangle(_l_foot, 0.05, 0.1);
-            visual_tools->publishWireframeRectangle(_r_foot, 0.05, 0.1);
+
+            Eigen::Isometry3d tmp, tmp2;
+            tmp.translation() = _l_foot.translation();
+            tmp.linear() = _l_foot.rotation();
+            tmp2.translation() = _r_foot.translation();
+            tmp2.linear() = _r_foot.rotation();
+            visual_tools->publishWireframeRectangle(tmp, 0.05, 0.1);
+            visual_tools->publishWireframeRectangle(tmp2, 0.05, 0.1);
+
 
 
         }
@@ -560,22 +562,22 @@ public:
     }
 
 
-    boost::shared_ptr<manipulation_trajectories> manip_trj;
-    boost::shared_ptr<walking_pattern_generator> walk_trj;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
-    boost::shared_ptr<trajectory_utils::trajectory_publisher> r_wrist_trj_pub;
+    std::shared_ptr<manipulation_trajectories> manip_trj;
+    std::shared_ptr<walking_pattern_generator> walk_trj;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> l_sole_trj_pub;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> r_sole_trj_pub;
+    std::shared_ptr<trajectory_utils::trajectory_publisher> r_wrist_trj_pub;
 
     ros::Publisher joint_state_pub;
-    boost::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
+    std::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
 
     rviz_visual_tools::RvizVisualToolsPtr visual_tools;
 
     XBot::ModelInterface::Ptr _model_ptr;
     Eigen::VectorXd _q;
 
-    boost::shared_ptr<ros::NodeHandle> _n;
+    std::shared_ptr<ros::NodeHandle> _n;
 
     void setGoodInitialPosition() {
         _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
@@ -943,17 +945,25 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         std::cout<<"Medium time per solve: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
     }
 
-    logger->flush();
+
 
 }
 
 }
 
+XBot::MatLogger2::Ptr getLogger(const std::string& name)
+{
+    XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger(name); // date-time automatically appended
+    logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+    return logger;
+}
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "testStaticWalkFloatingBaseFloatingBase_node");
-  logger = XBot::MatLogger::getLogger("EigenSVD_StaticWalk_FloatingBase");
+  logger = getLogger("EigenSVD_StaticWalk_FloatingBase");
   IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  auto ret = RUN_ALL_TESTS();
+  logger.reset();
+  return ret;
 }

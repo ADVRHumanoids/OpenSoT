@@ -52,11 +52,11 @@
                 
             public:
                 
-                typedef boost::shared_ptr<Cartesian> Ptr;
+                typedef std::shared_ptr<Cartesian> Ptr;
                 
             protected:
                 
-                virtual void _log(XBot::MatLogger::Ptr logger);
+                virtual void _log(XBot::MatLogger2::Ptr logger);
                 
                 XBot::ModelInterface& _robot;
 
@@ -113,8 +113,8 @@
                 Cartesian(std::string task_id,
                           const Eigen::VectorXd& x,
                           XBot::ModelInterface &robot,
-                          std::string distal_link,
-                          std::string base_link);
+                          const std::string& distal_link,
+                          const std::string& base_link);
 
                 ~Cartesian();
 
@@ -128,8 +128,7 @@
                  * for the distal_link in the base_link frame of reference.
                  */
                 void setReference(const Eigen::Affine3d& desiredPose);
-                [[deprecated]]
-                void setReference(const Eigen::MatrixXd& desiredPose);
+                void setReference(const Eigen::Matrix4d& desiredPose);
                 void setReference(const KDL::Frame& desiredPose);
 
                 /**
@@ -146,9 +145,8 @@
                  */
                 void setReference(const Eigen::Affine3d& desiredPose,
                                   const Eigen::Vector6d& desiredTwist);
-                [[deprecated]]
-                void setReference(const Eigen::MatrixXd& desiredPose,
-                                  const Eigen::VectorXd& desiredTwist);
+                void setReference(const Eigen::Matrix4d& desiredPose,
+                                  const Eigen::Vector6d& desiredTwist);
                 void setReference(const KDL::Frame& desiredPose,
                                   const KDL::Twist& desiredTwist);
 
@@ -157,10 +155,9 @@
                  * @return the Cartesian task reference \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                const void getReference(Eigen::Affine3d& desiredPose) const;
-                [[deprecated]]
-                const Eigen::MatrixXd getReference() const;
-                const void getReference(KDL::Frame& desiredPose) const;
+                void getReference(Eigen::Affine3d& desiredPose) const;
+                const Eigen::Matrix4d& getReference() const;
+                void getReference(KDL::Frame& desiredPose) const;
 
                 /**
                  * @brief getReference gets the current reference and feed-forward velocity for the Cartesian task.
@@ -171,9 +168,8 @@
                  */
                 void getReference(Eigen::Affine3d& desiredPose,
                                   Eigen::Vector6d& desiredTwist) const;
-                [[deprecated]]
-                void getReference(Eigen::MatrixXd& desiredPose,
-                                  Eigen::VectorXd& desiredTwist) const;
+                void getReference(Eigen::Matrix4d& desiredPose,
+                                  Eigen::Vector6d& desiredTwist) const;
                 void getReference(KDL::Frame& desiredPose,
                                   KDL::Vector& desiredTwist) const;
 
@@ -183,10 +179,9 @@
                  * @return the \f$R^{4x4}\f$ homogeneous transform matrix describing the actual pose
                  * for the distal_link in the base_link frame of reference.
                  */
-                const void getActualPose(Eigen::Affine3d& actual_pose) const;
-                [[deprecated]]
-                const Eigen::MatrixXd getActualPose() const;
-                const void getActualPose(KDL::Frame& actual_pose) const;
+                void getActualPose(Eigen::Affine3d& actual_pose) const;
+                const Eigen::Matrix4d& getActualPose() const;
+                void getActualPose(KDL::Frame& actual_pose) const;
 
                 /**
                  * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
@@ -198,8 +193,8 @@
                 void setOrientationErrorGain(const double& orientationErrorGain);
                 const double getOrientationErrorGain() const;
 
-                const std::string getDistalLink() const;
-                const std::string getBaseLink() const;
+                const std::string& getDistalLink() const;
+                const std::string& getBaseLink() const;
                 const bool baseLinkIsWorld() const;
 
                 virtual void setLambda(double lambda);
@@ -208,7 +203,7 @@
                  * @brief getError returns the 6d cartesian error (position and orientation) between actual and reference pose
                  * @return a \f$R^{6}\f$ vector describing cartesian error between actual and reference pose
                  */
-                const Eigen::Vector6d getError() const;
+                const Eigen::Vector6d& getError() const;
 
                 /**
                  * @brief setBaseLink change the base link of the task

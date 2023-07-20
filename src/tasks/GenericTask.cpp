@@ -79,9 +79,9 @@ bool GenericTask::setA(const Eigen::MatrixXd& A)
         return false;
     }
 
-    if(A.cols() != _var.getInputSize())
+    if(A.cols() != _var.getOutputSize())
     {
-        XBot::Logger::error() << "in " << __func__ << ": size not correct A.cols() != x.size()" << XBot::Logger::endl();
+        XBot::Logger::error() << "in " << __func__ << ": size not correct" << XBot::Logger::endl();
         return false;
     }
 

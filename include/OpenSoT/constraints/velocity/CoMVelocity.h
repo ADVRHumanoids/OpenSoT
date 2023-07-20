@@ -27,10 +27,10 @@
         namespace velocity {
             class CoMVelocity: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
-                typedef boost::shared_ptr<CoMVelocity> Ptr;
+                typedef std::shared_ptr<CoMVelocity> Ptr;
             private:
                 XBot::ModelInterface& _robot;
-                Eigen::VectorXd _velocityLimits;
+                Eigen::Vector3d _velocityLimits;
                 double _dT;
 
                 void generatebBounds();
@@ -41,17 +41,17 @@
                  * @param velocityLimits a vector of 3 elements describing the maximum velocity along x,y,z of the CoM.
                  * @param dT the time constant at which we are performing velocity control [s]
                  * @param x initial configuration of the robot when creating the constraint
-                 * @param robot the robot model, with floating base link set on the support foot
+                 * @param robot the robot model
                  */
-                CoMVelocity(const Eigen::VectorXd velocityLimits,
+                CoMVelocity(const Eigen::Vector3d velocityLimits,
                             const double dT,
                             const Eigen::VectorXd& x,
                             XBot::ModelInterface& robot);
 
                 virtual void update(const Eigen::VectorXd &x);
 
-                Eigen::VectorXd getVelocityLimits();
-                void setVelocityLimits(const Eigen::VectorXd velocityLimits);
+                Eigen::Vector3d getVelocityLimits();
+                void setVelocityLimits(const Eigen::Vector3d velocityLimits);
             };
         }
     }

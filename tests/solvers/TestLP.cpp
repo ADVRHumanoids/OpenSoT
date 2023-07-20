@@ -265,7 +265,7 @@ TEST_F(testLProblem, testMILPProblem)
 
 
         OpenSoT::solvers::iHQP::Ptr solver;
-        solver = boost::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), _autostack->getBounds(), 1.0, solver_vector);
+        solver = std::make_shared<OpenSoT::solvers::iHQP>(_autostack->getStack(), _autostack->getBounds(), 1.0, solver_vector);
 
         Eigen::VectorXd sol(3);
         for(unsigned int i = 0; i < 10; ++i)

@@ -171,7 +171,7 @@ void OpenSoT::tasks::velocity::RigidRotation::_update(const Eigen::VectorXd& x)
     
 }
 
-void OpenSoT::tasks::velocity::RigidRotation::_log(XBot::MatLogger::Ptr logger)
+void OpenSoT::tasks::velocity::RigidRotation::_log(XBot::MatLogger2::Ptr logger)
 {
     _model.getJointVelocity(_qdot);
     

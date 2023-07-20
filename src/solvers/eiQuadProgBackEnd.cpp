@@ -31,6 +31,11 @@ eiQuadProgBackEnd::eiQuadProgBackEnd(const int number_of_variables,
     _I.setIdentity(number_of_variables, number_of_variables);
 }
 
+eiQuadProgBackEnd::~eiQuadProgBackEnd()
+{
+
+}
+
 
 void eiQuadProgBackEnd::__generate_data_struct()
 {

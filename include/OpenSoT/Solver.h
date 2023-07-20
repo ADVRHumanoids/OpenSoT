@@ -29,11 +29,11 @@ using namespace std;
     class Solver {
     public:
         typedef Task< Matrix_type, Vector_type > TaskType;
-        typedef boost::shared_ptr<TaskType> TaskPtr;
+        typedef std::shared_ptr<TaskType> TaskPtr;
         typedef Constraint< Matrix_type, Vector_type > ConstraintType;
-        typedef boost::shared_ptr<ConstraintType> ConstraintPtr;
+        typedef std::shared_ptr<ConstraintType> ConstraintPtr;
         typedef Solver< Matrix_type, Vector_type > SolverType;
-        typedef boost::shared_ptr<SolverType> SolverPtr;
+        typedef std::shared_ptr<SolverType> SolverPtr;
         typedef vector <TaskPtr> Stack;
 
     protected:
@@ -47,7 +47,7 @@ using namespace std;
          * @param logger a pointer to a MatLogger
          * @param prefix used to log variables
          */
-        virtual void _log(XBot::MatLogger::Ptr logger, const std::string& prefix)
+        virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix)
         {
 
         }
@@ -106,7 +106,7 @@ using namespace std;
          * @param logger a pointer to a MatLogger
          * @param prefix used to log variables
          */
-        virtual void log(XBot::MatLogger::Ptr logger)
+        virtual void log(XBot::MatLogger2::Ptr logger)
         {
             if(_solver_id.empty())
                 _log(logger, _solver_id);
