@@ -11,6 +11,8 @@
 
 std::string _path_to_cfg = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
+#define TORAD(deg) deg*M_PI/180.
+
 namespace {
 
 class testJointLimitsNaive : public ::testing::Test {
@@ -204,7 +206,7 @@ TEST_F(testJointLimits, sizesAreCorrect) {
 
 TEST_F(testJointLimits, boundsDoUpdate) {
     Eigen::VectorXd q(zeros.size()); q.setZero(q.size());
-    Eigen::VectorXd q_next = Eigen::VectorXd::Constant(q.size(), 0.1);
+    Eigen::VectorXd q_next = Eigen::VectorXd::Constant(q.size(), 0.05);
 
     jointLimitsInvariance->update(q);
     Eigen::VectorXd oldLowerBound = jointLimitsInvariance->getLowerBound();
@@ -280,8 +282,8 @@ TEST_F(testJointLimits, test_bounds)
 
         for(unsigned int j = 0; j < this->qUpperBounds.size(); ++j)
         {
-          //  if(this->q[j] >= this->qUpperBounds[j])
-          //      EXPECT_NEAR(this->q[j] - this->qUpperBounds[j], 0.0, 1e-4)<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+            if(this->q[j] >= this->qUpperBounds[j])
+                EXPECT_NEAR(this->q[j] - this->qUpperBounds[j], 0.0, TORAD(0.1))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
             EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+1e-6)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+1e-6)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
@@ -324,8 +326,8 @@ TEST_F(testJointLimits, test_bounds)
         for(unsigned int j = 0; j < this->qLowerBounds.size(); ++j)
         {
 
-            //if(this->q[j] <= this->qLowerBounds[j])
-            //    EXPECT_NEAR(this->qLowerBounds[j] - this->q[j], 0.0, 1e-4)<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+            if(this->q[j] <= this->qLowerBounds[j])
+                EXPECT_NEAR(this->qLowerBounds[j] - this->q[j], 0.0, TORAD(0.1))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
             EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+1e-6)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+1e-6)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
