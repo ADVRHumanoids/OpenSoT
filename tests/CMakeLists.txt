@@ -1,24 +1,7 @@
 include(ExternalProject)
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++17" COMPILER_SUPPORTS_CXX17)
-check_cxx_compiler_flag("-std=c++14" COMPILER_SUPPORTS_CXX14)
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wmaybe-uninitialized -Wuninitialized")
-elseif(COMPILER_SUPPORTS_CXX14)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wmaybe-uninitialized -Wuninitialized")
-elseif(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wmaybe-uninitialized -Wuninitialized")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wmaybe-uninitialized -Wuninitialized")
-else()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 nor C++14 support. Please use a different C++ compiler.")
-endif()
-
-find_package(rviz_visual_tools QUIET)
-find_package(catkin REQUIRED tf roscpp robot_state_publisher urdf srdfdom)
+#find_package(rviz_visual_tools QUIET)
+#find_package(catkin REQUIRED tf roscpp robot_state_publisher urdf srdfdom)
 find_package(osqp QUIET)
 find_package(qpSWIFT QUIET)
 
@@ -51,8 +34,8 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testJointLimitsAccelerationViabilityBounds
                   testJointLimitsAccelerationECBFounds
                   testVelocityLimitsVelocityBounds
-                  testQPOasesSolver  
-                  testQPOases_SetActiveStack 
+                  testQPOasesSolver
+                  testQPOases_SetActiveStack
                   testQPOases_Options #10
                   testQPOases_SubTask
                   testQPOases_FF
@@ -68,8 +51,8 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testCartesianAdmittanceVelocityTask
                   testSubTask
                   testSubConstraint
-                  testCartesianUtils 
-                  testBasicAlgebra 
+                  testCartesianUtils
+                  testBasicAlgebra
                   testPosturalAccelerationTask
                   testCartesianAccelerationTask #30
                   testCoMAccelerationTask
@@ -89,13 +72,13 @@ if(${OPENSOT_SOTH_FRONT_END})
 endif()
 
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
-    set(OPENSOT_TEST testQPOases_ConvexHull 
+    set(OPENSOT_TEST testQPOases_ConvexHull
                      testConvexHullVelocityConstraint
                      testAutoStack) #45
 endif()
 
 if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver 
+    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver
                                       testGenericTask)
     set(OPENSOT_TEST ${OPENSOT_TESTS} testLP) #48
 endif()
@@ -129,29 +112,29 @@ endif()
 
 
 
-                      
-                      
-                      
+
+
+
 #
 #                      testQPOases_CartesianPositionConstraint
 
-                      
+
 #                      testQPOases_GlobalConstraints
-                      
+
 #                      testQPOases_PriorityInversion
 #                      testQPOases_SelfCollisionAvoidance
 
 
 #                      testQPOases_VelocityAllocation
 
-    
-                      
+
+
 #                      testGazeVelocityTask
 
 #                      testLogger
 
 #                      testVelocityAllocation
-                       
+
 #if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
 #    add_custom_command(TARGET OpenSoT POST_BUILD
 #                      COMMAND ${CMAKE_CTEST_COMMAND}
@@ -178,7 +161,7 @@ if(${OPENSOT_SOTH_FRONT_END})
     SET(TestLibs ${TestLibs} hcod_wrapper soth)
 endif()
 
-    
+
 if(${PCL_FOUND} AND ${moveit_core_FOUND})
     ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
     TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
@@ -504,7 +487,7 @@ endif()
 #    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
 
 #    add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
-    
+
 #    ##the following tests compile but don't get executed automatically. They are not proper tests ATM, rather case-studies and references for stack tuning.
 #    #add_test(NAME OpenSoT_solvers_qpOases_PriorityInversion COMMAND testQPOases_PriorityInversion)
 #    add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)

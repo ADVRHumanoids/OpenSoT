@@ -2,26 +2,11 @@
 # Authors: Enrico Mingo Hoffman, Alessio Rocchi
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 include(ExternalProject)
 project(open_sot VERSION 3.2.0)
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++17" COMPILER_SUPPORTS_CXX17)
-check_cxx_compiler_flag("-std=c++14" COMPILER_SUPPORTS_CXX14)
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wmaybe-uninitialized -Wuninitialized")
-elseif(COMPILER_SUPPORTS_CXX14)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wmaybe-uninitialized -Wuninitialized")
-elseif(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wmaybe-uninitialized -Wuninitialized")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wmaybe-uninitialized -Wuninitialized")
-else()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 nor C++14 support. Please use a different C++ compiler.")
-endif()
+set(CMAKE_CXX_STANDARD 20)
 
 option(SET_SSE4_FLAG "set -msse4 flag to gcc" OFF)
 
@@ -37,11 +22,11 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 set(${CMAKE_PROJECT_NAME}_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 
-find_package(Boost COMPONENTS system REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(orocos_kdl REQUIRED)
-find_package(urdf REQUIRED)
-find_package(kdl_parser REQUIRED)
+#find_package(Boost COMPONENTS system REQUIRED)
+#find_package(Eigen3 REQUIRED)
+#find_package(orocos_kdl REQUIRED)
+#find_package(urdf REQUIRED)
+#find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
 find_package(Qhull REQUIRED)
 find_package(PCL 1.7 QUIET COMPONENTS   common
@@ -49,8 +34,8 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         surface)
                                         #search
                                         #io)
-                                                                                
-find_package(eigen_conversions REQUIRED)
+
+#find_package(eigen_conversions REQUIRED)
 find_package(XBotInterface REQUIRED)
 find_package(fcl 0.6.1 QUIET)
 if(DEFINED FCL_VERSION)
@@ -59,7 +44,7 @@ else()
     set(FCL_FOUND 0)
 endif()
 find_package(PkgConfig REQUIRED)
-find_package(matlogger2 REQUIRED)
+#find_package(matlogger2 REQUIRED)
 
 
 # compilation flags
@@ -240,11 +225,11 @@ TARGET_LINK_LIBRARIES(OpenSoT
     matlogger2::matlogger2
     PRIVATE
     ${PRIVATE_TLL})
-    
+
 if(${OPENSOT_SOTH_FRONT_END})
-	target_compile_definitions(OpenSoT
-        	PUBLIC
-        	-DOPENSOT_HAS_SOTH_FRONT_END)
+    target_compile_definitions(OpenSoT
+            PUBLIC
+            -DOPENSOT_HAS_SOTH_FRONT_END)
 endif()
 
 
@@ -341,7 +326,7 @@ install(DIRECTORY include/
     DESTINATION include
     FILES_MATCHING PATTERN "*.h")
 
-include(AddUninstallTarget)
+#include(AddUninstallTarget)
 include(MacroInstallLib)
 
 library_install(OpenSoT

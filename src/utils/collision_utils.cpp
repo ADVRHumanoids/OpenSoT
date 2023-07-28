@@ -599,7 +599,7 @@ std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
 
     // set transform
     fcl::Transform3d w_T_octo;
-    tf::poseMsgToEigen(pose, w_T_octo);
+    tf2::poseMsgToEigen(pose, w_T_octo);
     co->setTransform(w_T_octo);
 
     return co;
@@ -695,7 +695,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
     // set transform
     fcl::Transform3d w_T_octo;
-    tf::poseMsgToEigen(wc.octomap.origin, w_T_octo);
+    tf2::poseMsgToEigen(wc.octomap.origin, w_T_octo);
     coll_obj->setTransform(w_T_octo);
 
     // save collision object

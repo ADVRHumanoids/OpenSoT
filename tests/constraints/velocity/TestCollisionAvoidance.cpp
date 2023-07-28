@@ -33,7 +33,7 @@
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
-// #include <eigen_conversions/eigen_kdl.h>
+// #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 // tf::vectorKDLToEigen
 void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 {
