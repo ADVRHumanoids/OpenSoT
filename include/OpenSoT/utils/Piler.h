@@ -7,28 +7,74 @@
 using XBot::Logger;
 
 namespace OpenSoT { namespace utils {
-   
+    /**
+     * @brief The MatrixPiler class implements real-time safe matrix/vector piling
+     */
     class MatrixPiler {
         
     public:
-        
+        /**
+         * @brief MatrixPiler constructor, the matrix starts with 0 rows
+         * @param cols number of columns
+         */
         MatrixPiler(const int cols = 0);
         
+        /**
+         * @brief reset the number of rows of the matrix to 0
+         */
         void reset();
+
+        /**
+         * @brief reset the number of rows of the matrix to 0 and set new number of columns
+         * @param cols new nnumber of columns
+         */
         void reset(const int cols);
         
         template <typename Derived>
+        /**
+         * @brief pile a new matrix
+         * @param matrix to pile
+         */
         void pile(const Eigen::MatrixBase<Derived>& matrix);
 
         template <typename Derived>
+        /**
+         * @brief set reset the matrix and initialize with new matrix
+         * @param matrix for initialization
+         */
         void set(const Eigen::MatrixBase<Derived>& matrix);
         
+        /**
+         * @brief generate_and_get
+         * @return the actual matrix
+         */
         Eigen::Block<Eigen::MatrixXd> generate_and_get();
 
+        /**
+         * @brief cols
+         * @return number of current columns
+         */
         int cols() const {return _mat.cols();}
+
+        /**
+         * @brief rows
+         * @return number of current rows
+         */
         int rows() const {return _current_row;}
 
+        /**
+         * @brief operator [] to index vector
+         * @param i index
+         * @return value at i
+         */
         double& operator[](const int i){return _mat(i);}
+
+        /**
+         * @brief operator () to index matrix
+         * @param i row
+         * @param j column
+         * @return value at (i,j)
+         */
         double& operator()(const int i, const int j){return _mat(i,j);}
         
     private:

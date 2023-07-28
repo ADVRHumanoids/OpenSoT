@@ -1,4 +1,4 @@
-#include <OpenSoT/floating_base_estimation/qp_estimation.h>
+#include "qp_estimation.h"
 #include <OpenSoT/utils/Affine.h>
 
 

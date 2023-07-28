@@ -21,8 +21,6 @@
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
-#include <OpenSoT/tasks/velocity/MinimizeAcceleration.h>
-#include <OpenSoT/tasks/velocity/MinimumVelocity.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/CoMVelocity.h>
@@ -93,9 +91,7 @@
          tasks::velocity::Gaze::Ptr gaze;
          tasks::velocity::Gaze::Ptr waist2gaze;
 
-         tasks::velocity::MinimumVelocity::Ptr minimumVelocity;
          tasks::velocity::Postural::Ptr postural;
-         tasks::velocity::MinimizeAcceleration::Ptr minimumAcceleration;
 
 
          constraints::velocity::CoMVelocity::Ptr comVelocity;

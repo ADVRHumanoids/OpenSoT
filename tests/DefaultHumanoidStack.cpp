@@ -1,4 +1,4 @@
-#include <OpenSoT/utils/DefaultHumanoidStack.h>
+#include "DefaultHumanoidStack.h"
 
 
 using namespace OpenSoT;
@@ -72,8 +72,6 @@ DefaultHumanoidStack::DefaultHumanoidStack(XBot::ModelInterface& model,
      com_Z( new SubTask(com,  Indices::range(2,2)) ),
      gaze( new tasks::velocity::Gaze("cartesian::gaze", state, model, "world") ),
      waist2gaze( new tasks::velocity::Gaze("cartesian::w2gaze", state, model, base_link) ),
-     minimumVelocity( new tasks::velocity::MinimumVelocity(state.size()) ),
-     minimumAcceleration( new tasks::velocity::MinimizeAcceleration(state) ),
      postural( new tasks::velocity::Postural(state) ),
      velocityLimits( new constraints::velocity::VelocityLimits(joint_velocity_limits,
                                                                dT,

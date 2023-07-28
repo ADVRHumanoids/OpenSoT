@@ -101,7 +101,6 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/acceleration/VelocityLimits.cpp
     src/constraints/acceleration/TorqueLimits.cpp
     src/constraints/velocity/CartesianPositionConstraint.cpp
-    src/constraints/velocity/CapturePoint.cpp
     src/constraints/velocity/CartesianVelocity.cpp
     src/constraints/velocity/CoMVelocity.cpp
     src/constraints/velocity/JointLimits.cpp
@@ -117,7 +116,6 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/GenericConstraint.cpp
     src/constraints/acceleration/JointLimits.cpp
     src/constraints/acceleration/JointLimitsViability.cpp
-    src/constraints/acceleration/JointLimitsPSAP.cpp
     src/constraints/acceleration/JointLimitsECBF.cpp
     )
 
@@ -157,9 +155,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/AngularMomentum.cpp
     src/tasks/velocity/LinearMomentum.cpp
     src/tasks/velocity/Manipulability.cpp
-    src/tasks/velocity/MinimizeAcceleration.cpp
     src/tasks/velocity/MinimumEffort.cpp
-    src/tasks/velocity/MinimumVelocity.cpp
     src/tasks/velocity/Postural.cpp
     src/tasks/velocity/JointAdmittance.cpp
     src/tasks/torque/JointImpedanceCtrl.cpp
@@ -192,11 +188,9 @@ endif()
 
 ##UTILS
 set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
-    src/utils/DefaultHumanoidStack.cpp
     src/utils/Affine.cpp
     src/utils/AffineUtils.cpp
     src/utils/Indices.cpp
-    src/utils/VelocityAllocation.cpp
     src/utils/cartesian_utils.cpp
     src/utils/ForceOptimization.cpp
     src/utils/InverseDynamics.cpp)
@@ -216,16 +210,12 @@ endif()
 ##VARIABLES
 set(OPENSOT_VARIABLES_SOURCES src/variables/Torque.cpp)
 
-##VARIABLES
-set(OPENSOT_FLOATING_BASE_ESTIMATION_SOURCES src/floating_base_estimation/qp_estimation.cpp)
-
 ADD_LIBRARY(OpenSoT SHARED
     ${OPENSOT_CONSTRAINTS_SOURCES}
     ${OPENSOT_TASKS_SOURCES}
     ${OPENSOT_SOLVERS_SOURCES}
     ${OPENSOT_UTILS_SOURCES}
     ${OPENSOT_VARIABLES_SOURCES}
-    ${OPENSOT_FLOATING_BASE_ESTIMATION_SOURCES}
     ${sot_INCLUDES})
 
 set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})

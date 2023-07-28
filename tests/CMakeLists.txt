@@ -17,7 +17,6 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 nor C++14 support. Please use a different C++ compiler.")
 endif()
 
-find_package(trajectory_utils QUIET)
 find_package(rviz_visual_tools QUIET)
 find_package(catkin REQUIRED tf roscpp robot_state_publisher urdf srdfdom)
 find_package(osqp QUIET)
@@ -26,9 +25,8 @@ find_package(qpSWIFT QUIET)
 add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
 message(STATUS "DOPENSOT_TEST_PATH is ${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
+if(${rviz_visual_tools_FOUND})
     set(TEST_INCLUDES ${TEST_INCLUDES} ${GTEST_INCLUDE_DIRS}
-                      ${trajectory_utils_INCLUDE_DIRS}
                       ${rviz_visual_tools_INCLUDE_DIRS})
 endif()
 
@@ -52,7 +50,6 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testJointLimitsInvarianceVelocityBounds
                   testJointLimitsAccelerationBounds
                   testJointLimitsAccelerationViabilityBounds
-                  testJointLimitsAccelerationPSAPBounds
                   testJointLimitsAccelerationECBFounds
                   testVelocityLimitsVelocityBounds
                   testQPOasesSolver  
@@ -66,8 +63,6 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testCoMVelocityVelocityConstraint
                   testCoMVelocityTask
                   testManipulabilityTask
-                  testMinimizeAccelerationTask
-                  testMinimumVelocityTask #20
                   testMinimumEffortVelocityTask
                   testPosturalVelocityTask
                   testCartesianVelocityTask
@@ -85,7 +80,6 @@ set(OPENSOT_TESTS testBilateralConstraint #1
                   testAffineHelper
                   testPiler
                   testAffineUtils
-                  testKinematicEstimationFloatingBase
                   testeiQuadProgSolver
                   testKinematics #40
                   testl1HQP
@@ -124,12 +118,8 @@ if(${FCL_FOUND})
 )
 endif()
 
-#THESE TESTS DEPEND ON trajectory_utils
-if(${trajectory_utils_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS}
-                  testQPOases_StaticWalk_FloatingBase
-                  testQPOases_StaticWalk
-                  testEigenSVD_StaticWalk_FloatingBase) #57
+if(${rviz_visual_tools_FOUND})
+    set(OPENSOT_TESTS ${OPENSOT_TESTS} testEigenSVD_StaticWalk_FloatingBase) #57
 endif()
 
 if(${qpSWIFT_FOUND})
@@ -181,8 +171,8 @@ if(${FCL_FOUND})
     SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
 endif()
 
-if(${trajectory_utils_FOUND} AND ${rviz_visual_tools_FOUND})
-    SET(TestLibs ${TestLibs} ${rviz_visual_tools_LIBRARIES} ${trajectory_utils_LIBRARIES}) 
+if(${rviz_visual_tools_FOUND})
+    SET(TestLibs ${TestLibs} ${rviz_visual_tools_LIBRARIES})
 endif()
 
 if(${OPENSOT_SOTH_FRONT_END})
@@ -214,11 +204,6 @@ if(${OPENSOT_SOTH_FRONT_END})
     add_dependencies(testSOTH OpenSoT)
     add_test(NAME OpenSoT_solvers_soth COMMAND testSOTH)
 endif()
-
-ADD_EXECUTABLE(testKinematicEstimationFloatingBase     floating_base/testKinematicEstimation.cpp)
-TARGET_LINK_LIBRARIES(testKinematicEstimationFloatingBase ${TestLibs})
-add_dependencies(testKinematicEstimationFloatingBase   OpenSoT)
-add_test(NAME OpenSoT_floating_base_KinematicEstimation COMMAND testKinematicEstimationFloatingBase)
 
 ADD_EXECUTABLE(testTask     tasks/TestTask.cpp)
 TARGET_LINK_LIBRARIES(testTask ${TestLibs})
@@ -291,22 +276,11 @@ TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
 add_dependencies(testAffineHelper   OpenSoT)
 add_test(NAME OpenSoT_utils_affineHelper COMMAND testAffineHelper)
 
-
-if(${trajectory_utils_FOUND})
-    ADD_EXECUTABLE(testQPOases_StaticWalk_FloatingBase solvers/TestQPOases_StaticWalk_FloatingBase.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk_FloatingBase ${TestLibs})
-    add_dependencies(testQPOases_StaticWalk_FloatingBase   OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk_FloatingBase COMMAND testQPOases_StaticWalk_FloatingBase)
-
-    ADD_EXECUTABLE(testQPOases_StaticWalk solvers/TestQPOases_StaticWalk.cpp)
-    TARGET_LINK_LIBRARIES(testQPOases_StaticWalk ${TestLibs})
-    add_dependencies(testQPOases_StaticWalk   OpenSoT)
-    add_test(NAME OpenSoT_solvers_qpOases_StaticWalk COMMAND testQPOases_StaticWalk)
-
-    ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp)
+if(${rviz_visual_tools_FOUND})
+    ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
     add_dependencies(testEigenSVD_StaticWalk_FloatingBase   OpenSoT)
-    add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)  
+    add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
 endif()
 
 ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
@@ -318,16 +292,6 @@ ADD_EXECUTABLE(testManipulabilityTask tasks/velocity/TestManipulability.cpp)
 TARGET_LINK_LIBRARIES(testManipulabilityTask ${TestLibs} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(testManipulabilityTask   OpenSoT)
 add_test(NAME OpenSoT_task_velocity_Manipulability COMMAND testManipulabilityTask)
-
-ADD_EXECUTABLE(testMinimizeAccelerationTask tasks/velocity/TestMinimizeAcceleration.cpp)
-TARGET_LINK_LIBRARIES(testMinimizeAccelerationTask ${TestLibs} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
-add_dependencies(testMinimizeAccelerationTask   OpenSoT)
-add_test(NAME OpenSoT_task_velocity_MinimizeAcceleration COMMAND testMinimizeAccelerationTask)
-
-ADD_EXECUTABLE(testMinimumVelocityTask tasks/velocity/TestMinimumVelocity.cpp)
-TARGET_LINK_LIBRARIES(testMinimumVelocityTask ${TestLibs} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
-add_dependencies(testMinimumVelocityTask   OpenSoT)
-add_test(NAME OpenSoT_task_velocity_MinimumVelocity COMMAND testMinimumVelocityTask)
 
 ADD_EXECUTABLE(testPosturalVelocityTask tasks/velocity/TestPostural.cpp)
 TARGET_LINK_LIBRARIES(testPosturalVelocityTask ${TestLibs})
@@ -396,11 +360,6 @@ TARGET_LINK_LIBRARIES(testJointLimitsAccelerationViabilityBounds ${TestLibs})
 add_dependencies(testJointLimitsAccelerationViabilityBounds   OpenSoT)
 add_test(NAME OpenSoT_constraints_acceleration_viability_JointLimits COMMAND testJointLimitsAccelerationViabilityBounds)
 
-ADD_EXECUTABLE(testJointLimitsAccelerationPSAPBounds constraints/acceleration/TestJointLimitsPSAP.cpp)
-TARGET_LINK_LIBRARIES(testJointLimitsAccelerationPSAPBounds ${TestLibs})
-add_dependencies(testJointLimitsAccelerationPSAPBounds   OpenSoT)
-add_test(NAME OpenSoT_constraints_acceleration_psap_JointLimits COMMAND testJointLimitsAccelerationPSAPBounds)
-
 ADD_EXECUTABLE(testJointLimitsAccelerationECBFBounds constraints/acceleration/TestJointLimitsECBF.cpp)
 TARGET_LINK_LIBRARIES(testJointLimitsAccelerationECBFBounds ${TestLibs})
 add_dependencies(testJointLimitsAccelerationECBFBounds   OpenSoT)
@@ -411,7 +370,7 @@ TARGET_LINK_LIBRARIES(testQPOases_Options ${TestLibs})
 add_dependencies(testQPOases_Options   OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases_Options COMMAND testQPOases_Options)
 
-ADD_EXECUTABLE(testQPOases_SubTask solvers/TestQPOases_SubTask.cpp)
+ADD_EXECUTABLE(testQPOases_SubTask solvers/TestQPOases_SubTask.cpp DefaultHumanoidStack.cpp)
 TARGET_LINK_LIBRARIES(testQPOases_SubTask ${TestLibs})
 add_dependencies(testQPOases_SubTask   OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases_SubTask COMMAND testQPOases_SubTask)
@@ -421,7 +380,7 @@ TARGET_LINK_LIBRARIES(testCoMVelocityTask ${TestLibs})
 add_dependencies(testCoMVelocityTask   OpenSoT)
 add_test(NAME OpenSoT_task_velocity_CoM COMMAND testCoMVelocityTask)
 
-ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp)
+ADD_EXECUTABLE(testAutoStack utils/TestAutoStack.cpp DefaultHumanoidStack.cpp)
 TARGET_LINK_LIBRARIES(testAutoStack ${TestLibs})
 add_dependencies(testAutoStack   OpenSoT)
 add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
@@ -482,7 +441,7 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
     add_dependencies(testQPOases_ConvexHull   OpenSoT)
     add_test(NAME OpenSoT_solvers_qpOases_ConvexHull COMMAND testQPOases_ConvexHull)
 
-    ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp)
+    ADD_EXECUTABLE(testQPOases_AutoStack solvers/TestQPOases_AutoStack.cpp DefaultHumanoidStack.cpp)
     TARGET_LINK_LIBRARIES(testQPOases_AutoStack ${TestLibs})
     add_dependencies(testQPOases_AutoStack   OpenSoT)
     add_test(NAME OpenSoT_solvers_qpOases_AutoStack COMMAND testQPOases_AutoStack)
