@@ -20,14 +20,11 @@
 #include <OpenSoT/utils/convex_hull_utils.h>
 #include <pcl/surface/convex_hull.h>
 
-#define MAKE_SHARED std::make_shared
-
-
 convex_hull::convex_hull():
     _ransac_distance_thr(0.001)
 {
-    _pointCloud = MAKE_SHARED< pcl::PointCloud<pcl::PointXYZ> >();
-    _projectedPointCloud = MAKE_SHARED< pcl::PointCloud<pcl::PointXYZ> >();
+	_pointCloud = boost::make_shared< pcl::PointCloud<pcl::PointXYZ> >();
+	_projectedPointCloud = boost::make_shared< pcl::PointCloud<pcl::PointXYZ> >();
 }
 
 convex_hull::~convex_hull()
@@ -86,7 +83,7 @@ bool convex_hull::getConvexHull(const std::list<KDL::Vector>& points,
 void convex_hull::projectPCL2Plane(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud, const double ransac_distance_thr,
                                    pcl::PointCloud<pcl::PointXYZ>::Ptr projected_point_cloud)
 {
-    pcl::ModelCoefficients::Ptr coefficients = MAKE_SHARED<pcl::ModelCoefficients>();
+    pcl::ModelCoefficients::Ptr coefficients = boost::make_shared<pcl::ModelCoefficients>();
 
     //We projects ALL the points in the plane (0 0 1)
     coefficients->values.clear();

@@ -19,7 +19,7 @@
 
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <memory>
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#include <eigen_conversions/eigen_kdl.h>
 
 #define toDeg(X) (X*180.0/M_PI)
 
@@ -87,14 +87,14 @@ void cartesian_utils::computeCartesianError(const Eigen::Matrix4d &T,
     KDL::Frame x; // ee pose
     x.Identity();
     Eigen::Matrix4d tmp = T;
-    tf2::transformEigenToKDL(Eigen::Affine3d(tmp),x);
+    tf::transformEigenToKDL(Eigen::Affine3d(tmp),x);
     quaternion q;
     x.M.GetQuaternion(q.x, q.y, q.z, q.w);
 
     KDL::Frame xd; // ee desired pose
     xd.Identity();
     tmp = Td;
-    tf2::transformEigenToKDL(Eigen::Affine3d(tmp),xd);
+    tf::transformEigenToKDL(Eigen::Affine3d(tmp),xd);
     quaternion qd;
     xd.M.GetQuaternion(qd.x, qd.y, qd.z, qd.w);
 

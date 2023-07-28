@@ -28,7 +28,7 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/project_inliers.h>
-#include <pcl/surface/convex_hull.h>
+#include <pcl/surface/concave_hull.h>
 #include <XBotInterface/ModelInterface.h>
 
 class convex_hull

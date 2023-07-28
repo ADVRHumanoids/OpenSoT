@@ -46,7 +46,7 @@ KDL::Frame fcl2KDL(const fcl::Transform3<double> &in)
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
-// #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+// #include <eigen_conversions/eigen_kdl.h>
 // tf::vectorKDLToEigen
 void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 {

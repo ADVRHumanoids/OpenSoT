@@ -192,7 +192,7 @@ void Cartesian::setPositionReference(const Eigen::Vector3d& pos_ref)
 
 void Cartesian::setReference(const KDL::Frame& ref)
 {
-    tf2::transformKDLToEigen(ref, _pose_ref);
+    tf::transformKDLToEigen(ref, _pose_ref);
     _vel_ref.setZero();
     _acc_ref.setZero();
 
@@ -224,8 +224,8 @@ void Cartesian::setReference(const Eigen::Affine3d& pose_ref,
 void Cartesian::setReference(const KDL::Frame& pose_ref,
                              const KDL::Twist& vel_ref)
 {
-    tf2::transformKDLToEigen(pose_ref, _pose_ref);
-    tf2::twistKDLToEigen(vel_ref, _vel_ref);
+    tf::transformKDLToEigen(pose_ref, _pose_ref);
+    tf::twistKDLToEigen(vel_ref, _vel_ref);
     _acc_ref.setZero();
 
     _vel_ref_cached = _vel_ref;
@@ -248,9 +248,9 @@ void Cartesian::setReference(const KDL::Frame& pose_ref,
                              const KDL::Twist& vel_ref,
                              const KDL::Twist& acc_ref)
 {
-    tf2::transformKDLToEigen(pose_ref, _pose_ref);
-    tf2::twistKDLToEigen(vel_ref, _vel_ref);
-    tf2::twistKDLToEigen(acc_ref, _acc_ref);
+    tf::transformKDLToEigen(pose_ref, _pose_ref);
+    tf::twistKDLToEigen(vel_ref, _vel_ref);
+    tf::twistKDLToEigen(acc_ref, _acc_ref);
 
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
@@ -328,7 +328,7 @@ void Cartesian::getReference(Eigen::Affine3d& ref)
 
 void Cartesian::getReference(KDL::Frame& ref)
 {
-    tf2::transformEigenToKDL(_pose_ref, ref);
+    tf::transformEigenToKDL(_pose_ref, ref);
 }
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
@@ -341,8 +341,8 @@ void Cartesian::getReference(Eigen::Affine3d& desiredPose,
 void Cartesian::getReference(KDL::Frame& desiredPose,
                              KDL::Twist& desiredTwist)
 {
-    tf2::transformEigenToKDL(_pose_ref, desiredPose);
-    tf2::twistEigenToKDL(_vel_ref, desiredTwist);
+    tf::transformEigenToKDL(_pose_ref, desiredPose);
+    tf::twistEigenToKDL(_vel_ref, desiredTwist);
 }
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
@@ -358,9 +358,9 @@ void Cartesian::getReference(KDL::Frame& desiredPose,
                              KDL::Twist& desiredTwist,
                              KDL::Twist& desiredAcceleration)
 {
-    tf2::transformEigenToKDL(_pose_ref, desiredPose);
-    tf2::twistEigenToKDL(_vel_ref, desiredTwist);
-    tf2::twistEigenToKDL(_acc_ref, desiredAcceleration);
+    tf::transformEigenToKDL(_pose_ref, desiredPose);
+    tf::twistEigenToKDL(_vel_ref, desiredTwist);
+    tf::twistEigenToKDL(_acc_ref, desiredAcceleration);
 }
 
 
@@ -371,7 +371,7 @@ void Cartesian::getActualPose(Eigen::Affine3d& actual)
 
 void Cartesian::getActualPose(KDL::Frame& actual)
 {
-    tf2::transformEigenToKDL(_pose_current, actual);
+    tf::transformEigenToKDL(_pose_current, actual);
 }
 
 void Cartesian::getActualTwist(Eigen::Vector6d& actual)
@@ -381,7 +381,7 @@ void Cartesian::getActualTwist(Eigen::Vector6d& actual)
 
 void Cartesian::getActualTwist(KDL::Twist& actual)
 {
-    tf2::twistEigenToKDL(_vel_current, actual);
+    tf::twistEigenToKDL(_vel_current, actual);
 }
 
 const bool Cartesian::baseLinkIsWorld() const
