@@ -31,6 +31,7 @@ JointLimitsInvariance::JointLimitsInvariance(const Eigen::VectorXd &q,
     _jointLimitsMax(jointBoundMax),
     _jointAccMax(jointAccMax),
     _robot(robot),
+    _p(1.),
     _lb(.0), _ub(0.), _acc_lim(0.), _pos_lim(0.), _via_lim(0.), _d(0.), _ac_lb(0), _ac_ub(0)
 {
     _upperBound.setZero(q.size());
@@ -64,7 +65,7 @@ void JointLimitsInvariance::update(const Eigen::VectorXd &x)
         }
         else
         {
-            _d = 2. * _jointAccMax[i] * _dt * _dt * _pos_lim;
+            _d = 2. * _jointAccMax[i] * _dt * _dt * _p * _pos_lim;
             _via_lim = (_d < 0.) ? -sqrt(fabs(_d)) : sqrt(_d);
             if(_via_lim < _acc_lim)
             {
@@ -96,7 +97,7 @@ void JointLimitsInvariance::update(const Eigen::VectorXd &x)
         }
         else
         {
-            _d = 2. * -_jointAccMax[i] * _dt * _dt * _pos_lim;
+            _d = 2. * -_jointAccMax[i] * _dt * _dt * _p * _pos_lim;
             _via_lim = (_d < 0.) ? sqrt(fabs(_d)) : -sqrt(_d);
             if(_via_lim > _acc_lim)
             {
@@ -128,10 +129,15 @@ void JointLimitsInvariance::update(const Eigen::VectorXd &x)
 
     }
 
+}
 
-
-
-
+bool JointLimitsInvariance::setPStepAheadPredictor(const double p)
+{
+    if(p > 1.)
+        return false;
+    else
+        _p = p;
+    return true;
 }
 
 void JointLimitsInvariance::setJointAccMax(const Eigen::VectorXd& jointAccMax)

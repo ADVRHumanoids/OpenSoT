@@ -123,6 +123,7 @@ class testJointLimits : public ::testing::Test {
 
       jointLimitsInvariance = std::make_shared<OpenSoT::constraints::velocity::JointLimitsInvariance>(zeros,
                                     qUpperBounds, qLowerBounds, acc_max, *_model_ptr.get(), dt);
+      jointLimitsInvariance->setPStepAheadPredictor(0.9);
 
       jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(vel_max, dt);
 
@@ -283,7 +284,7 @@ TEST_F(testJointLimits, test_bounds)
         for(unsigned int j = 0; j < this->qUpperBounds.size(); ++j)
         {
             if(this->q[j] >= this->qUpperBounds[j])
-                EXPECT_NEAR(this->q[j] - this->qUpperBounds[j], 0.0, TORAD(0.1))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+                EXPECT_NEAR(this->q[j] - this->qUpperBounds[j], 0.0, TORAD(0.01))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
             EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+1e-6)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+1e-6)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
@@ -327,7 +328,7 @@ TEST_F(testJointLimits, test_bounds)
         {
 
             if(this->q[j] <= this->qLowerBounds[j])
-                EXPECT_NEAR(this->qLowerBounds[j] - this->q[j], 0.0, TORAD(0.1))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+                EXPECT_NEAR(this->qLowerBounds[j] - this->q[j], 0.0, TORAD(0.01))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
             EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+1e-6)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+1e-6)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
