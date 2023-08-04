@@ -24,7 +24,7 @@
 #include <ros/publisher.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseArray.h>
-#include "trajectory_utils/trajectory_utils.h"
+#include "trajectory_utils.h"
 #include <rviz_visual_tools/rviz_visual_tools.h>
 
 namespace trajectory_utils{
