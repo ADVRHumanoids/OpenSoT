@@ -1,4 +1,4 @@
-#include <trajectory_utils/paths/path_circle_fix.hpp>
+#include "path_circle_fix.hpp"
 
 using namespace KDL;
 

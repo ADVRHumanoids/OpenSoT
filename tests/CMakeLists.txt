@@ -47,6 +47,7 @@ enable_testing()
 #ALL THE FOLLOWING TESTS ARE YARP FREE
 set(OPENSOT_TESTS testBilateralConstraint #1
                   testJointLimitsVelocityBounds
+                  testJointLimitsInvarianceVelocityBounds
                   testJointLimitsAccelerationBounds
                   testJointLimitsAccelerationViabilityBounds
                   testJointLimitsAccelerationECBFounds
@@ -218,6 +219,11 @@ ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLi
 TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
 add_dependencies(testJointLimitsVelocityBounds   OpenSoT)
 add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
+
+ADD_EXECUTABLE(testJointLimitsInvarianceVelocityBounds    constraints/velocity/TestJointLimitsInvariance.cpp)
+TARGET_LINK_LIBRARIES(testJointLimitsInvarianceVelocityBounds ${TestLibs})
+add_dependencies(testJointLimitsInvarianceVelocityBounds   OpenSoT)
+add_test(NAME OpenSoT_constraints_velocity_JointLimitsInvariance  COMMAND testJointLimitsInvarianceVelocityBounds)
 
 ADD_EXECUTABLE(testiHQP solvers/TestiHQP.cpp)
 TARGET_LINK_LIBRARIES(testiHQP ${TestLibs})

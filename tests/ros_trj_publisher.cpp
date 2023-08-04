@@ -1,4 +1,4 @@
-#include "trajectory_utils/utils/ros_trj_publisher.h"
+#include "ros_trj_publisher.h"
 #include <boost/shared_ptr.hpp>
 #include <ros/time.h>
 #include <geometry_msgs/PoseStamped.h>
