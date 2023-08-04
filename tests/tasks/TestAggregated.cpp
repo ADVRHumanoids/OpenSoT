@@ -2,7 +2,7 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/solvers/eHQP.h>
@@ -357,9 +357,9 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
                         _links_in_contact, 0.05));
         Eigen::VectorXd comlims(3);
         comlims<<0.03,0.03,0.03;
-        OpenSoT::constraints::velocity::CoMVelocity::Ptr constraintCoMVelocity(
-                new OpenSoT::constraints::velocity::CoMVelocity(comlims, 0.01,
-                        q, *(_model_ptr.get())));
+        OpenSoT::constraints::velocity::CartesianVelocity::Ptr constraintCoMVelocity(
+                new OpenSoT::constraints::velocity::CartesianVelocity(comlims, 0.01,
+                        std::make_shared<OpenSoT::tasks::velocity::CoM>(q, *(_model_ptr.get()))));
 
         taskCartesianWaist->getConstraints().push_back(constraintConvexHull);
 

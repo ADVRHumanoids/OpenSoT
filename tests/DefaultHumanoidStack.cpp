@@ -76,8 +76,8 @@ DefaultHumanoidStack::DefaultHumanoidStack(XBot::ModelInterface& model,
      velocityLimits( new constraints::velocity::VelocityLimits(joint_velocity_limits,
                                                                dT,
                                                                state.size()) ),
-     comVelocity(new constraints::velocity::CoMVelocity(Eigen::VectorXd::Constant(3,0.3)
-                                                        ,dT,state,model))
+     comVelocity(new constraints::velocity::CartesianVelocity(Eigen::Vector3d::Constant(3,0.3)
+                                                        ,dT,com))
 
 
  {

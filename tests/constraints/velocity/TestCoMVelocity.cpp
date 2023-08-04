@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
 #include <XBotInterface/ModelInterface.h>
 #include <cmath>
 #define  s                1.0
@@ -34,15 +35,15 @@ protected:
           std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     // You can do set-up work for each test here.
 
-      velocityLimits.resize(3);
-      velocityLimits.setZero(3);
+      velocityLimits.setZero();
       velocityLimits << CoMVelocityLimit, CoMVelocityLimit, CoMVelocityLimit;
 
       zeros.setZero(_model_ptr->getJointNum());
 
 
 
-      comVelocity = new CoMVelocity(velocityLimits,dT,zeros,*(_model_ptr.get()));
+      comVelocity = new CartesianVelocity(velocityLimits,dT,
+                                          std::make_shared<OpenSoT::tasks::velocity::CoM>(zeros, *_model_ptr.get()));
   }
 
   virtual ~testCoMVelocity() {
@@ -69,9 +70,9 @@ protected:
 
   // Objects declared here can be used by all tests in the test case for CoMVelocity.
 
-  CoMVelocity* comVelocity;
+  CartesianVelocity* comVelocity;
 
-  Eigen::VectorXd velocityLimits;
+  Eigen::Vector3d velocityLimits;
   Eigen::VectorXd zeros;
   Eigen::VectorXd q;
   XBot::ModelInterface::Ptr _model_ptr;

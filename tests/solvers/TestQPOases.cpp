@@ -4,7 +4,7 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/solvers/QPOasesBackEnd.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
@@ -727,11 +727,11 @@ TEST_F(testQPOasesTask, testCoMTask)
     OpenSoT::tasks::velocity::CoM::Ptr com_task(
                 new OpenSoT::tasks::velocity::CoM(q, *_model_ptr));
 
-    Eigen::VectorXd tmp(3);
+    Eigen::Vector3d tmp;
     tmp<<0.06,0.06,0.06;
-    OpenSoT::constraints::velocity::CoMVelocity::Ptr com_vel_constr(
-                new OpenSoT::constraints::velocity::CoMVelocity(
-                    tmp,1.0,q,*_model_ptr));
+    OpenSoT::constraints::velocity::CartesianVelocity::Ptr com_vel_constr(
+                new OpenSoT::constraints::velocity::CartesianVelocity(
+                    tmp,1.0,std::make_shared<OpenSoT::tasks::velocity::CoM>(q,*_model_ptr)));
     com_task->getConstraints().push_back(com_vel_constr);
 
     std::list< OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraint_list =

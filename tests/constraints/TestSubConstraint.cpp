@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/SubConstraint.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/utils/AutoStack.h>
 
@@ -17,7 +17,7 @@ class TestSubConstraint: public ::testing::Test
 protected:
 
     OpenSoT::constraints::velocity::JointLimits::Ptr _joint_limits;
-    OpenSoT::constraints::velocity::CoMVelocity::Ptr _vcom_constraint;
+    OpenSoT::constraints::velocity::CartesianVelocity::Ptr _vcom_constraint;
 
     TestSubConstraint()
 
@@ -52,7 +52,8 @@ protected:
 
         Eigen::Vector3d vcom_max;
         vcom_max<<10., 20., 30.;
-        _vcom_constraint = std::make_shared<velocity::CoMVelocity>(vcom_max, 0.01, q, *_model_ptr);
+        _vcom_constraint = std::make_shared<velocity::CartesianVelocity>(vcom_max, 0.01,
+                                                                         std::make_shared<OpenSoT::tasks::velocity::CoM>(q, *_model_ptr));
 
     }
 

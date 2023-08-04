@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <memory>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
@@ -56,9 +56,9 @@ TEST_F(testAffineUtils, testConstraintsToAffine)
     //1. Creates a CoM Limits constraint
     Eigen::Vector3d com_vel_lims;
     com_vel_lims<<0.1, 0.1, 0.1;
-    OpenSoT::constraints::velocity::CoMVelocity::Ptr constraint =
-            std::make_shared<OpenSoT::constraints::velocity::CoMVelocity>(
-                com_vel_lims, 0.01, this->q, *(this->model_ptr));
+    OpenSoT::constraints::velocity::CartesianVelocity::Ptr constraint =
+            std::make_shared<OpenSoT::constraints::velocity::CartesianVelocity>(
+                com_vel_lims, 0.01, std::make_shared<OpenSoT::tasks::velocity::CoM>(this->q, *this->model_ptr.get()));
 
     //2. Creates variables
     std::vector<std::pair<std::string, int>> name_size_pairs;

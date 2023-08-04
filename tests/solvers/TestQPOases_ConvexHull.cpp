@@ -8,7 +8,7 @@
 #include <OpenSoT/solvers/QPOasesBackEnd.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
@@ -197,10 +197,9 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     W.setIdentity(); W(2,2) = .1;
     com_task->setWeight(W);
 
-    OpenSoT::constraints::velocity::CoMVelocity::ConstraintPtr boundsCoMVelocity(
-                new OpenSoT::constraints::velocity::CoMVelocity(
-                    Eigen::Vector3d(0.05, 0.05, 0.05), 0.004 ,
-                    q, *(_model_ptr_com.get())));
+    OpenSoT::constraints::velocity::CartesianVelocity::ConstraintPtr boundsCoMVelocity(
+                new OpenSoT::constraints::velocity::CartesianVelocity(
+                    Eigen::Vector3d(0.05, 0.05, 0.05), 0.004,com_task));
     com_task->getConstraints().push_back(boundsCoMVelocity);
 
     std::list<std::string> _links_in_contact;
