@@ -1,7 +1,7 @@
 #ifndef _OPENSOT_FLOATING_BASE_ESTIMATION_QP_ESTIMATION_
 #define _OPENSOT_FLOATING_BASE_ESTIMATION_QP_ESTIMATION_
 
-#include <OpenSoT/utils/FloatingBaseEstimation.h>
+#include "FloatingBaseEstimation.h"
 #include <OpenSoT/tasks/floating_base/Contact.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
