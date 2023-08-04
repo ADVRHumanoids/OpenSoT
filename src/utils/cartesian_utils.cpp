@@ -23,48 +23,6 @@
 
 #define toDeg(X) (X*180.0/M_PI)
 
-Eigen::VectorXd cartesian_utils::computeCapturePoint(const Eigen::VectorXd& com_velocity,
-                                                     const Eigen::VectorXd& com_pose)
-{
-    Eigen::VectorXd cp(3); cp.setZero(3);
-
-    Eigen::VectorXd com_velocity_ = com_velocity;
-
-    double g = 9.81;
-
-    cp[0] = com_pose[0] + com_velocity_[0]*sqrt(com_pose[2]/g);
-    cp[1] = com_pose[1] + com_velocity_[1]*sqrt(com_pose[2]/g);
-    cp[2] = 0.0;
-
-    return cp;
-}
-
-Eigen::VectorXd cartesian_utils::computeFootZMP(const Eigen::VectorXd& forces, const Eigen::VectorXd& torques,
-                                                const double d, const double fz_threshold)
-{
-    Eigen::VectorXd ZMP(3); ZMP.setZero(3);
-
-    if(forces[2] > fz_threshold && fz_threshold >= 0.0){
-        ZMP[0] = -1.0 * (torques[1] + forces[0]*d)/forces[2];
-        ZMP[1] = (torques[0] - forces[1]*d)/forces[2];
-        ZMP[2] = -d;}
-    return ZMP;
-}
-
-Eigen::VectorXd cartesian_utils::computeZMP(const double Lforce_z, const double Rforce_z,
-                           const Eigen::VectorXd& ZMPL, const Eigen::VectorXd& ZMPR,
-                           const double fz_threshold)
-{
-    Eigen::VectorXd ZMP(3); ZMP.setZero(3);
-
-    if((Lforce_z > fz_threshold || Rforce_z > fz_threshold) &&
-        fz_threshold >= 0.0){
-
-        ZMP = (ZMPL*Lforce_z + ZMPR*Rforce_z)/(Lforce_z+Rforce_z);
-        ZMP[2] = ZMPL[2];
-    }
-    return ZMP;
-}
 
 void  cartesian_utils::computePanTiltMatrix(const Eigen::VectorXd &gaze, KDL::Frame &pan_tilt_matrix)
 {
