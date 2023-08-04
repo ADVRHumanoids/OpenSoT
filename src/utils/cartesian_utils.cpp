@@ -130,28 +130,4 @@ Eigen::VectorXd cartesian_utils::computeGradient(const Eigen::VectorXd &x,
     return gradient;
 }
 
-Eigen::MatrixXd cartesian_utils::computeHessian(const Eigen::VectorXd &x,
-                                                   GradientVector& vec,
-                                                   const double& step) {
-    Eigen::MatrixXd hessian(vec.size(),x.size());
-    Eigen::VectorXd deltas(x.rows());
-    deltas.setZero(x.rows());
-    const double h = step;
-    for(unsigned int i = 0; i < vec.size(); ++i)
-    {
-        deltas[i] = h;
-        Eigen::VectorXd gradient_a = vec.compute(x+deltas);
-        Eigen::VectorXd gradient_b = vec.compute(x-deltas);
-        Eigen::VectorXd gradient(vec.size());
-        for(unsigned int j = 0; j < vec.size(); ++j)
-            gradient[j] = (gradient_a[j] - gradient_b[j])/(2.0*h);
-
-        hessian.block(0,i,hessian.rows(),1) = gradient;
-
-        //hessian.setCol(i,gradient);
-        deltas[i] = 0.0;
-    }
-
-    return hessian;
-}
 

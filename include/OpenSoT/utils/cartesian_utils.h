@@ -369,21 +369,6 @@ public:
                                               CostFunction &fun,
                                               const std::vector<bool>& jointMask,
                                               const double &step = 1E-3);
-
-    /**
-     * @brief computeGradient compute numerical gradient of a function using 2 points formula:
-     *
-     *           f(x+h) - f(x-h)
-     *   df(x)= ----------------
-     *                2h
-     * @param x points around gradient is compute
-     * @param fun function to derive
-     * @param step step of gradient
-     * @return vector of gradient
-     */
-    static Eigen::MatrixXd computeHessian( const Eigen::VectorXd &x,
-                                              GradientVector &vec,
-                                              const double &step = 1E-3);
 };
 
 
