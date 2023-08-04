@@ -107,7 +107,6 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/velocity/JointLimitsInvariance.cpp
     src/constraints/velocity/VelocityLimits.cpp
     src/constraints/velocity/OmniWheels4X.cpp
-    src/constraints/torque/JointLimits.cpp
     src/constraints/force/FrictionCone.cpp
     src/constraints/force/WrenchLimits.cpp
     src/constraints/force/CoP.cpp
@@ -147,8 +146,6 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/Cartesian.cpp
     src/tasks/velocity/CartesianAdmittance.cpp
     src/tasks/velocity/PureRolling.cpp
-    src/tasks/velocity/RigidRotation.cpp
-    src/tasks/velocity/Unicycle.cpp
     src/tasks/velocity/Gaze.cpp
     src/tasks/velocity/Contact.cpp
     src/tasks/velocity/CoM.cpp
@@ -158,8 +155,6 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/MinimumEffort.cpp
     src/tasks/velocity/Postural.cpp
     src/tasks/velocity/JointAdmittance.cpp
-    src/tasks/torque/JointImpedanceCtrl.cpp
-    src/tasks/torque/CartesianImpedanceCtrl.cpp
     src/tasks/force/CoM.cpp
     src/tasks/force/FloatingBase.cpp
     src/tasks/force/Force.cpp
