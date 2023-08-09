@@ -1,2 +1,2 @@
-furo==2021.11.16
-
+furo
+sphinx_rtd_theme
