@@ -12,13 +12,6 @@ if(${DOXYGEN_FOUND})
     message("Creating Documentation")
     set(DOX_GENERATE_HTML YES)
     set(DOX_GENERATE_XML NO)
-    option(OPENSOT_DOXYGEN_XML "Generate doxygen XML output, for use by SWIG" NO)
-    mark_as_advanced(OPENSOT_DOXYGEN_XML)
-    if(OPENSOT_DOXYGEN_XML)
-        set(DOX_GENERATE_XML YES)
-    endif()
-    # openSoT documentation is always verbose now.  It used to be
-    # partially stripped of stuff less interesting to end-users.
 
     add_custom_target(dox COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
@@ -27,7 +20,6 @@ if(${DOXYGEN_FOUND})
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-    set(DOX_GENERATE_HTML YES)
-    set(DOX_GENERATE_XML NO)
     add_custom_target(man COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.man)
 endif()
+
