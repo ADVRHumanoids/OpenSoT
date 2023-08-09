@@ -43,21 +43,8 @@ alt="WALK-MAN Whole-Body, floating-base, walking" width="480" height="360" borde
 Add-ons
 ------------
 - [CartesI/O](https://github.com/ADVRHumanoids/CartesianInterface)
-- [Visual Servoing](https://github.com/EnricoMingo/opensot_visual_servoing), developed in collaboration with IDSIA - USI/SUPSI ([Antonio Paolillo](https://github.com/TotoPaolillo))
-
-Developers:
------------
-Enrico Mingo Hoffman  
-Arturo Laurenzi  
-Franesco Ruscelli
-Luca Rossini
-
-Previous Developers:
---------------------
-Alessio Rocchi  
-Cheng Fang
-Matteo Parigi Polverini 
-
+- [Visual Servoing](https://github.com/EnricoMingo/opensot_visual_servoing), developed in collaboration with IDSIA - USI/SUPSI (Dr. [Antonio Paolillo](https://github.com/TotoPaolillo))
+- [Compliant Stabilizer](https://github.com/ADVRHumanoids/compliant_stabilizer), developed in collaboration with Dr. [Chengxu Zhou](https://eps.leeds.ac.uk/mechanical-engineering/staff/1720/dr-chengxu-zhou) 
 
 How to cite this work:
 ======================
