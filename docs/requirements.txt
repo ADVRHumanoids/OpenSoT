@@ -1,2 +1,2 @@
-furo
+docutils<0.21,>=0.18.1
 sphinx_rtd_theme
