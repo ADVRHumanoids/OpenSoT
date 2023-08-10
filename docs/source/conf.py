@@ -16,7 +16,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'OpenSoT'
@@ -95,6 +94,12 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+
+html_logo = "openSoT_logo.png"
+html_theme_options = {
+    'logo_only': True,
+    'display_version': False,
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
