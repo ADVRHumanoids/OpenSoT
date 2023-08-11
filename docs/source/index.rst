@@ -26,6 +26,7 @@ Main features:
    :caption: Contents:
 
    intro
+   task
 
 
 
