@@ -10,12 +10,12 @@ message("Doxygen found: " ${DOXYGEN_FOUND})
 
 if(${DOXYGEN_FOUND})
     message("Creating Documentation")
-    set(DOX_GENERATE_HTML YES)
-    set(DOX_GENERATE_XML NO)
-    option(OPENSOT_DOXYGEN_XML "Generate doxygen XML output, for use by SWIG" NO)
-    mark_as_advanced(OPENSOT_DOXYGEN_XML)
-    if(OPENSOT_DOXYGEN_XML)
-        set(DOX_GENERATE_XML YES)
+    set(DOX_GENERATE_HTML NO)
+    set(DOX_GENERATE_XML YES)
+    option(OPENSOT_DOXYGEN_HTML "Generate doxygen HTML output" NO)
+    mark_as_advanced(OPENSOT_DOXYGEN_HTML)
+    if(OPENSOT_DOXYGEN_HTML)
+        set(OPENSOT_DOXYGEN_HTML YES)
     endif()
     # openSoT documentation is always verbose now.  It used to be
     # partially stripped of stuff less interesting to end-users.
