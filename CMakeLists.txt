@@ -36,6 +36,7 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
 set(${CMAKE_PROJECT_NAME}_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
+add_subdirectory(doc)
 
 find_package(Boost COMPONENTS system REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -344,8 +345,6 @@ library_install(OpenSoT
     ${PROJECT_VERSION_MINOR}
     ${PROJECT_VERSION_PATCH})
 
-
-add_subdirectory(doc)
 
 include(GenerateDeb)
 
