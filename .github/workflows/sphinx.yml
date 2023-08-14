@@ -3,7 +3,16 @@ name: Sphinx build
 on: push
 
 jobs:
-  build:
+  doxygen_build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Create build folder and run cmake
+      run: | 
+        mkdir build && cd build && cmake ..
+  sphinx_build:
+    needs: doxygen_build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
