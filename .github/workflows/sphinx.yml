@@ -13,7 +13,10 @@ jobs:
     - name: Create build folder and run cmake
       continue-on-error: true
       run: | 
-        mkdir build && cd build && cmake .. && ls
+        mkdir build && cd build && cmake ..
+    - name: compile doxygen
+      run : |
+        ls    
   sphinx_build:
     needs: doxygen_build
     runs-on: ubuntu-latest
