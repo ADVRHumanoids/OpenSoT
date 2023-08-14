@@ -6,11 +6,13 @@ jobs:
   doxygen_build:
     runs-on: ubuntu-latest
     steps:
+    - name: Install doxygen
+      run: sudo apt-get install -y doxygen
     - name: Check out repository
       uses: actions/checkout@v3
     - name: Create build folder and run cmake
       run: | 
-        mkdir build && cd build && cmake ..
+        mkdir build && cd build && cmake .. && ls
   sphinx_build:
     needs: doxygen_build
     runs-on: ubuntu-latest
