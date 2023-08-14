@@ -16,7 +16,7 @@ jobs:
         mkdir build && cd build && cmake ..
     - name: compile doxygen
       run : |
-        ls    
+        cd build && doxygen && ls    
   sphinx_build:
     needs: doxygen_build
     runs-on: ubuntu-latest
