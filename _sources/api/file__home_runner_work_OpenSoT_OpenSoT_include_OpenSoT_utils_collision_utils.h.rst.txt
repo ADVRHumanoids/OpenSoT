@@ -92,7 +92,7 @@ Functions
 
 - :ref:`exhale_function_collision__utils_8h_1abfb8e17c7aeeccc23c4337c7b500dd68`
 
-- :ref:`exhale_function_collision__utils_8h_1a7c6a03d0eba1d42095a9bfe884ee4158`
-
 - :ref:`exhale_function_collision__utils_8h_1a3fac393c6019835e39854c157c781dac`
+
+- :ref:`exhale_function_collision__utils_8h_1a7c6a03d0eba1d42095a9bfe884ee4158`
 
