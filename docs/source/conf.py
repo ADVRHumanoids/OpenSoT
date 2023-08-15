@@ -37,7 +37,35 @@ release = ''
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx_rtd_theme', 'breathe']
+extensions = ['sphinx_rtd_theme', 'breathe', 'exhale']
+
+# Setup the breathe extension
+breathe_projects = {
+    "OpenSoT": "../xml"
+}
+breathe_default_project = "OpenSoT"
+
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "./api",
+    "rootFileName":          "library_root.rst",
+    "doxygenStripFromPath":  "..",
+    # Heavily encouraged optional argument (see docs)
+    "rootFileTitle":         "Library API",
+    # Suggested optional arguments
+    "createTreeView":        True,
+    # TIP: if using the sphinx-bootstrap-theme, you need
+    # "treeViewIsBootstrap": True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleDoxygenStdin":    "INPUT = ../../include"
+}
+
+# Tell sphinx what the primary language being documented is.
+primary_domain = 'cpp'
+
+# Tell sphinx what the pygments highlight language should be.
+highlight_language = 'cpp'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
