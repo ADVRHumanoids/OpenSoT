@@ -108,17 +108,17 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1ace43b0e0f96fed6c9d0d6c7f85f722bf`
 
-- :ref:`exhale_function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0`
-
-- :ref:`exhale_function_namespaceOpenSoT_1ab831211523cf9d0c5c9ec1d4968ef6a7`
-
-- :ref:`exhale_function_namespaceOpenSoT_1a61aa6ca24b3a5cdbdad8656907e80153`
-
 - :ref:`exhale_function_namespaceOpenSoT_1af8aa6bbf8c8362fe1372db8ae2099071`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a422e1a9b98b71861968d14a251c54083`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a501cda32286c6a526b42ec3b2690eef2`
+
+- :ref:`exhale_function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0`
+
+- :ref:`exhale_function_namespaceOpenSoT_1ab831211523cf9d0c5c9ec1d4968ef6a7`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a61aa6ca24b3a5cdbdad8656907e80153`
 
 
 Typedefs

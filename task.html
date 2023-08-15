@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Library API" href="api/library_root.html" />
+    <link rel="next" title="Constraint" href="constraint.html" />
     <link rel="prev" title="Intro" href="intro.html" /> 
 </head>
 
@@ -52,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#subtask">SubTask</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="constraint.html">Constraint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
 </ul>
 
@@ -83,14 +84,22 @@
 <h1>Task<a class="headerlink" href="#task" title="Permalink to this headline"></a></h1>
 <p>In OpenSoT, <strong>tasks</strong> are utilized to construct a cost function. Considering a specific <em>task</em>, denoted as <span class="math notranslate nohighlight">\(\mathcal{T}_1\)</span>, it is defined by its corresponding matrices and vectors:</p>
 <div class="math notranslate nohighlight">
-\[\mathcal{T}_1 = \left\{ \mathbf{A}_1 \in \mathbb{R}^{m \times n}, \mathbf{W}_1 \in \mathbb{R}^{m \times m}, \mathbf{b}_1 \in \mathbb{R}^{m}, \mathbf{c}_1  \in \mathbb{R}^{n}  \right\}.\]</div>
+\[\mathcal{T}_1 = \left\{ \mathbf{A}_1 \in \mathbb{R}^{m \times n}, \mathbf{W}_1 \in \mathbb{R}^{m \times m}, \mathbf{b}_1 \in \mathbb{R}^{m}, \mathbf{c}_1  \in \mathbb{R}^{n}  \right\},\]</div>
+<p>which defines the scalar cost function:</p>
+<div class="math notranslate nohighlight">
+\[\begin{align}
+\mathcal{F}_1
+&amp; = \lVert \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \rVert_{\mathbf{W}_1} + \mathbf{c}_1^T\mathbf{x} = \newline
+&amp; = \left( \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \right)^T\mathbf{W}_1\left( \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \right) + \mathbf{c}_1^T\mathbf{x} = \newline
+&amp; = \mathbf{x}^T\mathbf{A}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} -2\mathbf{b}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} + \mathbf{c}_1^T\mathbf{x}.
+\end{align}\]</div>
 <p>Multiple <em>Tasks</em> can be summed together to form complex cost fucntions, for instance <span class="math notranslate nohighlight">\(\mathcal{T}_3 = \mathcal{T}_1 + \mathcal{T}_2\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[\mathcal{T}_3 = \left\{ \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}, \begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix}, \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix}, \mathbf{c}_1 + \mathbf{c}_2  \right\}.\]</div>
 <p>The scalar cost function associated to <span class="math notranslate nohighlight">\(\mathcal{T}_3\)</span> will be:</p>
 <div class="math notranslate nohighlight">
 \[\begin{align}
-\mathcal{F}
+\mathcal{F}_3
 %&amp; = \lVert \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix}\rVert_{\begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix}} + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
 &amp; = \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right)^T \begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix} \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right) + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
 %&amp; = \left(\mathbf{x}^T \begin{bmatrix} \mathbf{A}_1^T &amp; \mathbf{A}_2^T \end{bmatrix} - \begin{bmatrix}\mathbf{b}_1^T &amp; \mathbf{b}_2^T \end{bmatrix}\right) \begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix} \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right) + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
@@ -119,7 +128,7 @@
 <p class="admonition-title">Note</p>
 <p>When a <em>Task</em> is not active, its <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> matrix is set to <span class="math notranslate nohighlight">\(\mathbf{0}\)</span>.</p>
 </div>
-<p>Upon invoking the <code class="docutils literal notranslate"><span class="pre">loglog(XBot::MatLogger2::Ptr</span> <span class="pre">logger)</span></code> method, the internal matrices <code class="docutils literal notranslate"><span class="pre">_A</span></code> and <code class="docutils literal notranslate"><span class="pre">_W</span></code>, as well as the vectors <code class="docutils literal notranslate"><span class="pre">_b</span></code> and <code class="docutils literal notranslate"><span class="pre">_c</span></code>, are stored in the file specified within the log. To record additional data, you must implement the virtual method <code class="docutils literal notranslate"><span class="pre">_log(XBot::MatLogger2::Ptr</span> <span class="pre">logger)</span></code>.</p>
+<p>Upon invoking the <code class="docutils literal notranslate"><span class="pre">log(XBot::MatLogger2::Ptr</span> <span class="pre">logger)</span></code> method, the internal matrices <code class="docutils literal notranslate"><span class="pre">_A</span></code> and <code class="docutils literal notranslate"><span class="pre">_W</span></code>, as well as the vectors <code class="docutils literal notranslate"><span class="pre">_b</span></code> and <code class="docutils literal notranslate"><span class="pre">_c</span></code>, are stored in the file specified within the log. To record additional data, you must implement the virtual method <code class="docutils literal notranslate"><span class="pre">_log(XBot::MatLogger2::Ptr</span> <span class="pre">logger)</span></code>.</p>
 <div class="section" id="subtask">
 <h2>SubTask<a class="headerlink" href="#subtask" title="Permalink to this headline"></a></h2>
 <p>A <em>SubTask</em> comprises a specific number of rows from a <em>Task</em>. The <em>SubTask</em> class facilitates the selection of adjacent and non-adjacent rows from a task by extracting sub-matrices from <code class="docutils literal notranslate"><span class="pre">_A</span></code> and <code class="docutils literal notranslate"><span class="pre">_W</span></code>, along with a sub-vector from <code class="docutils literal notranslate"><span class="pre">_b</span></code>.</p>
@@ -141,7 +150,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="intro.html" class="btn btn-neutral float-left" title="Intro" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="api/library_root.html" class="btn btn-neutral float-right" title="Library API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="constraint.html" class="btn btn-neutral float-right" title="Constraint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
