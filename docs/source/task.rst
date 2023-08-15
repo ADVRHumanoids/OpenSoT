@@ -5,7 +5,18 @@ In OpenSoT, **tasks** are utilized to construct a cost function. Considering a s
 
 .. math::
   
-   \mathcal{T}_1 = \left\{ \mathbf{A}_1 \in \mathbb{R}^{m \times n}, \mathbf{W}_1 \in \mathbb{R}^{m \times m}, \mathbf{b}_1 \in \mathbb{R}^{m}, \mathbf{c}_1  \in \mathbb{R}^{n}  \right\}.
+   \mathcal{T}_1 = \left\{ \mathbf{A}_1 \in \mathbb{R}^{m \times n}, \mathbf{W}_1 \in \mathbb{R}^{m \times m}, \mathbf{b}_1 \in \mathbb{R}^{m}, \mathbf{c}_1  \in \mathbb{R}^{n}  \right\},
+   
+which defines the scalar cost function:
+
+.. math::
+
+   \begin{align}
+   \mathcal{F}_1 
+   & = \lVert \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \rVert_{\mathbf{W}_1} + \mathbf{c}_1^T\mathbf{x} = \newline
+   & = \left( \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \right)^T\mathbf{W}_1\left( \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \right) + \mathbf{c}_1^T\mathbf{x} = \newline
+   & = \mathbf{x}^T\mathbf{A}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} -2\mathbf{b}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} + \mathbf{c}_1^T\mathbf{x}.  
+   \end{align}  
    
 Multiple *Tasks* can be summed together to form complex cost fucntions, for instance :math:`\mathcal{T}_3 = \mathcal{T}_1 + \mathcal{T}_2`:
 
@@ -18,7 +29,7 @@ The scalar cost function associated to :math:`\mathcal{T}_3` will be:
 .. math::
 
    \begin{align}
-   \mathcal{F} 
+   \mathcal{F}_3 
    %& = \lVert \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix}\rVert_{\begin{bmatrix}\mathbf{W}_1 & \mathbf{0}\newline \mathbf{0}   & \mathbf{W}_2 \end{bmatrix}} + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
    & = \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right)^T \begin{bmatrix}\mathbf{W}_1 & \mathbf{0}\newline \mathbf{0}   & \mathbf{W}_2 \end{bmatrix} \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right) + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
    %& = \left(\mathbf{x}^T \begin{bmatrix} \mathbf{A}_1^T & \mathbf{A}_2^T \end{bmatrix} - \begin{bmatrix}\mathbf{b}_1^T & \mathbf{b}_2^T \end{bmatrix}\right) \begin{bmatrix}\mathbf{W}_1 & \mathbf{0}\newline \mathbf{0}   & \mathbf{W}_2 \end{bmatrix} \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right) + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
@@ -54,7 +65,7 @@ You can *activate* or *deactivate* a *Task* using the ``setActive(const bool act
 .. note:: 
    When a *Task* is not active, its :math:`\mathbf{A}` matrix is set to :math:`\mathbf{0}`.
 
-Upon invoking the ``loglog(XBot::MatLogger2::Ptr logger)`` method, the internal matrices ``_A`` and ``_W``, as well as the vectors ``_b`` and ``_c``, are stored in the file specified within the log. To record additional data, you must implement the virtual method ``_log(XBot::MatLogger2::Ptr logger)``.
+Upon invoking the ``log(XBot::MatLogger2::Ptr logger)`` method, the internal matrices ``_A`` and ``_W``, as well as the vectors ``_b`` and ``_c``, are stored in the file specified within the log. To record additional data, you must implement the virtual method ``_log(XBot::MatLogger2::Ptr logger)``.
 
 SubTask
 -------
