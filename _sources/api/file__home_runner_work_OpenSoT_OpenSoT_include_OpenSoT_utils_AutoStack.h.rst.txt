@@ -103,13 +103,13 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb`
 
-- :ref:`exhale_function_namespaceOpenSoT_1a4c31d7dd8eccb05044007ba7448dd263`
-
 - :ref:`exhale_function_namespaceOpenSoT_1adaea99bdf94335a8999e430d8746e7d3`
 
 - :ref:`exhale_function_namespaceOpenSoT_1ac8b11062807f3c28362a3ebec6966c48`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a9a9f6cea5ef3d3d8c3efdac6814fd29f`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a4c31d7dd8eccb05044007ba7448dd263`
 
 - :ref:`exhale_function_namespaceOpenSoT_1ace43b0e0f96fed6c9d0d6c7f85f722bf`
 

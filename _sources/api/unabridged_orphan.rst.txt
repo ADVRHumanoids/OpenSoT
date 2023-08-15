@@ -455,11 +455,6 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file__home_runner_work_OpenSoT_OpenSoT_README.md.rst
-
-.. toctree::
-   :maxdepth: 5
-
    file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h.rst
 
 .. toctree::
