@@ -1,0 +1,23 @@
+.. _exhale_class_classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData:
+
+Class nHQP::TaskData
+====================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h`
+
+
+Nested Relationships
+--------------------
+
+This class is a nested type of :ref:`exhale_class_classOpenSoT_1_1solvers_1_1nHQP`.
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::solvers::nHQP::TaskData
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

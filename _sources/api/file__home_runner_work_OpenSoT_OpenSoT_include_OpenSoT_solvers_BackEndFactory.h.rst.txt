@@ -1,0 +1,75 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h:
+
+File BackEndFactory.h
+=====================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/BackEndFactory.h``)
+-------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/solvers/BackEnd.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h`)
+
+- ``boost/make_shared.hpp``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__solvers`
+
+
+Enums
+-----
+
+
+- :ref:`exhale_enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21`
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_namespaceOpenSoT_1_1solvers_1afad360bd87e33794b09b791fb700a4df`
+
+- :ref:`exhale_function_namespaceOpenSoT_1_1solvers_1a7b39fcd96a93530cf5763e678cafdc03`
+

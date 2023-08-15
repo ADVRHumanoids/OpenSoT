@@ -1,0 +1,32 @@
+.. _dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity:
+
+
+Directory velocity
+==================
+
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity``
+
+
+Files
+-----
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_AngularMomentum.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CoM.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Contact.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Gaze.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_JointAdmittance.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_LinearMomentum.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Manipulability.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_MinimumEffort.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Postural.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_PureRolling.h`
+
+

@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1af8aa6bbf8c8362fe1372db8ae2099071:
+
+Function OpenSoT::operator<<(OpenSoT::AutoStack::Ptr, const OpenSoT::constraints::Aggregated::ConstraintPtr)
+============================================================================================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::operator<<(OpenSoT::AutoStack::Ptr, const OpenSoT::constraints::Aggregated::ConstraintPtr)
+   :project: OpenSoT

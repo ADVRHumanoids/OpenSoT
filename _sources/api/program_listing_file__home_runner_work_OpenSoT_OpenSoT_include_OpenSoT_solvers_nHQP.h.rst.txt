@@ -1,0 +1,190 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h:
+
+Program Listing for File nHQP.h
+===============================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/nHQP.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Arturo Laurenzi
+    * email: arturo.laurenzi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __SOT_SOLVERS_NULLSPACE_HQP_H__
+   #define __SOT_SOLVERS_NULLSPACE_HQP_H__
+   
+   #include <vector>
+   #include <iostream>
+   
+   #include <memory>
+   
+   #include <eigen3/Eigen/SVD>
+   
+   #include <OpenSoT/Task.h>
+   #include <OpenSoT/Solver.h>
+   #include <OpenSoT/constraints/Aggregated.h>
+   #include <OpenSoT/solvers/BackEndFactory.h>
+   #include <OpenSoT/utils/Piler.h>
+   
+   namespace OpenSoT { namespace solvers {
+       class nHQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
+       {
+           
+       public:
+   
+           static constexpr double DEFAULT_MIN_SV_RATIO = 0.05;
+           
+           // Shared pointer typedef
+           typedef std::shared_ptr<nHQP> Ptr;
+           
+           // Constructor
+           nHQP(Stack& stack_of_tasks,
+                ConstraintPtr bounds,
+                const double eps_regularisation,
+                const solver_back_ends be_solver = solver_back_ends::qpOASES);
+   
+           // Destructor
+           virtual ~nHQP() override;
+   
+           // Solve implementation
+           virtual bool solve(Eigen::VectorXd& solution) override;
+   
+           // Setter for minimum singular value ratio
+           void setMinSingularValueRatio(double sv_min);
+   
+           // Setter for minimum singular value ratio (layer wise)
+           void setMinSingularValueRatio(std::vector<double> sv_min);
+   
+   
+       private:
+           
+           class TaskData
+           {
+               
+           public:
+   
+               TaskData(int num_free_vars,
+                        TaskPtr task,
+                        ConstraintPtr constraint,
+                        BackEnd::Ptr back_end);
+   
+               void set_min_sv_ratio(double sv);
+   
+               int compute_nullspace_dimension(double threshold);
+   
+               void set_nullspace_dimension(int ns_dim);
+               
+               void compute_cost(const Eigen::MatrixXd * AN_nullspace,
+                                 const Eigen::VectorXd& q0);
+   
+               void compute_contraints(const Eigen::MatrixXd * AN_nullspace,
+                                       const Eigen::VectorXd& q0);
+   
+               bool update_and_solve();
+   
+               bool compute_nullspace();
+               
+               const Eigen::MatrixXd& get_nullspace() const;
+   
+               const Eigen::VectorXd& get_solution() const;
+   
+               bool enable_logger(XBot::MatLogger2::Ptr logger, std::string log_prefix);
+               
+           private:
+   
+               
+               // this task
+               TaskPtr task;
+   
+               // global constraints
+               ConstraintPtr constraints;
+               
+               // nullspace of AN (used by next task)
+               Eigen::MatrixXd AN_nullspace;
+   
+               // A matrix of this task (A projected onto previous tasks nullspace)
+               Eigen::MatrixXd AN;
+   
+               // b vector for this task
+               Eigen::VectorXd b0;
+   
+               // min singular value ratio
+               double min_sv_ratio;
+               
+               // quadratic cost matrices
+               Eigen::MatrixXd H;
+               Eigen::VectorXd g;
+   
+               // inequality constraints (including bounds for i = 1, 2, ...)
+               utils::MatrixPiler Aineq;
+   
+               // inequality bounds
+               utils::MatrixPiler lb, ub;
+   
+               // simple bounds (only i = 0)
+               Eigen::VectorXd lb_bound, ub_bound;
+               
+               // svd computation class
+               Eigen::BDCSVD<Eigen::MatrixXd> svd;
+   
+               // nullspace dimension (for next task)
+               int ns_dim;
+   
+               // backend for solving the QP
+               BackEnd::Ptr back_end;
+   
+               // flag indicating if back end was initialized
+               bool back_end_initialized;
+   
+               // logger (can be nullptr)
+               XBot::MatLogger2::Ptr logger;
+   
+               // prefix for logged variables
+               std::string log_prefix;
+   
+               void regularize_A_b(double threshold);
+   
+           };
+   
+           
+           virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix) override;
+   
+           // vector of previous task nullspaces (first elem is nx-by-nx identity)
+           std::vector<Eigen::MatrixXd> _cumulated_nullspace;
+   
+           // task data for all layers
+           std::vector<TaskData> _data_struct;
+   
+           // to store solution
+           Eigen::VectorXd _solution;
+   
+   
+       };
+   
+       
+   } }
+   
+   #endif
+   
+   
+   
+   
+   
+   

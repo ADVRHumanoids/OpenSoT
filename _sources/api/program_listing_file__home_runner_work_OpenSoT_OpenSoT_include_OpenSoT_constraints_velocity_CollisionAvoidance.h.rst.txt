@@ -1,0 +1,130 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h:
+
+Program Listing for File CollisionAvoidance.h
+=============================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/velocity/CollisionAvoidance.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Cheng Fang
+    * email:  cheng.fang@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef COLLISIONAVOIDANCE_H
+   #define COLLISIONAVOIDANCE_H
+   
+   #include <OpenSoT/Constraint.h>
+   #include <OpenSoT/tasks/velocity/Cartesian.h>
+   #include <XBotInterface/ModelInterface.h>
+   
+   #include <srdfdom/model.h>
+   #include <Eigen/Dense>
+   
+   #include <moveit_msgs/PlanningSceneWorld.h>
+   
+   class ComputeLinksDistance;
+   class LinkPairDistance;
+   
+   // forward declare fcl collision object
+   namespace fcl
+   {
+       template <typename Scalar>
+       class CollisionObject;
+   
+       using CollisionObjectd = CollisionObject<double>;
+   }
+   
+   namespace OpenSoT { namespace constraints { namespace velocity {
+   
+   class CollisionAvoidance: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
+   {
+   
+   public:
+   
+       typedef std::shared_ptr<CollisionAvoidance> Ptr;
+       typedef std::pair<std::string, std::string> LinksPair;
+   
+       CollisionAvoidance(const Eigen::VectorXd& x,
+                              const XBot::ModelInterface& robot,
+                              int max_pairs = -1,
+                              urdf::ModelConstSharedPtr collision_urdf = nullptr,
+                              srdf::ModelConstSharedPtr collision_srdf = nullptr);
+   
+       double getLinkPairThreshold();
+   
+       double getDetectionThreshold();
+   
+       void setLinkPairThreshold(const double linkPair_threshold);
+   
+       void setDetectionThreshold(const double detection_threshold);
+   
+       void update(const Eigen::VectorXd &x);
+   
+   
+       bool setCollisionWhiteList(std::list<LinksPair> whiteList);
+   
+       bool setCollisionBlackList(std::list<LinksPair> blackList);
+   
+       bool setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc);
+   
+       bool addWorldCollision(const std::string& id,
+                              std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
+   
+       bool removeWorldCollision(const std::string& id);
+   
+       bool moveWorldCollision(const std::string& id,
+                               KDL::Frame new_pose);
+   
+       void setBoundScaling(const double boundScaling);
+   
+       void setLinksVsEnvironment(const std::list<std::string>& links);
+   
+   
+       const std::list<LinkPairDistance>& getLinkPairDistances(){ return _distance_list;}
+   
+       ~CollisionAvoidance();
+   
+   protected:
+   
+       double _bound_scaling;
+   
+       double _distance_threshold;
+   
+       double _detection_threshold;
+   
+       int _max_pairs;
+   
+       const XBot::ModelInterface& _robot;
+   
+       std::unique_ptr<ComputeLinksDistance> _dist_calc;
+   
+       Eigen::VectorXd _x_cache;
+   
+       Eigen::MatrixXd _Jtmp;
+   
+       std::list<LinkPairDistance> _distance_list;
+   
+   };
+   
+   } } }
+   
+   
+   #endif // COLLISIONAVOIDANCE_H
+   

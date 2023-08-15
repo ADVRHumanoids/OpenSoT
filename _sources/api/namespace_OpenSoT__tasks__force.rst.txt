@@ -1,0 +1,28 @@
+
+.. _namespace_OpenSoT__tasks__force:
+
+Namespace OpenSoT::tasks::force
+===============================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1force_1_1Cartesian`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1force_1_1CoM`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1force_1_1FloatingBase`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1force_1_1Wrench`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1force_1_1Wrenches`

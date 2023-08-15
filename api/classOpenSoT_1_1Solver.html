@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Class Solver &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class BackEnd" href="classOpenSoT_1_1solvers_1_1BackEnd.html" />
+    <link rel="prev" title="Class OptvarHelper" href="classOpenSoT_1_1OptvarHelper.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Template Class Solver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1Solver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="template-class-solver">
+<span id="exhale-class-classopensot-1-1solver"></span><h1>Template Class Solver<a class="headerlink" href="#template-class-solver" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h.html#file-home-runner-work-opensot-opensot-include-opensot-solver-h"><span class="std std-ref">File Solver.h</span></a></p></li>
+</ul>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN7OpenSoT6SolverE">
+<span id="_CPPv3I00EN7OpenSoT6SolverE"></span><span id="_CPPv2I00EN7OpenSoT6SolverE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Matrix_type</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Vector_type</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1Solver"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Solver</span></span></span><a class="headerlink" href="#_CPPv4I00EN7OpenSoT6SolverE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver8TaskTypeE">
+<span id="_CPPv3N7OpenSoT6Solver8TaskTypeE"></span><span id="_CPPv2N7OpenSoT6Solver8TaskTypeE"></span><span id="OpenSoT::Solver::TaskType"></span><span class="target" id="classOpenSoT_1_1Solver_1a7bf39948a172df2821de3e12faff6cb9"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TaskType</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver8TaskTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver7TaskPtrE">
+<span id="_CPPv3N7OpenSoT6Solver7TaskPtrE"></span><span id="_CPPv2N7OpenSoT6Solver7TaskPtrE"></span><span id="OpenSoT::Solver::TaskPtr"></span><span class="target" id="classOpenSoT_1_1Solver_1aeab80caed1b031f289c733471814cf65"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver8TaskTypeE" title="OpenSoT::Solver::TaskType"><span class="n"><span class="pre">TaskType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TaskPtr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver14ConstraintTypeE">
+<span id="_CPPv3N7OpenSoT6Solver14ConstraintTypeE"></span><span id="_CPPv2N7OpenSoT6Solver14ConstraintTypeE"></span><span id="OpenSoT::Solver::ConstraintType"></span><span class="target" id="classOpenSoT_1_1Solver_1a8f92d3ec42350643ce70c98e2a10cb82"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><a class="reference internal" href="classOpenSoT_1_1Constraint.html#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint"><span class="n"><span class="pre">Constraint</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConstraintType</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver14ConstraintTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver13ConstraintPtrE">
+<span id="_CPPv3N7OpenSoT6Solver13ConstraintPtrE"></span><span id="_CPPv2N7OpenSoT6Solver13ConstraintPtrE"></span><span id="OpenSoT::Solver::ConstraintPtr"></span><span class="target" id="classOpenSoT_1_1Solver_1a8500f871774c6fabe7e9baa799f5d324"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver14ConstraintTypeE" title="OpenSoT::Solver::ConstraintType"><span class="n"><span class="pre">ConstraintType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConstraintPtr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver13ConstraintPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver10SolverTypeE">
+<span id="_CPPv3N7OpenSoT6Solver10SolverTypeE"></span><span id="_CPPv2N7OpenSoT6Solver10SolverTypeE"></span><span id="OpenSoT::Solver::SolverType"></span><span class="target" id="classOpenSoT_1_1Solver_1abd09dcaafbb15713aad2207680675baa"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver"><span class="n"><span class="pre">Solver</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SolverType</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver10SolverTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver9SolverPtrE">
+<span id="_CPPv3N7OpenSoT6Solver9SolverPtrE"></span><span id="_CPPv2N7OpenSoT6Solver9SolverPtrE"></span><span id="OpenSoT::Solver::SolverPtr"></span><span class="target" id="classOpenSoT_1_1Solver_1a1fd17c7b1ac567a8ac7cf55eead40361"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver10SolverTypeE" title="OpenSoT::Solver::SolverType"><span class="n"><span class="pre">SolverType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SolverPtr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver9SolverPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver5StackE">
+<span id="_CPPv3N7OpenSoT6Solver5StackE"></span><span id="_CPPv2N7OpenSoT6Solver5StackE"></span><span id="OpenSoT::Solver::Stack"></span><span class="target" id="classOpenSoT_1_1Solver_1aeed5246430704dc1e6f132060fe725d5"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver7TaskPtrE" title="OpenSoT::Solver::TaskPtr"><span class="n"><span class="pre">TaskPtr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Stack</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver5StackE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE">
+<span id="_CPPv3N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE"></span><span id="_CPPv2N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE"></span><span id="OpenSoT::Solver::Solver__vector:TaskPtr:R"></span><span class="target" id="classOpenSoT_1_1Solver_1aa78ab5939cf04b69ce957cc001af9519"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Solver</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver7TaskPtrE" title="OpenSoT::Solver::TaskPtr"><span class="n"><span class="pre">TaskPtr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1Solver"><span class="std std-ref">Solver</span></a> an interface for a generic solver. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stack</strong> – a vector of pointers to tasks </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr">
+<span id="_CPPv3N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr"></span><span id="_CPPv2N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr"></span><span id="OpenSoT::Solver::Solver__vector:TaskPtr:R.ConstraintPtr"></span><span class="target" id="classOpenSoT_1_1Solver_1ab2ee7cf3a13026bdd92fa6ab9a776119"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Solver</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver7TaskPtrE" title="OpenSoT::Solver::TaskPtr"><span class="n"><span class="pre">TaskPtr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack</span></span>, <a class="reference internal" href="#_CPPv4N7OpenSoT6Solver13ConstraintPtrE" title="OpenSoT::Solver::ConstraintPtr"><span class="n"><span class="pre">ConstraintPtr</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">bounds</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1Solver"><span class="std std-ref">Solver</span></a> an interface for a generic solver. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stack</strong> – a vector of pointers to tasks </p></li>
+<li><p><strong>bounds</strong> – a global bound for the problem </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr13ConstraintPtr">
+<span id="_CPPv3N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr13ConstraintPtr"></span><span id="_CPPv2N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr13ConstraintPtr"></span><span id="OpenSoT::Solver::Solver__vector:TaskPtr:R.ConstraintPtr.ConstraintPtr"></span><span class="target" id="classOpenSoT_1_1Solver_1aeb430e110872096ca418d0cf62f25efb"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Solver</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver7TaskPtrE" title="OpenSoT::Solver::TaskPtr"><span class="n"><span class="pre">TaskPtr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack</span></span>, <a class="reference internal" href="#_CPPv4N7OpenSoT6Solver13ConstraintPtrE" title="OpenSoT::Solver::ConstraintPtr"><span class="n"><span class="pre">ConstraintPtr</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">bounds</span></span>, <a class="reference internal" href="#_CPPv4N7OpenSoT6Solver13ConstraintPtrE" title="OpenSoT::Solver::ConstraintPtr"><span class="n"><span class="pre">ConstraintPtr</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">globalConstraints</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver6SolverER6vectorI7TaskPtrE13ConstraintPtr13ConstraintPtr" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1Solver"><span class="std std-ref">Solver</span></a> an interface for a generic solver. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stack</strong> – a vector of pointers to tasks </p></li>
+<li><p><strong>bounds</strong> – a global bound for the problem </p></li>
+<li><p><strong>globalConstraints</strong> – a global constrains for the problem </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6SolverD0Ev">
+<span id="_CPPv3N7OpenSoT6SolverD0Ev"></span><span id="_CPPv2N7OpenSoT6SolverD0Ev"></span><span id="OpenSoT::Solver::~Solver"></span><span class="target" id="classOpenSoT_1_1Solver_1a38c8ee8dcc57576f5e72313a311ed2c0"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~Solver</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6SolverD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver5solveER11Vector_type">
+<span id="_CPPv3N7OpenSoT6Solver5solveER11Vector_type"></span><span id="_CPPv2N7OpenSoT6Solver5solveER11Vector_type"></span><span id="OpenSoT::Solver::solve__Vector_typeR"></span><span class="target" id="classOpenSoT_1_1Solver_1a1456015d5a64ae00f057013aa25f7856"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solve</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">solution</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver5solveER11Vector_type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>solve solve an Optimization problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>solution</strong> – the solution </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if solved/solvable </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver11getSolverIDEv">
+<span id="_CPPv3N7OpenSoT6Solver11getSolverIDEv"></span><span id="_CPPv2N7OpenSoT6Solver11getSolverIDEv"></span><span id="OpenSoT::Solver::getSolverID"></span><span class="target" id="classOpenSoT_1_1Solver_1a4f2c35ebbc17e4eb906bbab1b6fbdcab"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getSolverID</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver11getSolverIDEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getSolverID </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>string with the solver id </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver11setSolverIDERKNSt6stringE">
+<span id="_CPPv3N7OpenSoT6Solver11setSolverIDERKNSt6stringE"></span><span id="_CPPv2N7OpenSoT6Solver11setSolverIDERKNSt6stringE"></span><span id="OpenSoT::Solver::setSolverID__ssCR"></span><span class="target" id="classOpenSoT_1_1Solver_1ad058b84b7230843ab3e601cd85c77054"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setSolverID</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">solver_id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver11setSolverIDERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setSolverID set an id to the solver. </p>
+<p>This id will be used as prefix in the logs! NOTE: if two solver are used, to avoid loggin errors, at least one of the two solvers should have an id. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>solver_id</strong> – name of the solver </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver3logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT6Solver3logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT6Solver3logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::Solver::log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1Solver_1a0ca134f877d4d31349ab063dd17af349"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver3logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>log logs data related to the solver </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logger</strong> – a pointer to a MatLogger </p></li>
+<li><p><strong>prefix</strong> – used to log variables </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver4_logEN4XBot10MatLogger23PtrERKNSt6stringE">
+<span id="_CPPv3N7OpenSoT6Solver4_logEN4XBot10MatLogger23PtrERKNSt6stringE"></span><span id="_CPPv2N7OpenSoT6Solver4_logEN4XBot10MatLogger23PtrERKNSt6stringE"></span><span id="OpenSoT::Solver::_log__XBot::MatLogger2::Ptr.ssCR"></span><span class="target" id="classOpenSoT_1_1Solver_1ac30bcc879bf734d97b4be2a512c08b45"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">prefix</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver4_logEN4XBot10MatLogger23PtrERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_log implement this on the solver to log data </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logger</strong> – a pointer to a MatLogger </p></li>
+<li><p><strong>prefix</strong> – used to log variables </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver6_tasksE">
+<span id="_CPPv3N7OpenSoT6Solver6_tasksE"></span><span id="_CPPv2N7OpenSoT6Solver6_tasksE"></span><span id="OpenSoT::Solver::_tasks__vector:TaskPtr:"></span><span class="target" id="classOpenSoT_1_1Solver_1aa97bb869188a371e2820ccf63fa2451f"></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver7TaskPtrE" title="OpenSoT::Solver::TaskPtr"><span class="n"><span class="pre">TaskPtr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_tasks</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver6_tasksE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver7_boundsE">
+<span id="_CPPv3N7OpenSoT6Solver7_boundsE"></span><span id="_CPPv2N7OpenSoT6Solver7_boundsE"></span><span id="OpenSoT::Solver::_bounds__ConstraintPtr"></span><span class="target" id="classOpenSoT_1_1Solver_1acdaabc8359ba757f60654b2910df6b42"></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver13ConstraintPtrE" title="OpenSoT::Solver::ConstraintPtr"><span class="n"><span class="pre">ConstraintPtr</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_bounds</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver7_boundsE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver18_globalConstraintsE">
+<span id="_CPPv3N7OpenSoT6Solver18_globalConstraintsE"></span><span id="_CPPv2N7OpenSoT6Solver18_globalConstraintsE"></span><span id="OpenSoT::Solver::_globalConstraints__ConstraintPtr"></span><span class="target" id="classOpenSoT_1_1Solver_1a73761cab92d4dea9d0645a12c398291d"></span><a class="reference internal" href="#_CPPv4N7OpenSoT6Solver13ConstraintPtrE" title="OpenSoT::Solver::ConstraintPtr"><span class="n"><span class="pre">ConstraintPtr</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_globalConstraints</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver18_globalConstraintsE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT6Solver10_solver_idE">
+<span id="_CPPv3N7OpenSoT6Solver10_solver_idE"></span><span id="_CPPv2N7OpenSoT6Solver10_solver_idE"></span><span id="OpenSoT::Solver::_solver_id__ss"></span><span class="target" id="classOpenSoT_1_1Solver_1a400060d74900d0d247a98fceffebc99f"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_solver_id</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT6Solver10_solver_idE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1OptvarHelper.html" class="btn btn-neutral float-left" title="Class OptvarHelper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1solvers_1_1BackEnd.html" class="btn btn-neutral float-right" title="Class BackEnd" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

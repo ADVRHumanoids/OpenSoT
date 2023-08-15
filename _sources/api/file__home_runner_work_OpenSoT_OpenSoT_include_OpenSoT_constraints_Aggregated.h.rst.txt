@@ -1,0 +1,84 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h:
+
+File Aggregated.h
+=================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/Aggregated.h``)
+-------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``Eigen/Dense``
+
+- ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
+
+- ``OpenSoT/utils/Piler.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h`)
+
+- ``list``
+
+- ``memory``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_CoP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_FrictionCone.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_NormalTorque.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_WrenchLimits.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__constraints`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1Aggregated`
+

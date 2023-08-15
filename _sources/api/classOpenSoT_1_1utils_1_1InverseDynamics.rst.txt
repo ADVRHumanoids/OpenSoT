@@ -1,0 +1,17 @@
+.. _exhale_class_classOpenSoT_1_1utils_1_1InverseDynamics:
+
+Class InverseDynamics
+=====================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::utils::InverseDynamics
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

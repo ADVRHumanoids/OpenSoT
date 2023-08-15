@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class CostFunction &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Template Class CollisionObject" href="classfcl_1_1CollisionObject.html" />
+    <link rel="prev" title="Class convex_hull" href="classconvex__hull.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class CostFunction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classCostFunction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-costfunction">
+<span id="exhale-class-classcostfunction"></span><h1>Class CostFunction<a class="headerlink" href="#class-costfunction" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-cartesian-utils-h"><span class="std std-ref">File cartesian_utils.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="derived-types">
+<h3>Derived Types<a class="headerlink" href="#derived-types" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::tasks::velocity::Manipulability::ComputeManipulabilityIndexGradient</span></code> (<a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html#exhale-class-classopensot-1-1tasks-1-1velocity-1-1manipulability-1-1computemanipulabilityindexgradient"><span class="std std-ref">Class Manipulability::ComputeManipulabilityIndexGradient</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient</span></code> (<a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#exhale-class-classopensot-1-1tasks-1-1velocity-1-1minimumeffort-1-1computegtaugradient"><span class="std std-ref">Class MinimumEffort::ComputeGTauGradient</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv412CostFunction">
+<span id="_CPPv312CostFunction"></span><span id="_CPPv212CostFunction"></span><span id="CostFunction"></span><span class="target" id="classCostFunction"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CostFunction</span></span></span><a class="headerlink" href="#_CPPv412CostFunction" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classCostFunction"><span class="std std-ref">CostFunction</span></a> class pure virtual function used to describe functions for computeGradient method. </p>
+<p>Subclassed by <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html#classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient"><span class="std std-ref">OpenSoT::tasks::velocity::Manipulability::ComputeManipulabilityIndexGradient</span></a>, <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient"><span class="std std-ref">OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12CostFunction7computeERKN5Eigen8VectorXdE">
+<span id="_CPPv3N12CostFunction7computeERKN5Eigen8VectorXdE"></span><span id="_CPPv2N12CostFunction7computeERKN5Eigen8VectorXdE"></span><span id="CostFunction::compute__Eigen::VectorXdCR"></span><span class="target" id="classCostFunction_1a8c6423320a79a60146cfb2b5e77d4423"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">compute</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N12CostFunction7computeERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>compute value of function in x </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scalar </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classconvex__hull.html" class="btn btn-neutral float-left" title="Class convex_hull" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classfcl_1_1CollisionObject.html" class="btn btn-neutral float-right" title="Template Class CollisionObject" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

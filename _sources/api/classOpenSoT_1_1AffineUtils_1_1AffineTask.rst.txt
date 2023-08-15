@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1AffineUtils_1_1AffineTask:
+
+Class AffineTask
+================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::Task< Eigen::MatrixXd, Eigen::VectorXd >`` (:ref:`exhale_class_classOpenSoT_1_1Task`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::AffineUtils::AffineTask
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

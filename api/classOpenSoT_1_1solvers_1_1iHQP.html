@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class iHQP &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class l1HQP" href="classOpenSoT_1_1solvers_1_1l1HQP.html" />
+    <link rel="prev" title="Class HCOD" href="classOpenSoT_1_1solvers_1_1HCOD.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class iHQP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1solvers_1_1iHQP.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-ihqp">
+<span id="exhale-class-classopensot-1-1solvers-1-1ihqp"></span><h1>Class iHQP<a class="headerlink" href="#class-ihqp" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h.html#file-home-runner-work-opensot-opensot-include-opensot-solvers-ihqp-h"><span class="std std-ref">File iHQP.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::Solver&lt;</span> <span class="pre">Eigen::MatrixXd,</span> <span class="pre">Eigen::VectorXd</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="classOpenSoT_1_1Solver.html#exhale-class-classopensot-1-1solver"><span class="std std-ref">Template Class Solver</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQPE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQPE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQPE"></span><span id="OpenSoT::solvers::iHQP"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Solver.html#_CPPv4I00EN7OpenSoT6SolverE" title="OpenSoT::Solver"><span class="n"><span class="pre">Solver</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQPE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1solvers_1_1iHQP"><span class="std std-ref">iHQP</span></a> class implement a solver that accept a Stack of Tasks with Bounds and Constraints. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP3PtrE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP3PtrE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP3PtrE"></span><span id="OpenSoT::solvers::iHQP::Ptr"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a3cc98bc2a984e643cefe3a1ec549dd9c"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT7solvers4iHQPE" title="OpenSoT::solvers::iHQP"><span class="n"><span class="pre">iHQP</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP11VectorPilerE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP11VectorPilerE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP11VectorPilerE"></span><span id="OpenSoT::solvers::iHQP::VectorPiler"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a9a21298c127e26ed8851840b50278f7f"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixPiler</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VectorPiler</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP11VectorPilerE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdK16solver_back_ends">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdK16solver_back_ends"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdK16solver_back_ends"></span><span id="OpenSoT::solvers::iHQP::iHQP__OpenSoT::AutoStackR.doubleC.solver_back_endsC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ae4f46bf56e78e70d3477c5a99cd7d487"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1AutoStack.html#_CPPv4N7OpenSoT9AutoStackE" title="OpenSoT::AutoStack"><span class="n"><span class="pre">AutoStack</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">DEFAULT_EPS_REGULARISATION</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_ends7qpOASESE" title="OpenSoT::solvers::solver_back_ends::qpOASES"><span class="n"><span class="pre">qpOASES</span></span></a><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdK16solver_back_ends" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1solvers_1_1iHQP"><span class="std std-ref">iHQP</span></a> constructor of the problem using the <a class="reference internal" href="classOpenSoT_1_1AutoStack.html#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a> this constructor permits to use user regularisation feature (inserting it inside the <a class="reference internal" href="classOpenSoT_1_1AutoStack.html#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a>) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stack_of_tasks</strong> – data structure which will contain tasks, constraints and user defined regularisation NOTICE that the user defined regularisation will be applied to all the stack levels </p></li>
+<li><p><strong>eps_regularisation</strong> – regularisation factor used inside the QP solver (<a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#classOpenSoT_1_1solvers_1_1BackEnd"><span class="std std-ref">BackEnd</span></a>) </p></li>
+<li><p><strong>be_solver</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><span><span class="cpp-expr sig sig-inline cpp"><span class="n">exception</span></span></span> – if the stack can not be initialized </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdKNSt6vectorI16solver_back_endsEE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdKNSt6vectorI16solver_back_endsEE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdKNSt6vectorI16solver_back_endsEE"></span><span id="OpenSoT::solvers::iHQP::iHQP__OpenSoT::AutoStackR.doubleC.std::vector:solver_back_ends:C"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aca08137d65d001cee37f415be689a496"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1AutoStack.html#_CPPv4N7OpenSoT9AutoStackE" title="OpenSoT::AutoStack"><span class="n"><span class="pre">AutoStack</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPERN7OpenSoT9AutoStackEKdKNSt6vectorI16solver_back_endsEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5StackKdK16solver_back_ends">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPER5StackKdK16solver_back_ends"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPER5StackKdK16solver_back_ends"></span><span id="OpenSoT::solvers::iHQP::iHQP__StackR.doubleC.solver_back_endsC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a19a0c9a9f6cd00fc86997d451a74672b"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Stack</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">DEFAULT_EPS_REGULARISATION</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_ends7qpOASESE" title="OpenSoT::solvers::solver_back_ends::qpOASES"><span class="n"><span class="pre">qpOASES</span></span></a><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5StackKdK16solver_back_ends" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1solvers_1_1iHQP"><span class="std std-ref">iHQP</span></a> constructor of the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stack_of_tasks</strong> – a vector of tasks </p></li>
+<li><p><strong>eps_regularisation</strong> – regularisation factor </p></li>
+</ul>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><span><span class="cpp-expr sig sig-inline cpp"><span class="n">exception</span></span></span> – if the stack can not be initialized </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5StackKdKNSt6vectorI16solver_back_endsEE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPER5StackKdKNSt6vectorI16solver_back_endsEE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPER5StackKdKNSt6vectorI16solver_back_endsEE"></span><span id="OpenSoT::solvers::iHQP::iHQP__StackR.doubleC.std::vector:solver_back_ends:C"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ac974c6915a3a456d8e5280f309e7934a"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Stack</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5StackKdKNSt6vectorI16solver_back_endsEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdK16solver_back_ends">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdK16solver_back_ends"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdK16solver_back_ends"></span><span id="OpenSoT::solvers::iHQP::iHQP__StackR.ConstraintPtr.doubleC.solver_back_endsC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a17be8782f0974bf4f390dce00cf74aa7"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Stack</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="n"><span class="pre">ConstraintPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bounds</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">DEFAULT_EPS_REGULARISATION</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_ends7qpOASESE" title="OpenSoT::solvers::solver_back_ends::qpOASES"><span class="n"><span class="pre">qpOASES</span></span></a><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdK16solver_back_ends" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1solvers_1_1iHQP"><span class="std std-ref">iHQP</span></a> constructor of the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stack_of_tasks</strong> – a vector of tasks </p></li>
+<li><p><strong>bounds</strong> – a vector of bounds passed to all the stacks </p></li>
+<li><p><strong>eps_regularisation</strong> – regularisation factor </p></li>
+</ul>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><span><span class="cpp-expr sig sig-inline cpp"><span class="n">exception</span></span></span> – if the stack can not be initialized </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE"></span><span id="OpenSoT::solvers::iHQP::iHQP__StackR.ConstraintPtr.doubleC.std::vector:solver_back_ends:C"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a8b561df365e0e47e25bc041952dd4e8f"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Stack</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="n"><span class="pre">ConstraintPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bounds</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdK16solver_back_ends">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdK16solver_back_ends"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdK16solver_back_ends"></span><span id="OpenSoT::solvers::iHQP::iHQP__StackR.ConstraintPtr.ConstraintPtr.doubleC.solver_back_endsC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a6e748da2634d2ac17335423fad2f52ea"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Stack</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="n"><span class="pre">ConstraintPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bounds</span></span>, <span class="n"><span class="pre">ConstraintPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">globalConstraints</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">DEFAULT_EPS_REGULARISATION</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_ends7qpOASESE" title="OpenSoT::solvers::solver_back_ends::qpOASES"><span class="n"><span class="pre">qpOASES</span></span></a><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdK16solver_back_ends" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1solvers_1_1iHQP"><span class="std std-ref">iHQP</span></a> constructor of the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stack_of_tasks</strong> – a vector of tasks </p></li>
+<li><p><strong>bounds</strong> – a vector of bounds passed to all the stacks </p></li>
+<li><p><strong>globalConstraints</strong> – a vector of constraints passed to all the stacks </p></li>
+<li><p><strong>eps_regularisation</strong> – regularisation factor </p></li>
+</ul>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><span><span class="cpp-expr sig sig-inline cpp"><span class="n">exception</span></span></span> – if the stack can not be initialized </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE"></span><span id="OpenSoT::solvers::iHQP::iHQP__StackR.ConstraintPtr.ConstraintPtr.doubleC.std::vector:solver_back_ends:C"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aa372e886fd89b07db8e56c00720340d9"></span><span class="sig-name descname"><span class="n"><span class="pre">iHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Stack</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="n"><span class="pre">ConstraintPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bounds</span></span>, <span class="n"><span class="pre">ConstraintPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">globalConstraints</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4iHQPER5Stack13ConstraintPtr13ConstraintPtrKdKNSt6vectorI16solver_back_endsEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQPD0Ev">
+<span id="_CPPv3N7OpenSoT7solvers4iHQPD0Ev"></span><span id="_CPPv2N7OpenSoT7solvers4iHQPD0Ev"></span><span id="OpenSoT::solvers::iHQP::~iHQP"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a78c17c4010e883f7e3f35bda425432f8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~iHQP</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQPD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP5solveERN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP5solveERN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP5solveERN5Eigen8VectorXdE"></span><span id="OpenSoT::solvers::iHQP::solve__Eigen::VectorXdR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a06d91dcf6df4237f2fdc832426050432"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solve</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">solution</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP5solveERN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>solve a stack of tasks </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>solution</strong> – vector </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if all the stack is solved </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP16getNumberOfTasksEv">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP16getNumberOfTasksEv"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP16getNumberOfTasksEv"></span><span id="OpenSoT::solvers::iHQP::getNumberOfTasks"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a3e7d1fb15fab29f946a4320e6b27160e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getNumberOfTasks</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP16getNumberOfTasksEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getNumberOfTasks </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>lenght of the stack </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP10setOptionsEKjRKN5boost3anyE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP10setOptionsEKjRKN5boost3anyE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP10setOptionsEKjRKN5boost3anyE"></span><span id="OpenSoT::solvers::iHQP::setOptions__unsigned-iC.boost::anyCR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a0214e0d7d8c561961bf8bc9ff76d9fec"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setOptions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">boost</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">opt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP10setOptionsEKjRKN5boost3anyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setOptions set option to a particular task </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> – number of stack to set the option </p></li>
+<li><p><strong>opt</strong> – options for task i </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if i-th problem does not exists or does not succeed </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP10getOptionsEKjRN5boost3anyE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP10getOptionsEKjRN5boost3anyE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP10getOptionsEKjRN5boost3anyE"></span><span id="OpenSoT::solvers::iHQP::getOptions__unsigned-iC.boost::anyR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a928d416f4d3bb144afa06cddf54a69bd"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getOptions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span>, <span class="n"><span class="pre">boost</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">opt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP10getOptionsEKjRN5boost3anyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getOptions return the options of the i-th qp problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> – number of stack to get the option </p></li>
+<li><p><strong>opt</strong> – a data structure which has to be converted to particular structure used by the <a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#classOpenSoT_1_1solvers_1_1BackEnd"><span class="std std-ref">BackEnd</span></a> implementation </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if i-th problem does not exists </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP12getObjectiveEKjRd">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP12getObjectiveEKjRd"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP12getObjectiveEKjRd"></span><span id="OpenSoT::solvers::iHQP::getObjective__unsigned-iC.doubleR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ad6d1700c2c00acec5bb8588b62d4f590"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getObjective</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">val</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP12getObjectiveEKjRd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getObjective return the value of the objective function at the optimum for the i-th qp problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> – number of stack to get the value of the objective function </p></li>
+<li><p><strong>val</strong> – value of the objective function at the optimum </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if i-th problem does not exists </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP14setActiveStackEKjKb">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP14setActiveStackEKjKb"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP14setActiveStackEKjKb"></span><span id="OpenSoT::solvers::iHQP::setActiveStack__unsigned-iC.bC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ac40c1e4ce8996b39fb67b22a06a9cc60"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setActiveStack</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flag</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP14setActiveStackEKjKb" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setActiveStack select a stack to do not solve </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> – stack index </p></li>
+<li><p><strong>flag</strong> – true or flase </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP17activateAllStacksEv">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP17activateAllStacksEv"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP17activateAllStacksEv"></span><span id="OpenSoT::solvers::iHQP::activateAllStacks"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a21e4449993ff6f48734a71bbd0ae29af"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">activateAllStacks</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP17activateAllStacksEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>activateAllStacks activate all stacks </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP14getBackEndNameEKj">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP14getBackEndNameEKj"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP14getBackEndNameEKj"></span><span id="OpenSoT::solvers::iHQP::getBackEndName__unsigned-iC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a0c52bae4211137ee7ac26c76c6403899"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getBackEndName</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP14getBackEndNameEKj" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getBackEndName retrieve the name of the solver </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a string with the name of the solver, right now: “qpOASES” “OSQP” “????” </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP20setEpsRegularisationEKdKj">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP20setEpsRegularisationEKdKj"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP20setEpsRegularisationEKdKj"></span><span id="OpenSoT::solvers::iHQP::setEpsRegularisation__doubleC.unsigned-iC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ac04dffa5eae0d2d57dddb88f36c6a010"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setEpsRegularisation</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP20setEpsRegularisationEKdKj" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setEpsRegularisation OVERWRITES the actual eps regularisation factor of a specific level of the stack </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eps</strong> – reguralisation factor </p></li>
+<li><p><strong>i</strong> – stack level </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if eps &lt; 0 or i no in the stack </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP20setEpsRegularisationEKd">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP20setEpsRegularisationEKd"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP20setEpsRegularisationEKd"></span><span id="OpenSoT::solvers::iHQP::setEpsRegularisation__doubleC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a7f21d016488bc570244f88eb3236e125"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setEpsRegularisation</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP20setEpsRegularisationEKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setEpsRegularisation OVERWRITES the actual eps regularisation factor for all the level of the stack </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eps</strong> – reguralisation factor </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if eps &lt; 0 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP10getBackEndEKjRN7BackEnd3PtrE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP10getBackEndEKjRN7BackEnd3PtrE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP10getBackEndEKjRN7BackEnd3PtrE"></span><span id="OpenSoT::solvers::iHQP::getBackEnd__unsigned-iC.BackEnd::PtrR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a1155bb75417d52779808915e079873a8"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getBackEnd</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span>, <a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEndE" title="OpenSoT::solvers::BackEnd"><span class="n"><span class="pre">BackEnd</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEnd3PtrE" title="OpenSoT::solvers::BackEnd::Ptr"><span class="n"><span class="pre">Ptr</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">back_end</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP10getBackEndEKjRN7BackEnd3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getBackEnd retrieve the back-end associated to the i-th qp problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> – priority level </p></li>
+<li><p><strong>back_end</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if the level does not exists </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP4_logEN4XBot10MatLogger23PtrERKNSt6stringE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP4_logEN4XBot10MatLogger23PtrERKNSt6stringE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP4_logEN4XBot10MatLogger23PtrERKNSt6stringE"></span><span id="OpenSoT::solvers::iHQP::_log__XBot::MatLogger2::Ptr.ssCR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ac9b5b94c8779a5fc0991e44a2490a3b5"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">prefix</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP4_logEN4XBot10MatLogger23PtrERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_log implement this on the solver to log data </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logger</strong> – a pointer to a MatLogger </p></li>
+<li><p><strong>prefix</strong> – used to log variables </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP10prepareSoTEKNSt6vectorI16solver_back_endsEE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP10prepareSoTEKNSt6vectorI16solver_back_endsEE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP10prepareSoTEKNSt6vectorI16solver_back_endsEE"></span><span id="OpenSoT::solvers::iHQP::prepareSoT__std::vector:solver_back_ends:C"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a59b9df796ce71f056fc05d0c406630ca"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">prepareSoT</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP10prepareSoTEKNSt6vectorI16solver_back_endsEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>prepareSoT initialize the complete stack </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if stack is correctly initialized </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP19computeCostFunctionERK7TaskPtrRN5Eigen8MatrixXdERN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP19computeCostFunctionERK7TaskPtrRN5Eigen8MatrixXdERN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP19computeCostFunctionERK7TaskPtrRN5Eigen8MatrixXdERN5Eigen8VectorXdE"></span><span id="OpenSoT::solvers::iHQP::computeCostFunction__TaskPtrCR.Eigen::MatrixXdR.Eigen::VectorXdR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a24f66c98dd4dc1ed1dc792725ae63a72"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">computeCostFunction</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">task</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">H</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">g</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP19computeCostFunctionERK7TaskPtrRN5Eigen8MatrixXdERN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>computeCostFunction compute a cost function for velocity control: F = ||Jdq - v|| </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task</strong> – to get Jacobian and reference </p></li>
+<li><p><strong>H</strong> – Hessian matrix computed as J’J </p></li>
+<li><p><strong>g</strong> – reference vector computed as J’v </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP27computeOptimalityConstraintERK7TaskPtrRN7BackEnd3PtrERN5Eigen8MatrixXdERN5Eigen8VectorXdERN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP27computeOptimalityConstraintERK7TaskPtrRN7BackEnd3PtrERN5Eigen8MatrixXdERN5Eigen8VectorXdERN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP27computeOptimalityConstraintERK7TaskPtrRN7BackEnd3PtrERN5Eigen8MatrixXdERN5Eigen8VectorXdERN5Eigen8VectorXdE"></span><span id="OpenSoT::solvers::iHQP::computeOptimalityConstraint__TaskPtrCR.BackEnd::PtrR.Eigen::MatrixXdR.Eigen::VectorXdR.Eigen::VectorXdR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a7eb18ba912fa5054546a77313a698f10"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">computeOptimalityConstraint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">task</span></span>, <a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEndE" title="OpenSoT::solvers::BackEnd"><span class="n"><span class="pre">BackEnd</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEnd3PtrE" title="OpenSoT::solvers::BackEnd::Ptr"><span class="n"><span class="pre">Ptr</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">problem</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">lA</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">uA</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP27computeOptimalityConstraintERK7TaskPtrRN7BackEnd3PtrERN5Eigen8MatrixXdERN5Eigen8VectorXdERN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>computeOptimalityConstraint compute optimality constraint for velocity control: Jj*dqj = Jj*dqi </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task</strong> – to get Jacobian of the previous task </p></li>
+<li><p><strong>problem</strong> – to get solution of the previous task </p></li>
+<li><p><strong>A</strong> – constraint matrix </p></li>
+<li><p><strong>lA</strong> – lower bounds </p></li>
+<li><p><strong>uA</strong> – upper bounds </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP16constraints_taskE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP16constraints_taskE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP16constraints_taskE"></span><span id="OpenSoT::solvers::iHQP::constraints_task__vector:OpenSoT::constraints::Aggregated:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aa6828d4bb771323156d49b425a42ff19"></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1constraints_1_1Aggregated.html#_CPPv4N7OpenSoT11constraints10AggregatedE" title="OpenSoT::constraints::Aggregated"><span class="n"><span class="pre">Aggregated</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraints_task</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP16constraints_taskE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP18_qp_stack_of_tasksE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP18_qp_stack_of_tasksE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP18_qp_stack_of_tasksE"></span><span id="OpenSoT::solvers::iHQP::_qp_stack_of_tasks__vector:BackEnd::Ptr:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1accb1e6055797ef76131be8225722f783"></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEndE" title="OpenSoT::solvers::BackEnd"><span class="n"><span class="pre">BackEnd</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEnd3PtrE" title="OpenSoT::solvers::BackEnd::Ptr"><span class="n"><span class="pre">Ptr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_qp_stack_of_tasks</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP18_qp_stack_of_tasksE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_qp_stack_of_tasks vector of QPOases Problem </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP14_active_stacksE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP14_active_stacksE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP14_active_stacksE"></span><span id="OpenSoT::solvers::iHQP::_active_stacks__vector:b:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a731bcbc9c11c0be5646e44c676b01af0"></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_active_stacks</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP14_active_stacksE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP18_epsRegularisationE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP18_epsRegularisationE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP18_epsRegularisationE"></span><span id="OpenSoT::solvers::iHQP::_epsRegularisation__double"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ac25ec13d47d988c46e2be5c3d24c48b4"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_epsRegularisation</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP18_epsRegularisationE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_epsRegularisation regularisation factor for dumped least squares </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP1HE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP1HE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP1HE"></span><span id="OpenSoT::solvers::iHQP::H__Eigen::MatrixXd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aee6a802f2a24a6f99dadcc1721a0bf07"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">H</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP1HE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP1gE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP1gE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP1gE"></span><span id="OpenSoT::solvers::iHQP::g__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aeb047ae99122c480be3ed7bb1fdd8e14"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP1gE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP2HrE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP2HrE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP2HrE"></span><span id="OpenSoT::solvers::iHQP::Hr__Eigen::MatrixXd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a1e5f4b72e7e22dffd2e9f81d3dae75c0"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Hr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP2HrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP2grE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP2grE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP2grE"></span><span id="OpenSoT::solvers::iHQP::gr__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a77cdc871e7013ef8f35c821ac909b528"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">gr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP2grE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP20_regularisation_taskE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP20_regularisation_taskE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP20_regularisation_taskE"></span><span id="OpenSoT::solvers::iHQP::_regularisation_task__OpenSoT::Task:Eigen::MatrixXd.Eigen::VectorXd:::TaskPtr"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1add59806eb2b113f7a98a0b4d68d4ac6f"></span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_regularisation_task</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP20_regularisation_taskE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP1AE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP1AE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP1AE"></span><span id="OpenSoT::solvers::iHQP::A__MatrixPiler"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aa0ae4b56cfa8e07d8e06d779535abae1"></span><span class="n"><span class="pre">MatrixPiler</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">A</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP1AE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP2lAE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP2lAE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP2lAE"></span><span id="OpenSoT::solvers::iHQP::lA__VectorPiler"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a4ce6150a8ed072a4c707fa18bc153fbf"></span><a class="reference internal" href="#_CPPv4N7OpenSoT7solvers4iHQP11VectorPilerE" title="OpenSoT::solvers::iHQP::VectorPiler"><span class="n"><span class="pre">VectorPiler</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lA</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP2lAE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP2uAE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP2uAE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP2uAE"></span><span id="OpenSoT::solvers::iHQP::uA__VectorPiler"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ae1d99bc96a63283ae1df492195521ad4"></span><a class="reference internal" href="#_CPPv4N7OpenSoT7solvers4iHQP11VectorPilerE" title="OpenSoT::solvers::iHQP::VectorPiler"><span class="n"><span class="pre">VectorPiler</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">uA</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP2uAE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP1lE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP1lE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP1lE"></span><span id="OpenSoT::solvers::iHQP::l__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a354628a4039a7da387f2163c674ba51c"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">l</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP1lE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP1uE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP1uE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP1uE"></span><span id="OpenSoT::solvers::iHQP::u__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a1a1879e88a2db317dbb0e85584bd0868"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">u</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP1uE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP5tmp_AE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP5tmp_AE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP5tmp_AE"></span><span id="OpenSoT::solvers::iHQP::tmp_A__std::vector:Eigen::MatrixXd:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1ac322b73e501b71225a7534b92c9bf7ea"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tmp_A</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP5tmp_AE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP6tmp_lAE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP6tmp_lAE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP6tmp_lAE"></span><span id="OpenSoT::solvers::iHQP::tmp_lA__std::vector:Eigen::VectorXd:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aea1f7c96887e9178712c8ae4116e9133"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tmp_lA</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP6tmp_lAE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP6tmp_uAE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP6tmp_uAE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP6tmp_uAE"></span><span id="OpenSoT::solvers::iHQP::tmp_uA__std::vector:Eigen::VectorXd:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aada8510f2ccea45bf90ce8cb5dbd4535"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tmp_uA</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP6tmp_uAE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP10_be_solverE">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP10_be_solverE"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP10_be_solverE"></span><span id="OpenSoT::solvers::iHQP::_be_solver__std::vector:solver_back_ends:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1af9d13743b16ec843f1ac23d14c3aa0cc"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_be_solver</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP10_be_solverE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-static-attributes">Protected Static Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP23_IHQP_CONSTRAINTS_PLUS_E">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP23_IHQP_CONSTRAINTS_PLUS_E"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP23_IHQP_CONSTRAINTS_PLUS_E"></span><span id="OpenSoT::solvers::iHQP::_IHQP_CONSTRAINTS_PLUS___ssC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1aa603c44e586022dcf7d7645383bd6737"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_IHQP_CONSTRAINTS_PLUS_</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP23_IHQP_CONSTRAINTS_PLUS_E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4iHQP29_IHQP_CONSTRAINTS_OPTIMALITY_E">
+<span id="_CPPv3N7OpenSoT7solvers4iHQP29_IHQP_CONSTRAINTS_OPTIMALITY_E"></span><span id="_CPPv2N7OpenSoT7solvers4iHQP29_IHQP_CONSTRAINTS_OPTIMALITY_E"></span><span id="OpenSoT::solvers::iHQP::_IHQP_CONSTRAINTS_OPTIMALITY___ssC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1iHQP_1a2d9f45e62953a075ce20ed6678a7ae59"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_IHQP_CONSTRAINTS_OPTIMALITY_</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4iHQP29_IHQP_CONSTRAINTS_OPTIMALITY_E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1solvers_1_1HCOD.html" class="btn btn-neutral float-left" title="Class HCOD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1solvers_1_1l1HQP.html" class="btn btn-neutral float-right" title="Class l1HQP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

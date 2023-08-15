@@ -1,0 +1,23 @@
+.. _exhale_struct_structOpenSoT_1_1Task_1_1istrue:
+
+Struct Task::istrue
+===================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`
+
+
+Nested Relationships
+--------------------
+
+This struct is a nested type of :ref:`exhale_class_classOpenSoT_1_1Task`.
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: OpenSoT::Task::istrue
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

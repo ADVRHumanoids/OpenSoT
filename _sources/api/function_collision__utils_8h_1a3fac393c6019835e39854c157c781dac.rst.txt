@@ -1,0 +1,14 @@
+.. _exhale_function_collision__utils_8h_1a3fac393c6019835e39854c157c781dac:
+
+Function toKdl(urdf::Vector3)
+=============================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: toKdl(urdf::Vector3)
+   :project: OpenSoT

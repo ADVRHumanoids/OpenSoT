@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1ManipulationStack:
+
+Class ManipulationStack
+=======================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_ManipulationStack.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::AutoStack`` (:ref:`exhale_class_classOpenSoT_1_1AutoStack`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::ManipulationStack
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

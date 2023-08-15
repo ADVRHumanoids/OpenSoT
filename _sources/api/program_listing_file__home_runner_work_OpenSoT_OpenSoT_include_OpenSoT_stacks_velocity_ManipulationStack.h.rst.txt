@@ -1,0 +1,56 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_ManipulationStack.h:
+
+Program Listing for File ManipulationStack.h
+============================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_ManipulationStack.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/stacks/velocity/ManipulationStack.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi, Luca Muratore, Enrico Mingo Hoffman
+    * email:  alessio.rocchi@iit.it, luca.muratore@iit.it, enrico.mingo@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+    #ifndef __MANIPULATION_STACK_H__
+    #define __MANIPULATION_STACK_H__
+   
+    #include <OpenSoT/utils/DefaultHumanoidStack.h>
+    #include <OpenSoT/utils/AutoStack.h>
+   
+   namespace OpenSoT {
+   
+        class ManipulationStack : public OpenSoT::AutoStack
+        {
+        public:
+           typedef std::shared_ptr<ManipulationStack> Ptr;
+   
+           ManipulationStack(iDynUtils &model,
+                             const double dT,
+                             const Eigen::VectorXd& state);
+   
+           ~ManipulationStack() {}
+   
+           OpenSoT::DefaultHumanoidStack::Ptr DHS;
+   
+           double eps;
+        };
+   }
+   
+   
+    #endif

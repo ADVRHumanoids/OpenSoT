@@ -1,0 +1,116 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h:
+
+Program Listing for File Aggregated.h
+=====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/Aggregated.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi
+    * email:  alessio.rocchi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __TASKS_AGGREGATED_H__
+   #define __TASKS_AGGREGATED_H__
+   
+   #include <OpenSoT/Task.h>
+   #include <Eigen/Dense>
+   #include <memory>
+   #include <list>
+   #include <OpenSoT/utils/Piler.h>
+   
+   using namespace OpenSoT::utils;
+   
+    namespace OpenSoT {
+       namespace tasks {
+   
+           class Aggregated: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
+           public:
+               typedef std::shared_ptr<Aggregated> Ptr;
+               typedef MatrixPiler VectorPiler;
+           protected:
+   
+               std::list< TaskPtr > _tasks;
+   
+               std::list< ConstraintPtr > _ownConstraints;
+               std::list< ConstraintPtr > _aggregatedConstraints;
+   
+               MatrixPiler _tmpA;
+               VectorPiler _tmpb;
+   
+               unsigned int _aggregationPolicy;
+   
+               void generateAll();
+   
+               void generateConstraints();
+   
+               void generateAggregatedConstraints();
+   
+               void generateWeight();
+   
+   
+   
+               HessianType computeHessianType();
+   
+               void checkSizes();
+   
+               static const std::string concatenateTaskIds(const std::list<TaskPtr> tasks);
+   
+               virtual void log(XBot::MatLogger2::Ptr logger);
+   
+               static const std::string _TASK_PLUS_;
+               static std::string concatenatedId;
+   
+           public:
+               Aggregated(const std::list< TaskPtr > tasks,
+                          const unsigned int x_size);
+   
+               Aggregated(TaskPtr task1,
+                          TaskPtr task2,
+                          const unsigned int x_size);
+   
+               Aggregated(TaskPtr task,
+                          const unsigned int x_size);
+   
+               Aggregated(const std::list< TaskPtr > tasks,
+                          const Eigen::VectorXd &q);
+   
+               ~Aggregated();
+   
+               void _update(const Eigen::VectorXd &x);
+   
+   
+               std::list< ConstraintPtr >& getOwnConstraints() { return _ownConstraints; }
+   
+               const std::list< ConstraintPtr >& getAggregatedConstraints() { return _aggregatedConstraints; }
+   
+               const std::list< TaskPtr >& getTaskList() { return _tasks; }
+   
+               void setLambda(double lambda);
+   
+               virtual void setWeight(const Eigen::MatrixXd& W);
+                 
+               static bool isAggregated(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+           };
+   
+       }
+    }
+   
+   #endif

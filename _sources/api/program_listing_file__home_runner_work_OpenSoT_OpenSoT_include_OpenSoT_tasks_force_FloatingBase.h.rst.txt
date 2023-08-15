@@ -1,0 +1,70 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_FloatingBase.h:
+
+Program Listing for File FloatingBase.h
+=======================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_FloatingBase.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/force/FloatingBase.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2018 Cogimon/Centauro
+    * Authors: Arturo Laurenzi, Enrico Mingo Hoffman
+    * email:  arturo.laurenzi@iit.it, enrico.mingo@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   #ifndef __TASKS_FORCE_FB_H__
+   #define __TASKS_FORCE_FB_H__
+   
+   #include <OpenSoT/Task.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <OpenSoT/utils/Affine.h>
+   
+   namespace OpenSoT {
+      namespace tasks {
+          namespace force {
+           class FloatingBase : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+               public:
+               typedef std::shared_ptr<FloatingBase> Ptr;
+   
+               FloatingBase(XBot::ModelInterface& model,
+                            const std::vector<OpenSoT::AffineHelper>& wrenches,
+                            const std::vector<std::string>& contact_links);
+   
+               void setFloatingBaseTorque(const Eigen::Vector6d& floating_base_torque);
+   
+               void setEnabledContacts(const std::vector<bool>& enabled_contacts);
+   
+               private:
+               virtual void _update(const Eigen::VectorXd& x);
+               virtual void _log(XBot::MatLogger2::Ptr logger);
+   
+               std::vector<std::string> _contact_links;
+               XBot::ModelInterface& _model;
+               Eigen::Vector6d _floating_base_torque;
+   
+               std::vector<bool> _enabled_contacts;
+               std::vector<OpenSoT::AffineHelper> _wrenches;
+               OpenSoT::AffineHelper _task;
+               Eigen::MatrixXd _J_i;
+               Eigen::Matrix6d _Jfb_i;
+           };
+   
+          }
+      }
+   }
+   
+   #endif

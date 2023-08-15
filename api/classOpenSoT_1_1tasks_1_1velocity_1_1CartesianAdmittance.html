@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class CartesianAdmittance &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class CoM" href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html" />
+    <link rel="prev" title="Class Cartesian" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class CartesianAdmittance</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-cartesianadmittance">
+<span id="exhale-class-classopensot-1-1tasks-1-1velocity-1-1cartesianadmittance"></span><h1>Class CartesianAdmittance<a class="headerlink" href="#class-cartesianadmittance" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h.html#file-home-runner-work-opensot-opensot-include-opensot-tasks-velocity-cartesianadmittance-h"><span class="std std-ref">File CartesianAdmittance.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::tasks::velocity::Cartesian</span></code> (<a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#exhale-class-classopensot-1-1tasks-1-1velocity-1-1cartesian"><span class="std std-ref">Class Cartesian</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittanceE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittanceE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittanceE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CartesianAdmittance</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">tasks</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#_CPPv4N7OpenSoT5tasks8velocity9CartesianE" title="OpenSoT::tasks::velocity::Cartesian"><span class="n"><span class="pre">Cartesian</span></span></a><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittanceE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance"><span class="std std-ref">CartesianAdmittance</span></a> class implements a simple admittance controller in velocity at the end-effectors. </p>
+<p>The implemented scheme is the following:</p>
+<p><span class="math notranslate nohighlight">\( \boldsymbol{\Delta}\mathbf{x}_r = \mathbf{C}\boldsymbol{\Delta}\mathbf{F} \)</span></p>
+<p>where <span class="math notranslate nohighlight">\( \mathbf{C} \in \mathbb{R}^{6 \times 6}\)</span> is the Compliance matrix. The torque error is computed as:</p>
+<p><span class="math notranslate nohighlight">\( \boldsymbol{\Delta}\mathbf{F} = \mathbf{F}_d - \mathbf{F}_m \)</span></p>
+<p>with <span class="math notranslate nohighlight">\( \mathbf{F}_m \)</span> transformed in the base frame of the <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> task. The computed <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> velocity reference is plugged in the <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> task as a feed-forward desired <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> velocity:</p>
+<p><span class="math notranslate nohighlight">\( \boldsymbol{\Delta}\mathbf{x}_d = \boldsymbol{\Delta}\mathbf{x}_r + \lambda \left( \mathbf{x}_d - \mathbf{x}\right) \\ \)</span></p>
+<p>NOTE: the task distal_link is the same link of the force/torque sensor </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance3PtrE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance3PtrE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance3PtrE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::Ptr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a263a085abddf09172e35c8fb5e6dec7b"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittanceE" title="OpenSoT::tasks::velocity::CartesianAdmittance"><span class="n"><span class="pre">CartesianAdmittance</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance19CartesianAdmittanceENSt6stringERKN5Eigen8VectorXdERN4XBot14ModelInterfaceENSt6stringEN4XBot17ForceTorqueSensor8ConstPtrE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance19CartesianAdmittanceENSt6stringERKN5Eigen8VectorXdERN4XBot14ModelInterfaceENSt6stringEN4XBot17ForceTorqueSensor8ConstPtrE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance19CartesianAdmittanceENSt6stringERKN5Eigen8VectorXdERN4XBot14ModelInterfaceENSt6stringEN4XBot17ForceTorqueSensor8ConstPtrE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::CartesianAdmittance__ss.Eigen::VectorXdCR.XBot::ModelInterfaceR.ss.XBot::ForceTorqueSensor::ConstPtr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a9761843f7e0550a35eabba718410638e"></span><span class="sig-name descname"><span class="n"><span class="pre">CartesianAdmittance</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task_id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">robot</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">base_link</span></span>, <span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ForceTorqueSensor</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ConstPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ft_sensor</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance19CartesianAdmittanceENSt6stringERKN5Eigen8VectorXdERN4XBot14ModelInterfaceENSt6stringEN4XBot17ForceTorqueSensor8ConstPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance"><span class="std std-ref">CartesianAdmittance</span></a> constructor. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – name of the task </p></li>
+<li><p><strong>x</strong> – the robot configuration </p></li>
+<li><p><strong>robot</strong> – model </p></li>
+<li><p><strong>base_link</strong> – base link of the task </p></li>
+<li><p><strong>ft_sensor</strong> – used to get measured contact forces and retrieve the distal_link </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceEv"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getCartesianCompliance"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a9dda8f843b45748da16a0732d83e00d6"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getCartesianCompliance</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getCartesianCompliance </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the actual Compliance matrix </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceERN5Eigen8Matrix6dE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceERN5Eigen8Matrix6dE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceERN5Eigen8Matrix6dE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getCartesianCompliance__Eigen::Matrix6dR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1aaff6fd37de86a4a3f52aba94f6557c0a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getCartesianCompliance</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance22getCartesianComplianceERN5Eigen8Matrix6dE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getCartesianCompliance </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>C</strong> – the actual Compliance matrix </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18setWrenchReferenceERKN5Eigen8Vector6dE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance18setWrenchReferenceERKN5Eigen8Vector6dE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance18setWrenchReferenceERKN5Eigen8Vector6dE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::setWrenchReference__Eigen::Vector6dCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1ace8124c9d5bee3ff7c21c1edcfc20021"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setWrenchReference</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">wrench</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18setWrenchReferenceERKN5Eigen8Vector6dE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setWrenchReference set the desired wrench at the controlled distal_link </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wrench</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceEv"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getWrenchReference"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a0364f1887e82fe899bf55574cadf470f"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getWrenchReference</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getWrenchReference </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the actual reference wrench </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceERN5Eigen8Vector6dE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceERN5Eigen8Vector6dE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceERN5Eigen8Vector6dE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getWrenchReference__Eigen::Vector6dR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a39f4a4b7fabb9d5f82886ea9530a043d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getWrenchReference</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">wrench_reference</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18getWrenchReferenceERN5Eigen8Vector6dE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getWrenchReference </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wrench_reference</strong> – the actual reference wrench </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance5resetEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance5resetEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance5resetEv"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::reset"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a058f9fa4d45e0393982468c3afe6f6be"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">reset</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance5resetEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>reset is used to reset the internal references of the <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> (and <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a>) The reference wrench is reset to the one measured by the Force/Torque sensors </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance4_logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance4_logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance4_logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::_log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1aea86833ae507d9962612dda3b5860366"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance4_logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_log can be used to log internal <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – a shared pointer to a MatLogger </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance12getStiffnessEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance12getStiffnessEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance12getStiffnessEv"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getStiffness"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1ac3472c0ae8b687d458e0cd28b58e8d81"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix6d</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getStiffness</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance12getStiffnessEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getStiffness </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>actual <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> Stiffness </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance10getInertiaEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance10getInertiaEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance10getInertiaEv"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getInertia"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a9a844a7cb2c6d51514f0ff6b77525c6e"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix6d</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getInertia</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance10getInertiaEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getStiffness </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>actual <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> Stiffness </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance10getDampingEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance10getDampingEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance10getDampingEv"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getDamping"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a0656abc4ca79f00d973e0ff9c808e6dc"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix6d</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getDamping</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance10getDampingEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getDamping </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>actual <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> Damping </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance17getFilterTimeStepEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance17getFilterTimeStepEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance17getFilterTimeStepEv"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::getFilterTimeStep"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1ac1836870812a6706f42de6750f4d7971"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getFilterTimeStep</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance17getFilterTimeStepEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance16setFilterDampingEKd">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance16setFilterDampingEKd"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance16setFilterDampingEKd"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::setFilterDamping__doubleC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1ad27f2fdf638663940c11733a677d5800"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setFilterDamping</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">damping</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance16setFilterDampingEKd" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18setImpedanceParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance18setImpedanceParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance18setImpedanceParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::setImpedanceParams__Eigen::Vector6dCR.Eigen::Vector6dCR.doubleC.doubleC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1afadd7b61c61cc91f33ca21aaee733978"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setImpedanceParams</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">K</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance18setImpedanceParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set impedance parameters to be emulated via admittance control. </p>
+<p>Stiffness and lambda MUST BE POSITIVE! Higher values of lambda will make the robot feel lighter, but will also destabilize the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>K</strong> – Stiffness </p></li>
+<li><p><strong>D</strong> – Damping </p></li>
+<li><p><strong>lambda</strong> – Lambda </p></li>
+<li><p><strong>dt</strong> – Control period </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance12setRawParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance12setRawParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance12setRawParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams__Eigen::Vector6dCR.Eigen::Vector6dCR.doubleC.doubleC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a5e9395f946bd622d6bb4b9cc95d7e17c"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setRawParams</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">omega</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance12setRawParamsERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set internal controller parameters implemeting the law: </p>
+<p>dx = lambda*(xd-x)+C*F_filt*dt F_filt = 1 / (1 + s/omega) * F</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>C</strong> – compliance </p></li>
+<li><p><strong>omega</strong> – filter cutoff </p></li>
+<li><p><strong>lambda</strong> – position feedback </p></li>
+<li><p><strong>dt</strong> – control period </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance11setDeadZoneERKN5Eigen8Vector6dE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance11setDeadZoneERKN5Eigen8Vector6dE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance11setDeadZoneERKN5Eigen8Vector6dE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::setDeadZone__Eigen::Vector6dCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1afbf3fcb398431cd9d37bab9cf5cfff71"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setDeadZone</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dead_zone_amplitude</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance11setDeadZoneERKN5Eigen8Vector6dE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance17computeParametersERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKdRN5Eigen8Vector6dERN5Eigen8Vector6dERN5Eigen8Vector6dE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance17computeParametersERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKdRN5Eigen8Vector6dERN5Eigen8Vector6dERN5Eigen8Vector6dE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance17computeParametersERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKdRN5Eigen8Vector6dERN5Eigen8Vector6dERN5Eigen8Vector6dE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::computeParameters__Eigen::Vector6dCR.Eigen::Vector6dCR.doubleC.doubleC.Eigen::Vector6dR.Eigen::Vector6dR.Eigen::Vector6dR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1ab4ca378b1521fbc4cb1ef8ba9ca143bb"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">computeParameters</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">K</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">C</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">M</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">w</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance17computeParametersERKN5Eigen8Vector6dERKN5Eigen8Vector6dEKdKdRN5Eigen8Vector6dERN5Eigen8Vector6dERN5Eigen8Vector6dE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>computeParameters given user’s K, D and lambda, computes M and w </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>K</strong> – user desired <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> Stiffness </p></li>
+<li><p><strong>D</strong> – user desired <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> Damping </p></li>
+<li><p><strong>lambda</strong> – user desired lambda </p></li>
+<li><p><strong>dt</strong> – filter time step </p></li>
+<li><p><strong>C</strong> – <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> Compliance <span class="math notranslate nohighlight">\( \mathbf{C} = \lambda\mathbf{K}^{-1} \)</span></p></li>
+<li><p><strong>M</strong> – <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> Mass <span class="math notranslate nohighlight">\( \mathbf{M} = \frac{dt}{\lambda}\left( \mathbf{D} - \mathbf{D}dt \right) \)</span></p></li>
+<li><p><strong>w</strong> – filter params <span class="math notranslate nohighlight">\( \mathbf{w} = dt\left( \mathbf{CM} \right)^{-1} \)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance9setLambdaEd">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance9setLambdaEd"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance9setLambdaEd"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::setLambda__double"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a896e10639c89cf717d9f3a3fce49ac8b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLambda</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance9setLambdaEd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setLambda do nothing in <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance"><span class="std std-ref">CartesianAdmittance</span></a>, use instead the <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a5e9395f946bd622d6bb4b9cc95d7e17c"><span class="std std-ref">setRawParams()</span></a> or the <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1afadd7b61c61cc91f33ca21aaee733978"><span class="std std-ref">setImpedanceParams()</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lambda</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance21isCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance21isCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance21isCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::isCartesianAdmittance__OpenSoT::Task:Eigen::MatrixXd.Eigen::VectorXd:::TaskPtr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1a5f0b1c52be3665eb1c10d600f3331d59"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isCartesianAdmittance</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance21isCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isCartesianAdmittance </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> – a generic task pointer </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if task is a <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html#classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance"><span class="std std-ref">JointAdmittance</span></a> task </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance21asCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity19CartesianAdmittance21asCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity19CartesianAdmittance21asCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="OpenSoT::tasks::velocity::CartesianAdmittance::asCartesianAdmittance__OpenSoT::Task:Eigen::MatrixXd.Eigen::VectorXd:::TaskPtr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance_1af19f89c853165d46759feb8fad2ddc69"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">tasks</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittanceE" title="OpenSoT::tasks::velocity::CartesianAdmittance"><span class="n"><span class="pre">CartesianAdmittance</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance3PtrE" title="OpenSoT::tasks::velocity::CartesianAdmittance::Ptr"><span class="n"><span class="pre">Ptr</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">asCartesianAdmittance</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity19CartesianAdmittance21asCartesianAdmittanceEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>asCartesianAdmittance </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> – a generic task pointer </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a pointer to a <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html#classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance"><span class="std std-ref">JointAdmittance</span></a> task </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html" class="btn btn-neutral float-left" title="Class Cartesian" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html" class="btn btn-neutral float-right" title="Class CoM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

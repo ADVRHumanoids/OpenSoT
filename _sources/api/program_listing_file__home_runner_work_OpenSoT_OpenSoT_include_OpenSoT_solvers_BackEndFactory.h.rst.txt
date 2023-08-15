@@ -1,0 +1,40 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h:
+
+Program Listing for File BackEndFactory.h
+=========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/BackEndFactory.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef _WB_SOT_SOLVERS_BE_FACTORY_H_
+   #define _WB_SOT_SOLVERS_BE_FACTORY_H_
+   
+   #include <OpenSoT/solvers/BackEnd.h>
+   #include <boost/make_shared.hpp>
+   
+   namespace OpenSoT{
+       namespace solvers{
+           enum class solver_back_ends{
+               qpOASES,
+               OSQP,
+               GLPK,
+               eiQuadProg,
+               ODYS,
+               qpSWIFT,
+               proxQP
+           };
+   
+           BackEnd::Ptr BackEndFactory(const solver_back_ends be_solver, const int number_of_variables,
+                                  const int number_of_constraints,
+                                  OpenSoT::HessianType hessian_type,
+                                  const double eps_regularisation);
+   
+           std::string whichBackEnd(const solver_back_ends be_solver);
+       }
+   }
+   
+   #endif

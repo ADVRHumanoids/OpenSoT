@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File cartesian_utils.h &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File cartesian_utils.h</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="program-listing-for-file-cartesian-utils-h">
+<span id="program-listing-file-home-runner-work-opensot-opensot-include-opensot-utils-cartesian-utils-h"></span><h1>Program Listing for File cartesian_utils.h<a class="headerlink" href="#program-listing-for-file-cartesian-utils-h" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-cartesian-utils-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/cartesian_utils.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Copyright (C) 2014 Walkman</span>
+<span class="cm"> * Author: Enrico Mingo, Alessio Rocchi,</span>
+<span class="cm"> * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it</span>
+<span class="cm"> *</span>
+<span class="cm"> * This program is free software: you can redistribute it and/or modify</span>
+<span class="cm"> * it under the terms of the GNU Lesser General Public License as published by</span>
+<span class="cm"> * the Free Software Foundation, either version 3 of the License, or</span>
+<span class="cm"> * (at your option) any later version.</span>
+<span class="cm"> *</span>
+<span class="cm"> * This program is distributed in the hope that it will be useful,</span>
+<span class="cm"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="cm"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="cm"> * GNU Lesser General Public License for more details.</span>
+<span class="cm"> *</span>
+<span class="cm"> * You should have received a copy of the GNU Lesser General Public License</span>
+<span class="cm"> * along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;</span>
+<span class="cm">*/</span>
+
+<span class="cp">#ifndef _CARTESIAN_UTILS_H__</span>
+<span class="cp">#define _CARTESIAN_UTILS_H__</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;kdl/frames.hpp&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;list&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;urdf/model.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;Eigen/Cholesky&gt;</span><span class="cp"></span>
+
+<span class="k">class</span> <span class="nc">CostFunction</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="kt">double</span> <span class="n">compute</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">GradientVector</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">_size</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">GradientVector</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">x_size</span><span class="p">)</span> <span class="o">:</span> <span class="n">_size</span><span class="p">(</span><span class="n">x_size</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">virtual</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">compute</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="nf">size</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_size</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">quaternion</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">double</span> <span class="n">x</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">y</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">z</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">w</span><span class="p">;</span>
+
+    <span class="n">quaternion</span><span class="p">()</span><span class="o">:</span>
+        <span class="n">x</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span>
+        <span class="n">y</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span>
+        <span class="n">z</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span>
+        <span class="n">w</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="p">{</span>
+
+    <span class="p">}</span>
+
+    <span class="n">quaternion</span><span class="p">(</span><span class="kt">double</span> <span class="n">_x</span><span class="p">,</span> <span class="kt">double</span> <span class="n">_y</span><span class="p">,</span> <span class="kt">double</span> <span class="n">_z</span><span class="p">,</span> <span class="kt">double</span> <span class="n">_w</span><span class="p">)</span><span class="o">:</span>
+        <span class="n">x</span><span class="p">(</span><span class="n">_x</span><span class="p">),</span>
+        <span class="n">y</span><span class="p">(</span><span class="n">_y</span><span class="p">),</span>
+        <span class="n">z</span><span class="p">(</span><span class="n">_z</span><span class="p">),</span>
+        <span class="n">w</span><span class="p">(</span><span class="n">_w</span><span class="p">)</span>
+    <span class="p">{</span>
+
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="kt">double</span> <span class="n">dot</span><span class="p">(</span><span class="k">const</span> <span class="n">quaternion</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">quaternion</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">.</span><span class="n">w</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">w</span> <span class="o">+</span> <span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">a</span><span class="p">.</span><span class="n">z</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">z</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">quaternion</span> <span class="k">operator</span><span class="o">*</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">a</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">quaternion</span> <span class="n">q</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">w</span><span class="p">);</span>
+
+        <span class="n">q</span><span class="p">.</span><span class="n">x</span> <span class="o">*=</span> <span class="n">a</span><span class="p">;</span>
+        <span class="n">q</span><span class="p">.</span><span class="n">y</span> <span class="o">*=</span> <span class="n">a</span><span class="p">;</span>
+        <span class="n">q</span><span class="p">.</span><span class="n">z</span> <span class="o">*=</span> <span class="n">a</span><span class="p">;</span>
+        <span class="n">q</span><span class="p">.</span><span class="n">w</span> <span class="o">*=</span> <span class="n">a</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="n">q</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">KDL</span><span class="o">::</span><span class="n">Rotation</span> <span class="n">skew</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">KDL</span><span class="o">::</span><span class="n">Rotation</span> <span class="n">s</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span>  <span class="o">-</span><span class="n">z</span><span class="p">,</span>   <span class="n">y</span><span class="p">,</span>
+                          <span class="n">z</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="o">-</span><span class="n">x</span><span class="p">,</span>
+                         <span class="o">-</span><span class="n">y</span><span class="p">,</span>   <span class="n">x</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="n">error</span><span class="p">(</span><span class="n">quaternion</span><span class="o">&amp;</span> <span class="n">q</span><span class="p">,</span> <span class="n">quaternion</span><span class="o">&amp;</span> <span class="n">qd</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="n">e</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+
+        <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="n">eps</span><span class="p">(</span><span class="n">q</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">q</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
+        <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="n">epsd</span><span class="p">(</span><span class="n">qd</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">qd</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">qd</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="n">qd</span><span class="p">.</span><span class="n">w</span><span class="o">*</span><span class="n">eps</span> <span class="o">-</span> <span class="n">q</span><span class="p">.</span><span class="n">w</span><span class="o">*</span><span class="n">epsd</span> <span class="o">+</span> <span class="n">qd</span><span class="p">.</span><span class="n">skew</span><span class="p">()</span><span class="o">*</span><span class="n">eps</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="n">e</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="n">error</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qx</span><span class="p">,</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qy</span><span class="p">,</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qz</span><span class="p">,</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qw</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qdx</span><span class="p">,</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qdy</span><span class="p">,</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qdz</span><span class="p">,</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">qdw</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="n">e</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="n">eps</span><span class="p">(</span><span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span><span class="p">);</span>
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="n">epsd</span><span class="p">(</span><span class="n">qdx</span><span class="p">,</span> <span class="n">qdy</span><span class="p">,</span> <span class="n">qdz</span><span class="p">);</span>
+
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">Matrix3d</span> <span class="n">skew</span><span class="p">;</span>
+        <span class="n">skew</span><span class="o">&lt;&lt;</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="o">-</span><span class="n">qdz</span><span class="p">,</span>  <span class="n">qdy</span><span class="p">,</span>
+             <span class="n">qdz</span><span class="p">,</span>   <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">qdx</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">qdy</span><span class="p">,</span> <span class="n">qdx</span><span class="p">,</span>    <span class="mf">0.0</span><span class="p">;</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="n">qdw</span><span class="o">*</span><span class="n">eps</span> <span class="o">-</span> <span class="n">qw</span><span class="o">*</span><span class="n">epsd</span> <span class="o">+</span> <span class="n">skew</span><span class="o">*</span><span class="n">eps</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="n">e</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="kt">void</span> <span class="n">normalize</span><span class="p">(</span><span class="n">quaternion</span><span class="o">&amp;</span> <span class="n">q</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">double</span> <span class="n">d</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">q</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">q</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">q</span><span class="p">.</span><span class="n">y</span><span class="o">*</span><span class="n">q</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">q</span><span class="p">.</span><span class="n">z</span><span class="o">*</span><span class="n">q</span><span class="p">.</span><span class="n">z</span> <span class="o">+</span> <span class="n">q</span><span class="p">.</span><span class="n">w</span><span class="o">*</span><span class="n">q</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
+        <span class="n">q</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">q</span><span class="p">.</span><span class="n">x</span><span class="o">/</span><span class="n">d</span><span class="p">;</span>
+        <span class="n">q</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">q</span><span class="p">.</span><span class="n">y</span><span class="o">/</span><span class="n">d</span><span class="p">;</span>
+        <span class="n">q</span><span class="p">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">q</span><span class="p">.</span><span class="n">z</span><span class="o">/</span><span class="n">d</span><span class="p">;</span>
+        <span class="n">q</span><span class="p">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">q</span><span class="p">.</span><span class="n">w</span><span class="o">/</span><span class="n">d</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Matrix_Type_</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">LDLTInverse</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">LDLTInverse</span><span class="p">(</span><span class="k">const</span> <span class="n">_Matrix_Type_</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">I</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">a</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span> <span class="n">I</span><span class="p">.</span><span class="n">setIdentity</span><span class="p">(</span><span class="n">I</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">I</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">compute</span><span class="p">(</span><span class="k">const</span> <span class="n">_Matrix_Type_</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="n">_Matrix_Type_</span> <span class="o">&amp;</span><span class="n">ainv</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">LDLT</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+        <span class="n">ainv</span> <span class="o">=</span> <span class="n">LDLT</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">LDLT</span><span class="o">&lt;</span><span class="n">_Matrix_Type_</span><span class="o">&gt;</span> <span class="n">LDLT</span><span class="p">;</span>
+    <span class="n">_Matrix_Type_</span> <span class="n">I</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Matrix_Type_</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">SVDPseudoInverse</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">SVDPseudoInverse</span><span class="p">(</span><span class="k">const</span> <span class="n">_Matrix_Type_</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;::</span><span class="n">epsilon</span><span class="p">())</span><span class="o">:</span>
+        <span class="n">_epsilon</span><span class="p">(</span><span class="n">epsilon</span><span class="p">),</span>
+        <span class="n">_svd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">ComputeThinU</span> <span class="o">|</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">ComputeThinV</span><span class="p">)</span>
+    <span class="p">{</span>
+
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">compute</span><span class="p">(</span><span class="k">const</span> <span class="n">_Matrix_Type_</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="n">_Matrix_Type_</span> <span class="o">&amp;</span><span class="n">ainv</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;::</span><span class="n">epsilon</span><span class="p">())</span>
+    <span class="p">{</span>
+        <span class="n">_svd</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">ComputeThinU</span> <span class="o">|</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">ComputeThinV</span><span class="p">);</span>
+        <span class="n">_singularValues</span> <span class="o">=</span> <span class="n">_svd</span><span class="p">.</span><span class="n">singularValues</span><span class="p">().</span><span class="n">array</span><span class="p">().</span><span class="n">abs</span><span class="p">();</span>
+
+        <span class="n">_tolerance</span> <span class="o">=</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">cols</span><span class="p">(),</span> <span class="n">a</span><span class="p">.</span><span class="n">rows</span><span class="p">())</span> <span class="o">*</span><span class="n">_singularValues</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+        <span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_singularValues</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_singularValues</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">_tolerance</span><span class="p">)</span>
+                <span class="n">_singularValues</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+            <span class="k">else</span>
+                <span class="n">_singularValues</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">_singularValues</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="p">}</span>
+
+        <span class="n">_tmp</span> <span class="o">=</span> <span class="n">_svd</span><span class="p">.</span><span class="n">matrixV</span><span class="p">()</span> <span class="o">*</span>  <span class="n">_singularValues</span><span class="p">.</span><span class="n">asDiagonal</span><span class="p">();</span>
+        <span class="n">ainv</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span>  <span class="n">_tmp</span> <span class="o">*</span> <span class="n">_svd</span><span class="p">.</span><span class="n">matrixU</span><span class="p">().</span><span class="n">transpose</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">setEpsilon</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_epsilon</span> <span class="o">=</span> <span class="n">epsilon</span><span class="p">;</span>
+    <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">double</span> <span class="n">_epsilon</span><span class="p">;</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">JacobiSVD</span><span class="o">&lt;</span><span class="n">_Matrix_Type_</span><span class="o">&gt;</span> <span class="n">_svd</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">_tolerance</span><span class="p">;</span>
+
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_singularValues</span><span class="p">;</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_tmp</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">cartesian_utils</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="kt">int</span> <span class="n">pnpoly</span><span class="p">(</span><span class="kt">int</span> <span class="n">nvert</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">vertx</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">verty</span><span class="p">,</span> <span class="kt">float</span> <span class="n">testx</span><span class="p">,</span> <span class="kt">float</span> <span class="n">testy</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+          <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">nvert</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nvert</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="p">((</span><span class="n">verty</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span><span class="n">testy</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">verty</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&gt;</span><span class="n">testy</span><span class="p">))</span> <span class="o">&amp;&amp;</span>
+             <span class="p">(</span><span class="n">testx</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">vertx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="n">vertx</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">testy</span><span class="o">-</span><span class="n">verty</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">verty</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="n">verty</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">vertx</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">)</span>
+               <span class="n">c</span> <span class="o">=</span> <span class="o">!</span><span class="n">c</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="kt">void</span> <span class="n">computePanTiltMatrix</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">gaze</span><span class="p">,</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span><span class="o">&amp;</span> <span class="n">pan_tilt_matrix</span><span class="p">);</span>
+
+    <span class="k">static</span> <span class="kt">void</span> <span class="nf">computeCartesianError</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Matrix4d</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Matrix4d</span> <span class="o">&amp;</span><span class="n">Td</span><span class="p">,</span>
+                                      <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&amp;</span> <span class="n">position_error</span><span class="p">,</span>
+                                      <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&amp;</span> <span class="n">orientation_error</span><span class="p">);</span>
+    <span class="k">static</span> <span class="kt">void</span> <span class="nf">computeCartesianError</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span> <span class="o">&amp;</span><span class="n">Td</span><span class="p">,</span>
+                                      <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&amp;</span> <span class="n">position_error</span><span class="p">,</span>
+                                      <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&amp;</span> <span class="n">orientation_error</span><span class="p">);</span>
+
+    <span class="k">static</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">computeGradient</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">,</span>
+                                              <span class="n">CostFunction</span> <span class="o">&amp;</span><span class="n">fun</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="kt">double</span> <span class="o">&amp;</span><span class="n">step</span> <span class="o">=</span> <span class="mf">1E-3</span><span class="p">);</span>
+
+    <span class="k">static</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">computeGradient</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">,</span>
+                                              <span class="n">CostFunction</span> <span class="o">&amp;</span><span class="n">fun</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">jointMask</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="kt">double</span> <span class="o">&amp;</span><span class="n">step</span> <span class="o">=</span> <span class="mf">1E-3</span><span class="p">);</span>
+<span class="p">};</span>
+
+
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

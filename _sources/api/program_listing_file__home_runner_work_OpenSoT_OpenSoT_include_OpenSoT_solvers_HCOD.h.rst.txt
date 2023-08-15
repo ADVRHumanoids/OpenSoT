@@ -1,0 +1,91 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h:
+
+Program Listing for File HCOD.h
+===============================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/HCOD.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __SOLVERS_HCOD__
+   #define __SOLVERS__HCOD__
+   
+   #include <OpenSoT/Solver.h>
+   #include <Eigen/Dense>
+   #include <OpenSoT/utils/AutoStack.h>
+   #include <OpenSoT/tasks/Aggregated.h>
+   
+   namespace soth{
+       class Bound;
+       typedef Eigen::Matrix<Bound, Eigen::Dynamic, 1> VectorBound;
+       class HCOD_wrapper;
+       class HCOD;
+   }
+   
+   namespace OpenSoT{
+       namespace solvers{
+           class HCOD: public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
+           {
+               public:
+                   typedef std::shared_ptr<HCOD> Ptr;
+                   typedef MatrixPiler VectorPiler;
+   
+                   HCOD(OpenSoT::AutoStack& stack_of_tasks, const double damping);
+   
+                   HCOD(Stack& stack_of_tasks, ConstraintPtr bounds, const double damping);
+   
+                   ~HCOD();
+   
+                   bool solve(Eigen::VectorXd& solution);
+   
+                   std::shared_ptr<soth::HCOD> getInternalSolver();
+   
+                   void setDisableWeightsComputation(const bool disable);
+   
+                   bool setDisableWeightsComputation();
+   
+               private:
+                   std::shared_ptr<soth::HCOD_wrapper> _hcod;
+   
+                   std::vector<soth::VectorBound> _vector_bounds;
+   
+                   std::vector<Eigen::MatrixXd> _vector_J;
+   
+                   int _VARS;
+   
+                   int _CL;
+   
+                   void init(const double damping);
+   
+                   void copy_bounds();
+   
+                   void copy_tasks();
+   
+                   MatrixPiler _A;
+   
+                   VectorPiler _lA;
+   
+                   VectorPiler _uA;
+   
+                   Eigen::MatrixXd _I;
+   
+                   // TASKS WEIGHTS ARE HANDLED WITH THE FOLLOWING OBJECTS.
+                   // NOTE THAT: FOR DIAGONAL MATRICES (WHEN THE WEIGHT IS DIAGONAL FLAG IS TRUE) THE
+                   // WEIGHT FOR THE TASK IS THE SIMPLE SQRT OF THE ELEMENTS ON THE DIAGONAL.
+                   //
+                   // TO DISABLE COMPUTATIONS OF WEIGHTS PLEASE SET THE FLAG: disable_weights_computation (default false, weights are computed).
+                   bool _disable_weights_computation;
+   
+                   std::vector<Eigen::MatrixXd> _W;
+   
+                   std::vector<Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> >_sqrt;
+   
+                   std::vector<Eigen::VectorXd> _Wb;
+           };
+       }
+   }
+   
+   #endif

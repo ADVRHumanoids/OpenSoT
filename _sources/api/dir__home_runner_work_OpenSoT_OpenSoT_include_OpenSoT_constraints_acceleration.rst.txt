@@ -1,0 +1,25 @@
+.. _dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration:
+
+
+Directory acceleration
+======================
+
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/acceleration``
+
+
+Files
+-----
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsECBF.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsViability.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_TorqueLimits.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_VelocityLimits.h`
+
+

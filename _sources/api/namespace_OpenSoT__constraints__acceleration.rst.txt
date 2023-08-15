@@ -1,0 +1,28 @@
+
+.. _namespace_OpenSoT__constraints__acceleration:
+
+Namespace OpenSoT::constraints::acceleration
+============================================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits`

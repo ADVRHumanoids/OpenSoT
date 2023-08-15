@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1_1solvers_1a7b39fcd96a93530cf5763e678cafdc03:
+
+Function OpenSoT::solvers::whichBackEnd
+=======================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::solvers::whichBackEnd(const solver_back_ends)
+   :project: OpenSoT

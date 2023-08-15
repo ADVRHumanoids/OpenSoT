@@ -1,0 +1,66 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_VelocityLimits.h:
+
+Program Listing for File VelocityLimits.h
+=========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_VelocityLimits.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/acceleration/VelocityLimits.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __CONSTRAINT_ACCELERATION_VELOCITY_LIMITS_H__
+   #define __CONSTRAINT_ACCELERATION_VELOCITY_LIMITS_H__
+   
+   #include <OpenSoT/Constraint.h>
+   #include <OpenSoT/utils/Affine.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <OpenSoT/constraints/GenericConstraint.h>
+   
+   namespace OpenSoT { namespace constraints { namespace acceleration {
+   
+   class VelocityLimits : public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
+   
+   public:
+   
+       typedef std::shared_ptr<VelocityLimits> Ptr;
+   
+       VelocityLimits(XBot::ModelInterface& robot,
+                      const AffineHelper& qddot,
+                      const double qDotLimit,
+                      const double dT);
+   
+       VelocityLimits(XBot::ModelInterface& robot,
+                      const AffineHelper& qddot,
+                      const Eigen::VectorXd& qDotLimit,
+                      const double dT);
+   
+       virtual void update(const Eigen::VectorXd& x);
+   
+       void setVelocityLimits(const double qDotLimit);
+   
+       void setVelocityLimits(const Eigen::VectorXd& qDotLimit);
+   
+       bool setPStepAheadPredictor(const double p);
+   
+   private:
+   
+       XBot::ModelInterface& _robot;
+       GenericConstraint::Ptr _generic_constraint_internal;
+   
+       Eigen::VectorXd _qdot;
+       Eigen::VectorXd _qdotmin, _qdotmax;
+   
+       double _dT;
+       double _p;
+   
+   };
+   
+   } } }
+   
+   
+   
+   
+   
+   #endif

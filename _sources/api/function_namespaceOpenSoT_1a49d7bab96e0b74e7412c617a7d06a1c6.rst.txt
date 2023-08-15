@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1a49d7bab96e0b74e7412c617a7d06a1c6:
+
+Function OpenSoT::operator%(const OpenSoT::tasks::Aggregated::TaskPtr, const std::list<unsigned int>&)
+======================================================================================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::operator%(const OpenSoT::tasks::Aggregated::TaskPtr, const std::list<unsigned int>&)
+   :project: OpenSoT

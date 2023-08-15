@@ -1,0 +1,50 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_MinJointVel.h:
+
+Program Listing for File MinJointVel.h
+======================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_MinJointVel.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/acceleration/MinJointVel.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __TASKS_ACCELERATION_MINJOINTVEL_H__
+   #define __TASKS_ACCELERATION_MINJOINTVEL_H__
+   
+   #include <OpenSoT/Task.h>
+   #include <OpenSoT/tasks/acceleration/Postural.h>
+   
+   namespace OpenSoT { namespace tasks { namespace acceleration {
+   
+       class MinJointVel : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
+   
+       public:
+           typedef std::shared_ptr<MinJointVel> Ptr;
+   
+           MinJointVel(const XBot::ModelInterface& robot,
+                       double dT,
+                       AffineHelper qddot = AffineHelper());
+   
+   
+   
+           bool setEps(const double eps);
+   
+   
+       private:
+           double _dT;
+           const XBot::ModelInterface& _robot;
+           OpenSoT::tasks::acceleration::Postural::Ptr _postural;
+           Eigen::MatrixXd I;
+   
+           virtual void _update(const Eigen::VectorXd& x);
+   
+   
+       };
+   
+           }
+       }
+   }
+   
+   #endif

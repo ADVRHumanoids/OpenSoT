@@ -1,0 +1,34 @@
+
+.. _namespace_OpenSoT__constraints__velocity:
+
+Namespace OpenSoT::constraints::velocity
+========================================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits`

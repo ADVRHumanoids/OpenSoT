@@ -1,0 +1,129 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h:
+
+Program Listing for File CartesianAdmittance.h
+==============================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity/CartesianAdmittance.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __TASKS_VELOCITY_CARTESIAN_ADMITTANCE_H__
+   #define __TASKS_VELOCITY_CARTESIAN_ADMITTANCE_H__
+   
+   #include <OpenSoT/tasks/velocity/Cartesian.h>
+   
+   using namespace XBot::Utils;
+   
+   namespace OpenSoT {
+      namespace tasks {
+          namespace velocity {
+          class CartesianAdmittance: public Cartesian {
+            public:
+               typedef std::shared_ptr<CartesianAdmittance> Ptr;
+   
+               CartesianAdmittance(std::string task_id,
+                                   const Eigen::VectorXd& x,
+                                   XBot::ModelInterface &robot,
+                                   std::string base_link,
+                                   XBot::ForceTorqueSensor::ConstPtr ft_sensor);
+   
+              const Eigen::Matrix6d& getCartesianCompliance();
+   
+              void getCartesianCompliance(Eigen::Matrix6d& C);
+   
+              void setWrenchReference(const Eigen::Vector6d& wrench);
+   
+              const Eigen::Vector6d& getWrenchReference();
+   
+              void getWrenchReference(Eigen::Vector6d& wrench_reference);
+   
+              static bool isCartesianAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+   
+              static OpenSoT::tasks::velocity::CartesianAdmittance::Ptr asCartesianAdmittance(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+   
+              bool reset();
+   
+              void _log(XBot::MatLogger2::Ptr logger);
+   
+              const Eigen::Matrix6d getStiffness();
+              
+              const Eigen::Matrix6d getInertia();
+   
+              const Eigen::Matrix6d getDamping();
+              
+              double getFilterTimeStep();
+              
+              void setFilterDamping(const double damping);
+              
+              void setImpedanceParams(const Eigen::Vector6d& K, 
+                                      const Eigen::Vector6d& D, 
+                                      const double lambda,
+                                      const double dt);
+              
+              bool setRawParams(const Eigen::Vector6d& C, 
+                                const Eigen::Vector6d& omega, 
+                                const double lambda,
+                                const double dt);
+              
+              bool setDeadZone(const Eigen::Vector6d& dead_zone_amplitude);
+   
+              bool computeParameters(const Eigen::Vector6d& K, 
+                                     const Eigen::Vector6d& D, 
+                                     const double lambda, 
+                                     const double dt,
+                                     Eigen::Vector6d& C, 
+                                     Eigen::Vector6d& M, 
+                                     Eigen::Vector6d& w);
+   
+              void setLambda(double lambda){XBot::Logger::warning("setLambda do nothing in CartesianAdmittance, use instead the setRawParams() or the setImpedanceParams()");}
+   
+   
+            private:
+                
+              void apply_deadzone(Eigen::Vector6d& data);
+                
+              Eigen::Vector6d _wrench_reference;
+              Eigen::Vector6d _wrench_measured;
+              Eigen::Vector6d _wrench_filt;
+              Eigen::Vector6d _wrench_error;
+              Eigen::Vector6d _deadzone;
+              std::vector<double> _tmp;
+   
+              void _update(const Eigen::VectorXd& x);
+   
+              //XBot::Utils::SecondOrderFilter<Eigen::Vector6d> _filter;
+              XBot::Utils::SecondOrderFilterArray<double> _filter;
+   
+              Eigen::Vector6d _C;
+   
+              Eigen::Vector6d _K;
+   
+              Eigen::Vector6d _M;
+   
+              Eigen::Vector6d _D;
+   
+              Eigen::Vector6d _w;
+   
+              Eigen::Vector6d _tmp_vec6;
+              Eigen::Matrix6d _tmp_mat6;
+   
+   
+              XBot::ForceTorqueSensor::ConstPtr _ft_sensor;
+   
+              Eigen::Affine3d _bl_T_ft;
+   
+              double _dt;
+   
+              void setFilterOmega(const Eigen::Vector6d& w);
+   
+   
+          };
+   
+          }
+      }
+   }
+   
+   #endif

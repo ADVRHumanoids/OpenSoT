@@ -1,0 +1,150 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h:
+
+File Affine.h
+=============
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/Affine.h``)
+---------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``Eigen/Dense``
+
+- ``map``
+
+- ``memory``
+
+- ``type_traits``
+
+- ``vector``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsECBF.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsViability.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_TorqueLimits.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_VelocityLimits.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_CoP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_FrictionCone.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_NormalTorque.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_AngularMomentum.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Cartesian.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_CoM.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Contact.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_DynamicFeasibility.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Cartesian.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_CoM.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_FloatingBase.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables_Torque.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_struct_structOpenSoT_1_1OptvarHelper_1_1VarInfo`
+
+- :ref:`exhale_class_classOpenSoT_1_1AffineHelperBase`
+
+- :ref:`exhale_class_classOpenSoT_1_1OptvarHelper`
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_namespaceOpenSoT_1aa4a98577a6a4beef8218ad4cad6bd987`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a63100ab9d4e96ae9b685df8a15736e8b`
+
+- :ref:`exhale_function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d`
+
+- :ref:`exhale_function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a9ea285f4bea5b924248306c73e63af0d`
+
+- :ref:`exhale_function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91`
+
+- :ref:`exhale_function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0`
+
+
+Typedefs
+--------
+
+
+- :ref:`exhale_typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb`
+

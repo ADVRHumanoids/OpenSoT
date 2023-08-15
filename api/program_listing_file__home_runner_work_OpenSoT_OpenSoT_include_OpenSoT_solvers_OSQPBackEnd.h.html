@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File OSQPBackEnd.h &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File OSQPBackEnd.h</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="program-listing-for-file-osqpbackend-h">
+<span id="program-listing-file-home-runner-work-opensot-opensot-include-opensot-solvers-osqpbackend-h"></span><h1>Program Listing for File OSQPBackEnd.h<a class="headerlink" href="#program-listing-for-file-osqpbackend-h" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h.html#file-home-runner-work-opensot-opensot-include-opensot-solvers-osqpbackend-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/OSQPBackEnd.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifndef _WB_SOT_SOLVERS_OSQP_BE_H_</span>
+<span class="cp">#define _WB_SOT_SOLVERS_OSQP_BE_H_</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/solvers/BackEnd.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Task.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;osqp.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Piler.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;Eigen/Sparse&gt;</span><span class="cp"></span>
+
+<span class="cp">#define OSQP_DEFAULT_EPS_REGULARISATION 0</span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">utils</span><span class="p">;</span>
+
+<span class="k">namespace</span> <span class="n">OpenSoT</span><span class="p">{</span>
+<span class="k">namespace</span> <span class="n">solvers</span><span class="p">{</span>
+
+<span class="k">class</span> <span class="nc">OSQPBackEnd</span><span class="o">:</span>  <span class="k">public</span> <span class="n">BackEnd</span><span class="p">{</span>
+
+<span class="k">public</span><span class="o">:</span>
+
+    <span class="k">typedef</span> <span class="n">MatrixPiler</span> <span class="n">VectorPiler</span><span class="p">;</span>
+
+    <span class="n">OSQPBackEnd</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">number_of_variables</span><span class="p">,</span>
+                <span class="k">const</span> <span class="kt">int</span> <span class="n">number_of_constraints</span><span class="p">,</span>
+                <span class="k">const</span> <span class="kt">double</span> <span class="n">eps_regularisation</span> <span class="o">=</span> <span class="n">OSQP_DEFAULT_EPS_REGULARISATION</span><span class="p">);</span>
+
+    <span class="o">~</span><span class="n">OSQPBackEnd</span><span class="p">();</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">initProblem</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="o">&amp;</span><span class="n">H</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">g</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="o">&amp;</span><span class="n">A</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">lA</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">uA</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">l</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">u</span><span class="p">);</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">solve</span><span class="p">();</span>
+
+    <span class="k">virtual</span> <span class="n">boost</span><span class="o">::</span><span class="n">any</span> <span class="n">getOptions</span><span class="p">();</span>
+
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">setOptions</span><span class="p">(</span><span class="k">const</span> <span class="n">boost</span><span class="o">::</span><span class="n">any</span><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">updateTask</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">H</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">g</span><span class="p">);</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">updateConstraints</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Ref</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&gt;&amp;</span> <span class="n">A</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Ref</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;&amp;</span> <span class="n">lA</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Ref</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;&amp;</span> <span class="n">uA</span><span class="p">);</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">updateBounds</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">l</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">u</span><span class="p">);</span>
+
+    <span class="k">virtual</span> <span class="kt">double</span> <span class="nf">getObjective</span><span class="p">();</span>
+
+    <span class="kt">bool</span> <span class="nf">setEpsRegularisation</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">eps</span><span class="p">);</span>
+
+    <span class="k">virtual</span> <span class="kt">double</span> <span class="nf">getEpsRegularisation</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">_eps_regularisation</span><span class="p">;</span>
+    <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+
+    <span class="k">typedef</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">SparseMatrix</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">SparseMatrix</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">SparseMatrix</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">RowMajor</span><span class="o">&gt;</span> <span class="n">SparseMatrixRowMajor</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="nf">__generate_data_struct</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">number_of_variables</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">number_of_constraints</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">number_of_bounds</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">update_data_struct</span><span class="p">();</span>
+
+    <span class="kt">void</span> <span class="nf">upper_triangular_sparse_update</span><span class="p">();</span>
+
+
+    <span class="n">OSQPWorkspace</span><span class="o">*</span> <span class="n">_workspace</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">OSQPData</span><span class="o">&gt;</span> <span class="n">_data</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">OSQPSettings</span><span class="o">&gt;</span> <span class="n">_settings</span><span class="p">;</span>
+
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_lb_piled</span><span class="p">,</span> <span class="n">_ub_piled</span><span class="p">;</span>
+
+    <span class="n">SparseMatrix</span> <span class="n">_Asparse</span><span class="p">,</span> <span class="n">_Asparse_upper</span><span class="p">;</span>
+    <span class="n">SparseMatrixRowMajor</span> <span class="n">_Asparse_rowmaj</span><span class="p">;</span>
+    <span class="n">SparseMatrix</span> <span class="n">_Psparse</span><span class="p">;</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_Adense</span><span class="p">;</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_P_values</span><span class="p">;</span>
+
+
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">csc</span><span class="o">&gt;</span> <span class="n">_Acsc</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">csc</span><span class="o">&gt;</span> <span class="n">_Pcsc</span><span class="p">;</span>
+
+    <span class="kt">double</span> <span class="n">_eps_regularisation</span><span class="p">;</span>
+
+
+
+<span class="c1">//        void print_csc_matrix_raw(csc* a, const std::string&amp; name);</span>
+
+    <span class="kt">void</span> <span class="nf">setCSCMatrix</span><span class="p">(</span><span class="n">csc</span><span class="o">*</span> <span class="n">a</span><span class="p">,</span> <span class="n">SparseMatrix</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">);</span>
+
+
+<span class="p">};</span>
+<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

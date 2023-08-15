@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability:
+
+Class JointLimitsViability
+==========================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsViability.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd >`` (:ref:`exhale_class_classOpenSoT_1_1Constraint`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::constraints::acceleration::JointLimitsViability
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

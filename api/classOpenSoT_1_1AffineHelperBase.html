@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Class AffineHelperBase &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class AffineConstraint" href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html" />
+    <link rel="prev" title="Class LinkPairDistance" href="classLinkPairDistance.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Template Class AffineHelperBase</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1AffineHelperBase.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="template-class-affinehelperbase">
+<span id="exhale-class-classopensot-1-1affinehelperbase"></span><h1>Template Class AffineHelperBase<a class="headerlink" href="#template-class-affinehelperbase" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-affine-h"><span class="std std-ref">File Affine.h</span></a></p></li>
+</ul>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN7OpenSoT16AffineHelperBaseE">
+<span id="_CPPv3I00EN7OpenSoT16AffineHelperBaseE"></span><span id="_CPPv2I00EN7OpenSoT16AffineHelperBaseE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DerivedM</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DerivedQ</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1AffineHelperBase"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AffineHelperBase</span></span></span><a class="headerlink" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>This class models an affine mapping between an “input variable” x, and an “output variable” y. </p>
+<p>The underlying math is:</p>
+<p>y = M*x + q</p>
+<p>This is useful to make a task/constraint aware about the formatting of the optimization vector w.r.t. to its own variable of interest</p>
+<p>Example: in the context of an optimization problem where x = joint acceleration, a torque constraint must know that y = B*x + h. The task can be used also in problems where x = tau, by passing the affine mapping y = x. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4PtrME">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4PtrME"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4PtrME"></span><span id="OpenSoT::AffineHelperBase::PtrM"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1ad50e1f3c759f8e27217ee9121c5e72f9"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">remove_reference</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">type</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PtrM</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4PtrME" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4PtrQE">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4PtrQE"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4PtrQE"></span><span id="OpenSoT::AffineHelperBase::PtrQ"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a07aa0dbd4cb4ce72b39c7b640451acb8"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">remove_reference</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">type</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PtrQ</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4PtrQE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase9ConstPtrME">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase9ConstPtrME"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase9ConstPtrME"></span><span id="OpenSoT::AffineHelperBase::ConstPtrM"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a50a52e96d72144a7597c9f77c1ada9ee"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">remove_reference</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">type</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ConstPtrM</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase9ConstPtrME" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase9ConstPtrQE">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase9ConstPtrQE"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase9ConstPtrQE"></span><span id="OpenSoT::AffineHelperBase::ConstPtrQ"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a9558caf3c0d8015ed77b2139dc2dcee6"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">remove_reference</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">type</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ConstPtrQ</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase9ConstPtrQE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase16AffineHelperBaseEv">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase16AffineHelperBaseEv"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase16AffineHelperBaseEv"></span><span id="OpenSoT::AffineHelperBase::AffineHelperBase"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a4c66420916711844452f4d601c51e209"></span><span class="sig-name descname"><span class="n"><span class="pre">AffineHelperBase</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">default</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase16AffineHelperBaseEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase16AffineHelperBaseEii">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase16AffineHelperBaseEii"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase16AffineHelperBaseEii"></span><span id="OpenSoT::AffineHelperBase::AffineHelperBase__i.i"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a36bc236bf225797fb36dcea3434e2161"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AffineHelperBase</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">input_size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">output_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase16AffineHelperBaseEii" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase16AffineHelperBaseERK8DerivedMRK8DerivedQ">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase16AffineHelperBaseERK8DerivedMRK8DerivedQ"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase16AffineHelperBaseERK8DerivedMRK8DerivedQ"></span><span id="OpenSoT::AffineHelperBase::AffineHelperBase__DerivedMCR.DerivedQCR"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a121c514338e9849d9fce0a21034ae825"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AffineHelperBase</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">M</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase16AffineHelperBaseERK8DerivedMRK8DerivedQ" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4setMERK8DerivedM">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4setMERK8DerivedM"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4setMERK8DerivedM"></span><span id="OpenSoT::AffineHelperBase::setM__DerivedMCR"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a27f4da31f84eb3b209a12d1398e13cfc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setM</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">M</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4setMERK8DerivedM" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4setqERK8DerivedQ">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4setqERK8DerivedQ"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4setqERK8DerivedQ"></span><span id="OpenSoT::AffineHelperBase::setq__DerivedQCR"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1ad63fe89525efe21eb5f3ffd87e115f41"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setq</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4setqERK8DerivedQ" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase3setERK8DerivedMRK8DerivedQ">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase3setERK8DerivedMRK8DerivedQ"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase3setERK8DerivedMRK8DerivedQ"></span><span id="OpenSoT::AffineHelperBase::set__DerivedMCR.DerivedQCR"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a8679aa000dfedef4162dbb889e12743d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">M</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase3setERK8DerivedMRK8DerivedQ" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN7OpenSoT16AffineHelperBase16AffineHelperBaseERK16AffineHelperBaseI6OtherM6OtherQE">
+<span id="_CPPv3I00EN7OpenSoT16AffineHelperBase16AffineHelperBaseERK16AffineHelperBaseI6OtherM6OtherQE"></span><span id="_CPPv2I00EN7OpenSoT16AffineHelperBase16AffineHelperBaseERK16AffineHelperBaseI6OtherM6OtherQE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OtherM</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OtherQ</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1AffineHelperBase_1ae747484dbc138ada3442202eae0907ac"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AffineHelperBase</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBase16AffineHelperBaseERK16AffineHelperBaseI6OtherM6OtherQE" title="OpenSoT::AffineHelperBase::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBase16AffineHelperBaseERK16AffineHelperBaseI6OtherM6OtherQE" title="OpenSoT::AffineHelperBase::AffineHelperBase::OtherM"><span class="n"><span class="pre">OtherM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBase16AffineHelperBaseERK16AffineHelperBaseI6OtherM6OtherQE" title="OpenSoT::AffineHelperBase::AffineHelperBase::OtherQ"><span class="n"><span class="pre">OtherQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I00EN7OpenSoT16AffineHelperBase16AffineHelperBaseERK16AffineHelperBaseI6OtherM6OtherQE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN7OpenSoT16AffineHelperBaseaSER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE">
+<span id="_CPPv3I00EN7OpenSoT16AffineHelperBaseaSERK16AffineHelperBaseI6OtherM6OtherQE"></span><span id="_CPPv2I00EN7OpenSoT16AffineHelperBaseaSERK16AffineHelperBaseI6OtherM6OtherQE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OtherM</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OtherQ</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a333946d5b1aad426d8e5747fcdc37260"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseaSER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE" title="OpenSoT::AffineHelperBase::operator=::OtherM"><span class="n"><span class="pre">OtherM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseaSER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE" title="OpenSoT::AffineHelperBase::operator=::OtherQ"><span class="n"><span class="pre">OtherQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseaSER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN7OpenSoT16AffineHelperBasepLER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE">
+<span id="_CPPv3I00EN7OpenSoT16AffineHelperBasepLERK16AffineHelperBaseI6OtherM6OtherQE"></span><span id="_CPPv2I00EN7OpenSoT16AffineHelperBasepLERK16AffineHelperBaseI6OtherM6OtherQE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OtherM</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OtherQ</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1AffineHelperBase_1aac33832d39633492025ba17302c9bab9"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">+=</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBasepLER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE" title="OpenSoT::AffineHelperBase::operator+=::OtherM"><span class="n"><span class="pre">OtherM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBasepLER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE" title="OpenSoT::AffineHelperBase::operator+=::OtherQ"><span class="n"><span class="pre">OtherQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I00EN7OpenSoT16AffineHelperBasepLER16AffineHelperBaseI8DerivedM8DerivedQERK16AffineHelperBaseI6OtherM6OtherQE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT16AffineHelperBase4getMEv">
+<span id="_CPPv3NK7OpenSoT16AffineHelperBase4getMEv"></span><span id="_CPPv2NK7OpenSoT16AffineHelperBase4getMEv"></span><span id="OpenSoT::AffineHelperBase::getMC"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1adfdda4a5bfdd5f81c20a3d4accdff2e9"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getM</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT16AffineHelperBase4getMEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT16AffineHelperBase4getqEv">
+<span id="_CPPv3NK7OpenSoT16AffineHelperBase4getqEv"></span><span id="_CPPv2NK7OpenSoT16AffineHelperBase4getqEv"></span><span id="OpenSoT::AffineHelperBase::getqC"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1ae91b8e24cdb1b9e2c0bddd7b830cfd89"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getq</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT16AffineHelperBase4getqEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT16AffineHelperBase12getInputSizeEv">
+<span id="_CPPv3NK7OpenSoT16AffineHelperBase12getInputSizeEv"></span><span id="_CPPv2NK7OpenSoT16AffineHelperBase12getInputSizeEv"></span><span id="OpenSoT::AffineHelperBase::getInputSizeC"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a4df92313fec7205ba438192bbb47240f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getInputSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT16AffineHelperBase12getInputSizeEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT16AffineHelperBase13getOutputSizeEv">
+<span id="_CPPv3NK7OpenSoT16AffineHelperBase13getOutputSizeEv"></span><span id="_CPPv2NK7OpenSoT16AffineHelperBase13getOutputSizeEv"></span><span id="OpenSoT::AffineHelperBase::getOutputSizeC"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a768cddf19310ad9a3596a29d0040074e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getOutputSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT16AffineHelperBase13getOutputSizeEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase7setZeroEii">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase7setZeroEii"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase7setZeroEii"></span><span id="OpenSoT::AffineHelperBase::setZero__i.i"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a6641882ed1d984ac728b87a5dad4ec0c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setZero</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">input_size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">output_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase7setZeroEii" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase7setZeroEv">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase7setZeroEv"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase7setZeroEv"></span><span id="OpenSoT::AffineHelperBase::setZero"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a98ea34e506353e95bc336abd7498e380"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setZero</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase7setZeroEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT16AffineHelperBase7segmentEii">
+<span id="_CPPv3NK7OpenSoT16AffineHelperBase7segmentEii"></span><span id="_CPPv2NK7OpenSoT16AffineHelperBase7segmentEii"></span><span id="OpenSoT::AffineHelperBase::segment__i.iC"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a99408367aa4e654cda44cb6c87f3428e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">segment</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">start_idx</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="o"><span class="pre">-&gt;</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">decltype</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">declval</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT16AffineHelperBase9ConstPtrME" title="OpenSoT::AffineHelperBase::ConstPtrM"><span class="n"><span class="pre">ConstPtrM</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="o"><span class="pre">-&gt;</span></span><span class="n"><span class="pre">block</span></span><span class="p"><span class="pre">(</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">decltype</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">declval</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT16AffineHelperBase9ConstPtrQE" title="OpenSoT::AffineHelperBase::ConstPtrQ"><span class="n"><span class="pre">ConstPtrQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="o"><span class="pre">-&gt;</span></span><span class="n"><span class="pre">segment</span></span><span class="p"><span class="pre">(</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT16AffineHelperBase7segmentEii" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4headEi">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4headEi"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4headEi"></span><span id="OpenSoT::AffineHelperBase::head__i"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1aa22feec16b00d00d97c2e93b1a723c29"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">head</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="o"><span class="pre">-&gt;</span></span><span class="w"> </span><span class="k"><span class="pre">decltype</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">this</span></span><span class="o"><span class="pre">-&gt;</span></span><span class="n"><span class="pre">segment</span></span><span class="p"><span class="pre">(</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4headEi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4tailEi">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4tailEi"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4tailEi"></span><span id="OpenSoT::AffineHelperBase::tail__i"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a04d6f06d9731bcb6a2b4538ad18aca9d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tail</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="o"><span class="pre">-&gt;</span></span><span class="w"> </span><span class="k"><span class="pre">decltype</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">this</span></span><span class="o"><span class="pre">-&gt;</span></span><span class="n"><span class="pre">segment</span></span><span class="p"><span class="pre">(</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4tailEi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0ENK7OpenSoT16AffineHelperBase8getValueEvRKN5Eigen8VectorXdERN5Eigen10MatrixBaseI7DerivedEE">
+<span id="_CPPv3I0ENK7OpenSoT16AffineHelperBase8getValueERKN5Eigen8VectorXdERN5Eigen10MatrixBaseI7DerivedEE"></span><span id="_CPPv2I0ENK7OpenSoT16AffineHelperBase8getValueERKN5Eigen8VectorXdERN5Eigen10MatrixBaseI7DerivedEE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Derived</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a44a35a2690daa97d960534940874a2af"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getValue</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixBase</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0ENK7OpenSoT16AffineHelperBase8getValueEvRKN5Eigen8VectorXdERN5Eigen10MatrixBaseI7DerivedEE" title="OpenSoT::AffineHelperBase::getValue::Derived"><span class="n"><span class="pre">Derived</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4I0ENK7OpenSoT16AffineHelperBase8getValueEvRKN5Eigen8VectorXdERN5Eigen10MatrixBaseI7DerivedEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase6updateEv">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase6updateEv"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase6updateEv"></span><span id="OpenSoT::AffineHelperBase::update"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a4f1c86bf6e9d9fd6440d27586e10b492"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase6updateEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase8IdentityEi">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase8IdentityEi"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase8IdentityEi"></span><span id="OpenSoT::AffineHelperBase::Identity__i"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a5999c652319b5e53036efc8446d3c955"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Identity</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase8IdentityEi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4ZeroEii">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4ZeroEii"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4ZeroEii"></span><span id="OpenSoT::AffineHelperBase::Zero__i.i"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1afc6e95a9ebdf989aac38488507e171a4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Zero</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">input_size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">output_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4ZeroEii" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase4selfEv">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase4selfEv"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase4selfEv"></span><span id="OpenSoT::AffineHelperBase::self"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a538642c7a6c0375d4c088befc6e69f34"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">self</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase4selfEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT16AffineHelperBase4selfEv">
+<span id="_CPPv3NK7OpenSoT16AffineHelperBase4selfEv"></span><span id="_CPPv2NK7OpenSoT16AffineHelperBase4selfEv"></span><span id="OpenSoT::AffineHelperBase::selfC"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1ad2f9749823a5daf946d9c8734c3cb704"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase"><span class="n"><span class="pre">AffineHelperBase</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">self</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT16AffineHelperBase4selfEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase17check_consistencyEv">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase17check_consistencyEv"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase17check_consistencyEv"></span><span id="OpenSoT::AffineHelperBase::check_consistency"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a6f76136a10b442c147acbed2793f5e6c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">check_consistency</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase17check_consistencyEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase2_ME">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase2_ME"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase2_ME"></span><span id="OpenSoT::AffineHelperBase::_M__DerivedM"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1ad24ca8935d1a8cd5be1ad49082fd1864"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedM"><span class="n"><span class="pre">DerivedM</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_M</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase2_ME" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT16AffineHelperBase2_qE">
+<span id="_CPPv3N7OpenSoT16AffineHelperBase2_qE"></span><span id="_CPPv2N7OpenSoT16AffineHelperBase2_qE"></span><span id="OpenSoT::AffineHelperBase::_q__DerivedQ"></span><span class="target" id="classOpenSoT_1_1AffineHelperBase_1a000be0cb59be400a35a9764cfb538736"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT16AffineHelperBaseE" title="OpenSoT::AffineHelperBase::DerivedQ"><span class="n"><span class="pre">DerivedQ</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_q</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT16AffineHelperBase2_qE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classLinkPairDistance.html" class="btn btn-neutral float-left" title="Class LinkPairDistance" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html" class="btn btn-neutral float-right" title="Class AffineConstraint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

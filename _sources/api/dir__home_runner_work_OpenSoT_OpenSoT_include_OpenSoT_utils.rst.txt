@@ -1,0 +1,31 @@
+.. _dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils:
+
+
+Directory utils
+===============
+
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils``
+
+
+Files
+-----
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Indices.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h`
+
+

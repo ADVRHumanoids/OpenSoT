@@ -1,0 +1,14 @@
+.. _exhale_define_qpSWIFTBackEnd_8h_1a116ea6cb761e6ab475f012b39f68a37a:
+
+Define QPSWIFT_DEFAULT_EPS_REGULARISATION
+=========================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: QPSWIFT_DEFAULT_EPS_REGULARISATION
+   :project: OpenSoT

@@ -1,0 +1,14 @@
+.. _exhale_typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb:
+
+Typedef OpenSoT::AffineHelper
+=============================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`
+
+
+Typedef Documentation
+---------------------
+
+
+.. doxygentypedef:: OpenSoT::AffineHelper
+   :project: OpenSoT

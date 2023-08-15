@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File l1HQP.h &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File l1HQP.h</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="program-listing-for-file-l1hqp-h">
+<span id="program-listing-file-home-runner-work-opensot-opensot-include-opensot-solvers-l1hqp-h"></span><h1>Program Listing for File l1HQP.h<a class="headerlink" href="#program-listing-for-file-l1hqp-h" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h.html#file-home-runner-work-opensot-opensot-include-opensot-solvers-l1hqp-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/l1HQP.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifndef _OPENSOT_L1_HQP_</span>
+<span class="cp">#define _OPENSOT_L1_HQP_</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Solver.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/solvers/BackEndFactory.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Affine.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/constraints/GenericConstraint.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/tasks/GenericLPTask.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/tasks/Aggregated.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Piler.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/constraints/Aggregated.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/solvers/BackEnd.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+
+<span class="cp">#define DEFAULT_EPS_REGULARISATION 2E2 </span><span class="c1">//THIS VALUE IS HISTORICALLY USED IN QPOASES</span>
+
+<span class="k">namespace</span> <span class="n">OpenSoT</span><span class="p">{</span>
+<span class="k">class</span> <span class="nc">AutoStack</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span>
+<span class="k">namespace</span> <span class="n">solvers</span> <span class="p">{</span>
+    <span class="k">class</span> <span class="nc">priority_constraint</span><span class="o">:</span> <span class="k">public</span> <span class="n">Constraint</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span>
+    <span class="p">{</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">priority_constraint</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
+        <span class="n">priority_constraint</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericLPTask</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">high_priority_task</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericLPTask</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">low_priority_task</span><span class="p">);</span>
+        <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericLPTask</span><span class="o">&gt;</span> <span class="n">_high_task</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericLPTask</span><span class="o">&gt;</span> <span class="n">_low_task</span><span class="p">;</span>
+
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_ones</span><span class="p">;</span>
+    <span class="p">};</span>
+
+    <span class="k">class</span> <span class="nc">constraint_helper</span><span class="o">:</span> <span class="k">public</span> <span class="n">Constraint</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span>
+    <span class="p">{</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">constraint_helper</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
+
+        <span class="n">constraint_helper</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">id</span><span class="p">,</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">constraints</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">ConstraintPtr</span> <span class="n">constraints</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">AffineHelper</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
+
+        <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">constraints</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">ConstraintPtr</span> <span class="n">_constraints</span><span class="p">;</span>
+        <span class="n">AffineHelper</span> <span class="n">_constraint</span><span class="p">;</span>
+        <span class="n">AffineHelper</span> <span class="n">_x</span><span class="p">;</span>
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">I</span><span class="p">;</span>
+
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">utils</span><span class="o">::</span><span class="n">MatrixPiler</span> <span class="n">_A</span><span class="p">;</span>
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">utils</span><span class="o">::</span><span class="n">MatrixPiler</span> <span class="n">_b_lower</span><span class="p">;</span>
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">utils</span><span class="o">::</span><span class="n">MatrixPiler</span> <span class="n">_b_upper</span><span class="p">;</span>
+
+    <span class="p">};</span>
+
+    <span class="k">class</span> <span class="nc">task_to_constraint_helper</span><span class="o">:</span> <span class="k">public</span> <span class="n">Constraint</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span>
+    <span class="p">{</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">task_to_constraint_helper</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
+        <span class="n">task_to_constraint_helper</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">id</span><span class="p">,</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">TaskPtr</span><span class="o">&amp;</span> <span class="n">task</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">AffineHelper</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="k">const</span> <span class="n">AffineHelper</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">);</span>
+
+        <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">TaskPtr</span><span class="o">&amp;</span> <span class="n">_task</span><span class="p">;</span>
+        <span class="n">AffineHelper</span> <span class="n">_constraint</span><span class="p">;</span>
+        <span class="n">AffineHelper</span> <span class="n">_x</span><span class="p">;</span>
+        <span class="n">AffineHelper</span> <span class="n">_t</span><span class="p">;</span>
+
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">utils</span><span class="o">::</span><span class="n">MatrixPiler</span> <span class="n">_II</span><span class="p">;</span>
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">utils</span><span class="o">::</span><span class="n">MatrixPiler</span> <span class="n">_AA</span><span class="p">;</span>
+        <span class="n">OpenSoT</span><span class="o">::</span><span class="n">utils</span><span class="o">::</span><span class="n">MatrixPiler</span> <span class="n">_bb</span><span class="p">;</span>
+
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">o</span><span class="p">,</span> <span class="n">inf</span><span class="p">,</span> <span class="n">ones</span><span class="p">;</span>
+        <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">O</span><span class="p">;</span>
+        <span class="kt">double</span> <span class="n">M</span> <span class="o">=</span> <span class="mf">10.</span><span class="p">;</span> <span class="c1">//This is for the Big-M constraint</span>
+    <span class="p">};</span>
+
+    <span class="k">class</span> <span class="nc">l1HQP</span><span class="o">:</span> <span class="k">public</span> <span class="n">Solver</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span>
+    <span class="p">{</span>
+        <span class="k">public</span><span class="o">:</span>
+            <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">l1HQP</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
+
+            <span class="n">l1HQP</span><span class="p">(</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">AutoStack</span><span class="o">&amp;</span> <span class="n">stack_of_tasks</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span> <span class="n">eps_regularisation</span> <span class="o">=</span> <span class="n">DEFAULT_EPS_REGULARISATION</span><span class="p">,</span>
+             <span class="k">const</span> <span class="n">solver_back_ends</span> <span class="n">be_solver</span> <span class="o">=</span> <span class="n">solver_back_ends</span><span class="o">::</span><span class="n">qpOASES</span><span class="p">);</span>
+
+            <span class="kt">bool</span> <span class="nf">solve</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">solution</span><span class="p">);</span>
+
+            <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">getFirstSlackIndex</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_first_slack_index</span><span class="p">;}</span>
+
+            <span class="kt">void</span> <span class="nf">getBackEnd</span><span class="p">(</span><span class="n">BackEnd</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&amp;</span> <span class="n">back_end</span><span class="p">);</span>
+
+            <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">AutoStack</span><span class="o">&gt;&amp;</span> <span class="n">getInternalProblem</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_internal_stack</span><span class="p">;}</span>
+            <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">task_to_constraint_helper</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;&amp;</span> <span class="n">getConstraints</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_constraints</span><span class="p">;</span> <span class="p">}</span>
+            <span class="k">const</span> <span class="n">constraint_helper</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&amp;</span> <span class="n">getHardConstraints</span><span class="p">(){</span><span class="k">return</span> <span class="n">_constraints2</span><span class="p">;</span> <span class="p">}</span>
+            <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericLPTask</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;&amp;</span> <span class="n">getTasks</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_lp_tasks</span><span class="p">;</span> <span class="p">}</span>
+            <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">priority_constraint</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;&amp;</span> <span class="n">getPriorityConstraints</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_priority_constraints</span><span class="p">;</span> <span class="p">}</span>
+
+
+            <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">getVariableSize</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_opt</span><span class="o">-&gt;</span><span class="n">getSize</span><span class="p">();}</span>
+
+
+            <span class="kt">bool</span> <span class="n">getInternalVariable</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">var</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">);</span>
+
+
+        <span class="k">private</span><span class="o">:</span>
+            <span class="kt">double</span> <span class="n">_epsRegularisation</span><span class="p">;</span>
+
+            <span class="n">OpenSoT</span><span class="o">::</span><span class="n">AutoStack</span><span class="o">&amp;</span> <span class="n">_stack_of_tasks</span><span class="p">;</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">OptvarHelper</span><span class="o">&gt;</span> <span class="n">_opt</span><span class="p">;</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">_linear_gains</span><span class="p">;</span>
+
+            <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">_task_id_priority_order</span><span class="p">;</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericLPTask</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;</span> <span class="n">_lp_tasks</span><span class="p">;</span>
+
+            <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">task_to_constraint_helper</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;</span> <span class="n">_constraints</span><span class="p">;</span>
+
+
+            <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">AutoStack</span><span class="o">&gt;</span> <span class="n">_internal_stack</span><span class="p">;</span>
+
+            <span class="n">constraint_helper</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_constraints2</span><span class="p">;</span>
+
+
+            <span class="kt">void</span> <span class="nf">creates_problem_variables</span><span class="p">();</span>
+            <span class="kt">void</span> <span class="nf">creates_tasks</span><span class="p">();</span>
+            <span class="kt">void</span> <span class="nf">creates_internal_problem</span><span class="p">();</span>
+            <span class="kt">void</span> <span class="nf">creates_constraints</span><span class="p">();</span>
+            <span class="kt">bool</span> <span class="nf">creates_solver</span><span class="p">(</span><span class="k">const</span> <span class="n">solver_back_ends</span><span class="p">);</span>
+
+            <span class="n">OpenSoT</span><span class="o">::</span><span class="n">solvers</span><span class="o">::</span><span class="n">BackEnd</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_solver</span><span class="p">;</span>
+
+            <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_internal_solution</span><span class="p">;</span>
+            <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_H</span><span class="p">;</span>
+            <span class="n">OpenSoT</span><span class="o">::</span><span class="n">HessianType</span> <span class="n">_hessian_type</span><span class="p">;</span>
+
+            <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">priority_constraint</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;</span> <span class="n">_priority_constraints</span><span class="p">;</span>
+
+            <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">_first_slack_index</span><span class="p">;</span>
+
+
+    <span class="p">};</span>
+
+<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

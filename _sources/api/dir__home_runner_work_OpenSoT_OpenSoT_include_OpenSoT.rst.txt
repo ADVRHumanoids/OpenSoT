@@ -1,0 +1,35 @@
+.. _dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT:
+
+
+Directory OpenSoT
+=================
+
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include>` (``/home/runner/work/OpenSoT/OpenSoT/include``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT``
+
+Subdirectories
+--------------
+
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables`
+
+
+Files
+-----
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubTask.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`
+
+

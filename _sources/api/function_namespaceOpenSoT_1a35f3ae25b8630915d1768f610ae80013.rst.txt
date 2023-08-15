@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1a35f3ae25b8630915d1768f610ae80013:
+
+Function OpenSoT::operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr, const std::list<unsigned int>&)
+==================================================================================================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr, const std::list<unsigned int>&)
+   :project: OpenSoT

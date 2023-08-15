@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1_1solvers_1afad360bd87e33794b09b791fb700a4df:
+
+Function OpenSoT::solvers::BackEndFactory
+=========================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::solvers::BackEndFactory(const solver_back_ends, const int, const int, OpenSoT::HessianType, const double)
+   :project: OpenSoT

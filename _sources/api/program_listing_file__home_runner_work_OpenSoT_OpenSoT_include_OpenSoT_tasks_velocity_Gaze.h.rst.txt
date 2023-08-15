@@ -1,0 +1,108 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Gaze.h:
+
+Program Listing for File Gaze.h
+===============================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Gaze.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity/Gaze.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2016 Walkman
+    * Authors:Enrico Mingo Hoffman, Alessio Rocchi
+    * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __TASKS_VELOCITY_GAZE_H__
+   #define __TASKS_VELOCITY_GAZE_H__
+   
+   #include <OpenSoT/tasks/velocity/Cartesian.h>
+   #include <OpenSoT/SubTask.h>
+   #include <OpenSoT/utils/cartesian_utils.h>
+   #include <XBotInterface/ModelInterface.h>
+   
+   namespace OpenSoT {
+   namespace tasks {
+   namespace velocity {
+   
+   
+   class Gaze: public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>
+   {
+   public:
+       typedef std::shared_ptr<Gaze> Ptr;
+   
+       Gaze(std::string task_id,
+            const Eigen::VectorXd &x,
+            XBot::ModelInterface &robot,
+            std::string base_link,
+            std::string distal_link = "gaze");
+   
+       ~Gaze();
+   
+       void setGaze(const Eigen::Affine3d& desiredGaze);
+       [[deprecated]]
+       void setGaze(const Eigen::MatrixXd& desiredGaze);
+       void setGaze(const KDL::Frame& desiredGaze);
+   
+       void setOrientationErrorGain(const double& orientationErrorGain);
+   
+       const double getOrientationErrorGain() const;
+   
+       virtual void setWeight(const Eigen::MatrixXd& W);
+   
+       virtual std::list< ConstraintPtr >& getConstraints();
+   
+       virtual const unsigned int getTaskSize() const;
+   
+       virtual void _update(const Eigen::VectorXd &x);
+   
+       virtual std::vector<bool> getActiveJointsMask();
+   
+       virtual bool setActiveJointsMask(const std::vector<bool>& active_joints_mask);
+   
+       std::string getDistalLink(){ return _distal_link;}
+   
+       virtual void setLambda(double lambda);
+   
+       bool setBaseLink(const std::string& base_link);
+   
+   private:
+       std::string _distal_link;
+       Cartesian::Ptr _cartesian_task;
+       SubTask::Ptr   _subtask;
+   
+       Eigen::Affine3d _gaze_T_obj;
+       Eigen::VectorXd _tmp_vector;
+   
+       XBot::ModelInterface& _robot;
+   
+       KDL::Frame _bl_T_gaze_kdl;
+       KDL::Frame _gaze_goal;
+       Eigen::Affine3d _tmpEigenM;
+       Eigen::Affine3d _tmpEigenM2;
+   
+   
+   
+   };
+   
+   }
+   
+   }
+   
+   }
+   
+   #endif

@@ -1,0 +1,17 @@
+.. _exhale_class_classOpenSoT_1_1Constraint:
+
+Template Class Constraint
+=========================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::Constraint
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

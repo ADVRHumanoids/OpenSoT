@@ -1,0 +1,85 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h:
+
+File l1HQP.h
+============
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/l1HQP.h``)
+----------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/Solver.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`)
+
+- ``OpenSoT/constraints/Aggregated.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h`)
+
+- ``OpenSoT/constraints/GenericConstraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h`)
+
+- ``OpenSoT/solvers/BackEnd.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h`)
+
+- ``OpenSoT/solvers/BackEndFactory.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`)
+
+- ``OpenSoT/tasks/Aggregated.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`)
+
+- ``OpenSoT/tasks/GenericLPTask.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`)
+
+- ``OpenSoT/utils/Affine.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`)
+
+- ``OpenSoT/utils/Piler.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h`)
+
+- ``memory``
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__solvers`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1constraint__helper`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1l1HQP`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1priority__constraint`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1task__to__constraint__helper`
+
+
+Defines
+-------
+
+
+- :ref:`exhale_define_l1HQP_8h_1af2ad25eb08eeeb4c02bdd5484dac1272`
+

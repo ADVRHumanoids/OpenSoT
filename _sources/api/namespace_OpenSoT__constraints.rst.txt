@@ -1,0 +1,37 @@
+
+.. _namespace_OpenSoT__constraints:
+
+Namespace OpenSoT::constraints
+==============================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT__constraints__acceleration`
+
+- :ref:`namespace_OpenSoT__constraints__force`
+
+- :ref:`namespace_OpenSoT__constraints__velocity`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1Aggregated`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1BilateralConstraint`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1GenericConstraint`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1TaskToConstraint`

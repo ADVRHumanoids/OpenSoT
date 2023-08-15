@@ -1,0 +1,135 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h:
+
+Program Listing for File Postural.h
+===================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/acceleration/Postural.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2017 IIT-ADVR
+    * Authors: Arturo Laurenzi
+    * email:  arturo.laurenzi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   
+   #ifndef __TASKS_ACCELERATION_POSTURAL_H__
+   #define __TASKS_ACCELERATION_POSTURAL_H__
+   
+   #include <OpenSoT/Task.h>
+   #include <OpenSoT/utils/Affine.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <OpenSoT/tasks/acceleration/GainType.h>
+   
+   namespace OpenSoT { namespace tasks { namespace acceleration {
+       
+       class Postural : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
+         
+       public:
+           
+           typedef std::shared_ptr<Postural> Ptr;
+           
+           Postural(const XBot::ModelInterface& robot,
+                    AffineHelper qddot = AffineHelper(), const std::string task_id = "Postural");
+   
+           Postural(const XBot::ModelInterface& robot,
+                    const int x_size, const std::string task_id = "Postural");
+   
+           void setGainType(GainType type);
+           GainType getGainType() const;
+           
+           virtual void _update(const Eigen::VectorXd& x);
+           
+           void setReference(const Eigen::VectorXd& qref);
+           void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref);
+           void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
+                             const Eigen::VectorXd& ddqref);
+   
+           const Eigen::VectorXd& getReference() const;
+           void getReference(Eigen::VectorXd& q_desired) const;
+           void getReference(Eigen::VectorXd& q_desired,
+                             Eigen::VectorXd& qdot_desired) const;
+           void getReference(Eigen::VectorXd& q_desired,
+                             Eigen::VectorXd& qdot_desired,
+                             Eigen::VectorXd& qddot_desired) const;
+   
+           const Eigen::VectorXd& getActualPositions() const;
+   
+           const Eigen::VectorXd& getError() const;
+   
+           const Eigen::VectorXd& getVelocityError() const;
+   
+           void setLambda(double lambda1, double lambda2);
+   
+           virtual void setLambda(double lambda);
+   
+           void getLambda(double & lambda, double & lambda2);
+           using Task::getLambda;
+   
+           const double getLambda2() const;
+   
+           bool reset();
+           
+           virtual void _log(XBot::MatLogger2::Ptr logger);
+   
+           const Eigen::VectorXd& getCachedVelocityReference() const;
+   
+           const Eigen::VectorXd& getCachedAccelerationReference() const;
+           
+           void setKp(const Eigen::MatrixXd& Kp);
+   
+           void setKd(const Eigen::MatrixXd& Kd);
+   
+           void setGains(const Eigen::MatrixXd& Kp, const Eigen::MatrixXd& Kd);
+   
+           const Eigen::MatrixXd& getKp() const;
+   
+           const Eigen::MatrixXd& getKd() const;
+   
+           void getGains(Eigen::MatrixXd& Kp, Eigen::MatrixXd& Kd);
+   
+           
+       private:
+           GainType _gain_type;
+   
+           Eigen::VectorXd _position_error, _velocity_error;
+           
+           const XBot::ModelInterface& _robot;
+           AffineHelper _qddot;
+           AffineHelper _postural_task;
+           
+           Eigen::VectorXd _qddot_d, _qddot_ref, _qref, _qdot, _q, _qdot_ref, _qdot_ref_cached, _qddot_ref_cached;
+           Eigen::MatrixXd _Jpostural;
+   
+           double _lambda2;
+   
+           Eigen::MatrixXd _Kp, _Kd;
+   
+           Eigen::MatrixXd _Mi;
+           
+           
+       };
+       
+       
+   } } }
+   
+   
+   
+   
+   
+   #endif

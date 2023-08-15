@@ -1,0 +1,14 @@
+.. _exhale_typedef_namespacesoth_1a95f694a0d705780b45cef2acf358ebfd:
+
+Typedef soth::VectorBound
+=========================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h`
+
+
+Typedef Documentation
+---------------------
+
+
+.. doxygentypedef:: soth::VectorBound
+   :project: OpenSoT

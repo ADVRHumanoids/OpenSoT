@@ -1,0 +1,69 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h:
+
+File qpSWIFTBackEnd.h
+=====================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/qpSWIFTBackEnd.h``)
+-------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/Task.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`)
+
+- ``OpenSoT/solvers/BackEnd.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h`)
+
+- ``OpenSoT/utils/Piler.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h`)
+
+- ``memory``
+
+- ``qpSWIFT/qpSWIFT.h``
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__solvers`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd`
+
+
+Defines
+-------
+
+
+- :ref:`exhale_define_qpSWIFTBackEnd_8h_1a116ea6cb761e6ab475f012b39f68a37a`
+

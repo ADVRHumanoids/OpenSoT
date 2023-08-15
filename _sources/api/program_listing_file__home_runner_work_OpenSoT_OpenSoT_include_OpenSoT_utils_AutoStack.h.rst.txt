@@ -1,0 +1,167 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h:
+
+Program Listing for File AutoStack.h
+====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/AutoStack.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi, Enrico Mingo
+    * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __AUTOSTACK_H__
+   #define __AUTOSTACK_H__
+   
+   #include <OpenSoT/tasks/Aggregated.h>
+   #include <OpenSoT/constraints/Aggregated.h>
+   #include <OpenSoT/solvers/iHQP.h>
+   #include <OpenSoT/tasks/velocity/Cartesian.h>
+   #include <OpenSoT/tasks/velocity/CoM.h>
+   #include <XBotInterface/Logger.hpp>
+   #include <OpenSoT/SubTask.h>
+   #include <OpenSoT/SubConstraint.h>
+   
+   namespace OpenSoT {
+       class AutoStack 
+       {
+           public:
+           typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
+           private:
+           OpenSoT::solvers::iHQP::Stack _stack;
+   
+          OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
+   
+           OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
+   
+           std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
+                   OpenSoT::solvers::iHQP::TaskPtr task);
+   
+           protected:
+               AutoStack(const double x_size);
+   
+           public:
+               AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
+   
+               AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
+                         std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
+   
+               AutoStack(OpenSoT::solvers::iHQP::Stack stack);
+   
+               AutoStack(OpenSoT::solvers::iHQP::Stack stack,
+                         std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
+   
+   
+               /*AutoStack(OpenSoT::solvers::iHQP::Stack stack,
+                         OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
+   
+               void update(const Eigen::VectorXd & state);
+   
+               void log(XBot::MatLogger2::Ptr logger);
+   
+               bool checkConsistency();
+   
+               OpenSoT::solvers::iHQP::Stack& getStack();
+   
+               std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& getBoundsList();
+   
+               void setRegularisationTask(OpenSoT::tasks::Aggregated::TaskPtr regularisation_task)
+               {
+                   _regularisation_task = regularisation_task;
+               }
+   
+               OpenSoT::tasks::Aggregated::TaskPtr getRegularisationTask()
+               {
+                   return _regularisation_task;
+               }
+   
+               void setBoundsAggregationPolicy(const unsigned int aggregationPolicy =
+                   OpenSoT::constraints::Aggregated::EQUALITIES_TO_INEQUALITIES |
+                   OpenSoT::constraints::Aggregated::UNILATERAL_TO_BILATERAL);
+   
+               OpenSoT::constraints::Aggregated::ConstraintPtr getBounds();
+   
+               OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
+               OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& task_id);
+       };
+   
+   
+   void operator/=(OpenSoT::AutoStack::Ptr& stack,
+                             const OpenSoT::tasks::Aggregated::TaskPtr task);
+   
+   
+   OpenSoT::tasks::Aggregated::TaskPtr operator*(const Eigen::MatrixXd& W,
+                                                 OpenSoT::tasks::Aggregated::TaskPtr task);
+   
+   OpenSoT::tasks::Aggregated::TaskPtr operator*(const double w,
+                                                 OpenSoT::tasks::Aggregated::TaskPtr task);
+   
+   OpenSoT::tasks::Aggregated::Ptr operator*(const double w,
+                                             OpenSoT::tasks::Aggregated::Ptr task);
+   
+   OpenSoT::SubTask::Ptr operator%(const OpenSoT::tasks::Aggregated::TaskPtr task,
+                                   const std::list<unsigned int>& rowIndices);
+   
+   OpenSoT::SubConstraint::Ptr operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr constraint,
+                                         const std::list<unsigned int>& rowIndices);
+   
+   OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
+                                               const OpenSoT::tasks::Aggregated::TaskPtr task2);
+   
+   OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ptr aggregated,
+                                               const OpenSoT::tasks::Aggregated::TaskPtr task);
+   
+   OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::TaskPtr task,
+                                               const OpenSoT::tasks::Aggregated::Ptr aggregated);
+   
+   OpenSoT::tasks::Aggregated::Ptr operator+(  const OpenSoT::tasks::Aggregated::Ptr aggregated1,
+                                               const OpenSoT::tasks::Aggregated::Ptr aggregated2);
+   
+   
+   OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task1,
+                                       const OpenSoT::tasks::Aggregated::TaskPtr task2);
+   
+   
+   OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack,
+                                       const OpenSoT::tasks::Aggregated::TaskPtr task);
+   
+   OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::tasks::Aggregated::TaskPtr task,
+                                       OpenSoT::AutoStack::Ptr stack);
+   
+   OpenSoT::AutoStack::Ptr operator/(  const OpenSoT::AutoStack::Ptr stack1,
+                                       const OpenSoT::AutoStack::Ptr stack2);
+   
+   OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
+                                                   const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
+   
+   OpenSoT::tasks::Aggregated::Ptr operator<<( OpenSoT::tasks::Aggregated::Ptr task,
+                                               const OpenSoT::constraints::Aggregated::ConstraintPtr constraint);
+   
+   OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack1,
+                                       const OpenSoT::constraints::Aggregated::ConstraintPtr bound);
+   
+   OpenSoT::tasks::Aggregated::TaskPtr operator<<( OpenSoT::tasks::Aggregated::TaskPtr task,
+                                                   const OpenSoT::tasks::Aggregated::TaskPtr constraint);
+   
+   OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr stack,
+                                       const OpenSoT::tasks::Aggregated::TaskPtr constraint);
+   
+   }
+   #endif

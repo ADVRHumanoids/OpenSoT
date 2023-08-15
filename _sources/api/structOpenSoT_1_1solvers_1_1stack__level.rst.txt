@@ -1,0 +1,17 @@
+.. _exhale_struct_structOpenSoT_1_1solvers_1_1stack__level:
+
+Struct stack_level
+==================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eHQP.h`
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: OpenSoT::solvers::stack_level
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

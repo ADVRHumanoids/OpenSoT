@@ -1,0 +1,247 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h:
+
+Program Listing for File cartesian_utils.h
+==========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/cartesian_utils.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Enrico Mingo, Alessio Rocchi,
+    * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it
+    *
+    * This program is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU Lesser General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    * GNU Lesser General Public License for more details.
+    *
+    * You should have received a copy of the GNU Lesser General Public License
+    * along with this program. If not, see <http://www.gnu.org/licenses/>
+   */
+   
+   #ifndef _CARTESIAN_UTILS_H__
+   #define _CARTESIAN_UTILS_H__
+   
+   #include <kdl/frames.hpp>
+   #include <vector>
+   #include <list>
+   #include <urdf/model.h>
+   #include <Eigen/Dense>
+   #include <Eigen/Cholesky>
+   
+   class CostFunction {
+   public:
+       virtual double compute(const Eigen::VectorXd &x) = 0;
+   };
+   
+   class GradientVector {
+       int _size;
+   public:
+       GradientVector(const int x_size) : _size(x_size) {}
+       virtual Eigen::VectorXd compute(const Eigen::VectorXd &x) = 0;
+       int size() { return _size; }
+   };
+   
+   class quaternion
+   {
+   public:
+       double x;
+       double y;
+       double z;
+       double w;
+   
+       quaternion():
+           x(0.0),
+           y(0.0),
+           z(0.0),
+           w(1.0)
+       {
+   
+       }
+   
+       quaternion(double _x, double _y, double _z, double _w):
+           x(_x),
+           y(_y),
+           z(_z),
+           w(_w)
+       {
+   
+       }
+   
+       static double dot(const quaternion& a, const quaternion& b)
+       {
+           return a.w*b.w + a.x*b.x + a.y*b.y + a.z*b.z;
+       }
+   
+       quaternion operator*(const double a)
+       {
+           quaternion q(x, y, z, w);
+   
+           q.x *= a;
+           q.y *= a;
+           q.z *= a;
+           q.w *= a;
+   
+           return q;
+       }
+   
+       KDL::Rotation skew()
+       {
+           KDL::Rotation s(0.0,  -z,   y,
+                             z, 0.0,  -x,
+                            -y,   x, 0.0);
+           return s;
+       }
+   
+       static KDL::Vector error(quaternion& q, quaternion& qd)
+       {
+           KDL::Vector e(0.0, 0.0, 0.0);
+   
+           KDL::Vector eps(q.x, q.y, q.z);
+           KDL::Vector epsd(qd.x, qd.y, qd.z);
+   
+           e = qd.w*eps - q.w*epsd + qd.skew()*eps;
+   
+           return e;
+       }
+   
+       static Eigen::Vector3d error(const double& qx,const double& qy,const double& qz,const double& qw,
+                                    const double& qdx,const double& qdy,const double& qdz,const double& qdw)
+       {
+           Eigen::Vector3d e(0.0, 0.0, 0.0);
+   
+           Eigen::Vector3d eps(qx, qy, qz);
+           Eigen::Vector3d epsd(qdx, qdy, qdz);
+   
+           Eigen::Matrix3d skew;
+           skew<<  0.0,  -qdz,  qdy,
+                qdz,   0.0, -qdx,
+               -qdy, qdx,    0.0;
+   
+           e = qdw*eps - qw*epsd + skew*eps;
+   
+           return e;
+       }
+   
+       static void normalize(quaternion& q)
+       {
+           double d = sqrt(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+           q.x = q.x/d;
+           q.y = q.y/d;
+           q.z = q.z/d;
+           q.w = q.w/d;
+       }
+   };
+   
+   template<class _Matrix_Type_> class LDLTInverse
+   {
+   public:
+       LDLTInverse(const _Matrix_Type_ &a)
+       {
+           I.resize(a.rows(), a.cols()); I.setIdentity(I.rows(), I.cols());
+       }
+       
+       void compute(const _Matrix_Type_ &a, _Matrix_Type_ &ainv)
+       {
+           LDLT.compute(a);
+           ainv = LDLT.solve(I);
+       }
+       
+   private:
+       Eigen::LDLT<_Matrix_Type_> LDLT;
+       _Matrix_Type_ I;
+   };
+   
+   
+   
+   template<class _Matrix_Type_> class SVDPseudoInverse
+   {
+   public:
+       SVDPseudoInverse(const _Matrix_Type_ &a, const double epsilon = std::numeric_limits<double>::epsilon()):
+           _epsilon(epsilon),
+           _svd(a, Eigen::ComputeThinU | Eigen::ComputeThinV)
+       {
+   
+       }
+   
+       void compute(const _Matrix_Type_ &a, _Matrix_Type_ &ainv, const double epsilon = std::numeric_limits<double>::epsilon())
+       {
+           _svd.compute(a, Eigen::ComputeThinU | Eigen::ComputeThinV);
+           _singularValues = _svd.singularValues().array().abs();
+           
+           _tolerance = epsilon * std::max(a.cols(), a.rows()) *_singularValues(0);
+           
+           for(unsigned int i = 0; i < _singularValues.size(); ++i)
+           {
+               if(_singularValues[i] < _tolerance)
+                   _singularValues[i] = 0.0;
+               else
+                   _singularValues[i] = 1./_singularValues[i];
+           }
+           
+           _tmp = _svd.matrixV() *  _singularValues.asDiagonal();
+           ainv.noalias() =  _tmp * _svd.matrixU().transpose();
+       }
+   
+       void setEpsilon(const double epsilon)
+       {
+           _epsilon = epsilon;
+       }
+   
+   private:
+       double _epsilon;
+       Eigen::JacobiSVD<_Matrix_Type_> _svd;
+       double _tolerance;
+       
+       Eigen::VectorXd _singularValues;
+       Eigen::MatrixXd _tmp;
+   };
+   
+   class cartesian_utils
+   {
+   public:
+       static int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
+       {
+           int i, j, c = 0;
+             for (i = 0, j = nvert-1; i < nvert; j = i++) {
+               if ( ((verty[i]>testy) != (verty[j]>testy)) &&
+                (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+                  c = !c;
+             }
+             return c;
+       }
+   
+       static void computePanTiltMatrix(const Eigen::VectorXd& gaze, KDL::Frame& pan_tilt_matrix);
+   
+       static void computeCartesianError(const Eigen::Matrix4d &T,
+                                         const Eigen::Matrix4d &Td,
+                                         Eigen::Vector3d& position_error,
+                                         Eigen::Vector3d& orientation_error);
+       static void computeCartesianError(const Eigen::Affine3d &T,
+                                         const Eigen::Affine3d &Td,
+                                         Eigen::Vector3d& position_error,
+                                         Eigen::Vector3d& orientation_error);
+   
+       static Eigen::VectorXd computeGradient(const Eigen::VectorXd &x,
+                                                 CostFunction &fun,
+                                                 const double &step = 1E-3);
+   
+       static Eigen::VectorXd computeGradient(const Eigen::VectorXd &x,
+                                                 CostFunction &fun,
+                                                 const std::vector<bool>& jointMask,
+                                                 const double &step = 1E-3);
+   };
+   
+   
+   
+   #endif

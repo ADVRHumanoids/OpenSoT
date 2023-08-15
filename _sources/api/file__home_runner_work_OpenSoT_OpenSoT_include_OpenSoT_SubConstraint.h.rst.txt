@@ -1,0 +1,74 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h:
+
+File SubConstraint.h
+====================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/SubConstraint.h``)
+----------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``Eigen/Dense``
+
+- ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
+
+- ``OpenSoT/utils/Indices.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Indices.h`)
+
+- ``cassert``
+
+- ``iterator``
+
+- ``list``
+
+- ``memory``
+
+- ``string``
+
+- ``vector``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1SubConstraint`
+

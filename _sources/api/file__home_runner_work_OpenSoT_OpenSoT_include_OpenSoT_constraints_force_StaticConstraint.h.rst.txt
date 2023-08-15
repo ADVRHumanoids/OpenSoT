@@ -1,0 +1,60 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h:
+
+File StaticConstraint.h
+=======================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/force``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/force/StaticConstraint.h``)
+-------------------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
+
+- ``OpenSoT/utils/Affine.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`)
+
+- ``XBotInterface/ModelInterface.h``
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__constraints`
+
+- :ref:`namespace_OpenSoT__constraints__force`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint`
+

@@ -1,0 +1,76 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h:
+
+File HCOD.h
+===========
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/HCOD.h``)
+---------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``Eigen/Dense``
+
+- ``OpenSoT/Solver.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`)
+
+- ``OpenSoT/tasks/Aggregated.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`)
+
+- ``OpenSoT/utils/AutoStack.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`)
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__solvers`
+
+- :ref:`namespace_soth`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1HCOD`
+
+
+Defines
+-------
+
+
+- :ref:`exhale_define_HCOD_8h_1ab984b6660eb2a62d534d96a72d13bf33`
+
+
+Typedefs
+--------
+
+
+- :ref:`exhale_typedef_namespacesoth_1a95f694a0d705780b45cef2acf358ebfd`
+

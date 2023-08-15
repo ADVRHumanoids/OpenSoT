@@ -1,0 +1,16 @@
+.. _dir__home_runner_work_OpenSoT_OpenSoT_include:
+
+
+Directory include
+=================
+
+
+*Directory path:* ``/home/runner/work/OpenSoT/OpenSoT/include``
+
+Subdirectories
+--------------
+
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT`
+
+
+

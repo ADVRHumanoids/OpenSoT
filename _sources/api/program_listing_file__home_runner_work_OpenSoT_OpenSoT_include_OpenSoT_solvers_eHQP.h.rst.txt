@@ -1,0 +1,71 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eHQP.h:
+
+Program Listing for File eHQP.h
+===============================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eHQP.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/eHQP.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __SOLVERS_PSEUDOINVERSE__
+   #define __SOLVERS__PSEUDOINVERSE__
+   
+   #include <OpenSoT/Solver.h>
+   #include <Eigen/Dense>
+   #include <Eigen/src/Core/util/Macros.h>
+   #include <OpenSoT/tasks/Aggregated.h>
+   
+   #if EIGEN_MINOR_VERSION <= 0
+   #include <Eigen/LU>
+   #endif
+   
+   namespace OpenSoT{
+       namespace solvers{
+       struct stack_level
+       {
+           Eigen::MatrixXd _P;
+           Eigen::MatrixXd _JP;
+           Eigen::MatrixXd _JPpinv;
+           Eigen::JacobiSVD<Eigen::MatrixXd> _JPsvd;
+   #if EIGEN_MINOR_VERSION <= 0
+           Eigen::FullPivLU<Eigen::MatrixXd> _FPL;
+   #endif
+           Eigen::LLT<Eigen::MatrixXd> _WChol;
+       };
+       class eHQP : public OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>
+       {
+           int _x_size;
+           std::vector<stack_level> _stack_levels;
+   
+           #if EIGEN_MINOR_VERSION <= 0
+           Eigen::MatrixXd getDampedPinv(  const Eigen::MatrixXd& J,
+                                   const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
+                                   const Eigen::FullPivLU<Eigen::MatrixXd>& fpl) const;
+           #else
+           Eigen::MatrixXd getDampedPinv(  const Eigen::MatrixXd& J,
+                                           const Eigen::JacobiSVD<Eigen::MatrixXd>& svd) const;
+           #endif
+                                           
+           double sigma_min;
+   
+           void printProblemInformation(const int problem_number, const std::string& problem_id,
+                                        const std::string& constraints_id, const std::string& bounds_id);
+   
+       public:
+           typedef std::shared_ptr<eHQP> Ptr;
+           eHQP(Stack& stack);
+           
+           bool solve(Eigen::VectorXd& solution);
+           
+           
+           double getSigmaMin() const;
+           
+           void setSigmaMin(const double& sigma_min);        
+       };
+   }
+   }
+   
+   #endif

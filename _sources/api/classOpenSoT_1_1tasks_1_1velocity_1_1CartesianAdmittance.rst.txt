@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance:
+
+Class CartesianAdmittance
+=========================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::tasks::velocity::Cartesian`` (:ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::tasks::velocity::CartesianAdmittance
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

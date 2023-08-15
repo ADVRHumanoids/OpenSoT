@@ -1,0 +1,14 @@
+.. _exhale_define_proxQPBackEnd_8h_1a2569c95d1abf790d88a7647864ea8c7a:
+
+Define PROXQP_DEFAULT_EPS_REGULARISATION
+========================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_proxQPBackEnd.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: PROXQP_DEFAULT_EPS_REGULARISATION
+   :project: OpenSoT

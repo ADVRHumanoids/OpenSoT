@@ -1,0 +1,86 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h:
+
+Program Listing for File convex_hull_utils.h
+============================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/convex_hull_utils.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi, Enrico Mingo
+    * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+    *
+    * This program is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU Lesser General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    * GNU Lesser General Public License for more details.
+    *
+    * You should have received a copy of the GNU Lesser General Public License
+    * along with this program. If not, see <http://www.gnu.org/licenses/>
+   */
+   
+   #ifndef _CONVEX_HULL_H__
+   #define _CONVEX_HULL_H__
+   
+   #include <pcl/point_cloud.h>
+   #include <pcl/point_types.h>
+   #include <kdl/frames.hpp>
+   #include <pcl/ModelCoefficients.h>
+   #include <pcl/sample_consensus/method_types.h>
+   #include <pcl/sample_consensus/model_types.h>
+   #include <pcl/filters/passthrough.h>
+   #include <pcl/filters/project_inliers.h>
+   #include <pcl/surface/concave_hull.h>
+   #include <XBotInterface/ModelInterface.h>
+   
+   class convex_hull
+   {
+   public:
+       convex_hull();
+       ~convex_hull();
+   
+       bool getSupportPolygonPoints(std::list<KDL::Vector>& points,
+                                    const std::list<std::string> links_in_contact,
+                                    const XBot::ModelInterface& model,
+                                    const std::string referenceFrame = "COM");
+   
+       bool getConvexHull(const std::list<KDL::Vector>& points,
+                                std::vector<KDL::Vector>& ch);
+       //void setRansacDistanceThr(const double x){_ransac_distance_thr = x;}
+   
+   private:
+       double _ransac_distance_thr;
+       pcl::PointCloud<pcl::PointXYZ>::Ptr _pointCloud;
+       pcl::PointCloud<pcl::PointXYZ>::Ptr _projectedPointCloud;
+   
+       KDL::Frame world_T_CoM;
+       KDL::Frame world_T_point;
+       KDL::Frame referenceFrame_T_point;
+       KDL::Frame CoM_T_point;
+       pcl::PointXYZ _tmp_pcl;
+       pcl::PointCloud<pcl::PointXYZ> pointsInConvexHull;
+       std::vector<pcl::Vertices> indicesOfVertexes;
+       pcl::ConvexHull<pcl::PointXYZ> huller;
+       KDL::Vector _tmp_vector;
+       pcl::ProjectInliers<pcl::PointXYZ> proj;
+   
+       void projectPCL2Plane(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
+                             const double ransac_distance_thr,
+                             pcl::PointCloud<pcl::PointXYZ>::Ptr projected_point_cloud);
+   
+   
+       void printIndexAndPointsInfo(const pcl::PointCloud<pcl::PointXYZ>& pointsInConvexHull,
+                                    const std::vector<pcl::Vertices>& indicesOfVertexes);
+   };
+   
+   #endif

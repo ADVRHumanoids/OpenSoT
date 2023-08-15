@@ -1,0 +1,58 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h:
+
+File CartesianAdmittance.h
+==========================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity/CartesianAdmittance.h``)
+-------------------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/tasks/velocity/Cartesian.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`)
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__tasks`
+
+- :ref:`namespace_OpenSoT__tasks__velocity`
+
+- :ref:`namespace_XBot__Utils`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance`
+

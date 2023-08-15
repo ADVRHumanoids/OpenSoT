@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class TaskToConstraint &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class CartesianPositionConstraint" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html" />
+    <link rel="prev" title="Class GenericConstraint" href="classOpenSoT_1_1constraints_1_1GenericConstraint.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class TaskToConstraint</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1constraints_1_1TaskToConstraint.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-tasktoconstraint">
+<span id="exhale-class-classopensot-1-1constraints-1-1tasktoconstraint"></span><h1>Class TaskToConstraint<a class="headerlink" href="#class-tasktoconstraint" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_TaskToConstraint.h.html#file-home-runner-work-opensot-opensot-include-opensot-constraints-tasktoconstraint-h"><span class="std std-ref">File TaskToConstraint.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::constraints::BilateralConstraint</span></code> (<a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#exhale-class-classopensot-1-1constraints-1-1bilateralconstraint"><span class="std std-ref">Class BilateralConstraint</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraintE">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraintE"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraintE"></span><span id="OpenSoT::constraints::TaskToConstraint"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TaskToConstraint</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#_CPPv4N7OpenSoT11constraints19BilateralConstraintE" title="OpenSoT::constraints::BilateralConstraint"><span class="n"><span class="pre">BilateralConstraint</span></span></a><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraintE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1constraints_1_1TaskToConstraint"><span class="std std-ref">TaskToConstraint</span></a> class transforms a task into an inequality constraint which bounds the error in between err_lb and err_ub. </p>
+<p><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#classOpenSoT_1_1constraints_1_1BilateralConstraint"><span class="std std-ref">BilateralConstraint</span></a>: <span class="math notranslate nohighlight">\( b + err_lb &lt;= A*x &lt;= b + err_ub \)</span></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraint7TaskPtrE">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraint7TaskPtrE"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraint7TaskPtrE"></span><span id="OpenSoT::constraints::TaskToConstraint::TaskPtr"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint_1ae7d42fc7413ea2670c5c0de6f93e42e8"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TaskPtr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraint3PtrE">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraint3PtrE"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraint3PtrE"></span><span id="OpenSoT::constraints::TaskToConstraint::Ptr"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint_1a9fd0317be1683ab7611a29cc80463cd5"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraintE" title="OpenSoT::constraints::TaskToConstraint"><span class="n"><span class="pre">TaskToConstraint</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtr">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtr"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtr"></span><span id="OpenSoT::constraints::TaskToConstraint::TaskToConstraint__TaskPtr"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint_1a9f3ad709ffd1d9c7af7daa46c6adbcf6"></span><span class="sig-name descname"><span class="n"><span class="pre">TaskToConstraint</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint7TaskPtrE" title="OpenSoT::constraints::TaskToConstraint::TaskPtr"><span class="n"><span class="pre">TaskPtr</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">task</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtr" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1constraints_1_1TaskToConstraint"><span class="std std-ref">TaskToConstraint</span></a> creates an equality <a class="reference internal" href="#classOpenSoT_1_1constraints_1_1TaskToConstraint"><span class="std std-ref">TaskToConstraint</span></a> from a task Calling update on the constraint will also update the task. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtrRKN5Eigen8VectorXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtrRKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtrRKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::constraints::TaskToConstraint::TaskToConstraint__TaskPtr.Eigen::VectorXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint_1acd80ba68e318f816cb2ae3830678a78d"></span><span class="sig-name descname"><span class="n"><span class="pre">TaskToConstraint</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint7TaskPtrE" title="OpenSoT::constraints::TaskToConstraint::TaskPtr"><span class="n"><span class="pre">TaskPtr</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">task</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">err_lb</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">err_ub</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint16TaskToConstraintE7TaskPtrRKN5Eigen8VectorXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1constraints_1_1TaskToConstraint"><span class="std std-ref">TaskToConstraint</span></a> creates a <a class="reference internal" href="#classOpenSoT_1_1constraints_1_1TaskToConstraint"><span class="std std-ref">TaskToConstraint</span></a> from a task Calling update on the constraint will also update the task. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraint6updateERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraint6updateERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraint6updateERKN5Eigen8VectorXdE"></span><span id="OpenSoT::constraints::TaskToConstraint::update__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint_1a08233b0c5ab64c1aac1897412be5bcdf"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint6updateERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>update updates the adapted task and the adapter constraint </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraint11generateAllEv">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraint11generateAllEv"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraint11generateAllEv"></span><span id="OpenSoT::constraints::TaskToConstraint::generateAll"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint_1a4cc78a6c914790ea82305f3c4e49267d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">generateAll</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint11generateAllEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints16TaskToConstraint4_logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT11constraints16TaskToConstraint4_logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT11constraints16TaskToConstraint4_logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::constraints::TaskToConstraint::_log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1constraints_1_1TaskToConstraint_1ab954d51ee5b56def1936cd4ca5769106"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints16TaskToConstraint4_logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_log can be used to log internal <a class="reference internal" href="classOpenSoT_1_1Constraint.html#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – a shared pointer to a MatLogger </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1constraints_1_1GenericConstraint.html" class="btn btn-neutral float-left" title="Class GenericConstraint" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html" class="btn btn-neutral float-right" title="Class CartesianPositionConstraint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,68 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h:
+
+File Force.h
+============
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/force``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/force/Force.h``)
+--------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/Task.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`)
+
+- ``OpenSoT/tasks/Aggregated.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`)
+
+- ``OpenSoT/tasks/MinimizeVariable.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`)
+
+- ``OpenSoT/utils/Affine.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`)
+
+- ``OpenSoT/utils/AutoStack.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`)
+
+- ``memory``
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__tasks`
+
+- :ref:`namespace_OpenSoT__tasks__force`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1force_1_1Wrench`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1force_1_1Wrenches`
+

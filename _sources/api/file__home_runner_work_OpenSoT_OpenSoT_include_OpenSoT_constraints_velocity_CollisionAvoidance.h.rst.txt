@@ -1,0 +1,77 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h:
+
+File CollisionAvoidance.h
+=========================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/velocity``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/velocity/CollisionAvoidance.h``)
+------------------------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``Eigen/Dense``
+
+- ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
+
+- ``OpenSoT/tasks/velocity/Cartesian.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`)
+
+- ``XBotInterface/ModelInterface.h``
+
+- ``moveit_msgs/PlanningSceneWorld.h``
+
+- ``srdfdom/model.h``
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_fcl`
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__constraints`
+
+- :ref:`namespace_OpenSoT__constraints__velocity`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classfcl_1_1CollisionObject`
+
+- :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance`
+
+
+Typedefs
+--------
+
+
+- :ref:`exhale_typedef_namespacefcl_1ad8615572c5e4ddaf74ecafd812f6798d`
+

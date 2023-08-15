@@ -1,0 +1,17 @@
+.. _exhale_class_classLinkPairDistance:
+
+Class LinkPairDistance
+======================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: LinkPairDistance
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

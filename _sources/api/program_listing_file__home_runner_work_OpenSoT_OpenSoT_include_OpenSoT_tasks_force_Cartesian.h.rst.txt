@@ -1,0 +1,87 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Cartesian.h:
+
+Program Listing for File Cartesian.h
+====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Cartesian.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/force/Cartesian.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __OPENSOT_FORCE_TASK_CARTESIAN_H__
+   #define __OPENSOT_FORCE_TASK_CARTESIAN_H__
+   
+   #include <OpenSoT/Task.h>
+   #include <OpenSoT/utils/Affine.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <XBotInterface/Utils.h>
+   
+   namespace OpenSoT { namespace tasks { namespace force {
+    
+     class Cartesian : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
+     
+     public:
+     
+       typedef std::shared_ptr<Cartesian> Ptr;
+       
+       Cartesian(const std::string task_id, 
+             const XBot::ModelInterface& robot,
+             const std::string& distal_link,
+             const std::string& base_link,
+             const AffineHelper& wrench);
+       
+       void resetReference();
+       
+       void setReference(const Eigen::Affine3d& pose_ref);
+       void setReference(const Eigen::Affine3d& pose_ref, Eigen::Vector6d& vel_ref);
+       
+       void setForceReference(const Eigen::Vector6d& _force_ref);
+       
+       void getReference(Eigen::Affine3d& pose_des);
+       void getReference(Eigen::Affine3d& pose_des, Eigen::Vector6d& twist_des);
+       
+       void setCartesianStiffness(const Eigen::Matrix6d& Kp);
+       void setCartesianDamping(const Eigen::Matrix6d& Kd);
+       
+       void getCartesianStiffness(Eigen::Matrix6d& Kp);
+       void getCartesianDamping(Eigen::Matrix6d& Kd);
+       
+       const std::string& getBaseLink() const { return _base_link;}
+   
+       const std::string& getDistalLink() const { return _distal_link;}
+     
+     private:
+     
+       static const std::string world_name;
+       
+       virtual void _update(const Eigen::VectorXd& x);
+       virtual void _log(XBot::MatLogger2::Ptr logger);
+       
+       const XBot::ModelInterface& _robot;
+       std::string _base_link, _distal_link;
+       
+       Eigen::Affine3d _pose_current, _pose_ref;
+       Eigen::Vector6d _pose_error, _vel_error, _vel_ref, _vel_current;
+       Eigen::Vector6d _virtual_force, _force_desired;
+       Eigen::Vector3d _orientation_error;
+       
+       
+       //Eigen::Vector6d _jodoqdot, _acc_ref;
+       //Eigen::Matrix6d _CartesianInertia;
+       
+       Eigen::Matrix6d _Kp, _Kd;
+       
+       AffineHelper _wrench;
+       AffineHelper _cartesian_task;
+       Eigen::Matrix6d I;
+       
+       
+     };
+     
+   } 
+   } 
+   }
+   
+   #endif

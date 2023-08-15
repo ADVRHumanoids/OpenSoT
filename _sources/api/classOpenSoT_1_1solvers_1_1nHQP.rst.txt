@@ -1,0 +1,36 @@
+.. _exhale_class_classOpenSoT_1_1solvers_1_1nHQP:
+
+Class nHQP
+==========
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h`
+
+
+Nested Relationships
+--------------------
+
+
+Nested Types
+************
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::Solver< Eigen::MatrixXd, Eigen::VectorXd >`` (:ref:`exhale_class_classOpenSoT_1_1Solver`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::solvers::nHQP
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

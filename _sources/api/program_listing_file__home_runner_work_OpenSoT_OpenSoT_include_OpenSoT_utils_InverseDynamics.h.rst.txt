@@ -1,0 +1,66 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h:
+
+Program Listing for File InverseDynamics.h
+==========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/InverseDynamics.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef _OPENSOT_INVERSE_DYNAMICS_H_
+   #define _OPENSOT_INVERSE_DYNAMICS_H_
+   
+   #include <OpenSoT/utils/Affine.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <OpenSoT/utils/AutoStack.h>
+   
+   namespace OpenSoT {
+   namespace utils{
+   
+   class InverseDynamics{
+   
+   public:
+       typedef std::shared_ptr<InverseDynamics> Ptr;
+   
+       enum CONTACT_MODEL{
+           POINT_CONTACT, // only Forces (3 dofs)
+           SURFACE_CONTACT //Forces and Moments (6 dofs)
+       };
+   
+       InverseDynamics(const std::vector<std::string> links_in_contact,
+                       XBot::ModelInterface& model, const CONTACT_MODEL& contact_model = CONTACT_MODEL::SURFACE_CONTACT);
+   
+       const AffineHelper& getJointsAccelerationAffine() const;
+   
+       const std::vector<AffineHelper>& getContactsWrenchAffine() const;
+   
+       const std::shared_ptr<OpenSoT::OptvarHelper> getSerializer() const;
+   
+       bool computedTorque(const Eigen::VectorXd& x, Eigen::VectorXd& tau,
+                           Eigen::VectorXd& qddot, std::vector<Eigen::Vector6d>& contact_wrench);
+       
+       
+   
+       void log(XBot::MatLogger2::Ptr& logger);
+   
+   private:
+       AffineHelper    _qddot;
+       std::vector<AffineHelper> _contacts_wrench;
+       std::vector<std::string> _links_in_contact;
+       XBot::ModelInterface& _model;
+       std::shared_ptr<OpenSoT::OptvarHelper> _serializer;
+   
+       Eigen::VectorXd _qddot_val;
+       std::vector<Eigen::Vector6d> _contacts_wrench_val;
+       std::vector<Eigen::MatrixXd> _Jc;
+       Eigen::VectorXd _tau_val;
+   
+   };
+   
+   }
+   }
+   
+   #endif

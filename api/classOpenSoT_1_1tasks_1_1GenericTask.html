@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class GenericTask &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class MinimizeVariable" href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html" />
+    <link rel="prev" title="Class GenericLPTask" href="classOpenSoT_1_1tasks_1_1GenericLPTask.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class GenericTask</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1tasks_1_1GenericTask.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-generictask">
+<span id="exhale-class-classopensot-1-1tasks-1-1generictask"></span><h1>Class GenericTask<a class="headerlink" href="#class-generictask" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h.html#file-home-runner-work-opensot-opensot-include-opensot-tasks-generictask-h"><span class="std std-ref">File GenericTask.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::Task&lt;</span> <span class="pre">Eigen::MatrixXd,</span> <span class="pre">Eigen::VectorXd</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="classOpenSoT_1_1Task.html#exhale-class-classopensot-1-1task"><span class="std std-ref">Template Class Task</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTaskE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTaskE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTaskE"></span><span id="OpenSoT::tasks::GenericTask"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GenericTask</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTaskE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1GenericTask"><span class="std std-ref">GenericTask</span></a> class implements a task where the A and b matrix can be updated outside the task itself, the task has the generic form: </p>
+<p>||Ax - b|| + c’x </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask3PtrE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask3PtrE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask3PtrE"></span><span id="OpenSoT::tasks::GenericTask::Ptr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1a6171316266f0c746414c1314293c69a0"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5tasks11GenericTaskE" title="OpenSoT::tasks::GenericTask"><span class="n"><span class="pre">GenericTask</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::GenericTask::GenericTask__ssCR.Eigen::MatrixXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1a00d0c0bfc94c0d0d4c30a79087e3d846"></span><span class="sig-name descname"><span class="n"><span class="pre">GenericTask</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">task_id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1tasks_1_1GenericTask"><span class="std std-ref">GenericTask</span></a> constructor. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – name of the task </p></li>
+<li><p><strong>A</strong> – matrix </p></li>
+<li><p><strong>b</strong> – vector </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERK12AffineHelper">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERK12AffineHelper"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERK12AffineHelper"></span><span id="OpenSoT::tasks::GenericTask::GenericTask__ssCR.Eigen::MatrixXdCR.Eigen::VectorXdCR.AffineHelperCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1a8a48afecb663484add6e0009101ceaa9"></span><span class="sig-name descname"><span class="n"><span class="pre">GenericTask</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">task_id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">b</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb.html#_CPPv4N7OpenSoT12AffineHelperE" title="OpenSoT::AffineHelper"><span class="n"><span class="pre">AffineHelper</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">var</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask11GenericTaskERKNSt6stringERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERK12AffineHelper" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1tasks_1_1GenericTask"><span class="std std-ref">GenericTask</span></a> constructor. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – name of the task </p></li>
+<li><p><strong>A</strong> – matrix </p></li>
+<li><p><strong>b</strong> – vector </p></li>
+<li><p><strong>var</strong> – variable </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTaskD0Ev">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTaskD0Ev"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTaskD0Ev"></span><span id="OpenSoT::tasks::GenericTask::~GenericTask"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1a1f1f66d3846ca8923410c6ee88d999c0"></span><span class="sig-name descname"><span class="n"><span class="pre">~GenericTask</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTaskD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask7_updateERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask7_updateERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask7_updateERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::GenericTask::_update__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1ac16c5f23f98f2b33dcbddc3fc56a956b"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask7_updateERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Updates the A, b, Aeq, beq, Aineq, b*Bound matrices. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – variable state at the current step (input) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask4setAERKN5Eigen8MatrixXdE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask4setAERKN5Eigen8MatrixXdE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask4setAERKN5Eigen8MatrixXdE"></span><span id="OpenSoT::tasks::GenericTask::setA__Eigen::MatrixXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1abd8c3a3e9f5d0957427ac9688bee3307"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setA</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask4setAERKN5Eigen8MatrixXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setA update the A matrix of the task </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>A</strong> – matrix </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if A.rows() != b.size() </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask4setbERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask4setbERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask4setbERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::GenericTask::setb__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1a55cd1eb51ffba7abc59e34975dc639f4"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setb</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask4setbERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setb update the b matrix of the task </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>b</strong> – vector </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if b.size() != A.rows() </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask5setAbERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask5setAbERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask5setAbERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::GenericTask::setAb__Eigen::MatrixXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1a1dec0dc4d0570c3d088460e3d745a744"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setAb</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask5setAbERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setAb update A and b of the task </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> – matrix </p></li>
+<li><p><strong>b</strong> – vector </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if A.rows() != b.size() NOTE: this is NOT RT-SAFE! </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask4setcERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask4setcERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask4setcERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::GenericTask::setc__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1a62d4bc30d87f19254ee813c3f5a74bbd"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setc</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask4setcERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setc update the c of the task </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c</strong> – vector </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if c.size() != b.size() </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks11GenericTask14setHessianTypeEK11HessianType">
+<span id="_CPPv3N7OpenSoT5tasks11GenericTask14setHessianTypeEK11HessianType"></span><span id="_CPPv2N7OpenSoT5tasks11GenericTask14setHessianTypeEK11HessianType"></span><span id="OpenSoT::tasks::GenericTask::setHessianType__HessianTypeC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1GenericTask_1acb52d12c8f73a5e35a8dfe4a77e87bb3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setHessianType</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#_CPPv4N7OpenSoT11HessianTypeE" title="OpenSoT::HessianType"><span class="n"><span class="pre">HessianType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">hessian_type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks11GenericTask14setHessianTypeEK11HessianType" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setHessianType </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>hessian_type</strong> – enum HessianType { HST_ZERO, &lt; Hessian is zero matrix (i.e. LP formulation). HST_IDENTITY, &lt; Hessian is identity matrix. HST_POSDEF, &lt; Hessian is (strictly) positive definite. HST_POSDEF_NULLSPACE, &lt; Hessian is positive definite on null space of active bounds/constraints. HST_SEMIDEF, &lt; Hessian is positive semi-definite. HST_UNKNOWN &lt; Hessian type is unknown. }; </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1tasks_1_1GenericLPTask.html" class="btn btn-neutral float-left" title="Class GenericLPTask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html" class="btn btn-neutral float-right" title="Class MinimizeVariable" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

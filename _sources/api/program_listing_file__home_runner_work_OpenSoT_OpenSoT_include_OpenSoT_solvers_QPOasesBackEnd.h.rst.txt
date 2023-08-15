@@ -1,0 +1,112 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h:
+
+Program Listing for File QPOasesBackEnd.h
+=========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/QPOasesBackEnd.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef _WB_SOT_SOLVERS_QP_OASES_BE_H_
+   #define _WB_SOT_SOLVERS_QP_OASES_BE_H_
+   
+   #include <OpenSoT/solvers/BackEnd.h>
+   #include <memory>
+   
+   #define QPOASES_DEFAULT_EPS_REGULARISATION 2E2
+   
+   namespace qpOASES {
+       class SQProblem;
+       class Options;
+       class Bounds;
+       class Constraints;
+   }
+   
+   namespace OpenSoT{
+       namespace solvers{
+   
+       class QPOasesBackEnd:  public BackEnd{
+       public:
+           QPOasesBackEnd(const int number_of_variables,
+                          const int number_of_constraints,
+                          OpenSoT::HessianType hessian_type = OpenSoT::HST_UNKNOWN,
+                          const double eps_regularisation = QPOASES_DEFAULT_EPS_REGULARISATION); //2E2
+   
+           ~QPOasesBackEnd();
+   
+           void setDefaultOptions();
+   
+           const std::shared_ptr<qpOASES::SQProblem>& getProblem(){return _problem;}
+   
+           virtual boost::any getOptions();
+   
+           virtual void setOptions(const boost::any& options);
+   
+           virtual bool initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                           const Eigen::MatrixXd& A,
+                           const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
+                           const Eigen::VectorXd& l, const Eigen::VectorXd& u);
+   
+           virtual bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
+   
+           virtual bool updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
+                                  const Eigen::Ref<const Eigen::VectorXd> &lA, 
+                                  const Eigen::Ref<const Eigen::VectorXd> &uA);
+   
+   
+           virtual bool solve();
+   
+   
+           OpenSoT::HessianType getHessianType();
+   
+           void setHessianType(const OpenSoT::HessianType ht);
+   
+           int getnWSR(){return _nWSR;}
+   
+           void setnWSR(const int nWSR){_nWSR = nWSR;}
+   
+           const qpOASES::Bounds& getActiveBounds(){return *_bounds;}
+   
+           const qpOASES::Constraints& getActiveConstraints(){return *_constraints;}
+   
+   
+           virtual void _printProblemInformation();
+   
+           virtual double getObjective();
+   
+           bool setEpsRegularisation(const double eps);
+   
+           virtual double getEpsRegularisation()
+           {
+               return _epsRegularisation;
+           }
+   
+       protected:
+           void printConstraintsInfo();
+   
+           void checkINFTY();
+   
+           std::shared_ptr<qpOASES::SQProblem> _problem;
+   
+           std::shared_ptr<qpOASES::Bounds> _bounds;
+   
+           std::shared_ptr<qpOASES::Constraints> _constraints;
+   
+           int _nWSR;
+   
+           double _epsRegularisation;
+   
+   
+           std::shared_ptr<qpOASES::Options> _opt;
+   
+           Eigen::VectorXd _dual_solution;
+           
+           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> _A_rm;
+   
+       };
+       }
+   }
+   #endif

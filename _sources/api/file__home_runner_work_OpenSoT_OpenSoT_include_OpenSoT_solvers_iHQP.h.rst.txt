@@ -1,0 +1,83 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h:
+
+File iHQP.h
+===========
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/iHQP.h``)
+---------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/Solver.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`)
+
+- ``OpenSoT/Task.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`)
+
+- ``OpenSoT/constraints/Aggregated.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h`)
+
+- ``OpenSoT/solvers/BackEndFactory.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`)
+
+- ``OpenSoT/utils/Piler.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h`)
+
+- ``iostream``
+
+- ``memory``
+
+- ``vector``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__solvers`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1iHQP`
+
+
+Defines
+-------
+
+
+- :ref:`exhale_define_iHQP_8h_1af2ad25eb08eeeb4c02bdd5484dac1272`
+

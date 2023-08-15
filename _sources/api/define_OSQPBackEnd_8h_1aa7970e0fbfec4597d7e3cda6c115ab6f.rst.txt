@@ -1,0 +1,14 @@
+.. _exhale_define_OSQPBackEnd_8h_1aa7970e0fbfec4597d7e3cda6c115ab6f:
+
+Define OSQP_DEFAULT_EPS_REGULARISATION
+======================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: OSQP_DEFAULT_EPS_REGULARISATION
+   :project: OpenSoT

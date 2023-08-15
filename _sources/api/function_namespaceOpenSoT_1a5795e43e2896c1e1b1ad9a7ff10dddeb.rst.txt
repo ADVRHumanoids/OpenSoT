@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb:
+
+Function OpenSoT::operator+(const OpenSoT::tasks::Aggregated::Ptr, const OpenSoT::tasks::Aggregated::Ptr)
+=========================================================================================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::operator+(const OpenSoT::tasks::Aggregated::Ptr, const OpenSoT::tasks::Aggregated::Ptr)
+   :project: OpenSoT

@@ -1,0 +1,75 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_TaskToConstraint.h:
+
+Program Listing for File TaskToConstraint.h
+===========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_TaskToConstraint.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/TaskToConstraint.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi
+    * email:  alessio.rocchi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __BOUNDS_TASKTOCONSTRAINT_H__
+   #define __BOUNDS_TASKTOCONSTRAINT_H__
+   
+   #include <OpenSoT/constraints/BilateralConstraint.h>
+   #include <OpenSoT/Task.h>
+   
+   #include <list>
+   
+   
+    namespace OpenSoT {
+       namespace constraints {
+   
+           class TaskToConstraint: public BilateralConstraint {
+           public:
+               typedef std::shared_ptr< OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> > TaskPtr;
+               typedef std::shared_ptr< OpenSoT::constraints::TaskToConstraint> Ptr;
+   
+           private:
+               
+               TaskPtr _task;
+               
+               Eigen::VectorXd _err_lb, _err_ub;
+   
+           public:
+   
+               TaskToConstraint(TaskPtr task);
+               
+               TaskToConstraint(TaskPtr task, 
+                                const Eigen::VectorXd& err_lb, 
+                                const Eigen::VectorXd& err_ub);
+   
+               void update(const Eigen::VectorXd &q);
+   
+           protected:
+   
+               void generateAll();
+   
+               virtual void _log(XBot::MatLogger2::Ptr logger)
+               {
+                   _task->log(logger);
+               }
+           };
+       }
+    }
+   
+   #endif

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File Affine.h &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File Affine.h</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="program-listing-for-file-affine-h">
+<span id="program-listing-file-home-runner-work-opensot-opensot-include-opensot-utils-affine-h"></span><h1>Program Listing for File Affine.h<a class="headerlink" href="#program-listing-for-file-affine-h" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-affine-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/Affine.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Copyright (C) 2017 IIT-ADVR</span>
+<span class="cm"> * Author: Arturo Laurenzi</span>
+<span class="cm"> * email:  arturo.laurenzi.it</span>
+<span class="cm"> * Permission is granted to copy, distribute, and/or modify this program</span>
+<span class="cm"> * under the terms of the GNU Lesser General Public License, version 2 or any</span>
+<span class="cm"> * later version published by the Free Software Foundation.</span>
+<span class="cm"> *</span>
+<span class="cm"> * A copy of the license can be found at</span>
+<span class="cm"> * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html</span>
+<span class="cm"> *</span>
+<span class="cm"> * This program is distributed in the hope that it will be useful, but</span>
+<span class="cm"> * WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="cm"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General</span>
+<span class="cm"> * Public License for more details</span>
+<span class="cm"> *</span>
+<span class="cm">*/</span>
+
+<span class="cp">#ifndef __OPENSOT_AFFINEHELPER_H__</span>
+<span class="cp">#define __OPENSOT_AFFINEHELPER_H__</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;map&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;type_traits&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+
+
+<span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span>
+
+
+
+<span class="cm">/* Base class for AffineHelpers */</span>
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">DerivedM</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedQ</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">AffineHelperBase</span> <span class="p">{</span>
+
+<span class="k">public</span><span class="o">:</span>
+
+    <span class="k">typedef</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">remove_reference</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="o">&gt;::</span><span class="n">type</span> <span class="o">*</span> <span class="n">PtrM</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">remove_reference</span><span class="o">&lt;</span><span class="n">DerivedQ</span><span class="o">&gt;::</span><span class="n">type</span> <span class="o">*</span> <span class="n">PtrQ</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">remove_reference</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="o">&gt;::</span><span class="n">type</span> <span class="k">const</span> <span class="o">*</span> <span class="n">ConstPtrM</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">remove_reference</span><span class="o">&lt;</span><span class="n">DerivedQ</span><span class="o">&gt;::</span><span class="n">type</span> <span class="k">const</span> <span class="o">*</span> <span class="n">ConstPtrQ</span><span class="p">;</span>
+
+
+    <span class="n">AffineHelperBase</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="n">AffineHelperBase</span><span class="p">(</span><span class="kt">int</span> <span class="n">input_size</span><span class="p">,</span> <span class="kt">int</span> <span class="n">output_size</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">setZero</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">AffineHelperBase</span><span class="p">(</span><span class="k">const</span> <span class="n">DerivedM</span><span class="o">&amp;</span> <span class="n">M</span><span class="p">,</span> <span class="k">const</span> <span class="n">DerivedQ</span><span class="o">&amp;</span> <span class="n">q</span><span class="p">)</span><span class="o">:</span> <span class="n">_M</span><span class="p">(</span><span class="n">M</span><span class="p">),</span> <span class="n">_q</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">check_consistency</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">setM</span><span class="p">(</span><span class="k">const</span> <span class="n">DerivedM</span><span class="o">&amp;</span> <span class="n">M</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_M</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">M</span><span class="p">;</span>
+        <span class="n">check_consistency</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">setq</span><span class="p">(</span><span class="k">const</span> <span class="n">DerivedQ</span><span class="o">&amp;</span> <span class="n">q</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_q</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">q</span><span class="p">;</span>
+        <span class="n">check_consistency</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">set</span><span class="p">(</span><span class="k">const</span> <span class="n">DerivedM</span><span class="o">&amp;</span> <span class="n">M</span><span class="p">,</span> <span class="k">const</span> <span class="n">DerivedQ</span><span class="o">&amp;</span> <span class="n">q</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_M</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">M</span><span class="p">;</span>
+        <span class="n">_q</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">q</span><span class="p">;</span>
+        <span class="n">check_consistency</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">OtherM</span><span class="p">,</span> <span class="k">typename</span> <span class="n">OtherQ</span><span class="o">&gt;</span>
+    <span class="n">AffineHelperBase</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">OtherM</span><span class="p">,</span> <span class="n">OtherQ</span><span class="o">&gt;&amp;</span> <span class="n">other</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="o">*</span><span class="k">this</span> <span class="o">=</span> <span class="n">other</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">OtherM</span><span class="p">,</span> <span class="k">typename</span> <span class="n">OtherQ</span><span class="o">&gt;</span>
+    <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="p">,</span> <span class="n">DerivedQ</span><span class="o">&gt;&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">OtherM</span><span class="p">,</span> <span class="n">OtherQ</span><span class="o">&gt;&amp;</span> <span class="n">other</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_M</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">other</span><span class="p">.</span><span class="n">getM</span><span class="p">();</span>
+        <span class="n">_q</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">other</span><span class="p">.</span><span class="n">getq</span><span class="p">();</span>
+        <span class="n">check_consistency</span><span class="p">();</span>
+        <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">OtherM</span><span class="p">,</span> <span class="k">typename</span> <span class="n">OtherQ</span><span class="o">&gt;</span>
+    <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="p">,</span> <span class="n">DerivedQ</span><span class="o">&gt;&amp;</span> <span class="k">operator</span><span class="o">+=</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">OtherM</span><span class="p">,</span> <span class="n">OtherQ</span><span class="o">&gt;&amp;</span> <span class="n">other</span><span class="p">);</span>
+
+    <span class="k">const</span> <span class="n">DerivedM</span><span class="o">&amp;</span> <span class="n">getM</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_M</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">const</span> <span class="n">DerivedQ</span><span class="o">&amp;</span> <span class="n">getq</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_q</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="kt">int</span> <span class="n">getInputSize</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_M</span><span class="p">.</span><span class="n">cols</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">getOutputSize</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_M</span><span class="p">.</span><span class="n">rows</span><span class="p">();</span> <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">setZero</span><span class="p">(</span><span class="kt">int</span> <span class="n">input_size</span><span class="p">,</span> <span class="kt">int</span> <span class="n">output_size</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_M</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_size</span><span class="p">);</span>
+        <span class="n">_q</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="n">output_size</span><span class="p">);</span>
+        <span class="n">check_consistency</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">setZero</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">_M</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="n">_M</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">_M</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+        <span class="n">_q</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="n">_q</span><span class="p">.</span><span class="n">rows</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="p">,</span> <span class="n">DerivedQ</span><span class="o">&gt;</span> <span class="n">Identity</span><span class="p">(</span><span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">DerivedM</span> <span class="n">m</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="o">&gt;::</span><span class="n">Identity</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+        <span class="n">DerivedQ</span> <span class="n">q</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixBase</span><span class="o">&lt;</span><span class="n">DerivedQ</span><span class="o">&gt;::</span><span class="n">Zero</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nf">AffineHelperBase</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">q</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="p">,</span> <span class="n">DerivedQ</span><span class="o">&gt;</span> <span class="n">Zero</span><span class="p">(</span><span class="kt">int</span> <span class="n">input_size</span><span class="p">,</span> <span class="kt">int</span> <span class="n">output_size</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">DerivedM</span> <span class="n">m</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="o">&gt;::</span><span class="n">Zero</span><span class="p">(</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_size</span><span class="p">);</span>
+        <span class="n">DerivedQ</span> <span class="n">q</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixBase</span><span class="o">&lt;</span><span class="n">DerivedQ</span><span class="o">&gt;::</span><span class="n">Zero</span><span class="p">(</span><span class="n">output_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nf">AffineHelperBase</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">q</span><span class="p">);</span>
+    <span class="p">}</span>
+
+
+    <span class="k">auto</span> <span class="n">segment</span><span class="p">(</span><span class="kt">int</span> <span class="n">start_idx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">declval</span><span class="o">&lt;</span><span class="n">ConstPtrM</span><span class="o">&gt;</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">block</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">declval</span><span class="o">&lt;</span><span class="n">ConstPtrQ</span><span class="o">&gt;</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">segment</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span><span class="o">&gt;</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">declval</span><span class="o">&lt;</span><span class="n">ConstPtrM</span><span class="o">&gt;</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">block</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">declval</span><span class="o">&lt;</span><span class="n">ConstPtrQ</span><span class="o">&gt;</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">segment</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span><span class="o">&gt;</span>
+                            <span class="p">(</span><span class="n">_M</span><span class="p">.</span><span class="n">block</span><span class="p">(</span><span class="n">start_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">_M</span><span class="p">.</span><span class="n">cols</span><span class="p">()),</span>
+                             <span class="n">_q</span><span class="p">.</span><span class="n">segment</span><span class="p">(</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+                             <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">auto</span> <span class="n">head</span><span class="p">(</span><span class="kt">int</span> <span class="n">size</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">segment</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">segment</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">auto</span> <span class="n">tail</span><span class="p">(</span><span class="kt">int</span> <span class="n">size</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">segment</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">segment</span><span class="p">(</span><span class="n">_M</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">-</span> <span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+    <span class="p">}</span>
+
+
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Derived</span><span class="o">&gt;</span>
+    <span class="kt">void</span> <span class="n">getValue</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixBase</span><span class="o">&lt;</span><span class="n">Derived</span><span class="o">&gt;&amp;</span> <span class="n">value</span><span class="p">)</span> <span class="k">const</span>
+    <span class="p">{</span>
+        <span class="n">value</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_M</span><span class="o">*</span><span class="n">x</span><span class="p">;</span>
+        <span class="n">value</span> <span class="o">+=</span> <span class="n">_q</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span> <span class="p">()</span> <span class="p">{}</span>
+
+<span class="k">protected</span><span class="o">:</span>
+
+    <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="p">,</span> <span class="n">DerivedQ</span><span class="o">&gt;&amp;</span> <span class="n">self</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="p">,</span> <span class="n">DerivedQ</span><span class="o">&gt;&amp;</span> <span class="n">self</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">check_consistency</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">_M</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">!=</span> <span class="n">_q</span><span class="p">.</span><span class="n">rows</span><span class="p">()){</span>
+            <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span><span class="p">(</span><span class="s">&quot;_M.rows() != _q.rows()&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="n">DerivedM</span> <span class="n">_M</span><span class="p">;</span>
+    <span class="n">DerivedQ</span> <span class="n">_q</span><span class="p">;</span>
+
+<span class="p">};</span>
+
+<span class="k">typedef</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">AffineHelper</span><span class="p">;</span>
+
+
+<span class="k">class</span> <span class="nc">OptvarHelper</span> <span class="p">{</span>
+
+<span class="k">public</span><span class="o">:</span>
+
+    <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">VariableVector</span><span class="p">;</span>
+
+    <span class="n">OptvarHelper</span><span class="p">(</span><span class="n">VariableVector</span> <span class="n">name_size_pairs</span><span class="p">);</span>
+
+    <span class="n">AffineHelper</span> <span class="nf">getVariable</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">AffineHelper</span><span class="o">&gt;</span> <span class="n">getAllVariables</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+
+    <span class="kt">int</span> <span class="nf">getSize</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+
+<span class="k">private</span><span class="o">:</span>
+
+    <span class="k">struct</span> <span class="n">VarInfo</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">start_idx</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">size</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">;</span>
+    <span class="p">};</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">VarInfo</span><span class="o">&gt;</span> <span class="n">_vars</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">VarInfo</span><span class="o">&gt;</span> <span class="n">_vars_map</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">_size</span><span class="p">;</span>
+
+<span class="p">};</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="cm">/*** IMPL ***/</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">DerivedM1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedM2</span><span class="p">,</span>
+          <span class="k">typename</span> <span class="n">DerivedQ1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedQ2</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="k">auto</span> <span class="k">operator</span><span class="o">-</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM1</span><span class="p">,</span> <span class="n">DerivedQ1</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM2</span><span class="p">,</span> <span class="n">DerivedQ2</span><span class="o">&gt;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="o">-&gt;</span>
+                      <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()</span><span class="o">-</span><span class="n">rhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">-</span><span class="n">rhs</span><span class="p">.</span><span class="n">getq</span><span class="p">())</span><span class="o">&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()</span><span class="o">-</span><span class="n">rhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">-</span><span class="n">rhs</span><span class="p">.</span><span class="n">getq</span><span class="p">())</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()</span><span class="o">-</span><span class="n">rhs</span><span class="p">.</span><span class="n">getM</span><span class="p">(),</span>
+                                                                                              <span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">-</span><span class="n">rhs</span><span class="p">.</span><span class="n">getq</span><span class="p">());</span>
+<span class="p">}</span>
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">DerivedM1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedM2</span><span class="p">,</span>
+          <span class="k">typename</span> <span class="n">DerivedQ1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedQ2</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="k">auto</span> <span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM1</span><span class="p">,</span> <span class="n">DerivedQ1</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM2</span><span class="p">,</span> <span class="n">DerivedQ2</span><span class="o">&gt;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="o">-&gt;</span>
+                      <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()</span><span class="o">+</span><span class="n">rhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">+</span><span class="n">rhs</span><span class="p">.</span><span class="n">getq</span><span class="p">())</span><span class="o">&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()</span><span class="o">+</span><span class="n">rhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">+</span><span class="n">rhs</span><span class="p">.</span><span class="n">getq</span><span class="p">())</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()</span><span class="o">+</span><span class="n">rhs</span><span class="p">.</span><span class="n">getM</span><span class="p">(),</span>
+                                                                                              <span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">+</span><span class="n">rhs</span><span class="p">.</span><span class="n">getq</span><span class="p">());</span>
+<span class="p">}</span>
+
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">DerivedM1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedQ1</span><span class="p">,</span>
+          <span class="k">typename</span> <span class="n">DerivedVector</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="k">auto</span> <span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM1</span><span class="p">,</span> <span class="n">DerivedQ1</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixBase</span><span class="o">&lt;</span><span class="n">DerivedVector</span><span class="o">&gt;&amp;</span> <span class="n">vector</span><span class="p">)</span> <span class="o">-&gt;</span>
+                      <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">+</span><span class="n">vector</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">+</span><span class="n">vector</span><span class="p">)</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">(),</span> <span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span> <span class="o">+</span> <span class="n">vector</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">DerivedM1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedQ1</span><span class="p">,</span>
+          <span class="k">typename</span> <span class="n">DerivedVector</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="k">auto</span> <span class="k">operator</span><span class="o">-</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM1</span><span class="p">,</span> <span class="n">DerivedQ1</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixBase</span><span class="o">&lt;</span><span class="n">DerivedVector</span><span class="o">&gt;&amp;</span> <span class="n">vector</span><span class="p">)</span> <span class="o">-&gt;</span>
+                      <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">-</span><span class="n">vector</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span><span class="o">-</span><span class="n">vector</span><span class="p">)</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">(),</span> <span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">()</span> <span class="o">-</span> <span class="n">vector</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">DerivedMatrix</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedM</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedQ</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="k">auto</span> <span class="k">operator</span><span class="o">*</span><span class="p">(</span><span class="k">const</span> <span class="n">DerivedMatrix</span><span class="o">&amp;</span> <span class="n">matrix</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM</span><span class="p">,</span> <span class="n">DerivedQ</span><span class="o">&gt;&amp;</span> <span class="n">affine</span><span class="p">)</span> <span class="o">-&gt;</span>
+                      <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">matrix</span><span class="o">*</span><span class="n">affine</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">matrix</span><span class="o">*</span><span class="n">affine</span><span class="p">.</span><span class="n">getq</span><span class="p">())</span><span class="o">&gt;</span>
+<span class="p">{</span>
+
+
+    <span class="k">return</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">matrix</span><span class="o">*</span><span class="n">affine</span><span class="p">.</span><span class="n">getM</span><span class="p">()),</span> <span class="k">decltype</span><span class="p">(</span><span class="n">matrix</span><span class="o">*</span><span class="n">affine</span><span class="p">.</span><span class="n">getq</span><span class="p">())</span><span class="o">&gt;</span> <span class="p">(</span><span class="n">matrix</span><span class="o">*</span><span class="n">affine</span><span class="p">.</span><span class="n">getM</span><span class="p">(),</span> <span class="n">matrix</span><span class="o">*</span><span class="n">affine</span><span class="p">.</span><span class="n">getq</span><span class="p">());</span>
+<span class="p">}</span>
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">DerivedM1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedM2</span><span class="p">,</span>
+          <span class="k">typename</span> <span class="n">DerivedQ1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DerivedQ2</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="n">AffineHelper</span> <span class="k">operator</span><span class="o">/</span><span class="p">(</span><span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM1</span><span class="p">,</span> <span class="n">DerivedQ1</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">AffineHelperBase</span><span class="o">&lt;</span><span class="n">DerivedM2</span><span class="p">,</span> <span class="n">DerivedQ2</span><span class="o">&gt;&amp;</span> <span class="n">rhs</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">lhs</span><span class="p">.</span><span class="n">getInputSize</span><span class="p">()</span> <span class="o">!=</span> <span class="n">rhs</span><span class="p">.</span><span class="n">getInputSize</span><span class="p">()){</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">stringstream</span> <span class="n">ss</span><span class="p">;</span>
+        <span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;lhs.getInputSize() != rhs.getInputSize(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">lhs</span><span class="p">.</span><span class="n">getInputSize</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; != &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">rhs</span><span class="p">.</span><span class="n">getInputSize</span><span class="p">();</span>
+        <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">invalid_argument</span><span class="p">(</span><span class="n">ss</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="kt">int</span> <span class="n">input_size</span> <span class="o">=</span> <span class="n">lhs</span><span class="p">.</span><span class="n">getInputSize</span><span class="p">();</span>
+    <span class="kt">int</span> <span class="n">output_size</span> <span class="o">=</span> <span class="n">lhs</span><span class="p">.</span><span class="n">getOutputSize</span><span class="p">()</span> <span class="o">+</span> <span class="n">rhs</span><span class="p">.</span><span class="n">getOutputSize</span><span class="p">();</span>
+
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">M3</span><span class="p">(</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_size</span><span class="p">);</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">q3</span><span class="p">(</span><span class="n">output_size</span><span class="p">);</span>
+
+    <span class="n">M3</span> <span class="o">&lt;&lt;</span> <span class="n">lhs</span><span class="p">.</span><span class="n">getM</span><span class="p">(),</span> <span class="n">rhs</span><span class="p">.</span><span class="n">getM</span><span class="p">();</span>
+    <span class="n">q3</span> <span class="o">&lt;&lt;</span> <span class="n">lhs</span><span class="p">.</span><span class="n">getq</span><span class="p">(),</span> <span class="n">rhs</span><span class="p">.</span><span class="n">getq</span><span class="p">();</span>
+
+    <span class="k">return</span> <span class="nf">AffineHelper</span><span class="p">(</span><span class="n">M3</span><span class="p">,</span> <span class="n">q3</span><span class="p">);</span>
+
+<span class="p">}</span>
+
+<span class="kr">inline</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="k">const</span> <span class="n">AffineHelper</span><span class="o">&amp;</span> <span class="n">affine</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;M:</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">affine</span><span class="p">.</span><span class="n">getM</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">q:</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">affine</span><span class="p">.</span><span class="n">getq</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">os</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">}</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

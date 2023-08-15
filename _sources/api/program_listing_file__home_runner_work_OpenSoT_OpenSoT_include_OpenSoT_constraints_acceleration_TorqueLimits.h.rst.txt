@@ -1,0 +1,61 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_TorqueLimits.h:
+
+Program Listing for File TorqueLimits.h
+=======================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_TorqueLimits.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/acceleration/TorqueLimits.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __CONSTRAINT_ACCELERATION_TORQUE_LIMITS_H__
+   #define __CONSTRAINT_ACCELERATION_TORQUE_LIMITS_H__
+   
+   #include <OpenSoT/Constraint.h>
+   #include <OpenSoT/utils/Affine.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <OpenSoT/constraints/GenericConstraint.h>
+   
+   namespace OpenSoT { namespace constraints { namespace acceleration {
+   class TorqueLimits : public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
+   public:
+       typedef std::shared_ptr<TorqueLimits> Ptr;
+   
+       TorqueLimits(const XBot::ModelInterface& robot,
+                    const AffineHelper& qddot,
+                    const std::vector<AffineHelper>& wrenches,
+                    const std::vector<std::string>& contact_links,
+                    const Eigen::VectorXd& torque_limits);
+   
+       void update(const Eigen::VectorXd& x);
+   
+       void setTorqueLimits(const Eigen::VectorXd& torque_limits);
+   
+       bool enableContact(const std::string& contact_link);
+   
+       bool disableContact(const std::string& contact_link);
+   
+       const std::vector<bool>& getEnabledContacts() const;
+   
+   private:
+       const XBot::ModelInterface& _robot;
+   
+       AffineHelper _qddot;
+       std::vector<AffineHelper> _wrenches;
+       std::vector<std::string> _contact_links;
+       AffineHelper _dyn_constraint;
+   
+       std::vector<bool> _enabled_contacts;
+   
+       Eigen::VectorXd _torque_limits;
+   
+       Eigen::VectorXd _h;
+       Eigen::MatrixXd _B, _Jtmp;
+   };
+   }
+   }
+   }
+   
+   #endif

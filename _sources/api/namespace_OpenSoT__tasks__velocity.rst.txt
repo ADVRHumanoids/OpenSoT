@@ -1,0 +1,50 @@
+
+.. _namespace_OpenSoT__tasks__velocity:
+
+Namespace OpenSoT::tasks::velocity
+==================================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CoM`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Contact`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Gaze`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Postural`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition`

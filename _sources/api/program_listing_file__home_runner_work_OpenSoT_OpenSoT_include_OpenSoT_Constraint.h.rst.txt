@@ -1,0 +1,277 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h:
+
+Program Listing for File Constraint.h
+=====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/Constraint.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi
+    * email:  alessio.rocchi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __CONSTRAINT_H__
+   #define __CONSTRAINT_H__
+   
+   #include <memory>
+   #include <string>
+   #include <matlogger2/matlogger2.h>
+   #include <XBotInterface/Logger.hpp>
+   
+   #include <OpenSoT/version.h>
+   
+    namespace OpenSoT {
+   
+    template <class Matrix_type, class Vector_type>
+       class Constraint {
+       public:
+           typedef Constraint< Matrix_type, Vector_type > ConstraintType;
+           typedef std::shared_ptr<ConstraintType> ConstraintPtr;
+       protected:
+   
+           std::string _constraint_id;
+   
+           unsigned int _x_size;
+   
+           Vector_type _lowerBound;
+   
+           Vector_type _upperBound;
+   
+           Matrix_type _Aeq;
+   
+           Vector_type _beq;
+   
+           Matrix_type _Aineq;
+   
+           Vector_type _bLowerBound;
+   
+           Vector_type _bUpperBound;
+   
+           virtual void _log(XBot::MatLogger2::Ptr logger)
+           {
+   
+           }
+   
+       public:
+           Constraint(const std::string constraint_id,
+                      const unsigned int x_size) :
+               _constraint_id(constraint_id), _x_size(x_size) {}
+           virtual ~Constraint() {}
+   
+           const unsigned int getXSize() { return _x_size; }
+           virtual const Vector_type& getLowerBound() { return _lowerBound; }
+           virtual const Vector_type& getUpperBound() { return _upperBound; }
+   
+           virtual const Matrix_type& getAeq() { return _Aeq; }
+           virtual const Vector_type& getbeq() { return _beq; }
+   
+           virtual const Matrix_type& getAineq() { return _Aineq; }
+           virtual const Vector_type& getbLowerBound() { return _bLowerBound; }
+           virtual const Vector_type& getbUpperBound() { return _bUpperBound; }
+   
+           virtual bool isEqualityConstraint() { return _Aeq.rows() > 0; }
+   
+           virtual bool isInequalityConstraint() { return _Aineq.rows() > 0; }
+   
+           virtual bool isUnilateralConstraint() { return isInequalityConstraint() &&
+                                                          (_bLowerBound.size() == 0 || _bUpperBound.size() == 0); }
+           virtual bool isBilateralConstraint() { return isInequalityConstraint() && !isUnilateralConstraint(); }
+   
+           virtual bool hasBounds() { return (_upperBound.size() > 0 || _lowerBound.size() > 0); }
+   
+           virtual bool isBound() { return this->hasBounds() &&
+                                           !this->isConstraint(); }
+   
+           virtual bool isConstraint() { return this->isEqualityConstraint() ||
+                                                this->isInequalityConstraint(); }
+   
+           std::string getConstraintID(){ return _constraint_id; }
+   
+           virtual void update(const Vector_type& x) {}
+   
+           virtual void log(XBot::MatLogger2::Ptr logger)
+           {
+               if(_Aeq.rows() > 0 && _Aeq.cols() > 0)
+                   logger->add(_constraint_id + "_Aeq", _Aeq);
+               if(_Aineq.rows() > 0 && _Aineq.cols() > 0)
+                   logger->add(_constraint_id + "_Aineq", _Aineq);
+               if(_beq.size() > 0)
+                   logger->add(_constraint_id + "_beq", _beq);
+               if(_bLowerBound.size() > 0)
+                   logger->add(_constraint_id + "_bLowerBound", _bLowerBound);
+               if(_bUpperBound.size() > 0)
+                   logger->add(_constraint_id + "_bUpperBound", _bUpperBound);
+               if(_upperBound.size() > 0)
+                   logger->add(_constraint_id + "_upperBound",  _upperBound);
+               if(_lowerBound.size() > 0)
+                   logger->add(_constraint_id + "_lowerBound", _lowerBound);
+               _log(logger);
+           }
+   
+           bool checkConsistency()
+           {
+               bool a = true;
+   //          //1) If isInequalityConstraint()
+               if(isInequalityConstraint())
+               {
+                   if(_Aineq.cols() != _x_size)
+                   {
+                       XBot::Logger::error("%s: _Aineq.cols() != _x_size -> %i != %i", _constraint_id.c_str(), _Aineq.cols(), _x_size);
+                       a = false;
+                   }
+                   if(isUnilateralConstraint())
+                   {
+                       if(_bUpperBound.size() > 0)
+                       {
+                           if(_Aineq.rows() != _bUpperBound.size())
+                           {
+                               XBot::Logger::error("%s: _Aineq.rows() != _bUpperBound.size() -> %i != %i",
+                                                   _constraint_id.c_str(), _Aineq.rows(), _bUpperBound.size());
+                               a = false;
+                           }
+                       }
+                       else
+                       {
+                           if(_Aineq.rows() != _bLowerBound.size())
+                           {
+                               XBot::Logger::error("%s: _Aineq.rows() != _bUpperLower.size() -> %i != %i",
+                                                   _constraint_id.c_str(), _Aineq.rows(), _bLowerBound.size());
+                               a = false;
+                           }
+                       }
+                   }
+                   else
+                   {
+                       if(_bUpperBound.size() != _bLowerBound.size()){
+                           XBot::Logger::error("%s: __bUpperBound.size() != _bLowerBound.size() -> %i != %i",
+                                               _constraint_id.c_str(), _bLowerBound.size(), _bUpperBound.size());
+                           a = false;
+                       }
+                       if(_Aineq.rows() != _bLowerBound.size())
+                       {
+                           XBot::Logger::error("%s: _Aineq.rows() != _bUpperLower.size() -> %i != %i",
+                                               _constraint_id.c_str(), _Aineq.rows(), _bLowerBound.size());
+                           a = false;
+                       }
+                   }
+                   if(isBound())
+                   {
+                       XBot::Logger::error("%s isInequalityConstraint = true and isBound = true at the same time!", _constraint_id.c_str());
+                       a = false;
+                   }
+                   if(isEqualityConstraint())
+                   {
+                       XBot::Logger::error("%s isInequalityConstraint = true and isEqualityConstraint = true at the same time!", _constraint_id.c_str());
+                       a = false;
+                   }
+                   if(_beq.size() != 0)
+                   {
+                       XBot::Logger::error("%s: _beq.size() = %i, should be 0!", _constraint_id.c_str(), _beq.size());
+                       a = false;
+                   }
+               }
+               //2) If isBound()
+               else if(isBound())
+               {
+                   if(_lowerBound.size() > 0 && _upperBound.size() > 0)
+                   {
+                       if(_lowerBound.size() != _upperBound.size())
+                       {
+                           XBot::Logger::error("%s: _lowerBound.size() != _upperBound.size_t() -> %i != %i",
+                                               _constraint_id.c_str(), _lowerBound.size(), _upperBound.size());
+                           a = false;
+                       }
+                       if(_lowerBound.size() != _x_size)
+                       {
+                           XBot::Logger::error("%s: _lowerBound.size() != _x_size -> %i != %i",
+                                               _constraint_id.c_str(), _lowerBound.size(), _x_size);
+                           a = false;
+                       }
+                   }
+                   else if(_lowerBound.size() > 0)
+                   {
+                       if(_lowerBound.size() != _x_size)
+                       {
+                           XBot::Logger::error("%s: _lowerBound.size() != _x_size -> %i != %i",
+                                               _constraint_id.c_str(), _lowerBound.size(), _x_size);
+                           a = false;
+                       }
+                       XBot::Logger::warning("%s: _upperBound.size() = 0", _constraint_id.c_str());
+                   }
+                   else
+                   {
+                       if(_upperBound.size() != _x_size)
+                       {
+                           XBot::Logger::error("%s: _upperBound.size() != _x_size -> %i != %i",
+                                               _constraint_id.c_str(), _upperBound.size(), _x_size);
+                           a = false;
+                       }
+                       XBot::Logger::warning("%s: _lowerBound.size() = 0", _constraint_id.c_str());
+                   }
+                   if(isEqualityConstraint())
+                   {
+                       XBot::Logger::error("%s isBound = true and isEqualityConstraint = true at the same time!", _constraint_id.c_str());
+                       a = false;
+                   }
+                   if(_beq.size() > 0)
+                   {
+                       XBot::Logger::error("%s: _beq.size() = %i, should be 0!", _constraint_id.c_str(), _beq.size());
+                       a = false;
+                   }
+                   if(_bUpperBound.size() > 0 || _bLowerBound.size() > 0)
+                   {
+                       XBot::Logger::error("%s: _bLowerBound.size() = %i, _bLowerBound.size() = %i, both should be 0",
+                                           _constraint_id.c_str(), _bLowerBound.size(), _bUpperBound.size());
+                       a = false;
+                   }
+   
+               }
+               //3) If isEqualityConstraint()
+               else if(isEqualityConstraint())
+               {
+                   if(_Aeq.rows() != _beq.size())
+                   {
+                       XBot::Logger::error("%s: _Aeq.rows() != _beq.size() -> %i != %i", _constraint_id.c_str(), _Aeq.rows(), _beq.size());
+                       a = false;
+                   }
+                   if(_Aeq.cols() != _x_size)
+                   {
+                       XBot::Logger::error("%s: _Aeq.cols() != _x_size -> %i != %i", _constraint_id.c_str(), _Aeq.cols(), _x_size);
+                       a = false;
+                   }
+                   if(_bUpperBound.size() > 0 || _bLowerBound.size() > 0)
+                   {
+                       XBot::Logger::error("%s: _bLowerBound.size() = %i, _bLowerBound.size() = %i, both should be 0",
+                                           _constraint_id.c_str(), _bLowerBound.size(), _bUpperBound.size());
+                       a = false;
+                   }
+               }
+               else
+               {
+                   XBot::Logger::error("%s: isEqualityConstraint() = false, isInequalityConstraint() = false, isBound() = false!");
+                   a = false;
+               }
+   
+               return a;
+           }
+       };
+    }
+   
+   #endif

@@ -1,0 +1,22 @@
+
+.. _namespace_OpenSoT__tasks__floating_base:
+
+Namespace OpenSoT::tasks::floating_base
+=======================================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1floating__base_1_1Contact`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1floating__base_1_1IMU`

@@ -1,0 +1,14 @@
+.. _exhale_define_velocity_2Cartesian_8h_1ad1d74d7fe24f1e58e135b1b9e100f31b:
+
+Define WORLD_FRAME_NAME
+=======================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: WORLD_FRAME_NAME
+   :project: OpenSoT

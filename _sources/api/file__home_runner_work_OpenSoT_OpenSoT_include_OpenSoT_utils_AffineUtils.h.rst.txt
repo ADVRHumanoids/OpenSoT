@@ -1,0 +1,64 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h:
+
+File AffineUtils.h
+==================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/AffineUtils.h``)
+--------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/constraints/Aggregated.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h`)
+
+- ``OpenSoT/constraints/GenericConstraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h`)
+
+- ``OpenSoT/tasks/Aggregated.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`)
+
+- ``OpenSoT/tasks/GenericTask.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`)
+
+- ``OpenSoT/utils/Affine.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`)
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__AffineUtils`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1AffineUtils_1_1AffineConstraint`
+
+- :ref:`exhale_class_classOpenSoT_1_1AffineUtils_1_1AffineTask`
+

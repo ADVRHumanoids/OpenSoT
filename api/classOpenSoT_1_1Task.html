@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Class Task &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class AngularMomentum" href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html" />
+    <link rel="prev" title="Class SubTask" href="classOpenSoT_1_1SubTask.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Template Class Task</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1Task.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="template-class-task">
+<span id="exhale-class-classopensot-1-1task"></span><h1>Template Class Task<a class="headerlink" href="#template-class-task" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h.html#file-home-runner-work-opensot-opensot-include-opensot-task-h"><span class="std std-ref">File Task.h</span></a></p></li>
+</ul>
+<div class="section" id="nested-relationships">
+<h2>Nested Relationships<a class="headerlink" href="#nested-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="nested-types">
+<h3>Nested Types<a class="headerlink" href="#nested-types" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="structOpenSoT_1_1Task_1_1istrue.html#exhale-struct-structopensot-1-1task-1-1istrue"><span class="std std-ref">Struct Task::istrue</span></a></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN7OpenSoT4TaskE">
+<span id="_CPPv3I00EN7OpenSoT4TaskE"></span><span id="_CPPv2I00EN7OpenSoT4TaskE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Matrix_type</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Vector_type</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1Task"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Task</span></span></span><a class="headerlink" href="#_CPPv4I00EN7OpenSoT4TaskE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> represents a task in the form <span class="math notranslate nohighlight">\(T(A,b,c)\)</span> where <span class="math notranslate nohighlight">\(A\)</span> is the task error jacobian, <span class="math notranslate nohighlight">\(b\)</span> is the task error and <span class="math notranslate nohighlight">\(c\)</span> is used for LP. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task8TaskTypeE">
+<span id="_CPPv3N7OpenSoT4Task8TaskTypeE"></span><span id="_CPPv2N7OpenSoT4Task8TaskTypeE"></span><span id="OpenSoT::Task::TaskType"></span><span class="target" id="classOpenSoT_1_1Task_1abab6773419dff12c0087f37d78bb1ab4"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TaskType</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task8TaskTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task7TaskPtrE">
+<span id="_CPPv3N7OpenSoT4Task7TaskPtrE"></span><span id="_CPPv2N7OpenSoT4Task7TaskPtrE"></span><span id="OpenSoT::Task::TaskPtr"></span><span class="target" id="classOpenSoT_1_1Task_1ad0ac11f1082125e53ddea86e84221656"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT4Task8TaskTypeE" title="OpenSoT::Task::TaskType"><span class="n"><span class="pre">TaskType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TaskPtr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task14ConstraintTypeE">
+<span id="_CPPv3N7OpenSoT4Task14ConstraintTypeE"></span><span id="_CPPv2N7OpenSoT4Task14ConstraintTypeE"></span><span id="OpenSoT::Task::ConstraintType"></span><span class="target" id="classOpenSoT_1_1Task_1aaf4314fcc1ea1fa1815efe7ca9fa8778"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><a class="reference internal" href="classOpenSoT_1_1Constraint.html#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint"><span class="n"><span class="pre">Constraint</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConstraintType</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task14ConstraintTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task13ConstraintPtrE">
+<span id="_CPPv3N7OpenSoT4Task13ConstraintPtrE"></span><span id="_CPPv2N7OpenSoT4Task13ConstraintPtrE"></span><span id="OpenSoT::Task::ConstraintPtr"></span><span class="target" id="classOpenSoT_1_1Task_1ad00f19b3839f97308650ff9bed24c50e"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT4Task14ConstraintTypeE" title="OpenSoT::Task::ConstraintType"><span class="n"><span class="pre">ConstraintType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConstraintPtr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task13ConstraintPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task4TaskEKNSt6stringEKj">
+<span id="_CPPv3N7OpenSoT4Task4TaskEKNSt6stringEKj"></span><span id="_CPPv2N7OpenSoT4Task4TaskEKNSt6stringEKj"></span><span id="OpenSoT::Task::Task__ssC.unsigned-iC"></span><span class="target" id="classOpenSoT_1_1Task_1a4a26040671800160c85b30c27d2a7223"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Task</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task_id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task4TaskEKNSt6stringEKj" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> define a task in terms of Ax = b. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – is a unique id </p></li>
+<li><p><strong>x_size</strong> – is the number of variables of the task </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4TaskD0Ev">
+<span id="_CPPv3N7OpenSoT4TaskD0Ev"></span><span id="_CPPv2N7OpenSoT4TaskD0Ev"></span><span id="OpenSoT::Task::~Task"></span><span class="target" id="classOpenSoT_1_1Task_1a4bd7b1bd15643fba22411acb13693cfc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~Task</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4TaskD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task23getWeightIsDiagonalFlagEv">
+<span id="_CPPv3N7OpenSoT4Task23getWeightIsDiagonalFlagEv"></span><span id="_CPPv2N7OpenSoT4Task23getWeightIsDiagonalFlagEv"></span><span id="OpenSoT::Task::getWeightIsDiagonalFlag"></span><span class="target" id="classOpenSoT_1_1Task_1a2ac3644954c1ea0403c0d49d41fed33a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getWeightIsDiagonalFlag</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task23getWeightIsDiagonalFlagEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getWeightIsDiagonal return the flag _weight_is_diagonal </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true or false </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task23setWeightIsDiagonalFlagEKb">
+<span id="_CPPv3N7OpenSoT4Task23setWeightIsDiagonalFlagEKb"></span><span id="_CPPv2N7OpenSoT4Task23setWeightIsDiagonalFlagEKb"></span><span id="OpenSoT::Task::setWeightIsDiagonalFlag__bC"></span><span class="target" id="classOpenSoT_1_1Task_1a583da4acbc0a044f213c763889c6a9a7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setWeightIsDiagonalFlag</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flag</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task23setWeightIsDiagonalFlagEKb" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setWeightIsDiagonalFlag set the flag _weight_is_diagonal (NOTE that no check on Weight matrix is performed, we trust you) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>flag</strong> – true or false </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task9setActiveEKb">
+<span id="_CPPv3N7OpenSoT4Task9setActiveEKb"></span><span id="_CPPv2N7OpenSoT4Task9setActiveEKb"></span><span id="OpenSoT::Task::setActive__bC"></span><span class="target" id="classOpenSoT_1_1Task_1a2f24ec2c94540ece2e835dc66cc91b3f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setActive</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">active_flag</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task9setActiveEKb" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Activated / deactivates the task by setting the A matrix to zero. </p>
+<p>Important note: after activating a task, call the <a class="reference internal" href="#classOpenSoT_1_1Task_1acabcc7da7201724197b561506e325335"><span class="std std-ref">update()</span></a> function in order to recompute a proper A matrix. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task8isActiveEv">
+<span id="_CPPv3NK7OpenSoT4Task8isActiveEv"></span><span id="_CPPv2NK7OpenSoT4Task8isActiveEv"></span><span id="OpenSoT::Task::isActiveC"></span><span class="target" id="classOpenSoT_1_1Task_1a7bb4bacd1214ff062ff9e8282c159611"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isActive</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task8isActiveEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a boolean which specifies if the task is active. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task4getAEv">
+<span id="_CPPv3NK7OpenSoT4Task4getAEv"></span><span id="_CPPv2NK7OpenSoT4Task4getAEv"></span><span id="OpenSoT::Task::getAC"></span><span class="target" id="classOpenSoT_1_1Task_1a82c19a88c55352ade2fc5aee28e9cdf2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getA</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task4getAEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getA </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the A matrix of the task </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task15getHessianAtypeEv">
+<span id="_CPPv3N7OpenSoT4Task15getHessianAtypeEv"></span><span id="_CPPv2N7OpenSoT4Task15getHessianAtypeEv"></span><span id="OpenSoT::Task::getHessianAtype"></span><span class="target" id="classOpenSoT_1_1Task_1a88cf4bdf140ced02eec3b6cd1a092f11"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#_CPPv4N7OpenSoT11HessianTypeE" title="OpenSoT::HessianType"><span class="n"><span class="pre">HessianType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getHessianAtype</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task15getHessianAtypeEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getHessianAtype </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the Hessian type </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task4getbEv">
+<span id="_CPPv3NK7OpenSoT4Task4getbEv"></span><span id="_CPPv2NK7OpenSoT4Task4getbEv"></span><span id="OpenSoT::Task::getbC"></span><span class="target" id="classOpenSoT_1_1Task_1addab62e8c282db86532e5c92dc337ae5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getb</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task4getbEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getb </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the b matrix of the task </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task5getWAEv">
+<span id="_CPPv3NK7OpenSoT4Task5getWAEv"></span><span id="_CPPv2NK7OpenSoT4Task5getWAEv"></span><span id="OpenSoT::Task::getWAC"></span><span class="target" id="classOpenSoT_1_1Task_1a15765100ac9318b6d5031425ac245106"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getWA</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task5getWAEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getWA </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the product between W and A </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task13getATransposeEv">
+<span id="_CPPv3NK7OpenSoT4Task13getATransposeEv"></span><span id="_CPPv2NK7OpenSoT4Task13getATransposeEv"></span><span id="OpenSoT::Task::getATransposeC"></span><span class="target" id="classOpenSoT_1_1Task_1a456e9880e1019a48e642772369845eb6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getATranspose</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task13getATransposeEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1Task_1a456e9880e1019a48e642772369845eb6"><span class="std std-ref">getATranspose()</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A transposed </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task5getWbEv">
+<span id="_CPPv3NK7OpenSoT4Task5getWbEv"></span><span id="_CPPv2NK7OpenSoT4Task5getWbEv"></span><span id="OpenSoT::Task::getWbC"></span><span class="target" id="classOpenSoT_1_1Task_1a8d14a51da1f29e2c11e64238ab26fc2f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getWb</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task5getWbEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getWb </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the product between W and b </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task4getcEv">
+<span id="_CPPv3NK7OpenSoT4Task4getcEv"></span><span id="_CPPv2NK7OpenSoT4Task4getcEv"></span><span id="OpenSoT::Task::getcC"></span><span class="target" id="classOpenSoT_1_1Task_1ac090067f9b9473b5be55ffd86d5ecee4"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getc</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task4getcEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getc </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the _c vector of the task </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task9getWeightEv">
+<span id="_CPPv3NK7OpenSoT4Task9getWeightEv"></span><span id="_CPPv2NK7OpenSoT4Task9getWeightEv"></span><span id="OpenSoT::Task::getWeightC"></span><span class="target" id="classOpenSoT_1_1Task_1abb6f29ababa2f8a041fc3914de12d563"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getWeight</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task9getWeightEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getWeight </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the weight of the norm of the task error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task9setWeightERK11Matrix_type">
+<span id="_CPPv3N7OpenSoT4Task9setWeightERK11Matrix_type"></span><span id="_CPPv2N7OpenSoT4Task9setWeightERK11Matrix_type"></span><span id="OpenSoT::Task::setWeight__Matrix_typeCR"></span><span class="target" id="classOpenSoT_1_1Task_1a48fd38ff360888a1557759ac3ae69200"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setWeight</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">W</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task9setWeightERK11Matrix_type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setWeight sets the task weight. </p>
+<p>Note the Weight needs to be positive definite. If your original intent was to get a subtask (i.e., reduce the number of rows of the task Jacobian), please use the class <a class="reference internal" href="classOpenSoT_1_1SubTask.html#classOpenSoT_1_1SubTask"><span class="std std-ref">SubTask</span></a> </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>W</strong> – matrix weight </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task9setWeightERKd">
+<span id="_CPPv3N7OpenSoT4Task9setWeightERKd"></span><span id="_CPPv2N7OpenSoT4Task9setWeightERKd"></span><span id="OpenSoT::Task::setWeight__doubleCR"></span><span class="target" id="classOpenSoT_1_1Task_1af7e0fb565841b6077da82de4ad06b3f8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setWeight</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">w</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task9setWeightERKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setWeight sets the task diagonal weight. </p>
+<p>Note the Weight needs to be positive definite. If your original intent was to get a subtask (i.e., reduce the number of rows of the task Jacobian), please use the class <a class="reference internal" href="classOpenSoT_1_1SubTask.html#classOpenSoT_1_1SubTask"><span class="std std-ref">SubTask</span></a> </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>w</strong> – scalar diagonal weight </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task9getLambdaEv">
+<span id="_CPPv3NK7OpenSoT4Task9getLambdaEv"></span><span id="_CPPv2NK7OpenSoT4Task9getLambdaEv"></span><span id="OpenSoT::Task::getLambdaC"></span><span class="target" id="classOpenSoT_1_1Task_1a82b956d3bfe8ccbe523bcec5ab5bc7e7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getLambda</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task9getLambdaEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLambda </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the lambda weight of the task </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task9setLambdaEd">
+<span id="_CPPv3N7OpenSoT4Task9setLambdaEd"></span><span id="_CPPv2N7OpenSoT4Task9setLambdaEd"></span><span id="OpenSoT::Task::setLambda__double"></span><span class="target" id="classOpenSoT_1_1Task_1ae7aa8648e286685ae4b81beb56b63cb6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLambda</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task9setLambdaEd" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task14getConstraintsEv">
+<span id="_CPPv3N7OpenSoT4Task14getConstraintsEv"></span><span id="_CPPv2N7OpenSoT4Task14getConstraintsEv"></span><span id="OpenSoT::Task::getConstraints"></span><span class="target" id="classOpenSoT_1_1Task_1a95c30b074fb58bc1b2280c24403ea54b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">list</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT4Task13ConstraintPtrE" title="OpenSoT::Task::ConstraintPtr"><span class="n"><span class="pre">ConstraintPtr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getConstraints</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task14getConstraintsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getConstraints return a reference to the constraint list. </p>
+<p>Use the standard list methods to add, remove, clear, … the constraints list. e.g.: task.getConstraints().push_back(new_constraint) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task8getXSizeEv">
+<span id="_CPPv3NK7OpenSoT4Task8getXSizeEv"></span><span id="_CPPv2NK7OpenSoT4Task8getXSizeEv"></span><span id="OpenSoT::Task::getXSizeC"></span><span class="target" id="classOpenSoT_1_1Task_1aec2aed0ded3388a5ac655f8f2fffbf52"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getXSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task8getXSizeEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the number of variables for the task. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of columns of A </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task11getTaskSizeEv">
+<span id="_CPPv3NK7OpenSoT4Task11getTaskSizeEv"></span><span id="_CPPv2NK7OpenSoT4Task11getTaskSizeEv"></span><span id="OpenSoT::Task::getTaskSizeC"></span><span class="target" id="classOpenSoT_1_1Task_1a3ed4544d4eb37d6e3d71f6424e2796e6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getTaskSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task11getTaskSizeEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the task size. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of rows of A </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task6updateERK11Vector_type">
+<span id="_CPPv3N7OpenSoT4Task6updateERK11Vector_type"></span><span id="_CPPv2N7OpenSoT4Task6updateERK11Vector_type"></span><span id="OpenSoT::Task::update__Vector_typeCR"></span><span class="target" id="classOpenSoT_1_1Task_1acabcc7da7201724197b561506e325335"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task6updateERK11Vector_type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Updates the A, b, Aeq, beq, Aineq, b*Bound matrices. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – variable state at the current step (input) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task9getTaskIDEv">
+<span id="_CPPv3N7OpenSoT4Task9getTaskIDEv"></span><span id="_CPPv2N7OpenSoT4Task9getTaskIDEv"></span><span id="OpenSoT::Task::getTaskID"></span><span class="target" id="classOpenSoT_1_1Task_1ae158d428b8b91f3603086ca5f102f3bb"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getTaskID</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task9getTaskIDEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getTaskID return the task id </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a string with the task id </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task19getActiveJointsMaskEv">
+<span id="_CPPv3N7OpenSoT4Task19getActiveJointsMaskEv"></span><span id="_CPPv2N7OpenSoT4Task19getActiveJointsMaskEv"></span><span id="OpenSoT::Task::getActiveJointsMask"></span><span class="target" id="classOpenSoT_1_1Task_1a9c056f1aae601b4ef00b7ae93b675be5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getActiveJointsMask</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task19getActiveJointsMaskEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getActiveJointsMask return a vector of length NumberOfDOFs. </p>
+<p>If an element is false the corresponding column of the task jacobian is set to 0. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a vector of bool </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task19setActiveJointsMaskERKNSt6vectorIbEE">
+<span id="_CPPv3N7OpenSoT4Task19setActiveJointsMaskERKNSt6vectorIbEE"></span><span id="_CPPv2N7OpenSoT4Task19setActiveJointsMaskERKNSt6vectorIbEE"></span><span id="OpenSoT::Task::setActiveJointsMask__std::vector:b:CR"></span><span class="target" id="classOpenSoT_1_1Task_1acd4e3395b41774419897545ca055fe5a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setActiveJointsMask</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">active_joints_mask</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task19setActiveJointsMaskERKNSt6vectorIbEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setActiveJointsMask set a mask on the Jacobian. </p>
+<p>The changes take effect immediately. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>active_joints_mask</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if success </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task19setActiveChainsMaskERKNSt6vectorINSt6stringEEEN4XBot14ModelInterface8ConstPtrE">
+<span id="_CPPv3N7OpenSoT4Task19setActiveChainsMaskERKNSt6vectorINSt6stringEEEN4XBot14ModelInterface8ConstPtrE"></span><span id="_CPPv2N7OpenSoT4Task19setActiveChainsMaskERKNSt6vectorINSt6stringEEEN4XBot14ModelInterface8ConstPtrE"></span><span id="OpenSoT::Task::setActiveChainsMask__std::vector:ss:CR.XBot::ModelInterface::ConstPtr"></span><span class="target" id="classOpenSoT_1_1Task_1ac0bfa044f3f65783a39d9138de98776b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setActiveChainsMask</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">active_chain_mask</span></span>, <span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ConstPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">model</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task19setActiveChainsMaskERKNSt6vectorINSt6stringEEEN4XBot14ModelInterface8ConstPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setActiveChainsMask set a mask (of true) on the Jacobian of a vector of kinematic chains </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_chain_mask</strong> – vector of kinematic chains to set the active joint mask </p></li>
+<li><p><strong>model</strong> – to retrieve the joint names from the kinematic chains </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task3logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT4Task3logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT4Task3logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::Task::log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1Task_1af69ba67edf253bc520f0a02da532e79a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task3logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>log logs common <a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> internal variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – a shared pointer to a MathLogger </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task11computeCostERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT4Task11computeCostERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT4Task11computeCostERKN5Eigen8VectorXdE"></span><span id="OpenSoT::Task::computeCost__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1Task_1a6dcea4f152fe207fb495cd3b1759432b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">computeCost</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task11computeCostERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>computeCost computes the residual of the task: </p>
+<p>residual = (Ax - b)^T * W * (Ax - b)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – solution NOTE: the solution should be the one where the task was evaluated to compute the internal A matrix and b vector! NOTE: computation can be improved as done in the solver… </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the cost of the task for given solution </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task16checkConsistencyEv">
+<span id="_CPPv3N7OpenSoT4Task16checkConsistencyEv"></span><span id="_CPPv2N7OpenSoT4Task16checkConsistencyEv"></span><span id="OpenSoT::Task::checkConsistency"></span><span class="target" id="classOpenSoT_1_1Task_1aa11f20e8db11fd4a00ac9d697ee5e2b6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">checkConsistency</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task16checkConsistencyEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>checkConsistency checks if all internal matrices and vectors are correctly instantiated and the right size </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if everything is ok </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task7_updateERK11Vector_type">
+<span id="_CPPv3N7OpenSoT4Task7_updateERK11Vector_type"></span><span id="_CPPv2N7OpenSoT4Task7_updateERK11Vector_type"></span><span id="OpenSoT::Task::_update__Vector_typeCR"></span><span class="target" id="classOpenSoT_1_1Task_1ad0af55aaba30b096fd0557ee6ce31659"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task7_updateERK11Vector_type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Updates the A, b, Aeq, beq, Aineq, b*Bound matrices. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – variable state at the current step (input) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task21applyActiveJointsMaskER11Matrix_type">
+<span id="_CPPv3N7OpenSoT4Task21applyActiveJointsMaskER11Matrix_type"></span><span id="_CPPv2N7OpenSoT4Task21applyActiveJointsMaskER11Matrix_type"></span><span id="OpenSoT::Task::applyActiveJointsMask__Matrix_typeR"></span><span class="target" id="classOpenSoT_1_1Task_1a5676ac20ffa2629fca382c8e5aef8db5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">applyActiveJointsMask</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task21applyActiveJointsMaskER11Matrix_type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>applyActiveJointsMask apply the active joint mask to the A matrix: in tasks in which b does not depend on A, this is done setting to 0 the columns of A corresponding to the index set to false of the _active_joint_mask vector </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>A</strong> – matrix of the <a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task4_logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT4Task4_logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT4Task4_logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::Task::_log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1Task_1ac53b0fd7f14fcdc91862373d9c8cbd41"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task4_logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_log can be used to log internal <a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – a shared pointer to a MatLogger </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task5resetEv">
+<span id="_CPPv3N7OpenSoT4Task5resetEv"></span><span id="_CPPv2N7OpenSoT4Task5resetEv"></span><span id="OpenSoT::Task::reset"></span><span class="target" id="classOpenSoT_1_1Task_1ae9c662d1c5e5ca92caecd2e9127af311"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">reset</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task5resetEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>reset permits to reset a task and all related variables. </p>
+<p>The correctness of the implementation depends to the particular task. Default implementation does nothing and return false. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>false </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task8_task_idE">
+<span id="_CPPv3N7OpenSoT4Task8_task_idE"></span><span id="_CPPv2N7OpenSoT4Task8_task_idE"></span><span id="OpenSoT::Task::_task_id__ss"></span><span class="target" id="classOpenSoT_1_1Task_1a6f1213ae9e648711e49f65525fe52e00"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_task_id</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task8_task_idE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_task_id unique name of the task </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task7_x_sizeE">
+<span id="_CPPv3N7OpenSoT4Task7_x_sizeE"></span><span id="_CPPv2N7OpenSoT4Task7_x_sizeE"></span><span id="OpenSoT::Task::_x_size__unsigned-i"></span><span class="target" id="classOpenSoT_1_1Task_1a8f3685c291bc2f4fc0cc0fab0d39a2a1"></span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_x_size</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task7_x_sizeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_x_size size of the controlled variables </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task12_hessianTypeE">
+<span id="_CPPv3N7OpenSoT4Task12_hessianTypeE"></span><span id="_CPPv2N7OpenSoT4Task12_hessianTypeE"></span><span id="OpenSoT::Task::_hessianType__HessianType"></span><span class="target" id="classOpenSoT_1_1Task_1ac89cb7cdd267c79e50d2bea177b63082"></span><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#_CPPv4N7OpenSoT11HessianTypeE" title="OpenSoT::HessianType"><span class="n"><span class="pre">HessianType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_hessianType</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task12_hessianTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_hessianType Type of Hessian associated to the <a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a></p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task2_AE">
+<span id="_CPPv3N7OpenSoT4Task2_AE"></span><span id="_CPPv2N7OpenSoT4Task2_AE"></span><span id="OpenSoT::Task::_A__Matrix_type"></span><span class="target" id="classOpenSoT_1_1Task_1ab2251a1dcfa5a051541ec2f9345d8101"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_A</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task2_AE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_A Jacobian of the <a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a></p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task2_bE">
+<span id="_CPPv3N7OpenSoT4Task2_bE"></span><span id="_CPPv2N7OpenSoT4Task2_bE"></span><span id="OpenSoT::Task::_b__Vector_type"></span><span class="target" id="classOpenSoT_1_1Task_1a6e1e81d312ef13965709a1033a2adddd"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_b</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task2_bE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_b error associated to the <a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a></p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task2_cE">
+<span id="_CPPv3N7OpenSoT4Task2_cE"></span><span id="_CPPv2N7OpenSoT4Task2_cE"></span><span id="OpenSoT::Task::_c__Vector_type"></span><span class="target" id="classOpenSoT_1_1Task_1affbfd16b5529d96bd3c13bd673e36b93"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_c</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task2_cE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_c vector used for LP Tasks </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task2_WE">
+<span id="_CPPv3N7OpenSoT4Task2_WE"></span><span id="_CPPv2N7OpenSoT4Task2_WE"></span><span id="OpenSoT::Task::_W__Matrix_type"></span><span class="target" id="classOpenSoT_1_1Task_1aba89813c34a7fa700f5819143b707432"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_W</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task2_WE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_W Weight multiplied to the task Jacobian </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task7_lambdaE">
+<span id="_CPPv3N7OpenSoT4Task7_lambdaE"></span><span id="_CPPv2N7OpenSoT4Task7_lambdaE"></span><span id="OpenSoT::Task::_lambda__double"></span><span class="target" id="classOpenSoT_1_1Task_1a3d068fd456cc382651f0b88ca678eeeb"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_lambda</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task7_lambdaE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_lambda error scaling, NOTE: _lambda &gt;= 0.0 </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task19_weight_is_diagonalE">
+<span id="_CPPv3N7OpenSoT4Task19_weight_is_diagonalE"></span><span id="_CPPv2N7OpenSoT4Task19_weight_is_diagonalE"></span><span id="OpenSoT::Task::_weight_is_diagonal__b"></span><span class="target" id="classOpenSoT_1_1Task_1adc1c9c2f31c9913964febc4e443a181a"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_weight_is_diagonal</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task19_weight_is_diagonalE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_weight_is_diagonal, if true the computation of W*A and W*b is optimized (default is false) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task12_constraintsE">
+<span id="_CPPv3N7OpenSoT4Task12_constraintsE"></span><span id="_CPPv2N7OpenSoT4Task12_constraintsE"></span><span id="OpenSoT::Task::_constraints__std::list:ConstraintPtr:"></span><span class="target" id="classOpenSoT_1_1Task_1ab98d05eec51b2ca3cb05cf501c1b730c"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">list</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT4Task13ConstraintPtrE" title="OpenSoT::Task::ConstraintPtr"><span class="n"><span class="pre">ConstraintPtr</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_constraints</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task12_constraintsE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_bounds related to the <a class="reference internal" href="#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a></p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task19_active_joints_maskE">
+<span id="_CPPv3N7OpenSoT4Task19_active_joints_maskE"></span><span id="_CPPv2N7OpenSoT4Task19_active_joints_maskE"></span><span id="OpenSoT::Task::_active_joints_mask__std::vector:b:"></span><span class="target" id="classOpenSoT_1_1Task_1a31b42412ff52330ff47970cc3b32dcb4"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_active_joints_mask</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task19_active_joints_maskE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_active_joint_mask is vector of bool that represent the active joints of the task. </p>
+<p>If false the corresponding column of the task jacobian is set to 0. </p>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT4Task6istrueE">
+<span id="_CPPv3N7OpenSoT4Task6istrueE"></span><span id="_CPPv2N7OpenSoT4Task6istrueE"></span><span id="OpenSoT::Task::istrue"></span><span class="target" id="structOpenSoT_1_1Task_1_1istrue"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">istrue</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT4Task6istrueE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT4Task6istrueclEi">
+<span id="_CPPv3NK7OpenSoT4Task6istrueclEi"></span><span id="_CPPv2NK7OpenSoT4Task6istrueclEi"></span><span id="OpenSoT::Task::istrue::call-operator__iC"></span><span class="target" id="structOpenSoT_1_1Task_1_1istrue_1a9055a7fda8028147565c46199de1ae09"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">()</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">val</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT4Task6istrueclEi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1SubTask.html" class="btn btn-neutral float-left" title="Class SubTask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html" class="btn btn-neutral float-right" title="Class AngularMomentum" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

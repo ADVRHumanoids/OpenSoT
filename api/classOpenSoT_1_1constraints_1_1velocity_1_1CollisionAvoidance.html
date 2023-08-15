@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class CollisionAvoidance &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class ConvexHull" href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html" />
+    <link rel="prev" title="Class CartesianVelocity" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class CollisionAvoidance</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-collisionavoidance">
+<span id="exhale-class-classopensot-1-1constraints-1-1velocity-1-1collisionavoidance"></span><h1>Class CollisionAvoidance<a class="headerlink" href="#class-collisionavoidance" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h.html#file-home-runner-work-opensot-opensot-include-opensot-constraints-velocity-collisionavoidance-h"><span class="std std-ref">File CollisionAvoidance.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::Constraint&lt;</span> <span class="pre">Eigen::MatrixXd,</span> <span class="pre">Eigen::VectorXd</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="classOpenSoT_1_1Constraint.html#exhale-class-classopensot-1-1constraint"><span class="std std-ref">Template Class Constraint</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidanceE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidanceE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidanceE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CollisionAvoidance</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Constraint.html#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint"><span class="n"><span class="pre">Constraint</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidanceE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The SelfCollisionAvoidance class implements a constraint of full-body Self-Collision Avoidance for Walkman This constraint is implemented by inequality: Aineq * x &lt;= bUpperBound where the dimension of Aineq is n * m, n is the number of Link pairs to be constrained, and m is total DOFs of the robot to be controlled; the x is infinitesimal increament of the joint variable vector which is the optimization variable, and its dimension is m * 1; the bUpperBound is the minimum distance vector of all the Link pairs, the dimension of which is n * 1. </p>
+<p>the element in bUpperBound is the minimum distance between the corresponding Link pair with taking the Link pair threshold into account. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance3PtrE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance3PtrE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance3PtrE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::Ptr"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a04e342298fd26e5811d9b98fc39b174c"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidanceE" title="OpenSoT::constraints::velocity::CollisionAvoidance"><span class="n"><span class="pre">CollisionAvoidance</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance9LinksPairE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance9LinksPairE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance9LinksPairE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::LinksPair"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a4e1ad72a7da8d656eb4a5f822744a2ae"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">pair</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinksPair</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance9LinksPairE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance18CollisionAvoidanceERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceEiN4urdf19ModelConstSharedPtrEN4srdf19ModelConstSharedPtrE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance18CollisionAvoidanceERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceEiN4urdf19ModelConstSharedPtrEN4srdf19ModelConstSharedPtrE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance18CollisionAvoidanceERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceEiN4urdf19ModelConstSharedPtrEN4srdf19ModelConstSharedPtrE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::CollisionAvoidance__Eigen::VectorXdCR.XBot::ModelInterfaceCR.i.urdf::ModelConstSharedPtr.srdf::ModelConstSharedPtr"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a98110aaf9af6b069575ffe4b6fa2528a"></span><span class="sig-name descname"><span class="n"><span class="pre">CollisionAvoidance</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">robot</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">max_pairs</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span>, <span class="n"><span class="pre">urdf</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelConstSharedPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">collision_urdf</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span>, <span class="n"><span class="pre">srdf</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelConstSharedPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">collision_srdf</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance18CollisionAvoidanceERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceEiN4urdf19ModelConstSharedPtrEN4srdf19ModelConstSharedPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>SelfCollisionAvoidance. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – status </p></li>
+<li><p><strong>robot</strong> – model </p></li>
+<li><p><strong>max_pairs</strong> – maximum number of link pairs checked for SCA (-1 for all) </p></li>
+<li><p><strong>collision_urdf</strong> – urdf used for collision model </p></li>
+<li><p><strong>collision_srdf</strong> – srdf used for collision model NOTE: if urdf and srdf are not specified, the one inside the robot model will be used </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairThresholdEv">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairThresholdEv"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairThresholdEv"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::getLinkPairThreshold"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a62b822c52937d34ef1c6ccbf459fb432"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getLinkPairThreshold</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairThresholdEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLinkPairThreshold distance offset between two link pairs </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>_LinkPair_threshold distance offset between two link pairs </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21getDetectionThresholdEv">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance21getDetectionThresholdEv"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance21getDetectionThresholdEv"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::getDetectionThreshold"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1aeecd272382d3cbaf10c531624b0f4f53"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getDetectionThreshold</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21getDetectionThresholdEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getDetectionThreshold </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>_Detection_threshold the maximum distance which we use to look for link pairs </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20setLinkPairThresholdEKd">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance20setLinkPairThresholdEKd"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance20setLinkPairThresholdEKd"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::setLinkPairThreshold__doubleC"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1ac250b47205806383bde7a82e0f3f2d03"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLinkPairThreshold</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">linkPair_threshold</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20setLinkPairThresholdEKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setLinkPairThreshold set _LinkPair_threshold distance offset between two link pairs </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>linkPair_threshold</strong> – (always positive) distance offset between two link pairs </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setDetectionThresholdEKd">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance21setDetectionThresholdEKd"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance21setDetectionThresholdEKd"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::setDetectionThreshold__doubleC"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1affc55e4d0eec349c245a282659b81832"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setDetectionThreshold</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">detection_threshold</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setDetectionThresholdEKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setDetectionThreshold set _Detection_threshold </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>detection_threshold</strong> – (always positive), the maximum distance which we use to look for link pairs </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance6updateERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance6updateERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance6updateERKN5Eigen8VectorXdE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::update__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a615d6a72e66900df9c3196b2294dddb0"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance6updateERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>update recomputes Aineq and bUpperBound if x is different than the previously stored value </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – the state vector. It gets cached so that we won’t recompute capsules distances if x didn’t change TODO if the capsules distances are given by a server (i.e. a separate thread updaing capsules at a given rate) then the inelegant caching of x is not needed anymore (notice that, however, it would be nice to have a caching system at the stack level so that, if two tasks in the same stack are constrained by the same constraint, this constraint gets updated only once per stack update) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionWhiteListENSt4listI9LinksPairEE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionWhiteListENSt4listI9LinksPairEE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionWhiteListENSt4listI9LinksPairEE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::setCollisionWhiteList__std::list:LinksPair:"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1abb7f7e06d92a1d2d6fd08b65d92d210f"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setCollisionWhiteList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">list</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance9LinksPairE" title="OpenSoT::constraints::velocity::CollisionAvoidance::LinksPair"><span class="n"><span class="pre">LinksPair</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">whiteList</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionWhiteListENSt4listI9LinksPairEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setCollisionWhiteList resets the allowed collision matrix by setting all collision pairs as disabled. </p>
+<p>It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs which are disabled in the SRDF </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>whiteList</strong> – a list of links pairs for which to not check collision detection </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true on success </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionBlackListENSt4listI9LinksPairEE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionBlackListENSt4listI9LinksPairEE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionBlackListENSt4listI9LinksPairEE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::setCollisionBlackList__std::list:LinksPair:"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a5d1840254bf8030e735d7fb4614756d8"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setCollisionBlackList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">list</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance9LinksPairE" title="OpenSoT::constraints::velocity::CollisionAvoidance::LinksPair"><span class="n"><span class="pre">LinksPair</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">blackList</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setCollisionBlackListENSt4listI9LinksPairEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setCollisionBlackList resets the allowed collision matrix by setting all collision pairs (for which collision geometries are avaiable) as enabled. </p>
+<p>It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs which are disabled in the SRDF </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>blackList</strong> – a list of links pairs for which to not check collision detection </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true on success </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance18setWorldCollisionsERKN11moveit_msgs18PlanningSceneWorldE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance18setWorldCollisionsERKN11moveit_msgs18PlanningSceneWorldE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance18setWorldCollisionsERKN11moveit_msgs18PlanningSceneWorldE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::setWorldCollisions__moveit_msgs::PlanningSceneWorldCR"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1aeb61231caa8c03d9eacdde7919c5dd72"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setWorldCollisions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">moveit_msgs</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">PlanningSceneWorld</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">wc</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance18setWorldCollisionsERKN11moveit_msgs18PlanningSceneWorldE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>add/remove world collision objects according to the given planning scene world </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if all requests (additions, deletions) could be performs succesfully, false on (partial) insuccess </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance17addWorldCollisionERKNSt6stringENSt10shared_ptrIN3fcl16CollisionObjectdEEE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance17addWorldCollisionERKNSt6stringENSt10shared_ptrIN3fcl16CollisionObjectdEEE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance17addWorldCollisionERKNSt6stringENSt10shared_ptrIN3fcl16CollisionObjectdEEE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::addWorldCollision__ssCR.std::shared_ptr:fcl::CollisionObjectd:"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1aca4585527526eb6c50babc2ce1c9de75"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">addWorldCollision</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">id</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">fcl</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="typedef_namespacefcl_1ad8615572c5e4ddaf74ecafd812f6798d.html#_CPPv4N3fcl16CollisionObjectdE" title="fcl::CollisionObjectd"><span class="n"><span class="pre">CollisionObjectd</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fcl_obj</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance17addWorldCollisionERKNSt6stringENSt10shared_ptrIN3fcl16CollisionObjectdEEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>add single collision to the world </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> – is the unique collision id </p></li>
+<li><p><strong>fcl_obj</strong> – is the fcl collision object (geometry + transform) </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if input is valid </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20removeWorldCollisionERKNSt6stringE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance20removeWorldCollisionERKNSt6stringE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance20removeWorldCollisionERKNSt6stringE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::removeWorldCollision__ssCR"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a9b918e99764c2a29d1535d1f8c8dd0ab"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">removeWorldCollision</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20removeWorldCollisionERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>remove world collision with given id </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance18moveWorldCollisionERKNSt6stringEN3KDL5FrameE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance18moveWorldCollisionERKNSt6stringEN3KDL5FrameE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance18moveWorldCollisionERKNSt6stringEN3KDL5FrameE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::moveWorldCollision__ssCR.KDL::Frame"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a33810232cf9ccecae8e303c2452fa89a"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">moveWorldCollision</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">id</span></span>, <span class="n"><span class="pre">KDL</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Frame</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">new_pose</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance18moveWorldCollisionERKNSt6stringEN3KDL5FrameE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>change the transform w.r.t. </p>
+<p>the world for the given world collision </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance15setBoundScalingEKd">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance15setBoundScalingEKd"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance15setBoundScalingEKd"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::setBoundScaling__doubleC"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a91e40fcd661ea2f42cc7f4cb2ff09086"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setBoundScaling</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">boundScaling</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance15setBoundScalingEKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setBoundScaling sets bound scaling for the capsule constraint </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>boundScaling</strong> – is a number which should be lower than 1.0 (e.g. 1./2. means we are looking two steps ahead and will avoid collision with the capsule by slowing down) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setLinksVsEnvironmentERKNSt4listINSt6stringEEE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance21setLinksVsEnvironmentERKNSt4listINSt6stringEEE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance21setLinksVsEnvironmentERKNSt4listINSt6stringEEE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::setLinksVsEnvironment__std::list:ss:CR"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1af55497b8f0cad294338fbdbd4a13694f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLinksVsEnvironment</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">list</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">links</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance21setLinksVsEnvironmentERKNSt4listINSt6stringEEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setLinksVsEnvironment </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>links</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairDistancesEv">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairDistancesEv"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairDistancesEv"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::getLinkPairDistances"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1adbf125f60464e16ef35dee171a8c9795"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">list</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classLinkPairDistance.html#_CPPv416LinkPairDistance" title="LinkPairDistance"><span class="n"><span class="pre">LinkPairDistance</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getLinkPairDistances</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20getLinkPairDistancesEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLinkPairDistances </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of <a class="reference internal" href="classLinkPairDistance.html#classLinkPairDistance"><span class="std std-ref">LinkPairDistance</span></a> which will be used in the task </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidanceD0Ev">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidanceD0Ev"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidanceD0Ev"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::~CollisionAvoidance"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a2d6b65d5d73eb3274b29e46c7b26ecaf"></span><span class="sig-name descname"><span class="n"><span class="pre">~CollisionAvoidance</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidanceD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance14_bound_scalingE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance14_bound_scalingE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance14_bound_scalingE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_bound_scaling__double"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a96e42dfd5ada77cf85500e3e64f406eb"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_bound_scaling</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance14_bound_scalingE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_bound_scaling </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance19_distance_thresholdE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance19_distance_thresholdE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance19_distance_thresholdE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_distance_threshold__double"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1ab61c8f40332d8d6b5b44d0e58d58c5e4"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_distance_threshold</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance19_distance_thresholdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_distance_threshold is the allowable minimum distance between every Link pair </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20_detection_thresholdE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance20_detection_thresholdE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance20_detection_thresholdE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_detection_threshold__double"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a400f20f410e95e58d9ecd75c9bff3bc5"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_detection_threshold</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance20_detection_thresholdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>all the link pairs whose minimum distance are smaller than this “_Detection_threshold” would be dealt with further </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance10_max_pairsE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance10_max_pairsE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance10_max_pairsE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_max_pairs__i"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1afe4b3bb317aa88af99fa6fd2f212b8ba"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_max_pairs</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance10_max_pairsE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_max_pairs </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance6_robotE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance6_robotE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance6_robotE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_robot__XBot::ModelInterfaceCR"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1af2f0723632ef8ec14d4d9fe284b3d3fa"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">_robot</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance6_robotE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_robot </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance10_dist_calcE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance10_dist_calcE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance10_dist_calcE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_dist_calc__std::unique_ptr:ComputeLinksDistance:"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1aa3791f8a30ac8bd44f2170c6ee32ef5b"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unique_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classComputeLinksDistance.html#_CPPv420ComputeLinksDistance" title="ComputeLinksDistance"><span class="n"><span class="pre">ComputeLinksDistance</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_dist_calc</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance10_dist_calcE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_dist_calc </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance8_x_cacheE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance8_x_cacheE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance8_x_cacheE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_x_cache__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1af26cc47b1be7c41644e166820c143330"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_x_cache</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance8_x_cacheE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_x_cache is a copy of last q vector used to update the constraints. </p>
+<p>It is used in order to avoid multiple updated when the constraint is present in multiple tasks in the same stack. It is a simple speedup waiting for the stack system to support constraint caching - or for idynutils to support some form of cache system </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance5_JtmpE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance5_JtmpE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance5_JtmpE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_Jtmp__Eigen::MatrixXd"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1a56de4cd2e15b9fa58611b1f8100e9ea3"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_Jtmp</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance5_JtmpE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_Jtmp </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance14_distance_listE">
+<span id="_CPPv3N7OpenSoT11constraints8velocity18CollisionAvoidance14_distance_listE"></span><span id="_CPPv2N7OpenSoT11constraints8velocity18CollisionAvoidance14_distance_listE"></span><span id="OpenSoT::constraints::velocity::CollisionAvoidance::_distance_list__std::list:LinkPairDistance:"></span><span class="target" id="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance_1af64f5eebb444efe64ffb50b82120b6fe"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">list</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classLinkPairDistance.html#_CPPv416LinkPairDistance" title="LinkPairDistance"><span class="n"><span class="pre">LinkPairDistance</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_distance_list</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT11constraints8velocity18CollisionAvoidance14_distance_listE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html" class="btn btn-neutral float-left" title="Class CartesianVelocity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html" class="btn btn-neutral float-right" title="Class ConvexHull" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

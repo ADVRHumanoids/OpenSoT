@@ -1,0 +1,36 @@
+.. _exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort:
+
+Class MinimumEffort
+===================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_MinimumEffort.h`
+
+
+Nested Relationships
+--------------------
+
+
+Nested Types
+************
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::Task< Eigen::MatrixXd, Eigen::VectorXd >`` (:ref:`exhale_class_classOpenSoT_1_1Task`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::tasks::velocity::MinimumEffort
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

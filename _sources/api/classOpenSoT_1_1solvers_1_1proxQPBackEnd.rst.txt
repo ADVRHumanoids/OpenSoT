@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1solvers_1_1proxQPBackEnd:
+
+Class proxQPBackEnd
+===================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_proxQPBackEnd.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::solvers::BackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1BackEnd`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::solvers::proxQPBackEnd
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

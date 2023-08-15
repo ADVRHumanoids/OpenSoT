@@ -1,0 +1,14 @@
+.. _exhale_enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68:
+
+Enum HessianType
+================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`
+
+
+Enum Documentation
+------------------
+
+
+.. doxygenenum:: OpenSoT::HessianType
+   :project: OpenSoT

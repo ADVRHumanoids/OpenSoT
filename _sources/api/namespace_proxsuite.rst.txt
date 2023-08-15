@@ -1,0 +1,20 @@
+
+.. _namespace_proxsuite:
+
+Namespace proxsuite
+===================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_proxsuite__proxqp`

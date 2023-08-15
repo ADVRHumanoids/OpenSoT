@@ -1,0 +1,168 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h:
+
+Program Listing for File iHQP.h
+===============================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/iHQP.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Enrico Mingo, Alessio Rocchi
+    * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef _WB_SOT_SOLVERS_QP_OASES_H_
+   #define _WB_SOT_SOLVERS_QP_OASES_H_
+   
+   #include <vector>
+   #include <iostream>
+   #include <memory>
+   #include <OpenSoT/Task.h>
+   #include <OpenSoT/Solver.h>
+   #include <OpenSoT/constraints/Aggregated.h>
+   #include <OpenSoT/solvers/BackEndFactory.h>
+   #include <OpenSoT/utils/Piler.h>
+   
+   using namespace OpenSoT::utils;
+   
+   #define DEFAULT_EPS_REGULARISATION 2E2 //THIS VALUE IS HISTORICALLY USED IN QPOASES
+   
+   namespace OpenSoT{
+   class AutoStack;
+   }
+   
+   namespace OpenSoT{
+       namespace solvers{
+   
+       class iHQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
+       {
+       public:
+       typedef std::shared_ptr<iHQP> Ptr;
+       typedef MatrixPiler VectorPiler;
+   
+           iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+                const solver_back_ends be_solver = solver_back_ends::qpOASES);
+           iHQP(OpenSoT::AutoStack& stack_of_tasks, const double eps_regularisation,
+                const std::vector<solver_back_ends> be_solver);
+   
+           iHQP(Stack& stack_of_tasks, const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+                const solver_back_ends be_solver = solver_back_ends::qpOASES);
+           iHQP(Stack& stack_of_tasks, const double eps_regularisation,
+                const std::vector<solver_back_ends> be_solver);
+   
+           iHQP(Stack& stack_of_tasks,
+                       ConstraintPtr bounds,
+                       const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+                       const solver_back_ends be_solver = solver_back_ends::qpOASES);
+           iHQP(Stack& stack_of_tasks,
+                       ConstraintPtr bounds,
+                       const double eps_regularisation,
+                       const std::vector<solver_back_ends> be_solver);
+   
+           iHQP(Stack& stack_of_tasks,
+                       ConstraintPtr bounds,
+                       ConstraintPtr globalConstraints,
+                       const double eps_regularisation = DEFAULT_EPS_REGULARISATION,
+                       const solver_back_ends be_solver = solver_back_ends::qpOASES);
+           iHQP(Stack& stack_of_tasks,
+                       ConstraintPtr bounds,
+                       ConstraintPtr globalConstraints,
+                       const double eps_regularisation,
+                       const std::vector<solver_back_ends> be_solver);
+   
+   
+           ~iHQP(){}
+   
+           bool solve(Eigen::VectorXd& solution);
+   
+           unsigned int getNumberOfTasks(){return _qp_stack_of_tasks.size();}
+   
+           bool setOptions(const unsigned int i, const boost::any &opt);
+   
+           bool getOptions(const unsigned int i, boost::any& opt);
+   
+           bool getObjective(const unsigned int i, double& val);
+   
+           void setActiveStack(const unsigned int i, const bool flag);
+   
+           void activateAllStacks();
+   
+           std::string getBackEndName(const unsigned int i);
+   
+           bool setEpsRegularisation(const double eps, const unsigned int i);
+   
+           bool setEpsRegularisation(const double eps);
+   
+           bool getBackEnd(const unsigned int i, BackEnd::Ptr& back_end);
+   
+       protected:
+           virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix);
+   
+           vector <OpenSoT::constraints::Aggregated> constraints_task;
+           
+           vector <BackEnd::Ptr> _qp_stack_of_tasks;
+   
+           vector<bool> _active_stacks;
+   
+           double _epsRegularisation;
+   
+           bool prepareSoT(const std::vector<solver_back_ends> be_solver);
+   
+           void computeCostFunction(const TaskPtr& task, Eigen::MatrixXd& H, Eigen::VectorXd& g);
+   
+           void computeOptimalityConstraint(const TaskPtr& task, BackEnd::Ptr& problem,
+                                            Eigen::MatrixXd& A,
+                                            Eigen::VectorXd& lA, Eigen::VectorXd& uA);
+   
+   
+   
+           Eigen::MatrixXd H;
+           Eigen::VectorXd g;
+   
+           //USER REGULARISATION
+           Eigen::MatrixXd Hr;
+           Eigen::VectorXd gr;
+   
+           OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _regularisation_task;
+           //
+   
+           MatrixPiler A;
+           VectorPiler lA;
+           VectorPiler uA;
+           
+           Eigen::VectorXd l;
+           Eigen::VectorXd u;
+           
+           std::vector<Eigen::MatrixXd> tmp_A;
+           std::vector<Eigen::VectorXd> tmp_lA;
+           std::vector<Eigen::VectorXd> tmp_uA;
+   
+   
+           std::vector<solver_back_ends> _be_solver;
+   
+           static const std::string _IHQP_CONSTRAINTS_PLUS_;
+           static const std::string _IHQP_CONSTRAINTS_OPTIMALITY_;
+   
+   
+       };
+   
+       }
+   }
+   
+   #endif

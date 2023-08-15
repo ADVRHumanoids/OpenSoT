@@ -1,0 +1,14 @@
+.. _exhale_define_iHQP_8h_1af2ad25eb08eeeb4c02bdd5484dac1272:
+
+Define DEFAULT_EPS_REGULARISATION
+=================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: DEFAULT_EPS_REGULARISATION
+   :project: OpenSoT

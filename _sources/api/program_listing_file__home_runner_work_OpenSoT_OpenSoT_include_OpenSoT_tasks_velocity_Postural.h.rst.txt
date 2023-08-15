@@ -1,0 +1,90 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Postural.h:
+
+Program Listing for File Postural.h
+===================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Postural.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity/Postural.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Authors:Alessio Rocchi, Enrico Mingo
+    * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __TASKS_VELOCITY_POSTURAL_H__
+   #define __TASKS_VELOCITY_POSTURAL_H__
+   
+    #include <OpenSoT/Task.h>
+   
+    #include <kdl/frames.hpp>
+   #include <Eigen/Dense>
+   
+    namespace OpenSoT {
+       namespace tasks {
+           namespace velocity {
+               class Postural : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+               public:
+                   typedef std::shared_ptr<Postural> Ptr;
+               protected:
+                   Eigen::VectorXd _x_desired;
+                   Eigen::VectorXd _xdot_desired, _xdot_desired_ref;
+                   Eigen::VectorXd _x;
+   
+                   void update_b();
+   
+               public:
+   
+                   Postural(const Eigen::VectorXd& x, const std::string& task_id = "Postural");
+   
+                   ~Postural();
+   
+                   virtual void _update(const Eigen::VectorXd& x);
+   
+                   void setReference(const Eigen::VectorXd& x_desired);
+   
+                   void setReference(const Eigen::VectorXd& x_desired,
+                                     const Eigen::VectorXd& xdot_desired);
+   
+                   const Eigen::VectorXd& getReference() const;
+   
+                   const Eigen::VectorXd& getCachedVelocityReference() const;
+   
+                   void getReference(Eigen::VectorXd& x_desired,
+                                     Eigen::VectorXd& xdot_desired) const;
+   
+                   void setLambda(double lambda);
+   
+                   Eigen::VectorXd getActualPositions();
+   
+                   Eigen::VectorXd getError();
+   
+                   bool reset();
+   
+                   virtual void _log(XBot::MatLogger2::Ptr logger);
+   
+                   static bool isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+   
+                   static OpenSoT::tasks::velocity::Postural::Ptr asPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+   
+               };
+           }
+       }
+    }
+   
+   #endif

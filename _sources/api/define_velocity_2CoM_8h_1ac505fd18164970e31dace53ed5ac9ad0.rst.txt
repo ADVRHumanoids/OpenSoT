@@ -1,0 +1,14 @@
+.. _exhale_define_velocity_2CoM_8h_1ac505fd18164970e31dace53ed5ac9ad0:
+
+Define DISTAL_LINK_COM
+======================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CoM.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: DISTAL_LINK_COM
+   :project: OpenSoT

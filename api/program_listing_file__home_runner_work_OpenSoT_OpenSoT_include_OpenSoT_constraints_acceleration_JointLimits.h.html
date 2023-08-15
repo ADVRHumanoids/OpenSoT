@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File JointLimits.h &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File JointLimits.h</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="program-listing-for-file-jointlimits-h">
+<span id="program-listing-file-home-runner-work-opensot-opensot-include-opensot-constraints-acceleration-jointlimits-h"></span><h1>Program Listing for File JointLimits.h<a class="headerlink" href="#program-listing-for-file-jointlimits-h" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h.html#file-home-runner-work-opensot-opensot-include-opensot-constraints-acceleration-jointlimits-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/acceleration/JointLimits.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Copyright (C) 2019 Cogimon</span>
+<span class="cm"> * Author: Matteo Parigi Polverini</span>
+<span class="cm"> * email:  matteo.parigi@iit.it</span>
+<span class="cm"> * Permission is granted to copy, distribute, and/or modify this program</span>
+<span class="cm"> * under the terms of the GNU Lesser General Public License, version 2 or any</span>
+<span class="cm"> * later version published by the Free Software Foundation.</span>
+<span class="cm"> *</span>
+<span class="cm"> * A copy of the license can be found at</span>
+<span class="cm"> * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html</span>
+<span class="cm"> *</span>
+<span class="cm"> * This program is distributed in the hope that it will be useful, but</span>
+<span class="cm"> * WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="cm"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General</span>
+<span class="cm"> * Public License for more details</span>
+<span class="cm">*/</span>
+
+<span class="cp">#ifndef __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__</span>
+<span class="cp">#define __BOUNDS_ACCELERATION_JOINTLIMITS_AFFINE_H__</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Constraint.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Affine.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/constraints/GenericConstraint.h&gt;</span><span class="cp"></span>
+
+ <span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span>
+    <span class="k">namespace</span> <span class="n">constraints</span> <span class="p">{</span>
+        <span class="k">namespace</span> <span class="n">acceleration</span><span class="p">{</span>
+            <span class="k">class</span> <span class="nc">JointLimits</span><span class="o">:</span> <span class="k">public</span> <span class="n">Constraint</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="p">{</span>
+            <span class="k">public</span><span class="o">:</span>
+                <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">JointLimits</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
+            <span class="k">private</span><span class="o">:</span>
+
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_jointLimitsMin</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_jointLimitsMax</span><span class="p">;</span>
+
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">__upperBound</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">__lowerBound</span><span class="p">;</span>
+
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_a</span><span class="p">,</span> <span class="n">_b_sup</span><span class="p">,</span> <span class="n">_c_sup</span><span class="p">,</span> <span class="n">_b_inf</span><span class="p">,</span> <span class="n">_c_inf</span><span class="p">,</span> <span class="n">_delta_sup</span><span class="p">,</span> <span class="n">_delta_inf</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_ub_sup</span><span class="p">,</span> <span class="n">_lb_sup</span><span class="p">,</span><span class="n">_ub_inf</span><span class="p">,</span> <span class="n">_lb_inf</span><span class="p">,</span> <span class="n">_ub</span><span class="p">,</span> <span class="n">_lb</span><span class="p">;</span>
+
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_jointAccMax</span><span class="p">;</span>
+
+                <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_robot</span><span class="p">;</span>
+
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_q</span><span class="p">,</span> <span class="n">_qdot</span><span class="p">;</span>
+
+                <span class="n">GenericConstraint</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_generic_constraint_internal</span><span class="p">;</span>
+
+
+                <span class="kt">double</span> <span class="n">_dt</span><span class="p">;</span>
+                <span class="kt">double</span> <span class="n">_p</span><span class="p">;</span>
+
+            <span class="k">public</span><span class="o">:</span>
+                <span class="n">JointLimits</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">AffineHelper</span><span class="o">&amp;</span> <span class="n">qddot</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">jointBoundMax</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">jointBoundMin</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">jointAccMax</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="kt">double</span> <span class="n">dt</span><span class="p">);</span>
+
+
+                <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
+
+                <span class="kt">void</span> <span class="nf">setJointAccMax</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">jointAccMax</span><span class="p">);</span>
+
+                <span class="kt">bool</span> <span class="nf">setPStepAheadPredictor</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">p</span><span class="p">);</span>
+
+            <span class="p">};</span>
+           <span class="p">}</span>
+        <span class="p">}</span>
+
+ <span class="p">}</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h:
+
+Program Listing for File GenericTask.h
+======================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/GenericTask.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef __OPENSOT_GENERIC_TASK__
+   #define __OPENSOT_GENERIC_TASK__
+   
+   #include <OpenSoT/Task.h>
+   #include <OpenSoT/utils/Affine.h>
+   #include <XBotInterface/ModelInterface.h>
+   
+   namespace OpenSoT { namespace tasks  {
+   
+   class GenericTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
+     public:
+       typedef std::shared_ptr<GenericTask> Ptr;
+   
+       GenericTask(const std::string& task_id,
+                   const Eigen::MatrixXd& A, const Eigen::VectorXd& b);
+   
+       GenericTask(const std::string& task_id,
+                   const Eigen::MatrixXd& A, const Eigen::VectorXd& b,
+                   const AffineHelper& var);
+   
+   
+       ~GenericTask();
+   
+       virtual void _update(const Eigen::VectorXd &x);
+   
+       bool setA(const Eigen::MatrixXd& A);
+   
+       bool setb(const Eigen::VectorXd& b);
+   
+       bool setAb(const Eigen::MatrixXd& A, const Eigen::VectorXd& b);
+   
+       bool setc(const Eigen::VectorXd& c);
+   
+       void setHessianType(const HessianType hessian_type);
+   
+   private:
+       AffineHelper _var;
+       AffineHelper _task;
+   
+       Eigen::MatrixXd __A;
+       Eigen::VectorXd __b;
+       Eigen::VectorXd __c;
+   
+   
+   };
+   
+   }}
+   
+   #endif

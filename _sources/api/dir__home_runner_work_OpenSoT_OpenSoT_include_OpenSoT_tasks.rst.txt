@@ -1,0 +1,32 @@
+.. _dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks:
+
+
+Directory tasks
+===============
+
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks``
+
+Subdirectories
+--------------
+
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force`
+- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity`
+
+
+Files
+-----
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`
+
+

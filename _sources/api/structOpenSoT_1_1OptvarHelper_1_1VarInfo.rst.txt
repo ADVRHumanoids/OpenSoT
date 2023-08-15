@@ -1,0 +1,23 @@
+.. _exhale_struct_structOpenSoT_1_1OptvarHelper_1_1VarInfo:
+
+Struct OptvarHelper::VarInfo
+============================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`
+
+
+Nested Relationships
+--------------------
+
+This struct is a nested type of :ref:`exhale_class_classOpenSoT_1_1OptvarHelper`.
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: OpenSoT::OptvarHelper::VarInfo
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

@@ -1,0 +1,22 @@
+
+.. _namespace_OpenSoT__AffineUtils:
+
+Namespace OpenSoT::AffineUtils
+==============================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1AffineUtils_1_1AffineConstraint`
+
+- :ref:`exhale_class_classOpenSoT_1_1AffineUtils_1_1AffineTask`

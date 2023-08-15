@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class QPOasesBackEnd &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class qpSWIFTBackEnd" href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html" />
+    <link rel="prev" title="Class proxQPBackEnd" href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class QPOasesBackEnd</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1solvers_1_1QPOasesBackEnd.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-qpoasesbackend">
+<span id="exhale-class-classopensot-1-1solvers-1-1qpoasesbackend"></span><h1>Class QPOasesBackEnd<a class="headerlink" href="#class-qpoasesbackend" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h.html#file-home-runner-work-opensot-opensot-include-opensot-solvers-qpoasesbackend-h"><span class="std std-ref">File QPOasesBackEnd.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::solvers::BackEnd</span></code> (<a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#exhale-class-classopensot-1-1solvers-1-1backend"><span class="std std-ref">Class BackEnd</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEndE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEndE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEndE"></span><span id="OpenSoT::solvers::QPOasesBackEnd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">QPOasesBackEnd</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">solvers</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEndE" title="OpenSoT::solvers::BackEnd"><span class="n"><span class="pre">BackEnd</span></span></a><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEndE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1solvers_1_1QPOasesBackEnd"><span class="std std-ref">QPOasesBackEnd</span></a> class handle variables, options and execution of a single qpOases problem. </p>
+<p>Is implemented using Eigen. This represent the Back-End. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14QPOasesBackEndEKiKiN7OpenSoT11HessianTypeEKd">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd14QPOasesBackEndEKiKiN7OpenSoT11HessianTypeEKd"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd14QPOasesBackEndEKiKiN7OpenSoT11HessianTypeEKd"></span><span id="OpenSoT::solvers::QPOasesBackEnd::QPOasesBackEnd__iC.iC.OpenSoT::HessianType.doubleC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a4205c773f85cd0e3d52c59cef6a2777c"></span><span class="sig-name descname"><span class="n"><span class="pre">QPOasesBackEnd</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">number_of_variables</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">number_of_constraints</span></span>, <span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#_CPPv4N7OpenSoT11HessianTypeE" title="OpenSoT::HessianType"><span class="n"><span class="pre">HessianType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">hessian_type</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#_CPPv4N7OpenSoT11HessianType11HST_UNKNOWNE" title="OpenSoT::HST_UNKNOWN"><span class="n"><span class="pre">HST_UNKNOWN</span></span></a>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">QPOASES_DEFAULT_EPS_REGULARISATION</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14QPOasesBackEndEKiKiN7OpenSoT11HessianTypeEKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1solvers_1_1QPOasesBackEnd"><span class="std std-ref">QPOasesBackEnd</span></a> constructor with creation of a QP problem. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_variables</strong> – of the QP problem </p></li>
+<li><p><strong>number_of_constraints</strong> – of the QP problem </p></li>
+<li><p><strong>hessian_type</strong> – of the QP problem </p></li>
+<li><p><strong>eps_regularization</strong> – set the Scaling factor of identity matrix used for Hessian regularisation. final_eps_regularisation = standard_eps_regularisation * eps_regularisation this parameter is particular important for the optimization! </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEndD0Ev">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEndD0Ev"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEndD0Ev"></span><span id="OpenSoT::solvers::QPOasesBackEnd::~QPOasesBackEnd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a88008fe3d6b48ca91578b8003d9d5bb4"></span><span class="sig-name descname"><span class="n"><span class="pre">~QPOasesBackEnd</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEndD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd><p>~QPOasesBackEnd destructor </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd17setDefaultOptionsEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd17setDefaultOptionsEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd17setDefaultOptionsEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::setDefaultOptions"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1ac0d7ce9c1fd3a30507bfcd998cfd0bb9"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setDefaultOptions</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd17setDefaultOptionsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setDefaultOptions to internal qpOases problem. </p>
+<p>Default are set to: opt.setToMPC(); opt.printLevel = qpOASES::PL_NONE; opt.enableRegularisation = qpOASES::BT_TRUE; opt.epsRegularisation *= _epsRegularisation; opt.numRegularisationSteps = 2; opt.numRefinementSteps = 1; opt.enableFlippingBounds = qpOASES::BT_TRUE; </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10getProblemEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd10getProblemEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd10getProblemEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getProblem"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a0d2a20ce4e5e89a589c95d8922fd3d3c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">qpOASES</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SQProblem</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getProblem</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10getProblemEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getProblem return the internal QP problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>reference to internal QP problem </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10getOptionsEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd10getOptionsEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd10getOptionsEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getOptions"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1ac1de508eea47ceccb8437b7e1c2b5ad9"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">boost</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getOptions</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10getOptionsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getOptions return the options of the QP problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>options </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10setOptionsERKN5boost3anyE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd10setOptionsERKN5boost3anyE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd10setOptionsERKN5boost3anyE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::setOptions__boost::anyCR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1aaaf4bfa1a8ce12e2a43a430d2e383491"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setOptions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">boost</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">options</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10setOptionsERKN5boost3anyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setOptions of the QP problem. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>options</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::initProblem__Eigen::MatrixXdCR.Eigen::VectorXdCR.Eigen::MatrixXdCR.Eigen::VectorXdCR.Eigen::VectorXdCR.Eigen::VectorXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1ae0d94aa38237d983239d5bde975b7770"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">initProblem</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">H</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">g</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">lA</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">uA</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">l</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">u</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>initProblem initialize the QP problem and get the solution, the dual solution, bounds and constraints. </p>
+<p>The QP problem has the following structure: <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span> <span class="n">min</span> <span class="o">=</span> <span class="o">||</span><span class="n">Hx</span> <span class="o">-</span> <span class="n">g</span><span class="o">||</span>
+</pre></div>
+</div>
+ st. lA &lt;= Ax &lt;= uA l &lt;= x &lt;= u </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>H</strong> – <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> Matrix </p></li>
+<li><p><strong>g</strong> – <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> references </p></li>
+<li><p><strong>A</strong> – <a class="reference internal" href="classOpenSoT_1_1Constraint.html#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> Matrix </p></li>
+<li><p><strong>lA</strong> – lower constraint Eigen::VectorXd </p></li>
+<li><p><strong>uA</strong> – upper constraint Eigen::VectorXd </p></li>
+<li><p><strong>l</strong> – lower bounds </p></li>
+<li><p><strong>u</strong> – upper bounds </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if the problem can be solved </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10updateTaskERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd10updateTaskERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd10updateTaskERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::updateTask__Eigen::MatrixXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1afe8e7b410420d329d1a3831aee2e96ef"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">updateTask</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">H</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">g</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10updateTaskERKN5Eigen8MatrixXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>This set of function update current problem copying input data. </p>
+<p>Use these methods to update existing matrices of the QP problem.</p>
+<p>updateTask update internal H and g: _H = H _g = g for now is not possible to have different size of H and g wrt internal ones </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>H</strong> – updated task matrix </p></li>
+<li><p><strong>g</strong> – updated reference Eigen::VectorXd </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if task is correctly updated </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd17updateConstraintsERKN5Eigen3RefIKN5Eigen8MatrixXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd17updateConstraintsERKN5Eigen3RefIKN5Eigen8MatrixXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd17updateConstraintsERKN5Eigen3RefIKN5Eigen8MatrixXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::updateConstraints__Eigen::Ref:Eigen::MatrixXdC:CR.Eigen::Ref:Eigen::VectorXdC:CR.Eigen::Ref:Eigen::VectorXdC:CR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1add86614c9ad85d5f05fe5227efc8ac8e"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">updateConstraints</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">lA</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">uA</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd17updateConstraintsERKN5Eigen3RefIKN5Eigen8MatrixXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEERKN5Eigen3RefIKN5Eigen8VectorXdEEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>updateConstraints update internal A, lA and uA _A = A _lA = lA _uA = uA A, lA and uA can change rows size to allow variable constraints </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> – update constraint matrix </p></li>
+<li><p><strong>lA</strong> – update lower constraint Eigen::VectorXd </p></li>
+<li><p><strong>uA</strong> – update upper constraint Eigen::VectorXd </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if constraints are correctly updated </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd5solveEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd5solveEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd5solveEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::solve"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a86459c63b3324b78a2bc4f1aca862e94"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solve</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd5solveEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>solve the QP problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if the QP problem is solved </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14getHessianTypeEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd14getHessianTypeEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd14getHessianTypeEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getHessianType"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a8f8c1b010acc4d5e62b20513ee480641"></span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#_CPPv4N7OpenSoT11HessianTypeE" title="OpenSoT::HessianType"><span class="n"><span class="pre">HessianType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getHessianType</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14getHessianTypeEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getHessianType return the hessian type f the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>hessian type </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14setHessianTypeEKN7OpenSoT11HessianTypeE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd14setHessianTypeEKN7OpenSoT11HessianTypeE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd14setHessianTypeEKN7OpenSoT11HessianTypeE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::setHessianType__OpenSoT::HessianTypeC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a9f8b33fcb17ef2ff2c16cc14f7717db7"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setHessianType</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#_CPPv4N7OpenSoT11HessianTypeE" title="OpenSoT::HessianType"><span class="n"><span class="pre">HessianType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">ht</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14setHessianTypeEKN7OpenSoT11HessianTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setHessianType of the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ht</strong> – hessian type </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd7getnWSREv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd7getnWSREv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd7getnWSREv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getnWSR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a0452d5d4b887e55cfbb00ec65f6f7327"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getnWSR</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd7getnWSREv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getnWSR return maximum number of working set recalculations </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>maximum number of working set recalculations </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd7setnWSREKi">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd7setnWSREKi"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd7setnWSREKi"></span><span id="OpenSoT::solvers::QPOasesBackEnd::setnWSR__iC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a407d15d2263c751631b95bc44f8107f3"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setnWSR</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nWSR</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd7setnWSREKi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setnWSR set maximum number of working set recalculations </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nWSR</strong> – Maximum number of working set recalculations </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd15getActiveBoundsEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd15getActiveBoundsEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd15getActiveBoundsEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getActiveBounds"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a9bb1668c02fc5f70e811947a6136b064"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">qpOASES</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Bounds</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getActiveBounds</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd15getActiveBoundsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getActiveBounds return the active bounds of the solved QP problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>active bounds </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20getActiveConstraintsEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd20getActiveConstraintsEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd20getActiveConstraintsEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getActiveConstraints"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a8ab3a80ec0cfcd1b04c77821fedb6eef"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">qpOASES</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Constraints</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getActiveConstraints</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20getActiveConstraintsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getActiveConstraints return the active constraints of the solved QP problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>active constraints </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd24_printProblemInformationEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd24_printProblemInformationEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd24_printProblemInformationEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_printProblemInformation"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a837570b12f84a6e60d04b6a274633fde"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_printProblemInformation</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd24_printProblemInformationEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>printProblemInformation print some extra information about the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>problem_number</strong> – a number to identify the problem </p></li>
+<li><p><strong>problem_id</strong> – a string to identify the problem </p></li>
+<li><p><strong>constraints_id</strong> – a string to identify the constraints associated to the problem </p></li>
+<li><p><strong>bounds_id</strong> – a string to identify the bounds associated to the problem </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd12getObjectiveEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd12getObjectiveEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd12getObjectiveEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getObjective"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1aa781878d0734b116e05dbba4463c256e"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getObjective</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd12getObjectiveEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getObjective return the value of the cost function at the optimum </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>finite value: Optimal objective function value (QP was solved) +infinity: QP was not yet solved </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20setEpsRegularisationEKd">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd20setEpsRegularisationEKd"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd20setEpsRegularisationEKd"></span><span id="OpenSoT::solvers::QPOasesBackEnd::setEpsRegularisation__doubleC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a7f3b538402ac60ddc2f322463fc8ba01"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setEpsRegularisation</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20setEpsRegularisationEKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setEpsRegularisation OVERWRITES the actual eps regularisation factor </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eps</strong> – the new regularisation factor </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>false if eps &lt; 0 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20getEpsRegularisationEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd20getEpsRegularisationEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd20getEpsRegularisationEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::getEpsRegularisation"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1ae437c47b15f62e9caf99d911e34cb9aa"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getEpsRegularisation</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20getEpsRegularisationEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getEpsRegularisation return internal solver eps </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>eps value </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20printConstraintsInfoEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd20printConstraintsInfoEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd20printConstraintsInfoEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::printConstraintsInfo"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a5a36db4668d80a0b481c2524774f91bb"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">printConstraintsInfo</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd20printConstraintsInfoEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>printConstraintsInfo function that print informations when the problem is not feasible </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10checkINFTYEv">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd10checkINFTYEv"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd10checkINFTYEv"></span><span id="OpenSoT::solvers::QPOasesBackEnd::checkINFTY"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a665c1697ec2449bf14a0e5fc005a064d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">checkINFTY</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd10checkINFTYEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>checkINFTY if a bound/constraint is set to a value less than -INFTY then the bound/constraint is set to -INFTY, if a bound/constraint is set to a value more than INFTY then the bound/constraint is set to INFTY. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd8_problemE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd8_problemE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd8_problemE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_problem__std::shared_ptr:qpOASES::SQProblem:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a11ad1ed466f93defb718344b811283aa"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">qpOASES</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SQProblem</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_problem</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd8_problemE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_problem is the internal SQProblem </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd7_boundsE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd7_boundsE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd7_boundsE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_bounds__std::shared_ptr:qpOASES::Bounds:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a7f58761f38c31c275b9405952972f984"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">qpOASES</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Bounds</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_bounds</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd7_boundsE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_bounds are the active bounds of the SQProblem </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd12_constraintsE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd12_constraintsE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd12_constraintsE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_constraints__std::shared_ptr:qpOASES::Constraints:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1af420cb4b6fb6b5ccc8549c1c484252a3"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">qpOASES</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Constraints</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_constraints</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd12_constraintsE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_constraints are the active constraints of the SQProblem </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd5_nWSRE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd5_nWSRE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd5_nWSRE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_nWSR__i"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a97ec0820324ecf79d1f39aa7b8a4365e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_nWSR</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd5_nWSRE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_nWSR is the maximum number of working set recalculations </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd18_epsRegularisationE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd18_epsRegularisationE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd18_epsRegularisationE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_epsRegularisation__double"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1aa6927da65d6cf5ec3c1b881f0e37a4f3"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_epsRegularisation</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd18_epsRegularisationE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_epsRegularisation is a factor that multiplies standard epsRegularisation of qpOases </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd4_optE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd4_optE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd4_optE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_opt__std::shared_ptr:qpOASES::Options:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a720b909a9f5fa1fc5685b4567a22390d"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">qpOASES</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Options</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_opt</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd4_optE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_opt solver options </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14_dual_solutionE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd14_dual_solutionE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd14_dual_solutionE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_dual_solution__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a02b4ac02d634deccd942a3dbd7c6c3d3"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_dual_solution</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd14_dual_solutionE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Solution of the QP problem. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers14QPOasesBackEnd5_A_rmE">
+<span id="_CPPv3N7OpenSoT7solvers14QPOasesBackEnd5_A_rmE"></span><span id="_CPPv2N7OpenSoT7solvers14QPOasesBackEnd5_A_rmE"></span><span id="OpenSoT::solvers::QPOasesBackEnd::_A_rm__Eigen::Matrix:double.Eigen::Dynamic.Eigen::Dynamic.Eigen::RowMajor:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1QPOasesBackEnd_1a624179d6524f33a44236827e0f458617"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Dynamic</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Dynamic</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RowMajor</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_A_rm</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers14QPOasesBackEnd5_A_rmE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html" class="btn btn-neutral float-left" title="Class proxQPBackEnd" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html" class="btn btn-neutral float-right" title="Class qpSWIFTBackEnd" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

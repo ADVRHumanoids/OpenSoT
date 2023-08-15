@@ -1,0 +1,113 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h:
+
+Program Listing for File BackEnd.h
+==================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/solvers/BackEnd.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef _WB_SOT_SOLVERS_BACK_END_H_
+   #define _WB_SOT_SOLVERS_BACK_END_H_
+   
+   #include <Eigen/Dense>
+   #include <XBotInterface/Logger.hpp>
+   #include <boost/any.hpp>
+   #include <OpenSoT/Task.h>
+   
+   namespace OpenSoT{
+       namespace solvers{
+   
+       class BackEnd{
+       public:
+           BackEnd(const int number_of_variables, const int number_of_constraints);
+           virtual ~BackEnd();
+   
+           typedef std::shared_ptr<BackEnd> Ptr;
+   
+           const Eigen::VectorXd& getSolution(){return _solution;}
+   
+           const Eigen::MatrixXd& getH(){return _H;}
+           const Eigen::VectorXd& getg(){return _g;}
+           const Eigen::MatrixXd& getA(){return _A;}
+           const Eigen::VectorXd& getlA(){return _lA;}
+           const Eigen::VectorXd& getuA(){return _uA;}
+           const Eigen::VectorXd& getl(){return _l;}
+           const Eigen::VectorXd& getu(){return _u;}
+           
+           int getNumVariables() const;
+           int getNumConstraints() const;
+   
+           void log(XBot::MatLogger2::Ptr logger, int i, const std::string& prefix);
+   
+           bool updateProblem(const Eigen::MatrixXd &H, const Eigen::VectorXd &g,
+                                              const Eigen::MatrixXd &A, const Eigen::VectorXd &lA, const Eigen::VectorXd &uA,
+                                              const Eigen::VectorXd &l, const Eigen::VectorXd &u);
+   
+           void printProblemInformation(const int problem_number, const std::string& problem_id,
+                                        const std::string& constraints_id, const std::string& bounds_id);
+   
+   
+           virtual bool updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g);
+   
+   
+           virtual bool updateConstraints(const Eigen::Ref<const Eigen::MatrixXd>& A,
+                                          const Eigen::Ref<const Eigen::VectorXd> &lA,
+                                          const Eigen::Ref<const Eigen::VectorXd> &uA);
+   
+           virtual bool updateBounds(const Eigen::VectorXd& l, const Eigen::VectorXd& u);
+   
+   
+   
+   
+           virtual bool initProblem(const Eigen::MatrixXd& H, const Eigen::VectorXd& g,
+                                    const Eigen::MatrixXd& A, const Eigen::VectorXd& lA, const Eigen::VectorXd& uA,
+                                    const Eigen::VectorXd& l, const Eigen::VectorXd& u) = 0;
+           virtual bool solve() = 0;
+   
+           virtual boost::any getOptions() = 0;
+   
+           virtual void setOptions(const boost::any& options) = 0;
+   
+           virtual double getObjective() = 0;
+   
+           virtual bool setEpsRegularisation(const double eps)
+           {
+               XBot::Logger::error("BackEnd does not allow setEpsRegularisation");
+               return false;
+           }
+   
+           virtual double getEpsRegularisation()
+           {
+               XBot::Logger::error("BackEnd does not allow getEpsRegularisation");
+               return 0;
+           }
+   
+       protected:
+   
+           virtual void _log(XBot::MatLogger2::Ptr logger, int i, const std::string& prefix){}
+   
+           virtual void _printProblemInformation(){}
+   
+           Eigen::MatrixXd _H;
+           Eigen::VectorXd _g;
+   
+           Eigen::MatrixXd _A;
+           Eigen::VectorXd _lA;
+           Eigen::VectorXd _uA;
+   
+           Eigen::VectorXd _l;
+           Eigen::VectorXd _u;
+   
+           Eigen::VectorXd _solution;
+   
+           int _number_of_variables;
+       };
+   
+       }
+   }
+   
+   #endif

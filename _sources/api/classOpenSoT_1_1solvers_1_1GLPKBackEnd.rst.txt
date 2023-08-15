@@ -1,0 +1,36 @@
+.. _exhale_class_classOpenSoT_1_1solvers_1_1GLPKBackEnd:
+
+Class GLPKBackEnd
+=================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_GLPKBackEnd.h`
+
+
+Nested Relationships
+--------------------
+
+
+Nested Types
+************
+
+- :ref:`exhale_struct_structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::solvers::BackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1BackEnd`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::solvers::GLPKBackEnd
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

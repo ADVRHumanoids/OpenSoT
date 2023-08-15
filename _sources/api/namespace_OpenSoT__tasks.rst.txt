@@ -1,0 +1,39 @@
+
+.. _namespace_OpenSoT__tasks:
+
+Namespace OpenSoT::tasks
+========================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT__tasks__acceleration`
+
+- :ref:`namespace_OpenSoT__tasks__floating_base`
+
+- :ref:`namespace_OpenSoT__tasks__force`
+
+- :ref:`namespace_OpenSoT__tasks__velocity`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1Aggregated`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1GenericLPTask`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1GenericTask`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1MinimizeVariable`

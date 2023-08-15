@@ -1,0 +1,58 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_GainType.h:
+
+File GainType.h
+===============
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/acceleration``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/acceleration/GainType.h``)
+------------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_GainType.h.rst
+
+
+
+
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Cartesian.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__tasks`
+
+- :ref:`namespace_OpenSoT__tasks__acceleration`
+
+
+Enums
+-----
+
+
+- :ref:`exhale_enum_namespaceOpenSoT_1_1tasks_1_1acceleration_1ac5e7971804aeb402ea61abadc7c52b42`
+

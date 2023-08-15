@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1variables_1_1Torque:
+
+Class Torque
+============
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables_Torque.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::AffineHelperBase< Eigen::MatrixXd, Eigen::VectorXd >`` (:ref:`exhale_class_classOpenSoT_1_1AffineHelperBase`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::variables::Torque
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

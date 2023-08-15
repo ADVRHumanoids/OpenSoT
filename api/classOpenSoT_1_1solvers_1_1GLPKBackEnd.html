@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class GLPKBackEnd &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class HCOD" href="classOpenSoT_1_1solvers_1_1HCOD.html" />
+    <link rel="prev" title="Class eiQuadProgBackEnd" href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class GLPKBackEnd</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1solvers_1_1GLPKBackEnd.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-glpkbackend">
+<span id="exhale-class-classopensot-1-1solvers-1-1glpkbackend"></span><h1>Class GLPKBackEnd<a class="headerlink" href="#class-glpkbackend" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_GLPKBackEnd.h.html#file-home-runner-work-opensot-opensot-include-opensot-solvers-glpkbackend-h"><span class="std std-ref">File GLPKBackEnd.h</span></a></p></li>
+</ul>
+<div class="section" id="nested-relationships">
+<h2>Nested Relationships<a class="headerlink" href="#nested-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="nested-types">
+<h3>Nested Types<a class="headerlink" href="#nested-types" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions.html#exhale-struct-structopensot-1-1solvers-1-1glpkbackend-1-1glpkbackendoptions"><span class="std std-ref">Struct GLPKBackEnd::GLPKBackEndOptions</span></a></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::solvers::BackEnd</span></code> (<a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#exhale-class-classopensot-1-1solvers-1-1backend"><span class="std std-ref">Class BackEnd</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEndE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEndE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEndE"></span><span id="OpenSoT::solvers::GLPKBackEnd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GLPKBackEnd</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">solvers</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#_CPPv4N7OpenSoT7solvers7BackEndE" title="OpenSoT::solvers::BackEnd"><span class="n"><span class="pre">BackEnd</span></span></a><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEndE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd5indexE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd5indexE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd5indexE"></span><span id="OpenSoT::solvers::GLPKBackEnd::index"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a8914ace5c23a6cbca424be29a1051361"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">index</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd5indexE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd4kindE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd4kindE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd4kindE"></span><span id="OpenSoT::solvers::GLPKBackEnd::kind"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a12502afeef878fbdb094259a14fb0ee0"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">kind</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd4kindE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd11var_id_kindE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd11var_id_kindE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd11var_id_kindE"></span><span id="OpenSoT::solvers::GLPKBackEnd::var_id_kind"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a46bc0235c3dd9775a745efc2f6ac492c"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">pair</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd5indexE" title="OpenSoT::solvers::GLPKBackEnd::index"><span class="n"><span class="pre">index</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd4kindE" title="OpenSoT::solvers::GLPKBackEnd::kind"><span class="n"><span class="pre">kind</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_id_kind</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd11var_id_kindE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd11GLPKBackEndEKiKiKd">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd11GLPKBackEndEKiKiKd"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd11GLPKBackEndEKiKiKd"></span><span id="OpenSoT::solvers::GLPKBackEnd::GLPKBackEnd__iC.iC.doubleC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1af5959048ec36ef783aeb26489cdec71b"></span><span class="sig-name descname"><span class="n"><span class="pre">GLPKBackEnd</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">number_of_variables</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">number_of_constraints</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0.0</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd11GLPKBackEndEKiKiKd" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEndD0Ev">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEndD0Ev"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEndD0Ev"></span><span id="OpenSoT::solvers::GLPKBackEnd::~GLPKBackEnd"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a6b5d574ea64502b34510f6c1f8601948"></span><span class="sig-name descname"><span class="n"><span class="pre">~GLPKBackEnd</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEndD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::solvers::GLPKBackEnd::initProblem__Eigen::MatrixXdCR.Eigen::VectorXdCR.Eigen::MatrixXdCR.Eigen::VectorXdCR.Eigen::VectorXdCR.Eigen::VectorXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a68696c251c7ddc91c99f4740a5aa1539"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">initProblem</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">H</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">g</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">lA</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">uA</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">l</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">u</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd11initProblemERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8MatrixXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>H NOT USED! g Linear cost function: g’x A Linear Constraints Ax lA/uA constraints l/u bounds. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd5solveEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd5solveEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd5solveEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::solve"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1ac5dc8103748bae7f17dc77833c9f3953"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solve</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd5solveEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>solve the QP problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if the QP problem is solved (implementation should use internally _solution) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd10setOptionsERKN5boost3anyE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd10setOptionsERKN5boost3anyE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd10setOptionsERKN5boost3anyE"></span><span id="OpenSoT::solvers::GLPKBackEnd::setOptions__boost::anyCR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1ad4b0e2ed16d1a75343209e5f2dd2fdb0"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setOptions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">boost</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">options</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd10setOptionsERKN5boost3anyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setOptions of the QP problem. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>options, a</strong> – boost::any object since we do not know the type of the object which depends on the solver </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd10getOptionsEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd10getOptionsEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd10getOptionsEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::getOptions"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1ae34118cfcb037995a82afaceca5a0dab"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">boost</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getOptions</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd10getOptionsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getOptions return the options of the QP problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>options, a boost::any object since we do not know the type of the object which depends on the solver </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd12getObjectiveEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd12getObjectiveEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd12getObjectiveEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::getObjective"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a1014250efd79925c191f552171d6ebe8"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getObjective</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd12getObjectiveEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getObjective to retrieve the value of the objective function </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the value of the objective function at the optimum </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd18getGLPKUpperBoundsEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd18getGLPKUpperBoundsEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd18getGLPKUpperBoundsEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::getGLPKUpperBounds"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1ada7d91ec37f1f563afeb4a92684b14de"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getGLPKUpperBounds</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd18getGLPKUpperBoundsEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd18getGLPKLowerBoundsEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd18getGLPKLowerBoundsEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd18getGLPKLowerBoundsEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::getGLPKLowerBounds"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a0865ae748c999e5da080401851937d3b"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getGLPKLowerBounds</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd18getGLPKLowerBoundsEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd23getGLPKUpperConstraintsEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd23getGLPKUpperConstraintsEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd23getGLPKUpperConstraintsEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::getGLPKUpperConstraints"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1ad6a177da9808f3c8b33919d1dac5d28f"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getGLPKUpperConstraints</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd23getGLPKUpperConstraintsEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd23getGLPKLowerConstraintsEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd23getGLPKLowerConstraintsEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd23getGLPKLowerConstraintsEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::getGLPKLowerConstraints"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1ab8a50a72f3450538ebc41c965f9b73c5"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getGLPKLowerConstraints</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd23getGLPKLowerConstraintsEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd23getGLPKConstraintMatrixEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd23getGLPKConstraintMatrixEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd23getGLPKConstraintMatrixEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::getGLPKConstraintMatrix"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a44eeec52cc183d5cb6923127ebadbd87"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getGLPKConstraintMatrix</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd23getGLPKConstraintMatrixEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd7writeLPEv">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd7writeLPEv"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd7writeLPEv"></span><span id="OpenSoT::solvers::GLPKBackEnd::writeLP"></span><span class="target" id="classOpenSoT_1_1solvers_1_1GLPKBackEnd_1a4528ba70b708e04e62866e1659ce85a3"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">writeLP</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd7writeLPEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>writeLP call glp_write_lp to have text file of the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>check glpk.h </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptionsE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptionsE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptionsE"></span><span id="OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions"></span><span class="target" id="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GLPKBackEndOptions</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptionsE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12ROUND_BOUNDSE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12ROUND_BOUNDSE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12ROUND_BOUNDSE"></span><span id="OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions::ROUND_BOUNDS__i"></span><span class="target" id="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions_1a39aa3bb91698302abd2d548c9992ac7c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ROUND_BOUNDS</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12ROUND_BOUNDSE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>ROUND_BOUNDS 0: bounds are not rounded 1: bounds are rounded to nearest sup integer -1: bounds are rounded to nearest inf integer. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12var_id_kind_E">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12var_id_kind_E"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12var_id_kind_E"></span><span id="OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions::var_id_kind___std::vector:var_id_kind:"></span><span class="target" id="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions_1ab8f7d724f4f64bbc76c4b16a016d870f"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd11var_id_kindE" title="OpenSoT::solvers::GLPKBackEnd::var_id_kind"><span class="n"><span class="pre">var_id_kind</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_id_kind_</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions12var_id_kind_E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions5paramE">
+<span id="_CPPv3N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions5paramE"></span><span id="_CPPv2N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions5paramE"></span><span id="OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions::param__std::shared_ptr:glp_iocp:"></span><span class="target" id="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions_1ac55fc9f493407c31d3966c15524e0f84"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">glp_iocp</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">param</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers11GLPKBackEnd18GLPKBackEndOptions5paramE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html" class="btn btn-neutral float-left" title="Class eiQuadProgBackEnd" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1solvers_1_1HCOD.html" class="btn btn-neutral float-right" title="Class HCOD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

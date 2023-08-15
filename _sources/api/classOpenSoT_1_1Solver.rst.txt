@@ -1,0 +1,17 @@
+.. _exhale_class_classOpenSoT_1_1Solver:
+
+Template Class Solver
+=====================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::Solver
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

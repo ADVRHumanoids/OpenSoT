@@ -1,0 +1,14 @@
+.. _exhale_enum_namespaceOpenSoT_1_1tasks_1_1acceleration_1ac5e7971804aeb402ea61abadc7c52b42:
+
+Enum GainType
+=============
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_GainType.h`
+
+
+Enum Documentation
+------------------
+
+
+.. doxygenenum:: OpenSoT::tasks::acceleration::GainType
+   :project: OpenSoT

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class InverseDynamics &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class MatrixPiler" href="classOpenSoT_1_1utils_1_1MatrixPiler.html" />
+    <link rel="prev" title="Class ForceOptimization" href="classOpenSoT_1_1utils_1_1ForceOptimization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class InverseDynamics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1utils_1_1InverseDynamics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-inversedynamics">
+<span id="exhale-class-classopensot-1-1utils-1-1inversedynamics"></span><h1>Class InverseDynamics<a class="headerlink" href="#class-inversedynamics" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-inversedynamics-h"><span class="std std-ref">File InverseDynamics.h</span></a></p></li>
+</ul>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamicsE">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamicsE"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamicsE"></span><span id="OpenSoT::utils::InverseDynamics"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">InverseDynamics</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamicsE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1utils_1_1InverseDynamics"><span class="std std-ref">InverseDynamics</span></a> class is a utility to help the computation of wholebody inverse dynamics controllers with contacts. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp enum">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODELE">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamics13CONTACT_MODELE"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamics13CONTACT_MODELE"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1a98f1e2bdcaf5e1f3739b4b73e3757b3f"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CONTACT_MODEL</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODELE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL13POINT_CONTACTE">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL13POINT_CONTACTE"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL13POINT_CONTACTE"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1a98f1e2bdcaf5e1f3739b4b73e3757b3fa85cc98be54cc9e1b2659ef788e6a609e"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">POINT_CONTACT</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL13POINT_CONTACTE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL15SURFACE_CONTACTE">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL15SURFACE_CONTACTE"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL15SURFACE_CONTACTE"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1a98f1e2bdcaf5e1f3739b4b73e3757b3fad63a8901c65a03ff2cba1f6d9f526818"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SURFACE_CONTACT</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL15SURFACE_CONTACTE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamics3PtrE">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamics3PtrE"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamics3PtrE"></span><span id="OpenSoT::utils::InverseDynamics::Ptr"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1ad907b28bee3139c1c59ff5350d551486"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5utils15InverseDynamicsE" title="OpenSoT::utils::InverseDynamics"><span class="n"><span class="pre">InverseDynamics</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamics3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamics15InverseDynamicsEKNSt6vectorINSt6stringEEERN4XBot14ModelInterfaceERK13CONTACT_MODEL">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamics15InverseDynamicsEKNSt6vectorINSt6stringEEERN4XBot14ModelInterfaceERK13CONTACT_MODEL"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamics15InverseDynamicsEKNSt6vectorINSt6stringEEERN4XBot14ModelInterfaceERK13CONTACT_MODEL"></span><span id="OpenSoT::utils::InverseDynamics::InverseDynamics__std::vector:ss:C.XBot::ModelInterfaceR.CONTACT_MODELCR"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1a9913787c300ad41d853bb1755bc11bcc"></span><span class="sig-name descname"><span class="n"><span class="pre">InverseDynamics</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">links_in_contact</span></span>, <span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">model</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODELE" title="OpenSoT::utils::InverseDynamics::CONTACT_MODEL"><span class="n"><span class="pre">CONTACT_MODEL</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">contact_model</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODELE" title="OpenSoT::utils::InverseDynamics::CONTACT_MODEL"><span class="n"><span class="pre">CONTACT_MODEL</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5utils15InverseDynamics13CONTACT_MODEL15SURFACE_CONTACTE" title="OpenSoT::utils::InverseDynamics::CONTACT_MODEL::SURFACE_CONTACT"><span class="n"><span class="pre">SURFACE_CONTACT</span></span></a><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamics15InverseDynamicsEKNSt6vectorINSt6stringEEERN4XBot14ModelInterfaceERK13CONTACT_MODEL" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1utils_1_1InverseDynamics"><span class="std std-ref">InverseDynamics</span></a> constructor. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links_in_contact</strong> – a vector of string each one representing a contact </p></li>
+<li><p><strong>model</strong> – </p></li>
+<li><p><strong>contact_model</strong> – the type of contact model defines the number of contact force variables, default is surface: 6dofs </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5utils15InverseDynamics27getJointsAccelerationAffineEv">
+<span id="_CPPv3NK7OpenSoT5utils15InverseDynamics27getJointsAccelerationAffineEv"></span><span id="_CPPv2NK7OpenSoT5utils15InverseDynamics27getJointsAccelerationAffineEv"></span><span id="OpenSoT::utils::InverseDynamics::getJointsAccelerationAffineC"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1a2c28e405cb51597cf59704082f9738fa"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb.html#_CPPv4N7OpenSoT12AffineHelperE" title="OpenSoT::AffineHelper"><span class="n"><span class="pre">AffineHelper</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getJointsAccelerationAffine</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5utils15InverseDynamics27getJointsAccelerationAffineEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getJointsAccelerationAffine return the Affine related to the joint accelerations </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>_qddot </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5utils15InverseDynamics23getContactsWrenchAffineEv">
+<span id="_CPPv3NK7OpenSoT5utils15InverseDynamics23getContactsWrenchAffineEv"></span><span id="_CPPv2NK7OpenSoT5utils15InverseDynamics23getContactsWrenchAffineEv"></span><span id="OpenSoT::utils::InverseDynamics::getContactsWrenchAffineC"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1aa6e42dd4d01677ce0f32ffb6943dd552"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb.html#_CPPv4N7OpenSoT12AffineHelperE" title="OpenSoT::AffineHelper"><span class="n"><span class="pre">AffineHelper</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getContactsWrenchAffine</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5utils15InverseDynamics23getContactsWrenchAffineEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getContactsWrenchAffine return a vector of Affines each related to a contact wrench </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>_contacts_wrench </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5utils15InverseDynamics13getSerializerEv">
+<span id="_CPPv3NK7OpenSoT5utils15InverseDynamics13getSerializerEv"></span><span id="_CPPv2NK7OpenSoT5utils15InverseDynamics13getSerializerEv"></span><span id="OpenSoT::utils::InverseDynamics::getSerializerC"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1a183fd6cb7fb1ed9080dc29c4324f94d0"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html#_CPPv4N7OpenSoT12OptvarHelperE" title="OpenSoT::OptvarHelper"><span class="n"><span class="pre">OptvarHelper</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getSerializer</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5utils15InverseDynamics13getSerializerEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getSerializer return a pointer to the object which contains all the variables of the Inverse Dynamics </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamics14computedTorqueERKN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdERNSt6vectorIN5Eigen8Vector6dEEE">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamics14computedTorqueERKN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdERNSt6vectorIN5Eigen8Vector6dEEE"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamics14computedTorqueERKN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdERNSt6vectorIN5Eigen8Vector6dEEE"></span><span id="OpenSoT::utils::InverseDynamics::computedTorque__Eigen::VectorXdCR.Eigen::VectorXdR.Eigen::VectorXdR.std::vector:Eigen::Vector6d:R"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1ad23fdb78c22cc3830bca32e52b0d96be"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">computedTorque</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">tau</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qddot</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector6d</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">contact_wrench</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamics14computedTorqueERKN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdERNSt6vectorIN5Eigen8Vector6dEEE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>computedTorque given the solution from the solver which contains all the optimization variables, returns the torque to send to the robot </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – optimized variables </p></li>
+<li><p><strong>tau</strong> – computed torques </p></li>
+<li><p><strong>qddot</strong> – computed accelerations from solution x </p></li>
+<li><p><strong>contact_wrench</strong> – computed wrenches from solution x </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if the model is fixed base, false if the base wrench is not 0 (for floating base models) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5utils15InverseDynamics3logERN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT5utils15InverseDynamics3logERN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT5utils15InverseDynamics3logERN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::utils::InverseDynamics::log__XBot::MatLogger2::PtrR"></span><span class="target" id="classOpenSoT_1_1utils_1_1InverseDynamics_1add83164e3c4342d4d1d2e7f92ff86e19"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5utils15InverseDynamics3logERN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>log internal variables: wrenches, tau and qddot </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1utils_1_1ForceOptimization.html" class="btn btn-neutral float-left" title="Class ForceOptimization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1utils_1_1MatrixPiler.html" class="btn btn-neutral float-right" title="Class MatrixPiler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

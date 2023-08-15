@@ -1,0 +1,80 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_LinearMomentum.h:
+
+Program Listing for File LinearMomentum.h
+=========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_LinearMomentum.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity/LinearMomentum.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2017 Walkman
+    * Authors: Enrico Mingo Hoffman, Pouya Mohammadi
+    * email:  enrico.mingo@iit.it, p.mohammadi@tu-bs.de
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __TASKS_VELOCITY_LINEAR_MOMENTUM_H__
+   #define __TASKS_VELOCITY_LINEAR_MOMENTUM_H__
+   
+   #include <OpenSoT/Task.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <kdl/frames.hpp>
+   #include <Eigen/Dense>
+   
+   namespace OpenSoT {
+      namespace tasks {
+          namespace velocity {
+   
+       #define BASE_LINK_COM "world"
+       #define DISTAL_LINK_COM "CoM"
+   
+          class LinearMomentum : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+          public:
+              typedef std::shared_ptr<LinearMomentum> Ptr;
+   
+          private:
+              XBot::ModelInterface& _robot;
+   
+              Eigen::Vector3d _desiredLinearMomentum;
+   
+              Eigen::MatrixXd _Momentum;
+   
+              void _update(const Eigen::VectorXd& x);
+   
+           public:
+              LinearMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot);
+              ~LinearMomentum();
+   
+              void setReference(const Eigen::Vector3d& desiredLinearMomentum);
+              void setReference(const KDL::Vector& desiredLinearMomentum);
+   
+              void getReference(Eigen::Vector3d& desiredLinearMomentum) const;
+              void getReference(KDL::Vector& desiredLinearMomentum) const;
+   
+              std::string getBaseLink();
+   
+              std::string getDistalLink();
+   
+              static bool isLinearMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+   
+              static OpenSoT::tasks::velocity::LinearMomentum::Ptr asLinearMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+          };
+       }
+      }
+   }
+   
+   #endif

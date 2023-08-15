@@ -1,0 +1,48 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h:
+
+Program Listing for File StaticConstraint.h
+===========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/constraints/force/StaticConstraint.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #include <OpenSoT/utils/Affine.h>
+   #include <OpenSoT/Constraint.h>
+   
+   #include <XBotInterface/ModelInterface.h>
+   
+   namespace OpenSoT { namespace constraints { namespace force {
+       
+       class StaticConstraint : public Constraint<Eigen::MatrixXd, Eigen::VectorXd> 
+       {
+           
+       public:
+           StaticConstraint(const XBot::ModelInterface& robot, 
+                           std::vector<std::string> contact_links,
+                           std::vector<AffineHelper> forces,
+                           AffineHelper robot_torque);
+           
+           
+       private:
+           
+           void update(const Eigen::VectorXd& x) override;
+           
+           const XBot::ModelInterface& _robot;
+           std::vector<std::string> _contact_links;
+           std::vector<AffineHelper> _forces;
+           AffineHelper _robot_torque;
+           
+           Eigen::MatrixXd _J;
+           Eigen::VectorXd _gcomp;
+           AffineHelper _constr;
+           
+       };
+   
+       
+   } } }
+   
+   

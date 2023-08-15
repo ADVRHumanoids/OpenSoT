@@ -1,0 +1,14 @@
+.. _exhale_define_HCOD_8h_1ab984b6660eb2a62d534d96a72d13bf33:
+
+Define __SOLVERS__HCOD__
+========================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: __SOLVERS__HCOD__
+   :project: OpenSoT

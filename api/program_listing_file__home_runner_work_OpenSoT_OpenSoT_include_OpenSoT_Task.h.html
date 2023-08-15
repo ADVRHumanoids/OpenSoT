@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File Task.h &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File Task.h</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="program-listing-for-file-task-h">
+<span id="program-listing-file-home-runner-work-opensot-opensot-include-opensot-task-h"></span><h1>Program Listing for File Task.h<a class="headerlink" href="#program-listing-for-file-task-h" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h.html#file-home-runner-work-opensot-opensot-include-opensot-task-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/Task.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Copyright (C) 2014 Walkman</span>
+<span class="cm"> * Author: Alessio Rocchi</span>
+<span class="cm"> * email:  alessio.rocchi@iit.it</span>
+<span class="cm"> * Permission is granted to copy, distribute, and/or modify this program</span>
+<span class="cm"> * under the terms of the GNU Lesser General Public License, version 2 or any</span>
+<span class="cm"> * later version published by the Free Software Foundation.</span>
+<span class="cm"> *</span>
+<span class="cm"> * A copy of the license can be found at</span>
+<span class="cm"> * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html</span>
+<span class="cm"> *</span>
+<span class="cm"> * This program is distributed in the hope that it will be useful, but</span>
+<span class="cm"> * WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="cm"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General</span>
+<span class="cm"> * Public License for more details</span>
+<span class="cm">*/</span>
+
+<span class="cp">#ifndef __TASK_H__</span>
+<span class="cp">#define __TASK_H__</span>
+
+ <span class="cp">#include</span> <span class="cpf">&lt;list&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;string&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Constraint.h&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;assert.h&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/Logger.hpp&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
+
+ <span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span>
+
+    <span class="k">enum</span> <span class="n">HessianType</span>
+    <span class="p">{</span>
+        <span class="n">HST_ZERO</span><span class="p">,</span>
+        <span class="n">HST_IDENTITY</span><span class="p">,</span>
+        <span class="n">HST_POSDEF</span><span class="p">,</span>
+        <span class="n">HST_POSDEF_NULLSPACE</span><span class="p">,</span>
+        <span class="n">HST_SEMIDEF</span><span class="p">,</span>
+        <span class="n">HST_UNKNOWN</span>
+    <span class="p">};</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Matrix_type</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Vector_type</span><span class="o">&gt;</span>
+    <span class="k">class</span> <span class="nc">Task</span> <span class="p">{</span>
+
+    <span class="k">public</span><span class="o">:</span>
+        <span class="k">typedef</span> <span class="n">Task</span><span class="o">&lt;</span> <span class="n">Matrix_type</span><span class="p">,</span> <span class="n">Vector_type</span> <span class="o">&gt;</span> <span class="n">TaskType</span><span class="p">;</span>
+        <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">TaskType</span><span class="o">&gt;</span> <span class="n">TaskPtr</span><span class="p">;</span>
+        <span class="k">typedef</span> <span class="n">Constraint</span><span class="o">&lt;</span> <span class="n">Matrix_type</span><span class="p">,</span> <span class="n">Vector_type</span> <span class="o">&gt;</span> <span class="n">ConstraintType</span><span class="p">;</span>
+        <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">ConstraintType</span><span class="o">&gt;</span> <span class="n">ConstraintPtr</span><span class="p">;</span>
+    <span class="k">protected</span><span class="o">:</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_task_id</span><span class="p">;</span>
+
+        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">_x_size</span><span class="p">;</span>
+
+        <span class="n">HessianType</span> <span class="n">_hessianType</span><span class="p">;</span>
+
+        <span class="n">Matrix_type</span> <span class="n">_A</span><span class="p">;</span>
+
+        <span class="n">Vector_type</span> <span class="n">_b</span><span class="p">;</span>
+
+        <span class="n">Vector_type</span> <span class="n">_c</span><span class="p">;</span>
+
+        <span class="n">Matrix_type</span> <span class="n">_W</span><span class="p">;</span>
+
+        <span class="kt">double</span> <span class="n">_lambda</span><span class="p">;</span>
+
+        <span class="kt">bool</span> <span class="n">_weight_is_diagonal</span><span class="p">;</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span> <span class="n">ConstraintPtr</span> <span class="o">&gt;</span> <span class="n">_constraints</span><span class="p">;</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">_active_joints_mask</span><span class="p">;</span>
+
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Vector_type</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+        <span class="k">struct</span> <span class="n">istrue</span> <span class="c1">//predicate</span>
+        <span class="p">{</span>
+           <span class="kt">bool</span> <span class="k">operator</span><span class="p">()(</span><span class="kt">int</span> <span class="n">val</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span><span class="k">return</span> <span class="n">val</span> <span class="o">==</span> <span class="nb">true</span><span class="p">;}</span>
+        <span class="p">};</span>
+
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">applyActiveJointsMask</span><span class="p">(</span><span class="n">Matrix_type</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">rows</span> <span class="o">=</span> <span class="n">A</span><span class="p">.</span><span class="n">rows</span><span class="p">();</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_x_size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">_active_joints_mask</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">rows</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+                        <span class="n">A</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="c1">//TODO: is necessary here to call update()?</span>
+        <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_log</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">MatLogger2</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">logger</span><span class="p">)</span>
+        <span class="p">{</span>
+
+        <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">reset</span><span class="p">()</span>
+        <span class="p">{</span>
+            <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;reset is not implemented for task %s </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+            <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+    <span class="k">private</span><span class="o">:</span>
+
+        <span class="k">mutable</span> <span class="n">Matrix_type</span> <span class="n">_WA</span><span class="p">;</span>
+
+        <span class="k">mutable</span> <span class="n">Vector_type</span> <span class="n">_Wb</span><span class="p">;</span>
+
+        <span class="k">mutable</span> <span class="n">Matrix_type</span> <span class="n">_Atranspose</span><span class="p">;</span>
+
+        <span class="kt">bool</span> <span class="n">_is_active</span><span class="p">;</span>
+
+        <span class="n">Matrix_type</span> <span class="n">_A_last_active</span><span class="p">;</span>
+
+    <span class="k">public</span><span class="o">:</span>
+        <span class="n">Task</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">task_id</span><span class="p">,</span>
+             <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">x_size</span><span class="p">)</span> <span class="o">:</span>
+            <span class="n">_task_id</span><span class="p">(</span><span class="n">task_id</span><span class="p">),</span> <span class="n">_x_size</span><span class="p">(</span><span class="n">x_size</span><span class="p">),</span> <span class="n">_active_joints_mask</span><span class="p">(</span><span class="n">x_size</span><span class="p">),</span> <span class="n">_is_active</span><span class="p">(</span><span class="nb">true</span><span class="p">),</span> <span class="n">_weight_is_diagonal</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="c1">//Eigen:</span>
+            <span class="n">_A</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">x_size</span><span class="p">);</span>
+            <span class="n">_b</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="n">_c</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="n">x_size</span><span class="p">);</span>
+            <span class="c1">//</span>
+
+            <span class="n">_lambda</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+            <span class="n">_hessianType</span> <span class="o">=</span> <span class="n">HST_UNKNOWN</span><span class="p">;</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">x_size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">_active_joints_mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="o">~</span><span class="n">Task</span><span class="p">(){}</span>
+
+        <span class="kt">bool</span> <span class="n">getWeightIsDiagonalFlag</span><span class="p">(){</span><span class="k">return</span> <span class="n">_weight_is_diagonal</span><span class="p">;}</span>
+
+        <span class="kt">void</span> <span class="n">setWeightIsDiagonalFlag</span><span class="p">(</span><span class="k">const</span> <span class="kt">bool</span> <span class="n">flag</span><span class="p">){</span>
+            <span class="n">_weight_is_diagonal</span> <span class="o">=</span> <span class="n">flag</span><span class="p">;}</span>
+
+        <span class="kt">void</span> <span class="n">setActive</span><span class="p">(</span><span class="k">const</span> <span class="kt">bool</span> <span class="n">active_flag</span><span class="p">){</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">_is_active</span> <span class="o">&amp;&amp;</span> <span class="n">active_flag</span> <span class="o">&amp;&amp;</span> <span class="n">_A_last_active</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">){</span>
+                <span class="n">_A</span> <span class="o">=</span> <span class="n">_A_last_active</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="n">_is_active</span> <span class="o">=</span> <span class="n">active_flag</span><span class="p">;</span>
+        <span class="p">}</span>
+
+
+        <span class="kt">bool</span> <span class="n">isActive</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">_is_active</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">Matrix_type</span><span class="o">&amp;</span> <span class="n">getA</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">_A</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">HessianType</span> <span class="n">getHessianAtype</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_hessianType</span><span class="p">;</span> <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">Vector_type</span><span class="o">&amp;</span> <span class="n">getb</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_b</span><span class="p">;</span> <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">Matrix_type</span><span class="o">&amp;</span> <span class="n">getWA</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_weight_is_diagonal</span><span class="p">)</span>
+                <span class="n">_WA</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_W</span><span class="p">.</span><span class="n">diagonal</span><span class="p">().</span><span class="n">asDiagonal</span><span class="p">()</span><span class="o">*</span><span class="n">_A</span><span class="p">;</span>
+            <span class="k">else</span>
+                <span class="n">_WA</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_W</span><span class="o">*</span><span class="n">_A</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">_WA</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">Matrix_type</span><span class="o">&amp;</span> <span class="n">getATranspose</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+            <span class="n">_Atranspose</span> <span class="o">=</span> <span class="n">_A</span><span class="p">.</span><span class="n">transpose</span><span class="p">();</span> <span class="c1">//This brakes the use of the template!</span>
+            <span class="k">return</span> <span class="n">_Atranspose</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">Vector_type</span><span class="o">&amp;</span> <span class="n">getWb</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_weight_is_diagonal</span><span class="p">)</span>
+                <span class="n">_Wb</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_W</span><span class="p">.</span><span class="n">diagonal</span><span class="p">().</span><span class="n">asDiagonal</span><span class="p">()</span><span class="o">*</span><span class="n">_b</span><span class="p">;</span>
+            <span class="k">else</span>
+                <span class="n">_Wb</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_W</span><span class="o">*</span><span class="n">_b</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">_Wb</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">Vector_type</span><span class="o">&amp;</span> <span class="n">getc</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">_c</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">const</span> <span class="n">Matrix_type</span><span class="o">&amp;</span> <span class="n">getWeight</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_W</span><span class="p">;</span> <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="n">setWeight</span><span class="p">(</span><span class="k">const</span> <span class="n">Matrix_type</span><span class="o">&amp;</span> <span class="n">W</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">assert</span><span class="p">(</span><span class="n">W</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">==</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">getTaskSize</span><span class="p">());</span>
+            <span class="n">assert</span><span class="p">(</span><span class="n">W</span><span class="p">.</span><span class="n">cols</span><span class="p">()</span> <span class="o">==</span> <span class="n">W</span><span class="p">.</span><span class="n">rows</span><span class="p">());</span>
+            <span class="n">_W</span> <span class="o">=</span> <span class="n">W</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="n">setWeight</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">assert</span><span class="p">(</span><span class="n">w</span><span class="o">&gt;=</span><span class="mf">0.0</span><span class="p">);</span>
+            <span class="n">_W</span><span class="p">.</span><span class="n">setIdentity</span><span class="p">();</span>
+            <span class="n">_W</span> <span class="o">=</span> <span class="n">_W</span> <span class="o">*</span> <span class="n">w</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">const</span> <span class="kt">double</span> <span class="n">getLambda</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_lambda</span><span class="p">;</span> <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="n">setLambda</span><span class="p">(</span><span class="kt">double</span> <span class="n">lambda</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">lambda</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">){</span>
+                <span class="n">_lambda</span> <span class="o">=</span> <span class="n">lambda</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span> <span class="n">ConstraintPtr</span> <span class="o">&gt;&amp;</span> <span class="n">getConstraints</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_constraints</span><span class="p">;</span> <span class="p">}</span>
+
+        <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">getXSize</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_x_size</span><span class="p">;</span> <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">getTaskSize</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">();</span> <span class="p">}</span>
+
+        <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Vector_type</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+
+
+            <span class="k">for</span><span class="p">(</span><span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span> <span class="n">ConstraintPtr</span> <span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">i</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">getConstraints</span><span class="p">().</span><span class="n">begin</span><span class="p">();</span>
+                <span class="n">i</span> <span class="o">!=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">getConstraints</span><span class="p">().</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+            <span class="k">this</span><span class="o">-&gt;</span><span class="n">_update</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">_is_active</span><span class="p">){</span>
+                <span class="n">_A_last_active</span> <span class="o">=</span> <span class="n">_A</span><span class="p">;</span>
+                <span class="n">_A</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">_A</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;::</span><span class="n">const_iterator</span> <span class="n">it_m</span><span class="p">;</span>
+            <span class="kt">bool</span> <span class="n">all_true</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+            <span class="k">for</span><span class="p">(</span> <span class="n">it_m</span> <span class="n">active_joint</span> <span class="o">=</span> <span class="n">_active_joints_mask</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+                 <span class="n">active_joint</span> <span class="o">!=</span> <span class="n">_active_joints_mask</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+                 <span class="o">++</span><span class="n">active_joint</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">active_joint</span> <span class="o">==</span> <span class="nb">false</span><span class="p">)</span> <span class="n">all_true</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">all_true</span><span class="p">)</span> <span class="n">applyActiveJointsMask</span><span class="p">(</span><span class="n">_A</span><span class="p">);</span>
+
+
+        <span class="p">}</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getTaskID</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_task_id</span><span class="p">;</span> <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">getActiveJointsMask</span><span class="p">(){</span><span class="k">return</span> <span class="n">_active_joints_mask</span><span class="p">;}</span>
+
+        <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">setActiveJointsMask</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">active_joints_mask</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">active_joints_mask</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">_active_joints_mask</span><span class="p">.</span><span class="n">size</span><span class="p">())</span>
+            <span class="p">{</span>
+                <span class="n">_active_joints_mask</span> <span class="o">=</span> <span class="n">active_joints_mask</span><span class="p">;</span>
+
+                <span class="n">applyActiveJointsMask</span><span class="p">(</span><span class="n">_A</span><span class="p">);</span>
+
+                <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">setActiveChainsMask</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">active_chain_mask</span><span class="p">,</span>
+                                         <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">::</span><span class="n">ConstPtr</span> <span class="n">model</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_active_joints_mask</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">_active_joints_mask</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="nb">false</span><span class="p">);</span>
+
+            <span class="k">for</span><span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="nl">ch</span> <span class="p">:</span> <span class="n">active_chain_mask</span><span class="p">){</span>
+
+                <span class="k">for</span><span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="nl">jid</span> <span class="p">:</span> <span class="n">model</span><span class="o">-&gt;</span><span class="n">chain</span><span class="p">(</span><span class="n">ch</span><span class="p">).</span><span class="n">getJointIds</span><span class="p">())</span>
+                <span class="p">{</span>
+                    <span class="n">_active_joints_mask</span><span class="p">[</span> <span class="n">model</span><span class="o">-&gt;</span><span class="n">getDofIndex</span><span class="p">(</span><span class="n">jid</span><span class="p">)</span> <span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+
+        <span class="p">}</span>
+
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="n">log</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">MatLogger2</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">logger</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">_task_id</span> <span class="o">+</span> <span class="s">&quot;_A&quot;</span><span class="p">,</span> <span class="n">_A</span><span class="p">);</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_b</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">_task_id</span> <span class="o">+</span> <span class="s">&quot;_b&quot;</span><span class="p">,</span> <span class="n">_b</span><span class="p">);</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_W</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">_task_id</span> <span class="o">+</span> <span class="s">&quot;_W&quot;</span><span class="p">,</span> <span class="n">_W</span><span class="p">);</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_c</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">_task_id</span> <span class="o">+</span> <span class="s">&quot;_c&quot;</span><span class="p">,</span> <span class="n">_c</span><span class="p">);</span>
+            <span class="n">logger</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="n">_task_id</span> <span class="o">+</span> <span class="s">&quot;_lambda&quot;</span><span class="p">,</span> <span class="n">_lambda</span><span class="p">);</span>
+            <span class="n">_log</span><span class="p">(</span><span class="n">logger</span><span class="p">);</span>
+
+            <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="nl">constraint</span> <span class="p">:</span> <span class="n">_constraints</span><span class="p">)</span>
+                <span class="n">constraint</span><span class="o">-&gt;</span><span class="n">log</span><span class="p">(</span><span class="n">logger</span><span class="p">);</span>
+
+        <span class="p">}</span>
+
+    <span class="k">private</span><span class="o">:</span> <span class="n">Vector_type</span> <span class="n">_error_</span><span class="p">,</span> <span class="n">_tmp_</span><span class="p">,</span> <span class="n">_residual_</span><span class="p">;</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="kt">double</span> <span class="n">computeCost</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_error_</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_A</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="n">_b</span><span class="p">;</span>
+            <span class="n">_tmp_</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_error_</span><span class="p">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">*</span><span class="n">_W</span><span class="p">;</span>
+            <span class="n">_residual_</span><span class="p">.</span><span class="n">noalias</span><span class="p">()</span> <span class="o">=</span> <span class="n">_tmp_</span><span class="p">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">*</span><span class="n">_error_</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">_residual_</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+        <span class="p">}</span>
+
+        <span class="kt">bool</span> <span class="n">checkConsistency</span><span class="p">()</span>
+        <span class="p">{</span>
+            <span class="kt">bool</span> <span class="n">a</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+            <span class="c1">//0) Check Weight size is not 0 if b.size &gt; 0!</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_b</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">_W</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+                    <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _W.rows() == %i ! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_W</span><span class="p">.</span><span class="n">rows</span><span class="p">());</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;}</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">_W</span><span class="p">.</span><span class="n">cols</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+                    <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _W.cols() == %i ! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_W</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;}</span>
+            <span class="p">}</span>
+
+            <span class="c1">//1) Check Weight is square</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_W</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">!=</span> <span class="n">_W</span><span class="p">.</span><span class="n">cols</span><span class="p">()){</span>
+                <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _W.rows() != _W.cols() -&gt; %i != %i! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">_W</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">_W</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="c1">//2) Check consistency between matrices</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">!=</span> <span class="n">_b</span><span class="p">.</span><span class="n">size</span><span class="p">()){</span>
+                <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _A.rows() != _b.size() -&gt; %i != %i! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">_b</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">!=</span> <span class="n">_W</span><span class="p">.</span><span class="n">rows</span><span class="p">()){</span>
+                <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _A.rows() != _W.rows() -&gt; %i != %i! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">_W</span><span class="p">.</span><span class="n">rows</span><span class="p">());</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="c1">//3) Check task size</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_A</span><span class="p">.</span><span class="n">cols</span><span class="p">()</span> <span class="o">!=</span> <span class="n">_x_size</span><span class="p">){</span>
+                <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _A.cols() != _x_size -&gt; %i != %i! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">_A</span><span class="p">.</span><span class="n">cols</span><span class="p">(),</span> <span class="n">_x_size</span><span class="p">);</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="c1">//4) Check eventually c</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_c</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">!=</span> <span class="n">_x_size</span><span class="p">){</span>
+                    <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _c.size() != _x_size -&gt; %i != %i! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">_c</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">_x_size</span><span class="p">);</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="c1">//5) If the Hessian Type is ZERO we want to check that all the entries of _A and _b are zeros!</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">_hessianType</span> <span class="o">==</span> <span class="n">HST_ZERO</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">_A</span><span class="p">.</span><span class="n">isZero</span><span class="p">()){</span>
+                    <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: Hessian is HST_ZERO but _A is not all zeros! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">_b</span><span class="p">.</span><span class="n">isZero</span><span class="p">()){</span>
+                    <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: Hessian is HST_ZERO but _b is not all zeros! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">else</span><span class="p">{</span>
+            <span class="c1">//6) If the Hessian Type is NOT ZERO we want to check that _A and _b exists!</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">_A</span><span class="p">.</span><span class="n">cols</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+                    <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _A is [%i x %i]! </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">_A</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">_A</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">_b</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+                    <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%s: _b size is %i!  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">_b</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+
+
+            <span class="k">if</span><span class="p">(</span><span class="n">_constraints</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="p">{</span>
+
+                <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="nl">constraint</span> <span class="p">:</span> <span class="n">_constraints</span><span class="p">)</span>
+                <span class="p">{</span>
+                    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">constraint</span><span class="o">-&gt;</span><span class="n">checkConsistency</span><span class="p">()))</span>
+                        <span class="n">a</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                <span class="n">XBot</span><span class="o">::</span><span class="n">Logger</span><span class="o">::</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;%s is consistent!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">_task_id</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+
+            <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+
+        <span class="p">}</span>
+
+    <span class="p">};</span>
+
+
+ <span class="p">}</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+.. _exhale_define_CartesianPositionConstraint_8h_1aafbe565fb234e1a7fb6c348a44891464:
+
+Define BOUND_SCALING
+====================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CartesianPositionConstraint.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: BOUND_SCALING
+   :project: OpenSoT

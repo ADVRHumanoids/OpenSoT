@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File collision_utils.h &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File collision_utils.h</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="program-listing-for-file-collision-utils-h">
+<span id="program-listing-file-home-runner-work-opensot-opensot-include-opensot-utils-collision-utils-h"></span><h1>Program Listing for File collision_utils.h<a class="headerlink" href="#program-listing-for-file-collision-utils-h" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-collision-utils-h"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/collision_utils.h</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * Copyright (C) 2014 Walkman</span>
+<span class="cm"> * Author: Enrico Mingo, Alessio Rocchi, Cheng Fang, Arturo Laurenzi</span>
+<span class="cm"> * email:  enrico.mingo@iit.it, alessio.rocchi@iit.it, arturo.laurenzi@iit.it</span>
+<span class="cm"> *</span>
+<span class="cm"> * This program is free software: you can redistribute it and/or modify</span>
+<span class="cm"> * it under the terms of the GNU Lesser General Public License as published by</span>
+<span class="cm"> * the Free Software Foundation, either version 3 of the License, or</span>
+<span class="cm"> * (at your option) any later version.</span>
+<span class="cm"> *</span>
+<span class="cm"> * This program is distributed in the hope that it will be useful,</span>
+<span class="cm"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="cm"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="cm"> * GNU Lesser General Public License for more details.</span>
+<span class="cm"> *</span>
+<span class="cm"> * You should have received a copy of the GNU Lesser General Public License</span>
+<span class="cm"> * along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;</span>
+<span class="cm">*/</span>
+
+<span class="cp">#ifndef OPENSOT_COLLISION_UTILS_H_</span>
+<span class="cp">#define OPENSOT_COLLISION_UTILS_H_</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;kdl/frames.hpp&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;limits&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;list&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;string&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;utility&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;srdfdom_advr/model.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fcl/config.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fcl/narrowphase/distance.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fcl/narrowphase/collision.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fcl/narrowphase/collision_object.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;moveit/collision_detection/collision_matrix.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;moveit/robot_model/robot_model.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;urdf/model.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;geometric_shapes/shapes.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;geometric_shapes/shape_operations.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;kdl_parser/kdl_parser.hpp&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;moveit_msgs/PlanningSceneWorld.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/LinkPairDistance.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;map&gt;</span><span class="cp"></span>
+
+
+<span class="c1">// construct vector</span>
+<span class="kr">inline</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="n">toKdl</span><span class="p">(</span><span class="n">urdf</span><span class="o">::</span><span class="n">Vector3</span> <span class="n">v</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">v</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// construct rotation</span>
+<span class="kr">inline</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Rotation</span> <span class="n">toKdl</span><span class="p">(</span><span class="n">urdf</span><span class="o">::</span><span class="n">Rotation</span> <span class="n">r</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Rotation</span><span class="o">::</span><span class="n">Quaternion</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">r</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">r</span><span class="p">.</span><span class="n">z</span><span class="p">,</span> <span class="n">r</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// construct pose</span>
+<span class="kr">inline</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">toKdl</span><span class="p">(</span><span class="n">urdf</span><span class="o">::</span><span class="n">Pose</span> <span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span><span class="p">(</span><span class="n">toKdl</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">rotation</span><span class="p">),</span> <span class="n">toKdl</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">));</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">ComputeLinksDistance</span>
+<span class="p">{</span>
+
+<span class="k">public</span><span class="o">:</span>
+
+    <span class="n">ComputeLinksDistance</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">model</span><span class="p">,</span>
+                         <span class="n">urdf</span><span class="o">::</span><span class="n">ModelConstSharedPtr</span> <span class="n">collision_urdf</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">,</span>
+                         <span class="n">srdf</span><span class="o">::</span><span class="n">ModelConstSharedPtr</span> <span class="n">collision_srdf</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">);</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">LinkPairDistance</span><span class="o">&gt;</span> <span class="n">getLinkDistances</span><span class="p">(</span><span class="kt">double</span> <span class="n">detectionThreshold</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;::</span><span class="n">infinity</span><span class="p">());</span>
+
+    <span class="kt">bool</span> <span class="nf">setCollisionWhiteList</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span> <span class="n">LinkPairDistance</span><span class="o">::</span><span class="n">LinksPair</span> <span class="o">&gt;</span> <span class="n">whiteList</span><span class="p">);</span>
+
+    <span class="kt">bool</span> <span class="nf">setCollisionBlackList</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span> <span class="n">LinkPairDistance</span><span class="o">::</span><span class="n">LinksPair</span> <span class="o">&gt;</span> <span class="n">blackList</span><span class="p">);</span>
+
+    <span class="kt">bool</span> <span class="nf">setWorldCollisions</span><span class="p">(</span><span class="k">const</span> <span class="n">moveit_msgs</span><span class="o">::</span><span class="n">PlanningSceneWorld</span><span class="o">&amp;</span> <span class="n">wc</span><span class="p">);</span>
+
+    <span class="kt">bool</span> <span class="nf">addWorldCollision</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">,</span>
+                           <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">fcl</span><span class="o">::</span><span class="n">CollisionObjectd</span><span class="o">&gt;</span> <span class="n">fcl_obj</span><span class="p">);</span>
+
+    <span class="kt">bool</span> <span class="nf">removeWorldCollision</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">);</span>
+
+    <span class="kt">void</span> <span class="nf">removeAllWorldCollision</span><span class="p">();</span>
+
+    <span class="kt">bool</span> <span class="nf">moveWorldCollision</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">,</span>
+                            <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">new_pose</span><span class="p">);</span>
+
+    <span class="k">static</span> <span class="n">fcl</span><span class="o">::</span><span class="n">Transform3</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">KDL2fcl</span><span class="p">(</span><span class="k">const</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="o">&amp;</span><span class="n">in</span><span class="p">);</span>
+
+    <span class="k">static</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">fcl2KDL</span><span class="p">(</span><span class="k">const</span> <span class="n">fcl</span><span class="o">::</span><span class="n">Transform3d</span><span class="o">&amp;</span> <span class="n">in</span><span class="p">);</span>
+
+    <span class="k">class</span> <span class="nc">LinksPair</span>
+    <span class="p">{</span>
+
+    <span class="k">public</span><span class="o">:</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">linkA</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">linkB</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">fcl</span><span class="o">::</span><span class="n">CollisionObjectd</span><span class="o">&gt;</span> <span class="n">collisionObjectA</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">fcl</span><span class="o">::</span><span class="n">CollisionObjectd</span><span class="o">&gt;</span> <span class="n">collisionObjectB</span><span class="p">;</span>
+
+        <span class="n">LinksPair</span><span class="p">(</span><span class="n">ComputeLinksDistance</span><span class="o">*</span> <span class="k">const</span> <span class="n">father</span><span class="p">,</span>
+                  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">linkA</span><span class="p">,</span>
+                  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">linkB</span><span class="p">);</span>
+
+    <span class="p">};</span>
+
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">ComputeLinksDistance</span><span class="o">::</span><span class="n">LinksPair</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">fcl</span><span class="o">::</span><span class="n">CollisionObjectd</span><span class="o">&gt;&gt;</span> <span class="n">getCollisionObjects</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_collision_obj</span><span class="p">;}</span>
+
+    <span class="kt">bool</span> <span class="n">globalToLinkCoordinates</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">linkName</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">fcl</span><span class="o">::</span><span class="n">Transform3</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">w_T_f</span><span class="p">,</span>
+                                 <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span><span class="o">&amp;</span> <span class="n">link_T_f</span><span class="p">);</span>
+
+    <span class="kt">bool</span> <span class="nf">updateCollisionObjects</span><span class="p">();</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span><span class="o">&gt;</span> <span class="n">getLinkToShapeTransforms</span><span class="p">();</span>
+
+    <span class="kt">void</span> <span class="nf">setLinksVsEnvironment</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">links</span><span class="p">);</span>
+
+<span class="k">private</span><span class="o">:</span>
+
+    <span class="n">collision_detection</span><span class="o">::</span><span class="n">AllowedCollisionMatrixPtr</span> <span class="n">_acm</span><span class="p">;</span>
+
+    <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_model</span><span class="p">;</span>
+
+    <span class="n">robot_model</span><span class="o">::</span><span class="n">RobotModelConstPtr</span> <span class="n">_moveit_model</span><span class="p">;</span>
+
+    <span class="n">srdf</span><span class="o">::</span><span class="n">ModelSharedPtr</span> <span class="n">_srdf</span><span class="p">;</span>
+
+    <span class="n">urdf</span><span class="o">::</span><span class="n">ModelSharedPtr</span> <span class="n">_urdf</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">fcl</span><span class="o">::</span><span class="n">CollisionObjectd</span><span class="o">&gt;&gt;</span> <span class="n">_collision_obj</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">_env_obj_names</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span><span class="o">&gt;</span> <span class="n">_link_T_shape</span><span class="p">;</span>
+
+    <span class="kt">bool</span> <span class="nf">shapeToLinkCoordinates</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">linkName</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">fcl</span><span class="o">::</span><span class="n">Transform3</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">fcl_shape_T_f</span><span class="p">,</span>
+                                <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="o">&amp;</span><span class="n">link_T_f</span><span class="p">);</span>
+
+
+    <span class="kt">bool</span> <span class="nf">parseCollisionObjects</span><span class="p">();</span>
+
+
+
+    <span class="kt">void</span> <span class="nf">generateLinksToUpdate</span><span class="p">();</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">_links_to_update</span><span class="p">;</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">_links_vs_environment</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="nf">generatePairsToCheck</span><span class="p">();</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">ComputeLinksDistance</span><span class="o">::</span><span class="n">LinksPair</span><span class="o">&gt;</span> <span class="n">_pairs_to_check</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="nf">loadDisabledCollisionsFromSRDF</span><span class="p">(</span><span class="k">const</span> <span class="n">srdf</span><span class="o">::</span><span class="n">Model</span><span class="o">&amp;</span> <span class="n">srdf</span><span class="p">,</span>
+                                        <span class="n">collision_detection</span><span class="o">::</span><span class="n">AllowedCollisionMatrixPtr</span> <span class="n">acm</span><span class="p">);</span>
+
+
+<span class="p">};</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

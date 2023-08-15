@@ -1,0 +1,518 @@
+:orphan:
+
+
+Full API
+========
+
+Directories
+***********
+
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables.rst
+
+Files
+*****
+
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_AngularMomentum.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_AngularMomentum.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_BilateralConstraint.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Cartesian.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Cartesian.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CartesianPositionConstraint.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CartesianVelocity.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_CoM.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_CoM.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CoM.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Contact.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base_Contact.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Contact.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_ConvexHull.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_CoP.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_DynamicFeasibility.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eHQP.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eiQuadProgBackEnd.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_FloatingBase.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_FrictionCone.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_GainType.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Gaze.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_GLPKBackEnd.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base_IMU.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Indices.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_JointAdmittance.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_JointLimits.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsECBF.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_JointLimitsInvariace.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsViability.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_LinearMomentum.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Manipulability.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_ManipulationStack.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_MinimumEffort.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_MinJointVel.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_NormalTorque.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_OmniWheels4X.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Postural.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_proxQPBackEnd.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_PureRolling.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_README.md.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubTask.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_TaskToConstraint.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables_Torque.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_TorqueLimits.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_VelocityLimits.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_VelocityLimits.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_WalkingStack.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_WrenchLimits.h.rst

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class quaternion &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Template Class SVDPseudoInverse" href="classSVDPseudoInverse.html" />
+    <link rel="prev" title="Class WalkingStack" href="classOpenSoT_1_1WalkingStack.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class quaternion</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classquaternion.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-quaternion">
+<span id="exhale-class-classquaternion"></span><h1>Class quaternion<a class="headerlink" href="#class-quaternion" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-cartesian-utils-h"><span class="std std-ref">File cartesian_utils.h</span></a></p></li>
+</ul>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv410quaternion">
+<span id="_CPPv310quaternion"></span><span id="_CPPv210quaternion"></span><span id="quaternion"></span><span class="target" id="classquaternion"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">quaternion</span></span></span><a class="headerlink" href="#_CPPv410quaternion" title="Permalink to this definition"></a><br /></dt>
+<dd><p>This class implements quaternion error as in the paper: “Operational Space Control: A Theoretical and Empirical Comparison” Authors: Jun Nakanishi, Rick Cory, Michael Mistry, Jan Peters and Stefan Schaal The International Journal of Robotics Research, Vol. </p>
+<p>27, No. 6, June 2008, pp. 737–757</p>
+<p>REMEMBER: if e is the quaternion error, the orientation error is defined as: o_error = -Ke with K positive definite! </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion10quaternionEv">
+<span id="_CPPv3N10quaternion10quaternionEv"></span><span id="_CPPv2N10quaternion10quaternionEv"></span><span id="quaternion::quaternion"></span><span class="target" id="classquaternion_1a66be1b74fcbd7d2bf8b92d0ff3760c03"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">quaternion</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternion10quaternionEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion10quaternionEdddd">
+<span id="_CPPv3N10quaternion10quaternionEdddd"></span><span id="_CPPv2N10quaternion10quaternionEdddd"></span><span id="quaternion::quaternion__double.double.double.double"></span><span class="target" id="classquaternion_1ae38ab6969e2c556a4a66a2ad73def7b7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">quaternion</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">_x</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">_y</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">_z</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">_w</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternion10quaternionEdddd" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternionmlEKd">
+<span id="_CPPv3N10quaternionmlEKd"></span><span id="_CPPv2N10quaternionmlEKd"></span><span id="quaternion::mul-operator__doubleC"></span><span class="target" id="classquaternion_1aa55920e34b5fc180dd6ea9373a0de642"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410quaternion" title="quaternion"><span class="n"><span class="pre">quaternion</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">*</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">a</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternionmlEKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>operator * product between a quaternion and a scalar </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> – scalar </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a quaternion </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion4skewEv">
+<span id="_CPPv3N10quaternion4skewEv"></span><span id="_CPPv2N10quaternion4skewEv"></span><span id="quaternion::skew"></span><span class="target" id="classquaternion_1ae304bf6d944298aaffcdf39370360f1e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">KDL</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Rotation</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">skew</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternion4skewEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>skew operator </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the skew matrix of the quaternion </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion1xE">
+<span id="_CPPv3N10quaternion1xE"></span><span id="_CPPv2N10quaternion1xE"></span><span id="quaternion::x__double"></span><span class="target" id="classquaternion_1a5c5a14238588d315a2bcc09314cde2a2"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">x</span></span></span><a class="headerlink" href="#_CPPv4N10quaternion1xE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion1yE">
+<span id="_CPPv3N10quaternion1yE"></span><span id="_CPPv2N10quaternion1yE"></span><span id="quaternion::y__double"></span><span class="target" id="classquaternion_1a406b90163f3f0872dace46a7c60ee04c"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">y</span></span></span><a class="headerlink" href="#_CPPv4N10quaternion1yE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion1zE">
+<span id="_CPPv3N10quaternion1zE"></span><span id="_CPPv2N10quaternion1zE"></span><span id="quaternion::z__double"></span><span class="target" id="classquaternion_1a757a8ae35a9481734f916bf6c91bec80"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">z</span></span></span><a class="headerlink" href="#_CPPv4N10quaternion1zE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion1wE">
+<span id="_CPPv3N10quaternion1wE"></span><span id="_CPPv2N10quaternion1wE"></span><span id="quaternion::w__double"></span><span class="target" id="classquaternion_1afdcf32e0560046f46356e2ba22257043"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">w</span></span></span><a class="headerlink" href="#_CPPv4N10quaternion1wE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion3dotERK10quaternionRK10quaternion">
+<span id="_CPPv3N10quaternion3dotERK10quaternionRK10quaternion"></span><span id="_CPPv2N10quaternion3dotERK10quaternionRK10quaternion"></span><span id="quaternion::dot__quaternionCR.quaternionCR"></span><span class="target" id="classquaternion_1a460c920b667cecc3524a8edf48c38666"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dot</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410quaternion" title="quaternion"><span class="n"><span class="pre">quaternion</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">a</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410quaternion" title="quaternion"><span class="n"><span class="pre">quaternion</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternion3dotERK10quaternionRK10quaternion" title="Permalink to this definition"></a><br /></dt>
+<dd><p>dot product between two quaternions </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – first quaternion </p></li>
+<li><p><strong>b</strong> – second quaternion </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a scalar </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion5errorER10quaternionR10quaternion">
+<span id="_CPPv3N10quaternion5errorER10quaternionR10quaternion"></span><span id="_CPPv2N10quaternion5errorER10quaternionR10quaternion"></span><span id="quaternion::error__quaternionR.quaternionR"></span><span class="target" id="classquaternion_1a0aa7f2ec37ded26c1a934c5026113de8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">KDL</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410quaternion" title="quaternion"><span class="n"><span class="pre">quaternion</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span>, <a class="reference internal" href="#_CPPv410quaternion" title="quaternion"><span class="n"><span class="pre">quaternion</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternion5errorER10quaternionR10quaternion" title="Permalink to this definition"></a><br /></dt>
+<dd><p>error compute the error between two quaternion to be usable in orientation control </p>
+<p>
+REMEMBER: if e is the quaternion error, the orientation error is defined as: o_error = -Ke with K positive definite! </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> – actual quaternion </p></li>
+<li><p><strong>qd</strong> – desired quaternion </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an error vector [3x1]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion5errorERKdRKdRKdRKdRKdRKdRKdRKd">
+<span id="_CPPv3N10quaternion5errorERKdRKdRKdRKdRKdRKdRKdRKd"></span><span id="_CPPv2N10quaternion5errorERKdRKdRKdRKdRKdRKdRKdRKd"></span><span id="quaternion::error__doubleCR.doubleCR.doubleCR.doubleCR.doubleCR.doubleCR.doubleCR.doubleCR"></span><span class="target" id="classquaternion_1a3bb024269e1890dac5017e57a36951f6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector3d</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qy</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qz</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qw</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qdx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qdy</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qdz</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qdw</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternion5errorERKdRKdRKdRKdRKdRKdRKdRKd" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N10quaternion9normalizeER10quaternion">
+<span id="_CPPv3N10quaternion9normalizeER10quaternion"></span><span id="_CPPv2N10quaternion9normalizeER10quaternion"></span><span id="quaternion::normalize__quaternionR"></span><span class="target" id="classquaternion_1a1c1555c45e94864495bddbd5097edc6a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">normalize</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410quaternion" title="quaternion"><span class="n"><span class="pre">quaternion</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N10quaternion9normalizeER10quaternion" title="Permalink to this definition"></a><br /></dt>
+<dd><p>normalize a given quaternion: Given q = (x, y, z, w) return q_n = (x/d, y/d, z/d, w/d) with d = sqrt(x**2 + y**2 + z**2 + w**2) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> – quaternion to normalize </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1WalkingStack.html" class="btn btn-neutral float-left" title="Class WalkingStack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classSVDPseudoInverse.html" class="btn btn-neutral float-right" title="Template Class SVDPseudoInverse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

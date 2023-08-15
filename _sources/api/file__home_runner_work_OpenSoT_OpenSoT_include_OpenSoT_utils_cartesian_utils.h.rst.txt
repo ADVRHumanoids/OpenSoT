@@ -1,0 +1,75 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h:
+
+File cartesian_utils.h
+======================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/cartesian_utils.h``)
+------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``Eigen/Cholesky``
+
+- ``Eigen/Dense``
+
+- ``kdl/frames.hpp``
+
+- ``list``
+
+- ``urdf/model.h``
+
+- ``vector``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Gaze.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Manipulability.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_MinimumEffort.h`
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classcartesian__utils`
+
+- :ref:`exhale_class_classCostFunction`
+
+- :ref:`exhale_class_classGradientVector`
+
+- :ref:`exhale_class_classLDLTInverse`
+
+- :ref:`exhale_class_classquaternion`
+
+- :ref:`exhale_class_classSVDPseudoInverse`
+

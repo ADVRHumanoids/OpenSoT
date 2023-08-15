@@ -1,0 +1,27 @@
+.. _exhale_class_classOpenSoT_1_1Task:
+
+Template Class Task
+===================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`
+
+
+Nested Relationships
+--------------------
+
+
+Nested Types
+************
+
+- :ref:`exhale_struct_structOpenSoT_1_1Task_1_1istrue`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::Task
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

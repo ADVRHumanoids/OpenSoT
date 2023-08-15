@@ -1,0 +1,92 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h:
+
+Program Listing for File Solver.h
+=================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/Solver.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi
+    * email:  alessio.rocchi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __SOLVER_H__
+   #define __SOLVER_H__
+   
+   #include <OpenSoT/Task.h>
+   #include <OpenSoT/Constraint.h>
+   #include <list>
+   
+   using namespace std;
+   
+    namespace OpenSoT {
+       template < class Matrix_type, class Vector_type >
+       class Solver {
+       public:
+           typedef Task< Matrix_type, Vector_type > TaskType;
+           typedef std::shared_ptr<TaskType> TaskPtr;
+           typedef Constraint< Matrix_type, Vector_type > ConstraintType;
+           typedef std::shared_ptr<ConstraintType> ConstraintPtr;
+           typedef Solver< Matrix_type, Vector_type > SolverType;
+           typedef std::shared_ptr<SolverType> SolverPtr;
+           typedef vector <TaskPtr> Stack;
+   
+       protected:
+           vector <TaskPtr> _tasks;
+           ConstraintPtr _bounds;
+           ConstraintPtr _globalConstraints;
+           std::string _solver_id;
+   
+           virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix)
+           {
+   
+           }
+   
+       public:
+   
+           Solver(vector <TaskPtr>& stack) : _tasks(stack), _solver_id(""){}
+   
+           Solver(vector <TaskPtr>& stack,
+                  ConstraintPtr bounds) : _tasks(stack), _bounds(bounds), _solver_id(""){}
+   
+           Solver(vector<TaskPtr> &stack, ConstraintPtr bounds, ConstraintPtr globalConstraints):
+               _tasks(stack), _bounds(bounds), _globalConstraints(globalConstraints), _solver_id(""){}
+   
+           virtual ~Solver(){}
+   
+           virtual bool solve(Vector_type& solution) = 0;
+   
+          std::string getSolverID(){return _solver_id;}
+   
+          void setSolverID(const std::string& solver_id){
+              _solver_id = solver_id;
+          }
+   
+           virtual void log(XBot::MatLogger2::Ptr logger)
+           {
+               if(_solver_id.empty())
+                   _log(logger, _solver_id);
+               else
+                   _log(logger, _solver_id+"_");
+           }
+       };
+    }
+   
+   #endif

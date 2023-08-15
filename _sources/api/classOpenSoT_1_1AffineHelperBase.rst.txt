@@ -1,0 +1,17 @@
+.. _exhale_class_classOpenSoT_1_1AffineHelperBase:
+
+Template Class AffineHelperBase
+===============================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::AffineHelperBase
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

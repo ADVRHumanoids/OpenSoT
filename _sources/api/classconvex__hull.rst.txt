@@ -1,0 +1,17 @@
+.. _exhale_class_classconvex__hull:
+
+Class convex_hull
+=================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: convex_hull
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

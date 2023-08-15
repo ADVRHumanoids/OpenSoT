@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class Postural &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class Aggregated" href="classOpenSoT_1_1tasks_1_1Aggregated.html" />
+    <link rel="prev" title="Class MinJointVel" href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class Postural</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-postural">
+<span id="exhale-class-classopensot-1-1tasks-1-1acceleration-1-1postural"></span><h1>Class Postural<a class="headerlink" href="#class-postural" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h.html#file-home-runner-work-opensot-opensot-include-opensot-tasks-acceleration-postural-h"><span class="std std-ref">File Postural.h</span></a></p></li>
+</ul>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::Task&lt;</span> <span class="pre">Eigen::MatrixXd,</span> <span class="pre">Eigen::VectorXd</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="classOpenSoT_1_1Task.html#exhale-class-classopensot-1-1task"><span class="std std-ref">Template Class Task</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8PosturalE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8PosturalE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8PosturalE"></span><span id="OpenSoT::tasks::acceleration::Postural"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Postural</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8PosturalE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1acceleration_1_1Postural"><span class="std std-ref">Postural</span></a> class implement a postural task on the ACTUATED joints. </p>
+<p>Underactuated joints are not considered. NOTICE that input vectors and matrices anyway consider the full 6+n state </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural3PtrE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural3PtrE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural3PtrE"></span><span id="OpenSoT::tasks::acceleration::Postural::Ptr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1aa7570cb6d51ce7b0502d0aa6c49063a0"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5tasks12acceleration8PosturalE" title="OpenSoT::tasks::acceleration::Postural"><span class="n"><span class="pre">Postural</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceE12AffineHelperKNSt6stringE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceE12AffineHelperKNSt6stringE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceE12AffineHelperKNSt6stringE"></span><span id="OpenSoT::tasks::acceleration::Postural::Postural__XBot::ModelInterfaceCR.AffineHelper.ssC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a087bdd2576b7572f6ef528ce22aa9987"></span><span class="sig-name descname"><span class="n"><span class="pre">Postural</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">robot</span></span>, <a class="reference internal" href="typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb.html#_CPPv4N7OpenSoT12AffineHelperE" title="OpenSoT::AffineHelper"><span class="n"><span class="pre">AffineHelper</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">qddot</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb.html#_CPPv4N7OpenSoT12AffineHelperE" title="OpenSoT::AffineHelper"><span class="n"><span class="pre">AffineHelper</span></span></a><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task_id</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;Postural&quot;</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceE12AffineHelperKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceEKiKNSt6stringE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceEKiKNSt6stringE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceEKiKNSt6stringE"></span><span id="OpenSoT::tasks::acceleration::Postural::Postural__XBot::ModelInterfaceCR.iC.ssC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1aac50bcf376def6da764f38f45a061804"></span><span class="sig-name descname"><span class="n"><span class="pre">Postural</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">robot</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x_size</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task_id</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;Postural&quot;</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural8PosturalERKN4XBot14ModelInterfaceEKiKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural11setGainTypeE8GainType">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural11setGainTypeE8GainType"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural11setGainTypeE8GainType"></span><span id="OpenSoT::tasks::acceleration::Postural::setGainType__GainType"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1acc940736aa0a15a4aca2d5df085d63fa"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setGainType</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="enum_namespaceOpenSoT_1_1tasks_1_1acceleration_1ac5e7971804aeb402ea61abadc7c52b42.html#_CPPv4N7OpenSoT5tasks12acceleration8GainTypeE" title="OpenSoT::tasks::acceleration::GainType"><span class="n"><span class="pre">GainType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural11setGainTypeE8GainType" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural11getGainTypeEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural11getGainTypeEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural11getGainTypeEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getGainTypeC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a5e8364924adb5ddf72b052510a08f6b9"></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1tasks_1_1acceleration_1ac5e7971804aeb402ea61abadc7c52b42.html#_CPPv4N7OpenSoT5tasks12acceleration8GainTypeE" title="OpenSoT::tasks::acceleration::GainType"><span class="n"><span class="pre">GainType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getGainType</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural11getGainTypeEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural7_updateERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural7_updateERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural7_updateERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::_update__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a0c320011136a357e0eae213f717060c2"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural7_updateERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Updates the A, b, Aeq, beq, Aineq, b*Bound matrices. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – variable state at the current step (input) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::setReference__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a1b9dfd9ae149ba4825aeaaca16998c76"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setReference</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qref</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setReference sets a new reference for the postural actuated part. </p>
+<p>The task error IS NOT recomputed immediately, you need to call the _update(x) function Notice how the setReference(…) needs to be called before each _update(x) of the <a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian"><span class="std std-ref">Cartesian</span></a> task, since THE <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a0c320011136a357e0eae213f717060c2"><span class="std std-ref">_update()</span></a> RESETS THE FEED-FORWARD VELOCITY and ACCELERATION TERMS for safety reasons. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qref</strong> – the desired position 6+n vector, first 6 joints are removed </p></li>
+<li><p><strong>dqref</strong> – describe the desired trajectory velocity 6+n vector, first 6 joints are removed </p></li>
+<li><p><strong>ddqref</strong> – describe the desired trajectory acceleration, and it represents a feed-forward term in task computation, 6+n vector, first 6 joints are removed. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::setReference__Eigen::VectorXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a224c846f524692075f45b249ba4ecccf"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setReference</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qref</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dqref</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::setReference__Eigen::VectorXdCR.Eigen::VectorXdCR.Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a7c31641468c2b923f1a93a4d08d143bc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setReference</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qref</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dqref</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">ddqref</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural12setReferenceERKN5Eigen8VectorXdERKN5Eigen8VectorXdERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural12getReferenceEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural12getReferenceEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getReferenceC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1af92ed5bda961b3a342c48dbb0e9458ea"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getReference</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getReference return references (6+n vectors) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint position, velocity and acceleration desired </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdE">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdE"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::getReference__Eigen::VectorXdRC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a6a6a6fca541088160819dd5625fd46a0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getReference</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q_desired</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdE">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdE"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::getReference__Eigen::VectorXdR.Eigen::VectorXdRC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a59dc1f46cab943469db8fdb024c9e7da"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getReference</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q_desired</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qdot_desired</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdE">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdE"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::getReference__Eigen::VectorXdR.Eigen::VectorXdR.Eigen::VectorXdRC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a1967d21d7e8fc0281ec6e96ed182003b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getReference</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q_desired</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qdot_desired</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">qddot_desired</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural12getReferenceERN5Eigen8VectorXdERN5Eigen8VectorXdERN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural18getActualPositionsEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural18getActualPositionsEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural18getActualPositionsEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getActualPositionsC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a9ec5f5d327b86d86f1bd180eb9b0eaba"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getActualPositions</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural18getActualPositionsEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural8getErrorEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural8getErrorEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural8getErrorEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getErrorC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1aba2693d3043ee9725f1ec799cb5cbfde"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getError</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural8getErrorEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getError </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>position error vector (6+n vector) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural16getVelocityErrorEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural16getVelocityErrorEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural16getVelocityErrorEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getVelocityErrorC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a926a40676ea74e584b1dca178c2e95b7"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getVelocityError</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural16getVelocityErrorEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getVelocityError </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>velocity error vector (6+n vector) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural9setLambdaEdd">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural9setLambdaEdd"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural9setLambdaEdd"></span><span id="OpenSoT::tasks::acceleration::Postural::setLambda__double.double"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1aef633b892616f48763e98db2ba00374a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLambda</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda1</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural9setLambdaEdd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setLambda </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda1</strong> – </p></li>
+<li><p><strong>lambda2</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural9setLambdaEd">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural9setLambdaEd"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural9setLambdaEd"></span><span id="OpenSoT::tasks::acceleration::Postural::setLambda__double"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1ad355a25da0a5a77b83935fc7c6c36d5c"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLambda</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural9setLambdaEd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setLambda </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lambda</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural9getLambdaERdRd">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural9getLambdaERdRd"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural9getLambdaERdRd"></span><span id="OpenSoT::tasks::acceleration::Postural::getLambda__doubleR.doubleR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1aacb370de69bb03fc24854ce483a11606"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getLambda</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">lambda</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">lambda2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural9getLambdaERdRd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLambda return both position and velocity convergence gains </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda</strong> – position gain </p></li>
+<li><p><strong>lambda2</strong> – velocity gain </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural10getLambda2Ev">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural10getLambda2Ev"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural10getLambda2Ev"></span><span id="OpenSoT::tasks::acceleration::Postural::getLambda2C"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a638f7ddcda88524d2e7566c78aaf4f98"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getLambda2</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural10getLambda2Ev" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLambda2 return velocity convergence gain </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>lambda2 gain </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural5resetEv">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural5resetEv"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural5resetEv"></span><span id="OpenSoT::tasks::acceleration::Postural::reset"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a623478faa2a7bd022cd239060bdfd288"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">reset</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural5resetEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>reset position reference to actual, velcoity and accelration to 0 </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural4_logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural4_logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural4_logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::tasks::acceleration::Postural::_log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a10648735f6a87880f2d8d57df1421d7f"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural4_logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_log can be used to log internal <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task"><span class="std std-ref">Task</span></a> variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – a shared pointer to a MatLogger </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural26getCachedVelocityReferenceEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural26getCachedVelocityReferenceEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural26getCachedVelocityReferenceEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getCachedVelocityReferenceC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1ab96cffafe88d26058fcf6bdd150dba7b"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getCachedVelocityReference</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural26getCachedVelocityReferenceEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getCachedVelocityReference can be used to get Velocity reference after <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task_1acabcc7da7201724197b561506e325335"><span class="std std-ref">update()</span></a>, it will reset next <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task_1acabcc7da7201724197b561506e325335"><span class="std std-ref">update()</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>internal velcity reference </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural30getCachedAccelerationReferenceEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural30getCachedAccelerationReferenceEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural30getCachedAccelerationReferenceEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getCachedAccelerationReferenceC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1ae06de68d543c6eac51a46018578eef55"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getCachedAccelerationReference</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural30getCachedAccelerationReferenceEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getCachedAccelerationReference can be used to get Velocity reference after <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task_1acabcc7da7201724197b561506e325335"><span class="std std-ref">update()</span></a>, it will reset next <a class="reference internal" href="classOpenSoT_1_1Task.html#classOpenSoT_1_1Task_1acabcc7da7201724197b561506e325335"><span class="std std-ref">update()</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>internal acceleration reference </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural5setKpERKN5Eigen8MatrixXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural5setKpERKN5Eigen8MatrixXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural5setKpERKN5Eigen8MatrixXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::setKp__Eigen::MatrixXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a43ea78f5d8adf7d18a11de1c2f0afa07"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setKp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">Kp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural5setKpERKN5Eigen8MatrixXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setKp set position gain </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Kp</strong> – a SPD matrix (n+6 x n+6), first 6 elements are not used </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural5setKdERKN5Eigen8MatrixXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural5setKdERKN5Eigen8MatrixXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural5setKdERKN5Eigen8MatrixXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::setKd__Eigen::MatrixXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a6699322606b44109aa2c7de02e7bd09c"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setKd</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">Kd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural5setKdERKN5Eigen8MatrixXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setKd set velocity gain </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Kd</strong> – a SPD matrix (n+6 x n+6), first 6 elements are not used </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural8setGainsERKN5Eigen8MatrixXdERKN5Eigen8MatrixXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural8setGainsERKN5Eigen8MatrixXdERKN5Eigen8MatrixXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural8setGainsERKN5Eigen8MatrixXdERKN5Eigen8MatrixXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::setGains__Eigen::MatrixXdCR.Eigen::MatrixXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a5f2e84d9e4097087020fbb709473b659"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setGains</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">Kp</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">Kd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural8setGainsERKN5Eigen8MatrixXdERKN5Eigen8MatrixXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setGains set both position and velocity gains </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Kp</strong> – a SPD matrix (n+6 x n+6), first 6 elements are not used </p></li>
+<li><p><strong>Kd</strong> – a SPD matrix (n+6 x n+6), first 6 elements are not used </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural5getKpEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural5getKpEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural5getKpEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getKpC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a0f84c9fe2badb5612425727b2ee5451b"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getKp</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural5getKpEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getKp </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>position gain (n+6 x n+6), first 6 elements are not used </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural5getKdEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural5getKdEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural5getKdEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getKdC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a18507f07883a426a0b780ba436f79098"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getKd</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural5getKdEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getKd </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>velocity gain (n+6 x n+6), first 6 elements are not used </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks12acceleration8Postural8getGainsERN5Eigen8MatrixXdERN5Eigen8MatrixXdE">
+<span id="_CPPv3N7OpenSoT5tasks12acceleration8Postural8getGainsERN5Eigen8MatrixXdERN5Eigen8MatrixXdE"></span><span id="_CPPv2N7OpenSoT5tasks12acceleration8Postural8getGainsERN5Eigen8MatrixXdERN5Eigen8MatrixXdE"></span><span id="OpenSoT::tasks::acceleration::Postural::getGains__Eigen::MatrixXdR.Eigen::MatrixXdR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a74fcc00fc5068a8d8b845e9c4b45d0f0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getGains</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">Kp</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">Kd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks12acceleration8Postural8getGainsERN5Eigen8MatrixXdERN5Eigen8MatrixXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getGains return both position and velocity gains </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Kp</strong> – (n+6 x n+6), first 6 elements are not used </p></li>
+<li><p><strong>Kd</strong> – (n+6 x n+6), first 6 elements are not used </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks12acceleration8Postural9getLambdaEv">
+<span id="_CPPv3NK7OpenSoT5tasks12acceleration8Postural9getLambdaEv"></span><span id="_CPPv2NK7OpenSoT5tasks12acceleration8Postural9getLambdaEv"></span><span id="OpenSoT::tasks::acceleration::Postural::getLambdaC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural_1a82b956d3bfe8ccbe523bcec5ab5bc7e7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getLambda</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks12acceleration8Postural9getLambdaEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLambda </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the lambda weight of the task </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html" class="btn btn-neutral float-left" title="Class MinJointVel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1tasks_1_1Aggregated.html" class="btn btn-neutral float-right" title="Class Aggregated" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

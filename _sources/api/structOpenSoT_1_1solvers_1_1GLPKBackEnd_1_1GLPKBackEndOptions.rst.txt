@@ -1,0 +1,23 @@
+.. _exhale_struct_structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions:
+
+Struct GLPKBackEnd::GLPKBackEndOptions
+======================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_GLPKBackEnd.h`
+
+
+Nested Relationships
+--------------------
+
+This struct is a nested type of :ref:`exhale_class_classOpenSoT_1_1solvers_1_1GLPKBackEnd`.
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: OpenSoT::solvers::GLPKBackEnd::GLPKBackEndOptions
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Class Constraint &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class JointLimits" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html" />
+    <link rel="prev" title="Class AutoStack" href="classOpenSoT_1_1AutoStack.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Template Class Constraint</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1Constraint.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="template-class-constraint">
+<span id="exhale-class-classopensot-1-1constraint"></span><h1>Template Class Constraint<a class="headerlink" href="#template-class-constraint" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h.html#file-home-runner-work-opensot-opensot-include-opensot-constraint-h"><span class="std std-ref">File Constraint.h</span></a></p></li>
+</ul>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN7OpenSoT10ConstraintE">
+<span id="_CPPv3I00EN7OpenSoT10ConstraintE"></span><span id="_CPPv2I00EN7OpenSoT10ConstraintE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Matrix_type</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Vector_type</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1Constraint"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Constraint</span></span></span><a class="headerlink" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> class describes all the different types of constraints: </p>
+<p><ol class="loweralpha simple">
+<li><p>bounds &amp; bilateral</p></li>
+<li><p>equalities</p></li>
+<li><p>unilateral </p></li>
+</ol>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint14ConstraintTypeE">
+<span id="_CPPv3N7OpenSoT10Constraint14ConstraintTypeE"></span><span id="_CPPv2N7OpenSoT10Constraint14ConstraintTypeE"></span><span id="OpenSoT::Constraint::ConstraintType"></span><span class="target" id="classOpenSoT_1_1Constraint_1ac1cd7f86540d46b238e3a58c95372bcf"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint"><span class="n"><span class="pre">Constraint</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConstraintType</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint14ConstraintTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint13ConstraintPtrE">
+<span id="_CPPv3N7OpenSoT10Constraint13ConstraintPtrE"></span><span id="_CPPv2N7OpenSoT10Constraint13ConstraintPtrE"></span><span id="OpenSoT::Constraint::ConstraintPtr"></span><span class="target" id="classOpenSoT_1_1Constraint_1aeecfa549cf299321667bde49e9dad836"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT10Constraint14ConstraintTypeE" title="OpenSoT::Constraint::ConstraintType"><span class="n"><span class="pre">ConstraintType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConstraintPtr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint13ConstraintPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint10ConstraintEKNSt6stringEKj">
+<span id="_CPPv3N7OpenSoT10Constraint10ConstraintEKNSt6stringEKj"></span><span id="_CPPv2N7OpenSoT10Constraint10ConstraintEKNSt6stringEKj"></span><span id="OpenSoT::Constraint::Constraint__ssC.unsigned-iC"></span><span class="target" id="classOpenSoT_1_1Constraint_1a1cc08905973e92a4e2db67ab35991faf"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Constraint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">constraint_id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint10ConstraintEKNSt6stringEKj" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10ConstraintD0Ev">
+<span id="_CPPv3N7OpenSoT10ConstraintD0Ev"></span><span id="_CPPv2N7OpenSoT10ConstraintD0Ev"></span><span id="OpenSoT::Constraint::~Constraint"></span><span class="target" id="classOpenSoT_1_1Constraint_1addd26d38a621b110fb70ce910fece496"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~Constraint</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10ConstraintD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint8getXSizeEv">
+<span id="_CPPv3N7OpenSoT10Constraint8getXSizeEv"></span><span id="_CPPv2N7OpenSoT10Constraint8getXSizeEv"></span><span id="OpenSoT::Constraint::getXSize"></span><span class="target" id="classOpenSoT_1_1Constraint_1afcc8db8cd91b36028b1812c816ac9d62"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getXSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint8getXSizeEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint13getLowerBoundEv">
+<span id="_CPPv3N7OpenSoT10Constraint13getLowerBoundEv"></span><span id="_CPPv2N7OpenSoT10Constraint13getLowerBoundEv"></span><span id="OpenSoT::Constraint::getLowerBound"></span><span class="target" id="classOpenSoT_1_1Constraint_1aa4defa5237004866c3691a938cf126a0"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getLowerBound</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint13getLowerBoundEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint13getUpperBoundEv">
+<span id="_CPPv3N7OpenSoT10Constraint13getUpperBoundEv"></span><span id="_CPPv2N7OpenSoT10Constraint13getUpperBoundEv"></span><span id="OpenSoT::Constraint::getUpperBound"></span><span class="target" id="classOpenSoT_1_1Constraint_1a26f22e035ab21a0edcbe808e425f75a5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getUpperBound</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint13getUpperBoundEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint6getAeqEv">
+<span id="_CPPv3N7OpenSoT10Constraint6getAeqEv"></span><span id="_CPPv2N7OpenSoT10Constraint6getAeqEv"></span><span id="OpenSoT::Constraint::getAeq"></span><span class="target" id="classOpenSoT_1_1Constraint_1ac698d74f6d5ded98df5d439acf62e470"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getAeq</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint6getAeqEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint6getbeqEv">
+<span id="_CPPv3N7OpenSoT10Constraint6getbeqEv"></span><span id="_CPPv2N7OpenSoT10Constraint6getbeqEv"></span><span id="OpenSoT::Constraint::getbeq"></span><span class="target" id="classOpenSoT_1_1Constraint_1a80c6fc27fbd041e740a488ea765f2807"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getbeq</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint6getbeqEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint8getAineqEv">
+<span id="_CPPv3N7OpenSoT10Constraint8getAineqEv"></span><span id="_CPPv2N7OpenSoT10Constraint8getAineqEv"></span><span id="OpenSoT::Constraint::getAineq"></span><span class="target" id="classOpenSoT_1_1Constraint_1a4cb5e0ec9c629009b39f660a7510fd44"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getAineq</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint8getAineqEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint14getbLowerBoundEv">
+<span id="_CPPv3N7OpenSoT10Constraint14getbLowerBoundEv"></span><span id="_CPPv2N7OpenSoT10Constraint14getbLowerBoundEv"></span><span id="OpenSoT::Constraint::getbLowerBound"></span><span class="target" id="classOpenSoT_1_1Constraint_1ab0116d508ece545c47a5924e9f95a3a7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getbLowerBound</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint14getbLowerBoundEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint14getbUpperBoundEv">
+<span id="_CPPv3N7OpenSoT10Constraint14getbUpperBoundEv"></span><span id="_CPPv2N7OpenSoT10Constraint14getbUpperBoundEv"></span><span id="OpenSoT::Constraint::getbUpperBound"></span><span class="target" id="classOpenSoT_1_1Constraint_1a73945ddd6fd9d9ff2f38bb5432f292c9"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getbUpperBound</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint14getbUpperBoundEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint20isEqualityConstraintEv">
+<span id="_CPPv3N7OpenSoT10Constraint20isEqualityConstraintEv"></span><span id="_CPPv2N7OpenSoT10Constraint20isEqualityConstraintEv"></span><span id="OpenSoT::Constraint::isEqualityConstraint"></span><span class="target" id="classOpenSoT_1_1Constraint_1a3f9c3a7d53061976b6d677a7b1b1e5b5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isEqualityConstraint</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint20isEqualityConstraintEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isEqualityConstraint </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> enforces an equality constraint </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint22isInequalityConstraintEv">
+<span id="_CPPv3N7OpenSoT10Constraint22isInequalityConstraintEv"></span><span id="_CPPv2N7OpenSoT10Constraint22isInequalityConstraintEv"></span><span id="OpenSoT::Constraint::isInequalityConstraint"></span><span class="target" id="classOpenSoT_1_1Constraint_1ac60cf5ce1d72b7c5f10a7257eec5339c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isInequalityConstraint</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint22isInequalityConstraintEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isEqualityConstraint </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> enforces an inequality constraint </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint22isUnilateralConstraintEv">
+<span id="_CPPv3N7OpenSoT10Constraint22isUnilateralConstraintEv"></span><span id="_CPPv2N7OpenSoT10Constraint22isUnilateralConstraintEv"></span><span id="OpenSoT::Constraint::isUnilateralConstraint"></span><span class="target" id="classOpenSoT_1_1Constraint_1acc5149bc05a47b3fc77089024c21dafd"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isUnilateralConstraint</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint22isUnilateralConstraintEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isUnilateralConstraint </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if the <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> is an unilateral inequality </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint21isBilateralConstraintEv">
+<span id="_CPPv3N7OpenSoT10Constraint21isBilateralConstraintEv"></span><span id="_CPPv2N7OpenSoT10Constraint21isBilateralConstraintEv"></span><span id="OpenSoT::Constraint::isBilateralConstraint"></span><span class="target" id="classOpenSoT_1_1Constraint_1a55215dc19170dafc0d8172ae7d39a948"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isBilateralConstraint</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint21isBilateralConstraintEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isBilateralConstraint </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if the <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> is a bilateral inequality </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint9hasBoundsEv">
+<span id="_CPPv3N7OpenSoT10Constraint9hasBoundsEv"></span><span id="_CPPv2N7OpenSoT10Constraint9hasBoundsEv"></span><span id="OpenSoT::Constraint::hasBounds"></span><span class="target" id="classOpenSoT_1_1Constraint_1a0cc34bc172a84b019a9d85a9c4a70b06"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hasBounds</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint9hasBoundsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>hasBounds checks whether this <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> contains a bound (or box constraint), meaning the constraint matrix $A^T=\left(I \quad \tilde{A}^T\right)$ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> if this constraint contains a bound </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint7isBoundEv">
+<span id="_CPPv3N7OpenSoT10Constraint7isBoundEv"></span><span id="_CPPv2N7OpenSoT10Constraint7isBoundEv"></span><span id="OpenSoT::Constraint::isBound"></span><span class="target" id="classOpenSoT_1_1Constraint_1a8fe9e420c889bef14f148c814abb12bc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isBound</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint7isBoundEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isBound checks whether this <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> is a bound in the form lowerBound &lt;= x &lt;= upperBound, meaning the constraint matrix $A = I$ is a box constraint </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> is a bound </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint12isConstraintEv">
+<span id="_CPPv3N7OpenSoT10Constraint12isConstraintEv"></span><span id="_CPPv2N7OpenSoT10Constraint12isConstraintEv"></span><span id="OpenSoT::Constraint::isConstraint"></span><span class="target" id="classOpenSoT_1_1Constraint_1af06317ac9f66075466d16531b7b6aa8d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isConstraint</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint12isConstraintEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isConstraint checks whether this <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> is a constraint (i.e., it is not a bound) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if the <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> is not a bound </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint15getConstraintIDEv">
+<span id="_CPPv3N7OpenSoT10Constraint15getConstraintIDEv"></span><span id="_CPPv2N7OpenSoT10Constraint15getConstraintIDEv"></span><span id="OpenSoT::Constraint::getConstraintID"></span><span class="target" id="classOpenSoT_1_1Constraint_1a234561c4adb8e2427404ce877ab33a17"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getConstraintID</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint15getConstraintIDEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getTaskID return the task id </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a string with the task id </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint6updateERK11Vector_type">
+<span id="_CPPv3N7OpenSoT10Constraint6updateERK11Vector_type"></span><span id="_CPPv2N7OpenSoT10Constraint6updateERK11Vector_type"></span><span id="OpenSoT::Constraint::update__Vector_typeCR"></span><span class="target" id="classOpenSoT_1_1Constraint_1a5b11f8cf1d6e85308e24dc96dbd86209"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint6updateERK11Vector_type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Updates the A, b, Aeq, beq, Aineq, b*Bound matrices. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – variable state at the current step (input) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint3logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT10Constraint3logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT10Constraint3logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::Constraint::log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1Constraint_1a17f9beebde94d0aec45cd5ed7ae33f31"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint3logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>log logs common <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> internal variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – a shared pointer to a MathLogger </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint16checkConsistencyEv">
+<span id="_CPPv3N7OpenSoT10Constraint16checkConsistencyEv"></span><span id="_CPPv2N7OpenSoT10Constraint16checkConsistencyEv"></span><span id="OpenSoT::Constraint::checkConsistency"></span><span class="target" id="classOpenSoT_1_1Constraint_1aaad0bb2ef28c9eaf97c1814b8c8a829d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">checkConsistency</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint16checkConsistencyEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>checkConsistency checks if all internal matrices and vectors are correctly instantiated and the right size </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if everything is ok </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint4_logEN4XBot10MatLogger23PtrE">
+<span id="_CPPv3N7OpenSoT10Constraint4_logEN4XBot10MatLogger23PtrE"></span><span id="_CPPv2N7OpenSoT10Constraint4_logEN4XBot10MatLogger23PtrE"></span><span id="OpenSoT::Constraint::_log__XBot::MatLogger2::Ptr"></span><span class="target" id="classOpenSoT_1_1Constraint_1a0265a435ac2d56f5e403870689ebdbd8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_log</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint4_logEN4XBot10MatLogger23PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_log can be used to log internal <a class="reference internal" href="#classOpenSoT_1_1Constraint"><span class="std std-ref">Constraint</span></a> variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – a shared pointer to a MatLogger </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint14_constraint_idE">
+<span id="_CPPv3N7OpenSoT10Constraint14_constraint_idE"></span><span id="_CPPv2N7OpenSoT10Constraint14_constraint_idE"></span><span id="OpenSoT::Constraint::_constraint_id__ss"></span><span class="target" id="classOpenSoT_1_1Constraint_1aa0c012a9688f43205ba7434afe37b8ad"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_constraint_id</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint14_constraint_idE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_constraint_id unique name of the constraint </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint7_x_sizeE">
+<span id="_CPPv3N7OpenSoT10Constraint7_x_sizeE"></span><span id="_CPPv2N7OpenSoT10Constraint7_x_sizeE"></span><span id="OpenSoT::Constraint::_x_size__unsigned-i"></span><span class="target" id="classOpenSoT_1_1Constraint_1a1d88f9bff13f56df7a4ce87c12f1b78c"></span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_x_size</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint7_x_sizeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_x_size size of the controlled variables </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint11_lowerBoundE">
+<span id="_CPPv3N7OpenSoT10Constraint11_lowerBoundE"></span><span id="_CPPv2N7OpenSoT10Constraint11_lowerBoundE"></span><span id="OpenSoT::Constraint::_lowerBound__Vector_type"></span><span class="target" id="classOpenSoT_1_1Constraint_1a17b30dec8c4d96f14f0115bf3fcee0c2"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_lowerBound</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint11_lowerBoundE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_lowerBound lower bounds on controlled variables e.g. </p>
+<p>: _lowerBound &lt;= x </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint11_upperBoundE">
+<span id="_CPPv3N7OpenSoT10Constraint11_upperBoundE"></span><span id="_CPPv2N7OpenSoT10Constraint11_upperBoundE"></span><span id="OpenSoT::Constraint::_upperBound__Vector_type"></span><span class="target" id="classOpenSoT_1_1Constraint_1a252b6460f214c67e878df3540a2bddfb"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_upperBound</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint11_upperBoundE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_upperBound upper bounds on controlled variables e.g. </p>
+<p>: x &lt;= _upperBound </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint4_AeqE">
+<span id="_CPPv3N7OpenSoT10Constraint4_AeqE"></span><span id="_CPPv2N7OpenSoT10Constraint4_AeqE"></span><span id="OpenSoT::Constraint::_Aeq__Matrix_type"></span><span class="target" id="classOpenSoT_1_1Constraint_1af22f69dd86f97e1c052ff43c4f2b6f1d"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_Aeq</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint4_AeqE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_Aeq Matrix for equality constraint e.g. </p>
+<p>: _Aeq*x = _beq </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint4_beqE">
+<span id="_CPPv3N7OpenSoT10Constraint4_beqE"></span><span id="_CPPv2N7OpenSoT10Constraint4_beqE"></span><span id="OpenSoT::Constraint::_beq__Vector_type"></span><span class="target" id="classOpenSoT_1_1Constraint_1ad65f1618a9a9630cbe8d3989971ad92d"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_beq</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint4_beqE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_beq constraint vector for equality constraint e.g. </p>
+<p>: _Aeq*x = _beq </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint6_AineqE">
+<span id="_CPPv3N7OpenSoT10Constraint6_AineqE"></span><span id="_CPPv2N7OpenSoT10Constraint6_AineqE"></span><span id="OpenSoT::Constraint::_Aineq__Matrix_type"></span><span class="target" id="classOpenSoT_1_1Constraint_1ac17f9e316a07cea753f1e0986a592b95"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Matrix_type"><span class="n"><span class="pre">Matrix_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_Aineq</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint6_AineqE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_Aineq Matrix for inequality constraint e.g. </p>
+<p>: _bLowerBound &lt;= _Aineq*x &lt;= _bUpperBound </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint12_bLowerBoundE">
+<span id="_CPPv3N7OpenSoT10Constraint12_bLowerBoundE"></span><span id="_CPPv2N7OpenSoT10Constraint12_bLowerBoundE"></span><span id="OpenSoT::Constraint::_bLowerBound__Vector_type"></span><span class="target" id="classOpenSoT_1_1Constraint_1a0fc0f1740148b69eb0ec84c86500400c"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_bLowerBound</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint12_bLowerBoundE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_bLowerBound lower bounds in generic inequality constraints e.g. </p>
+<p>: _bLowerBound &lt;= _Aineq*x </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT10Constraint12_bUpperBoundE">
+<span id="_CPPv3N7OpenSoT10Constraint12_bUpperBoundE"></span><span id="_CPPv2N7OpenSoT10Constraint12_bUpperBoundE"></span><span id="OpenSoT::Constraint::_bUpperBound__Vector_type"></span><span class="target" id="classOpenSoT_1_1Constraint_1a0cae356058d34759284523a4ddafef7b"></span><a class="reference internal" href="#_CPPv4I00EN7OpenSoT10ConstraintE" title="OpenSoT::Constraint::Vector_type"><span class="n"><span class="pre">Vector_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_bUpperBound</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT10Constraint12_bUpperBoundE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_bUpperBound upper bounds in generic inequality constraints e.g. </p>
+<p>: _Aineq*x &lt;= _bUpperBound </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1AutoStack.html" class="btn btn-neutral float-left" title="Class AutoStack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html" class="btn btn-neutral float-right" title="Class JointLimits" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

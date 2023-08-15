@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1SubConstraint:
+
+Class SubConstraint
+===================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::Constraint< Eigen::MatrixXd, Eigen::VectorXd >`` (:ref:`exhale_class_classOpenSoT_1_1Constraint`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::SubConstraint
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

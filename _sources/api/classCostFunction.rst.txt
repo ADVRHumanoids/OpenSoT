@@ -1,0 +1,27 @@
+.. _exhale_class_classCostFunction:
+
+Class CostFunction
+==================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Derived Types
+*************
+
+- ``public OpenSoT::tasks::velocity::Manipulability::ComputeManipulabilityIndexGradient`` (:ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient`)
+- ``public OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient`` (:ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: CostFunction
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class MinimumEffort &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class MinimumEffort::ComputeGTauGradient" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html" />
+    <link rel="prev" title="Class Manipulability::ComputeManipulabilityIndexGradient" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class MinimumEffort</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-minimumeffort">
+<span id="exhale-class-classopensot-1-1tasks-1-1velocity-1-1minimumeffort"></span><h1>Class MinimumEffort<a class="headerlink" href="#class-minimumeffort" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_MinimumEffort.h.html#file-home-runner-work-opensot-opensot-include-opensot-tasks-velocity-minimumeffort-h"><span class="std std-ref">File MinimumEffort.h</span></a></p></li>
+</ul>
+<div class="section" id="nested-relationships">
+<h2>Nested Relationships<a class="headerlink" href="#nested-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="nested-types">
+<h3>Nested Types<a class="headerlink" href="#nested-types" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#exhale-class-classopensot-1-1tasks-1-1velocity-1-1minimumeffort-1-1computegtaugradient"><span class="std std-ref">Class MinimumEffort::ComputeGTauGradient</span></a></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="inheritance-relationships">
+<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
+<div class="section" id="base-type">
+<h3>Base Type<a class="headerlink" href="#base-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::Task&lt;</span> <span class="pre">Eigen::MatrixXd,</span> <span class="pre">Eigen::VectorXd</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="classOpenSoT_1_1Task.html#exhale-class-classopensot-1-1task"><span class="std std-ref">Template Class Task</span></a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffortE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffortE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffortE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MinimumEffort</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffortE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort"><span class="std std-ref">MinimumEffort</span></a> class implements a task that tries to bring the robot in a minimum-effort posture. </p>
+<p>Notice that the weight of the robot is not taken into account when computing effort on the legs (that is, the forces on the floating base are not projected on the contact points jacobians). Also, the minimum effort task is using a simple gradient worker, <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient"><span class="std std-ref">ComputeGTauGradient</span></a>, which does not satisfy contact points constraints while performing the configuration vector needed to numerically compute the gradient. In particular, the gravity vector is computed considering a support foot always in contact with the ground. This means in general the minimum effort task should be used together with a cartesian task on the swing foot, imeplemented through the <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian"><span class="std std-ref">OpenSoT::tasks::velocity::Cartesian</span></a> class. You can take a look at an implementation example in example_minimum_effort.cpp</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort3PtrE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort3PtrE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort3PtrE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::Ptr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1a1c59e97c06d2b4aa6db7e985325f9c5a"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffortE" title="OpenSoT::tasks::velocity::MinimumEffort"><span class="n"><span class="pre">MinimumEffort</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ptr</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort3PtrE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort13MinimumEffortERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort13MinimumEffortERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort13MinimumEffortERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::MinimumEffort__Eigen::VectorXdCR.XBot::ModelInterfaceCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1a9fb1e60ebfeac4b284e1f6c19b8a9bbf"></span><span class="sig-name descname"><span class="n"><span class="pre">MinimumEffort</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">robot_model</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort13MinimumEffortERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffortD0Ev">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffortD0Ev"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffortD0Ev"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::~MinimumEffort"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1a6613050f5497bef39058d8cc2ed8ed46"></span><span class="sig-name descname"><span class="n"><span class="pre">~MinimumEffort</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffortD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort7_updateERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort7_updateERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort7_updateERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::_update__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1aa82867de79b72e12cfc2c6630de301f7"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort7_updateERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>_update updates the minimum effort gradient. </p>
+<p>&#64;detail It also updates the state on the internal robot model so that successive calls to the <a class="reference internal" href="#classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1af6219ad467444f6223afb8266b0a907a"><span class="std std-ref">computeEffort()</span></a> function will take into account the updated posture of the robot. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – the actual posture of the robot </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort13computeEffortEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort13computeEffortEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort13computeEffortEv"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::computeEffort"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1af6219ad467444f6223afb8266b0a907a"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">computeEffort</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort13computeEffortEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>computeEffort </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the effort at the actual configuration q (ast from latest update(q)) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort4setWERKN5Eigen8MatrixXdE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort4setWERKN5Eigen8MatrixXdE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort4setWERKN5Eigen8MatrixXdE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::setW__Eigen::MatrixXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1a590dca173b2a99f1f8e1235b57902b88"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setW</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">W</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort4setWERKN5Eigen8MatrixXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setW set a CONSTANT Weight matrix for the manipulability index </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>W</strong> – weight matrix </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort4getWEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort4getWEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort4getWEv"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::getW"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1a87d76757b1db943c3a17b9ea870b4d21"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getW</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort4getWEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getW get a Weight matrix for the manipulability index </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort9setLambdaEd">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort9setLambdaEd"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort9setLambdaEd"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::setLambda__double"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1af7f2f6baae23ec184345c4fa6387346b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLambda</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort9setLambdaEd" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort2_xE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort2_xE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort2_xE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::_x__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1a75deb1df1f1278e2ff472542b1abe348"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_x</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort2_xE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19_gTauGradientWorkerE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19_gTauGradientWorkerE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19_gTauGradientWorkerE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::_gTauGradientWorker__ComputeGTauGradient"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1a927e9caa086136963eba2acbff42b652"></span><a class="reference internal" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradientE" title="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient"><span class="n"><span class="pre">ComputeGTauGradient</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_gTauGradientWorker</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19_gTauGradientWorkerE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradientE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradientE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradientE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ComputeGTauGradient</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="classCostFunction.html#_CPPv412CostFunction" title="CostFunction"><span class="n"><span class="pre">CostFunction</span></span></a><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradientE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient"><span class="std std-ref">ComputeGTauGradient</span></a> class implements a worker class to computes the effort for a certain configuration. </p>
+<p>It will take into account the robot as standing on a flat floor, and while computing the gradient, we will assume a foot is on the ground. Notice that the way we compute the gradient does not satisfy the constraints of both flat foot on the ground. So in general this simple implementation of the gradient worker needs to be used in a minimum effort task together with a constraint (or a higher priority task) for the swing foot. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient19ComputeGTauGradientERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient19ComputeGTauGradientERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient19ComputeGTauGradientERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::ComputeGTauGradient__Eigen::VectorXdCR.XBot::ModelInterfaceCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1a18cdc48e4a9899603d8ce14e43345115"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ComputeGTauGradient</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">robot_model</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient19ComputeGTauGradientERKN5Eigen8VectorXdERKN4XBot14ModelInterfaceE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient7computeERKN5Eigen8VectorXdE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient7computeERKN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient7computeERKN5Eigen8VectorXdE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::compute__Eigen::VectorXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1ad9063d5e2b80354f51d492a52df4e004"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">compute</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">q</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient7computeERKN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>compute value of function in x </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scalar </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4setWERKN5Eigen8MatrixXdE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4setWERKN5Eigen8MatrixXdE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4setWERKN5Eigen8MatrixXdE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::setW__Eigen::MatrixXdCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1afa068f90e1a4d070aa9511d83a6bcace"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setW</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">W</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4setWERKN5Eigen8MatrixXdE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4getWEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4getWEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4getWEv"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::getW"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1af1a8d837511baf5de711c695e1801a60"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getW</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4getWEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_robotE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_robotE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_robotE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::_robot__XBot::ModelInterface::Ptr"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1a2eca229cc8f4556b2dd1be94476016c4"></span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_robot</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_robotE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_modelE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_modelE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_modelE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::_model__XBot::ModelInterfaceCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1a284729f6956a03573bc9d84033e3b96c"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ModelInterface</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">_model</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_modelE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient2_WE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient2_WE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient2_WE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::_W__Eigen::MatrixXd"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1ad53ae6cc49b52dc0e37f833aa00ca02b"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_W</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient2_WE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_zerosE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_zerosE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_zerosE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::_zeros__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1a3f4e9546324c72bb3d98070659529459"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_zeros</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient6_zerosE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4_tauE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4_tauE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4_tauE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::_tau__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1a730c6b8d164c80a27a5c51f29c8daa9e"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_tau</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient4_tauE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient8_tau_limE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient8_tau_limE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient8_tau_limE"></span><span id="OpenSoT::tasks::velocity::MinimumEffort::ComputeGTauGradient::_tau_lim__Eigen::VectorXd"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient_1a5c3aa2adad47228a895f5f58e58e6b11"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_tau_lim</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity13MinimumEffort19ComputeGTauGradient8_tau_limE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html" class="btn btn-neutral float-left" title="Class Manipulability::ComputeManipulabilityIndexGradient" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html" class="btn btn-neutral float-right" title="Class MinimumEffort::ComputeGTauGradient" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

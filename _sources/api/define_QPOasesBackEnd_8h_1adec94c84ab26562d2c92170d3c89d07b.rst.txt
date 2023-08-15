@@ -1,0 +1,14 @@
+.. _exhale_define_QPOasesBackEnd_8h_1adec94c84ab26562d2c92170d3c89d07b:
+
+Define QPOASES_DEFAULT_EPS_REGULARISATION
+=========================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: QPOASES_DEFAULT_EPS_REGULARISATION
+   :project: OpenSoT

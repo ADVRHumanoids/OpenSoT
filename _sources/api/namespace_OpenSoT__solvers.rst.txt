@@ -1,0 +1,70 @@
+
+.. _namespace_OpenSoT__solvers:
+
+Namespace OpenSoT::solvers
+==========================
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_struct_structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions`
+
+- :ref:`exhale_struct_structOpenSoT_1_1solvers_1_1stack__level`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1BackEnd`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1constraint__helper`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1eHQP`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1GLPKBackEnd`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1HCOD`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1iHQP`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1l1HQP`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1nHQP`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1OSQPBackEnd`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1priority__constraint`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1proxQPBackEnd`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1QPOasesBackEnd`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd`
+
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1task__to__constraint__helper`
+
+
+Enums
+-----
+
+
+- :ref:`exhale_enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21`
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_namespaceOpenSoT_1_1solvers_1afad360bd87e33794b09b791fb700a4df`
+
+- :ref:`exhale_function_namespaceOpenSoT_1_1solvers_1a7b39fcd96a93530cf5763e678cafdc03`

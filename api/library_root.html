@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library API &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Namespace fcl" href="namespace_fcl.html" />
+    <link rel="prev" title="Task" href="../task.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Library API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">OpenSoT MultiDoF (v3.0)  &lt;img src=”https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel” alt=”Travis badge”/&gt;</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#full-api">Full API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#namespaces">Namespaces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enums">Enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#defines">Defines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Library API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/library_root.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="library-api">
+<h1>Library API<a class="headerlink" href="#library-api" title="Permalink to this headline"></a></h1>
+<div class="section" id="opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge">
+<span id="page-index"></span><h2>OpenSoT MultiDoF (v3.0)  &lt;img src=”<a class="reference external" href="https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel">https://app.travis-ci.com/ADVRHumanoids/OpenSoT.svg?token=iQZzUD6rXcPydQAabf7T&amp;branch=devel</a>” alt=”Travis badge”/&gt;<a class="headerlink" href="#opensot-multidof-v3-0-img-src-https-app-travis-ci-com-advrhumanoids-opensot-svg-token-iqzzud6rxcpydqaabf7t-branch-devel-alt-travis-badge" title="Permalink to this headline"></a></h2>
+<dl>
+<dt class="sig sig-object cpp">
+<span class="target" id="indexpage"></span><em><span class="pre">page</span></em> <span class="sig-name descname"><span class="pre">index</span></span></dt>
+<dd><p><span class="target" id="index_1md__home_runner_work_OpenSoT_OpenSoT_README"></span> An Open Source Task Solving library with Constraints</p>
+<p>Change Log (short):<ul class="simple">
+<li><p>Linear Tasks</p></li>
+<li><p>iHQP/LP solver</p></li>
+<li><p>Inverse Dynamics &amp; Operational Space</p></li>
+<li><p>Contact Force Optimization</p></li>
+<li><p>Added eiQuadProg</p></li>
+<li><p>Added GLPK</p></li>
+</ul>
+</p>
+<div class="section" id="index_1autotoc_md0">
+<h3>Available Solvers:<a class="headerlink" href="#index_1autotoc_md0" title="Permalink to this headline"></a></h3>
+<p id="index_1autotoc_md0"><ul class="simple">
+<li><p>iHQP/LP: implemented using <a class="reference external" href="https://projects.coin-or.org/qpOASES">qpOASES</a>, <a class="reference external" href="http://osqp.readthedocs.io/en/latest/">OSQP</a>, <a class="reference external" href="https://www.cs.cmu.edu/~bstephe1/eiquadprog.hpp">eiQuadProg</a>, <a class="reference external" href="https://www.gnu.org/software/glpk/">GLPK</a></p></li>
+<li><p>eHQP: implemented using Eigen-based Damped Pseudo Inverse</p></li>
+<li><p>nHQP: Null-Space Hierarchical QP, implemented using Eigen SVD</p></li>
+</ul>
+</p>
+<p>The default iHQP solver is based on qpOASES and eiQuadProg.</p>
+</div>
+<div class="section" id="index_1autotoc_md1">
+<h3>Introduction<a class="headerlink" href="#index_1autotoc_md1" title="Permalink to this headline"></a></h3>
+<p id="index_1autotoc_md1">OpenSoT is a library dedicated to hierarchical whole-body control of robots subject to constraints such as joint limits, joint velocities, Cartesian constraints… The main idea behind OpenSoT is to decouple Task and Constraints description from the Solver used to compute the robot commands and the Type of Control available on the robot to perform them.</p>
+<p>OpenSoT was initially developed under the EU Project WALK-MAN (<a class="reference external" href="http://www.walk-man.eu/">http://www.walk-man.eu/</a>). Currently, the project is developed under the EU Projects CogIMon (<a class="reference external" href="https://cogimon.eu/">https://cogimon.eu/</a>) and CENTAURO (<a class="reference external" href="http://www.centauro-project.eu/">http://www.centauro-project.eu/</a>).</p>
+<p>Its homepage resides in <a class="reference external" href="http://github.com/robotology-playground/OpenSoT">http://github.com/robotology-playground/OpenSoT</a> You can also find a wiki there.</p>
+<p>An online version of this documentation can be obtained at <a class="reference external" href="http://opensot.github.io">http://opensot.github.io</a></p>
+<p>Some videos from OpenSoT YouTube channel (<a class="reference external" href="https://www.youtube.com/channel/UCkkZXunCN6eJwww1CeK7DrA">https://www.youtube.com/channel/UCkkZXunCN6eJwww1CeK7DrA</a>):</p>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=Q1u2vZ0dhh0 ">
+Self Collision Avoidance</a></p>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=-n3jxAZaK5Q ">
+WALK-MAN Whole-Body, floating-base, walking</a></p>
+</div>
+<div class="section" id="index_1autotoc_md2">
+<h3>Add-ons<a class="headerlink" href="#index_1autotoc_md2" title="Permalink to this headline"></a></h3>
+<p id="index_1autotoc_md2"><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/ADVRHumanoids/CartesianInterface">CartesI/O</a></p></li>
+<li><p><a class="reference external" href="https://github.com/EnricoMingo/opensot_visual_servoing">Visual Servoing</a>, developed in collaboration with IDSIA - USI/SUPSI (Dr. <a class="reference external" href="https://github.com/TotoPaolillo">Antonio Paolillo</a>)</p></li>
+<li><p><a class="reference external" href="https://github.com/ADVRHumanoids/compliant_stabilizer">Compliant Stabilizer</a>, developed in collaboration with Dr. <a class="reference external" href="https://eps.leeds.ac.uk/mechanical-engineering/staff/1720/dr-chengxu-zhou">Chengxu Zhou</a></p></li>
+</ul>
+</p>
+</div>
+<div class="section" id="index_1autotoc_md3">
+<h3>How to cite this work:<a class="headerlink" href="#index_1autotoc_md3" title="Permalink to this headline"></a></h3>
+<p id="index_1autotoc_md3">Please support <code class="docutils literal notranslate"><span class="pre">OpenSoT</span></code> development by referencing it in your works/publications/projects the following:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>@inproceedings{OpenSot17,
+  title = {Robot Control for Dummies: Insights and Examples using OpenSoT},
+  author = {Mingo Hoffman, Enrico and Rocchi, Alessio and Laurenzi, Arturo and Tsagarakis, Nikos G.},
+  pages     = {736-741},
+  booktitle = {17th {IEEE-RAS} International Conference on Humanoid Robots, Humanoids},
+  year = {2017}
+}
+</pre></div>
+</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>@inproceedings{AlessioEnrico2015,
+  title={OpenSoT: a Whole-Body Control Library for the Compliant Humanoid Robot COMAN},
+  author={Rocchi, Alessio and Hoffman, Enrico Mingo and Caldwell, Darwin G. and Tsagarakis, Nikos G.},
+  booktitle={Robotics and Automation (ICRA), 2015 IEEE International Conference on},
+  pages={1093--1099},
+  year={2015},
+  organization={IEEE}
+}
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<div class="section" id="class-hierarchy">
+<h3>Class Hierarchy<a class="headerlink" href="#class-hierarchy" title="Permalink to this headline"></a></h3>
+<ul class="treeView" id="class-treeView">
+  <li>
+    <ul class="collapsibleList">
+      <li>Namespace <a href="namespace_fcl.html#namespace-fcl">fcl</a><ul><li class="lastChild">Template Class <a href="classfcl_1_1CollisionObject.html#exhale-class-classfcl-1-1CollisionObject">CollisionObject</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT.html#namespace-OpenSoT">OpenSoT</a><ul><li>Namespace <a href="namespace_OpenSoT__AffineUtils.html#namespace-OpenSoT-AffineUtils">OpenSoT::AffineUtils</a><ul><li>Class <a href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html#exhale-class-classOpenSoT-1-1AffineUtils-1-1AffineConstraint">AffineConstraint</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1AffineUtils_1_1AffineTask.html#exhale-class-classOpenSoT-1-1AffineUtils-1-1AffineTask">AffineTask</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__constraints.html#namespace-OpenSoT-constraints">OpenSoT::constraints</a><ul><li>Namespace <a href="namespace_OpenSoT__constraints__acceleration.html#namespace-OpenSoT-constraints-acceleration">OpenSoT::constraints::acceleration</a><ul><li>Class <a href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html#exhale-class-classOpenSoT-1-1constraints-1-1acceleration-1-1JointLimits">JointLimits</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF.html#exhale-class-classOpenSoT-1-1constraints-1-1acceleration-1-1JointLimitsECBF">JointLimitsECBF</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability.html#exhale-class-classOpenSoT-1-1constraints-1-1acceleration-1-1JointLimitsViability">JointLimitsViability</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits.html#exhale-class-classOpenSoT-1-1constraints-1-1acceleration-1-1TorqueLimits">TorqueLimits</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits.html#exhale-class-classOpenSoT-1-1constraints-1-1acceleration-1-1VelocityLimits">VelocityLimits</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__constraints__force.html#namespace-OpenSoT-constraints-force">OpenSoT::constraints::force</a><ul><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1CoP.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1CoP">CoP</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1CoPs.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1CoPs">CoPs</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCone.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1FrictionCone">FrictionCone</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCones.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1FrictionCones">FrictionCones</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorque.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1NormalTorque">NormalTorque</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorques.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1NormalTorques">NormalTorques</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1StaticConstraint">StaticConstraint</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1force_1_1WrenchesLimits.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1WrenchesLimits">WrenchesLimits</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1constraints_1_1force_1_1WrenchLimits.html#exhale-class-classOpenSoT-1-1constraints-1-1force-1-1WrenchLimits">WrenchLimits</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__constraints__velocity.html#namespace-OpenSoT-constraints-velocity">OpenSoT::constraints::velocity</a><ul><li>Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1CartesianPositionConstraint">CartesianPositionConstraint</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1CartesianVelocity">CartesianVelocity</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1CollisionAvoidance">CollisionAvoidance</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1ConvexHull">ConvexHull</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1JointLimits">JointLimits</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1JointLimitsInvariance">JointLimitsInvariance</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1OmniWheels4X">OmniWheels4X</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html#exhale-class-classOpenSoT-1-1constraints-1-1velocity-1-1VelocityLimits">VelocityLimits</a></li></ul></li><li>Class <a href="classOpenSoT_1_1constraints_1_1Aggregated.html#exhale-class-classOpenSoT-1-1constraints-1-1Aggregated">Aggregated</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#exhale-class-classOpenSoT-1-1constraints-1-1BilateralConstraint">BilateralConstraint</a></li><li>Class <a href="classOpenSoT_1_1constraints_1_1GenericConstraint.html#exhale-class-classOpenSoT-1-1constraints-1-1GenericConstraint">GenericConstraint</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1constraints_1_1TaskToConstraint.html#exhale-class-classOpenSoT-1-1constraints-1-1TaskToConstraint">TaskToConstraint</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__solvers.html#namespace-OpenSoT-solvers">OpenSoT::solvers</a><ul><li>Struct <a href="structOpenSoT_1_1solvers_1_1stack__level.html#exhale-struct-structOpenSoT-1-1solvers-1-1stack-level">stack_level</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1BackEnd.html#exhale-class-classOpenSoT-1-1solvers-1-1BackEnd">BackEnd</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1constraint__helper.html#exhale-class-classOpenSoT-1-1solvers-1-1constraint-helper">constraint_helper</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1eHQP.html#exhale-class-classOpenSoT-1-1solvers-1-1eHQP">eHQP</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html#exhale-class-classOpenSoT-1-1solvers-1-1eiQuadProgBackEnd">eiQuadProgBackEnd</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html#exhale-class-classOpenSoT-1-1solvers-1-1GLPKBackEnd">GLPKBackEnd</a><ul><li class="lastChild">Struct <a href="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions.html#exhale-struct-structOpenSoT-1-1solvers-1-1GLPKBackEnd-1-1GLPKBackEndOptions">GLPKBackEnd::GLPKBackEndOptions</a></li></ul></li><li>Class <a href="classOpenSoT_1_1solvers_1_1HCOD.html#exhale-class-classOpenSoT-1-1solvers-1-1HCOD">HCOD</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1iHQP.html#exhale-class-classOpenSoT-1-1solvers-1-1iHQP">iHQP</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1l1HQP.html#exhale-class-classOpenSoT-1-1solvers-1-1l1HQP">l1HQP</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1nHQP.html#exhale-class-classOpenSoT-1-1solvers-1-1nHQP">nHQP</a><ul><li class="lastChild">Class <a href="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData.html#exhale-class-classOpenSoT-1-1solvers-1-1nHQP-1-1TaskData">nHQP::TaskData</a></li></ul></li><li>Class <a href="classOpenSoT_1_1solvers_1_1OSQPBackEnd.html#exhale-class-classOpenSoT-1-1solvers-1-1OSQPBackEnd">OSQPBackEnd</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1priority__constraint.html#exhale-class-classOpenSoT-1-1solvers-1-1priority-constraint">priority_constraint</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html#exhale-class-classOpenSoT-1-1solvers-1-1proxQPBackEnd">proxQPBackEnd</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1QPOasesBackEnd.html#exhale-class-classOpenSoT-1-1solvers-1-1QPOasesBackEnd">QPOasesBackEnd</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html#exhale-class-classOpenSoT-1-1solvers-1-1qpSWIFTBackEnd">qpSWIFTBackEnd</a></li><li>Class <a href="classOpenSoT_1_1solvers_1_1task__to__constraint__helper.html#exhale-class-classOpenSoT-1-1solvers-1-1task-to-constraint-helper">task_to_constraint_helper</a></li><li class="lastChild">Enum <a href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#exhale-enum-namespaceOpenSoT-1-1solvers-1ad3629163caba5dfb33fc5662ad77dc21">solver_back_ends</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__tasks.html#namespace-OpenSoT-tasks">OpenSoT::tasks</a><ul><li>Namespace <a href="namespace_OpenSoT__tasks__acceleration.html#namespace-OpenSoT-tasks-acceleration">OpenSoT::tasks::acceleration</a><ul><li>Class <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html#exhale-class-classOpenSoT-1-1tasks-1-1acceleration-1-1AngularMomentum">AngularMomentum</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html#exhale-class-classOpenSoT-1-1tasks-1-1acceleration-1-1Cartesian">Cartesian</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1CoM.html#exhale-class-classOpenSoT-1-1tasks-1-1acceleration-1-1CoM">CoM</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1Contact.html#exhale-class-classOpenSoT-1-1tasks-1-1acceleration-1-1Contact">Contact</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1DynamicFeasibility.html#exhale-class-classOpenSoT-1-1tasks-1-1acceleration-1-1DynamicFeasibility">DynamicFeasibility</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html#exhale-class-classOpenSoT-1-1tasks-1-1acceleration-1-1MinJointVel">MinJointVel</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.html#exhale-class-classOpenSoT-1-1tasks-1-1acceleration-1-1Postural">Postural</a></li><li class="lastChild">Enum <a href="enum_namespaceOpenSoT_1_1tasks_1_1acceleration_1ac5e7971804aeb402ea61abadc7c52b42.html#exhale-enum-namespaceOpenSoT-1-1tasks-1-1acceleration-1ac5e7971804aeb402ea61abadc7c52b42">GainType</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__tasks__floating_base.html#namespace-OpenSoT-tasks-floating-base">OpenSoT::tasks::floating_base</a><ul><li>Class <a href="classOpenSoT_1_1tasks_1_1floating__base_1_1Contact.html#exhale-class-classOpenSoT-1-1tasks-1-1floating-base-1-1Contact">Contact</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1tasks_1_1floating__base_1_1IMU.html#exhale-class-classOpenSoT-1-1tasks-1-1floating-base-1-1IMU">IMU</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__tasks__force.html#namespace-OpenSoT-tasks-force">OpenSoT::tasks::force</a><ul><li>Class <a href="classOpenSoT_1_1tasks_1_1force_1_1Cartesian.html#exhale-class-classOpenSoT-1-1tasks-1-1force-1-1Cartesian">Cartesian</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1force_1_1CoM.html#exhale-class-classOpenSoT-1-1tasks-1-1force-1-1CoM">CoM</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1force_1_1FloatingBase.html#exhale-class-classOpenSoT-1-1tasks-1-1force-1-1FloatingBase">FloatingBase</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1force_1_1Wrench.html#exhale-class-classOpenSoT-1-1tasks-1-1force-1-1Wrench">Wrench</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1tasks_1_1force_1_1Wrenches.html#exhale-class-classOpenSoT-1-1tasks-1-1force-1-1Wrenches">Wrenches</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__tasks__velocity.html#namespace-OpenSoT-tasks-velocity">OpenSoT::tasks::velocity</a><ul><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1AngularMomentum">AngularMomentum</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1Cartesian">Cartesian</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1CartesianAdmittance">CartesianAdmittance</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1CoM">CoM</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Contact.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1Contact">Contact</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Gaze.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1Gaze">Gaze</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1JointAdmittance">JointAdmittance</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1LinearMomentum">LinearMomentum</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1Manipulability">Manipulability</a><ul><li class="lastChild">Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1Manipulability-1-1ComputeManipulabilityIndexGradient">Manipulability::ComputeManipulabilityIndexGradient</a></li></ul></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1MinimumEffort">MinimumEffort</a><ul><li class="lastChild">Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1MinimumEffort-1-1ComputeGTauGradient">MinimumEffort::ComputeGTauGradient</a></li></ul></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1Postural">Postural</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1PureRolling">PureRolling</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1PureRollingOrientation">PureRollingOrientation</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition.html#exhale-class-classOpenSoT-1-1tasks-1-1velocity-1-1PureRollingPosition">PureRollingPosition</a></li></ul></li><li>Class <a href="classOpenSoT_1_1tasks_1_1Aggregated.html#exhale-class-classOpenSoT-1-1tasks-1-1Aggregated">Aggregated</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1GenericLPTask.html#exhale-class-classOpenSoT-1-1tasks-1-1GenericLPTask">GenericLPTask</a></li><li>Class <a href="classOpenSoT_1_1tasks_1_1GenericTask.html#exhale-class-classOpenSoT-1-1tasks-1-1GenericTask">GenericTask</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html#exhale-class-classOpenSoT-1-1tasks-1-1MinimizeVariable">MinimizeVariable</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__utils.html#namespace-OpenSoT-utils">OpenSoT::utils</a><ul><li>Class <a href="classOpenSoT_1_1utils_1_1ForceOptimization.html#exhale-class-classOpenSoT-1-1utils-1-1ForceOptimization">ForceOptimization</a></li><li>Class <a href="classOpenSoT_1_1utils_1_1InverseDynamics.html#exhale-class-classOpenSoT-1-1utils-1-1InverseDynamics">InverseDynamics</a></li><li class="lastChild">Class <a href="classOpenSoT_1_1utils_1_1MatrixPiler.html#exhale-class-classOpenSoT-1-1utils-1-1MatrixPiler">MatrixPiler</a></li></ul></li><li>Namespace <a href="namespace_OpenSoT__variables.html#namespace-OpenSoT-variables">OpenSoT::variables</a><ul><li class="lastChild">Class <a href="classOpenSoT_1_1variables_1_1Torque.html#exhale-class-classOpenSoT-1-1variables-1-1Torque">Torque</a></li></ul></li><li>Template Class <a href="classOpenSoT_1_1AffineHelperBase.html#exhale-class-classOpenSoT-1-1AffineHelperBase">AffineHelperBase</a></li><li>Class <a href="classOpenSoT_1_1AutoStack.html#exhale-class-classOpenSoT-1-1AutoStack">AutoStack</a></li><li>Template Class <a href="classOpenSoT_1_1Constraint.html#exhale-class-classOpenSoT-1-1Constraint">Constraint</a></li><li>Class <a href="classOpenSoT_1_1Indices.html#exhale-class-classOpenSoT-1-1Indices">Indices</a></li><li>Class <a href="classOpenSoT_1_1ManipulationStack.html#exhale-class-classOpenSoT-1-1ManipulationStack">ManipulationStack</a></li><li>Class <a href="classOpenSoT_1_1OptvarHelper.html#exhale-class-classOpenSoT-1-1OptvarHelper">OptvarHelper</a><ul><li class="lastChild">Struct <a href="structOpenSoT_1_1OptvarHelper_1_1VarInfo.html#exhale-struct-structOpenSoT-1-1OptvarHelper-1-1VarInfo">OptvarHelper::VarInfo</a></li></ul></li><li>Template Class <a href="classOpenSoT_1_1Solver.html#exhale-class-classOpenSoT-1-1Solver">Solver</a></li><li>Class <a href="classOpenSoT_1_1SubConstraint.html#exhale-class-classOpenSoT-1-1SubConstraint">SubConstraint</a></li><li>Class <a href="classOpenSoT_1_1SubTask.html#exhale-class-classOpenSoT-1-1SubTask">SubTask</a></li><li>Template Class <a href="classOpenSoT_1_1Task.html#exhale-class-classOpenSoT-1-1Task">Task</a><ul><li class="lastChild">Struct <a href="structOpenSoT_1_1Task_1_1istrue.html#exhale-struct-structOpenSoT-1-1Task-1-1istrue">Task::istrue</a></li></ul></li><li>Class <a href="classOpenSoT_1_1WalkingStack.html#exhale-class-classOpenSoT-1-1WalkingStack">WalkingStack</a></li><li class="lastChild">Enum <a href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#exhale-enum-namespaceOpenSoT-1a8c807753165f8f6e74b6d6f74afadb68">HessianType</a></li></ul></li><li>Class <a href="classcartesian__utils.html#exhale-class-classcartesian-utils">cartesian_utils</a></li><li>Class <a href="classComputeLinksDistance.html#exhale-class-classComputeLinksDistance">ComputeLinksDistance</a><ul><li class="lastChild">Class <a href="classComputeLinksDistance_1_1LinksPair.html#exhale-class-classComputeLinksDistance-1-1LinksPair">ComputeLinksDistance::LinksPair</a></li></ul></li><li>Class <a href="classconvex__hull.html#exhale-class-classconvex-hull">convex_hull</a></li><li>Class <a href="classCostFunction.html#exhale-class-classCostFunction">CostFunction</a></li><li>Class <a href="classGradientVector.html#exhale-class-classGradientVector">GradientVector</a></li><li>Template Class <a href="classLDLTInverse.html#exhale-class-classLDLTInverse">LDLTInverse</a></li><li>Class <a href="classLinkPairDistance.html#exhale-class-classLinkPairDistance">LinkPairDistance</a></li><li>Class <a href="classquaternion.html#exhale-class-classquaternion">quaternion</a></li><li class="lastChild">Template Class <a href="classSVDPseudoInverse.html#exhale-class-classSVDPseudoInverse">SVDPseudoInverse</a></li>
+    </ul>
+  </li><!-- only tree view element -->
+</ul><!-- /treeView class-treeView --></div>
+<div class="section" id="file-hierarchy">
+<h3>File Hierarchy<a class="headerlink" href="#file-hierarchy" title="Permalink to this headline"></a></h3>
+<ul class="treeView" id="file-treeView">
+  <li>
+    <ul class="collapsibleList">
+      <li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include.html#dir-home-runner-work-OpenSoT-OpenSoT-include">include</a><ul><li class="lastChild">Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT">OpenSoT</a><ul><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints">constraints</a><ul><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-acceleration">acceleration</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-acceleration-JointLimits.h">JointLimits.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsECBF.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-acceleration-JointLimitsECBF.h">JointLimitsECBF.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsViability.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-acceleration-JointLimitsViability.h">JointLimitsViability.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_TorqueLimits.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-acceleration-TorqueLimits.h">TorqueLimits.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_VelocityLimits.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-acceleration-VelocityLimits.h">VelocityLimits.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-force">force</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_CoP.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-force-CoP.h">CoP.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_FrictionCone.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-force-FrictionCone.h">FrictionCone.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_NormalTorque.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-force-NormalTorque.h">NormalTorque.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-force-StaticConstraint.h">StaticConstraint.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_WrenchLimits.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-force-WrenchLimits.h">WrenchLimits.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity">velocity</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CartesianPositionConstraint.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-CartesianPositionConstraint.h">CartesianPositionConstraint.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CartesianVelocity.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-CartesianVelocity.h">CartesianVelocity.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-CollisionAvoidance.h">CollisionAvoidance.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_ConvexHull.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-ConvexHull.h">ConvexHull.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_JointLimits.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-JointLimits.h">JointLimits.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_JointLimitsInvariace.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-JointLimitsInvariace.h">JointLimitsInvariace.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_OmniWheels4X.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-OmniWheels4X.h">OmniWheels4X.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_VelocityLimits.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-velocity-VelocityLimits.h">VelocityLimits.h</a></li></ul></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-Aggregated.h">Aggregated.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_BilateralConstraint.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-BilateralConstraint.h">BilateralConstraint.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-GenericConstraint.h">GenericConstraint.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_TaskToConstraint.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-constraints-TaskToConstraint.h">TaskToConstraint.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers">solvers</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-BackEnd.h">BackEnd.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-BackEndFactory.h">BackEndFactory.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eHQP.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-eHQP.h">eHQP.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eiQuadProgBackEnd.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-eiQuadProgBackEnd.h">eiQuadProgBackEnd.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_GLPKBackEnd.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-GLPKBackEnd.h">GLPKBackEnd.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-HCOD.h">HCOD.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-iHQP.h">iHQP.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-l1HQP.h">l1HQP.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-nHQP.h">nHQP.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-OSQPBackEnd.h">OSQPBackEnd.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_proxQPBackEnd.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-proxQPBackEnd.h">proxQPBackEnd.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-QPOasesBackEnd.h">QPOasesBackEnd.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-solvers-qpSWIFTBackEnd.h">qpSWIFTBackEnd.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-stacks">stacks</a><ul><li class="lastChild">Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-stacks-velocity">velocity</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_ManipulationStack.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-stacks-velocity-ManipulationStack.h">ManipulationStack.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_WalkingStack.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-stacks-velocity-WalkingStack.h">WalkingStack.h</a></li></ul></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks">tasks</a><ul><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration">acceleration</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_AngularMomentum.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-AngularMomentum.h">AngularMomentum.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Cartesian.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-Cartesian.h">Cartesian.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_CoM.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-CoM.h">CoM.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Contact.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-Contact.h">Contact.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_DynamicFeasibility.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-DynamicFeasibility.h">DynamicFeasibility.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_GainType.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-GainType.h">GainType.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_MinJointVel.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-MinJointVel.h">MinJointVel.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-acceleration-Postural.h">Postural.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-floating-base">floating_base</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base_Contact.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-floating-base-Contact.h">Contact.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base_IMU.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-floating-base-IMU.h">IMU.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-force">force</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Cartesian.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-force-Cartesian.h">Cartesian.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_CoM.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-force-CoM.h">CoM.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_FloatingBase.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-force-FloatingBase.h">FloatingBase.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-force-Force.h">Force.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity">velocity</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_AngularMomentum.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-AngularMomentum.h">AngularMomentum.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-Cartesian.h">Cartesian.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-CartesianAdmittance.h">CartesianAdmittance.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CoM.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-CoM.h">CoM.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Contact.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-Contact.h">Contact.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Gaze.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-Gaze.h">Gaze.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_JointAdmittance.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-JointAdmittance.h">JointAdmittance.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_LinearMomentum.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-LinearMomentum.h">LinearMomentum.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Manipulability.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-Manipulability.h">Manipulability.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_MinimumEffort.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-MinimumEffort.h">MinimumEffort.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Postural.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-Postural.h">Postural.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_PureRolling.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-velocity-PureRolling.h">PureRolling.h</a></li></ul></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-Aggregated.h">Aggregated.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-GenericLPTask.h">GenericLPTask.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-GenericTask.h">GenericTask.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-tasks-MinimizeVariable.h">MinimizeVariable.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils">utils</a><ul><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-Affine.h">Affine.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-AffineUtils.h">AffineUtils.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-AutoStack.h">AutoStack.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-cartesian-utils.h">cartesian_utils.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-collision-utils.h">collision_utils.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-convex-hull-utils.h">convex_hull_utils.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-ForceOptimization.h">ForceOptimization.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Indices.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-Indices.h">Indices.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-InverseDynamics.h">InverseDynamics.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-LinkPairDistance.h">LinkPairDistance.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-utils-Piler.h">Piler.h</a></li></ul></li><li>Directory <a href="dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables.html#dir-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-variables">variables</a><ul><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables_Torque.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-variables-Torque.h">Torque.h</a></li></ul></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-Constraint.h">Constraint.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-Solver.h">Solver.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-SubConstraint.h">SubConstraint.h</a></li><li>File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubTask.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-SubTask.h">SubTask.h</a></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h.html#file-home-runner-work-OpenSoT-OpenSoT-include-OpenSoT-Task.h">Task.h</a></li></ul></li></ul></li><li class="lastChild">File <a href="file__home_runner_work_OpenSoT_OpenSoT_README.md.html#file-home-runner-work-OpenSoT-OpenSoT-README.md">README.md</a></li>
+    </ul>
+  </li><!-- only tree view element -->
+</ul><!-- /treeView file-treeView --></div>
+<div class="section" id="full-api">
+<h3>Full API<a class="headerlink" href="#full-api" title="Permalink to this headline"></a></h3>
+<div class="section" id="namespaces">
+<h4>Namespaces<a class="headerlink" href="#namespaces" title="Permalink to this headline"></a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_fcl.html">Namespace fcl</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_fcl.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_fcl.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_idynutils.html">Namespace idynutils</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT.html">Namespace OpenSoT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT.html#namespaces">Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT.html#enums">Enums</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__AffineUtils.html">Namespace OpenSoT::AffineUtils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__AffineUtils.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__constraints.html">Namespace OpenSoT::constraints</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__constraints.html#namespaces">Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__constraints.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__constraints__acceleration.html">Namespace OpenSoT::constraints::acceleration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__constraints__acceleration.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__constraints__force.html">Namespace OpenSoT::constraints::force</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__constraints__force.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__constraints__velocity.html">Namespace OpenSoT::constraints::velocity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__constraints__velocity.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__solvers.html">Namespace OpenSoT::solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__solvers.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__solvers.html#enums">Enums</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__solvers.html#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__tasks.html">Namespace OpenSoT::tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__tasks.html#namespaces">Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__tasks.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__tasks__acceleration.html">Namespace OpenSoT::tasks::acceleration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__tasks__acceleration.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__tasks__acceleration.html#enums">Enums</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__tasks__floating_base.html">Namespace OpenSoT::tasks::floating_base</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__tasks__floating_base.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__tasks__force.html">Namespace OpenSoT::tasks::force</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__tasks__force.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__tasks__velocity.html">Namespace OpenSoT::tasks::velocity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__tasks__velocity.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__utils.html">Namespace OpenSoT::utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__utils.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_OpenSoT__variables.html">Namespace OpenSoT::variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_OpenSoT__variables.html#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_proxsuite.html">Namespace proxsuite</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_proxsuite.html#namespaces">Namespaces</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_proxsuite__proxqp.html">Namespace proxsuite::proxqp</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_qpOASES.html">Namespace qpOASES</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_soth.html">Namespace soth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="namespace_soth.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_std.html">Namespace std</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="namespace_XBot__Utils.html">Namespace XBot::Utils</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="classes-and-structs">
+<h4>Classes and Structs<a class="headerlink" href="#classes-and-structs" title="Permalink to this headline"></a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structOpenSoT_1_1OptvarHelper_1_1VarInfo.html">Struct OptvarHelper::VarInfo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structOpenSoT_1_1OptvarHelper_1_1VarInfo.html#nested-relationships">Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structOpenSoT_1_1OptvarHelper_1_1VarInfo.html#struct-documentation">Struct Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions.html">Struct GLPKBackEnd::GLPKBackEndOptions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions.html#nested-relationships">Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions.html#struct-documentation">Struct Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1stack__level.html">Struct stack_level</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1stack__level.html#struct-documentation">Struct Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structOpenSoT_1_1Task_1_1istrue.html">Struct Task::istrue</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structOpenSoT_1_1Task_1_1istrue.html#nested-relationships">Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structOpenSoT_1_1Task_1_1istrue.html#struct-documentation">Struct Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classcartesian__utils.html">Class cartesian_utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classcartesian__utils.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classComputeLinksDistance.html">Class ComputeLinksDistance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classComputeLinksDistance.html#nested-relationships">Nested Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classComputeLinksDistance.html#nested-types">Nested Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classComputeLinksDistance.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classComputeLinksDistance_1_1LinksPair.html">Class ComputeLinksDistance::LinksPair</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classComputeLinksDistance_1_1LinksPair.html#nested-relationships">Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classComputeLinksDistance_1_1LinksPair.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classconvex__hull.html">Class convex_hull</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classconvex__hull.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classCostFunction.html">Class CostFunction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classCostFunction.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classCostFunction.html#derived-types">Derived Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classCostFunction.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classfcl_1_1CollisionObject.html">Template Class CollisionObject</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classfcl_1_1CollisionObject.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classGradientVector.html">Class GradientVector</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classGradientVector.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classLDLTInverse.html">Template Class LDLTInverse</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classLDLTInverse.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classLinkPairDistance.html">Class LinkPairDistance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classLinkPairDistance.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1AffineHelperBase.html">Template Class AffineHelperBase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1AffineHelperBase.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html">Class AffineConstraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineTask.html">Class AffineTask</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineTask.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineTask.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineTask.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1AutoStack.html">Class AutoStack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1AutoStack.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1AutoStack.html#derived-types">Derived Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1AutoStack.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1Constraint.html">Template Class Constraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1Constraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html">Class JointLimits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF.html">Class JointLimitsECBF</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability.html">Class JointLimitsViability</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits.html">Class TorqueLimits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits.html">Class VelocityLimits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1Aggregated.html">Class Aggregated</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1Aggregated.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1Aggregated.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1Aggregated.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html">Class BilateralConstraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#base-type">Base Type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#derived-type">Derived Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoP.html">Class CoP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoP.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoP.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoP.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoPs.html">Class CoPs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoPs.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoPs.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoPs.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCone.html">Class FrictionCone</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCone.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCone.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCone.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCones.html">Class FrictionCones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCones.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCones.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCones.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorque.html">Class NormalTorque</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorque.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorque.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorque.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorques.html">Class NormalTorques</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorques.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorques.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorques.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint.html">Class StaticConstraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchesLimits.html">Class WrenchesLimits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchesLimits.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchesLimits.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchesLimits.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchLimits.html">Class WrenchLimits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchLimits.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchLimits.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchLimits.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1GenericConstraint.html">Class GenericConstraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1GenericConstraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1GenericConstraint.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1GenericConstraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1TaskToConstraint.html">Class TaskToConstraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1TaskToConstraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1TaskToConstraint.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1TaskToConstraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html">Class CartesianPositionConstraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html">Class CartesianVelocity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.html">Class CollisionAvoidance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html">Class ConvexHull</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits.html">Class JointLimits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance.html">Class JointLimitsInvariance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html">Class OmniWheels4X</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html">Class VelocityLimits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1Indices.html">Class Indices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1Indices.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1ManipulationStack.html">Class ManipulationStack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1ManipulationStack.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1ManipulationStack.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1ManipulationStack.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html">Class OptvarHelper</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html#nested-relationships">Nested Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html#nested-types">Nested Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1Solver.html">Template Class Solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1Solver.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html">Class BackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#derived-types">Derived Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1constraint__helper.html">Class constraint_helper</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1constraint__helper.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1constraint__helper.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1constraint__helper.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eHQP.html">Class eHQP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eHQP.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eHQP.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eHQP.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html">Class eiQuadProgBackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html">Class GLPKBackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html#nested-relationships">Nested Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html#nested-types">Nested Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1HCOD.html">Class HCOD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1HCOD.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1HCOD.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1HCOD.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1iHQP.html">Class iHQP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1iHQP.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1iHQP.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1iHQP.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1l1HQP.html">Class l1HQP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1l1HQP.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1l1HQP.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1l1HQP.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html">Class nHQP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html#nested-relationships">Nested Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html#nested-types">Nested Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData.html">Class nHQP::TaskData</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData.html#nested-relationships">Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1OSQPBackEnd.html">Class OSQPBackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1OSQPBackEnd.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1OSQPBackEnd.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1OSQPBackEnd.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1priority__constraint.html">Class priority_constraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1priority__constraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1priority__constraint.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1priority__constraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html">Class proxQPBackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1QPOasesBackEnd.html">Class QPOasesBackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1QPOasesBackEnd.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1QPOasesBackEnd.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1QPOasesBackEnd.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html">Class qpSWIFTBackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1task__to__constraint__helper.html">Class task_to_constraint_helper</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1task__to__constraint__helper.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1task__to__constraint__helper.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1task__to__constraint__helper.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1SubConstraint.html">Class SubConstraint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1SubConstraint.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1SubConstraint.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1SubConstraint.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1SubTask.html">Class SubTask</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1SubTask.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1SubTask.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1SubTask.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1Task.html">Template Class Task</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1Task.html#nested-relationships">Nested Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1Task.html#nested-types">Nested Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1Task.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html">Class AngularMomentum</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html">Class Cartesian</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1CoM.html">Class CoM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1CoM.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1CoM.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1CoM.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Contact.html">Class Contact</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Contact.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Contact.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Contact.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1DynamicFeasibility.html">Class DynamicFeasibility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1DynamicFeasibility.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1DynamicFeasibility.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1DynamicFeasibility.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html">Class MinJointVel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.html">Class Postural</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1Aggregated.html">Class Aggregated</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1Aggregated.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1Aggregated.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1Aggregated.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1Contact.html">Class Contact</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1Contact.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1Contact.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1Contact.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1IMU.html">Class IMU</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1IMU.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1IMU.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1IMU.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Cartesian.html">Class Cartesian</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Cartesian.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Cartesian.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Cartesian.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1CoM.html">Class CoM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1CoM.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1CoM.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1CoM.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1FloatingBase.html">Class FloatingBase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1FloatingBase.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1FloatingBase.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1FloatingBase.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrench.html">Class Wrench</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrench.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrench.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrench.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrenches.html">Class Wrenches</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrenches.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrenches.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrenches.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericLPTask.html">Class GenericLPTask</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericLPTask.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericLPTask.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericLPTask.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericTask.html">Class GenericTask</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericTask.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericTask.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericTask.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html">Class MinimizeVariable</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum.html">Class AngularMomentum</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html">Class Cartesian</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#base-type">Base Type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#derived-type">Derived Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.html">Class CartesianAdmittance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html">Class CoM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Contact.html">Class Contact</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Contact.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Contact.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Contact.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Gaze.html">Class Gaze</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Gaze.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Gaze.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Gaze.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html">Class JointAdmittance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum.html">Class LinearMomentum</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html">Class Manipulability</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html#nested-relationships">Nested Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html#nested-types">Nested Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html">Class Manipulability::ComputeManipulabilityIndexGradient</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html#nested-relationships">Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html">Class MinimumEffort</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html#nested-relationships">Nested Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html#nested-types">Nested Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html">Class MinimumEffort::ComputeGTauGradient</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#nested-relationships">Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html">Class Postural</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html#base-type">Base Type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html#derived-type">Derived Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling.html">Class PureRolling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation.html">Class PureRollingOrientation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition.html">Class PureRollingPosition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1utils_1_1ForceOptimization.html">Class ForceOptimization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1utils_1_1ForceOptimization.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1utils_1_1InverseDynamics.html">Class InverseDynamics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1utils_1_1InverseDynamics.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1utils_1_1MatrixPiler.html">Class MatrixPiler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1utils_1_1MatrixPiler.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1variables_1_1Torque.html">Class Torque</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1variables_1_1Torque.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1variables_1_1Torque.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1variables_1_1Torque.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classOpenSoT_1_1WalkingStack.html">Class WalkingStack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1WalkingStack.html#inheritance-relationships">Inheritance Relationships</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classOpenSoT_1_1WalkingStack.html#base-type">Base Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classOpenSoT_1_1WalkingStack.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classquaternion.html">Class quaternion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classquaternion.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classSVDPseudoInverse.html">Template Class SVDPseudoInverse</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classSVDPseudoInverse.html#class-documentation">Class Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="enums">
+<h4>Enums<a class="headerlink" href="#enums" title="Permalink to this headline"></a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html">Enum HessianType</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="enum_namespaceOpenSoT_1a8c807753165f8f6e74b6d6f74afadb68.html#enum-documentation">Enum Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html">Enum solver_back_ends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#enum-documentation">Enum Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="enum_namespaceOpenSoT_1_1tasks_1_1acceleration_1ac5e7971804aeb402ea61abadc7c52b42.html">Enum GainType</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="enum_namespaceOpenSoT_1_1tasks_1_1acceleration_1ac5e7971804aeb402ea61abadc7c52b42.html#enum-documentation">Enum Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="functions">
+<h4>Functions<a class="headerlink" href="#functions" title="Permalink to this headline"></a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a49d7bab96e0b74e7412c617a7d06a1c6.html">Function OpenSoT::operator%(const OpenSoT::tasks::Aggregated::TaskPtr, const std::list&lt;unsigned int&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a49d7bab96e0b74e7412c617a7d06a1c6.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a35f3ae25b8630915d1768f610ae80013.html">Function OpenSoT::operator%(const OpenSoT::constraints::Aggregated::ConstraintPtr, const std::list&lt;unsigned int&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a35f3ae25b8630915d1768f610ae80013.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1aa4a98577a6a4beef8218ad4cad6bd987.html">Template Function OpenSoT::operator*(const DerivedMatrix&amp;, const AffineHelperBase&lt;DerivedM, DerivedQ&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1aa4a98577a6a4beef8218ad4cad6bd987.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a062f99e2d6db737dd7f13f156574a1d0.html">Function OpenSoT::operator*(const Eigen::MatrixXd&amp;, OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a062f99e2d6db737dd7f13f156574a1d0.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a2c5d7dd14b11e588a36c0eecb0ed6ed5.html">Function OpenSoT::operator*(const double, OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a2c5d7dd14b11e588a36c0eecb0ed6ed5.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22.html">Function OpenSoT::operator*(const double, OpenSoT::tasks::Aggregated::Ptr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a63100ab9d4e96ae9b685df8a15736e8b.html">Template Function OpenSoT::operator+(const AffineHelperBase&lt;DerivedM1, DerivedQ1&gt;&amp;, const AffineHelperBase&lt;DerivedM2, DerivedQ2&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a63100ab9d4e96ae9b685df8a15736e8b.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d.html">Template Function OpenSoT::operator+(const AffineHelperBase&lt;DerivedM1, DerivedQ1&gt;&amp;, const Eigen::MatrixBase&lt;DerivedVector&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a28dfa90c3909a4091eac86ddf0dba03b.html">Function OpenSoT::operator+(const OpenSoT::tasks::Aggregated::TaskPtr, const OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a28dfa90c3909a4091eac86ddf0dba03b.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1ae24411e8b9b45d1bf190e8597c709e37.html">Function OpenSoT::operator+(const OpenSoT::tasks::Aggregated::Ptr, const OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1ae24411e8b9b45d1bf190e8597c709e37.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1aeada9a77011c67d9610e49709538d424.html">Function OpenSoT::operator+(const OpenSoT::tasks::Aggregated::TaskPtr, const OpenSoT::tasks::Aggregated::Ptr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1aeada9a77011c67d9610e49709538d424.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb.html">Function OpenSoT::operator+(const OpenSoT::tasks::Aggregated::Ptr, const OpenSoT::tasks::Aggregated::Ptr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe.html">Template Function OpenSoT::operator-(const AffineHelperBase&lt;DerivedM1, DerivedQ1&gt;&amp;, const AffineHelperBase&lt;DerivedM2, DerivedQ2&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a9ea285f4bea5b924248306c73e63af0d.html">Template Function OpenSoT::operator-(const AffineHelperBase&lt;DerivedM1, DerivedQ1&gt;&amp;, const Eigen::MatrixBase&lt;DerivedVector&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a9ea285f4bea5b924248306c73e63af0d.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91.html">Template Function OpenSoT::operator/(const AffineHelperBase&lt;DerivedM1, DerivedQ1&gt;&amp;, const AffineHelperBase&lt;DerivedM2, DerivedQ2&gt;&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a4c31d7dd8eccb05044007ba7448dd263.html">Function OpenSoT::operator/(const OpenSoT::tasks::Aggregated::TaskPtr, const OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a4c31d7dd8eccb05044007ba7448dd263.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1adaea99bdf94335a8999e430d8746e7d3.html">Function OpenSoT::operator/(const OpenSoT::AutoStack::Ptr, const OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1adaea99bdf94335a8999e430d8746e7d3.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1ac8b11062807f3c28362a3ebec6966c48.html">Function OpenSoT::operator/(const OpenSoT::tasks::Aggregated::TaskPtr, OpenSoT::AutoStack::Ptr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1ac8b11062807f3c28362a3ebec6966c48.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a9a9f6cea5ef3d3d8c3efdac6814fd29f.html">Function OpenSoT::operator/(const OpenSoT::AutoStack::Ptr, const OpenSoT::AutoStack::Ptr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a9a9f6cea5ef3d3d8c3efdac6814fd29f.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1ace43b0e0f96fed6c9d0d6c7f85f722bf.html">Function OpenSoT::operator/=</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1ace43b0e0f96fed6c9d0d6c7f85f722bf.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0.html">Function OpenSoT::operator&lt;&lt;(std::ostream&amp;, const AffineHelper&amp;)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1ab831211523cf9d0c5c9ec1d4968ef6a7.html">Function OpenSoT::operator&lt;&lt;(OpenSoT::tasks::Aggregated::TaskPtr, const OpenSoT::constraints::Aggregated::ConstraintPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1ab831211523cf9d0c5c9ec1d4968ef6a7.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a61aa6ca24b3a5cdbdad8656907e80153.html">Function OpenSoT::operator&lt;&lt;(OpenSoT::tasks::Aggregated::Ptr, const OpenSoT::constraints::Aggregated::ConstraintPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a61aa6ca24b3a5cdbdad8656907e80153.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1af8aa6bbf8c8362fe1372db8ae2099071.html">Function OpenSoT::operator&lt;&lt;(OpenSoT::AutoStack::Ptr, const OpenSoT::constraints::Aggregated::ConstraintPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1af8aa6bbf8c8362fe1372db8ae2099071.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a422e1a9b98b71861968d14a251c54083.html">Function OpenSoT::operator&lt;&lt;(OpenSoT::tasks::Aggregated::TaskPtr, const OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a422e1a9b98b71861968d14a251c54083.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1a501cda32286c6a526b42ec3b2690eef2.html">Function OpenSoT::operator&lt;&lt;(OpenSoT::AutoStack::Ptr, const OpenSoT::tasks::Aggregated::TaskPtr)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1a501cda32286c6a526b42ec3b2690eef2.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1_1solvers_1afad360bd87e33794b09b791fb700a4df.html">Function OpenSoT::solvers::BackEndFactory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1_1solvers_1afad360bd87e33794b09b791fb700a4df.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_namespaceOpenSoT_1_1solvers_1a7b39fcd96a93530cf5763e678cafdc03.html">Function OpenSoT::solvers::whichBackEnd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_namespaceOpenSoT_1_1solvers_1a7b39fcd96a93530cf5763e678cafdc03.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_collision__utils_8h_1a3fac393c6019835e39854c157c781dac.html">Function toKdl(urdf::Vector3)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_collision__utils_8h_1a3fac393c6019835e39854c157c781dac.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_collision__utils_8h_1abfb8e17c7aeeccc23c4337c7b500dd68.html">Function toKdl(urdf::Rotation)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_collision__utils_8h_1abfb8e17c7aeeccc23c4337c7b500dd68.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="function_collision__utils_8h_1a7c6a03d0eba1d42095a9bfe884ee4158.html">Function toKdl(urdf::Pose)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="function_collision__utils_8h_1a7c6a03d0eba1d42095a9bfe884ee4158.html#function-documentation">Function Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="defines">
+<h4>Defines<a class="headerlink" href="#defines" title="Permalink to this headline"></a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_HCOD_8h_1ab984b6660eb2a62d534d96a72d13bf33.html">Define __SOLVERS__HCOD__</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_HCOD_8h_1ab984b6660eb2a62d534d96a72d13bf33.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_eHQP_8h_1a69ed3484a05681c3b40c8aa98bc1f7f1.html">Define __SOLVERS__PSEUDOINVERSE__</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_eHQP_8h_1a69ed3484a05681c3b40c8aa98bc1f7f1.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_acceleration_2AngularMomentum_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html">Define BASE_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_acceleration_2AngularMomentum_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_velocity_2AngularMomentum_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html">Define BASE_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_velocity_2AngularMomentum_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_force_2CoM_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html">Define BASE_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_force_2CoM_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_velocity_2CoM_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html">Define BASE_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_velocity_2CoM_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_LinearMomentum_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html">Define BASE_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_LinearMomentum_8h_1a6b876ac2c8257ddf13f8396e67e289a6.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_CartesianPositionConstraint_8h_1aafbe565fb234e1a7fb6c348a44891464.html">Define BOUND_SCALING</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_CartesianPositionConstraint_8h_1aafbe565fb234e1a7fb6c348a44891464.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_ConvexHull_8h_1aafbe565fb234e1a7fb6c348a44891464.html">Define BOUND_SCALING</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_ConvexHull_8h_1aafbe565fb234e1a7fb6c348a44891464.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_iHQP_8h_1af2ad25eb08eeeb4c02bdd5484dac1272.html">Define DEFAULT_EPS_REGULARISATION</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_iHQP_8h_1af2ad25eb08eeeb4c02bdd5484dac1272.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_l1HQP_8h_1af2ad25eb08eeeb4c02bdd5484dac1272.html">Define DEFAULT_EPS_REGULARISATION</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_l1HQP_8h_1af2ad25eb08eeeb4c02bdd5484dac1272.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_acceleration_2AngularMomentum_8h_1ac505fd18164970e31dace53ed5ac9ad0.html">Define DISTAL_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_acceleration_2AngularMomentum_8h_1ac505fd18164970e31dace53ed5ac9ad0.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_velocity_2AngularMomentum_8h_1ac505fd18164970e31dace53ed5ac9ad0.html">Define DISTAL_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_velocity_2AngularMomentum_8h_1ac505fd18164970e31dace53ed5ac9ad0.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_force_2CoM_8h_1ac505fd18164970e31dace53ed5ac9ad0.html">Define DISTAL_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_force_2CoM_8h_1ac505fd18164970e31dace53ed5ac9ad0.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_velocity_2CoM_8h_1ac505fd18164970e31dace53ed5ac9ad0.html">Define DISTAL_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_velocity_2CoM_8h_1ac505fd18164970e31dace53ed5ac9ad0.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_LinearMomentum_8h_1ac505fd18164970e31dace53ed5ac9ad0.html">Define DISTAL_LINK_COM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_LinearMomentum_8h_1ac505fd18164970e31dace53ed5ac9ad0.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_eiQuadProgBackEnd_8h_1a61c86b9b6b2da55bd00786078c8d9eae.html">Define EIQUADPROG_DEFAULT_EPS_REGULARISATION</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_eiQuadProgBackEnd_8h_1a61c86b9b6b2da55bd00786078c8d9eae.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_OSQPBackEnd_8h_1aa7970e0fbfec4597d7e3cda6c115ab6f.html">Define OSQP_DEFAULT_EPS_REGULARISATION</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_OSQPBackEnd_8h_1aa7970e0fbfec4597d7e3cda6c115ab6f.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_proxQPBackEnd_8h_1a2569c95d1abf790d88a7647864ea8c7a.html">Define PROXQP_DEFAULT_EPS_REGULARISATION</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_proxQPBackEnd_8h_1a2569c95d1abf790d88a7647864ea8c7a.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_QPOasesBackEnd_8h_1adec94c84ab26562d2c92170d3c89d07b.html">Define QPOASES_DEFAULT_EPS_REGULARISATION</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_QPOasesBackEnd_8h_1adec94c84ab26562d2c92170d3c89d07b.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_qpSWIFTBackEnd_8h_1a116ea6cb761e6ab475f012b39f68a37a.html">Define QPSWIFT_DEFAULT_EPS_REGULARISATION</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_qpSWIFTBackEnd_8h_1a116ea6cb761e6ab475f012b39f68a37a.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_velocity_2Cartesian_8h_1ad1d74d7fe24f1e58e135b1b9e100f31b.html">Define WORLD_FRAME_NAME</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_velocity_2Cartesian_8h_1ad1d74d7fe24f1e58e135b1b9e100f31b.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="define_velocity_2Contact_8h_1ad1d74d7fe24f1e58e135b1b9e100f31b.html">Define WORLD_FRAME_NAME</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="define_velocity_2Contact_8h_1ad1d74d7fe24f1e58e135b1b9e100f31b.html#define-documentation">Define Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="typedefs">
+<h4>Typedefs<a class="headerlink" href="#typedefs" title="Permalink to this headline"></a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="typedef_namespacefcl_1ad8615572c5e4ddaf74ecafd812f6798d.html">Typedef fcl::CollisionObjectd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="typedef_namespacefcl_1ad8615572c5e4ddaf74ecafd812f6798d.html#typedef-documentation">Typedef Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb.html">Typedef OpenSoT::AffineHelper</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="typedef_namespaceOpenSoT_1af3b814ec3c109a2e6a4f162196ffb2bb.html#typedef-documentation">Typedef Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="typedef_namespacesoth_1a95f694a0d705780b45cef2acf358ebfd.html">Typedef soth::VectorBound</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="typedef_namespacesoth_1a95f694a0d705780b45cef2acf358ebfd.html#typedef-documentation">Typedef Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../task.html" class="btn btn-neutral float-left" title="Task" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="namespace_fcl.html" class="btn btn-neutral float-right" title="Namespace fcl" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

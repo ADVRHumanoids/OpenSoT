@@ -1,0 +1,14 @@
+.. _exhale_define_eiQuadProgBackEnd_8h_1a61c86b9b6b2da55bd00786078c8d9eae:
+
+Define EIQUADPROG_DEFAULT_EPS_REGULARISATION
+============================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eiQuadProgBackEnd.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: EIQUADPROG_DEFAULT_EPS_REGULARISATION
+   :project: OpenSoT

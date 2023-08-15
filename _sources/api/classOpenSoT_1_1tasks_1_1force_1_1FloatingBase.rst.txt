@@ -1,0 +1,26 @@
+.. _exhale_class_classOpenSoT_1_1tasks_1_1force_1_1FloatingBase:
+
+Class FloatingBase
+==================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_FloatingBase.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public OpenSoT::Task< Eigen::MatrixXd, Eigen::VectorXd >`` (:ref:`exhale_class_classOpenSoT_1_1Task`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::tasks::force::FloatingBase
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

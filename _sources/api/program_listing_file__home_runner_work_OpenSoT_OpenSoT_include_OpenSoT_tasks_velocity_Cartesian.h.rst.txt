@@ -1,0 +1,161 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h:
+
+Program Listing for File Cartesian.h
+====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity/Cartesian.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Authors:Alessio Rocchi, Enrico Mingo
+    * email:  alessio.rocchi@iit.it, enrico.mingo@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __TASKS_VELOCITY_CARTESIAN_H__
+   #define __TASKS_VELOCITY_CARTESIAN_H__
+   
+    #include <OpenSoT/Task.h>
+    #include <XBotInterface/ModelInterface.h>
+    #include <kdl/frames.hpp>
+    #include <Eigen/Dense>
+   
+    #define WORLD_FRAME_NAME "world"
+   
+    namespace OpenSoT {
+       namespace tasks {
+           namespace velocity {
+               class Cartesian : public Task < Eigen::MatrixXd, Eigen::VectorXd > {
+                   
+               public:
+                   
+                   typedef std::shared_ptr<Cartesian> Ptr;
+                   
+               protected:
+                   
+                   virtual void _log(XBot::MatLogger2::Ptr logger);
+                   
+                   XBot::ModelInterface& _robot;
+   
+                   std::string _distal_link;
+                   std::string _base_link;
+   
+                   int _distal_link_index;
+                   int _base_link_index;
+   
+                   Eigen::Affine3d _actualPose;
+                   Eigen::Affine3d _desiredPose;
+                   Eigen::Vector6d _desiredTwist, _desiredTwistRef;
+   
+                   bool _base_link_is_world;
+   
+                   void update_b();
+   
+                   double _orientationErrorGain;
+   
+                   bool _is_initialized;
+   
+                   Eigen::Vector6d _error;
+   
+                   Eigen::Affine3d _tmpMatrix, _tmpMatrix2;
+   
+                   Eigen::Affine3d _base_T_distal;
+   
+                   Eigen::Vector3d positionError;
+                   Eigen::Vector3d orientationError;
+   
+                   bool _is_body_jacobian;
+   
+                   Eigen::MatrixXd _tmp_A;
+                   Eigen::VectorXd _tmp_b;
+   
+               public:
+                   /*********** TASK PARAMETERS ************/
+   
+   
+   
+                   /****************************************/
+   
+                   Cartesian(std::string task_id,
+                             const Eigen::VectorXd& x,
+                             XBot::ModelInterface &robot,
+                             const std::string& distal_link,
+                             const std::string& base_link);
+   
+                   ~Cartesian();
+   
+                   virtual void _update(const Eigen::VectorXd& x);
+   
+                   void setReference(const Eigen::Affine3d& desiredPose);
+                   void setReference(const Eigen::Matrix4d& desiredPose);
+                   void setReference(const KDL::Frame& desiredPose);
+   
+                   void setReference(const Eigen::Affine3d& desiredPose,
+                                     const Eigen::Vector6d& desiredTwist);
+                   void setReference(const Eigen::Matrix4d& desiredPose,
+                                     const Eigen::Vector6d& desiredTwist);
+                   void setReference(const KDL::Frame& desiredPose,
+                                     const KDL::Twist& desiredTwist);
+   
+                   void getReference(Eigen::Affine3d& desiredPose) const;
+                   const Eigen::Matrix4d& getReference() const;
+                   void getReference(KDL::Frame& desiredPose) const;
+   
+                   void getReference(Eigen::Affine3d& desiredPose,
+                                     Eigen::Vector6d& desiredTwist) const;
+                   void getReference(Eigen::Matrix4d& desiredPose,
+                                     Eigen::Vector6d& desiredTwist) const;
+                   void getReference(KDL::Frame& desiredPose,
+                                     KDL::Vector& desiredTwist) const;
+   
+   
+                   void getActualPose(Eigen::Affine3d& actual_pose) const;
+                   const Eigen::Matrix4d& getActualPose() const;
+                   void getActualPose(KDL::Frame& actual_pose) const;
+   
+                   const Eigen::Vector6d& getCachedVelocityReference() const;
+                   
+                   void setOrientationErrorGain(const double& orientationErrorGain);
+                   const double getOrientationErrorGain() const;
+   
+                   const std::string& getDistalLink() const;
+                   const std::string& getBaseLink() const;
+                   const bool baseLinkIsWorld() const;
+   
+                   virtual void setLambda(double lambda);
+   
+                   const Eigen::Vector6d& getError() const;
+   
+                   bool setBaseLink(const std::string& base_link);
+                   
+                   bool setDistalLink(const std::string& distal_link);
+   
+                   virtual bool reset();
+   
+                   void setIsBodyJacobian(const bool is_body_jacobian);
+                   
+                   static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+   
+                   static OpenSoT::tasks::velocity::Cartesian::Ptr asCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
+   
+               };
+           }
+       }
+    }
+   
+   #endif

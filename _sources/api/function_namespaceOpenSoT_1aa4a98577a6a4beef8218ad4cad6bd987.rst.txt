@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1aa4a98577a6a4beef8218ad4cad6bd987:
+
+Template Function OpenSoT::operator\*(const DerivedMatrix&, const AffineHelperBase<DerivedM, DerivedQ>&)
+========================================================================================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::operator*(const DerivedMatrix&, const AffineHelperBase<DerivedM, DerivedQ>&)
+   :project: OpenSoT

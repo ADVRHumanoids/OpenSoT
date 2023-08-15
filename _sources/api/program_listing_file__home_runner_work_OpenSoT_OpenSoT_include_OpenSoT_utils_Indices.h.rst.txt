@@ -1,0 +1,107 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Indices.h:
+
+Program Listing for File Indices.h
+==================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Indices.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/Indices.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2014 Walkman
+    * Author: Alessio Rocchi
+    * email:  alessio.rocchi@iit.it
+    * Permission is granted to copy, distribute, and/or modify this program
+    * under the terms of the GNU Lesser General Public License, version 2 or any
+    * later version published by the Free Software Foundation.
+    *
+    * A copy of the license can be found at
+    * https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    *
+    * This program is distributed in the hope that it will be useful, but
+    * WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    * Public License for more details
+   */
+   
+   #ifndef __INDICES_H__
+   #define __INDICES_H__
+   
+   #include <cassert>
+   #include <list>
+   #include <sstream>
+   #include <string>
+   #include <vector>
+   
+   namespace OpenSoT
+   {
+   
+   class Indices {
+   public:
+       typedef std::vector<unsigned int> RowsChunk;
+       typedef std::list< RowsChunk > ChunkList;
+   private:
+   
+       ChunkList _contiguousChunks;
+       std::list<unsigned int> _rowsList;
+       std::vector<unsigned int> _rowsVector;
+   
+       std::list<unsigned int>::iterator getNextAdjacentChunk(std::list<unsigned int>::iterator searchBegin);
+   
+       void generateChunks();
+   
+   public:
+       Indices(unsigned int i);
+   
+       Indices(const std::list<unsigned int>& rowsList);
+   
+       Indices(const std::vector<unsigned int> &rowsVector);
+   
+       template<class Iterator>
+       Indices(Iterator it, const Iterator end) {
+           while( it != end)
+           {
+               _rowsList.push_back(*it);
+               ++it;
+           }
+       }
+   
+       Indices(const Indices& indices);
+   
+       const ChunkList &getChunks() const;
+   
+       const std::list<unsigned int> &asList() const;
+   
+       const std::vector<unsigned int> &asVector() const;
+   
+       Indices& shift(unsigned int amount);
+   
+       bool isContiguous() const;
+   
+       int size() const;
+   
+       Indices& filter(const OpenSoT::Indices& f);
+   
+       static Indices range(unsigned int from, unsigned int to);
+   
+       Indices operator+(const Indices& b) const;
+   
+       Indices operator+(const unsigned int r) const;
+   
+       Indices operator-(const Indices& b) const;
+   
+       Indices operator-(const unsigned int r) const;
+   
+       bool operator==(const Indices& b) const;
+   
+       operator std::string() const;
+   
+       operator std::list<unsigned int>() const;
+   };
+   
+   }
+   
+   #endif

@@ -1,0 +1,28 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_GainType.h:
+
+Program Listing for File GainType.h
+===================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_GainType.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/acceleration/GainType.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef _OPENSOT_GAIN_TYPE_
+   #define _OPENSOT_GAIN_TYPE_
+   
+   namespace OpenSoT { namespace tasks { namespace acceleration {
+   
+   enum GainType
+   {
+       Force,
+       Acceleration
+   };
+   
+   }
+   }
+   }
+   
+   #endif

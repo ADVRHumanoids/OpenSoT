@@ -1,0 +1,31 @@
+.. _exhale_class_classOpenSoT_1_1solvers_1_1BackEnd:
+
+Class BackEnd
+=============
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Derived Types
+*************
+
+- ``public OpenSoT::solvers::GLPKBackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1GLPKBackEnd`)
+- ``public OpenSoT::solvers::OSQPBackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1OSQPBackEnd`)
+- ``public OpenSoT::solvers::QPOasesBackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1QPOasesBackEnd`)
+- ``public OpenSoT::solvers::eiQuadProgBackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd`)
+- ``public OpenSoT::solvers::proxQPBackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1proxQPBackEnd`)
+- ``public OpenSoT::solvers::qpSWIFTBackEnd`` (:ref:`exhale_class_classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::solvers::BackEnd
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

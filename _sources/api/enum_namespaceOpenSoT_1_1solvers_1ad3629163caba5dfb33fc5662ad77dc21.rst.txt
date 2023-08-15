@@ -1,0 +1,14 @@
+.. _exhale_enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21:
+
+Enum solver_back_ends
+=====================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`
+
+
+Enum Documentation
+------------------
+
+
+.. doxygenenum:: OpenSoT::solvers::solver_back_ends
+   :project: OpenSoT
