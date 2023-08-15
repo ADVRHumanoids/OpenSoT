@@ -46,16 +46,6 @@ Directories
 .. toctree::
    :maxdepth: 5
 
-   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity.rst
-
-.. toctree::
-   :maxdepth: 5
-
    dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks.rst
 
 .. toctree::
@@ -380,11 +370,6 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_ManipulationStack.h.rst
-
-.. toctree::
-   :maxdepth: 5
-
    file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h.rst
 
 .. toctree::
@@ -501,11 +486,6 @@ Files
    :maxdepth: 5
 
    file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_VelocityLimits.h.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_WalkingStack.h.rst
 
 .. toctree::
    :maxdepth: 5

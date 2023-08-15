@@ -99,7 +99,6 @@
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html">Class OmniWheels4X</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html">Class VelocityLimits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Indices.html">Class Indices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1ManipulationStack.html">Class ManipulationStack</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html">Class OptvarHelper</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Solver.html">Template Class Solver</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html">Class BackEnd</a></li>
@@ -159,7 +158,6 @@
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1utils_1_1InverseDynamics.html">Class InverseDynamics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1utils_1_1MatrixPiler.html">Class MatrixPiler</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1variables_1_1Torque.html">Class Torque</a></li>
-<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1WalkingStack.html">Class WalkingStack</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classquaternion.html">Class quaternion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classSVDPseudoInverse.html">Template Class SVDPseudoInverse</a></li>
 </ul>
@@ -204,16 +202,6 @@
 <ul class="simple">
 <li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-autostack-h"><span class="std std-ref">File AutoStack.h</span></a></p></li>
 </ul>
-<div class="section" id="inheritance-relationships">
-<h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Permalink to this headline"></a></h2>
-<div class="section" id="derived-types">
-<h3>Derived Types<a class="headerlink" href="#derived-types" title="Permalink to this headline"></a></h3>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::ManipulationStack</span></code> (<a class="reference internal" href="classOpenSoT_1_1ManipulationStack.html#exhale-class-classopensot-1-1manipulationstack"><span class="std std-ref">Class ManipulationStack</span></a>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">OpenSoT::WalkingStack</span></code> (<a class="reference internal" href="classOpenSoT_1_1WalkingStack.html#exhale-class-classopensot-1-1walkingstack"><span class="std std-ref">Class WalkingStack</span></a>)</p></li>
-</ul>
-</div>
-</div>
 <div class="section" id="class-documentation">
 <h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
 <dl class="cpp class">
@@ -222,7 +210,6 @@
 <dd><p>The <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a> class eases the managing of a stack of task, by automatically calling the <a class="reference internal" href="#classOpenSoT_1_1AutoStack_1a0075a08765fc796ea2d72fd843f774e0"><span class="std std-ref">update()</span></a> function on all tasks of the stack. </p>
 <p>Many operators are defined for the <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a>, so that it’s possible to concisely write stacks. Together with OpenSoT::DefaultHumanoidStack it allows to use the MOT (Math of Tasks) to define stacks, e.g.: <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a> = (T1 + T2) / (T3 &lt;&lt; ConstraintT3 + T4) &lt;&lt; Bounds</p>
 <p>You can see an example in example_autostack.cpp</p>
-<p>Subclassed by <a class="reference internal" href="classOpenSoT_1_1ManipulationStack.html#classOpenSoT_1_1ManipulationStack"><span class="std std-ref">OpenSoT::ManipulationStack</span></a>, <a class="reference internal" href="classOpenSoT_1_1WalkingStack.html#classOpenSoT_1_1WalkingStack"><span class="std std-ref">OpenSoT::WalkingStack</span></a></p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
 <dl class="cpp type">

@@ -17,7 +17,6 @@ Subdirectories
 
 - :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints`
 - :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers`
-- :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks`
 - :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks`
 - :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils`
 - :ref:`dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_variables`

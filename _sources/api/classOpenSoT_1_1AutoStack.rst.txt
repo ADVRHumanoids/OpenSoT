@@ -6,16 +6,6 @@ Class AutoStack
 - Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
 
 
-Inheritance Relationships
--------------------------
-
-Derived Types
-*************
-
-- ``public OpenSoT::ManipulationStack`` (:ref:`exhale_class_classOpenSoT_1_1ManipulationStack`)
-- ``public OpenSoT::WalkingStack`` (:ref:`exhale_class_classOpenSoT_1_1WalkingStack`)
-
-
 Class Documentation
 -------------------
 

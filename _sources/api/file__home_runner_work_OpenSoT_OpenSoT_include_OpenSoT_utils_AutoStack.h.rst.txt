@@ -54,10 +54,6 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_ManipulationStack.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_stacks_velocity_WalkingStack.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
