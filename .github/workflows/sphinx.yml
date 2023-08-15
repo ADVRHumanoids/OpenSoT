@@ -15,9 +15,10 @@ jobs:
       run: | 
         mkdir build && cd build && cmake ..
     - name: compile doxygen
-      run : |
+      run: |
         cd build/doc/ && doxygen && mv xml ../../docs/
     - name: test
+      run: |
         cd docs && ls 
   sphinx_build:
     needs: doxygen_build
