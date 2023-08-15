@@ -1,30 +1,30 @@
-name: Sphinx build
+name: Doc build
 
 on: push
 
 jobs:
-  doxygen_build:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: Install doxygen
+    - name: Doxygen:Install
       run: sudo apt-get install -y doxygen
-    - name: Check out repository
+    - name: Doxygen:CheckOut
       uses: actions/checkout@v3
-    - name: Create build folder and run cmake
+    - name: Doxygen:cmake
       continue-on-error: true
       run: | 
         mkdir build && cd build && cmake ..
-    - name: compile doxygen
+    - name: Doxygen:Compile
       run: |
         cd build/doc/ && doxygen && mv xml ../../docs/ 
-    - name: Build HTML
+    - name: Sphinx:BuildHTML
       uses: ammaraskar/sphinx-action@master
-    - name: Upload artifacts
+    - name: Sphinx:UploadArtifacts
       uses: actions/upload-artifact@v3
       with:
         name: html-docs
         path: docs/build/html/
-    - name: Deploy
+    - name: Sphinx:Deploy
       uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/doxygen_githubpage_integration'
       with:
