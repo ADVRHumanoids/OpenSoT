@@ -39,11 +39,8 @@ namespace OpenSoT {
      *        by automatically calling the update() function on all
      *        tasks of the stack. Many operators are defined for the
      *        AutoStack, so that it's possible to concisely write
-     *        stacks. Together with OpenSoT::DefaultHumanoidStack
-     *        it allows to use the MOT (Math of Tasks) to define stacks, e.g.:
-     * AutoStack = (T1 + T2) / (T3 << ConstraintT3 + T4) << Bounds
-     *
-     * You can see an example in @ref example_autostack.cpp
+     *        stacks. It allows to use the MOT (Math of Tasks) to define stacks, e.g.:
+     *        AutoStack = (T1 + T2) / (T3 << ConstraintT3 + T4) << Bounds
      */
     class AutoStack 
     {
