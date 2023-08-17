@@ -28,6 +28,7 @@ Main features:
    intro
    task
    constraint
+   stack
    aknowledge
    api/library_root
 
