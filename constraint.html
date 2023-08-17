@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Aknowledge" href="aknowledge.html" />
+    <link rel="next" title="Stack" href="stack.html" />
     <link rel="prev" title="Task" href="task.html" /> 
 </head>
 
@@ -51,8 +51,10 @@
 <li class="toctree-l1"><a class="reference internal" href="task.html">Task</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Constraint</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subconstraint">SubConstraint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bilateralconstraint">BilateralConstraint:</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
 </ul>
@@ -93,7 +95,7 @@
 <div class="math notranslate nohighlight">
 \[\mathcal{C}_1 = \left\{ \mathbf{C}_1 \in \mathbb{R}^{l \times n}, \mathbf{d}_1 \in \mathbb{R}^l\right\},\]</div>
 <p>for <strong>equality constraints</strong> in the form <span class="math notranslate nohighlight">\(\mathbf{C}_1\mathbf{x} = \mathbf{d}_1\)</span>.</p>
-<p>A <em>Constraint</em> object is inherited from the base class <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1Constraint.html#exhale-class-classopensot-1-1constraint">Constraint.h</a>, where the method <code class="docutils literal notranslate"><span class="pre">update(const</span> <span class="pre">Vector_type&amp;</span> <span class="pre">x)</span></code> must be implemented to assign:</p>
+<p>A <em>Constraint</em> object is inherited from the base class <code class="docutils literal notranslate"><span class="pre">OpenSoT::Constraint</span></code> in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1Constraint.html#exhale-class-classopensot-1-1constraint">Constraint.h</a>, where the method <code class="docutils literal notranslate"><span class="pre">update(const</span> <span class="pre">Vector_type&amp;</span> <span class="pre">x)</span></code> must be implemented to assign:</p>
 <ul class="simple">
 <li><p>the matrix <span class="math notranslate nohighlight">\(\mathbf{C}\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">_Aineq</span></code> and the vectors <span class="math notranslate nohighlight">\(\mathbf{d}_m\)</span> and <span class="math notranslate nohighlight">\(\mathbf{d}_M\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_bLowerBound</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_bUpperBound</span></code> for an <strong>inequality constraint</strong>;</p></li>
 <li><p>the vectors <span class="math notranslate nohighlight">\(\mathbf{d}_m\)</span> and <span class="math notranslate nohighlight">\(\mathbf{d}_M\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_lowerBound</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_upperBound</span></code> for a <strong>bound</strong>;</p></li>
@@ -118,6 +120,18 @@
 </div>
 <p>A common application of a <em>SubConstraint</em> is to focus on a specific portion of a constraint. For instance, in a <em>Joint Limits Constraint</em>, a <em>SubCOnstraint</em> can be employed to do not consider limitations on the floating-base part of the state.</p>
 </div>
+<div class="section" id="bilateralconstraint">
+<h2>BilateralConstraint:<a class="headerlink" href="#bilateralconstraint" title="Permalink to this headline"></a></h2>
+<p>A <em>constraint</em> can be created also from bare <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span></code> using the <code class="docutils literal notranslate"><span class="pre">BilateralConstraint</span></code> class in <a class="reference external" href="file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1constraints_1_1BilateralConstraint.html">BilateralConstraint.h</a>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//Creates a constraint</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">C</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">C</span><span class="p">.</span><span class="n">setIdentity</span><span class="p">();</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">l</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">u</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.</span><span class="p">;</span>
+<span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>  <span class="mf">10.</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">constraint</span><span class="o">::</span><span class="n">BilateralConstraint</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;constraint1&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">u</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -125,7 +139,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="task.html" class="btn btn-neutral float-left" title="Task" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="aknowledge.html" class="btn btn-neutral float-right" title="Aknowledge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="stack.html" class="btn btn-neutral float-right" title="Stack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

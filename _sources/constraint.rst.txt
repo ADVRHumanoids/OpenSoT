@@ -1,6 +1,5 @@
 Constraint
 ==========
-
 In OpenSoT, **constraints** are utilized to limit a cost function. Considering a specific *linear constraint*, denoted as :math:`\mathcal{C}_1`, it is defined by its corresponding matrices and vectors:
 
 .. math::
@@ -21,7 +20,7 @@ for **bounds** in the form :math:`\mathbf{d}_{m,1} \leq \mathbf{x} \leq \mathbf{
 
 for **equality constraints** in the form :math:`\mathbf{C}_1\mathbf{x} = \mathbf{d}_1`.
 
-A *Constraint* object is inherited from the base class `Constraint.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1Constraint.html#exhale-class-classopensot-1-1constraint>`__, where the method ``update(const Vector_type& x)`` must be implemented to assign:
+A *Constraint* object is inherited from the base class ``OpenSoT::Constraint`` in `Constraint.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1Constraint.html#exhale-class-classopensot-1-1constraint>`__, where the method ``update(const Vector_type& x)`` must be implemented to assign:
 
 - the matrix :math:`\mathbf{C}` as ``Eigen::MatrixXd _Aineq`` and the vectors :math:`\mathbf{d}_m` and :math:`\mathbf{d}_M` as ``Eigen::VectorXd _bLowerBound`` and ``Eigen::VectorXd _bUpperBound`` for an **inequality constraint**;
 - the vectors :math:`\mathbf{d}_m` and :math:`\mathbf{d}_M` as ``Eigen::VectorXd _lowerBound`` and ``Eigen::VectorXd _upperBound`` for a **bound**;
@@ -45,3 +44,17 @@ A *SubConstraints* can be instantiated from a *Constraint* using the ``SubConstr
    A *SubConstraint* holds a reference to the *Constraint* that was used to instantiate it. As a result, any modifications applied to the primary *Constraint* are reflected in the *SubCOnstraint*, and vice versa. **When the** ``update(const Vector_type &x)`` **method is invoked on the** *SubConstraint*, **the referenced** *Constraint* **is also updated.**
       
 A common application of a *SubConstraint* is to focus on a specific portion of a constraint. For instance, in a *Joint Limits Constraint*, a *SubCOnstraint* can be employed to do not consider limitations on the floating-base part of the state.
+
+BilateralConstraint:
+--------------------
+A *constraint* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd`` using the ``BilateralConstraint`` class in `BilateralConstraint.h <file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1constraints_1_1BilateralConstraint.html>`__:
+
+.. code-block:: cpp
+   
+   //Creates a constraint
+   Eigen::MatrixXd C(2,2); C.setIdentity();
+   Eigen::VectorXd l(2), u(2);
+   l[0] = l[1] = -10.;
+   u[0] = u[1] =  10.;
+   auto c1 = std::make_shared<OpenSoT::constraint::BilateralConstraint>("constraint1", C, l, u);
+

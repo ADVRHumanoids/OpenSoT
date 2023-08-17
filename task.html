@@ -50,9 +50,11 @@
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Intro</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Task</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subtask">SubTask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generictask">GenericTask</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="constraint.html">Constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
 </ul>
@@ -94,26 +96,11 @@
 &amp; = \left( \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \right)^T\mathbf{W}_1\left( \mathbf{A}_1\mathbf{x} - \mathbf{b}_1 \right) + \mathbf{c}_1^T\mathbf{x} = \newline
 &amp; = \mathbf{x}^T\mathbf{A}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} -2\mathbf{b}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} + \mathbf{c}_1^T\mathbf{x}.
 \end{align}\]</div>
-<p>Multiple <em>Tasks</em> can be summed together to form complex cost fucntions, for instance <span class="math notranslate nohighlight">\(\mathcal{T}_3 = \mathcal{T}_1 + \mathcal{T}_2\)</span>:</p>
-<div class="math notranslate nohighlight">
-\[\mathcal{T}_3 = \left\{ \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}, \begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix}, \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix}, \mathbf{c}_1 + \mathbf{c}_2  \right\}.\]</div>
-<p>The scalar cost function associated to <span class="math notranslate nohighlight">\(\mathcal{T}_3\)</span> will be:</p>
-<div class="math notranslate nohighlight">
-\[\begin{align}
-\mathcal{F}_3
-%&amp; = \lVert \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix}\rVert_{\begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix}} + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
-&amp; = \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right)^T \begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix} \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right) + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
-%&amp; = \left(\mathbf{x}^T \begin{bmatrix} \mathbf{A}_1^T &amp; \mathbf{A}_2^T \end{bmatrix} - \begin{bmatrix}\mathbf{b}_1^T &amp; \mathbf{b}_2^T \end{bmatrix}\right) \begin{bmatrix}\mathbf{W}_1 &amp; \mathbf{0}\newline \mathbf{0}   &amp; \mathbf{W}_2 \end{bmatrix} \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right) + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
-%&amp; = \left( \begin{bmatrix}\mathbf{x}^T\mathbf{A}_1^T\mathbf{W}_1 &amp; \mathbf{x}^T\mathbf{A}_2^T\mathbf{W}_2 \end{bmatrix} - \begin{bmatrix} \mathbf{b}_1^T\mathbf{W}_1 &amp; \mathbf{b}_2^T\mathbf{W}_2 \end{bmatrix}\right) \left( \begin{bmatrix}\mathbf{A}_1\newline \mathbf{A}_2 \end{bmatrix}\mathbf{x} -  \begin{bmatrix} \mathbf{b}_1\newline \mathbf{b}_2 \end{bmatrix} \right) + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
-%&amp; = \mathbf{x}^T\mathbf{A}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} + \mathbf{x}^T\mathbf{A}_2^T\mathbf{W}_2\mathbf{A}_2\mathbf{x} -2\mathbf{b}_1^T\mathbf{W}_1\mathbf{A}_1\mathbf{x} -2\mathbf{b}_2^T\mathbf{W}_2\mathbf{A}_2\mathbf{x} + \left(\mathbf{c}_1 + \mathbf{c}_2\right)^T\mathbf{x} = \newline
-&amp; = \sum_{i = 1}^{2} \lVert \mathbf{A}_i\mathbf{x} - \mathbf{b}_i\rVert_{\mathbf{W}_i} + \sum_{i = 1}^{2}\mathbf{c}_i^T\mathbf{x},
-\end{align}\]</div>
-<p>i.e. a weighted sum of cost functions associated to each <em>Task</em>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Most of the time, the <span class="math notranslate nohighlight">\(\mathbf{c}\)</span> term is used to implement the <em>Lasso</em> or an <em>L-1 norm</em>; thus, it is typically not utilized.</p>
 </div>
-<p>A <em>Task</em> object is inherited from the base class <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1Task.html#exhale-class-classopensot-1-1task">Task.h</a>, where the method <code class="docutils literal notranslate"><span class="pre">_update(const</span> <span class="pre">Vector_type</span> <span class="pre">&amp;x)</span></code> must be implemented to assign the matrix <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">_A</span></code>, along with the vectors <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_b</span></code> and <span class="math notranslate nohighlight">\(\mathbf{c}\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_c</span></code>. <strong>This assignment will take place every time the</strong> <code class="docutils literal notranslate"><span class="pre">update(const</span> <span class="pre">Vector_type</span> <span class="pre">&amp;x)</span></code> <strong>method is invoked.</strong></p>
+<p>A <em>Task</em> object is inherited from the base class <code class="docutils literal notranslate"><span class="pre">OpenSoT::Task</span></code> in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1Task.html#exhale-class-classopensot-1-1task">Task.h</a>, where the method <code class="docutils literal notranslate"><span class="pre">_update(const</span> <span class="pre">Vector_type</span> <span class="pre">&amp;x)</span></code> must be implemented to assign the matrix <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">_A</span></code>, along with the vectors <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_b</span></code> and <span class="math notranslate nohighlight">\(\mathbf{c}\)</span> as <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">_c</span></code>. <strong>This assignment will take place every time the</strong> <code class="docutils literal notranslate"><span class="pre">update(const</span> <span class="pre">Vector_type</span> <span class="pre">&amp;x)</span></code> <strong>method is invoked.</strong></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">Hessian</span> <span class="pre">Type</span></code> can be set according to the type of Hessian generated by the task as:</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{H} = \mathbf{A}^T\mathbf{W}\mathbf{A}.\]</div>
@@ -143,6 +130,17 @@
 <p>A <em>SubTask</em> holds a reference to the <em>Task</em> that was used to instantiate it. As a result, any modifications applied to the primary <em>Task</em> are reflected in the <em>SubTask</em>, and vice versa. <strong>When the</strong> <code class="docutils literal notranslate"><span class="pre">update(const</span> <span class="pre">Vector_type</span> <span class="pre">&amp;x)</span></code> <strong>method is invoked on the</strong> <em>SubTask</em>, <strong>the referenced</strong> <em>Task</em> <strong>is also updated.</strong></p>
 </div>
 <p>A common application of a <em>SubTask</em> is to focus on a specific portion of a task. For instance, in a <em>Cartesian Task</em>, a <em>SubTask</em> can be employed to isolate the positional component while disregarding the orientation.</p>
+</div>
+<div class="section" id="generictask">
+<h2>GenericTask<a class="headerlink" href="#generictask" title="Permalink to this headline"></a></h2>
+<p>A <em>task</em> can be created also from bare <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span></code> using the <code class="docutils literal notranslate"><span class="pre">GenericTask</span></code> class in <a class="reference external" href="file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1tasks_1_1GenericTask.html">GenericTask.h</a>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//Creates a task</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">A</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">A</span><span class="p">.</span><span class="n">rand</span><span class="p">();</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="n">b</span><span class="p">.</span><span class="n">rand</span><span class="p">();</span>
+<span class="k">auto</span> <span class="n">t1</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericTask</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;task1&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Various set methods can be used to update the internal matrices and vectors. A <em>linear task</em> can be created through the <code class="docutils literal notranslate"><span class="pre">GenericLPTask</span></code> in <a class="reference external" href="file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1tasks_1_1GenericLPTask.html">GenericLPTask.h</a>.</p>
 </div>
 </div>
 

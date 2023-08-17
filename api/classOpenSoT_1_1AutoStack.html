@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../constraint.html">Constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stack.html">Stack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
@@ -210,8 +211,7 @@
 <dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT9AutoStackE">
 <span id="_CPPv3N7OpenSoT9AutoStackE"></span><span id="_CPPv2N7OpenSoT9AutoStackE"></span><span id="OpenSoT::AutoStack"></span><span class="target" id="classOpenSoT_1_1AutoStack"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AutoStack</span></span></span><a class="headerlink" href="#_CPPv4N7OpenSoT9AutoStackE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>The <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a> class eases the managing of a stack of task, by automatically calling the <a class="reference internal" href="#classOpenSoT_1_1AutoStack_1a0075a08765fc796ea2d72fd843f774e0"><span class="std std-ref">update()</span></a> function on all tasks of the stack. </p>
-<p>Many operators are defined for the <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a>, so that it’s possible to concisely write stacks. Together with OpenSoT::DefaultHumanoidStack it allows to use the MOT (Math of Tasks) to define stacks, e.g.: <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a> = (T1 + T2) / (T3 &lt;&lt; ConstraintT3 + T4) &lt;&lt; Bounds</p>
-<p>You can see an example in example_autostack.cpp</p>
+<p>Many operators are defined for the <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a>, so that it’s possible to concisely write stacks. It allows to use the MOT (Math of Tasks) to define stacks, e.g.: <a class="reference internal" href="#classOpenSoT_1_1AutoStack"><span class="std std-ref">AutoStack</span></a> = (T1 + T2) / (T3 &lt;&lt; ConstraintT3 + T4) &lt;&lt; Bounds </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
 <dl class="cpp type">
