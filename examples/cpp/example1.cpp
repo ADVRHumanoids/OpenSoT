@@ -20,8 +20,8 @@ int main()
      *
      *  T := ||Ax - b||
      */
-    Eigen::MatrixXd A;
-    Eigen::VectorXd b;
+    Eigen::MatrixXd A(5,5);
+    Eigen::VectorXd b(5);
 
     A.setIdentity(5, 5);
     b.setConstant(5, 2.0);
@@ -30,7 +30,7 @@ int main()
      * @brief Creates 2 generic OpenSoT tasks using the same A and b functions
      */
     auto mytask1  = std::make_shared<OpenSoT::tasks::GenericTask>("mytask1", A, b);
-    auto mytask2 = std::make_shared<OpenSoT::tasks::GenericTask>("mytask2", A, b);
+    auto mytask2 = std::make_shared<OpenSoT::tasks::GenericTask>("mytask2", A.Random(5,5), b.Random(5));
 
     /**
      * @brief Creates a constraint:
