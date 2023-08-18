@@ -37,7 +37,13 @@ release = ''
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx_rtd_theme', 'breathe', 'exhale']
+extensions = ['sphinx_rtd_theme', 'breathe', 'exhale', 'sphinx.ext.todo', 'sphinx.ext.autosectionlabel']
+
+# Set autosection label to true to simplify referencing
+autosectionlabel_prefix_document = True
+
+# Display todos by setting to True
+todo_include_todos = True
 
 # Setup the breathe extension
 breathe_projects = {

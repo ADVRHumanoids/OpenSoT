@@ -45,9 +45,9 @@ A *SubConstraints* can be instantiated from a *Constraint* using the ``SubConstr
       
 A common application of a *SubConstraint* is to focus on a specific portion of a constraint. For instance, in a *Joint Limits Constraint*, a *SubCOnstraint* can be employed to do not consider limitations on the floating-base part of the state.
 
-BilateralConstraint:
---------------------
-A *constraint* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd`` using the ``BilateralConstraint`` class in `BilateralConstraint.h <file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1constraints_1_1BilateralConstraint.html>`__:
+BilateralConstraint
+-------------------
+A *constraint* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd`` using the ``BilateralConstraint`` class in `BilateralConstraint.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1constraints_1_1BilateralConstraint.html>`__:
 
 .. code-block:: cpp
    
@@ -58,3 +58,22 @@ A *constraint* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::Ve
    u[0] = u[1] =  10.;
    auto c1 = std::make_shared<OpenSoT::constraint::BilateralConstraint>("constraint1", C, l, u);
 
+GenericConstraint
+-----------------
+Another way to create a *constraint* from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd`` is to use the ``GenericConstraint`` class in `GenericConstraint.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1constraints_1_1GenericConstraint.html>`__ which make use of the *variables* concept (check :ref:`variables:Variables`) to model the constraint matrix :math:`\mathbf{C}`:
+
+.. code-block:: cpp
+   
+   //Creates a constraint
+   Eigen::MatrixXd C(2,2); C.setIdentity();
+   Eigen::VectorXd l(2), u(2);
+   l.rand(); u.rand();
+   
+   //Create variable
+   OpenSoT::AffineHelper C2(2,2);
+   C2.setM(C);
+   
+   //Creates a constraint
+   auto c1 = std::make_shared<OpenSoT::constraint::GenericConstraint>("constraint1", C2, u, l);
+
+Various set methods can be used to update the internal matrices and vectors.
