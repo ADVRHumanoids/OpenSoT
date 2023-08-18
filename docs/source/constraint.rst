@@ -67,7 +67,7 @@ Another way to create a *constraint* from bare ``Eigen::MatrixXd`` and ``Eigen::
    //Creates a constraint
    Eigen::MatrixXd C(2,2); C.setIdentity();
    Eigen::VectorXd l(2), u(2);
-   l.rand(); u.rand();
+   l.Random(); u.Random();
    
    //Create variable
    OpenSoT::AffineHelper C2(2,2);

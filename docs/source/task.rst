@@ -65,8 +65,8 @@ A *task* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd
 .. code-block:: cpp
    
    //Creates a task
-   Eigen::MatrixXd A(2,2); A.rand();
-   Eigen::VectorXd b(2); b.rand();
+   Eigen::MatrixXd A(2,2); A.Random();
+   Eigen::VectorXd b(2); b.Random();
    auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A, b);
 
 Various set methods can be used to update the internal matrices and vectors. A *linear task* can be created through the ``GenericLPTask`` in `GenericLPTask.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1tasks_1_1GenericLPTask.html>`__. 

@@ -8,8 +8,8 @@ A single *task* can be used to initialize a *stack* by using the ``/=`` operator
 .. code-block:: cpp
    
    //Creates a task
-   Eigen::MatrixXd A(2,2); A.rand();
-   Eigen::VectorXd b(2); b.rand();
+   Eigen::MatrixXd A(2,2); A.Random();
+   Eigen::VectorXd b(2); b.Random();
    auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A, b);
 	
    //Creates a stack
@@ -45,8 +45,8 @@ Multiple *tasks* can be summed up using the ``+`` operator. Relative weights can
    //Creates tasks
    Eigen::MatrixXd A(2,2);
    Eigen::VectorXd b(2);
-   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.rand(), b.rand());
-   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.rand(), b.rand());
+   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.Random(), b.Random());
+   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.Random(), b.Random());
 	
    //Creates a stack
    OpenSoT::AutoStack::Ptr stack = t1 + 0.1*t2; 
@@ -60,8 +60,8 @@ A *subtask* can be used as well inside a *stack*. A simple way to create a *subt
    //Creates tasks
    Eigen::MatrixXd A(3,3);
    Eigen::VectorXd b(3);
-   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.rand(), b.rand());
-   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.rand(), b.rand());
+   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.Random(), b.Random());
+   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.Random(), b.Random());
 	
    //Creates a stack
    std::list<unsigned int> idx {0, 1};
@@ -74,8 +74,8 @@ A *constraint* can be associated to *task* or a *stack* using the ``<<`` operato
    //Creates tasks
    Eigen::MatrixXd A(2,2);
    Eigen::VectorXd b(2);
-   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.rand(), b.rand());
-   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.rand(), b.rand());
+   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.Random(), b.Random());
+   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.Random(), b.Random());
    
    //Creates a constraint
    Eigen::MatrixXd C(2,2); C.setIdentity();
@@ -94,8 +94,8 @@ Multiple *constraints* can be included using ``<<``. *Tasks* can be also used as
    //Creates tasks
    Eigen::MatrixXd A(2,2);
    Eigen::VectorXd b(2);
-   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.rand(), b.rand());
-   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.rand(), b.rand());
+   auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A.Random(), b.Random());
+   auto t2 = std::make_shared<OpenSoT::tasks::GenericTask>("task2", A.Random(), b.Random());
    
    //Creates a constraint
    Eigen::MatrixXd C(2,2); C.setIdentity();

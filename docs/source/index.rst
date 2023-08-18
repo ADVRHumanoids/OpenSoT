@@ -29,6 +29,7 @@ Main features:
    task
    constraint
    stack
+   solver
    variables
    aknowledge
    api/library_root
