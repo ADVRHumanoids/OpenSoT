@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solver &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Variables" href="variables.html" />
+    <link rel="prev" title="Stack" href="stack.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constraint.html">Constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ehqp">eHQP</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Solver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/solver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="solver">
+<h1>Solver<a class="headerlink" href="#solver" title="Permalink to this headline"></a></h1>
+<p>A <strong>solver</strong> implements a mathematical method to resolve a QP/LP problem (a <em>stack</em>).
+A <em>solver</em> is implemented deriving from the <code class="docutils literal notranslate"><span class="pre">OpenSoT::Solver</span></code> class in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1Solver.html">Solver.h</a> implementing the virtual method <code class="docutils literal notranslate"><span class="pre">solve(Vector_type&amp;</span> <span class="pre">solution)</span></code>.</p>
+<div class="section" id="ehqp">
+<h2>eHQP<a class="headerlink" href="#ehqp" title="Permalink to this headline"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">eHQP</span></code> solver (<a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1solvers_1_1eHQP.html">eHQP.h</a>) is based on the work from <em>Flacco et. al</em>: <em>Prioritized Multi-Task Motion Control of Redundant Robots under Hard Joint Constraints</em> (<a class="reference external" href="https://khatib.stanford.edu/publications/pdfs/Flacco_2012.pdf">paper</a>) and permits to resolve QP problem with <strong>equality only constraints</strong>, without considering the <span class="math notranslate nohighlight">\(\mathbf{c}\)</span> term in the cost function. Singularities are checked and avoided thorugh damped pseudo-inverse. Solution of the problem is provided by the use of <code class="docutils literal notranslate"><span class="pre">Eigen::JacobiSVD</span></code> (<a class="reference external" href="https://eigen.tuxfamily.org/dox/classEigen_1_1JacobiSVD.html">webpage</a>).</p>
+<p>The eHQP solver permits to set mulitple levels of <em>hard</em> priorities between tasks. When two or more tasks are at a <em>soft</em> priority, they are intended to be summed in the same cost function with a different weight, for example, given two tasks <span class="math notranslate nohighlight">\(\mathcal{T}_1\)</span> and <span class="math notranslate nohighlight">\(\mathcal{T}_2\)</span>, is possible to write a cost function where both the tasks are solved together but with <span class="math notranslate nohighlight">\(\mathcal{T}_1\)</span> which is 10 times more important than <span class="math notranslate nohighlight">\(\mathcal{T}_2\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{T}_3 = \mathcal{T}_1 + 0.1*\mathcal{T}_2\]</div>
+<p>meaning that when the solver will give more importance (ten times) to <span class="math notranslate nohighlight">\(\mathcal{T}_1\)</span> w.r.t. <span class="math notranslate nohighlight">\(\mathcal{T}_2\)</span>. However, if the two tasks are minimizing different quantities, they may not be scaled the same, leading to scaling issues (e.g. position in meters and orientation in radiants). Therefore, the weight <em>0.1</em> may not be enough to properly set a <em>soft</em> priority between the tasks.</p>
+<p>In these cases is possible to set a <strong>hard</strong> priority, meaning that the highest priority task will be minimized regardless the less priority task. There are several techniques to enforce hard priority between tasks, for example <em>null-space projection</em>, which is implemented in the <code class="docutils literal notranslate"><span class="pre">eHQP</span></code> solver. To enforce hard-priorities between tasks using the <em>MoT</em> you just need to use the <code class="docutils literal notranslate"><span class="pre">/</span></code> operator:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{S}_1 = \mathcal{T}_1 / \mathcal{T}_2\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{S}_1\)</span> is a <em>stack</em>. <strong>Notice that the way the</strong> <em>hard</em> <strong>priority is implemented depends on the particular</strong> <em>solver</em> <strong>used</strong>. <em>Soft</em> and <em>hard</em> priorities can be mixed together and several layers can be created up to saturate the Degrees of Freedom (DoFs) of the problem:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{S}_1 = \mathcal{T}_1 / (\mathcal{T}_2+\mathcal{T}_3) / \mathcal{T}_4\]</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="stack.html" class="btn btn-neutral float-left" title="Stack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="variables.html" class="btn btn-neutral float-right" title="Variables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

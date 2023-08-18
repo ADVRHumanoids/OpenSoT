@@ -55,6 +55,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="constraint.html">Constraint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">Solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
@@ -136,8 +137,8 @@
 <h2>GenericTask<a class="headerlink" href="#generictask" title="Permalink to this headline"></a></h2>
 <p>A <em>task</em> can be created also from bare <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span></code> using the <code class="docutils literal notranslate"><span class="pre">GenericTask</span></code> class in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1tasks_1_1GenericTask.html">GenericTask.h</a>:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//Creates a task</span>
-<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">A</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">A</span><span class="p">.</span><span class="n">rand</span><span class="p">();</span>
-<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="n">b</span><span class="p">.</span><span class="n">rand</span><span class="p">();</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">A</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">A</span><span class="p">.</span><span class="n">Random</span><span class="p">();</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="n">b</span><span class="p">.</span><span class="n">Random</span><span class="p">();</span>
 <span class="k">auto</span> <span class="n">t1</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">GenericTask</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;task1&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
 </pre></div>
 </div>
