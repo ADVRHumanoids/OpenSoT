@@ -80,6 +80,8 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22`
 
+- :ref:`exhale_function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb`
+
 - :ref:`exhale_function_namespaceOpenSoT_1a63100ab9d4e96ae9b685df8a15736e8b`
 
 - :ref:`exhale_function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d`
@@ -90,13 +92,9 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1aeada9a77011c67d9610e49709538d424`
 
-- :ref:`exhale_function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb`
-
 - :ref:`exhale_function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a9ea285f4bea5b924248306c73e63af0d`
-
-- :ref:`exhale_function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a4c31d7dd8eccb05044007ba7448dd263`
 
@@ -106,19 +104,21 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1a9a9f6cea5ef3d3d8c3efdac6814fd29f`
 
+- :ref:`exhale_function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91`
+
 - :ref:`exhale_function_namespaceOpenSoT_1ace43b0e0f96fed6c9d0d6c7f85f722bf`
-
-- :ref:`exhale_function_namespaceOpenSoT_1a422e1a9b98b71861968d14a251c54083`
-
-- :ref:`exhale_function_namespaceOpenSoT_1a501cda32286c6a526b42ec3b2690eef2`
-
-- :ref:`exhale_function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0`
 
 - :ref:`exhale_function_namespaceOpenSoT_1ab831211523cf9d0c5c9ec1d4968ef6a7`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a61aa6ca24b3a5cdbdad8656907e80153`
 
 - :ref:`exhale_function_namespaceOpenSoT_1af8aa6bbf8c8362fe1372db8ae2099071`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a422e1a9b98b71861968d14a251c54083`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a501cda32286c6a526b42ec3b2690eef2`
+
+- :ref:`exhale_function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0`
 
 
 Typedefs

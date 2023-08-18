@@ -60,7 +60,7 @@ A common application of a *SubTask* is to focus on a specific portion of a task.
 
 GenericTask
 -----------
-A *task* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd`` using the ``GenericTask`` class in `GenericTask.h <file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1tasks_1_1GenericTask.html>`__:
+A *task* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd`` using the ``GenericTask`` class in `GenericTask.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1tasks_1_1GenericTask.html>`__:
 
 .. code-block:: cpp
    
@@ -69,4 +69,4 @@ A *task* can be created also from bare ``Eigen::MatrixXd`` and ``Eigen::VectorXd
    Eigen::VectorXd b(2); b.rand();
    auto t1 = std::make_shared<OpenSoT::tasks::GenericTask>("task1", A, b);
 
-Various set methods can be used to update the internal matrices and vectors. A *linear task* can be created through the ``GenericLPTask`` in `GenericLPTask.h <file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1tasks_1_1GenericLPTask.html>`__. 
+Various set methods can be used to update the internal matrices and vectors. A *linear task* can be created through the ``GenericLPTask`` in `GenericLPTask.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1tasks_1_1GenericLPTask.html>`__. 

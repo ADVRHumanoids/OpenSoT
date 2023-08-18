@@ -51,10 +51,12 @@
 <li class="toctree-l1"><a class="reference internal" href="task.html">Task</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Constraint</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subconstraint">SubConstraint</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bilateralconstraint">BilateralConstraint:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bilateralconstraint">BilateralConstraint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#genericconstraint">GenericConstraint</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
 </ul>
@@ -121,8 +123,8 @@
 <p>A common application of a <em>SubConstraint</em> is to focus on a specific portion of a constraint. For instance, in a <em>Joint Limits Constraint</em>, a <em>SubCOnstraint</em> can be employed to do not consider limitations on the floating-base part of the state.</p>
 </div>
 <div class="section" id="bilateralconstraint">
-<h2>BilateralConstraint:<a class="headerlink" href="#bilateralconstraint" title="Permalink to this headline"></a></h2>
-<p>A <em>constraint</em> can be created also from bare <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span></code> using the <code class="docutils literal notranslate"><span class="pre">BilateralConstraint</span></code> class in <a class="reference external" href="file:///home/enrico/catkin_ws/external/OpenSoT/docs/build/html/api/classOpenSoT_1_1constraints_1_1BilateralConstraint.html">BilateralConstraint.h</a>:</p>
+<h2>BilateralConstraint<a class="headerlink" href="#bilateralconstraint" title="Permalink to this headline"></a></h2>
+<p>A <em>constraint</em> can be created also from bare <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span></code> using the <code class="docutils literal notranslate"><span class="pre">BilateralConstraint</span></code> class in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1constraints_1_1BilateralConstraint.html">BilateralConstraint.h</a>:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//Creates a constraint</span>
 <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">C</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">C</span><span class="p">.</span><span class="n">setIdentity</span><span class="p">();</span>
 <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">l</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">u</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
@@ -131,6 +133,24 @@
 <span class="k">auto</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">constraint</span><span class="o">::</span><span class="n">BilateralConstraint</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;constraint1&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">u</span><span class="p">);</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="genericconstraint">
+<h2>GenericConstraint<a class="headerlink" href="#genericconstraint" title="Permalink to this headline"></a></h2>
+<p>Another way to create a <em>constraint</em> from bare <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span></code> is to use the <code class="docutils literal notranslate"><span class="pre">GenericConstraint</span></code> class in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1constraints_1_1GenericConstraint.html">GenericConstraint.h</a> which make use of the <em>variables</em> concept (check <a class="reference internal" href="variables.html#variables"><span class="std std-ref">Variables</span></a>) to model the constraint matrix <span class="math notranslate nohighlight">\(\mathbf{C}\)</span>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">//Creates a constraint</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">C</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">C</span><span class="p">.</span><span class="n">setIdentity</span><span class="p">();</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">l</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">u</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">l</span><span class="p">.</span><span class="n">rand</span><span class="p">();</span> <span class="n">u</span><span class="p">.</span><span class="n">rand</span><span class="p">();</span>
+
+<span class="c1">//Create variable</span>
+<span class="n">OpenSoT</span><span class="o">::</span><span class="n">AffineHelper</span> <span class="n">C2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">C2</span><span class="p">.</span><span class="n">setM</span><span class="p">(</span><span class="n">C</span><span class="p">);</span>
+
+<span class="c1">//Creates a constraint</span>
+<span class="k">auto</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">constraint</span><span class="o">::</span><span class="n">GenericConstraint</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;constraint1&quot;</span><span class="p">,</span> <span class="n">C2</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">l</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Various set methods can be used to update the internal matrices and vectors.</p>
 </div>
 </div>
 
