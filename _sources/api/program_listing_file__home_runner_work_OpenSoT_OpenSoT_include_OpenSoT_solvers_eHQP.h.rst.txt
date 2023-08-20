@@ -60,7 +60,6 @@ Program Listing for File eHQP.h
            
            bool solve(Eigen::VectorXd& solution);
            
-           
            double getSigmaMin() const;
            
            void setSigmaMin(const double& sigma_min);        
