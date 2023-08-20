@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iHQP &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constraint.html">Constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">iHQP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/iHQP.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="ihqp">
+<h1>iHQP<a class="headerlink" href="#ihqp" title="Permalink to this headline"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">iHQP</span></code> solver (<a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1solvers_1_1iHQP.html">iHQP.h</a>) is based on the work from <em>Kanoun et. al</em>: <em>Kinematic control of redundant manipulators: generalizing the task priority framework to inequality tasks</em> (<a class="reference external" href="https://citeseerx.ist.psu.edu/document?repid=rep1&amp;type=pdf&amp;doi=a98060c46adf364b21f7e197edca2abc774c8c98">paper</a>) and permits to resolve hierarchical QP problems with <strong>generic equality and inequality constraints</strong>.</p>
+<p>Hierarchies are solved by a cascade of QP problems where high-level tasks become constraints in lower level ones. Let’s consider for example the following <em>stack</em>:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{S} = (\mathcal{T}_1 / \mathcal{T}_2)&lt;&lt;\mathcal{C}_1\]</div>
+<p>This correspond to the following cascade of QPs:</p>
+<ol class="arabic simple">
+<li><p>a QP solving <span class="math notranslate nohighlight">\(\mathcal{T}_1&lt;&lt;\mathcal{C}_1\)</span> and computing the higher priority solution ::math::<cite>mathbf{x}_1</cite>:</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[\begin{align}
+&amp;\mathbf{x}_1 = arg\min\limits_{\mathbf{x}} \lVert \mathbf{A}_1\mathbf{x} - \mathbf{b}_1\rVert \newline
+&amp;s.t. \quad  \mathbf{d}_{m,1}\leq \mathbf{C}_1\mathbf{x}\leq\mathbf{d}_{M,1}
+\end{align}\]</div>
+<ol class="arabic simple" start="2">
+<li><p>a QP solving <span class="math notranslate nohighlight">\(\mathcal{T}_2&lt;&lt;\mathcal{C}_1&lt;&lt;\mathcal{T}_1^{opt}\)</span> and computing the final solution <span class="math notranslate nohighlight">\(\mathbf{x}_2 = \mathbf{x}^{opt}\)</span>:</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[\begin{align}
+&amp;\mathbf{x}_2 = \text{arg}\min\limits_{\mathbf{x}} \lVert \mathbf{A}_2\mathbf{x} - \mathbf{b}_2\rVert \newline
+&amp;s.t. \quad  \mathbf{d}_{m,1}\leq \mathbf{C}_1\mathbf{x}\leq\mathbf{d}_{M,1} \newline
+&amp; \quad \quad \mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1
+\end{align}\]</div>
+<p>the term <span class="math notranslate nohighlight">\(\mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1\)</span> is called <em>optimality constraint</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">iHQP</span></code> solver consists in a <strong>front-end</strong> (derived from <code class="docutils literal notranslate"><span class="pre">OpenSoT::Solver</span></code>), that prepares the optimization problems to be solved starting from the given <em>stack</em>, and a <strong>back-end</strong> (derived from the <code class="docutils literal notranslate"><span class="pre">OpenSoT::solvers::BackEnd</span></code> base class in <a href="#id1"><span class="problematic" id="id2">`BackEnd.h &lt;&gt;`__</span></a>) which solves the optimization problem using an out-of-the-box QP solver. Different <em>back-ends</em> are available in OpenSoT and can be used in different <em>front-ends</em>:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/coin-or/qpOASES">qpOASES</a> v3.1 internally distributed</p></li>
+<li><p><a class="reference external" href="https://www.cs.cmu.edu/~bstephe1/eiquadprog.hpp">eiQuadProg</a> v1.0.0 internally distributed</p></li>
+<li><p><a class="reference external" href="https://www.gnu.org/software/glpk/">GLPK</a> suggested v4.65, only for LP</p></li>
+<li><p><a class="reference external" href="https://osqp.org/">OSQP</a> suggested Release 0.6.2</p></li>
+<li><p><a class="reference external" href="https://github.com/Simple-Robotics/proxsuite">proxQP</a> suggested v0.1.0</p></li>
+<li><p><a class="reference external" href="https://github.com/qpSWIFT/qpSWIFT">qpSWIFT</a> suggested v1.00</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some <em>front-ends</em>, e.g. <cite>qpOASES</cite>, permit to solve LP problems, i.e. optimization problems where the <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> matrix is null (hence also the Hessian is null). <strong>GLPK</strong> is a LP dedicated solver that can not be used to solve QP problems.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">iHQP</span></code> constructor permits to decide which <em>back-end</em> solver to use, as well as specify a vector of <em>back-ends</em>, one per hierarchy level.</p>
+<p>Reqularization of the cost function can be added to handle <em>task</em> singularities as well as non square problems, i.e. when <span class="math notranslate nohighlight">\(\mathbf{A}\in\mathbb{R}^{m \times n}\)</span> with <span class="math notranslate nohighlight">\(m &lt; n\)</span>, through the constructor parameter <code class="docutils literal notranslate"><span class="pre">eps_regularisation</span></code>. Different values for each level of the stack can be set thorugh the <code class="docutils literal notranslate"><span class="pre">setEpsRegularisation(const</span> <span class="pre">double</span> <span class="pre">eps,</span> <span class="pre">const</span> <span class="pre">unsigned</span> <span class="pre">int</span> <span class="pre">i)</span></code> method.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The regularization term can be seen as <em>task</em> with <span class="math notranslate nohighlight">\(\mathbf{A} = \mathbf{I}\in\mathbb{R}^{n \times n}\)</span>,  <span class="math notranslate nohighlight">\(\mathbf{b} = \mathbf{0}\in\mathbb{R}^n\)</span>, and <span class="math notranslate nohighlight">\(\mathbf{W} = \epsilon \in \mathbb{R}\)</span>. However the regularization is not considered when computing the optimality constraint of a level <em>i</em>, in order to do not saturate the remaining null-space. This may cause instability of the solution at the level <em>i-1</em>, which is well-posed at the level <em>i</em> due to the presence of the regularization term, and become ill-posed as a constraint at the level <em>i-1</em>. This problem can be solved directly acting on the task matrix <span class="math notranslate nohighlight">\(\mathbf{A}_i\)</span> as done in the <a class="reference internal" href="nHQP.html#nhqp"><span class="std std-ref">nHQP</span></a> solver.</p>
+</div>
+<p>Another way to specify a task that is NOT moved to the next level of priority when computing the <em>optimality constraint</em>, hence is used as a regularization, is through the <code class="docutils literal notranslate"><span class="pre">setRegularisationTask(OpenSoT::tasks::Aggregated::TaskPtr</span> <span class="pre">regularisation_task)</span></code> method of the <code class="docutils literal notranslate"><span class="pre">OpenSoT::AutoStack</span></code> class. For example in this way is possible to regularize at the velocity level a task written in acceleration.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">setRegularisationTask(OpenSoT::tasks::Aggregated::TaskPtr</span> <span class="pre">regularisation_task)</span></code> method of the <code class="docutils literal notranslate"><span class="pre">OpenSoT::AutoStack</span></code> class is considered only by the <code class="docutils literal notranslate"><span class="pre">iHQP</span></code> solver for the moment!ùù</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">setActiveStack(const</span> <span class="pre">unsigned</span> <span class="pre">int</span> <span class="pre">i,</span> <span class="pre">const</span> <span class="pre">bool</span> <span class="pre">flag)</span></code> permits to select a stack level to do not be solved during the next <code class="docutils literal notranslate"><span class="pre">solve</span></code> procedure.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">setOptions(const</span> <span class="pre">unsigned</span> <span class="pre">int</span> <span class="pre">i,</span> <span class="pre">const</span> <span class="pre">boost::any</span> <span class="pre">&amp;opt)</span></code> permits to set the options of the <em>back-end</em> at the <em>i-th</em> priority level. <code class="docutils literal notranslate"><span class="pre">getBackEnd(const</span> <span class="pre">unsigned</span> <span class="pre">int</span> <span class="pre">i,</span> <span class="pre">BackEnd::Ptr&amp;</span> <span class="pre">back_end)</span></code> return a <em>back-end</em> pointer at the <em>i-th</em> level.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
