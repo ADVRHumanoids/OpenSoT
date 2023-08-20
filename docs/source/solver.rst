@@ -29,5 +29,6 @@ OpenSoT provides out-of-the-box *solvers*, in particular:
 
 - The :ref:`eHQP:eHQP` solver for **equality-only Hierarchical QPs**
 - The :ref:`iHQP:iHQP` solver for **inequality Hierarchical QPs**
+- The :ref:`nHQP:nHQP` solver for **null-space Hierarchical QPs**
 
 
