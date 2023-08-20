@@ -35,6 +35,7 @@ Program Listing for File Postural.h
     #include <kdl/frames.hpp>
    #include <Eigen/Dense>
    
+   
     namespace OpenSoT {
        namespace tasks {
            namespace velocity {
