@@ -5,6 +5,7 @@
 
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/iHQP.h>
+#include <OpenSoT/solvers/eHQP.h>
 
 /**
  * @brief This example shows a basic usage of generic tasks and constraints to setupe a single static QP
@@ -67,20 +68,23 @@ int main()
 
     double eps_regularisation = 2e2;
     solver_back_ends be_solver = solver_back_ends::qpOASES; // iHQP will use qpOASES as back-end solver
-    iHQP solver(*stack, eps_regularisation, be_solver);
+    iHQP solver_ihqp(*stack, eps_regularisation, be_solver);
+
+    eHQP solver_ehqp(stack->getStack());
 
     /**
      * @brief solve is called to compute a solution
      */
-    Eigen::VectorXd solution;
-    if(!solver.solve(solution))
+    Eigen::VectorXd solution_ihqp;
+    if(!solver_ihqp.solve(solution_ihqp))
     {
-        std::cout << "unable to solve" << std::endl;
+        std::cout << "unable to solve iHQP" << std::endl;
         exit(1);
     }
 
 
     /** outputs **/
+    std::cout<<"\n\n"<<std::endl;
     std::cout<<"Stack levels: "<< stack->getStack().size()<<std::endl;
     std::cout<<"Cost function A: \n"<< stack->getStack()[0]->getA()<<std::endl;
     std::cout<<"Cost function b: \n"<< stack->getStack()[0]->getb()<<std::endl;
@@ -88,7 +92,21 @@ int main()
     std::cout<<"Constraint Matrix: \n"<<stack->getBounds()->getAineq()<<std::endl;
     std::cout<<"Constraint ub: \n"<<stack->getBounds()->getbUpperBound()<<std::endl;
     std::cout<<"Constraint lb: \n"<<stack->getBounds()->getbLowerBound()<<std::endl;
-    std::cout << "Solution is " << solution.transpose() << std::endl;
+    std::cout<<"iHQP:"<<std::endl;
+    std::cout<<"    Solution is "<<solution_ihqp.transpose()<< std::endl;
+    std::cout<<"     norm:"<<(stack->getStack()[0]->getA()*solution_ihqp - stack->getStack()[0]->getb()).norm()<<std::endl;
+
+    Eigen::VectorXd solution_ehqp;
+    if(!solver_ehqp.solve(solution_ehqp))
+    {
+        std::cout << "unable to solve eHQP" << std::endl;
+        exit(1);
+    }
+
+    std::cout<<"eHQP:"<<std::endl;
+    std::cout<<"    Solution is "<<solution_ehqp.transpose()<< std::endl;
+    std::cout<<"     norm:"<<(stack->getStack()[0]->getA()*solution_ehqp - stack->getStack()[0]->getb()).norm()<<std::endl;
+
 
     return 0;
 }
