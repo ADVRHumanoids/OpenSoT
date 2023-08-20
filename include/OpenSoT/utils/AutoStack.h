@@ -27,12 +27,6 @@
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/SubConstraint.h>
 
-/**
- * @example example_autostack.cpp
- * The AutoStack class allows to use the MOT (Math of Tasks)
- * to define stacks.
- */
-
 namespace OpenSoT {
     /**
      * @brief The AutoStack class eases the managing of a stack of task,

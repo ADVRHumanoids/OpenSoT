@@ -23,10 +23,6 @@
  #include <kdl/frames.hpp>
 #include <Eigen/Dense>
 
-/**
- * @example example_postural.cpp
- * The Postural class implements a task that tries to bring the robust posture to a reference posture.
- */
 
  namespace OpenSoT {
     namespace tasks {

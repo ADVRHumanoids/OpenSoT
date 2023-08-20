@@ -24,10 +24,6 @@
  #include <OpenSoT/utils/cartesian_utils.h>
 
 
-/**
-  * @example example_minimum_effort.cpp
-  * The MinimumEffort class implements a task that tries to bring the robot in a minimum-effort posture.
-  */
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
