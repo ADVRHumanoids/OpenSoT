@@ -8,8 +8,8 @@
 #include <OpenSoT/solvers/eHQP.h>
 
 /**
- * @brief This example shows a basic usage of generic tasks and constraints to setupe a single static QP
- * using OpenSoT.
+ * @brief This example shows a basic usage of generic tasks and constraints to setup a single static QP
+ * using OpenSoT. It is consequently solved using the eHQP and iHQP solvers.
  */
 
 int main()
@@ -28,7 +28,7 @@ int main()
     b.setConstant(5, 2.0);
 
     /**
-     * @brief Creates 2 generic OpenSoT tasks using the same A and b functions
+     * @brief Creates 2 generic OpenSoT tasks
      */
     auto mytask1  = std::make_shared<OpenSoT::tasks::GenericTask>("mytask1", A, b);
     auto mytask2 = std::make_shared<OpenSoT::tasks::GenericTask>("mytask2", A.Random(5,5), b.Random(5));
@@ -63,17 +63,21 @@ int main()
     stack->update(Eigen::VectorXd(0)); // Stack update should be called every time tasks or constraints changes
 
     /**
-     * @brief The stack is inserted into a solver using the iHQP technique (inequality Hierarchical QP)
+     * @brief The stack is inserted into a solver using the iHQP technique (inequality Hierarchical QP),
+     * tasks and constraints are considered
      */
-
     double eps_regularisation = 2e2;
     solver_back_ends be_solver = solver_back_ends::qpOASES; // iHQP will use qpOASES as back-end solver
     iHQP solver_ihqp(*stack, eps_regularisation, be_solver);
 
+    /**
+     * @brief The stack is inserted into a solver using the eHQP technique (equality Hierarchical QP),
+     * only tasks are considered
+     */
     eHQP solver_ehqp(stack->getStack());
 
     /**
-     * @brief solve is called to compute a solution
+     * @brief solve is called to compute a solution for the iHQP
      */
     Eigen::VectorXd solution_ihqp;
     if(!solver_ihqp.solve(solution_ihqp))
@@ -96,6 +100,9 @@ int main()
     std::cout<<"    Solution is "<<solution_ihqp.transpose()<< std::endl;
     std::cout<<"     norm:"<<(stack->getStack()[0]->getA()*solution_ihqp - stack->getStack()[0]->getb()).norm()<<std::endl;
 
+    /**
+     * @brief solve is called to compute a solution for the eHQP
+     */
     Eigen::VectorXd solution_ehqp;
     if(!solver_ehqp.solve(solution_ehqp))
     {
