@@ -88,7 +88,7 @@ TEST_F(testAutoStack, test_complexAutostack)
 
 }
 
-TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
+TEST_F(testAutoStack, test_getTask_with_task_id)
 {
     using namespace OpenSoT;
     std::string task_id = "CoM";
@@ -98,7 +98,7 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
             DHS->postural;
     auto_stack->update(Eigen::VectorXd::Zero(_robot->getJointNum()));
 
-    OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getTask(task_id);
     EXPECT_TRUE(com_task != NULL);
     std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
             std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
@@ -106,11 +106,11 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     EXPECT_TRUE(task_CoM->getTaskID().compare(task_id) == 0);
 
     task_id = "mammeta";
-    OpenSoT::solvers::iHQP::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr mammeta_task = auto_stack->getTask(task_id);
     EXPECT_TRUE(mammeta_task == NULL);
 
     task_id = "cartesian::l_wrist";
-    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getTask(task_id);
     EXPECT_TRUE(Cartesian_task != NULL);
     std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
             std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
@@ -118,7 +118,7 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     EXPECT_TRUE(left_arm->getTaskID().compare(task_id) == 0);
 
     task_id = "cartesian:r2l_sole";
-    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(task_id);
+    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getTask(task_id);
     EXPECT_TRUE(Cartesian_task2 != NULL);
     std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
             std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
@@ -126,49 +126,6 @@ TEST_F(testAutoStack, test_getOperationalSpaceTask_with_task_id)
     EXPECT_TRUE(right_left_leg->getTaskID().compare(task_id) == 0);
 }
 
-TEST_F(testAutoStack, test_getOperationalSpaceTask_with_links)
-{
-    using namespace OpenSoT;
-    std::string base_link = "world";
-    std::string distal_link = "CoM";
-
-    AutoStack::Ptr auto_stack = (DHS->right2LeftLeg)/
-            (DHS->com + DHS->leftArm)/
-            DHS->postural;
-    auto_stack->update(Eigen::VectorXd::Zero(_robot->getJointNum()));
-
-    OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
-    EXPECT_TRUE(com_task != NULL);
-    std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(com_task);
-    EXPECT_TRUE(task_CoM != NULL);
-    EXPECT_TRUE(task_CoM->getBaseLink().compare(base_link) == 0);
-    EXPECT_TRUE(task_CoM->getDistalLink().compare(distal_link) == 0);
-
-    base_link = "mammeta";
-    OpenSoT::solvers::iHQP::TaskPtr mammeta_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
-    EXPECT_TRUE(mammeta_task == NULL);
-
-    base_link = "world";
-    distal_link = "LSoftHand";
-    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task = auto_stack->getOperationalSpaceTask(base_link, distal_link);
-    EXPECT_TRUE(Cartesian_task != NULL);
-    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> left_arm =
-            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task);
-    EXPECT_TRUE(left_arm != NULL);
-    EXPECT_TRUE(left_arm->getBaseLink().compare(base_link) == 0);
-    EXPECT_TRUE(left_arm->getDistalLink().compare(distal_link) == 0);
-
-    base_link = "l_sole";
-    distal_link = "r_sole";
-    OpenSoT::solvers::iHQP::TaskPtr Cartesian_task2 = auto_stack->getOperationalSpaceTask(base_link, distal_link);
-    EXPECT_TRUE(Cartesian_task2 != NULL);
-    std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> right_left_leg =
-            std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(Cartesian_task2);
-    EXPECT_TRUE(right_left_leg != NULL);
-    EXPECT_TRUE(right_left_leg->getBaseLink().compare(base_link) == 0);
-    EXPECT_TRUE(right_left_leg->getDistalLink().compare(distal_link) == 0);
-}
 
 TEST_F(testAutoStack, testOperatorPlus )
 {

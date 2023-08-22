@@ -108,8 +108,7 @@ namespace OpenSoT {
 
             OpenSoT::constraints::Aggregated::ConstraintPtr getBounds();
 
-            OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
-            OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& task_id);
+            OpenSoT::solvers::iHQP::TaskPtr getTask(const std::string& task_id);
     };
 
 
