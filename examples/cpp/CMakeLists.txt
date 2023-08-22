@@ -16,4 +16,7 @@ if(${catkin_FOUND})
                             ${OPENSOT_EXAMPLE_PATH}path_circle_fix.cpp
                             ${OPENSOT_EXAMPLE_PATH}ros_trj_publisher.cpp)
     target_link_libraries(example_static_walk OpenSoT ${catkin_LIBRARIES} ${qpOASES_LIBRARIES})
+    
+    add_executable(example_panda_ik panda_ik.cpp)
+    target_link_libraries(example_panda_ik OpenSoT ${catkin_LIBRARIES} ${qpOASES_LIBRARIES})
 endif()
