@@ -1,8 +1,7 @@
 #include "../../tests/trajectory_utils.h"
 #include "../../tests/ros_trj_publisher.h"
 #include <tf/transform_broadcaster.h>
-#include <tf_conversions/tf_eigen.h>
-#include <tf_conversions/tf_kdl.h>
+#include "StaticWalkUtils.hpp"
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
@@ -31,210 +30,6 @@ bool IS_ROSCORE_RUNNING;
  */
 
 namespace{
-    /**
-     * @brief The manipulation_trajectories class creates a simple linear trajectory for the arm and the com during
-     * simple manipulation task
-     */
-    class manipulation_trajectories{
-    public:
-        manipulation_trajectories(const KDL::Frame& com_init,
-                                  const KDL::Frame& r_wrist_init):
-            com_trj(0.01, "world", "com"),
-            r_wrist_trj(0.01, "DWYTorso", "r_wrist")
-        {
-            T_trj = 1.;
-            double h_com = 0.1;
-            double arm_forward = 0.1;
-
-            KDL::Frame com_wp = com_init;
-            KDL::Frame r_wrist_wp = r_wrist_init;
-
-            std::vector<KDL::Frame> com_waypoints, r_wrist_waypoints;
-            //1. CoM goes down a little
-            com_waypoints.push_back(com_wp);
-            com_wp.p.z(com_wp.p.z()-h_com);
-            com_waypoints.push_back(com_wp);
-
-            r_wrist_waypoints.push_back(r_wrist_wp);
-            r_wrist_waypoints.push_back(r_wrist_wp);
-            //2. right arm move forward
-            com_waypoints.push_back(com_wp);
-
-            r_wrist_wp.p.x(r_wrist_wp.p.x()+arm_forward);
-            r_wrist_waypoints.push_back(r_wrist_wp);
-            //3. right arm move backward
-            com_waypoints.push_back(com_wp);
-
-            r_wrist_wp.p.x(r_wrist_wp.p.x()-arm_forward);
-            r_wrist_waypoints.push_back(r_wrist_wp);
-            //4. com goes back
-            com_wp.p.z(com_wp.p.z()+h_com);
-            com_waypoints.push_back(com_wp);
-            r_wrist_waypoints.push_back(r_wrist_wp);
-
-            com_trj.addMinJerkTrj(com_waypoints, T_trj);
-            r_wrist_trj.addMinJerkTrj(r_wrist_waypoints, T_trj);
-        }
-
-        trajectory_utils::trajectory_generator com_trj, r_wrist_trj;
-        double T_trj;
-    };
-
-
-    /**
-     * @brief The walking_pattern_generator class generate Cartesian trajectories
-     * for COM, left/right feet for a "static walk" (the CoM is always inside the
-     * support polygon)
-     * We consider 3 steps (hardcoded) and we always start with the right foot.
-     */
-    class walking_pattern_generator{
-    public:
-        walking_pattern_generator(const KDL::Frame& com_init,
-                                  const KDL::Frame& l_sole_init,
-                                  const KDL::Frame& r_sole_init):
-            com_trj(0.01, "world", "com"),
-            l_sole_trj(0.01, "world", "l_sole"),
-            r_sole_trj(0.01, "world", "r_sole")
-        {
-            T_com = 3.;
-            T_foot = 1.;
-
-            step_lenght = 0.1;
-
-            KDL::Vector plane_normal; plane_normal.Zero();
-            plane_normal.y(1.0);
-
-            KDL::Frame com_wp = com_init;
-
-            KDL::Frame r_sole_wp, l_sole_wp;
-
-            std::vector<double> com_time;
-            std::vector<KDL::Frame> com_waypoints;
-            com_waypoints.push_back(com_init);
-
-            //1. We assume the CoM is in the middle of the feet and it
-            //moves on top of the left feet (keeping the same height),
-            //left and right feet keep the same pose:
-            com_wp.p.x(l_sole_init.p.x());
-            com_wp.p.y(l_sole_init.p.y());
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_com);
-
-            l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_com);
-            r_sole_trj.addMinJerkTrj(r_sole_init, r_sole_init, T_com);
-            //2. Now the CoM is on the left foot, the right foot move forward
-            // while the left foot keep the position:
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_foot);
-            l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_foot);
-
-            KDL::Vector arc_center = r_sole_init.p;
-            arc_center.x(arc_center.x() + step_lenght/2.);
-            r_sole_trj.addArcTrj(r_sole_init, r_sole_init.M, M_PI, arc_center, plane_normal, T_foot);
-            //3. CoM pass from left to right foot, feet remains in the
-            // same position
-            r_sole_wp = r_sole_trj.Pos(r_sole_trj.Duration());
-            com_wp.p.x(r_sole_wp.p.x());
-            com_wp.p.y(r_sole_wp.p.y());
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_com);
-
-            l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_com);
-            r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
-            //4. Now the CoM is on the right foot, the left foot move forward
-            // while the right foot keep the position:
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_foot);
-            r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_foot);
-
-            arc_center = l_sole_init.p;
-            arc_center.x(arc_center.x() + step_lenght);
-            l_sole_trj.addArcTrj(l_sole_init, l_sole_init.M, M_PI, arc_center, plane_normal, T_foot);
-            //5. CoM pass from right to left foot, feet remains in the
-            // same position
-            l_sole_wp = l_sole_trj.Pos(l_sole_trj.Duration());
-            com_wp.p.x(l_sole_wp.p.x());
-            com_wp.p.y(l_sole_wp.p.y());
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_com);
-
-            l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_com);
-            r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
-            //6. Now the CoM is on the left foot, the right foot move forward
-            // while the left foot keep the position:
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_foot);
-            l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_foot);
-
-            arc_center = r_sole_wp.p;
-            arc_center.x(arc_center.x() + step_lenght);
-            r_sole_trj.addArcTrj(r_sole_wp, r_sole_wp.M, M_PI, arc_center, plane_normal, T_foot);
-            //7. CoM pass from left to right foot, feet remains in the
-            // same position
-            r_sole_wp = r_sole_trj.Pos(r_sole_trj.Duration());
-            com_wp.p.x(r_sole_wp.p.x());
-            com_wp.p.y(r_sole_wp.p.y());
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_com);
-
-            l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_com);
-            r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
-            //8. Now the CoM is on the right foot, the left foot move forward
-            // while the right foot keep the position:
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_foot);
-            r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_foot);
-
-            arc_center = l_sole_wp.p;
-            arc_center.x(arc_center.x() + step_lenght/2.);
-            l_sole_trj.addArcTrj(l_sole_wp, l_sole_wp.M, M_PI, arc_center, plane_normal, T_foot);
-            //9. The CoM goes back in the middle of the feet. Feet remain
-            // in the same position
-            com_wp.p.y(com_init.p.y());
-            com_waypoints.push_back(com_wp);
-            com_time.push_back(T_com);
-
-            l_sole_wp = l_sole_trj.Pos(l_sole_trj.Duration());
-            l_sole_trj.addMinJerkTrj(l_sole_wp, l_sole_wp, T_com);
-            r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
-
-            com_trj.addMinJerkTrj(com_waypoints,com_time);
-        }
-
-        /**
-         * @brief getAnchor return the hardcoded anchor foot based on the time
-         * @param t time
-         * @return anchor string
-         */
-        std::string getAnchor(const double t)
-        {
-            double phase = T_com+T_foot;
-            if(t < phase)
-                return "l_sole";
-            else if(t < 2.*phase)
-                return "r_sole";
-            else if (t < 3*phase)
-                return "l_sole";
-            else
-                return "r_sole";
-        }
-
-        /**
-         * @brief T_COM trajectory time for the CoM
-         */
-        double T_com;
-        /**
-         * @brief T_foot trajectory time for the feet
-         */
-        double T_foot;
-
-        /**
-         * @brief step_lenght
-         */
-        double step_lenght;
-
-        trajectory_utils::trajectory_generator com_trj, l_sole_trj, r_sole_trj;
-    };
 
     /**
      * @brief The theWalkingStack class setup the stack for the walking
@@ -267,30 +62,26 @@ namespace{
         {
             I.setIdentity(q.size(), q.size());
 
+            using namespace OpenSoT::tasks::velocity;
             /**
               * @brief Creates Cartesian tasks for l_wrist and r_wrist frames w.r.t. DWYTorso frame,
               * and l_sole and r_sole w.r.t. world frame
               **/
-            l_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_wrist", q,
-                model_ref, "l_wrist","DWYTorso"));
-            r_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_wrist", q,
-                model_ref, "r_wrist","DWYTorso"));
-            l_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_sole", q,
-                model_ref, "l_sole","world"));
-            r_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_sole", q,
-                model_ref, "r_sole","world"));
+            l_wrist = std::make_shared<Cartesian>("Cartesian::l_wrist", q, model_ref, "l_wrist","DWYTorso");
+            r_wrist = std::make_shared<Cartesian>("Cartesian::r_wrist", q, model_ref, "r_wrist","DWYTorso");
+            l_sole = std::make_shared<Cartesian>("Cartesian::l_sole", q, model_ref, "l_sole","world");
+            r_sole = std::make_shared<Cartesian>("Cartesian::r_sole", q, model_ref, "r_sole","world");
 
             /**
               * @brief Creates CoM task always defined in world frame
               **/
-            com.reset(new OpenSoT::tasks::velocity::CoM(q, model_ref));
+            com = std::make_shared<CoM>(q, model_ref);
 
             /**
               * @brief Creates gase task in world frame. The active joint mask is used to set columns of the Jacobian to 0.
               * The active joint mask is initialized to false, the Waist joints are the only one set to true.
               **/
-            gaze.reset(new OpenSoT::tasks::velocity::Gaze("Cartesian::Gaze",q,
-                            model_ref, "world"));
+            gaze = std::make_shared<Gaze>("Cartesian::Gaze",q, model_ref, "world");
             std::vector<bool> ajm = gaze->getActiveJointsMask();
             for(unsigned int i = 0; i < ajm.size(); ++i)
                 ajm[i] = false;
@@ -302,7 +93,7 @@ namespace{
             /**
               * @brief Creates postural task
               **/
-            postural.reset(new OpenSoT::tasks::velocity::Postural(q));
+            postural = std::make_shared<Postural>(q);
             postural->setLambda(0.1);
 
             /**
@@ -310,17 +101,17 @@ namespace{
              */
             Eigen::VectorXd qmin, qmax;
             model_ref.getJointLimits(qmin, qmax);
-            joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
+            joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
 
             /**
               * @brief creates joint velocity limits
               **/
-            vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2.*M_PI, 0.01, q.size()));
+            vel_limits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(2.*M_PI, 0.01, q.size());
 
             /**
               * @brief transform CoM tasks into equality constraint
               **/
-            com_constr.reset(new OpenSoT::constraints::TaskToConstraint(com));
+            com_constr = std::make_shared<OpenSoT::constraints::TaskToConstraint>(com);
 
             /**
               * @brief creation of a stack with 3 tasks priorities (0 higest, 2 lowest)
@@ -344,8 +135,7 @@ namespace{
             /**
               * @brief creates solver inserting the stack with qpOASES by default
               **/
-            solver.reset(new OpenSoT::solvers::iHQP(auto_stack->getStack(),
-                        auto_stack->getBounds(), 1e6));
+            solver = std::make_shared<OpenSoT::solvers::iHQP>(auto_stack->getStack(), auto_stack->getBounds(), 1e6);
 
             /**
              * @brief Setting some options to the qpOases Solver
@@ -645,8 +435,6 @@ namespace{
             this->_fb->setAnchor("r_sole");
             this->_fb->update();
 
-
-
         //1. WALKING Phase
             /**
               * @brief Get CoM and feet state from model
@@ -868,8 +656,6 @@ namespace{
     }
 
 };
-
-
 
 
 }

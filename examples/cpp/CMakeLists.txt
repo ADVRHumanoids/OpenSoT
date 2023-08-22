@@ -11,9 +11,9 @@ target_link_libraries(example_joint_limits_psap OpenSoT)
 
 find_package(catkin QUIET COMPONENTS roscpp rviz_visual_tools tf)
 if(${catkin_FOUND})
-    add_executable(example3 example3.cpp qp_estimation.cpp
+    add_executable(example_static_walk static_walk.cpp qp_estimation.cpp StaticWalkUtils.hpp
                             ${OPENSOT_EXAMPLE_PATH}trajectory_utils.cpp
                             ${OPENSOT_EXAMPLE_PATH}path_circle_fix.cpp
                             ${OPENSOT_EXAMPLE_PATH}ros_trj_publisher.cpp)
-    target_link_libraries(example3 OpenSoT ${catkin_LIBRARIES} ${qpOASES_LIBRARIES})
+    target_link_libraries(example_static_walk OpenSoT ${catkin_LIBRARIES} ${qpOASES_LIBRARIES})
 endif()
