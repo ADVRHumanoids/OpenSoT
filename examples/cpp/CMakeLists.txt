@@ -5,8 +5,8 @@ add_definitions(-DOPENSOT_EXAMPLE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../../tests/
 set(OPENSOT_EXAMPLE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../tests/")
 message(STATUS "OPENSOT_EXAMPLE_PATH is ${OPENSOT_EXAMPLE_PATH}")
 
-add_executable(example2 example2.cpp JointLimitsPSAP.cpp)
-target_link_libraries(example2 OpenSoT)
+add_executable(example_joint_limits_psap joint_limits_psap.cpp JointLimitsPSAP.cpp)
+target_link_libraries(example_joint_limits_psap OpenSoT)
 
 
 find_package(catkin QUIET COMPONENTS roscpp rviz_visual_tools tf)
