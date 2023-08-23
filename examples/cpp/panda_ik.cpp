@@ -55,10 +55,12 @@ void vectorRand(Eigen::VectorXd& vec, const Eigen::VectorXd& min, const Eigen::V
 struct solver_statistics{
     solver_statistics(const std::string& back_end_id_, const std::vector<double>& solver_time_ms_, const unsigned int number_of_iterations_):
         back_end_id(back_end_id_), solver_time_ms(solver_time_ms_), number_of_iterations(number_of_iterations_){}
-    std::vector<double> solver_time_ms;
-    unsigned int number_of_iterations;
+
+    std::vector<double> solver_time_ms; // each time a solve is called in a ik call
+    unsigned int number_of_iterations;  // to the solution in a ik call
     std::string back_end_id;
-    double mean()
+
+    double solverTimeMean()
     {
         return accumulate(solver_time_ms.begin(), solver_time_ms.end(),double(0.0))/solver_time_ms.size();
     }
@@ -139,6 +141,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
     auto task = OpenSoT::SubTask::asSubTask(subtask)->getTask();
     OpenSoT::tasks::velocity::Cartesian::asCartesian(task)->setReference(TCP_world_pose_goal);
 
+
     /**
      * @brief ik loop
      */
@@ -207,9 +210,18 @@ std::string getBackEndString(const solver_back_ends solver_back_end)
     return "";
 }
 
+solver_back_ends getBackEndFromString(const std::string& str)
+{
+    if(str == "qpOASES")            return solver_back_ends::qpOASES;
+    else if(str == "OSQP")          return solver_back_ends::OSQP;
+    else if(str == "eiQuadProg")    return solver_back_ends::eiQuadProg;
+    else if(str == "qpSWIFT")       return solver_back_ends::qpSWIFT;
+    else if(str == "proxQP")        return solver_back_ends::proxQP;
+}
+
 void log(XBot::MatLogger2::Ptr logger, solver_statistics& stats)
 {
-    logger->add(stats.back_end_id + "solver_time_ms_mean", stats.mean());
+    logger->add(stats.back_end_id + "solver_time_ms_mean", stats.solverTimeMean());
     logger->add(stats.back_end_id + "iterations", stats.number_of_iterations);
 }
 
@@ -236,6 +248,13 @@ int main(int argc, char **argv)
     unsigned int max_iter = 1000;
     double min_error = 1e-4;
     std::vector<solver_statistics> st;
+    std::map<solver_back_ends, unsigned int> back_end_success; //store back-ends to test and total number of ik call success
+    back_end_success[solver_back_ends::qpOASES] = 0;
+    back_end_success[solver_back_ends::OSQP] = 0;
+    back_end_success[solver_back_ends::eiQuadProg] = 0;
+    back_end_success[solver_back_ends::qpSWIFT] = 0;
+    back_end_success[solver_back_ends::proxQP] = 0;
+
 
     XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/panda_ik_stats");
     logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
@@ -243,6 +262,7 @@ int main(int argc, char **argv)
     /**
       * Outer loop: the ik is tested on 30 different start and goal configurations
       **/
+    unsigned int total_runs = 0;
     for(unsigned int k = 0; k < 30; ++k)
     {
         /**
@@ -272,9 +292,7 @@ int main(int argc, char **argv)
               **/
             for(solver_back_ends solver_back_end : solver_back_ends_iterator())
             {
-                if(solver_back_end == solver_back_ends::qpOASES || solver_back_end == solver_back_ends::OSQP ||
-                   solver_back_end == solver_back_ends::eiQuadProg || solver_back_end == solver_back_ends::qpSWIFT ||
-                   solver_back_end == solver_back_ends::proxQP)
+                if(back_end_success.find(solver_back_end) != back_end_success.end())
                 {
                     std::cout<<"USING BACK-END: "<<getBackEndString(solver_back_end)<<std::endl;
 
@@ -351,6 +369,7 @@ int main(int argc, char **argv)
                 }
 
             }
+            total_runs++;
 
             /**
               * @brief check if everything went fine using all the solvers
@@ -358,8 +377,10 @@ int main(int argc, char **argv)
             all_good = true;
             for(solver_statistics solver_stat : st)
             {
-                if(solver_stat.number_of_iterations < max_iter && solver_stat.solver_time_ms.size() > 0)
-                    std::cout<<"mean solver_time: "<<solver_stat.mean()<<" [ms] using back-end: "<<solver_stat.back_end_id<<std::endl;
+                if(solver_stat.number_of_iterations < max_iter && solver_stat.solver_time_ms.size() > 0){
+                    std::cout<<"mean solver_time: "<<solver_stat.solverTimeMean()<<" [ms] using back-end: "<<solver_stat.back_end_id<<std::endl;
+                    back_end_success[getBackEndFromString(solver_stat.back_end_id)]++;
+                }
                 else
                     all_good = false;
             }
@@ -371,6 +392,12 @@ int main(int argc, char **argv)
             }
         }
     }
+    for(solver_statistics solver_stat : st){
+        logger->add(solver_stat.back_end_id + "number_of_success", back_end_success[getBackEndFromString(solver_stat.back_end_id)]);
+        std::cout<<solver_stat.back_end_id<<" number of success: "<<back_end_success[getBackEndFromString(solver_stat.back_end_id)]<<std::endl;
+    }
+    logger->add("total_runs", total_runs);
+    std::cout<<"total runs: "<<total_runs<<std::endl;
 
     return 0;
 }
