@@ -12,8 +12,14 @@
 #include <chrono>
 using namespace std::chrono;
 
+#include <ros/ros.h>
+#include <sensor_msgs/JointState.h>
+#include <tf/transform_broadcaster.h>
+#include <tf_conversions/tf_eigen.h>
 
 std::string _path_to_cfg = OPENSOT_EXAMPLE_PATH "configs/panda/configs/config_panda.yaml";
+
+bool IS_ROSCORE_RUNNING;
 
 /**
  * @brief removeMinMax remove min and max element from vector
@@ -58,6 +64,34 @@ struct solver_statistics{
     }
 };
 
+void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, const Eigen::Affine3d& goal,
+                        const XBot::ModelInterface::Ptr model, ros::NodeHandle& n)
+{
+    sensor_msgs::JointState msg;
+    std::vector<std::string> joint_names = model->getEnabledJointNames();
+    for(unsigned int i = 0; i < joint_names.size(); ++i)
+    {
+        msg.name.push_back(joint_names[i]);
+        msg.position.push_back(q[i]);
+    }
+    msg.header.stamp = ros::Time::now();
+    static auto joint_state_pub = n.advertise<sensor_msgs::JointState>("joint_states", 1000);
+    joint_state_pub.publish(msg);
+
+    static tf::TransformBroadcaster br;
+    tf::Transform transform_start, transform_goal;
+    tf::Pose pose_start, pose_goal;
+    tf::poseEigenToTF(start, pose_start);
+    transform_start.setOrigin(pose_start.getOrigin());
+    transform_start.setRotation(pose_start.getRotation());
+    tf::poseEigenToTF(goal, pose_goal);
+    transform_goal.setOrigin(pose_goal.getOrigin());
+    transform_goal.setRotation(pose_goal.getRotation());
+
+    br.sendTransform(tf::StampedTransform(transform_start, msg.header.stamp, "base_link", "start"));
+    br.sendTransform(tf::StampedTransform(transform_goal, msg.header.stamp, "base_link", "goal"));
+}
+
 /**
  * @brief solveIK resolve inverse kineamtics from a start and goal pose using Euler integration:
  *      \mathbf{q}_{k+1} = \mathbf{q}_{k} + \boldsymbol{\delta}\mathbf{q}
@@ -70,12 +104,15 @@ struct solver_statistics{
  * @param solver
  * @param max_iterations number of maximum iterations to the goal pose
  * @param norm_error_eps under this value the goal pose is considered reached
+ * @param dT control loop time, used by ROS to publish joint states
+ * @param n ROS node handle
  * @return solver statistics
  */
 solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd& q_goal, const std::string& TCP_frame,
                           XBot::ModelInterface::Ptr model, OpenSoT::AutoStack::Ptr stack,
                           OpenSoT::solvers::iHQP::Ptr solver,
-                          const unsigned int max_iterations, const double norm_error_eps)
+                          const unsigned int max_iterations, const double norm_error_eps,
+                          const double dT, std::shared_ptr<ros::NodeHandle> n)
 {
     /**
       * Update model with q_start and q_goal and retrieve initial and goal Cartesian pose
@@ -134,6 +171,14 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
         //4. update the state
         q += dq;
 
+        if(IS_ROSCORE_RUNNING)
+        {
+            ros::Rate loop_rate(int(1./dT));
+            loop_rate.sleep();
+            publishJointStates(q, TCP_world_pose_init, TCP_world_pose_goal, model, *n.get());
+            ros::spinOnce();
+        }
+
         model->getPose(TCP_frame, TCP_world_pose);
         position_error_norm = (TCP_world_pose.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
         iter++;
@@ -142,6 +187,8 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
 
     std::cout<<"TCP final pose in world: \n"<<TCP_world_pose.matrix()<<std::endl;
     std::cout<<"TCP goal position in world: \n"<<TCP_world_pose.matrix().block(0,3,3,1).transpose()<<std::endl;
+
+    if(IS_ROSCORE_RUNNING) usleep(500000);
 
     return solver_statistics(solver->getBackEndName(0), solver_time, iter);
 }
@@ -166,8 +213,14 @@ void log(XBot::MatLogger2::Ptr logger, solver_statistics& stats)
     logger->add(stats.back_end_id + "iterations", stats.number_of_iterations);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    ros::init(argc, argv, "panda_ik_node");
+    IS_ROSCORE_RUNNING = ros::master::check();
+    std::shared_ptr<ros::NodeHandle> n;
+    if(IS_ROSCORE_RUNNING)
+        n = std::make_shared<ros::NodeHandle>();
+
     /**
       * @brief Retrieve model from config file and generate random initial configuration from qmin and qmax
       **/
@@ -286,7 +339,7 @@ int main()
                    /**
                     * @brief Here we do the ik loop
                     */
-                   solver_statistics stats =  solveIK(q_init, q_goal, TCP_frame, model_ptr, stack, solver, max_iter, min_error);
+                   solver_statistics stats =  solveIK(q_init, q_goal, TCP_frame, model_ptr, stack, solver, max_iter, min_error, dT, n);
 
                    /**
                      * We possibly remove the largest and smaller values

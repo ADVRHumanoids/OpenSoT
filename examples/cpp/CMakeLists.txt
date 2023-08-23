@@ -9,7 +9,7 @@ add_executable(example_joint_limits_psap joint_limits_psap.cpp JointLimitsPSAP.c
 target_link_libraries(example_joint_limits_psap OpenSoT)
 
 
-find_package(catkin QUIET COMPONENTS roscpp rviz_visual_tools tf)
+find_package(catkin QUIET COMPONENTS roscpp rviz_visual_tools tf tf_conversions)
 if(${catkin_FOUND})
     add_executable(example_static_walk static_walk.cpp qp_estimation.cpp StaticWalkUtils.hpp
                             ${OPENSOT_EXAMPLE_PATH}trajectory_utils.cpp
