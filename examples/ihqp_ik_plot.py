@@ -1,8 +1,9 @@
 import mat73
 import matplotlib.pyplot as plt
+import sys
 import numpy as np
 
-loaded_data_dict = mat73.loadmat('panda_ik_stats__0_2023_08_23__15_26_34.mat')
+loaded_data_dict = mat73.loadmat(sys.argv[1])
 
 print(loaded_data_dict)
 
