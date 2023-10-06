@@ -11,6 +11,6 @@
         <param name="publish_frequency" type="double" value="50.0" />
     </node>
     
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(env PWD)/static_walk.rviz" output="screen"/> 
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(env PWD)/coman_ik.rviz" output="screen"/> 
 
 </launch>

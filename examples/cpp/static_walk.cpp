@@ -23,7 +23,7 @@ bool IS_ROSCORE_RUNNING;
 
 /**
  * @brief The example3 shows the usage of the OpenSoT library for open-loop resolved-rate IK.
- * The execution of the example can be shown in rviz by launching the launch file example3.launch in \examples\launch folder,
+ * The execution of the example can be shown in rviz by launching the launch file coman_ik.launch in \examples\launch folder,
  * which depends on the package
  *      https://github.com/ADVRHumanoids/iit-coman-ros-pkg/tree/master
  * for the COMAN model and meshes.
