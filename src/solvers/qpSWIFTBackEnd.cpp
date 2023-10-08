@@ -142,6 +142,8 @@ bool qpSWIFTBackEnd::solve()
 
     createDataStructure(_A, _lA, _uA, _l, _u);
 
+
+
     _qp.reset(QP_SETUP_dense(_H.cols(), _h.rows(), _b.rows(),
                              _H.data(),
                              _AA.generate_and_get().data(),
@@ -150,6 +152,9 @@ bool qpSWIFTBackEnd::solve()
                              _h.generate_and_get().data(),
                              _b.generate_and_get().data(),
                              NULL, COLUMN_MAJOR_ORDERING));
+
+    if(_user_options)
+        _qp->options = _user_options.get();
 
     qp_int exit_code = QP_SOLVE(_qp.get());
     if(exit_code == QP_MAXIT)
@@ -174,7 +179,14 @@ boost::any qpSWIFTBackEnd::getOptions()
 
 void qpSWIFTBackEnd::setOptions(const boost::any& options)
 {
-    _qp->options = boost::any_cast<settings*>(options);
+    _user_options = std::make_shared<settings>();
+    settings* options_ptr = boost::any_cast<settings*>(options);
+
+    _user_options->maxit = options_ptr->maxit;
+    _user_options->reltol = options_ptr->reltol;
+    _user_options->abstol = options_ptr->abstol;
+    _user_options->sigma = options_ptr->sigma;
+    _user_options->verbose = options_ptr->verbose;
 }
 
 bool qpSWIFTBackEnd::updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g)
