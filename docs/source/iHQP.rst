@@ -56,7 +56,7 @@ Another way to specify a task that is NOT moved to the next level of priority wh
 
 .. warning::
 
-   The ``setRegularisationTask(OpenSoT::tasks::Aggregated::TaskPtr regularisation_task)`` method of the ``OpenSoT::AutoStack`` class is considered only by the ``iHQP`` solver for the moment!ùù
+   The ``setRegularisationTask(OpenSoT::tasks::Aggregated::TaskPtr regularisation_task)`` method of the ``OpenSoT::AutoStack`` class is considered only by the ``iHQP`` solver for the moment!
    
 The ``setActiveStack(const unsigned int i, const bool flag)`` permits to select a stack level to do not be solved during the next ``solve`` procedure.
 
