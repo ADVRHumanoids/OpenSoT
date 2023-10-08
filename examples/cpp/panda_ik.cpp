@@ -7,6 +7,7 @@
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/iHQP.h>
+#include <qpSWIFT/qpSWIFT.h>
 #include <matlogger2/matlogger2.h>
 
 #include <chrono>
@@ -355,6 +356,17 @@ int main(int argc, char **argv)
                            try{
                                solver = std::make_shared<OpenSoT::solvers::iHQP>(*stack, eps, solver_back_end);
                                solver_inited = true;
+                               if(solver_back_end == solver_back_ends::qpSWIFT)
+                               {
+                                   for(unsigned int i = 0; i < solver->getNumberOfTasks(); ++i)
+                                   {
+                                       boost::any options;
+                                       solver->getOptions(i, options);
+                                       std::shared_ptr<settings> qpSwift_options(boost::any_cast<settings*>(options));
+                                       qpSwift_options->reltol = 1e-1;
+                                       solver->setOptions(i, qpSwift_options.get());
+                                   }
+                               }
                            }catch(...){
                                eps *= 10;
                                std::cout<<"Problem initializing solver, increasing eps..."<<std::endl;
