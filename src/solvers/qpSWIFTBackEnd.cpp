@@ -187,6 +187,8 @@ void qpSWIFTBackEnd::setOptions(const boost::any& options)
     _user_options->abstol = options_ptr->abstol;
     _user_options->sigma = options_ptr->sigma;
     _user_options->verbose = options_ptr->verbose;
+
+    _qp->options = _user_options.get();
 }
 
 bool qpSWIFTBackEnd::updateTask(const Eigen::MatrixXd& H, const Eigen::VectorXd& g)
