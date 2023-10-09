@@ -23,6 +23,8 @@ std::string _path_to_cfg = OPENSOT_EXAMPLE_PATH "configs/coman/configs/config_co
 
 bool IS_ROSCORE_RUNNING;
 
+#define NUMBER_OF_RUNS 30
+
 /**
  * @brief removeMinMax remove min and max element from vector
  * @param vec
@@ -287,10 +289,10 @@ int main(int argc, char **argv)
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
 
         /**
-          * Outer loop: the ik is tested on 30 different start and goal configurations
+          * Outer loop: the ik is tested on NUMBER_OF_RUNS different start and goal configurations
           **/
         unsigned int total_runs = 0;
-        for(unsigned int k = 0; k < 30; ++k)
+        for(unsigned int k = 0; k < NUMBER_OF_RUNS; ++k)
         {
             /**
              * @brief We pass to the next configurations only if all the solvers reach the min_error in the Cartesian position task

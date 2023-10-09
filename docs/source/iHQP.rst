@@ -40,6 +40,8 @@ The ``iHQP`` solver consists in a **front-end** (derived from ``OpenSoT::Solver`
 - `proxQP <https://github.com/Simple-Robotics/proxsuite>`__ suggested v0.1.0
 - `qpSWIFT <https://github.com/qpSWIFT/qpSWIFT>`__ suggested v1.00
 
+You can find :doc:`here <iHQP_comparison>`  a comparison among the different *back-ends* for the iHQP solver. 
+
 .. note::
 
    Some *front-ends*, e.g. `qpOASES`, permit to solve LP problems, i.e. optimization problems where the :math:`\mathbf{A}` matrix is null (hence also the Hessian is null). **GLPK** is a LP dedicated solver that can not be used to solve QP problems. 
@@ -60,4 +62,6 @@ Another way to specify a task that is NOT moved to the next level of priority wh
    
 The ``setActiveStack(const unsigned int i, const bool flag)`` permits to select a stack level to do not be solved during the next ``solve`` procedure.
 
-The ``setOptions(const unsigned int i, const boost::any &opt)`` permits to set the options of the *back-end* at the *i-th* priority level. ``getBackEnd(const unsigned int i, BackEnd::Ptr& back_end)`` return a *back-end* pointer at the *i-th* level.    
+The ``setOptions(const unsigned int i, const boost::any &opt)`` permits to set the options of the *back-end* at the *i-th* priority level. ``getBackEnd(const unsigned int i, BackEnd::Ptr& back_end)`` return a *back-end* pointer at the *i-th* level.   
+
+
