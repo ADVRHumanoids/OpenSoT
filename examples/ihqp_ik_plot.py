@@ -65,23 +65,33 @@ bplot = plt.boxplot([data_dict['solver_time_ms_mean'][solver_label[0]],
                     vert=True,  # vertical box alignment
                     patch_artist=True,  # fill with color
                     showfliers=False, #remove outliers from plot
-                    labels=(100.*np.array(number_of_success_list)/total_runs).round(decimals=1))  # will be used to label x-ticks
+                    labels=(100.*np.array(number_of_success_list)/total_runs).round(decimals=1),
+                    medianprops = dict(color = "black"))  # will be used to label x-ticks
 
 # fill with colors
-colors = ['tab:blue', 'tab:red', 'tab:green', 'tab:orange', 'tab:purple']
-for patch, color in zip(bplot['boxes'], colors):
-    patch.set_facecolor(color)
+dict_colors = {'OSQP': 'tab:blue', 'eiQuadProg': 'tab:red', 'proxQP': 'tab:green', 'qpOASES': 'tab:orange', 'qpSWIFT': 'tab:purple'}
+for patch, solver in zip(bplot['boxes'], solver_label):
+    patch.set_facecolor(dict_colors[solver])
+    patch.set_edgecolor(dict_colors[solver])
 
 fig.get_axes()[0].yaxis.grid(True)
 fig.get_axes()[0].xaxis.grid(True)
 fig.get_axes()[0].set_xlabel('Success rate [$\%$]')
 fig.get_axes()[0].set_ylabel('Solver time [ms]')
+plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 
-leg = fig.get_axes()[0].legend(solver_label)
+
+
+solver_list = ['OSQP', 'eiQuadProg', 'proxQP', 'qpOASES', 'qpSWIFT']
+
+leg = fig.get_axes()[0].legend(solver_list)
 hl_dict = {handle.get_label(): handle for handle in leg.legendHandles}
 i = 0
 for key in hl_dict:
-    hl_dict[key].set_color(colors[i])
+    hl_dict[key].set_color(dict_colors[solver_list[i]])
     i = i + 1
+
+
+plt.savefig(sys.argv[1] + ".pdf")
 
 plt.show()

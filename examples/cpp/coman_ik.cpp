@@ -271,16 +271,18 @@ int main(int argc, char **argv)
     double min_error = 1e-3;
     std::vector<solver_statistics> st;
     std::map<solver_back_ends, unsigned int> back_end_success; //store back-ends to test and total number of ik call success
-    back_end_success[solver_back_ends::qpOASES] = 0;
-    back_end_success[solver_back_ends::OSQP] = 0;
-    back_end_success[solver_back_ends::eiQuadProg] = 0;
-    back_end_success[solver_back_ends::qpSWIFT] = 0;
-    back_end_success[solver_back_ends::proxQP] = 0;
 
     std::vector<std::string> stack_priorities = {"1_LEVEL", "2_LEVELS", "3_LEVELS", "4_LEVELS"};
 
     for(auto stack_priority : stack_priorities)
     {
+        back_end_success[solver_back_ends::qpOASES] = 0;
+        back_end_success[solver_back_ends::OSQP] = 0;
+        back_end_success[solver_back_ends::eiQuadProg] = 0;
+        back_end_success[solver_back_ends::qpSWIFT] = 0;
+        back_end_success[solver_back_ends::proxQP] = 0;
+
+
         XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/coman_ik_stats_" + stack_priority);
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
 
