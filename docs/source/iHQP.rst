@@ -40,7 +40,7 @@ The ``iHQP`` solver consists in a **front-end** (derived from ``OpenSoT::Solver`
 - `proxQP <https://github.com/Simple-Robotics/proxsuite>`__ suggested v0.1.0
 - `qpSWIFT <https://github.com/qpSWIFT/qpSWIFT>`__ suggested v1.00
 
-You can find :doc:`here <iHQP_comparison>`  a comparison among the different *back-ends* for the iHQP solver. 
+You can find :doc:`here a comparison <iHQP_comparison>` among the different *back-ends* for the iHQP solver. 
 
 .. note::
 
