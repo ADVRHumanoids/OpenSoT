@@ -17,7 +17,7 @@ The comparison was conducted on an AMD® Ryzen 9 4900HS with 32 GiB of RAM.
 
 .. warning::
 
-	The tests were conducted without fully leveraging the extensive capabilities of the QP solvers, both in terms of tunable options and optimal implementation. For example, some of the QP solvers only offer a sparse interface, necessitating the conversion of dense matrices, which are typical of the problems in the OpenSoT framework, into sparse format. Consequently, the obtained results may be affected by suboptimal option tuning and less-than-optimal implementation. It's important to note that these results are provided solely to offer a preliminary understanding of the performance in solving specific control problems.
+	The tests were conducted without fully leveraging the extensive capabilities of the QP solvers, both in terms of tunable options and optimal implementation. For example, some of the QP solvers only offer a sparse interface, necessitating the conversion of dense matrices, which are typical of the problems in the OpenSoT framework, into sparse format. Consequently, the obtained results may be affected by suboptimal option tuning and less-than-optimal implementation. It's important to note that these results are provided solely to offer a preliminary understanding of the performance in solving specific control problems and may vary in different runs.
 
 Manipulator
 -----------
@@ -31,13 +31,12 @@ with :math:`\mathcal{T}_{ee}` the Cartesian task associated to the end-effector,
 
 The statics running the comparison are presented in the following figures:
 
-- **Stack 1:** SOFT priorities, 1 level
-.. image:: img/panda_ik_stats_SOFT__0_2023_10_09__10_20_56.mat.svg
+- **Stack 1:** `SOFT priorities, 1 level <_static/panda_ik_stats_SOFT_iHQP.pdf>`_
 
-- **Stack 2:** HARD priorities, 2 levels
-.. image:: img/panda_ik_stats_HARD__1_2023_10_09__10_20_57.mat.svg
 
-In both cases, *qpOASES* results as the faster solver while *proxQP* the more robust. For robots with such few DOFs, simple constrained IK problems can be solved very fast, within :math:`1e^{-2} \ [ms]`.
+- **Stack 2:** `HARD priorities, 2 levels <_static/panda_ik_stats_HARD_iHQP.pdf>`_
+
+For robots with such few DOFs, simple constrained IK problems can be solved very fast, within :math:`1e^{-2} \ [ms]`.
 
 Humanoid
 --------
@@ -54,21 +53,15 @@ with :math:`\mathcal{T}_{lh}` and :math:`\mathcal{T}_{rh}` the Cartesian task as
 
 The statics running the comparison are presented in the following figures:
 
-- **Stack 1:** SOFT priorities, 1 level
-.. image:: img/coman_ik_stats_1_LEVEL__0_2023_10_09__11_15_29.mat.svg
+- **Stack 1:** `SOFT priorities, 1 level <_static/coman_ik_stats_1_LEVEL_iHQP.pdf>`_
 
-- **Stack 2:** HARD priorities, 2 levels
-.. image:: img/coman_ik_stats_2_LEVELS__1_2023_10_09__11_15_51.mat.svg
+- **Stack 2:** `HARD priorities, 2 levels <_static/coman_ik_stats_2_LEVELS_iHQP.pdf>`_
 
-- **Stack 3:** HARD priorities, 3 levels
-.. image:: img/coman_ik_stats_3_LEVELS__2_2023_10_09__11_16_31.mat.svg
+- **Stack 3:** `HARD priorities, 3 levels <_static/coman_ik_stats_3_LEVELS_iHQP.pdf>`_
 
-- **Stack 4:** HARD priorities, 4 levels
-.. image:: img/coman_ik_stats_4_LEVELS__3_2023_10_09__11_16_57.mat.svg
+- **Stack 4:** `HARD priorities, 4 levels <_static/coman_ik_stats_4_LEVELS_iHQP.pdf>`_
 
-
-
-Once again, *qpOASES* and *proxQP* exhibit superior and comparable performance in terms of both robustness and speed. Interestingly, for most of the considered back-ends, speed performances are not significantly impacted by the number of stacks (usually, 4 stacks already suffice in multi-limbed robot control). For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]`.
+For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]`. Notably, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).
 
 
 

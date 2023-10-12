@@ -285,7 +285,7 @@ int main(int argc, char **argv)
         back_end_success[solver_back_ends::proxQP] = 0;
 
 
-        XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/coman_ik_stats_" + stack_priority);
+        XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/coman_ik_stats_" + stack_priority + "_iHQP");
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
 
         /**
@@ -351,10 +351,13 @@ int main(int argc, char **argv)
                        auto l_wrist = std::make_shared<Cartesian>("l_wrist", q, *model_ptr.get(), "l_wrist", "world");
                        l_wrist->setLambda(0.1);
                        auto r_wrist = std::make_shared<Cartesian>("r_wrist", q, *model_ptr.get(), TCP_frame, "world");
+                       r_wrist->setLambda(0.1);
                        auto com = std::make_shared<CoM>(q, *model_ptr.get());
+                       com->setLambda(0.1);
 
 
                        auto postural = std::make_shared<Postural>(q, "postural");
+                       postural->setLambda(0.01);
 
                        /**
                         * Creates constraints joint position and velocity limits

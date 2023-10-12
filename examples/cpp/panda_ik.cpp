@@ -264,7 +264,7 @@ int main(int argc, char **argv)
         back_end_success[solver_back_ends::proxQP] = 0;
 
 
-        XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/panda_ik_stats_" + stack_priority);
+        XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/panda_ik_stats_" + stack_priority + "_iHQP");
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
 
         /**
@@ -312,11 +312,13 @@ int main(int argc, char **argv)
 
                        using namespace OpenSoT::tasks::velocity;
                        auto TCP = std::make_shared<Cartesian>("TCP", q_init, *model_ptr.get(), TCP_frame, "world");
+                       TCP->setLambda(0.1);
 
                        Eigen::VectorXd zeros = q_init;
                        zeros.setZero();
                        auto postural = std::make_shared<Postural>(q_init, "postural");
                        postural->setReference(zeros);
+                       postural->setLambda(0.01);
 
                        /**
                         * Creates constraints joint position and velocity limits
