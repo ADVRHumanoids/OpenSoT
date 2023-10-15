@@ -70,6 +70,12 @@ namespace OpenSoT{
                  */
                 bool setDisableWeightsComputation();
 
+                /**
+                 * @brief setDamping to all levels
+                 * @param damping > 0.
+                 */
+                void setDamping(double damping);
+
             private:
                 /**
                  * @brief _hcod internal solver

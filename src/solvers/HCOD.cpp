@@ -174,6 +174,11 @@ bool HCOD::setDisableWeightsComputation()
     return _disable_weights_computation;
 }
 
+void HCOD::setDamping(double damping)
+{
+    _hcod->setDamping(damping);
+}
+
 
 
 HCOD::~HCOD()
