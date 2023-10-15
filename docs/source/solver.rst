@@ -28,7 +28,10 @@ Available Solvers
 OpenSoT provides out-of-the-box *solvers*, in particular:
 
 - The :ref:`eHQP:eHQP` solver for **equality-only Hierarchical QPs**
-- The :ref:`iHQP:iHQP` solver for **inequality Hierarchical QPs**
+- The :ref:`iHQP:iHQP` solver for **inequality Hierarchical QPs** 
 - The :ref:`nHQP:nHQP` solver for **null-space Hierarchical QPs**
+- The :ref:`HCOD:HCOD` solver for **Hierarchical Complete Orthogonal Decomposition**
+
+You can find :doc:`here a comparison <solvers_comparison>` among the different solvers.
 
 

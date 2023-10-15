@@ -1,9 +1,9 @@
 iHQP: back-end comparison
 =========================
 We randomly selected 30 IK problems, each involving a transition from an initial configuration to a goal configuration defined by a specific Cartesian pose. 
-Each IK problem was solved using all the back-ends included in the comparison, notably the solvers *OSQP*, *qpOASES*, *eigQuadProg*, *proxQP*, and *qpSWIFT*.
+Each IK problem was solved using the iHQP and HCOD front-end solvers. In particular, for the iHQP solver, all the back-ends are included in the comparison, notably the solvers *OSQP*, *qpOASES*, *eigQuadProg*, *proxQP*, and *qpSWIFT*.
 
-We compared the average time taken to solve a single instance of a QP, including the time needed to compute the Hessian and gradient, as well as to fill the solver matrices. 
+We compared the average time taken to solve a single instance of a hierarchical problem, including the time needed to compute the Hessian and gradient, as well as to fill the solver matrices. 
 Additionally, we calculated the success rate :math:`SR`, defined as the number of times the back-end successfully found a solution within certain conditions, divided by the total number of runs:
 
 .. math::
@@ -31,10 +31,8 @@ with :math:`\mathcal{T}_{ee}` the Cartesian task associated to the end-effector,
 
 The statics running the comparison are presented in the following figures:
 
-- **Stack 1:** `SOFT priorities, 1 level <_static/panda_ik_stats_SOFT_iHQP.pdf>`_
-
-
-- **Stack 2:** `HARD priorities, 2 levels <_static/panda_ik_stats_HARD_iHQP.pdf>`_
+- **iHQP**: `Stack 1 <_static/panda_ik_stats_SOFT_iHQP.pdf>`_, `Stack 2 <_static/panda_ik_stats_HARD_iHQP.pdf>`_
+- **HCOD**: `Stack 1 & Stack 2 <_static/panda_ik_stats_hcod.pdf>`_
 
 For robots with such few DOFs, simple constrained IK problems can be solved very fast, within :math:`1e^{-2} \ [ms]`.
 
@@ -53,15 +51,10 @@ with :math:`\mathcal{T}_{lh}` and :math:`\mathcal{T}_{rh}` the Cartesian task as
 
 The statics running the comparison are presented in the following figures:
 
-- **Stack 1:** `SOFT priorities, 1 level <_static/coman_ik_stats_1_LEVEL_iHQP.pdf>`_
+- **iHQP**: `Stack 1 <_static/coman_ik_stats_1_LEVEL_iHQP.pdf>`_, `Stack 2 <_static/coman_ik_stats_2_LEVELS_iHQP.pdf>`_, `Stack 3 <_static/coman_ik_stats_3_LEVELS_iHQP.pdf>`_, `Stack 4 <_static/coman_ik_stats_4_LEVELS_iHQP.pdf>`_
 
-- **Stack 2:** `HARD priorities, 2 levels <_static/coman_ik_stats_2_LEVELS_iHQP.pdf>`_
 
-- **Stack 3:** `HARD priorities, 3 levels <_static/coman_ik_stats_3_LEVELS_iHQP.pdf>`_
-
-- **Stack 4:** `HARD priorities, 4 levels <_static/coman_ik_stats_4_LEVELS_iHQP.pdf>`_
-
-For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]`. Notably, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).
+For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]`. Notably, in the case of the iHQP, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).
 
 
 

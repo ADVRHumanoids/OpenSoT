@@ -1,0 +1,3 @@
+HCOD
+----
+The Hierarchical Complete Orthogonal Decomposition (HCOD) has been introduced in `Hierarchical quadratic programming: Fast online humanoid-robot motion generation <https://journals.sagepub.com/doi/epub/10.1177/0278364914521306>`__ by Adrien Escande et al., as a method to solve hierarchical quadratic optimizaiton problems exploiting the particular structure hence not requiring the execution of multiple cascade of QP optimizaitons. We integrated the HCOD solver as a *front-end* for OpenSoT wrapping the implementation provided by the `soth framework <https://github.com/stack-of-tasks/soth#soth>`__.
