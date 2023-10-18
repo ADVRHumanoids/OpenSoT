@@ -13,6 +13,19 @@ HCOD::HCOD(OpenSoT::AutoStack &stack_of_tasks, const double damping):
     _Wb(stack_of_tasks.getStack().size()),
     _disable_weights_computation(DEFAULT_DISABLE_WEIGHTS_COMPUTATION)
 {
+    std::list<ConstraintPtr> constraints_in_tasks_list;
+    for(auto& task : _tasks)
+    {
+        for(auto& constraint : task->getConstraints())
+            constraints_in_tasks_list.push_back(constraint);
+    }
+
+    if(constraints_in_tasks_list.size() > 0)
+    {
+        constraints_in_tasks_list.push_back(stack_of_tasks.getBounds());
+        _bounds = std::make_shared<constraints::Aggregated>(constraints_in_tasks_list, _tasks[0]->getA().cols());
+    }
+
     init(damping);
 }
 
@@ -23,6 +36,20 @@ HCOD::HCOD(Stack& stack_of_tasks, ConstraintPtr bounds, const double damping):
     _Wb(stack_of_tasks.size()),
     _disable_weights_computation(DEFAULT_DISABLE_WEIGHTS_COMPUTATION)
 {
+    std::list<ConstraintPtr> constraints_in_tasks_list;
+    for(auto& task : _tasks)
+    {
+        for(auto& constraint : task->getConstraints())
+            constraints_in_tasks_list.push_back(constraint);
+    }
+
+    if(constraints_in_tasks_list.size() > 0)
+    {
+        constraints_in_tasks_list.push_back(bounds);
+        _bounds = std::make_shared<constraints::Aggregated>(constraints_in_tasks_list, _tasks[0]->getA().cols());
+    }
+
+
     init(damping);
 }
 
@@ -57,12 +84,19 @@ void HCOD::init(const double damping)
     for (unsigned int i = 0; i < _vector_J.size(); ++i)
     {
         _hcod->pushBackStage(_vector_J[i].rows(), _vector_J[i].data(), _vector_bounds[i].data());
-        _hcod->setNameByOrder("level_");
+        _hcod->setNameByOrder("level_" + i);
     }
 
     // Set damping to all levels and initial active set
     _hcod->setDamping(damping);
     _hcod->setInitialActiveSet();
+
+    std::cout<<"HCOD:"<<std::endl;
+    std::cout<<"    TOTAL STAGES: "<<_CL+TL<<std::endl;
+    std::cout<<"    STACK STAGES: "<<TL<<std::endl;
+    std::cout<<"    #CONSTRAINTS: "<<_A.rows()<<std::endl;
+    for(unsigned int i = _CL; i < _vector_J.size(); ++i)
+        std::cout<<"    #TASK "<<i<<":"<<_vector_J[i].rows()<<std::endl;
 }
 
 bool HCOD::solve(Eigen::VectorXd &solution)
@@ -152,6 +186,7 @@ void HCOD::copy_bounds()
         _lA.pile(_bounds->getbeq());
         _uA.pile(_bounds->getbeq());
     }
+
 
     _vector_J[0] = _A.generate_and_get();
 

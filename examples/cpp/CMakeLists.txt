@@ -25,4 +25,7 @@ if(${catkin_FOUND})
 
     add_executable(example_coman_ik coman_ik.cpp)
     target_link_libraries(example_coman_ik OpenSoT ${catkin_LIBRARIES} ${qpOASES_LIBRARIES})
+
+    add_executable(example_coman_ik_hcod coman_ik_hcod.cpp)
+    target_link_libraries(example_coman_ik_hcod OpenSoT ${catkin_LIBRARIES} ${qpOASES_LIBRARIES})
 endif()
