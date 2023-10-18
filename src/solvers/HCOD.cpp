@@ -91,12 +91,17 @@ void HCOD::init(const double damping)
     _hcod->setDamping(damping);
     _hcod->setInitialActiveSet();
 
-    std::cout<<"HCOD:"<<std::endl;
-    std::cout<<"    TOTAL STAGES: "<<_CL+TL<<std::endl;
-    std::cout<<"    STACK STAGES: "<<TL<<std::endl;
-    std::cout<<"    #CONSTRAINTS: "<<_A.rows()<<std::endl;
+    printSOT();
+}
+
+void HCOD::printSOT()
+{
+    XBot::Logger::info("HCOD:\n");
+    XBot::Logger::info("    TOTAL STAGES: %i\n", _CL+_tasks.size());
+    XBot::Logger::info("    STACK STAGES: %i\n", _tasks.size());
+    XBot::Logger::info("    CONSTRAINTS: %i\n", _A.rows());
     for(unsigned int i = _CL; i < _vector_J.size(); ++i)
-        std::cout<<"    #TASK "<<i<<":"<<_vector_J[i].rows()<<std::endl;
+        XBot::Logger::info("    TOTAL TASKS STAGE %i: %i\n", i, _vector_J[i].rows());
 }
 
 bool HCOD::solve(Eigen::VectorXd &solution)
@@ -196,7 +201,14 @@ void HCOD::copy_bounds()
         _vector_bounds[0].resize(s);
 
     for(unsigned int i = 0; i < s; ++i)
-        _vector_bounds[0][i] = soth::Bound(_lA.generate_and_get()(i,0), _uA.generate_and_get()(i,0));
+    {
+        double lAi = _lA.generate_and_get()(i,0);
+        double uAi = _uA.generate_and_get()(i,0);
+        if(std::fabs(lAi-uAi) <= std::numeric_limits<double>::epsilon())
+            _vector_bounds[0][i] = soth::Bound(lAi);
+        else
+            _vector_bounds[0][i] = soth::Bound(lAi, uAi);
+    }
 }
 
 void HCOD::setDisableWeightsComputation(const bool disable)

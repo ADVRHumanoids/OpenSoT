@@ -76,6 +76,11 @@ namespace OpenSoT{
                  */
                 void setDamping(double damping);
 
+                /**
+                 * @brief printSOT print some SOT infos
+                 */
+                void printSOT();
+
             private:
                 /**
                  * @brief _hcod internal solver

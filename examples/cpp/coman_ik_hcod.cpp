@@ -333,10 +333,7 @@ int main(int argc, char **argv)
                auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);
 
                OpenSoT::AutoStack::Ptr stack;
-
-               stack_priority = stack_priorities[3];
                std::cout<<"Creating stack "<<stack_priority<<std::endl;
-
 
                if(stack_priority == stack_priorities[0]){
                /**
