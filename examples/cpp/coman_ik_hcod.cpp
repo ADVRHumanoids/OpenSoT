@@ -91,6 +91,37 @@ void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, 
     br.sendTransform(tf::StampedTransform(transform_goal, msg.header.stamp, "world", "goal"));
 }
 
+
+/**
+ * @brief areAlmostEqual check if two double numbers are the same up t certain precision
+ * @param a first number
+ * @param b second number
+ * @param precision
+ * @return true if a == b
+ */
+bool areAlmostEqual(double a, double b, int precision = 5) {
+    double epsilon = std::pow(10, -precision);
+    return std::fabs(a - b) < epsilon;
+}
+
+/**
+ * @brief allElementsSame check if all elements are equal in a vector of double
+ * @param vec of double
+ * @return true if all elements are equal
+ */
+bool allElementsSame(const std::vector<double>& vec) {
+    if (vec.empty())
+        return true;
+
+    double firstElement = vec[0];
+    for (const auto& num : vec)
+    {
+        if (!areAlmostEqual(firstElement, num))
+            return false;
+    }
+    return true;
+}
+
 /**
  * @brief solveIK resolve inverse kineamtics from a start and goal pose using Euler integration:
  *      \mathbf{q}_{k+1} = \mathbf{q}_{k} + \boldsymbol{\delta}\mathbf{q}
@@ -135,6 +166,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
     unsigned int iter = 0;
     std::vector<double> solver_time; //ms
     solver_time.reserve(max_iterations);
+    std::vector<double> errors;
     while(position_error_norm > norm_error_eps && iter < max_iterations)
     {
         std::cout<<"position error norm: "<<position_error_norm<<" at iteration "<<iter<<std::endl;
@@ -169,6 +201,17 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
         model->getPose(TCP_frame, TCP_world_pose);
         position_error_norm = (TCP_world_pose.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
         iter++;
+
+        errors.push_back(position_error_norm);
+        /**
+          * We check if last 10 errors are equal, if true we abort
+          */
+        if(errors.size() == 10)
+        {
+            if(allElementsSame(errors))
+                break;
+            errors.clear();
+        }
     }
     std::cout<<"position error norm: "<<position_error_norm<<" at iteration "<<iter<<std::endl;
 
@@ -260,6 +303,8 @@ int main(int argc, char **argv)
 
         XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/coman_ik_stats_" + stack_priority + "_hcod");
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+
+        logger->add("ID", stack_priority.begin(), stack_priority.end());
 
         /**
           * Outer loop: the ik is tested on NUMBER_OF_RUNS different start and goal configurations
