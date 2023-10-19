@@ -124,6 +124,14 @@ OpenSoT::solvers::nHQP::~nHQP()
 
 }
 
+void OpenSoT::solvers::nHQP::set_perform_A_b_regularization(int hierarchy_level, bool perform_A_b_regularization)
+{
+    if(hierarchy_level >= _data_struct.size())
+        throw std::invalid_argument("hierarchy_level >= # layers");
+    auto& data = _data_struct[hierarchy_level];
+    data.set_perform_A_b_regularization(perform_A_b_regularization);
+}
+
 bool OpenSoT::solvers::nHQP::solve(Eigen::VectorXd& solution)
 {
     const int n_tasks = _tasks.size();
@@ -304,7 +312,8 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
     Aineq(num_free_vars), lb(1), ub(1),
     ns_dim(num_free_vars - a_task->getTaskSize()),
     back_end(a_back_end),
-    back_end_initialized(false)
+    back_end_initialized(false),
+    perform_A_b_regularization(true)
 {
 
 }
@@ -343,7 +352,8 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
     svd.compute(AN, Eigen::ComputeFullU|Eigen::ComputeFullV);
 
-    regularize_A_b(min_sv_ratio);
+    if(perform_A_b_regularization)
+        regularize_A_b(min_sv_ratio);
 
     H.noalias() =  AN.transpose() * task->getWeight() * AN;
     g.noalias() = -AN.transpose() * task->getWeight() * b0;
@@ -443,3 +453,10 @@ void OpenSoT::solvers::nHQP::TaskData::set_nullspace_dimension(int a_ns_dim)
 {
     ns_dim = a_ns_dim;
 }
+
+void OpenSoT::solvers::nHQP::TaskData::set_perform_A_b_regularization(bool perform_A_b_regularization_)
+{
+    perform_A_b_regularization = perform_A_b_regularization_;
+}
+
+

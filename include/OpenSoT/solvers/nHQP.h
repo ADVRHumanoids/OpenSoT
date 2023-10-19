@@ -54,19 +54,20 @@ namespace OpenSoT { namespace solvers {
      *  - no support for local constraints
      *  - [!!!] ranks of tasks should not change during runtime (e.g. disabling a task)
      *
-     * TODO: implement equality constraints by considering the nullspace Neq = Null(Aeq).
+     * @todo: implement equality constraints by considering the nullspace Neq = Null(Aeq).
      * All optimizations will then take place in the null space of equality constraints.
+     * @todo: add reference
      */
     class nHQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
     {
-        
+
     public:
 
         static constexpr double DEFAULT_MIN_SV_RATIO = 0.05;
-        
+
         // Shared pointer typedef
         typedef std::shared_ptr<nHQP> Ptr;
-        
+
         // Constructor
         nHQP(Stack& stack_of_tasks,
              ConstraintPtr bounds,
@@ -85,16 +86,23 @@ namespace OpenSoT { namespace solvers {
         // Setter for minimum singular value ratio (layer wise)
         void setMinSingularValueRatio(std::vector<double> sv_min);
 
+        /**
+         * @brief set_perform_A_b_regularization at a certain hierarchy level
+         * @param hierarchy_level
+         * @param perform_A_b_regularization true or false (default is true for all levels)
+         * @note throw if asked hierarchy that does not exists
+         */
+        void set_perform_A_b_regularization(int hierarchy_level, bool perform_A_b_regularization);
 
     private:
-        
+
         /**
          * @brief The TaskData class is a helper class containing all that is needed to setup,
          * regularize, and solve the i-th QP problem.
          */
         class TaskData
         {
-            
+
         public:
 
             TaskData(int num_free_vars,
@@ -107,7 +115,7 @@ namespace OpenSoT { namespace solvers {
             int compute_nullspace_dimension(double threshold);
 
             void set_nullspace_dimension(int ns_dim);
-            
+
             void compute_cost(const Eigen::MatrixXd * AN_nullspace,
                               const Eigen::VectorXd& q0);
 
@@ -117,22 +125,32 @@ namespace OpenSoT { namespace solvers {
             bool update_and_solve();
 
             bool compute_nullspace();
-            
+
             const Eigen::MatrixXd& get_nullspace() const;
 
             const Eigen::VectorXd& get_solution() const;
 
             bool enable_logger(XBot::MatLogger2::Ptr logger, std::string log_prefix);
-            
+
+            /**
+             * @brief skip_A_b_regularization skip the regularization of the A matrix and b vector based on the
+             * method void regularize_A_b(double threshold).
+             * This is particularly suggested when a single layer is used together with a joint-space task. Regularization in this
+             * case is not needed and usually perform badly.
+
+             * @param perform_A_b_regularization true or false, default true
+             */
+            void set_perform_A_b_regularization(bool perform_A_b_regularization_);
+
         private:
 
-            
+
             // this task
             TaskPtr task;
 
             // global constraints
             ConstraintPtr constraints;
-            
+
             // nullspace of AN (used by next task)
             Eigen::MatrixXd AN_nullspace;
 
@@ -144,7 +162,7 @@ namespace OpenSoT { namespace solvers {
 
             // min singular value ratio
             double min_sv_ratio;
-            
+
             // quadratic cost matrices
             Eigen::MatrixXd H;
             Eigen::VectorXd g;
@@ -157,7 +175,7 @@ namespace OpenSoT { namespace solvers {
 
             // simple bounds (only i = 0)
             Eigen::VectorXd lb_bound, ub_bound;
-            
+
             // svd computation class
             Eigen::BDCSVD<Eigen::MatrixXd> svd;
 
@@ -176,6 +194,9 @@ namespace OpenSoT { namespace solvers {
             // prefix for logged variables
             std::string log_prefix;
 
+            // if true the regularize_A_b(double threshold) is called in compute_cost()
+            bool perform_A_b_regularization;
+
             /**
              * @brief Perform SVD-based regularization of AN and b0 as follows:
              *  - components of b0 along A's singular vectors with low singular value are deflated
@@ -187,7 +208,7 @@ namespace OpenSoT { namespace solvers {
 
         };
 
-        
+
         virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix) override;
 
         // vector of previous task nullspaces (first elem is nx-by-nx identity)
@@ -202,7 +223,7 @@ namespace OpenSoT { namespace solvers {
 
     };
 
-    
+
 } }
 
 #endif
