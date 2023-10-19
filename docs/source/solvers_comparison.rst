@@ -10,17 +10,17 @@ Additionally, we calculated the success rate :math:`SR`, defined as the number o
 
    SR = \frac{\#success}{\#runs}
 
-To confirm that the back-end successfully performs the task, we consider the task error norm to be less than or equal to :math:`1e^{-3}` within the specified maximum number of iterations, set to 1000.
+To confirm that the back-end successfully performs the task, we consider the task error norm to be less than or equal to :math:`1e^{-3}` within the specified maximum number of iterations, set to 1000. Local minima as well near singular configurations may reduce the SR. 
 
 We performed the comparison considering two prfoundly diverse robotic systems: a 7 DOFs fixed-base manipulator and a 29+6 DOFs floating-base humanoids. For each system we consider different stacks.
 The comparison was conducted on an AMD® Ryzen 9 4900HS with 32 GiB of RAM.
 
 .. warning::
 
-	The tests were conducted without fully leveraging the extensive capabilities of the QP solvers, both in terms of tunable options and optimal implementation. For example, some of the QP solvers only offer a sparse interface, necessitating the conversion of dense matrices, which are typical of the problems in the OpenSoT framework, into sparse format. Consequently, the obtained results may be affected by suboptimal option tuning and less-than-optimal implementation. It's important to note that these results are provided solely to offer a preliminary understanding of the performance in solving specific control problems and may vary in different runs.
+	The tests were conducted without fully leveraging the extensive capabilities of the examined QP solvers, both in terms of tunable options and optimal implementation. For example, some of the QP solvers only offer a sparse interface, necessitating the conversion of dense matrices, which are typical of the problems in the OpenSoT framework, into sparse format. Consequently, the obtained results may be affected by suboptimal option tuning and less-than-optimal implementation. It's important to note that these results are provided solely to offer a preliminary understanding of the performance in solving specific control problems and may vary in different runs.
 
-Manipulator
------------
+Manipulator (7 DOFs)
+--------------------
 For the manipulator we consider just an end-effector positioning task :math:`\in \mathbb{R}^3`, meaning that the the null-space size is 4.
 We consider the following two stacks:
 
@@ -29,15 +29,20 @@ We consider the following two stacks:
 
 with :math:`\mathcal{T}_{ee}` the Cartesian task associated to the end-effector, :math:`\mathcal{T}_{p}` the joint-space postural task, :math:`\mathcal{C}_{jl}` the joint-limits constraint, :math:`\mathcal{C}_{vl}` the velocity limit constraint. Notice that from the Cartesian task, the SubTask with the position part is considered.  
 
-The statics running the comparison are presented in the following figures:
+The statics running the comparison are presented in the following figures. For the **iHQP** and **nHQP** we plotted separately the results for each stack applying different *back-ends* while, for the **HCOD** solver, we plotted together the results for both the stacks:
 
 - **iHQP**: `Stack 1 <_static/panda_ik_stats_SOFT_iHQP.pdf>`_, `Stack 2 <_static/panda_ik_stats_HARD_iHQP.pdf>`_
+- **nHQP**: `Stack 1 <_static/panda_ik_stats_SOFT_nHQP.pdf>`_, `Stack 2 <_static/panda_ik_stats_HARD_nHQP.pdf>`_
 - **HCOD**: `Stack 1 and Stack 2 <_static/panda_ik_stats_hcod.pdf>`_
 
-For robots with such few DOFs, simple constrained IK problems can be solved very fast, within :math:`1e^{-2} \ [ms]`.
+In Stack 1, the *success rate* is approximately :math:`90\%`, with the **HCOD** solver achieving the highest success rate of :math:`100\%`. The fastest solver is **iHQP** utilizing **eiQuadProg** with :math:`0.3^{-2} \ [ms]`. Among the three front-ends, **nHQP** demonstrates the best balance between speed and success rate.
 
-Humanoid
---------
+In Stack 2, the *success rate* is approximately :math:`85\%`, with the **iHQP** solver utlizing **qpOASES**  achieving the highest success rate of :math:`90.5\%`. Both **iHQP** and **nHQP** utilizing **eiQuadProg**  achieve fast resolution time with :math:`\approx 1^{-2} \ [ms]`. 
+
+To conlcude, for robots with such few DOFs, e.g. manipulators, simple constrained IK problems can be solved very fast, within :math:`1e^{-2} \ [ms]` and with a very high success rate `> 80\%`.
+
+Humanoid (35 DOFs)
+------------------
 For the humanoid we consider Cartesian pose tasks :math:`\in SE(3)` to model the feet in contact with the environment and the tasks at the left and right hands. We consider a quati-static condition of stability by controlling the position :math:`\in \mathbb{R}^3` Center of Mass (CoM) of the robot. All these tasks together occupies 27 of the 29 DOFs available in the robot, resulting in a null-space of size 2.
 
 We consider the following four stacks:
@@ -47,7 +52,7 @@ We consider the following four stacks:
 - **Stack 3**: :math:`(\mathcal{T}_{CoM} / (1e^{-1}\cdot\mathcal{T}_{lh} + \mathcal{T}_{rh}) / \mathcal{T}_{p})<<\mathcal{C}_{jl}<<\mathcal{C}_{vl}<<(\mathcal{T}_{ls} + \mathcal{T}_{rs})`
 - **Stack 4**: :math:`(\mathcal{T}_{CoM} / \mathcal{T}_{rh} / \mathcal{T}_{lh} / \mathcal{T}_{p})<<\mathcal{C}_{jl}<<\mathcal{C}_{vl}<<(\mathcal{T}_{ls} + \mathcal{T}_{rs})`
 
-with :math:`\mathcal{T}_{lh}` and :math:`\mathcal{T}_{rh}` the Cartesian task associated to the left and right hands respectively,:math:`\mathcal{T}_{lf}` and :math:`\mathcal{T}_{rf}` the Cartesian task associated to the left and right feet respectively, and :math:`\mathcal{T}_{CoM}` the CoM task. Notice that the feet tasks are used as constraints in these stacks. The desired Cartesian references are sent to the :math:`\mathcal{T}_{rh}` task, while to the :math:`\mathcal{T}_{lh}` is requested to keep its pose with less priority.  
+with :math:`\mathcal{T}_{lh}` and :math:`\mathcal{T}_{rh}` the Cartesian task associated to the left and right hands respectively, :math:`\mathcal{T}_{lf}` and :math:`\mathcal{T}_{rf}` the Cartesian task associated to the left and right feet respectively, and :math:`\mathcal{T}_{CoM}` the CoM task. Notice that the feet tasks are used as constraints in these stacks. The desired Cartesian references are sent to the :math:`\mathcal{T}_{rh}` task, while to the :math:`\mathcal{T}_{lh}` is requested to keep its pose with less priority.  
 
 The statics running the comparison are presented in the following figures:
 
