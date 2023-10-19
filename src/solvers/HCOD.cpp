@@ -112,8 +112,15 @@ bool HCOD::solve(Eigen::VectorXd &solution)
     copy_tasks();
 
     solution.setZero(_VARS);
-    _hcod->activeSearch(solution.data());
-    return true; ///TODO: HOW TO CHECK IF EVERYTHING WENT FINE???
+    try
+    {
+        _hcod->activeSearch(solution.data());
+    }
+    catch(int)
+    {
+        return false;
+    }
+    return true;
 }
 
 void HCOD::copy_tasks()
