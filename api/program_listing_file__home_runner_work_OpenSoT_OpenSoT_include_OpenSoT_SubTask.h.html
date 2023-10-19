@@ -154,6 +154,17 @@
         <span class="k">virtual</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">getActiveJointsMask</span><span class="p">();</span>
 
         <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">setActiveJointsMask</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">active_joints_mask</span><span class="p">);</span>
+
+        <span class="k">static</span> <span class="kt">bool</span> <span class="nf">isSubTask</span><span class="p">(</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">Task</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;::</span><span class="n">TaskPtr</span> <span class="n">task</span><span class="p">){</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kt">bool</span><span class="p">)</span><span class="n">std</span><span class="o">::</span><span class="n">dynamic_pointer_cast</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">SubTask</span><span class="o">&gt;</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">static</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">SubTask</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">asSubTask</span><span class="p">(</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">Task</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;::</span><span class="n">TaskPtr</span> <span class="n">task</span><span class="p">){</span>
+            <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">dynamic_pointer_cast</span><span class="o">&lt;</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">SubTask</span><span class="o">&gt;</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">TaskPtr</span> <span class="n">getTask</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="n">_taskPtr</span><span class="p">;}</span>
+
     <span class="p">};</span>
 
 

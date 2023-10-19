@@ -86,6 +86,7 @@
 
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/solvers/BackEnd.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;boost/make_shared.hpp&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;type_traits&gt;</span><span class="cp"></span>
 
 <span class="k">namespace</span> <span class="n">OpenSoT</span><span class="p">{</span>
     <span class="k">namespace</span> <span class="n">solvers</span><span class="p">{</span>
@@ -98,6 +99,28 @@
             <span class="n">qpSWIFT</span><span class="p">,</span>
             <span class="n">proxQP</span>
         <span class="p">};</span>
+
+        <span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">C</span><span class="p">,</span> <span class="n">C</span> <span class="n">beginVal</span><span class="p">,</span> <span class="n">C</span> <span class="n">endVal</span><span class="o">&gt;</span>
+        <span class="k">class</span> <span class="nc">Iterator</span> <span class="p">{</span>
+          <span class="k">typedef</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">underlying_type</span><span class="o">&lt;</span><span class="n">C</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">val_t</span><span class="p">;</span>
+          <span class="kt">int</span> <span class="n">val</span><span class="p">;</span>
+        <span class="k">public</span><span class="o">:</span>
+          <span class="n">Iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">C</span> <span class="o">&amp;</span> <span class="n">f</span><span class="p">)</span> <span class="o">:</span> <span class="n">val</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">val_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="p">{}</span>
+          <span class="n">Iterator</span><span class="p">()</span> <span class="o">:</span> <span class="n">val</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">val_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">beginVal</span><span class="p">))</span> <span class="p">{}</span>
+          <span class="n">Iterator</span> <span class="k">operator</span><span class="o">++</span><span class="p">()</span> <span class="p">{</span>
+            <span class="o">++</span><span class="n">val</span><span class="p">;</span>
+            <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="n">C</span> <span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">C</span><span class="o">&gt;</span><span class="p">(</span><span class="n">val</span><span class="p">);</span> <span class="p">}</span>
+          <span class="n">Iterator</span> <span class="n">begin</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span> <span class="p">}</span> <span class="c1">//default ctor is good</span>
+          <span class="n">Iterator</span> <span class="n">end</span><span class="p">()</span> <span class="p">{</span>
+              <span class="k">static</span> <span class="k">const</span> <span class="n">Iterator</span> <span class="n">endIter</span><span class="o">=++</span><span class="n">Iterator</span><span class="p">(</span><span class="n">endVal</span><span class="p">);</span> <span class="c1">// cache it</span>
+              <span class="k">return</span> <span class="n">endIter</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">Iterator</span><span class="o">&amp;</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">i</span><span class="p">.</span><span class="n">val</span><span class="p">;</span> <span class="p">}</span>
+        <span class="p">};</span>
+
+        <span class="k">typedef</span> <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">solver_back_ends</span><span class="p">,</span> <span class="n">solver_back_ends</span><span class="o">::</span><span class="n">qpOASES</span><span class="p">,</span> <span class="n">solver_back_ends</span><span class="o">::</span><span class="n">proxQP</span><span class="o">&gt;</span> <span class="n">solver_back_ends_iterator</span><span class="p">;</span>
 
         <span class="n">BackEnd</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">BackEndFactory</span><span class="p">(</span><span class="k">const</span> <span class="n">solver_back_ends</span> <span class="n">be_solver</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">number_of_variables</span><span class="p">,</span>
                                <span class="k">const</span> <span class="kt">int</span> <span class="n">number_of_constraints</span><span class="p">,</span>

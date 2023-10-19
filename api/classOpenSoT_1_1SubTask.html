@@ -114,6 +114,7 @@
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html">Class GLPKBackEnd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1HCOD.html">Class HCOD</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1iHQP.html">Class iHQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1Iterator.html">Template Class Iterator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1l1HQP.html">Class l1HQP</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html">Class nHQP</a></li>
 <li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData.html">Class nHQP::TaskData</a></li>
@@ -311,6 +312,48 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>true if success </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7SubTask7getTaskEv">
+<span id="_CPPv3N7OpenSoT7SubTask7getTaskEv"></span><span id="_CPPv2N7OpenSoT7SubTask7getTaskEv"></span><span id="OpenSoT::SubTask::getTask"></span><span class="target" id="classOpenSoT_1_1SubTask_1aa742a657d7213a4d6bdca4efb18ac2b2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getTask</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7SubTask7getTaskEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getTask return the internal pointer of the task used to create the subtask </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>internal pointer to task </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7SubTask9isSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE">
+<span id="_CPPv3N7OpenSoT7SubTask9isSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="_CPPv2N7OpenSoT7SubTask9isSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="OpenSoT::SubTask::isSubTask__OpenSoT::Task:Eigen::MatrixXd.Eigen::VectorXd:::TaskPtr"></span><span class="target" id="classOpenSoT_1_1SubTask_1a88957e634e06db18a4324f53f1d1e0bd"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isSubTask</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7SubTask9isSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isSubTask check wether a generic task is a subtask </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> – pointer to generic task </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if is a subtask </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7SubTask9asSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE">
+<span id="_CPPv3N7OpenSoT7SubTask9asSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="_CPPv2N7OpenSoT7SubTask9asSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE"></span><span id="OpenSoT::SubTask::asSubTask__OpenSoT::Task:Eigen::MatrixXd.Eigen::VectorXd:::TaskPtr"></span><span class="target" id="classOpenSoT_1_1SubTask_1a998fe87e96177363b425ac16162aa628"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT7SubTaskE" title="OpenSoT::SubTask"><span class="n"><span class="pre">SubTask</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N7OpenSoT7SubTask3PtrE" title="OpenSoT::SubTask::Ptr"><span class="n"><span class="pre">Ptr</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">asSubTask</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OpenSoT</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classOpenSoT_1_1Task.html#_CPPv4I00EN7OpenSoT4TaskE" title="OpenSoT::Task"><span class="n"><span class="pre">Task</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatrixXd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TaskPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">task</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7SubTask9asSubTaskEN7OpenSoT4TaskIN5Eigen8MatrixXdEN5Eigen8VectorXdEE7TaskPtrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>asSubTask cast generic task to a subtask </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> – pointer to generic task </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pointer to subtask casted from given task </p>
 </dd>
 </dl>
 </dd></dl>

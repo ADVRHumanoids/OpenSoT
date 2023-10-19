@@ -1,0 +1,14 @@
+.. _exhale_typedef_namespaceOpenSoT_1_1solvers_1a51cf6e89506893c78e9e5eba67814187:
+
+Typedef OpenSoT::solvers::solver_back_ends_iterator
+===================================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`
+
+
+Typedef Documentation
+---------------------
+
+
+.. doxygentypedef:: OpenSoT::solvers::solver_back_ends_iterator
+   :project: OpenSoT

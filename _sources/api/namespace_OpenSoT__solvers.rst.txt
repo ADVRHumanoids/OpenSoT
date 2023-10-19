@@ -35,6 +35,8 @@ Classes
 
 - :ref:`exhale_class_classOpenSoT_1_1solvers_1_1iHQP`
 
+- :ref:`exhale_class_classOpenSoT_1_1solvers_1_1Iterator`
+
 - :ref:`exhale_class_classOpenSoT_1_1solvers_1_1l1HQP`
 
 - :ref:`exhale_class_classOpenSoT_1_1solvers_1_1nHQP`
@@ -68,3 +70,10 @@ Functions
 - :ref:`exhale_function_namespaceOpenSoT_1_1solvers_1afad360bd87e33794b09b791fb700a4df`
 
 - :ref:`exhale_function_namespaceOpenSoT_1_1solvers_1a7b39fcd96a93530cf5763e678cafdc03`
+
+
+Typedefs
+--------
+
+
+- :ref:`exhale_typedef_namespaceOpenSoT_1_1solvers_1a51cf6e89506893c78e9e5eba67814187`

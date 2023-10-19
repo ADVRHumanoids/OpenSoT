@@ -47,6 +47,10 @@ Program Listing for File HCOD.h
    
                    bool setDisableWeightsComputation();
    
+                   void setDamping(double damping);
+   
+                   void printSOT();
+   
                private:
                    std::shared_ptr<soth::HCOD_wrapper> _hcod;
    

@@ -1,0 +1,17 @@
+.. _exhale_class_classOpenSoT_1_1solvers_1_1Iterator:
+
+Template Class Iterator
+=======================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: OpenSoT::solvers::Iterator
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iHQP: back-end comparison &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constraint.html">Constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">iHQP: back-end comparison</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/solvers_comparison.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="ihqp-back-end-comparison">
+<h1>iHQP: back-end comparison<a class="headerlink" href="#ihqp-back-end-comparison" title="Permalink to this headline"></a></h1>
+<p>We randomly selected 30 IK problems, each involving a transition from an initial configuration to a goal configuration defined by a specific Cartesian pose.
+Each IK problem was solved using the iHQP and HCOD front-end solvers. In particular, for the iHQP solver, all the back-ends are included in the comparison, notably the solvers <em>OSQP</em>, <em>qpOASES</em>, <em>eigQuadProg</em>, <em>proxQP</em>, and <em>qpSWIFT</em>.</p>
+<p>We compared the average time taken to solve a single instance of a hierarchical problem, including the time needed to compute the Hessian and gradient, as well as to fill the solver matrices.
+Additionally, we calculated the success rate <span class="math notranslate nohighlight">\(SR\)</span>, defined as the number of times the back-end successfully found a solution within certain conditions, divided by the total number of runs:</p>
+<div class="math notranslate nohighlight">
+\[SR = \frac{\#success}{\#runs}\]</div>
+<p>To confirm that the back-end successfully performs the task, we consider the task error norm to be less than or equal to <span class="math notranslate nohighlight">\(1e^{-3}\)</span> within the specified maximum number of iterations, set to 1000.</p>
+<p>We performed the comparison considering two prfoundly diverse robotic systems: a 7 DOFs fixed-base manipulator and a 29+6 DOFs floating-base humanoids. For each system we consider different stacks.
+The comparison was conducted on an AMD® Ryzen 9 4900HS with 32 GiB of RAM.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The tests were conducted without fully leveraging the extensive capabilities of the QP solvers, both in terms of tunable options and optimal implementation. For example, some of the QP solvers only offer a sparse interface, necessitating the conversion of dense matrices, which are typical of the problems in the OpenSoT framework, into sparse format. Consequently, the obtained results may be affected by suboptimal option tuning and less-than-optimal implementation. It’s important to note that these results are provided solely to offer a preliminary understanding of the performance in solving specific control problems and may vary in different runs.</p>
+</div>
+<div class="section" id="manipulator">
+<h2>Manipulator<a class="headerlink" href="#manipulator" title="Permalink to this headline"></a></h2>
+<p>For the manipulator we consider just an end-effector positioning task <span class="math notranslate nohighlight">\(\in \mathbb{R}^3\)</span>, meaning that the the null-space size is 4.
+We consider the following two stacks:</p>
+<ul class="simple">
+<li><p><strong>Stack 1</strong>: <span class="math notranslate nohighlight">\((\mathcal{T}_{ee}\%\{0,1,2\} + 1e^{-4}\cdot\mathcal{T}_{p})&lt;&lt;\mathcal{C}_{jl}&lt;&lt;\mathcal{C}_{vl}\)</span></p></li>
+<li><p><strong>Stack 2</strong>: <span class="math notranslate nohighlight">\((\mathcal{T}_{ee}\%\{0,1,2\} / \mathcal{T}_{p})&lt;&lt;\mathcal{C}_{jl}&lt;&lt;\mathcal{C}_{vl}\)</span></p></li>
+</ul>
+<p>with <span class="math notranslate nohighlight">\(\mathcal{T}_{ee}\)</span> the Cartesian task associated to the end-effector, <span class="math notranslate nohighlight">\(\mathcal{T}_{p}\)</span> the joint-space postural task, <span class="math notranslate nohighlight">\(\mathcal{C}_{jl}\)</span> the joint-limits constraint, <span class="math notranslate nohighlight">\(\mathcal{C}_{vl}\)</span> the velocity limit constraint. Notice that from the Cartesian task, the SubTask with the position part is considered.</p>
+<p>The statics running the comparison are presented in the following figures:</p>
+<ul class="simple">
+<li><p><strong>iHQP</strong>: <a class="reference external" href="_static/panda_ik_stats_SOFT_iHQP.pdf">Stack 1</a>, <a class="reference external" href="_static/panda_ik_stats_HARD_iHQP.pdf">Stack 2</a></p></li>
+<li><p><strong>HCOD</strong>: <a class="reference external" href="_static/panda_ik_stats_hcod.pdf">Stack 1 and Stack 2</a></p></li>
+</ul>
+<p>For robots with such few DOFs, simple constrained IK problems can be solved very fast, within <span class="math notranslate nohighlight">\(1e^{-2} \ [ms]\)</span>.</p>
+</div>
+<div class="section" id="humanoid">
+<h2>Humanoid<a class="headerlink" href="#humanoid" title="Permalink to this headline"></a></h2>
+<p>For the humanoid we consider Cartesian pose tasks <span class="math notranslate nohighlight">\(\in SE(3)\)</span> to model the feet in contact with the environment and the tasks at the left and right hands. We consider a quati-static condition of stability by controlling the position <span class="math notranslate nohighlight">\(\in \mathbb{R}^3\)</span> Center of Mass (CoM) of the robot. All these tasks together occupies 27 of the 29 DOFs available in the robot, resulting in a null-space of size 2.</p>
+<p>We consider the following four stacks:</p>
+<ul class="simple">
+<li><p><strong>Stack 1</strong>: <span class="math notranslate nohighlight">\((1e^{-1}\cdot\mathcal{T}_{lh} + \mathcal{T}_{rh} + \mathcal{T}_{CoM} + 1e^{-4}\cdot\mathcal{T}_{p})&lt;&lt;\mathcal{C}_{jl}&lt;&lt;\mathcal{C}_{vl}&lt;&lt;(\mathcal{T}_{ls} + \mathcal{T}_{rs})\)</span></p></li>
+<li><p><strong>Stack 2</strong>: <span class="math notranslate nohighlight">\(((1e^{-1}\cdot\mathcal{T}_{lh} + \mathcal{T}_{rh} + \mathcal{T}_{CoM}) / \mathcal{T}_{p})&lt;&lt;\mathcal{C}_{jl}&lt;&lt;\mathcal{C}_{vl}&lt;&lt;(\mathcal{T}_{ls} + \mathcal{T}_{rs})\)</span></p></li>
+<li><p><strong>Stack 3</strong>: <span class="math notranslate nohighlight">\((\mathcal{T}_{CoM} / (1e^{-1}\cdot\mathcal{T}_{lh} + \mathcal{T}_{rh}) / \mathcal{T}_{p})&lt;&lt;\mathcal{C}_{jl}&lt;&lt;\mathcal{C}_{vl}&lt;&lt;(\mathcal{T}_{ls} + \mathcal{T}_{rs})\)</span></p></li>
+<li><p><strong>Stack 4</strong>: <span class="math notranslate nohighlight">\((\mathcal{T}_{CoM} / \mathcal{T}_{rh} / \mathcal{T}_{lh} / \mathcal{T}_{p})&lt;&lt;\mathcal{C}_{jl}&lt;&lt;\mathcal{C}_{vl}&lt;&lt;(\mathcal{T}_{ls} + \mathcal{T}_{rs})\)</span></p></li>
+</ul>
+<p>with <span class="math notranslate nohighlight">\(\mathcal{T}_{lh}\)</span> and <span class="math notranslate nohighlight">\(\mathcal{T}_{rh}\)</span> the Cartesian task associated to the left and right hands respectively,:math:<cite>mathcal{T}_{lf}</cite> and <span class="math notranslate nohighlight">\(\mathcal{T}_{rf}\)</span> the Cartesian task associated to the left and right feet respectively, and <span class="math notranslate nohighlight">\(\mathcal{T}_{CoM}\)</span> the CoM task. Notice that the feet tasks are used as constraints in these stacks. The desired Cartesian references are sent to the <span class="math notranslate nohighlight">\(\mathcal{T}_{rh}\)</span> task, while to the <span class="math notranslate nohighlight">\(\mathcal{T}_{lh}\)</span> is requested to keep its pose with less priority.</p>
+<p>The statics running the comparison are presented in the following figures:</p>
+<ul class="simple">
+<li><p><strong>iHQP</strong>: <a class="reference external" href="_static/coman_ik_stats_1_LEVEL_iHQP.pdf">Stack 1</a>, <a class="reference external" href="_static/coman_ik_stats_2_LEVELS_iHQP.pdf">Stack 2</a>, <a class="reference external" href="_static/coman_ik_stats_3_LEVELS_iHQP.pdf">Stack 3</a>, <a class="reference external" href="_static/coman_ik_stats_4_LEVELS_iHQP.pdf">Stack 4</a></p></li>
+<li><p><strong>HCOD</strong>: <a class="reference external" href="_static/coman_ik_stats_hcod.pdf">Stack 1, Stack 2, Stack 3, and Stack 4</a></p></li>
+</ul>
+<p>For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within <span class="math notranslate nohighlight">\(1 \ [ms]\)</span> and <cite>10 [ms]</cite>. Notably, in the case of the iHQP, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
