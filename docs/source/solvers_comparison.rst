@@ -32,7 +32,7 @@ with :math:`\mathcal{T}_{ee}` the Cartesian task associated to the end-effector,
 The statics running the comparison are presented in the following figures:
 
 - **iHQP**: `Stack 1 <_static/panda_ik_stats_SOFT_iHQP.pdf>`_, `Stack 2 <_static/panda_ik_stats_HARD_iHQP.pdf>`_
-- **HCOD**: `Stack 1 & Stack 2 <_static/panda_ik_stats_hcod.pdf>`_
+- **HCOD**: `Stack 1 and Stack 2 <_static/panda_ik_stats_hcod.pdf>`_
 
 For robots with such few DOFs, simple constrained IK problems can be solved very fast, within :math:`1e^{-2} \ [ms]`.
 
@@ -52,9 +52,10 @@ with :math:`\mathcal{T}_{lh}` and :math:`\mathcal{T}_{rh}` the Cartesian task as
 The statics running the comparison are presented in the following figures:
 
 - **iHQP**: `Stack 1 <_static/coman_ik_stats_1_LEVEL_iHQP.pdf>`_, `Stack 2 <_static/coman_ik_stats_2_LEVELS_iHQP.pdf>`_, `Stack 3 <_static/coman_ik_stats_3_LEVELS_iHQP.pdf>`_, `Stack 4 <_static/coman_ik_stats_4_LEVELS_iHQP.pdf>`_
+- **HCOD**: `Stack 1, Stack 2, Stack 3, and Stack 4 <_static/coman_ik_stats_hcod.pdf>`_
 
 
-For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]`. Notably, in the case of the iHQP, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).
+For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]` and `10 \ [ms]`. Notably, in the case of the iHQP, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).
 
 
 
