@@ -152,6 +152,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
      * @brief ik loop
      */
     Eigen::VectorXd dq, q = q_start;
+    dq.setZero(q.size());
     Eigen::Affine3d TCP_world_pose = TCP_world_pose_init;
     double position_error_norm = (TCP_world_pose.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
     unsigned int iter = 0;
@@ -195,7 +196,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
     std::cout<<"position error norm: "<<position_error_norm<<" at iteration "<<iter<<std::endl;
 
     std::cout<<"TCP final pose in world: \n"<<TCP_world_pose.matrix()<<std::endl;
-    std::cout<<"TCP goal position in world: \n"<<TCP_world_pose.matrix().block(0,3,3,1).transpose()<<std::endl;
+    std::cout<<"TCP goal position in world: \n"<<TCP_world_pose_goal.matrix().block(0,3,3,1).transpose()<<std::endl;
 
     if(IS_ROSCORE_RUNNING) usleep(500000);
 
@@ -263,6 +264,8 @@ int main(int argc, char **argv)
         std::vector<std::string> front_ends = {"iHQP", "nHQP"};
         for(auto front_end : front_ends)
         {
+            std::cout<<"USING FRONT-END: "<<front_end<<std::endl;
+
             back_end_success[solver_back_ends::qpOASES] = 0;
             back_end_success[solver_back_ends::OSQP] = 0;
             back_end_success[solver_back_ends::eiQuadProg] = 0;
@@ -391,7 +394,7 @@ int main(int argc, char **argv)
                                {
                                    OpenSoT::solvers::nHQP::Ptr nHQPSolver = std::make_shared<OpenSoT::solvers::nHQP>(stack->getStack(), stack->getBounds(), eps, solver_back_end);
                                    if(stack_priority == stack_priorities[0])
-                                       nHQPSolver->set_perform_A_b_regularization(0, false);
+                                       nHQPSolver->setPerformAbRegularization(0, false);
                                    solver = nHQPSolver;
                                    solver_inited = true;
                                }

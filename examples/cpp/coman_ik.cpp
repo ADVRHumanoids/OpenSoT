@@ -7,6 +7,7 @@
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/utils/AutoStack.h>
+#include <OpenSoT/solvers/nHQP.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <qpSWIFT/qpSWIFT.h>
 #include <matlogger2/matlogger2.h>
@@ -92,6 +93,36 @@ void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, 
 }
 
 /**
+ * @brief areAlmostEqual check if two double numbers are the same up t certain precision
+ * @param a first number
+ * @param b second number
+ * @param precision
+ * @return true if a == b
+ */
+bool areAlmostEqual(double a, double b, int precision = 5) {
+    double epsilon = std::pow(10, -precision);
+    return std::fabs(a - b) < epsilon;
+}
+
+/**
+ * @brief allElementsSame check if all elements are equal in a vector of double
+ * @param vec of double
+ * @return true if all elements are equal
+ */
+bool allElementsSame(const std::vector<double>& vec) {
+    if (vec.empty())
+        return true;
+
+    double firstElement = vec[0];
+    for (const auto& num : vec)
+    {
+        if (!areAlmostEqual(firstElement, num))
+            return false;
+    }
+    return true;
+}
+
+/**
  * @brief solveIK resolve inverse kineamtics from a start and goal pose using Euler integration:
  *      \mathbf{q}_{k+1} = \mathbf{q}_{k} + \boldsymbol{\delta}\mathbf{q}
  * \boldsymbol{\delta}\mathbf{q} is computed from QP
@@ -105,13 +136,14 @@ void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, 
  * @param norm_error_eps under this value the goal pose is considered reached
  * @param dT control loop time, used by ROS to publish joint states
  * @param n ROS node handle
+ * @param back_end_name name of the used backend
  * @return solver statistics
  */
 solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d& TCP_world_pose_goal, const std::string& TCP_frame,
                           XBot::ModelInterface::Ptr model, OpenSoT::AutoStack::Ptr stack,
-                          OpenSoT::solvers::iHQP::Ptr solver,
+                          OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr solver,
                           const unsigned int max_iterations, const double norm_error_eps,
-                          const double dT, std::shared_ptr<ros::NodeHandle> n)
+                          const double dT, std::shared_ptr<ros::NodeHandle> n, const std::string& back_end_name)
 {
     /**
       * Update model with q_start and q_goal and retrieve initial and goal Cartesian pose
@@ -129,12 +161,14 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
      * @brief ik loop
      */
     Eigen::VectorXd dq, q = q_start;
+    dq.setZero(q.size());
     Eigen::Affine3d TCP_world_pose_init, TCP_world_pose;
     OpenSoT::tasks::velocity::Cartesian::asCartesian(task)->getActualPose(TCP_world_pose_init);
     double position_error_norm = (TCP_world_pose_init.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
     unsigned int iter = 0;
     std::vector<double> solver_time; //ms
     solver_time.reserve(max_iterations);
+    std::vector<double> errors;
     while(position_error_norm > norm_error_eps && iter < max_iterations)
     {
         std::cout<<"position error norm: "<<position_error_norm<<" at iteration "<<iter<<std::endl;
@@ -169,15 +203,26 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
         model->getPose(TCP_frame, TCP_world_pose);
         position_error_norm = (TCP_world_pose.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
         iter++;
+
+        errors.push_back(position_error_norm);
+        /**
+          * We check if last 10 errors are equal, if true we abort
+          */
+        if(errors.size() == 10)
+        {
+            if(allElementsSame(errors))
+                break;
+            errors.clear();
+        }
     }
     std::cout<<"position error norm: "<<position_error_norm<<" at iteration "<<iter<<std::endl;
 
     std::cout<<"TCP final pose in world: \n"<<TCP_world_pose.matrix()<<std::endl;
-    std::cout<<"TCP goal position in world: \n"<<TCP_world_pose.matrix().block(0,3,3,1).transpose()<<std::endl;
+    std::cout<<"TCP goal position in world: \n"<<TCP_world_pose_goal.matrix().block(0,3,3,1).transpose()<<std::endl;
 
     if(IS_ROSCORE_RUNNING) usleep(500000);
 
-    return solver_statistics(solver->getBackEndName(0), solver_time, iter);
+    return solver_statistics(back_end_name, solver_time, iter);
 }
 
 using namespace OpenSoT::solvers;
@@ -278,205 +323,215 @@ int main(int argc, char **argv)
 
     for(auto stack_priority : stack_priorities)
     {
-        back_end_success[solver_back_ends::qpOASES] = 0;
-        back_end_success[solver_back_ends::OSQP] = 0;
-        back_end_success[solver_back_ends::eiQuadProg] = 0;
-        back_end_success[solver_back_ends::qpSWIFT] = 0;
-        back_end_success[solver_back_ends::proxQP] = 0;
-
-
-        XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/coman_ik_stats_" + stack_priority + "_iHQP");
-        logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
-
-        /**
-          * Outer loop: the ik is tested on NUMBER_OF_RUNS different start and goal configurations
-          **/
-        unsigned int total_runs = 0;
-        for(unsigned int k = 0; k < NUMBER_OF_RUNS; ++k)
+        std::vector<std::string> front_ends = {"iHQP", "nHQP"};
+        for(auto front_end : front_ends)
         {
+            std::cout<<"USING FRONT-END: "<<front_end<<std::endl;
+
+            back_end_success[solver_back_ends::qpOASES] = 0;
+            back_end_success[solver_back_ends::OSQP] = 0;
+            back_end_success[solver_back_ends::eiQuadProg] = 0;
+            back_end_success[solver_back_ends::qpSWIFT] = 0;
+            back_end_success[solver_back_ends::proxQP] = 0;
+
+
+            XBot::MatLogger2::Ptr logger = XBot::MatLogger2::MakeLogger("/tmp/coman_ik_stats_" + stack_priority + "_" + front_end);
+            logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
+
             /**
-             * @brief We pass to the next configurations only if all the solvers reach the min_error in the Cartesian position task
-             * with less iterations than max_iter. This is checked at the end of this while loop.
-             */
-            bool all_good = false;
-            while(!all_good)
+              * Outer loop: the ik is tested on NUMBER_OF_RUNS different start and goal configurations
+              **/
+            unsigned int total_runs = 0;
+            for(unsigned int k = 0; k < NUMBER_OF_RUNS; ++k)
             {
-                st.clear();
-
                 /**
-                 * @brief Given initial pose, we select random delta motion for the r_wrist and we assign as Cartesian goal
+                 * @brief We pass to the next configurations only if all the solvers reach the min_error in the Cartesian position task
+                 * with less iterations than max_iter. This is checked at the end of this while loop.
                  */
-                Eigen::VectorXd q(model_ptr->getJointNum()); q.setZero();
-                setGoodInitialPosition(q, model_ptr);
-
-                model_ptr->setJointPosition(q);
-                model_ptr->update();
-                Eigen::Affine3d floating_base_pose;
-                model_ptr->getPose("Waist", "r_sole", floating_base_pose);
-                std::cout<<"floating base pose: \n"<<floating_base_pose.matrix()<<std::endl;
-                model_ptr->setFloatingBasePose(floating_base_pose);
-                model_ptr->update();
-                model_ptr->getJointPosition(q);
-                std::cout<<"q: "<<q.transpose()<<std::endl;
-
-                Eigen::Affine3d w_T_TCP;
-                model_ptr->getPose(TCP_frame, w_T_TCP);
-                std::cout<<"Initial r_wrist pose: \n"<<w_T_TCP.matrix()<<std::endl;
-
-                std::random_device seeder;
-                std::mt19937 engine(seeder());
-                Eigen::VectorXd Dp; Dp.setZero(3);
-                positionRand(Dp, -0.2, 0.2, engine);
-                Eigen::Affine3d w_T_TCP_goal = w_T_TCP;
-                w_T_TCP_goal.translation() += Dp;
-
-                /**
-                  * We loop on the solvers
-                  **/
-                for(solver_back_ends solver_back_end : solver_back_ends_iterator())
+                bool all_good = false;
+                while(!all_good)
                 {
-                    if(back_end_success.find(solver_back_end) != back_end_success.end())
+                    st.clear();
+
+                    /**
+                     * @brief Given initial pose, we select random delta motion for the r_wrist and we assign as Cartesian goal
+                     */
+                    Eigen::VectorXd q(model_ptr->getJointNum()); q.setZero();
+                    setGoodInitialPosition(q, model_ptr);
+
+                    model_ptr->setJointPosition(q);
+                    model_ptr->update();
+                    Eigen::Affine3d floating_base_pose;
+                    model_ptr->getPose("Waist", "r_sole", floating_base_pose);
+                    std::cout<<"floating base pose: \n"<<floating_base_pose.matrix()<<std::endl;
+                    model_ptr->setFloatingBasePose(floating_base_pose);
+                    model_ptr->update();
+                    model_ptr->getJointPosition(q);
+                    std::cout<<"q: "<<q.transpose()<<std::endl;
+
+                    Eigen::Affine3d w_T_TCP;
+                    model_ptr->getPose(TCP_frame, w_T_TCP);
+                    std::cout<<"Initial r_wrist pose: \n"<<w_T_TCP.matrix()<<std::endl;
+
+                    std::random_device seeder;
+                    std::mt19937 engine(seeder());
+                    Eigen::VectorXd Dp; Dp.setZero(3);
+                    positionRand(Dp, -0.2, 0.2, engine);
+                    Eigen::Affine3d w_T_TCP_goal = w_T_TCP;
+                    w_T_TCP_goal.translation() += Dp;
+
+                    /**
+                      * We loop on the solvers
+                      **/
+                    for(solver_back_ends solver_back_end : solver_back_ends_iterator())
                     {
-                        std::cout<<"USING BACK-END: "<<getBackEndString(solver_back_end)<<std::endl;
+                        if(back_end_success.find(solver_back_end) != back_end_success.end())
+                        {
+                            std::cout<<"USING BACK-END: "<<getBackEndString(solver_back_end)<<std::endl;
 
-                        /**
-                        * Creates one Cartesian task and one Postural task
-                        */
-                        model_ptr->setJointPosition(q);
-                        model_ptr->update();
+                            /**
+                            * Creates one Cartesian task and one Postural task
+                            */
+                            model_ptr->setJointPosition(q);
+                            model_ptr->update();
 
-                       using namespace OpenSoT::tasks::velocity;
-                       auto r_sole = std::make_shared<Cartesian>("r_sole", q, *model_ptr.get(), "r_sole", "world");
-                       auto l_sole = std::make_shared<Cartesian>("l_sole", q, *model_ptr.get(), "l_sole", "world");
-                       auto l_wrist = std::make_shared<Cartesian>("l_wrist", q, *model_ptr.get(), "l_wrist", "world");
-                       l_wrist->setLambda(0.1);
-                       auto r_wrist = std::make_shared<Cartesian>("r_wrist", q, *model_ptr.get(), TCP_frame, "world");
-                       r_wrist->setLambda(0.1);
-                       auto com = std::make_shared<CoM>(q, *model_ptr.get());
-                       com->setLambda(0.1);
+                           using namespace OpenSoT::tasks::velocity;
+                           auto r_sole = std::make_shared<Cartesian>("r_sole", q, *model_ptr.get(), "r_sole", "world");
+                           auto l_sole = std::make_shared<Cartesian>("l_sole", q, *model_ptr.get(), "l_sole", "world");
+                           auto l_wrist = std::make_shared<Cartesian>("l_wrist", q, *model_ptr.get(), "l_wrist", "world");
+                           l_wrist->setLambda(0.1);
+                           auto r_wrist = std::make_shared<Cartesian>("r_wrist", q, *model_ptr.get(), TCP_frame, "world");
+                           r_wrist->setLambda(0.1);
+                           auto com = std::make_shared<CoM>(q, *model_ptr.get());
+                           com->setLambda(0.1);
 
 
-                       auto postural = std::make_shared<Postural>(q, "postural");
-                       postural->setLambda(0.01);
+                           auto postural = std::make_shared<Postural>(q, "postural");
+                           postural->setLambda(0.01);
 
-                       /**
-                        * Creates constraints joint position and velocity limits
-                        */
-                       using namespace OpenSoT::constraints::velocity;
-                       auto joint_limits = std::make_shared<JointLimits>(q, qmax, qmin);
-
-                       double dT = 0.01;
-                       auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);
-
-                       OpenSoT::AutoStack::Ptr stack;
-                       std::cout<<"Creating stack "<<stack_priority<<std::endl;
-                       if(stack_priority == stack_priorities[0]){
-                       /**
-                         * We create a stack with ONE priority level:
-                         **/
-                        stack /= (0.1*l_wrist + r_wrist + com + 1e-4*postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
-                       }
-                       else if (stack_priority == stack_priorities[1]){
-                        /**
-                         * We create a stack with TWO priority levels:
-                         **/
-                        stack = ((com + 0.1*l_wrist + r_wrist)/postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
-                       }
-                       else if (stack_priority == stack_priorities[2]){
-                        /**
-                         * We create a stack with THREE priority levels:
-                         **/
-                        stack = (com/(0.1*l_wrist + r_wrist)/postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
-                       }
-                       else{
                            /**
-                            * We create a stack with FOUR priority levels:
-                            **/
-                           stack = (com/l_wrist/r_wrist/postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
-                       }
+                            * Creates constraints joint position and velocity limits
+                            */
+                           using namespace OpenSoT::constraints::velocity;
+                           auto joint_limits = std::make_shared<JointLimits>(q, qmax, qmin);
 
-                       stack->update(q);
+                           double dT = 0.01;
+                           auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);
 
-                       double eps = 1e6;
-                       OpenSoT::solvers::iHQP::Ptr solver;
-                       bool solver_inited = false;
-                       bool reset_eps = false;
-                       while(!solver_inited)
-                       {
-                           try{
-                               solver = std::make_shared<OpenSoT::solvers::iHQP>(*stack, eps, solver_back_end);
-                               solver_inited = true;
-                               if(solver_back_end == solver_back_ends::qpSWIFT)
-                               {
-                                   for(unsigned int i = 0; i < solver->getNumberOfTasks(); ++i)
-                                   {
-                                       boost::any options;
-                                       solver->getOptions(i, options);
-                                       std::shared_ptr<settings> qpSwift_options(boost::any_cast<settings*>(options));
-                                       qpSwift_options->reltol = 1e-1;
-                                       solver->setOptions(i, qpSwift_options.get());
-                                   }
-                               }
-                           }catch(...){
-                               eps *= 10;
-                               std::cout<<"Problem initializing solver, increasing eps..."<<std::endl;
-                               reset_eps = true;
+                           OpenSoT::AutoStack::Ptr stack;
+                           std::cout<<"Creating stack "<<stack_priority<<std::endl;
+                           if(stack_priority == stack_priorities[0]){
+                           /**
+                             * We create a stack with ONE priority level:
+                             **/
+                            stack /= (0.1*l_wrist + r_wrist + com + 1e-4*postural);
+                            stack<<joint_limits<<vel_limits<<(l_sole + r_sole);
                            }
-                       }
-                       /**
-                         * If we needed to increase the eps to initialize the solver, we now put an initial value very low
-                         * @note: Differently from the eps used in the constructor, when using the setEpsRegularisation(eps) method,
-                         * the value is not premultiplied for BASE_REGULARISATION which is used to be compatible with qpOASES initial
-                         * regularisation. This is LEGACY!
-                         * @todo: align the methods to set the eps which is fundamental!!!
-                         */
-                       if(reset_eps)
-                           solver->setEpsRegularisation(1e-5);
+                           else if (stack_priority == stack_priorities[1]){
+                            /**
+                             * We create a stack with TWO priority levels:
+                             **/
+                            stack = ((com + 0.1*l_wrist + r_wrist)/postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
+                           }
+                           else if (stack_priority == stack_priorities[2]){
+                            /**
+                             * We create a stack with THREE priority levels:
+                             **/
+                            stack = (com/(0.1*l_wrist + r_wrist)/postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
+                           }
+                           else{
+                               /**
+                                * We create a stack with FOUR priority levels:
+                                **/
+                               stack = (com/l_wrist/r_wrist/postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
+                           }
 
-                       /**
-                        * @brief Here we do the ik loop
-                        */
-                       solver_statistics stats =  solveIK(q, w_T_TCP_goal, TCP_frame, model_ptr, stack, solver, max_iter, min_error, dT, n);
+                           stack->update(q);
 
-                       /**
-                         * We possibly remove the largest and smaller values
-                         **/
-                       if(stats.solver_time_ms.size() > 2)
-                           removeMinMax(stats.solver_time_ms);
+                           double eps = 1e6;
+                           //if(front_end == front_ends[1])
+                           //    eps = 1e-6;
+                           OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr solver;
+                           bool solver_inited = false;
+                           bool reset_eps = false;
+                           while(!solver_inited)
+                           {
+                               if(front_end == front_ends[0])
+                               {
+                                   OpenSoT::solvers::iHQP::Ptr iHQPSolver;
+                                   try
+                                   {
+                                        iHQPSolver = std::make_shared<OpenSoT::solvers::iHQP>(*stack, eps, solver_back_end);
+                                   }
+                                   catch(...)
+                                   {
+                                      eps *= 10;
+                                      std::cout<<"Problem initializing solver, increasing eps..."<<std::endl;
+                                      reset_eps = true;
+                                   }
 
-                       st.push_back(stats);
+                                   if(reset_eps)
+                                    iHQPSolver->setEpsRegularisation(1e-5);
+
+                                   solver = iHQPSolver;
+                                   solver_inited = true;
+                               }
+                               else
+                               {
+                                   OpenSoT::solvers::nHQP::Ptr nHQPSolver = std::make_shared<OpenSoT::solvers::nHQP>(stack->getStack(), stack->getBounds(), eps, solver_back_end);
+                                   if(stack_priority == stack_priorities[0])
+                                       nHQPSolver->setPerformAbRegularization(false);
+                                   nHQPSolver->setPerformSelectiveNullSpaceRegularization(false);
+                                   solver = nHQPSolver;
+                                   solver_inited = true;
+                               }
+                           }
+
+                           /**
+                            * @brief Here we do the ik loop
+                            */
+                           solver_statistics stats =  solveIK(q, w_T_TCP_goal, TCP_frame, model_ptr, stack, solver, max_iter, min_error, dT, n, getBackEndString(solver_back_end));
+
+                           /**
+                             * We possibly remove the largest and smaller values
+                             **/
+                           if(stats.solver_time_ms.size() > 2)
+                               removeMinMax(stats.solver_time_ms);
+
+                           st.push_back(stats);
+                        }
+
                     }
+                    total_runs++;
 
-                }
-                total_runs++;
-
-                /**
-                  * @brief check if everything went fine using all the solvers
-                  **/
-                all_good = true;
-                for(solver_statistics solver_stat : st)
-                {
-                    if(solver_stat.number_of_iterations < max_iter && solver_stat.solver_time_ms.size() > 0){
-                        std::cout<<"mean solver_time: "<<solver_stat.solverTimeMean()<<" [ms] using back-end: "<<solver_stat.back_end_id<<std::endl;
-                        back_end_success[getBackEndFromString(solver_stat.back_end_id)]++;
-                    }
-                    else
-                        all_good = false;
-                }
-                // if everything went good with all the solvers then the data are logged
-                if(all_good)
-                {
+                    /**
+                      * @brief check if everything went fine using all the solvers
+                      **/
+                    all_good = true;
                     for(solver_statistics solver_stat : st)
-                        log(logger, solver_stat);
+                    {
+                        if(solver_stat.number_of_iterations < max_iter && solver_stat.solver_time_ms.size() > 0){
+                            std::cout<<"mean solver_time: "<<solver_stat.solverTimeMean()<<" [ms] using back-end: "<<solver_stat.back_end_id<<std::endl;
+                            back_end_success[getBackEndFromString(solver_stat.back_end_id)]++;
+                        }
+                        else
+                            all_good = false;
+                    }
+                    // if everything went good with all the solvers then the data are logged
+                    if(all_good)
+                    {
+                        for(solver_statistics solver_stat : st)
+                            log(logger, solver_stat);
+                    }
                 }
             }
+            for(solver_statistics solver_stat : st){
+                logger->add(solver_stat.back_end_id + "number_of_success", back_end_success[getBackEndFromString(solver_stat.back_end_id)]);
+                std::cout<<solver_stat.back_end_id<<" number of success: "<<back_end_success[getBackEndFromString(solver_stat.back_end_id)]<<std::endl;
+            }
+            logger->add("total_runs", total_runs);
+            std::cout<<"total runs: "<<total_runs<<std::endl;
         }
-        for(solver_statistics solver_stat : st){
-            logger->add(solver_stat.back_end_id + "number_of_success", back_end_success[getBackEndFromString(solver_stat.back_end_id)]);
-            std::cout<<solver_stat.back_end_id<<" number of success: "<<back_end_success[getBackEndFromString(solver_stat.back_end_id)]<<std::endl;
-        }
-        logger->add("total_runs", total_runs);
-        std::cout<<"total runs: "<<total_runs<<std::endl;
     }
     return 0;
 }
