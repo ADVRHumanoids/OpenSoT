@@ -87,12 +87,32 @@ namespace OpenSoT { namespace solvers {
         void setMinSingularValueRatio(std::vector<double> sv_min);
 
         /**
-         * @brief set_perform_A_b_regularization at a certain hierarchy level
+         * @brief setPerformAbRegularization at a certain hierarchy level
          * @param hierarchy_level
          * @param perform_A_b_regularization true or false (default is true for all levels)
          * @note throw if asked hierarchy that does not exists
          */
-        void set_perform_A_b_regularization(int hierarchy_level, bool perform_A_b_regularization);
+        void setPerformAbRegularization(int hierarchy_level, bool perform_A_b_regularization);
+
+        /**
+         * @brief setPerformAbRegularization to all leveles
+         * @param perform_A_b_regularization true or false (default is true for all levels)
+         */
+        void setPerformAbRegularization(bool perform_A_b_regularization);
+
+        /**
+         * @brief setPerformSelectiveNullSpaceRegularization at a certain hierarchy level
+         * @param hierarchy_level
+         * @param perform_selective_null_space_regularization true or false (default is true for all levels)
+         * @note throw if asked hierarchy that does not exists
+         */
+        void setPerformSelectiveNullSpaceRegularization(int hierarchy_level, bool perform_selective_null_space_regularization);
+
+        /**
+         * @brief setPerformSelectiveNullSpaceRegularization to all leveles
+         * @param perform_selective_null_space_regularization true or false (default is true for all levels)
+         */
+        void setPerformSelectiveNullSpaceRegularization(bool perform_selective_null_space_regularization);
 
     private:
 
@@ -141,6 +161,12 @@ namespace OpenSoT { namespace solvers {
              * @param perform_A_b_regularization true or false, default true
              */
             void set_perform_A_b_regularization(bool perform_A_b_regularization_);
+
+            /**
+             * @brief set_perform_selective_null_space_regularization regularization of the Hessian matrix using max singular value and null_space
+             * @param perform_selective_null_space_regularization_ true or false, default true
+             */
+            void set_perform_selective_null_space_regularization(bool perform_selective_null_space_regularization_);
 
         private:
 
@@ -196,6 +222,9 @@ namespace OpenSoT { namespace solvers {
 
             // if true the regularize_A_b(double threshold) is called in compute_cost()
             bool perform_A_b_regularization;
+
+            // if true the selective regularization is performed in compute_cost()
+            bool perform_selective_null_space_regularization;
 
             /**
              * @brief Perform SVD-based regularization of AN and b0 as follows:
