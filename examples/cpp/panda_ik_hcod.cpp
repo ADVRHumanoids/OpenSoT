@@ -148,6 +148,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
      * @brief ik loop
      */
     Eigen::VectorXd dq, q = q_start;
+    dq.setZero(q.size());
     Eigen::Affine3d TCP_world_pose = TCP_world_pose_init;
     double position_error_norm = (TCP_world_pose.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
     unsigned int iter = 0;
@@ -191,7 +192,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
     std::cout<<"position error norm: "<<position_error_norm<<" at iteration "<<iter<<std::endl;
 
     std::cout<<"TCP final pose in world: \n"<<TCP_world_pose.matrix()<<std::endl;
-    std::cout<<"TCP goal position in world: \n"<<TCP_world_pose.matrix().block(0,3,3,1).transpose()<<std::endl;
+    std::cout<<"TCP goal position in world: \n"<<TCP_world_pose_goal.matrix().block(0,3,3,1).transpose()<<std::endl;
 
     if(IS_ROSCORE_RUNNING) usleep(500000);
 
