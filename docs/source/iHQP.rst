@@ -16,8 +16,8 @@ This correspond to the following cascade of QPs:
 .. math:: 
    
    \begin{align}
-   &\mathbf{x}_1 = arg\min\limits_{\mathbf{x}} \lVert \mathbf{A}_1\mathbf{x} - \mathbf{b}_1\rVert \newline
-   &s.t. \quad  \mathbf{d}_{m,1}\leq \mathbf{C}_1\mathbf{x}\leq\mathbf{d}_{M,1} 
+   &\mathbf{x}_1 = \text{arg}\min\limits_{\mathbf{x}} \lVert \mathbf{A}_1\mathbf{x} - \mathbf{b}_1\rVert \newline
+   &s.t. \quad  \mathbf{d}_m\leq \mathbf{C}\mathbf{x}\leq\mathbf{d}_M 
    \end{align} 
 
 2. a QP solving :math:`\mathcal{T}_2<<\mathcal{C}_1<<\mathcal{T}_1^{opt}` and computing the final solution :math:`\mathbf{x}_2 = \mathbf{x}^{opt}`:
@@ -26,11 +26,24 @@ This correspond to the following cascade of QPs:
    
    \begin{align}
    &\mathbf{x}_2 = \text{arg}\min\limits_{\mathbf{x}} \lVert \mathbf{A}_2\mathbf{x} - \mathbf{b}_2\rVert \newline
-   &s.t. \quad  \mathbf{d}_{m,1}\leq \mathbf{C}_1\mathbf{x}\leq\mathbf{d}_{M,1} \newline
-   & \quad \quad \mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1 
+   &s.t. \quad \mathbf{d}_m\leq \mathbf{C}\mathbf{x}\leq\mathbf{d}_M \newline
+   & \quad \quad \quad \mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1 
    \end{align} 
 
 the term :math:`\mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1` is called *optimality constraint*.
+
+The generic *k-th* priority is implemented as:
+
+.. math::
+
+   \begin{align}
+   &\mathbf{x}_k = \text{arg}\min\limits_{\mathbf{x}} \lVert \mathbf{A}_k\mathbf{x} - \mathbf{b}_k\rVert \nonumber \\
+   &s.t. \quad \mathbf{d}_m\leq \mathbf{C}\mathbf{x}\leq\mathbf{d}_M \nonumber \\
+   & \quad \quad \quad \mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1 \nonumber \\
+   & \quad \quad \quad \mathbf{A}_2\mathbf{x} = \mathbf{A}_2\mathbf{x}_2 \nonumber \\
+   & \quad \quad \quad \quad \quad \ \vdots \nonumber \\
+   & \quad \quad \mathbf{A}_{k-1}\mathbf{x} = \mathbf{A}_{k-1}\mathbf{x}_{k-1} \nonumber 
+   \end{align}  
    
 The ``iHQP`` solver consists in a **front-end** (derived from ``OpenSoT::Solver``), that prepares the optimization problems to be solved starting from the given *stack*, and a **back-end** (derived from the ``OpenSoT::solvers::BackEnd`` base class in `BackEnd.h <>`__) which solves the optimization problem using an out-of-the-box QP solver. Different *back-ends* are available in OpenSoT and can be used in different *front-ends*. For the iHQP there are available the following *back-ends*:
 

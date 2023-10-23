@@ -1,6 +1,6 @@
 nHQP
 ----
-The ``nHQP`` solver (`nHQP.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1solvers_1_1nHQP.html>`__) is based on the work from *authors*: *paper* (`paper <>`__) and permits to resolve hierarchical QP problems with **generic inequality constraints**.
+The ``nHQP`` solver (`nHQP.h <https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1solvers_1_1nHQP.html>`__) is based on the work from *authors*: *de Lasa et al.* (`Prioritized Optimization for Task-Space Control <https://ieeexplore.ieee.org/abstract/document/5354341>`__) and permits to resolve hierarchical QP problems with **generic inequality constraints**.
 
 As in the case of the iHQP solver, hierarchies are solved by a cascade of QP problems, but in this case, the null-space of high priority tasks is exploited to solve only the remaining available free DOFs, resulting in successive optimizations with reduced number of variables.  
 

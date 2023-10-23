@@ -68,22 +68,40 @@ namespace OpenSoT { namespace solvers {
         // Shared pointer typedef
         typedef std::shared_ptr<nHQP> Ptr;
 
-        // Constructor
+        /**
+         * @brief nHQP constructor
+         * @param stack_of_tasks vector of tasks
+         * @param bounds and constraints of the problem
+         * @param eps_regularisation resularization for the back-end
+         * @param be_solver to solve the QP
+         */
         nHQP(Stack& stack_of_tasks,
              ConstraintPtr bounds,
              const double eps_regularisation,
              const solver_back_ends be_solver = solver_back_ends::qpOASES);
 
-        // Destructor
+        /**
+         * @brief ~nHQP destructor
+         */
         virtual ~nHQP() override;
 
-        // Solve implementation
+        /**
+         * @brief solve implementation
+         * @param solution
+         * @return false if something went wrong
+         */
         virtual bool solve(Eigen::VectorXd& solution) override;
 
-        // Setter for minimum singular value ratio
+        /**
+         * @brief setMinSingularValueRatio for the A and b regularization for all priority levels
+         * @param sv_min between 0. and 1.
+         */
         void setMinSingularValueRatio(double sv_min);
 
-        // Setter for minimum singular value ratio (layer wise)
+        /**
+         * @brief setMinSingularValueRatio for the A and b regularization for a single priority levels
+         * @param sv_min between 0. and 1.
+         */
         void setMinSingularValueRatio(std::vector<double> sv_min);
 
         /**
