@@ -28,7 +28,7 @@ Currently, the project is developed under the EU Projects CogIMon (https://cogim
 Its homepage resides in http://github.com/robotology-playground/OpenSoT
 You can also find a wiki there.
 
-An online version of this documentation can be obtained at http://opensot.github.io
+An online version of this documentation can be obtained at https://advrhumanoids.github.io/OpenSoT/index.html
 
 Some videos from OpenSoT YouTube channel (https://www.youtube.com/channel/UCkkZXunCN6eJwww1CeK7DrA):
 
