@@ -17,6 +17,7 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
         <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -80,10 +81,46 @@
              
   <div class="section" id="nhqp">
 <h1>nHQP<a class="headerlink" href="#nhqp" title="Permalink to this headline"></a></h1>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>TODO</p>
-</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">nHQP</span></code> solver (<a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1solvers_1_1nHQP.html">nHQP.h</a>) is based on the work from <em>authors</em>: <em>de Lasa et al.</em> (<a class="reference external" href="https://ieeexplore.ieee.org/abstract/document/5354341">Prioritized Optimization for Task-Space Control</a>) and permits to resolve hierarchical QP problems with <strong>generic inequality constraints</strong>.</p>
+<p>As in the case of the iHQP solver, hierarchies are solved by a cascade of QP problems, but in this case, the null-space of high priority tasks is exploited to solve only the remaining available free DOFs, resulting in successive optimizations with reduced number of variables.</p>
+<p>The generic <em>k-th</em> priority is implemented as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{align}
+        &amp;\mathbf{\bar{x}}_k^* = arg\min\limits_{\mathbf{\bar{x}}_k} \lVert \mathbf{\bar{A}}_k\mathbf{\bar{x}}_k - \mathbf{\bar{b}}_k\rVert \newline
+        &amp;s.t. \quad  \mathbf{\bar{d}}_{m,k}\leq \mathbf{\bar{C}}_k\mathbf{x}\leq\mathbf{\bar{d}}_{M,k}
+\end{align}\]</div>
+<p>with:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+\mathbf{\bar{A}}_k &amp;= \mathbf{A}_k\mathbf{N}_{k-1}, \\
+\mathbf{\bar{b}}_k &amp;= \mathbf{b}_k-\mathbf{A}_k\mathbf{x}_{k-1}, \\
+\mathbf{\bar{C}}_k &amp;= \mathbf{A}_k\mathbf{N}_{k-1}, \\
+[\mathbf{\bar{d}}_{m,k}, \mathbf{\bar{d}}_{M,k}] &amp;= [\mathbf{d}_{m,k}-\mathbf{A}_k\mathbf{x}_{k-1}, \mathbf{d}_{M,k}-\mathbf{A}_k\mathbf{x}_{k-1}]
+\end{align}\end{split}\]</div>
+<p>and <span class="math notranslate nohighlight">\(\mathbf{N}_{k-1}\)</span> is a <em>cumulative</em> base of the null-space of the previous <em>k-1</em> levels computed as:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{N}_{k-1} = \mathbf{N}_{k-2} * Null(\mathbf{A}_{k-1}\mathbf{N}_{k-2}).\]</div>
+<p>The final solution is computed ad <span class="math notranslate nohighlight">\(\mathbf{x}_k = \mathbf{x}_{k-1} + \mathbf{N}_{k-1}*\mathbf{\bar{x}}_k^*\)</span>.</p>
+<p>For the first priority level <span class="math notranslate nohighlight">\(k = 0\)</span>:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+\mathbf{N}_{0} &amp;= \mathbf{I}, \\
+\mathbf{x}_{0} &amp;= \mathbf{0}, \\
+\mathbf{N}_{1} &amp;= Null(\mathbf{A}_1).
+\end{align}\end{split}\]</div>
+</div></blockquote>
+<p>Notice that <span class="math notranslate nohighlight">\(\mathbf{x}_k \in \mathbb{R}^p\)</span>, <span class="math notranslate nohighlight">\(\mathbf{x}_{k-1} \in \mathbb{R}^l\)</span>, …, <span class="math notranslate nohighlight">\(\mathbf{x}_1 \in \mathbb{R}^n\)</span>, with <span class="math notranslate nohighlight">\(p &lt; l &lt; ... &lt; n\)</span>.
+<span class="math notranslate nohighlight">\(Null(\mathbf{H})\)</span> can be computed thorugh SVD; in particular we use the <a class="reference external" href="https://eigen.tuxfamily.org/dox/classEigen_1_1BDCSVD.html">Bidiagonal Divide and Conquer SVD</a> provided by Eigen.</p>
+<p>The <em>back-ends</em> available for the nHQP <em>front-end</em> are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/coin-or/qpOASES">qpOASES</a> v3.1 internally distributed</p></li>
+<li><p><a class="reference external" href="https://www.cs.cmu.edu/~bstephe1/eiquadprog.hpp">eiQuadProg</a> v1.0.0 internally distributed</p></li>
+<li><p><a class="reference external" href="https://osqp.org/">OSQP</a> suggested Release 0.6.2</p></li>
+<li><p><a class="reference external" href="https://github.com/Simple-Robotics/proxsuite">proxQP</a> suggested v0.1.0</p></li>
+<li><p><a class="reference external" href="https://github.com/qpSWIFT/qpSWIFT">qpSWIFT</a> suggested v1.00</p></li>
+</ul>
+<p>It is worth noticing that the computation of the SVD permits to access to information on the rank of the Task matrix with the possiblity to apply some strategy to handle singularities. In particular, we added regularization to the <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> matrix and <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> vector based on the singular Cartesian directions, and to the Hessian matrix based on the null-space.</p>
 </div>
 
 

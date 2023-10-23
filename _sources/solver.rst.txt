@@ -23,9 +23,12 @@ where :math:`\mathcal{S}_1` is a *stack*. **Notice that the way the** *hard* **p
 
    \mathcal{S}_1 = \mathcal{T}_1 / (\mathcal{T}_2+\mathcal{T}_3) / \mathcal{T}_4
    
+
 Available Solvers
 -----------------
-OpenSoT provides out-of-the-box *solvers*, in particular:
+In OpenSoT, solvers are often implemented putting together 2 layers: a **front-end**, and a **back-end**. The **front-end** prepares the optimization problems to be solved starting from the given *stack*, by means of putting together the necessary matrices and vectors, computing cost fucntions and so forth. The **back-end** solves the optimization problem. 
+
+Not all the solvers follow this structure, for example, the **HCOD** solver consists just in a front-end. OpenSoT provides the following out-of-the-box *solvers*:
 
 - The :ref:`eHQP:eHQP` solver for **equality-only Hierarchical QPs**
 - The :ref:`iHQP:iHQP` solver for **inequality Hierarchical QPs** 

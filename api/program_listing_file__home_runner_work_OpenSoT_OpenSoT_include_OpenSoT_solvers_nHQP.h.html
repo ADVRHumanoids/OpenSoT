@@ -125,24 +125,26 @@
         <span class="c1">// Shared pointer typedef</span>
         <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">nHQP</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
 
-        <span class="c1">// Constructor</span>
         <span class="n">nHQP</span><span class="p">(</span><span class="n">Stack</span><span class="o">&amp;</span> <span class="n">stack_of_tasks</span><span class="p">,</span>
              <span class="n">ConstraintPtr</span> <span class="n">bounds</span><span class="p">,</span>
              <span class="k">const</span> <span class="kt">double</span> <span class="n">eps_regularisation</span><span class="p">,</span>
              <span class="k">const</span> <span class="n">solver_back_ends</span> <span class="n">be_solver</span> <span class="o">=</span> <span class="n">solver_back_ends</span><span class="o">::</span><span class="n">qpOASES</span><span class="p">);</span>
 
-        <span class="c1">// Destructor</span>
         <span class="k">virtual</span> <span class="o">~</span><span class="n">nHQP</span><span class="p">()</span> <span class="k">override</span><span class="p">;</span>
 
-        <span class="c1">// Solve implementation</span>
         <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">solve</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">solution</span><span class="p">)</span> <span class="k">override</span><span class="p">;</span>
 
-        <span class="c1">// Setter for minimum singular value ratio</span>
         <span class="kt">void</span> <span class="nf">setMinSingularValueRatio</span><span class="p">(</span><span class="kt">double</span> <span class="n">sv_min</span><span class="p">);</span>
 
-        <span class="c1">// Setter for minimum singular value ratio (layer wise)</span>
         <span class="kt">void</span> <span class="nf">setMinSingularValueRatio</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">sv_min</span><span class="p">);</span>
 
+        <span class="kt">void</span> <span class="nf">setPerformAbRegularization</span><span class="p">(</span><span class="kt">int</span> <span class="n">hierarchy_level</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">perform_A_b_regularization</span><span class="p">);</span>
+
+        <span class="kt">void</span> <span class="nf">setPerformAbRegularization</span><span class="p">(</span><span class="kt">bool</span> <span class="n">perform_A_b_regularization</span><span class="p">);</span>
+
+        <span class="kt">void</span> <span class="nf">setPerformSelectiveNullSpaceRegularization</span><span class="p">(</span><span class="kt">int</span> <span class="n">hierarchy_level</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">perform_selective_null_space_regularization</span><span class="p">);</span>
+
+        <span class="kt">void</span> <span class="nf">setPerformSelectiveNullSpaceRegularization</span><span class="p">(</span><span class="kt">bool</span> <span class="n">perform_selective_null_space_regularization</span><span class="p">);</span>
 
     <span class="k">private</span><span class="o">:</span>
 
@@ -177,6 +179,10 @@
             <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">get_solution</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 
             <span class="kt">bool</span> <span class="nf">enable_logger</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">MatLogger2</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">logger</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">log_prefix</span><span class="p">);</span>
+
+            <span class="kt">void</span> <span class="nf">set_perform_A_b_regularization</span><span class="p">(</span><span class="kt">bool</span> <span class="n">perform_A_b_regularization_</span><span class="p">);</span>
+
+            <span class="kt">void</span> <span class="nf">set_perform_selective_null_space_regularization</span><span class="p">(</span><span class="kt">bool</span> <span class="n">perform_selective_null_space_regularization_</span><span class="p">);</span>
 
         <span class="k">private</span><span class="o">:</span>
 
@@ -229,6 +235,12 @@
 
             <span class="c1">// prefix for logged variables</span>
             <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">log_prefix</span><span class="p">;</span>
+
+            <span class="c1">// if true the regularize_A_b(double threshold) is called in compute_cost()</span>
+            <span class="kt">bool</span> <span class="n">perform_A_b_regularization</span><span class="p">;</span>
+
+            <span class="c1">// if true the selective regularization is performed in compute_cost()</span>
+            <span class="kt">bool</span> <span class="n">perform_selective_null_space_regularization</span><span class="p">;</span>
 
             <span class="kt">void</span> <span class="nf">regularize_A_b</span><span class="p">(</span><span class="kt">double</span> <span class="n">threshold</span><span class="p">);</span>
 

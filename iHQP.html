@@ -82,7 +82,8 @@
   <div class="section" id="ihqp">
 <h1>iHQP<a class="headerlink" href="#ihqp" title="Permalink to this headline"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">iHQP</span></code> solver (<a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1solvers_1_1iHQP.html">iHQP.h</a>) is based on the work from <em>Kanoun et. al</em>: <em>Kinematic control of redundant manipulators: generalizing the task priority framework to inequality tasks</em> (<a class="reference external" href="https://citeseerx.ist.psu.edu/document?repid=rep1&amp;type=pdf&amp;doi=a98060c46adf364b21f7e197edca2abc774c8c98">paper</a>) and permits to resolve hierarchical QP problems with <strong>generic equality and inequality constraints</strong>.</p>
-<p>Hierarchies are solved by a cascade of QP problems where high-level tasks become constraints in lower level ones. Let’s consider for example the following <em>stack</em>:</p>
+<p>Hierarchies are solved by a cascade of QP problems where high-level tasks become constraints in lower level ones.
+Let’s consider for example the following <em>stack</em>:</p>
 <div class="math notranslate nohighlight">
 \[\mathcal{S} = (\mathcal{T}_1 / \mathcal{T}_2)&lt;&lt;\mathcal{C}_1\]</div>
 <p>This correspond to the following cascade of QPs:</p>
@@ -91,8 +92,8 @@
 </ol>
 <div class="math notranslate nohighlight">
 \[\begin{align}
-&amp;\mathbf{x}_1 = arg\min\limits_{\mathbf{x}} \lVert \mathbf{A}_1\mathbf{x} - \mathbf{b}_1\rVert \newline
-&amp;s.t. \quad  \mathbf{d}_{m,1}\leq \mathbf{C}_1\mathbf{x}\leq\mathbf{d}_{M,1}
+&amp;\mathbf{x}_1 = \text{arg}\min\limits_{\mathbf{x}} \lVert \mathbf{A}_1\mathbf{x} - \mathbf{b}_1\rVert \newline
+&amp;s.t. \quad  \mathbf{d}_m\leq \mathbf{C}\mathbf{x}\leq\mathbf{d}_M
 \end{align}\]</div>
 <ol class="arabic simple" start="2">
 <li><p>a QP solving <span class="math notranslate nohighlight">\(\mathcal{T}_2&lt;&lt;\mathcal{C}_1&lt;&lt;\mathcal{T}_1^{opt}\)</span> and computing the final solution <span class="math notranslate nohighlight">\(\mathbf{x}_2 = \mathbf{x}^{opt}\)</span>:</p></li>
@@ -100,11 +101,21 @@
 <div class="math notranslate nohighlight">
 \[\begin{align}
 &amp;\mathbf{x}_2 = \text{arg}\min\limits_{\mathbf{x}} \lVert \mathbf{A}_2\mathbf{x} - \mathbf{b}_2\rVert \newline
-&amp;s.t. \quad  \mathbf{d}_{m,1}\leq \mathbf{C}_1\mathbf{x}\leq\mathbf{d}_{M,1} \newline
-&amp; \quad \quad \mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1
+&amp;s.t. \quad \mathbf{d}_m\leq \mathbf{C}\mathbf{x}\leq\mathbf{d}_M \newline
+&amp; \quad \quad \quad \mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1
 \end{align}\]</div>
 <p>the term <span class="math notranslate nohighlight">\(\mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1\)</span> is called <em>optimality constraint</em>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">iHQP</span></code> solver consists in a <strong>front-end</strong> (derived from <code class="docutils literal notranslate"><span class="pre">OpenSoT::Solver</span></code>), that prepares the optimization problems to be solved starting from the given <em>stack</em>, and a <strong>back-end</strong> (derived from the <code class="docutils literal notranslate"><span class="pre">OpenSoT::solvers::BackEnd</span></code> base class in <a href="#id1"><span class="problematic" id="id2">`BackEnd.h &lt;&gt;`__</span></a>) which solves the optimization problem using an out-of-the-box QP solver. Different <em>back-ends</em> are available in OpenSoT and can be used in different <em>front-ends</em>:</p>
+<p>The generic <em>k-th</em> priority is implemented as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+&amp;\mathbf{x}_k = \text{arg}\min\limits_{\mathbf{x}} \lVert \mathbf{A}_k\mathbf{x} - \mathbf{b}_k\rVert \nonumber \\
+&amp;s.t. \quad \mathbf{d}_m\leq \mathbf{C}\mathbf{x}\leq\mathbf{d}_M \nonumber \\
+&amp; \quad \quad \quad \mathbf{A}_1\mathbf{x} = \mathbf{A}_1\mathbf{x}_1 \nonumber \\
+&amp; \quad \quad \quad \mathbf{A}_2\mathbf{x} = \mathbf{A}_2\mathbf{x}_2 \nonumber \\
+&amp; \quad \quad \quad \quad \quad \ \vdots \nonumber \\
+&amp; \quad \quad \mathbf{A}_{k-1}\mathbf{x} = \mathbf{A}_{k-1}\mathbf{x}_{k-1} \nonumber
+\end{align}\end{split}\]</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">iHQP</span></code> solver consists in a <strong>front-end</strong> (derived from <code class="docutils literal notranslate"><span class="pre">OpenSoT::Solver</span></code>), that prepares the optimization problems to be solved starting from the given <em>stack</em>, and a <strong>back-end</strong> (derived from the <code class="docutils literal notranslate"><span class="pre">OpenSoT::solvers::BackEnd</span></code> base class in <a href="#id1"><span class="problematic" id="id2">`BackEnd.h &lt;&gt;`__</span></a>) which solves the optimization problem using an out-of-the-box QP solver. Different <em>back-ends</em> are available in OpenSoT and can be used in different <em>front-ends</em>. For the iHQP there are available the following <em>back-ends</em>:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/coin-or/qpOASES">qpOASES</a> v3.1 internally distributed</p></li>
 <li><p><a class="reference external" href="https://www.cs.cmu.edu/~bstephe1/eiquadprog.hpp">eiQuadProg</a> v1.0.0 internally distributed</p></li>
@@ -113,7 +124,6 @@
 <li><p><a class="reference external" href="https://github.com/Simple-Robotics/proxsuite">proxQP</a> suggested v0.1.0</p></li>
 <li><p><a class="reference external" href="https://github.com/qpSWIFT/qpSWIFT">qpSWIFT</a> suggested v1.00</p></li>
 </ul>
-<p>You can find <span class="xref std std-doc">here a comparison</span> among the different <em>back-ends</em> for the iHQP solver.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Some <em>front-ends</em>, e.g. <cite>qpOASES</cite>, permit to solve LP problems, i.e. optimization problems where the <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> matrix is null (hence also the Hessian is null). <strong>GLPK</strong> is a LP dedicated solver that can not be used to solve QP problems.</p>

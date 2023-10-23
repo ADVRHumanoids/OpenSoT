@@ -54,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../variables.html">Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#page-hierarchy">Page Hierarchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
@@ -242,7 +243,14 @@
 <li><p>[!!!] ranks of tasks should not change during runtime (e.g. disabling a task)</p></li>
 </ul>
 </p>
-<p>TODO: implement equality constraints by considering the nullspace Neq = Null(Aeq). All optimizations will then take place in the null space of equality constraints. </p>
+<p><dl>
+<dt class="sig sig-object cpp">
+<a class="reference internal" href="page_todo.html#todo_1_todo000001"><span class="std std-ref"><span class="pre">Todo:</span></span></a></dt>
+<dd><p>: implement equality constraints by considering the nullspace Neq = Null(Aeq). All optimizations will then take place in the null space of equality constraints. </p>
+<p>: add reference </p>
+</dd></dl>
+
+</p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
 <dl class="cpp type">
@@ -256,23 +264,35 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP4nHQPER5Stack13ConstraintPtrKdK16solver_back_ends">
 <span id="_CPPv3N7OpenSoT7solvers4nHQP4nHQPER5Stack13ConstraintPtrKdK16solver_back_ends"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP4nHQPER5Stack13ConstraintPtrKdK16solver_back_ends"></span><span id="OpenSoT::solvers::nHQP::nHQP__StackR.ConstraintPtr.doubleC.solver_back_endsC"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1adb66b7f824d9b492968dc804e2854fec"></span><span class="sig-name descname"><span class="n"><span class="pre">nHQP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Stack</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">stack_of_tasks</span></span>, <span class="n"><span class="pre">ConstraintPtr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bounds</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">eps_regularisation</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">be_solver</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_endsE" title="OpenSoT::solvers::solver_back_ends"><span class="n"><span class="pre">solver_back_ends</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum_namespaceOpenSoT_1_1solvers_1ad3629163caba5dfb33fc5662ad77dc21.html#_CPPv4N7OpenSoT7solvers16solver_back_ends7qpOASESE" title="OpenSoT::solvers::solver_back_ends::qpOASES"><span class="n"><span class="pre">qpOASES</span></span></a><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP4nHQPER5Stack13ConstraintPtrKdK16solver_back_ends" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p><a class="reference internal" href="#classOpenSoT_1_1solvers_1_1nHQP"><span class="std std-ref">nHQP</span></a> constructor </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stack_of_tasks</strong> – vector of tasks </p></li>
+<li><p><strong>bounds</strong> – and constraints of the problem </p></li>
+<li><p><strong>eps_regularisation</strong> – resularization for the back-end </p></li>
+<li><p><strong>be_solver</strong> – to solve the QP </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQPD0Ev">
 <span id="_CPPv3N7OpenSoT7solvers4nHQPD0Ev"></span><span id="_CPPv2N7OpenSoT7solvers4nHQPD0Ev"></span><span id="OpenSoT::solvers::nHQP::~nHQP"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1a979bbf594d5b8a941ecd2f1c5e925459"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~nHQP</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">override</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQPD0Ev" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>~nHQP destructor </p>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP5solveERN5Eigen8VectorXdE">
 <span id="_CPPv3N7OpenSoT7solvers4nHQP5solveERN5Eigen8VectorXdE"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP5solveERN5Eigen8VectorXdE"></span><span id="OpenSoT::solvers::nHQP::solve__Eigen::VectorXdR"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1a489a01c19506ef8a5c09270c20685481"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solve</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">solution</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">override</span></span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP5solveERN5Eigen8VectorXdE" title="Permalink to this definition"></a><br /></dt>
-<dd><p>solve solve an Optimization problem </p>
+<dd><p>solve implementation </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>solution</strong> – the solution </p>
+<dd class="field-odd"><p><strong>solution</strong> – </p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>true if solved/solvable </p>
+<dd class="field-even"><p>false if something went wrong </p>
 </dd>
 </dl>
 </dd></dl>
@@ -280,12 +300,82 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP24setMinSingularValueRatioEd">
 <span id="_CPPv3N7OpenSoT7solvers4nHQP24setMinSingularValueRatioEd"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP24setMinSingularValueRatioEd"></span><span id="OpenSoT::solvers::nHQP::setMinSingularValueRatio__double"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1aa9d3bba6daa827493391af435f2bd5cd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setMinSingularValueRatio</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sv_min</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP24setMinSingularValueRatioEd" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>setMinSingularValueRatio for the A and b regularization for all priority levels </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sv_min</strong> – between 0. and 1. </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP24setMinSingularValueRatioENSt6vectorIdEE">
 <span id="_CPPv3N7OpenSoT7solvers4nHQP24setMinSingularValueRatioENSt6vectorIdEE"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP24setMinSingularValueRatioENSt6vectorIdEE"></span><span id="OpenSoT::solvers::nHQP::setMinSingularValueRatio__std::vector:double:"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1a4bc57cc72ce7e6e84751bff7a2912461"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setMinSingularValueRatio</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sv_min</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP24setMinSingularValueRatioENSt6vectorIdEE" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>setMinSingularValueRatio for the A and b regularization for a single priority levels </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sv_min</strong> – between 0. and 1. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEib">
+<span id="_CPPv3N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEib"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEib"></span><span id="OpenSoT::solvers::nHQP::setPerformAbRegularization__i.b"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1ad69ff500ceac332b3f7942aed5733cc5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setPerformAbRegularization</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hierarchy_level</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">perform_A_b_regularization</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEib" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setPerformAbRegularization at a certain hierarchy level </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>throw if asked hierarchy that does not exists </p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hierarchy_level</strong> – </p></li>
+<li><p><strong>perform_A_b_regularization</strong> – true or false (default is true for all levels) </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEb">
+<span id="_CPPv3N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEb"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEb"></span><span id="OpenSoT::solvers::nHQP::setPerformAbRegularization__b"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1a65cb246609fd593a42afc6a6df194c51"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setPerformAbRegularization</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">perform_A_b_regularization</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP26setPerformAbRegularizationEb" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setPerformAbRegularization to all leveles </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>perform_A_b_regularization</strong> – true or false (default is true for all levels) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEib">
+<span id="_CPPv3N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEib"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEib"></span><span id="OpenSoT::solvers::nHQP::setPerformSelectiveNullSpaceRegularization__i.b"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1a99c49232584a40cfe1f2f622eeb9d4b2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setPerformSelectiveNullSpaceRegularization</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hierarchy_level</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">perform_selective_null_space_regularization</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEib" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setPerformSelectiveNullSpaceRegularization at a certain hierarchy level </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>throw if asked hierarchy that does not exists </p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hierarchy_level</strong> – </p></li>
+<li><p><strong>perform_selective_null_space_regularization</strong> – true or false (default is true for all levels) </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEb">
+<span id="_CPPv3N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEb"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEb"></span><span id="OpenSoT::solvers::nHQP::setPerformSelectiveNullSpaceRegularization__b"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1a9dca09b7554a0d48f59938c468a8c12c"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setPerformSelectiveNullSpaceRegularization</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">perform_selective_null_space_regularization</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP42setPerformSelectiveNullSpaceRegularizationEb" title="Permalink to this definition"></a><br /></dt>
+<dd><p>setPerformSelectiveNullSpaceRegularization to all leveles </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>perform_selective_null_space_regularization</strong> – true or false (default is true for all levels) </p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 <div class="breathe-sectiondef docutils container">

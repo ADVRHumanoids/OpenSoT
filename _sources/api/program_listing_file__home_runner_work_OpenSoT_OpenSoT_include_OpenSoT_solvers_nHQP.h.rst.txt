@@ -46,38 +46,40 @@ Program Listing for File nHQP.h
    namespace OpenSoT { namespace solvers {
        class nHQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>
        {
-           
+   
        public:
    
            static constexpr double DEFAULT_MIN_SV_RATIO = 0.05;
-           
+   
            // Shared pointer typedef
            typedef std::shared_ptr<nHQP> Ptr;
-           
-           // Constructor
+   
            nHQP(Stack& stack_of_tasks,
                 ConstraintPtr bounds,
                 const double eps_regularisation,
                 const solver_back_ends be_solver = solver_back_ends::qpOASES);
    
-           // Destructor
            virtual ~nHQP() override;
    
-           // Solve implementation
            virtual bool solve(Eigen::VectorXd& solution) override;
    
-           // Setter for minimum singular value ratio
            void setMinSingularValueRatio(double sv_min);
    
-           // Setter for minimum singular value ratio (layer wise)
            void setMinSingularValueRatio(std::vector<double> sv_min);
    
+           void setPerformAbRegularization(int hierarchy_level, bool perform_A_b_regularization);
+   
+           void setPerformAbRegularization(bool perform_A_b_regularization);
+   
+           void setPerformSelectiveNullSpaceRegularization(int hierarchy_level, bool perform_selective_null_space_regularization);
+   
+           void setPerformSelectiveNullSpaceRegularization(bool perform_selective_null_space_regularization);
    
        private:
-           
+   
            class TaskData
            {
-               
+   
            public:
    
                TaskData(int num_free_vars,
@@ -90,7 +92,7 @@ Program Listing for File nHQP.h
                int compute_nullspace_dimension(double threshold);
    
                void set_nullspace_dimension(int ns_dim);
-               
+   
                void compute_cost(const Eigen::MatrixXd * AN_nullspace,
                                  const Eigen::VectorXd& q0);
    
@@ -100,22 +102,26 @@ Program Listing for File nHQP.h
                bool update_and_solve();
    
                bool compute_nullspace();
-               
+   
                const Eigen::MatrixXd& get_nullspace() const;
    
                const Eigen::VectorXd& get_solution() const;
    
                bool enable_logger(XBot::MatLogger2::Ptr logger, std::string log_prefix);
-               
+   
+               void set_perform_A_b_regularization(bool perform_A_b_regularization_);
+   
+               void set_perform_selective_null_space_regularization(bool perform_selective_null_space_regularization_);
+   
            private:
    
-               
+   
                // this task
                TaskPtr task;
    
                // global constraints
                ConstraintPtr constraints;
-               
+   
                // nullspace of AN (used by next task)
                Eigen::MatrixXd AN_nullspace;
    
@@ -127,7 +133,7 @@ Program Listing for File nHQP.h
    
                // min singular value ratio
                double min_sv_ratio;
-               
+   
                // quadratic cost matrices
                Eigen::MatrixXd H;
                Eigen::VectorXd g;
@@ -140,7 +146,7 @@ Program Listing for File nHQP.h
    
                // simple bounds (only i = 0)
                Eigen::VectorXd lb_bound, ub_bound;
-               
+   
                // svd computation class
                Eigen::BDCSVD<Eigen::MatrixXd> svd;
    
@@ -159,11 +165,17 @@ Program Listing for File nHQP.h
                // prefix for logged variables
                std::string log_prefix;
    
+               // if true the regularize_A_b(double threshold) is called in compute_cost()
+               bool perform_A_b_regularization;
+   
+               // if true the selective regularization is performed in compute_cost()
+               bool perform_selective_null_space_regularization;
+   
                void regularize_A_b(double threshold);
    
            };
    
-           
+   
            virtual void _log(XBot::MatLogger2::Ptr logger, const std::string& prefix) override;
    
            // vector of previous task nullspaces (first elem is nx-by-nx identity)
@@ -178,7 +190,7 @@ Program Listing for File nHQP.h
    
        };
    
-       
+   
    } }
    
    #endif

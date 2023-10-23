@@ -100,7 +100,8 @@ A <em>solver</em> is implemented deriving from the <code class="docutils literal
 \[\mathcal{S}_1 = \mathcal{T}_1 / (\mathcal{T}_2+\mathcal{T}_3) / \mathcal{T}_4\]</div>
 <div class="section" id="available-solvers">
 <h2>Available Solvers<a class="headerlink" href="#available-solvers" title="Permalink to this headline"></a></h2>
-<p>OpenSoT provides out-of-the-box <em>solvers</em>, in particular:</p>
+<p>In OpenSoT, solvers are often implemented putting together 2 layers: a <strong>front-end</strong>, and a <strong>back-end</strong>. The <strong>front-end</strong> prepares the optimization problems to be solved starting from the given <em>stack</em>, by means of putting together the necessary matrices and vectors, computing cost fucntions and so forth. The <strong>back-end</strong> solves the optimization problem.</p>
+<p>Not all the solvers follow this structure, for example, the <strong>HCOD</strong> solver consists just in a front-end. OpenSoT provides the following out-of-the-box <em>solvers</em>:</p>
 <ul class="simple">
 <li><p>The <a class="reference internal" href="eHQP.html#ehqp"><span class="std std-ref">eHQP</span></a> solver for <strong>equality-only Hierarchical QPs</strong></p></li>
 <li><p>The <a class="reference internal" href="iHQP.html#ihqp"><span class="std std-ref">iHQP</span></a> solver for <strong>inequality Hierarchical QPs</strong></p></li>

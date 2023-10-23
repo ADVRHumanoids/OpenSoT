@@ -54,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../variables.html">Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#page-hierarchy">Page Hierarchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
@@ -274,6 +275,29 @@
 <dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP8TaskData13enable_loggerEN4XBot10MatLogger23PtrENSt6stringE">
 <span id="_CPPv3N7OpenSoT7solvers4nHQP8TaskData13enable_loggerEN4XBot10MatLogger23PtrENSt6stringE"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP8TaskData13enable_loggerEN4XBot10MatLogger23PtrENSt6stringE"></span><span id="OpenSoT::solvers::nHQP::TaskData::enable_logger__XBot::MatLogger2::Ptr.ss"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData_1aa0edb3582dd7e87a7e7024c7474a3fec"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">enable_logger</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">XBot</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MatLogger2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">logger</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">log_prefix</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP8TaskData13enable_loggerEN4XBot10MatLogger23PtrENSt6stringE" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP8TaskData30set_perform_A_b_regularizationEb">
+<span id="_CPPv3N7OpenSoT7solvers4nHQP8TaskData30set_perform_A_b_regularizationEb"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP8TaskData30set_perform_A_b_regularizationEb"></span><span id="OpenSoT::solvers::nHQP::TaskData::set_perform_A_b_regularization__b"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData_1a99a43108d76f0b64c30f43ab148b4de4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set_perform_A_b_regularization</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">perform_A_b_regularization_</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP8TaskData30set_perform_A_b_regularizationEb" title="Permalink to this definition"></a><br /></dt>
+<dd><p>skip_A_b_regularization skip the regularization of the A matrix and b vector based on the method void regularize_A_b(double threshold). </p>
+<p>This is particularly suggested when a single layer is used together with a joint-space task. Regularization in this case is not needed and usually perform badly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>perform_A_b_regularization</strong> – true or false, default true </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT7solvers4nHQP8TaskData47set_perform_selective_null_space_regularizationEb">
+<span id="_CPPv3N7OpenSoT7solvers4nHQP8TaskData47set_perform_selective_null_space_regularizationEb"></span><span id="_CPPv2N7OpenSoT7solvers4nHQP8TaskData47set_perform_selective_null_space_regularizationEb"></span><span id="OpenSoT::solvers::nHQP::TaskData::set_perform_selective_null_space_regularization__b"></span><span class="target" id="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData_1ae316b2af98d7a4ebb283c067f16b4fa5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set_perform_selective_null_space_regularization</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">perform_selective_null_space_regularization_</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT7solvers4nHQP8TaskData47set_perform_selective_null_space_regularizationEb" title="Permalink to this definition"></a><br /></dt>
+<dd><p>set_perform_selective_null_space_regularization regularization of the Hessian matrix using max singular value and null_space </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>perform_selective_null_space_regularization_</strong> – true or false, default true </p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 </dd></dl>
