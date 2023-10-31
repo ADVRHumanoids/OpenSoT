@@ -21,6 +21,8 @@ for key in data_dicts:
     data_dict['iterations'][key] = data_dicts[key]['HCODiterations']
     data_dict['total_runs'][key] = data_dicts[key]['total_runs']
 
+print(data_dict)
+
 #computes oredered labels of solver based on number_of_success/total runs
 levels_label = []
 success_ratio_list = []
