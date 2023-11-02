@@ -64,7 +64,7 @@ def subplot(level, index, data, print_phantom=False):
     ll = dict()
     ll["1 LEVEL"] = "Stack 1"
     ll["2 LEVELS"] = "Stack 2"
-    ax.text(5.4, 80, ll[level], rotation=-90)
+    ax.text(0.042, 93, ll[level], rotation=-90, fontsize=25)
 
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
