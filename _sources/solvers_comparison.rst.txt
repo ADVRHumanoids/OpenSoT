@@ -24,22 +24,12 @@ Manipulator (7 DOFs)
 For the manipulator we consider just an end-effector positioning task :math:`\in \mathbb{R}^3`, meaning that the the null-space size is 4.
 We consider the following two stacks:
 
-- **Stack 1**: :math:`(\mathcal{T}_{ee}\%\{0,1,2\} + 1e^{-4}\cdot\mathcal{T}_{p})<<\mathcal{C}_{jl}<<\mathcal{C}_{vl}`
-- **Stack 2**: :math:`(\mathcal{T}_{ee}\%\{0,1,2\} / \mathcal{T}_{p})<<\mathcal{C}_{jl}<<\mathcal{C}_{vl}`
+- **Stack 1**: :math:`(\mathcal{T}_{ee}\%\{0,1,2\} + 1e^{-4}\cdot\mathcal{T}_{p})<<\mathcal{C}_{jl}<<\mathcal{C}_{vl}`, only *soft* priorities;
+- **Stack 2**: :math:`(\mathcal{T}_{ee}\%\{0,1,2\} / \mathcal{T}_{p})<<\mathcal{C}_{jl}<<\mathcal{C}_{vl}`, 2 levels of *hard* priorites;
 
-with :math:`\mathcal{T}_{ee}` the Cartesian task associated to the end-effector, :math:`\mathcal{T}_{p}` the joint-space postural task, :math:`\mathcal{C}_{jl}` the joint-limits constraint, :math:`\mathcal{C}_{vl}` the velocity limit constraint. Notice that from the Cartesian task, the SubTask with the position part is considered.  
+with :math:`\mathcal{T}_{ee}` the Cartesian task associated to the end-effector, :math:`\mathcal{T}_{p}` the joint-space postural task, :math:`\mathcal{C}_{jl}` the joint-limits constraint, :math:`\mathcal{C}_{vl}` the velocity limit constraint. Notice that from the Cartesian task, only the SubTask with the position part is considered.  
 
-The statics running the comparison are presented in the following figures. For the **iHQP** and **nHQP** we plotted separately the results for each stack applying different *back-ends* while, for the **HCOD** solver, we plotted together the results for both the stacks:
-
-- **iHQP**: `Stack 1 <_static/panda_ik_stats_SOFT_iHQP.pdf>`_, `Stack 2 <_static/panda_ik_stats_HARD_iHQP.pdf>`_
-- **nHQP**: `Stack 1 <_static/panda_ik_stats_SOFT_nHQP.pdf>`_, `Stack 2 <_static/panda_ik_stats_HARD_nHQP.pdf>`_
-- **HCOD**: `Stack 1 and Stack 2 <_static/panda_ik_stats_hcod.pdf>`_
-
-In Stack 1, the *success rate* is approximately :math:`90\%`, with the **HCOD** solver achieving the highest success rate of :math:`100\%`. The fastest solver is **iHQP** utilizing **eiQuadProg** with :math:`0.3^{-2} \ [ms]`. Among the three front-ends, **nHQP** demonstrates the best balance between speed and success rate.
-
-In Stack 2, the *success rate* is approximately :math:`85\%`, with the **iHQP** solver utlizing **qpOASES**  achieving the highest success rate of :math:`90.5\%`. Both **iHQP** and **nHQP** utilizing **eiQuadProg**  achieve fast resolution time with :math:`\approx 1^{-2} \ [ms]`. 
-
-To conlcude, for robots with such few DOFs, e.g. manipulators, simple constrained IK problems can be solved very fast, within :math:`1e^{-2} \ [ms]` and with a very high success rate `> 80\%`.
+The statistics comparing the performance are presented in `this figure <_static/panda_plot_ik.pdf>`_. We excluded the HCOD solver from the comparison as it performed poorly in terms of solving time compared to other implementations. For robots with few DOFs, simple constrained IK problems can be solved very fast, under  :math:`0.1 \ [ms]` with a success rate higher than 90%.
 
 Humanoid (35 DOFs)
 ------------------
@@ -54,7 +44,7 @@ We consider the following four stacks:
 
 with :math:`\mathcal{T}_{lh}` and :math:`\mathcal{T}_{rh}` the Cartesian task associated to the left and right hands respectively, :math:`\mathcal{T}_{lf}` and :math:`\mathcal{T}_{rf}` the Cartesian task associated to the left and right feet respectively, and :math:`\mathcal{T}_{CoM}` the CoM task. Notice that the feet tasks are used as constraints in these stacks. The desired Cartesian references are sent to the :math:`\mathcal{T}_{rh}` task, while to the :math:`\mathcal{T}_{lh}` is requested to keep its pose with less priority.  
 
-The statistics comparing the performance are presented in `this figure <_static/coman_plot_ik.pdf>`_. We excluded the HCOD solver from the comparison as it performed poorly in terms of solving time compared to other implementations, although it achieved a 100% success rate. For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]` and `10 \ [ms]`. Notably, in the case of the iHQP, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).
+The statistics comparing the performance are presented in `this figure <_static/coman_plot_ik.pdf>`_. We again excluded the HCOD solver from the comparison as it performed poorly in terms of solving time compared to other implementations, although it achieved a 100% success rate. For robots with multiple DOFs, simple constrained IK problems can be solved also fast, within :math:`1 \ [ms]` and :math:`10 \ [ms]`. The success rate is for most of the cases between 80% and 100%. Notably, in the case of the iHQP, the time taken to resolve multiple layers does not change significantly when increasing the number of layers to values typically used in complex robotics systems (4-5 layers).
 
 
 
