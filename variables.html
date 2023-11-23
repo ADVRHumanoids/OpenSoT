@@ -17,6 +17,7 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
         <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -51,7 +52,11 @@
 <li class="toctree-l1"><a class="reference internal" href="constraint.html">Constraint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stack.html">Stack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">Solver</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Variables</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#variable-usage">Variable usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#affine-task-and-affine-constraint">Affine Task and Affine Constraint</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="aknowledge.html">Aknowledge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/library_root.html">Library API</a></li>
 </ul>
@@ -82,9 +87,68 @@
              
   <div class="section" id="variables">
 <h1>Variables<a class="headerlink" href="#variables" title="Permalink to this headline"></a></h1>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Write section related to <em>implicit</em> and <em>explicit</em> variables</p>
+<p>In OpenSoT, the matrix <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> and the vectors <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{c}\)</span> completely define a task, and in the same way the matrix <span class="math notranslate nohighlight">\(\mathbf{C}\)</span> and the vectors <span class="math notranslate nohighlight">\(\mathbf{d}_m\)</span> and <span class="math notranslate nohighlight">\(\mathbf{d}_M\)</span> completely define a constraint. While writing the optimization problem using these matrices, the <em>optimization variables</em> are <em>implicit</em> and depends on how these matrices and vectors are written, in other words, we do not write the variables of the problem but we infer them from its structure.</p>
+<p>For example, in differential inverse kinematics, a Cartesian task is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{J}\mathbf{\dot{q}} = \begin{bmatrix} \mathbf{v}\\ \boldsymbol{\omega} \end{bmatrix}\end{split}\]</div>
+<p>which results in <span class="math notranslate nohighlight">\(\mathcal{T} = \left\{ \mathbf{A} =\mathbf{J}, \mathbf{W} = \mathbf{I}, \mathbf{b} =\begin{bmatrix} \mathbf{v}\\ \boldsymbol{\omega} \end{bmatrix}  \right\}\)</span>. It is important to notice that the optimization variable <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> consists <em>only</em> in the joint velocities <span class="math notranslate nohighlight">\(\mathbf{x} = \mathbf{\dot{q}}\)</span>.</p>
+<p>However, there are other formulations which may contains different types of variables. For example, in floating-base inverse dynamics, the variables considered are the joint acceleartions <span class="math notranslate nohighlight">\(\mathbf{\ddot{q}}\)</span> and contact forces <span class="math notranslate nohighlight">\(\mathbf{F}\)</span>. In these cases, the optimization variables contains both accelerations and forces <span class="math notranslate nohighlight">\(\mathbf{x} = \begin{bmatrix} \mathbf{\ddot{q}} \\ \mathbf{F} \end{bmatrix}\)</span>. Therefore, if we consider implicitely the optimization variables, the matrices and vectors forming the tasks will have to take into account both types of optimization variables when defining the task. A Cartesian task in acceleration defined as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{J}\mathbf{\ddot{q}} = \begin{bmatrix} \mathbf{a}\\ \boldsymbol{\dot{\omega}} \end{bmatrix}-\mathbf{\dot{J}}\mathbf{\dot{q}}\end{split}\]</div>
+<p>will result in:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathcal{T} = \left\{ \mathbf{A} =\left[ \mathbf{J} \quad \mathbf{0} \right], \mathbf{W} = \mathbf{I}, \mathbf{b} =\begin{bmatrix} \mathbf{a}\\ \boldsymbol{\dot{\omega}} \end{bmatrix}-\mathbf{\dot{J}}\mathbf{\dot{q}}   \right\}\end{split}\]</div>
+<p>where the <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> matrix has a structure that takes into account the variables we are considering. From a developer point of view, this is not convenient because depending on the number of contact forces, the size of the task matrix will be different requiring more code to consider a variable which in fact is not used in the task! This also makes more complicate to reuse the task, for example in differential inverse kineamtics at the acceleration level where contact forces and dynamics are not present. Ideally, a developer would implement the task regardless of the other variables but considering only the joint accelerations.</p>
+<p>To solve this issue, in OpenSoT we introduced the concepts of <em>explicit variables</em> through the <code class="docutils literal notranslate"><span class="pre">OpenSoT::AffineHelper</span></code> class  in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-affine-h">Affine.h</a>. An <em>affine</em> variable is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{y} = \mathbf{M}\mathbf{x} + \mathbf{q}\]</div>
+<p>and can be used to define (or extract) explicit variables from <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>.
+For example, if <span class="math notranslate nohighlight">\(\mathbf{x} = \begin{bmatrix} \mathbf{\ddot{q}} \\ \mathbf{F} \end{bmatrix}\)</span> with <span class="math notranslate nohighlight">\(\mathbf{\ddot{q}} \in \mathbb{R}^n\)</span> and <span class="math notranslate nohighlight">\(\mathbf{F} \in \mathbb{R}^{3c}\)</span>, then:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{\ddot{q}} = \mathbf{M}_{\mathbf{\ddot{q}}}\mathbf{x}\]</div>
+<p>and</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{F} = \mathbf{M}_{\mathbf{F}}\mathbf{x}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\mathbf{M}_{\mathbf{\ddot{q}}} = \left[ \mathbf{I}_{n \times n} \quad \mathbf{0}_{n \times 3c} \right]\)</span> and <span class="math notranslate nohighlight">\(\mathbf{M}_{\mathbf{F}} = \left[ \mathbf{0}_{3c \times n} \quad \mathbf{I}_{3c \times 3c} \right]\)</span>. In this way is possible to write task/constraints matrices and vectors that are independent from the definition of the optimization variables, in fact, if we consider again the Cartesian task in acceleration, we can write it as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathcal{T} = \left\{ \mathbf{\bar{A}} =\mathbf{J}, \mathbf{W} = \mathbf{I}, \mathbf{b} =\begin{bmatrix} \mathbf{a}\\ \boldsymbol{\dot{\omega}} \end{bmatrix}-\mathbf{\dot{J}}\mathbf{\dot{q}}   \right\}\end{split}\]</div>
+<p>and compute the task matrix that will be used by the solver as:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{A} = \mathbf{\bar{A}}\mathbf{M}_{\mathbf{\ddot{q}}}\]</div>
+<div class="section" id="variable-usage">
+<h2>Variable usage<a class="headerlink" href="#variable-usage" title="Permalink to this headline"></a></h2>
+<p>To create the vector of variables <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> we stack together all the variables we have in our optimization problem. This is done by the <code class="docutils literal notranslate"><span class="pre">OpenSoT::OptvarHelper::VariableVector</span></code> type. With the <code class="docutils literal notranslate"><span class="pre">emplace_back(variable_name,</span> <span class="pre">variable_size)</span></code> method we create and stack the variables. For example, for the previous inverse dynamics case, if <span class="math notranslate nohighlight">\(n=19\)</span> and <span class="math notranslate nohighlight">\(c=4\)</span>, we will have:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">OptvarHelper</span><span class="o">::</span><span class="n">VariableVector</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">variable_name_dims</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="s">&quot;qddot&quot;</span><span class="p">,</span> <span class="mi">19</span><span class="p">);</span>
+<span class="n">variable_name_dims</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="s">&quot;F1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">variable_name_dims</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="s">&quot;F2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">variable_name_dims</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="s">&quot;F3&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">variable_name_dims</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="s">&quot;F4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>It is then possible to retrieve the variable by name:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">AffineHelper</span> <span class="n">qddot</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">getVariable</span><span class="p">(</span><span class="s">&quot;qddot&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Some tasks in OpenSoT can be constructed using a variable, for example the <code class="docutils literal notranslate"><span class="pre">OpenSoT::tasks::acceleration::Cartesian</span></code> in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html">Cartesian.h</a>.
+Tasks that accepts variables normally does not directly assign the <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">_A</span></code> and <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">_b</span></code>, but first uses internal variables to compute the task matrix and constraints with the size related to the variable in use and then computes the <code class="docutils literal notranslate"><span class="pre">_A</span></code> and <code class="docutils literal notranslate"><span class="pre">_b</span></code> using the API from the  <code class="docutils literal notranslate"><span class="pre">AffineHelper</span></code> class.
+For example, considering the Cartesian task in acceleration, let consider to have the Jacobian <code class="docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">J</span></code> and bias vector <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">Jdotqdot</span></code> and the variable <code class="docutils literal notranslate"><span class="pre">AffineHelper</span> <span class="pre">qddot</span></code>, we can define the Cartesian acceleration as:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">AffineHelper</span> <span class="n">xddot</span> <span class="o">=</span> <span class="n">J</span><span class="o">*</span><span class="n">qddot</span> <span class="o">+</span> <span class="n">Jdotqdot</span>
+</pre></div>
+</div>
+<p>The Cartesian acceleration task is defined as the minimization of the Cartesian acceleration and the reference, named <code class="docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">xddot_ref</span></code>, we can define:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">AffineHelper</span> <span class="n">cartesian_task</span> <span class="o">=</span> <span class="n">xddot</span> <span class="o">-</span> <span class="n">xddot_ref</span>
+</pre></div>
+</div>
+<p>Now, we can retrieve the <code class="docutils literal notranslate"><span class="pre">_A</span></code> and <code class="docutils literal notranslate"><span class="pre">_b</span></code> from the <code class="docutils literal notranslate"><span class="pre">cartesian_task</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">_A</span> <span class="o">=</span> <span class="n">cartesian_task</span><span class="p">.</span><span class="n">getM</span><span class="p">();</span>
+<span class="n">_b</span> <span class="o">=</span> <span class="o">-</span><span class="n">cartesian_task</span><span class="p">.</span><span class="n">getq</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="affine-task-and-affine-constraint">
+<h2>Affine Task and Affine Constraint<a class="headerlink" href="#affine-task-and-affine-constraint" title="Permalink to this headline"></a></h2>
+<p>OpenSoT provides utilities to transform tasks and constraints written without variables. This is done by the <code class="docutils literal notranslate"><span class="pre">OpenSoT::AffineUtilsAffineTask</span></code> and <code class="docutils literal notranslate"><span class="pre">OpenSoT::AffineUtilsAffineConstraint</span></code> classes in <a class="reference external" href="https://advrhumanoids.github.io/OpenSoT/api/namespace_OpenSoT__AffineUtils.html">AffineUtils.h</a>. This permits to include in a stack also tasks and constraints that are (or were) not written using the <code class="docutils literal notranslate"><span class="pre">AffineHelper</span></code> variable API (e.g. the tasks and constraints at velocity level).</p>
 </div>
 </div>
 
