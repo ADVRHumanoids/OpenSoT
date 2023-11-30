@@ -6,8 +6,6 @@ jobs:
   include:
     - os: linux
       dist: focal
-    - os: linux
-      dist: bionic
 
 branches:
   only:
