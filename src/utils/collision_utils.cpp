@@ -1,18 +1,11 @@
 #include <OpenSoT/utils/collision_utils.h>
 #include <octomap_msgs/conversions.h>
-#include <eigen_conversions/eigen_msg.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
-#if ROS_VERSION_MINOR <= 12
-#define STATIC_POINTER_CAST boost::static_pointer_cast
-#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
-#define SHARED_PTR boost::shared_ptr
-#define MAKE_SHARED boost::make_shared
-#else
 #define STATIC_POINTER_CAST std::static_pointer_cast
 #define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
 #define SHARED_PTR std::shared_ptr
 #define MAKE_SHARED std::make_shared
-#endif
 
 
 bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
@@ -387,8 +380,7 @@ ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
         _srdf->initString(*_urdf, _model.getSrdfString());
     }
 
-    _moveit_model = std::make_shared<robot_model::RobotModel>(_urdf,
-                                                              _srdf);
+    _moveit_model = std::make_shared<RobotModel>(_urdf, _srdf);
     parseCollisionObjects();
 
     setCollisionBlackList({});
@@ -571,8 +563,8 @@ namespace
 {
 
 std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
-        const shape_msgs::SolidPrimitive& shape,
-        const geometry_msgs::Pose& pose)
+    const shape_msgs::msg::SolidPrimitive& shape,
+    const geometry_msgs::msg::Pose& pose)
 {
     std::shared_ptr<fcl::CollisionGeometryd> fcl_shape;
 
@@ -599,7 +591,7 @@ std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
 
     // set transform
     fcl::Transform3d w_T_octo;
-    tf2::poseMsgToEigen(pose, w_T_octo);
+    tf2::fromMsg(pose, w_T_octo);
     co->setTransform(w_T_octo);
 
     return co;
@@ -607,7 +599,7 @@ std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
 
 }
 
-bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc)
+bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::msg::PlanningSceneWorld& wc)
 {
 
     bool ret = true;
@@ -695,7 +687,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
     // set transform
     fcl::Transform3d w_T_octo;
-    tf2::poseMsgToEigen(wc.octomap.origin, w_T_octo);
+    tf2::fromMsg(wc.octomap.origin, w_T_octo);
     coll_obj->setTransform(w_T_octo);
 
     // save collision object

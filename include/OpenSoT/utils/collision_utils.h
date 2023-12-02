@@ -38,12 +38,13 @@
 #include <geometric_shapes/shape_operations.h>
 #include <memory>
 #include <kdl_parser/kdl_parser.hpp>
-#include <moveit_msgs/PlanningSceneWorld.h>
+#include <moveit_msgs/msg/planning_scene_world.hpp>
 
 #include <OpenSoT/utils/LinkPairDistance.h>
 
 #include <map>
 
+using namespace moveit::core;
 
 // construct vector
 inline KDL::Vector toKdl(urdf::Vector3 v)
@@ -116,7 +117,7 @@ public:
      * @return true if all requests (additions, deletions) could be performs
      * succesfully, false on (partial) insuccess
      */
-    bool setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc);
+    bool setWorldCollisions(const moveit_msgs::msg::PlanningSceneWorld& wc);
 
     /**
      * @brief add single collision to the world
@@ -215,7 +216,7 @@ private:
     /**
      * @brief moveit_robot_model
      */
-    robot_model::RobotModelConstPtr _moveit_model;
+    RobotModelConstPtr _moveit_model;
 
     /**
      * @brief robot_srdf is used to load the ACM every time a whiteList or blackList is generated

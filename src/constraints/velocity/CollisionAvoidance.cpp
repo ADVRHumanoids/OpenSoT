@@ -167,7 +167,7 @@ bool CollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::Links
     return _dist_calc->setCollisionBlackList(blackList);
 }
 
-bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
+bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::msg::PlanningSceneWorld &wc)
 {
     return _dist_calc->setWorldCollisions(wc);
 }

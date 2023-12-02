@@ -25,7 +25,7 @@
 #include <srdfdom/model.h>
 #include <Eigen/Dense>
 
-#include <moveit_msgs/PlanningSceneWorld.h>
+#include <moveit_msgs/msg/planning_scene_world.hpp>
 
 class ComputeLinksDistance;
 class LinkPairDistance;
@@ -137,7 +137,7 @@ public:
      * @return true if all requests (additions, deletions) could be performs
      * succesfully, false on (partial) insuccess
      */
-    bool setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc);
+    bool setWorldCollisions(const moveit_msgs::msg::PlanningSceneWorld& wc);
 
     /**
      * @brief add single collision to the world

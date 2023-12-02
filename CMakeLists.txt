@@ -2,7 +2,7 @@
 # Authors: Enrico Mingo Hoffman, Alessio Rocchi
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 include(ExternalProject)
 project(open_sot VERSION 3.2.0)
 
@@ -28,6 +28,7 @@ set(${CMAKE_PROJECT_NAME}_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #find_package(urdf REQUIRED)
 #find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
+find_package(moveit_msgs QUIET)
 find_package(Qhull REQUIRED)
 find_package(PCL 1.7 QUIET COMPONENTS   common
                                         filters
@@ -113,6 +114,7 @@ if(${FCL_FOUND} AND ${moveit_core_FOUND})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/CollisionAvoidance.cpp)
+    set(PRIVATE_TLL ${PRIVATE_TLL} moveit_core::moveit_planning_scene moveit_msgs::moveit_msgs__rosidl_typesupport_cpp)
 endif()
 
 ##TASKS
