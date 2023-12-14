@@ -81,15 +81,15 @@ Functions
 ---------
 
 
-- :ref:`exhale_function_namespaceOpenSoT_1a35f3ae25b8630915d1768f610ae80013`
-
 - :ref:`exhale_function_namespaceOpenSoT_1a49d7bab96e0b74e7412c617a7d06a1c6`
 
-- :ref:`exhale_function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22`
+- :ref:`exhale_function_namespaceOpenSoT_1a35f3ae25b8630915d1768f610ae80013`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a062f99e2d6db737dd7f13f156574a1d0`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a2c5d7dd14b11e588a36c0eecb0ed6ed5`
+
+- :ref:`exhale_function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a28dfa90c3909a4091eac86ddf0dba03b`
 

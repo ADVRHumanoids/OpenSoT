@@ -94,6 +94,10 @@ The comparison was conducted on an AMD® Ryzen 9 4900HS with 32 GiB of RAM.</p>
 <p class="admonition-title">Warning</p>
 <p>The tests were conducted without fully leveraging the extensive capabilities of the examined QP solvers, both in terms of tunable options and optimal implementation. For example, some of the QP solvers only offer a sparse interface, necessitating the conversion of dense matrices, which are typical of the problems in the OpenSoT framework, into sparse format. Consequently, the obtained results may be affected by suboptimal option tuning and less-than-optimal implementation. It’s important to note that these results are provided solely to offer a preliminary understanding of the performance in solving specific control problems and may vary in different runs.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A great comparison of QP solvers can be found at the following <a class="reference external" href="https://github.com/qpsolvers/qpbenchmark/">GitHub repository</a> (by Stéphane Caron).</p>
+</div>
 <div class="section" id="manipulator-7-dofs">
 <h2>Manipulator (7 DOFs)<a class="headerlink" href="#manipulator-7-dofs" title="Permalink to this headline"></a></h2>
 <p>For the manipulator we consider just an end-effector positioning task <span class="math notranslate nohighlight">\(\in \mathbb{R}^3\)</span>, meaning that the the null-space size is 4.
