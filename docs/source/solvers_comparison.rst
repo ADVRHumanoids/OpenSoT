@@ -18,6 +18,10 @@ The comparison was conducted on an AMD® Ryzen 9 4900HS with 32 GiB of RAM.
 .. warning::
 
 	The tests were conducted without fully leveraging the extensive capabilities of the examined QP solvers, both in terms of tunable options and optimal implementation. For example, some of the QP solvers only offer a sparse interface, necessitating the conversion of dense matrices, which are typical of the problems in the OpenSoT framework, into sparse format. Consequently, the obtained results may be affected by suboptimal option tuning and less-than-optimal implementation. It's important to note that these results are provided solely to offer a preliminary understanding of the performance in solving specific control problems and may vary in different runs.
+	
+.. note::
+
+	A great comparison of QP solvers can be found at the following `GitHub repository <https://github.com/qpsolvers/qpbenchmark/>`__ (by Stéphane Caron). 
 
 Manipulator (7 DOFs)
 --------------------
