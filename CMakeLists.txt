@@ -52,7 +52,7 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         #io)
                                                                                 
 find_package(eigen_conversions REQUIRED)
-find_package(XBotInterface REQUIRED)
+find_package(xbot2_interface REQUIRED)
 find_package(fcl 0.6.1 QUIET)
 if(DEFINED FCL_VERSION)
     set(FCL_FOUND 1)
@@ -89,6 +89,7 @@ INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
     )
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
+add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 
 # for every file in sot_INCLUDES CMake already sets the property HEADER_FILE_ONLY
@@ -144,7 +145,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/acceleration/MinJointVel.cpp
     src/tasks/acceleration/AngularMomentum.cpp
     src/tasks/velocity/Cartesian.cpp
-    src/tasks/velocity/CartesianAdmittance.cpp
+    # src/tasks/velocity/CartesianAdmittance.cpp REFACTOR
     src/tasks/velocity/PureRolling.cpp
     src/tasks/velocity/Gaze.cpp
     src/tasks/velocity/Contact.cpp
@@ -154,7 +155,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/Manipulability.cpp
     src/tasks/velocity/MinimumEffort.cpp
     src/tasks/velocity/Postural.cpp
-    src/tasks/velocity/JointAdmittance.cpp
+    # src/tasks/velocity/JointAdmittance.cpp REFACTOR
     src/tasks/force/CoM.cpp
     src/tasks/force/FloatingBase.cpp
     src/tasks/force/Force.cpp
@@ -232,7 +233,7 @@ install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
 
 TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC
-    XBotInterface::XBotInterface
+    xbot2_interface::xbot2_interface
     matlogger2::matlogger2
     PRIVATE
     ${PRIVATE_TLL})
@@ -358,7 +359,6 @@ install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
 # Add Testing and Examples target  #
 #######################
 if(OPENSOT_COMPILE_TESTS)
-    enable_testing()
     add_subdirectory(tests)
 endif()
 
