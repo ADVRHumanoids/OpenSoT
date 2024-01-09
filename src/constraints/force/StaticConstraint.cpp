@@ -16,12 +16,12 @@ OpenSoT::constraints::force::StaticConstraint::StaticConstraint(const XBot::Mode
 
 void OpenSoT::constraints::force::StaticConstraint::update(const Eigen::VectorXd& x)
 {
-    _constr.setZero(getXSize(), _robot.getActuatedJointNum());
+    _constr.setZero(getXSize(), _robot.getActuatedNv());
     
     for(int i = 0; i < _contact_links.size(); i++)
     {
         _robot.getJacobian(_contact_links.at(i), _J);
-        _constr = _constr + _J.transpose().bottomRows(_robot.getActuatedJointNum()) * _forces[i];
+        _constr = _constr + _J.transpose().bottomRows(_robot.getActuatedNv()) * _forces[i];
     }
     
     _constr = _constr + _robot_torque;
@@ -29,6 +29,6 @@ void OpenSoT::constraints::force::StaticConstraint::update(const Eigen::VectorXd
     _robot.computeGravityCompensation(_gcomp);
     
     _Aeq = _constr.getM();
-    _beq = _gcomp.tail(_robot.getActuatedJointNum()) - _constr.getq();
+    _beq = _gcomp.tail(_robot.getActuatedNv()) - _constr.getq();
     
 }
