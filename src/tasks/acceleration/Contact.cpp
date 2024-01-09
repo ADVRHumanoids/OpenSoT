@@ -1,16 +1,15 @@
 #include <OpenSoT/tasks/acceleration/Contact.h>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
 
 void OpenSoT::tasks::acceleration::Contact::_update(const Eigen::VectorXd& x)
 {
     _robot.getJacobian(_contact_link, _J);
     
-    Eigen::Matrix3d w_R_cl;
-    _robot.getOrientation(_contact_link, w_R_cl);
+    Eigen::Matrix3d w_R_cl = _robot.getPose(_contact_link).linear();
     
-    _robot.computeJdotQdot(_contact_link, Eigen::Vector3d::Zero(), _jdotqdot);
+    _robot.getJdotTimesV(_contact_link, _jdotqdot);
     
-    auto w_adj_cl = XBot::Utils::GetAdjointFromRotation(w_R_cl);
+    auto w_adj_cl = XBot::Utils::adjointFromRotation(w_R_cl);
     
     _contact_task = _K*w_adj_cl*(_J*_qddot + _jdotqdot);
     
