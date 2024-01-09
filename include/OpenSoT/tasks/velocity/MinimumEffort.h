@@ -20,7 +20,7 @@
 #define __TASKS_VELOCITY_MINIMUMEFFORT_H__
 
  #include <OpenSoT/Task.h>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/xbotinterface2.h>
  #include <OpenSoT/utils/cartesian_utils.h>
 
 
@@ -60,7 +60,7 @@
                     Eigen::VectorXd _tau_lim;
 
                     ComputeGTauGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model) :
-                        _robot(XBot::ModelInterface::getModel(robot_model.getConfigOptions())),
+                        _robot(robot_model.clone()),
                         _model(robot_model),
                         _W(q.rows(),q.rows()),
                         _zeros(q.rows())
