@@ -19,31 +19,38 @@
 
 using namespace OpenSoT::constraints::velocity;
 
-JointLimits::JointLimits(   const Eigen::VectorXd& q,
+JointLimits::JointLimits(   const XBot::ModelInterface& robot,
+                            const Eigen::VectorXd& q,
                             const Eigen::VectorXd& jointBoundMax,
                             const Eigen::VectorXd& jointBoundMin,
                             const double boundScaling) :
     Constraint("joint_limits", q.size()),
+    _robot(robot),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
     _boundScaling(boundScaling) {
 
-    assert(q.rows() == _jointLimitsMax.rows());
-    assert(q.rows() == _jointLimitsMin.rows());
+    assert(robot.getNv() == _jointLimitsMax.rows());
+    assert(robot.getNv() == _jointLimitsMin.rows());
+
     /* calling update to generate bounds */
-    update(q);
+    JointLimits::update(q);
 }
 
 void JointLimits::update(const Eigen::VectorXd& x)
 {
 
+
+    _robot.difference(x, _robot.getNeutralQ(), _dq);
 /************************ COMPUTING BOUNDS ****************************/
 
-    if(x.size() == _jointLimitsMax.size())
+    if(_robot.getNv() == _jointLimitsMax.size())
     {
-        _upperBound = ( _jointLimitsMax - x)*_boundScaling;
-        _lowerBound = ( _jointLimitsMin - x)*_boundScaling;
 
+        _upperBound = ( _jointLimitsMax - _dq)*_boundScaling;
+        _lowerBound = ( _jointLimitsMin - _dq)*_boundScaling;
+
+        // avoid infeasibility
         _upperBound = _upperBound.cwiseMax(0.0);
         _lowerBound = _lowerBound.cwiseMin(0.0);
     }
