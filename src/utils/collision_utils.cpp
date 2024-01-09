@@ -14,24 +14,39 @@
 #define MAKE_SHARED std::make_shared
 #endif
 
+namespace
+{
+Eigen::Affine3d toEigen(urdf::Pose p)
+{
+    Eigen::Affine3d ret;
+    ret.setIdentity();
+    ret.translation() << p.position.x, p.position.y, p.position.z;
+
+    Eigen::Quaterniond quat;
+    p.rotation.getQuaternion(quat.x(), quat.y(), quat.z(), quat.w());
+    ret.linear() = quat.toRotationMatrix();
+
+    return ret;
+}
+}
 
 bool ComputeLinksDistance::globalToLinkCoordinates(const std::string& linkName,
                                                    const fcl::Transform3d &fcl_w_T_f,
-                                                   KDL::Frame &link_T_f )
+                                                   Eigen::Affine3d &link_T_f )
 {
 
     fcl::Transform3d fcl_w_T_shape = _collision_obj[linkName]->getTransform();
 
     fcl::Transform3d fcl_shape_T_f = fcl_w_T_shape.inverse() *fcl_w_T_f;
 
-    link_T_f = _link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
+    link_T_f = _link_T_shape[linkName] * fcl_shape_T_f;
 
     return true;
 }
 
 bool ComputeLinksDistance::shapeToLinkCoordinates(const std::string& linkName,
                                                   const fcl::Transform3d &fcl_shape_T_f,
-                                                  KDL::Frame &link_T_f )
+                                                  Eigen::Affine3d &link_T_f )
 {
 
     link_T_f = _link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
@@ -95,7 +110,8 @@ bool ComputeLinksDistance::parseCollisionObjects()
 
         // convert urdf collision to fcl shape
         std::shared_ptr<fcl::CollisionGeometryd> shape;
-        KDL::Frame shape_origin;
+        Eigen::Affine3d shape_origin;
+        shape_origin.setIdentity();
 
         if(auto cylinder = capsule_from_collision(*link))
         {
@@ -107,7 +123,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
             shape = std::make_shared<fcl::Capsuled>(collisionGeometry->radius,
                                                     collisionGeometry->length);
 
-            shape_origin = toKdl(cylinder->origin);
+            shape_origin = toEigen(cylinder->origin);
 
         }
         else if(link->collision->geometry->type == urdf::Geometry::CYLINDER)
@@ -120,7 +136,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
             shape = std::make_shared<fcl::Cylinderd>(collisionGeometry->radius,
                                                      collisionGeometry->length);
 
-            shape_origin = toKdl(link->collision->origin);
+            shape_origin = toEigen(link->collision->origin);
 
             // note: check following line (for capsules it looks to
             // generate wrong results)
@@ -135,7 +151,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
                     DYNAMIC_POINTER_CAST<urdf::Sphere>(link->collision->geometry);
 
             shape = std::make_shared<fcl::Sphered>(collisionGeometry->radius);
-            shape_origin = toKdl(link->collision->origin);
+            shape_origin = toEigen(link->collision->origin);
         }
         else if ( link->collision->geometry->type == urdf::Geometry::BOX )
         {
@@ -148,7 +164,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
                                                 collisionGeometry->dim.y,
                                                 collisionGeometry->dim.z);
 
-            shape_origin = toKdl(link->collision->origin);
+            shape_origin = toEigen(link->collision->origin);
 
         }
         else if(link->collision->geometry->type == urdf::Geometry::MESH)
@@ -194,7 +210,7 @@ bool ComputeLinksDistance::parseCollisionObjects()
             bvhModel->addSubModel(vertices, triangles);
             bvhModel->endModel();
 
-            shape_origin = toKdl(link->collision->origin);
+            shape_origin = toEigen(link->collision->origin);
         }
 
 
@@ -231,22 +247,22 @@ bool ComputeLinksDistance::updateCollisionObjects()
     for(auto link_name : _links_to_update)
     {
         // link pose
-        KDL::Frame w_T_link, w_T_shape;
-        _model.getPose(link_name, w_T_link);
+        Eigen::Affine3d w_T_link, w_T_shape;
+        w_T_link = _model.getPose(link_name);
 
         // shape pose
         w_T_shape = w_T_link * _link_T_shape.at(link_name);
 
         // set pose to fcl shape
-        fcl::Transform3d fcl_w_T_shape = KDL2fcl(w_T_shape);
         fcl::CollisionObjectd* collObj_shape = _collision_obj.at(link_name).get();
+        Eigen::Isometry3d fcl_w_T_shape(w_T_shape.matrix());
         collObj_shape->setTransform(fcl_w_T_shape);
     }
 
     return true;
 }
 
-std::map<std::string, KDL::Frame> ComputeLinksDistance::getLinkToShapeTransforms()
+std::map<std::string, Eigen::Affine3d> ComputeLinksDistance::getLinkToShapeTransforms()
 {
     return _link_T_shape;
 }
@@ -258,31 +274,6 @@ void ComputeLinksDistance::setLinksVsEnvironment(const std::list<std::string>& l
 
     generateLinksToUpdate();
     generatePairsToCheck();
-}
-
-
-fcl::Transform3d ComputeLinksDistance::KDL2fcl(const KDL::Frame& in)
-{
-    fcl::Transform3d out;
-    double x, y, z, w;
-    in.M.GetQuaternion(x, y, z, w);
-    fcl::Quaterniond q(w, x, y, z);
-    out.translation() << in.p[0], in.p[1], in.p[2];
-    out.linear() = q.toRotationMatrix();
-    return out;
-}
-
-KDL::Frame ComputeLinksDistance::fcl2KDL(const fcl::Transform3d& in)
-{
-
-    fcl::Quaterniond q (in.linear());
-    fcl::Vector3d t = in.translation();
-
-    KDL::Frame f;
-    f.p = KDL::Vector (t[0], t[1], t[2]);
-    f.M = KDL::Rotation::Quaternion(q.x(), q.y(), q.z(), q.w());
-
-    return f;
 }
 
 void ComputeLinksDistance::generateLinksToUpdate()
@@ -780,7 +771,7 @@ void ComputeLinksDistance::removeAllWorldCollision()
 }
 
 bool ComputeLinksDistance::moveWorldCollision(const std::string &id,
-                                              KDL::Frame new_pose)
+                                              Eigen::Affine3d new_pose)
 {
     auto it = _collision_obj.find(world_obj_name(id));
 
@@ -807,8 +798,8 @@ void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf::Model& srd
 
 LinkPairDistance::LinkPairDistance(const std::string& link1,
                                    const std::string& link2,
-                                   const KDL::Frame& w_T_closestPoint1,
-                                   const KDL::Frame& w_T_closestPoint2,
+                                   const Eigen::Affine3d& w_T_closestPoint1,
+                                   const Eigen::Affine3d& w_T_closestPoint2,
                                    const double& distance ) :
     _link_pair(link1, link2),
     _closest_points(w_T_closestPoint1, w_T_closestPoint2),
@@ -831,7 +822,7 @@ const double &LinkPairDistance::getDistance() const
     return distance;
 }
 
-const std::pair<KDL::Frame, KDL::Frame> &LinkPairDistance::getClosestPoints() const
+const std::pair<Eigen::Affine3d, Eigen::Affine3d> &LinkPairDistance::getClosestPoints() const
 {
     return _closest_points;
 }

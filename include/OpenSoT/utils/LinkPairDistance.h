@@ -29,8 +29,8 @@ public:
      */
     LinkPairDistance(const std::string& link1,
                      const std::string& link2,
-                     const KDL::Frame& w_T_closestPoint1,
-                     const KDL::Frame& w_T_closestPoint2,
+                     const Eigen::Affine3d& w_T_closestPoint1,
+                     const Eigen::Affine3d& w_T_closestPoint2,
                      const double& distance);
 
     /**
@@ -51,7 +51,7 @@ public:
      * from a link reference frame to the closest point on the respective link shape
      * @return a pair of homogeneous transformations
      */
-    const std::pair<KDL::Frame, KDL::Frame>& getClosestPoints() const;
+    const std::pair<Eigen::Affine3d, Eigen::Affine3d>& getClosestPoints() const;
 
     /**
      * @brief getLinkNames returns the pair of links between which we want
@@ -83,7 +83,7 @@ private:
      *        The second transformation will express the pose of the closes point on the second link shape
      *        in the link reference frame, i.e. link2_T_closestPoint2.
      */
-    std::pair<KDL::Frame, KDL::Frame> _closest_points;
+    std::pair<Eigen::Affine3d, Eigen::Affine3d> _closest_points;
 
     /**
      * @brief distance the minimum distance between the two link shapes, i.e.

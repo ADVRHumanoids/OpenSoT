@@ -25,8 +25,8 @@
 #include <list>
 #include <string>
 #include <utility>
-#include <XBotInterface/ModelInterface.h>
-#include <srdfdom_advr/model.h>
+#include <xbot2_interface/xbotinterface2.h>
+#include <srdfdom/model.h>
 #include <fcl/config.h>
 #include <fcl/narrowphase/distance.h>
 #include <fcl/narrowphase/collision.h>
@@ -44,24 +44,6 @@
 
 #include <map>
 
-
-// construct vector
-inline KDL::Vector toKdl(urdf::Vector3 v)
-{
-    return KDL::Vector(v.x, v.y, v.z);
-}
-
-// construct rotation
-inline KDL::Rotation toKdl(urdf::Rotation r)
-{
-    return KDL::Rotation::Quaternion(r.x, r.y, r.z, r.w);
-}
-
-// construct pose
-inline KDL::Frame toKdl(urdf::Pose p)
-{
-    return KDL::Frame(toKdl(p.rotation), toKdl(p.position));
-}
 
 
 class ComputeLinksDistance
@@ -142,21 +124,21 @@ public:
      * world collision
      */
     bool moveWorldCollision(const std::string& id,
-                            KDL::Frame new_pose);
+                            Eigen::Affine3d new_pose);
 
     /**
      * @brief KDL2fcl ceonverts a kdl transform into a fcl transform
-     * @param in a KDL::Frame
+     * @param in a Eigen::Affine3d
      * @return  fcl::Transform3f
      */
-    static fcl::Transform3<double> KDL2fcl(const KDL::Frame &in);
+    static fcl::Transform3<double> KDL2fcl(const Eigen::Affine3d &in);
 
     /**
      * @brief fcl2KDL converts a fcl transform into a kdl transform
      * @param in a fcl::Transform3f
-     * @return a KDL::Frame
+     * @return a Eigen::Affine3d
      */
-    static KDL::Frame fcl2KDL(const fcl::Transform3d& in);
+    static Eigen::Affine3d fcl2KDL(const fcl::Transform3d& in);
 
     class LinksPair
     {
@@ -179,15 +161,15 @@ public:
     std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> getCollisionObjects(){ return _collision_obj;}
 
     /**
-     * @brief globalToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
+     * @brief globalToLinkCoordinates transforms a fcl::Transform3f frame to a Eigen::Affine3d in the link reference frame
      * @param linkName the link name representing a link reference frame
      * @param w_T_f fcl::Transform3f representing a frame in a global reference frame
-     * @param link_T_f a KDL::Frame representing a frame in link reference frame
+     * @param link_T_f a Eigen::Affine3d representing a frame in link reference frame
      * @return true on success
      */
     bool globalToLinkCoordinates(const std::string& linkName,
                                  const fcl::Transform3<double>& w_T_f,
-                                 KDL::Frame& link_T_f);
+                                 Eigen::Affine3d& link_T_f);
 
     /**
      * @brief updateCollisionObjects updates all collision objects with correct transforms (link_T_shape)
@@ -195,7 +177,7 @@ public:
      */
     bool updateCollisionObjects();
 
-    std::map<std::string,KDL::Frame> getLinkToShapeTransforms();
+    std::map<std::string, Eigen::Affine3d> getLinkToShapeTransforms();
 
     void setLinksVsEnvironment(const std::list<std::string>& links);
 
@@ -244,18 +226,18 @@ private:
      * Notice how the shape frame is always the center of the shape,
      * except for the capsule, where it lies on one endpoint
      */
-    std::map<std::string,KDL::Frame> _link_T_shape;
+    std::map<std::string, Eigen::Affine3d> _link_T_shape;
 
     /**
-     * @brief shapeToLinkCoordinates transforms a fcl::Transform3f frame to a KDL::Frame in the link reference frame
+     * @brief shapeToLinkCoordinates transforms a fcl::Transform3f frame to a Eigen::Affine3d in the link reference frame
      * @param linkName the link name representing a link reference frame
      * @param w_T_f fcl::Transform3f representing a frame in the shape reference frame
-     * @param link_T_f a KDL::Frame representing a frame in link reference frame
+     * @param link_T_f a Eigen::Affine3d representing a frame in link reference frame
      * @return true on success
      */
     bool shapeToLinkCoordinates(const std::string &linkName,
                                 const fcl::Transform3<double> &fcl_shape_T_f,
-                                KDL::Frame &link_T_f);
+                                Eigen::Affine3d &link_T_f);
 
 
     /**
