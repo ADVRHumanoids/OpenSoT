@@ -65,9 +65,9 @@ CoM::CoM( const Eigen::VectorXd& x,
     _g.setZero();
     _g(2) = -9.81;
 
-    _robot.getCOM(_desiredPosition);
-    _robot.getCOMVelocity(_desiredVelocity);
-    _robot.getCentroidalMomentum(_centroidalMomentum);
+    _desiredPosition = _robot.getCOM();
+    _desiredVelocity = _robot.getCOMVelocity();
+    _centroidalMomentum.noalias() = _robot.computeCentroidalMomentumMatrix() * _robot.getJointVelocity();
     _desiredAngularMomentum = _centroidalMomentum.segment(3,3);
     /* first update. Setting desired pose equal to the actual pose */
 
@@ -140,9 +140,9 @@ CoM::CoM( std::vector<AffineHelper> wrenches,
     _g.setZero();
     _g(2) = -9.81;
 
-    _robot.getCOM(_desiredPosition);
-    _robot.getCOMVelocity(_desiredVelocity);
-    _robot.getCentroidalMomentum(_centroidalMomentum);
+    _desiredPosition = _robot.getCOM();
+    _desiredVelocity = _robot.getCOMVelocity();
+    _centroidalMomentum = _robot.computeCentroidalMomentum();
     _desiredAngularMomentum = _centroidalMomentum.segment(3,3);
     /* first update. Setting desired pose equal to the actual pose */
 
@@ -185,9 +185,9 @@ void CoM::_update(const Eigen::VectorXd &x)
 {
 
     /************************* COMPUTING TASK *****************************/
-    _robot.getCOM(_actualPosition);
-    _robot.getCOMVelocity(_actualVelocity);
-    _robot.getCentroidalMomentum(_centroidalMomentum);
+    _actualPosition = _robot.getCOM();
+    _actualVelocity = _robot.getCOMVelocity();
+    _centroidalMomentum = _robot.computeCentroidalMomentum();
     _actualAngularMomentum = _centroidalMomentum.segment(3,3);
 
     this->update_b();
@@ -404,7 +404,7 @@ bool CoM::reset()
     _desiredVariationAngularMomentum.setZero();
     _desiredVelocity.setZero();
 
-    _robot.getCOM(_desiredPosition);
+    _desiredPosition = _robot.getCOM();
 
     return true;
 }

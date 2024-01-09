@@ -55,17 +55,9 @@ void Gaze::setGaze(const Eigen::Affine3d &desiredGaze)
     _tmpEigenM.setIdentity();
 
     if(_cartesian_task->baseLinkIsWorld())
-        _robot.getPose(_distal_link, _bl_T_gaze_kdl);
+        _robot.getPose(_distal_link, _tmpEigenM);
     else
-        _robot.getPose(_distal_link, _cartesian_task->getBaseLink(), _bl_T_gaze_kdl);
-
-    for(unsigned int i = 0; i < 3; ++i){
-        for(unsigned int j = 0; j < 3; ++j)
-            _tmpEigenM(i,j) = _bl_T_gaze_kdl.M(i,j);
-    }
-    _tmpEigenM.translation().x() = _bl_T_gaze_kdl.p.x();
-    _tmpEigenM.translation().y() = _bl_T_gaze_kdl.p.y();
-    _tmpEigenM.translation().z() = _bl_T_gaze_kdl.p.z();
+        _robot.getPose(_distal_link, _cartesian_task->getBaseLink(), _tmpEigenM);
 
 
     _gaze_T_obj = _tmpEigenM.inverse()*desiredGaze;

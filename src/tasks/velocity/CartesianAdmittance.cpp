@@ -9,7 +9,7 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
                                          XBot::ModelInterface &robot,
                                          std::string base_link,
                                          XBot::ForceTorqueSensor::ConstPtr ft_sensor):
-    Cartesian(task_id, x, robot, ft_sensor->getSensorName(), base_link),
+    Cartesian(task_id, x, robot, ft_sensor->getName(), base_link),
     _ft_sensor(ft_sensor),
     _filter(CHANNELS)
 {
