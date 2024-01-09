@@ -55,7 +55,7 @@ void ConvexHull::update(const Eigen::VectorXd &x) {
     /**********************************************************************/
 }
 
-bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
+bool ConvexHull::getConvexHull(std::vector<Eigen::Vector3d> &ch)
 {
     _points.clear();
     // get support polygon points w.r.t. COM
@@ -79,7 +79,7 @@ bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 }
 
 
-void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
+void ConvexHull::getConstraints(const std::vector<Eigen::Vector3d> &convex_hull,
                                 Eigen::MatrixXd &A, Eigen::VectorXd &b,
                                 const double boundScaling)
 {
@@ -120,7 +120,7 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
     //std::cout<<"b_ch: "<<b<<std::endl;
 }
 
-void ConvexHull::getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,
+void ConvexHull::getLineCoefficients(const Eigen::Vector3d &p0, const Eigen::Vector3d &p1,
                                      double &a, double &b, double&c)
 {
     double x1 = p0.x();
