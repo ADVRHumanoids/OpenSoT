@@ -21,7 +21,7 @@
 
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/acceleration/GainType.h>
 
 namespace OpenSoT { namespace tasks { namespace acceleration {
@@ -30,6 +30,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
      * @brief The Postural class implement a postural task on the ACTUATED joints.
      * Underactuated joints are not considered.
      * NOTICE that input vectors and matrices anyway consider the full 6+n state
+     *
      */
     class Postural : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
       
@@ -41,7 +42,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                  AffineHelper qddot = AffineHelper(), const std::string task_id = "Postural");
 
         Postural(const XBot::ModelInterface& robot,
-                 const int x_size, const std::string task_id = "Postural");
+                 const std::string task_id = "Postural");
 
         void setGainType(GainType type);
         GainType getGainType() const;
@@ -187,7 +188,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         AffineHelper _postural_task;
         
         Eigen::VectorXd _qddot_d, _qddot_ref, _qref, _qdot, _q, _qdot_ref, _qdot_ref_cached, _qddot_ref_cached;
-        Eigen::MatrixXd _Jpostural;
 
         double _lambda2;
 

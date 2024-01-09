@@ -1,8 +1,8 @@
 #include <OpenSoT/tasks/acceleration/Postural.h>
 
 OpenSoT::tasks::acceleration::Postural::Postural(
-         const XBot::ModelInterface& robot,const int x_size, const std::string task_id):
-    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x_size),
+         const XBot::ModelInterface& robot, const std::string task_id):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, robot.getNv()),
     _robot(robot),
     _gain_type(OpenSoT::tasks::acceleration::GainType::Acceleration)
 {
@@ -10,24 +10,23 @@ OpenSoT::tasks::acceleration::Postural::Postural(
     _hessianType = HST_SEMIDEF;
 
     robot.getJointPosition(_qref);
-    robot.getPosturalJacobian(_Jpostural);
 
-    _qddot = AffineHelper::Identity(x_size);
+    _qddot = AffineHelper::Identity(_x_size);
 
-    _A.setZero(x_size, x_size);
+    _A.setZero(_x_size, _x_size);
 
     _Kp.setIdentity(_qref.size(), _qref.size());
     _Kd.setIdentity(_qref.size(), _qref.size());
 
     setLambda(10.0);
-    setWeight(Eigen::MatrixXd::Identity(x_size, x_size));
+    setWeight(Eigen::MatrixXd::Identity(_x_size, _x_size));
 
-    _qdot_ref.setZero(_qref.size());
-    _qddot_ref.setZero(_qref.size());
+    _qdot_ref.setZero(robot.getNv());
+    _qddot_ref.setZero(robot.getNv());
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
 
-    _Mi.setIdentity(_qref.size(), _qref.size());
+    _Mi.setIdentity(robot.getNv(), robot.getNv());
 
     _update(_q);
 }
@@ -43,18 +42,17 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
     _hessianType = HST_SEMIDEF;
     
     robot.getJointPosition(_qref);
-    robot.getPosturalJacobian(_Jpostural);
     
     _A.setZero(qddot.getOutputSize(), qddot.getInputSize());
 
-    _Kp.setIdentity(_qref.size(), _qref.size());
-    _Kd.setIdentity(_qref.size(), _qref.size());
+    _Kp.setIdentity(robot.getNv(), robot.getNv());
+    _Kd.setIdentity(robot.getNv(), robot.getNv());
     
     setLambda(10.);
     setWeight(Eigen::MatrixXd::Identity(qddot.getOutputSize(), qddot.getOutputSize()));
 
-    _qdot_ref.setZero(_qref.size());
-    _qddot_ref.setZero(_qref.size());
+    _qdot_ref.setZero(robot.getNv());
+    _qddot_ref.setZero(robot.getNv());
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
 
@@ -79,7 +77,6 @@ void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda)
         return;
     }
     
-    
     _lambda = lambda;
     _lambda2 = 2*std::sqrt(lambda);
 }
@@ -101,27 +98,29 @@ void OpenSoT::tasks::acceleration::Postural::setLambda(double lambda1, double la
 void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref)
 {
     _qref = qref;
-    _qdot_ref.setZero(_qref.size());
-    _qddot_ref.setZero(_qref.size());
+    _qdot_ref.setZero(_robot.getNv());
+    _qddot_ref.setZero(_robot.getNv());
 
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
 
 }
 
-void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref)
+void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref,
+                                                          const Eigen::VectorXd& dqref)
 {
     _qref = qref;
     _qdot_ref = dqref;
-    _qddot_ref.setZero(_qref.size());
+    _qddot_ref.setZero(_robot.getNv());
 
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;
 
 }
 
-void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref,
-                  const Eigen::VectorXd& ddqref)
+void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd& qref,
+                                                          const Eigen::VectorXd& dqref,
+                                                          const Eigen::VectorXd& ddqref)
 {
     _qref = qref;
     _qdot_ref = dqref;
@@ -142,7 +141,7 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
     
-    _position_error = _qref - _q;
+    _robot.difference(_qref, _q, _position_error);
     _velocity_error = _qdot_ref - _qdot;
 
     if(_gain_type == Acceleration)
@@ -151,7 +150,7 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     }
     else if(_gain_type == Force)
     {
-        _robot.getInertiaInverse(_Mi);
+        _robot.computeInertiaInverse(_Mi);
 
         _qddot_d = _qddot_ref + _Mi*_lambda2*_Kd*_velocity_error + _Mi*_lambda*_Kp*_position_error;
     }

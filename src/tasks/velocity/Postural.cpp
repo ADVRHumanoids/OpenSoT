@@ -22,13 +22,15 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-Postural::Postural(   const Eigen::VectorXd& x, const std::string& task_id) :
-    Task(task_id, x.size()), _x(x),
-    _x_desired(x.size()), _xdot_desired(x.size())
+Postural::Postural(const XBot::ModelInterface& robot,
+                   const Eigen::VectorXd& q,
+                   const std::string& task_id) :
+    Task(task_id, robot.getNv()), _q(q),
+    _robot(robot)
 {
-    _x_desired.setZero(_x_size);
-    _xdot_desired.setZero(_x_size);
-    _xdot_desired_ref = _xdot_desired;
+    _q_desired = _robot.getNeutralQ();
+    _v_desired.setZero(_x_size);
+    _dq = _v_desired_ref = _v_desired;
 
     _W.setIdentity(_x_size, _x_size);
     _A.setIdentity(_x_size, _x_size);
@@ -36,63 +38,64 @@ Postural::Postural(   const Eigen::VectorXd& x, const std::string& task_id) :
     _hessianType = HST_IDENTITY;
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->setReference(x);
-    this->_update(x);
+    this->setReference(q);
+    this->_update(q);
 }
 
 Postural::~Postural()
 {
 }
 
-void Postural::_update(const Eigen::VectorXd &x) {
-    _xdot_desired_ref = _xdot_desired;
-    _x = x;
+void Postural::_update(const Eigen::VectorXd &q) {
+    _v_desired_ref = _v_desired;
+    _q = q;
 
     /************************* COMPUTING TASK *****************************/
 
     this->update_b();
 
-    _xdot_desired.setZero(_x_size);
+    _v_desired.setZero(_x_size);
 
     /**********************************************************************/
 }
 
-void Postural::setReference(const Eigen::VectorXd& x_desired) {
-    if(x_desired.size() == _x_size)
+void Postural::setReference(const Eigen::VectorXd& q_desired) {
+    if(q_desired.size() == _robot.getNq())
     {
-        _x_desired = x_desired;
-        _xdot_desired.setZero(_x_size);
-        _xdot_desired_ref = _xdot_desired;
+        _q_desired = q_desired;
+        _v_desired.setZero(_x_size);
+        _v_desired_ref = _v_desired;
         this->update_b();
     }
 }
 
-void OpenSoT::tasks::velocity::Postural::setReference(const Eigen::VectorXd &x_desired,
-                                                      const Eigen::VectorXd &xdot_desired)
+void OpenSoT::tasks::velocity::Postural::setReference(const Eigen::VectorXd &q_desired,
+                                                      const Eigen::VectorXd &v_desired)
 {
-    if(x_desired.size() == _x_size && xdot_desired.size() == _x_size)
+    if(q_desired.size() == _robot.getNq() && v_desired.size() == _x_size)
     {
-        _x_desired = x_desired;
-        _xdot_desired = xdot_desired;
-        _xdot_desired_ref = _xdot_desired;
+        _q_desired = q_desired;
+        _v_desired = v_desired;
+        _v_desired_ref = _v_desired;
         this->update_b();
     }
 }
 
 const Eigen::VectorXd& OpenSoT::tasks::velocity::Postural::getReference() const
 {
-    return _x_desired;
+    return _q_desired;
 }
 
-void OpenSoT::tasks::velocity::Postural::getReference(Eigen::VectorXd &x_desired,
-                                                      Eigen::VectorXd &xdot_desired) const
+void OpenSoT::tasks::velocity::Postural::getReference(Eigen::VectorXd &q_desired,
+                                                      Eigen::VectorXd &v_desired) const
 {
-    x_desired = _x_desired;
-    xdot_desired = _xdot_desired;
+    q_desired = _q_desired;
+    v_desired = _v_desired;
 }
 
 void Postural::update_b() {
-    _b = _xdot_desired + _lambda*(_x_desired - _x);
+    _robot.difference(_q_desired, _q, _dq);
+    _b = _v_desired + _lambda*_dq;
 }
 
 void OpenSoT::tasks::velocity::Postural::setLambda(double lambda)
@@ -105,18 +108,18 @@ void OpenSoT::tasks::velocity::Postural::setLambda(double lambda)
 
 Eigen::VectorXd Postural::getError()
 {
-    return _x_desired - _x;
+    return _robot.difference(_q_desired, _q);
 }
 
 Eigen::VectorXd OpenSoT::tasks::velocity::Postural::getActualPositions()
 {
-    return _x;
+    return _q;
 }
 
 bool OpenSoT::tasks::velocity::Postural::reset()
 {
-    _x_desired = _x;
-    _update(_x_desired);
+    _q_desired = _q;
+    _update(_q_desired);
 
     return true;
 }
@@ -133,14 +136,14 @@ static OpenSoT::tasks::velocity::Postural::Ptr asPostural(OpenSoT::Task<Eigen::M
 
 const Eigen::VectorXd& OpenSoT::tasks::velocity::Postural::getCachedVelocityReference() const
 {
-    return _xdot_desired_ref;
+    return _v_desired_ref;
 }
 
 void OpenSoT::tasks::velocity::Postural::_log(XBot::MatLogger2::Ptr logger)
 {
-    logger->add(_task_id + "_position_err", _x_desired - _x);
-    logger->add(_task_id + "_pos_ref", _x_desired);
-    logger->add(_task_id + "_pos_actual", _x);
-    logger->add(_task_id + "_desiredVelocityRef", _xdot_desired_ref);
+    logger->add(_task_id + "_position_err", _dq);
+    logger->add(_task_id + "_pos_ref", _q_desired);
+    logger->add(_task_id + "_pos_actual", _q);
+    logger->add(_task_id + "_desiredVelocityRef", _v_desired_ref);
 }
 

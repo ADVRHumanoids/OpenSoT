@@ -18,11 +18,9 @@
 #ifndef __TASKS_VELOCITY_POSTURAL_H__
 #define __TASKS_VELOCITY_POSTURAL_H__
 
- #include <OpenSoT/Task.h>
+#include <OpenSoT/Task.h>
 
- #include <kdl/frames.hpp>
-#include <Eigen/Dense>
-
+#include <xbot2_interface/xbotinterface2.h>
 
  namespace OpenSoT {
     namespace tasks {
@@ -35,15 +33,19 @@
             public:
                 typedef std::shared_ptr<Postural> Ptr;
             protected:
-                Eigen::VectorXd _x_desired;
-                Eigen::VectorXd _xdot_desired, _xdot_desired_ref;
-                Eigen::VectorXd _x;
+                Eigen::VectorXd _q_desired;
+                Eigen::VectorXd _dq;
+                Eigen::VectorXd _v_desired, _v_desired_ref;
+                Eigen::VectorXd _q;
+                const XBot::ModelInterface& _robot;
 
                 void update_b();
 
             public:
 
-                Postural(const Eigen::VectorXd& x, const std::string& task_id = "Postural");
+                Postural(const XBot::ModelInterface& robot,
+                         const Eigen::VectorXd& x,
+                         const std::string& task_id = "Postural");
 
                 ~Postural();
 
