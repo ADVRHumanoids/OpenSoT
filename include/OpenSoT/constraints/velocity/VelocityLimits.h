@@ -42,7 +42,8 @@
                  */
                 VelocityLimits(const double qDotLimit,
                                const double dT,
-                               const unsigned int x_size);
+                               const unsigned int v_size);
+
                 VelocityLimits(const Eigen::VectorXd& qDotLimit,
                                const double dT);
 

@@ -22,8 +22,8 @@ using namespace OpenSoT::constraints::velocity;
 
 VelocityLimits::VelocityLimits(const double qDotLimit,
                                const double dT,
-                               const unsigned int x_size) :
-    Constraint("velocity_limits", x_size), _dT(dT) {
+                               const unsigned int v_size) :
+    Constraint("velocity_limits", v_size), _dT(dT) {
 
     _lowerBound.setZero(_x_size);
     _upperBound.setZero(_x_size);
