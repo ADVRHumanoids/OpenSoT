@@ -17,7 +17,7 @@
 
 #include <OpenSoT/tasks/floating_base/Contact.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-
+#include <xbot2_interface/common/utils.h>
 
 OpenSoT::tasks::floating_base::Contact::Contact(XBot::ModelInterface &robot,
                                         const std::string& link_in_contact,
@@ -46,7 +46,8 @@ OpenSoT::tasks::floating_base::Contact::~Contact()
 
 void OpenSoT::tasks::floating_base::Contact::_update(const Eigen::VectorXd &x)
 {
-    _robot.getJacobian(_link_in_contact, _link_in_contact, _J);
+    _robot.getJacobian(_link_in_contact, _J);
+    XBot::Utils::rotate(_J, _robot.getPose(_link_in_contact).linear().transpose(), Jrot);
     _Jcontact = _contact_matrix*_J;
     _robot.getJointVelocity(_dqm);
     

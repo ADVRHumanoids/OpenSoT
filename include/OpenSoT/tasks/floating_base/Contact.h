@@ -19,7 +19,7 @@
 #define _OPENSOT_FLOATING_BASE_CONTACT_ESTIMATION_
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT{
     namespace tasks{
@@ -53,7 +53,7 @@ namespace OpenSoT{
             private:
                 std::string _link_in_contact;
                 XBot::ModelInterface& _robot;
-                Eigen::MatrixXd _J;
+                Eigen::MatrixXd _J, Jrot;
                 Eigen::MatrixXd _Jcontact;
                 Eigen::VectorXd _dqm;
                 Eigen::MatrixXd _contact_matrix;
