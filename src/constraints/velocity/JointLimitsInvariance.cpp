@@ -34,6 +34,8 @@ JointLimitsInvariance::JointLimitsInvariance(const Eigen::VectorXd &q,
     _p(1.),
     _lb(.0), _ub(0.), _acc_lim(0.), _pos_lim(0.), _via_lim(0.), _d(0.), _ac_lb(0), _ac_ub(0)
 {
+    throw std::runtime_error("YET TO BE PORTED TO XBOTINTERFACE2");
+
     _upperBound.setZero(q.size());
     _lowerBound.setZero(q.size());
     _active_constraint_lb.setZero(q.size());
