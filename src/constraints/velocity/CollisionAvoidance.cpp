@@ -103,10 +103,10 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
         }
 
         // closest point on first link
-        Eigen::Vector3d p1_world = k2e(data.getClosestPoints().first.p);
+        Eigen::Vector3d p1_world = data.getClosestPoints().first.translation();
 
         // closest point on second link
-        Eigen::Vector3d p2_world = k2e(data.getClosestPoints().second.p);
+        Eigen::Vector3d p2_world = data.getClosestPoints().second.translation();
 
         // local closest points on link 1
         Eigen::Affine3d w_T_l1;
@@ -189,7 +189,7 @@ bool CollisionAvoidance::removeWorldCollision(const std::string &id)
 }
 
 bool CollisionAvoidance::moveWorldCollision(const std::string &id,
-                                                KDL::Frame new_pose)
+                                            Eigen::Affine3d new_pose)
 {
     return _dist_calc->moveWorldCollision(id, new_pose);
 }

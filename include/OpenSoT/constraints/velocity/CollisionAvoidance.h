@@ -20,7 +20,7 @@
 
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 #include <srdfdom/model.h>
 #include <Eigen/Dense>
@@ -158,7 +158,7 @@ public:
      * world collision
      */
     bool moveWorldCollision(const std::string& id,
-                            KDL::Frame new_pose);
+                            Eigen::Affine3d new_pose);
 
     /**
      * @brief setBoundScaling sets bound scaling for the capsule constraint
