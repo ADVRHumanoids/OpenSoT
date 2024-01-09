@@ -1,16 +1,17 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
+#include "../../common.h"
 
 namespace {
 
-class testPosturalTask: public ::testing::Test
+class testPosturalTask: public TestBase
 {
 protected:
 
-    testPosturalTask()
+    testPosturalTask() : TestBase("coman")
     {
 
     }
@@ -51,13 +52,11 @@ double getRandomAngle()
 
 TEST_F(testPosturalTask, testPosturalTask_)
 {
-    Eigen::VectorXd q(6); q.setZero();
-    for(unsigned int i = 0; i < q.size(); ++i)
-        q[i] = getRandomAngle();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
-    Eigen::VectorXd q_ref(q.size()); q_ref.setZero();
+    Eigen::VectorXd q_ref = _model_ptr->getNeutralQ();
 
-    OpenSoT::tasks::velocity::Postural postural(q);
+    OpenSoT::tasks::velocity::Postural postural(*_model_ptr, q);
     std::cout<<"Postural Task Inited"<<std::endl;
     EXPECT_TRUE(postural.getA() == Eigen::MatrixXd::Identity(q.size(), q.size()));
     EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(q.size(), q.size()));
@@ -87,7 +86,6 @@ std::string _path_to_cfg = relative_path;
 
 TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
 {
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
     std::cout<<"# JOINTS: "<<_model_ptr->getJointNum()<<std::endl;
 
     Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
@@ -105,9 +103,9 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin,qmax);
 
-    OpenSoT::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::tasks::velocity::Postural(q) );
+    OpenSoT::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::tasks::velocity::Postural(*_model_ptr, q) );
     OpenSoT::tasks::velocity::Postural::ConstraintPtr bound(
-        new OpenSoT::constraints::velocity::JointLimits(q,
+        new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, q,
                         qmax,
                         qmin)
     );
@@ -132,11 +130,9 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
 
 TEST_F(testPosturalTask, testReset)
 {
-    Eigen::VectorXd q(6); q.setZero();
-    for(unsigned int i = 0; i < q.size(); ++i)
-        q[i] = getRandomAngle();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
-    OpenSoT::tasks::velocity::Postural postural(q);
+    OpenSoT::tasks::velocity::Postural postural(*_model_ptr, q);
 
     std::cout<<"INITIALIZATION: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
     Eigen::VectorXd actual_q = postural.getActualPositions();

@@ -3,6 +3,8 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <chrono>
 
+#include "../common.h"
+
 namespace {
 class fooTask: public OpenSoT::Task <Eigen::MatrixXd, Eigen::VectorXd>
 {
@@ -29,10 +31,10 @@ public:
     void _update(const Eigen::VectorXd &x){}
 };
 
-class testTask: public ::testing::Test
+class testTask: public TestBase
 {
 protected:
-    testTask()
+    testTask(): TestBase("coman")
     {
 
     }
@@ -56,8 +58,9 @@ protected:
 TEST_F(testTask, testCheckConsistency)
 {
     OpenSoT::tasks::velocity::Postural::Ptr postural;
-    postural.reset(new OpenSoT::tasks::velocity::Postural(Eigen::VectorXd::Ones(10)));
-    postural->update(Eigen::VectorXd::Ones(10));
+    auto q = _model_ptr->generateRandomQ();
+    postural.reset(new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+    postural->update(q);
 
     EXPECT_TRUE(postural->checkConsistency());
 
@@ -109,19 +112,17 @@ TEST_F(testTask, testCheckConsistency)
 
 TEST_F(testTask, testComputeCost)
 {
-    Eigen::VectorXd q(30);
-    q = 10*q.setOnes();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
     OpenSoT::tasks::velocity::Postural::Ptr postural =
-            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr, q);
 
     postural->setWeight(10.);
     postural->setLambda(1.);
 
     postural->update(q);
 
-    Eigen::VectorXd x(30);
-    x.setRandom();
+    Eigen::VectorXd x = _model_ptr->generateRandomQ();
 
     double cost = (postural->getA()*x - postural->getb()).transpose()*postural->getWeight()*(postural->getA()*x - postural->getb());
     std::cout<<"cost: "<<cost<<std::endl;
@@ -133,10 +134,9 @@ TEST_F(testTask, testComputeCost)
 
 TEST_F(testTask, testDiagonalWeight)
 {
-    Eigen::VectorXd q(30);
-    q.setRandom(q.size());
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
     OpenSoT::tasks::velocity::Postural::Ptr postural(
-        new OpenSoT::tasks::velocity::Postural(q));
+        new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
 
     EXPECT_FALSE(postural->getWeightIsDiagonalFlag());
 

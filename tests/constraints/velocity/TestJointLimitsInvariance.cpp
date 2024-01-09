@@ -5,9 +5,11 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/iHQP.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <cmath>
 #include <matlogger2/matlogger2.h>
+
+#include "../../common.h"
 
 std::string _path_to_cfg = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
@@ -16,13 +18,11 @@ std::string _path_to_cfg = OPENSOT_TEST_PATH "configs/coman/configs/config_coman
 
 namespace {
 
-class testJointLimitsNaive : public ::testing::Test {
+class testJointLimitsNaive : public TestBase {
  protected:
 
-  testJointLimitsNaive()
+  testJointLimitsNaive() : TestBase("coman")
   {
-
-      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -40,7 +40,7 @@ class testJointLimitsNaive : public ::testing::Test {
 
       dt = 0.001;
 
-      jointLimits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(zeros, qUpperBounds, qLowerBounds);
+      jointLimits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, zeros, qUpperBounds, qLowerBounds);
 
       jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(vel_max, dt);
 
@@ -93,16 +93,14 @@ public:
 
 
 // The fixture for testing class JointLimits.
-class testJointLimits : public ::testing::Test {
+class testJointLimits : public TestBase {
  protected:
 
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testJointLimits()
+  testJointLimits(): TestBase("coman")
   {
-
-      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -230,7 +228,8 @@ TEST_F(testJointLimits, test_bounds)
     this->_model_ptr->setJointPosition(this->q);
 
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural = std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+    OpenSoT::tasks::velocity::Postural::Ptr postural =
+        std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr, q);
 
     Eigen::VectorXd qref = 4. * Eigen::VectorXd::Ones(this->q.size());
     postural->setReference(qref);
@@ -347,7 +346,8 @@ TEST_F(testJointLimitsNaive, test_bounds)
     this->_model_ptr->setJointPosition(this->q);
 
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural = std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+    OpenSoT::tasks::velocity::Postural::Ptr postural =
+        std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr, q);
 
     Eigen::VectorXd qref = 4. * Eigen::VectorXd::Ones(this->q.size());
     postural->setReference(qref);

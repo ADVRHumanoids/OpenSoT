@@ -6,18 +6,18 @@
 #include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <memory>
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string path_to_cfg = relative_path;
+#include "../common.h"
 
 namespace{
 
-class testAffineUtils: public ::testing::Test
+class testAffineUtils: public TestBase
 {
 protected:
 
-    testAffineUtils()
+    testAffineUtils(): TestBase("coman")
     {
-        model_ptr = XBot::ModelInterface::getModel(path_to_cfg);
+        model_ptr = _model_ptr;
+
         q.setZero(model_ptr->getJointNum());
 
         q[model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;

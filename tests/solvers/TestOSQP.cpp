@@ -3,14 +3,13 @@
 #include <qpOASES.hpp>
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
+#include <eigen_conversions/eigen_kdl.h>
+#include "../common.h"
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -48,11 +47,11 @@ public:
     qpOASES::HessianType ht;
 };
 
-class testOSQPProblem: public ::testing::Test
+class testOSQPProblem: public TestBase
 {
 protected:
 
-    testOSQPProblem()
+    testOSQPProblem(): TestBase("coman")
     {
 
     }
@@ -177,12 +176,10 @@ Eigen::VectorXd getRandomAngles(const Eigen::VectorXd &min,
 
 TEST_F(testOSQPProblem, testTask)
 {
-    Eigen::VectorXd q_ref(10); q_ref.setZero(q_ref.size());
-    Eigen::VectorXd q(q_ref.size()); q.setZero(q_ref.size());
-    for(unsigned int i = 0; i < q.size(); ++i)
-        q[i] = getRandomAngle();
+    Eigen::VectorXd q_ref = _model_ptr->getNeutralQ();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
-    OpenSoT::tasks::velocity::Postural postural_task(q);
+    OpenSoT::tasks::velocity::Postural postural_task(*_model_ptr, q);
     postural_task.setReference(q_ref);
     postural_task.update(q);
 
@@ -222,8 +219,6 @@ TEST_F(testOSQPProblem, testTask)
 using namespace OpenSoT::constraints::velocity;
 TEST_F(testOSQPProblem, testProblemWithConstraint)
 {
-        XBot::ModelInterface::Ptr _model_ptr;
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
         Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
         Eigen::VectorXd q_ref(q.size()); q_ref.setConstant(q.size(), M_PI);
@@ -231,7 +226,7 @@ TEST_F(testOSQPProblem, testProblemWithConstraint)
         _model_ptr->update();
 
         OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(q));
+                new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
         postural_task->setReference(q_ref);
 
         Eigen::VectorXd q_max, q_min;
@@ -239,7 +234,7 @@ TEST_F(testOSQPProblem, testProblemWithConstraint)
 
 
         JointLimits::Ptr joint_limits(
-            new JointLimits(q, q_max, q_min));
+            new JointLimits(*_model_ptr, q, q_max, q_min));
         postural_task->getConstraints().push_back(joint_limits);
         postural_task->setLambda(0.1);
 
@@ -325,8 +320,6 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 
 TEST_F(testOSQPProblem, testCartesian)
 {
-    XBot::ModelInterface::Ptr _model_ptr;
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
     Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
 
     _model_ptr->setJointPosition(q);
@@ -390,8 +383,7 @@ TEST_F(testOSQPProblem, testCartesian)
 
 TEST_F(testOSQPProblem, testEpsRegularisation)
 {
-    XBot::ModelInterface::Ptr _model_ptr;
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+
     Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
 
     _model_ptr->setJointPosition(q);
@@ -461,8 +453,6 @@ TEST_F(testOSQPProblem, testEpsRegularisation)
 
 TEST_F(testOSQPProblem, testContructor2Problems)
 {
-    XBot::ModelInterface::Ptr _model_ptr;
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
     Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
 
     Eigen::VectorXd torso(q.size()); torso.setZero(q.size());
@@ -483,7 +473,7 @@ TEST_F(testOSQPProblem, testContructor2Problems)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist", q, *_model_ptr,
                                                        "l_wrist", "Waist"));
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(q));
+                new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
     cartesian_task->setLambda(0.1);
     postural_task->setLambda(0.1);
 
@@ -499,7 +489,7 @@ TEST_F(testOSQPProblem, testContructor2Problems)
     std::cout<<"q_max: ["<<q_max.transpose()<<"]"<<std::endl;
 
     JointLimits::Ptr joint_limits(
-        new JointLimits(q, q_max,
+        new JointLimits(*_model_ptr, q, q_max,
                            q_min));
     joint_limits->setBoundScaling((double)(1.0/t));
 
@@ -555,9 +545,8 @@ TEST_F(testOSQPProblem, testContructor2Problems)
     _model_ptr->update();
     std::cout<<"INITIAL CONFIG: "<<T_init.matrix()<<std::endl;
     KDL::Frame T_kdl;
-    _model_ptr->getPose("l_wrist", "Waist", T_kdl);
-    std::cout<<"FINAL CONFIG: "<<T_kdl<<std::endl;
-    std::cout<<"DESIRED CONFIG: "<<T_ref_kdl<<std::endl;
+    auto Teigen = _model_ptr->getPose("l_wrist", "Waist");
+    tf::transformEigenToKDL(Teigen, T_kdl);
 
 
     for(unsigned int i = 0; i < 3; ++i)
@@ -569,11 +558,11 @@ TEST_F(testOSQPProblem, testContructor2Problems)
 
 }
 
-class testiHQP: public ::testing::Test
+class testiHQP: public TestBase
 {
 protected:
 
-    testiHQP()
+    testiHQP(): TestBase("coman")
     {
     }
 
@@ -591,8 +580,6 @@ protected:
 
 TEST_F(testiHQP, testContructor1Problem)
 {
-    XBot::ModelInterface::Ptr _model_ptr;
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
     Eigen::VectorXd q_ref(q.size()); q_ref.setConstant(q.size(), M_PI);
@@ -600,7 +587,7 @@ TEST_F(testiHQP, testContructor1Problem)
     _model_ptr->update();
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
     postural_task->setReference(q_ref);
 
 
@@ -608,7 +595,8 @@ TEST_F(testiHQP, testContructor1Problem)
     _model_ptr->getJointLimits(q_min, q_max);
 
     JointLimits::Ptr joint_limits(
-        new JointLimits(q,
+        new JointLimits(*_model_ptr,
+                        q,
                         q_max,
                         q_min));
     postural_task->setLambda(0.1);

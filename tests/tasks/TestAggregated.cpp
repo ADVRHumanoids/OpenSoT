@@ -4,11 +4,12 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/SubTask.h>
 
+#include "../common.h"
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
@@ -63,22 +64,21 @@ Eigen::VectorXd getRandomAngles(const Eigen::VectorXd &min,
 
 namespace {
 
-class testAggregatedTask: public ::testing::Test
+class testAggregatedTask: public TestBase
 {
 protected:
 
     std::list< OpenSoT::tasks::Aggregated::TaskPtr > _tasks;
     Eigen::VectorXd q;
 
-    testAggregatedTask()
+    testAggregatedTask():
+        TestBase("coman")
     {
-        q.setRandom(6);
+        q = _model_ptr->generateRandomQ();
+        auto q1 = _model_ptr->generateRandomQ();
 
-        for(unsigned int i = 0; i < q.size(); ++i)
-            q[i] = getRandomAngle();
-
-        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(q)));
-        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(2.*q)));
+        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(*_model_ptr, q)));
+        _tasks.push_back(Aggregated::TaskPtr(new velocity::Postural(*_model_ptr, q1)));
     }
 
     virtual ~testAggregatedTask() {
@@ -98,7 +98,7 @@ protected:
 TEST_F(testAggregatedTask, testConcatenateTaskIds)
 {
     OpenSoT::tasks::velocity::Postural::Ptr postural_in_aggregated(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
     std::list<Aggregated::TaskPtr> task_list;
     task_list.push_back(postural_in_aggregated);
     task_list.push_back(postural_in_aggregated);
@@ -138,15 +138,12 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
     EXPECT_TRUE(aggregated.getWeight() == Eigen::MatrixXd::Identity(q.size()*2, q.size()*2));
 
 
-
-   _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
     Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
     Eigen::VectorXd q_ref(q.size());
     q_ref = M_PI*Eigen::VectorXd::Ones(q.size());
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_in_aggregated(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
     postural_in_aggregated->setReference(q_ref);
     std::list<OpenSoT::Task<Eigen::MatrixXd,Eigen::VectorXd>::TaskPtr> task_list;
     task_list.push_back(postural_in_aggregated);
@@ -154,7 +151,7 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
                 new OpenSoT::tasks::Aggregated(task_list, q.size()));
     aggregated_task->setLambda(0.1);
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
     postural_task->setReference(q_ref);
     postural_task->setLambda(0.1);
 
@@ -273,7 +270,6 @@ bool vectorAreEqual(const Eigen::VectorXd& v0,
 
 TEST_F(testAggregatedTask, testAggregatedCost)
 {
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     Eigen::VectorXd q(_model_ptr->getJointNum());
     q.setZero(q.size());
@@ -316,7 +312,6 @@ TEST_F(testAggregatedTask, testAggregatedCost)
 
 TEST_F(testAggregatedTask, testConstraintsUpdate)
 {
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -336,7 +331,7 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        OpenSoT::tasks::velocity::Postural::Ptr taskPostural(new OpenSoT::tasks::velocity::Postural(q));
+        OpenSoT::tasks::velocity::Postural::Ptr taskPostural(new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
         OpenSoT::tasks::velocity::Cartesian::Ptr taskCartesianWaist(
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",
                                                         q,*(_model_ptr.get()), "Waist", "world"));
@@ -505,15 +500,13 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
 
 TEST_F(testAggregatedTask, testWeightsUpdate)
 {
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
     Eigen::VectorXd qmin(_model_ptr->getJointNum()), qmax(_model_ptr->getJointNum());
     _model_ptr->getJointLimits(qmin, qmax);
     q = getRandomAngles(qmin, qmax, qmin.size());
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(q));
+    OpenSoT::tasks::velocity::Postural::Ptr postural(new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
     OpenSoT::tasks::velocity::Cartesian::Ptr waist(
             new OpenSoT::tasks::velocity::Cartesian("cartesian::Waist",
                                                     q,*(_model_ptr.get()), "Waist", "world"));
@@ -604,7 +597,6 @@ TEST_F(testAggregatedTask, testWeightsUpdate)
 
 TEST_F(testAggregatedTask, testSingleTask)
 {
-    _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
     Eigen::VectorXd qmin(_model_ptr->getJointNum()), qmax(_model_ptr->getJointNum());
     _model_ptr->getJointLimits(qmin, qmax);
