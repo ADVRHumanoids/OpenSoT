@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/acceleration/CoM.h>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
 using XBot::Logger;
 
 const std::string OpenSoT::tasks::acceleration::CoM::world_name = "world";
@@ -76,9 +76,10 @@ void OpenSoT::tasks::acceleration::CoM::_update(const Eigen::VectorXd& x)
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
 
-    _robot.getCOMJacobian(_J, _jdotqdot);
-    _robot.getCOM(_pose_current);
-    _robot.getCOMVelocity(_vel_current);
+    _robot.getCOMJacobian(_J);
+    _jdotqdot = _robot.getCOMJdotTimesV();
+    _pose_current = _robot.getCOM();
+    _vel_current = _robot.getCOMVelocity();
 
 
     _pose_error = _pose_ref - _pose_current;
@@ -152,7 +153,7 @@ void OpenSoT::tasks::acceleration::CoM::setLambda(double lambda1, double lambda2
 
 void OpenSoT::tasks::acceleration::CoM::resetReference()
 {
-    _robot.getCOM(_pose_ref);
+    _pose_ref = _robot.getCOM();
     _vel_ref.setZero();
     _acc_ref.setZero();
 
