@@ -24,8 +24,8 @@
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
  #include <memory>
- #include <XBotInterface/Logger.hpp>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/logger.h>
+ #include <xbot2_interface/xbotinterface2.h>
 
  namespace OpenSoT {
 
@@ -431,7 +431,7 @@
             }
             return false;
         }
-        
+#ifdef PORTING_TO_XBOTIFC2
         /**
          * @brief setActiveChainsMask set a mask (of true) on the Jacobian of a vector of kinematic chains
          * @param active_chain_mask vector of kinematic chains to set the active joint mask
@@ -454,7 +454,7 @@
             return true;
             
         }
-
+#endif
         /**
          * @brief log logs common Task internal variables
          * @param logger a shared pointer to a MathLogger
