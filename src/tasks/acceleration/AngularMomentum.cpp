@@ -31,8 +31,11 @@ AngularMomentum::~AngularMomentum()
 void AngularMomentum::_update(const Eigen::VectorXd &x)
 {
     //1. get centroidal momentum matrix and momentum
-    _robot.getCentroidalMomentumMatrix(_Mom, _Momdot);
-    _robot.getCentroidalMomentum(_L);
+    _robot.computeCentroidalMomentumMatrix(_Mom);
+    _L = _robot.computeCentroidalMomentum();
+
+    // WARN: missing CMMdot*v API !
+    _Momdot.setZero();
 
     //2. if not init, initialize momentum reference with actual momentum
     if(!_is_init)
