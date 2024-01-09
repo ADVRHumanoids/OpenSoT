@@ -21,7 +21,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
         vars.emplace_back(cl, optimize_contact_torque ? 6 : 3); // put 6 for full wrench
     }
     
-    vars.emplace_back("tau", _model->getActuatedJointNum());
+    vars.emplace_back("tau", _model->getActuatedNv());
 
     OpenSoT::OptvarHelper opt(vars);
     
@@ -66,7 +66,7 @@ OpenSoT::utils::ForceOptimization::ForceOptimization(XBot::ModelInterface::Ptr m
     
     Eigen::VectorXd tau_max;
     _model->getEffortLimits(tau_max);
-    min_tau_weight.diagonal() = tau_max.tail(_model->getActuatedJointNum());
+    min_tau_weight.diagonal() = tau_max.tail(_model->getActuatedNv());
     
     min_tau_weight = min_tau_weight * min_tau_weight;
     

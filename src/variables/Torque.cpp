@@ -1,22 +1,22 @@
 #include <OpenSoT/variables/Torque.h>
 
 
-OpenSoT::variables::Torque::Torque(XBot::ModelInterface::Ptr model, 
-                                   const OpenSoT::AffineHelper& qddot_var, 
-                                   std::vector< std::string > contact_links, 
-                                   std::vector< OpenSoT::AffineHelper > force_vars): 
-    OpenSoT::AffineHelper(qddot_var.getInputSize(), model->getActuatedJointNum()),
+OpenSoT::variables::Torque::Torque(XBot::ModelInterface::Ptr model,
+                                   const OpenSoT::AffineHelper& qddot_var,
+                                   std::vector< std::string > contact_links,
+                                   std::vector< OpenSoT::AffineHelper > force_vars):
+    OpenSoT::AffineHelper(qddot_var.getInputSize(), model->getActuatedNv()),
     _model(model),
     _num_contacts(contact_links.size()),
     _contact_links(contact_links),
     _qddot_var(qddot_var),
     _force_vars(force_vars)
 {
-    if( _qddot_var.getOutputSize() != model->getJointNum() ){
-        throw std::runtime_error("_qddot_var.getOutputSize() != model->getJointNum()");
+    if( _qddot_var.getOutputSize() != model->getNv() ){
+        throw std::runtime_error("_qddot_var.getOutputSize() != model->getNv()");
     }
-    _S.setZero(model->getActuatedJointNum(), model->getJointNum());
-    _S.rightCols(model->getActuatedJointNum()) = Eigen::MatrixXd::Identity(model->getActuatedJointNum(), model->getActuatedJointNum());
+    _S.setZero(model->getActuatedNv(), model->getNv());
+    _S.rightCols(model->getActuatedNv()) = Eigen::MatrixXd::Identity(model->getActuatedNv(), model->getActuatedNv());
     update();
 }
 
@@ -29,7 +29,7 @@ void OpenSoT::variables::Torque::update()
     // _C.setZero(getSize(), getOptvarHelper().getSize());
     // _d.setZero(getSize());
     
-    _model->getInertiaMatrix(_B);
+    _model->computeInertiaMatrix(_B);
     
      self() = self() + _S*_B*_qddot_var;
     
