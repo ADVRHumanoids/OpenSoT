@@ -1,5 +1,7 @@
 #include <OpenSoT/tasks/acceleration/Cartesian.h>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
+#include <eigen_conversions/eigen_kdl.h>
+
 using XBot::Logger;
 using namespace OpenSoT::tasks::acceleration;
 
@@ -133,13 +135,13 @@ void Cartesian::_update(const Eigen::VectorXd& x)
         _robot.getJacobian(_distal_link, _J);
         _robot.getPose(_distal_link, _pose_current);
         _robot.getVelocityTwist(_distal_link, _vel_current);
-        _robot.computeJdotQdot(_distal_link, Eigen::Vector3d::Zero(), _jdotqdot);
+        _robot.getJdotTimesV(_distal_link, _jdotqdot);
     }
     else{
         _robot.getRelativeJacobian(_distal_link, _base_link, _J);
         _robot.getPose(_distal_link, _base_link, _pose_current);
-        _robot.getVelocityTwist(_distal_link, _base_link, _vel_current);
-        _robot.computeRelativeJdotQdot(_distal_link, _base_link, _jdotqdot);
+        _vel_current = _robot.getRelativeVelocityTwist(_distal_link, _base_link);
+        _robot.getRelativeJdotTimesV(_distal_link, _base_link, _jdotqdot);
         //_jdotqdot.setZero(); ///TODO: computeJdotQdot relative!
     }
     
@@ -183,16 +185,6 @@ void Cartesian::_update(const Eigen::VectorXd& x)
 void Cartesian::setPositionReference(const Eigen::Vector3d& pos_ref)
 {
     _pose_ref.translation() = pos_ref;
-    _vel_ref.setZero();
-    _acc_ref.setZero();
-
-    _vel_ref_cached = _vel_ref;
-    _acc_ref_cached = _acc_ref;
-}
-
-void Cartesian::setReference(const KDL::Frame& ref)
-{
-    tf::transformKDLToEigen(ref, _pose_ref);
     _vel_ref.setZero();
     _acc_ref.setZero();
 
@@ -433,7 +425,7 @@ bool Cartesian::setBaseLink(const std::string& base_link)
         _robot.getPose(base_link, _tmpMatrix2);
         _tmpMatrix = _tmpMatrix2.inverse();
     }
-    else if(_robot.getLinkID(base_link) == -1)
+    else if(_robot.getLinkId(base_link) < 0)
         return false;
     else
         _robot.getPose(_base_link, base_link, _tmpMatrix);
@@ -515,7 +507,7 @@ void Cartesian::getGains(Eigen::Matrix6d& Kp, Eigen::Matrix6d& Kd)
 
 void Cartesian::compute_cartesian_inertia_inverse()
 {
-    _robot.getInertiaInverse(_Bi);
+    _robot.computeInertiaInverse(_Bi);
 
     _tmpMatrixXd.noalias() = _J*_Bi;
 
