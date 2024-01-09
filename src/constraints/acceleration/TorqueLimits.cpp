@@ -24,7 +24,7 @@ TorqueLimits::TorqueLimits(const XBot::ModelInterface &robot,
 
 void TorqueLimits::update(const Eigen::VectorXd &x)
 {
-    _robot.getInertiaMatrix(_B);
+    _robot.computeInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);
 
     _dyn_constraint = _B*_qddot;

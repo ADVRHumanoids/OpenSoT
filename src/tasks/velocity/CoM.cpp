@@ -63,7 +63,7 @@ void CoM::_update(const Eigen::VectorXd &x)
     /************************* COMPUTING TASK *****************************/
     _desiredVelocityRef = _desiredVelocity;
 
-    _robot.getCOM(_actualPosition);
+    _actualPosition = _robot.getCOM();
 
     _robot.getCOMJacobian(_A);
 
@@ -183,7 +183,7 @@ void OpenSoT::tasks::velocity::CoM::_log(XBot::MatLogger2::Ptr logger)
 
 bool OpenSoT::tasks::velocity::CoM::reset()
 {
-    _robot.getCOM(_actualPosition);
+    _actualPosition = _robot.getCOM();
 
     _robot.getCOMJacobian(_A);
 

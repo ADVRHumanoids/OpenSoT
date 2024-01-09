@@ -42,7 +42,7 @@ LinearMomentum::~LinearMomentum()
 
 void LinearMomentum::_update(const Eigen::VectorXd& x)
 {
-    _robot.getCentroidalMomentumMatrix(_Momentum);
+    _robot.computeCentroidalMomentumMatrix(_Momentum);
     _A = _Momentum.block(0,0,3,_x_size);
     _b = _desiredLinearMomentum;
 }

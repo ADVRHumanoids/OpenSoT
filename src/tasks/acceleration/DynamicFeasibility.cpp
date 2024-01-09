@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/acceleration/DynamicFeasibility.h>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
 using XBot::Logger;
 
 OpenSoT::tasks::acceleration::DynamicFeasibility::DynamicFeasibility(const std::string task_id,
@@ -21,7 +21,7 @@ OpenSoT::tasks::acceleration::DynamicFeasibility::DynamicFeasibility(const std::
 
 void OpenSoT::tasks::acceleration::DynamicFeasibility::_update(const Eigen::VectorXd& x)
 {
-    _robot.getInertiaMatrix(_B);
+    _robot.computeInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);
     _Bu = _B.topRows(6);
     _hu = _h.topRows(6);
