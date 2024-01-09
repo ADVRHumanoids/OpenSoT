@@ -21,7 +21,7 @@
 #include <qpOASES.hpp>
 #include <fstream>
 
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <chrono>
 #include <ctime>
 #include <thread>

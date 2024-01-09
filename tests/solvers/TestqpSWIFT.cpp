@@ -4,7 +4,7 @@
 #include <qpOASES.hpp>
 #include <qpSWIFT.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/solvers/iHQP.h>

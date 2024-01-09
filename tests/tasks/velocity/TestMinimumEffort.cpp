@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <memory>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <ros/master.h>
 #include <sensor_msgs/JointState.h>

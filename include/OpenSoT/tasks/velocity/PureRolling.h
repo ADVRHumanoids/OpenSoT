@@ -23,7 +23,7 @@
 #define __OPENSOT_TASKS_VELOCITY_PURE_ROLLING_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/SubTask.h>
 
 namespace OpenSoT { namespace tasks { namespace velocity {

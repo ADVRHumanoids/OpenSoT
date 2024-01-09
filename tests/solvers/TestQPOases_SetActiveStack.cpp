@@ -7,7 +7,7 @@
 #include <qpOASES.hpp>
 #include <fstream>
 #include <OpenSoT/solvers/iHQP.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/AutoStack.h>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";

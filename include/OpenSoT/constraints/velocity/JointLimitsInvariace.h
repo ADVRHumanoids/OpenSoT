@@ -19,7 +19,7 @@
 #define __BOUNDS_VELOCITY_JOINTLIMITS_INVARIANCE_H__
 
 #include <OpenSoT/Constraint.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <Eigen/Dense>
 
  namespace OpenSoT {

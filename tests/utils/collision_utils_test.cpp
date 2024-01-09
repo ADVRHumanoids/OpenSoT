@@ -2,7 +2,7 @@
 #include <OpenSoT/utils/collision_utils.h>
 #include <cmath>
 #include <fcl/narrowphase/detail/primitive_shape_algorithm/capsule_capsule-inl.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <chrono>
 
 #define ENABLE_ROS false

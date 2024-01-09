@@ -19,7 +19,7 @@
 #define _OPENSOT_FLOATING_BASE_ESTIMATION_H_
 
 #include <memory>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <matlogger2/matlogger2.h>
 
 namespace OpenSoT {

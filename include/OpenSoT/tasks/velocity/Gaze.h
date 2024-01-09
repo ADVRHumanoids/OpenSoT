@@ -21,7 +21,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT {
 namespace tasks {

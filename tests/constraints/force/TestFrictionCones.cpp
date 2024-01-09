@@ -6,8 +6,8 @@
 #include <OpenSoT/constraints/force/WrenchLimits.h>
 #include <cmath>
 #include <fstream>
-#include <XBotInterface/ModelInterface.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <ros/master.h>
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_broadcaster.h>

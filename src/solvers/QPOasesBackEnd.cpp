@@ -6,8 +6,7 @@
 #include <memory>
 #include <iostream>
 #include <qpOASES/Matrices.hpp>
-#include <XBotInterface/Logger.hpp>
-#include <XBotInterface/SoLib.h>
+#include <xbot2_interface/logger.h>
 
 using namespace OpenSoT::solvers;
 

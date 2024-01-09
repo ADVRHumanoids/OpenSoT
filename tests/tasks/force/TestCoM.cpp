@@ -9,7 +9,7 @@
 #include <ros/ros.h>
 #include <qpOASES.hpp>
 #include <OpenSoT/constraints/force/WrenchLimits.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/force/Force.h>
 #include <OpenSoT/utils/InverseDynamics.h>
 

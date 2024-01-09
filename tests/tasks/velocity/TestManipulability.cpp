@@ -1,4 +1,4 @@
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <gtest/gtest.h>
 #include <kdl/frames.hpp>
 #include <kdl/frames_io.hpp>

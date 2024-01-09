@@ -2,7 +2,7 @@
 #include <OpenSoT/tasks/acceleration/Postural.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 
 namespace {

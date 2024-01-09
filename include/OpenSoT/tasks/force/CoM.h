@@ -19,7 +19,7 @@
 #define __TASKS_FORCE_COM_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/Affine.h>
 

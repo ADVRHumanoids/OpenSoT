@@ -4,8 +4,8 @@
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/tasks/acceleration/Postural.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <XBotInterface/ModelInterface.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/xbotinterface2.h>
+#include <xbot2_interface/logger.h>
 #include <cmath>
 #include <OpenSoT/solvers/iHQP.h>
 #include <matlogger2/matlogger2.h>

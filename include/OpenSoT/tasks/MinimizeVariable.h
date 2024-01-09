@@ -21,7 +21,7 @@
 
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT { namespace tasks  {
     

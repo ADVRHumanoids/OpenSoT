@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = relative_path;

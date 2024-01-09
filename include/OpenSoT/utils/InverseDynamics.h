@@ -2,7 +2,7 @@
 #define _OPENSOT_INVERSE_DYNAMICS_H_
 
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/AutoStack.h>
 
 namespace OpenSoT {

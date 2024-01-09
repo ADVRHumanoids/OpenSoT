@@ -19,7 +19,7 @@
 #define _CONSTRAINT_NORMAL_TORQUE_LIMITS_H_
 
 #include <OpenSoT/Constraint.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/utils/Piler.h>

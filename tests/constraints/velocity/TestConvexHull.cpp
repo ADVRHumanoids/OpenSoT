@@ -2,7 +2,7 @@
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <OpenSoT/utils/convex_hull_utils.h>
 #include <cmath>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #define  s                1.0
 #define  dT               0.001* s
 #define  m_s              1.0

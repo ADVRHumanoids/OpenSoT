@@ -1,4 +1,4 @@
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include "DefaultHumanoidStack.h"
 #include <gtest/gtest.h>

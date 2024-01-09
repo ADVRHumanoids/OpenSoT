@@ -18,7 +18,7 @@
 #define __TASKS_FORCE_FB_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/Affine.h>
 
 namespace OpenSoT {

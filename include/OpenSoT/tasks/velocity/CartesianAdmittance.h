@@ -2,6 +2,7 @@
 #define __TASKS_VELOCITY_CARTESIAN_ADMITTANCE_H__
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <xbot2_interface/common/utils.h>
 
 using namespace XBot::Utils;
 

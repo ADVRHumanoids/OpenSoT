@@ -23,7 +23,7 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/SubConstraint.h>
 

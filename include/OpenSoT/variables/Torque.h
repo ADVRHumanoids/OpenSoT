@@ -2,8 +2,8 @@
 #define __OPENSOT_VARIABLES_TORQUE_H__
 
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
-#include <XBotInterface/Utils.h>
+#include <xbot2_interface/xbotinterface2.h>
+#include <xbot2_interface/common/utils.h>
 
 namespace OpenSoT { namespace variables {
         

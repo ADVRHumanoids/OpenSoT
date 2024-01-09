@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 #include <matlogger2/matlogger2.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 
 #include <OpenSoT/version.h>
 

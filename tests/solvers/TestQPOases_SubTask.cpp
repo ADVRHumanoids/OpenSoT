@@ -6,7 +6,7 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include "DefaultHumanoidStack.h"
 #include <fstream>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 
 #define GREEN "\033[0;32m"

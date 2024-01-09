@@ -19,7 +19,7 @@
 #define _OPENSOT_TASK_FLOATING_BASE_IMU_
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT{
     namespace tasks{

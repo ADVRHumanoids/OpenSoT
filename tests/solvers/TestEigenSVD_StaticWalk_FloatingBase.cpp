@@ -13,12 +13,12 @@
 #include <ros/master.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <qpOASES/Options.hpp>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <sensor_msgs/JointState.h>
 
 #include <OpenSoT/solvers/eHQP.h>
 
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 #include <matlogger2/matlogger2.h>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";

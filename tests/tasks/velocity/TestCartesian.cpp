@@ -2,7 +2,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <memory>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 
 namespace {

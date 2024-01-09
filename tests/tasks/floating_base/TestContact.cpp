@@ -7,7 +7,7 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 #include <OpenSoT/utils/Affine.h>
 

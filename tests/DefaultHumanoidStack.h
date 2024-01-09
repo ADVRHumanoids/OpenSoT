@@ -25,7 +25,7 @@
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
  namespace OpenSoT {
 

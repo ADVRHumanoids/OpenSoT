@@ -19,7 +19,7 @@
 #define __TASKS_ACCELERATION_ANGULAR_MOMENTUM_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <Eigen/Dense>
 #include <OpenSoT/utils/Affine.h>
 

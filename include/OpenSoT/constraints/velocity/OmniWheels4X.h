@@ -19,7 +19,7 @@
 #define __BOUNDS_OMNIWHEEL4X_H__
 
  #include <OpenSoT/Constraint.h>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT {
    namespace constraints {

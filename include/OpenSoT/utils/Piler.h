@@ -2,7 +2,7 @@
 #define _OPENSOT_UTILS_PILER_H_
 
 #include <Eigen/Dense>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
 
 using XBot::Logger;
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <memory>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 
 namespace{

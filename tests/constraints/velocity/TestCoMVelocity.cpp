@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <cmath>
 #define  s                1.0
 #define  dT               0.001* s

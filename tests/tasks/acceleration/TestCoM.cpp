@@ -5,10 +5,10 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <gtest/gtest.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
 std::string _path_to_cfg = relative_path;

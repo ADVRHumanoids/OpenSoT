@@ -1,7 +1,7 @@
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/Constraint.h>
 
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT { namespace constraints { namespace force {
     

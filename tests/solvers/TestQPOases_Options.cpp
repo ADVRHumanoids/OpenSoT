@@ -9,7 +9,7 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <fstream>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <chrono>
 
 #define GREEN "\033[0;32m"

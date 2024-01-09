@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_ANGULAR_MOMENTUM_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <Eigen/Dense>
 
