@@ -24,7 +24,7 @@ JointLimits::JointLimits(   const XBot::ModelInterface& robot,
                             const Eigen::VectorXd& jointBoundMax,
                             const Eigen::VectorXd& jointBoundMin,
                             const double boundScaling) :
-    Constraint("joint_limits", q.size()),
+    Constraint("joint_limits", robot.getNv()),
     _robot(robot),
     _jointLimitsMax(jointBoundMax),
     _jointLimitsMin(jointBoundMin),
@@ -39,14 +39,14 @@ JointLimits::JointLimits(   const XBot::ModelInterface& robot,
 
 void JointLimits::update(const Eigen::VectorXd& x)
 {
+    _robot.difference(_robot.getJointPosition(),
+                      _robot.getNeutralQ(),
+                      _dq);
 
-
-    _robot.difference(x, _robot.getNeutralQ(), _dq);
 /************************ COMPUTING BOUNDS ****************************/
 
     if(_robot.getNv() == _jointLimitsMax.size())
     {
-
         _upperBound = ( _jointLimitsMax - _dq)*_boundScaling;
         _lowerBound = ( _jointLimitsMin - _dq)*_boundScaling;
 

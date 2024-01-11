@@ -22,6 +22,11 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
                                                                 OpenSoT::HessianType hessian_type,
                                                                 const double eps_regularisation)
 {
+    std::cout << "BackEndFactory will load solver " <<
+        number_of_variables << " variables, " <<
+        number_of_constraints << " constraints,  " <<
+        eps_regularisation << " regularization \n";
+
     if (be_solver == solver_back_ends::qpOASES) {
         return CreateBackend("QPOases",
                              number_of_variables,

@@ -6,7 +6,7 @@ using namespace OpenSoT::tasks::velocity;
 
 Manipulability::Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model,
                                const Cartesian::Ptr CartesianTask):
-    Task("manipulability::"+CartesianTask->getTaskID(), x.size()),
+    Task("manipulability::"+CartesianTask->getTaskID(), robot_model.getNv()),
     _manipulabilityIndexGradientWorker(x, robot_model, CartesianTask),
     _x(x)
 {
@@ -25,7 +25,7 @@ Manipulability::Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterf
 
 Manipulability::Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model,
                                const CoM::Ptr CartesianTask):
-    Task("manipulability::"+CartesianTask->getTaskID(), x.size()),
+    Task("manipulability::"+CartesianTask->getTaskID(), robot_model.getNv()),
     _manipulabilityIndexGradientWorker(x, robot_model,CartesianTask),
     _x(x)
 {

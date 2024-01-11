@@ -27,13 +27,13 @@ CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd &
                                                          const Eigen::MatrixXd &A_Cartesian,
                                                          const Eigen::VectorXd &b_Cartesian,
                                                          const double boundScaling) :
-    Constraint("position_constraint", x.size()),
+    Constraint("position_constraint", cartesianTask->getXSize()),
     _cartesianTask(cartesianTask),
     _A_Cartesian(A_Cartesian),
     _b_Cartesian(b_Cartesian),
     _boundScaling(boundScaling),
     _is_Cartesian(true),
-    J(3, x.size()),
+    J(3, _x_size),
     currentPosition(3)
 {
 
@@ -49,13 +49,13 @@ CartesianPositionConstraint::CartesianPositionConstraint(const Eigen::VectorXd& 
                              const Eigen::MatrixXd& A_Cartesian,
                              const Eigen::VectorXd& b_Cartesian,
                              const double boundScaling  ):
-    Constraint("position_constraint", x.size()),
+    Constraint("position_constraint", comTask->getXSize()),
     _comTask(comTask),
     _A_Cartesian(A_Cartesian),
     _b_Cartesian(b_Cartesian),
     _boundScaling(boundScaling),
     _is_Cartesian(false),
-    J(3, x.size()),
+    J(3, _x_size),
     currentPosition(3)
 {
     assert(_A_Cartesian.rows() == _b_Cartesian.rows() && "A and b must have the same size");

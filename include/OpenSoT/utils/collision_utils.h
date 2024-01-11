@@ -127,18 +127,14 @@ public:
                             Eigen::Affine3d new_pose);
 
     /**
-     * @brief KDL2fcl ceonverts a kdl transform into a fcl transform
-     * @param in a Eigen::Affine3d
-     * @return  fcl::Transform3f
+     * @brief eigen2fcl ceonverts an eigen transform into a fcl transform
      */
-    static fcl::Transform3<double> KDL2fcl(const Eigen::Affine3d &in);
+    static fcl::Transform3<double> eigen2fcl(const Eigen::Affine3d &in);
 
     /**
-     * @brief fcl2KDL converts a fcl transform into a kdl transform
-     * @param in a fcl::Transform3f
-     * @return a Eigen::Affine3d
+     * @brief fcl2eigen converts a fcl transform into an eigen transform
      */
-    static Eigen::Affine3d fcl2KDL(const fcl::Transform3d& in);
+    static Eigen::Affine3d fcl2eigen(const fcl::Transform3d& in);
 
     class LinksPair
     {

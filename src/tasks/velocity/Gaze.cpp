@@ -9,7 +9,7 @@ Gaze::Gaze(std::string task_id,
            XBot::ModelInterface &robot,
            std::string base_link,
            std::string distal_link) :
-    Task(task_id, x.size()),
+    Task(task_id, robot.getNv()),
     _distal_link(distal_link),
     _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, base_link)),
     _subtask(new SubTask(_cartesian_task, Indices::range(4,5))),

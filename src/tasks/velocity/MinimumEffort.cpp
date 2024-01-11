@@ -23,7 +23,7 @@ using namespace OpenSoT::tasks::velocity;
 
 
 MinimumEffort::MinimumEffort(   const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model) :
-    Task("min_effort", x.size()), _gTauGradientWorker(x, robot_model), _x(x)
+    Task("min_effort", robot_model.getNv()), _gTauGradientWorker(x, robot_model), _x(x)
 {
     _W.resize(_x_size, _x_size);
     _W.setIdentity(_x_size, _x_size);

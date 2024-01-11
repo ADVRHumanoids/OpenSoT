@@ -28,7 +28,7 @@ Cartesian::Cartesian(std::string task_id,
                      XBot::ModelInterface &robot,
                      const std::string& distal_link,
                      const std::string& base_link) :
-    Task(task_id, x.size()), _robot(robot),
+    Task(task_id, robot.getNv()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
     _error(6), _is_body_jacobian(false)

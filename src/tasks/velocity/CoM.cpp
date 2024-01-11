@@ -30,7 +30,7 @@ CoM::CoM(   const Eigen::VectorXd& x,
             XBot::ModelInterface &robot,
             const std::string& id
         ) :
-    Task(id, x.size()), _robot(robot), _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
+    Task(id, robot.getNv()), _robot(robot), _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
 {
     _desiredPosition.setZero();
     _actualPosition.setZero();

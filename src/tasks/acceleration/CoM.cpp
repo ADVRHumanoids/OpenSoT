@@ -5,12 +5,12 @@ using XBot::Logger;
 const std::string OpenSoT::tasks::acceleration::CoM::world_name = "world";
 
 OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot, const Eigen::VectorXd& x):
-    Task< Eigen::MatrixXd, Eigen::VectorXd >("CoM", x.size()),
+    Task< Eigen::MatrixXd, Eigen::VectorXd >("CoM", robot.getNv()),
     _robot(robot),
     _distal_link("CoM"),
     _base_link(world_name)
 {
-    _qddot = AffineHelper::Identity(x.size());
+    _qddot = AffineHelper::Identity(_x_size);
 
     _hessianType = HST_SEMIDEF;
 

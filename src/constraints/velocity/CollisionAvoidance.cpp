@@ -35,7 +35,7 @@ CollisionAvoidance::CollisionAvoidance(
         int max_pairs,
         urdf::ModelConstSharedPtr collision_urdf,
         srdf::ModelConstSharedPtr collision_srdf):
-    Constraint("self_collision_avoidance", x.size()),
+    Constraint("self_collision_avoidance", robot.getNv()),
     _detection_threshold(std::numeric_limits<double>::max()),
     _distance_threshold(0.001),
     _robot(robot),

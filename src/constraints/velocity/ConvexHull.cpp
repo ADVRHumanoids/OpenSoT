@@ -26,10 +26,10 @@ ConvexHull::ConvexHull(const Eigen::VectorXd& x,
                        XBot::ModelInterface& robot,
                        const std::list<std::string>& links_in_contact,
                        const double safetyMargin) :
-    Constraint("convex_hull", x.size()),
+    Constraint("convex_hull", robot.getNv()),
     _links_in_contact(links_in_contact),_robot(robot),
     _boundScaling(safetyMargin),
-    _JCoM(3, x.size()),
+    _JCoM(3, _x_size),
     _C(links_in_contact.size(), 2)
 {
     _convex_hull = std::make_shared<convex_hull>();

@@ -49,7 +49,7 @@ bool ComputeLinksDistance::shapeToLinkCoordinates(const std::string& linkName,
                                                   Eigen::Affine3d &link_T_f )
 {
 
-    link_T_f = _link_T_shape[linkName] * fcl2KDL ( fcl_shape_T_f );
+    link_T_f = _link_T_shape[linkName] * fcl2eigen ( fcl_shape_T_f );
 
     return true;
 }
@@ -464,7 +464,7 @@ std::list<LinkPairDistance> ComputeLinksDistance::getLinkDistances(double detect
         if(result.min_distance < detectionThreshold)
         {
             results.emplace_back(linkA, linkB,
-                                 fcl2KDL(world_pA), fcl2KDL(world_pB),
+                                 fcl2eigen(world_pA), fcl2eigen(world_pB),
                                  result.min_distance);
         }
     }
@@ -780,9 +780,23 @@ bool ComputeLinksDistance::moveWorldCollision(const std::string &id,
         return false;
     }
 
-    it->second->setTransform(KDL2fcl(new_pose));
+    it->second->setTransform(eigen2fcl(new_pose));
 
     return true;
+}
+
+fcl::Transform3<double> ComputeLinksDistance::eigen2fcl(const Eigen::Affine3d &in)
+{
+    fcl::Transform3d ret;
+    ret.matrix() = in.matrix();
+    return ret;
+}
+
+Eigen::Affine3d ComputeLinksDistance::fcl2eigen(const fcl::Transform3d &in)
+{
+    Eigen::Affine3d ret;
+    ret.matrix() = in.matrix();
+    return ret;
 }
 
 void ComputeLinksDistance::loadDisabledCollisionsFromSRDF(const srdf::Model& srdf,

@@ -20,7 +20,7 @@
 using namespace OpenSoT::tasks::velocity;
 
 LinearMomentum::LinearMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot):
-    Task("LinearMomentum", x.size()), _robot(robot)
+    Task("LinearMomentum", robot.getNv()), _robot(robot)
 {
     _desiredLinearMomentum.setZero();
     this->_update(x);

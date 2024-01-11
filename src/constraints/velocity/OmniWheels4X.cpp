@@ -24,9 +24,9 @@ OmniWheels4X::OmniWheels4X(const double l1, const double l2, const double r,
                          const std::string base_link,
                          const Eigen::VectorXd &x,
                          XBot::ModelInterface &robot):
-    Constraint("OmniWheels4X", x.size()), _robot(robot), _base_link(base_link)
+    Constraint("OmniWheels4X", robot.getNv()), _robot(robot), _base_link(base_link)
 {
-    _J.resize(3, x.size());
+    _J.resize(3, _x_size);
     _J.setZero();
 
     //select xdot, ydot, and wz
@@ -57,7 +57,7 @@ OmniWheels4X::OmniWheels4X(const double l1, const double l2, const double r,
     _J(1, hr_id) -= -1.;
     _J(2, hr_id) -= 1./(l1 + l2);
 
-    _J.rightCols(x.size()-6) *= r/4.;
+    _J.rightCols(_x_size-6) *= r/4.;
 
     _bLowerBound.setZero(3);
     _bUpperBound.setZero(3);
@@ -71,7 +71,7 @@ OmniWheels4X::OmniWheels4X(const double l1, const double l2, const double r,
 void OmniWheels4X::update(const Eigen::VectorXd &x)
 {
     _robot.getPose(_base_link, _w_T_b);
-    _Aineq.rightCols(x.size()-6).noalias() = _w_T_b.linear() * _J.rightCols(x.size()-6);
+    _Aineq.rightCols(_x_size-6).noalias() = _w_T_b.linear() * _J.rightCols(_x_size-6);
 }
 
 
