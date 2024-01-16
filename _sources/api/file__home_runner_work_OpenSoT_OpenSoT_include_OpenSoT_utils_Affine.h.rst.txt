@@ -133,9 +133,9 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d`
 
-- :ref:`exhale_function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe`
-
 - :ref:`exhale_function_namespaceOpenSoT_1a9ea285f4bea5b924248306c73e63af0d`
+
+- :ref:`exhale_function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe`
 
 - :ref:`exhale_function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91`
 
