@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 include(ExternalProject)
-project(open_sot VERSION 3.3.0)
+project(open_sot VERSION 3.4.0)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++17" COMPILER_SUPPORTS_CXX17)

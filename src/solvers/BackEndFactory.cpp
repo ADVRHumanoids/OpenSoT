@@ -9,7 +9,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
     if(be_solver == solver_back_ends::qpOASES) { 
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndQPOases.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = "libOpenSotBackEndQPOases.so";
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEndQPOases.so must be listed inside LD_LIBRARY_PATH");
         }
@@ -22,7 +22,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
     if(be_solver == solver_back_ends::OSQP) { 
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndOSQP.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = "libOpenSotBackEndOSQP.so";
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEndOSQP.so must be listed inside LD_LIBRARY_PATH");
         }
@@ -35,7 +35,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
     if(be_solver == solver_back_ends::GLPK) { 
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndGLPK.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = "libOpenSotBackEndGLPK.so";
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEndGLPK.so must be listed inside LD_LIBRARY_PATH");
         }
@@ -48,7 +48,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
     if(be_solver == solver_back_ends::eiQuadProg) {
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndeiQuadProg.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = "libOpenSotBackEndeiQuadProg.so";
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEnduQuadProg.so must be listed inside LD_LIBRARY_PATH");
         }
@@ -61,7 +61,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
     if(be_solver == solver_back_ends::ODYS) {
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndODYS.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = "libOpenSotBackEndODYS.so";
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEndODYS.so must be listed inside LD_LIBRARY_PATH");
         }
@@ -74,7 +74,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
     if(be_solver == solver_back_ends::qpSWIFT) {
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndqpSWIFT.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = "libOpenSotBackEndqpSWIFT.so";
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEndqpSWIFT.so must be listed inside LD_LIBRARY_PATH");
         }
@@ -87,7 +87,7 @@ OpenSoT::solvers::BackEnd::Ptr OpenSoT::solvers::BackEndFactory(const solver_bac
     if(be_solver == solver_back_ends::proxQP) {
 
         /* Obtain full path to shared lib */
-        std::string path_to_shared_lib = XBot::Utils::FindLib("libOpenSotBackEndproxQP.so", "LD_LIBRARY_PATH");
+        std::string path_to_shared_lib = "libOpenSotBackEndproxQP.so";
         if (path_to_shared_lib == "") {
             throw std::runtime_error("libOpenSotBackEndproxQP.so must be listed inside LD_LIBRARY_PATH");
         }
