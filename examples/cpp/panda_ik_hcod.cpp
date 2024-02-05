@@ -282,7 +282,7 @@ int main(int argc, char **argv)
 
                Eigen::VectorXd zeros = q_init;
                zeros.setZero();
-               auto postural = std::make_shared<Postural>(*model_ptr, q_init, "postural");
+               auto postural = std::make_shared<Postural>(*model_ptr, "postural");
                postural->setReference(zeros);
                postural->setLambda(0.01);
 
@@ -290,7 +290,7 @@ int main(int argc, char **argv)
                 * Creates constraints joint position and velocity limits
                 */
                using namespace OpenSoT::constraints::velocity;
-               auto joint_limits = std::make_shared<JointLimits>(*model_ptr, q_init, qmax, qmin);
+               auto joint_limits = std::make_shared<JointLimits>(*model_ptr, qmax, qmin);
 
                double dT = 0.01;
                auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);

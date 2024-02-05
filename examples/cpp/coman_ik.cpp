@@ -410,14 +410,14 @@ int main(int argc, char **argv)
                            com->setLambda(0.1);
 
 
-                           auto postural = std::make_shared<Postural>(*model_ptr, q, "postural");
+                           auto postural = std::make_shared<Postural>(*model_ptr, "postural");
                            postural->setLambda(0.01);
 
                            /**
                             * Creates constraints joint position and velocity limits
                             */
                            using namespace OpenSoT::constraints::velocity;
-                           auto joint_limits = std::make_shared<JointLimits>(*model_ptr, q, qmax, qmin);
+                           auto joint_limits = std::make_shared<JointLimits>(*model_ptr, qmax, qmin);
 
                            double dT = 0.01;
                            auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);
