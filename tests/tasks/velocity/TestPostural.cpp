@@ -11,7 +11,7 @@ class testPosturalTask: public TestBase
 {
 protected:
 
-    testPosturalTask() : TestBase("coman")
+    testPosturalTask() : TestBase("coman_floating_base")
     {
 
     }
@@ -52,29 +52,31 @@ double getRandomAngle()
 
 TEST_F(testPosturalTask, testPosturalTask_)
 {
+    std::cout<<"Is model floating_base: "<<_model_ptr->isFloatingBase()<<std::endl;
+
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
     Eigen::VectorXd q_ref = _model_ptr->getNeutralQ();
 
     OpenSoT::tasks::velocity::Postural postural(*_model_ptr, q);
     std::cout<<"Postural Task Inited"<<std::endl;
-    EXPECT_TRUE(postural.getA() == Eigen::MatrixXd::Identity(q.size(), q.size()));
-    EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(q.size(), q.size()));
+    EXPECT_TRUE(postural.getA() == Eigen::MatrixXd::Identity(_model_ptr->getNv(), _model_ptr->getNv()));
+    EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(_model_ptr->getNv(), _model_ptr->getNv()));
     EXPECT_TRUE(postural.getConstraints().size() == 0);
 
-    double K = 0.1;
+    double K = 0.3;
     postural.setLambda(K);
     EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
     postural.setReference(q_ref);
     postural.update(q);
-    EXPECT_TRUE(postural.getb() == postural.getLambda()*(q_ref-q));
+    EXPECT_TRUE(postural.getb() == postural.getLambda()*_model_ptr->difference(q_ref, q));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
         postural.update(q);
         Eigen::VectorXd qq = postural.getb();
-        q += qq;
+        q = _model_ptr->sum(q, qq);
     }
 
     for(unsigned int i = 0; i < q.size(); ++i)
@@ -88,7 +90,8 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
 {
     std::cout<<"# JOINTS: "<<_model_ptr->getJointNum()<<std::endl;
 
-    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
+    Eigen::VectorXd q(_model_ptr->getNq());
+    q = _model_ptr->getNeutralQ();
     Eigen::VectorXd q_next = q;
 
     for(unsigned int i = 0; i < q.size(); ++i) {
@@ -141,14 +144,18 @@ TEST_F(testPosturalTask, testReset)
     std::cout<<"reference_q: \n"<<reference_q<<std::endl;
     std::cout<<"b: \n"<<postural.getb()<<std::endl;
 
-    for(unsigned int i = 0; i < q.size(); ++i)
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
+    {
+        EXPECT_NEAR(postural.getb()[i], 0.0, 1e-9);
+    }
+
+    for(unsigned int i = 0; i < _model_ptr->getNq(); ++i)
     {
         EXPECT_EQ(actual_q[i], reference_q[i]);
-        EXPECT_EQ(postural.getb()[i], 0.0);
     }
 
     std::cout<<"CHANGING q: ACTUAL AND REFERENCE DIFFERENT, b IS NOT 0"<<std::endl;
-    q.setRandom(q.size());
+    q = _model_ptr->generateRandomQ();
 
     postural.update(q);
 
@@ -166,10 +173,14 @@ TEST_F(testPosturalTask, testReset)
     std::cout<<"reference_q: \n"<<reference_q<<std::endl;
     std::cout<<"b: \n"<<postural.getb()<<std::endl;
 
-    for(unsigned int i = 0; i < q.size(); ++i)
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
+    {
+        EXPECT_NEAR(postural.getb()[i], 0.0, 1e-9);
+    }
+
+    for(unsigned int i = 0; i < _model_ptr->getNq(); ++i)
     {
         EXPECT_EQ(actual_q[i], reference_q[i]);
-        EXPECT_EQ(postural.getb()[i], 0.0);
     }
 }
 
