@@ -34,7 +34,7 @@ public:
 class testTask: public TestBase
 {
 protected:
-    testTask(): TestBase("coman")
+    testTask(): TestBase("coman_floating_base")
     {
 
     }
@@ -127,7 +127,8 @@ TEST_F(testTask, testComputeCost)
 
     postural->update(Eigen::VectorXd(0));
 
-    Eigen::VectorXd x = _model_ptr->generateRandomQ();
+    Eigen::VectorXd x(_model_ptr->getNv());
+    x.setRandom();
 
     double cost = (postural->getA()*x - postural->getb()).transpose()*postural->getWeight()*(postural->getA()*x - postural->getb());
     std::cout<<"cost: "<<cost<<std::endl;
