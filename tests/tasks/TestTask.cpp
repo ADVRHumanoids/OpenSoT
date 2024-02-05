@@ -141,6 +141,9 @@ TEST_F(testTask, testDiagonalWeight)
 {
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
 
 
     OpenSoT::tasks::velocity::Postural::Ptr postural(

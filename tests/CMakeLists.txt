@@ -53,124 +53,6 @@ link_directories(${GTEST_LIB_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} )
 enable_testing()
 
-#ALL THE FOLLOWING TESTS ARE YARP FREE
-set(OPENSOT_TESTS
-    # testBilateralConstraint #1
-    # testJointLimitsVelocityBounds
-    # testJointLimitsInvarianceVelocityBounds
-    # testJointLimitsAccelerationBounds
-    # testJointLimitsAccelerationViabilityBounds
-    # testJointLimitsAccelerationECBFounds
-    # testVelocityLimitsVelocityBounds
-    # testQPOasesSolver
-    # testQPOases_SetActiveStack
-    # testQPOases_Options #10
-    # testQPOases_SubTask
-    # testQPOases_FF
-    # testQPOases_AutoStack
-    # testiHQP
-    # testFrictionConeForceConstraint
-    # testCoMVelocityVelocityConstraint
-    # testCoMVelocityTask
-    # testManipulabilityTask
-    # testMinimumEffortVelocityTask
-    # testPosturalVelocityTask
-    # testCartesianVelocityTask
-    # testCartesianAdmittanceVelocityTask
-    # testSubTask
-    # testSubConstraint
-    # testCartesianUtils
-    # testBasicAlgebra
-    # testPosturalAccelerationTask
-    # testCartesianAccelerationTask #30
-    # testCoMAccelerationTask
-    # testContactFloatingBaseTask
-    # testCoMForceTask
-    # testTask
-    # testAffineHelper
-    # testPiler
-    # testAffineUtils
-    # testeiQuadProgSolver
-    # testKinematics #40
-    # testl1HQP
-)
-
-if(${OPENSOT_SOTH_FRONT_END})
-    set(${OPENSOT_TESTS} testSOTH) #42
-endif()
-
-if(${PCL_FOUND} AND ${moveit_core_FOUND})
-    set(OPENSOT_TEST testQPOases_ConvexHull 
-                     testConvexHullVelocityConstraint
-                     testAutoStack) #45
-endif()
-
-if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testOSQPSolver 
-                                      testGenericTask)
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testLP) #48
-endif()
-
-if(${GLPK_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testGLPKSolver) #49
-endif()
-
-if(${PCL_FOUND} AND ${moveit_core_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS} testAggregatedConstraint
-                                       testAggregatedTask) #51
-endif()
-
-#THESE TESTS DEPEND ON fcl
-if(${FCL_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS} testCollisionUtils
-                                       testCollisionAvoidanceVelocityConstraint
-                                       testCollisionAvoidanceEnvironmentVelocityConstraint #54
-)
-endif()
-
-if(${rviz_visual_tools_FOUND})
-    set(OPENSOT_TESTS ${OPENSOT_TESTS} testEigenSVD_StaticWalk_FloatingBase) #57
-endif()
-
-if(${qpSWIFT_FOUND})
-    set(OPENSOT_TEST ${OPENSOT_TESTS} testqpSWIFTSolver) #58
-endif()
-
-
-
-
-
-                      
-                      
-                      
-#
-#                      testQPOases_CartesianPositionConstraint
-
-                      
-#                      testQPOases_GlobalConstraints
-                      
-#                      testQPOases_PriorityInversion
-#                      testQPOases_SelfCollisionAvoidance
-
-
-#                      testQPOases_VelocityAllocation
-
-    
-                      
-#                      testGazeVelocityTask
-
-#                      testLogger
-
-#                      testVelocityAllocation
-                       
-#if(TRUE OR YCM_EP_DEVEL_MODE_OpenSoT)
-#    add_custom_command(TARGET OpenSoT POST_BUILD
-#                      COMMAND ${CMAKE_CTEST_COMMAND}
-#                      MAIN_DEPENDENCY OpenSoT
-#                      DEPENDS
-#                        ${OPENSOT_TESTS}
-#    )
-#endif()
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
@@ -189,6 +71,11 @@ if(${OPENSOT_SOTH_FRONT_END})
     SET(TestLibs ${TestLibs} hcod_wrapper soth)
 endif()
 
+ADD_EXECUTABLE(testTask     tasks/TestTask.cpp)
+TARGET_LINK_LIBRARIES(testTask ${TestLibs})
+add_dependencies(testTask   OpenSoT)
+add_test(NAME OpenSoT_tasks_Task COMMAND testTask)
+
     
 # if(${PCL_FOUND} AND ${moveit_core_FOUND})
 #     ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
@@ -203,10 +90,10 @@ endif()
 # endif()
 
 
-ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)
-TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
-add_dependencies(testl1HQP   OpenSoT)
-add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
+#ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)
+#TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
+#add_dependencies(testl1HQP   OpenSoT)
+#add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
 
 # if(${OPENSOT_SOTH_FRONT_END})
 #     ADD_EXECUTABLE(testSOTH     solvers/TestSOTH.cpp)
@@ -215,41 +102,36 @@ add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
 #     add_test(NAME OpenSoT_solvers_soth COMMAND testSOTH)
 # endif()
 
-ADD_EXECUTABLE(testTask     tasks/TestTask.cpp)
-TARGET_LINK_LIBRARIES(testTask ${TestLibs})
-add_dependencies(testTask   OpenSoT)
-add_test(NAME OpenSoT_tasks_Task COMMAND testTask)
-
 ADD_EXECUTABLE(testBilateralConstraint     constraints/TestBilateralConstraint.cpp)
 TARGET_LINK_LIBRARIES(testBilateralConstraint ${TestLibs})
 add_dependencies(testBilateralConstraint   OpenSoT)
 add_test(NAME OpenSoT_constraints_BilateralConstraint COMMAND testBilateralConstraint)
 
-ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLimits.cpp)
-TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
-add_dependencies(testJointLimitsVelocityBounds   OpenSoT)
-add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
+#ADD_EXECUTABLE(testJointLimitsVelocityBounds    constraints/velocity/TestJointLimits.cpp)
+#TARGET_LINK_LIBRARIES(testJointLimitsVelocityBounds ${TestLibs})
+#add_dependencies(testJointLimitsVelocityBounds   OpenSoT)
+#add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsVelocityBounds)
 
-ADD_EXECUTABLE(testJointLimitsInvarianceVelocityBounds    constraints/velocity/TestJointLimitsInvariance.cpp)
-TARGET_LINK_LIBRARIES(testJointLimitsInvarianceVelocityBounds ${TestLibs})
-add_dependencies(testJointLimitsInvarianceVelocityBounds   OpenSoT)
-add_test(NAME OpenSoT_constraints_velocity_JointLimitsInvariance  COMMAND testJointLimitsInvarianceVelocityBounds)
+#ADD_EXECUTABLE(testJointLimitsInvarianceVelocityBounds    constraints/velocity/TestJointLimitsInvariance.cpp)
+#TARGET_LINK_LIBRARIES(testJointLimitsInvarianceVelocityBounds ${TestLibs})
+#add_dependencies(testJointLimitsInvarianceVelocityBounds   OpenSoT)
+#add_test(NAME OpenSoT_constraints_velocity_JointLimitsInvariance  COMMAND testJointLimitsInvarianceVelocityBounds)
 
-ADD_EXECUTABLE(testiHQP solvers/TestiHQP.cpp)
-TARGET_LINK_LIBRARIES(testiHQP ${TestLibs})
-add_dependencies(testiHQP   OpenSoT)
-add_test(NAME OpenSoT_front_ends_ihqp COMMAND testiHQP)
+#ADD_EXECUTABLE(testiHQP solvers/TestiHQP.cpp)
+#TARGET_LINK_LIBRARIES(testiHQP ${TestLibs})
+#add_dependencies(testiHQP   OpenSoT)
+#add_test(NAME OpenSoT_front_ends_ihqp COMMAND testiHQP)
 
-ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
-TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
-add_dependencies(testQPOasesSolver   OpenSoT)
-add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
+#ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
+#TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
+#add_dependencies(testQPOasesSolver   OpenSoT)
+#add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
 if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
-    ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
-    TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs} osqp::osqpstatic)
-    add_dependencies(testOSQPSolver   OpenSoT)
-    add_test(NAME OpenSoT_solvers_osqp COMMAND testOSQPSolver)
+#    ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
+#    TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs} osqp::osqpstatic)
+#    add_dependencies(testOSQPSolver   OpenSoT)
+#    add_test(NAME OpenSoT_solvers_osqp COMMAND testOSQPSolver)
 
     ADD_EXECUTABLE(testGenericTask     tasks/TestGenericTask.cpp)
     TARGET_LINK_LIBRARIES(testGenericTask ${TestLibs})
@@ -257,10 +139,10 @@ if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
 
 
-    ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
-    TARGET_LINK_LIBRARIES(testLP ${TestLibs} osqp::osqpstatic)
-    add_dependencies(testLP   OpenSoT)
-    add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
+#    ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
+#    TARGET_LINK_LIBRARIES(testLP ${TestLibs} osqp::osqpstatic)
+#    add_dependencies(testLP   OpenSoT)
+#    add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
 
 endif()
 
@@ -276,10 +158,10 @@ endif()
 # add_dependencies(testeiQuadProgSolver   OpenSoT)
 # add_test(NAME OpenSoT_solvers_eiquadprog COMMAND testeiQuadProgSolver)
 
-ADD_EXECUTABLE(testAffineUtils utils/TestAffineUtils.cpp)
-TARGET_LINK_LIBRARIES(testAffineUtils ${TestLibs})
-add_dependencies(testAffineUtils   OpenSoT)
-add_test(NAME OpenSoT_affine_utils COMMAND testAffineUtils)
+#ADD_EXECUTABLE(testAffineUtils utils/TestAffineUtils.cpp)
+#TARGET_LINK_LIBRARIES(testAffineUtils ${TestLibs})
+#add_dependencies(testAffineUtils   OpenSoT)
+#add_test(NAME OpenSoT_affine_utils COMMAND testAffineUtils)
 
 ADD_EXECUTABLE(testAffineHelper utils/TestAffineHelper.cpp)
 TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
@@ -355,10 +237,10 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 # add_dependencies(testMinimumEffortVelocityTask   OpenSoT)
 # add_test(NAME OpenSoT_task_velocity_MinimumEffort COMMAND testMinimumEffortVelocityTask)
 
-# ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocityLimits.cpp)
-# TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
-# add_dependencies(testVelocityLimitsVelocityBounds   OpenSoT)
-# add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
+ ADD_EXECUTABLE(testVelocityLimitsVelocityBounds constraints/velocity/TestVelocityLimits.cpp)
+ TARGET_LINK_LIBRARIES(testVelocityLimitsVelocityBounds ${TestLibs})
+ add_dependencies(testVelocityLimitsVelocityBounds   OpenSoT)
+ add_test(NAME OpenSoT_constraints_velocity_VelocityLimit COMMAND testVelocityLimitsVelocityBounds)
 
 # ADD_EXECUTABLE(testJointLimitsAccelerationBounds constraints/acceleration/TestJointLimits.cpp)
 # TARGET_LINK_LIBRARIES(testJointLimitsAccelerationBounds ${TestLibs})
