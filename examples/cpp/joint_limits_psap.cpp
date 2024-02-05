@@ -8,8 +8,7 @@
 #include <cmath>
 #include <OpenSoT/solvers/iHQP.h>
 #include <matlogger2/matlogger2.h>
-
-std::string _path_to_cfg = OPENSOT_EXAMPLE_PATH "configs/coman/configs/config_coman_RBDL.yaml";
+#include "../../tests/common.h"
 
 #define P 100.
 
@@ -23,8 +22,7 @@ public:
         /**
          * @brief Create and get a model Pointer from config
          */
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
+        _model_ptr = GetTestModel("coman");
         /**
          * @brief Create a logger
          */

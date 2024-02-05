@@ -21,6 +21,7 @@
 #include <memory>
 #include <xbot2_interface/xbotinterface2.h>
 #include <matlogger2/matlogger2.h>
+#include <xbot2_interface/logger.h>
 
 namespace OpenSoT {
     /**

@@ -17,8 +17,8 @@ using namespace std::chrono;
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_broadcaster.h>
 #include <tf_conversions/tf_eigen.h>
+#include "../../tests/common.h"
 
-std::string _path_to_cfg = OPENSOT_EXAMPLE_PATH "configs/coman/configs/config_coman_floating_base.yaml";
 
 bool IS_ROSCORE_RUNNING;
 
@@ -58,8 +58,11 @@ void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, 
                         const XBot::ModelInterface::Ptr model, ros::NodeHandle& n)
 {
     sensor_msgs::JointState msg;
-    std::vector<std::string> joint_names = model->getEnabledJointNames();
-    for(unsigned int i = 6; i < joint_names.size(); ++i)
+    std::vector<std::string> joint_names = model->getJointNames();
+    unsigned int i = 0;
+    if(model->isFloatingBase())
+        i = 1;
+    for(i; i < joint_names.size(); ++i)
     {
         msg.name.push_back(joint_names[i]);
         msg.position.push_back(q[i]);
@@ -278,7 +281,7 @@ int main(int argc, char **argv)
     /**
       * @brief Retrieve model from config file and generate random initial configuration from qmin and qmax
       **/
-    XBot::ModelInterface::Ptr model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    XBot::ModelInterface::Ptr model_ptr = GetTestModel("coman");
     if(model_ptr->isFloatingBase())
         std::cout<<"floating base is true!"<<std::endl;
     std::cout<<"#DOFs: "<<model_ptr->getJointNum()<<std::endl;
@@ -366,14 +369,14 @@ int main(int argc, char **argv)
                com->setLambda(0.1);
 
 
-               auto postural = std::make_shared<Postural>(q, "postural");
+               auto postural = std::make_shared<Postural>(*model_ptr, q, "postural");
                postural->setLambda(0.01);
 
                /**
                 * Creates constraints joint position and velocity limits
                 */
                using namespace OpenSoT::constraints::velocity;
-               auto joint_limits = std::make_shared<JointLimits>(q, qmax, qmin);
+               auto joint_limits = std::make_shared<JointLimits>(*model_ptr, q, qmax, qmin);
 
                double dT = 0.01;
                auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);

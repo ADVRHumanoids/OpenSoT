@@ -16,8 +16,7 @@ using namespace std::chrono;
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_broadcaster.h>
 #include <tf_conversions/tf_eigen.h>
-
-std::string _path_to_cfg = OPENSOT_EXAMPLE_PATH "configs/panda/configs/config_panda.yaml";
+#include "../../tests/common.h"
 
 bool IS_ROSCORE_RUNNING;
 
@@ -72,7 +71,7 @@ void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, 
                         const XBot::ModelInterface::Ptr model, ros::NodeHandle& n)
 {
     sensor_msgs::JointState msg;
-    std::vector<std::string> joint_names = model->getEnabledJointNames();
+    std::vector<std::string> joint_names = model->getJointNames();
     for(unsigned int i = 0; i < joint_names.size(); ++i)
     {
         msg.name.push_back(joint_names[i]);
@@ -216,7 +215,7 @@ int main(int argc, char **argv)
     /**
       * @brief Retrieve model from config file and generate random initial configuration from qmin and qmax
       **/
-    XBot::ModelInterface::Ptr model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    XBot::ModelInterface::Ptr model_ptr = GetTestModel("panda");
 
     Eigen::VectorXd qmin, qmax;
     model_ptr->getJointLimits(qmin, qmax);
@@ -283,7 +282,7 @@ int main(int argc, char **argv)
 
                Eigen::VectorXd zeros = q_init;
                zeros.setZero();
-               auto postural = std::make_shared<Postural>(q_init, "postural");
+               auto postural = std::make_shared<Postural>(*model_ptr, q_init, "postural");
                postural->setReference(zeros);
                postural->setLambda(0.01);
 
@@ -291,7 +290,7 @@ int main(int argc, char **argv)
                 * Creates constraints joint position and velocity limits
                 */
                using namespace OpenSoT::constraints::velocity;
-               auto joint_limits = std::make_shared<JointLimits>(q_init, qmax, qmin);
+               auto joint_limits = std::make_shared<JointLimits>(*model_ptr, q_init, qmax, qmin);
 
                double dT = 0.01;
                auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);

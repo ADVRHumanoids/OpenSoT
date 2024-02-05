@@ -15,8 +15,9 @@
 #include <qpOASES/Options.hpp>
 #include "qp_estimation.h"
 #include <sensor_msgs/JointState.h>
+#include "../../tests/common.h"
+#include <eigen_conversions/eigen_kdl.h>
 
-std::string _path_to_cfg = OPENSOT_EXAMPLE_PATH "configs/coman/configs/config_coman_floating_base.yaml";
 
 bool IS_ROSCORE_RUNNING;
 
@@ -159,7 +160,7 @@ namespace{
         void setInertiaPostureTask()
         {
             Eigen::MatrixXd M;
-            model_ref.getInertiaMatrix(M);
+            model_ref.computeInertiaMatrix(M);
 
             postural->setWeight(M);
             postural->setLambda(0.);
@@ -214,8 +215,7 @@ namespace{
             /**
               * @brief Retrieve model from config file
               **/
-            _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
+            _model_ptr = GetTestModel("coman");
             /**
               * @brief Set and update moedl with zero config
               **/
@@ -350,7 +350,7 @@ namespace{
             if(IS_ROSCORE_RUNNING)
             {
                 sensor_msgs::JointState joint_msg;
-                joint_msg.name = _model_ptr->getEnabledJointNames();
+                joint_msg.name = _model_ptr->getJointNames();
 
                 for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
                     joint_msg.position.push_back(0.0);
@@ -439,15 +439,19 @@ namespace{
             /**
               * @brief Get CoM and feet state from model
               **/
-            KDL::Vector com_vector; this->_model_ptr->getCOM(com_vector);
-            KDL::Frame com_init; com_init.p = com_vector;
-            KDL::Frame l_foot_init; this->_model_ptr->getPose("l_sole", l_foot_init);
-            KDL::Frame r_foot_init; this->_model_ptr->getPose("r_sole", r_foot_init);
+            Eigen::Vector3d com_vector; this->_model_ptr->getCOM(com_vector);
+            Eigen::Affine3d com_init; com_init.translation() = com_vector;
+            Eigen::Affine3d l_foot_init; this->_model_ptr->getPose("l_sole", l_foot_init);
+            Eigen::Affine3d r_foot_init; this->_model_ptr->getPose("r_sole", r_foot_init);
 
             /**
               * @brief Initialize trajectories, publiahers and walking stack
               **/
-            this->initTrj(com_init, l_foot_init, r_foot_init);
+            KDL::Frame com_init_kdl, l_foot_init_kdl, r_foot_init_kdl;
+            tf::transformEigenToKDL(com_init, com_init_kdl);
+            tf::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
+            tf::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
+            this->initTrj(com_init_kdl, l_foot_init_kdl, r_foot_init_kdl);
             this->initTrjPublisher();
             theWalkingStack ws(*(this->_model_ptr.get()), this->_q);
 
@@ -522,10 +526,13 @@ namespace{
               * @brief Same steps as before
               **/
             _model_ptr->getCOM(com_vector);
-            com_init.p = com_vector;
-            KDL::Frame r_wrist_init; _model_ptr->getPose("r_wrist","DWYTorso",r_wrist_init);
+            com_init.translation() = com_vector;
+            Eigen::Affine3d r_wrist_init; _model_ptr->getPose("r_wrist","DWYTorso",r_wrist_init);
 
-            this->initManipTrj(com_init,  r_wrist_init);
+            KDL::Frame r_wrist_init_kdl;
+            tf::transformEigenToKDL(r_wrist_init, r_wrist_init_kdl);
+            tf::transformEigenToKDL(com_init, com_init_kdl);
+            this->initManipTrj(com_init_kdl,  r_wrist_init_kdl);
             this->initManipTrjPublisher();
 
 
