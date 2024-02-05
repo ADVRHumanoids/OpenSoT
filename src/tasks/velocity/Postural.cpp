@@ -23,11 +23,12 @@
 using namespace OpenSoT::tasks::velocity;
 
 Postural::Postural(const XBot::ModelInterface& robot,
-                   const Eigen::VectorXd& q,
                    const std::string& task_id) :
-    Task(task_id, robot.getNv()), _q(q),
+    Task(task_id, robot.getNv()),
     _robot(robot)
 {
+    _q = _robot.getJointPosition();
+
     _q_desired = _robot.getNeutralQ();
     _v_desired.setZero(_x_size);
     _dq = _v_desired_ref = _v_desired;
@@ -38,8 +39,8 @@ Postural::Postural(const XBot::ModelInterface& robot,
     _hessianType = HST_IDENTITY;
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->setReference(q);
-    this->_update(q);
+    this->setReference(_q);
+    this->_update(Eigen::VectorXd(0));
 }
 
 Postural::~Postural()
@@ -48,7 +49,7 @@ Postural::~Postural()
 
 void Postural::_update(const Eigen::VectorXd &q) {
     _v_desired_ref = _v_desired;
-    _q = q;
+    _q = _robot.getJointPosition();
 
     /************************* COMPUTING TASK *****************************/
 
