@@ -44,7 +44,7 @@ find_package(orocos_kdl REQUIRED)
 find_package(urdf REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
-find_package(Qhull REQUIRED)
+
 find_package(PCL 1.7 QUIET COMPONENTS   common
                                         filters
                                         surface)
