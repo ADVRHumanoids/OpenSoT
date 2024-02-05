@@ -44,7 +44,6 @@
             public:
 
                 Postural(const XBot::ModelInterface& robot,
-                         const Eigen::VectorXd& x,
                          const std::string& task_id = "Postural");
 
                 ~Postural();
