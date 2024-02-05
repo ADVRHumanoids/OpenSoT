@@ -178,10 +178,12 @@ TEST_F(testOSQPProblem, testTask)
 {
     Eigen::VectorXd q_ref = _model_ptr->getNeutralQ();
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-    OpenSoT::tasks::velocity::Postural postural_task(*_model_ptr, q);
+    OpenSoT::tasks::velocity::Postural postural_task(*_model_ptr);
     postural_task.setReference(q_ref);
-    postural_task.update(q);
+    postural_task.update(Eigen::VectorXd(0));
 
     Eigen::MatrixXd H(q.size(),q.size()); H.setIdentity(H.rows(), H.cols());
     Eigen::VectorXd g(-1.0*postural_task.getb());
@@ -197,8 +199,11 @@ TEST_F(testOSQPProblem, testTask)
 
     for(unsigned int i = 0; i < 10; ++i)
     {
-        q += dq;
-        postural_task.update(q);
+        q = _model_ptr->sum(q, dq);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        postural_task.update(Eigen::VectorXd(0));
 
         qp_postural_problem->updateTask(H, -1.0*postural_task.getb());
 
@@ -207,13 +212,11 @@ TEST_F(testOSQPProblem, testTask)
 
         std::cout<<"dq: "<<dq.transpose()<<std::endl;
     }
+    q = _model_ptr->sum(q, dq);
 
     for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_NEAR( q[i] + dq[i], q_ref[i], 1E-12);
+        EXPECT_NEAR( q[i], q_ref[i], 1E-12);
 
-
-    std::cout<<"q+dq: "<<(q + dq).transpose()<<std::endl;
-    std::cout<<"q_ref: "<<q_ref.transpose()<<std::endl;
 }
 
 using namespace OpenSoT::constraints::velocity;
@@ -226,7 +229,7 @@ TEST_F(testOSQPProblem, testProblemWithConstraint)
         _model_ptr->update();
 
         OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+                new OpenSoT::tasks::velocity::Postural(*_model_ptr));
         postural_task->setReference(q_ref);
 
         Eigen::VectorXd q_max, q_min;
@@ -234,7 +237,7 @@ TEST_F(testOSQPProblem, testProblemWithConstraint)
 
 
         JointLimits::Ptr joint_limits(
-            new JointLimits(*_model_ptr, q, q_max, q_min));
+            new JointLimits(*_model_ptr, q_max, q_min));
         postural_task->getConstraints().push_back(joint_limits);
         postural_task->setLambda(0.1);
 
@@ -259,7 +262,10 @@ TEST_F(testOSQPProblem, testProblemWithConstraint)
         Eigen::VectorXd l, u;
         for(unsigned int i = 0; i < 100; ++i)
         {
-            postural_task->update(q);
+            _model_ptr->setJointPosition(q);
+            _model_ptr->update();
+
+            postural_task->update(Eigen::VectorXd(0));
 
             qp_postural_problem->updateBounds(constraint->getLowerBound(), constraint->getUpperBound());
             qp_postural_problem->updateTask(postural_task->getA(), -1.0*postural_task->getb());
@@ -473,7 +479,7 @@ TEST_F(testOSQPProblem, testContructor2Problems)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist", q, *_model_ptr,
                                                        "l_wrist", "Waist"));
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+                new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     cartesian_task->setLambda(0.1);
     postural_task->setLambda(0.1);
 
@@ -489,8 +495,7 @@ TEST_F(testOSQPProblem, testContructor2Problems)
     std::cout<<"q_max: ["<<q_max.transpose()<<"]"<<std::endl;
 
     JointLimits::Ptr joint_limits(
-        new JointLimits(*_model_ptr, q, q_max,
-                           q_min));
+        new JointLimits(*_model_ptr, q_max, q_min));
     joint_limits->setBoundScaling((double)(1.0/t));
 
     VelocityLimits::Ptr joint_velocity_limits(
@@ -532,8 +537,8 @@ TEST_F(testOSQPProblem, testContructor2Problems)
         _model_ptr->update();
 
         cartesian_task->update(q);
-        postural_task->update(q);
-        joint_constraints->update(q);
+        postural_task->update(Eigen::VectorXd(0));
+        joint_constraints->update(Eigen::VectorXd(0));
 
         ASSERT_TRUE(sot.solve(dq));
         Eigen::VectorXd _dq = dq;
@@ -587,7 +592,7 @@ TEST_F(testiHQP, testContructor1Problem)
     _model_ptr->update();
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+            new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     postural_task->setReference(q_ref);
 
 
@@ -596,7 +601,6 @@ TEST_F(testiHQP, testContructor1Problem)
 
     JointLimits::Ptr joint_limits(
         new JointLimits(*_model_ptr,
-                        q,
                         q_max,
                         q_min));
     postural_task->setLambda(0.1);
@@ -621,7 +625,10 @@ TEST_F(testiHQP, testContructor1Problem)
     double obj_;
     for(unsigned int i = 0; i < 100; ++i)
     {
-        postural_task->update(q);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        postural_task->update(Eigen::VectorXd(0));
         bounds->update(q);
 
         EXPECT_TRUE(sot.solve(dq));

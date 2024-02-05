@@ -59,8 +59,10 @@ TEST_F(testTask, testCheckConsistency)
 {
     OpenSoT::tasks::velocity::Postural::Ptr postural;
     auto q = _model_ptr->generateRandomQ();
-    postural.reset(new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
-    postural->update(q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+    postural.reset(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
+    postural->update(Eigen::VectorXd(0));
 
     EXPECT_TRUE(postural->checkConsistency());
 
@@ -114,13 +116,16 @@ TEST_F(testTask, testComputeCost)
 {
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
     OpenSoT::tasks::velocity::Postural::Ptr postural =
-            std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr, q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     postural->setWeight(10.);
     postural->setLambda(1.);
 
-    postural->update(q);
+    postural->update(Eigen::VectorXd(0));
 
     Eigen::VectorXd x = _model_ptr->generateRandomQ();
 
@@ -135,8 +140,11 @@ TEST_F(testTask, testComputeCost)
 TEST_F(testTask, testDiagonalWeight)
 {
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
+
+
+
     OpenSoT::tasks::velocity::Postural::Ptr postural(
-        new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+        new OpenSoT::tasks::velocity::Postural(*_model_ptr));
 
     EXPECT_FALSE(postural->getWeightIsDiagonalFlag());
 

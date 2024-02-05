@@ -50,7 +50,6 @@
                  * within joint limits iff jointBoundMax <= v <= jointBoundMax
                  */
                 JointLimits(const XBot::ModelInterface& robot,
-                            const Eigen::VectorXd &q,
                             const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
                             const double boundScaling = 1.0);

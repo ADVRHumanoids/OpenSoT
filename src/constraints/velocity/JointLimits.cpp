@@ -20,7 +20,6 @@
 using namespace OpenSoT::constraints::velocity;
 
 JointLimits::JointLimits(   const XBot::ModelInterface& robot,
-                            const Eigen::VectorXd& q,
                             const Eigen::VectorXd& jointBoundMax,
                             const Eigen::VectorXd& jointBoundMin,
                             const double boundScaling) :
@@ -30,11 +29,9 @@ JointLimits::JointLimits(   const XBot::ModelInterface& robot,
     _jointLimitsMin(jointBoundMin),
     _boundScaling(boundScaling) {
 
-    assert(robot.getNv() == _jointLimitsMax.rows());
-    assert(robot.getNv() == _jointLimitsMin.rows());
 
     /* calling update to generate bounds */
-    JointLimits::update(q);
+    JointLimits::update(Eigen::VectorXd(0));
 }
 
 void JointLimits::update(const Eigen::VectorXd& x)

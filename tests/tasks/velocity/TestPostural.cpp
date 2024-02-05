@@ -55,10 +55,12 @@ TEST_F(testPosturalTask, testPosturalTask_)
     std::cout<<"Is model floating_base: "<<_model_ptr->isFloatingBase()<<std::endl;
 
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
     Eigen::VectorXd q_ref = _model_ptr->getNeutralQ();
 
-    OpenSoT::tasks::velocity::Postural postural(*_model_ptr, q);
+    OpenSoT::tasks::velocity::Postural postural(*_model_ptr);
     std::cout<<"Postural Task Inited"<<std::endl;
     EXPECT_TRUE(postural.getA() == Eigen::MatrixXd::Identity(_model_ptr->getNv(), _model_ptr->getNv()));
     EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(_model_ptr->getNv(), _model_ptr->getNv()));
@@ -68,12 +70,17 @@ TEST_F(testPosturalTask, testPosturalTask_)
     postural.setLambda(K);
     EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
     postural.setReference(q_ref);
-    postural.update(q);
+    postural.update(Eigen::VectorXd(0));
     EXPECT_TRUE(postural.getb() == postural.getLambda()*_model_ptr->difference(q_ref, q));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
         postural.update(q);
         Eigen::VectorXd qq = postural.getb();
         q = _model_ptr->sum(q, qq);
@@ -106,9 +113,9 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin,qmax);
 
-    OpenSoT::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::tasks::velocity::Postural(*_model_ptr, q) );
+    OpenSoT::tasks::velocity::Postural::TaskPtr postural( new OpenSoT::tasks::velocity::Postural(*_model_ptr) );
     OpenSoT::tasks::velocity::Postural::ConstraintPtr bound(
-        new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, q,
+        new OpenSoT::constraints::velocity::JointLimits(*_model_ptr,
                         qmax,
                         qmin)
     );
@@ -135,7 +142,10 @@ TEST_F(testPosturalTask, testReset)
 {
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
-    OpenSoT::tasks::velocity::Postural postural(*_model_ptr, q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::Postural postural(*_model_ptr);
 
     std::cout<<"INITIALIZATION: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
     Eigen::VectorXd actual_q = postural.getActualPositions();
@@ -157,7 +167,10 @@ TEST_F(testPosturalTask, testReset)
     std::cout<<"CHANGING q: ACTUAL AND REFERENCE DIFFERENT, b IS NOT 0"<<std::endl;
     q = _model_ptr->generateRandomQ();
 
-    postural.update(q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    postural.update(Eigen::VectorXd(0));
 
     actual_q = postural.getActualPositions();
     std::cout<<"actual_q: \n"<<actual_q<<std::endl;

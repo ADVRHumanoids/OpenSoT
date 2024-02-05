@@ -40,7 +40,7 @@ class testJointLimitsNaive : public TestBase {
 
       dt = 0.001;
 
-      jointLimits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, zeros, qUpperBounds, qLowerBounds);
+      jointLimits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qUpperBounds, qLowerBounds);
 
       jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(vel_max, dt);
 
@@ -223,13 +223,14 @@ TEST_F(testJointLimits, boundsDoUpdate) {
 
 TEST_F(testJointLimits, test_bounds)
 {
-    this->q.setZero();
+    this->q = _model_ptr->getNeutralQ();
 
     this->_model_ptr->setJointPosition(this->q);
+    this->_model_ptr->update();
 
 
     OpenSoT::tasks::velocity::Postural::Ptr postural =
-        std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr, q);
+        std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     Eigen::VectorXd qref = 4. * Eigen::VectorXd::Ones(this->q.size());
     postural->setReference(qref);
@@ -344,10 +345,11 @@ TEST_F(testJointLimitsNaive, test_bounds)
     this->q.setZero();
 
     this->_model_ptr->setJointPosition(this->q);
+    this->_model_ptr->update();
 
 
     OpenSoT::tasks::velocity::Postural::Ptr postural =
-        std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr, q);
+        std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     Eigen::VectorXd qref = 4. * Eigen::VectorXd::Ones(this->q.size());
     postural->setReference(qref);

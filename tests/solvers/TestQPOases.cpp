@@ -33,7 +33,7 @@ public:
 
     old_gravity_gradient()
     {
-        _model_ptr = GetTestModel("coman");
+        _model_ptr = GetTestModel("coman_floating_base");
 
         if(_model_ptr)
             std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -469,9 +469,12 @@ TEST_F(testQPOasesProblem, testTask)
     Eigen::VectorXd q_ref = _model_ptr->getNeutralQ();
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
-    OpenSoT::tasks::velocity::Postural postural_task(*_model_ptr, q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::tasks::velocity::Postural postural_task(*_model_ptr);
     postural_task.setReference(q_ref);
-    postural_task.update(q);
+    postural_task.update(Eigen::VectorXd(0));
 
     Eigen::MatrixXd H(q.size(),q.size()); H.setIdentity(H.rows(), H.cols());
     Eigen::VectorXd g(-1.0*postural_task.getb());
@@ -500,10 +503,13 @@ TEST_F(testQPOasesTask, testQPOasesTask)
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
     std::cout<<"q: "<<q<<std::endl;
 
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+                new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     postural_task->setReference(q_ref);
-    postural_task->update(q);
+    postural_task->update(Eigen::VectorXd(0));
     std::cout<<"error: "<<postural_task->getb()<<std::endl;
 
 //    OpenSoT::solvers::QPOasesBackEnd qp_postural_problem(postural_task->getXSize(), 0,
@@ -517,7 +523,7 @@ TEST_F(testQPOasesTask, testQPOasesTask)
                                                 Eigen::VectorXd(), Eigen::VectorXd()));
     std::cout<<"solution: "<<qp_postural_problem->getSolution()<<std::endl;
     Eigen::VectorXd dq = qp_postural_problem->getSolution();
-    q += dq;
+    q = _model_ptr->sum(q, dq);
 
     for(unsigned int i = 0; i < q.size(); ++i)
         EXPECT_DOUBLE_EQ(q[i], q_ref[i]);
@@ -533,7 +539,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         _model_ptr->update();
 
         OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+                new OpenSoT::tasks::velocity::Postural(*_model_ptr));
         postural_task->setReference(q_ref);
 
         Eigen::VectorXd q_max, q_min;
@@ -541,7 +547,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
 
 
         JointLimits::Ptr joint_limits(
-            new JointLimits(*_model_ptr, q, q_max, q_min));
+            new JointLimits(*_model_ptr, q_max, q_min));
         postural_task->getConstraints().push_back(joint_limits);
         postural_task->setLambda(0.1);
 
@@ -567,6 +573,9 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         Eigen::VectorXd l, u;
         for(unsigned int i = 0; i < 100; ++i)
         {
+            _model_ptr->setJointPosition(q);
+            _model_ptr->update();
+
             postural_task->update(q);
 
             qp_postural_problem->updateBounds(constraint->getLowerBound(), constraint->getUpperBound());
@@ -576,7 +585,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
             l = qp_postural_problem->getl();
             u = qp_postural_problem->getu();
             Eigen::VectorXd dq = qp_postural_problem->getSolution();
-            q += dq;
+            q = _model_ptr->sum(q, dq);
 
             if(i > 1)
             {
@@ -644,7 +653,7 @@ TEST_F(testiHQP, testContructor1Problem)
     _model_ptr->update();
 
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+            new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     postural_task->setReference(q_ref);
 
 
@@ -653,7 +662,6 @@ TEST_F(testiHQP, testContructor1Problem)
 
     JointLimits::Ptr joint_limits(
         new JointLimits(*_model_ptr,
-                        q,
                         q_max,
                         q_min));
     postural_task->setLambda(0.1);
@@ -677,7 +685,10 @@ TEST_F(testiHQP, testContructor1Problem)
     double obj_;
     for(unsigned int i = 0; i < 100; ++i)
     {
-        postural_task->update(q);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        postural_task->update(Eigen::VectorXd(0));
         bounds->update(q);
 
         EXPECT_TRUE(sot.solve(dq));
@@ -685,8 +696,7 @@ TEST_F(testiHQP, testContructor1Problem)
         obj_ = norm(obj_);
         EXPECT_TRUE(obj_ <= obj);
         obj = obj_;
-        Eigen::VectorXd _dq = dq;
-        q += _dq;
+        q = _model_ptr->sum(q, dq);
 
         std::cout<<"obj: "<<obj<<std::endl;
     }
@@ -762,7 +772,7 @@ TEST_F(testQPOasesTask, testCoMTask)
 
         ASSERT_TRUE(qp_CoM_problem->solve());
         Eigen::VectorXd dq = qp_CoM_problem->getSolution();
-        q += dq;
+        q = _model_ptr->sum(q, dq);
     }
 
 
@@ -819,7 +829,7 @@ TEST_F(testQPOasesTask, testCartesian)
         qp_cartesian_problem->updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
         ASSERT_TRUE(qp_cartesian_problem->solve());
         Eigen::VectorXd dq = qp_cartesian_problem->getSolution();
-        q += dq;
+        q = _model_ptr->sum(q, dq);
     }
 
     _model_ptr->getPose("l_wrist", "Waist", T);
@@ -889,7 +899,7 @@ TEST_F(testQPOasesTask, testEpsRegularisation)
         qp_cartesian_problem->updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
         ASSERT_TRUE(qp_cartesian_problem->solve());
         Eigen::VectorXd dq = qp_cartesian_problem->getSolution();
-        q += dq;
+        q = _model_ptr->sum(q, dq);
     }
 
     _model_ptr->getPose("l_wrist", "Waist", T);
@@ -929,7 +939,7 @@ TEST_F(testiHQP, testContructor2Problems)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::l_wrist", q, *_model_ptr,
                                                        "l_wrist", "Waist"));
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
+                new OpenSoT::tasks::velocity::Postural(*_model_ptr));
 
     postural_task->setReference(q);
     cartesian_task->setReference(T_init.matrix());
@@ -940,8 +950,7 @@ TEST_F(testiHQP, testContructor2Problems)
     _model_ptr->getJointLimits(q_min, q_max);
 
     JointLimits::Ptr joint_limits(
-        new JointLimits(*_model_ptr, q, q_max,
-                           q_min));
+        new JointLimits(*_model_ptr, q_max, q_min));
     joint_limits->setBoundScaling((double)(1.0/t));
 
     VelocityLimits::Ptr joint_velocity_limits(
@@ -987,9 +996,7 @@ TEST_F(testiHQP, testContructor2Problems)
         joint_constraints->update(q);
 
         ASSERT_TRUE(sot.solve(dq));
-        Eigen::VectorXd _dq = dq;
-        //std::cout<<"Solution: ["<<dq<<"]"<<std::endl;
-        q += _dq;
+        q = _model_ptr->sum(q, dq);
     }
 
     _model_ptr->setJointPosition(q);
@@ -1020,99 +1027,21 @@ TEST_F(testiHQP, testContructor2Problems)
                 Eigen::MatrixXd::Identity(postural_task->getA().rows(),postural_task->getA().cols())); //<--because we added manual regularisation in qpoases
 }
 
-TEST_F(testiHQP, testContructor1ProblemAggregated)
-{
-    int n_dofs = _model_ptr->getNv();
-    Eigen::VectorXd q(n_dofs); q.setZero(n_dofs);
-    Eigen::VectorXd q_ref(n_dofs); q_ref.setConstant(n_dofs, M_PI);
-
-    Eigen::VectorXd q2(n_dofs); q2.setZero(n_dofs);
-    Eigen::VectorXd q_ref2(n_dofs); q_ref2.setConstant(n_dofs, M_PI);
-
-
-    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q));
-    postural_task->setReference(q_ref);
-
-    OpenSoT::tasks::velocity::Postural::Ptr postural_task2(
-            new OpenSoT::tasks::velocity::Postural(*_model_ptr, q2));
-    postural_task2->setReference(q_ref2);
-    std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> task_list;
-    task_list.push_back(postural_task2);
-    OpenSoT::tasks::Aggregated::Ptr joint_space_task(
-                new OpenSoT::tasks::Aggregated(task_list, q2.size()));
-
-
-    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_vel_limits(
-        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q.size()));
-    OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_vel_limits2(
-        new OpenSoT::constraints::velocity::VelocityLimits(0.3, 0.1, q2.size()));
-
-    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list;
-    bounds_list.push_back(joint_vel_limits);
-    std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> bounds_list2;
-    bounds_list2.push_back(joint_vel_limits2);
-
-
-    OpenSoT::constraints::Aggregated::Ptr bounds(
-                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
-    OpenSoT::constraints::Aggregated::Ptr bounds2(
-                new OpenSoT::constraints::Aggregated(bounds_list2, q2.size()));
-
-//1. Here we use postural_task
-    std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks;
-    stack_of_tasks.push_back(postural_task);
-    OpenSoT::solvers::iHQP sot(stack_of_tasks, bounds);
-
-    EXPECT_TRUE(sot.getNumberOfTasks() == 1);
-    Eigen::VectorXd dq(q.size());
-    dq.setZero(q.size());
-    for(unsigned int i = 0; i < 1000; ++i)
-    {
-        postural_task->update(q);
-        bounds->update(q);
-
-        EXPECT_TRUE(sot.solve(dq));
-        q += dq;
-    }
-
-    for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_NEAR( q[i], q_ref[i], 1E-4);
-
-
-////2. Here we use joint_space_task
-    std::vector<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> stack_of_tasks2;
-    stack_of_tasks2.push_back(joint_space_task);
-    OpenSoT::solvers::iHQP sot2(stack_of_tasks2, bounds2);
-
-    EXPECT_TRUE(sot2.getNumberOfTasks() == 1);
-    Eigen::VectorXd dq2(q2.size());
-    dq2.setZero(q2.size());
-    for(unsigned int i = 0; i < 1000; ++i)
-    {
-        joint_space_task->update(q2);
-        bounds2->update(q2);
-        EXPECT_TRUE(sot2.solve(dq2));
-        q2 += dq2;
-    }
-
-    for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_NEAR( q2[i], q_ref2[i], 1E-4);
-
-}
 
 TEST_F(testiHQP, testSingleTask)
 {
     Eigen::VectorXd q0 = _model_ptr->generateRandomQ();
+    _model_ptr->setJointPosition(q0);
+    _model_ptr->update();
 
     OpenSoT::tasks::velocity::Postural::Ptr postural;
-    postural.reset(new OpenSoT::tasks::velocity::Postural(*_model_ptr, q0));
+    postural.reset(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
 
     Eigen::VectorXd qmin(q0.size()), qmax(q0.size());
     qmax = 1000. * Eigen::VectorXd::Ones(q0.size());
     qmin = -qmax;
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits;
-    joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, q0, qmax, qmin));
+    joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, qmax, qmin));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr vel_limits;
     vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2., 0.001, q0.size()));
@@ -1174,7 +1103,10 @@ TEST_F(testiHQP, testMinEffort)
     old_gravity_gradient oldGravityGradient;
     for(unsigned int i = 0; i < 100; ++i)
     {
-        joint_space_task->update(q);
+        _model_ptr->setJointPosition(q);
+        _model_ptr->update();
+
+        joint_space_task->update(Eigen::VectorXd(0));
         bounds->update(q);
 
         Eigen::VectorXd old_gradient = oldGravityGradient.computeMinEffort(q);
@@ -1184,8 +1116,7 @@ TEST_F(testiHQP, testMinEffort)
 
 
         EXPECT_TRUE(sot.solve(dq));
-        Eigen::VectorXd dq_ = dq;
-        q += dq_;
+        q = _model_ptr->sum(q, dq);
     }
 
 }

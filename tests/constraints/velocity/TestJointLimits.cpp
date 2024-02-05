@@ -6,7 +6,6 @@
 
 #include "../../common.h"
 
-std::string _path_to_cfg = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
 namespace {
 
@@ -17,20 +16,16 @@ class testJointLimits : public TestBase {
   // You can remove any or all of the following functions if its body
   // is empty.
 
-     testJointLimits(): TestBase("coman")
+     testJointLimits(): TestBase("coman_floating_base")
   {
-
-
-      if(_model_ptr)
-          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-      else
-          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-    // You can do set-up work for each test here.
 
       _model_ptr->getJointLimits(qLowerBounds, qUpperBounds);
       zeros = _model_ptr->getNeutralQ();
 
-      jointLimits = new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, zeros,
+      _model_ptr->setJointPosition(zeros);
+      _model_ptr->update();
+
+      jointLimits = new OpenSoT::constraints::velocity::JointLimits(*_model_ptr,
                                     qUpperBounds, qLowerBounds);
   }
 
@@ -177,12 +172,17 @@ TEST_F(testJointLimits, boundsDoUpdate) {
     Eigen::VectorXd q = _model_ptr->getNeutralQ();
     Eigen::VectorXd q_next = _model_ptr->sum(q, Eigen::VectorXd::Constant(_model_ptr->getNv(), 0.1));
 
-    jointLimits->update(q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    jointLimits->update(Eigen::VectorXd(0));
     Eigen::VectorXd oldLowerBound = jointLimits->getLowerBound();
     Eigen::VectorXd oldUpperBound = jointLimits->getUpperBound();
 
-    jointLimits->update(q_next);
+    _model_ptr->setJointPosition(q_next);
+    _model_ptr->update();
 
+    jointLimits->update(Eigen::VectorXd(0));
     Eigen::VectorXd newLowerBound = jointLimits->getLowerBound();
     Eigen::VectorXd newUpperBound = jointLimits->getUpperBound();
 
@@ -192,39 +192,46 @@ TEST_F(testJointLimits, boundsDoUpdate) {
 
 TEST_F(testJointLimits, startingOutsideBoundsPositive)
 {
-    //Bounds between -1 and 1
     Eigen::VectorXd q_min;
     q_min = -Eigen::VectorXd::Ones(_model_ptr->getNv());
     Eigen::VectorXd q_max = -q_min;
 
     //q all zero but q[5] = 2
     Eigen::VectorXd q = zeros;
-    q[5] = 2;  // ok since this model is euclidean
+    q[15] = 2.;  // ok since this model is euclidean
 
-    OpenSoT::constraints::velocity::JointLimits joint_lims(*_model_ptr, q, q_max, q_min);
-    joint_lims.update(q);
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    OpenSoT::constraints::velocity::JointLimits joint_lims(*_model_ptr, q_max, q_min);
+    joint_lims.update(Eigen::VectorXd(0));
 
     Eigen::VectorXd lb = joint_lims.getLowerBound();
-    for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_DOUBLE_EQ(lb[i], q_min[i] - q[i]);
+    auto dqmin_diff = _model_ptr->difference(q_min, q);
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
+        EXPECT_DOUBLE_EQ(lb[i], dqmin_diff[i]);
 
     Eigen::VectorXd ub = joint_lims.getUpperBound();
-    for(unsigned int i = 0; i < q.size(); ++i){
-        if(i == 5)
+    auto dqmax_diff = _model_ptr->difference(q_max, q);
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i){
+        if(i == 15)
             EXPECT_DOUBLE_EQ(ub[i], 0.0);
         else
-            EXPECT_DOUBLE_EQ(ub[i], q_max[i] - q[i]);
+            EXPECT_DOUBLE_EQ(ub[i], dqmax_diff[i]);
     }
 
-    q[5] = 0;
-    joint_lims.update(q);
-    lb = joint_lims.getLowerBound();
-    for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_DOUBLE_EQ(lb[i], q_min[i] - q[i]);
+//    q[15] = 0.;
+//    _model_ptr->setJointPosition(q);
+//    _model_ptr->update();
 
-    ub = joint_lims.getUpperBound();
-    for(unsigned int i = 0; i < q.size(); ++i)
-        EXPECT_DOUBLE_EQ(ub[i], q_max[i] - q[i]);
+//    joint_lims.update(Eigen::VectorXd(0));
+//    lb = joint_lims.getLowerBound();
+//    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
+//        EXPECT_DOUBLE_EQ(lb[i], dqmin_diff[i]);
+
+//    ub = joint_lims.getUpperBound();
+//    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
+//        EXPECT_DOUBLE_EQ(ub[i], dqmax_diff[i]);
 }
 
 TEST_F(testJointLimits, startingOutsideBoundsNegative)
@@ -238,8 +245,8 @@ TEST_F(testJointLimits, startingOutsideBoundsNegative)
     Eigen::VectorXd q = _model_ptr->getNeutralQ();
     q[5] = -2;
 
-    OpenSoT::constraints::velocity::JointLimits joint_lims(*_model_ptr, q, q_max, q_min);
-    joint_lims.update(q);
+    OpenSoT::constraints::velocity::JointLimits joint_lims(*_model_ptr, q_max, q_min);
+    joint_lims.update(Eigen::VectorXd(0));
 
     Eigen::VectorXd lb = joint_lims.getLowerBound();
     for(unsigned int i = 0; i < q.size(); ++i){

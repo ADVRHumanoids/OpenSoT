@@ -80,7 +80,7 @@ TEST_F(testl1HQP, testContructor)
     Eigen::VectorXd qmin, qmax;
     model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits =
-            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, q, qmax, qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
 
     OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM)<<joint_limits;
     stack->update(q);
