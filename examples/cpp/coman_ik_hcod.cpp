@@ -365,7 +365,7 @@ int main(int argc, char **argv)
                l_wrist->setLambda(0.1);
                auto r_wrist = std::make_shared<Cartesian>("r_wrist", q, *model_ptr.get(), TCP_frame, "world");
                r_wrist->setLambda(0.1);
-               auto com = std::make_shared<CoM>(q, *model_ptr.get());
+               auto com = std::make_shared<CoM>(*model_ptr.get());
                com->setLambda(0.1);
 
 

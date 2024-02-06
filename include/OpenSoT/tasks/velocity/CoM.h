@@ -63,8 +63,7 @@
                  * @param x the initial configuration of the robot
                  * @param robot the robot model
                  */
-                CoM(const Eigen::VectorXd& x,
-                    XBot::ModelInterface& robot,
+                CoM(XBot::ModelInterface& robot,
                     const std::string& id = "CoM"
                    );
 

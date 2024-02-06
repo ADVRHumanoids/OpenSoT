@@ -26,8 +26,7 @@ using namespace OpenSoT::tasks::velocity;
 
 #define LAMBDA_THS 1E-12
 
-CoM::CoM(   const Eigen::VectorXd& x,
-            XBot::ModelInterface &robot,
+CoM::CoM(XBot::ModelInterface &robot,
             const std::string& id
         ) :
     Task(id, robot.getNv()), _robot(robot), _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
@@ -39,7 +38,7 @@ CoM::CoM(   const Eigen::VectorXd& x,
     _desiredVelocityRef = _desiredVelocity;
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(x);
+    this->_update(Eigen::VectorXd(0));
 
 
     /* initializing to zero error */

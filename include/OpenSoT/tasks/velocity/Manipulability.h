@@ -123,7 +123,7 @@ namespace OpenSoT {
 
                         _robot->syncFrom(_model);
 
-                        _CartesianTask = CoM::Ptr(new OpenSoT::tasks::velocity::CoM(q, *(_robot.get())));
+                        _CartesianTask = CoM::Ptr(new OpenSoT::tasks::velocity::CoM(*(_robot.get())));
                     }
 
                     double compute(const Eigen::VectorXd &q)
