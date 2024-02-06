@@ -3,25 +3,20 @@
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <xbot2_interface/xbotinterface2.h>
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
+#include "../../common.h"
+
+
 
 namespace {
 
-class testCoMTask: public ::testing::Test
+class testCoMTask: public TestBase
 {
 public:
 
 protected:
 
-    testCoMTask()
+    testCoMTask() : TestBase("coman_floating_base")
     {
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     }
 
     virtual ~testCoMTask() {
@@ -36,15 +31,12 @@ protected:
 
     }
 
-    XBot::ModelInterface::Ptr _model_ptr;
-
 };
 
 TEST_F(testCoMTask, testCoMTask_)
 {
     // setting initial position with bent legs
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
     q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -56,7 +48,7 @@ TEST_F(testCoMTask, testCoMTask_)
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    OpenSoT::tasks::velocity::CoM CoM(q_whole, *(_model_ptr.get()));
+    OpenSoT::tasks::velocity::CoM CoM(*(_model_ptr.get()));
 
     EXPECT_TRUE(CoM.getb() == Eigen::VectorXd::Zero(3)) << "b = " << CoM.getb();
 
@@ -88,7 +80,7 @@ TEST_F(testCoMTask, testCoMTask_)
         EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
     CoM.setReference(x_ref);
-    CoM.update(q_whole);
+    CoM.update(Eigen::VectorXd(0));
     Eigen::VectorXd positionError = x_ref - x;
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
@@ -100,11 +92,11 @@ TEST_F(testCoMTask, testCoMTask_)
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
-        CoM.update(q_whole);
+        CoM.update(Eigen::VectorXd(0));
 
         Eigen::MatrixXd Apinv;
         _pinv.compute(CoM.getA(), Apinv);
-        q_whole += Apinv*CoM.getb();
+        q_whole = _model_ptr->sum(q_whole, Apinv*CoM.getb());
 
         _model_ptr->getCOM(x_now);
         std::cout << "Current error after iteration " << i << " is " << x_ref(2) - x_now(2) << std::endl;
@@ -123,9 +115,8 @@ TEST_F(testCoMTask, testCoMTask_)
 }
 
 TEST_F(testCoMTask, testReset)
-{
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
+{    
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
     q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -133,10 +124,11 @@ TEST_F(testCoMTask, testReset)
     q_whole[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
+
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    OpenSoT::tasks::velocity::CoM CoM(q_whole, *(_model_ptr.get()));
+    OpenSoT::tasks::velocity::CoM CoM(*(_model_ptr.get()));
 
     std::cout<<"INITIALIZATION: ACTUAL AND REFERENCE EQUAL, b IS 0"<<std::endl;
     Eigen::Vector3d actual_pose = CoM.getActualPosition();
@@ -152,11 +144,11 @@ TEST_F(testCoMTask, testReset)
         EXPECT_EQ(CoM.getb()[i], 0);
 
     std::cout<<"CHANGING q: ACTUAL AND REFERENCE DIFFERENT, b IS NOT 0"<<std::endl;
-    q_whole.setRandom(q_whole.size());
+    q_whole = _model_ptr->generateRandomQ();
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    CoM.update(q_whole);
+    CoM.update(Eigen::VectorXd(0));
 
     actual_pose = CoM.getActualPosition();
     std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
