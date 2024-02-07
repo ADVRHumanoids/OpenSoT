@@ -27,6 +27,7 @@ find_package(srdfdom)
 find_package(osqp QUIET)
 find_package(qpSWIFT QUIET)
 
+
 set(catkin_LIBRARIES
     ${tf_LIBRARIES} ${roscpp_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES} ${eigen_conversions_LIBRARIES})
 
@@ -277,10 +278,10 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 # add_dependencies(testAutoStack   OpenSoT)
 # add_test(NAME OpenSoT_utils_AutoStack COMMAND testAutoStack)
 
-# ADD_EXECUTABLE(testBasicAlgebra solvers/TestBasicAlgebra.cpp)
-# TARGET_LINK_LIBRARIES(testBasicAlgebra ${TestLibs})
-# add_dependencies(testBasicAlgebra   OpenSoT)
-# add_test(NAME OpenSoT_solvers_BasicAlgebra COMMAND testBasicAlgebra)
+ ADD_EXECUTABLE(testBasicAlgebra solvers/TestBasicAlgebra.cpp)
+ TARGET_LINK_LIBRARIES(testBasicAlgebra ${TestLibs})
+ add_dependencies(testBasicAlgebra   OpenSoT)
+ add_test(NAME OpenSoT_solvers_BasicAlgebra COMMAND testBasicAlgebra)
 
 # ADD_EXECUTABLE(testCartesianAccelerationTask tasks/acceleration/TestCartesian.cpp)
 # TARGET_LINK_LIBRARIES(testCartesianAccelerationTask ${TestLibs})
